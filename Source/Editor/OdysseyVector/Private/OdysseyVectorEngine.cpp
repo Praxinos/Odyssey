@@ -13,7 +13,7 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double 
     BLContextCreateInfo createInfo {};
 
     // Configure the number of threads to use.
-    createInfo.threadCount = 8;
+    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
 
     mBLContext = new BLContext();
     mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );

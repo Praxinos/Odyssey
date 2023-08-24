@@ -903,6 +903,16 @@ FOdysseyVectorSegmentCubic::Draw( )
 
     // NOTE: Might not be super fast to call this for each segment
     BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
+#ifdef unused
+    BLPath widthPath;
+
+    widthPath.moveTo ( mWidthBezier[0][0].x, mWidthBezier[0][0].y );
+    widthPath.cubicTo( mWidthBezier[0][1].x, mWidthBezier[0][1].y
+                     , mWidthBezier[0][2].x, mWidthBezier[0][2].y
+                     , mWidthBezier[0][3].x, mWidthBezier[0][3].y );
+
+    blctx->strokePath( widthPath );
+#endif
 
     blctx->fillPath( mBLPath );
 
@@ -1115,10 +1125,10 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                                                                                        , bezier[2]
                                                                                        , bezier[3]
                                                                                        , 1.0f ) };
-
-    ResetPolygonCache();
-    UpdateBoundingBox();
-
+/*
+    ::ULIS::FVec2D perpendicular[2] = { ::ULIS::FVec2D( -tangent[0].y, tangent[0].x )
+                                      , ::ULIS::FVec2D( -tangent[1].y, tangent[1].x ) };
+*/
     if( tangent[0].DistanceSquared() )
     {
         tangent[0].Normalize();
@@ -1128,6 +1138,46 @@ FOdysseyVectorSegmentCubic::BuildVariable()
     {
         tangent[1].Normalize();
     }
+
+    ResetPolygonCache();
+    UpdateBoundingBox();
+
+#ifdef unused
+    mWidthBezier[0][0] = ::ULIS::FVec2D( 0.0f, 0.0f);
+    mWidthBezier[0][1] = ::ULIS::FVec2D( 0.0f, 0.0f );
+    mWidthBezier[0][2] = ::ULIS::FVec2D( 0.0f, 0.0f );
+    mWidthBezier[0][3] = ::ULIS::FVec2D( 0.0f, 0.0f );
+
+    if( perpendicular[0].Distance() && perpendicular[1].Distance() )
+    {
+       ::ULIS::FVec2D tanvec[2] = { bezier[1] - bezier[0], bezier[3] - bezier[2] };
+        double ratio[2] = { 1.0f, 1.0f };
+
+        perpendicular[0].Normalize();
+        perpendicular[1].Normalize();
+
+        mWidthBezier[0][0] = bezier[0] + ( perpendicular[0] * segmentStartRadius );
+        mWidthBezier[0][3] = bezier[3] + ( perpendicular[1] * segmentEndRadius   );
+
+        ratio[0] = 1.0f + ( segmentStartRadius / tanvec[0].Distance() );
+        ratio[1] = 1.0f + ( segmentEndRadius   / tanvec[1].Distance() );
+/*
+        ratio[0] = ::ULIS::FVec2D( mWidthBezier[0][0].x - bezier[3].x
+                                 , mWidthBezier[0][0].y - bezier[3].y ).Distance()
+                 / ::ULIS::FVec2D( bezier[0].x - bezier[3].x
+                                 , bezier[0].y - bezier[3].y ).Distance();
+
+
+        ratio[1] = ::ULIS::FVec2D( mWidthBezier[0][3].x - bezier[0].x
+                                 , mWidthBezier[0][3].y - bezier[0].y ).Distance()
+                 / ::ULIS::FVec2D( bezier[0].x - bezier[3].x
+                                 , bezier[0].y - bezier[3].y ).Distance();
+*/
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), ratio[0], ratio[1] );
+        mWidthBezier[0][1] = mWidthBezier[0][0] + ( tanvec[0] * ratio[0] );
+        mWidthBezier[0][2] = mWidthBezier[0][3] - ( tanvec[1] * ratio[1] );
+    }
+#endif
 
     BuildVariableAdaptive ( 0.0f
                           , 1.0f

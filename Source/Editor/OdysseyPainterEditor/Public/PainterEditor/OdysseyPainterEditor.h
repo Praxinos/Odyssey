@@ -110,6 +110,11 @@ public:
     static void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void CopyObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void PasteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void UnalignPointSelection( FOdysseyVectorScene* iScene );
+    static void AlignPointSelection( FOdysseyVectorScene* iScene );
+    static void GetVertexSelection( FOdysseyVectorScene* iScene
+                                  , std::vector<FOdysseyVectorPoint*>& iSelectedVertexArray );
+
 
     void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
     eVectorEditionMode GetVectorEditionMode();

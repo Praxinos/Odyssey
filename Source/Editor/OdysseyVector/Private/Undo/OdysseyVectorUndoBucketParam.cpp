@@ -15,47 +15,54 @@ FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
     }
 }
 
+// Backup bucket params in the constructor
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
                                                             , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
 {
     mParamBucketSaveArray.emplace_back( iBucket->GetOwner(), 0.0f, 0.0f, false );
-    mParamBucketArray.push_back( iBucket );
+
+    mBucketArray.push_back( iBucket );
+
+    mBucketArray[0]->Copy( &mParamBucketSaveArray[0] );
 }
 
+// Backup bucket params in the constructor
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
                                                             , std::vector<FOdysseyVectorBucket*>& iAddedBucketArray
-                                                            , std::vector<FOdysseyVectorBucket*>& iParamBucketArray )
+                                                            , std::vector<FOdysseyVectorBucket*>& iBucketArray )
     : FOdysseyVectorUndo( iScene )
 {
     mAddedBucketArray = iAddedBucketArray;
-    mParamBucketArray = iParamBucketArray;
+    mBucketArray = iBucketArray;
 
-    for( int i = 0; i < mParamBucketArray.size(); i++ )
+    for( int i = 0; i < mBucketArray.size(); i++ )
     {
-        mParamBucketSaveArray.emplace_back( mParamBucketArray[i]->GetOwner(), 0.0f, 0.0f, false );
+        // Note: setting the owner does not make sense per se, as the bucket is only
+        // temporary, but is mandatory in the ctor
+        mParamBucketSaveArray.emplace_back( mBucketArray[i]->GetOwner(), 0.0f, 0.0f, false );
 
-        mParamBucketArray[i]->Copy( &mParamBucketSaveArray[i] );
+        mBucketArray[i]->Copy( &mParamBucketSaveArray[i] );
     }
 }
 
 void
 FOdysseyVectorUndoBucketParam::Swap()
 {
-    for( int i = 0; i < mParamBucketArray.size(); i++ )
+    for( int i = 0; i < mBucketArray.size(); i++ )
     {
         // Note: setting the owner does not make sense per se, as the bucket is only
         // temporary, but is mandatory in the ctor
         FOdysseyVectorBucket tmpBucketSave( mParamBucketSaveArray[i].GetOwner(), 0.0f, 0.0f, false );
 
         // save data to tmp
-        mParamBucketArray[i]->Copy( &tmpBucketSave );
+        mBucketArray[i]->Copy( &tmpBucketSave );
         // restore bucket data
-        mParamBucketSaveArray[i].Copy( mParamBucketArray[i] );
+        mParamBucketSaveArray[i].Copy( mBucketArray[i] );
         // swap data from tmp
         tmpBucketSave.Copy( &mParamBucketSaveArray[i] );
 
-        mParamBucketArray[i]->Invalidate();
+        mBucketArray[i]->Invalidate();
     }
 }
 

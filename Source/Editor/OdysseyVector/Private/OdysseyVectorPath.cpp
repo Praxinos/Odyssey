@@ -343,6 +343,8 @@ FOdysseyVectorPath::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPoint
     {
         std::list<FOdysseyVectorVertex*>::iterator vit;
 
+        oPointArray.reserve( oPointArray.size() + mSelectedVertexList.size() );
+
         for( vit = mSelectedVertexList.begin(); vit != mSelectedVertexList.end(); ++vit )
         {
             FOdysseyVectorVertex* vertex = *vit;
@@ -355,6 +357,8 @@ FOdysseyVectorPath::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPoint
     if( iPointSelectionFlags & ePointSelectionFlags::SegmentHandle )
     {
         std::list<FOdysseyVectorSegment*>::iterator sit;
+
+        oPointArray.reserve( oPointArray.size() + ( mSegmentList.size() * 2 ) );
 
         for( sit = mSegmentList.begin(); sit != mSegmentList.end(); ++sit )
         {

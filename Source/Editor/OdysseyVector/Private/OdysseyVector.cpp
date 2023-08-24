@@ -99,14 +99,14 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
 }
 */
 
-double
+inline double
 FOdysseyVector::Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB )
 {
     return ( iA.x * iB.y ) - ( iA.y * iB.x );
 }
 
 // https://stackoverflow.com/questions/35473936/find-whether-two-line-segments-intersect-or-not-in-c
-bool
+inline bool
 FOdysseyVector::IntersectSegment( const ::ULIS::FVec2D& line0p0
                                 , const ::ULIS::FVec2D& line0p1
                                 , const ::ULIS::FVec2D& line1p0

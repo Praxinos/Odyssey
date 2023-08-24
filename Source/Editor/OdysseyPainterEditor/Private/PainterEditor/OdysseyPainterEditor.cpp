@@ -815,6 +815,76 @@ FOdysseyPainterEditor::ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorS
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
+void
+FOdysseyPainterEditor::GetVertexSelection( FOdysseyVectorScene* iScene
+                                         , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+
+    for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    {
+        FOdysseyVectorObject* selectedObject  = *it;
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
+
+            path->GetSelectedPoints( iSelectedPointArray, ePointSelectionFlags::Vertex );
+        }
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+
+            paintGroup->GetSelectedPoints( iSelectedPointArray, ePointSelectionFlags::Vertex );
+        }
+    }
+}
+
+void
+FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorScene* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::vector<FOdysseyVectorPoint*> selectedPointArray;
+
+    GetVertexSelection( iScene, selectedPointArray );
+
+    for( int i = 0; i < selectedPointArray.size(); i++ )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(selectedPointArray[i]);
+
+        //vertex->UnalignHandles();
+    }
+
+    vectorEngine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+void
+FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorScene* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::vector<FOdysseyVectorPoint*> selectedPointArray;
+
+    GetVertexSelection( iScene, selectedPointArray );
+
+    for( int i = 0; i < selectedPointArray.size(); i++ )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(selectedPointArray[i]);
+
+        //vertex->AlignHandles();
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
+
+    vectorEngine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
 static void
 GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
                      , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
