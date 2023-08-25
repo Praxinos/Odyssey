@@ -165,14 +165,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iCtrlPointNum index of the handle (0 or 1).
          * @return a pointer to the requested handle.
          */
-        FOdysseyVectorHandleSegment* GetHandle( int iCtrlPointNum );
+        virtual FOdysseyVectorHandleSegment* GetHandle( int iCtrlPointNum ) override;
 
        /**
          * @brief Get a handle (a control point).
          * @param iAssociatedVertex vertex associated to the handle.
          * @return a pointer to the requested handle.
          */
-        FOdysseyVectorHandleSegment* GetHandle( FOdysseyVectorVertex* iAssociatedVertex );
+        virtual FOdysseyVectorHandleSegment* GetHandle( FOdysseyVectorVertex* iAssociatedVertex ) override;
 
        /**
          * @brief Get the number of polygons in cache.
@@ -241,7 +241,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         void MakeBLPath();
 
     protected:
-        //::ULIS::FVec2D mWidthBezier[2][4];
+        ::ULIS::FVec2D mWidthBezier[2][4];
         FOdysseyVectorHandleSegment mCtrlPoint[2];
         std::vector<FPolygon> mPolygonCache;
         BLPath mBLPath;

@@ -1339,6 +1339,8 @@ FOdysseyVectorPath::Cut( const ::ULIS::FVec2D& iLinePoint0
 
     for( int i = vertexCount; i < oNewVertexArray.size(); i++ )
     {
+        oNewVertexArray[i]->SetHandleAligned( true );
+
         AddVertex( oNewVertexArray[i] );
     }
 

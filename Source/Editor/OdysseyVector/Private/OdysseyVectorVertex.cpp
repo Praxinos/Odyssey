@@ -1,4 +1,5 @@
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorHandleSegment.h"
 
 FOdysseyVectorVertex::~FOdysseyVectorVertex()
 {
@@ -481,6 +482,51 @@ bool
 FOdysseyVectorVertex::IsSelected()
 {
     return ( mFlags & SELECTED ) ? true : false;
+}
+
+void
+FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
+{
+    ::ULIS::FVec2D handleVector = iHandle->GetCoords() - GetCoords();
+
+    if( handleVector.Distance() )
+    {
+        FOdysseyVectorSegment* segment = iHandle->GetOwner();
+        FOdysseyVectorSegment* otherSegment = GetOtherSegment( segment );
+
+        handleVector.Normalize();
+
+        if( otherSegment )
+        {
+            if( otherSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FOdysseyVectorSegmentCubic* otherCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(otherSegment);
+                FOdysseyVectorHandleSegment* otherHandle = otherCubicSegment->GetHandle( this );
+                ::ULIS::FVec2D otherHandleVector = otherHandle->GetCoords() - GetCoords();
+
+                otherHandle->Set( GetCoords() - ( otherHandleVector.Distance() * handleVector ) );
+            }
+        }
+    }
+}
+
+void
+FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
+{
+    if( iHandleAligned == true )
+    {
+        mFlags |= HANDLE_ALIGNED;
+    }
+    else
+    {
+        mFlags &= (~HANDLE_ALIGNED);
+    }
+}
+
+bool
+FOdysseyVectorVertex::IsHandleAligned()
+{
+    return ( mFlags & HANDLE_ALIGNED ) ? true : false;
 }
 
 void

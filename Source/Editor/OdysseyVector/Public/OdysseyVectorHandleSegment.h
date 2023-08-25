@@ -28,7 +28,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
          * @param iX x coordinates.
          * @param iY y coordinates.
          */
-        FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment, double iX, double iY );
+        FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment, uint32 iHandleID, double iX, double iY );
 
         /**
          * @brief Get segment owning this handle
@@ -36,9 +36,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
          */
         FOdysseyVectorSegment* GetOwner();
 
+        uint32 GetHandleID();
+
     protected:
         virtual void SetCoords( double iX, double iY, double iRadius ) override;
 
     private:
         FOdysseyVectorSegment* mOwnerSegment;
+        uint32 mHandleID;
 };

@@ -11,6 +11,14 @@
 
 class FOdysseyPainterEditorVectorPathEditToolHUD;
 
+UENUM()
+enum class ePathPickingMode : uint8
+{
+    Vertex = 0,
+    VertexHandle = 1,
+    SegmentHandle = 2
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public UOdysseyPainterEditorTool
 {
@@ -56,6 +64,7 @@ public:
     virtual void Commit() override;
 
     uint64 GetPickingFlags();
+    ePathPickingMode GetPickingMode();
 
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     void PropertyChanged( const FName& iPropertyName );
@@ -87,6 +96,7 @@ private:
 
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
     uint64 mPickingFlags;
+    ePathPickingMode mPickingMode;
     ::ULIS::FVec2D mOldPointInTexture;
 
 public:

@@ -152,7 +152,7 @@ FOdysseyVectorPathBuilder::GetSampleAngle()
 */
 
 static void
-Smooth( FOdysseyVectorSegmentCubic* iNewSegment, bool iSharp )
+Smooth( FOdysseyVectorSegmentCubic* iNewSegment )
 {
     FOdysseyVectorVertex* vertex = iNewSegment->GetVertex( 0 );
     FOdysseyVectorHandleSegment* handle = iNewSegment->GetHandle( 0 );
@@ -163,17 +163,16 @@ Smooth( FOdysseyVectorSegmentCubic* iNewSegment, bool iSharp )
         ::ULIS::FVec2D prevVector = prevSegment->GetHandleVector( vertex, false );
         ::ULIS::FVec2D nsegVector = iNewSegment->GetHandleVector( vertex, false );
 
-        if( iSharp == false )
+        vertex->SetHandleAligned( true );
+
+        if( prevVector.DistanceSquared() )
         {
-            if( prevVector.DistanceSquared() )
-            {
-                double distance = nsegVector.Distance();
+            double distance = nsegVector.Distance();
 
-                prevVector.Normalize();
+            prevVector.Normalize();
 
-                handle->Set( vertex->GetX() - ( prevVector.x * distance )
-                           , vertex->GetY() - ( prevVector.y * distance ) );
-            }
+            handle->Set( vertex->GetX() - ( prevVector.x * distance )
+                        , vertex->GetY() - ( prevVector.y * distance ) );
         }
     }
 }
@@ -220,7 +219,10 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             mCubicPath->AddSegment( mCubicSegment );
 
-            Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
+            if( mSampleBuffer[0].IsSharp() == false )
+            {
+                Smooth( mCubicSegment );
+            }
 
             AdjustHandle( mCubicSegment, 0, 0.5f, ADJUSTRECURSE );
             AdjustHandle( mCubicSegment, 1, 0.5f, ADJUSTRECURSE );
@@ -398,7 +400,10 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
 
             mCubicPath->AddSegment( mCubicSegment );
 
-            Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
+            if( mSampleBuffer[0].IsSharp() == false )
+            {
+                Smooth( mCubicSegment );
+            }
 
             AdjustHandle( mCubicSegment, 0, 0.5f, ADJUSTRECURSE );
             AdjustHandle( mCubicSegment, 1, 0.5f, ADJUSTRECURSE );

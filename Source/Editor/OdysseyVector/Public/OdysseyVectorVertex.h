@@ -10,6 +10,7 @@ class FOdysseyVectorSegment;
 class FOdysseyVectorSection;
 class FOdysseyVectorPath;
 class FOdysseyVectorVertex;
+class FOdysseyVectorHandleSegment;
 
 struct FExplorationPair
 {
@@ -205,6 +206,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         bool IsSelected();
 
         /**
+         * @brief Is vertex "handle aligned" ? 
+         * @return true if handles must be aligned, false otherwise
+         */
+        bool IsHandleAligned();
+
+        /**
          * @brief Tell whether or not the angle between the segments connected to this vertex is smooth (low).
          * @return true or false
          */
@@ -260,6 +267,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void SetSelected( bool iSelected );
 
         /**
+         * @brief Set the vertex as HANDLE_ALIGNED.
+         * @param iHandleAligned
+         */
+        void SetHandleAligned( bool iHandleAligned );
+
+        /**
          * @brief Set the vertex as VISITED. Internal use only for the GroupPaint class.
          * @param iVisited;
          */
@@ -272,6 +285,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                                      , double& oYMax );
 
         ::ULIS::FVec2D GetWorldCoords();
+        void AlignHandles( FOdysseyVectorHandleSegment* iHandle );
 
     protected:
         /**
@@ -293,6 +307,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorVertex* mNearestVertex;
 
     private :
-        static const uint32 VISITED  = ( 1 << 2 );
-        static const uint32 SELECTED = ( 1 << 3 );
+        static const uint32 VISITED        = ( 1 << 2 );
+        static const uint32 SELECTED       = ( 1 << 3 );
+        static const uint32 HANDLE_ALIGNED = ( 1 << 4 );
 };

@@ -17,8 +17,8 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPat
                                                       , double iCtrlPoint1y
                                                       , FOdysseyVectorVertex* iPoint1 )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
-    , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0.0f, 0.0f )
-                 , FOdysseyVectorHandleSegment( this, 0.0f, 0.0f ) }
+    , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0, 0.0f, 0.0f )
+                 , FOdysseyVectorHandleSegment( this, 1, 0.0f, 0.0f ) }
 {
     Init ( iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
 }
@@ -27,8 +27,8 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPat
                                                       , FOdysseyVectorVertex* iPoint0
                                                       , FOdysseyVectorVertex* iPoint1 )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
-    , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0.0f, 0.0f )
-                 , FOdysseyVectorHandleSegment( this, 0.0f, 0.0f ) }
+    , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0, 0.0f, 0.0f )
+                 , FOdysseyVectorHandleSegment( this, 1, 0.0f, 0.0f ) }
 {
     Init( iPoint0, iPoint1 );
 }
@@ -916,6 +916,7 @@ FOdysseyVectorSegmentCubic::Draw( )
 
     blctx->fillPath( mBLPath );
 
+
 #ifdef unused
     uint32 segmentCount = GetVertex(0)->GetSegmentCount();
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
@@ -1125,10 +1126,11 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                                                                                        , bezier[2]
                                                                                        , bezier[3]
                                                                                        , 1.0f ) };
-/*
+#ifdef unused
     ::ULIS::FVec2D perpendicular[2] = { ::ULIS::FVec2D( -tangent[0].y, tangent[0].x )
                                       , ::ULIS::FVec2D( -tangent[1].y, tangent[1].x ) };
-*/
+#endif
+
     if( tangent[0].DistanceSquared() )
     {
         tangent[0].Normalize();
@@ -1150,7 +1152,9 @@ FOdysseyVectorSegmentCubic::BuildVariable()
 
     if( perpendicular[0].Distance() && perpendicular[1].Distance() )
     {
-       ::ULIS::FVec2D tanvec[2] = { bezier[1] - bezier[0], bezier[3] - bezier[2] };
+        ::ULIS::FVec2D tanvec[2] = { bezier[1] - bezier[0], bezier[3] - bezier[2] };
+        double straightDistance = GetStraightDistance();
+        double widthBezierDistance;
         double ratio[2] = { 1.0f, 1.0f };
 
         perpendicular[0].Normalize();
@@ -1159,8 +1163,10 @@ FOdysseyVectorSegmentCubic::BuildVariable()
         mWidthBezier[0][0] = bezier[0] + ( perpendicular[0] * segmentStartRadius );
         mWidthBezier[0][3] = bezier[3] + ( perpendicular[1] * segmentEndRadius   );
 
-        ratio[0] = 1.0f + ( segmentStartRadius / tanvec[0].Distance() );
-        ratio[1] = 1.0f + ( segmentEndRadius   / tanvec[1].Distance() );
+        widthBezierDistance = ::ULIS::FVec2D( mWidthBezier[0][0] - mWidthBezier[0][3] ).Distance();
+
+        ratio[0] = tanvec[0].Distance() / straightDistance;
+        ratio[1] = tanvec[1].Distance() / straightDistance;
 /*
         ratio[0] = ::ULIS::FVec2D( mWidthBezier[0][0].x - bezier[3].x
                                  , mWidthBezier[0][0].y - bezier[3].y ).Distance()
@@ -1174,8 +1180,11 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                                  , bezier[0].y - bezier[3].y ).Distance();
 */
 //UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), ratio[0], ratio[1] );
-        mWidthBezier[0][1] = mWidthBezier[0][0] + ( tanvec[0] * ratio[0] );
-        mWidthBezier[0][2] = mWidthBezier[0][3] - ( tanvec[1] * ratio[1] );
+        tanvec[0].Normalize();
+        tanvec[1].Normalize();
+
+        mWidthBezier[0][1] = mWidthBezier[0][0] + ( tanvec[0] * ratio[0] * ratio[0] * widthBezierDistance );
+        mWidthBezier[0][2] = mWidthBezier[0][3] - ( tanvec[1] * ratio[1] * ratio[1] * widthBezierDistance );
     }
 #endif
 

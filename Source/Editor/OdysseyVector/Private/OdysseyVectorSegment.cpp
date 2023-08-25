@@ -14,6 +14,18 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
 {
 }
 
+FOdysseyVectorHandleSegment*
+FOdysseyVectorSegment::GetHandle( int iCtrlPointNum )
+{
+    return nullptr;
+}
+
+FOdysseyVectorHandleSegment*
+FOdysseyVectorSegment::GetHandle( FOdysseyVectorVertex* iVertex )
+{
+    return nullptr;
+}
+
 FOdysseyVectorVertex*
 FOdysseyVectorSegment::GetOtherVertex( FOdysseyVectorVertex* iVertex )
 {

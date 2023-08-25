@@ -107,10 +107,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 VIEW_VERTEX          = VIEW_VERTEX_VALENCE0
                                                  | VIEW_VERTEX_VALENCE1
                                                  | VIEW_VERTEX_VALENCE2;
-        static const uint64 VIEW_VERTEX_HANDLE   = 1 << 3;
-        static const uint64 VIEW_SEGMENT_HANDLE  = 1 << 4;
-        static const uint64 VIEW_SEGMENT         = 1 << 5;
-        static const uint64 VIEW_ALL             = 0xFFFFFFFFFFFFFFFFULL;
+        static const uint64 VIEW_VERTEX_HANDLE    = 1 << 3;
+        static const uint64 VIEW_VERTEX_ALIGNMENT = 1 << 4;
+        static const uint64 VIEW_SEGMENT_HANDLE   = 1 << 5;
+        static const uint64 VIEW_SEGMENT          = 1 << 6;
+        static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iHUDFlags ) = 0;
         virtual void Reset( FOdysseyVectorScene* iScene ) = 0;
