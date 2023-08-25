@@ -77,7 +77,7 @@ FULISInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
     if (iRect.x >= mWidth || iRect.x + iRect.w < 0 || iRect.y >= mHeight || iRect.y + iRect.h < 0)
         return;
 
-    if (iRect.x <= 0 && iRect.y <= 0 && iRect.x + iRect.w >= mWidth || iRect.y + iRect.h >= mHeight)
+    if (iRect.x <= 0 && iRect.y <= 0 && iRect.x + iRect.w >= mWidth && iRect.y + iRect.h >= mHeight)
     {
         mIsFullyInvalidated = true;
         return;
