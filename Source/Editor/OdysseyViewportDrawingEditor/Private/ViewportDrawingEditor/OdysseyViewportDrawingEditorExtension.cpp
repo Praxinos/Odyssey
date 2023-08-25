@@ -198,7 +198,7 @@ EOdysseyViewportDrawingPaintingAdapterMethod FOdysseyViewportDrawingEditorExtens
 //TODO: Move to adapter
 int32 FOdysseyViewportDrawingEditorExtension::GetUVIndexUsedByCurrentTexture()
 {
-	if (mMaterial != NULL)
+	if (mMaterial != NULL && mMaterial->GetMaterial() != NULL)
 	{
         for (UMaterialExpression* expression : mMaterial->GetMaterial()->GetExpressions())
         {
