@@ -8,6 +8,7 @@ FULISInvalidTileMap::FULISInvalidTileMap()
     , mTileSize(0)
     , mWidth(0)
     , mHeight(0)
+    , mIsFullyInvalidated(false)
 {
 }
 
@@ -16,6 +17,7 @@ FULISInvalidTileMap::FULISInvalidTileMap(int iTileSize, int iWidth, int iHeight)
     , mTileSize(iTileSize)
     , mWidth(0)
     , mHeight(0)
+    , mIsFullyInvalidated(false)
 {
     Resize(iWidth, iHeight);
     Clear();
@@ -33,6 +35,9 @@ FULISInvalidTileMap::Resize(int iWidth, int iHeight)
 void
 FULISInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
 {
+    if (mIsFullyInvalidated)
+        return;
+        
     FIntPoint tileCount = mTileMap.Size();
 
     if (iTileIndex.X < 0 || iTileIndex.Y < 0 || iTileIndex.X >= tileCount.X || iTileIndex.Y >= tileCount.Y)
@@ -44,6 +49,9 @@ FULISInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
 void
 FULISInvalidTileMap::Invalidate(const TArray<FIntPoint>& iTileIndexes)
 {
+    if (mIsFullyInvalidated)
+        return;
+
     FIntPoint tileCount = mTileMap.Size();
 
     for (int i = 0; i < iTileIndexes.Num(); i++)
@@ -63,8 +71,17 @@ FULISInvalidTileMap::Invalidate(const TArray<FIntPoint>& iTileIndexes)
 void
 FULISInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
 {
-    if (iRect.x >= mWidth || iRect.x + iRect.w < 0 || iRect.y >= mHeight || iRect.y + iRect.y < 0)
+    if (mIsFullyInvalidated)
         return;
+
+    if (iRect.x >= mWidth || iRect.x + iRect.w < 0 || iRect.y >= mHeight || iRect.y + iRect.h < 0)
+        return;
+
+    if (iRect.x <= 0 && iRect.y <= 0 && iRect.x + iRect.w >= mWidth || iRect.y + iRect.h >= mHeight)
+    {
+        mIsFullyInvalidated = true;
+        return;
+    }
 
     float xf = float( iRect.x ) / mTileSize;
     float yf = float( iRect.y ) / mTileSize;
@@ -90,6 +107,9 @@ FULISInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
 void
 FULISInvalidTileMap::Invalidate(const TArray<::ULIS::FRectI>& iRects)
 {
+    if (mIsFullyInvalidated)
+        return;
+        
     for (int i = 0; i < iRects.Num(); i++)
     {
         Invalidate(iRects[i]);
@@ -99,6 +119,8 @@ FULISInvalidTileMap::Invalidate(const TArray<::ULIS::FRectI>& iRects)
 void
 FULISInvalidTileMap::Clear()
 {
+    mIsFullyInvalidated = false;
+
     FIntPoint tileCount = mTileMap.Size();
 
     for( int y = 0; y < tileCount.Y; ++y )
@@ -124,7 +146,7 @@ FULISInvalidTileMap::GetTileRect(const FIntPoint& iTileIndex) const
 bool
 FULISInvalidTileMap::IsValidTile(const FIntPoint& iTileIndex) const
 {
-    return mTileMap.Get(iTileIndex.X, iTileIndex.Y);
+    return !mIsFullyInvalidated && mTileMap.Get(iTileIndex.X, iTileIndex.Y);
 }
 
 TArray<FIntPoint>
@@ -137,7 +159,7 @@ FULISInvalidTileMap::InvalidTiles() const
     {
         for( int x = 0; x < tileCount.X; ++x )
         {
-            if (!mTileMap.Get(x, y))
+            if (mIsFullyInvalidated || !mTileMap.Get(x, y))
             {
                 invalidTiles.Add(FIntPoint(x, y));
             }
@@ -150,20 +172,59 @@ FULISInvalidTileMap::InvalidTiles() const
 TArray<::ULIS::FRectI>
 FULISInvalidTileMap::InvalidRects() const
 {
+    if (mIsFullyInvalidated)
+        return { ::ULIS::FRectI::FromXYWH(0, 0, mWidth, mHeight) };
+
     TArray<::ULIS::FRectI> invalidRects;
     FIntPoint tileCount = mTileMap.Size();
 
+    TArray<int> prevRectIndexes;
     for( int y = 0; y < tileCount.Y; ++y )
     {
+        TArray<::ULIS::FRectI> rects;
+        bool wasInvalid = false;
         for( int x = 0; x < tileCount.X; ++x )
         {
-            if (!mTileMap.Get(x, y))
+            bool isInvalid = !mTileMap.Get(x, y);
+            if (isInvalid)
             {
-                invalidRects.Add(
-                    GetTileRect({x, y})
-                );
+                ::ULIS::FRectI rect = GetTileRect({x, y});
+                if (wasInvalid)
+                {
+                    rects.Last().w += rect.w;
+                }
+                else
+                {
+                    rects.Add(rect);
+                }
+            }
+            wasInvalid = isInvalid;
+        }
+
+        TArray<int> rectIndexes;
+        for (int i = 0; i < rects.Num(); i++)
+        {
+            const ::ULIS::FRectI& rect = rects[i];
+            bool prevRectExtended = false;
+            for (int prevIdx : prevRectIndexes)
+            {
+                ::ULIS::FRectI& prevRect = invalidRects[prevIdx];
+                if (rect.x == prevRect.x && rect.w == prevRect.w )
+                {
+                    prevRect.h += rect.h;
+                    rectIndexes.Add(prevIdx);
+                    prevRectExtended = true;
+                    break;
+                }
+            }
+
+            if (!prevRectExtended)
+            {
+                invalidRects.Add(rect);
+                rectIndexes.Add(invalidRects.Num() - 1);
             }
         }
+        prevRectIndexes = rectIndexes;
     }
 
     return invalidRects;

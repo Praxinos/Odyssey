@@ -116,4 +116,5 @@ private:
     int mTileSize;
     int mWidth;
     int mHeight;
+    bool mIsFullyInvalidated;
 };
