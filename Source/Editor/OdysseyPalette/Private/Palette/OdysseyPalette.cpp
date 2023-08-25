@@ -120,7 +120,7 @@ UOdysseyPaletteEntry* UOdysseyPalette::DuplicateEntry(UOdysseyPaletteEntry* iEnt
     FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Duplicate Entries"));
 #endif
 
-    //Duplicate the layer
+    //Duplicate the entry
     UOdysseyPaletteEntry* entryDuplicate = CopyEntryInternal(iEntry, iEntry->Parent, iEntry->Parent->Children.Find(iEntry));
 
     return entryDuplicate;
@@ -175,6 +175,9 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPalette::DuplicateEntries(TArray<UOdysseyP
         UOdysseyPaletteEntry* entryCopy = CopyEntryInternal(entry, entry->Parent, entry->Parent->Children.Find(entry));
         entriesDuplicates.Add(entryCopy);
     }
+
+    if (entriesDuplicates.Num() != 0)
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(entriesDuplicates[0]));
 
     return entriesDuplicates;
 }
@@ -551,6 +554,11 @@ void UOdysseyPalette::AddEntriesToHierarchy(TArray<UOdysseyPaletteEntry*> iEntri
         FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
     }
 
+    for (UOdysseyPaletteEntry* entry : iEntries)
+    {
+        entry->Children.Empty();
+    }
+    
     //Add entries to parent's children
     iParent->Children.Insert(iEntries, FMath::Clamp(iIndexInParent, 0, iParent->Children.Num()));
 

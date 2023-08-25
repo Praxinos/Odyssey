@@ -35,6 +35,7 @@ void SOdysseyBrushSelector::Construct(const FArguments& InArgs)
             .EnableContentPicker(   true )
             .DisplayCompactSize(    true )
             .DisplayThumbnail(      true )
+            .AllowCreate(           true )
             .ThumbnailSizeOverride( FIntPoint( 30, 30 ) )
     ];
 }

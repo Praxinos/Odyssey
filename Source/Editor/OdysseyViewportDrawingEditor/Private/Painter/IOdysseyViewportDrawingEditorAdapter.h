@@ -102,6 +102,5 @@ protected:
     bool mIsCapturedByStylus;
 
     /** Current or previous selected tool which still has delegates on this adapter, we keep it here so that we can handle said delegates */
-    UOdysseyPainterEditorTool* mTool;
-    //UOdysseyPainterEditorRasterDrawingTool* mDrawingTool;
+    TStrongObjectPtr<UOdysseyPainterEditorTool> mTool;
 };

@@ -135,6 +135,7 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
                 [
                     SAssignNew( hex_editable_text_box, SEditableTextBox )
                     .Text( this, &SOdysseyColorSelector::GetColorHex )
+                    .IsReadOnly(true)
                     .BackgroundColor( hex_box_bg_brush )
                     .ForegroundColor( hex_box_fg_brush )
                     .Justification( ETextJustify::Center )
@@ -215,7 +216,7 @@ FSlateFontInfo
 SOdysseyColorSelector::GetHexFont() const
 {
     FSlateFontInfo nfo = FCoreStyle::Get().GetWidgetStyle< FEditableTextBoxStyle >("NormalEditableTextBox").TextStyle.Font;
-    nfo.Size *= adv_color_wheel->GetDrawRatio() * 5;
+    nfo.Size *= adv_color_wheel->GetDrawRatio() * 3;
     return  nfo;
 }
 

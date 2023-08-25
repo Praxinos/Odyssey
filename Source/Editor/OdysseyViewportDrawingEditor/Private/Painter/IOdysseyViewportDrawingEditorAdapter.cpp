@@ -81,7 +81,7 @@ IOdysseyViewportDrawingEditorAdapter::OnSelectedToolChanged()
 void
 IOdysseyViewportDrawingEditorAdapter::SetTool(UOdysseyPainterEditorTool* iTool)
 {
-    UOdysseyPainterEditorRasterDrawingTool* drawingTool = GetDrawingTool();    
+    UOdysseyPainterEditorRasterDrawingTool* drawingTool = GetDrawingTool();
     if (drawingTool)
     {
         drawingTool->OnCreatedBrushInstance().RemoveAll(this);
@@ -89,9 +89,9 @@ IOdysseyViewportDrawingEditorAdapter::SetTool(UOdysseyPainterEditorTool* iTool)
         UnbindStampBrushInstance(drawingTool->GetBrushInstance());
     }
     
-    mTool = iTool;
+    mTool = TStrongObjectPtr< UOdysseyPainterEditorTool >(iTool);
 
-    drawingTool = GetDrawingTool();    
+    drawingTool = GetDrawingTool();
     if (drawingTool)
     {
         drawingTool->OnCreatedBrushInstance().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance);
@@ -103,7 +103,7 @@ IOdysseyViewportDrawingEditorAdapter::SetTool(UOdysseyPainterEditorTool* iTool)
 UOdysseyPainterEditorRasterDrawingTool*
 IOdysseyViewportDrawingEditorAdapter::GetDrawingTool()
 {
-    return Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool);
+    return Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
 }
 
 void IOdysseyViewportDrawingEditorAdapter::UnbindStampBrushInstance(UOdysseyBrushAssetBase* iUnbindBrush)

@@ -567,7 +567,6 @@ SOdysseyLayerStackTreeView::DuplicateSelectedLayers()
 
 	//manage current layer seperately
 	TArray<UOdysseyLayer*> duplicatedLayers = mLayerStack->DuplicateLayers(selectedLayers);
-    SetItemSelection(duplicatedLayers, true);
 }
 
 void

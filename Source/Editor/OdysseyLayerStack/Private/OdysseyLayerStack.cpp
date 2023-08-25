@@ -215,6 +215,9 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
         layersDuplicates.Add(layerCopy);
     }
 
+    if (layersDuplicates.Num() != 0)
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layersDuplicates[0]));
+
     return layersDuplicates;
 }
 
@@ -719,6 +722,11 @@ UOdysseyLayerStack::AddLayersToHierarchy(TArray<UOdysseyLayer*> iLayers, UOdysse
     for ( UOdysseyLayer* layer : iLayers )
     {
         FOdysseyObjectEditorUtils::PreChangePropertyValue(layer, "Parent");
+    }
+
+    for (UOdysseyLayer* layer : iLayers)
+    {
+        layer->Children.Empty();
     }
 
     //Add Layers to parent's children
