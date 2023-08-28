@@ -245,7 +245,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iE
                   , false );
     iEngine->UseColorImage();
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("EraserTool","Erase"));

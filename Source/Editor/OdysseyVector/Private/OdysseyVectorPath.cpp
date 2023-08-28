@@ -1868,15 +1868,15 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
             {
                 //::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
                 ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( iVertex, true );
-                double dot = iPerpendicularVector.DotProduct( segmentVector );
-                ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( iPerpendicularVector.y, -iPerpendicularVector.x );
+                //double dot = iPerpendicularVector.DotProduct( segmentVector );
+                ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( -iPerpendicularVector.y, iPerpendicularVector.x );
                 double distance;
 
                 // if perpendicular vector equals 0 or is orthogonal to the segment vector
-                if ( tangentVector.DotProduct( segmentVector )  < 0.0f )
+                /*if ( tangentVector.DotProduct( segmentVector )  < 0.0f )
                 {
                     tangentVector = -tangentVector;
-                }
+                }*/
 
                 if( iPreserveHandleLength )
                 {

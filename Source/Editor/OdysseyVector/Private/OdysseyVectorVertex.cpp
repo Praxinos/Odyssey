@@ -358,6 +358,11 @@ FOdysseyVectorVertex::InvalidateSegments()
 void 
 FOdysseyVectorVertex::SetCoords( double iX, double iY, double iRadius )
 {
+    if( iRadius < 0.0f )
+    {
+        iRadius = 0.0f;
+    }
+
     FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
 
     InvalidateSegments();

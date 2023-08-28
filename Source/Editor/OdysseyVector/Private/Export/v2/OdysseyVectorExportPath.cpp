@@ -41,6 +41,51 @@ FOdysseyVectorExportV2::WritePathGeometrySegments( FOdysseyVectorPath& iPath, FA
 
 //static
 void
+FOdysseyVectorExportV2::WritePathGeometryVertexHandleAlignment( FOdysseyVectorVertex& iVertex, FArchive &Ar )
+{
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT
+                                      , Ar
+                                      , [&iVertex](FArchive &Ar) -> void
+    {
+        uint32 isHandleAligned = static_cast<uint32>(iVertex.IsHandleAligned());
+
+        Ar << isHandleAligned;
+    } );
+}
+
+//static
+void
+FOdysseyVectorExportV2::WritePathGeometryVertexPosition( FOdysseyVectorVertex& iVertex, FArchive &Ar )
+{
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX_POSITION
+                                      , Ar
+                                      , [&iVertex](FArchive &Ar) -> void
+    {
+        double x = iVertex.GetX();
+        double y = iVertex.GetY();
+        double radius = iVertex.GetRadius();
+
+        Ar << x;
+        Ar << y;
+        Ar << radius;
+    } );
+}
+
+//static
+void
+FOdysseyVectorExportV2::WritePathGeometryVertex( FOdysseyVectorVertex& iVertex, FArchive &Ar )
+{
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX
+                                      , Ar
+                                      , [&iVertex](FArchive &Ar) -> void
+    {
+        WritePathGeometryVertexPosition( iVertex, Ar );
+        WritePathGeometryVertexHandleAlignment( iVertex, Ar );
+    } );
+}
+
+//static
+void
 FOdysseyVectorExportV2::WritePathGeometryVertices( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
     if ( iPath.GetVertexList().size() )
@@ -61,9 +106,6 @@ FOdysseyVectorExportV2::WritePathGeometryVertices( FOdysseyVectorPath& iPath, FA
                 double y = vertex->GetY();
                 double radius = vertex->GetRadius();
 
-                // used as a reference when writing segments
-                vertex->SetID( vertexID++ );
-
                 Ar << x;
                 Ar << y;
                 Ar << radius;
@@ -76,11 +118,24 @@ FOdysseyVectorExportV2::WritePathGeometryVertices( FOdysseyVectorPath& iPath, FA
 void
 FOdysseyVectorExportV2::WritePathGeometry( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
+    uint32 vertexID = 0;
+
+    // renumber vertices, for use as a reference when writing segments e.g
+    for( FOdysseyVectorVertex* vertex : iPath.GetVertexList() )
+    {
+        vertex->SetID( vertexID++ );
+    }
+
     FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY
                                       , Ar
                                       , [&iPath](FArchive &Ar) -> void
     {
-        WritePathGeometryVertices( iPath, Ar );
+        //WritePathGeometryVertices_Packed( iPath, Ar );
+        for( FOdysseyVectorVertex* vertex : iPath.GetVertexList() )
+        {
+            WritePathGeometryVertex( *vertex, Ar );
+        }
+
         WritePathGeometrySegments( iPath, Ar );
     } );
 }

@@ -530,6 +530,24 @@ GetPointParentObject( FOdysseyVectorPoint *iPoint )
     return object;
 }
 
+static void
+AlterVertexRadius( FOdysseyVectorVertex* vertex
+                 , FOdysseyVectorSegment* iFromSegment
+                 , double iDeltaRadius )
+{
+    vertex->SetRadius( vertex->GetRadius() + iDeltaRadius );
+
+    for( FOdysseyVectorSegment* segment : vertex->GetSegmentList() )
+    {
+        if( segment != iFromSegment )
+        {
+            FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( vertex );
+
+            AlterVertexRadius( otherVertex, segment, iDeltaRadius );
+        }
+    }
+}
+
 static ::ULIS::FRectD
 DragPoint( FOdysseyVectorPoint *iPoint
          , double iWorldX
@@ -548,7 +566,7 @@ DragPoint( FOdysseyVectorPoint *iPoint
         ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
                              , cubicVertex->GetY() - localCoords.y };
 
-        cubicVertex->SetRadius( dif.Distance() );
+        AlterVertexRadius( cubicVertex, nullptr, dif.Distance() - cubicVertex->GetRadius() );
 
         return cubicVertex->GetBoundingBox( false );
     }

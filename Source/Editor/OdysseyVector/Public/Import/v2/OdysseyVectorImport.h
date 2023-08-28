@@ -37,6 +37,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
     void ReadPathGeometryVertices( FOdysseyVectorPath& iPath
                                  , std::vector<FOdysseyVectorVertex*>& vertexArray
                                  , FArchive &Ar );
+    void ReadPathGeometryVertexPosition( FOdysseyVectorVertex& iVertex
+                                       , FArchive &Ar );
+    void ReadPathGeometryVertexHandleAlignment( FOdysseyVectorVertex& iVertex
+                                              , FArchive &Ar );
     void ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
                                       , std::vector<FOdysseyVectorVertex*>& vertexArray
                                       , FArchive &Ar );

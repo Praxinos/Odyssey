@@ -39,7 +39,13 @@ namespace FOdysseyVectorExportV2
                     // ... inherited chunks.
                     static const uint32 CHUNK_PATH_JOINT = 0x272518f6; // uint32(type)
                     static const uint32 CHUNK_PATH_GEOMETRY = 0x904a4229; // container
+                        // packed version
                         static const uint32 CHUNK_PATH_GEOMETRY_VERTICES = 0x1116a85d; // uint32(count), array[double(X)-double(Y)-double(Radius)]
+                        // per-vertex version. Slower but more convenient to handle
+                        static const uint32 CHUNK_PATH_GEOMETRY_VERTEX =  0x1f128031; // container
+                            static const uint32 CHUNK_PATH_GEOMETRY_VERTEX_POSITION = 0xc66f513b; // double(X)-double(Y)-double(Radius)
+                            static const uint32 CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT = 0x285aa8d4; // uint32(bool)
+
                         static const uint32 CHUNK_PATH_GEOMETRY_CUBICSEGMENTS = 0x76cacf19; // uint32(count), array[uint32(P0ID)-uint32(P1ID)-double(CX0)-double(CY0)-double(CX1)-double(CY1)]
 
                 static const uint32 CHUNK_GROUPPAINT = 0xac92b85d; // container
@@ -105,6 +111,9 @@ namespace FOdysseyVectorExportV2
     void ODYSSEYVECTOR_API WritePath( FOdysseyVectorPath& iPath, FArchive &Ar );
     void WritePathGeometrySegments( FOdysseyVectorPath& iPath, FArchive &Ar );
     void WritePathGeometryVertices( FOdysseyVectorPath& iPath, FArchive &Ar );
+    void WritePathGeometryVertex( FOdysseyVectorVertex& iVertex, FArchive &Ar );
+    void WritePathGeometryVertexPosition( FOdysseyVectorVertex& iVertex, FArchive &Ar );
+    void WritePathGeometryVertexHandleAlignment( FOdysseyVectorVertex& iVertex, FArchive &Ar );
     void WritePathGeometry( FOdysseyVectorPath& iPath, FArchive &Ar );
     void WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar );
 
