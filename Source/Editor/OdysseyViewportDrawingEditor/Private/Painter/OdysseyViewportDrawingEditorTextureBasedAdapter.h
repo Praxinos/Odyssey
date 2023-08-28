@@ -27,4 +27,5 @@ private:
 
     //A useful boolean to stop the drawing when we crossed a big seam in the mesh (for texture adapter, handling of seams/loops)
     bool mStopDrawing = false;
+    FVector2D mLastPoint;
 };

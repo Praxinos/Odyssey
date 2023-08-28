@@ -14,7 +14,8 @@ FOdysseyViewportDrawingEditorTextureBasedAdapter::~FOdysseyViewportDrawingEditor
 }
 
 FOdysseyViewportDrawingEditorTextureBasedAdapter::FOdysseyViewportDrawingEditorTextureBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension) :
-    IOdysseyViewportDrawingEditorAdapter(iExtension)
+    IOdysseyViewportDrawingEditorAdapter(iExtension),
+    mLastPoint( FVector2D (-1,-1))
 {
 }
 
@@ -27,8 +28,9 @@ FOdysseyViewportDrawingEditorTextureBasedAdapter::Initialize()
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
 {
-    mStopDrawing = false;
     IOdysseyViewportDrawingEditorAdapter::FinishPainting();
+    mStopDrawing = false;
+    mLastPoint = FVector2D( -1, -1 );
 }
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
@@ -41,36 +43,26 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
     if (mExtension->GetEditor()->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
         drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
 
-    const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mExtension->ComponentToAdapterMap().Find(mExtension->Component());
+    if (mStopDrawing == true || !drawingTool)
+        return iStampParams.mEvent;
 
-    TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
+    if (mLastPoint == FVector2D(-1, -1))
+    {
+        mLastPoint = FVector2D( mCurrentStrokeRay.mPoint.x, mCurrentStrokeRay.mPoint.y);
+    }
 
-    FHitResult lastTraceHitResult(1.0f);
-    const FVector lastRayEnd(mLastStrokeRay.mRayOrigin + mLastStrokeRay.mRayDirection * HALF_WORLD_MAX);
+    float thresholdX = mTexture->Resource->GetSizeX() / 5.f; //20% of texture Size
+    float thresholdY = mTexture->Resource->GetSizeY() / 5.f; //20% of texture Size
 
-    FHitResult currentTraceHitResult(1.0f);
-    const FVector currentRayEnd(mCurrentStrokeRay.mRayOrigin + mCurrentStrokeRay.mRayDirection * HALF_WORLD_MAX);
-
-    meshAdapter->LineTraceComponent(lastTraceHitResult, mLastStrokeRay.mRayOrigin, lastRayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
-    meshAdapter->LineTraceComponent(currentTraceHitResult, mCurrentStrokeRay.mRayOrigin, currentRayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
-
-    // Convert trace to UV position
-    FVector2D lastCoord;
-    FVector2D currentCoord;
-    UGameplayStatics::FindCollisionUV(lastTraceHitResult, mExtension->GetUVIndexUsedByCurrentTexture(), lastCoord);
-    UGameplayStatics::FindCollisionUV(currentTraceHitResult, mExtension->GetUVIndexUsedByCurrentTexture(), currentCoord);
-
-    if (::ULIS::FMath::Dist(lastCoord.X, lastCoord.Y, currentCoord.X, currentCoord.Y) > 0.1f)
+    if ((::FMath::Abs( float(mLastPoint.X) - mCurrentStrokeRay.mPoint.x ) > thresholdX || ::FMath::Abs(float(mLastPoint.Y) - mCurrentStrokeRay.mPoint.y) > thresholdY))
     {
         mStopDrawing = true;
         return iStampParams.mEvent;
     }
 
-    if(drawingTool && mStopDrawing == false)
-        return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
-    else
-        return iStampParams.mEvent;
+    mLastPoint = FVector2D(mCurrentStrokeRay.mPoint.x, mCurrentStrokeRay.mPoint.y);
 
+    return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
 }
 
 #undef LOCTEXT_NAMESPACE
