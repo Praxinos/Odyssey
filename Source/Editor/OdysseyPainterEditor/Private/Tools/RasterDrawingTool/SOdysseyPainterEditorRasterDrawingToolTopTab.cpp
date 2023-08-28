@@ -63,7 +63,7 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArg
 
     TSharedPtr<class IPropertyHandle> blendParametersHandle = mBlendParametersPropertyView->GetPropertyHandle();
     TSharedPtr<class IPropertyHandle> sizeHandle = mSizePropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> flowHandle = mSizePropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> flowHandle = mFlowPropertyView->GetPropertyHandle();
     TSharedPtr<class IPropertyHandle> opacityHandle = blendParametersHandle->GetChildHandle("Opacity");
     TSharedPtr<class IPropertyHandle> blendModeHandle = blendParametersHandle->GetChildHandle("BlendingMode");
 
