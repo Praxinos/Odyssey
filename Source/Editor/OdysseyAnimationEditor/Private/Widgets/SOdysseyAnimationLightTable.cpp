@@ -9,6 +9,20 @@
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SSlider.h"
 
+
+SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationLightTable)
+void
+SOdysseyAnimationLightTable::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
+{
+	SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mLayerStack, EInvalidateWidgetReason::Layout)
+    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
+        [](SWidget& Widget)
+        {
+            static_cast<SOdysseyAnimationLightTable&>(Widget).RequestRebuild();
+        }
+    ));
+}
+
 SOdysseyAnimationLightTable::~SOdysseyAnimationLightTable()
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
@@ -16,15 +30,17 @@ SOdysseyAnimationLightTable::~SOdysseyAnimationLightTable()
 
 SOdysseyAnimationLightTable::SOdysseyAnimationLightTable()
 	: mRebuildRequested(false)
+    , mLayerStack(*this, nullptr)
 {
 }
 
 void
 SOdysseyAnimationLightTable::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)
 {
-	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyAnimationLightTable::OnCurrentLayerChanged);
+	UOdysseyLayerStack::OnCurrentLayerChanged().AddSP(this, &SOdysseyAnimationLightTable::OnCurrentLayerChanged);
 
     mExtension = iExtension;
+    mLayerStack.Assign(*this, InArgs._LayerStack);
     
 	ChildSlot
 	[
@@ -38,6 +54,9 @@ TSharedPtr<FOdysseyAnimationLightTable>
 SOdysseyAnimationLightTable::GetLightTable() const
 {
 	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+	if (!layerStack)
+		return nullptr;
+
 	UOdysseyAnimationLayerImageRaster* currentLayer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
 	if (!currentLayer)
 		return nullptr;

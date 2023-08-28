@@ -23,6 +23,7 @@ protected:
 
 protected:
     // Widget Getters
+    UOdysseyAnimationLayerStack* LayerStack() const;
 
 protected:
     // Event 

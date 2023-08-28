@@ -13,9 +13,12 @@ class FOdysseyAnimationLightTable;
 // SOdysseyAnimationLightTable
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLightTable : public SCompoundWidget
 {
+    SLATE_DECLARE_WIDGET(SOdysseyAnimationLightTable, SCompoundWidget)
+
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationLightTable)
 		{}
+        SLATE_ATTRIBUTE( UOdysseyAnimationLayerStack*, LayerStack )
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
@@ -44,4 +47,5 @@ private:
 	FOdysseyAnimationEditorExtension* mExtension;
 	TSharedPtr<SHorizontalBox> mSlidersBox;
 	bool mRebuildRequested;
+    TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;
 };

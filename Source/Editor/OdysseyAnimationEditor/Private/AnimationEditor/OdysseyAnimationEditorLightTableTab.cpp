@@ -42,7 +42,14 @@ FOdysseyAnimationEditorLightTableTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyAnimationEditorLightTableTab::CreateWidget()
 {
-    return SNew(SOdysseyAnimationLightTable, mExtension);
+    return SNew(SOdysseyAnimationLightTable, mExtension)
+        .LayerStack(this, &FOdysseyAnimationEditorLightTableTab::LayerStack);
+}
+
+UOdysseyAnimationLayerStack*
+FOdysseyAnimationEditorLightTableTab::LayerStack() const
+{
+    return mExtension->LayerStack();
 }
 
 #undef LOCTEXT_NAMESPACE
