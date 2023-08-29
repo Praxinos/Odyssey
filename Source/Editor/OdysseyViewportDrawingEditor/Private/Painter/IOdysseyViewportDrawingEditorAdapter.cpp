@@ -173,6 +173,10 @@ FVector2D IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoor
         iPositionInViewport.X = coord.X * mTexture->GetSurfaceWidth();
         iPositionInViewport.Y = coord.Y * mTexture->GetSurfaceHeight();
     }
+    else
+    {
+        iPositionInViewport = FVector2D( mLastStrokeRay.mPoint.x, mLastStrokeRay.mPoint.y );
+    }
 
     return iPositionInViewport;
 }
