@@ -426,6 +426,28 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 }
 
 void
+FOdysseyVectorPath::Invalidate()
+{
+    FOdysseyVectorObject::Invalidate();
+}
+
+void
+FOdysseyVectorPath::Invalidate( uint32 iInvalidationFlags )
+{
+    if( iInvalidationFlags & INVALIDATE_MATRIX )
+    {
+        // Mark all segment as NOT painting ready to force recalculation of cached subsegments
+        // use by the parent paint group
+        for( FOdysseyVectorSegment* segment : mSegmentList )
+        {
+            segment->SetPaintingReady( false );
+        }
+    }
+
+    FOdysseyVectorObject::Invalidate( iInvalidationFlags );
+}
+
+void
 FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.remove( iSegment );
@@ -1573,7 +1595,8 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
                                                                                     , handle0.y
                                                                                     , handle1.x
                                                                                     , handle1.y
-                                                                                    , stitchingVertex1 );
+                                                                                    , stitchingVertex1
+                                                                                    , true );
 
 
         iPath->AddSegment( stitchedSegment );
@@ -1659,6 +1682,12 @@ FOdysseyVectorPath::DrawStructure( const FColor& iStrokeColor, double iStrokeWid
     blctx->restore();
 }
 
+std::list<FOdysseyVectorSegment*>&
+FOdysseyVectorPath::GetInvalidatedSegmentList()
+{
+    return mInvalidatedSegmentList;
+}
+
 FOdysseyVectorObject*
 FOdysseyVectorPath::CopyShape()
 {
@@ -1689,12 +1718,15 @@ FOdysseyVectorPath::CopyShape()
                                                                                , originalSegment->GetHandle(0)->GetY()
                                                                                , originalSegment->GetHandle(1)->GetX()
                                                                                , originalSegment->GetHandle(1)->GetY()
-                                                                               , lookupTable[vertex1] );
+                                                                               , lookupTable[vertex1]
+                                                                               , true );
 
         cubicPathCopy->AddSegment( newSegment );
 
-        newSegment->BuildVariable();
+        //newSegment->BuildVariable();
     }
+
+    //cubicPathCopy->Update( 0 );
 
     return static_cast<FOdysseyVectorObject*>( cubicPathCopy );
 }
@@ -1753,7 +1785,8 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
                                                                                    , pt[0].y
                                                                                    , pt[1].x
                                                                                    , pt[1].y
-                                                                                   , newCubicVertex1 );
+                                                                                   , newCubicVertex1
+                                                                                   , true );
             oAddedSegmentArray.push_back( newSegment );
 
             AddSegment( newSegment ); // this also invalidates the segment
@@ -1815,7 +1848,7 @@ FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
 
 // static
 void
-FOdysseyVectorPath::SharpSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength )
+FOdysseyVectorPath::SharpSegments( FOdysseyVectorVertex* iVertex, bool iPreserveHandleLength )
 {
     std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
 
@@ -1825,20 +1858,13 @@ FOdysseyVectorPath::SharpSegments( FOdysseyVectorVertex* iVertex, bool iBuildSeg
 
         cubicSegment->GetHandle( iVertex )->Set( iVertex->GetX(), iVertex->GetY() );
 
-        if ( iBuildSegments == true )
-        {
-            cubicSegment->Update();
-        }
-        else
-        {
-            cubicSegment->Invalidate();
-        }
+        cubicSegment->Invalidate();
     }
 }
 
 // static
 void
-FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength )
+FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iPreserveHandleLength )
 {
     ::ULIS::FVec2D perpendicularVector = iVertex->GetAverageStraightVectorOnSegment( true );
 
@@ -1849,12 +1875,12 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSe
         perpendicularVector = ::ULIS::FVec2D( perpendicularVector.y, -perpendicularVector.x );
     }
 
-    SmoothSegments( iVertex, perpendicularVector, iBuildSegments, iPreserveHandleLength );
+    SmoothSegments( iVertex, perpendicularVector, iPreserveHandleLength );
 }
 
 // static
 void
-FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2D iPerpendicularVector, bool iBuildSegments, bool iPreserveHandleLength )
+FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2D iPerpendicularVector, bool iPreserveHandleLength )
 {
     std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
 
@@ -1924,14 +1950,7 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
                                                  iVertex->GetY() + ( tangentVector.y * distance ) );
             }
 
-            if ( iBuildSegments == true )
-            {
-                cubicSegment->Update();
-            }
-            else
-            {
-                cubicSegment->Invalidate();
-            }
+            cubicSegment->Invalidate();
         }
     }
 }

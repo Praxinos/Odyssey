@@ -380,6 +380,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
         delete primitive;
 
         iScene->AppendChild( path );
+        //path->InvalidateAllSegments();
         path->UpdateMatrix();
         iScene->Select( path );
     }

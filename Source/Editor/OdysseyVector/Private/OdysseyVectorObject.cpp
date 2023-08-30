@@ -548,6 +548,19 @@ FOdysseyVectorObject::IsSelected()
 }
 
 void
+FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild )
+{
+    // this is temporary and should be optimized somehow
+    if( std::find( mInvalidatedChildrenList.begin(), mInvalidatedChildrenList.end(), iChild ) == mInvalidatedChildrenList.end() )
+        /*mInvalidationFlags & INVALIDATE_PARENT ) == 0*/
+    {
+        mInvalidatedChildrenList.push_back( iChild );
+    }
+
+    Invalidate( INVALIDATE_CHILD );
+}
+
+void
 FOdysseyVectorObject::Invalidate()
 {
     Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
@@ -558,14 +571,7 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
 {
     if ( mParent )
     {
-        // this is temporary and should be optimized somehow
-        if( std::find( mParent->mInvalidatedChildrenList.begin(), mParent->mInvalidatedChildrenList.end(), this ) == mParent->mInvalidatedChildrenList.end() )
-            /*mInvalidationFlags & INVALIDATE_PARENT ) == 0*/
-        {
-            mParent->mInvalidatedChildrenList.push_back( this );
-        }
-
-        mParent->Invalidate( INVALIDATE_CHILD );
+        mParent->InvalidateChild( this );
     }
 
     mInvalidationFlags |= iInvalidationFlags;

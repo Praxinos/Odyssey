@@ -143,20 +143,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         FOdysseyVectorVertex*
         GetOtherVertex( FOdysseyVectorVertex* iVertex );
 
-        virtual uint32 Intersect( FOdysseyVectorSegment* iOther
-                                , double iTolerance
-                                , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ){ return 0; };
-
         virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize );
         void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
         virtual FOdysseyVectorHandleSegment* GetHandle( FOdysseyVectorVertex* iVertex );
         virtual FOdysseyVectorHandleSegment* GetHandle( int iCtrlPointNum );
+
+        void SetPaintingReady( bool iIsPaintingReady );
+        bool IsPaintingReady();
 
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
         bool mIsInvalidated;
+        bool mIsPaintingReady;
         uint32 mID;
         uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
 

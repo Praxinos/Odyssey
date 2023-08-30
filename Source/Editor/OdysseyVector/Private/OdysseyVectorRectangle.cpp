@@ -16,10 +16,10 @@ FOdysseyVectorRectangle::FOdysseyVectorRectangle( const FString iName, double iW
     mCubicVertex[2] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
     mCubicVertex[3] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
 
-    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1] );
-    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[1], mCubicVertex[2] );
-    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[2], mCubicVertex[3] );
-    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[3], mCubicVertex[0] );
+    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1], true );
+    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[1], mCubicVertex[2], true );
+    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[2], mCubicVertex[3], true );
+    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[3], mCubicVertex[0], true );
 
     AddVertex ( mCubicVertex[0] );
     AddVertex ( mCubicVertex[1] );
@@ -69,7 +69,7 @@ FOdysseyVectorRectangle::UpdateShape( uint32 iUpdateFlags )
 
     mCubicSegment[3]->GetHandle(0)->Set(  0.0f           , mHeight * 0.75f );
     mCubicSegment[3]->GetHandle(1)->Set(  0.0f           , mHeight * 0.25f );
-
+/*
     mCubicSegment[0]->Update();
     mCubicSegment[1]->Update();
     mCubicSegment[2]->Update();
@@ -80,6 +80,8 @@ FOdysseyVectorRectangle::UpdateShape( uint32 iUpdateFlags )
     mBBox.y =    (-mHeight * 0.5f ) -  mStrokeWidth;
     mBBox.w =  ( ( mWidth  * 0.5f ) +  mStrokeWidth ) * 2;
     mBBox.h =  ( ( mHeight * 0.5f ) +  mStrokeWidth ) * 2;
+*/
+    FOdysseyVectorPath::UpdateShape( iUpdateFlags );
 }
 
 FOdysseyVectorObject*

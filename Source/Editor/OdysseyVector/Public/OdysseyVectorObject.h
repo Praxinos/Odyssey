@@ -197,6 +197,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void BringForward();
         virtual void Invalidate( uint32 iInvalidationFlags );
         virtual void Invalidate();
+        virtual void InvalidateChild( FOdysseyVectorObject* iChild );
         FOdysseyVectorScene* GetScene();
         bool IsInvalidated();
         bool IsSelected();

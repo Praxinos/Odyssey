@@ -14,7 +14,8 @@ class FOdysseyVectorPathCubic;
 typedef struct _FPolygon {
     ::ULIS::FVec2D quadVertex[4];
     ::ULIS::FVec2D lineVertex[2];
-    double xmin, xmax, ymin, ymax;
+    ::ULIS::FVec2D lineVertexInParent[2];
+    double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;
     double fromT;
     double toT;
 } FPolygon;
@@ -40,7 +41,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          */
         FOdysseyVectorSegmentCubic ( FOdysseyVectorPath* iPath
                                    , FOdysseyVectorVertex* iVertex0
-                                   , FOdysseyVectorVertex* iVertex1 );
+                                   , FOdysseyVectorVertex* iVertex1
+                                   , bool iNeedWidth );
 
        /**
          * @brief function to allocate a new cubic segment
@@ -59,7 +61,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , double iCtrlPoint0y
                                   , double iCtrlPoint1x
                                   , double iCtrlPoint1y
-                                  , FOdysseyVectorVertex* iVertex1 );
+                                  , FOdysseyVectorVertex* iVertex1
+                                  , bool iNeedWidth );
 
         void Smooth( double iLimitAngleInRadians );
 
@@ -148,9 +151,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iTolerance a maximum distance to consider an almost-hit as a hit.
          * @param iIntersectionArray array that receives the created intersections.
          */
-        virtual uint32 Intersect( FOdysseyVectorSegment* iOther
-                                , double iTolerance
-                                , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ) override;
+        //virtual uint32 Intersect( FOdysseyVectorSegment* iOther
+                                //, double iTolerance
+                               // , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ) override;
 
        /**
          * @brief Builds the variable thickness segment (stores values into polygon cache).
@@ -229,6 +232,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
 
         virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
 
+        ::ULIS::FVec2D GetPolygonCacheStartPointInParent();
+        ::ULIS::FVec2D GetPolygonCacheEndPointInParent();
+
     private:
         void BuildVariableAdaptive( double  iFromT
                                   , double  iToT
@@ -241,7 +247,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         void MakeBLPath();
 
     protected:
-        ::ULIS::FVec2D mWidthBezier[2][4];
+        ::ULIS::FVec2D mBezier[4];
+        bool mNeedWidth;
+        //::ULIS::FVec2D mWidthBezier[2][4];
         FOdysseyVectorHandleSegment mCtrlPoint[2];
         std::vector<FPolygon> mPolygonCache;
         BLPath mBLPath;

@@ -254,12 +254,12 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngi
                 // then sharp or smooth
                 if( SmoothingMode == ePathSmoothingMode::Sharp )
                 {
-                    FOdysseyVectorPath::SharpSegments( vertex, false, PreserveHandleLength );
+                    FOdysseyVectorPath::SharpSegments( vertex, PreserveHandleLength );
                 }
 
                 if( SmoothingMode == ePathSmoothingMode::Round )
                 {
-                    FOdysseyVectorPath::SmoothSegments( vertex, false, PreserveHandleLength );
+                    FOdysseyVectorPath::SmoothSegments( vertex, PreserveHandleLength );
                 }
             }
         }

@@ -12,6 +12,7 @@
 #include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorSegmentCubicGap.h"
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorCycle.h"
@@ -151,6 +152,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void SetPainted( bool iPainted );
         virtual void TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
 
+        uint32 IntersectSegment( FOdysseyVectorSegmentCubic* iSegment0
+                               , FOdysseyVectorSegmentCubic* iSegment1
+                               , double iTolerance
+                               , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
+
     protected:
         /**
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).
@@ -159,9 +165,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param oIntersectionList list populated by the pointers to the intersection that will be created.
          * @return the number of intersections
          */
-        uint32 IntersectSegment( FOdysseyVectorSegment* iSegment
-                               , std::list<FOdysseyVectorSegment*>& iSegmenList
-                               , std::vector<FOdysseyVectorIntersection*>& oIntersectionList );
+        uint32 IntersectSegmentWithList( FOdysseyVectorSegment* iSegment
+                                       , std::list<FOdysseyVectorSegment*>& iSegmenList
+                                       , std::vector<FOdysseyVectorIntersection*>& oIntersectionList );
 
         /**
          * @brief Build the graph that allows to detect the cycles. It basically checks intersections
@@ -218,6 +224,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void PropagateBuckets();
 
+        void CreateVertexGapSegment( FOdysseyVectorVertex* iVertex
+                                   , std::vector<FOdysseyVectorSection>& iSectionBuffer
+                                   , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer );
+        void CreateSegmentSections( FOdysseyVectorSegment* iSegment
+                                  , BLMatrix2D& iConversionMatrix
+                                  , std::vector<FOdysseyVectorSection>& iSectionBuffer );
+        void CreatePathSections( FOdysseyVectorPath* iPath
+                               , BLMatrix2D& iConversionMatrix
+                               , std::vector<FOdysseyVectorSection>& iSectionBuffer
+                               , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer );
+
     protected:
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
@@ -230,7 +247,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         uint32 mPaintingCode;
 
         std::vector<FOdysseyVectorSection> mSectionBuffer;
-        std::vector<FOdysseyVectorSegmentCubic> mGapSegmentBuffer;
+        std::vector<FOdysseyVectorSegmentCubicGap> mGapSegmentBuffer;
 
     public:
         FGroupPaintParam mGroupPaintParam;

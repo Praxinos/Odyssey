@@ -543,10 +543,12 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
             FOdysseyVectorVertex* knotVertex = new FOdysseyVectorVertex( cubicPath, averageCoords.x, averageCoords.y, averageRadius );
             FOdysseyVectorSegmentCubic* newCubicSegment[2] = { new FOdysseyVectorSegmentCubic( cubicPath
                                                                                             ,  prevVertex
-                                                                                            ,  knotVertex ),
+                                                                                            ,  knotVertex
+                                                                                            ,  true ),
                                                                new FOdysseyVectorSegmentCubic( cubicPath
                                                                                             ,  knotVertex
-                                                                                            ,  nextVertex ) };
+                                                                                            ,  nextVertex
+                                                                                            ,  true ) };
 
             newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertex)->GetCoords() );
             newCubicSegment[0]->GetHandle(1)->Set( vertexASegment->GetHandle(iVertexA  )->GetCoords() );

@@ -24,10 +24,10 @@ FOdysseyVectorEllipse::FOdysseyVectorEllipse( const FString& iName
     mCubicVertex[2] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
     mCubicVertex[3] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
 
-    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1] );
-    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[1], mCubicVertex[2] );
-    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[2], mCubicVertex[3] );
-    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[3], mCubicVertex[0] );
+    mCubicSegment[0] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1], true );
+    mCubicSegment[1] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[1], mCubicVertex[2], true );
+    mCubicSegment[2] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[2], mCubicVertex[3], true );
+    mCubicSegment[3] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[3], mCubicVertex[0], true );
 
     AddVertex ( mCubicVertex[0] );
     AddVertex ( mCubicVertex[1] );
@@ -81,16 +81,19 @@ FOdysseyVectorEllipse::UpdateShape( uint32 iUpdateFlags )
     mCubicSegment[3]->GetHandle(0)->Set( -mRadiusX,  ctlDistY );
     mCubicSegment[3]->GetHandle(1)->Set( -ctlDistX,  mRadiusY );
 
-    mCubicSegment[0]->Update();
-    mCubicSegment[1]->Update();
-    mCubicSegment[2]->Update();
-    mCubicSegment[3]->Update();
+    FOdysseyVectorPath::UpdateShape( iUpdateFlags );
+/*
+    mCubicSegment[0]->Update( nullptr );
+    mCubicSegment[1]->Update( nullptr );
+    mCubicSegment[2]->Update( nullptr );
+    mCubicSegment[3]->Update( nullptr );
 
     // Update the bounding box
     mBBox.x = - mRadiusX - mStrokeWidth;
     mBBox.y = - mRadiusY - mStrokeWidth;
     mBBox.w =  ( mRadiusX +  mStrokeWidth ) * 2;
     mBBox.h =  ( mRadiusY +  mStrokeWidth ) * 2;
+*/
 }
 
 FOdysseyVectorObject*

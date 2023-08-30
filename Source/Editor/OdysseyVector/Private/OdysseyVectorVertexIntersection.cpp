@@ -47,6 +47,12 @@ FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSegment* iSegment )
     return mT;
 }
 
+double
+FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSection* iSection )
+{
+    return ( this == iSection->GetVertex(0) ) ? 0.0f : 1.0f;
+}
+
 FOdysseyVectorVertexIntersection*
 FOdysseyVectorVertexIntersection::GetPartner()
 {

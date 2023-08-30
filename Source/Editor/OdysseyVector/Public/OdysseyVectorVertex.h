@@ -175,6 +175,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         virtual double GetT( FOdysseyVectorSegment* iSegment );
 
+        /**
+         * @brief Get the position of the vertex on the section passed as parameter, in a range from 0.0 to 1.0.
+         * @param iSection the section the vertex lies on.
+         * @return a range from 0.0 to 1.0.
+         */
+        virtual double GetT( FOdysseyVectorSection* iSection );
 
         virtual ::ULIS::FVec2D GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize );
 

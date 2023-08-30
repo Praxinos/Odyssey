@@ -102,9 +102,9 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
     }
 
     // Then check if all vertices lies within the parent candidate
-    for( int i = 0; i < mVertexArray.size(); i++ )
+    for( int i = 0; i < mSectionArray.size(); i++ )
     {
-        ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords();
+        ::ULIS::FVec2D vCoords = mSectionArray[i]->GetVertexCoords( mVertexArray[i] );
         BLPoint pt = BLPoint( vCoords.x, vCoords.y );
         uint32 ret = iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
@@ -121,12 +121,13 @@ void
 FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                           , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
-    int32 arraySize = iVertexArray.size();
+    int32 arraySize = iSectionArray.size();
     int seg = 0;
 
-    if ( iVertexArray.size() ) 
+    if ( iSectionArray.size() ) 
     {
-        ::ULIS::FVec2D originAt = iVertexArray[0]->GetCoords();
+        // Note: section::GetVertexCoords() return the coords in paintgroup's coordinates
+        ::ULIS::FVec2D originAt = iSectionArray[0]->GetVertexCoords( iVertexArray[0] );
 
         mContourPath.moveTo( originAt.x, originAt.y );
 

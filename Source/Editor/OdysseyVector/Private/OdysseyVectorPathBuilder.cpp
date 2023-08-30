@@ -118,7 +118,7 @@ Shape( FOdysseyVectorSegmentCubic& iCubicSegment, ::ULIS::FVec2D iEntryVector, :
     iCubicSegment.GetHandle(1)->Set( iCubicSegment.GetPoint(1)->GetX() - iExitVector.x * length * 0.25f
                                    , iCubicSegment.GetPoint(1)->GetY() - iExitVector.y * length * 0.25f );
 
-    iCubicSegment.Update();
+    //iCubicSegment.Update();
 }
 
 double
@@ -211,7 +211,7 @@ FOdysseyVectorPathBuilder::RecordVertex()
             uint32 linkID0 =  0;
             uint32 linkID1 =  mLinkBuffer.size() - 2; // penultimate link
 /// TODO: Factorize that part
-            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, previousCubicVertex, cubicVertex );
+            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, previousCubicVertex, cubicVertex, true );
 
             Shape ( *mCubicSegment
                    , mLinkBuffer[linkID0].GetVector( true )
@@ -229,7 +229,7 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             mCubicSegment->Invalidate();
 
-            //mCubicPath->Update( 0 );
+            mCubicPath->Update( 0 );
 /// end TODO
 
             ret |= FOdysseyVectorPathBuilder::NEWSEGMENT;
@@ -392,7 +392,7 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
             uint32 linkID1 =  mLinkBuffer.size() - 1; // last link
 
         /// TODO: Factorize that part
-            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, mVertexArray.back(), iVertex );
+            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, mVertexArray.back(), iVertex, true );
 
             Shape ( *mCubicSegment
                    , mLinkBuffer[linkID0].GetVector( true )

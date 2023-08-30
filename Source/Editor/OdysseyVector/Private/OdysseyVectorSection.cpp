@@ -10,15 +10,17 @@ FOdysseyVectorSection::FOdysseyVectorSection()
 }
 
 FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
+                                            , BLMatrix2D& iConversionMatrix
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1 )
     : FOdysseyVectorSection()
 {
-    Init( iSegment, iVertex0, iVertex1 );
+    Init( iSegment, iConversionMatrix, iVertex0, iVertex1 );
 }
 
 void
 FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
+                           , BLMatrix2D& iConversionMatrix
                            , FOdysseyVectorVertex* iVertex0
                            , FOdysseyVectorVertex* iVertex1 )
 {
@@ -44,6 +46,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
         ::ULIS::FVec2D& point1 = cubicSegment->GetVertex(1)->GetCoords();
         ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
         ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+        BLPoint convertedPoint[4];
 
         if( fabs( t0 - t1 ) < 1.0f )
         {
@@ -58,7 +61,91 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
             mBezier[2] = ctrlPoint1;
             mBezier[3] = point1;
         }
+
+        // convert to desired space (the paintgroup, normally)
+        convertedPoint[0] = iConversionMatrix.mapPoint( mBezier[0].x, mBezier[0].y );
+        convertedPoint[1] = iConversionMatrix.mapPoint( mBezier[1].x, mBezier[1].y );
+        convertedPoint[2] = iConversionMatrix.mapPoint( mBezier[2].x, mBezier[2].y );
+        convertedPoint[3] = iConversionMatrix.mapPoint( mBezier[3].x, mBezier[3].y );
+
+        // copy values directly (we don't use ::ULIS::FVec2D constructor, to save some speed).
+        mBezier[0].x = convertedPoint[0].x;
+        mBezier[0].y = convertedPoint[0].y;
+
+        mBezier[1].x = convertedPoint[1].x;
+        mBezier[1].y = convertedPoint[1].y;
+
+        mBezier[2].x = convertedPoint[2].x;
+        mBezier[2].y = convertedPoint[2].y;
+
+        mBezier[3].x = convertedPoint[3].x;
+        mBezier[3].y = convertedPoint[3].y;
     }
+}
+
+::ULIS::FVec2D&
+FOdysseyVectorSection::GetVertexCoords( FOdysseyVectorVertex* iVertex )
+{
+    return ( iVertex == mVertex[0] ) ? mBezier[0] : mBezier[3];
+}
+
+::ULIS::FVec2D
+FOdysseyVectorSection::GetPointAt( double t )
+{
+    ::ULIS::FVec2D pointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( mBezier[0]
+                                                                                , mBezier[1]
+                                                                                , mBezier[2]
+                                                                                , mBezier[3]
+                                                                                , t );
+
+    return pointAt;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorSection::GetTangentAt( double t, bool iNormalize )
+{
+    ::ULIS::FVec2D tangent;
+
+    // Special case when control point are located at endpoint (tangentequals 0 then).
+
+    if( ( t > 0.0f ) && ( t < 1.0f ) )
+    {
+        tangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( mBezier[0]
+                                                                       , mBezier[1]
+                                                                       , mBezier[2]
+                                                                       , mBezier[3]
+                                                                       , t );
+    }
+
+    if( t == 0.0f )
+    {
+        tangent = mBezier[1] - mBezier[0];
+
+        if( tangent.Distance() == 0.0f ) 
+        {
+            tangent = mBezier[2] - mBezier[0];
+        }
+    }
+
+    if( t == 1.0f )
+    {
+        tangent =  mBezier[3] - mBezier[2];
+
+        if( tangent.Distance() == 0.0f )
+        {
+            tangent = mBezier[3] - mBezier[1];
+        }
+    }
+
+    if( iNormalize )
+    {
+        if( tangent.DistanceSquared() )
+        {
+            tangent.Normalize();
+        }
+    }
+
+    return tangent;
 }
 
 uint32
@@ -90,17 +177,17 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
 {
     ::ULIS::FVec2D tangent = { 0.0f, 0.0f };
 
-    if( ( mSegment == nullptr ) || ( iStraight == true ) )
+    if( /*( mSegment == nullptr ) || */( iStraight == true ) )
     {
-        tangent =  ( iVertex == mVertex[0] ) ? mVertex[1]->GetCoords() - mVertex[0]->GetCoords()
-                                             : mVertex[0]->GetCoords() - mVertex[1]->GetCoords();
+        tangent =  ( iVertex == mVertex[0] ) ? mBezier[3] - mBezier[0]
+                                             : mBezier[0] - mBezier[3];
     }
     else
     {
         if( mSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-             tangent = ( iVertex == mVertex[0] ) ?  mSegment->GetTangentAt( iVertex->GetT( mSegment ), false )
-                                                 : -mSegment->GetTangentAt( iVertex->GetT( mSegment ), false );
+             tangent = ( iVertex == mVertex[0] ) ?  GetTangentAt( 0.0f, false )
+                                                 : -GetTangentAt( 1.0f, false );
         }
     }
 

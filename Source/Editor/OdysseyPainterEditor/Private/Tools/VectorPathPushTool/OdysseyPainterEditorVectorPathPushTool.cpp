@@ -292,7 +292,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
                 ::ULIS::FVec2D handleVector = vertex->GetFirstSegment()->GetHandleVector( vertex, true);
                 ::ULIS::FVec2D perpendicularVector = ::ULIS::FVec2D( -handleVector.y, handleVector.x );
 
-                FOdysseyVectorPath::SmoothSegments( vertex, perpendicularVector, false, true );
+                FOdysseyVectorPath::SmoothSegments( vertex, perpendicularVector, true );
             }
         }
     }

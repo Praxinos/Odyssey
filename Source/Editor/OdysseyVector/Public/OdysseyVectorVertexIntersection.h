@@ -36,6 +36,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation ) override;
 
         virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
+        virtual double GetT( FOdysseyVectorSection* iSection ) override;
 
         void SetIntersection( FOdysseyVectorIntersection* iIntersection );
         FOdysseyVectorIntersection* GetIntersection();
