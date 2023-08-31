@@ -214,7 +214,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     iScene->Update( 0 ); // update invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return true;
 }
@@ -332,7 +333,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
     iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 bool

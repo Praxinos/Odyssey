@@ -94,7 +94,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* mParent;
         bool mIsSelected;
         bool mIsExpanded;
-        bool mDependsOnChildren;
         ::ULIS::FRectD mBBox;
 
         FOdysseyVectorBucket mBackgroundBucket;

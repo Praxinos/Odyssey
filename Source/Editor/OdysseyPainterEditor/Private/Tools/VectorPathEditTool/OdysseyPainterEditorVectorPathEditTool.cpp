@@ -440,7 +440,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorEngine
     }
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW 
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return true;
 }
@@ -490,7 +491,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorEngin
     // It should not use too much CPU time.
     //DetectPickingMode();
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void
@@ -676,7 +678,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
 
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void

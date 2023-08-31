@@ -3,7 +3,6 @@
 
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanToolHUD.h"
-#include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorScenePanTool"
@@ -120,7 +119,8 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorEngine
     mDownLocalMouseX = localCoords.x;
     mDownLocalMouseY = localCoords.y;
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
 
     return true;
@@ -142,11 +142,10 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag( const FOdysseyPoint& iPoin
     UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
 }
 
-// static
 void
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVectorStatic( FOdysseyVectorEngine* iEngine
-                                                                , FOdysseyVectorScene* iScene
-                                                                , const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorScenePanTool::Pan( FOdysseyVectorEngine* iEngine
+                                            , FOdysseyVectorScene* iScene
+                                            , const FOdysseyPoint& iPointInTexture )
 {
     double factor = 1.0f;
 
@@ -164,7 +163,47 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVectorStatic( FOdysseyVector
                      , iScene->GetTranslationY() + ( iPointInTexture.deltaPosition.Y * factor ) );
     iScene->UpdateMatrix();
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+}
+
+void
+UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
+                                              , FOdysseyVectorScene* iScene
+                                              , const FOdysseyPoint& iPointInTexture )
+{
+    BLPoint worldMouseCoordsBefore = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
+    uint32 imageWidth,imageHeight;
+    double factor;
+
+    iEngine->GetColorImageSize( &imageWidth, &imageHeight );
+
+    factor = (double) iPointInTexture.deltaPosition.X / imageWidth;
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    {
+        factor *= 4.0f;
+    }
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+    {
+        factor *= 0.25f;
+    }
+
+    iScene->Scale( iScene->GetScalingX() * ( 1.0f + factor )
+                 , iScene->GetScalingY() * ( 1.0f + factor ) );
+
+    iScene->UpdateMatrix();
+
+    BLPoint worldMouseCoordsAfter = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
+
+    iScene->Translate( iScene->GetTranslationX() - ( worldMouseCoordsAfter.x - worldMouseCoordsBefore.x )
+                     , iScene->GetTranslationY() - ( worldMouseCoordsAfter.y - worldMouseCoordsBefore.y ) );
+
+    iScene->UpdateMatrix();
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void
@@ -175,17 +214,13 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorEngine
 
     if(iPointInTexture.keysDown.Find(EKeys::RightMouseButton) != INDEX_NONE)
     {
-        UOdysseyPainterEditorVectorSceneScaleTool::OnMouseDragVectorStatic(mDownLocalMouseX
-                                                                          ,mDownLocalMouseY
-                                                                          ,iEngine
-                                                                          ,iScene
-                                                                          ,iPointInTexture);
+        Scale( iEngine, iScene, iPointInTexture );
     }
     else // Right-click has priority over left click
     {
         if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
         {
-            OnMouseDragVectorStatic( iEngine, iScene, iPointInTexture );
+            Pan( iEngine, iScene, iPointInTexture );
         }
     }
 }

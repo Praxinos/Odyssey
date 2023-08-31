@@ -189,7 +189,8 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return true;
 }
@@ -233,7 +234,8 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorEng
     if( rect.Area() )
     {*/
     /*}*/
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void
@@ -259,7 +261,8 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorEngi
 {
     mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 bool

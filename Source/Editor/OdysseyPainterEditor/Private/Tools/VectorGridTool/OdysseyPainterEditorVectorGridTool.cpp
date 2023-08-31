@@ -147,7 +147,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return true;
 }
@@ -198,7 +199,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 bool

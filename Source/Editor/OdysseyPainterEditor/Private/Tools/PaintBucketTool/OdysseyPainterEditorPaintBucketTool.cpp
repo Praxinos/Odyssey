@@ -600,7 +600,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorEngine* 
         mBucketHUD->SetCycle( hoveredCycle );
     }
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 double
@@ -670,7 +671,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( FOdysseyVectorEngine* i
 
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED ); // update vector scene
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void

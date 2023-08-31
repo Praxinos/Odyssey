@@ -1,7 +1,23 @@
 #include "OdysseyVectorGroupPaint.h"
 
+// Some explanations are needed here, as this is by far the most complex process
+// of Odyssey's vector features. The principles is to find cycles determined by
+// the intersected paths. To do so we have a multi-step process :
+// - find intersections
+// - make sections
+// - find chordless cycles by exploring sections :
+//    -> To find chordless cycles, we have to always go the same way, either
+//       always left or always right, it does not matter but we always go the same way.
+//       This is the CORE of the process. To find the correct way, we simply compute 
+//       the cross product, which will be either positive or negative relative to the direction.
+//       The only case when we take the negative-direction is when there is no positive-direction.
+
+
+
+
 // MUST be even number
 #define EDGESUBSAMPLES 8
+
 
 static double
 GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
@@ -19,8 +35,6 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     : FOdysseyVectorGroup( iName )
 {
     SetName( iName );
-
-    mDependsOnChildren = true;
 
     mIntersectionArray.reserve( 60 );
 
@@ -143,7 +157,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                          && ( segment0T != 1.0f && segment1T != 0.0f ) )
                         {
                             FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( iSegment0->GetPath(), ( iSegment0 == iSegment1 ), segment0ISXCoords.x, segment0ISXCoords.y, segment0T )
-                                                                                      , new FOdysseyVectorVertexIntersection( iSegment1->GetPath(), ( iSegment0 == iSegment1 ), segment1ISXCoords.x, segment1ISXCoords.y, segment1T  ) };
+                                                                                      , new FOdysseyVectorVertexIntersection( iSegment1->GetPath(), ( iSegment0 == iSegment1 ), segment1ISXCoords.x, segment1ISXCoords.y, segment1T ) };
 
                             iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
 
@@ -153,6 +167,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                             intersectionCount++;
                         }
                     }
+// this part is for detecting near-intersections. We only consider path tips (segmentCount = 1)
 /////////////////////////////// UGLY. NEEDS REFACTORING !!!! //////////////////
                     /*else
                     {*/

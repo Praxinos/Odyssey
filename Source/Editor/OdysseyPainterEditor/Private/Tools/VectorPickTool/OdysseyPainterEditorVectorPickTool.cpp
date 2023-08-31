@@ -180,7 +180,8 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( FOdysseyVectorEngine* iE
 
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
 
-        iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                       | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
     }
 
     return true;
@@ -235,7 +236,8 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( FOdysseyVectorEngine* iE
         }
     }
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     //return redrawRegion; // unused;
 }

@@ -117,7 +117,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorEngine* 
 
     iScene->Update( 0 );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return true;
 }
@@ -161,7 +162,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorEngine*
 
     /*}*/
     // refresh vector scene and GUI widgets via delegates.
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void
@@ -197,7 +199,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* 
                                        , iPointInTexture.y );
     iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
     iEngine->UseColorImage();
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 bool

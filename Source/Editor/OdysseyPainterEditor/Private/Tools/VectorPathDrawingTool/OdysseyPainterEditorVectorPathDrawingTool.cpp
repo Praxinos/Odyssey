@@ -288,7 +288,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorEng
                    | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     mPathDrawingHUD->Reset( iScene ); // re-creates the quadtree;
 
@@ -342,7 +343,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorEn
         redrawRegion = imageRegion;
     }
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return redrawRegion;
 }
@@ -438,7 +440,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorEng
     mOldPointInTexture.x = iPointInTexture.x;
     mOldPointInTexture.y = iPointInTexture.y;
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return redrawRegion;
 }

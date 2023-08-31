@@ -34,7 +34,6 @@
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
-#include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
@@ -74,7 +73,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEdite
 	, mVectorPathEditTool(nullptr)
 	, mVectorPathCutTool(nullptr)
 	, mVectorPickTool(nullptr)
-	, mVectorSceneScaleTool(nullptr)
 	, mVectorScenePanTool(nullptr)
 	, mVectorEraserTool(nullptr)
 	, mVectorPathPushTool(nullptr)
@@ -132,7 +130,6 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mVectorPathEditTool->BindShortcuts(iToolkit);
 	mVectorPathCutTool->BindShortcuts(iToolkit);
 	mVectorPickTool->BindShortcuts(iToolkit);
-	mVectorSceneScaleTool->BindShortcuts(iToolkit);
 	mVectorScenePanTool->BindShortcuts(iToolkit);
 	mVectorEraserTool->BindShortcuts(iToolkit);
 	mVectorPathPushTool->BindShortcuts(iToolkit);
@@ -167,7 +164,6 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPickTool->ExtendMenu(iOwner, iMenuName);
-	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
 	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
 	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
@@ -212,7 +208,6 @@ FOdysseyPainterEditor::InitTools()
 	mVectorPathEditTool = NewObject<UOdysseyPainterEditorVectorPathEditTool>();
 	mVectorPathCutTool = NewObject<UOdysseyPainterEditorVectorPathCutTool>();
 	mVectorPickTool = NewObject<UOdysseyPainterEditorVectorPickTool>();
-    mVectorSceneScaleTool = NewObject<UOdysseyPainterEditorVectorSceneScaleTool>();
     mVectorScenePanTool = NewObject<UOdysseyPainterEditorVectorScenePanTool>();
     mVectorEraserTool = NewObject<UOdysseyPainterEditorVectorEraserTool>();
     mVectorPathPushTool = NewObject<UOdysseyPainterEditorVectorPathPushTool>();
@@ -230,7 +225,6 @@ FOdysseyPainterEditor::InitTools()
     mVectorPathEditTool->SetEditor(this);
     mVectorPathCutTool->SetEditor(this);
     mVectorPickTool->SetEditor(this);
-    mVectorSceneScaleTool->SetEditor(this);
     mVectorScenePanTool->SetEditor(this);
     mVectorEraserTool->SetEditor(this);
     mVectorPathPushTool->SetEditor(this);
@@ -249,7 +243,6 @@ FOdysseyPainterEditor::InitTools()
     mTools.Add(mVectorPathEditTool);
     mTools.Add(mVectorPathCutTool);
     mTools.Add(mVectorPickTool);
-    mTools.Add(mVectorSceneScaleTool);
     mTools.Add(mVectorScenePanTool);
     mTools.Add(mVectorEraserTool);
     mTools.Add(mVectorPathPushTool);
@@ -329,12 +322,6 @@ UOdysseyPainterEditorVectorTransformTool*
 FOdysseyPainterEditor::GetVectorTransformTool() const
 {
     return mVectorTransformTool;
-}
-
-UOdysseyPainterEditorVectorSceneScaleTool*
-FOdysseyPainterEditor::GetVectorSceneScaleTool() const
-{
-    return mVectorSceneScaleTool;
 }
 
 UOdysseyPainterEditorVectorScenePanTool*
@@ -1324,7 +1311,6 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mVectorPathEditTool);
 	Collector.AddReferencedObject(mVectorPathCutTool);
 	Collector.AddReferencedObject(mVectorPickTool);
-    Collector.AddReferencedObject(mVectorSceneScaleTool);
     Collector.AddReferencedObject(mVectorScenePanTool);
     Collector.AddReferencedObject(mVectorEraserTool);
     Collector.AddReferencedObject(mVectorPathPushTool);
