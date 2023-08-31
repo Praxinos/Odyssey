@@ -131,29 +131,25 @@ FOdysseyAnimationLayerImageRasterMediaAbility::AutoCreateCell(int iFrameIndex) c
 			if (cellIndex >= 0 && cellFrameIndex != 0)
 			{
 				TSharedPtr<FOdysseyAnimationCell> currentCell = mLayer->GetCell(cellIndex);
-				TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = currentCell->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-				if ( imageRenderAbility )
-				{
-					//Here we need to break the instance
-					//We get the render of the current frame, and create a raster cell to draw on it
+				//Here we need to break the instance
+				//We get the render of the current frame, and create a raster cell to draw on it
 
-					TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
-					TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderAbility->BuildRenderer(cellFrameIndex, IOdysseyImageRenderer::eRenderType::Render);
-					renderer->Copy(block, block->Rect(), {});
-					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-					ctx.Finish();
+				TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+				TSharedPtr<IOdysseyImageRenderer> renderer = currentCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrameIndex);
+				renderer->Copy(block, block->Rect(), {});
+				::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+				ctx.Finish();
 
-					int currentCellLength = cellFrameIndex;
-					int newCellLength = currentCell->GetLength() - currentCellLength;
+				int currentCellLength = cellFrameIndex;
+				int newCellLength = currentCell->GetLength() - currentCellLength;
 
-					TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(mLayer, block);
-					cell->SetLength(newCellLength);
+				TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(mLayer, block);
+				cell->SetLength(newCellLength);
 
-					FOdysseyAnimationCellsMutator mutator(mLayer);
-					mutator.SetLength(cellIndex, currentCellLength);
-					mutator.Add({ cell }, cellIndex + 1);
-					mutator.Commit();
-				}
+				FOdysseyAnimationCellsMutator mutator(mLayer);
+				mutator.SetLength(cellIndex, currentCellLength);
+				mutator.Add({ cell }, cellIndex + 1);
+				mutator.Commit();
 			}
 		}
 	}

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
 #include "OdysseyAnimationEditorTimeline.h"
+#include "OdysseyImageRenderingAbility.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyAnimation;
@@ -38,7 +39,7 @@ private:
     void OnSourceChanged();
     void OnPlayerStop();
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
-    void OnImageRenderingCompositionCommited(const FGuid& iFrameId);
+    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
     void OnLayerStackElementMediaChanged();
 

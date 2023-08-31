@@ -178,7 +178,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
     TArray<::ULIS::FRectI> rects;
 
     //Get Biggest rectangle
-    int minX = 100000000;
+    /* int minX = 100000000;
     int minY = 100000000;
     int maxX = 0;
     int maxY = 0;
@@ -191,7 +191,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
         maxY = ::ULIS::FMath::Max4(double(maxY), iTriangles[i].TrianglePoints[0].Y, iTriangles[i].TrianglePoints[1].Y, iTriangles[i].TrianglePoints[2].Y);
     }
     rects.Add( ::ULIS::FRectI::FromMinMax( FMath::Max(minX - 1, 0), FMath::Max(minY - 1, 0), FMath::Min( maxX + 1, iMaxWidth ), FMath::Min( maxY + 1, iMaxHeight ) ) );
-    return rects;
+    return rects; */
 
     //First step, we get all bounding rectangles from the triangles
     for (int i = 0; i < iTriangles.Num(); i++)

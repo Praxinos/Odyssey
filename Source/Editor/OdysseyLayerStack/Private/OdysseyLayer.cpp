@@ -6,6 +6,7 @@
 #include "OdysseyLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "OdysseyLayerImageRenderer.h"
 
 UOdysseyLayer::FOnNameChanged&
 UOdysseyLayer::OnNameChanged()
@@ -225,4 +226,57 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     {
         PropertyChanged(propertyName);
     }
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    return MakeShared<FOdysseyLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+}
+
+TArray<FGuid>
+UOdysseyLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    const TArray<UOdysseyLayer*>& children = GetChildren();
+    for (UOdysseyLayer* child : children)
+    {
+        if (!child->IsActivated)
+            continue;
+
+        idComposition.Append(child->GetImageRenderingComposition(iRenderType, iFrameIndex));
+    }
+
+    return idComposition;
+}
+
+TSharedPtr<IOdysseyHandle>
+UOdysseyLayer::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    const TArray<UOdysseyLayer*>& children = GetChildren();
+    if (children.IsEmpty())
+        return nullptr;
+
+    TArray<TSharedPtr<IOdysseyHandle>> handles;
+
+    for (UOdysseyLayer* child : children)
+    {
+        if (!child->IsActivated)
+            continue;
+
+        handles.Add(child->PreloadImageRendering(iRenderType, iFrame));
+    }
+
+    return MakeShared<FOdysseyHandleContainer>(handles);
+}
+
+TArray<::ULIS::FRectI>
+UOdysseyLayer::GetImageRenderingRects() const
+{
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if(!layerStack)
+        return {};
+
+    return layerStack->GetImageRenderingRects();
 }

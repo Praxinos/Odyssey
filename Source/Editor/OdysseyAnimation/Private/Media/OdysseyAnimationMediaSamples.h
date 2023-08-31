@@ -40,8 +40,7 @@ protected:
 
 private:
 	//Events
-	void OnImageRenderingChanged(const FGuid& iFrameId, const TArray<::ULIS::FRectI>& iRects);
-	void OnImageRenderingCompositionChanged(const FGuid& iFrameId);
+	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 
 private:
 	UOdysseyAnimation* mAnimation;

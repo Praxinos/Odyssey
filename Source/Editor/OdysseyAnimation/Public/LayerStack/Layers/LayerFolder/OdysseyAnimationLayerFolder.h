@@ -53,16 +53,16 @@ public:
      */
     virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTypes) const override;
 
+    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
+
+    virtual float GetImageRenderingOpacity() const override;
+
 private:
     //Property changed methods
     void OpacityChanged();
     void BlendModeChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName) override;
-
-public:
-    //UObject overrides
-	virtual void PostInitProperties() override;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")

@@ -3,37 +3,33 @@
 
 #pragma once
 
-#include "LayerStack/Layers/OdysseyAnimationLayerImageRenderer.h"
+#include "OdysseyLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
 
-FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyLayerImageRenderer::FOdysseyLayerImageRenderer(const UOdysseyLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {    
     const TArray<UOdysseyLayer*>& children = iLayer->GetChildren();
     for (int i = children.Num() - 1; i >= 0 ; i--)
     {
-        UOdysseyAnimationLayer* animationChild = Cast<UOdysseyAnimationLayer>(children[i]);
-        if (!animationChild)
+        UOdysseyLayer* child = Cast<UOdysseyLayer>(children[i]);
+        if (!child)
             continue;
 
-        if (!animationChild->IsActivated)
-            continue;
-
-        TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderingAbility = animationChild->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-        if (!imageRenderingAbility)
+        if (!child->IsActivated)
             continue;
 
         FChildData data;
-        data.mRenderer = imageRenderingAbility->BuildRenderer(iFrame, iRenderType);
-        data.mBlendMode = imageRenderingAbility->GetBlendMode();
-        data.mOpacity = imageRenderingAbility->GetOpacity();
+        data.mRenderer = child->BuildImageRenderer(iRenderType, iFrame);
+        data.mBlendMode = child->GetImageRenderingBlendMode();
+        data.mOpacity = child->GetImageRenderingOpacity();
 
         mChildrenData.Add(data);
     }
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!ioBlock)
         return iWaitList;
@@ -64,7 +60,7 @@ FOdysseyAnimationLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyLayerImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!ioBlock)
         return iWaitList;

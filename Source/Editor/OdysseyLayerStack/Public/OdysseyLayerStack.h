@@ -5,11 +5,13 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyPerformanceMode.h"
+#include "OdysseyImageRenderingAbility.h"
 #include "OdysseyLayerStack.generated.h"
 
 UCLASS(Abstract, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerStack
     : public UObject
+    , public FOdysseyImageRenderingAbility
 {
     GENERATED_BODY()
 

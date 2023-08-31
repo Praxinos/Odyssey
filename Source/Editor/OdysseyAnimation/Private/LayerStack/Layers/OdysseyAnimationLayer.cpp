@@ -11,7 +11,7 @@
 //===========================
 
 UOdysseyAnimation*
-UOdysseyAnimationLayer::GetAnimation()
+UOdysseyAnimationLayer::GetAnimation() const
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
     if(!layerStack)
@@ -42,12 +42,8 @@ UOdysseyAnimationLayer::ChildrenChanged()
 {
     Super::ChildrenChanged();
 
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( imageRenderAbility )
-    {
-        imageRenderAbility->CompositionChanged();
-        imageRenderAbility->CompositionCommited();
-    }
+    ImageRenderingCompositionChanged();
+    ImageRenderingCompositionCommited();
 }
 
 void
@@ -58,13 +54,9 @@ UOdysseyAnimationLayer::IsActivatedChanged()
     UOdysseyAnimationLayer* parentLayer = Cast<UOdysseyAnimationLayer>(GetParent());
     if (!parentLayer)
         return;
-    
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = parentLayer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( imageRenderAbility )
-    {
-        imageRenderAbility->CompositionChanged();
-        imageRenderAbility->CompositionCommited();
-    }
+
+    parentLayer->ImageRenderingCompositionChanged();
+    parentLayer->ImageRenderingCompositionCommited();
 }
 
 #undef LOCTEXT_NAMESPACE

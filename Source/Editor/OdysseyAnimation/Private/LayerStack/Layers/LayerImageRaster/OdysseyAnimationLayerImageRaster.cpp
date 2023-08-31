@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImageRenderingAbility.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterMediaAbility.h"
 
 #include "OdysseyPixelFormat.h"
@@ -10,6 +9,7 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImageRenderer.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "OdysseyRasterBlockMutator.h"
 
@@ -128,7 +128,7 @@ UOdysseyAnimationLayerImageRaster::GetCellType(int iIndex, FName& oType) const
 }
 
 TSharedPtr<FOdysseyAnimationLightTable>
-UOdysseyAnimationLayerImageRaster::GetLightTable()
+UOdysseyAnimationLayerImageRaster::GetLightTable() const
 {
     return mLightTable;
 }
@@ -171,10 +171,6 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     if ( !animation )
         return;
 
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> thisImageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( !thisImageRenderAbility )
-        return;
-
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Merge Layers"));
 #endif
@@ -185,9 +181,6 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     {
         UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
         if ( !layer )
-            continue;
-
-        if ( !layer->HasAbility<IOdysseyAnimationImageRenderingAbility>() )
             continue;
 
         frameRanges.Add(layer->GetFrameRange());
@@ -211,11 +204,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !layer )
                 continue;
 
-            TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = layer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-            if ( !imageRenderAbility )
-                return;
-
-            currentIds.Append(imageRenderAbility->GetComposition(frameIndex, IOdysseyImageRenderer::eRenderType::Render));
+            currentIds.Append(layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, frameIndex));
         }
 
         //Do we need a new cell
@@ -259,13 +248,9 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                         if ( !layer )
                             continue;
 
-                        TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = layer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-                        if ( !imageRenderAbility )
-                            continue;
+                        TSharedPtr<IOdysseyImageRenderer> renderer = layer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, frame);
 
-                        TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderAbility->BuildRenderer(frame, IOdysseyImageRenderer::eRenderType::Render);
-
-                        lastEvent = renderer->Blend(ULISBlock, imageRenderAbility->GetBlendMode(), imageRenderAbility->GetOpacity(), rect, lastEvent);
+                        lastEvent = renderer->Blend(ULISBlock, layer->GetImageRenderingBlendMode(), layer->GetImageRenderingOpacity(), rect, lastEvent);
                     }
 
                     return lastEvent;
@@ -292,12 +277,8 @@ UOdysseyAnimationLayerImageRaster::IsLightTableActivatedChanged()
     if ( !animation )
         return;
 
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( !imageRenderAbility )
-        return;
-
-    imageRenderAbility->Changed();
-    imageRenderAbility->Commited();
+    ImageRenderingChanged();
+    ImageRenderingCommited();
 }
 
 void
@@ -305,46 +286,26 @@ UOdysseyAnimationLayerImageRaster::OpacityChanged()
 {
     OnOpacityChanged().Broadcast(this);
 
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( !imageRenderAbility )
-        return;
-
-    imageRenderAbility->Changed();
-    imageRenderAbility->Commited();
+    ImageRenderingChanged();
+    ImageRenderingCommited();
 }
 
 void
 UOdysseyAnimationLayerImageRaster::BlendModeChanged()
 {
     OnBlendModeChanged().Broadcast(this);
-
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( !imageRenderAbility )
-        return;
-
-    imageRenderAbility->Changed();
-    imageRenderAbility->Commited();
+    
+    ImageRenderingChanged();
+    ImageRenderingCommited();
 }
 
 void
 UOdysseyAnimationLayerImageRaster::CellsChanged()
 {
     OnCellsChanged().Broadcast(this);
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( !imageRenderAbility )
-        return;
-
-    imageRenderAbility->CompositionChanged();
-    imageRenderAbility->CompositionCommited();
+    
+    ImageRenderingChanged();
+    ImageRenderingCommited();
 }
 
 void
@@ -365,8 +326,7 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
 {
     Super::PostInitProperties();
 
-    mLightTable = FOdysseyAnimationLightTable::Create(this);
-    SetAbility(MakeShared<FOdysseyAnimationLayerImageRasterImageRenderingAbility>(this));
+    mLightTable = MakeShared<FOdysseyAnimationLightTable>(this);
     SetAbility(MakeShared<FOdysseyAnimationLayerImageRasterMediaAbility>(this));
 }
 
@@ -432,6 +392,69 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
             mCells[i]->Serialize(Ar);
         }
     }
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyAnimationLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    return MakeShared<FOdysseyAnimationLayerImageRasterImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+}
+
+TArray<FGuid>
+UOdysseyAnimationLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    if (iRenderType == IOdysseyImageRenderer::eRenderType::Editor && bIsLightTableActivated && mLightTable->GetDisplayPosition() == EOdysseyLightTableDisplayPosition::UnderLayer )
+    {
+        idComposition.Append(mLightTable->GetImageRenderingComposition(iRenderType, iFrameIndex));
+    }
+
+    int celFrameIndex = INDEX_NONE;
+    TSharedPtr<FOdysseyAnimationCell> cell = GetCellAtFrame(iFrameIndex, celFrameIndex);
+    if (cell)
+    {
+        idComposition.Append(cell->GetImageRenderingComposition(iRenderType, celFrameIndex));
+    }
+
+    if (iRenderType == IOdysseyImageRenderer::eRenderType::Editor && bIsLightTableActivated && mLightTable->GetDisplayPosition() == EOdysseyLightTableDisplayPosition::AboveLayer )
+    {
+        idComposition.Append(mLightTable->GetImageRenderingComposition(iRenderType, iFrameIndex));
+    }
+
+    return idComposition;
+}
+
+TSharedPtr<IOdysseyHandle>
+UOdysseyAnimationLayerImageRaster::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+{
+    int celFrameIndex = INDEX_NONE;
+    TSharedPtr<FOdysseyAnimationCell> cell = GetCellAtFrame(iFrameIndex, celFrameIndex);
+    TArray<TSharedPtr<IOdysseyHandle>> handles;
+    if (cell)
+    {
+        handles.Add(cell->PreloadImageRendering(iRenderType, celFrameIndex));
+    }
+
+    if (iRenderType == IOdysseyImageRenderer::eRenderType::Editor && bIsLightTableActivated)
+    {
+        handles.Add(mLightTable->PreloadImageRendering(iRenderType, iFrameIndex));
+
+    }
+
+    return MakeShared<FOdysseyHandleContainer>(handles);
+}
+
+::ULIS::eBlendMode
+UOdysseyAnimationLayerImageRaster::GetImageRenderingBlendMode() const
+{
+    return (::ULIS::eBlendMode)BlendMode;
+}
+
+float
+UOdysseyAnimationLayerImageRaster::GetImageRenderingOpacity() const
+{
+    return Opacity;
 }
 
 

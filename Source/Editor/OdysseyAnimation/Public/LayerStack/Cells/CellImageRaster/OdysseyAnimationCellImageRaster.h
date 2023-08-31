@@ -4,6 +4,7 @@
 #pragma once
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyImageRenderingAbility.h"
 
 class UOdysseyAnimationLayerImageRaster;
 class FOdysseyRasterBlock;
@@ -30,9 +31,19 @@ public:
     virtual void PostDuplicate() override;
     virtual void Serialize(FArchive& Ar);
 
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+	virtual TSharedPtr<IOdysseyHandle> PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+
 private:
     void InitAbilities();
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
+    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
+    void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
+    void OnBlockPtrChanged();
 
 private:
     UOdysseyAnimationLayerImageRaster* mLayer;

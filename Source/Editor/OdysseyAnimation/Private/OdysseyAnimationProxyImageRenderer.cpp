@@ -6,17 +6,14 @@
 #include "OdysseyAnimationProxyImageRenderer.h"
 
 
-FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
+FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
-    , mAnimation(iAnimation)
     , mProxy(iAnimation->GetProxy())
     , mFrameIndex(iFrameIndex)
     , mAnimationRenderer(nullptr)
 {
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> animationAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-
     if ( GetRenderType() != IOdysseyImageRenderer::eRenderType::Render )
-        mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, iFrameIndex, iRenderType, iDefaultRects);
+        mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(iAnimation, iFrameIndex, iRenderType, iDefaultRects);
 }
 
 TArray<::ULIS::FEvent>

@@ -19,7 +19,7 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     GENERATED_BODY()
 public:
     //Getters
-    UOdysseyAnimation* GetAnimation();
+    UOdysseyAnimation* GetAnimation() const;
     virtual FInt32Range GetFrameRange() const;
     
 protected:

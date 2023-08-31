@@ -89,7 +89,7 @@ public:
     void SetCellLength(int iIndex, int iLength); */
 
 public:
-    TSharedPtr<FOdysseyAnimationLightTable> GetLightTable();
+    TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
     int GetOffset() const;
     TArray<TSharedPtr<FOdysseyAnimationCell>>& GetCells();
     TSharedPtr<FOdysseyAnimationCell> GetCell(int iIndex) const;
@@ -104,6 +104,16 @@ public:
      * 
      */
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
+
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+	virtual TSharedPtr<IOdysseyHandle> PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+
+    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
+
+    virtual float GetImageRenderingOpacity() const override;
 
 protected:
     void IsLightTableActivatedChanged();

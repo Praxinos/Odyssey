@@ -11,16 +11,14 @@ FOdysseyAnimationLightTableMutator::FOdysseyAnimationLightTableMutator(TSharedPt
         [lightTable = mLightTable]()
         {
             //TODO: Finding the rect to invalidate is annoying, please find another way, so that it is transparent for the dev
-            TSharedPtr<IOdysseyAnimationImageRenderingAbility> ability = lightTable->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-            ability->Changed();
+            lightTable->ImageRenderingChanged();
         }
     );
 
     GetRootMutation()->OnCommited().BindLambda(
         [lightTable = mLightTable]()
         {
-            TSharedPtr<IOdysseyAnimationImageRenderingAbility> ability = lightTable->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-            ability->Commited();
+            lightTable->ImageRenderingCommited();
         }
     );
 }

@@ -2,14 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderingAbility.h"
 
-TSharedRef<FOdysseyAnimationLightTable>
-FOdysseyAnimationLightTable::Create(UOdysseyAnimationLayer* iLayer)
+FOdysseyAnimationLightTable::~FOdysseyAnimationLightTable()
 {
-    TSharedRef<FOdysseyAnimationLightTable> lightTable = MakeShareable(new FOdysseyAnimationLightTable(iLayer));
-    lightTable->SetAbility(MakeShared<FOdysseyAnimationLightTableImageRenderingAbility>(lightTable));
-    return lightTable;
 }
 
 FOdysseyAnimationLightTable::FOdysseyAnimationLightTable(UOdysseyAnimationLayer* iLayer)
@@ -120,4 +115,62 @@ const TArray<FOdysseyAnimationLightTable::FKeyData>&
 FOdysseyAnimationLightTable::GetKeysData() const
 {
     return mKeysData;
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+FOdysseyAnimationLightTable::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    return MakeShared<FOdysseyAnimationLightTableImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects());
+}
+
+TArray<FGuid>
+FOdysseyAnimationLightTable::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    if(!mSourceLayer)
+        return idComposition;
+
+    for (int i = 0; i < mKeysData.Num(); i++)
+    {
+        if (!mKeysData[i].mIsActivated)
+            continue;
+
+        //Find the cell or frame 
+        int offset = mKeysData[i].mOffset;
+        int celFrameIndex = INDEX_NONE;
+        idComposition.Append(mSourceLayer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, iFrameIndex + offset));
+    }
+
+    return idComposition;
+}
+
+TArray<::ULIS::FRectI>
+FOdysseyAnimationLightTable::GetImageRenderingRects() const
+{
+    if (!mSourceLayer)
+        return {};
+
+    return mSourceLayer->GetImageRenderingRects();
+}
+
+
+TSharedPtr<IOdysseyHandle>
+FOdysseyAnimationLightTable::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    if(!mSourceLayer)
+        return nullptr;
+
+    TArray<TSharedPtr<IOdysseyHandle>> handles;
+    for (int i = 0; i < mKeysData.Num(); i++)
+    {
+        if (!mKeysData[i].mIsActivated)
+            continue;
+
+        //Find the cell or frame 
+        int offset = mKeysData[i].mOffset;
+        handles.Add(mSourceLayer->PreloadImageRendering(IOdysseyImageRenderer::eRenderType::Render, iFrame + offset));
+    }
+
+    return MakeShared<FOdysseyHandleContainer>(handles);
 }

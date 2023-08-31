@@ -33,10 +33,8 @@ public:
 
 private:
     TSharedPtr<FBlockData> GetBlockDataForComposition(const TArray<FGuid>& iComposition);
-    void OnImageRenderingPreChanged(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
-    void OnImageRenderingCommited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
-    void OnImageRenderingCompositionPreChanged(const FGuid& iId);
-    void OnImageRenderingCompositionCommited(const FGuid& iId);
+    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void OnImageRenderingPreChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 
 private:
     UOdysseyAnimation* mAnimation;

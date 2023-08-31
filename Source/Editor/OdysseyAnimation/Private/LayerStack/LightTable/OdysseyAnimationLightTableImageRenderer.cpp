@@ -5,25 +5,21 @@
 
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderer.h"
 
-FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(TSharedPtr<FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> ability = iLightTable->GetSourceLayer()->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if (ability)
+    const TArray<FOdysseyAnimationLightTable::FKeyData>& keysData = iLightTable->GetKeysData();
+    for (int i = 0; i < keysData.Num(); i++)
     {
-        const TArray<FOdysseyAnimationLightTable::FKeyData>& keysData = iLightTable->GetKeysData();
-        for (int i = 0; i < keysData.Num(); i++)
-        {
-            if (!iLightTable->GetKeyIsActivated(i))
-                continue;
+        if (!iLightTable->GetKeyIsActivated(i))
+            continue;
 
-            FFrameData data;
-            data.mOpacity = iLightTable->GetKeyOpacity(i);
-            data.mDisplayMode = iLightTable->GetKeyDisplayMode(i);
-            data.mColor = iLightTable->GetKeyColor(i);
-            data.mRenderer = ability->BuildRenderer(iFrame + iLightTable->GetKeyOffset(i), IOdysseyImageRenderer::eRenderType::Render);
-            mFramesData.Add(data);
-        }
+        FFrameData data;
+        data.mOpacity = iLightTable->GetKeyOpacity(i);
+        data.mDisplayMode = iLightTable->GetKeyDisplayMode(i);
+        data.mColor = iLightTable->GetKeyColor(i);
+        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, iFrame + iLightTable->GetKeyOffset(i));
+        mFramesData.Add(data);
     }
 }
 

@@ -10,6 +10,7 @@
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"
 #include "OdysseyAnimationProxy.h"
+#include "OdysseyImageRenderingAbility.h"
 #include <ULIS>
 
 #include "OdysseyAnimation.generated.h"
@@ -17,7 +18,7 @@
 UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYANIMATION_API UOdysseyAnimation
 	: public UBaseMediaSource
-	, public FOdysseyAbilityContainer
+    , public FOdysseyImageRenderingAbility
 	//, public FTickableEditorObject //Allows us to react to Tick events
 {
 	GENERATED_BODY()
@@ -39,12 +40,6 @@ public:
 
 public:
 	void Init(const FOdysseyAnimationConfiguration& iConfiguration);
-
-public:
-
-	//~ IMediaOptions interface
-	virtual bool GetMediaOption(const FName& Key, bool DefaultValue) const override;
-	virtual bool HasMediaOption(const FName& Key) const override;
 
 public:
 
@@ -77,6 +72,13 @@ public:
 	//TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtIndex(uint32 iIndex);
 
 public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+	virtual TSharedPtr<IOdysseyHandle> PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+
+public:
 	//UObject overrides
 
 	/**
@@ -98,8 +100,7 @@ protected:
 	virtual void FramesPerSecondChanged();
 
 private:
-	void OnImageRenderingCommited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
-	void OnImageRenderingCompositionCommited(const FGuid& iId);
+	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 
 public:
 	//CurrentFrame is specific to the user, not to the animation itself
