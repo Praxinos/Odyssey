@@ -17,4 +17,5 @@ public:
 
 public:
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
+    TSharedPtr<IOdysseyHandle> mRasterBlockPreloadHandle;
 };

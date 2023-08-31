@@ -28,13 +28,6 @@ public:
      */
     virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex = 0) const;
 
-    /**
-     * @brief Preloads in memory everything needed to make RenderImage() as fast as possible
-     *
-     * @param iFrame
-     */
-    virtual TSharedPtr<IOdysseyHandle> PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const;
-
     virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const;
 
     virtual float GetImageRenderingOpacity() const;

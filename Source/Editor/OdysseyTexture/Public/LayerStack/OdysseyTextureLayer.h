@@ -80,7 +80,6 @@ public:
 	//FOdysseyImageRenderingAbility overrides
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
-	virtual TSharedPtr<IOdysseyHandle> PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType) const override;
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
 private:

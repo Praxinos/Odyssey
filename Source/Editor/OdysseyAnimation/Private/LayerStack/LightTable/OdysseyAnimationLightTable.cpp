@@ -153,24 +153,3 @@ FOdysseyAnimationLightTable::GetImageRenderingRects() const
 
     return mSourceLayer->GetImageRenderingRects();
 }
-
-
-TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationLightTable::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    if(!mSourceLayer)
-        return nullptr;
-
-    TArray<TSharedPtr<IOdysseyHandle>> handles;
-    for (int i = 0; i < mKeysData.Num(); i++)
-    {
-        if (!mKeysData[i].mIsActivated)
-            continue;
-
-        //Find the cell or frame 
-        int offset = mKeysData[i].mOffset;
-        handles.Add(mSourceLayer->PreloadImageRendering(IOdysseyImageRenderer::eRenderType::Render, iFrame + offset));
-    }
-
-    return MakeShared<FOdysseyHandleContainer>(handles);
-}

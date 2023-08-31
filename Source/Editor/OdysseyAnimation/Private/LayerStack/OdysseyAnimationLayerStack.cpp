@@ -60,16 +60,6 @@ UOdysseyAnimationLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer:
     return idComposition;
 }
 
-TSharedPtr<IOdysseyHandle>
-UOdysseyAnimationLayerStack::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    UOdysseyAnimationLayer* layerRoot = Cast<UOdysseyAnimationLayer>(LayerRoot);
-    if ( !layerRoot )
-        return nullptr;
-
-    return layerRoot->PreloadImageRendering(iRenderType, iFrame);
-}
-
 TArray<::ULIS::FRectI>
 UOdysseyAnimationLayerStack::GetImageRenderingRects() const
 {

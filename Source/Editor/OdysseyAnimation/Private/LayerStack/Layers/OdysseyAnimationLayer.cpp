@@ -87,30 +87,6 @@ UOdysseyAnimationLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRen
     return idComposition;
 }
 
-TSharedPtr<IOdysseyHandle>
-UOdysseyAnimationLayer::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    const TArray<UOdysseyLayer*>& children = GetChildren();
-    if (children.IsEmpty())
-        return nullptr;
-
-    TArray<TSharedPtr<IOdysseyHandle>> handles;
-
-    for (UOdysseyLayer* child : children)
-    {
-        if (!child->IsActivated)
-            continue;
-
-        UOdysseyAnimationLayer* animationChild = Cast<UOdysseyAnimationLayer>(child);
-        if (!animationChild)
-            continue;
-
-        handles.Add(animationChild->PreloadImageRendering(iRenderType, iFrame));
-    }
-
-    return MakeShared<FOdysseyHandleContainer>(handles);
-}
-
 TArray<::ULIS::FRectI>
 UOdysseyAnimationLayer::GetImageRenderingRects() const
 {

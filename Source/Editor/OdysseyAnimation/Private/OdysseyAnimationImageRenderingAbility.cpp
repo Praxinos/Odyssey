@@ -17,12 +17,6 @@ FOdysseyAnimationImageRenderingAbility::GetImageRenderingComposition(IOdysseyIma
     return {};
 }
 
-TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationImageRenderingAbility::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    return nullptr;
-}
-
 ::ULIS::eBlendMode
 FOdysseyAnimationImageRenderingAbility::GetImageRenderingBlendMode() const
 {

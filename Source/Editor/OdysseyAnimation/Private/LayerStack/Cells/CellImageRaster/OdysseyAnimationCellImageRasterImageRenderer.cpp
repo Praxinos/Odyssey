@@ -11,6 +11,7 @@
 FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(TSharedRef<const FOdysseyAnimationCellImageRaster> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mRasterBlock(iCell->GetRasterBlock())
+    , mRasterBlockPreloadHandle(mRasterBlock->Preload())
 {
 }
 

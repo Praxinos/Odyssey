@@ -163,26 +163,13 @@ FOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, T
 TSharedPtr<IOdysseyImageRenderer>
 FOdysseyAnimationCellImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
-    TSharedPtr<IOdysseyImageRenderer> renderer = MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects());
-    renderer->AddHandle(PreloadImageRendering(iRenderType, iFrame));
-    return renderer;
+    return MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects());
 }
 
 TArray<FGuid>
 FOdysseyAnimationCellImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
 {
     return { GetImageRenderingId() };
-}
-
-TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationCellImageRaster::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    if (!mRasterBlock)
-        return nullptr;
-
-    TArray<TSharedPtr<IOdysseyHandle>> handles = { mRasterBlock->Preload() };
-
-    return MakeShared<FOdysseyHandleContainer>(handles);
 }
 
 TArray<::ULIS::FRectI>

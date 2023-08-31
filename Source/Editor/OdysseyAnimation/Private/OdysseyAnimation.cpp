@@ -252,26 +252,6 @@ UOdysseyAnimation::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderTy
     return idComposition;
 }
 
-TSharedPtr<IOdysseyHandle>
-UOdysseyAnimation::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    if (!mLayerStack)
-        return nullptr;
-
-    TArray<TSharedPtr<IOdysseyHandle>> handles = {};
-
-    if (iRenderType == IOdysseyImageRenderer::eRenderType::Editor)
-    {
-        handles.Add(mLayerStack->PreloadImageRendering(iRenderType, iFrame));
-    }
-    else if (iRenderType == IOdysseyImageRenderer::eRenderType::Render)
-    {
-        handles.Add(mProxy->Preload(iFrame));
-    }
-
-    return MakeShared<FOdysseyHandleContainer>(handles);
-}
-
 TArray<::ULIS::FRectI>
 UOdysseyAnimation::GetImageRenderingRects() const
 {

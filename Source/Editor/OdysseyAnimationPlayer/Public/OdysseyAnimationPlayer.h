@@ -115,7 +115,11 @@ private:
 	FTimespan mCurrentTime; 
 	TArray<FGuid>   mImageRenderingComposition;
 	FULISInvalidTileMap mInvalidTileMap;
-	TSharedPtr<IOdysseyHandle> mAnimationHandle;
+
+	/**
+	 * We keep the renderer in memory to ensure all blocks are loaded and ready to be used instead of being recached
+	 */
+	TSharedPtr<IOdysseyImageRenderer> mRenderer;
 	IOdysseyImageRenderer::eRenderType mRenderType = IOdysseyImageRenderer::eRenderType::Render;
 
 private:

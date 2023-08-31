@@ -424,26 +424,6 @@ UOdysseyAnimationLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRen
     return idComposition;
 }
 
-TSharedPtr<IOdysseyHandle>
-UOdysseyAnimationLayerImageRaster::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
-{
-    int celFrameIndex = INDEX_NONE;
-    TSharedPtr<FOdysseyAnimationCell> cell = GetCellAtFrame(iFrameIndex, celFrameIndex);
-    TArray<TSharedPtr<IOdysseyHandle>> handles;
-    if (cell)
-    {
-        handles.Add(cell->PreloadImageRendering(iRenderType, celFrameIndex));
-    }
-
-    if (iRenderType == IOdysseyImageRenderer::eRenderType::Editor && bIsLightTableActivated)
-    {
-        handles.Add(mLightTable->PreloadImageRendering(iRenderType, iFrameIndex));
-
-    }
-
-    return MakeShared<FOdysseyHandleContainer>(handles);
-}
-
 ::ULIS::eBlendMode
 UOdysseyAnimationLayerImageRaster::GetImageRenderingBlendMode() const
 {
