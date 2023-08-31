@@ -14,6 +14,7 @@
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     : public UOdysseyLayer
+    , public FOdysseyAnimationImageRenderingAbility
 {
     GENERATED_BODY()
 public:
@@ -25,4 +26,11 @@ protected:
     //Property changes
     virtual void ChildrenChanged() override;
     virtual void IsActivatedChanged() override;
+
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TSharedPtr<IOdysseyHandle> PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 };

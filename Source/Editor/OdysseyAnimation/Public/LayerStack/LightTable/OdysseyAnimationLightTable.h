@@ -26,7 +26,7 @@ enum class EOdysseyLightTableDisplayPosition
 
 class ODYSSEYANIMATION_API FOdysseyAnimationLightTable
     : public TSharedFromThis<FOdysseyAnimationLightTable>
-    , public FOdysseyImageRenderingAbility
+    , public FOdysseyAnimationImageRenderingAbility
 {
 public:
     virtual ~FOdysseyAnimationLightTable();

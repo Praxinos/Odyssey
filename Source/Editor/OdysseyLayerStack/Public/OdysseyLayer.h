@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyPerformanceMode.h"
-#include "OdysseyImageRenderingAbility.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyLayer.generated.h"
 
@@ -21,7 +20,6 @@ enum  class  EGetLayerChildrenMethod : uint8
 UCLASS(Abstract, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayer
 	: public UObject
-    , public FOdysseyImageRenderingAbility
 {
     GENERATED_BODY()
 
@@ -191,13 +189,6 @@ public:
     // UObject overrides
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
-
-public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
-	virtual TSharedPtr<IOdysseyHandle> PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
-	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
 public:
     //Default properties

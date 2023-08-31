@@ -63,23 +63,6 @@ public:
 
 public:
     /**
-     * @brief Called when a child ImageRendering has changed
-     * Event if the child is not a direct child
-     * 
-     * @param iDependencyId 
-     * @param iEvent 
-     */
-    //virtual void OnImageRenderingDependencyChanged(const FGuid& iDependencyId, const FOdysseyImageRenderingChangedEvent& iEvent);
-
-    /**
-     * @brief Creates a renderer able to render an image at the specified frame
-     * This renderer is made to always render the same rendering composition
-     * For example : if you delete a layer, you should create a new renderer
-     * but if you are just drawing on the layer, you can reuse the renderer
-     */
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const;
-
-    /**
      * @brief Returns the full rect that can be rendered
      * 
      * @return ::ULIS::FRect 
@@ -87,29 +70,11 @@ public:
     virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const;
 
     /**
-     * @brief Returns the full Render Image Id, eventually composed of underlying ids
-     *
-     * @return const FGuid&
-     */
-    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex = 0) const;
-
-    /**
      * @brief Returns the image rendering id of this rendering ability, without underlying ids
      *
      * @return const FGuid&
      */
     virtual FGuid GetImageRenderingId() const;
-
-    /**
-     * @brief Preloads in memory everything needed to make RenderImage() as fast as possible
-     *
-     * @param iFrame
-     */
-    virtual TSharedPtr<IOdysseyHandle> PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const;
-
-    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const;
-
-    virtual float GetImageRenderingOpacity() const;
 
 private:
 	FGuid mImageRenderingId;

@@ -4,6 +4,7 @@
 #include "LayerStack/OdysseyTextureLayer.h"
 
 #include "LayerStack/OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayerImageRenderer.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureLayer"
 
@@ -173,6 +174,67 @@ UOdysseyTextureLayer::OnTrackerChildrenChanged(const TArray<UOdysseyLayer*>& iOl
         return;
 
     RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) }, false);
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyTextureLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const
+{
+    return MakeShared<FOdysseyTextureLayerImageRenderer>(this, iRenderType, GetImageRenderingRects());
+}
+
+TArray<FGuid>
+UOdysseyTextureLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    const TArray<UOdysseyLayer*>& children = GetChildren();
+    for (UOdysseyLayer* child : children)
+    {
+        if (!child->IsActivated)
+            continue;
+
+        UOdysseyTextureLayer* textureChild = Cast<UOdysseyTextureLayer>(child);
+        if (!textureChild)
+            continue;
+
+        idComposition.Append(textureChild->GetImageRenderingComposition(iRenderType));
+    }
+
+    return idComposition;
+}
+
+TSharedPtr<IOdysseyHandle>
+UOdysseyTextureLayer::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType) const
+{
+    const TArray<UOdysseyLayer*>& children = GetChildren();
+    if (children.IsEmpty())
+        return nullptr;
+
+    TArray<TSharedPtr<IOdysseyHandle>> handles;
+
+    for (UOdysseyLayer* child : children)
+    {
+        if (!child->IsActivated)
+            continue;
+
+        UOdysseyTextureLayer* textureChild = Cast<UOdysseyTextureLayer>(child);
+        if (!textureChild)
+            continue;
+
+        handles.Add(textureChild->PreloadImageRendering(iRenderType));
+    }
+
+    return MakeShared<FOdysseyHandleContainer>(handles);
+}
+
+TArray<::ULIS::FRectI>
+UOdysseyTextureLayer::GetImageRenderingRects() const
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    if(!layerStack)
+        return {};
+
+    return layerStack->GetImageRenderingRects();
 }
 
 #undef LOCTEXT_NAMESPACE

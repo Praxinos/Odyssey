@@ -4,7 +4,7 @@
 #pragma once
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
 
 class UOdysseyAnimationLayerImageRaster;
 class FOdysseyRasterBlock;

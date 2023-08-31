@@ -103,22 +103,8 @@ FOdysseyImageRenderingAbility::ImageRenderingCompositionCommited()
     OnImageRenderingChangedDelegate().Broadcast(eventChanged);
 }
 
-TSharedPtr<IOdysseyImageRenderer>
-FOdysseyImageRenderingAbility::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    check(false); //If you need it, override it in your class
-    return nullptr;
-}
-
 TArray<::ULIS::FRectI>
 FOdysseyImageRenderingAbility::GetImageRenderingRects() const
-{
-    check(false); //If you need it, override it in your class
-    return {};
-}
-
-TArray<FGuid>
-FOdysseyImageRenderingAbility::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
     check(false); //If you need it, override it in your class
     return {};
@@ -128,22 +114,4 @@ FGuid
 FOdysseyImageRenderingAbility::GetImageRenderingId() const
 {
     return mImageRenderingId;
-}
-
-TSharedPtr<IOdysseyHandle>
-FOdysseyImageRenderingAbility::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    return nullptr;
-}
-
-::ULIS::eBlendMode
-FOdysseyImageRenderingAbility::GetImageRenderingBlendMode() const
-{
-    return ::ULIS::Blend_Normal;
-}
-
-float
-FOdysseyImageRenderingAbility::GetImageRenderingOpacity() const
-{
-    return 1.f;
 }

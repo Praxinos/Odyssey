@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
 #include "OdysseyMediaProvider.h"
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCell
     : public TSharedFromThis<FOdysseyAnimationCell>
-    , public FOdysseyImageRenderingAbility
+    , public FOdysseyAnimationImageRenderingAbility
 {
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnLengthChanged, TSharedRef<FOdysseyAnimationCell>)

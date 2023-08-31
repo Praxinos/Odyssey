@@ -8,6 +8,7 @@
 #include "UObject/OdysseyObjectPropertyTracker.h"
 #include "Misc/OdysseyHandle.h"
 #include "OdysseyMediaProvider.h"
+#include "OdysseyStaticImageRenderingAbility.h"
 #include <ULIS>
 
 #include "OdysseyTextureLayer.generated.h"
@@ -15,6 +16,7 @@
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayer
     : public UOdysseyLayer
+    , public FOdysseyStaticImageRenderingAbility
 {
     GENERATED_BODY()
 
@@ -73,6 +75,13 @@ public:
      * One handle corresponds to something being held in memory
      */
     virtual TSharedPtr<IOdysseyHandle> Preload();
+
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+	virtual TSharedPtr<IOdysseyHandle> PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
 private:
     void OnTrackerChildrenChanged(const TArray<UOdysseyLayer*>& iOldChildren);

@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
 #include "OdysseyAnimationEditorTimeline.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyAnimation;

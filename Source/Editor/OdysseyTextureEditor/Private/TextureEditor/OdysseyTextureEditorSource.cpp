@@ -184,7 +184,7 @@ FOdysseyTextureEditorSource::Clear()
 
         vectorEngine->SetScene( new FOdysseyVectorScene("Scene") );
 
-        currentLayerVector->RenderImageChanged(false);
+        currentLayerVector->RenderImageChanged(false); //TODO: SHould be engine->Signal(REDRAW_SCENE)
     }
 }
 

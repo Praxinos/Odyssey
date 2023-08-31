@@ -7,6 +7,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Misc/OdysseyHandle.h"
 #include "ULISInvalidTileMap.h"
+#include "OdysseyStaticImageRenderingAbility.h"
 
 #include <ULIS>
 
@@ -25,6 +26,7 @@ enum class EOdysseyTextureLayerStackTextureUpdateMode
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
     : public UOdysseyLayerStack
+    , public FOdysseyStaticImageRenderingAbility
     , public FTickableGameObject
 {
     GENERATED_BODY()

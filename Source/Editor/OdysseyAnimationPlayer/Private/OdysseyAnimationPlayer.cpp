@@ -4,6 +4,7 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyRectUtils.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
 
 #include "ULISLoaderModule.h"
 

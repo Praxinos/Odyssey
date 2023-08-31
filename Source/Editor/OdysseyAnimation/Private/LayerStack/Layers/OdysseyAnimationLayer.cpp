@@ -4,6 +4,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 #include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerImageRenderer.h"
 #include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationLayer"
@@ -57,6 +58,67 @@ UOdysseyAnimationLayer::IsActivatedChanged()
 
     parentLayer->ImageRenderingCompositionChanged();
     parentLayer->ImageRenderingCompositionCommited();
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyAnimationLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    return MakeShared<FOdysseyAnimationLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+}
+
+TArray<FGuid>
+UOdysseyAnimationLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    const TArray<UOdysseyLayer*>& children = GetChildren();
+    for (UOdysseyLayer* child : children)
+    {
+        if (!child->IsActivated)
+            continue;
+
+        UOdysseyAnimationLayer* animationChild = Cast<UOdysseyAnimationLayer>(child);
+        if (!animationChild)
+            continue;
+
+        idComposition.Append(animationChild->GetImageRenderingComposition(iRenderType, iFrame));
+    }
+
+    return idComposition;
+}
+
+TSharedPtr<IOdysseyHandle>
+UOdysseyAnimationLayer::PreloadImageRendering(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    const TArray<UOdysseyLayer*>& children = GetChildren();
+    if (children.IsEmpty())
+        return nullptr;
+
+    TArray<TSharedPtr<IOdysseyHandle>> handles;
+
+    for (UOdysseyLayer* child : children)
+    {
+        if (!child->IsActivated)
+            continue;
+
+        UOdysseyAnimationLayer* animationChild = Cast<UOdysseyAnimationLayer>(child);
+        if (!animationChild)
+            continue;
+
+        handles.Add(animationChild->PreloadImageRendering(iRenderType, iFrame));
+    }
+
+    return MakeShared<FOdysseyHandleContainer>(handles);
+}
+
+TArray<::ULIS::FRectI>
+UOdysseyAnimationLayer::GetImageRenderingRects() const
+{
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
+    if(!layerStack)
+        return {};
+
+    return layerStack->GetImageRenderingRects();
 }
 
 #undef LOCTEXT_NAMESPACE

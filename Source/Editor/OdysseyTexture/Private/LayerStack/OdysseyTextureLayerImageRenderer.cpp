@@ -3,16 +3,16 @@
 
 #pragma once
 
-#include "OdysseyLayerImageRenderer.h"
+#include "OdysseyTextureLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
 
-FOdysseyLayerImageRenderer::FOdysseyLayerImageRenderer(const UOdysseyLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyTextureLayerImageRenderer::FOdysseyTextureLayerImageRenderer(const UOdysseyTextureLayer* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {    
     const TArray<UOdysseyLayer*>& children = iLayer->GetChildren();
     for (int i = children.Num() - 1; i >= 0 ; i--)
     {
-        UOdysseyLayer* child = Cast<UOdysseyLayer>(children[i]);
+        UOdysseyTextureLayer* child = Cast<UOdysseyTextureLayer>(children[i]);
         if (!child)
             continue;
 
@@ -20,7 +20,7 @@ FOdysseyLayerImageRenderer::FOdysseyLayerImageRenderer(const UOdysseyLayer* iLay
             continue;
 
         FChildData data;
-        data.mRenderer = child->BuildImageRenderer(iRenderType, iFrame);
+        data.mRenderer = child->BuildImageRenderer(iRenderType);
         data.mBlendMode = child->GetImageRenderingBlendMode();
         data.mOpacity = child->GetImageRenderingOpacity();
 
@@ -29,7 +29,7 @@ FOdysseyLayerImageRenderer::FOdysseyLayerImageRenderer(const UOdysseyLayer* iLay
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyTextureLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!ioBlock)
         return iWaitList;
@@ -60,7 +60,7 @@ FOdysseyLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eB
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyLayerImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyTextureLayerImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!ioBlock)
         return iWaitList;
