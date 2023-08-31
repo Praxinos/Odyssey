@@ -50,16 +50,6 @@ FOdysseyAnimationProxy::GetBlock(int iFrameIndex)
     return block;
 }
 
-TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationProxy::Preload(int iFrameIndex) const
-{
-    if (!mFramesToBlockData.Contains(iFrameIndex))
-        return nullptr;
-    
-    TSharedPtr<FBlockData> blockData = mFramesToBlockData[iFrameIndex];
-    return blockData->GetRasterBlock()->Preload();
-}
-
 bool
 FOdysseyAnimationProxy::IsDone(int iFrameIndex) const
 {

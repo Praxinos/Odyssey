@@ -21,4 +21,5 @@ public:
     TSharedPtr<FOdysseyAnimationProxy> mProxy;
     int mFrameIndex;
     TSharedPtr<IOdysseyImageRenderer> mAnimationRenderer;
+    TSharedPtr<::ULIS::FBlock> mBlock;
 };

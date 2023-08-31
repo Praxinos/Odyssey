@@ -11,9 +11,16 @@ FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const U
     , mProxy(iAnimation->GetProxy())
     , mFrameIndex(iFrameIndex)
     , mAnimationRenderer(nullptr)
+    , mBlock(nullptr)
 {
     if ( GetRenderType() != IOdysseyImageRenderer::eRenderType::Render )
+    {
         mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(iAnimation, iFrameIndex, iRenderType, iDefaultRects);
+    }
+    else
+    {
+        mBlock = mProxy->GetBlock(mFrameIndex);
+    }
 }
 
 TArray<::ULIS::FEvent>
@@ -22,8 +29,10 @@ FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
         return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 
-    TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameIndex);
-    if ( !block )
+    if ( !mBlock )
+        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block one more time
+
+    if ( !mBlock )
     {
         if (mAnimationRenderer)
             return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
@@ -31,7 +40,7 @@ FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
         return iWaitList;
     }
 
-    return ConvertAndBlend(block, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
@@ -40,8 +49,10 @@ FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, co
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
         return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 
-    TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameIndex);
-    if ( !block )
+    if ( !mBlock )
+        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block one more time
+
+    if ( !mBlock )
     {
         if (mAnimationRenderer)
             return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
@@ -49,5 +60,5 @@ FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, co
         return iWaitList;
     }
 
-    return ConvertAndCopy(block, ioBlock, iRects, iPos, iWaitList);
+    return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
 }

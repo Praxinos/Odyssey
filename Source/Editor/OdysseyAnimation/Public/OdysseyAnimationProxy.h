@@ -16,7 +16,6 @@ public:
 
 public:
     TSharedPtr<::ULIS::FBlock> GetBlock(int iFrameIndex);
-    TSharedPtr<IOdysseyHandle> Preload(int iFrameIndex) const;
     bool IsDone(int iFrameIndex) const;
 
     void PostLoad();

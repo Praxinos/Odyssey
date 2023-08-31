@@ -16,6 +16,5 @@ public:
     virtual TArray<::ULIS::FEvent> Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-    TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
-    TSharedPtr<IOdysseyHandle> mRasterBlockPreloadHandle;
+    TSharedPtr<::ULIS::FBlock> mBlock;
 };
