@@ -127,7 +127,7 @@ FOdysseyTextureEditorSource::GetCurrentMediaProvider()
 	if (!currentLayer)
 		return FOdysseyMediaProvider();
 
-	return currentLayer->GetMediaProvider();
+	return currentLayer->GetMediaProvider(0);
 }
 
 

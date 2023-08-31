@@ -50,6 +50,13 @@ UOdysseyLayer::OnChildrenChanged()
     return onChildrenChanged;
 }
 
+FSimpleMulticastDelegate&
+UOdysseyLayer::OnMediaChanged()
+{
+    static FSimpleMulticastDelegate onMediaChanged;
+    return onMediaChanged;
+}
+
 UOdysseyLayer*
 UOdysseyLayer::GetParent() const
 {
@@ -279,4 +286,10 @@ UOdysseyLayer::GetImageRenderingRects() const
         return {};
 
     return layerStack->GetImageRenderingRects();
+}
+
+FOdysseyMediaProvider
+UOdysseyLayer::GetMediaProvider(uint32 iFrameIndex) const
+{
+    return FOdysseyMediaProvider();
 }

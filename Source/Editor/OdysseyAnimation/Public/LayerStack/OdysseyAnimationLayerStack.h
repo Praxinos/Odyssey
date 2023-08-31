@@ -5,7 +5,6 @@
 
 #include "OdysseyLayerStack.h"
 #include "Misc/OdysseyHandle.h"
-#include "OdysseyAbility.h"
 
 #include <ULIS>
 
@@ -16,7 +15,6 @@ class UOdysseyAnimationLayer;
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerStack
     : public UOdysseyLayerStack
-	, public FOdysseyAbilityContainer
 {
     GENERATED_BODY()
 

@@ -14,7 +14,6 @@
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     : public UOdysseyLayer
-    , public FOdysseyAbilityContainer
 {
     GENERATED_BODY()
 public:

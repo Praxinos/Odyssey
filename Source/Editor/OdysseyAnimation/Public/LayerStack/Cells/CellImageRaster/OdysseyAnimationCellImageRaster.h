@@ -24,6 +24,7 @@ public:
     void Init(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
     void Init(TSharedPtr<::ULIS::FBlock> iBlock);
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
     virtual const FName& GetType() const override;
@@ -39,7 +40,6 @@ public:
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
 private:
-    void InitAbilities();
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);

@@ -52,4 +52,10 @@ FOdysseyAnimationCell::Serialize(FArchive& Ar)
     Ar << mLength;
 }
 
+FOdysseyMediaProvider
+FOdysseyAnimationCell::GetMediaProvider(uint32 iFrameIndex) const
+{
+    return FOdysseyMediaProvider();
+}
+
 #undef LOCTEXT_NAMESPACE

@@ -74,8 +74,6 @@ public:
      */
     virtual TSharedPtr<IOdysseyHandle> Preload();
 
-    virtual FOdysseyMediaProvider GetMediaProvider() const;
-
 private:
     void OnTrackerChildrenChanged(const TArray<UOdysseyLayer*>& iOldChildren);
 

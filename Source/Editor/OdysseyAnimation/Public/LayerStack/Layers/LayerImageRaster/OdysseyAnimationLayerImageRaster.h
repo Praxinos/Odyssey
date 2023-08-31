@@ -51,6 +51,7 @@ public:
 public:
     //UOdysseyLayer overrides
     virtual void OnCreated_Implementation() override;
+    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
     //UOdysseyAnimationLayer overrides
@@ -121,6 +122,11 @@ protected:
     void BlendModeChanged();
     void CellsChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
+
+private:
+    TSharedPtr<IOdysseyMedia> CreateMediaRaster(int iFrameIndex);
+    void AutoCreateCell(int iFrameIndex);
+    TSharedPtr<IOdysseyMedia> GetCellMediaRaster(uint32 iFrameIndex) const;
 
 public:
     // UObject overrides

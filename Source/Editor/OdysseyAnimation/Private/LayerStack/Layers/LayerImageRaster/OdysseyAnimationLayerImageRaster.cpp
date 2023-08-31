@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterMediaAbility.h"
 
 #include "OdysseyPixelFormat.h"
 #include "ULISEventBuilder.h"
@@ -12,6 +11,7 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImageRenderer.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "OdysseyLayerFunctionLibrary.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageRaster"
 
@@ -327,7 +327,6 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
     Super::PostInitProperties();
 
     mLightTable = MakeShared<FOdysseyAnimationLightTable>(this);
-    SetAbility(MakeShared<FOdysseyAnimationLayerImageRasterMediaAbility>(this));
 }
 
 void
@@ -457,5 +456,141 @@ UOdysseyAnimationLayerImageRaster::GetImageRenderingOpacity() const
     return Opacity;
 }
 
+TSharedPtr<IOdysseyMedia>
+UOdysseyAnimationLayerImageRaster::GetCellMediaRaster(uint32 iFrameIndex) const
+{
+	int celFrameIndex = INDEX_NONE;
+    TSharedPtr<FOdysseyAnimationCell> cell = GetCellAtFrame(iFrameIndex, celFrameIndex);
+    if (!cell || celFrameIndex != 0)
+        return nullptr;
+
+    FOdysseyMediaProvider provider = cell->GetMediaProvider(celFrameIndex);
+    if (!provider.HasMedia<FOdysseyMediaRaster>())
+        return nullptr;
+
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasterList = provider.GetOrCreateMedias<FOdysseyMediaRaster>();
+    if (mediaRasterList.Num() <= 0)
+        return nullptr;
+
+	return mediaRasterList[0];
+}
+
+FOdysseyMediaProvider
+UOdysseyAnimationLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
+{
+	FOdysseyMediaProvider provider;
+	TSharedPtr<IOdysseyMedia> cellMediaRaster = GetCellMediaRaster(iFrameIndex);
+	if (cellMediaRaster)
+	{
+		bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
+		bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+		cellMediaRaster->IsLocked(!isActive || isLocked);
+		provider.Add(cellMediaRaster);
+	}
+	else
+	{
+		FOdysseyMediaProvider::FCreateMediaDelegate createMediaRasterDelegate = FOdysseyMediaProvider::FCreateMediaDelegate::CreateUObject(const_cast<UOdysseyAnimationLayerImageRaster*>(this), &UOdysseyAnimationLayerImageRaster::CreateMediaRaster, (int)iFrameIndex);
+		provider.Add(FOdysseyMediaRaster::StaticId(), createMediaRasterDelegate);
+	}
+    return provider;
+}
+
+TSharedPtr<IOdysseyMedia>
+UOdysseyAnimationLayerImageRaster::CreateMediaRaster(int iFrameIndex)
+{
+    //Create the cell if needed
+    AutoCreateCell(iFrameIndex);
+
+    int celFrameIndex = INDEX_NONE;
+    TSharedPtr<FOdysseyAnimationCell> cell = GetCellAtFrame(iFrameIndex, celFrameIndex);
+    if (!cell)
+        return nullptr;
+
+    FOdysseyMediaProvider provider = cell->GetMediaProvider(celFrameIndex);
+    if (!provider.HasMedia<FOdysseyMediaRaster>())
+        return nullptr;
+
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasterList = provider.GetOrCreateMedias<FOdysseyMediaRaster>();
+    if (mediaRasterList.Num() <= 0)
+        return nullptr;
+
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = mediaRasterList[0];
+
+    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
+    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+
+    mediaRaster->IsLocked(!isActive || isLocked);
+    return mediaRaster;
+}
+
+void
+UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
+{
+    UOdysseyAnimation* animation = GetAnimation();
+	FInt32Range range = GetFrameRange();
+	if ( iFrameIndex < range.GetLowerBoundValue())
+	{
+		//Add a frame at current frame and extend it 
+		TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format());
+        cell->SetLength(range.GetLowerBoundValue() - iFrameIndex);
+
+		FOdysseyAnimationCellsMutator mutator(this);
+		mutator.Add({cell}, 0);
+		mutator.SetOffset(GetOffset() - cell->GetLength());
+		mutator.Commit();
+	}
+	else if ( iFrameIndex > range.GetUpperBoundValue())
+	{
+		//Add a frame at current frame and extend previous frame to it 
+		TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format());
+        cell->SetLength(1);
+		
+		FOdysseyAnimationCellsMutator mutator(this);
+
+		int lastCellIndex = GetCellsCount() - 1;
+		if ( lastCellIndex >= 0 )
+		{
+			int cellLength;
+			if ( GetCellLength(lastCellIndex, cellLength) )
+			{
+				mutator.SetLength(lastCellIndex, cellLength + iFrameIndex - range.GetUpperBoundValue() - 1);
+			}
+		}
+
+		mutator.Add({cell});
+		mutator.Commit();
+	}
+	else
+	{
+		int cellIndex;
+		int cellFrameIndex;
+		if(GetCellIndexAtFrame(iFrameIndex, cellIndex, cellFrameIndex))
+		{
+			if (cellIndex >= 0 && cellFrameIndex != 0)
+			{
+				TSharedPtr<FOdysseyAnimationCell> currentCell = GetCell(cellIndex);
+				//Here we need to break the instance
+				//We get the render of the current frame, and create a raster cell to draw on it
+
+				TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+				TSharedPtr<IOdysseyImageRenderer> renderer = currentCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrameIndex);
+				renderer->Copy(block, block->Rect(), {});
+				::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+				ctx.Finish();
+
+				int currentCellLength = cellFrameIndex;
+				int newCellLength = currentCell->GetLength() - currentCellLength;
+
+				TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, block);
+				cell->SetLength(newCellLength);
+
+				FOdysseyAnimationCellsMutator mutator(this);
+				mutator.SetLength(cellIndex, currentCellLength);
+				mutator.Add({ cell }, cellIndex + 1);
+				mutator.Commit();
+			}
+		}
+	}
+}
 
 #undef LOCTEXT_NAMESPACE

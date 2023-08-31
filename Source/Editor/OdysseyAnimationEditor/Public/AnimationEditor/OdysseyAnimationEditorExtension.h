@@ -41,7 +41,7 @@ private:
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
     void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
     void OnCurrentLayerChanged(class UOdysseyLayerStack* iLayerStack);
-    void OnLayerStackElementMediaChanged();
+    void OnLayerMediaChanged();
 
 public:
     TSharedPtr<FOdysseyAnimationEditorSource> mAnimationSource;

@@ -5,7 +5,7 @@
 
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "OdysseyAnimation.h"
-#include "Abilities/IOdysseyAnimationMediaAbility.h"
+#include "OdysseyLayer.h"
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 
@@ -44,7 +44,7 @@ FOdysseyAnimationEditorExtension::Finalize()
 	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
 	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	IOdysseyAnimationMediaAbility::OnChanged().RemoveAll(this);
+	UOdysseyLayer::OnMediaChanged().RemoveAll(this);
 }
 
 void
@@ -67,7 +67,7 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 		UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
 		FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
         UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-        IOdysseyAnimationMediaAbility::OnChanged().RemoveAll(this);
+        UOdysseyLayer::OnMediaChanged().RemoveAll(this);
 		return;
 	}
 
@@ -80,7 +80,7 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 	//Set Media player and Animation callbacks
 	UOdysseyAnimation::OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnCurrentFrameChanged);
 	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationEditorExtension::OnImageRenderingChanged);
-	IOdysseyAnimationMediaAbility::OnChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnLayerStackElementMediaChanged);
+	UOdysseyLayer::OnMediaChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnLayerMediaChanged);
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnCurrentLayerChanged);
 }
 
@@ -130,7 +130,7 @@ FOdysseyAnimationEditorExtension::PlaybackFramesPerSecond() const
 //------------------------------------------------------------------------------- Events
 
 void
-FOdysseyAnimationEditorExtension::OnLayerStackElementMediaChanged()
+FOdysseyAnimationEditorExtension::OnLayerMediaChanged()
 {
 	GetEditor()->RefreshCurrentTool(); //Refresh the current tool
 }

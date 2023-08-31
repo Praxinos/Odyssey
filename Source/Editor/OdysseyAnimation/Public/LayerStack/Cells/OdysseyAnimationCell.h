@@ -3,12 +3,11 @@
 
 #pragma once
 
-#include "OdysseyAbility.h"
 #include "OdysseyImageRenderingAbility.h"
+#include "OdysseyMediaProvider.h"
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCell
     : public TSharedFromThis<FOdysseyAnimationCell>
-    , public FOdysseyAbilityContainer
     , public FOdysseyImageRenderingAbility
 {
 public:
@@ -23,6 +22,7 @@ public:
     void SetLength(int iLength);
     int GetLength() const;
     virtual const FName& GetType() const = 0;
+    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
 public:
     virtual void PostLoad();

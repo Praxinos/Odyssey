@@ -78,7 +78,7 @@ UOdysseyTextureLayerImageVector::GetEngine()
 }
 
 FOdysseyMediaProvider
-UOdysseyTextureLayerImageVector::GetMediaProvider() const
+UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
     FOdysseyMediaProvider mediaProvider;
     TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mEngine->GetScene());

@@ -287,7 +287,7 @@ UOdysseyTextureLayerImageRaster::Preload()
 }
 
 FOdysseyMediaProvider
-UOdysseyTextureLayerImageRaster::GetMediaProvider() const
+UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
 {
     FOdysseyMediaProvider mediaProvider;
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(RasterBlock);
