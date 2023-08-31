@@ -14,6 +14,7 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyLayerFunctionLibrary.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "LayerStack/OdysseyTextureLayerImageRasterImageRenderer.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyTextureLayerImageRaster"
 
@@ -40,7 +41,6 @@ UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Raster Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerBitmap16");
-    RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);    
 }
 
 void
@@ -77,92 +77,19 @@ UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 void
 UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
-    RenderImageChanged(iRects, true);
+    ImageRenderingChanged(iRects, true);
 }
 
 void
 UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
-    RenderImageChanged(iRects, false);
+    ImageRenderingChanged(iRects);
 }
 
 void
 UOdysseyTextureLayerImageRaster::OnBlockPtrChanged()
 {
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) }, false);
-}
-
-TArray<::ULIS::FEvent>
-UOdysseyTextureLayerImageRaster::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    if (!IsActivated)
-        return iWaitList;
-
-    if (!ioBlock)
-        return iWaitList;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = /* RasterBlock->IsBeingEdited() ? RasterBlock->GetUndoableBlock() : */ RasterBlock->GetBlock();
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
-
-    TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
-        [this, &ULISRasterBlock, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-        {
-            ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(ULISRasterBlock).Build();
-            ctx.Blend(
-                *ULISRasterBlock,
-                *ioDest,
-                iRect,
-                iPos,
-                ::ULIS::eBlendMode(BlendMode),
-                ::ULIS::Alpha_Normal,
-                Opacity,
-                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                iWaitList.Num(),
-                iWaitList.GetData(),
-                &eventBlend
-            );
-            return { eventBlend };
-        }
-    );
-
-    ctx.Flush();
-
-    return eventConvertAndExecute;
-}
-
-TArray<::ULIS::FEvent>
-UOdysseyTextureLayerImageRaster::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    if (!IsActivated)
-        return iWaitList;
-
-    if (!ioBlock)
-        return iWaitList;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->GetBlock();
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULISRasterBlock->Format());
-
-    TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, ULISRasterBlock->Format(), iRect, iPos, iWaitList,
-        [this, &ULISRasterBlock, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-        {
-            ::ULIS::FEvent eventCopy;
-            ctx.Copy(
-                *ULISRasterBlock,
-                *ioDest,
-                iRect,
-                iPos,
-                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                iWaitList.Num(),
-                iWaitList.GetData(),
-                &eventCopy
-            );
-            return { eventCopy };
-        }
-    );
-
-    ctx.Flush();
-
-    return eventConvertAndExecute;
+    ImageRenderingChanged();
 }
 
 void
@@ -186,7 +113,9 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                     UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
                     if ( !textureLayer )
                         continue;
-                    lastEvent = textureLayer->RenderImage(ULISRasterBlock, ULISRasterBlock->Rect(), ::ULIS::FVec2I(0), lastEvent);
+
+                    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+                    lastEvent = renderer->Blend(ULISRasterBlock, textureLayer->GetImageRenderingBlendMode(), textureLayer->GetImageRenderingOpacity(), ULISRasterBlock->Rect(), lastEvent);
                 }
                 return { lastEvent };
             }
@@ -198,23 +127,17 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 void
 UOdysseyTextureLayerImageRaster::OpacityChanged()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return;
-
     OnOpacityChanged().Broadcast(this);
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) }, false);
+
+    ImageRenderingChanged();
 }
 
 void
 UOdysseyTextureLayerImageRaster::BlendModeChanged()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return;
-
     OnBlendModeChanged().Broadcast(this);
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) }, false);
+    
+    ImageRenderingChanged();
 }
 
 void
@@ -226,6 +149,14 @@ UOdysseyTextureLayerImageRaster::PropertyChanged(const FName& iPropertyName)
         BlendModeChanged();
     if (iPropertyName == "Opacity")
         OpacityChanged();
+}
+
+void
+UOdysseyTextureLayerImageRaster::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
 }
 
 void
@@ -278,12 +209,6 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 
     //Replace old rasterblock with an owned one
     RasterBlock->SetBlock(duplicatedBlock);
-}
-
-TSharedPtr<IOdysseyHandle>
-UOdysseyTextureLayerImageRaster::Preload()
-{
-    return RasterBlock->Preload();
 }
 
 FOdysseyMediaProvider
@@ -339,6 +264,30 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
     }
 
     return events;
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const
+{
+    return MakeShared<FOdysseyTextureLayerImageRasterImageRenderer>(this, iRenderType, GetImageRenderingRects());
+}
+
+TArray<FGuid>
+UOdysseyTextureLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
+{
+    return { GetImageRenderingId() };
+}
+
+::ULIS::eBlendMode
+UOdysseyTextureLayerImageRaster::GetImageRenderingBlendMode() const
+{
+    return (::ULIS::eBlendMode)BlendMode;
+}
+
+float
+UOdysseyTextureLayerImageRaster::GetImageRenderingOpacity() const
+{
+    return Opacity;
 }
 
 #undef LOCTEXT_NAMESPACE

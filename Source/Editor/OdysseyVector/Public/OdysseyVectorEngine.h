@@ -33,7 +33,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1 << 2 );
         static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1 << 3 );
         static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1 << 4 );
-        static const uint64 SIGNAL_ALL                = 0xFFFFFFFFFFFFFFFF;
+        static const uint64 SIGNAL_INTERACTIVE        = ( 1 << 5 );
+        static const uint64 SIGNAL_ALL                = 0xFFFFFFFFFFFFFFFF & ~SIGNAL_INTERACTIVE;
 
         static FSignalDelegate& OnSignalDelegate();
 

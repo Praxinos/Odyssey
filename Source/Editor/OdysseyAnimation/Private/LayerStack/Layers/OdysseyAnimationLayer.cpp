@@ -44,7 +44,6 @@ UOdysseyAnimationLayer::ChildrenChanged()
     Super::ChildrenChanged();
 
     ImageRenderingCompositionChanged();
-    ImageRenderingCompositionCommited();
 }
 
 void
@@ -57,7 +56,6 @@ UOdysseyAnimationLayer::IsActivatedChanged()
         return;
 
     parentLayer->ImageRenderingCompositionChanged();
-    parentLayer->ImageRenderingCompositionCommited();
 }
 
 TSharedPtr<IOdysseyImageRenderer>

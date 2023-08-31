@@ -44,26 +44,11 @@ public:
 public:
     //UOdysseyLayer overrides
     virtual void OnCreated_Implementation() override;
+    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
     // Public API
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
-
-public:
-    //IOdysseyTextureLayerImageRenderer implementation
-    
-    /**
-     * @brief Renders an image in the given Block
-     * Takes into account the size / format of the given block
-     * 
-     */
-    virtual TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>  ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
-
-    /**
-     * @brief Copies an image in the given Block
-     * Takes into account the size / format of the given block
-     */
-    virtual TArray<::ULIS::FEvent> CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>  ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
     // UOdysseyLayer Overrides
@@ -75,12 +60,6 @@ public:
      */
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
-    /**
-     * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
-     * One handle corresponds to something being held in memory
-     */
-    virtual TSharedPtr<IOdysseyHandle> Preload() override;
-
 protected:
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
@@ -89,10 +68,10 @@ protected:
     void OpacityChanged();
     void BlendModeChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
-    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
     // UObject overrides
+    virtual void PostInitProperties() override;
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void PostLoad() override;
 
@@ -105,6 +84,13 @@ public:
      * @param Ar
      */
     virtual void Serialize(FArchive& Ar) override;
+
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
+    virtual float GetImageRenderingOpacity() const override;
 
 private:
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);

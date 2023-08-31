@@ -18,17 +18,17 @@ public:
     };
 
 public:
-    FOdysseyImageRenderingChangedEvent(eEventType iType, bool iIsCommit, const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
+    FOdysseyImageRenderingChangedEvent(eEventType iType, bool iIsInteractive, const FGuid& iId, const TArray<::ULIS::FRectI>& iRects);
 
 public:
     eEventType GetType() const;
-    bool IsCommit() const;
+    bool IsInteractive() const;
     const FGuid& GetId() const;
     const TArray<::ULIS::FRectI>& GetRects() const;
 
 private:
-    eEventType mType;   
-    bool mIsCommit;
+    eEventType mType;
+    bool mIsInteractive;
     FGuid mId;
     TArray<::ULIS::FRectI> mRects;
 };
@@ -54,12 +54,12 @@ public:
     FOdysseyImageRenderingAbility();
 
 public:
-    void ImageRenderingChanged(); //Changes the whole rect
-    void ImageRenderingChanged(const TArray<::ULIS::FRectI>& iRects);
-    void ImageRenderingCommited(); //Changes the whole rect
-    void ImageRenderingCommited(const TArray<::ULIS::FRectI>& iRects);
-    void ImageRenderingCompositionChanged();
-    void ImageRenderingCompositionCommited();
+    void ImageRenderingChanged(bool iIsInteractive = false); //Changes the whole rect
+    void ImageRenderingChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive = false);
+    /*void ImageRenderingCommited(); //Changes the whole rect
+    void ImageRenderingCommited(const TArray<::ULIS::FRectI>& iRects); */
+    void ImageRenderingCompositionChanged(bool iIsInteractive = false);
+    //void ImageRenderingCompositionCommited();
 
 public:
     /**

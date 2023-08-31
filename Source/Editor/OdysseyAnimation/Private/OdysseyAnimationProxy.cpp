@@ -173,9 +173,6 @@ FOdysseyAnimationProxy::Serialize(FArchive& Ar)
 void
 FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-    if (iEvent.IsCommit())
-        return;
-
     const FGuid& id = iEvent.GetId();
 
     if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
@@ -309,7 +306,7 @@ FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingC
 void
 FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-    if (!iEvent.IsCommit())
+    if (iEvent.IsInteractive())
         return;
 
     FGuid id = iEvent.GetId();

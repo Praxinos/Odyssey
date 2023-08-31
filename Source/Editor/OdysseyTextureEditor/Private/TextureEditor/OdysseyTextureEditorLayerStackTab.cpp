@@ -314,7 +314,8 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
         if ( !textureLayer )
             continue;
 
-        textureLayer->CopyImage(block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0, 0), TArray<::ULIS::FEvent>());
+        TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+        renderer->Copy(block, {});
         ctx.Finish();
 
         // Create texture asset
@@ -382,7 +383,8 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
-    textureLayer->CopyImage(block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0, 0), TArray<::ULIS::FEvent>());
+    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+    renderer->Copy(block, {});
     ctx.Finish();
 
     InitTextureWithBlockData(block.Get(), outTexture, texture->Source.GetFormat());

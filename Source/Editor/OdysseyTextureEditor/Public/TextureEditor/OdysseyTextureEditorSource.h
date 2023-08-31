@@ -40,5 +40,4 @@ public:
 
 public:
     UTexture2D* mTexture;
-    TSharedPtr<IOdysseyHandle> mLayerStackPreloadHandle;
 };

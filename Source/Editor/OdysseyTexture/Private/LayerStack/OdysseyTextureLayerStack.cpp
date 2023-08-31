@@ -9,13 +9,7 @@
 #include "UObject/ObjectSaveContext.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyRectUtils.h"
-
-UOdysseyTextureLayerStack::FOnRenderImageChanged&
-UOdysseyTextureLayerStack::OnRenderImageChanged()
-{
-    static FOnRenderImageChanged onRenderImageChanged;
-    return onRenderImageChanged;
-}
+#include "LayerStack/OdysseyTextureLayerStackImageRenderer.h"
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter)
@@ -57,6 +51,11 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     return layerStack;
 }
 
+UOdysseyTextureLayerStack::~UOdysseyTextureLayerStack()
+{
+    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
+}
+
 UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
 {
     CompatibleLayers.Add(UOdysseyTextureLayerFolder::StaticClass());
@@ -64,6 +63,8 @@ UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
     CompatibleLayers.Add(UOdysseyTextureLayerImageVector::StaticClass());
 
     LayerRootClass = UOdysseyTextureLayerRoot::StaticClass();
+
+    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnImageRenderingChanged);
 }
 
 void
@@ -90,72 +91,46 @@ UOdysseyTextureLayerStack::GetTexture() const
     return nullptr;    
 }
 
-TArray<::ULIS::FEvent>
-UOdysseyTextureLayerStack::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyTextureLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const
 {
-    if (!ioBlock)
-        return iWaitList;
-
-    TArray<UOdysseyLayer*> children = GetRootLayers();
-    if (children.Num() <= 0)
-        return iWaitList;
-
-    //ensure we use a sourceBlock with an alpha channel
-    ::ULIS::eFormat format = static_cast< ::ULIS::eFormat >( ioBlock->Format() | ULIS_W_ALPHA( 1 ) );
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-
-    //Convert the destination if needed and Blend the folderBlock
-    TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, format, iRect, iPos, iWaitList,
-        [this, &children](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-        {
-            return RenderLayersImage(children, ioDest, iRect, iPos, iWaitList);
-        }
-    );
-    ctx.Flush();
-
-    return eventConvertAndExecute;
+    return MakeShared<FOdysseyTextureLayerStackImageRenderer>(this, iRenderType, GetImageRenderingRects());
 }
 
-TArray<::ULIS::FEvent>
-UOdysseyTextureLayerStack::RenderLayersImage(TArray<UOdysseyLayer*> iLayers, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+TArray<FGuid>
+UOdysseyTextureLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
 {
-    if (!ioBlock)
-        return iWaitList;
+    return { GetImageRenderingId() };
+}
 
-    if (iLayers.Num() <= 0)
-        return iWaitList;
+TArray<::ULIS::FRectI>
+UOdysseyTextureLayerStack::GetImageRenderingRects() const
+{
+    UTexture2D* texture = GetTexture();
+    if ( !texture )
+        return {};
 
-    //Clear the block before blending on it
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlock->Format() );
-    ::ULIS::FEvent eventClearBlock;
-    ctx.Clear( *ioBlock, ::ULIS::FRectI::FromXYWH(iPos.x, iPos.y, iRect.w, iRect.h), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, iWaitList.Num(), iWaitList.GetData(), &eventClearBlock );
-
-    TArray<::ULIS::FEvent> lastEvent = { eventClearBlock };
-    for (int i = iLayers.Num() - 1; i >= 0 ; i--)
-    {
-        UOdysseyTextureLayer* layer = Cast<UOdysseyTextureLayer>(iLayers[i]);
-        if (!layer)
-            continue;
-
-        lastEvent = layer->RenderImage(ioBlock, iRect, iPos, lastEvent);
-    }
-    
-    ctx.Flush();
-
-    return lastEvent;
+    return { ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()) };
 }
 
 void
-UOdysseyTextureLayerStack::OnRootLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
+UOdysseyTextureLayerStack::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-    //PATCH BEGIN: because Unreal Undo does not make package dirty correctly
-    MarkPackageDirty();
-    //PATCH END:
+    if (!iEvent.IsInteractive())
+    {
+        //PATCH BEGIN: because Unreal Undo does not make package dirty correctly
+        MarkPackageDirty();
+        //PATCH END:
+    }
 
-    OnRenderImageChanged().Broadcast(this, iRects, iIsInteractive);
-    
-    mInvalidTileMap.Invalidate(iRects);
+    if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
+    {
+        mInvalidTileMap.Invalidate(iEvent.GetRects());
+    }
+    else if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+    {
+        mInvalidTileMap.Invalidate();
+    }
 
     if (mTextureUpdateMode == EOdysseyTextureLayerStackTextureUpdateMode::Instantaneous)
         UpdateTexture();
@@ -165,12 +140,6 @@ TSharedPtr<FOdysseySurfaceTexture2DEditable>
 UOdysseyTextureLayerStack::GetSurface() const
 {
     return mTextureFastUpdateSurface;
-}
-
-TSharedPtr<IOdysseyHandle>
-UOdysseyTextureLayerStack::Preload()
-{
-    return Cast<UOdysseyTextureLayerRoot>(LayerRoot)->Preload();
 }
 
 void
@@ -186,6 +155,7 @@ UOdysseyTextureLayerStack::InactivateTextureFastUpdate()
     CompressTexture();
     texture->UpdateResource();
     mTextureFastUpdateSurface = nullptr;
+    mRenderer = nullptr;
 }
 
 void
@@ -197,6 +167,8 @@ UOdysseyTextureLayerStack::ActivateTextureFastUpdate()
 
     mTextureFastUpdateSurface = MakeShared<FOdysseySurfaceTexture2DEditable>(texture);
     UncompressTexture();
+
+    mRenderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
 
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddUObject(this, &UOdysseyTextureLayerStack::OnPreGlobalObjectPropertyChanged);
     UPackage::PreSavePackageWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackagePreSave);
@@ -251,8 +223,8 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<::ULIS::FRectI>& iRect
 
     FTextureCompilingManager::Get().FinishCompilation({ texture });
 
-    for ( int i = 0; i < iRects.Num(); i++ )
-        RenderImage(mTextureFastUpdateSurface->Block(), iRects[i], iRects[i].Position(), TArray<::ULIS::FEvent>());
+    mRenderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render); //TODO: should depend on a variable or something ?
+    mRenderer->Copy(mTextureFastUpdateSurface->Block(), iRects, {});
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mTextureFastUpdateSurface->Block()->Format());
     ctx.Finish();
@@ -328,8 +300,11 @@ UOdysseyTextureLayerStack::GetTextureUpdateMode()
 }
 
 void
-UOdysseyTextureLayerStack::UpdateTexture()
+UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
 {
+    if (iForceRefresh)
+        mInvalidTileMap.Invalidate();
+
     if (mInvalidTileMap.InvalidTiles().IsEmpty())
         return;
 
@@ -349,8 +324,8 @@ UOdysseyTextureLayerStack::UpdateTexture()
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShareable(NewBlockFromUTextureData(texture, format));
 
         TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
-        for ( ::ULIS::FRectI& rect : invalidRects )
-            RenderImage(block, rect, rect.Position(), TArray<::ULIS::FEvent>());
+        TSharedPtr<IOdysseyImageRenderer> renderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render); //TODO: should depend on a variable or something ?
+        renderer->Copy(block, invalidRects, {});
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
         ctx.Finish();

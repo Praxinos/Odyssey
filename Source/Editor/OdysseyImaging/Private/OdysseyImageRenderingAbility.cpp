@@ -3,9 +3,9 @@
 
 #include "OdysseyImageRenderingAbility.h"
 
-FOdysseyImageRenderingChangedEvent::FOdysseyImageRenderingChangedEvent(eEventType iType, bool iIsCommit, const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+FOdysseyImageRenderingChangedEvent::FOdysseyImageRenderingChangedEvent(eEventType iType, bool iIsInteractive, const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
     : mType(iType)
-    , mIsCommit(iIsCommit)
+    , mIsInteractive(iIsInteractive)
     , mId(iId)
     , mRects(iRects)
 {
@@ -18,9 +18,9 @@ FOdysseyImageRenderingChangedEvent::GetType() const
 }
 
 bool
-FOdysseyImageRenderingChangedEvent::IsCommit() const
+FOdysseyImageRenderingChangedEvent::IsInteractive() const
 {
-    return mIsCommit;
+    return mIsInteractive;
 }
 
 const FGuid&
@@ -56,49 +56,25 @@ FOdysseyImageRenderingAbility::FOdysseyImageRenderingAbility()
 }
 
 void
-FOdysseyImageRenderingAbility::ImageRenderingChanged()
+FOdysseyImageRenderingAbility::ImageRenderingChanged(bool iIsInteractive)
 {
-    FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kValueChange, false, GetImageRenderingId(), GetImageRenderingRects());
+    FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kValueChange, iIsInteractive, GetImageRenderingId(), GetImageRenderingRects());
     OnImageRenderingPreChangedDelegate().Broadcast(eventChanged);
     OnImageRenderingChangedDelegate().Broadcast(eventChanged);
 }
 
 void
-FOdysseyImageRenderingAbility::ImageRenderingChanged(const TArray<::ULIS::FRectI>& iRects)
+FOdysseyImageRenderingAbility::ImageRenderingChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-    FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kValueChange, false, GetImageRenderingId(), iRects);
+    FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kValueChange, iIsInteractive, GetImageRenderingId(), iRects);
     OnImageRenderingPreChangedDelegate().Broadcast(eventChanged);
     OnImageRenderingChangedDelegate().Broadcast(eventChanged);
 }
 
 void
-FOdysseyImageRenderingAbility::ImageRenderingCommited()
+FOdysseyImageRenderingAbility::ImageRenderingCompositionChanged(bool iIsInteractive)
 {
-    FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kValueChange, true, GetImageRenderingId(), GetImageRenderingRects());
-    OnImageRenderingPreChangedDelegate().Broadcast(eventChanged);
-    OnImageRenderingChangedDelegate().Broadcast(eventChanged);
-}
-
-void
-FOdysseyImageRenderingAbility::ImageRenderingCommited(const TArray<::ULIS::FRectI>& iRects)
-{
-    FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kValueChange, true, GetImageRenderingId(), iRects);
-    OnImageRenderingPreChangedDelegate().Broadcast(eventChanged);
-    OnImageRenderingChangedDelegate().Broadcast(eventChanged);
-}
-
-void
-FOdysseyImageRenderingAbility::ImageRenderingCompositionChanged()
-{
-    FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange, false, GetImageRenderingId(), {});
-    OnImageRenderingPreChangedDelegate().Broadcast(eventChanged);
-    OnImageRenderingChangedDelegate().Broadcast(eventChanged);
-}
-
-void
-FOdysseyImageRenderingAbility::ImageRenderingCompositionCommited()
-{
-    FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange, true, GetImageRenderingId(), {});
+    FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange, iIsInteractive, GetImageRenderingId(), {});
     OnImageRenderingPreChangedDelegate().Broadcast(eventChanged);
     OnImageRenderingChangedDelegate().Broadcast(eventChanged);
 }

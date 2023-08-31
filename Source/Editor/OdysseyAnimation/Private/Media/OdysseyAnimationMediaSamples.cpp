@@ -359,13 +359,11 @@ FOdysseyAnimationMediaSamples::OnImageRenderingChanged(const FOdysseyImageRender
 
 	if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
 	{
-		//delay rects update to tick
-		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH( 0, 0, mAnimation->Width(), mAnimation->Height() ));
-
 		TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, mCurrentFrameIndex);
 		if ( imageRenderingComposition == mImageRenderingComposition )
 			return;
 
+		mInvalidTileMap.Invalidate();
 		mImageRenderingComposition = imageRenderingComposition;
 	}
 	else if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)

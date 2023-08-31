@@ -65,16 +65,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
         FOdysseyVectorEngine* GetEngine();
         //FOdysseyVectorScene* GetScene();
-
-        /**
-         * @brief Renders an image in the given Block
-         * Takes into account the size / format of the given block
-         * 
-         */
-        virtual TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
  
-        virtual void RenderImageChanged( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive ) override;
-        virtual void RenderImageChanged(bool iIsInteractive) override;
         void OpacityChanged();
         void BlendModeChanged();
         void Serialize(FArchive& Ar);
@@ -85,6 +76,14 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     public:
         // Event Listeners
         void OnRefresh(FOdysseyVectorScene* iScene);
+        void OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
+
+    public:
+        //FOdysseyImageRenderingAbility overrides
+        virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+        virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+        virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
+        virtual float GetImageRenderingOpacity() const override;
 
     public:
         UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")

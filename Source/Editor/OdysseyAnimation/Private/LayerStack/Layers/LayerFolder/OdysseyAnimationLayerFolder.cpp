@@ -67,9 +67,7 @@ UOdysseyAnimationLayerFolder::OpacityChanged()
 {
     OnOpacityChanged().Broadcast(this);
 
-    //TODO: react to interactive events by not commiting immediately
     ImageRenderingChanged();
-    ImageRenderingCommited();
 }
 
 void
@@ -78,7 +76,6 @@ UOdysseyAnimationLayerFolder::BlendModeChanged()
     OnBlendModeChanged().Broadcast(this);
 
     ImageRenderingChanged();
-    ImageRenderingCommited();
 }
 
 void

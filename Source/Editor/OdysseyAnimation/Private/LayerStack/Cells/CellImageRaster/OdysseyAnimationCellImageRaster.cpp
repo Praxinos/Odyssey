@@ -184,20 +184,19 @@ FOdysseyAnimationCellImageRaster::GetImageRenderingRects() const
 void
 FOdysseyAnimationCellImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
-    ImageRenderingChanged(iRects);
+    ImageRenderingChanged(iRects, true);
 }
 
 void
 FOdysseyAnimationCellImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
-    ImageRenderingCommited(iRects);
+    ImageRenderingChanged(iRects);
 }
 
 void
 FOdysseyAnimationCellImageRaster::OnBlockPtrChanged()
 {
     ImageRenderingChanged();
-    ImageRenderingCommited();
 }
 
 FOdysseyMediaProvider

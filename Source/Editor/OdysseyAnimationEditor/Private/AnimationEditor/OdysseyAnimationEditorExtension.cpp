@@ -138,7 +138,7 @@ FOdysseyAnimationEditorExtension::OnLayerMediaChanged()
 void
 FOdysseyAnimationEditorExtension::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-	if (!iEvent.IsCommit() || iEvent.GetType() != FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+	if (iEvent.IsInteractive() || iEvent.GetType() != FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
 		return;
 
     UOdysseyAnimation* animation = Animation();

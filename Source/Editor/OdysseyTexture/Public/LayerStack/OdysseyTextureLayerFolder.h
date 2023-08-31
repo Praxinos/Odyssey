@@ -35,22 +35,6 @@ public:
     UOdysseyTextureLayerFolder();
 
 public:
-    //IOdysseyTextureLayerImageRenderer implementation
-    
-    /**
-     * @brief Renders an image in the given Block
-     * Takes into account the size / format of the given block
-     * 
-     */
-    virtual TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-
-    /**
-     * @brief Copies an image in the given Block
-     * Takes into account the size / format of the given block
-     */
-    virtual TArray<::ULIS::FEvent> CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-
-public:
     // UOdysseyLayer Overrides
 
     /**
@@ -68,6 +52,10 @@ public:
      * @return TSet<UClass*> 
      */
     virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTypes) const override;
+
+    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
+
+    virtual float GetImageRenderingOpacity() const override;
 
 private:
     //Property changed methods

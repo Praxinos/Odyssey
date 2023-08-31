@@ -38,10 +38,7 @@ FOdysseyTextureEditorSource::Activate()
 
 	UOdysseyTextureLayerStack* layerStack = GetLayerStack();
 	if ( layerStack )
-    {
-		mLayerStackPreloadHandle = layerStack->Preload();
 		layerStack->ActivateTextureFastUpdate();
-    }
 
     FOdysseyPainterEditorSource::Activate();
 }
@@ -51,10 +48,7 @@ FOdysseyTextureEditorSource::Inactivate()
 {
 	UOdysseyTextureLayerStack* layerStack = GetLayerStack();
 	if ( layerStack )
-    {
-        mLayerStackPreloadHandle = nullptr;
 		layerStack->InactivateTextureFastUpdate();
-    }
 
     FOdysseyPainterEditorSource::Inactivate();
 }
@@ -183,8 +177,7 @@ FOdysseyTextureEditorSource::Clear()
         GEditor->EndTransaction();
 
         vectorEngine->SetScene( new FOdysseyVectorScene("Scene") );
-
-        currentLayerVector->RenderImageChanged(false); //TODO: SHould be engine->Signal(REDRAW_SCENE)
+		vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 }
 

@@ -174,7 +174,7 @@ UOdysseyAnimation::PostInitProperties()
 void
 UOdysseyAnimation::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-	if (!iEvent.IsCommit())
+	if (iEvent.IsInteractive())
 		return;
 
 	const FGuid& eventId = iEvent.GetId();

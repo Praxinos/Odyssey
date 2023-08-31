@@ -37,6 +37,10 @@ public:
     */
     void Resize(int iWidth, int iHeight);
 
+    /** Invalidates the whole map
+     */
+    void Invalidate();
+
     /** Invalidates the tile at iTileIndex
      *
      * @param iTileIndex the index (X, Y) of the tile to invalidate

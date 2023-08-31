@@ -278,7 +278,6 @@ UOdysseyAnimationLayerImageRaster::IsLightTableActivatedChanged()
         return;
 
     ImageRenderingChanged();
-    ImageRenderingCommited();
 }
 
 void
@@ -287,7 +286,6 @@ UOdysseyAnimationLayerImageRaster::OpacityChanged()
     OnOpacityChanged().Broadcast(this);
 
     ImageRenderingChanged();
-    ImageRenderingCommited();
 }
 
 void
@@ -296,7 +294,6 @@ UOdysseyAnimationLayerImageRaster::BlendModeChanged()
     OnBlendModeChanged().Broadcast(this);
     
     ImageRenderingChanged();
-    ImageRenderingCommited();
 }
 
 void
@@ -305,7 +302,6 @@ UOdysseyAnimationLayerImageRaster::CellsChanged()
     OnCellsChanged().Broadcast(this);
     
     ImageRenderingChanged();
-    ImageRenderingCommited();
 }
 
 void

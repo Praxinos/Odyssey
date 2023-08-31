@@ -313,9 +313,6 @@ UOdysseyAnimationPlayer::UpdateTexture()
 void
 UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-	if (iEvent.IsCommit())
-		return;
-
 	if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
 	{
 		if (mImageRenderingComposition.Contains(iEvent.GetId()))
