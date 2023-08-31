@@ -38,6 +38,15 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     //mSectionBuffer.reserve( 200 );
 }
 
+// This is a constrained version of a segment-to-point proximity test.
+// It means that if the projection of the point on the segment is beyond limits,
+// it will remain within limits (0.0f) or (1.0f). On the figure below, x would be at t=0.0
+//
+//                    ° (point)
+//     segment        |
+// 1______________0   x (proj. point will also be at t = 0.0,
+//                       even though it is outside the segment)
+//
 static double
 DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
                             , const ::ULIS::FVec2D& iSegmentP0
@@ -64,6 +73,14 @@ DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
     return t;
 }
 
+// CubicSegment-CubicSegment intersection test. The test is performed using straight sub-segments
+// that are precomputed by the PaintGroup object when updated and stored in the path's PolygonCache,
+// as it would be too complicated to do maths using the parametric bezier and I'm not that smart.
+// Actual intersections vertices are created in this method. We create 2 vertices per intersection.
+// This is required because a segment can intersect itself, in that case we need to be able to create
+// a section that has 2 different vertices as endpoints and not the same one. 
+// A Tolerance value is accepted to test for near-intersections, that will be created later in the
+// process.
 uint32
 FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment0
                                           , FOdysseyVectorSegmentCubic* iSegment1
@@ -103,6 +120,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                 // check this is not the same sub-segment or adjacent sub-segment, or else they would always intersect
                  || ( ( iSegment0 == iSegment1 ) && ( ( i - j ) > 1 ) ) )
                 {
+                    // Test intersections in PaintGroup's coordinates system (struct member lineVertexInParent).
                     if ( FOdysseyVector::IntersectSegment ( segment0Poly->lineVertexInParent[0]
                                                           , segment0Poly->lineVertexInParent[1]
                                                           , segment1Poly->lineVertexInParent[0]
@@ -112,10 +130,12 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                     {
                         ::ULIS::FVec2D segment0PolyVector = ( segment0Poly->lineVertex[1] - segment0Poly->lineVertex[0] );
                         ::ULIS::FVec2D segment1PolyVector = ( segment1Poly->lineVertex[1] - segment1Poly->lineVertex[0] );
+                        // Find intersections coordinates in respective coordinates systems (struct member lineVertex).
                         ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->lineVertex[0].x + ( segment0PolyVector.x * segment0PolySubT )
                                                            , segment0Poly->lineVertex[0].y + ( segment0PolyVector.y * segment0PolySubT ) };
                         ::ULIS::FVec2D segment1ISXCoords = { segment1Poly->lineVertex[0].x + ( segment1PolyVector.x * segment1PolySubT )
                                                            , segment1Poly->lineVertex[0].y + ( segment1PolyVector.y * segment1PolySubT ) };
+                        // find value T at intersection. This is coordinates system-independent.
                         double segment0T = segment0Poly->fromT + ( segment0PolySubT * ( segment0Poly->toT - segment0Poly->fromT ) );
                         double segment1T = segment1Poly->fromT + ( segment1PolySubT * ( segment1Poly->toT - segment1Poly->fromT ) );
 
@@ -133,7 +153,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                             intersectionCount++;
                         }
                     }
-/////////////////////////////// NEEDS REFACTORING !!!! //////////////////
+/////////////////////////////// UGLY. NEEDS REFACTORING !!!! //////////////////
                     /*else
                     {*/
                       if( iTolerance && ( iSegment0 != iSegment1 ) ) // limitation: tolerance can only work with different segments, otherwise it's too complicated to have something coherent
