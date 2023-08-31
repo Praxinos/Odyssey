@@ -234,6 +234,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
 
         ::ULIS::FVec2D GetPolygonCacheStartPointInParent();
         ::ULIS::FVec2D GetPolygonCacheEndPointInParent();
+        ::ULIS::FVec2D* GetBezier();
+        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
     private:
         void BuildVariableAdaptive( double  iFromT

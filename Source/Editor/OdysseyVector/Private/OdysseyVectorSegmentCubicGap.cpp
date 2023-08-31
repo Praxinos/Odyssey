@@ -15,6 +15,17 @@ FOdysseyVectorSegmentCubicGap::FOdysseyVectorSegmentCubicGap( FOdysseyVectorGrou
 {
 }
 
+bool
+FOdysseyVectorSegmentCubicGap::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorSegmentCubic::HasBaseClass( iBaseClassID );
+}
+
 void
 FOdysseyVectorSegmentCubicGap::Update()
 {

@@ -91,6 +91,15 @@ private:
                               , const FOdysseyPoint& iPointInTexture );
     void DetectPickingMode();
 
+    ::ULIS::FRectD DragPoint( FOdysseyVectorPoint *iPoint
+                            , double iWorldX
+                            , double iWorldY
+                            , double iDeltaX
+                            , double iDeltaY );
+    void AlterVertexRadius( FOdysseyVectorVertex* vertex
+                          , FOdysseyVectorSegment* iFromSegment
+                          , double iDeltaRadius );
+
 private:
     FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
 
@@ -102,4 +111,7 @@ private:
 public:
     UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
     double PickingRadius;
+
+    UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool" )
+    bool WidenAllAlong;
 };

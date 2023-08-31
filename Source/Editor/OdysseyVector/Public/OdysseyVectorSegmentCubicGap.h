@@ -35,6 +35,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubicGap : public FOdysseyVectorSeg
          * @brief Update cached data for this segment.
          */
         virtual void Update() override;
+        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
     private:
         FOdysseyVectorGroupPaint* mPaintgroup;

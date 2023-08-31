@@ -209,6 +209,17 @@ FOdysseyVectorSegment::GetIntersectionVertices( std::vector<FOdysseyVectorVertex
     }
 }
 
+bool
+FOdysseyVectorSegment::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void
 FOdysseyVectorSegment::SetPaintingReady( bool iIsPaintingReady )
 {

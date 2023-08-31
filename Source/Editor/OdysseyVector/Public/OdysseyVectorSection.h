@@ -29,12 +29,12 @@ class FOdysseyVectorSection
          * @param iVertex1 end point 1
          */
         FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
-                             , BLMatrix2D& iConversionMatrix
+                             , BLMatrix2D* iConversionMatrix
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1 );
 
         void Init( FOdysseyVectorSegment* iSegment
-                 , BLMatrix2D& iConversionMatrix
+                 , BLMatrix2D* iConversionMatrix
                  , FOdysseyVectorVertex* iVertex0
                  , FOdysseyVectorVertex* iVertex1 );
 

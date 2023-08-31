@@ -19,6 +19,7 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
     : mPickingFlags ( FOdysseyVectorPath::PICK_POINT )
     , mPickingMode  ( ePathPickingMode::Vertex )
     , PickingRadius(10.0f)
+    , WidenAllAlong( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 
@@ -530,37 +531,39 @@ GetPointParentObject( FOdysseyVectorPoint *iPoint )
     return object;
 }
 
-static void
-AlterVertexRadius( FOdysseyVectorVertex* vertex
-                 , FOdysseyVectorSegment* iFromSegment
-                 , double iDeltaRadius )
+void
+UOdysseyPainterEditorVectorPathEditTool::AlterVertexRadius( FOdysseyVectorVertex* vertex
+                                                          , FOdysseyVectorSegment* iFromSegment
+                                                          , double iDeltaRadius )
 {
     vertex->SetRadius( vertex->GetRadius() + iDeltaRadius );
 
-    for( FOdysseyVectorSegment* segment : vertex->GetSegmentList() )
+    if( WidenAllAlong )
     {
-        if( segment != iFromSegment )
+        for( FOdysseyVectorSegment* segment : vertex->GetSegmentList() )
         {
-            FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( vertex );
+            if( segment != iFromSegment )
+            {
+                FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( vertex );
 
-            AlterVertexRadius( otherVertex, segment, iDeltaRadius );
+                AlterVertexRadius( otherVertex, segment, iDeltaRadius );
+            }
         }
     }
 }
 
-static ::ULIS::FRectD
-DragPoint( FOdysseyVectorPoint *iPoint
-         , double iWorldX
-         , double iWorldY
-         , double iDeltaX
-         , double iDeltaY
-         , ePathPickingMode iPickingMode )
+::ULIS::FRectD
+UOdysseyPainterEditorVectorPathEditTool::DragPoint( FOdysseyVectorPoint *iPoint
+                                                  , double iWorldX
+                                                  , double iWorldY
+                                                  , double iDeltaX
+                                                  , double iDeltaY )
 {
     FOdysseyVectorObject* object = GetPointParentObject( iPoint );
     BLPoint localCoords = object->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
     BLPoint localVector = object->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
 
-    if( iPickingMode == ePathPickingMode::VertexHandle  )
+    if( mPickingMode == ePathPickingMode::VertexHandle  )
     {
         FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
         ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
@@ -571,7 +574,7 @@ DragPoint( FOdysseyVectorPoint *iPoint
         return cubicVertex->GetBoundingBox( false );
     }
 
-    if( iPickingMode == ePathPickingMode::Vertex )
+    if( mPickingMode == ePathPickingMode::Vertex )
     {
         if( iPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
         {
@@ -595,7 +598,7 @@ DragPoint( FOdysseyVectorPoint *iPoint
         }
     }
 
-    if( iPickingMode == ePathPickingMode::SegmentHandle )
+    if( mPickingMode == ePathPickingMode::SegmentHandle )
     {
         if( iPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
         {
@@ -648,8 +651,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
                         // we don't use iPointInTexture.deltaPosition because for some reason,
                         // the readings are not good when a key is pressed.
                         , iPointInTexture.x - mOldPointInTexture.x
-                        , iPointInTexture.y - mOldPointInTexture.y
-                        , mPickingMode );
+                        , iPointInTexture.y - mOldPointInTexture.y );
 
         //localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
 

@@ -150,6 +150,23 @@ FOdysseyVectorSegmentCubic::Smooth( double iLimitAngleInRadians )
     }
 }
 
+bool
+FOdysseyVectorSegmentCubic::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorSegment::HasBaseClass( iBaseClassID );
+}
+
+::ULIS::FVec2D* 
+FOdysseyVectorSegmentCubic::GetBezier()
+{
+    return mBezier;
+}
+
 ::ULIS::FVec2D
 FOdysseyVectorSegmentCubic::GetPointAt( double t )
 {
@@ -657,14 +674,10 @@ FOdysseyVectorSegmentCubic::DrawStructure( FOdysseyVectorObject* iParentObject, 
 {
     BLContext* blctx = iParentObject->GetScene()->GetEngine()->GetBLContext();
     BLMatrix2D& worldMatrix = iParentObject->GetWorldMatrix();
-    FOdysseyVectorVertex* vertex0 = GetVertex(0);
-    FOdysseyVectorVertex* vertex1 = GetVertex(1);
-    FOdysseyVectorHandleSegment* handle0 = GetHandle(0);
-    FOdysseyVectorHandleSegment* handle1 = GetHandle(1);
-    BLPoint point0 = iWorld ? worldMatrix.mapPoint( vertex0->GetX(), vertex0->GetY() ) : BLPoint( vertex0->GetX(), vertex0->GetY() );
-    BLPoint point1 = iWorld ? worldMatrix.mapPoint( vertex1->GetX(), vertex1->GetY() ) : BLPoint( vertex1->GetX(), vertex1->GetY() );
-    BLPoint handlePoint0 = iWorld ? worldMatrix.mapPoint( handle0->GetX(), handle0->GetY() ) : BLPoint( handle0->GetX(), handle0->GetY() );
-    BLPoint handlePoint1 = iWorld ? worldMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) : BLPoint( handle1->GetX(), handle1->GetY() );
+    BLPoint point0 = iWorld ? worldMatrix.mapPoint( mBezier[0].x, mBezier[0].y ) : BLPoint( mBezier[0].x, mBezier[0].y );
+    BLPoint point1 = iWorld ? worldMatrix.mapPoint( mBezier[3].x, mBezier[3].y ) : BLPoint( mBezier[3].x, mBezier[3].y );
+    BLPoint handlePoint0 = iWorld ? worldMatrix.mapPoint( mBezier[1].x, mBezier[1].y ) : BLPoint( mBezier[1].x, mBezier[1].y );
+    BLPoint handlePoint1 = iWorld ? worldMatrix.mapPoint( mBezier[2].x, mBezier[2].y ) : BLPoint( mBezier[2].x, mBezier[2].y );
     BLPath path;
 
     path.moveTo( point0 );

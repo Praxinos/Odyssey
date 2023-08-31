@@ -228,10 +228,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                    , std::vector<FOdysseyVectorSection>& iSectionBuffer
                                    , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer );
         void CreateSegmentSections( FOdysseyVectorSegment* iSegment
-                                  , BLMatrix2D& iConversionMatrix
+                                  , BLMatrix2D* iConversionMatrix
                                   , std::vector<FOdysseyVectorSection>& iSectionBuffer );
         void CreatePathSections( FOdysseyVectorPath* iPath
-                               , BLMatrix2D& iConversionMatrix
+                               , BLMatrix2D* iConversionMatrix
                                , std::vector<FOdysseyVectorSection>& iSectionBuffer
                                , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer );
 
