@@ -67,12 +67,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         FOdysseyVectorGroupPaint( const FString& iName );
 
         /**
-         * @brief function called after a child has its matrix updated.
-         * @param iChild the child.
-         */
-        virtual void OnChildTransform( FOdysseyVectorObject* iChild ) override;
-
-        /**
          * @brief Update the shape's cached data e.g.
          * @param iUpdateFlags
          */

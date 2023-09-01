@@ -1,34 +1,219 @@
 #include "OdysseyVectorGroupPaint.h"
 
 // Some explanations are needed here, as this is by far the most complex process
-// of Odyssey's vector features. The principles is to find cycles determined by
+// of Odyssey's vector features. The principles is to find cycles chordless determined by
 // the intersected paths. To do so we have a multi-step process :
 // - find intersections
-// - make sections
+// - Build a graph by creating sections
 // - find chordless cycles by exploring sections :
 //    -> To find chordless cycles, we have to always go the same way, either
 //       always left or always right, it does not matter but we always go the same way.
-//       This is the CORE of the process. To find the correct way, we simply compute 
+//       This is the basic principle of the method. To find the correct way, we simply compute 
 //       the cross product, which will be either positive or negative relative to the direction.
 //       The only case when we take the negative-direction is when there is no positive-direction.
-
-
-
+//         
+//         Let's say we only take the first section going to the right :
+//         
+//             /              Sections B and A are both at the right side of section S
+//            /               This can be determined by computing the cross products SxA and SxB
+//           B                However, the closest section to segment S is section A. This can be
+//          /                 Determined by the dot product. The biggest dot product wins (S.A).
+//         /_____ A______
+//         o
+//         |
+//         |
+//         S
+//         |
+//         |
+//
+//          But what if there is no section going the right way ?
+//         Then we choose the section with the biggest dot product
+//
+//               \            
+//                \           
+//                 B          
+//                  \         Here, the smallest dot product wins (S.B).
+//      _____ A______\
+//                   o
+//                   |
+//                   |
+//                   S
+//                   |
+//                   |
+//
+// See functions :
+//    FOdysseyVectorVertex::GetCycleNextSection()
+//    FOdysseyVectorVertexIntersection::GetCycleNextSection()
+//
+// Using these principles, we are guaranteed to always turn in the right direction.
+// Then, to tell whether or not we have found a cycle, we just check that the last vertex
+// we met is the same as the first vertex we explored the graph from.
+//
+// Another important technique is blocking the sections once they were explored in one way.
+// Indeed, a set of connected cycles always face the same direction because their vertices "turn"
+// in the same direction. It is the same as face orientation on a 3D-Mesh.
+// 
+//      o______________o______________o
+//      |   ------->   |   ------->   |     What do we notice here ? Although cycles have the same
+//      |  ^        |  |  ^        |  |     orientation (cross product facing in the same direction),
+//      |  |        |  A  |        |  |     sections A, B, C, D are never "explored" twice in the same
+//      |  |        v  |  |        v  |     direction (look at the arrows above and below). We use 
+//      |   <-------   |   <-------   |     this as an advantage to prevent double detection of the
+//      o_______C______o_______D______o     same cycle, which will speed up things. Each time a cycle
+//      |   ------->   |   ------->   |     is detected, its sections are blocked one-way, guaranteing
+//      |  ^        |  |  ^        |  |     that there will be no other detection. By and by, the whole
+//      |  |        |  B  |        |  |     graphs simplifies itself.
+//      |  |        v  |  |        v  |
+//      |   <-------   |   <-------   |
+//      o______________o______________o
+//
+// See functions:
+//     FOdysseyVectorSection::Block()
+//
+//                  Some requirements :
+//
+//         the algorithm had to work even in this case:
+//          ______________________________
+//         |                              |
+//         |           _______            |
+//         |          |       |           |
+//         |           \     /            |
+//         |            \ o /             |
+//         \             / \              /
+//          \___________/   \____________/
+//
+//          Here there are 2 chordless cycles :
+//
+//                      Cycle 1
+//         _______________________________
+//         |...............................|
+//         |............_______............|
+//         |...........|       |...........|
+//         |............\     /............|
+//         |.............\ o /.............|
+//         \............../ \............../
+//          \____________/   \____________/
+//
+//                      Cycle 2
+//                      _______
+//                     |.......|
+//                      \...../
+//                       \ o /
+//
+//  But a naive approach could first detect this cycle below, because
+// at intersection point o, there would indeed be a loop detection.
+//          _______________________________
+//         |...............................|
+//         |...............................|
+//         |...............................|
+//         |...............................|
+//         |...............o...............|
+//         \............../ \............../
+//          \____________/   \____________/
+//
+// What is the solution ? Detecting a loop only by comparing its
+// initial and final vertices is not enough, we also have to check if the
+// recursive exploration process has ended on a section that is allowed.
+// This is why we introduced the concept of exploration pairs. Exploration pairs
+// consists in a "depart section", a vertex, and an "return section". So, for each
+// intersection point, we first determine as many exploration pairs as sections connected
+// to this vertex. At intersection point o, we would have 4 exploration pairs :
+//
+//                        1.      2.        3.          4.
+//                      \                      /     \     /
+//                       \ o       o        o /       \ o /
+//                        /       / \        \
+//                       /       /   \        \
+//
+// See functions:
+//     FOdysseyVectorVertexIntersection::BuildExplorationPairs()
+//     FOdysseyVectorVertex::BuildExplorationPairs()
+//
+// A cycle is detected only if the last section matches the allowed return section
+// OR, if the allowed return section was removed from the graph, then any return
+// section is allowed. Indeed, there are orphaned section (that leads to nowhere),
+// and we get rid of them because the would cause problems. E.g :
+//              o
+//              |
+//              |
+//       o______o______o
+//              |
+//              |
+//              o
+//
+// Here there is no cycle. But if we explore those sections, we would find one, and it would look
+// like this cross. So we get rid of these kind of sections. How ? Simply get rid of any section
+// whose vertices are not connected to another section. This implies that this is a multi-pass
+// process, as we can have such cases :
+//
+//              o
+//              |       <--- deletion at first pass 
+//              |
+//              o
+//              |       <--- deletion at second pass 
+//              |
+//       o______o______o
+//       |      |      |  
+//       |      |      |      <--- keep those sections.
+//       o____  o______o
+//
+// See functions:
+//        FOdysseyVectorGroupPaint::SimplifyGraph()
+//
+// When a cycle is detected, it is not guaranteed that it will be correctly oriented. Indeed,
+// a contour can be detected as a cycle, we always took the best section possible, but the
+//  overall cycle isn't correctly oriented :
+//
+//      <-----------------------------
+//  |                                      ^
+//  |    o______________o______________o   |
+//  |    |   ------->   |   ------->   |   |
+//  |    |  ^        |  |  ^        |  |   |
+//  |    |  |        |  A  |        |  |   |
+//  |    |  |        v  |  |        v  |   |
+//  |    |   <-------   |   <-------   |   |
+//  |    o_______C______o_______D______o   |
+//  |    |   ------->   |   ------->   |   |
+//  |    |  ^        |  |  ^        |  |   |
+//  |    |  |        |  B  |        |  |   |
+//  |    |  |        v  |  |        v  |   |
+//  |    |   <-------   |   <-------   |   |
+//  |    o______________o______________o   |
+//  v
+//      ------------------------------>
+//
+// The contour cycle detected was the only possibility, but in the end
+// is not well oriented. That's why, for any cycle we find, we always
+// have to check its overall orientation anyways. This one will be discarded.
+//
+// See functions:
+//    static GetCycleNormalVector()
+//
+// Stay focused, it's not over yet !
+//
+// Once we have detected the cycles, how to deal with cycles that are the one inside the other ?
+// we have to check which one fits into which one and then merge them :
+//
+// See functions:
+//     FOdysseyVectorGroupPaint::OrderCycles()
+//     FOdysseyVectorGroupPaint::MergeCycles()
+//
+//  That's basically it !
 
 // MUST be even number
 #define EDGESUBSAMPLES 8
 
 
 static double
-GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
-               , std::vector<FOdysseyVectorSection*>& iSectionArray );
+GetCycleNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
+                    , std::vector<FOdysseyVectorSection*>& iSectionArray );
 static void
 BlockPath( std::vector<FOdysseyVectorVertex*>& iVertexArray
          , std::vector<FOdysseyVectorSection*>& iSectionArray );
 
 FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 {
-    //ClearCycles();
+    Clear();
 }
 
 FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
@@ -388,24 +573,6 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
     /*Invalidate();*/
 }
 
-// TODO: Rename this method. this is not a callback anymore
-void
-FOdysseyVectorGroupPaint::OnChildTransform( FOdysseyVectorObject* iChild )
-{
-/*
-    if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
-    {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
-
-        path->SwitchSpace( *this );
-        path->ResetTransform();
-        path->UpdateMatrix( false );// pass false to prevent loop
-        path->InvalidateAllSegments();
-        path->Update(0);
-    }
-*/
-}
-
 void
 FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
 {
@@ -454,8 +621,6 @@ FOdysseyVectorGroupPaint::Draw( uint64 iFlags )
 void
 FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
 {
-    //OnChildTransform( iFosterChild );
-
     FOdysseyVectorGroup::TransferChild( iFosterChild, iInsertAfter );
 }
 
@@ -561,12 +726,6 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
         Clear();
     }
 }
-
-/*void
-FOdysseyVectorGroupPaint::InvalidateColoring()
-{
-
-}*/
 
 void
 FOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
@@ -828,34 +987,6 @@ PrintCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
     }
 }
 
-/*
-static FOdysseyVectorSection*
-NextSection( FOdysseyVectorVertex* iNextVertex, FOdysseyVectorSection* iSection )
-{
-    FOdysseyVectorSection* primaryNextSection = iNextVertex->GetCycleNextSection( iSection, 1.0f );
-
-    if( primaryNextSection && ( primaryNextSection->IsBlocked( iNextVertex ) == false ) )
-    {
-        return primaryNextSection;
-    }
-
-    FOdysseyVectorSection* secondaryNextSection = iNextVertex->GetOtherSection( iSection );
-
-    if( secondaryNextSection && ( secondaryNextSection->IsBlocked( iNextVertex ) == false ) )
-    {
-        return secondaryNextSection;
-    }
-
-    FOdysseyVectorSection* tertiaryNextSection = iNextVertex->GetCycleNextSection( iSection, -1.0f );
-
-    if( tertiaryNextSection && ( tertiaryNextSection->IsBlocked( iNextVertex ) == false ) )
-    {
-        return tertiaryNextSection;
-    }
-
-    return nullptr;
-}
-*/
 uint32
 FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
                                   , FOdysseyVectorVertex* iVertex
@@ -879,16 +1010,6 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     iVertexArray.push_back( iVertex );
     iSection->Block( iVertex );
 
-//    if( i == 15)
-//    {
-//            UE_LOG(LogTemp,Warning,TEXT("let's break, nextVertex: %d"), nextVertex );
- //   }
-
-//UE_LOG(LogTemp,Warning,TEXT("%d"), i++ );
-
-
-    //UE_LOG(LogTemp, Warning, TEXT("exploring section:") );
-    //PrintSection( iSection );
     // loop checking if initiator is of type 
     if( iVertexArray[0]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
     {
@@ -902,22 +1023,12 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
         isLoop = ( iVertexArray[0] == nextVertex );
     }
 
-    //PrintSection(iSection);
-    //UE_LOG(LogTemp,Warning,TEXT("IsLoop: %d %d"), isLoop, iVertexArray.size() );
-    //PrintVertex(nextVertex);
-
     if( ( isLoop == true )// cycle detected
     && ( ( ( iReturnSection->IsLinked() == true ) && ( iReturnSection == iSection ) ) // 1 return path accepted
         || ( iReturnSection->IsLinked() == false ) ) ) // any return path accepted
     {
-        //UE_LOG(LogTemp,Warning,TEXT("cycle detected") );
-
-        //PrintCycle( iVertexArray, iSectionArray );
-
-        if( GetNormalVector( iVertexArray, iSectionArray ) > 0.0f )
+        if( GetCycleNormalVector( iVertexArray, iSectionArray ) > 0.0f )
         {
-            //UE_LOG(LogTemp,Warning,TEXT("cycle accepted") );
-
             mCycleList.push_back( new FOdysseyVectorCycle( this, iVertexArray, iSectionArray ) );
         }
 
@@ -931,7 +1042,6 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
 
             if( primaryNextSection )
             {
-         //UE_LOG(LogTemp,Warning,TEXT("primary flags: %d %d"), primaryNextSection->GetFlags(), nextVertex->GetSectionCount() );
                 if( primaryNextSection->IsBlocked( nextVertex ) == false )
                 {
                     ret = FindPath( iReturnSection, nextVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
@@ -953,7 +1063,6 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
 
             if( primaryNextSection )
             {
-        //UE_LOG(LogTemp,Warning,TEXT("primary") );
                 if( primaryNextSection->IsBlocked( nextPartnerVertex ) == false )
                 {
                     ret = FindPath( iReturnSection, nextPartnerVertex, primaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
@@ -966,7 +1075,6 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
 
             if( ( ret == FOdysseyVectorGroupPaint::NOCYCLE ) && secondaryNextSection )
             {
-        //UE_LOG(LogTemp,Warning,TEXT("secondary") );
                 if( secondaryNextSection->IsBlocked( nextIntersectionVertex ) == false )
                 {
                     ret = FindPath( iReturnSection, nextIntersectionVertex, secondaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
@@ -979,7 +1087,6 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
 
             if( ( ret == FOdysseyVectorGroupPaint::NOCYCLE ) && tertiaryNextSection )
             {
-       //UE_LOG(LogTemp,Warning,TEXT("tertiary") );
                 if( tertiaryNextSection->IsBlocked( nextPartnerVertex ) == false )
                 {
                     ret = FindPath( iReturnSection, nextPartnerVertex, tertiaryNextSection, iVertexArray, iSectionArray, iOrientation, iDepth + 1 );
@@ -998,9 +1105,10 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     return ret;
 }
 
+// find the overall orientation of the cycle
 static double
-GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
-               , std::vector<FOdysseyVectorSection*>& iSectionArray )
+GetCycleNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
+                    , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
     double z = 0;
     int32 arraySize = iSectionArray.size();
@@ -1044,14 +1152,7 @@ GetNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
             // due to imprecision and would fake the calculation. So, we use the value stored in viCoords and vnCoords.
             ::ULIS::FVec2D v0Coords = ( j == 0          ) ? viCoords : sectioni->GetPointAt( t0 );
             ::ULIS::FVec2D v1Coords = ( j == subdiv - 1 ) ? vnCoords : sectioni->GetPointAt( t1 );
-/*
-            BLMatrix2D& worldMatrix = segment->GetPath()->GetWorldMatrix();
-            BLPoint w0coords = worldMatrix.mapPoint( v0Coords.x, v0Coords.y );
-            BLPoint w1coords = worldMatrix.mapPoint( v1Coords.x, v1Coords.y );
 
-UE_LOG(LogTemp,Warning,TEXT("v0coords:t:%f:c:%f %f v1coords:t:%f:c:%f %f"), t0, w0coords.x, w0coords.y, t1, w1coords.x, w1coords.y);
-
-*/
             z += ( ( v0Coords.x - v1Coords.x ) * ( v0Coords.y + v1Coords.y ) );
 
             t0 += stepT;
@@ -1062,8 +1163,6 @@ UE_LOG(LogTemp,Warning,TEXT("v0coords:t:%f:c:%f %f v1coords:t:%f:c:%f %f"), t0, 
         //z += ( ( viCoords.x - vnCoords.x ) * ( viCoords.y + vnCoords.y ) );
     }
 
-    //UE_LOG(LogTemp,Warning,TEXT("Normal Z:%f"), z);
-
     return z;
 }
 
@@ -1072,11 +1171,6 @@ FOdysseyVectorGroupPaint::Explore( FExplorationPair* iExplorationPair )
 {
     if( iExplorationPair->departSection )
     {
-        // UE_LOG(LogTemp, Warning, TEXT("Exploring") ); 
-        //PrintSection( iExplorationPair->returnSection );
-        //PrintSection( iExplorationPair->departSection );
-
-
         if( iExplorationPair->departSection->IsLinked() == true )
         {
             if( iExplorationPair->departSection->IsBlocked( iExplorationPair->departVertex ) == false )
@@ -1090,8 +1184,8 @@ FOdysseyVectorGroupPaint::Explore( FExplorationPair* iExplorationPair )
                                      , sectionArray
                                      , 1.0f
                                      , 0 );
-            }// else UE_LOG(LogTemp, Warning, TEXT("Blocked") ); 
-        }// else UE_LOG(LogTemp, Warning, TEXT("Unlinked") ); 
+            }
+        }
     }
 
     return 0;
@@ -1112,15 +1206,11 @@ FOdysseyVectorGroupPaint::FindCycles()
         mIntersectionArray[i]->BuildExplorationPairs( explorationPairsBuffer );
     }
 
-     //UE_LOG(LogTemp, Warning, TEXT("ExpPairs: %d Sections:%d Gaps:%d"), explorationPairsBuffer.size(), mSectionBuffer.size(), mGapSegmentBuffer.size() ); 
-
     // Build exploration pair before simplification
     for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
     {
         FOdysseyVectorVertex* vertex0 = mGapSegmentBuffer[i].GetVertex(0);
         FOdysseyVectorVertex* vertex1 = mGapSegmentBuffer[i].GetVertex(1);
-
-        //mGapSegmentBuffer[i].BuildExplorationPairs( explorationPairsBuffer );
 
         if( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
             vertex0->BuildExplorationPairs( explorationPairsBuffer );
@@ -1184,8 +1274,6 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
 
             iVertex->SetNearestVertex( nearestVertex );
         }
-
-        //UE_LOG(LogTemp,Warning,TEXT("GetSectionCount: %d %d"),intersectionVertex[0]->GetSectionCount(),intersectionVertex[1]->GetSectionCount());
     }
 
     return nearestVertex;
@@ -1328,8 +1416,6 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
     mPaintingCode = ++paintingCode;
 
-    //Clear();
-
     for( std::list<FOdysseyVectorPath*>::iterator pit = mPathList.begin(); pit != mPathList.end(); ++pit )
     {
         FOdysseyVectorPath *path = (*pit);
@@ -1443,7 +1529,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
             BLMatrix2D conversionMatrix;
 
             FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, pathWorldMatrix, conversionMatrix );
-//UE_LOG(LogTemp, Warning, TEXT("path:%d"), path->GetIntersectionCount() );
+
             CreatePathSections( path, &conversionMatrix, mSectionBuffer, mGapSegmentBuffer );
 
             // create a cycle right now for untouched looped-paths
@@ -1469,8 +1555,6 @@ FOdysseyVectorGroupPaint::BuildGraph()
             }
         }
     }
-
-//UE_LOG(LogTemp, Warning, TEXT("%d %d"), mSectionBuffer.size(), mGapSegmentBuffer.size() );
 }
 
 void

@@ -130,8 +130,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                          , double iScalingX
                          , double iScalingY );
 
-        virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
-
         virtual void Update( uint32 iUpdateFlags );
         virtual void UpdateShape( uint32 iUpdateFlags );
 
