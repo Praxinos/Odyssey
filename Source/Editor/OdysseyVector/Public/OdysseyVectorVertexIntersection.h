@@ -25,7 +25,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         /**
          * @brief Constructor.
          */
-        FOdysseyVectorVertexIntersection( FOdysseyVectorPath* iPath, bool iSelfIntersects, double iX, double iY, double iT );
+        FOdysseyVectorVertexIntersection( FOdysseyVectorIntersection* iIntersection
+                                        , FOdysseyVectorPath* iPath
+                                        , double iX
+                                        , double iY
+                                        , double iT );
 
         /**
          * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.
@@ -38,17 +42,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
         virtual double GetT( FOdysseyVectorSection* iSection ) override;
 
-        void SetIntersection( FOdysseyVectorIntersection* iIntersection );
         FOdysseyVectorIntersection* GetIntersection();
         FOdysseyVectorVertexIntersection* GetPartner();
 
         virtual uint32 GetSectionCount() override;
-        bool SelfIntersects();
 
         virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray ) override;
 
 private:
         FOdysseyVectorIntersection* mIntersection;
         double mT;
-        bool mSelfIntersects;
 };

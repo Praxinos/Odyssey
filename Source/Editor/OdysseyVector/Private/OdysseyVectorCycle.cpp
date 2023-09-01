@@ -148,7 +148,7 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                 FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
 
                 if( ( iSectionArray[i]->GetSegment() != iSectionArray[n]->GetSegment() )
-                 || ( intersectionVertex->SelfIntersects() == true ) )
+                 || ( intersectionVertex->GetIntersection()->SelfIntersects() == true ) )
                 {
                     vertexn = intersectionVertex->GetPartner();
                 }

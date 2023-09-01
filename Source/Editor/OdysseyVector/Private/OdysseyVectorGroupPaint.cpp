@@ -85,7 +85,7 @@
 //          Here there are 2 chordless cycles :
 //
 //                      Cycle 1
-//         _______________________________
+//          _______________________________
 //         |...............................|
 //         |............_______............|
 //         |...........|       |...........|
@@ -341,13 +341,20 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                         if( ( segment0T != 0.0f && segment1T != 1.0f )
                          && ( segment0T != 1.0f && segment1T != 0.0f ) )
                         {
-                            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( iSegment0->GetPath(), ( iSegment0 == iSegment1 ), segment0ISXCoords.x, segment0ISXCoords.y, segment0T )
-                                                                                      , new FOdysseyVectorVertexIntersection( iSegment1->GetPath(), ( iSegment0 == iSegment1 ), segment1ISXCoords.x, segment1ISXCoords.y, segment1T ) };
+                            bool selfIntersects = ( iSegment0 == iSegment1 );
+                            FOdysseyVectorIntersection* intersection = new FOdysseyVectorIntersection( selfIntersects
+                                                                                                   ,   iSegment0->GetPath()
+                                                                                                   ,   segment0ISXCoords.x
+                                                                                                   ,   segment0ISXCoords.y
+                                                                                                   ,   segment0T
+                                                                                                   ,   iSegment1->GetPath()
+                                                                                                   ,   segment1ISXCoords.x
+                                                                                                   ,   segment1ISXCoords.y
+                                                                                                   ,   segment1T );
+                            iIntersectionArray.emplace_back( intersection );
 
-                            iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
-
-                            iSegment0->AddIntersection( intersectionVertex[0] );
-                            iSegment1->AddIntersection( intersectionVertex[1] );
+                            iSegment0->AddIntersection( intersection->GetVertex(0) );
+                            iSegment1->AddIntersection( intersection->GetVertex(1) );
 
                             intersectionCount++;
                         }
@@ -1127,7 +1134,7 @@ GetCycleNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
             FOdysseyVectorSection* sectionn = iSectionArray[n];
 
             if( ( sectioni->GetSegment() != sectionn->GetSegment() )
-             || ( intersectionVertex->SelfIntersects() == true ) )
+             || ( intersectionVertex->GetIntersection()->SelfIntersects() == true ) )
             {
                 vertexn = intersectionVertex->GetPartner();
             }
@@ -1263,14 +1270,21 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
         else
         {
             ::ULIS::FVec2D nearestVertexAt = nearestSegment->GetPointAt( nearestSegmentT );
-            FOdysseyVectorVertexIntersection* intersectionVertex[2] = { new FOdysseyVectorVertexIntersection( nearestSegment->GetPath(), false, nearestVertexAt.x, nearestVertexAt.y, nearestSegmentT )
-                                                                      , new FOdysseyVectorVertexIntersection( nearestSegment->GetPath(), false, nearestVertexAt.x, nearestVertexAt.y, 0.0f ) };
+            FOdysseyVectorIntersection* intersection = new FOdysseyVectorIntersection( false
+                                                                                     , nearestSegment->GetPath()
+                                                                                     , nearestVertexAt.x
+                                                                                     , nearestVertexAt.y
+                                                                                     , nearestSegmentT
+                                                                                     , nearestSegment->GetPath()
+                                                                                     , nearestVertexAt.x
+                                                                                     , nearestVertexAt.y
+                                                                                     , 0.0f );
 
-            iIntersectionArray.push_back( new FOdysseyVectorIntersection( intersectionVertex[0], intersectionVertex[1] ) );
+            iIntersectionArray.emplace_back( intersection );
 
-            nearestSegment->AddIntersection( intersectionVertex[0] );
+            nearestSegment->AddIntersection( intersection->GetVertex(0) );
 
-            nearestVertex = intersectionVertex[1];
+            nearestVertex = intersection->GetVertex(1);
 
             iVertex->SetNearestVertex( nearestVertex );
         }

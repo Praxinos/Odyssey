@@ -293,6 +293,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         ::ULIS::FVec2D GetWorldCoords();
         void AlignHandles( FOdysseyVectorHandleSegment* iHandle );
 
+        void AlterRadius( FOdysseyVectorSegment* iFromSegment
+                        , double iDeltaRadius
+                        , bool iAlterAllAlong );
+
     protected:
         /**
          * @brief Set the vertex coordinate in the X-Axis and Y-axis. It invalidates the attached segments.

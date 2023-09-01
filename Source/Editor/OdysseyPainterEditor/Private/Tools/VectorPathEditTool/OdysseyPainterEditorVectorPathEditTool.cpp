@@ -5,6 +5,7 @@
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditToolHUD.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
+#include "Undo/OdysseyVectorUndoVertexRadius.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathEditTool"
@@ -404,15 +405,32 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorEng
         // Else, save point coordinates before changing them
         else
         {
-            // needed for valid GUndo pointer
-            GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
-            if( GUndo )
+            switch( mPickingMode )
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedPointArray );
+                case ePathPickingMode::VertexHandle :
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
+                    if( GUndo )
+                    {
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexRadius( iScene, mPickedPointArray, WidenAllAlong );
 
-                GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    }
+                    GEditor->EndTransaction();
+                break;
+
+                default :
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
+                    if( GUndo )
+                    {
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedPointArray );
+
+                        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    }
+                    GEditor->EndTransaction();
+                break;
             }
-            GEditor->EndTransaction();
         }
     }
 }
@@ -533,27 +551,6 @@ GetPointParentObject( FOdysseyVectorPoint *iPoint )
     return object;
 }
 
-void
-UOdysseyPainterEditorVectorPathEditTool::AlterVertexRadius( FOdysseyVectorVertex* vertex
-                                                          , FOdysseyVectorSegment* iFromSegment
-                                                          , double iDeltaRadius )
-{
-    vertex->SetRadius( vertex->GetRadius() + iDeltaRadius );
-
-    if( WidenAllAlong )
-    {
-        for( FOdysseyVectorSegment* segment : vertex->GetSegmentList() )
-        {
-            if( segment != iFromSegment )
-            {
-                FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( vertex );
-
-                AlterVertexRadius( otherVertex, segment, iDeltaRadius );
-            }
-        }
-    }
-}
-
 ::ULIS::FRectD
 UOdysseyPainterEditorVectorPathEditTool::DragPoint( FOdysseyVectorPoint *iPoint
                                                   , double iWorldX
@@ -571,7 +568,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragPoint( FOdysseyVectorPoint *iPoint
         ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
                              , cubicVertex->GetY() - localCoords.y };
 
-        AlterVertexRadius( cubicVertex, nullptr, dif.Distance() - cubicVertex->GetRadius() );
+        cubicVertex->AlterRadius( nullptr, dif.Distance() - cubicVertex->GetRadius(), WidenAllAlong );
 
         return cubicVertex->GetBoundingBox( false );
     }
