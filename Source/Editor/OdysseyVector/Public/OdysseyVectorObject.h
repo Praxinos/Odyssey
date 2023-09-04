@@ -212,4 +212,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FString& GetName();
         FOdysseyVectorObject* GetLastChild();
         FOdysseyVectorObject* GetPreviousChild( FOdysseyVectorObject* iChild );
+        virtual void ApplyTransformations();
+        virtual void ApplyMatrix( BLMatrix2D& iMatrix );
 };

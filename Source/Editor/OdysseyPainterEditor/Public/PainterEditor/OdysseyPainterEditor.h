@@ -112,6 +112,8 @@ public:
     static void AlignPointSelection( FOdysseyVectorScene* iScene );
     static void GetVertexSelection( FOdysseyVectorScene* iScene
                                   , std::vector<FOdysseyVectorPoint*>& iSelectedVertexArray );
+    static void ClearColoring( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void ApplyTransformations( FOdysseyVectorScene* iScene );
 
 
     void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);

@@ -329,6 +329,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         virtual void Invalidate() override;
         virtual void Invalidate( uint32 iInvalidationFlags ) override;
+        virtual void ApplyTransformations() override;
+        virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
@@ -339,6 +341,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags );
         void UpdateBBox();
         void Fill();
+
 
     protected :
         std::list<FOdysseyVectorVertex*> mVertexList;

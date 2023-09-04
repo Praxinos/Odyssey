@@ -688,6 +688,58 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorSce
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
+static void
+ApplyTransformationsRecursive( FOdysseyVectorObject* iObject )
+{
+    if( iObject->IsSelected() == true )
+    {
+        iObject->ApplyTransformations();
+    }
+
+    for( FOdysseyVectorObject* child : iObject->GetChildrenList() )
+    {
+        ApplyTransformationsRecursive( child );
+    }
+}
+
+void
+FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorScene* iScene )
+{
+    FOdysseyVectorEngine* engine = iScene->GetEngine();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList :
+                                                                                      engine->GetChildrenList();
+
+    // Backup before, for undoing
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("ApplyTransformations", "Apply Transformations"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, focusedObjectList );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+
+    if( selectedObjectList.size() == 0 )
+    {
+        iScene->SetIsSelected( true );
+    }
+
+    ApplyTransformationsRecursive( iScene );
+
+    iScene->SetIsSelected( false );
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    engine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    engine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
 void
 FOdysseyPainterEditor::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
@@ -1021,6 +1073,62 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVe
     iScene->FlipSelectionHorizontal( true /*ignored for now*/ );
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    iEngine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+void
+FOdysseyPainterEditor::ClearColoring( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList :
+                                                                                      iEngine->GetChildrenList();
+
+    std::vector<FOdysseyVectorBucket*> bucketArray;
+
+    bucketArray.reserve( 100 );
+
+    // first step: retrieve all buckets for undoing.
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
+    {
+        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintgroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
+            std::list<FOdysseyVectorBucket*>& bucketList = paintgroup->GetBucketList();
+
+            for( FOdysseyVectorBucket* bucket : bucketList )
+            {
+                bucketArray.push_back( bucket );
+            }
+        }
+    }
+
+    // first step: the actual removal.
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
+    {
+        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintgroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
+
+            paintgroup->RemoveAllBuckets();
+        }
+    }
+
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("ClearColoring", "Clear Coloring"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, bucketArray );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // re-colorize paint group
 
     iEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

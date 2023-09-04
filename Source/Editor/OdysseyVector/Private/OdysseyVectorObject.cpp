@@ -165,6 +165,41 @@ FOdysseyVectorObject::SetIsSelected( bool iIsSelected )
     mIsSelected = iIsSelected;
 }
 
+void FOdysseyVectorObject::ApplyMatrix( BLMatrix2D& iMatrix )
+{
+
+}
+
+void FOdysseyVectorObject::ApplyTransformations()
+{
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        BLMatrix2D& parentInverseWorldMatrix = mParent->GetInverseWorldMatrix();
+        BLMatrix2D& childWorldMatrix = child->GetWorldMatrix();
+        BLMatrix2D localMatrix;
+        double translationX, translationY, rotation, scalingX, scalingY;
+
+        FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, childWorldMatrix, localMatrix );
+
+        FOdysseyVector::ExtractTransformations( localMatrix
+                                              , &translationX
+                                              , &translationY
+                                              , &rotation
+                                              , &scalingX
+                                              , &scalingY );
+
+        child->SetTransform( translationX
+                           , translationY
+                           , rotation / M_PI * 180.0f
+                           , scalingX
+                           , scalingY );
+    }
+
+    SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
+
+    UpdateMatrix();
+}
+
 void
 FOdysseyVectorObject::Transfer( const BLMatrix2D& iMatrix )
 {

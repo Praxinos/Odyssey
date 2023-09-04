@@ -4,7 +4,10 @@ FOdysseyVectorUndoBucketRemove::~FOdysseyVectorUndoBucketRemove()
 {
     if( mApplied )
     {
-        delete mBucket;
+        for( FOdysseyVectorBucket* bucket : mBucketArray )
+        {
+            delete bucket;
+        }
     }
     else
     {
@@ -15,24 +18,33 @@ FOdysseyVectorUndoBucketRemove::~FOdysseyVectorUndoBucketRemove()
 FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
                                                               , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
-    , mBucket( iBucket )
+{
+    mBucketArray.push_back( iBucket );
+}
+
+FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
+                                                              , std::vector<FOdysseyVectorBucket*>& iBucketArray )
+    : FOdysseyVectorUndo( iScene )
+    , mBucketArray( iBucketArray )
 {
 }
 
 void
 FOdysseyVectorUndoBucketRemove::Apply( UObject* iIgnored )
 {
-    FOdysseyVectorObject* ownerObject = mBucket->GetOwner();
-
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    if( ownerObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+    for( FOdysseyVectorBucket* bucket : mBucketArray )
     {
-        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+        FOdysseyVectorObject* ownerObject = bucket->GetOwner();
 
-        paintGroup->RemoveBucket( mBucket );
-        paintGroup->Colorize();
+        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+            paintGroup->RemoveBucket( bucket );
+        }
     }
 
     // update invalidated objects
@@ -47,17 +59,19 @@ FOdysseyVectorUndoBucketRemove::Apply( UObject* iIgnored )
 void
 FOdysseyVectorUndoBucketRemove::Revert( UObject* iIgnored )
 {
-    FOdysseyVectorObject* ownerObject = mBucket->GetOwner();
-
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    if( ownerObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+    for( FOdysseyVectorBucket* bucket : mBucketArray )
     {
-        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+        FOdysseyVectorObject* ownerObject = bucket->GetOwner();
 
-        paintGroup->AddBucket( mBucket );
-        paintGroup->Colorize();
+        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+            paintGroup->AddBucket( bucket );
+        }
     }
 
     // update invalidated objects

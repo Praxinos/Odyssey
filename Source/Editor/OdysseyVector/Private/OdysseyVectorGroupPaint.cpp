@@ -62,7 +62,7 @@
 //      o_______C______o_______D______o     same cycle, which will speed up things. Each time a cycle
 //      |   ------->   |   ------->   |     is detected, its sections are blocked one-way, guaranteing
 //      |  ^        |  |  ^        |  |     that there will be no other detection. By and by, the whole
-//      |  |        |  B  |        |  |     graphs simplifies itself.
+//      |  |        |  B  |        |  |     graph exploration simplifies itself.
 //      |  |        v  |  |        v  |
 //      |   <-------   |   <-------   |
 //      o______________o______________o
@@ -214,6 +214,13 @@ BlockPath( std::vector<FOdysseyVectorVertex*>& iVertexArray
 FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 {
     Clear();
+
+    for( FOdysseyVectorBucket* bucket : mBucketList )
+    {
+        delete bucket;
+    }
+
+    mBucketList.clear();
 }
 
 FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
@@ -505,6 +512,31 @@ FOdysseyVectorGroupPaint::GetCycleList()
 }
 
 void
+FOdysseyVectorGroupPaint::ApplyMatrix( BLMatrix2D& iMatrix )
+{
+    for( FOdysseyVectorBucket* bucket : mBucketList )
+    {
+        ::ULIS::FVec2D& point = bucket->GetCoords();
+        BLPoint localPt = iMatrix.mapPoint( point.x, point.y );
+
+        bucket->Set( localPt.x, localPt.y );
+    }
+}
+
+void
+FOdysseyVectorGroupPaint::ApplyTransformations()
+{
+    BLMatrix2D& parentInverseWorldMatrix = mParent->GetInverseWorldMatrix();
+    BLMatrix2D conversionMatrix = mLocalMatrix;
+
+    FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, mWorldMatrix, conversionMatrix );
+
+    ApplyMatrix( conversionMatrix );
+
+    FOdysseyVectorObject::ApplyTransformations();
+}
+
+void
 FOdysseyVectorGroupPaint::PropagateBuckets()
 {
     bool doPropagate = true;
@@ -752,6 +784,22 @@ FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
     {
         UnselectBucket( iBucket );
     }
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+}
+
+void
+FOdysseyVectorGroupPaint::RemoveAllBuckets()
+{
+    mBucketList.remove_if( [this]( FOdysseyVectorBucket* iBucket )
+                           {
+                                if( iBucket->IsSelected() )
+                                {
+                                    UnselectBucket( iBucket );
+                                }
+
+                                return true;
+                            } );
 
     Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }

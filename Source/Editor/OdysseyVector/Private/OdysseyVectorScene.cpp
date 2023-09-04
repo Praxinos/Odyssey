@@ -93,29 +93,6 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
         {
             FOdysseyVectorObject* selectedObject = (*it);
 
-            if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
-            {
-                FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-                        
-                for( std::list<FOdysseyVectorObject*>::iterator cit = selectedPaintGroup->GetChildrenList().begin(); cit != selectedPaintGroup->GetChildrenList().end(); ++cit )
-                {
-                    FOdysseyVectorObject* childObject = (*cit);
-
-                    if( childObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                    {
-                        FOdysseyVectorPath* childPath = static_cast<FOdysseyVectorPath*>( childObject );
-
-                        oCubicPathArray.push_back( childPath );
-                    }
-                }
-
-                selectedPaintGroup->GetParent()->RemoveChild( selectedPaintGroup );
-
-                selectedPaintGroup->CopyBuckets( paintGroup, true );
-
-                oRemovedPaintGroupArray.push_back( selectedPaintGroup );
-            }
-
             if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
             {
                 FOdysseyVectorPath* selectedCubicPath = static_cast<FOdysseyVectorPath*>( selectedObject );

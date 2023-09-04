@@ -1803,6 +1803,50 @@ FOdysseyVectorPath::GetType()
 }
 
 void
+FOdysseyVectorPath::ApplyMatrix( BLMatrix2D& iMatrix )
+{
+    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
+        ::ULIS::FVec2D& point = cubicVertex->GetCoords();
+        BLPoint localPt = iMatrix.mapPoint( point.x, point.y );
+        BLPoint localVec = iMatrix.mapVector( 0.70710678118f * cubicVertex->GetRadius()
+                                            , 0.70710678118f * cubicVertex->GetRadius() );
+        ::ULIS::FVec2D vec = { localVec.x, localVec.y };
+
+        cubicVertex->Set( localPt.x, localPt.y, vec.Distance() );
+    }
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+        ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+        ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+        BLPoint localPt0 = iMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y );
+        BLPoint localPt1 = iMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y );
+
+        cubicSegment->GetHandle(0)->Set( localPt0.x, localPt0.y );
+        cubicSegment->GetHandle(1)->Set( localPt1.x, localPt1.y );
+
+        InvalidateSegment( cubicSegment );
+    }
+}
+
+void
+FOdysseyVectorPath::ApplyTransformations()
+{
+    BLMatrix2D& parentInverseWorldMatrix = mParent->GetInverseWorldMatrix();
+    BLMatrix2D conversionMatrix = mLocalMatrix;
+
+    FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, mWorldMatrix, conversionMatrix );
+
+    ApplyMatrix( conversionMatrix );
+
+    // inherited
+    FOdysseyVectorObject::ApplyTransformations();
+}
+
+void
 FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
 {
     BLMatrix2D& newSpaceInverseWorldMatrix = iNewSpace.GetInverseWorldMatrix();

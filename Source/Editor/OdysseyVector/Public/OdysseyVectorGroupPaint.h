@@ -113,6 +113,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::list<FOdysseyVectorCycle*>& GetCycleList();
         void AddBucket( FOdysseyVectorBucket* iBucket );
         void RemoveBucket( FOdysseyVectorBucket* iBucket );
+        void RemoveAllBuckets();
         void Colorize();
         void MergeCycles();
         double GetGapTolerance();
@@ -150,6 +151,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                , FOdysseyVectorSegmentCubic* iSegment1
                                , double iTolerance
                                , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
+        virtual void ApplyTransformations() override;
+        virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
 
     protected:
         /**
