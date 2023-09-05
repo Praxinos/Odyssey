@@ -5,13 +5,12 @@
 
 #include "LayerStack/OdysseyAnimationLayerStackImageRenderer.h"
 
-FOdysseyAnimationLayerStackImageRenderer::FOdysseyAnimationLayerStackImageRenderer(UOdysseyAnimationLayerStack* iLayerStack, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
+FOdysseyAnimationLayerStackImageRenderer::FOdysseyAnimationLayerStackImageRenderer(const UOdysseyAnimationLayerStack* iLayerStack, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mLayerRootRenderer(nullptr)
 {
     UOdysseyAnimationLayer* layerRoot = Cast<UOdysseyAnimationLayer>(iLayerStack->LayerRoot);
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> layerRootAbility = layerRoot->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    mLayerRootRenderer = layerRootAbility->BuildRenderer(iFrame, iRenderType);
+    mLayerRootRenderer = layerRoot->BuildImageRenderer(iRenderType, iFrame);
 }
 
 TArray<::ULIS::FEvent>

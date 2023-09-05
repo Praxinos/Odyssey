@@ -33,6 +33,12 @@ FULISInvalidTileMap::Resize(int iWidth, int iHeight)
 }
 
 void
+FULISInvalidTileMap::Invalidate()
+{
+    mIsFullyInvalidated = true;
+}
+
+void
 FULISInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
 {
     if (mIsFullyInvalidated)

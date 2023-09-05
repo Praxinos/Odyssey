@@ -6,17 +6,21 @@
 #include "OdysseyAnimationProxyImageRenderer.h"
 
 
-FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
+FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
-    , mAnimation(iAnimation)
     , mProxy(iAnimation->GetProxy())
     , mFrameIndex(iFrameIndex)
     , mAnimationRenderer(nullptr)
+    , mBlock(nullptr)
 {
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> animationAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-
     if ( GetRenderType() != IOdysseyImageRenderer::eRenderType::Render )
-        mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, iFrameIndex, iRenderType, iDefaultRects);
+    {
+        mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(iAnimation, iFrameIndex, iRenderType, iDefaultRects);
+    }
+    else
+    {
+        mBlock = mProxy->GetBlock(mFrameIndex);
+    }
 }
 
 TArray<::ULIS::FEvent>
@@ -25,8 +29,10 @@ FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
         return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 
-    TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameIndex);
-    if ( !block )
+    if ( !mBlock )
+        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block one more time
+
+    if ( !mBlock )
     {
         if (mAnimationRenderer)
             return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
@@ -34,7 +40,7 @@ FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
         return iWaitList;
     }
 
-    return ConvertAndBlend(block, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
@@ -43,8 +49,10 @@ FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, co
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
         return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 
-    TSharedPtr<::ULIS::FBlock> block = mProxy->GetBlock(mFrameIndex);
-    if ( !block )
+    if ( !mBlock )
+        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block one more time
+
+    if ( !mBlock )
     {
         if (mAnimationRenderer)
             return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
@@ -52,5 +60,5 @@ FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, co
         return iWaitList;
     }
 
-    return ConvertAndCopy(block, ioBlock, iRects, iPos, iWaitList);
+    return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
 }

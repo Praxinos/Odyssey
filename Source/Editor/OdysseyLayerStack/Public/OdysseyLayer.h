@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyPerformanceMode.h"
+#include "OdysseyMediaProvider.h"
 #include "OdysseyLayer.generated.h"
 
 class UOdysseyLayerStack;
@@ -66,6 +67,7 @@ public:
     static FOnIsExpandedChanged& OnIsExpandedChanged();
     static FOnParentChanged& OnParentChanged();
     static FOnChildrenChanged& OnChildrenChanged();
+    static FSimpleMulticastDelegate& OnMediaChanged();
     
 public:
     // Events
@@ -169,6 +171,8 @@ public:
 	 */
     UFUNCTION(BlueprintPure, Category="LayerStack")
     UOdysseyLayerStack* GetLayerStack() const;
+
+    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
 protected:
     //Property changed methods

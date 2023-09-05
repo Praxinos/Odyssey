@@ -15,7 +15,4 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerRoot
 
 public:
     UOdysseyTextureLayerRoot();
-
-protected:
-    virtual void RenderImageChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive) override;
 };

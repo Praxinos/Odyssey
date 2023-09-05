@@ -9,7 +9,7 @@
 
 #include <ULIS>
 
-class ODYSSEYANIMATION_API FOdysseyAnimationImageRenderingAbility
+class ODYSSEYIMAGING_API FOdysseyStaticImageRenderingAbility
     : public FOdysseyImageRenderingAbility
 {
 public:
@@ -19,14 +19,14 @@ public:
      * For example : if you delete a layer, you should create a new renderer
      * but if you are just drawing on the layer, you can reuse the renderer
      */
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const;
 
     /**
      * @brief Returns the full Render Image Id, eventually composed of underlying ids
      *
      * @return const FGuid&
      */
-    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex = 0) const;
+    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const;
 
     virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const;
 

@@ -4,6 +4,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 #include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerImageRenderer.h"
 #include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationLayer"
@@ -11,7 +12,7 @@
 //===========================
 
 UOdysseyAnimation*
-UOdysseyAnimationLayer::GetAnimation()
+UOdysseyAnimationLayer::GetAnimation() const
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
     if(!layerStack)
@@ -42,12 +43,7 @@ UOdysseyAnimationLayer::ChildrenChanged()
 {
     Super::ChildrenChanged();
 
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( imageRenderAbility )
-    {
-        imageRenderAbility->CompositionChanged();
-        imageRenderAbility->CompositionCommited();
-    }
+    ImageRenderingCompositionChanged();
 }
 
 void
@@ -58,13 +54,45 @@ UOdysseyAnimationLayer::IsActivatedChanged()
     UOdysseyAnimationLayer* parentLayer = Cast<UOdysseyAnimationLayer>(GetParent());
     if (!parentLayer)
         return;
-    
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = parentLayer->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( imageRenderAbility )
+
+    parentLayer->ImageRenderingCompositionChanged();
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyAnimationLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    return MakeShared<FOdysseyAnimationLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+}
+
+TArray<FGuid>
+UOdysseyAnimationLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    const TArray<UOdysseyLayer*>& children = GetChildren();
+    for (UOdysseyLayer* child : children)
     {
-        imageRenderAbility->CompositionChanged();
-        imageRenderAbility->CompositionCommited();
+        if (!child->IsActivated)
+            continue;
+
+        UOdysseyAnimationLayer* animationChild = Cast<UOdysseyAnimationLayer>(child);
+        if (!animationChild)
+            continue;
+
+        idComposition.Append(animationChild->GetImageRenderingComposition(iRenderType, iFrame));
     }
+
+    return idComposition;
+}
+
+TArray<::ULIS::FRectI>
+UOdysseyAnimationLayer::GetImageRenderingRects() const
+{
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
+    if(!layerStack)
+        return {};
+
+    return layerStack->GetImageRenderingRects();
 }
 
 #undef LOCTEXT_NAMESPACE

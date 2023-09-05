@@ -6,7 +6,7 @@
 #include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
-#include "LayerStack/OdysseyAnimationLayerStackImageRenderingAbility.h"
+#include "LayerStack/OdysseyAnimationLayerStackImageRenderer.h"
 #include "OdysseyRectUtils.h"
 
 //===============================================
@@ -41,10 +41,31 @@ UOdysseyAnimationLayerStack::GetFrameRange() const
     return Cast<UOdysseyAnimationLayerRoot>(LayerRoot)->GetFrameRange();
 }
 
-void
-UOdysseyAnimationLayerStack::PostInitProperties()
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyAnimationLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
-    Super::PostInitProperties();
+    return MakeShared<FOdysseyAnimationLayerStackImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+}
 
-    SetAbility(MakeShared<FOdysseyAnimationLayerStackImageRenderingAbility>(this));
+TArray<FGuid>
+UOdysseyAnimationLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    UOdysseyAnimationLayer* layerRoot = Cast<UOdysseyAnimationLayer>(LayerRoot);
+    if ( !layerRoot )
+        return idComposition;
+    
+    idComposition.Append(layerRoot->GetImageRenderingComposition(iRenderType, iFrameIndex));
+    return idComposition;
+}
+
+TArray<::ULIS::FRectI>
+UOdysseyAnimationLayerStack::GetImageRenderingRects() const
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    if (!animation)
+        return {};
+
+    return animation->GetImageRenderingRects();
 }

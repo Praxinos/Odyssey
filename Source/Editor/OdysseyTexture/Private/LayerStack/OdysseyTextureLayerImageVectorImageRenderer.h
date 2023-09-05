@@ -5,22 +5,18 @@
 
 #include "OdysseyImageRenderer.h"
 
-class ODYSSEYANIMATION_API FOdysseyAnimationLayerImageRenderer
+class FOdysseyTextureLayerImageVectorImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationLayerImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
+    FOdysseyTextureLayerImageVectorImageRenderer(const UOdysseyTextureLayerImageVector* iLayer, TSharedPtr<::ULIS::FBlock> iBlock, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
 
 public:
     virtual TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
     virtual TArray<::ULIS::FEvent> Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-    struct FChildData
-    {
-        TSharedPtr<IOdysseyImageRenderer> mRenderer;
-        ::ULIS::eBlendMode mBlendMode;
-        float mOpacity;
-    };
-    TArray<FChildData> mChildrenData;
+    FOdysseyVectorEngine* mEngine;
+    TSharedPtr<::ULIS::FBlock> mBlock;
+    bool mRenderHUD;
 };

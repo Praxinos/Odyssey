@@ -15,8 +15,4 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerRoot
 
 public:
     UOdysseyAnimationLayerRoot();
-
-public:
-    //UObject overrides
-	virtual void PostInitProperties() override;
 };

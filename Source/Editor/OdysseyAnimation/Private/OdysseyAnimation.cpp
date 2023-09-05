@@ -5,9 +5,9 @@
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationProxyImageRenderer.h"
 
 #include "Misc/TransactionObjectEvent.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
 
 #include <ULIS>
 #include "ULISLoaderModule.h"
@@ -167,41 +167,24 @@ UOdysseyAnimation::PostInitProperties()
         return;
 	
 	mProxy = MakeShared<FOdysseyAnimationProxy>(this);
-	SetAbility(MakeShared<FOdysseyAnimationImageRenderingAbility>(this));
 
-	FOdysseyAnimationImageRenderingAbility::OnCommited().AddUObject(this, &UOdysseyAnimation::OnImageRenderingCommited);
-	FOdysseyAnimationImageRenderingAbility::OnCompositionCommited().AddUObject(this, &UOdysseyAnimation::OnImageRenderingCompositionCommited);
+	OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimation::OnImageRenderingChanged);
 }
 
 void
-UOdysseyAnimation::OnImageRenderingCommited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+UOdysseyAnimation::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-	TSharedPtr<FOdysseyAnimationImageRenderingAbility> ability = GetAbility<FOdysseyAnimationImageRenderingAbility>();
+	if (iEvent.IsInteractive())
+		return;
+
+	const FGuid& eventId = iEvent.GetId();
 	FInt32Range frameRange = GetFrameRange();
 	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
 	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
 	for (int i = startFrame; i <= endFrame; i++)
 	{
-		TArray<FGuid> composition = ability->GetComposition(i, IOdysseyImageRenderer::eRenderType::Editor);
-		if (composition.Contains(iId))
-		{
-			MarkPackageDirty();
-			break;
-		}
-	}
-}
-
-void
-UOdysseyAnimation::OnImageRenderingCompositionCommited(const FGuid& iId)
-{
-	TSharedPtr<FOdysseyAnimationImageRenderingAbility> ability = GetAbility<FOdysseyAnimationImageRenderingAbility>();
-	FInt32Range frameRange = GetFrameRange();
-	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
-	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
-	for (int i = startFrame; i <= endFrame; i++)
-	{
-		TArray<FGuid> composition = ability->GetComposition(i, IOdysseyImageRenderer::eRenderType::Editor);
-		if (composition.Contains(iId))
+		TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, i);
+		if (composition.Contains(eventId))
 		{
 			MarkPackageDirty();
 			break;
@@ -237,20 +220,6 @@ UOdysseyAnimation::FramesPerSecondChanged()
 	OnFramesPerSecondChanged().Broadcast(this);
 }
 
-/* IMediaSource overrides
- *****************************************************************************/
-
-bool UOdysseyAnimation::GetMediaOption(const FName& Key, bool DefaultValue) const
-{
-	return Super::GetMediaOption(Key, DefaultValue);
-}
-
-
-bool UOdysseyAnimation::HasMediaOption(const FName& Key) const
-{
-	return Super::HasMediaOption(Key);
-}
-
 /* UMediaSource overrides
  *****************************************************************************/
 
@@ -262,4 +231,29 @@ FString UOdysseyAnimation::GetUrl() const
 bool UOdysseyAnimation::Validate() const
 {
 	return true;
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyAnimation::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    return MakeShared<FOdysseyAnimationProxyImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+}
+
+TArray<FGuid>
+UOdysseyAnimation::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    if (!mLayerStack)
+        return idComposition;
+
+    idComposition.Append(mLayerStack->GetImageRenderingComposition(iRenderType, iFrameIndex));
+
+    return idComposition;
+}
+
+TArray<::ULIS::FRectI>
+UOdysseyAnimation::GetImageRenderingRects() const
+{
+    return { ::ULIS::FRectI::FromXYWH(0, 0, Width(), Height()) };
 }

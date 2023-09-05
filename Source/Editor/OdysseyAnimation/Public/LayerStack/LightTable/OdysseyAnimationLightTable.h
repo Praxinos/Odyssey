@@ -25,12 +25,11 @@ enum class EOdysseyLightTableDisplayPosition
 };
 
 class ODYSSEYANIMATION_API FOdysseyAnimationLightTable
-    : public FOdysseyAbilityContainer
+    : public TSharedFromThis<FOdysseyAnimationLightTable>
+    , public FOdysseyAnimationImageRenderingAbility
 {
 public:
-    static TSharedRef<FOdysseyAnimationLightTable> Create(UOdysseyAnimationLayer* iLayer);
-
-private:
+    virtual ~FOdysseyAnimationLightTable();
     FOdysseyAnimationLightTable(UOdysseyAnimationLayer* iLayer);
 
 public:
@@ -62,6 +61,12 @@ public:
     };
 
     const TArray<FKeyData>& GetKeysData() const;
+
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
 private:
     friend class FOdysseyAnimationLightTableMutator;

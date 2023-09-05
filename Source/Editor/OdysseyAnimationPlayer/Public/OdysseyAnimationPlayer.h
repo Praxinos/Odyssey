@@ -9,6 +9,7 @@
 #include "ULISInvalidTileMap.h"
 #include "Misc/OdysseyHandle.h"
 #include "OdysseyImageRenderer.h"
+#include "OdysseyImageRenderingAbility.h"
 
 #include <ULIS>
 
@@ -90,8 +91,7 @@ protected:
 private:
 	void UpdateTexture();
 	void CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBlock>>& iBlocks, const TArray<::ULIS::FRectI>& iRects);
-	void OnImageRenderingChanged(const FGuid& iImageRenderingId, const TArray<::ULIS::FRectI>& iRects);
-	void OnImageRenderingCompositionChanged(const FGuid& iImageRenderingId);
+	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 
 private:
 	UPROPERTY()
@@ -115,7 +115,11 @@ private:
 	FTimespan mCurrentTime; 
 	TArray<FGuid>   mImageRenderingComposition;
 	FULISInvalidTileMap mInvalidTileMap;
-	TSharedPtr<IOdysseyHandle> mAnimationHandle;
+
+	/**
+	 * We keep the renderer in memory to ensure all blocks are loaded and ready to be used instead of being recached
+	 */
+	TSharedPtr<IOdysseyImageRenderer> mRenderer;
 	IOdysseyImageRenderer::eRenderType mRenderType = IOdysseyImageRenderer::eRenderType::Render;
 
 private:

@@ -89,8 +89,7 @@ FOdysseyTextureEditorExtension::OnCurrentLayerChanged(UOdysseyLayerStack* iLayer
 
     // PATCH : We have to redraw all layers in order to draw all layers without the HUD of the tool.
     // This will be removed when we'll have a dedicated HUD layer.
-    UOdysseyTextureLayer* layerRoot = static_cast<UOdysseyTextureLayer*>(iLayerStack->LayerRoot);
-	layerRoot->RenderImageChanged(false);
+	Cast<UOdysseyTextureLayerStack>(iLayerStack)->UpdateTexture(true);
 }
 
 #undef LOCTEXT_NAMESPACE

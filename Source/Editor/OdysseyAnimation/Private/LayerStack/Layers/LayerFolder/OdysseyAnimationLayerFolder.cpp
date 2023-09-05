@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
-#include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolderImageRenderingAbility.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyPixelFormat.h"
 #include "EditorStyleSet.h"
@@ -68,19 +67,7 @@ UOdysseyAnimationLayerFolder::OpacityChanged()
 {
     OnOpacityChanged().Broadcast(this);
 
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( !imageRenderAbility )
-        return;
-    {
-        //TODO: react to interactive events by not commiting immediately
-        ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-        imageRenderAbility->Changed({rect});
-        imageRenderAbility->Commited({rect});
-    }
+    ImageRenderingChanged();
 }
 
 void
@@ -88,18 +75,7 @@ UOdysseyAnimationLayerFolder::BlendModeChanged()
 {
     OnBlendModeChanged().Broadcast(this);
 
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    if ( !imageRenderAbility )
-        return;
-    {
-        ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-        imageRenderAbility->Changed({rect});
-        imageRenderAbility->Commited({rect});
-    }
+    ImageRenderingChanged();
 }
 
 void
@@ -113,12 +89,16 @@ UOdysseyAnimationLayerFolder::PropertyChanged(const FName& iPropertyName)
         OpacityChanged();
 }
 
-void
-UOdysseyAnimationLayerFolder::PostInitProperties()
+::ULIS::eBlendMode
+UOdysseyAnimationLayerFolder::GetImageRenderingBlendMode() const
 {
-    Super::PostInitProperties();
+    return (::ULIS::eBlendMode)BlendMode;
+}
 
-    SetAbility(MakeShared<FOdysseyAnimationLayerFolderImageRenderingAbility>(this));
+float
+UOdysseyAnimationLayerFolder::GetImageRenderingOpacity() const
+{
+    return Opacity;
 }
 
 #undef LOCTEXT_NAMESPACE

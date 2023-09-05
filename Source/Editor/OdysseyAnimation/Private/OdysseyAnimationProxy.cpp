@@ -6,10 +6,8 @@
 
 FOdysseyAnimationProxy::~FOdysseyAnimationProxy()
 {
-    IOdysseyAnimationImageRenderingAbility::OnPreChanged().RemoveAll(this);
-    IOdysseyAnimationImageRenderingAbility::OnCommited().RemoveAll(this);
-    IOdysseyAnimationImageRenderingAbility::OnCompositionPreChanged().RemoveAll(this);
-    IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
+    FOdysseyImageRenderingAbility::OnImageRenderingPreChangedDelegate().RemoveAll(this);
+    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
     
     delete mThread;
     mThread = nullptr;
@@ -21,10 +19,8 @@ FOdysseyAnimationProxy::FOdysseyAnimationProxy(UOdysseyAnimation* iAnimation)
     , mBlockData()
     , mFramesToBlockData()
 {
-    IOdysseyAnimationImageRenderingAbility::OnPreChanged().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingPreChanged);
-    IOdysseyAnimationImageRenderingAbility::OnCommited().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingCommited);
-    IOdysseyAnimationImageRenderingAbility::OnCompositionPreChanged().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingCompositionPreChanged);
-    IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingCompositionCommited);
+    FOdysseyImageRenderingAbility::OnImageRenderingPreChangedDelegate().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingPreChanged);
+    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationProxy::OnImageRenderingChanged);
     //this line starts the thread which will execute Init() => Run()
     mThread = FRunnableThread::Create(this, TEXT("FOdysseyAnimationProxy"), 0, TPri_BelowNormal); //windows default = 8mb for thread, could specify more
 }
@@ -54,16 +50,6 @@ FOdysseyAnimationProxy::GetBlock(int iFrameIndex)
     return block;
 }
 
-TSharedPtr<IOdysseyHandle>
-FOdysseyAnimationProxy::Preload(int iFrameIndex) const
-{
-    if (!mFramesToBlockData.Contains(iFrameIndex))
-        return nullptr;
-    
-    TSharedPtr<FBlockData> blockData = mFramesToBlockData[iFrameIndex];
-    return blockData->GetRasterBlock()->Preload();
-}
-
 bool
 FOdysseyAnimationProxy::IsDone(int iFrameIndex) const
 {
@@ -77,7 +63,6 @@ FOdysseyAnimationProxy::IsDone(int iFrameIndex) const
 void
 FOdysseyAnimationProxy::PostLoad()
 {
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> animationAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
     mAnimationRange = mAnimation->GetFrameRange();
 
     TArray<TSharedPtr<FBlockData>> blockDataToEnqueue;
@@ -90,7 +75,7 @@ FOdysseyAnimationProxy::PostLoad()
         int endFrame = mAnimationRange.GetUpperBound().IsInclusive() ? mAnimationRange.GetUpperBoundValue() : mAnimationRange.GetUpperBoundValue() - 1;
         for ( int i = startFrame; i <= endFrame; i++ )
         {
-            TArray<FGuid> composition = animationAbility->GetComposition(i, IOdysseyImageRenderer::eRenderType::Render);
+            TArray<FGuid> composition = mAnimation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, i);
             TSharedPtr<FBlockData> blockData = GetBlockDataForComposition(composition);
             if ( !blockData )
             {
@@ -186,156 +171,151 @@ FOdysseyAnimationProxy::Serialize(FArchive& Ar)
 }
 
 void
-FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-    for (TSharedPtr<FBlockData> blockData : mBlockData)
+    const FGuid& id = iEvent.GetId();
+
+    if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
     {
-        if (blockData->GetComposition().Contains(iId))
+        const TArray<::ULIS::FRectI>& rects = iEvent.GetRects();
+        for (TSharedPtr<FBlockData> blockData : mBlockData)
         {
-            blockData->LockPending(iId);
-            blockData->AppendInvalidRects(iRects);
-        }
-    }
-}
-
-void
-FOdysseyAnimationProxy::OnImageRenderingCommited(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
-{
-    for (TSharedPtr<FBlockData> blockData : mBlockData)
-    {
-        if (blockData->GetComposition().Contains(iId))
-        {
-            if (blockData->UnlockPending(iId))
-                mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe
-        }
-    }
-}
-
-void
-FOdysseyAnimationProxy::OnImageRenderingCompositionPreChanged(const FGuid& iId)
-{
-    for (TSharedPtr<FBlockData> blockData : mBlockData)
-    {
-        if (blockData->GetComposition().Contains(iId))
-            blockData->LockPending(iId);
-    }
-
-    TSharedPtr<IOdysseyAnimationImageRenderingAbility> animationAbility = mAnimation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-    FInt32Range range = mAnimation->GetFrameRange();
-
-    TArray<FInt32Range> rangesToRemove;
-    if ( !mAnimationRange.GetUpperBound().IsOpen() && !mAnimationRange.GetLowerBound().IsOpen() )
-        rangesToRemove = FInt32Range::Difference(mAnimationRange, range);
-
-    TMap<TSharedPtr<FBlockData>, TArray<int>> frameIndexesToRemove;
-    TMap<TSharedPtr<FBlockData>, TArray<int>> frameIndexesToAdd;
-
-    //Remove unused indexes
-    for ( const FInt32Range& rangeToRemove : rangesToRemove )
-    {
-        int startFrame = rangeToRemove.GetLowerBound().IsInclusive() ? rangeToRemove.GetLowerBoundValue() : rangeToRemove.GetLowerBoundValue() + 1;
-        int endFrame = rangeToRemove.GetUpperBound().IsInclusive() ? rangeToRemove.GetUpperBoundValue() : rangeToRemove.GetUpperBoundValue() - 1;
-        for ( int i = startFrame; i <= endFrame; i++ )
-        {
-            if ( !frameIndexesToRemove.Contains(mFramesToBlockData[i]) )
+            if (blockData->GetComposition().Contains(id))
             {
-                frameIndexesToRemove.Add(mFramesToBlockData[i], { i });
-            }
-            else
-            {
-                frameIndexesToRemove[mFramesToBlockData[i]].Add(i);
+                blockData->LockPending(id);
+                blockData->AppendInvalidRects(rects);
             }
         }
     }
-
-    mAnimationRange = range;
-
-    if ( !mAnimationRange.GetUpperBound().IsOpen() && !mAnimationRange.GetLowerBound().IsOpen() )
+    else if(iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
     {
-        //Add new indexes
-        int startFrame = mAnimationRange.GetLowerBound().IsInclusive() ? mAnimationRange.GetLowerBoundValue() : mAnimationRange.GetLowerBoundValue() + 1;
-        int endFrame = mAnimationRange.GetUpperBound().IsInclusive() ? mAnimationRange.GetUpperBoundValue() : mAnimationRange.GetUpperBoundValue() - 1;
-        for ( int i = startFrame; i <= endFrame; i++ )
+        for (TSharedPtr<FBlockData> blockData : mBlockData)
         {
-            TArray<FGuid> composition = animationAbility->GetComposition(i, IOdysseyImageRenderer::eRenderType::Render);
-            const TSharedPtr<FBlockData>* blockDataPtr = mFramesToBlockData.Find(i);
-            TSharedPtr<FBlockData> blockData = blockDataPtr ? *blockDataPtr : nullptr;
-            if ( blockData )
-            {
-                const TArray<FGuid>& blockDataComposition = blockData->GetComposition();
-                if ( blockDataComposition == composition )
-                    continue;
+            if (blockData->GetComposition().Contains(id))
+                blockData->LockPending(id);
+        }
 
-                if ( !frameIndexesToRemove.Contains(blockData) )
+        FInt32Range range = mAnimation->GetFrameRange();
+
+        TArray<FInt32Range> rangesToRemove;
+        if ( !mAnimationRange.GetUpperBound().IsOpen() && !mAnimationRange.GetLowerBound().IsOpen() )
+            rangesToRemove = FInt32Range::Difference(mAnimationRange, range);
+
+        TMap<TSharedPtr<FBlockData>, TArray<int>> frameIndexesToRemove;
+        TMap<TSharedPtr<FBlockData>, TArray<int>> frameIndexesToAdd;
+
+        //Remove unused indexes
+        for ( const FInt32Range& rangeToRemove : rangesToRemove )
+        {
+            int startFrame = rangeToRemove.GetLowerBound().IsInclusive() ? rangeToRemove.GetLowerBoundValue() : rangeToRemove.GetLowerBoundValue() + 1;
+            int endFrame = rangeToRemove.GetUpperBound().IsInclusive() ? rangeToRemove.GetUpperBoundValue() : rangeToRemove.GetUpperBoundValue() - 1;
+            for ( int i = startFrame; i <= endFrame; i++ )
+            {
+                if ( !frameIndexesToRemove.Contains(mFramesToBlockData[i]) )
                 {
-                    frameIndexesToRemove.Add(blockData, { i });
+                    frameIndexesToRemove.Add(mFramesToBlockData[i], { i });
                 }
                 else
                 {
-                    frameIndexesToRemove[blockData].Add(i);
+                    frameIndexesToRemove[mFramesToBlockData[i]].Add(i);
                 }
             }
-
-            blockData = GetBlockDataForComposition(composition);
-            if ( !blockData )
-            {
-                TSharedPtr<FOdysseyRasterBlock> block = MakeShared<FOdysseyRasterBlock>(mAnimation);
-                block->SetBlock(MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format()));
-                blockData = MakeShared<FBlockData>(mAnimation, composition, block);
-                blockData->LockPending(iId);
-                mBlockData.Add(blockData);
-            }
-
-            if ( !frameIndexesToAdd.Contains(blockData) )
-            {
-                frameIndexesToAdd.Add(blockData, { i });
-            }
-            else
-            {
-                frameIndexesToAdd[blockData].Add(i);
-            }
         }
-    }
 
-    for (auto& element : frameIndexesToRemove)
-    {
-        TSharedPtr<FBlockData> blockData = element.Key;
-        TArray<int> frameIndexes = element.Value; 
-        for (int frameIndex : frameIndexes)
+        mAnimationRange = range;
+
+        if ( !mAnimationRange.GetUpperBound().IsOpen() && !mAnimationRange.GetLowerBound().IsOpen() )
         {
-            blockData->RemoveFrameIndex(frameIndex);
-            mFramesToBlockData.Remove(frameIndex);
-        }
-    }
+            //Add new indexes
+            int startFrame = mAnimationRange.GetLowerBound().IsInclusive() ? mAnimationRange.GetLowerBoundValue() : mAnimationRange.GetLowerBoundValue() + 1;
+            int endFrame = mAnimationRange.GetUpperBound().IsInclusive() ? mAnimationRange.GetUpperBoundValue() : mAnimationRange.GetUpperBoundValue() - 1;
+            for ( int i = startFrame; i <= endFrame; i++ )
+            {
+                TArray<FGuid> composition = mAnimation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, i);
+                const TSharedPtr<FBlockData>* blockDataPtr = mFramesToBlockData.Find(i);
+                TSharedPtr<FBlockData> blockData = blockDataPtr ? *blockDataPtr : nullptr;
+                if ( blockData )
+                {
+                    const TArray<FGuid>& blockDataComposition = blockData->GetComposition();
+                    if ( blockDataComposition == composition )
+                        continue;
 
-    for (auto& element : frameIndexesToAdd)
-    {
-        TSharedPtr<FBlockData> blockData = element.Key;
-        TArray<int> frameIndexes = element.Value; 
-        for (int frameIndex : frameIndexes)
-        {
-            blockData->AddFrameIndex(frameIndex);
-            mFramesToBlockData.Add(frameIndex, blockData);
-        }
-    }
+                    if ( !frameIndexesToRemove.Contains(blockData) )
+                    {
+                        frameIndexesToRemove.Add(blockData, { i });
+                    }
+                    else
+                    {
+                        frameIndexesToRemove[blockData].Add(i);
+                    }
+                }
 
-    //Remove unused blockData
-    mBlockData.RemoveAll(
-        [](TSharedPtr<FBlockData> iBlockData)
-        {
-            return iBlockData->GetFrameIndexes().IsEmpty();
+                blockData = GetBlockDataForComposition(composition);
+                if ( !blockData )
+                {
+                    TSharedPtr<FOdysseyRasterBlock> block = MakeShared<FOdysseyRasterBlock>(mAnimation);
+                    block->SetBlock(MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format()));
+                    blockData = MakeShared<FBlockData>(mAnimation, composition, block);
+                    blockData->LockPending(id);
+                    mBlockData.Add(blockData);
+                }
+
+                if ( !frameIndexesToAdd.Contains(blockData) )
+                {
+                    frameIndexesToAdd.Add(blockData, { i });
+                }
+                else
+                {
+                    frameIndexesToAdd[blockData].Add(i);
+                }
+            }
         }
-    );
+
+        for (auto& element : frameIndexesToRemove)
+        {
+            TSharedPtr<FBlockData> blockData = element.Key;
+            TArray<int> frameIndexes = element.Value; 
+            for (int frameIndex : frameIndexes)
+            {
+                blockData->RemoveFrameIndex(frameIndex);
+                mFramesToBlockData.Remove(frameIndex);
+            }
+        }
+
+        for (auto& element : frameIndexesToAdd)
+        {
+            TSharedPtr<FBlockData> blockData = element.Key;
+            TArray<int> frameIndexes = element.Value; 
+            for (int frameIndex : frameIndexes)
+            {
+                blockData->AddFrameIndex(frameIndex);
+                mFramesToBlockData.Add(frameIndex, blockData);
+            }
+        }
+
+        //Remove unused blockData
+        mBlockData.RemoveAll(
+            [](TSharedPtr<FBlockData> iBlockData)
+            {
+                return iBlockData->GetFrameIndexes().IsEmpty();
+            }
+        );
+    }
 }
 
 void
-FOdysseyAnimationProxy::OnImageRenderingCompositionCommited(const FGuid& iId)
+FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+    if (iEvent.IsInteractive())
+        return;
+
+    FGuid id = iEvent.GetId();
+    
     for (TSharedPtr<FBlockData> blockData : mBlockData)
     {
-        if (blockData->GetComposition().Contains(iId))
+        if (blockData->GetComposition().Contains(id))
         {
-            if (blockData->UnlockPending(iId))
+            if (blockData->UnlockPending(id))
                 mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe
         }
     }

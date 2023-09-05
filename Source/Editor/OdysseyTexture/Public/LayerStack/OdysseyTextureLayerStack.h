@@ -7,6 +7,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Misc/OdysseyHandle.h"
 #include "ULISInvalidTileMap.h"
+#include "OdysseyStaticImageRenderingAbility.h"
 
 #include <ULIS>
 
@@ -25,6 +26,7 @@ enum class EOdysseyTextureLayerStackTextureUpdateMode
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
     : public UOdysseyLayerStack
+    , public FOdysseyStaticImageRenderingAbility
     , public FTickableGameObject
 {
     GENERATED_BODY()
@@ -32,55 +34,16 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
 public:
     static UOdysseyTextureLayerStack* CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter);
     static UOdysseyTextureLayerStack* CreateFromTexture(UTexture2D* iTexture, UObject* iOuter);
+    ~UOdysseyTextureLayerStack();
     UOdysseyTextureLayerStack();
 
     virtual void PostLoad() override;
-public:
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnRenderImageChanged, UOdysseyTextureLayerStack*, const TArray<::ULIS::FRectI>&, bool)
-    static FOnRenderImageChanged& OnRenderImageChanged(); //Delegate
 
 public:
     UFUNCTION(BlueprintPure, Category="LayerStack")
     UTexture2D* GetTexture() const;
 
 public:
-    /**
-     * @brief Renders an image in the given Block
-     * Takes into account the size / format of the given block
-     * 
-     */
-    TArray<::ULIS::FEvent> RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-
-    /**
-     * @brief Called when one of the direct children layer render image changed
-     * 
-     * Called by the child layer RenderImageChanged() function
-     */
-    void OnRootLayerRenderImageChanged(UOdysseyTextureLayer* iLayer, const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
-
-    /**
-     * @brief Reders the given layer's image
-     * 
-     * @param iLayers 
-     * @param ioBlock 
-     * @param iRect 
-     * @param iPos 
-     * @param iWaitList 
-     * @return TArray<::ULIS::FEvent> 
-     */
-    TArray<::ULIS::FEvent> RenderLayersImage(TArray<UOdysseyLayer*> iLayers, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-
-public:
-    /**
-     * @brief Preloads the layers and keeps them preloaded untile the hiven handles are destroyed
-     * One handle corresponds to something being held in memory
-     */
-    TSharedPtr<IOdysseyHandle> Preload();
-
     /**
      * @brief Returns the surface used for fast update (see ActivateTextureFastUpdate)
      * 
@@ -124,7 +87,13 @@ public:
      * @brief Set the Texture Update Mode
      * Forces the texture to be updated now
      */
-    void UpdateTexture();
+    void UpdateTexture(bool iForceRefresh = false);
+
+public:
+    //FOdysseyImageRenderingAbility overrides
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+    virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
 private:
     virtual bool IsTickableInEditor() const override { return true; }
@@ -141,6 +110,7 @@ private:
     void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
     void OnPackagePreSave(UPackage* iPackage, FObjectPreSaveContext ObjectSaveContext);
     void OnPackageSaved(const FString& iPackageFilename, UPackage* iPackage, FObjectPostSaveContext ObjectSaveContext);
+    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 
 private:
     TSharedPtr<FOdysseySurfaceTexture2DEditable> mTextureFastUpdateSurface;
@@ -148,4 +118,5 @@ private:
 
     EOdysseyTextureLayerStackTextureUpdateMode mTextureUpdateMode = EOdysseyTextureLayerStackTextureUpdateMode::OnTick;
     FULISInvalidTileMap mInvalidTileMap;
+    TSharedPtr<IOdysseyImageRenderer> mRenderer; //Used for FastUpdateTexture to keep the LayerStack Ready to render
 };

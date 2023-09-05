@@ -4,7 +4,7 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyRectUtils.h"
-#include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
 
 #include "ULISLoaderModule.h"
 
@@ -12,9 +12,7 @@ void
 UOdysseyAnimationPlayer::PostInitProperties()
 {
     Super::PostInitProperties();
-
-	IOdysseyAnimationImageRenderingAbility::OnChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
-	IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged);
+	UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
 }
 
 FSimpleMulticastDelegate&
@@ -267,23 +265,18 @@ UOdysseyAnimationPlayer::UpdateTexture()
 	if ( frameIndex == INDEX_NONE )
 		return;
 
-	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderingAbility = Animation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	if ( !imageRenderingAbility )
-		return;
-
-	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex, mRenderType);
+	TArray<FGuid> imageRenderingComposition = Animation->GetImageRenderingComposition(mRenderType, frameIndex);
 	if ( imageRenderingComposition != mImageRenderingComposition )
 	{
 		mImageRenderingComposition = imageRenderingComposition;
-		mAnimationHandle = imageRenderingAbility->Preload(frameIndex, mRenderType);
-		TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex, mRenderType);
+		mRenderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
 
 		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height());
 		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->Width(), Animation->Height(), Animation->Format());
 
 		{
 			TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture);
-			renderer->Copy(block, rect, {});
+			mRenderer->Copy(block, rect, {});
 
 			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
 			ctx.Finish();
@@ -297,14 +290,14 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
 	if (!mInvalidTileMap.InvalidTiles().IsEmpty())
 	{
-		TSharedPtr<IOdysseyImageRenderer> renderer = imageRenderingAbility->BuildRenderer(frameIndex, mRenderType);
+		mRenderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
 
 		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
 		TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
 		for ( const ::ULIS::FRectI& rect : invalidRects )
 		{
 			TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->Format());
-			renderer->Copy(block, rect, ::ULIS::FVec2I(0), {});
+			mRenderer->Copy(block, rect, ::ULIS::FVec2I(0), {});
 			blocks.Add(block);
 		}
 		
@@ -318,33 +311,32 @@ UOdysseyAnimationPlayer::UpdateTexture()
 }
 
 void
-UOdysseyAnimationPlayer::OnImageRenderingChanged(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
+UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-	if (!mImageRenderingComposition.Contains(iId))
+	if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
+	{
+		if (mImageRenderingComposition.Contains(iEvent.GetId()))
+		{
+			mInvalidTileMap.Invalidate(iEvent.GetRects());
+		}
 		return;
+	}
 
-	mInvalidTileMap.Invalidate(iRects);
-}
+	if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+	{
+		if ( !mImageRenderingComposition.Contains(iEvent.GetId()) )
+			return;
 
-void
-UOdysseyAnimationPlayer::OnImageRenderingCompositionChanged(const FGuid& iId)
-{
-	if ( !mImageRenderingComposition.Contains(iId) )
-		return;
+		int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
+		if (frameIndex == INDEX_NONE)
+			return;
 
-	int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
-	if (frameIndex == INDEX_NONE)
-		return;
+		TArray<FGuid> imageRenderingComposition = Animation->GetImageRenderingComposition(mRenderType, frameIndex);
+		if ( imageRenderingComposition == mImageRenderingComposition )
+			return;
 
-	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderingAbility = Animation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	if ( !imageRenderingAbility )
-		return;
-
-	TArray<FGuid> imageRenderingComposition = imageRenderingAbility->GetComposition(frameIndex, mRenderType);
-	if ( imageRenderingComposition == mImageRenderingComposition )
-		return;
-
-	mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
+		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
+	}
 }
 
 void

@@ -114,11 +114,7 @@ FOdysseyAnimationEditorSource::GetCurrentMediaProvider()
 	if (!currentLayer)
 		return FOdysseyMediaProvider();
 
-	TSharedPtr<IOdysseyAnimationMediaAbility> mediaAbility = currentLayer->GetAbility<IOdysseyAnimationMediaAbility>();
-	if ( !mediaAbility )
-		return FOdysseyMediaProvider();
-
-	return mediaAbility->GetMediaProvider(mAnimation->CurrentFrame);
+	return currentLayer->GetMediaProvider(mAnimation->CurrentFrame);
 }
 
 //--------------------------------------------------------------------------------------
@@ -164,39 +160,34 @@ FOdysseyAnimationEditorSource::Clear()
 	#ifdef WITH_EDITOR
 		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear"));
 	#endif
-
-		TSharedPtr<IOdysseyAnimationMediaAbility> mediaAbility = currentLayer->GetAbility<IOdysseyAnimationMediaAbility>();
-		if ( mediaAbility )
+		FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(mAnimation->CurrentFrame);
+		if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
 		{
-			FOdysseyMediaProvider mediaProvider = mediaAbility->GetMediaProvider(mAnimation->CurrentFrame);
-			if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
+			TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+			for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
 			{
-				TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-				for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
-				{
-					if (mediaRaster->IsLocked())
-						continue;
+				if (mediaRaster->IsLocked())
+					continue;
 
-					TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-					if (!rasterBlock)
-						continue;
+				TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
+				if (!rasterBlock)
+					continue;
 
-					FOdysseyRasterBlockMutator mutator(rasterBlock);
-					mutator.EditTilesFromRects(
-						{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-						FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-							[&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-							{
-								TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
-								::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-								::ULIS::FEvent eventClear;
-								ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-								return { eventClear };
-							}
-						)
-					);
-					mutator.Commit();
-				}
+				FOdysseyRasterBlockMutator mutator(rasterBlock);
+				mutator.EditTilesFromRects(
+					{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+					FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+						[&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+						{
+							TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
+							::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+							::ULIS::FEvent eventClear;
+							ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+							return { eventClear };
+						}
+					)
+				);
+				mutator.Commit();
 			}
 		}
 	}

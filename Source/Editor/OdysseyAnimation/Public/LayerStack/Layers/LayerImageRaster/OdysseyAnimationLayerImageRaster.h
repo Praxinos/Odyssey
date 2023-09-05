@@ -51,6 +51,7 @@ public:
 public:
     //UOdysseyLayer overrides
     virtual void OnCreated_Implementation() override;
+    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
     //UOdysseyAnimationLayer overrides
@@ -89,7 +90,7 @@ public:
     void SetCellLength(int iIndex, int iLength); */
 
 public:
-    TSharedPtr<FOdysseyAnimationLightTable> GetLightTable();
+    TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
     int GetOffset() const;
     TArray<TSharedPtr<FOdysseyAnimationCell>>& GetCells();
     TSharedPtr<FOdysseyAnimationCell> GetCell(int iIndex) const;
@@ -105,12 +106,26 @@ public:
      */
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+
+    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
+
+    virtual float GetImageRenderingOpacity() const override;
+
 protected:
     void IsLightTableActivatedChanged();
     void OpacityChanged();
     void BlendModeChanged();
     void CellsChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
+
+private:
+    TSharedPtr<IOdysseyMedia> CreateMediaRaster(int iFrameIndex);
+    void AutoCreateCell(int iFrameIndex);
+    TSharedPtr<IOdysseyMedia> GetCellMediaRaster(uint32 iFrameIndex) const;
 
 public:
     // UObject overrides

@@ -5,8 +5,7 @@
 
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "OdysseyAnimation.h"
-#include "Abilities/IOdysseyAnimationImageRenderingAbility.h"
-#include "Abilities/IOdysseyAnimationMediaAbility.h"
+#include "OdysseyLayer.h"
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 
@@ -43,9 +42,9 @@ FOdysseyAnimationEditorExtension::Finalize()
 	//Ensure all deleates are removed
 	mAnimationSource = nullptr;
 	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
-	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
+	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	IOdysseyAnimationMediaAbility::OnChanged().RemoveAll(this);
+	UOdysseyLayer::OnMediaChanged().RemoveAll(this);
 }
 
 void
@@ -66,23 +65,22 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 	{
 		mAnimationSource = nullptr;
 		UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
-        IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().RemoveAll(this);
+		FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
         UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-        IOdysseyAnimationMediaAbility::OnChanged().RemoveAll(this);
+        UOdysseyLayer::OnMediaChanged().RemoveAll(this);
 		return;
 	}
 
 	mAnimationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(source);
     
     UOdysseyAnimation* animation = Animation();
-	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = animation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	mImageRenderingComposition = imageRenderAbility->GetComposition(animation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
+	mImageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	mPlaybackFramesPerSecond = animation->GetFramesPerSecond();
 
 	//Set Media player and Animation callbacks
 	UOdysseyAnimation::OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnCurrentFrameChanged);
-	IOdysseyAnimationImageRenderingAbility::OnCompositionCommited().AddRaw(this, &FOdysseyAnimationEditorExtension::OnImageRenderingCompositionCommited);
-	IOdysseyAnimationMediaAbility::OnChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnLayerStackElementMediaChanged);
+	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationEditorExtension::OnImageRenderingChanged);
+	UOdysseyLayer::OnMediaChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnLayerMediaChanged);
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnCurrentLayerChanged);
 }
 
@@ -132,20 +130,22 @@ FOdysseyAnimationEditorExtension::PlaybackFramesPerSecond() const
 //------------------------------------------------------------------------------- Events
 
 void
-FOdysseyAnimationEditorExtension::OnLayerStackElementMediaChanged()
+FOdysseyAnimationEditorExtension::OnLayerMediaChanged()
 {
 	GetEditor()->RefreshCurrentTool(); //Refresh the current tool
 }
 
 void
-FOdysseyAnimationEditorExtension::OnImageRenderingCompositionCommited(const FGuid& iFrameId)
+FOdysseyAnimationEditorExtension::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	if (iEvent.IsInteractive() || iEvent.GetType() != FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+		return;
+
     UOdysseyAnimation* animation = Animation();
 	if (!animation)
 		return;
 
-	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = animation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(animation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
+	TArray<FGuid> imageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	if ( imageRenderingComposition == mImageRenderingComposition )
 		return;
 
@@ -162,8 +162,7 @@ FOdysseyAnimationEditorExtension::OnCurrentFrameChanged(UOdysseyAnimation* iAnim
 		return;
 
 	//Preload the new current frame for edition
-	TSharedPtr<IOdysseyAnimationImageRenderingAbility> imageRenderAbility = animation->GetAbility<IOdysseyAnimationImageRenderingAbility>();
-	TArray<FGuid> imageRenderingComposition = imageRenderAbility->GetComposition(animation->CurrentFrame, IOdysseyImageRenderer::eRenderType::Render);
+	TArray<FGuid> imageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	if ( imageRenderingComposition == mImageRenderingComposition )
 		return;
 

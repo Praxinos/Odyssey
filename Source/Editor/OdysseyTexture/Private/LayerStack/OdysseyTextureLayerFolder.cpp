@@ -35,119 +35,6 @@ UOdysseyTextureLayerFolder::UOdysseyTextureLayerFolder()
     CanHaveChildren = true;
 }
 
-TArray<::ULIS::FEvent>
-UOdysseyTextureLayerFolder::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    if (!IsActivated)
-        return iWaitList;
-
-    if (!ioBlock)
-        return iWaitList;
-        
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return iWaitList;
-
-    if (Children.Num() <= 0)
-        return iWaitList;
-
-    //ensure we use a sourceBlock with an alpha channel
-    ::ULIS::eFormat format = static_cast< ::ULIS::eFormat >( ioBlock->Format() | ULIS_W_ALPHA( 1 ) );
-
-    //Generate the folder block, which is all children layers blended together
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> folderBlock = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, format);
-
-    //Render children Image
-    TArray<::ULIS::FEvent> eventRenderChildrenImage = layerStack->RenderLayersImage(Children, folderBlock, iRect, ::ULIS::FVec2I(0), TArray<::ULIS::FEvent>());
-    eventRenderChildrenImage.Append(iWaitList);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(folderBlock->Format());
-
-    //Convert the destination if needed and Blend the folderBlock
-    TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, folderBlock->Format(), iRect, iPos, eventRenderChildrenImage,
-        [this, &folderBlock, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-        {
-            //if ioBlock and mBlock use same format, Blend directly in ioBlock
-            ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(folderBlock).Build();
-
-            ctx.Blend(
-                *folderBlock,
-                *ioDest,
-                ::ULIS::FRectI::Auto,
-                iPos,
-                ::ULIS::eBlendMode(BlendMode),
-                ::ULIS::Alpha_Normal,
-                Opacity,
-                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                iWaitList.Num(),
-                iWaitList.GetData(),
-                &eventBlend
-            );
-
-            return { eventBlend };
-        }
-    );
-    
-    ctx.Flush();
-
-    return eventConvertAndExecute;
-}
-
-TArray<::ULIS::FEvent>
-UOdysseyTextureLayerFolder::CopyImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    if (!IsActivated)
-        return iWaitList;
-
-    if (!ioBlock)
-        return iWaitList;
-        
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return iWaitList;
-
-    if (Children.Num() <= 0)
-        return iWaitList;
-
-    //ensure we use a sourceBlock with an alpha channel
-    ::ULIS::eFormat format = static_cast< ::ULIS::eFormat >( ioBlock->Format() | ULIS_W_ALPHA( 1 ) );
-
-    //Generate the folder block, which is all children layers blended together
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> folderBlock = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, format);
-
-    //Render children Image
-    TArray<::ULIS::FEvent> eventRenderChildrenImage = layerStack->RenderLayersImage(Children, folderBlock, iRect, ::ULIS::FVec2I(0), TArray<::ULIS::FEvent>());
-    eventRenderChildrenImage.Append(iWaitList);
-    
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(folderBlock->Format());
-
-    //Convert the destination if needed and copy the folderBlock
-    TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, folderBlock->Format(), iRect, iPos, eventRenderChildrenImage,
-        [this, &ctx, &folderBlock](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-        {
-            //if ioBlock and mBlock use same format, Copy directly in ioBlock
-            ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(folderBlock).Build();
-
-            ctx.Copy(
-                *folderBlock,
-                *ioDest,
-                ::ULIS::FRectI::Auto,
-                iPos,
-                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                iWaitList.Num(),
-                iWaitList.GetData(),
-                &eventCopy
-            );
-
-            return { eventCopy };
-        }
-    );
-    
-    ctx.Flush();
-
-    return eventConvertAndExecute;
-}
-
 TSet<UClass*>
 UOdysseyTextureLayerFolder::GetMergeDefaultLayerTypes() const
 {
@@ -179,31 +66,18 @@ UOdysseyTextureLayerFolder::GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerType
 void
 UOdysseyTextureLayerFolder::OpacityChanged()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return;
-
-    UTexture2D* texture = layerStack->GetTexture();
-    if (!texture)
-        return;
-
     OnOpacityChanged().Broadcast(this);
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY() ) }, false);
+
+    //TODO: react to interactive events by not commiting immediately
+    ImageRenderingChanged();
 }
 
 void
 UOdysseyTextureLayerFolder::BlendModeChanged()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return;
-
-    UTexture2D* texture = layerStack->GetTexture();
-    if (!texture)
-        return;
-
     OnBlendModeChanged().Broadcast(this);
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()) }, false);
+
+    ImageRenderingChanged();
 }
 
 void
@@ -215,6 +89,18 @@ UOdysseyTextureLayerFolder::PropertyChanged(const FName& iPropertyName)
         BlendModeChanged();
     if (iPropertyName == "Opacity")
         OpacityChanged();
+}
+
+::ULIS::eBlendMode
+UOdysseyTextureLayerFolder::GetImageRenderingBlendMode() const
+{
+    return (::ULIS::eBlendMode)BlendMode;
+}
+
+float
+UOdysseyTextureLayerFolder::GetImageRenderingOpacity() const
+{
+    return Opacity;
 }
 
 #undef LOCTEXT_NAMESPACE

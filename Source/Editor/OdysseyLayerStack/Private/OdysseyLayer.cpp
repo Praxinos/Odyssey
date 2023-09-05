@@ -49,6 +49,13 @@ UOdysseyLayer::OnChildrenChanged()
     return onChildrenChanged;
 }
 
+FSimpleMulticastDelegate&
+UOdysseyLayer::OnMediaChanged()
+{
+    static FSimpleMulticastDelegate onMediaChanged;
+    return onMediaChanged;
+}
+
 UOdysseyLayer*
 UOdysseyLayer::GetParent() const
 {
@@ -225,4 +232,10 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     {
         PropertyChanged(propertyName);
     }
+}
+
+FOdysseyMediaProvider
+UOdysseyLayer::GetMediaProvider(uint32 iFrameIndex) const
+{
+    return FOdysseyMediaProvider();
 }

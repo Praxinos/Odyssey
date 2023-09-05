@@ -3,11 +3,12 @@
 
 #pragma once
 
-#include "OdysseyAbility.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
+#include "OdysseyMediaProvider.h"
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCell
     : public TSharedFromThis<FOdysseyAnimationCell>
-    , public FOdysseyAbilityContainer
+    , public FOdysseyAnimationImageRenderingAbility
 {
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnLengthChanged, TSharedRef<FOdysseyAnimationCell>)
@@ -21,6 +22,7 @@ public:
     void SetLength(int iLength);
     int GetLength() const;
     virtual const FName& GetType() const = 0;
+    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
 public:
     virtual void PostLoad();

@@ -24,6 +24,7 @@ public class OdysseyLayerStack : ModuleRules
 
                 "OdysseyCore",
                 "OdysseyImaging",
+                "OdysseyMedia",
                 "OdysseyMaths",
                 "OdysseyStyle",
 

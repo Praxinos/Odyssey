@@ -94,12 +94,6 @@ IOdysseyImageRenderer::GetRenderType() const
     return mRenderType;
 }
 
-void
-IOdysseyImageRenderer::AddHandle(TSharedPtr<IOdysseyHandle> iHandle)
-{
-    mHandles.Add( iHandle );
-}
-
 TArray<::ULIS::FEvent>
 IOdysseyImageRenderer::ConvertAndBlend(TSharedPtr<::ULIS::FBlock> iFront, TSharedPtr<::ULIS::FBlock> iBack, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {

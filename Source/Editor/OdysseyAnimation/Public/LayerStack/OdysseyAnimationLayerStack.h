@@ -5,7 +5,7 @@
 
 #include "OdysseyLayerStack.h"
 #include "Misc/OdysseyHandle.h"
-#include "OdysseyAbility.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
 
 #include <ULIS>
 
@@ -16,7 +16,8 @@ class UOdysseyAnimationLayer;
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerStack
     : public UOdysseyLayerStack
-	, public FOdysseyAbilityContainer
+    , public FOdysseyAnimationImageRenderingAbility
+    
 {
     GENERATED_BODY()
 
@@ -37,6 +38,8 @@ public:
     FInt32Range GetFrameRange() const;
 
 public:
-    //UObject overrides
-	virtual void PostInitProperties() override;
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 };

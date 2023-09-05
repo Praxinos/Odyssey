@@ -45,6 +45,5 @@ public:
 
 private:
     IOdysseyImageRenderer::eRenderType mRenderType;
-    TArray<TSharedPtr<IOdysseyHandle>> mHandles;
     TArray<::ULIS::FRectI> mDefaultRects;
 };

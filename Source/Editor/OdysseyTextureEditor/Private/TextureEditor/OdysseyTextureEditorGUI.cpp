@@ -239,11 +239,6 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
 
         if( currentVectorLayer && ( currentVectorLayer->GetEngine()->GetScene() == iScene ) )
         {
-            if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )
-            {
-                currentVectorLayer->RenderImageChanged( false );
-            }
-
             if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
             {
                 vectorSceneTreeViewTab.Get()->Update( iScene );

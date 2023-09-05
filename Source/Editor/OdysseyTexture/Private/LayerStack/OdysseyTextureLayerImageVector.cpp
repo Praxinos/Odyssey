@@ -11,6 +11,7 @@
 #include "ULISUtils.h"
 #include "Import/v2/OdysseyVectorImport.h"
 #include "Import/v1/OdysseyVectorImport.h"
+#include "LayerStack/OdysseyTextureLayerImageVectorImageRenderer.h"
 
 #include "blend2d.h"
 
@@ -35,6 +36,9 @@ UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
     // TODO: free the scene
 
     //mScene->OnUpdateDelegate().Remove(mOnRefreshHandle);
+
+    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
+    FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
 }
 
 UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
@@ -58,6 +62,9 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
 //UE_LOG(LogTemp, Warning, TEXT("UOdysseyTextureLayerImageVector::Init %X"), mEngine );
     // record a callback to refresh the layer when a property of an object's details view is changed
     //mOnRefreshHandle = mScene->OnUpdateDelegate().AddUObject( this, &UOdysseyTextureLayerImageVector::OnRefresh );
+    
+    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
+    FOdysseyVectorEngine::OnSignalDelegate().AddUObject( this, &UOdysseyTextureLayerImageVector::OnVectorSceneSignal );
 
     //UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d %d"), iWidth, iHeight, mVEngine );
 
@@ -78,7 +85,7 @@ UOdysseyTextureLayerImageVector::GetEngine()
 }
 
 FOdysseyMediaProvider
-UOdysseyTextureLayerImageVector::GetMediaProvider() const
+UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
     FOdysseyMediaProvider mediaProvider;
     TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mEngine->GetScene());
@@ -101,70 +108,6 @@ UOdysseyTextureLayerImageVector::OnCreated_Implementation()
     UTexture2D* texture = layerStack->GetTexture();
 
     Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
-}
-
-void
-UOdysseyTextureLayerImageVector::RenderImageChanged( bool iIsInteractive )
-{
-    UOdysseyTextureLayer::RenderImageChanged( iIsInteractive );
-}
-
-void
-UOdysseyTextureLayerImageVector::RenderImageChanged( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive )
-{
-    mEngine->Invalidate();
-
-    UOdysseyTextureLayer::RenderImageChanged( iRects, iIsInteractive );
-}
-
-TArray<::ULIS::FEvent>
-UOdysseyTextureLayerImageVector::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-
-    if (!IsActivated)
-        return iWaitList;
-
-    if (!ioBlock)
-        return iWaitList;
-
-    mEngine->Update( 0 );
-
-    // HUD displaying only for the current layer.
-    if( layerStack->CurrentLayer.Get() == this )
-    {
-        mEngine->RenderHUD();
-    }
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
-
-    TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(ioBlock, mBlock->Format(), iRect, iPos, iWaitList,
-        [this, &ctx](TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
-        {
-            ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(mBlock).Build();
-
-            ctx.Blend(
-                *mBlock,
-                *ioDest,
-                iRect,
-                iPos,
-                ::ULIS::eBlendMode(BlendMode),
-                ::ULIS::Alpha_Normal,
-                Opacity,
-                ::ULIS::FSchedulePolicy::/*CacheEfficient*/AsyncCacheEfficient,
-                iWaitList.Num(),
-                iWaitList.GetData(),
-                &eventBlend
-            );
-
-            return { eventBlend };
-        }
-    );
-
-    ctx.Flush();
-    ctx.Finish();
-
-    return eventConvertAndExecute;
 }
 
 void
@@ -245,25 +188,54 @@ UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
 void
 UOdysseyTextureLayerImageVector::OpacityChanged()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return;
-
     OnOpacityChanged().Broadcast(this);
-
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, mBlock->Width(), mBlock->Height()) }, false);
+    
+    ImageRenderingChanged();
 }
 
 void
 UOdysseyTextureLayerImageVector::BlendModeChanged()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (!layerStack)
+    OnBlendModeChanged().Broadcast(this);
+    
+    ImageRenderingChanged();
+}
+
+void
+UOdysseyTextureLayerImageVector::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
+{
+    if (mEngine->GetScene() != iScene)
         return;
 
-    OnBlendModeChanged().Broadcast(this);
+    if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )
+    {
+        mEngine->Invalidate();
+        ImageRenderingChanged(iSignalFlags & FOdysseyVectorEngine::SIGNAL_INTERACTIVE);
+    }
+}
 
-    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, mBlock->Width(), mBlock->Height()) }, false);
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const
+{
+    return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mBlock, iRenderType, GetImageRenderingRects());
+}
+
+TArray<FGuid>
+UOdysseyTextureLayerImageVector::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
+{
+    return { GetImageRenderingId() };
+}
+
+::ULIS::eBlendMode
+UOdysseyTextureLayerImageVector::GetImageRenderingBlendMode() const
+{
+    return (::ULIS::eBlendMode)BlendMode;
+}
+
+float
+UOdysseyTextureLayerImageVector::GetImageRenderingOpacity() const
+{
+    return Opacity;
 }
 
 #undef LOCTEXT_NAMESPACE
