@@ -27,6 +27,7 @@
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "Undo/OdysseyVectorUndoPathStitch.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
+#include "Undo/OdysseyVectorUndoApplyTransformations.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
@@ -715,7 +716,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorScene* iScene )
     GEditor->BeginTransaction(LOCTEXT("ApplyTransformations", "Apply Transformations"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, focusedObjectList );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoApplyTransformations( iScene, focusedObjectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }

@@ -295,6 +295,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          */
         ::ULIS::FRectD GenerateRectangleMask( const ::ULIS::FRectD& iRect );
 
+        void Render( uint64 iDrawingFlags );
+
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
@@ -312,7 +314,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                   , const ::ULIS::FRectD &iRoi
                                   , bool iSelectedOnly );
 
-        virtual void UpdateShape( uint32 iUpdateFlags );
 
 
     private:

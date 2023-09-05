@@ -64,7 +64,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 VECTORGROUPPAINTTYPE = 6;
 
         // drawing mask
-        //static const uint32 DRAWSTRUCTURE = ( 1 << 0 );
+        static const uint32 DRAWING_IGNORECOLOR  = ( 1 << 0 );
 
         // update mask
         //static const uint32 FREQUENTUPDATES = ( 1 << 0 );

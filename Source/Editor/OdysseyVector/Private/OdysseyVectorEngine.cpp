@@ -198,7 +198,7 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 }
 
 void
-FOdysseyVectorEngine::UpdateShape( uint32 iUpdateFlags )
+FOdysseyVectorEngine::Render( uint64 iDrawingFlags )
 {
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/
@@ -215,7 +215,7 @@ FOdysseyVectorEngine::UpdateShape( uint32 iUpdateFlags )
 
     if( mInvalidationFlags )
     {
-        mScene->Draw( 0 );
+        mScene->Draw( iDrawingFlags );
     /*
         mBLContext->save();
         mBLContext->resetMatrix();
@@ -236,11 +236,7 @@ FOdysseyVectorEngine::UpdateShape( uint32 iUpdateFlags )
         mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
 
-    //mBLContext->end();
-    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-    {
-        mInvalidationFlags = 0;
-    }
+    mInvalidationFlags = 0;
 }
 
 void

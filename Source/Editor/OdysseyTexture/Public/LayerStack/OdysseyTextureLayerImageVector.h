@@ -77,6 +77,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         virtual void RenderImageChanged(bool iIsInteractive) override;
         void OpacityChanged();
         void BlendModeChanged();
+        void IsColoredChanged();
         void Serialize(FArchive& Ar);
         virtual void PropertyChanged(const FName& iPropertyName) override;
 
@@ -87,6 +88,9 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         void OnRefresh(FOdysseyVectorScene* iScene);
 
     public:
+        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
+        bool IsColored = true;
+
         UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
 	    EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
 

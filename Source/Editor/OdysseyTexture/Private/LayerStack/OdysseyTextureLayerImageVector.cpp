@@ -128,7 +128,7 @@ UOdysseyTextureLayerImageVector::RenderImage(TSharedPtr<::ULIS::FBlock, ESPMode:
     if (!ioBlock)
         return iWaitList;
 
-    mEngine->Update( 0 );
+    mEngine->Render( IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
 
     // HUD displaying only for the current layer.
     if( layerStack->CurrentLayer.Get() == this )
@@ -235,11 +235,22 @@ void
 UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
 {
     Super::PropertyChanged(iPropertyName);
-
+    if(iPropertyName == "IsColored")
+        IsColoredChanged();
     if (iPropertyName == "BlendMode")
         BlendModeChanged();
     if (iPropertyName == "Opacity")
         OpacityChanged();
+}
+
+void
+UOdysseyTextureLayerImageVector::IsColoredChanged()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    if (!layerStack)
+        return;
+
+    RenderImageChanged({ ::ULIS::FRectI::FromXYWH(0, 0, mBlock->Width(), mBlock->Height()) }, false);
 }
 
 void

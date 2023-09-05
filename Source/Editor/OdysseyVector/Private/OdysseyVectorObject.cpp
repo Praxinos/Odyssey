@@ -536,7 +536,11 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysse
     
     AddChild( iFosterChild, iInsertAfter );
 
-    iFosterChild->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
+    iFosterChild->SetTransform( translationX
+                              , translationY
+                              , rotation / M_PI * 180.0f
+                              , scalingX
+                              , scalingY );
 
     iFosterChild->UpdateMatrix();
 }

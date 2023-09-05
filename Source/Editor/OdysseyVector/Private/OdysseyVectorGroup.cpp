@@ -53,24 +53,30 @@ FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
         for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
         {
             FOdysseyVectorObject *child = (*it);
-            ::ULIS::FRectD childBBox = child->GetBBox( true );
+            ::ULIS::FRectD childBBox = child->GetBBox( false );
 
-            bbox = ( init == 0 ) ? childBBox : bbox | childBBox;
+            if( childBBox.Area() )
+            {
+                BLMatrix2D childLocalMatrix = child->GetLocalMatrix();
+                BLPoint p0 = childLocalMatrix.mapPoint( childBBox.x              , childBBox.y               );
+                BLPoint p1 = childLocalMatrix.mapPoint( childBBox.x + childBBox.w, childBBox.y               );
+                BLPoint p2 = childLocalMatrix.mapPoint( childBBox.x + childBBox.w, childBBox.y + childBBox.h );
+                BLPoint p3 = childLocalMatrix.mapPoint( childBBox.x              , childBBox.y + childBBox.h );
 
-            init = 1;
+                childBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                      , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                      , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                      , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+
+                bbox = ( init == 0 ) ? childBBox : bbox | childBBox;
+
+                init = 1;
+            }
         }
 
         if( init )
         {
-            BLPoint p0 = mInverseWorldMatrix.mapPoint( bbox.x         , bbox.y          );
-            BLPoint p1 = mInverseWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
-            BLPoint p2 = mInverseWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
-            BLPoint p3 = mInverseWorldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
-
-            mBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
-                                              , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
-                                              , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
-                                              , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+            mBBox = bbox;
         }
         else
         {
