@@ -46,6 +46,44 @@ FOdysseyPainterEditorPaintBucketToolHUD::GetBucketPosition( FOdysseyVectorBucket
 }
 
 ::ULIS::FVec2D
+FOdysseyPainterEditorPaintBucketToolHUD::GetRadialHandlePosition( FOdysseyVectorBucket* iBucket
+                                                                , bool iWorld )
+{
+    ::ULIS::FVec2D radialHandleCoords = iBucket->GetCoords() + iBucket->GetRadialOffset();
+
+    radialHandleCoords.x += iBucket->GetRadialRadius();
+
+    if( iWorld )
+    {
+        FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
+        BLPoint worldPosition = worldMatrix.mapPoint( radialHandleCoords.x, radialHandleCoords.y );
+
+        return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
+    }
+
+    return radialHandleCoords;
+}
+
+::ULIS::FVec2D
+FOdysseyPainterEditorPaintBucketToolHUD::GetRadialPosition( FOdysseyVectorBucket* iBucket
+                                                          , bool iWorld )
+{
+    ::ULIS::FVec2D radialCoords = iBucket->GetCoords() + iBucket->GetRadialOffset();
+
+    if( iWorld )
+    {
+        FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
+        BLPoint worldPosition = worldMatrix.mapPoint( radialCoords.x, radialCoords.y );
+
+        return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
+    }
+
+    return radialCoords;
+}
+
+::ULIS::FVec2D
 FOdysseyPainterEditorPaintBucketToolHUD::GetHandleVector( FOdysseyVectorBucket* iBucket
                                                         , bool iWorld )
 {
@@ -73,22 +111,49 @@ FOdysseyPainterEditorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBucket* i
                                                        , double iWorldY )
 {
     ::ULIS::FVec2D bucketWorldCoords = GetBucketPosition( iBucket, true );
-    ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetHandleVector( iBucket, true ) * HANDLE_DISTANCE );
-    ::ULIS::FVec2D bucketDif = ::ULIS::FVec2D( iWorldX - bucketWorldCoords.x
-                                             , iWorldY - bucketWorldCoords.y );
-    ::ULIS::FVec2D handleDif = ::ULIS::FVec2D( iWorldX - handleWorldCoords.x
-                                             , iWorldY - handleWorldCoords.y );
 
-    if ( bucketDif.Distance() < mPaintBucketTool->PickingRadius )
+    if( mPaintBucketTool->GetShowControls() )
     {
-        return PICK_BUCKET;
-    }
-
-    if( mPaintBucketTool->ShowControls && ( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )  )
-    {
-        if ( handleDif.Distance() < mPaintBucketTool->PickingRadius )
+        if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
         {
-            return PICK_HANDLE;
+            ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetHandleVector( iBucket, true ) * HANDLE_DISTANCE );
+            ::ULIS::FVec2D pickDif = ::ULIS::FVec2D( iWorldX - handleWorldCoords.x
+                                                   , iWorldY - handleWorldCoords.y );
+
+            if ( pickDif.Distance() < mPaintBucketTool->PickingRadius )
+            {
+                return PICK_HANDLE;
+            }
+        }
+
+        if( iBucket->GetColorMode() == eBucketColorMode::RadialGradient )
+        {
+            ::ULIS::FVec2D radialHandleWorldCoords = GetRadialHandlePosition( iBucket, true );
+            ::ULIS::FVec2D radialHandleDif = ::ULIS::FVec2D( iWorldX - radialHandleWorldCoords.x
+                                                           , iWorldY - radialHandleWorldCoords.y );
+            ::ULIS::FVec2D radialWorldCoords = GetRadialPosition( iBucket, true );
+            ::ULIS::FVec2D radialDif = ::ULIS::FVec2D( iWorldX - radialWorldCoords.x
+                                                     , iWorldY - radialWorldCoords.y );
+
+            if ( radialHandleDif.Distance() < mPaintBucketTool->PickingRadius )
+            {
+                return PICK_RADIAL_HANDLE;
+            }
+
+            if ( radialDif.Distance() < RADIAL_AREA_RADIUS )
+            {
+                return PICK_RADIAL_AREA;
+            }
+        }
+    }
+    else
+    {
+        ::ULIS::FVec2D pickDif = ::ULIS::FVec2D( iWorldX - bucketWorldCoords.x
+                                               , iWorldY - bucketWorldCoords.y );
+
+        if ( pickDif.Distance() < mPaintBucketTool->PickingRadius )
+        {
+            return PICK_BUCKET;
         }
     }
 
@@ -286,8 +351,6 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
                                                    , BLRgba32 hcColor )
 {
     ::ULIS::FVec2D bucketWorldCoords = GetBucketPosition( iBucket, true );
-    ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetHandleVector( iBucket, true ) * HANDLE_DISTANCE );
-
     FColor bucketColor = iBucket->GetColor();
     BLRgba32 fillColor = BLRgba32( bucketColor.R, bucketColor.G, bucketColor.B, bucketColor.A );
     BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF )
@@ -296,27 +359,84 @@ FOdysseyPainterEditorPaintBucketToolHUD::DrawBucket( FOdysseyVectorBucket* iBuck
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    if( mPaintBucketTool->ShowControls && ( iBucket->GetColorMode() == eBucketColorMode::LinearGradient ) )
+    if( mPaintBucketTool->GetShowControls() )
     {
-        BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
-        BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+        if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
+        {
+            ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetHandleVector( iBucket, true ) * HANDLE_DISTANCE );
+            BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+            BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
-        // Bucket-to-handle line
-        iBLContext->setStrokeWidth( 2.0f );
-        iBLContext->setStrokeStyle( blackColor );
-        iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
-                              , handleWorldCoords.x, handleWorldCoords.y );
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->setStrokeStyle( whiteColor );
-        iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
-                              , handleWorldCoords.x, handleWorldCoords.y );
+            // Bucket-to-handle line
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
+                                  , handleWorldCoords.x, handleWorldCoords.y );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
+                                  , handleWorldCoords.x, handleWorldCoords.y );
 
-        // Handle
-        iBLContext->setFillStyle( whiteColor );
-        iBLContext->fillCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->setStrokeStyle( blackColor );
-        iBLContext->strokeCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
+            // Handle
+            iBLContext->setFillStyle( whiteColor );
+            iBLContext->fillCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
+        }
+
+        if( iBucket->GetColorMode() == eBucketColorMode::RadialGradient )
+        {
+            ::ULIS::FVec2D radialWorldCoords = GetRadialPosition( iBucket, true );
+            ::ULIS::FVec2D radialHandleWorldCoords = GetRadialHandlePosition( iBucket, true );
+            double radialRadius = ( radialHandleWorldCoords - radialWorldCoords ).Distance();
+
+            BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+            BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+
+            // Bucket-to-radial line
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
+                                  , radialWorldCoords.x, radialWorldCoords.y );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
+                                  , radialWorldCoords.x, radialWorldCoords.y );
+
+            // Radial Circle
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeCircle( radialWorldCoords.x, radialWorldCoords.y, RADIAL_AREA_RADIUS );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeCircle( radialWorldCoords.x, radialWorldCoords.y, RADIAL_AREA_RADIUS );
+
+            // Radial-to-RadialHandle line
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeLine( radialWorldCoords.x, radialWorldCoords.y
+                                  , radialHandleWorldCoords.x, radialHandleWorldCoords.y );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeLine( radialWorldCoords.x, radialWorldCoords.y
+                                  , radialHandleWorldCoords.x, radialHandleWorldCoords.y );
+
+            // RadialHandle Circle
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeCircle( radialWorldCoords.x, radialWorldCoords.y, radialRadius );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeCircle( radialWorldCoords.x, radialWorldCoords.y, radialRadius );
+
+            // RadialHandle
+            iBLContext->setFillStyle( whiteColor );
+            iBLContext->fillCircle( radialHandleWorldCoords.x, radialHandleWorldCoords.y, HANDLE_RADIUS );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeCircle( radialHandleWorldCoords.x, radialHandleWorldCoords.y, HANDLE_RADIUS );
+        }
     }
 
     // Bucket

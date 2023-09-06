@@ -81,40 +81,56 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     FOdysseyVectorScene* itemScene = itemObject->GetScene();
     std::list<FOdysseyVectorObject*>& selectedObjectList = itemScene->GetSelectedObjectList();
     FOdysseyVectorObject* insertObject = itemObject;
+    std::list<FOdysseyVectorObject*> droppedObjectList;
 
+    // filter dropped object
     for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
         if( selectedObject != itemObject )
         {
-            switch( mDropZone )
+            droppedObjectList.push_back( selectedObject );
+        }
+    }
+
+    GEditor->BeginTransaction(LOCTEXT("DropObjects", "Drop Objects"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( itemScene, droppedObjectList ) );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
+    {
+        switch( mDropZone )
+        {
+            case DROPZONE_ABOVE:
             {
-                case DROPZONE_ABOVE:
-                {
-                    FOdysseyVectorObject* parentObject = itemObject->GetParent();
+                FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-                    parentObject->TransferChild( selectedObject, parentObject->GetPreviousChild( insertObject ) );
+                parentObject->TransferChild( selectedObject, parentObject->GetPreviousChild( insertObject ) );
 
-                    insertObject = selectedObject;
-                }
-                break;
-
-                case DROPZONE_ONTO:
-                    itemObject->TransferChild( selectedObject, itemObject->GetLastChild() );
-                break;
-
-                case DROPZONE_BELOW:
-                {
-                    FOdysseyVectorObject* parentObject = itemObject->GetParent();
-
-                    parentObject->TransferChild( selectedObject, insertObject );
-
-                    insertObject = selectedObject;
-                }
-                break;
-
-                default :
-                break;
+                insertObject = selectedObject;
             }
+            break;
+
+            case DROPZONE_ONTO:
+                itemObject->TransferChild( selectedObject, itemObject->GetLastChild() );
+            break;
+
+            case DROPZONE_BELOW:
+            {
+                FOdysseyVectorObject* parentObject = itemObject->GetParent();
+
+                parentObject->TransferChild( selectedObject, insertObject );
+
+                insertObject = selectedObject;
+            }
+            break;
+
+            default :
+            break;
         }
     }
 

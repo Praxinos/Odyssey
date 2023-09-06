@@ -1615,7 +1615,7 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
 }
 
 void
-FOdysseyVectorPath::DrawShape( uint64 iFlags )
+FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
 {
     if ( mPathParam.Filled )
     {
@@ -1624,7 +1624,8 @@ FOdysseyVectorPath::DrawShape( uint64 iFlags )
     }
 
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-    FColor color = mForegroundBucket.GetColor();
+    FColor color = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? FColor( 0, 0, 0, 255 )
+                                                                                 : mForegroundBucket.GetColor();
     BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A );
 
     if( mSegmentList.size() )
@@ -1647,7 +1648,7 @@ FOdysseyVectorPath::DrawShape( uint64 iFlags )
         {
             FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
 
-            DrawJoint( cubicVertex, iFlags );
+            DrawJoint( cubicVertex, iDrawingFlags );
         }
     }
 }

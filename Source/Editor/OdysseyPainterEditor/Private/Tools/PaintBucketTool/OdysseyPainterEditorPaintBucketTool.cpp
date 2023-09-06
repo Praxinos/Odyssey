@@ -27,11 +27,11 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
     : Tolerance( 0 )
     , RestrictToSelection( false )
     , Propagate( true )
-    , Gradient( false )
+    , ColorMode ( eBucketColorMode::SolidColor )
     , Color1( 255, 255, 255, 255 )
     , Color2( 255, 255, 255, 255 )
     , PickingRadius( 10.0f )
-    , ShowControls( false )
+    , mShowControls( false )
     , mPickedBucket( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
@@ -267,11 +267,9 @@ UOdysseyPainterEditorPaintBucketTool::OnKeyDownVector( FOdysseyVectorEngine* iEn
                                                      , FOdysseyVectorScene* iScene
                                                      , const FKey& iKey )
 {
-    ShowControlsAtKeyDown =  ShowControls;
-
     if ( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
     {
-        ShowControls = true;
+        mShowControls = true;
     }
 
     //UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
@@ -285,7 +283,7 @@ UOdysseyPainterEditorPaintBucketTool::OnKeyUpVector( FOdysseyVectorEngine* iEngi
                                                    , FOdysseyVectorScene* iScene
                                                    , const FKey& iKey )
 {
-    ShowControls = ShowControlsAtKeyDown;
+    mShowControls = false;
 
     //UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
@@ -465,8 +463,8 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( FOdysseyVectorEngine* i
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-    mDownMouseX = iPointInTexture.x;
-    mDownMouseY = iPointInTexture.y;
+    mDownMouseX = mOldPointInTexture.x = iPointInTexture.x;
+    mDownMouseY = mOldPointInTexture.y = iPointInTexture.y;
 
     mPickedBucket = mBucketHUD->PickBucket( iScene, iPointInTexture.x, iPointInTexture.y );
     mPickedArea = FOdysseyPainterEditorPaintBucketToolHUD::PICK_NONE;
@@ -571,33 +569,21 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorEngine* 
                                                         , FOdysseyVectorScene* iScene
                                                         , const FOdysseyPoint& iPointInTexture )
 {
-/*
-    FOdysseyVectorObject* selectedObject = iScene->GetLastSelected() ? iScene->GetLastSelected() : iScene;
-
-    if( selectedObject )
+    if( mShowControls == false )
     {
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        ::ULIS::FRectD roi;
+
+        roi.x = iPointInTexture.x;
+        roi.y = iPointInTexture.y;
+
+        mBucketHUD->PickCycles( iScene, iPointInTexture.x, iPointInTexture.y, mPickedCycleArray );
+
+        for( int i = 0; i < mPickedCycleArray.size(); i++ )
         {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>( selectedObject );
+            FOdysseyVectorCycle* hoveredCycle = mPickedCycleArray[i];
 
-            mBucketHUD->SetCycle( mBucketHUD->PickCycle( paintGroup
-                                                       , iPointInTexture.x
-                                                       , iPointInTexture.y ) );
+            mBucketHUD->SetCycle( hoveredCycle );
         }
-    }
-*/
-    ::ULIS::FRectD roi;
-
-    roi.x = iPointInTexture.x;
-    roi.y = iPointInTexture.y;
-
-    mBucketHUD->PickCycles( iScene, iPointInTexture.x, iPointInTexture.y, mPickedCycleArray );
-
-    for( int i = 0; i < mPickedCycleArray.size(); i++ )
-    {
-        FOdysseyVectorCycle* hoveredCycle = mPickedCycleArray[i];
-
-        mBucketHUD->SetCycle( hoveredCycle );
     }
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
@@ -645,8 +631,9 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( FOdysseyVectorEngine* i
             FOdysseyVectorObject* bucketOwner = mPickedBucket->GetOwner();
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(bucketOwner);
             BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
-            BLPoint localVector = inverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
-                                                              , iPointInTexture.deltaPosition.Y );
+            BLPoint localPoint = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+            BLPoint localVector = inverseWorldMatrix.mapVector( iPointInTexture.x - mOldPointInTexture.x
+                                                              , iPointInTexture.y - mOldPointInTexture.y );
 
             switch( mPickedArea )
             {
@@ -663,11 +650,34 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( FOdysseyVectorEngine* i
                 }
                 break;
 
+                case FOdysseyPainterEditorPaintBucketToolHUD::PICK_RADIAL_AREA:
+                {
+                    ::ULIS::FVec2D offset = mPickedBucket->GetRadialOffset();
+
+                    offset.x += localVector.x;
+                    offset.y += localVector.y;
+
+                    mPickedBucket->SetRadialOffset( offset );
+                }
+                break;
+
+                case FOdysseyPainterEditorPaintBucketToolHUD::PICK_RADIAL_HANDLE:
+                {
+                    ::ULIS::FVec2D radialCoords = mPickedBucket->GetCoords() + mPickedBucket->GetRadialOffset();
+                    double distance = ::ULIS::FVec2D( localPoint.x - radialCoords.x
+                                                    , localPoint.y - radialCoords.y ).Distance();
+
+                    mPickedBucket->SetRadialRadius( distance );
+                }
+                break;
+
                 default :
                 break;
             }
         }
     }
+
+    mOldPointInTexture = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED ); // update vector scene
 
@@ -678,9 +688,10 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDragVector( FOdysseyVectorEngine* i
 void
 UOdysseyPainterEditorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBucket )
 {
-    if( Gradient )
+    if( ( ColorMode == eBucketColorMode::LinearGradient )
+     || ( ColorMode == eBucketColorMode::RadialGradient ) )
     {
-        iBucket->SetColorMode( eBucketColorMode::LinearGradient );
+        iBucket->SetColorMode( ColorMode );
         iBucket->SetGradientColor0( Color1.R, Color1.G, Color1.B, Color1.A );
         iBucket->SetGradientColor1( Color2.R, Color2.G, Color2.B, Color2.A );
     }
@@ -1079,6 +1090,12 @@ UOdysseyPainterEditorPaintBucketTool::PropertyChangedVector( FOdysseyVectorEngin
                                                            , const FName& iPropertyName )
 {
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+}
+
+bool
+UOdysseyPainterEditorPaintBucketTool::GetShowControls()
+{
+    return mShowControls;
 }
 
 #undef LOCTEXT_NAMESPACE

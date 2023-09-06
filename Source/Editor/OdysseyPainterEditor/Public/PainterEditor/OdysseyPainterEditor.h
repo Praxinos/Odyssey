@@ -115,7 +115,6 @@ public:
     static void ClearColoring( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void ApplyTransformations( FOdysseyVectorScene* iScene );
 
-
     void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
     eVectorEditionMode GetVectorEditionMode();
 

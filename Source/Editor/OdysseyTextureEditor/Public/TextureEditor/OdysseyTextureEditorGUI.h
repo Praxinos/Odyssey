@@ -37,19 +37,8 @@ protected:
 	TSharedRef<FTabManager::FSplitter>	CreateRightSection();
 
 public:
-    void ResetView();
-    void GroupPaint();
-    void Group();
-    void Ungroup();
-    void BringForward();
-    void SendBackward();
-    void DeleteSelection();
-    void FlipHorizontal();
-    void FlipVertical();
-    void StitchVertices();
- 
-public:
     void BindVectorScene( FOdysseyVectorScene* iScene );
+
 protected:
     void OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
     void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );

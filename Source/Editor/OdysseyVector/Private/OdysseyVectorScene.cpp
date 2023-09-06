@@ -275,12 +275,13 @@ FOdysseyVectorScene::GetSelectedObjectList()
 }
 
 void
-FOdysseyVectorScene::DrawShape( uint64 iFlags )
+FOdysseyVectorScene::DrawShape( uint64 iDrawingFlags )
 {
     BLContext* blctx = GetEngine()->GetBLContext();
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
-    FColor fillColor = mBackgroundBucket.GetColor();
+    FColor fillColor = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? mGroupPaintParam.MonochromeColor
+                                                                                     : mBackgroundBucket.GetColor();
 
     blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
@@ -299,7 +300,7 @@ FOdysseyVectorScene::DrawShape( uint64 iFlags )
     blctx->fillAll();
     blctx->restore();
 
-    FOdysseyVectorGroupPaint::DrawShape( iFlags );
+    FOdysseyVectorGroupPaint::DrawShape( iDrawingFlags );
 
     // view the updated zone ( testing purpose only )
     /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));

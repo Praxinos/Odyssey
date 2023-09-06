@@ -415,15 +415,13 @@ FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeCo
                 {
                     eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
                     ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
-                    double radialMinX = /*bbox.x0*/bbox.x;
-                    double radialMinY = /*bbox.y0*/bbox.y;
-                    double radialMaxX = /*bbox.x1*/bbox.x + bbox.w;
-                    double radialMaxY = /*bbox.y1*/bbox.y + bbox.h;
-                    BLGradient radial( BLRadialGradientValues( bbox.x + (bbox.w * 0.5f)
-                                                             , bbox.y + (bbox.h * 0.5f)
-                                                             , bbox.x + (bbox.w * 0.5f)
-                                                             , bbox.y + (bbox.h * 0.5f)
-                                                             , 45.0f ) );
+                    ::ULIS::FVec2D& radialOffset = bucket->GetRadialOffset();
+                    ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
+                    BLGradient radial( BLRadialGradientValues( bucketCoords.x + radialOffset.x
+                                                             , bucketCoords.y + radialOffset.y
+                                                             , bucketCoords.x + radialOffset.x
+                                                             , bucketCoords.y + radialOffset.y
+                                                             , bucket->GetRadialRadius() ) );
                     FColor& gradientColor0 = bucket->GetGradientColor0();
                     FColor& gradientColor1 = bucket->GetGradientColor1();
                     BLRgba32 BLColor0;

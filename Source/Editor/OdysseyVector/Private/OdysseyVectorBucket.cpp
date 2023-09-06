@@ -22,6 +22,41 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner, double
     SetGradientColor1( 255, 255, 255, 255 );
     SetColorMode( eBucketColorMode::SolidColor );
     SetSpreadingPolicy( eBucketSpreadingPolicy::Group );
+    SetRadialRadius( 80.0f );
+    SetRadialOffset( ::ULIS::FVec2D( 0.0f, 0.0f ) );
+}
+
+void
+FOdysseyVectorBucket::Invalidate()
+{
+    if( mOwner ) // owner can be nullptr (when copy pasting a bucket)
+    {
+        mOwner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    }
+}
+
+double
+FOdysseyVectorBucket::GetRadialRadius()
+{
+    return mBucketParam.RadialRadius;
+}
+
+void
+FOdysseyVectorBucket::SetRadialRadius( double iRadialRadius )
+{
+    mBucketParam.RadialRadius = iRadialRadius;
+}
+
+::ULIS::FVec2D&
+FOdysseyVectorBucket::GetRadialOffset()
+{
+    return mBucketParam.RadialOffset;
+}
+
+void
+FOdysseyVectorBucket::SetRadialOffset( const ::ULIS::FVec2D& iRadialOffset )
+{
+    mBucketParam.RadialOffset = iRadialOffset;
 }
 
 eBucketColorMode
@@ -76,13 +111,7 @@ FOdysseyVectorBucket::SetCoords( double iX, double iY, double iRadius )
 {
     FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
 
-    mOwner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
-}
-
-void
-FOdysseyVectorBucket::Invalidate()
-{
-    mOwner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate();
 }
 
 void
@@ -90,7 +119,7 @@ FOdysseyVectorBucket::SetPropagated( bool iPropagated )
 {
     mBucketParam.Propagated = iPropagated;
 
-    mOwner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate();
 }
 
 bool
@@ -183,6 +212,7 @@ FOdysseyVectorBucket::GetRotation()
     return mBucketParam.Rotation;
 }
 
+// you'd better use ImportParam() over Copy() if you need invalidation
 void
 FOdysseyVectorBucket::ImportParam( FBucketParam& iBucketParam )
 {
@@ -194,6 +224,8 @@ FOdysseyVectorBucket::ImportParam( FBucketParam& iBucketParam )
     SetColorMode( iBucketParam.ColorMode );
     SetGradientColor0( iBucketParam.GradientColor0 );
     SetGradientColor1( iBucketParam.GradientColor1 );
+    SetRadialRadius( iBucketParam.RadialRadius );
+    SetRadialOffset( iBucketParam.RadialOffset );
 }
 
 void
@@ -210,8 +242,10 @@ FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
     iDestinationBucket->mBucketParam.ColorMode       = mBucketParam.ColorMode;
     iDestinationBucket->mBucketParam.GradientColor0  = mBucketParam.GradientColor0;
     iDestinationBucket->mBucketParam.GradientColor1  = mBucketParam.GradientColor1;
+    iDestinationBucket->mBucketParam.RadialRadius    = mBucketParam.RadialRadius;
+    iDestinationBucket->mBucketParam.RadialOffset    = mBucketParam.RadialOffset;
 
-    //iDestinationBucket->Invalidate();
+    iDestinationBucket->Invalidate();
 }
 
 FOdysseyVectorObject*

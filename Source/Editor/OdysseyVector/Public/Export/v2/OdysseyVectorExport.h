@@ -68,6 +68,8 @@ namespace FOdysseyVectorExportV2
                             static const uint32 CHUNK_BUCKET_SOLIDCOLOR = 0xd951af3c; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                             static const uint32 CHUNK_BUCKET_GRADIENT = 0x5d7bbd93; // container
                                 static const uint32 CHUNK_BUCKET_GRADIENT_STOP = 0xd0dfb9d3; // uint8(R)-uint8(G)-uint8(B)-uint8(A)-float(stop)
+                                static const uint32 CHUNK_BUCKET_GRADIENT_RADIALRADIUS = 0xcdbd0ebb; // double(radius)
+                                static const uint32 CHUNK_BUCKET_GRADIENT_RADIALOFFSET = 0xafcbaa31; // double(x),double(y)
 
                 static const uint32 CHUNK_SCENE =  0xfe491c66; // container
                     // ... +inherited chunks.
@@ -106,6 +108,8 @@ namespace FOdysseyVectorExportV2
     void WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar);
     void WriteBucketColorMode( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    void WriteBucketGradientRadialOffset( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    void WriteBucketGradientRadialRadius( FOdysseyVectorBucket& iBucket, FArchive &Ar );
 
     ////////////////////////////////////
     void ODYSSEYVECTOR_API WritePath( FOdysseyVectorPath& iPath, FArchive &Ar );

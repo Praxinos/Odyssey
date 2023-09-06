@@ -81,6 +81,33 @@ FOdysseyVectorExportV2::WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArc
 }
 
 void
+FOdysseyVectorExportV2::WriteBucketGradientRadialRadius( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT_RADIALRADIUS
+                                    , Ar
+                                    , [&iBucket](FArchive &Ar) -> void
+    {
+        double radialRadius = iBucket.GetRadialRadius();
+
+        Ar << radialRadius;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteBucketGradientRadialOffset( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT_RADIALOFFSET
+                                    , Ar
+                                    , [&iBucket](FArchive &Ar) -> void
+    {
+        ::ULIS::FVec2D& radialOffset = iBucket.GetRadialOffset();
+
+        Ar << radialOffset.x;
+        Ar << radialOffset.y;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar )
 {
     FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT_STOP
@@ -113,6 +140,8 @@ FOdysseyVectorExportV2::WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArc
 
         WriteBucketGradientStop( gradientColor0, 0.0f, Ar );
         WriteBucketGradientStop( gradientColor1, 1.0f, Ar );
+        WriteBucketGradientRadialRadius( iBucket, Ar );
+        WriteBucketGradientRadialOffset( iBucket, Ar );
     } );
 }
 
