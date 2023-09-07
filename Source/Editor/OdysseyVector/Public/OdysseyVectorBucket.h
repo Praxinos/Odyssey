@@ -57,6 +57,9 @@ struct FBucketParam
     UPROPERTY(EditAnywhere,Category="Bucket")
     double RadialRadius; // radius in radial mode
     ::ULIS::FVec2D RadialOffset; // distance from the radial-gradient to the bucket.
+
+    /* The Palette Entry associated with this vector object, if any*/
+    UOdysseyPaletteEntry* PaletteEntry = nullptr;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
@@ -146,7 +149,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          */
         FOdysseyVectorObject* GetOwner();
 
-        void ImportParam( FBucketParam& iBuketParam );
         virtual void SetCoords( double iX, double iY, double iRadius ) override;
         void SetColorMode( eBucketColorMode iColorMode );
         void SetSpreadingPolicy( eBucketSpreadingPolicy iSpreadingPolicy );
@@ -176,10 +178,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
     protected:
         FOdysseyVectorObject* mOwner;
         bool mIsSelected;
-
-
-        /* The Palette Entry associated with this vector object, if any*/
-        UOdysseyPaletteEntry* mPaletteEntry = nullptr;
 
     public:
         FBucketParam mBucketParam;

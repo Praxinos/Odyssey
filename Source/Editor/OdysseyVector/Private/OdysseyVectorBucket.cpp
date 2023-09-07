@@ -197,7 +197,7 @@ FOdysseyVectorBucket::GetColor()
     switch ( mBucketParam.ColorMode )
     {
         case eBucketColorMode::Palette:
-        return ( mPaletteEntry ) ? Cast< UOdysseyPaletteEntryColor >( mPaletteEntry )->GetUsedColor() : mBucketParam.SolidColor;
+        return ( mBucketParam.PaletteEntry ) ? Cast< UOdysseyPaletteEntryColor >( mBucketParam.PaletteEntry )->GetUsedColor() : mBucketParam.SolidColor;
 
         case eBucketColorMode::SolidColor:
         return mBucketParam.SolidColor;
@@ -212,28 +212,12 @@ FOdysseyVectorBucket::GetRotation()
     return mBucketParam.Rotation;
 }
 
-// you'd better use ImportParam() over Copy() if you need invalidation
-void
-FOdysseyVectorBucket::ImportParam( FBucketParam& iBucketParam )
-{
-    SetColorMode(  iBucketParam.ColorMode );
-    SetSpreadingPolicy(  iBucketParam.SpreadingPolicy );
-    SetSolidColor( iBucketParam.SolidColor );
-    SetRotation( iBucketParam.Rotation );
-    SetPropagated( iBucketParam.Propagated );
-    SetColorMode( iBucketParam.ColorMode );
-    SetGradientColor0( iBucketParam.GradientColor0 );
-    SetGradientColor1( iBucketParam.GradientColor1 );
-    SetRadialRadius( iBucketParam.RadialRadius );
-    SetRadialOffset( iBucketParam.RadialOffset );
-}
-
 void
 FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
 {
     iDestinationBucket->mCoords                      = mCoords;
-    iDestinationBucket->mPaletteEntry                = mPaletteEntry;
 
+    iDestinationBucket->mBucketParam.PaletteEntry    = mBucketParam.PaletteEntry;
     iDestinationBucket->mBucketParam.ColorMode       = mBucketParam.ColorMode;
     iDestinationBucket->mBucketParam.SpreadingPolicy = mBucketParam.SpreadingPolicy;
     iDestinationBucket->mBucketParam.SolidColor      = mBucketParam.SolidColor;
@@ -257,11 +241,11 @@ FOdysseyVectorBucket::GetOwner()
 void
 FOdysseyVectorBucket::SetPaletteEntry( UOdysseyPaletteEntry* iPaletteEntry )
 {
-    mPaletteEntry = iPaletteEntry;
+    mBucketParam.PaletteEntry = iPaletteEntry;
 }
 
 UOdysseyPaletteEntry*
 FOdysseyVectorBucket::GetPaletteEntry()
 {
-    return mPaletteEntry;
+    return mBucketParam.PaletteEntry;
 }

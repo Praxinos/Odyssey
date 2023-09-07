@@ -55,6 +55,7 @@ class ODYSSEYVECTOR_API FSnapshotBucket
 {
     public:
         static const uint32 SNAPSHOT_POSITION = ( 1 << 0 );
+        static const uint32 SNAPSHOT_PARAM    = ( 1 << 1 );
         static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
 
         ~FSnapshotBucket();
@@ -66,6 +67,7 @@ class ODYSSEYVECTOR_API FSnapshotBucket
         uint32 mBucketSnapshotFlags;
         FOdysseyVectorBucket* mBucket;
         ULIS::FVec2D mCoords;
+        FBucketParam mBucketParam;
 };
 
 class ODYSSEYVECTOR_API FSnapshotObject

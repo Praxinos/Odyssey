@@ -230,9 +230,17 @@ FSnapshotBucket::~FSnapshotBucket()
 
 FSnapshotBucket::FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint32 iBucketSnapshotFlags )
     : mBucketSnapshotFlags( iBucketSnapshotFlags )
-    , mCoords( iBucket->GetCoords() )
     , mBucket ( iBucket )
 {
+    if( mBucketSnapshotFlags & SNAPSHOT_POSITION )
+    {
+        mCoords = iBucket->GetCoords();
+    }
+
+    if( mBucketSnapshotFlags & SNAPSHOT_PARAM )
+    {
+        mBucketParam = iBucket->mBucketParam;
+    }
 }
 
 void
@@ -243,8 +251,18 @@ FSnapshotBucket::Restore()
         ::ULIS::FVec2D swapCoords = mBucket->GetCoords();
 
         mBucket->Set( mCoords.x, mCoords.y );
-
+        // swap
         mCoords = swapCoords;
+    }
+
+    if( mBucketSnapshotFlags & SNAPSHOT_PARAM )
+    {
+        FBucketParam swapBucketParam = mBucket->mBucketParam;
+
+        mBucket->mBucketParam = mBucketParam;
+        mBucket->Invalidate();
+        // swap
+        mBucketParam = swapBucketParam;
     }
 }
 
