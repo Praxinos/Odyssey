@@ -30,9 +30,9 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
     std::vector<FTracerEdge>& edgeArray = pathTracer.GetEdgeArray();
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FOdysseyVectorPath* path = pathTracer.GetPath();
-    BLImage* mask = pathTracer.GetBLImage();
+    //BLImage* mask = pathTracer.GetBLImage();
 
-    blctx->blitImage( BLPoint( 0, 0 ), *mask );
+    //blctx->blitImage( BLPoint( 0, 0 ), *mask );
 
     if( path )
     {
@@ -41,7 +41,19 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
         blctx->save();
         blctx->resetMatrix();
 
+        blctx->setStrokeStyle( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
+
+        for( int n = 1; n < pointArray.size(); n++)
+        {
+            int i = n - 1;
+
+            blctx->setStrokeWidth( pointArray[i].radius );
+            blctx->strokeLine( pointArray[i].coords.x, pointArray[i].coords.y
+                             , pointArray[n].coords.x, pointArray[n].coords.y );
+        }
+
         blctx->setFillStyle( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
+
         for( int i = 0; i < edgeArray.size(); i++ )
         {
             int n = i + 1;

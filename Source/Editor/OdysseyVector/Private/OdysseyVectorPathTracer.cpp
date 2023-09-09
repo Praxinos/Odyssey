@@ -13,12 +13,12 @@ FOdysseyVectorPathTracer::~FOdysseyVectorPathTracer()
 FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
     : mCumulAngle ( 0.0f )
     , mCumulAngleLimit ( 1.5708f ) // 90 degrees
-    , mAngleLimit ( 1.0472f ) // 60 deg
-    //, mAngleLimit ( 0.7071f ) // 45 deg
+    //, mAngleLimit ( 0.86 ) // 60 deg
+    , mAngleLimit ( 0.7071f ) // cos 45deg
     , mPointID( 0 )
     , mSampleDistance( 12.0f )
     , mCubicPath ( nullptr )
-    , mLastVertex ( nullptr )
+    , mPreviousVertex ( nullptr )
 {
     mPointArray.reserve(100);
     mRecordArray.reserve(100);
@@ -60,11 +60,13 @@ FOdysseyVectorPathTracer::Flush()
         CommitSegment();
     }
 
+    mBestBezier.inited = false;
+
     mPointArray.clear();
     mRecordArray.clear();
     mEdgeArray.clear();
     mCubicPath = nullptr;
-    mLastVertex = nullptr;
+    mPreviousVertex = nullptr;
     mPointID = 0;
 }
 
@@ -99,18 +101,107 @@ FOdysseyVectorPathTracer::GetEdgeChainLength()
     return length;
 }
 
-bool
-FOdysseyVectorPathTracer::TestBezier( FTracerBezierPoint iBezier[4] )
+/* AdjustBezier()
+ *
+ * The idea here is to adjust the cubic curve if it drifts away too much from the sample points
+ * How do we do that ? We have the samples points :
+ *
+ *      o o o o o o o
+ *   A                 B
+ *
+ * and we have computed the cubic curve from entry vector and exit vector (first and last sample points).
+ * The length of the handles by default is 0.35 the length of the distance between A and B.
+ *      _____________
+ *     /             \
+ *    /               \
+ *   A                 B
+ *
+ * We then pick a point P1 at position 0.33f and P2 at 0.66f on this cubic curve :
+ *      _____________
+ *     P1           P2
+ *    /               \
+ *   A                 B
+ *
+ * we compare this position with an interpolated sample point "s" located at 0.33f and 0.66f as well. 
+ *      _____________
+ *     P1           P2
+ *    /   s1     s2   \
+ *   A                 B
+ *
+ * from the angles between vectors [A-B,A-P1] and [A-B,A-s1], we get a ratio that we use to decrease the length of the handles.
+ * same goes for A-P2 and A-s2. Not perfect but not bad. Works only when decreasing the handles' length though, not increasing.
+ *      _____________
+ *    /               \
+ *   A                 B
+ *
+ */
+
+
+void
+FOdysseyVectorPathTracer::AdjustBezier( ::ULIS::FVec2D iBezier[4] )
 {
-    if( ( fabs( iBezier[0].coords.x - iBezier[1].coords.x ) < 1.0f )
-     && ( fabs( iBezier[0].coords.x - iBezier[2].coords.x ) < 1.0f )
-     && ( fabs( iBezier[0].coords.x - iBezier[3].coords.x ) < 1.0f )
-     && ( fabs( iBezier[0].coords.y - iBezier[1].coords.y ) < 1.0f )
-     && ( fabs( iBezier[0].coords.y - iBezier[2].coords.y ) < 1.0f )
-     && ( fabs( iBezier[0].coords.y - iBezier[3].coords.y ) < 1.0f ) )
+    AdjustBezierHandle( iBezier, expectedPoint, sampledPoint, 0 );
+    AdjustBezierHandle( iBezier, expectedPoint, sampledPoint, 3 );
+}
+
+void
+FOdysseyVectorPathTracer::AdjustBezierHandle( ::ULIS::FVec2D iBezier[4]
+                                            , ::ULIS::FVec2D& iExpectedPoint
+                                            , ::ULIS::FVec2D& iSampledPoint
+                                            , uint32 iAt )
+{
+    uint32 pointID = iAt;
+    uint32 handleID = ( iAt == 0 ) ? 1 : 2;
+//    double totalLinkLength = GetTotalSampleLinkLength();
+
+//     ::ULIS::FVec2D expectedPoint = CubicBezierPointAtParameter( iBezier[0]
+//                                                               , iBezier[1]
+//                                                               , iBezier[2]
+//                                                               , iBezier[3]
+//                                                               , 0.5f );
+    //::ULIS::FVec2D sampledPoint = GetSamplePointAtParameter( totalLinkLength, 0.5f );
+    ::ULIS::FVec2D& endPoint = iBezier[pointID];
+    ::ULIS::FVec2D& handlePoint = iBezier[handleID];
+    ::ULIS::FVec2D endPointToExpectedPoint = iExpectedPoint - endPoint;
+    ::ULIS::FVec2D endPointToSampledPoint = iSampledPoint - endPoint;
+    ::ULIS::FVec2D endPointToHandlePoint = handlePoint - endPoint;
+
+    if ( endPointToExpectedPoint.DistanceSquared()
+      && endPointToSampledPoint.DistanceSquared()
+      && endPointToHandlePoint.DistanceSquared() )
     {
-        int32 x = (int)iBezier[0].coords.x;
-        int32 y = (int)iBezier[0].coords.y;
+        ::ULIS::FVec2D direction = endPointToHandlePoint;
+        endPointToExpectedPoint.Normalize();
+        endPointToSampledPoint.Normalize();
+        endPointToHandlePoint.Normalize();
+
+        double dot0 = endPointToHandlePoint.DotProduct( endPointToExpectedPoint );
+        double angle0 = acos( ULIS::FMath::Clamp<double>( dot0, -1.0f, 1.0f ) );
+        double dot1 = endPointToHandlePoint.DotProduct( endPointToSampledPoint );
+        double angle1 = acos( ULIS::FMath::Clamp<double>( dot1, -1.0f, 1.0f ) );
+
+        if ( angle1 > 0.1f )
+        {
+            double ratio = angle0 / angle1;
+
+            handlePoint.x = endPoint.x + ( direction.x * ratio );
+            handlePoint.y = endPoint.y + ( direction.y * ratio );
+        }
+    }
+}
+
+bool
+FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
+{
+    if( ( fabs( iBezier[0].x - iBezier[1].x ) < 1.0f )
+     && ( fabs( iBezier[0].x - iBezier[2].x ) < 1.0f )
+     && ( fabs( iBezier[0].x - iBezier[3].x ) < 1.0f )
+     && ( fabs( iBezier[0].y - iBezier[1].y ) < 1.0f )
+     && ( fabs( iBezier[0].y - iBezier[2].y ) < 1.0f )
+     && ( fabs( iBezier[0].y - iBezier[3].y ) < 1.0f ) )
+    {
+        int32 x = (int)iBezier[0].x;
+        int32 y = (int)iBezier[0].y;
 
         if( ( x >= 0 ) && ( x < (int)mWidth ) && ( y >= 0 ) && ( y < (int)mHeight ) )
         {
@@ -128,25 +219,25 @@ FOdysseyVectorPathTracer::TestBezier( FTracerBezierPoint iBezier[4] )
     }
     else // refine
     {
-        FTracerBezierPoint childBezier[2][4];
+        ::ULIS::FVec2D childBezier[2][4];
 
         memcpy( childBezier[0], iBezier, sizeof( childBezier[0] ) );
         memcpy( childBezier[1], iBezier, sizeof( childBezier[1] ) );
 
-        ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0].coords
-                                                                  , &childBezier[0][1].coords
-                                                                  , &childBezier[0][2].coords
-                                                                  , &childBezier[0][3].coords
+        ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
+                                                                  , &childBezier[0][1]
+                                                                  , &childBezier[0][2]
+                                                                  , &childBezier[0][3]
                                                                   , 0.5f );
         if( TestBezier( childBezier[0] ) == false )
         {
             return false;
         }
 
-        ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0].coords
-                                                                  , &childBezier[1][1].coords
-                                                                  , &childBezier[1][2].coords
-                                                                  , &childBezier[1][3].coords
+        ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
+                                                                  , &childBezier[1][1]
+                                                                  , &childBezier[1][2]
+                                                                  , &childBezier[1][3]
                                                                   , 0.5f );
         if( TestBezier( childBezier[1] ) == false )
         {
@@ -167,91 +258,111 @@ FOdysseyVectorPathTracer::MakeBezier( bool iForce )
     FTracerEdge* firstEdge = &mEdgeArray.front();
     FTracerEdge* lastEdge = &mEdgeArray.back();
     double linkChainLength = GetEdgeChainLength();
-    ::ULIS::FVec2D firstEdgeVector = firstEdge->vector * linkChainLength * 0.35f;
+    ::ULIS::FVec2D firstEdgeVector = firstRecord->smooth ? mSmoothVector * linkChainLength * 0.35f 
+                                                         : firstEdge->vector * linkChainLength * 0.35f;
     ::ULIS::FVec2D lastEdgeVector = lastEdge->vector * linkChainLength * 0.35f;
-    FTracerBezierPoint currentBezier[4];
 
-    currentBezier[0].id = firstRecord->id;
-    currentBezier[3].id = lastRecord->id;
+    mCandidateBezier.inited = true;
+    mCandidateBezier.firstRecordRadius = firstRecord->radius;
+    mCandidateBezier.lastRecordRadius = lastRecord->radius;
 
-    currentBezier[0].radius = firstRecord->radius;
-    currentBezier[3].radius = lastRecord->radius;
+    mCandidateBezier.firstRecordID = firstRecord->id;
+    mCandidateBezier.lastRecordID = lastRecord->id;
+    mCandidateBezier.firstEdgeID = firstEdge->id;
+    mCandidateBezier.lastEdgeID = lastEdge->id;
 
-    currentBezier[0].coords = firstRecordCoords;
-    currentBezier[1].coords = firstRecordCoords + firstEdgeVector;
-    currentBezier[2].coords = lastRecordCoords - lastEdgeVector;
-    currentBezier[3].coords = lastRecordCoords;
+    mCandidateBezier.pt[0] = firstRecordCoords;
+    mCandidateBezier.pt[1] = firstRecordCoords + firstEdgeVector;
+    mCandidateBezier.pt[2] = lastRecordCoords - lastEdgeVector;
+    mCandidateBezier.pt[3] = lastRecordCoords;
 
-    if( ( iForce == true ) || ( TestBezier( currentBezier ) == true ) )
+    if( ( iForce == true ) || ( TestBezier( mCandidateBezier.pt ) == true ) )
     {
-        mCandidateBezier[0] = currentBezier[0];
-        mCandidateBezier[1] = currentBezier[1];
-        mCandidateBezier[2] = currentBezier[2];
-        mCandidateBezier[3] = currentBezier[3];
+        mBestBezier = mCandidateBezier;
 
         return true;
+    }
+
+    // if we never found any best bezier, then we use the last candidate
+    if( mBestBezier.inited == false )
+    {
+        mBestBezier = mCandidateBezier;
     }
 
     return false;
 }
 
 void
-FOdysseyVectorPathTracer::ClearRecordsUntil( std::vector<FTracerRecord>& iRecordArray, uint32 iID )
+FOdysseyVectorPathTracer::ClearPointsTo( uint32 iPointID )
 {
-    int i, j, rank;
+    std::vector<FTracerPoint> newPointArray;
+    int pointRank = 0;
 
-    for( i = 0, rank = 0; i < iRecordArray.size(); i++, rank++ )
+    // clear points until the one passed as parameter (but keep it)
+    newPointArray.reserve( mPointArray.size() );
+
+    while( mPointArray[pointRank++].id != iPointID );
+
+    for( int i = --pointRank, j = 0; i < mPointArray.size(); i++, j++ )
     {
-        if( iRecordArray[i].id == iID ) break;
+        newPointArray.push_back( mPointArray[i] );
     }
 
-    for( i = rank, j = 0; i < iRecordArray.size(); i++, j++ )
-    {
-        iRecordArray[j] = iRecordArray[i];
-    }
-
-    iRecordArray.resize( iRecordArray.size() - rank );
+    mPointArray = newPointArray;
 }
 
 void
-FOdysseyVectorPathTracer::ClearEdgesUntil( std::vector<FTracerEdge>& iEdgeArray, uint32 iID )
+FOdysseyVectorPathTracer::ClearTo( uint32 iRecordID, uint32 iEdgeID )
 {
-    int i, j, rank;
+    std::vector<FTracerRecord> newRecordArray;
+    std::vector<FTracerEdge> newEdgeArray;
+    int recordRank = 0;
+    int edgeRank = 0;
 
-    for( i = 0, rank = 0; i < iEdgeArray.size(); i++, rank++ )
+    // clear records until the one passed as parameter (but keep it)
+    newRecordArray.reserve( mRecordArray.size() );
+
+    while( mRecordArray[recordRank++].id != iRecordID );
+
+    for( int i = --recordRank, j = 0; i < mRecordArray.size(); i++, j++ )
     {
-        if( iEdgeArray[i].id == iID ) break;
+        newRecordArray.push_back( mRecordArray[i] );
     }
 
-    for( i = rank, j = 0; i < iEdgeArray.size(); i++, j++ )
+    mRecordArray = newRecordArray;
+
+    // clear edges until the one passed as parameter
+    newEdgeArray.reserve( mEdgeArray.size() );
+
+    while( mEdgeArray[edgeRank++].id != iEdgeID );
+
+    for( int i = edgeRank, j = 0; i < mEdgeArray.size(); i++, j++ )
     {
-        iEdgeArray[j] = iEdgeArray[i];
+        newEdgeArray.push_back( mEdgeArray[i] );
     }
 
-    iEdgeArray.resize( iEdgeArray.size() - rank );
-
-    UE_LOG(LogTemp, Warning, TEXT("iEdgeArray: %d"), iEdgeArray.size() );
+    mEdgeArray = newEdgeArray;
 }
 
 void
 FOdysseyVectorPathTracer::CommitSegment()
 {
     BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
-    BLPoint localHandlePoint[2] = { cubicPathInverseWorldMatrix.mapPoint( mCandidateBezier[1].coords.x
-                                                                        , mCandidateBezier[1].coords.y )
-                                  , cubicPathInverseWorldMatrix.mapPoint( mCandidateBezier[2].coords.x
-                                                                        , mCandidateBezier[2].coords.y ) };
-    BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( mCandidateBezier[3].coords.x
-                                                               , mCandidateBezier[3].coords.y ) };
-    BLPoint localVector = cubicPathInverseWorldMatrix.mapVector( mCandidateBezier[3].radius * 0.7071f
-                                                               , mCandidateBezier[3].radius * 0.7071f );
+    BLPoint localHandlePoint[2] = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[1].x
+                                                                        , mBestBezier.pt[1].y )
+                                  , cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[2].x
+                                                                        , mBestBezier.pt[2].y ) };
+    BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[3].x
+                                                               , mBestBezier.pt[3].y ) };
+    BLPoint localVector = cubicPathInverseWorldMatrix.mapVector( mBestBezier.lastRecordRadius * 0.7071f
+                                                               , mBestBezier.lastRecordRadius * 0.7071f );
     double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
     FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( mCubicPath
                                                               , localPoint.x
                                                               , localPoint.y
                                                               , localRadius );
     FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath
-                                                                                , mLastVertex
+                                                                                , mPreviousVertex
                                                                                 , localHandlePoint[0].x
                                                                                 , localHandlePoint[0].y
                                                                                 , localHandlePoint[1].x
@@ -261,10 +372,17 @@ FOdysseyVectorPathTracer::CommitSegment()
     mCubicPath->AddVertex( newVertex );
     mCubicPath->AddSegment( newCubicSegment );
 
-    ClearRecordsUntil( mRecordArray, mCandidateBezier[3].id );
-    ClearEdgesUntil( mEdgeArray, mCandidateBezier[3].id );
+    newCubicSegment->Update();
 
-    mLastVertex = newVertex;
+    ClearTo( mBestBezier.lastRecordID, mBestBezier.lastEdgeID );
+
+    mPreviousVertex = newVertex;
+    mSmoothVector = mBestBezier.pt[3] - mBestBezier.pt[2];
+
+    if( mSmoothVector.Distance() )
+    {
+        mSmoothVector.Normalize();
+    }
 }
 
 void
@@ -277,7 +395,6 @@ FOdysseyVectorPathTracer::Trace( double iWorldX, double iWorldY, double iRadius 
 
     if( indexn == 0 )
     {
-
         BLPoint localPoint = cubicPathInverseWorldMatrix.mapPoint( iWorldX, iWorldY );
         BLPoint localVector = cubicPathInverseWorldMatrix.mapVector( iRadius * 0.7071f
                                                                    , iRadius * 0.7071f );
@@ -290,11 +407,11 @@ FOdysseyVectorPathTracer::Trace( double iWorldX, double iWorldY, double iRadius 
 
         mRecordArray.emplace_back( mPointID, iWorldX, iWorldY, iRadius );
 
-        mLastVertex = newVertex;
+        mPreviousVertex = newVertex;
     }
     else
     {
-        FTracerRecord& lastRecord = mRecordArray.back();
+        FTracerRecord* lastRecord = mRecordArray.size() ? &mRecordArray.back() : nullptr;
         uint32 indexi = indexn - 1;
 
         mBLContext->setFillAlpha( 1.0f );
@@ -312,15 +429,30 @@ FOdysseyVectorPathTracer::Trace( double iWorldX, double iWorldY, double iRadius 
 
         mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
-        if( ::ULIS::FVec2D( lastRecord.coords.x - iWorldX
-                          , lastRecord.coords.y - iWorldY ).Distance() > mSampleDistance )
+        if( ::ULIS::FVec2D( lastRecord->coords.x - iWorldX
+                          , lastRecord->coords.y - iWorldY ).Distance() > mSampleDistance )
         {
-            // points are no more needed, clear them
-            //ClearPointsUntil( mPointArray, mPointID );
+            uint32 edgeCount = mEdgeArray.size();
+            FTracerEdge* lastEdge = edgeCount ? &mEdgeArray.back() : nullptr;
+
+            ClearPointsTo( mPointID );
 
             mRecordArray.emplace_back( mPointID, iWorldX, iWorldY, iRadius );
 
-            mEdgeArray.emplace_back( lastRecord.id, lastRecord.coords.x, lastRecord.coords.y, iWorldX, iWorldY );
+            mEdgeArray.emplace_back( lastRecord->id
+                                   , lastRecord->coords.x
+                                   , lastRecord->coords.y
+                                   , iWorldX
+                                   , iWorldY );
+
+            // detect if smooth or not
+            if( lastEdge )
+            {
+                if ( lastEdge->vector.DotProduct( mEdgeArray[edgeCount].vector ) > mAngleLimit )
+                {
+                    lastRecord->smooth = true;
+                }
+            }
 
             if( MakeBezier( false ) == false )
             {

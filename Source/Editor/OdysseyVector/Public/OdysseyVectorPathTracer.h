@@ -17,10 +17,12 @@ typedef struct _FTracerPoint
     ::ULIS::FVec2D coords;
     double radius;
     uint32 id;
+    bool smooth;
 
     _FTracerPoint()
     {
         coords.x = coords.y = radius = 0.0f;
+        smooth = false;
     }
 
     _FTracerPoint( uint32 iID, double iX, double iY, double iRadius )
@@ -29,8 +31,9 @@ typedef struct _FTracerPoint
         coords.x = iX;
         coords.y = iY;
         radius = iRadius;
+        smooth = false;
     }
-} FTracerPoint, FTracerRecord, FTracerBezierPoint;
+} FTracerPoint, FTracerRecord;
 
 typedef struct _FTracerEdge
 {
@@ -58,6 +61,23 @@ typedef struct _FTracerEdge
     }
 } FTracerEdge;
 
+typedef struct _FTracerBezier
+{
+    bool inited;
+    double firstRecordRadius;
+    double lastRecordRadius;
+    uint32 firstRecordID;
+    uint32 lastRecordID;
+    uint32 firstEdgeID;
+    uint32 lastEdgeID;
+    ::ULIS::FVec2D pt[4];
+
+    _FTracerBezier()
+    {
+        inited = false;
+    }
+} FTracerBezier;
+
 class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
 {
     private:
@@ -71,10 +91,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         std::vector<FTracerPoint> mPointArray;
         std::vector<FTracerRecord> mRecordArray;
         std::vector<FTracerEdge> mEdgeArray;
-        FOdysseyVectorVertex* mLastVertex;
-        FTracerBezierPoint mCandidateBezier[4];
+        FOdysseyVectorVertex* mPreviousVertex;
+        ::ULIS::FVec2D mSmoothVector;
+        FTracerBezier mCandidateBezier;
+        FTracerBezier mBestBezier;
         FOdysseyVectorPath* mCubicPath;
-        //FOdysseyVectorSegmentCubic* mCubicSegment;
         uint32 mWidth, mHeight;
         uint8* mPixelData;
 
@@ -86,10 +107,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         FOdysseyVectorPath* GetPath();
         BLImage* GetBLImage();
         void Trace( double iWorldX, double iWorldY, double iRadius );
-        void ClearEdgesUntil( std::vector<FTracerEdge>& iEdgeArray, uint32 iID );
-        void ClearRecordsUntil( std::vector<FTracerRecord>& iRecordArray, uint32 iID );
         bool MakeBezier( bool iForce );
-        bool TestBezier( FTracerBezierPoint iBezier[4] );
+        bool TestBezier( ::ULIS::FVec2D iBezier[4] );
         double GetEdgeChainLength();
         void Init( FOdysseyVectorScene* iScene );
         std::vector<FTracerPoint>& GetPointArray();
@@ -97,4 +116,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         std::vector<FTracerEdge>& GetEdgeArray();
         void Flush();
         void CommitSegment();
+        void ClearPointsTo( uint32 iPointID );
+        void ClearTo( uint32 iRecordID, uint32 iEdgeID );
+        void AdjustBezier( ::ULIS::FVec2D iBezier[4] );
+        void AdjustBezierHandle( ::ULIS::FVec2D iBezier[4]
+                               , ::ULIS::FVec2D& expectedPoint
+                               , ::ULIS::FVec2D& sampledPoint
+                               , uint32 iAt );
 };

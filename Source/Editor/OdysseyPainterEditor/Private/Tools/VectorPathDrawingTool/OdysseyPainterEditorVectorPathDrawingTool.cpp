@@ -188,9 +188,10 @@ void
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorScene* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
+    double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-    mPathTracer.Trace( iPointInTexture.x, iPointInTexture.y, 2.0f );
+    mPathTracer.Trace( iPointInTexture.x, iPointInTexture.y, pointRadius );
 
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
