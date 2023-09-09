@@ -101,7 +101,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     }
     GEditor->EndTransaction();
 
-    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
+    for( FOdysseyVectorObject* selectedObject : droppedObjectList )
     {
         switch( mDropZone )
         {

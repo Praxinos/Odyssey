@@ -24,6 +24,48 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Load( FOdysseyVectorScene* iScene
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
+    FOdysseyVectorPathTracer& pathTracer = mPathDrawingTool->GetPathTracer();
+    std::vector<FTracerRecord>& recordArray = pathTracer.GetRecordArray();
+    std::vector<FTracerPoint>& pointArray = pathTracer.GetPointArray();
+    std::vector<FTracerEdge>& edgeArray = pathTracer.GetEdgeArray();
+    BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FOdysseyVectorPath* path = pathTracer.GetPath();
+    BLImage* mask = pathTracer.GetBLImage();
+
+    blctx->blitImage( BLPoint( 0, 0 ), *mask );
+
+    if( path )
+    {
+        FColor pathcolor = path->GetForegroundColor();
+
+        blctx->save();
+        blctx->resetMatrix();
+
+        blctx->setFillStyle( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
+        for( int i = 0; i < edgeArray.size(); i++ )
+        {
+            int n = i + 1;
+            ::ULIS::FVec2D perpendicular = ::ULIS::FVec2D( -edgeArray[i].vector.y, edgeArray[i].vector.x );
+            BLPoint pt[4] = { BLPoint( recordArray[i].coords.x + ( perpendicular.x * recordArray[i].radius )
+                                     , recordArray[i].coords.y + ( perpendicular.y * recordArray[i].radius ) )
+                           ,  BLPoint( recordArray[i].coords.x - ( perpendicular.x * recordArray[i].radius )
+                                     , recordArray[i].coords.y - ( perpendicular.y * recordArray[i].radius ) )
+                           ,  BLPoint( recordArray[n].coords.x - ( perpendicular.x * recordArray[n].radius )
+                                     , recordArray[n].coords.y - ( perpendicular.y * recordArray[n].radius ) )
+                           ,  BLPoint( recordArray[n].coords.x + ( perpendicular.x * recordArray[n].radius )
+                                     , recordArray[n].coords.y + ( perpendicular.y * recordArray[n].radius ) ) };
+
+            blctx->fillPolygon( pt, 4 );
+        }
+
+        blctx->restore();
+    }
+}
+
+#ifdef unused
+void
+FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+{
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FOdysseyVectorPathBuilder* pathBuilder = mPathDrawingTool->GetPathBuilder();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
@@ -78,6 +120,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
 
     blctx->restore();
 }
+#endif
 
 bool
 FOdysseyPainterEditorVectorPathDrawingToolHUD::SetCursorPosition( double iX, double iY )

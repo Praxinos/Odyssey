@@ -3,6 +3,8 @@
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
     mBLContext->end();
+
+    delete mBLImage;
 }
 
 FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight )
