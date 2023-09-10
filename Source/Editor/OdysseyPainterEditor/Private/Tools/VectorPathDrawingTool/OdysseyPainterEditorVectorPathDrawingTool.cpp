@@ -26,6 +26,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , Stitch( false )
     , AverageStitchedRadius( true )
     , StitchingRadius( 10 )
+    , Debug( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
 

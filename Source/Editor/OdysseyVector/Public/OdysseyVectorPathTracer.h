@@ -38,6 +38,8 @@ typedef struct _FTracerPoint
 typedef struct _FTracerEdge
 {
     ::ULIS::FVec2D vector;
+    ::ULIS::FVec2D p0;
+    ::ULIS::FVec2D p1;
     double length;
     uint32 id;
 
@@ -49,8 +51,13 @@ typedef struct _FTracerEdge
     {
         id = iID;
 
-        vector.x = iX1 - iX0;
-        vector.y = iY1 - iY0;
+        p0.x = iX0;
+        p0.y = iY0;
+
+        p1.x = iX1;
+        p1.y = iY1;
+
+        vector = p1 - p0;
 
         length = vector.Distance();
 
@@ -95,6 +102,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         ::ULIS::FVec2D mSmoothVector;
         FTracerBezier mCandidateBezier;
         FTracerBezier mBestBezier;
+        FTracerBezier mRawBezier;
         FOdysseyVectorPath* mCubicPath;
         uint32 mWidth, mHeight;
         uint8* mPixelData;
@@ -102,14 +110,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
     public:
         ~FOdysseyVectorPathTracer();
         FOdysseyVectorPathTracer();
-
+  
+        FTracerBezier& GetBestBezier();
+        FTracerBezier& GetRawBezier();
         void AttachPath( FOdysseyVectorPath* iCubicPath );
         FOdysseyVectorPath* GetPath();
         BLImage* GetBLImage();
         void Trace( double iWorldX, double iWorldY, double iRadius );
         bool MakeBezier( bool iForce );
         bool TestBezier( ::ULIS::FVec2D iBezier[4] );
-        double GetEdgeChainLength();
         void Init( FOdysseyVectorScene* iScene );
         std::vector<FTracerPoint>& GetPointArray();
         std::vector<FTracerRecord>& GetRecordArray();
@@ -118,9 +127,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         void CommitSegment();
         void ClearPointsTo( uint32 iPointID );
         void ClearTo( uint32 iRecordID, uint32 iEdgeID );
-        void AdjustBezier( ::ULIS::FVec2D iBezier[4] );
+        void AdjustBezier( ::ULIS::FVec2D iBezier[4], double iEdgeChainLength );
         void AdjustBezierHandle( ::ULIS::FVec2D iBezier[4]
                                , ::ULIS::FVec2D& expectedPoint
                                , ::ULIS::FVec2D& sampledPoint
                                , uint32 iAt );
+        ::ULIS::FVec2D GetSamplePointAtParameter( double iEdgeChainLength, double iAt );
+        double GetEdgeChainLength();
+        void TraceEdges( double iAlpha, double iWidth );
+        void TraceEdge( FTracerEdge* iEdge, double iAlpha, double iWidth );
 };
