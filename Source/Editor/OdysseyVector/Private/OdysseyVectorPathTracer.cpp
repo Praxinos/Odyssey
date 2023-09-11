@@ -15,6 +15,7 @@ FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
     //, mDotLimit ( 0.7071f ) // cos 45deg
     , mPointID( 0 )
     , mSampleDistance( 6.0f )
+    , mTracingWidth( 6.0f )
     , mCubicPath ( nullptr )
     , mPreviousVertex ( nullptr )
 {
@@ -23,6 +24,12 @@ FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
     mEdgeArray.reserve(100);
 
     mBLContext.setCompOp( BL_COMP_OP_SRC_COPY );
+}
+
+void
+FOdysseyVectorPathTracer::SetTracingWidth( double iTracingWidth )
+{
+    mTracingWidth = iTracingWidth;
 }
 
 void
@@ -298,13 +305,13 @@ FOdysseyVectorPathTracer::GetRawBezier()
 }
 
 void
-FOdysseyVectorPathTracer::TraceEdge( FTracerEdge* iEdge, double iAlpha, double iWidth )
+FOdysseyVectorPathTracer::TraceEdge( FTracerEdge* iEdge, double iAlpha )
 {
-    double circleRadius = iWidth * 0.5f;
+    double circleRadius = mTracingWidth * 0.5f;
 
     mBLContext.setFillAlpha( iAlpha );
     mBLContext.setStrokeAlpha( iAlpha );
-    mBLContext.setStrokeWidth( iWidth );
+    mBLContext.setStrokeWidth( mTracingWidth );
 
     mBLContext.fillCircle( iEdge->p0.x, iEdge->p0.y, circleRadius );
     mBLContext.strokeLine( iEdge->p0.x, iEdge->p0.y
@@ -313,11 +320,11 @@ FOdysseyVectorPathTracer::TraceEdge( FTracerEdge* iEdge, double iAlpha, double i
 }
 
 void
-FOdysseyVectorPathTracer::TraceEdges( double iAlpha, double iWidth )
+FOdysseyVectorPathTracer::TraceEdges( double iAlpha )
 {
     for( int i = 0; i < mEdgeArray.size(); i++ )
     {
-        TraceEdge( &mEdgeArray[i], iAlpha, iWidth );
+        TraceEdge( &mEdgeArray[i], iAlpha );
     }
 }
 
@@ -426,7 +433,7 @@ FOdysseyVectorPathTracer::ClearTo( uint32 iRecordID, uint32 iEdgeID )
     }
 
     mEdgeArray = newEdgeArray;
-    TraceEdges( 1.0f, 6.0f ); // trace again
+    TraceEdges( 1.0f ); // trace again
 }
 
 void
@@ -475,7 +482,10 @@ FOdysseyVectorPathTracer::CommitSegment()
 }
 
 void
-FOdysseyVectorPathTracer::Trace( double iWorldX, double iWorldY, double iRadius )
+FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
+                               , double iWorldX
+                               , double iWorldY
+                               , double iRadius )
 {
     BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
     uint32 indexn = mPointArray.size();
@@ -488,15 +498,21 @@ FOdysseyVectorPathTracer::Trace( double iWorldX, double iWorldY, double iRadius 
         BLPoint localVector = cubicPathInverseWorldMatrix.mapVector( iRadius * 0.7071f
                                                                    , iRadius * 0.7071f );
         double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
-        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( mCubicPath
-                                                                  , localPoint.x
-                                                                  , localPoint.y
-                                                                  , localRadius );
-        mCubicPath->AddVertex( newVertex );
+
+        if( iStitchedVertex )
+        {
+            mPreviousVertex = iStitchedVertex;
+        }
+        else
+        {
+            mPreviousVertex = new FOdysseyVectorVertex( mCubicPath
+                                                      , localPoint.x
+                                                      , localPoint.y
+                                                      , localRadius );
+            mCubicPath->AddVertex( mPreviousVertex );
+        }
 
         mRecordArray.emplace_back( mPointID, iWorldX, iWorldY, iRadius );
-
-        mPreviousVertex = newVertex;
     }
     else
     {
@@ -515,7 +531,7 @@ FOdysseyVectorPathTracer::Trace( double iWorldX, double iWorldY, double iRadius 
                                              , iWorldX
                                              , iWorldY );
             // draw alpha to pixel buffer
-            TraceEdge( &newEdge, 1.0f, 6.0f );
+            TraceEdge( &newEdge, 1.0f );
 
             mBLContext.flush(BL_CONTEXT_FLUSH_SYNC);
 

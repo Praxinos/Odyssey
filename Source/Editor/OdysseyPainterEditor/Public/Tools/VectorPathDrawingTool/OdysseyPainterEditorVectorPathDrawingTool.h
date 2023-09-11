@@ -20,6 +20,16 @@ enum class eTracingType : uint8
     Mechanic = 1,
 };
 
+UENUM()
+enum class eTracingFidelity: uint8
+{
+    Lowest  = 10,
+    Low     =  8,
+    Average =  6,
+    High    =  4,
+    Highest =  2
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : public UOdysseyPainterEditorDefaultTool
 {
@@ -61,10 +71,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
     private:
         void OnSizeChanged();
         bool HasMedia() const;
+        FOdysseyVectorVertex* PickVertex( FOdysseyVectorEngine* iVectorEngine
+                                        , FOdysseyVectorScene* iScene
+                                        , double iWorldX
+                                        , double iWorldY
+                                        , double iPickingRadius );
+        void SetPathColor( FOdysseyVectorPath* iPath );
 
     public:
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         eTracingType TracingType;
+
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        eTracingFidelity TracingFidelity;
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
         double Radius;
@@ -98,4 +117,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
     private:
         FOdysseyPainterEditorVectorPathDrawingToolHUD* mPathDrawingHUD;
         FOdysseyVectorPathTracer mPathTracer;
+        FOdysseyVectorVertex* mStitchedVertex;
 };

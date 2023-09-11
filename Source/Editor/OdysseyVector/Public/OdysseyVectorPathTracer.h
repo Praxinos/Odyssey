@@ -91,6 +91,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         double mDotLimit;
         uint32 mPointID;
         double mSampleDistance;
+        double mTracingWidth;
         BLImage* mBLImage;
         BLContext mBLContext;
         std::vector<FTracerPoint> mPointArray;
@@ -114,7 +115,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         void AttachPath( FOdysseyVectorPath* iCubicPath );
         FOdysseyVectorPath* GetPath();
         BLImage* GetBLImage();
-        void Trace( double iWorldX, double iWorldY, double iRadius );
+        void Trace( FOdysseyVectorVertex* iStitchedVertex
+                  , double iWorldX
+                  , double iWorldY
+                  , double iRadius );
         bool MakeBezier( bool iForce );
         bool TestBezier( ::ULIS::FVec2D iBezier[4] );
         void Init( FOdysseyVectorScene* iScene );
@@ -132,7 +136,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
                                , uint32 iAt );
         ::ULIS::FVec2D GetSamplePointAtParameter( double iEdgeChainLength, double iAt );
         double GetEdgeChainLength();
-        void TraceEdges( double iAlpha, double iWidth );
-        void TraceEdge( FTracerEdge* iEdge, double iAlpha, double iWidth );
+        void TraceEdges( double iAlpha );
+        void TraceEdge( FTracerEdge* iEdge, double iAlpha );
         void SetDotLimit( double iDotLimit );
+        void SetTracingWidth( double iTracingWidth );
 };

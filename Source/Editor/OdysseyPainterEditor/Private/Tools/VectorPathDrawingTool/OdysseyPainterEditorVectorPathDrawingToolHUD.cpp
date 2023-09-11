@@ -21,6 +21,12 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Load( FOdysseyVectorScene* iScene
 {
 }
 
+std::vector<FOdysseyVectorPoint*>&
+FOdysseyPainterEditorVectorPathDrawingToolHUD::GetStitchedPointArray()
+{
+    return mStitchedPointArray;
+}
+
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
@@ -32,6 +38,37 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( FOdysseyVectorScene* iScene
     FOdysseyVectorPath* path = pathTracer.GetPath();
     FTracerBezier& bestBezier = pathTracer.GetBestBezier();
     FTracerBezier& rawBezier = pathTracer.GetRawBezier();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+
+    if( mPathDrawingTool->Stitch )
+    {
+        if( mStitchedPointArray.size() )
+        {
+            FOdysseyVectorPoint* point = mStitchedPointArray[0];
+
+            if( point->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            {
+                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
+
+                if( vertex->GetSegmentCount() == 1 )
+                {
+                    FOdysseyVectorPath* stitchedPath = vertex->GetPath();
+
+                    DrawPath( stitchedPath
+                            , hcColor
+                            , bgColor
+                            , hcColor
+                            , true // World
+                            , VIEW_SEGMENT );
+                }
+            }
+        }
+    }
 
     if( path )
     {
