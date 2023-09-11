@@ -88,13 +88,11 @@ typedef struct _FTracerBezier
 class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
 {
     private:
-        double mCumulAngle;
-        double mCumulAngleLimit;
-        double mAngleLimit;
+        double mDotLimit;
         uint32 mPointID;
         double mSampleDistance;
         BLImage* mBLImage;
-        BLContext* mBLContext;
+        BLContext mBLContext;
         std::vector<FTracerPoint> mPointArray;
         std::vector<FTracerRecord> mRecordArray;
         std::vector<FTracerEdge> mEdgeArray;
@@ -136,4 +134,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         double GetEdgeChainLength();
         void TraceEdges( double iAlpha, double iWidth );
         void TraceEdge( FTracerEdge* iEdge, double iAlpha, double iWidth );
+        void SetDotLimit( double iDotLimit );
 };

@@ -13,6 +13,13 @@
 
 class FOdysseyPainterEditorVectorPathDrawingToolHUD;
 
+UENUM()
+enum class eTracingType : uint8
+{
+    Organic  = 0,
+    Mechanic = 1,
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : public UOdysseyPainterEditorDefaultTool
 {
@@ -53,8 +60,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         void PropertyChangedVector( FOdysseyVectorScene* iScene, const FName& iPropertyName );
     private:
         void OnSizeChanged();
+        bool HasMedia() const;
 
     public:
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        eTracingType TracingType;
+
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
         double Radius;
         // computed based upon whether or not the pencil size is relative to the object's transformation matrix
@@ -81,7 +92,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
         double StitchingRadius;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         bool Debug;
 
     private:
