@@ -232,13 +232,13 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
 
     mGroupPaintParam.Painted = true;
     mGroupPaintParam.Monochrome = false;
-    mGroupPaintParam.MonochromeColor = FColor( 128, 128, 128, 255 );
+    mGroupPaintParam.MonochromeColor = FColor( 160, 160, 160, 255 );
     mGroupPaintParam.GapTolerance = 12.0f;
     mGroupPaintParam.Realtime = false;
     mGroupPaintParam.Wireframe = false;
     mGroupPaintParam.WireframeColor = FColor( 255, 255, 255, 255 );
  
-    mBackgroundBucket.SetSolidColor( 128, 128, 128, 0 );
+    mBackgroundBucket.SetSolidColor( 160, 160, 160, 0 );
 
     //mGapSegmentBuffer.reserve( 200 );
     //mSectionBuffer.reserve( 200 );
@@ -1929,13 +1929,43 @@ FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
 
     return nullptr;
 }
-
 /*
 void
-FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*> iSectionArray
-                                       , std::vector<FOdysseyVectorSegment*> oRemovedPathArray
-                                       , std::vector<FOdysseyVectorSegment*> oAddedSegmentArray )
+FOdysseyVectorGroupPaint::ExtendErasedSection( FOdysseyVectorVertex* iVertex
+                                             , FOdysseyVectorSection* iFromSection
+                                             , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                                             , std::vector<FOdysseyVectorSection*>& oRemovedSectionArray )
 {
+    FOdysseyVectorSection* currentSection = iFromSection;
+    FOdysseyVectorVertex* currentVertex = iVertex;
 
+    while( currentVertex->GetClass() == FOdysseyVectorVertex::StaticClass() )
+    {
+        FOdysseyVectorSection* nextSection = currentVertex->GetOtherSection( currentSection );
+
+        if( nextSection )
+        {
+            oRemovedSectionArray.push_back( nextSection );
+
+            currentVertex = nextSection->GetOtherVertex( currentVertex );
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+
+void
+FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iErasedSectionArray
+                                       , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                                       , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                                       , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray )
+{
+    for( FOdysseyVectorSection* erasedSection : iErasedSectionArray )
+    {
+        ExtendErasedSection( erasedSection );
+    }
 }
 */
