@@ -85,14 +85,11 @@ SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSce
 
     for( FOdysseyVectorObject* child : childrenList )
     {
-        if( child->GetClass() != FOdysseyVectorPathBuilder::StaticClass() )
-        {
-            TSharedPtr<FVectorSceneTreeViewItem> childItem = MakeShareable(new FVectorSceneTreeViewItem(child));
+        TSharedPtr<FVectorSceneTreeViewItem> childItem = MakeShareable(new FVectorSceneTreeViewItem(child));
 
-            iItem.Get()->mChildren.Add( childItem );
+        iItem.Get()->mChildren.Add( childItem );
 
-            BuildTree( childItem );
-        }
+        BuildTree( childItem );
     }
 }
 

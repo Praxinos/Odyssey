@@ -53,16 +53,6 @@ protected:
     void GetBrushPack();
     void Discord();
     void SwitchTabletAPI();
-    void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void DeleteSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
 private:
     FOdysseyPainterEditor*                          mEditor;

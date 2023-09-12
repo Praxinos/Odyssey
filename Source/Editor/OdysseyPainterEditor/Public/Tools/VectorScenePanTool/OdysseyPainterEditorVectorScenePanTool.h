@@ -18,10 +18,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorScenePanTool : public 
         GENERATED_BODY()
 
     public:
-        static void OnMouseDragVectorStatic( FOdysseyVectorEngine* iEngine
-                                           , FOdysseyVectorScene* iScene
-                                           , const FOdysseyPoint& iPointInTexture );
-
         // Destructor
         virtual ~UOdysseyPainterEditorVectorScenePanTool();
 
@@ -55,6 +51,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorScenePanTool : public 
 
         //OdysseyPainterEditorTool overrides
         virtual void Commit() override;
+
+    protected:
+        void Pan( FOdysseyVectorEngine* iEngine
+                , FOdysseyVectorScene* iScene
+                , const FOdysseyPoint& iPointInTexture );
+        void Scale( FOdysseyVectorEngine* iEngine
+                  , FOdysseyVectorScene* iScene
+                  , const FOdysseyPoint& iPointInTexture );
 
     private:
         double mDownLocalMouseX;

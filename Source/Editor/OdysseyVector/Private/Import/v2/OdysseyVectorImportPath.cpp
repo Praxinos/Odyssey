@@ -32,13 +32,40 @@ FOdysseyVectorImportV2::ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
                                                        , ctrlPoint0Y
                                                        , ctrlPoint1X
                                                        , ctrlPoint1Y
-                                                       , vertexArray[p1ID] );
+                                                       , vertexArray[p1ID]
+                                                       , true );
 
         iPath.AddSegment( cubicSegment );
 
         // update bounding box
         /*cubicSegment->Update();*/
     }
+}
+
+void
+FOdysseyVectorImportV2::ReadPathGeometryVertexHandleAlignment( FOdysseyVectorVertex& iVertex
+                                                             , FArchive &Ar )
+{
+    uint32 handleAlignment;
+
+    Ar << handleAlignment;
+
+    iVertex.SetHandleAligned( handleAlignment ? true : false );
+}
+
+void
+FOdysseyVectorImportV2::ReadPathGeometryVertexPosition( FOdysseyVectorVertex& iVertex
+                                                      , FArchive &Ar )
+{
+    double x;
+    double y;
+    double radius;
+
+    Ar << x;
+    Ar << y;
+    Ar << radius;
+
+    iVertex.Set( x, y, radius );
 }
 
 void
@@ -74,6 +101,7 @@ void
 FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, FArchive &Ar )
 {
     std::vector<FOdysseyVectorVertex*> vertexArray;
+    static FOdysseyVectorVertex* currentVertex;
 
     FOdysseyVectorImportV2::ReadChunks( iChunkEnd
                                     , Ar
@@ -92,6 +120,24 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
                 break;
 
                 case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY:
+                break;
+
+                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX:
+                {
+                    currentVertex = new FOdysseyVectorVertex( &iPath, 0.0f, 0.0f, 0.0f );
+
+                    iPath.AddVertex( currentVertex );
+                    // indexation required for creating segments
+                    vertexArray.push_back( currentVertex );
+                }
+                break;
+
+                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX_POSITION:
+                    ReadPathGeometryVertexPosition( *currentVertex, Ar );
+                break;
+
+                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT:
+                    ReadPathGeometryVertexHandleAlignment( *currentVertex, Ar );
                 break;
 
                 case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTICES:

@@ -426,6 +426,28 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 }
 
 void
+FOdysseyVectorPath::Invalidate()
+{
+    FOdysseyVectorObject::Invalidate();
+}
+
+void
+FOdysseyVectorPath::Invalidate( uint32 iInvalidationFlags )
+{
+    if( iInvalidationFlags & INVALIDATE_MATRIX )
+    {
+        // Mark all segment as NOT painting ready to force recalculation of cached subsegments
+        // use by the parent paint group
+        for( FOdysseyVectorSegment* segment : mSegmentList )
+        {
+            segment->SetPaintingReady( false );
+        }
+    }
+
+    FOdysseyVectorObject::Invalidate( iInvalidationFlags );
+}
+
+void
 FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.remove( iSegment );
@@ -1339,6 +1361,8 @@ FOdysseyVectorPath::Cut( const ::ULIS::FVec2D& iLinePoint0
 
     for( int i = vertexCount; i < oNewVertexArray.size(); i++ )
     {
+        oNewVertexArray[i]->SetHandleAligned( true );
+
         AddVertex( oNewVertexArray[i] );
     }
 
@@ -1571,7 +1595,8 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
                                                                                     , handle0.y
                                                                                     , handle1.x
                                                                                     , handle1.y
-                                                                                    , stitchingVertex1 );
+                                                                                    , stitchingVertex1
+                                                                                    , true );
 
 
         iPath->AddSegment( stitchedSegment );
@@ -1590,7 +1615,7 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
 }
 
 void
-FOdysseyVectorPath::DrawShape( uint64 iFlags )
+FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
 {
     if ( mPathParam.Filled )
     {
@@ -1599,7 +1624,8 @@ FOdysseyVectorPath::DrawShape( uint64 iFlags )
     }
 
     BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-    FColor color = mForegroundBucket.GetColor();
+    FColor color = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? FColor( 0, 0, 0, 255 )
+                                                                                 : mForegroundBucket.GetColor();
     BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A );
 
     if( mSegmentList.size() )
@@ -1622,7 +1648,7 @@ FOdysseyVectorPath::DrawShape( uint64 iFlags )
         {
             FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
 
-            DrawJoint( cubicVertex, iFlags );
+            DrawJoint( cubicVertex, iDrawingFlags );
         }
     }
 }
@@ -1657,6 +1683,12 @@ FOdysseyVectorPath::DrawStructure( const FColor& iStrokeColor, double iStrokeWid
     blctx->restore();
 }
 
+std::list<FOdysseyVectorSegment*>&
+FOdysseyVectorPath::GetInvalidatedSegmentList()
+{
+    return mInvalidatedSegmentList;
+}
+
 FOdysseyVectorObject*
 FOdysseyVectorPath::CopyShape()
 {
@@ -1687,12 +1719,15 @@ FOdysseyVectorPath::CopyShape()
                                                                                , originalSegment->GetHandle(0)->GetY()
                                                                                , originalSegment->GetHandle(1)->GetX()
                                                                                , originalSegment->GetHandle(1)->GetY()
-                                                                               , lookupTable[vertex1] );
+                                                                               , lookupTable[vertex1]
+                                                                               , true );
 
         cubicPathCopy->AddSegment( newSegment );
 
-        newSegment->BuildVariable();
+        //newSegment->BuildVariable();
     }
+
+    //cubicPathCopy->Update( 0 );
 
     return static_cast<FOdysseyVectorObject*>( cubicPathCopy );
 }
@@ -1751,7 +1786,8 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
                                                                                    , pt[0].y
                                                                                    , pt[1].x
                                                                                    , pt[1].y
-                                                                                   , newCubicVertex1 );
+                                                                                   , newCubicVertex1
+                                                                                   , true );
             oAddedSegmentArray.push_back( newSegment );
 
             AddSegment( newSegment ); // this also invalidates the segment
@@ -1765,6 +1801,50 @@ uint32
 FOdysseyVectorPath::GetType()
 {
     return FOdysseyVectorObject::VECTORPATHTYPE;
+}
+
+void
+FOdysseyVectorPath::ApplyMatrix( BLMatrix2D& iMatrix )
+{
+    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    {
+        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
+        ::ULIS::FVec2D& point = cubicVertex->GetCoords();
+        BLPoint localPt = iMatrix.mapPoint( point.x, point.y );
+        BLPoint localVec = iMatrix.mapVector( 0.70710678118f * cubicVertex->GetRadius()
+                                            , 0.70710678118f * cubicVertex->GetRadius() );
+        ::ULIS::FVec2D vec = { localVec.x, localVec.y };
+
+        cubicVertex->Set( localPt.x, localPt.y, vec.Distance() );
+    }
+
+    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    {
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+        ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+        ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+        BLPoint localPt0 = iMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y );
+        BLPoint localPt1 = iMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y );
+
+        cubicSegment->GetHandle(0)->Set( localPt0.x, localPt0.y );
+        cubicSegment->GetHandle(1)->Set( localPt1.x, localPt1.y );
+
+        InvalidateSegment( cubicSegment );
+    }
+}
+
+void
+FOdysseyVectorPath::ApplyTransformations()
+{
+    BLMatrix2D& parentInverseWorldMatrix = mParent->GetInverseWorldMatrix();
+    BLMatrix2D conversionMatrix = mLocalMatrix;
+
+    FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, mWorldMatrix, conversionMatrix );
+
+    ApplyMatrix( conversionMatrix );
+
+    // inherited
+    FOdysseyVectorObject::ApplyTransformations();
 }
 
 void
@@ -1813,7 +1893,7 @@ FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
 
 // static
 void
-FOdysseyVectorPath::SharpSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength )
+FOdysseyVectorPath::SharpSegments( FOdysseyVectorVertex* iVertex, bool iPreserveHandleLength )
 {
     std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
 
@@ -1823,20 +1903,13 @@ FOdysseyVectorPath::SharpSegments( FOdysseyVectorVertex* iVertex, bool iBuildSeg
 
         cubicSegment->GetHandle( iVertex )->Set( iVertex->GetX(), iVertex->GetY() );
 
-        if ( iBuildSegments == true )
-        {
-            cubicSegment->Update();
-        }
-        else
-        {
-            cubicSegment->Invalidate();
-        }
+        cubicSegment->Invalidate();
     }
 }
 
 // static
 void
-FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength )
+FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iPreserveHandleLength )
 {
     ::ULIS::FVec2D perpendicularVector = iVertex->GetAverageStraightVectorOnSegment( true );
 
@@ -1847,12 +1920,12 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSe
         perpendicularVector = ::ULIS::FVec2D( perpendicularVector.y, -perpendicularVector.x );
     }
 
-    SmoothSegments( iVertex, perpendicularVector, iBuildSegments, iPreserveHandleLength );
+    SmoothSegments( iVertex, perpendicularVector, iPreserveHandleLength );
 }
 
 // static
 void
-FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2D iPerpendicularVector, bool iBuildSegments, bool iPreserveHandleLength )
+FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2D iPerpendicularVector, bool iPreserveHandleLength )
 {
     std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
 
@@ -1866,15 +1939,15 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
             {
                 //::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
                 ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( iVertex, true );
-                double dot = iPerpendicularVector.DotProduct( segmentVector );
-                ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( iPerpendicularVector.y, -iPerpendicularVector.x );
+                //double dot = iPerpendicularVector.DotProduct( segmentVector );
+                ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( -iPerpendicularVector.y, iPerpendicularVector.x );
                 double distance;
 
                 // if perpendicular vector equals 0 or is orthogonal to the segment vector
-                if ( tangentVector.DotProduct( segmentVector )  < 0.0f )
+                /*if ( tangentVector.DotProduct( segmentVector )  < 0.0f )
                 {
                     tangentVector = -tangentVector;
-                }
+                }*/
 
                 if( iPreserveHandleLength )
                 {
@@ -1922,14 +1995,7 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
                                                  iVertex->GetY() + ( tangentVector.y * distance ) );
             }
 
-            if ( iBuildSegments == true )
-            {
-                cubicSegment->Update();
-            }
-            else
-            {
-                cubicSegment->Invalidate();
-            }
+            cubicSegment->Invalidate();
         }
     }
 }

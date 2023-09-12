@@ -21,7 +21,6 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , mIsSelected( false )
     , mIsExpanded( false )
-    , mDependsOnChildren( false )
     , mBackgroundBucket( this, 0.0f, 0.0f, false )
     , mForegroundBucket( this, 0.0f, 0.0f, false )
     , mInvalidationFlags ( 0 )
@@ -164,6 +163,41 @@ void
 FOdysseyVectorObject::SetIsSelected( bool iIsSelected )
 {
     mIsSelected = iIsSelected;
+}
+
+void FOdysseyVectorObject::ApplyMatrix( BLMatrix2D& iMatrix )
+{
+
+}
+
+void FOdysseyVectorObject::ApplyTransformations()
+{
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        BLMatrix2D& parentInverseWorldMatrix = mParent->GetInverseWorldMatrix();
+        BLMatrix2D& childWorldMatrix = child->GetWorldMatrix();
+        BLMatrix2D localMatrix;
+        double translationX, translationY, rotation, scalingX, scalingY;
+
+        FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, childWorldMatrix, localMatrix );
+
+        FOdysseyVector::ExtractTransformations( localMatrix
+                                              , &translationX
+                                              , &translationY
+                                              , &rotation
+                                              , &scalingX
+                                              , &scalingY );
+
+        child->SetTransform( translationX
+                           , translationY
+                           , rotation / M_PI * 180.0f
+                           , scalingX
+                           , scalingY );
+    }
+
+    SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
+
+    UpdateMatrix();
 }
 
 void
@@ -502,7 +536,11 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysse
     
     AddChild( iFosterChild, iInsertAfter );
 
-    iFosterChild->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
+    iFosterChild->SetTransform( translationX
+                              , translationY
+                              , rotation / M_PI * 180.0f
+                              , scalingX
+                              , scalingY );
 
     iFosterChild->UpdateMatrix();
 }
@@ -548,6 +586,19 @@ FOdysseyVectorObject::IsSelected()
 }
 
 void
+FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild )
+{
+    // this is temporary and should be optimized somehow
+    if( std::find( mInvalidatedChildrenList.begin(), mInvalidatedChildrenList.end(), iChild ) == mInvalidatedChildrenList.end() )
+        /*mInvalidationFlags & INVALIDATE_PARENT ) == 0*/
+    {
+        mInvalidatedChildrenList.push_back( iChild );
+    }
+
+    Invalidate( INVALIDATE_CHILD );
+}
+
+void
 FOdysseyVectorObject::Invalidate()
 {
     Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
@@ -558,14 +609,7 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
 {
     if ( mParent )
     {
-        // this is temporary and should be optimized somehow
-        if( std::find( mParent->mInvalidatedChildrenList.begin(), mParent->mInvalidatedChildrenList.end(), this ) == mParent->mInvalidatedChildrenList.end() )
-            /*mInvalidationFlags & INVALIDATE_PARENT ) == 0*/
-        {
-            mParent->mInvalidatedChildrenList.push_back( this );
-        }
-
-        mParent->Invalidate( INVALIDATE_CHILD );
+        mParent->InvalidateChild( this );
     }
 
     mInvalidationFlags |= iInvalidationFlags;

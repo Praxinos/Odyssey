@@ -167,6 +167,9 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorEngi
     }
     GEditor->EndTransaction();
 
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+
     return true;
 }
 
@@ -199,7 +202,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEng
 
     mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void
@@ -254,12 +258,12 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngi
                 // then sharp or smooth
                 if( SmoothingMode == ePathSmoothingMode::Sharp )
                 {
-                    FOdysseyVectorPath::SharpSegments( vertex, false, PreserveHandleLength );
+                    FOdysseyVectorPath::SharpSegments( vertex, PreserveHandleLength );
                 }
 
                 if( SmoothingMode == ePathSmoothingMode::Round )
                 {
-                    FOdysseyVectorPath::SmoothSegments( vertex, false, PreserveHandleLength );
+                    FOdysseyVectorPath::SmoothSegments( vertex, PreserveHandleLength );
                 }
             }
         }
@@ -267,7 +271,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngi
 
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 bool

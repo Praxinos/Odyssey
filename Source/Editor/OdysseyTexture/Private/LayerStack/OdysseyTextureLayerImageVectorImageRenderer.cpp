@@ -10,6 +10,7 @@ FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorIma
     , mEngine(const_cast<UOdysseyTextureLayerImageVector*>(iLayer)->GetEngine())
     , mBlock(iBlock)
     , mRenderHUD(false)
+    , mIsColored(iLayer->IsColored)
 {
     UOdysseyLayerStack* layerStack = iLayer->GetLayerStack();
     if (!layerStack)
@@ -24,7 +25,7 @@ FOdysseyTextureLayerImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> i
     if (!mBlock)
         return iWaitList;
 
-    mEngine->Update( 0 );
+    mEngine->Render( mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
 
     // HUD displaying only for the current layer.
     if( mRenderHUD )
@@ -39,7 +40,7 @@ FOdysseyTextureLayerImageVectorImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> io
     if (!mBlock)
         return iWaitList;
 
-    mEngine->Update( 0 );
+    mEngine->Render( mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
 
     // HUD displaying only for the current layer.
     if( mRenderHUD )

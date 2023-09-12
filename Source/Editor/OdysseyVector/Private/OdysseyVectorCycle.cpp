@@ -102,9 +102,9 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
     }
 
     // Then check if all vertices lies within the parent candidate
-    for( int i = 0; i < mVertexArray.size(); i++ )
+    for( int i = 0; i < mSectionArray.size(); i++ )
     {
-        ::ULIS::FVec2D& vCoords = mVertexArray[i]->GetCoords();
+        ::ULIS::FVec2D vCoords = mSectionArray[i]->GetVertexCoords( mVertexArray[i] );
         BLPoint pt = BLPoint( vCoords.x, vCoords.y );
         uint32 ret = iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
@@ -121,12 +121,13 @@ void
 FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                           , std::vector<FOdysseyVectorSection*>& iSectionArray )
 {
-    int32 arraySize = iVertexArray.size();
+    int32 arraySize = iSectionArray.size();
     int seg = 0;
 
-    if ( iVertexArray.size() ) 
+    if ( iSectionArray.size() ) 
     {
-        ::ULIS::FVec2D originAt = iVertexArray[0]->GetCoords();
+        // Note: section::GetVertexCoords() return the coords in paintgroup's coordinates
+        ::ULIS::FVec2D originAt = iSectionArray[0]->GetVertexCoords( iVertexArray[0] );
 
         mContourPath.moveTo( originAt.x, originAt.y );
 
@@ -147,7 +148,7 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
                 FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
 
                 if( ( iSectionArray[i]->GetSegment() != iSectionArray[n]->GetSegment() )
-                 || ( intersectionVertex->SelfIntersects() == true ) )
+                 || ( intersectionVertex->GetIntersection()->SelfIntersects() == true ) )
                 {
                     vertexn = intersectionVertex->GetPartner();
                 }
@@ -349,7 +350,7 @@ FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeCo
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
 
-    if( iMonochrome )
+    if( iMonochrome || ( iFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) )
     {
         BLRgba32 BLColor = BLRgba32( iMonochromeColor.R
                                    , iMonochromeColor.G
@@ -414,15 +415,13 @@ FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeCo
                 {
                     eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
                     ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
-                    double radialMinX = /*bbox.x0*/bbox.x;
-                    double radialMinY = /*bbox.y0*/bbox.y;
-                    double radialMaxX = /*bbox.x1*/bbox.x + bbox.w;
-                    double radialMaxY = /*bbox.y1*/bbox.y + bbox.h;
-                    BLGradient radial( BLRadialGradientValues( bbox.x + (bbox.w * 0.5f)
-                                                             , bbox.y + (bbox.h * 0.5f)
-                                                             , bbox.x + (bbox.w * 0.5f)
-                                                             , bbox.y + (bbox.h * 0.5f)
-                                                             , 45.0f ) );
+                    ::ULIS::FVec2D& radialOffset = bucket->GetRadialOffset();
+                    ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
+                    BLGradient radial( BLRadialGradientValues( bucketCoords.x + radialOffset.x
+                                                             , bucketCoords.y + radialOffset.y
+                                                             , bucketCoords.x + radialOffset.x
+                                                             , bucketCoords.y + radialOffset.y
+                                                             , bucket->GetRadialRadius() ) );
                     FColor& gradientColor0 = bucket->GetGradientColor0();
                     FColor& gradientColor1 = bucket->GetGradientColor1();
                     BLRgba32 BLColor0;

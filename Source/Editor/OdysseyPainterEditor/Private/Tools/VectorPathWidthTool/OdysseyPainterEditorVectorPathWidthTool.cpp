@@ -104,7 +104,8 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDownVector( FOdysseyVectorEngin
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey)
 {
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return true;
 }
@@ -132,7 +133,8 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseHoverVector( FOdysseyVectorEngi
 {
     mPickingHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void
@@ -195,7 +197,8 @@ UOdysseyPainterEditorVectorPathWidthTool::OnMouseDragVector( FOdysseyVectorEngin
     // update vector scene and GUI widgets via delegates.
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 bool

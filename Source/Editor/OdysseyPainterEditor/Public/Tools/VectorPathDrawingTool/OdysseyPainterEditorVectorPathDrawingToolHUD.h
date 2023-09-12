@@ -23,4 +23,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : p
         virtual void Load( FOdysseyVectorScene* iScene ) override;
 
         bool SetCursorPosition( double iX, double iY );
+        std::vector<FOdysseyVectorPoint*>& GetStitchedPointArray();
 };

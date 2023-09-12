@@ -11,7 +11,6 @@
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
-#include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
@@ -82,7 +81,6 @@ public:
     virtual UOdysseyPainterEditorVectorPickTool*                     GetVectorPickTool() const;
     virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const;
     virtual UOdysseyPainterEditorVectorTransformTool*                GetVectorTransformTool() const;
-    virtual UOdysseyPainterEditorVectorSceneScaleTool*               GetVectorSceneScaleTool() const;
     virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const;
     virtual UOdysseyPainterEditorVectorEraserTool*                   GetVectorEraserTool() const;
     virtual UOdysseyPainterEditorVectorPathPushTool*                 GetVectorPathPushTool() const;
@@ -114,7 +112,8 @@ public:
     static void AlignPointSelection( FOdysseyVectorScene* iScene );
     static void GetVertexSelection( FOdysseyVectorScene* iScene
                                   , std::vector<FOdysseyVectorPoint*>& iSelectedVertexArray );
-
+    static void ClearColoring( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void ApplyTransformations( FOdysseyVectorScene* iScene );
 
     void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
     eVectorEditionMode GetVectorEditionMode();
@@ -172,7 +171,6 @@ protected:
     UOdysseyPainterEditorVectorPathEditTool* mVectorPathEditTool;
     UOdysseyPainterEditorVectorPathCutTool* mVectorPathCutTool;
     UOdysseyPainterEditorVectorPickTool* mVectorPickTool;
-    UOdysseyPainterEditorVectorSceneScaleTool* mVectorSceneScaleTool;
     UOdysseyPainterEditorVectorScenePanTool* mVectorScenePanTool;
     UOdysseyPainterEditorVectorEraserTool* mVectorEraserTool;
     UOdysseyPainterEditorVectorPathPushTool* mVectorPathPushTool;

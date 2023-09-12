@@ -786,7 +786,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDrag( const FOdysseyPoint& iPoi
             }
         }
 
-        vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                            | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
     }
 }
 

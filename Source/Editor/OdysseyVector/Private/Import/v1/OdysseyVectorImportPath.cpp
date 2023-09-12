@@ -32,7 +32,8 @@ FOdysseyVectorImportV1::ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
                                                        , ctrlPoint0Y
                                                        , ctrlPoint1X
                                                        , ctrlPoint1Y
-                                                       , vertexArray[p1ID] );
+                                                       , vertexArray[p1ID]
+                                                       , true );
 
         iPath.AddSegment( cubicSegment );
 

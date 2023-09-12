@@ -27,6 +27,7 @@
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "Undo/OdysseyVectorUndoPathStitch.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
+#include "Undo/OdysseyVectorUndoApplyTransformations.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
@@ -34,7 +35,6 @@
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
 #include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
-#include "Tools/VectorSceneScaleTool/OdysseyPainterEditorVectorSceneScaleTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
@@ -74,7 +74,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEdite
 	, mVectorPathEditTool(nullptr)
 	, mVectorPathCutTool(nullptr)
 	, mVectorPickTool(nullptr)
-	, mVectorSceneScaleTool(nullptr)
 	, mVectorScenePanTool(nullptr)
 	, mVectorEraserTool(nullptr)
 	, mVectorPathPushTool(nullptr)
@@ -134,7 +133,6 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mVectorPathEditTool->BindShortcuts(iToolkit);
 	mVectorPathCutTool->BindShortcuts(iToolkit);
 	mVectorPickTool->BindShortcuts(iToolkit);
-	mVectorSceneScaleTool->BindShortcuts(iToolkit);
 	mVectorScenePanTool->BindShortcuts(iToolkit);
 	mVectorEraserTool->BindShortcuts(iToolkit);
 	mVectorPathPushTool->BindShortcuts(iToolkit);
@@ -169,7 +167,6 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPickTool->ExtendMenu(iOwner, iMenuName);
-	mVectorSceneScaleTool->ExtendMenu(iOwner, iMenuName);
 	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
 	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
@@ -214,7 +211,6 @@ FOdysseyPainterEditor::InitTools()
 	mVectorPathEditTool = NewObject<UOdysseyPainterEditorVectorPathEditTool>();
 	mVectorPathCutTool = NewObject<UOdysseyPainterEditorVectorPathCutTool>();
 	mVectorPickTool = NewObject<UOdysseyPainterEditorVectorPickTool>();
-    mVectorSceneScaleTool = NewObject<UOdysseyPainterEditorVectorSceneScaleTool>();
     mVectorScenePanTool = NewObject<UOdysseyPainterEditorVectorScenePanTool>();
     mVectorEraserTool = NewObject<UOdysseyPainterEditorVectorEraserTool>();
     mVectorPathPushTool = NewObject<UOdysseyPainterEditorVectorPathPushTool>();
@@ -232,7 +228,6 @@ FOdysseyPainterEditor::InitTools()
     mVectorPathEditTool->SetEditor(this);
     mVectorPathCutTool->SetEditor(this);
     mVectorPickTool->SetEditor(this);
-    mVectorSceneScaleTool->SetEditor(this);
     mVectorScenePanTool->SetEditor(this);
     mVectorEraserTool->SetEditor(this);
     mVectorPathPushTool->SetEditor(this);
@@ -251,7 +246,6 @@ FOdysseyPainterEditor::InitTools()
     mTools.Add(mVectorPathEditTool);
     mTools.Add(mVectorPathCutTool);
     mTools.Add(mVectorPickTool);
-    mTools.Add(mVectorSceneScaleTool);
     mTools.Add(mVectorScenePanTool);
     mTools.Add(mVectorEraserTool);
     mTools.Add(mVectorPathPushTool);
@@ -331,12 +325,6 @@ UOdysseyPainterEditorVectorTransformTool*
 FOdysseyPainterEditor::GetVectorTransformTool() const
 {
     return mVectorTransformTool;
-}
-
-UOdysseyPainterEditorVectorSceneScaleTool*
-FOdysseyPainterEditor::GetVectorSceneScaleTool() const
-{
-    return mVectorSceneScaleTool;
 }
 
 UOdysseyPainterEditorVectorScenePanTool*
@@ -703,6 +691,58 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorSce
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
+static void
+ApplyTransformationsRecursive( FOdysseyVectorObject* iObject )
+{
+    if( iObject->IsSelected() == true )
+    {
+        iObject->ApplyTransformations();
+    }
+
+    for( FOdysseyVectorObject* child : iObject->GetChildrenList() )
+    {
+        ApplyTransformationsRecursive( child );
+    }
+}
+
+void
+FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorScene* iScene )
+{
+    FOdysseyVectorEngine* engine = iScene->GetEngine();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList :
+                                                                                      engine->GetChildrenList();
+
+    // Backup before, for undoing
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("ApplyTransformations", "Apply Transformations"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoApplyTransformations( iScene, focusedObjectList );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+
+    if( selectedObjectList.size() == 0 )
+    {
+        iScene->SetIsSelected( true );
+    }
+
+    ApplyTransformationsRecursive( iScene );
+
+    iScene->SetIsSelected( false );
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    engine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    engine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
 void
 FOdysseyPainterEditor::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
@@ -1044,6 +1084,62 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVe
 }
 
 void
+FOdysseyPainterEditor::ClearColoring( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList :
+                                                                                      iEngine->GetChildrenList();
+
+    std::vector<FOdysseyVectorBucket*> bucketArray;
+
+    bucketArray.reserve( 100 );
+
+    // first step: retrieve all buckets for undoing.
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
+    {
+        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintgroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
+            std::list<FOdysseyVectorBucket*>& bucketList = paintgroup->GetBucketList();
+
+            for( FOdysseyVectorBucket* bucket : bucketList )
+            {
+                bucketArray.push_back( bucket );
+            }
+        }
+    }
+
+    // first step: the actual removal.
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
+    {
+        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintgroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
+
+            paintgroup->RemoveAllBuckets();
+        }
+    }
+
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("ClearColoring", "Clear Coloring"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, bucketArray );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // re-colorize paint group
+
+    iEngine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+void
 FOdysseyPainterEditor::FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
 {
     // needed for undos
@@ -1326,7 +1422,6 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mVectorPathEditTool);
 	Collector.AddReferencedObject(mVectorPathCutTool);
 	Collector.AddReferencedObject(mVectorPickTool);
-    Collector.AddReferencedObject(mVectorSceneScaleTool);
     Collector.AddReferencedObject(mVectorScenePanTool);
     Collector.AddReferencedObject(mVectorEraserTool);
     Collector.AddReferencedObject(mVectorPathPushTool);

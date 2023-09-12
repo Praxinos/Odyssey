@@ -10,8 +10,21 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
     : FOdysseyVectorLink( iVertex0, iVertex1 )
     , mPath ( iPath )
     , mIsInvalidated( false )
+    , mIsPaintingReady( false )
     , mPaintingCode ( 0 )
 {
+}
+
+FOdysseyVectorHandleSegment*
+FOdysseyVectorSegment::GetHandle( int iCtrlPointNum )
+{
+    return nullptr;
+}
+
+FOdysseyVectorHandleSegment*
+FOdysseyVectorSegment::GetHandle( FOdysseyVectorVertex* iVertex )
+{
+    return nullptr;
 }
 
 FOdysseyVectorVertex*
@@ -162,6 +175,8 @@ FOdysseyVectorSegment::Invalidate()
         mPath->InvalidateSegment( this );
 
         mIsInvalidated = true;
+
+        mIsPaintingReady = false;
     }
 }
 
@@ -192,6 +207,29 @@ FOdysseyVectorSegment::GetIntersectionVertices( std::vector<FOdysseyVectorVertex
 
         oVertexArray.push_back( intersectionVertex );
     }
+}
+
+bool
+FOdysseyVectorSegment::HasBaseClass( uint32 iBaseClassID )
+{
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void
+FOdysseyVectorSegment::SetPaintingReady( bool iIsPaintingReady )
+{
+    mIsPaintingReady = iIsPaintingReady;
+}
+
+bool
+FOdysseyVectorSegment::IsPaintingReady()
+{
+    return mIsPaintingReady;
 }
 
 ::ULIS::FVec2D

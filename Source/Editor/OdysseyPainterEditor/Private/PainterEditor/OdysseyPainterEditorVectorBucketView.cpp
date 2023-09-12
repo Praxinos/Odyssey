@@ -36,7 +36,9 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
 {
     if( mBucket )
     {
-        mBucket->ImportParam( BucketParam );
+        mBucket->mBucketParam = BucketParam;
+
+        mBucket->Invalidate();
     }
 }
 

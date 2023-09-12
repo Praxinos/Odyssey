@@ -64,7 +64,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 VECTORGROUPPAINTTYPE = 6;
 
         // drawing mask
-        //static const uint32 DRAWSTRUCTURE = ( 1 << 0 );
+        static const uint32 DRAWING_IGNORECOLOR  = ( 1 << 0 );
 
         // update mask
         //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
@@ -94,7 +94,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* mParent;
         bool mIsSelected;
         bool mIsExpanded;
-        bool mDependsOnChildren;
         ::ULIS::FRectD mBBox;
 
         FOdysseyVectorBucket mBackgroundBucket;
@@ -130,8 +129,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                          , double iRotation
                          , double iScalingX
                          , double iScalingY );
-
-        virtual void OnChildTransform( FOdysseyVectorObject* iChild ) {};
 
         virtual void Update( uint32 iUpdateFlags );
         virtual void UpdateShape( uint32 iUpdateFlags );
@@ -197,6 +194,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void BringForward();
         virtual void Invalidate( uint32 iInvalidationFlags );
         virtual void Invalidate();
+        virtual void InvalidateChild( FOdysseyVectorObject* iChild );
         FOdysseyVectorScene* GetScene();
         bool IsInvalidated();
         bool IsSelected();
@@ -214,4 +212,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FString& GetName();
         FOdysseyVectorObject* GetLastChild();
         FOdysseyVectorObject* GetPreviousChild( FOdysseyVectorObject* iChild );
+        virtual void ApplyTransformations();
+        virtual void ApplyMatrix( BLMatrix2D& iMatrix );
 };

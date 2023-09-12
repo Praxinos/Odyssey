@@ -118,7 +118,7 @@ Shape( FOdysseyVectorSegmentCubic& iCubicSegment, ::ULIS::FVec2D iEntryVector, :
     iCubicSegment.GetHandle(1)->Set( iCubicSegment.GetPoint(1)->GetX() - iExitVector.x * length * 0.25f
                                    , iCubicSegment.GetPoint(1)->GetY() - iExitVector.y * length * 0.25f );
 
-    iCubicSegment.Update();
+    //iCubicSegment.Update();
 }
 
 double
@@ -152,7 +152,7 @@ FOdysseyVectorPathBuilder::GetSampleAngle()
 */
 
 static void
-Smooth( FOdysseyVectorSegmentCubic* iNewSegment, bool iSharp )
+Smooth( FOdysseyVectorSegmentCubic* iNewSegment )
 {
     FOdysseyVectorVertex* vertex = iNewSegment->GetVertex( 0 );
     FOdysseyVectorHandleSegment* handle = iNewSegment->GetHandle( 0 );
@@ -163,17 +163,16 @@ Smooth( FOdysseyVectorSegmentCubic* iNewSegment, bool iSharp )
         ::ULIS::FVec2D prevVector = prevSegment->GetHandleVector( vertex, false );
         ::ULIS::FVec2D nsegVector = iNewSegment->GetHandleVector( vertex, false );
 
-        if( iSharp == false )
+        vertex->SetHandleAligned( true );
+
+        if( prevVector.DistanceSquared() )
         {
-            if( prevVector.DistanceSquared() )
-            {
-                double distance = nsegVector.Distance();
+            double distance = nsegVector.Distance();
 
-                prevVector.Normalize();
+            prevVector.Normalize();
 
-                handle->Set( vertex->GetX() - ( prevVector.x * distance )
-                           , vertex->GetY() - ( prevVector.y * distance ) );
-            }
+            handle->Set( vertex->GetX() - ( prevVector.x * distance )
+                        , vertex->GetY() - ( prevVector.y * distance ) );
         }
     }
 }
@@ -212,7 +211,7 @@ FOdysseyVectorPathBuilder::RecordVertex()
             uint32 linkID0 =  0;
             uint32 linkID1 =  mLinkBuffer.size() - 2; // penultimate link
 /// TODO: Factorize that part
-            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, previousCubicVertex, cubicVertex );
+            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, previousCubicVertex, cubicVertex, true );
 
             Shape ( *mCubicSegment
                    , mLinkBuffer[linkID0].GetVector( true )
@@ -220,14 +219,17 @@ FOdysseyVectorPathBuilder::RecordVertex()
 
             mCubicPath->AddSegment( mCubicSegment );
 
-            Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
+            if( mSampleBuffer[0].IsSharp() == false )
+            {
+                Smooth( mCubicSegment );
+            }
 
             AdjustHandle( mCubicSegment, 0, 0.5f, ADJUSTRECURSE );
             AdjustHandle( mCubicSegment, 1, 0.5f, ADJUSTRECURSE );
 
             mCubicSegment->Invalidate();
 
-            //mCubicPath->Update( 0 );
+            mCubicPath->Update( 0 );
 /// end TODO
 
             ret |= FOdysseyVectorPathBuilder::NEWSEGMENT;
@@ -390,7 +392,7 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
             uint32 linkID1 =  mLinkBuffer.size() - 1; // last link
 
         /// TODO: Factorize that part
-            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, mVertexArray.back(), iVertex );
+            mCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath, mVertexArray.back(), iVertex, true );
 
             Shape ( *mCubicSegment
                    , mLinkBuffer[linkID0].GetVector( true )
@@ -398,7 +400,10 @@ FOdysseyVectorPathBuilder::RecordEnd( FOdysseyVectorVertex *iVertex )
 
             mCubicPath->AddSegment( mCubicSegment );
 
-            Smooth( mCubicSegment, mSampleBuffer[0].IsSharp() );
+            if( mSampleBuffer[0].IsSharp() == false )
+            {
+                Smooth( mCubicSegment );
+            }
 
             AdjustHandle( mCubicSegment, 0, 0.5f, ADJUSTRECURSE );
             AdjustHandle( mCubicSegment, 1, 0.5f, ADJUSTRECURSE );

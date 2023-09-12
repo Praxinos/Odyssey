@@ -15,11 +15,13 @@ FOdysseyVectorLine::FOdysseyVectorLine( const FString iName, double iWidth, doub
     mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
     mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
 
-    mCubicSegment = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1] );
+    mCubicSegment = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1], true );
 
     AddVertex( mCubicVertex[0] );
     AddVertex( mCubicVertex[1] );
     AddSegment( mCubicSegment );
+
+    UpdateShape( 0 );
 }
 
 bool
@@ -46,7 +48,8 @@ FOdysseyVectorLine::UpdateShape( uint32 iUpdateFlags )
     mCubicSegment->GetHandle(0)->Set( mWidth  * 0.25f, mHeight  * 0.25f );
     mCubicSegment->GetHandle(1)->Set( mWidth  * 0.75f, mHeight  * 0.75f );
 
-    mCubicSegment->Update();
+    //mCubicSegment->Update( nullptr );
+    FOdysseyVectorPath::UpdateShape( iUpdateFlags );
 }
 
 FOdysseyVectorObject*

@@ -4,10 +4,133 @@
 #include "Misc/Change.h"
 #include "Misc/ITransaction.h"
 
+#include <ULIS>
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
-#include "OdysseyVectorScene.h"
+
+
+class FOdysseyVectorScene;
+class FOdysseyVectorGroupPaint;
+class FOdysseyVectorVertex;
+class FOdysseyVectorSegmentCubic;
+
+class ODYSSEYVECTOR_API FSnapshotVertex
+{
+    public:
+        static const uint32 SNAPSHOT_POSITION = ( 1 << 0 );
+        static const uint32 SNAPSHOT_RADIUS   = ( 1 << 1 );
+        static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
+
+        ~FSnapshotVertex();
+        FSnapshotVertex( FOdysseyVectorVertex* iVertex, uint32 iVertexSnapshotFlags );
+
+        void Restore();
+
+    private:
+        uint32 mVertexSnapshotFlags;
+        FOdysseyVectorVertex* mVertex;
+        ULIS::FVec2D mCoords;
+        double mRadius;
+};
+
+class ODYSSEYVECTOR_API FSnapshotSegmentCubic
+{
+    public:
+        static const uint32 SNAPSHOT_HANDLES = ( 1 << 0 );
+        static const uint32 SNAPSHOT_ALL     = 0xFFFFFFFF;
+
+        ~FSnapshotSegmentCubic();
+        FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic* iCubicSegment, uint32 iCubicSegmentSnapshotFlags );
+
+        void Restore();
+
+    private:
+        uint32 mCubicSegmentSnapshotFlags;
+        FOdysseyVectorSegmentCubic* mCubicSegment;
+        ULIS::FVec2D mHandleCoords[2];
+};
+
+class ODYSSEYVECTOR_API FSnapshotBucket
+{
+    public:
+        static const uint32 SNAPSHOT_POSITION = ( 1 << 0 );
+        static const uint32 SNAPSHOT_PARAM    = ( 1 << 1 );
+        static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
+
+        ~FSnapshotBucket();
+        FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint32 iBucketSnapshotFlags );
+
+        void Restore();
+
+    private:
+        uint32 mBucketSnapshotFlags;
+        FOdysseyVectorBucket* mBucket;
+        ULIS::FVec2D mCoords;
+        FBucketParam mBucketParam;
+};
+
+class ODYSSEYVECTOR_API FSnapshotObject
+{
+    public:
+        static const uint32 SNAPSHOT_TRANSFORMATIONS          = ( 1 << 0 );
+        static const uint32 SNAPSHOT_CHILDREN_TRANSFORMATIONS = ( 1 << 1 );
+        static const uint32 SNAPSHOT_ALL                      = 0xFFFFFFFF;
+
+        ~FSnapshotObject();
+        FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectSnapshotFlags );
+
+        virtual void Restore();
+
+    private:
+        uint32 mObjectSnapshotFlags;
+        FOdysseyVectorObject* mObject;
+        std::vector<FSnapshotObject*> mChildrenSnapshotArray;
+        double mTranslationX;
+        double mTranslationY;
+        double mRotation;
+        double mScalingX;
+        double mScalingY;
+};
+
+class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
+{
+    public:
+        static const uint32 SNAPSHOT_VERTICES = ( 1 << 0 );
+        static const uint32 SNAPSHOT_SEGMENTS = ( 1 << 1 );
+        static const uint32 SNAPSHOT_ALL     = 0xFFFFFFFF;
+
+        ~FSnapshotPath();
+        FSnapshotPath( FOdysseyVectorPath* iPath
+                      , uint32 iObjectSnapshotFlags
+                      , uint32 iPathSnapshotFlags );
+
+        virtual void Restore() override;
+
+    private:
+        uint32 mPathSnapshotFlags;
+        std::vector<FSnapshotVertex> mVertexSnapshotArray;
+        std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;
+};
+
+class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotObject
+{
+    public:
+        static const uint32 SNAPSHOT_BUCKETS = ( 1 << 0 );
+        static const uint32 SNAPSHOT_ALL     = 0xFFFFFFFF;
+
+        ~FSnapshotGroupPaint();
+        FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
+                           , uint32 iObjectSnapshotFlags
+                           , uint32 iPaintGroupSnapshotFlags );
+
+        virtual void Restore() override;
+
+    private:
+        uint32 mPaintGroupSnapshotFlags;
+        std::vector<FSnapshotBucket> mBucketSnapshotArray;
+};
+
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 {

@@ -34,7 +34,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1 << 3 );
         static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1 << 4 );
         static const uint64 SIGNAL_INTERACTIVE        = ( 1 << 5 );
-        static const uint64 SIGNAL_ALL                = 0xFFFFFFFFFFFFFFFF & ~SIGNAL_INTERACTIVE;
+        static const uint64 SIGNAL_ALL                = 0xFFFFFFFFFFFFFFFF & (~SIGNAL_INTERACTIVE);
 
         static FSignalDelegate& OnSignalDelegate();
 
@@ -295,6 +295,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          */
         ::ULIS::FRectD GenerateRectangleMask( const ::ULIS::FRectD& iRect );
 
+        void Render( uint64 iDrawingFlags );
+
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
@@ -312,7 +314,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                   , const ::ULIS::FRectD &iRoi
                                   , bool iSelectedOnly );
 
-        virtual void UpdateShape( uint32 iUpdateFlags );
 
 
     private:

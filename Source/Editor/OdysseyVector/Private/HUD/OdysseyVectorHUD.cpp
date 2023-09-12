@@ -336,6 +336,7 @@ FOdysseyVectorHUD::DrawVertex( FOdysseyVectorVertex* iVertex
     // TODO: compute that once and pass it as parameter for all vertices
     BLPoint point = HUDMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );
     BLPoint handle = HUDMatrix.mapVector( ctrl.x, ctrl.y );
+    static BLRgba32 greenColor = BLRgba32( 0, 255, 0, 255 );
 
     FOdysseyVectorHUD::DrawCircle( point.x
                                  , point.y
@@ -343,6 +344,16 @@ FOdysseyVectorHUD::DrawVertex( FOdysseyVectorVertex* iVertex
                                  , iBLContext
                                  , iVertex->IsSelected() ? hcColor : fgColor
                                  , bgColor );
+
+    if ( iHUDFlags & VIEW_VERTEX_ALIGNMENT )
+    {
+        if( iVertex->IsHandleAligned() )
+        {
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( greenColor );
+            iBLContext->strokeCircle( point.x, point.y, VERTEXRADIUS + 2 );
+        }
+    }
 
     if ( iHUDFlags & VIEW_VERTEX_HANDLE )
     {

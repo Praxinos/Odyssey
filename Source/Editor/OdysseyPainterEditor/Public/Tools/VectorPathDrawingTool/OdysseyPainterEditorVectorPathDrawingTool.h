@@ -12,16 +12,31 @@
 #include "OdysseyPainterEditorVectorPathDrawingTool.generated.h"
 
 class FOdysseyPainterEditorVectorPathDrawingToolHUD;
+class FOdysseyVectorUndoPathExtend;
+
+UENUM()
+enum class eTracingType : uint8
+{
+    Organic  = 0,
+    Mechanic = 1,
+};
+
+UENUM()
+enum class eTracingFidelity: uint8
+{
+    Lowest  = 10,
+    Low     =  8,
+    Average =  6,
+    High    =  4,
+    Highest =  2
+};
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : public UOdysseyPainterEditorDefaultTool
 {
     public:
         GENERATED_BODY()
-/*
-        DECLARE_MULTICAST_DELEGATE_OneParam(FSelectionChanged,FOdysseyVectorScene*)
-        FSelectionChanged mSelectionChanged;
-*/
+
     public:
         // Destructor
         virtual ~UOdysseyPainterEditorVectorPathDrawingTool();
@@ -33,53 +48,50 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         virtual bool IsActivable() const override;
         virtual void Load() override;
         virtual void Unload() override;
-
+        virtual bool OnKeyDown( const FKey& iKey ) override;
+        virtual bool OnKeyUp( const FKey& iKey ) override;
         virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
         virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
         virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
         virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
- 
-        void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-        void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-        bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
-                              , const FOdysseyPoint& iPointInTexture
-                              , const FKey& iKey );
-        ::ULIS::FRectI OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                                         , FOdysseyVectorScene* iScene
-                                         , const FOdysseyPoint& iPointInTexture );
-        ::ULIS::FRectI OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                        , FOdysseyVectorScene* iScene
-                                        , const FOdysseyPoint& iPointInTexture );
-        bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                            , FOdysseyVectorScene* iScene
-                            , const FOdysseyPoint& iPointInTexture
-                            , const FKey& iKey );
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
+
+        bool OnKeyDownVector( FOdysseyVectorScene* iScene, const FKey& iKey );
+        bool OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey );
+        void UnloadVector( FOdysseyVectorScene* iScene );
+        void LoadVector( FOdysseyVectorScene* iScene );
+        bool OnMouseDownVector( FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+        void OnMouseHoverVector( FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+        void OnMouseDragVector( FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture );
+        bool OnMouseUpVector( FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
         //OdysseyPainterEditorTool overrides
         virtual void Commit() override;
 
-        FOdysseyVectorPathBuilder* GetPathBuilder();
+        FOdysseyVectorPathTracer& GetPathTracer();
 
     protected:
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-        void PropertyChangedVector( FOdysseyVectorEngine* iEngine
-                                  , FOdysseyVectorScene* iScene
-                                  , const FName& iPropertyName );
+        void PropertyChangedVector( FOdysseyVectorScene* iScene, const FName& iPropertyName );
+
+    private:
+        void OnSizeChanged();
+        bool HasMedia() const;
         FOdysseyVectorVertex* PickVertex( FOdysseyVectorEngine* iVectorEngine
                                         , FOdysseyVectorScene* iScene
                                         , double iWorldX
                                         , double iWorldY
                                         , double iPickingRadius );
-    private:
-        FOdysseyVectorPathBuilder* MakePathBuilder( FOdysseyVectorEngine* iVectorEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , double iWorldX
-                                                  , double iWorldY );
-        void OnSizeChanged();
-
+        void SetPathColor( FOdysseyVectorPath* iPath );
+        void RecordUndoPathAdd( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath  );
+        void RecordUndoPathExtend( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath );
     public:
+        //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        eTracingType TracingType;
+
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        eTracingFidelity TracingFidelity;
+
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
         double Radius;
         // computed based upon whether or not the pencil size is relative to the object's transformation matrix
@@ -99,22 +111,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         bool Stitch;
+        bool StitchAtKeyDown;
 
-        UPROPERTY(EditAnywhere,Category="Odyssey PathDrawing Tool")
+        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         bool AverageStitchedRadius;
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
         double StitchingRadius;
 
+        //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        bool Debug;
+
     private:
-        double mPointRadius;
-        FOdysseyVectorPathBuilder* mPathBuilder;
-        ::ULIS::FVec2D mOldPointInTexture;
         FOdysseyPainterEditorVectorPathDrawingToolHUD* mPathDrawingHUD;
-        FOdysseyVectorVertex* mPreviousVertex;
-        bool mStitched;
-
-
-        std::vector<FOdysseyVectorVertex*> mVertexArray;
-        std::vector<FOdysseyVectorSegment*> mSegmentArray;
+        FOdysseyVectorPathTracer mPathTracer;
+        FOdysseyVectorVertex* mStitchedVertex;
+        FOdysseyVectorUndoPathExtend* mUndoPathExtend;
 };

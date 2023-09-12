@@ -16,6 +16,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketRemove : public FOdysseyVectorUn
         ~FOdysseyVectorUndoBucketRemove();
         FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
                                       , FOdysseyVectorBucket* iBucket );
+        FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
+                                      , std::vector<FOdysseyVectorBucket*>& iBucketArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -27,5 +29,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketRemove : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorBucket* mBucket;
+        std::vector<FOdysseyVectorBucket*> mBucketArray;
 };

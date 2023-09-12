@@ -24,10 +24,8 @@ public:
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
     virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
-/*
-    void OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState);
-    ECheckBoxState GetIsAlphaLockedIsChecked() const;
-*/
+    void OnIsColoredCheckStateChanged( ECheckBoxState iState );
+    ECheckBoxState GetIsColoredIsChecked() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);

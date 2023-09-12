@@ -111,7 +111,8 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorEngine*
     mPathCutHUD->SetP0( iPointInTexture.x, iPointInTexture.y );
     mPathCutHUD->SetP1( iPointInTexture.x, iPointInTexture.y );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return true;
 }
@@ -148,7 +149,8 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDragVector( FOdysseyVectorEngine*
 */
     mPathCutHUD->SetP1( iPointInTexture.x, iPointInTexture.y );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 bool

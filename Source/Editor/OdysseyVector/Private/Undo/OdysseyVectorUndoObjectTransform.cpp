@@ -62,7 +62,7 @@ FOdysseyVectorUndoObjectTransform::Apply( UObject* iIgnored )
     RestoreObjectTransform( mObjectTransformArray );
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -80,7 +80,7 @@ FOdysseyVectorUndoObjectTransform::Revert( UObject* iIgnored )
     RestoreObjectTransform( mObjectTransformArray );
 
     // update invalidated objects
-    mScene->Update(0);
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

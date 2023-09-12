@@ -4,10 +4,17 @@ FOdysseyVectorHandleSegment::~FOdysseyVectorHandleSegment()
 {
 }
 
-FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment, double iX, double iY )
+FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment, uint32 iHandleID, double iX, double iY )
     : FOdysseyVectorPoint( iX, iY, 0.0f )
+    , mHandleID( iHandleID )
     , mOwnerSegment ( iOwnerSegment )
 {
+}
+
+uint32
+FOdysseyVectorHandleSegment::GetHandleID()
+{
+    return mHandleID;
 }
 
 FOdysseyVectorSegment*

@@ -194,7 +194,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorEngine
     }
     GEditor->EndTransaction();
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 
     return true;
 }
@@ -228,7 +229,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorEngin
 
     mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void
@@ -287,21 +289,12 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
         {
             FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
 
-            if( mPushedPointArray[i].isSmooth && PreserveSmoothness )
+            if( /*vertex->IsHandleAligned()*/ mPushedPointArray[i].isSmooth && PreserveSmoothness )
             {
-                if( vertex )
-                {
-                    ::ULIS::FVec2D perpendicularVector = vertex->GetAverageVectorOnSegmentHandle(true);
+                ::ULIS::FVec2D handleVector = vertex->GetFirstSegment()->GetHandleVector( vertex, true);
+                ::ULIS::FVec2D perpendicularVector = ::ULIS::FVec2D( -handleVector.y, handleVector.x );
 
-                    // if the perpendicular vector is 0, use one of the segment's vector as a reference.
-                    if( perpendicularVector.DistanceSquared() == 0.0f && vertex->GetFirstSegment() )
-                    {
-                        perpendicularVector = vertex->GetVectorOnSegment( vertex->GetFirstSegment(), true );
-                        perpendicularVector = ::ULIS::FVec2D( perpendicularVector.y, -perpendicularVector.x );
-                    }
-
-                    FOdysseyVectorPath::SmoothSegments(vertex,perpendicularVector,false,true);
-                }
+                FOdysseyVectorPath::SmoothSegments( vertex, perpendicularVector, true );
             }
         }
     }
@@ -314,7 +307,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorEngine
     // update vector scene and GUI widgets via delegates.
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 bool

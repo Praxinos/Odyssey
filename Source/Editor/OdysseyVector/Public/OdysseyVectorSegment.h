@@ -13,6 +13,9 @@ class FOdysseyVectorPath;
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 {
+    private:
+        static const uint32 mStaticClass = 0x45c58ef1; // value is crc32 FOdysseyVectorSegment
+
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
@@ -143,21 +146,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         FOdysseyVectorVertex*
         GetOtherVertex( FOdysseyVectorVertex* iVertex );
 
-        virtual uint32 Intersect( FOdysseyVectorSegment* iOther
-                                , double iTolerance
-                                , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray ){ return 0; };
-
         virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize );
         void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
+        virtual FOdysseyVectorHandleSegment* GetHandle( FOdysseyVectorVertex* iVertex );
+        virtual FOdysseyVectorHandleSegment* GetHandle( int iCtrlPointNum );
+
+        void SetPaintingReady( bool iIsPaintingReady );
+        bool IsPaintingReady();
+        virtual bool HasBaseClass( uint32 iBaseClassID );
 
     protected:
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
         bool mIsInvalidated;
+        bool mIsPaintingReady;
         uint32 mID;
         uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
-
-    private:
-        static const uint32 mStaticClass = 0x45c58ef1; // value is crc32 FOdysseyVectorSegment
 };

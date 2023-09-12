@@ -84,6 +84,8 @@ public:
 
     std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
 
+    bool GetShowControls();
+
 private:
     void SetBucketColor( FOdysseyVectorBucket* iBucket );
     void PopUpMenu( FOdysseyVectorBucket* iBucket );
@@ -120,7 +122,7 @@ public:
     bool Propagate;
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
-    bool Gradient;
+    eBucketColorMode ColorMode;
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     FColor Color1;
@@ -130,10 +132,6 @@ public:
 
     UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
     double PickingRadius;
-
-    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
-    bool ShowControls;
-    bool ShowControlsAtKeyDown;
 
 protected:
     std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
@@ -149,4 +147,6 @@ protected:
     FOdysseyPainterEditorPaintBucketToolHUD* mBucketHUD;
     FOdysseyPainterEditorPaintBucketToolContextMenu* mContextMenu;
     uint32 mPickedArea;
+    ::ULIS::FVec2D mOldPointInTexture;
+    bool mShowControls;
 };

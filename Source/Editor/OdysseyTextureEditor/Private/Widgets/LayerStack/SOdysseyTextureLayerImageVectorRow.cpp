@@ -9,7 +9,9 @@
 #define LOCTEXT_NAMESPACE "SOdysseyTextureLayerImageVectorRow"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
-void SOdysseyTextureLayerImageVectorRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyTextureLayerImageVector* iTextureLayerImageVector)
+void SOdysseyTextureLayerImageVectorRow::Construct( const FArguments& InArgs
+                                                  , const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView
+                                                  , UOdysseyTextureLayerImageVector* iTextureLayerImageVector )
 {
     ensure(iTextureLayerImageVector);
     mTextureLayerImageVector = iTextureLayerImageVector;
@@ -28,6 +30,8 @@ void SOdysseyTextureLayerImageVectorRow::Construct(const FArguments& InArgs, con
 TSharedRef<SWidget>
 SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
 {
+    const FCheckBoxStyle* coloredToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.ColoredToggle");
+
 	TSharedRef<SWidget> defaultWidget = SOdysseyLayerRow::GenerateHeaderWidget();
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
@@ -37,32 +41,17 @@ SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
             //LayerName
             SOdysseyLayerRow::GenerateHeaderWidget()
         ]
-/*
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
         .VAlign(VAlign_Center)
         .AutoWidth()
         [
-            //AlphaLock
+            //ColoredLock
             SNew(SCheckBox)
-            .Type(ESlateCheckBoxType::ToggleButton)
-            .ForegroundColor(FSlateColor::UseForeground())
-            .CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-            .CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-            .CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-            .UncheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16"))
-            .UncheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16"))
-            .UncheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16"))
-            .OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsAlphaLockedCheckStateChanged)
-            .IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsAlphaLockedIsChecked)
-            [
-                //Just for the checkbox to take the space of an icon
-                SNew(SImage)
-                    .Visibility(EVisibility::Hidden)
-                    .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16"))
-		    ]
+            .Style(coloredToggleStyle)
+            .OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged)
+            .IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked)
         ]
-*/
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
         .VAlign(VAlign_Center)
@@ -85,14 +74,13 @@ SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
         ];
 }
 
-/*
+
 void
-SOdysseyTextureLayerImageVectorRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
+SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Alpha Lock"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "IsAlphaLocked", iState == ECheckBoxState::Checked);
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Coloring"));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "IsColored", iState == ECheckBoxState::Checked);
 }
-*/
 
 void
 SOdysseyTextureLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
@@ -121,13 +109,11 @@ SOdysseyTextureLayerImageVectorRow::OnOpacityEndSliderMovement(int iValue)
     GEditor->EndTransaction();
 }
 
-/*
 ECheckBoxState
-SOdysseyTextureLayerImageVectorRow::GetIsAlphaLockedIsChecked() const
+SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked() const
 {
-	return mTextureLayerImageVector->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mTextureLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
-*/
 
 TSharedRef<SWidget>
 SOdysseyTextureLayerImageVectorRow::GenerateOptionsWidget()

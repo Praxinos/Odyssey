@@ -16,4 +16,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolContextMenu
         // FOdysseyEditorTab interface
         static TSharedPtr<SWidget> CreateWidget( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
         static void BucketProperties( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
+
+    private:
+        static void CopyBucketParam( FOdysseyVectorBucket* iSourceBucket );
+        static void PasteBucketParam( FOdysseyVectorBucket* iDestinationBucket );
 };

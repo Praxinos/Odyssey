@@ -19,4 +19,5 @@ public:
     FOdysseyVectorEngine* mEngine;
     TSharedPtr<::ULIS::FBlock> mBlock;
     bool mRenderHUD;
+    bool mIsColored;
 };

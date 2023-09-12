@@ -75,11 +75,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         bool HasBaseClass( uint32 iBaseClassID );
 
         static ::ULIS::FVec2D GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
-        static void SharpSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
-        static void SmoothSegments( FOdysseyVectorVertex* iVertex, bool iBuildSegments, bool iPreserveHandleLength );
+        static void SharpSegments( FOdysseyVectorVertex* iVertex, bool iPreserveHandleLength );
+        static void SmoothSegments( FOdysseyVectorVertex* iVertex, bool iPreserveHandleLength );
         static void SmoothSegments( FOdysseyVectorVertex* iVertex
                                   , ::ULIS::FVec2D iPerpendicularVector
-                                  , bool iBuildSegments
                                   , bool iPreserveHandleLength );
         //static
         static void DeletePoint( FOdysseyVectorPath* iPath
@@ -326,6 +325,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , ePointSelectionFlags iPointSelectionFlags );
 
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
+        std::list<FOdysseyVectorSegment*>& GetInvalidatedSegmentList();
+
+        virtual void Invalidate() override;
+        virtual void Invalidate( uint32 iInvalidationFlags ) override;
+        virtual void ApplyTransformations() override;
+        virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
@@ -336,6 +341,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags );
         void UpdateBBox();
         void Fill();
+
 
     protected :
         std::list<FOdysseyVectorVertex*> mVertexList;

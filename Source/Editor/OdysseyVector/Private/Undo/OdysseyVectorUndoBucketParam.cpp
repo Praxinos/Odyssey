@@ -20,11 +20,7 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScen
                                                             , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
 {
-    mParamBucketSaveArray.emplace_back( iBucket->GetOwner(), 0.0f, 0.0f, false );
-
-    mBucketArray.push_back( iBucket );
-
-    mBucketArray[0]->Copy( &mParamBucketSaveArray[0] );
+    mBucketSnapshotArray.emplace_back( iBucket, FSnapshotBucket::SNAPSHOT_PARAM );
 }
 
 // Backup bucket params in the constructor
@@ -34,35 +30,23 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScen
     : FOdysseyVectorUndo( iScene )
 {
     mAddedBucketArray = iAddedBucketArray;
-    mBucketArray = iBucketArray;
 
-    for( int i = 0; i < mBucketArray.size(); i++ )
+    mBucketSnapshotArray.reserve( iBucketArray.size() );
+
+    for( int i = 0; i < iBucketArray.size(); i++ )
     {
         // Note: setting the owner does not make sense per se, as the bucket is only
         // temporary, but is mandatory in the ctor
-        mParamBucketSaveArray.emplace_back( mBucketArray[i]->GetOwner(), 0.0f, 0.0f, false );
-
-        mBucketArray[i]->Copy( &mParamBucketSaveArray[i] );
+        mBucketSnapshotArray.emplace_back( iBucketArray[i], FSnapshotBucket::SNAPSHOT_PARAM );
     }
 }
 
 void
 FOdysseyVectorUndoBucketParam::Swap()
 {
-    for( int i = 0; i < mBucketArray.size(); i++ )
+    for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
     {
-        // Note: setting the owner does not make sense per se, as the bucket is only
-        // temporary, but is mandatory in the ctor
-        FOdysseyVectorBucket tmpBucketSave( mParamBucketSaveArray[i].GetOwner(), 0.0f, 0.0f, false );
-
-        // save data to tmp
-        mBucketArray[i]->Copy( &tmpBucketSave );
-        // restore bucket data
-        mParamBucketSaveArray[i].Copy( mBucketArray[i] );
-        // swap data from tmp
-        tmpBucketSave.Copy( &mParamBucketSaveArray[i] );
-
-        mBucketArray[i]->Invalidate();
+        mBucketSnapshotArray[i].Restore();
     }
 }
 

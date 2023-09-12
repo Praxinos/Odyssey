@@ -124,6 +124,28 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
+                case FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT_RADIALRADIUS:
+                {
+                    double radialRadius;
+
+                    Ar << radialRadius;
+
+                    iBucket.SetRadialRadius( radialRadius );
+                }
+                break;
+
+                case FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT_RADIALOFFSET:
+                {
+                    double offsetX;
+                    double offsetY;
+
+                    Ar << offsetX;
+                    Ar << offsetY;
+
+                    iBucket.SetRadialOffset( ::ULIS::FVec2D( offsetX, offsetY ) );
+                }
+                break;
+
                 default:
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

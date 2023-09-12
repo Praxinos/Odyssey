@@ -6,33 +6,21 @@ FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 {
 }
 
-FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorPath* iPath
-                                                                  , bool iSelfIntersects
+FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorIntersection* iIntersection
+                                                                  , FOdysseyVectorPath* iPath
                                                                   , double iX
                                                                   , double iY
                                                                   , double iT )
     : FOdysseyVectorVertex ( iPath, iX, iY, 0.0f )
+    , mIntersection( iIntersection )
+    , mT( iT )
 {
-    mT = iT;
-    mSelfIntersects = iSelfIntersects;
-}
-
-bool 
-FOdysseyVectorVertexIntersection::SelfIntersects()
-{
-    return mSelfIntersects;
 }
 
 uint32
 FOdysseyVectorVertexIntersection::GetSectionCount()
 {
     return GetSectionList().size() + GetPartner()->GetSectionList().size();
-}
-
-void
-FOdysseyVectorVertexIntersection::SetIntersection( FOdysseyVectorIntersection* iIntersection )
-{
-    mIntersection = iIntersection;
 }
 
 FOdysseyVectorIntersection*
@@ -45,6 +33,12 @@ double
 FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSegment* iSegment )
 {
     return mT;
+}
+
+double
+FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSection* iSection )
+{
+    return ( this == iSection->GetVertex(0) ) ? 0.0f : 1.0f;
 }
 
 FOdysseyVectorVertexIntersection*

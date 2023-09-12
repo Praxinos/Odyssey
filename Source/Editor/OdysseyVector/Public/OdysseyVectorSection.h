@@ -24,14 +24,17 @@ class FOdysseyVectorSection
        /**
          * @brief constructor
          * @param iSegment the segment it belongs to
+         * @param iConversionMatrix
          * @param iVertex0 end point 0
          * @param iVertex1 end point 1
          */
         FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
+                             , BLMatrix2D* iConversionMatrix
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1 );
 
         void Init( FOdysseyVectorSegment* iSegment
+                 , BLMatrix2D* iConversionMatrix
                  , FOdysseyVectorVertex* iVertex0
                  , FOdysseyVectorVertex* iVertex1 );
 
@@ -93,6 +96,9 @@ class FOdysseyVectorSection
         uint32 GetFlags();
         uint32 GetCycleCount();
         bool HasCycle( FOdysseyVectorCycle* iCycle );
+        ::ULIS::FVec2D GetPointAt( double t );
+        ::ULIS::FVec2D GetTangentAt( double t, bool iNormalize );
+        ::ULIS::FVec2D& GetVertexCoords( FOdysseyVectorVertex* iVertex );
 
     protected:
         FOdysseyVectorSegment* mSegment;

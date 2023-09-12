@@ -93,29 +93,6 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
         {
             FOdysseyVectorObject* selectedObject = (*it);
 
-            if( selectedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
-            {
-                FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-                        
-                for( std::list<FOdysseyVectorObject*>::iterator cit = selectedPaintGroup->GetChildrenList().begin(); cit != selectedPaintGroup->GetChildrenList().end(); ++cit )
-                {
-                    FOdysseyVectorObject* childObject = (*cit);
-
-                    if( childObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                    {
-                        FOdysseyVectorPath* childPath = static_cast<FOdysseyVectorPath*>( childObject );
-
-                        oCubicPathArray.push_back( childPath );
-                    }
-                }
-
-                selectedPaintGroup->GetParent()->RemoveChild( selectedPaintGroup );
-
-                selectedPaintGroup->CopyBuckets( paintGroup, true );
-
-                oRemovedPaintGroupArray.push_back( selectedPaintGroup );
-            }
-
             if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
             {
                 FOdysseyVectorPath* selectedCubicPath = static_cast<FOdysseyVectorPath*>( selectedObject );
@@ -298,12 +275,13 @@ FOdysseyVectorScene::GetSelectedObjectList()
 }
 
 void
-FOdysseyVectorScene::DrawShape( uint64 iFlags )
+FOdysseyVectorScene::DrawShape( uint64 iDrawingFlags )
 {
     BLContext* blctx = GetEngine()->GetBLContext();
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
-    FColor fillColor = mBackgroundBucket.GetColor();
+    FColor fillColor = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? mGroupPaintParam.MonochromeColor
+                                                                                     : mBackgroundBucket.GetColor();
 
     blctx->setCompOp( BL_COMP_OP_SRC_COPY );
 
@@ -322,7 +300,7 @@ FOdysseyVectorScene::DrawShape( uint64 iFlags )
     blctx->fillAll();
     blctx->restore();
 
-    FOdysseyVectorGroupPaint::DrawShape( iFlags );
+    FOdysseyVectorGroupPaint::DrawShape( iDrawingFlags );
 
     // view the updated zone ( testing purpose only )
     /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));

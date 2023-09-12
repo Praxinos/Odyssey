@@ -32,8 +32,10 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, u
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 pickingFlags = mPathEditTool->GetPickingFlags();
-    uint64 vertexHandleFlag  = ( pickingFlags & FOdysseyVectorPath::PICK_HANDLE_POINT   ) ? VIEW_VERTEX_HANDLE   : 0;
-    uint64 segmentHandleFlag = ( pickingFlags & FOdysseyVectorPath::PICK_HANDLE_SEGMENT ) ? VIEW_SEGMENT_HANDLE  : 0;
+    ePathPickingMode pickingMode = mPathEditTool->GetPickingMode();
+    uint64 vertexHandleFlag  = ( pickingMode == ePathPickingMode::VertexHandle  ) ? VIEW_VERTEX_HANDLE  : 0;
+    uint64 segmentHandleFlag = ( pickingMode == ePathPickingMode::SegmentHandle ) ? VIEW_SEGMENT_HANDLE
+                                                                                  | VIEW_VERTEX_ALIGNMENT : 0;
 
     blctx->save();
 

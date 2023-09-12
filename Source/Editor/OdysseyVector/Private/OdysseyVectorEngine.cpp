@@ -3,6 +3,8 @@
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
     mBLContext->end();
+
+    delete mBLImage;
 }
 
 FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight )
@@ -198,7 +200,7 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 }
 
 void
-FOdysseyVectorEngine::UpdateShape( uint32 iUpdateFlags )
+FOdysseyVectorEngine::Render( uint64 iDrawingFlags )
 {
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/
@@ -215,7 +217,7 @@ FOdysseyVectorEngine::UpdateShape( uint32 iUpdateFlags )
 
     if( mInvalidationFlags )
     {
-        mScene->Draw( 0 );
+        mScene->Draw( iDrawingFlags );
     /*
         mBLContext->save();
         mBLContext->resetMatrix();
@@ -236,11 +238,7 @@ FOdysseyVectorEngine::UpdateShape( uint32 iUpdateFlags )
         mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
 
-    //mBLContext->end();
-    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-    {
-        mInvalidationFlags = 0;
-    }
+    mInvalidationFlags = 0;
 }
 
 void
@@ -543,10 +541,12 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
             FOdysseyVectorVertex* knotVertex = new FOdysseyVectorVertex( cubicPath, averageCoords.x, averageCoords.y, averageRadius );
             FOdysseyVectorSegmentCubic* newCubicSegment[2] = { new FOdysseyVectorSegmentCubic( cubicPath
                                                                                             ,  prevVertex
-                                                                                            ,  knotVertex ),
+                                                                                            ,  knotVertex
+                                                                                            ,  true ),
                                                                new FOdysseyVectorSegmentCubic( cubicPath
                                                                                             ,  knotVertex
-                                                                                            ,  nextVertex ) };
+                                                                                            ,  nextVertex
+                                                                                            ,  true ) };
 
             newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertex)->GetCoords() );
             newCubicSegment[0]->GetHandle(1)->Set( vertexASegment->GetHandle(iVertexA  )->GetCoords() );

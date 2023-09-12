@@ -30,6 +30,16 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEd
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, iBucket )));
         menu.AddMenuEntry(
+            LOCTEXT("CopyBucketParam", "Copy Bucket Param")
+            , LOCTEXT("CopyBucketParam", "Copy Bucket Param")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorPaintBucketToolContextMenu::CopyBucketParam, iBucket )));
+        menu.AddMenuEntry(
+            LOCTEXT("PasteBucketParam", "Paste Bucket Param")
+            , LOCTEXT("PasteBucketParam", "Paste Bucket Param")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorPaintBucketToolContextMenu::PasteBucketParam, iBucket )));
+        menu.AddMenuEntry(
             LOCTEXT("BucketProperties", "Bucket properties")
             , LOCTEXT("BucketProperties", "Bucket Properties")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
@@ -88,5 +98,38 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPaint
 
     bucketView->ConditionalBeginDestroy();
 }
+
+static FOdysseyVectorBucket&
+GetCopiedBucket()
+{
+    static FOdysseyVectorBucket copiedBucket( nullptr, 0, 0, false );
+
+    return copiedBucket;
+}
+
+// static
+void
+FOdysseyPainterEditorPaintBucketToolContextMenu::CopyBucketParam( FOdysseyVectorBucket* iSourceBucket )
+{
+    FOdysseyVectorBucket& destinationBucket = GetCopiedBucket();
+
+    iSourceBucket->Copy( &destinationBucket );
+}
+
+// static
+void
+FOdysseyPainterEditorPaintBucketToolContextMenu::PasteBucketParam( FOdysseyVectorBucket* iDestinationBucket )
+{
+    FOdysseyVectorBucket& sourceBucket = GetCopiedBucket();
+    ::ULIS::FVec2D destinationBucketCoords = iDestinationBucket->GetCoords();
+
+    sourceBucket.Copy( iDestinationBucket );
+
+    // we only keep the coords
+    iDestinationBucket->SetCoords( destinationBucketCoords.x, destinationBucketCoords.y, 0.0f );
+
+    iDestinationBucket->Invalidate();
+}
+
 
 #undef LOCTEXT_NAMESPACE
