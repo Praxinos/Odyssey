@@ -207,7 +207,7 @@ SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
 #endif
-        FOdysseyAnimationCellsMutator mutator(layer);
+        FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
         mutator.Add({ cell });
         mutator.Commit();
 

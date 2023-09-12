@@ -12,6 +12,7 @@
 #include "OdysseyAnimationLayerImageRaster.generated.h"
 
 class FOdysseyAnimationLightTable;
+class FOdysseyAnimationCellsContainer;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
@@ -37,12 +38,12 @@ public:
      * @brief Delegate called when adding / removing cells
      * 
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCellsChanged, UOdysseyAnimationLayerImageRaster*)
+    //DECLARE_MULTICAST_DELEGATE_OneParam(FOnCellsChanged, UOdysseyAnimationLayerImageRaster*)
 
 public:
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
-    static FOnCellsChanged& OnCellsChanged();
+    //static FOnCellsChanged& OnCellsChanged();
 
 public:
     ~UOdysseyAnimationLayerImageRaster();
@@ -59,7 +60,7 @@ public:
 
 public:
     //Public API - Cells
-    UFUNCTION(BlueprintPure, Category="Animation Layer")
+    /* UFUNCTION(BlueprintPure, Category="Animation Layer")
     int GetCellsCount() const;
 
     UFUNCTION(BlueprintPure, Category = "Animation Layer")
@@ -72,7 +73,7 @@ public:
     bool GetCellLength(int iIndex, int& oLength) const;
     
     UFUNCTION(BlueprintPure, Category = "Animation Layer")
-    bool GetCellType(int iIndex, FName& oType) const;
+    bool GetCellType(int iIndex, FName& oType) const; */
 
     /**
      * @brief Inserts a Cell of given type at given index
@@ -91,10 +92,11 @@ public:
 
 public:
     TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
-    int GetOffset() const;
-    TArray<TSharedPtr<FOdysseyAnimationCell>>& GetCells();
+    TSharedRef<FOdysseyAnimationCellsContainer> GetCellsContainer() const;
+    //int GetOffset() const;
+    /* TArray<TSharedPtr<FOdysseyAnimationCell>>& GetCells();
     TSharedPtr<FOdysseyAnimationCell> GetCell(int iIndex) const;
-    TSharedPtr<FOdysseyAnimationCell> GetCellAtFrame(int iFrameIndex, int& oCelFrameIndex) const;
+    TSharedPtr<FOdysseyAnimationCell> GetCellAtFrame(int iFrameIndex, int& oCelFrameIndex) const; */
 
 public:
     // UOdysseyLayer Overrides
@@ -119,19 +121,23 @@ protected:
     void IsLightTableActivatedChanged();
     void OpacityChanged();
     void BlendModeChanged();
-    void CellsChanged();
+    //void CellsChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
+    
+private:
+    void OnCellsChanged();
+    TSharedPtr<FOdysseyAnimationCell> CreateCell( const FName& iCellType, bool iForSerialization);
 
 private:
     TSharedPtr<IOdysseyMedia> CreateMediaRaster(int iFrameIndex);
-    void AutoCreateCell(int iFrameIndex);
+    
     TSharedPtr<IOdysseyMedia> GetCellMediaRaster(uint32 iFrameIndex) const;
+    void AutoCreateCell(int iFrameIndex);
+    void CreateCell( const FName& iCellType);
 
 public:
     // UObject overrides
 	virtual void PostInitProperties() override;
-    virtual void PostDuplicate(bool bDuplicateForPIE) override;
-    virtual void PostLoad() override;
 
     /**
      * @brief Serialize this object
@@ -153,17 +159,25 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     bool bIsLightTableActivated = true;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
+    bool bAutoBreakCells = true;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
+    bool bAutoAddCells = true;
+
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
 
 private:
-    TArray<TSharedPtr<FOdysseyAnimationCell>> mCells;
+    //TArray<TSharedPtr<FOdysseyAnimationCell>> mCells;
+    TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;
     TSharedPtr<FOdysseyAnimationLightTable> mLightTable;
-    int mOffset = 0;
+    //int mOffset = 0;
 
+/*
 private:
     friend class FOdysseyAnimationCellsMutator;
     friend class FOdysseyAddCellsMutation;
     friend class FOdysseyRemoveCellsMutation;
     friend class FOdysseySetCellLengthMutation;
-    friend class FOdysseySetCellsOffsetMutation;
+    friend class FOdysseySetCellsOffsetMutation; */
 };

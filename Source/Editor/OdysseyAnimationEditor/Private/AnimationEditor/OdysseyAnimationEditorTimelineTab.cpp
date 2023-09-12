@@ -199,7 +199,7 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
         }
     }
     
-    FOdysseyAnimationCellsMutator mutator(layerImageRaster);
+    FOdysseyAnimationCellsMutator mutator(layerImageRaster, layerImageRaster->GetCellsContainer());
     mutator.Add(cells);
     mutator.Commit();
 }
@@ -256,7 +256,7 @@ FOdysseyAnimationEditorTimelineTab::OnLayerAdded(UOdysseyLayer* iLayer)
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
 #endif
-        FOdysseyAnimationCellsMutator mutator(layer);
+        FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
         mutator.Add({ cell });
         mutator.Commit();
 

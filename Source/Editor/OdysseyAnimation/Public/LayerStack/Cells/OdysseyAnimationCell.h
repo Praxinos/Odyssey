@@ -25,8 +25,6 @@ public:
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
 public:
-    virtual void PostLoad();
-    virtual void PostDuplicate();
     virtual void Serialize(FArchive& Ar);
 
 private:

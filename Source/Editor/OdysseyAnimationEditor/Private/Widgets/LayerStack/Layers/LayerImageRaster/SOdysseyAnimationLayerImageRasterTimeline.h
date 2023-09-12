@@ -65,7 +65,7 @@ private:
     void DeleteSelectedFrames();
 
 private:
-    void OnCellsChanged(class UOdysseyAnimationLayerImageRaster* iLayer);
+    void OnCellsChanged();
 
 private:
     //Widget Methods
@@ -104,6 +104,7 @@ private:
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
+    TSharedPtr<FOdysseyAnimationCellsContainer> mCellsContainer;
 
     TSharedPtr<SBorder> mCellsBorder;
     TSharedPtr<SHorizontalBox> mCellsBox;

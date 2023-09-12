@@ -5,13 +5,13 @@
 
 #include "Mutations/OdysseyMutator.h"
 
-class UOdysseyAnimationLayerImageRaster;
+class UObject;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellsMutator
     : public FOdysseyMutator
 {
 public:
-    FOdysseyAnimationCellsMutator(UOdysseyAnimationLayerImageRaster* iLayer);
+    FOdysseyAnimationCellsMutator(UObject* iOwner, TSharedRef<FOdysseyAnimationCellsContainer> iContainer);
 
 public:
     void Add(TArray<TSharedPtr<FOdysseyAnimationCell>> iCells, int iIndex = INDEX_NONE);
@@ -20,16 +20,14 @@ public:
     void SetOffset(int iOffset);
 
 private:
-    UOdysseyAnimationLayerImageRaster* mLayer;
-
-    //TWeakPtr<FOdysseyAnimationCellsContainer> mCellsContainer;
+    TSharedRef<FOdysseyAnimationCellsContainer> mContainer;
 };
 
 class ODYSSEYANIMATION_API FOdysseyAddCellsMutation
     : public IOdysseyMutation
 {
 public:
-    FOdysseyAddCellsMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells);
+    FOdysseyAddCellsMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells);
 
 public:
     //Applies the mutation
@@ -39,7 +37,7 @@ public:
     virtual void Revert() override;
 
 public:
-    UOdysseyAnimationLayerImageRaster* mLayer;
+    TSharedRef<FOdysseyAnimationCellsContainer> mContainer;
     int mIndex; //Index of the cells
     TArray<TSharedPtr<FOdysseyAnimationCell>> mCells;
 };
@@ -48,7 +46,7 @@ class ODYSSEYANIMATION_API FOdysseyRemoveCellsMutation
     : public IOdysseyMutation
 {
 public:
-    FOdysseyRemoveCellsMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells);
+    FOdysseyRemoveCellsMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells);
 
 public:
     //Applies the mutation
@@ -58,7 +56,7 @@ public:
     virtual void Revert() override;
 
 public:
-    UOdysseyAnimationLayerImageRaster* mLayer;
+    TSharedRef<FOdysseyAnimationCellsContainer> mContainer;
     int mIndex; //Index of the cells
     TArray<TSharedPtr<FOdysseyAnimationCell>> mCells;
 };
@@ -67,7 +65,7 @@ class ODYSSEYANIMATION_API FOdysseySetCellLengthMutation
     : public IOdysseyMutation
 {
 public:
-    FOdysseySetCellLengthMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iIndex, int iNewLength, int iOldLength);
+    FOdysseySetCellLengthMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iIndex, int iNewLength, int iOldLength);
 
 public:
     //Applies the mutation
@@ -77,7 +75,7 @@ public:
     virtual void Revert() override;
 
 public:
-    UOdysseyAnimationLayerImageRaster* mLayer;
+    TSharedRef<FOdysseyAnimationCellsContainer> mContainer;
     int mIndex; //Index of the cells
     int mNewLength; //Index of the cells
     int mOldLength; //Index of the cells
@@ -87,7 +85,7 @@ class ODYSSEYANIMATION_API FOdysseySetCellsOffsetMutation
     : public IOdysseyMutation
 {
 public:
-    FOdysseySetCellsOffsetMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iNewOffset, int iOldOffset);
+    FOdysseySetCellsOffsetMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iNewOffset, int iOldOffset);
     
 public:
     //Applies the mutation
@@ -97,7 +95,7 @@ public:
     virtual void Revert() override;
 
 public:
-    UOdysseyAnimationLayerImageRaster* mLayer;
+    TSharedRef<FOdysseyAnimationCellsContainer> mContainer;
     int mNewOffset; //Index of the cells
     int mOldOffset; //Index of the cells
 };

@@ -28,8 +28,6 @@ public:
 
 public:
     virtual const FName& GetType() const override;
-    virtual void PostLoad() override;
-    virtual void PostDuplicate() override;
     virtual void Serialize(FArchive& Ar);
 
 public:

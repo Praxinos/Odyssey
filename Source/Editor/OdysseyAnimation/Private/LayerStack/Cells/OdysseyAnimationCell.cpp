@@ -35,18 +35,6 @@ FOdysseyAnimationCell::GetLength() const
 }
 
 void
-FOdysseyAnimationCell::PostLoad()
-{
-
-}
-
-void
-FOdysseyAnimationCell::PostDuplicate()
-{
-
-}
-
-void
 FOdysseyAnimationCell::Serialize(FArchive& Ar)
 {
     Ar << mLength;

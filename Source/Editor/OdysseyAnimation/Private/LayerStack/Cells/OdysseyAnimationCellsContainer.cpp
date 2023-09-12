@@ -1,0 +1,171 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+
+FOdysseyAnimationCellsContainer::FOnCellsChanged&
+FOdysseyAnimationCellsContainer::OnCellsChanged()
+{
+    return mOnCellsChanged;
+}
+
+FOdysseyAnimationCellsContainer::~FOdysseyAnimationCellsContainer()
+{
+}
+
+FOdysseyAnimationCellsContainer::FOdysseyAnimationCellsContainer()
+    : mOffset(0)
+{
+}
+
+FOdysseyAnimationCellsContainer::FCreateCell&
+FOdysseyAnimationCellsContainer::CreateCellDelegate()
+{
+    return mCreateCell;
+}
+
+int
+FOdysseyAnimationCellsContainer::GetOffset() const
+{
+    return mOffset;
+}
+
+FInt32Range
+FOdysseyAnimationCellsContainer::GetFrameRange() const
+{
+    uint32 length = 0;
+    for (TSharedPtr<FOdysseyAnimationCell> cell : mCells)
+    {
+        length += cell->GetLength();
+    }
+    return FInt32Range::Inclusive(mOffset, mOffset + length - 1);
+}
+
+const TArray<TSharedPtr<FOdysseyAnimationCell>>&
+FOdysseyAnimationCellsContainer::GetCells() const
+{
+    return mCells;
+}
+
+TSharedPtr<FOdysseyAnimationCell>
+FOdysseyAnimationCellsContainer::GetCellAtFrame(int iFrameIndex) const
+{
+    int celIndex = GetCellIndexAtFrame(iFrameIndex);
+    if ( celIndex == INDEX_NONE)
+        return nullptr;
+
+    return mCells[celIndex];
+}
+
+int
+FOdysseyAnimationCellsContainer::GetCellIndexAtFrame(int iFrameIndex) const
+{
+    if( iFrameIndex < mOffset )
+        return INDEX_NONE;
+
+    int frameIndex = mOffset;
+    for (int i = 0; i < mCells.Num(); i++)
+    {
+        TSharedPtr<FOdysseyAnimationCell> cell = mCells[i];
+
+        if ( frameIndex + cell->GetLength() - 1 >= iFrameIndex)
+            return i;
+
+        frameIndex += cell->GetLength();
+    }
+
+    return INDEX_NONE;
+}
+
+int
+FOdysseyAnimationCellsContainer::GetCellFrameAtFrame(int iFrameIndex) const
+{
+    if( iFrameIndex < mOffset )
+        return INDEX_NONE;
+
+    int frameIndex = mOffset;
+    for (int i = 0; i < mCells.Num(); i++)
+    {
+        TSharedPtr<FOdysseyAnimationCell> cell = mCells[i];
+
+        if ( frameIndex + cell->GetLength() - 1 >= iFrameIndex)
+            return iFrameIndex - frameIndex;
+
+        frameIndex += cell->GetLength();
+    }
+
+    return INDEX_NONE;
+}
+
+FInt32Range
+FOdysseyAnimationCellsContainer::GetCellFrameRange(int iIndex) const
+{
+    if (iIndex < 0 || iIndex >= mCells.Num())
+        return FInt32Range::Empty();
+
+    uint32 startFrame = mOffset;
+    for (int i = 0; i < iIndex; i++ )
+    {
+        startFrame += mCells[i]->GetLength();
+    }
+    return FInt32Range::Inclusive(startFrame, startFrame + mCells[iIndex]->GetLength() - 1);
+}
+
+bool
+FOdysseyAnimationCellsContainer::HasCellAtFrame(int iFrame) const
+{
+    return GetCellIndexAtFrame(iFrame) != INDEX_NONE;
+}
+
+bool
+FOdysseyAnimationCellsContainer::IsCellHeadAtFrame(int iFrame) const
+{
+    return GetCellFrameAtFrame(iFrame) == 0;
+}
+
+void
+FOdysseyAnimationCellsContainer::Serialize(FArchive& Ar)
+{
+    if ( Ar.IsTransacting() || !Ar.IsPersistent() )
+        return;
+
+    //Load or Save the offset
+    Ar << mOffset;
+
+    //Empty Cells to prepare for loading
+    if ( Ar.IsLoading() )
+        mCells.Empty();
+
+    //Load or Save number of cells
+    int32 numCells = mCells.Num();
+    Ar << numCells;
+
+    for ( int i = 0; i < numCells; i++ )
+    {
+        if ( Ar.IsLoading() )
+        {
+            //Load the cell type
+            FName cellType;
+            Ar << cellType;
+
+            //Create a cell of the given type
+            TSharedPtr<FOdysseyAnimationCell> cell = mCreateCell.Execute(cellType, true);
+            checkf(!!cell, TEXT("Failed to create a cell of the given type"));
+
+            //Load the cell
+            cell->Serialize(Ar);
+
+            //Add the cell to the cell list
+            mCells.Add(cell);
+        }
+        else
+        {
+            //Save the Cell Type
+            FName cellType = mCells[i]->GetType();
+            Ar << cellType;
+
+            //Save the Cell
+            mCells[i]->Serialize(Ar);
+        }
+    }
+}

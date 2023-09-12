@@ -3,7 +3,6 @@
 
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImageRenderer.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaRaster.h"
@@ -44,23 +43,22 @@ FOdysseyAnimationCellImageRaster::~FOdysseyAnimationCellImageRaster()
     mRasterBlock->OnBlockChanged().RemoveAll(this);
     mRasterBlock->OnBlockCommited().RemoveAll(this);
     mRasterBlock->OnBlockPtrChanged().RemoveAll(this);
+    mRasterBlock->PostProcess().Unbind();
 }
 
 FOdysseyAnimationCellImageRaster::FOdysseyAnimationCellImageRaster(UOdysseyAnimationLayerImageRaster* iLayer)
     : mLayer(iLayer)
-    , mRasterBlock(nullptr)
-
+    , mRasterBlock(MakeShared<FOdysseyRasterBlock>(mLayer))
 {
+    mRasterBlock->OnBlockChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockChanged);
+    mRasterBlock->OnBlockCommited().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockCommited);
+    mRasterBlock->OnBlockPtrChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockPtrChanged);
+    mRasterBlock->PostProcess().BindRaw(this, &FOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
 }
 
 void
 FOdysseyAnimationCellImageRaster::Init(int iWidth, int iHeight, ::ULIS::eFormat iFormat)
 {
-    mRasterBlock = MakeShared<FOdysseyRasterBlock>(mLayer);
-    mRasterBlock->OnBlockChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockChanged);
-    mRasterBlock->OnBlockCommited().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockCommited);
-    mRasterBlock->OnBlockPtrChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockPtrChanged);
-    mRasterBlock->PostProcess().BindRaw(this, &FOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
     TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(iWidth, iHeight, iFormat);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iFormat);
@@ -73,13 +71,7 @@ FOdysseyAnimationCellImageRaster::Init(int iWidth, int iHeight, ::ULIS::eFormat 
 void
 FOdysseyAnimationCellImageRaster::Init(TSharedPtr<::ULIS::FBlock> iBlock)
 {
-    mRasterBlock = MakeShared<FOdysseyRasterBlock>(mLayer);
-    mRasterBlock->OnBlockChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockChanged);
-    mRasterBlock->OnBlockCommited().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockCommited);
-    mRasterBlock->OnBlockPtrChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockPtrChanged);
-    mRasterBlock->PostProcess().BindRaw(this, &FOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
     mRasterBlock->SetBlock(iBlock);
-
 }
 
 const FName&
@@ -89,40 +81,10 @@ FOdysseyAnimationCellImageRaster::GetType() const
 }
 
 void
-FOdysseyAnimationCellImageRaster::PostLoad()
-{
-    FOdysseyAnimationCell::PostLoad();
-    mRasterBlock->PostProcess().Unbind();
-    mRasterBlock->PostProcess().BindRaw(this, &FOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
-}
-
-void
-FOdysseyAnimationCellImageRaster::PostDuplicate()
-{
-    FOdysseyAnimationCell::PostDuplicate();
-}
-
-void
 FOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
 {
     FOdysseyAnimationCell::Serialize(Ar);
-
-    if ( Ar.IsLoading() )
-    {
-        mRasterBlock = MakeShared<FOdysseyRasterBlock>(mLayer);
-    }
-    
     Ar << *mRasterBlock;
-
-    if ( Ar.IsLoading() )
-    {
-        mRasterBlock->OnBlockChanged().RemoveAll(this);
-        mRasterBlock->OnBlockCommited().RemoveAll(this);
-        mRasterBlock->OnBlockPtrChanged().RemoveAll(this);
-        mRasterBlock->OnBlockChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockChanged);
-        mRasterBlock->OnBlockCommited().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockCommited);
-        mRasterBlock->OnBlockPtrChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockPtrChanged);
-    }
 }
 
 TArray<::ULIS::FEvent>

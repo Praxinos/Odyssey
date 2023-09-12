@@ -38,7 +38,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 	mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
 
 	TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, mWidth, mHeight, Format());
-	FOdysseyAnimationCellsMutator mutator(Cast<UOdysseyAnimationLayerImageRaster>(layer));
+	FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
 	mutator.Add({ cell });
 	mutator.Commit();
 }

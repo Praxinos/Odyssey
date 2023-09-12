@@ -3,17 +3,17 @@
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationCellsMutator.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 
 
-FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UOdysseyAnimationLayerImageRaster* iLayer)
-    : FOdysseyMutator(iLayer, "FOdysseyAnimationCellsMutator")
-    , mLayer(iLayer)
+FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UObject* iOwner, TSharedRef<FOdysseyAnimationCellsContainer> iContainer)
+    : FOdysseyMutator(iOwner, "FOdysseyAnimationCellsMutator")
+    , mContainer(iContainer)
 {
     GetRootMutation()->OnCommited().BindLambda(
-        [iLayer]()
+        [this]()
         {
-            iLayer->CellsChanged();
-            UOdysseyLayer::OnMediaChanged().Broadcast();
+            mContainer->OnCellsChanged().Broadcast();
         }
     );
 }
@@ -21,51 +21,51 @@ FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UOdysseyAnimationLa
 void
 FOdysseyAnimationCellsMutator::Add(TArray<TSharedPtr<FOdysseyAnimationCell>> iCells, int iIndex)
 {
-    int index = iIndex < 0 ? mLayer->mCells.Num() : iIndex;
-    TSharedPtr<FOdysseyAddCellsMutation> mutation = MakeShared<FOdysseyAddCellsMutation>(mLayer, index, iCells);
+    int index = iIndex < 0 ? mContainer->mCells.Num() : iIndex;
+    TSharedPtr<FOdysseyAddCellsMutation> mutation = MakeShared<FOdysseyAddCellsMutation>(mContainer, index, iCells);
     AddAndApplyMutation(mutation);
 }
 
 void
 FOdysseyAnimationCellsMutator::Remove(int iIndex, int iNumCells)
 {
-    if (iNumCells < 1 || iIndex < 0 || iIndex + iNumCells > mLayer->GetCellsCount())
+    if (iNumCells < 1 || iIndex < 0 || iIndex + iNumCells > mContainer->mCells.Num())
         return;
         
     TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
     for (int i = 0; i < iNumCells; i++)
     {
-        TSharedPtr<FOdysseyAnimationCell> cell = mLayer->GetCell(i + iIndex);
+        TSharedPtr<FOdysseyAnimationCell> cell = mContainer->mCells[i + iIndex];
         cells.Add(cell);
     }
 
-    TSharedPtr<FOdysseyRemoveCellsMutation> mutation = MakeShared<FOdysseyRemoveCellsMutation>(mLayer, iIndex, cells);
+    TSharedPtr<FOdysseyRemoveCellsMutation> mutation = MakeShared<FOdysseyRemoveCellsMutation>(mContainer, iIndex, cells);
     AddAndApplyMutation(mutation);
 }
 
 void
 FOdysseyAnimationCellsMutator::SetLength(int iIndex, int iLength)
 {
-    if (iIndex < 0 || iIndex >= mLayer->GetCellsCount())
+    if (iIndex < 0 || iIndex >= mContainer->mCells.Num())
         return;
 
-    int oldLength = mLayer->mCells[iIndex]->GetLength();
+    int oldLength = mContainer->mCells[iIndex]->GetLength();
 
-    TSharedPtr<FOdysseySetCellLengthMutation> mutation = MakeShared<FOdysseySetCellLengthMutation>(mLayer, iIndex, iLength, oldLength);
+    TSharedPtr<FOdysseySetCellLengthMutation> mutation = MakeShared<FOdysseySetCellLengthMutation>(mContainer, iIndex, iLength, oldLength);
     AddAndApplyMutation(mutation);
 }
 
 void
 FOdysseyAnimationCellsMutator::SetOffset(int iOffset)
 {
-    TSharedPtr<FOdysseySetCellsOffsetMutation> mutation = MakeShared<FOdysseySetCellsOffsetMutation>(mLayer, iOffset, mLayer->GetOffset());
+    TSharedPtr<FOdysseySetCellsOffsetMutation> mutation = MakeShared<FOdysseySetCellsOffsetMutation>(mContainer, iOffset, mContainer->GetOffset());
     AddAndApplyMutation(mutation);
 }
 
 //=======================================================================================
 
-FOdysseyAddCellsMutation::FOdysseyAddCellsMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells)
-    : mLayer(iLayer)
+FOdysseyAddCellsMutation::FOdysseyAddCellsMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells)
+    : mContainer(iContainer)
     , mIndex(iIndex)
     , mCells(iCells)
 {
@@ -74,19 +74,19 @@ FOdysseyAddCellsMutation::FOdysseyAddCellsMutation(UOdysseyAnimationLayerImageRa
 void
 FOdysseyAddCellsMutation::Apply()
 {
-    mLayer->mCells.Insert(mCells, mIndex);
+    mContainer->mCells.Insert(mCells, mIndex);
 }
 
 void
 FOdysseyAddCellsMutation::Revert()
 {
-    mLayer->mCells.RemoveAt(mIndex, mCells.Num());
+    mContainer->mCells.RemoveAt(mIndex, mCells.Num());
 }
 
 //=======================================================================================
 
-FOdysseyRemoveCellsMutation::FOdysseyRemoveCellsMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells)
-    : mLayer(iLayer)
+FOdysseyRemoveCellsMutation::FOdysseyRemoveCellsMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells)
+    : mContainer(iContainer)
     , mIndex(iIndex)
     , mCells(iCells)
 {
@@ -95,19 +95,19 @@ FOdysseyRemoveCellsMutation::FOdysseyRemoveCellsMutation(UOdysseyAnimationLayerI
 void
 FOdysseyRemoveCellsMutation::Apply()
 {
-    mLayer->mCells.RemoveAt(mIndex, mCells.Num());
+    mContainer->mCells.RemoveAt(mIndex, mCells.Num());
 }
 
 void
 FOdysseyRemoveCellsMutation::Revert()
 {
-    mLayer->mCells.Insert(mCells, mIndex);
+    mContainer->mCells.Insert(mCells, mIndex);
 }
 
 //=======================================================================================
 
-FOdysseySetCellLengthMutation::FOdysseySetCellLengthMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iIndex, int iNewLength, int iOldLength)
-    : mLayer(iLayer)
+FOdysseySetCellLengthMutation::FOdysseySetCellLengthMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iIndex, int iNewLength, int iOldLength)
+    : mContainer(iContainer)
     , mIndex(iIndex)
     , mNewLength(iNewLength)
     , mOldLength(iOldLength)
@@ -117,20 +117,20 @@ FOdysseySetCellLengthMutation::FOdysseySetCellLengthMutation(UOdysseyAnimationLa
 void
 FOdysseySetCellLengthMutation::Apply()
 {
-    mLayer->mCells[mIndex]->SetLength(mNewLength);
+    mContainer->mCells[mIndex]->SetLength(mNewLength);
 }
 
 void
 FOdysseySetCellLengthMutation::Revert()
 {
-    mLayer->mCells[mIndex]->SetLength(mOldLength);
+    mContainer->mCells[mIndex]->SetLength(mOldLength);
 }
 
 //=======================================================================================
 
 
-FOdysseySetCellsOffsetMutation::FOdysseySetCellsOffsetMutation(UOdysseyAnimationLayerImageRaster* iLayer, int iNewOffset, int iOldOffset)
-    : mLayer(iLayer)
+FOdysseySetCellsOffsetMutation::FOdysseySetCellsOffsetMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iNewOffset, int iOldOffset)
+    : mContainer(iContainer)
     , mNewOffset(iNewOffset)
     , mOldOffset(iOldOffset)
 {
@@ -139,11 +139,11 @@ FOdysseySetCellsOffsetMutation::FOdysseySetCellsOffsetMutation(UOdysseyAnimation
 void
 FOdysseySetCellsOffsetMutation::Apply()
 {
-    mLayer->mOffset = mNewOffset;
+    mContainer->mOffset = mNewOffset;
 }
 
 void
 FOdysseySetCellsOffsetMutation::Revert()
 {
-    mLayer->mOffset = mOldOffset;
+    mContainer->mOffset = mOldOffset;
 }

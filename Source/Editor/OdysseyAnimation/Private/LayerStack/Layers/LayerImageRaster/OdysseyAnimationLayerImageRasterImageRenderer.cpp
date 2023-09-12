@@ -13,13 +13,10 @@ FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRaste
     , mOpacity(iLayer->Opacity) 
     , mLightTableDisplayPosition(iLayer->GetLightTable()->GetDisplayPosition())
 {    
-    int cellIndex = INDEX_NONE;
-    int cellFrameIndex = INDEX_NONE;
-    if (!iLayer->GetCellIndexAtFrame(iFrame, cellIndex, cellFrameIndex))
-        return;
+    TSharedPtr<FOdysseyAnimationCell> cell = iLayer->GetCellsContainer()->GetCellAtFrame(iFrame);
+    int cellFrameIndex = iLayer->GetCellsContainer()->GetCellFrameAtFrame(iFrame);
 
-    TSharedPtr<FOdysseyAnimationCell> cell = iLayer->GetCell(cellIndex);
-    if (!cell)
+    if (!cell || cellFrameIndex == INDEX_NONE)
         return;
 
     mCellRenderer = cell->BuildImageRenderer(iRenderType, cellFrameIndex);
