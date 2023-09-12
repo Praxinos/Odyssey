@@ -10,7 +10,9 @@ SOdysseyAnimationLayerImageRasterTimeline::~SOdysseyAnimationLayerImageRasterTim
 }
 
 SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTimeline()
+    : mCommandList(MakeShared<FUICommandList>())
 {
+    MapActions(mCommandList);
 }
 
 void
@@ -34,13 +36,14 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
             SNew(SOdysseyAnimationCells, mExtension, mAnimationLayerImageRaster, mAnimationLayerImageRaster->GetCellsContainer())
             .OnCreateCell(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCreateCell)
             .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageRasterTimeline::OnCreateCellWidget)
-            .OnBuildCellContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnBuildCellContextMenu)
+            .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnBuildCellsContextMenu)
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
             SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
             .Visibility(this, &SOdysseyAnimationLayerImageRasterTimeline::GetFrameSelectorVisibility)
+            .OnBuildContextMenu(this, &SOdysseyAnimationLayerImageRasterTimeline::OnBuildFrameSelectorContextMenu)
         ]
     ];
 }
@@ -66,8 +69,107 @@ SOdysseyAnimationLayerImageRasterTimeline::GetFrameSelectorVisibility() const
 }
 
 void
-SOdysseyAnimationLayerImageRasterTimeline::OnBuildCellContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
+SOdysseyAnimationLayerImageRasterTimeline::OnBuildCellsContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
 {
+    BuildContextMenu(iMenuBuilder, iFrame);
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::OnBuildFrameSelectorContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
+{
+    BuildContextMenu(iMenuBuilder, iFrame);
+}
+
+bool
+SOdysseyAnimationLayerImageRasterTimeline::SupportsKeyboardFocus() const
+{
+    return true;
+}
+
+FReply
+SOdysseyAnimationLayerImageRasterTimeline::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
+{
+	if (mCommandList->ProcessCommandBindings(iKeyEvent))
+        return FReply::Handled();
+
+    return SCompoundWidget::OnKeyDown(iGeometry, iKeyEvent);
+}
+
+FReply
+SOdysseyAnimationLayerImageRasterTimeline::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+	if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
+    {
+        int frame = mExtension->Timeline()->GetFrameIndexAtMousePosition(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
+        if (frame == INDEX_NONE)
+            return FReply::Unhandled();
+
+		FMenuBuilder menuBuilder(true, mCommandList);
+		BuildContextMenu(menuBuilder, frame);
+
+		TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
+		FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
+		FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
+    	return FReply::Handled();
+	}
+	return FReply::Unhandled();
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::SelectAllFrames()
+{
+    FInt32Range frameRange = mAnimationLayerImageRaster->GetFrameRange();
+    mExtension->Timeline()->SetSelectedFrames(frameRange);
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames()
+{
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Remove Frames"));
+#endif
+
+    FOdysseyAnimationCellsMutator mutator(mAnimationLayerImageRaster, mAnimationLayerImageRaster->GetCellsContainer());
+
+    bool isLowerClosed = mExtension->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
+    bool isUpperClosed = mExtension->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
+
+    if ( !isLowerClosed || !isUpperClosed )
+    {
+        mutator.RemoveFrame(mExtension->Animation()->CurrentFrame);
+    }
+    else
+    {
+        mutator.RemoveFrameRange(mExtension->Timeline()->GetSelectedFrames());
+    }
+
+    mutator.Commit();
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
+{
+    const FText commonSectionTitle = LOCTEXT("OdysseyAnimationTimelineCommonSection", "Common");
+    iMenuBuilder.BeginSection("Common", commonSectionTitle);
+        iMenuBuilder.PushCommandList(mCommandList);
+        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
+        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
+        iMenuBuilder.PopCommandList();
+    iMenuBuilder.EndSection();
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::MapActions(TSharedPtr<FUICommandList> iCommandList)
+{
+	iCommandList->MapAction(
+        FGenericCommands::Get().SelectAll,
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::SelectAllFrames)
+    );
+
+    iCommandList->MapAction(
+        FGenericCommands::Get().Delete,
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames)
+    );
 }
 
 #undef LOCTEXT_NAMESPACE

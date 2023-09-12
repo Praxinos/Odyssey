@@ -51,7 +51,7 @@ SOdysseyAnimationCells::Construct(
 
     mOnCreateCellWidget = InArgs._OnCreateCellWidget;
     mOnCreateCell = InArgs._OnCreateCell;
-    mOnBuildCellContextMenu = InArgs._OnBuildCellContextMenu;
+    mOnBuildContextMenu = InArgs._OnBuildContextMenu;
     
     ChildSlot
     [
@@ -483,55 +483,16 @@ SOdysseyAnimationCells::OnCellsMouseButtonUp(const FGeometry& iGeometry, const F
     return FReply::Unhandled();
 }
 
-/* void
-SOdysseyAnimationCells::OnCellsBuildContextMenu(FMenuBuilder& iMenuBuilder, TSharedPtr<FCellData> iCellData)
-{
-    BuildContextMenu(iMenuBuilder);
-    mOnBuildCellContextMenu.ExecuteIfBound(iMenuBuilder, iCellData->mCell);
-} */
-
-/* void
-SOdysseyAnimationCells::OnFrameSelectorBuildContextMenu(FMenuBuilder& iMenuBuilder)
-{
-    BuildContextMenu(iMenuBuilder);
-} */
-
 void
 SOdysseyAnimationCells::MapActions(TSharedPtr<FUICommandList> iCommandList)
 {
-	iCommandList->MapAction(
-        FGenericCommands::Get().SelectAll,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationCells::SelectAllFrames)
-    );
-
-    iCommandList->MapAction(
-        FGenericCommands::Get().Delete,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationCells::DeleteSelectedFrames)
-    );
 }
 
 void
 SOdysseyAnimationCells::BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
 {
-    const FText commonSectionTitle = LOCTEXT("OdysseyAnimationTimelineCommonSection", "Common");
-    iMenuBuilder.BeginSection("Common", commonSectionTitle);
-        iMenuBuilder.PushCommandList(mCommandList);
-        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
-        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
-        iMenuBuilder.PopCommandList();
-    iMenuBuilder.EndSection();
-
-    mOnBuildCellContextMenu.ExecuteIfBound(iMenuBuilder, iFrame);
+    mOnBuildContextMenu.ExecuteIfBound(iMenuBuilder, iFrame);
 }
-
-/*
-EVisibility
-SOdysseyAnimationCells::GetFrameSelectorVisibility() const
-{
-    bool isCurrentLayer = mAnimationLayer->GetLayerStack()->CurrentLayer == mAnimationLayer;
-	return isCurrentLayer ? EVisibility::Visible : EVisibility::Hidden;
-}
-*/
 
 EVisibility
 SOdysseyAnimationCells::GetTimingHandleVisibility(TSharedPtr<FCellData> iCellData) const
@@ -1031,37 +992,6 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, 
             mutator.Commit();
         }
     }
-}
-
-void
-SOdysseyAnimationCells::SelectAllFrames()
-{
-    FInt32Range frameRange = mCellsContainer->GetFrameRange();
-    mExtension->Timeline()->SetSelectedFrames(frameRange);
-}
-
-void
-SOdysseyAnimationCells::DeleteSelectedFrames()
-{
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Remove Frames"));
-#endif
-
-    FOdysseyAnimationCellsMutator mutator(mAnimationLayer, mCellsContainer.ToSharedRef());
-
-    bool isLowerClosed = mExtension->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
-    bool isUpperClosed = mExtension->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
-
-    if ( !isLowerClosed || !isUpperClosed )
-    {
-        mutator.RemoveFrame(mExtension->Animation()->CurrentFrame);
-    }
-    else
-    {
-        mutator.RemoveFrameRange(mExtension->Timeline()->GetSelectedFrames());
-    }
-
-    mutator.Commit();
 }
 
 #undef LOCTEXT_NAMESPACE

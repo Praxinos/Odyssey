@@ -14,14 +14,14 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCells
 {
     DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<SWidget>, FOnCreateCellWidget, TSharedPtr<FOdysseyAnimationCell>)
     DECLARE_DELEGATE_RetVal(TSharedRef<FOdysseyAnimationCell>, FOnCreateCell)
-    DECLARE_DELEGATE_TwoParams(FOnBuildCellContextMenu, FMenuBuilder& /*iMenuBuilder*/, int /*iFrameIndex*/)
+    DECLARE_DELEGATE_TwoParams(FOnBuildContextMenu, FMenuBuilder& /*iMenuBuilder*/, int /*iFrameIndex*/)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCells)
         {}
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
         SLATE_EVENT(FOnCreateCell, OnCreateCell)
-        SLATE_EVENT(FOnBuildCellContextMenu, OnBuildCellContextMenu)
+        SLATE_EVENT(FOnBuildContextMenu, OnBuildContextMenu)
     SLATE_END_ARGS()
 
 public:
@@ -113,7 +113,7 @@ private:
 
     FOnCreateCellWidget mOnCreateCellWidget;
     FOnCreateCell mOnCreateCell;
-    FOnBuildCellContextMenu mOnBuildCellContextMenu;
+    FOnBuildContextMenu mOnBuildContextMenu;
 
     TSharedPtr<SBorder> mCellsBorder;
     TSharedPtr<SHorizontalBox> mCellsBox;

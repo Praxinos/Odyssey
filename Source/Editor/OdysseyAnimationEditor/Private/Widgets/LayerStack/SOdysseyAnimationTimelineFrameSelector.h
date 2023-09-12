@@ -10,13 +10,15 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineFrameSelector
 	: public SCompoundWidget
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnBuildContextMenu, FMenuBuilder&)
+    DECLARE_DELEGATE_TwoParams(FOnBuildContextMenu, FMenuBuilder& /*iMenuBuilder*/, int /*iFrameIndex*/)
 
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineFrameSelector)
 	{}
-        //SLATE_EVENT(FOnBuildContextMenu, OnBuildContextMenu)
+        SLATE_EVENT(FOnBuildContextMenu, OnBuildContextMenu)
 	SLATE_END_ARGS()
+
+	SOdysseyAnimationTimelineFrameSelector();
 
 	void Construct(
 		const FArguments& InArgs,
@@ -31,10 +33,13 @@ public:
 
 private:
 	bool GetSelectedFrames(int& oStartFrame, int& oEndFrame) const;
+	void MapActions(TSharedPtr<FUICommandList> iCommandList);
+	void BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
 
 private:
 	bool mIsSelecting = false;
 	FOdysseyAnimationEditorExtension* mExtension;
+	TSharedRef<FUICommandList> mCommandList;
 
     struct
     {
@@ -42,5 +47,5 @@ private:
         FInt32Range mSelectedFrames;
     } mSelectionData;
 
-	//FOnBuildContextMenu mOnBuildContextMenu;
+	FOnBuildContextMenu mOnBuildContextMenu;
 };
