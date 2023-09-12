@@ -35,18 +35,6 @@ FOdysseyAnimationCell::GetLength() const
 }
 
 void
-FOdysseyAnimationCell::PostLoad()
-{
-
-}
-
-void
-FOdysseyAnimationCell::PostDuplicate()
-{
-
-}
-
-void
 FOdysseyAnimationCell::Serialize(FArchive& Ar)
 {
     Ar << mLength;
@@ -56,6 +44,12 @@ FOdysseyMediaProvider
 FOdysseyAnimationCell::GetMediaProvider(uint32 iFrameIndex) const
 {
     return FOdysseyMediaProvider();
+}
+
+TSharedPtr<FOdysseyAnimationCell>
+FOdysseyAnimationCell::CreateCellFromFrame(uint32 iFrameIndex) const
+{
+    return nullptr;
 }
 
 #undef LOCTEXT_NAMESPACE

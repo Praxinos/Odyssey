@@ -72,6 +72,16 @@ FOdysseyAnimationEditorTimeline::GetOffset() const
     return mOffset;
 }
 
+int
+FOdysseyAnimationEditorTimeline::GetFrameIndexAtMousePosition(float iX) const
+{
+    int frame = (int)(iX / GetFrameWidth() + mOffset);
+    if (frame < 0 )
+        return INDEX_NONE;
+
+    return frame;
+}
+
 FInt32Range
 FOdysseyAnimationEditorTimeline::GetSelectedFrames() const
 {
@@ -89,3 +99,5 @@ FOdysseyAnimationEditorTimeline::OnZoomChanged()
 {
     return mOnZoomChanged;
 }
+
+		

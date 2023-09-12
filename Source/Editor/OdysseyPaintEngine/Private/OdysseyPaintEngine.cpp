@@ -235,9 +235,8 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
     mRasterBlockMutator.EditTilesFromRects(
         mInvalidRects,
         FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-            [&](const FULISInvalidTileMap& iTileMap)
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
             {
-                const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mRasterBlock->GetBlock();
                 TArray<::ULIS::FRectI> invalidRects = iTileMap.InvalidRects();
 
                 //Blend Paint Block over OriginalBlock
@@ -245,7 +244,7 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
                 for ( const ::ULIS::FRectI& rect : invalidRects )
                 {
                     ::ULIS::FEvent blendEvent;
-                    ctx.Blend(*mPaintBlock, *block, rect, rect.Position(), ::ULIS::eBlendMode(iBlendParameters.BlendingMode), ::ULIS::eAlphaMode(iBlendParameters.AlphaMode), iBlendParameters.Opacity / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &blendEvent);
+                    ctx.Blend(*mPaintBlock, *iBlock, rect, rect.Position(), ::ULIS::eBlendMode(iBlendParameters.BlendingMode), ::ULIS::eAlphaMode(iBlendParameters.AlphaMode), iBlendParameters.Opacity / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &blendEvent);
                     events.Add(blendEvent);
                 }
                 return events;

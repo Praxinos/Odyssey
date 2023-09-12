@@ -149,12 +149,11 @@ FOdysseyTextureEditorSource::Clear()
 		mutator.EditTilesFromRects(
 			{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
 			FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-				[&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
 				{
-					TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = rasterBlock->GetBlock();
 					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
 					::ULIS::FEvent clearEvent;
-					ctx.Clear(*ULISRasterBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &clearEvent);
+					ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &clearEvent);
 					return { clearEvent };
 				}
 			)

@@ -4,7 +4,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorTimelineTab.h"
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationCellsMutator.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "ULISEventBuilder.h"
@@ -183,12 +183,11 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
             rasterBlockMutator.EditTilesFromRects(
                 { invalidRect },
                 FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                    [&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                     {
-                        TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
-                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-                        ::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(block).RetainBlock(textureBlock).Build();
-                        ctx.ConvertFormat(*textureBlock, *block, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
+                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+                        ::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(iBlock).RetainBlock(textureBlock).Build();
+                        ctx.ConvertFormat(*textureBlock, *iBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
                         return { eventConvertFormat };
                     }
                 )
@@ -199,7 +198,7 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
         }
     }
     
-    FOdysseyAnimationCellsMutator mutator(layerImageRaster);
+    FOdysseyAnimationCellsMutator mutator(layerImageRaster, layerImageRaster->GetCellsContainer());
     mutator.Add(cells);
     mutator.Commit();
 }
@@ -256,7 +255,7 @@ FOdysseyAnimationEditorTimelineTab::OnLayerAdded(UOdysseyLayer* iLayer)
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
 #endif
-        FOdysseyAnimationCellsMutator mutator(layer);
+        FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
         mutator.Add({ cell });
         mutator.Commit();
 

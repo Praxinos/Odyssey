@@ -103,9 +103,8 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     mutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) },
         FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-            [&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
             {
-                TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ULISRasterBlock = RasterBlock->GetBlock();
                 ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
                 TArray<::ULIS::FEvent> lastEvent = {};
                 for ( UOdysseyLayer* layer : iLayers )
@@ -115,7 +114,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                         continue;
 
                     TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
-                    lastEvent = renderer->Blend(ULISRasterBlock, textureLayer->GetImageRenderingBlendMode(), textureLayer->GetImageRenderingOpacity(), ULISRasterBlock->Rect(), lastEvent);
+                    lastEvent = renderer->Blend(iBlock, textureLayer->GetImageRenderingBlendMode(), textureLayer->GetImageRenderingOpacity(), iBlock->Rect(), lastEvent);
                 }
                 return { lastEvent };
             }

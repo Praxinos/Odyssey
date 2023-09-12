@@ -12,6 +12,7 @@
 #include "OdysseyAnimationLayerImageRaster.generated.h"
 
 class FOdysseyAnimationLightTable;
+class FOdysseyAnimationCellsContainer;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
@@ -32,21 +33,24 @@ public:
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyAnimationLayerImageRaster*)
 
-
-    /**
-     * @brief Delegate called when adding / removing cells
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCellsChanged, UOdysseyAnimationLayerImageRaster*)
-
 public:
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
-    static FOnCellsChanged& OnCellsChanged();
 
 public:
     ~UOdysseyAnimationLayerImageRaster();
     UOdysseyAnimationLayerImageRaster();
+
+public:
+    // UObject overrides
+	virtual void PostInitProperties() override;
+
+    /**
+     * @brief Serialize this object
+     *
+     * @param Ar
+     */
+    virtual void Serialize(FArchive& Ar) override;
 
 public:
     //UOdysseyLayer overrides
@@ -58,43 +62,8 @@ public:
     virtual FInt32Range GetFrameRange() const override;
 
 public:
-    //Public API - Cells
-    UFUNCTION(BlueprintPure, Category="Animation Layer")
-    int GetCellsCount() const;
-
-    UFUNCTION(BlueprintPure, Category = "Animation Layer")
-    bool GetCellIndexAtFrame(int iFrameIndex, int& oCellIndex, int& oCellFrameIndex) const;
-
-    UFUNCTION(BlueprintPure, Category = "Animation Layer")
-    bool GetCellFrameRange(int iIndex, FInt32Range& oFrameRange) const;
-    
-    UFUNCTION(BlueprintPure, Category = "Animation Layer")
-    bool GetCellLength(int iIndex, int& oLength) const;
-    
-    UFUNCTION(BlueprintPure, Category = "Animation Layer")
-    bool GetCellType(int iIndex, FName& oType) const;
-
-    /**
-     * @brief Inserts a Cell of given type at given index
-     * 
-     * @param iIndex 
-     * @return uint32 
-     */
-    /* UFUNCTION(BlueprintCallable)
-    void AddImageCell();
-
-    UFUNCTION(BlueprintCallable)
-    void RemoveCell(int iIndex);
-
-    UFUNCTION(BlueprintCallable)
-    void SetCellLength(int iIndex, int iLength); */
-
-public:
     TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
-    int GetOffset() const;
-    TArray<TSharedPtr<FOdysseyAnimationCell>>& GetCells();
-    TSharedPtr<FOdysseyAnimationCell> GetCell(int iIndex) const;
-    TSharedPtr<FOdysseyAnimationCell> GetCellAtFrame(int iFrameIndex, int& oCelFrameIndex) const;
+    TSharedRef<FOdysseyAnimationCellsContainer> GetCellsContainer() const;
 
 public:
     // UOdysseyLayer Overrides
@@ -110,35 +79,24 @@ public:
 	//FOdysseyImageRenderingAbility overrides
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
-
     virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
-
     virtual float GetImageRenderingOpacity() const override;
 
 protected:
     void IsLightTableActivatedChanged();
     void OpacityChanged();
     void BlendModeChanged();
-    void CellsChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
+    
+private:
+    void OnCellsChanged();
+    TSharedPtr<FOdysseyAnimationCell> CreateCell( const FName& iCellType, bool iForSerialization);
 
 private:
     TSharedPtr<IOdysseyMedia> CreateMediaRaster(int iFrameIndex);
-    void AutoCreateCell(int iFrameIndex);
     TSharedPtr<IOdysseyMedia> GetCellMediaRaster(uint32 iFrameIndex) const;
-
-public:
-    // UObject overrides
-	virtual void PostInitProperties() override;
-    virtual void PostDuplicate(bool bDuplicateForPIE) override;
-    virtual void PostLoad() override;
-
-    /**
-     * @brief Serialize this object
-     *
-     * @param Ar
-     */
-    virtual void Serialize(FArchive& Ar) override;
+    void AutoCreateCell(int iFrameIndex);
+    void CreateCell( const FName& iCellType);
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
@@ -153,17 +111,13 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     bool bIsLightTableActivated = true;
 
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
+    bool bAutoBreakCells = true;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
+    bool bAutoAddCells = true;
 
 private:
-    TArray<TSharedPtr<FOdysseyAnimationCell>> mCells;
+    TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;
     TSharedPtr<FOdysseyAnimationLightTable> mLightTable;
-    int mOffset = 0;
-
-private:
-    friend class FOdysseyAnimationCellsMutator;
-    friend class FOdysseyAddCellsMutation;
-    friend class FOdysseyRemoveCellsMutation;
-    friend class FOdysseySetCellLengthMutation;
-    friend class FOdysseySetCellsOffsetMutation;
 };

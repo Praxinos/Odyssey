@@ -7,27 +7,27 @@
 
 class FOdysseyAnimationEditorExtension;
 class FOdysseyAnimationCell;
-class UOdysseyAnimationLayerImageRaster;
+class UOdysseyAnimationLayerImageVector;
 
 /**
  * Implements a layer row widget
  */
-class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterTimeline
+class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimeline
     : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterTimeline)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimeline)
         {}
     SLATE_END_ARGS()
 
 public:
     // Construction / Destruction
-    ~SOdysseyAnimationLayerImageRasterTimeline();
-    SOdysseyAnimationLayerImageRasterTimeline();
+    ~SOdysseyAnimationLayerImageVectorTimeline();
+    SOdysseyAnimationLayerImageVectorTimeline();
     void Construct(
         const FArguments& iArgs, 
         FOdysseyAnimationEditorExtension* iExtension,
-        UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
+        UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
     );
 
 public:
@@ -50,7 +50,7 @@ private:
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;
-    UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
+    UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
 	
 	TSharedRef<FUICommandList> mCommandList;
 };
