@@ -37,7 +37,7 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateHeaderWidget()
 {
     const FCheckBoxStyle* lightTableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LightTableToggle");
-    const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.AlphaLockedToggle");
+    const FCheckBoxStyle* coloredToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.ColoredToggle");
 
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
@@ -63,11 +63,11 @@ SOdysseyAnimationLayerImageVectorRow::GenerateHeaderWidget()
         .VAlign(VAlign_Center)
         .AutoWidth()
         [
-            //AlphaLock
+            //ColoredLock
             SNew(SCheckBox)
-            .Style(alphaLockedToggleStyle)
-            .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsAlphaLockedCheckStateChanged)
-            .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsAlphaLockedIsChecked)
+            .Style(coloredToggleStyle)
+            .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged)
+            .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked)
         ]
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
@@ -117,15 +117,16 @@ SOdysseyAnimationLayerImageVectorRow::GenerateTimelineWidget()
 }
 
 void
-SOdysseyAnimationLayerImageVectorRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
+SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "bIsLightTableActivated", iState == ECheckBoxState::Checked);
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Coloring"));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "IsColored", iState == ECheckBoxState::Checked);
 }
 
 void
-SOdysseyAnimationLayerImageVectorRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
+SOdysseyAnimationLayerImageVectorRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "IsAlphaLocked", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "bIsLightTableActivated", iState == ECheckBoxState::Checked);
 }
 
 void
@@ -156,15 +157,15 @@ SOdysseyAnimationLayerImageVectorRow::OnOpacityEndSliderMovement(int iValue)
 }
 
 ECheckBoxState
-SOdysseyAnimationLayerImageVectorRow::GetLightTableIsChecked() const
+SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked() const
 {
-	return mAnimationLayerImageVector->bIsLightTableActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mAnimationLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
-SOdysseyAnimationLayerImageVectorRow::GetIsAlphaLockedIsChecked() const
+SOdysseyAnimationLayerImageVectorRow::GetLightTableIsChecked() const
 {
-	return mAnimationLayerImageVector->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mAnimationLayerImageVector->bIsLightTableActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void

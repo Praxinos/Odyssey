@@ -29,6 +29,13 @@ UOdysseyAnimationLayerImageVector::OnOpacityChanged()
     return onOpacityChanged;
 }
 
+UOdysseyAnimationLayerImageVector::FOnIsColoredChanged&
+UOdysseyAnimationLayerImageVector::OnIsColoredChanged()
+{
+    static FOnIsColoredChanged onIsColoredChanged;
+    return onIsColoredChanged;
+}
+
 UOdysseyAnimationLayerImageVector::~UOdysseyAnimationLayerImageVector()
 {
 }
@@ -74,6 +81,12 @@ UOdysseyAnimationLayerImageVector::IsLightTableActivatedChanged()
 }
 
 void
+UOdysseyAnimationLayerImageVector::IsColoredChanged()
+{
+    OnIsColoredChanged().Broadcast(this);
+}
+
+void
 UOdysseyAnimationLayerImageVector::OpacityChanged()
 {
     OnOpacityChanged().Broadcast(this);
@@ -102,6 +115,8 @@ UOdysseyAnimationLayerImageVector::PropertyChanged(const FName& iPropertyName)
 {
     Super::PropertyChanged(iPropertyName);
 
+    if(iPropertyName == "IsColored")
+        IsColoredChanged();
     if (iPropertyName == "BlendMode")
         BlendModeChanged();
     if (iPropertyName == "Opacity")

@@ -10,11 +10,12 @@
 
 static FCriticalSection mEngineMutex;
 
-FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(FOdysseyVectorEngine* iEngine, TSharedPtr<::ULIS::FBlock> iBlock, bool iRenderHUD, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(FOdysseyVectorEngine* iEngine, TSharedPtr<::ULIS::FBlock> iBlock, bool iRenderHUD, bool iIsColored, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mEngine(iEngine)
     , mBlock(iBlock)
     , mRenderHUD(iRenderHUD)
+    , mIsColored(iIsColored)
 {
 }
 
@@ -27,7 +28,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> 
     {   
         FScopeLock renderLock(&mEngineMutex);
 
-        mEngine->Update( 0 );
+        mEngine->Render( mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
 
         // HUD displaying only for the current layer.
         if( mRenderHUD )
@@ -47,7 +48,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> i
     {   
         FScopeLock renderLock(&mEngineMutex);
         
-        mEngine->Update( 0 );
+        mEngine->Render( mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
 
         // HUD displaying only for the current layer.
         if( mRenderHUD )

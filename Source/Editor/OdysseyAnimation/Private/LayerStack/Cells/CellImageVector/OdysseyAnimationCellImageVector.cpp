@@ -29,6 +29,7 @@ FOdysseyAnimationCellImageVector::StaticType()
 FOdysseyAnimationCellImageVector::~FOdysseyAnimationCellImageVector()
 {
     FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
+    UOdysseyAnimationLayerImageVector::OnIsColoredChanged().RemoveAll( this );
     delete mEngine;
     mEngine = nullptr;
 }
@@ -55,6 +56,7 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyAnimationCellImageVector::OnVectorSceneSignal );
+    UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsColoredChanged );
 
     mEngine->GetBLImage()->getData( &imgData );
 
@@ -149,11 +151,21 @@ FOdysseyAnimationCellImageVector::OnVectorSceneSignal( FOdysseyVectorScene* iSce
     }
 }
 
+void
+FOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImageVector* iLayer)
+{
+    if (iLayer != mLayer)
+        return;
+
+    mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+    ImageRenderingChanged();
+}
+
 TSharedPtr<IOdysseyImageRenderer>
 FOdysseyAnimationCellImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
     bool renderHUD = iRenderType == IOdysseyImageRenderer::eRenderType::Editor && mLayer->GetLayerStack()->CurrentLayer.Get() == mLayer;
-    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(mEngine, mBlock, renderHUD, iRenderType, GetImageRenderingRects());
+    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(mEngine, mBlock, renderHUD, mLayer->IsColored, iRenderType, GetImageRenderingRects());
 }
 
 TArray<FGuid>

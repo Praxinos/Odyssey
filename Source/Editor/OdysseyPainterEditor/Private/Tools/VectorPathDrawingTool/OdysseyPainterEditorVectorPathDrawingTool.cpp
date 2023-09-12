@@ -353,7 +353,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDown( const FOdysseyPoint& iP
 {
     if( HasMedia() )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
 
         if ( mediaVectors.Num() )
         {

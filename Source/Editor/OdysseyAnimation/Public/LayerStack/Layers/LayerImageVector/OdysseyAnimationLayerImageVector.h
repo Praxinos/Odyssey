@@ -31,9 +31,16 @@ public:
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyAnimationLayerImageVector*)
 
+    /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsColoredChanged, UOdysseyAnimationLayerImageVector*)
+
 public:
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
+    static FOnIsColoredChanged& OnIsColoredChanged();
 
 public:
     ~UOdysseyAnimationLayerImageVector();
@@ -71,6 +78,7 @@ public:
     virtual float GetImageRenderingOpacity() const override;
 
 protected:
+    void IsColoredChanged();
     void IsLightTableActivatedChanged();
     void OpacityChanged();
     void BlendModeChanged();
@@ -87,6 +95,9 @@ private:
     void CreateCell( const FName& iCellType);
 
 public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
+    bool IsColored = true;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
     bool IsAlphaLocked = false;
 
