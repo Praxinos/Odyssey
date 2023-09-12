@@ -213,6 +213,8 @@ SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
 
         return;
     }
+
+    //TODO: Vector Layer
 }
 
 float

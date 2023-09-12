@@ -9,18 +9,18 @@
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageRaster"
 
-TSharedPtr<FOdysseyAnimationCellImageRaster>
+TSharedRef<FOdysseyAnimationCellImageRaster>
 FOdysseyAnimationCellImageRaster::Create(UOdysseyAnimationLayerImageRaster* iLayer, int iWidth, int iHeight, ::ULIS::eFormat iFormat)
 {
-    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = MakeShared<FOdysseyAnimationCellImageRaster>(iLayer);
+    TSharedRef<FOdysseyAnimationCellImageRaster> cell = MakeShared<FOdysseyAnimationCellImageRaster>(iLayer);
     cell->Init(iWidth, iHeight, iFormat);
     return cell;
 }
 
-TSharedPtr<FOdysseyAnimationCellImageRaster>
+TSharedRef<FOdysseyAnimationCellImageRaster>
 FOdysseyAnimationCellImageRaster::Create(UOdysseyAnimationLayerImageRaster* iLayer, TSharedPtr<::ULIS::FBlock> iBlock)
 {
-    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = MakeShared<FOdysseyAnimationCellImageRaster>(iLayer);
+    TSharedRef<FOdysseyAnimationCellImageRaster> cell = MakeShared<FOdysseyAnimationCellImageRaster>(iLayer);
     cell->Init(iBlock);
     return cell;
 }

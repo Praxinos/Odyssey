@@ -11,9 +11,9 @@ FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UObject* iOwner, TS
     , mContainer(iContainer)
 {
     GetRootMutation()->OnCommited().BindLambda(
-        [this]()
+        [container = mContainer]()
         {
-            mContainer->OnCellsChanged().Broadcast();
+            container->OnCellsChanged().Broadcast();
         }
     );
 }
@@ -41,6 +41,91 @@ FOdysseyAnimationCellsMutator::Remove(int iIndex, int iNumCells)
 
     TSharedPtr<FOdysseyRemoveCellsMutation> mutation = MakeShared<FOdysseyRemoveCellsMutation>(mContainer, iIndex, cells);
     AddAndApplyMutation(mutation);
+}
+
+void
+FOdysseyAnimationCellsMutator::RemoveFrame(int iFrameIndex)
+{
+    int cellIndex = mContainer->GetCellIndexAtFrame(iFrameIndex);
+    if (cellIndex == INDEX_NONE)
+        return;
+    
+    int cellLength = mContainer->GetCells()[cellIndex]->GetLength();
+    if (cellLength == 1)
+    {
+        Remove(cellIndex);
+    }
+    else
+    {
+        SetLength(cellIndex, cellLength - 1);
+    }
+}
+
+void
+FOdysseyAnimationCellsMutator::RemoveFrameRange(const FInt32Range& iRange)
+{
+    bool isLowerClosed = iRange.GetLowerBound().IsClosed();
+    bool isUpperClosed = iRange.GetUpperBound().IsClosed();
+
+    if ( !isLowerClosed || !isUpperClosed )
+        return;
+
+    int startFrame = iRange.GetLowerBoundValue();
+    int endFrame = iRange.GetUpperBoundValue();
+
+    //Travel Backward to keep frame indexes in sync with cells modifications/removal
+    //Should the last cell in frame range shrinked or removed ?
+    int lastCellIndex = mContainer->GetCellIndexAtFrame(endFrame);
+    int firstCellIndex = mContainer->GetCellIndexAtFrame(startFrame);
+
+    if (lastCellIndex == firstCellIndex && lastCellIndex != INDEX_NONE && firstCellIndex != INDEX_NONE)
+    {
+        int cellLength = mContainer->GetCells()[lastCellIndex]->GetLength();
+        int lengthToRemove = endFrame - startFrame + 1;
+        if (lengthToRemove >= cellLength)
+            Remove(lastCellIndex);
+        else
+            SetLength(lastCellIndex, cellLength - lengthToRemove);
+        return;
+    }
+
+    if (lastCellIndex != INDEX_NONE)
+    {
+        int cellFrame = mContainer->GetCellFrameAtFrame(endFrame);
+        int cellLength = mContainer->GetCells()[lastCellIndex]->GetLength();
+        if (cellFrame == cellLength - 1)
+        {
+            Remove(lastCellIndex);
+        }
+        else
+        {
+            SetLength(lastCellIndex, cellLength - (cellFrame + 1));
+        }
+    }
+
+    //Remove cells
+    int firstCellIndexToRemove = firstCellIndex == INDEX_NONE ? 0 : firstCellIndex + 1;
+    int lastCellIndexToRemove = lastCellIndex == INDEX_NONE ? mContainer->GetCells().Num() - 1 : lastCellIndex - 1;
+    int numCellsToRemove = lastCellIndexToRemove - firstCellIndexToRemove + 1;
+    
+    if (numCellsToRemove > 0)
+    {
+        Remove(firstCellIndexToRemove, numCellsToRemove);
+    }
+
+    //Should the first cell in frame range shrink ?
+    if (firstCellIndex != INDEX_NONE)
+    {
+        int cellFrame = mContainer->GetCellFrameAtFrame(startFrame);
+        if (firstCellIndex == 0)
+        {
+            Remove(firstCellIndex);
+        }
+        else
+        {
+            SetLength(firstCellIndex, cellFrame);
+        }
+    }
 }
 
 void

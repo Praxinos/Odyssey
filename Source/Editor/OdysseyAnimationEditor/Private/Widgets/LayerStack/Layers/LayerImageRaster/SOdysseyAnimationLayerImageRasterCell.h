@@ -9,32 +9,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterCell
     : public SCompoundWidget
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnBuildContextMenu, FMenuBuilder&)
-    DECLARE_DELEGATE_OneParam(FOnMapActions, TSharedPtr<FUICommandList>)
-
-public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterCell)
         {}
-        SLATE_EVENT(FOnBuildContextMenu, OnBuildContextMenu)
-        SLATE_EVENT(FOnMapActions, OnMapActions)
     SLATE_END_ARGS()
 
 public:
-    void Construct(
-        const FArguments& iArgs,
-        FOdysseyAnimationEditorExtension* iExtension,
-        UOdysseyAnimationLayerImageRaster* iLayer
-    );
-
-public:
-    virtual bool SupportsKeyboardFocus() const override;
-    virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
-    virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
+    void Construct(const FArguments& iArgs);
 
 private:
-    FOdysseyAnimationEditorExtension* mExtension;
-    UOdysseyAnimationLayerImageRaster* mLayer;
-
-    FOnBuildContextMenu mOnBuildContextMenu;
-    FOnMapActions mOnMapActions;
 };

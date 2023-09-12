@@ -11,13 +11,11 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineFrameSelector
 {
 public:
     DECLARE_DELEGATE_OneParam(FOnBuildContextMenu, FMenuBuilder&)
-    DECLARE_DELEGATE_OneParam(FOnMapActions, TSharedPtr<FUICommandList>)
 
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineFrameSelector)
 	{}
-        SLATE_EVENT(FOnBuildContextMenu, OnBuildContextMenu)
-        SLATE_EVENT(FOnMapActions, OnMapActions)
+        //SLATE_EVENT(FOnBuildContextMenu, OnBuildContextMenu)
 	SLATE_END_ARGS()
 
 	void Construct(
@@ -44,6 +42,5 @@ private:
         FInt32Range mSelectedFrames;
     } mSelectionData;
 
-	FOnBuildContextMenu mOnBuildContextMenu;
-    FOnMapActions mOnMapActions;
+	//FOnBuildContextMenu mOnBuildContextMenu;
 };

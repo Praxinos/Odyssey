@@ -23,6 +23,8 @@ public:
 	float GetOffset() const;
     FInt32Range GetSelectedFrames() const;
 
+    int GetFrameIndexAtMousePosition(float iX) const;
+
 public:
     //Events
     FSimpleMulticastDelegate& OnSelectedFramesChanged();

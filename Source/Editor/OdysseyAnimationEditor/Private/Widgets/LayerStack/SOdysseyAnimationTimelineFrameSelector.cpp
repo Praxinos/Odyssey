@@ -15,8 +15,7 @@ SOdysseyAnimationTimelineFrameSelector::Construct(
 )
 {
 	mExtension = iExtension;
-	mOnBuildContextMenu = InArgs._OnBuildContextMenu;
-	mOnMapActions = InArgs._OnMapActions;
+	//mOnBuildContextMenu = InArgs._OnBuildContextMenu;
 
 	ChildSlot
 	[
