@@ -1929,3 +1929,13 @@ FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
 
     return nullptr;
 }
+
+/*
+void
+FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*> iSectionArray
+                                       , std::vector<FOdysseyVectorSegment*> oRemovedPathArray
+                                       , std::vector<FOdysseyVectorSegment*> oAddedSegmentArray )
+{
+
+}
+*/

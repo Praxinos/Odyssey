@@ -59,26 +59,35 @@ FOdysseyVectorPathTracer::Init( FOdysseyVectorScene* iScene )
     mBLContext.begin( *mBLImage );
     mBLContext.clearAll();
 
-    Flush();
+    Reset();
 }
 
 void
-FOdysseyVectorPathTracer::Flush()
+FOdysseyVectorPathTracer::Reset()
 {
-    if( mEdgeArray.size() )
-    {
-        MakeBezier( true );
-        CommitSegment();
-    }
-
     mBestBezier.inited = false;
-
     mPointArray.clear();
     mRecordArray.clear();
     mEdgeArray.clear();
     mCubicPath = nullptr;
     mPreviousVertex = nullptr;
     mPointID = 0;
+}
+
+FOdysseyVectorSegment*
+FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
+{
+    FOdysseyVectorSegment* newSegment = nullptr;
+
+    if( mEdgeArray.size() )
+    {
+        MakeBezier( true );
+        newSegment = CommitSegment( iEndVertex ? iEndVertex : CommitVertex() );
+    }
+
+    Reset();
+
+    return newSegment;
 }
 
 std::vector<FTracerPoint>&
@@ -436,14 +445,10 @@ FOdysseyVectorPathTracer::ClearTo( uint32 iRecordID, uint32 iEdgeID )
     TraceEdges( 1.0f ); // trace again
 }
 
-void
-FOdysseyVectorPathTracer::CommitSegment()
+FOdysseyVectorVertex*
+FOdysseyVectorPathTracer::CommitVertex()
 {
     BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
-    BLPoint localHandlePoint[2] = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[1].x
-                                                                        , mBestBezier.pt[1].y )
-                                  , cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[2].x
-                                                                        , mBestBezier.pt[2].y ) };
     BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[3].x
                                                                , mBestBezier.pt[3].y ) };
     BLPoint localVector = cubicPathInverseWorldMatrix.mapVector( mBestBezier.lastRecordRadius * 0.7071f
@@ -453,23 +458,37 @@ FOdysseyVectorPathTracer::CommitSegment()
                                                               , localPoint.x
                                                               , localPoint.y
                                                               , localRadius );
+
+    mCubicPath->AddVertex( newVertex );
+
+    return newVertex;
+}
+
+FOdysseyVectorSegment*
+FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
+{
+    BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
+    BLPoint localHandlePoint[2] = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[1].x
+                                                                        , mBestBezier.pt[1].y )
+                                  , cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[2].x
+                                                                        , mBestBezier.pt[2].y ) };
     FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath
                                                                                 , mPreviousVertex
                                                                                 , localHandlePoint[0].x
                                                                                 , localHandlePoint[0].y
                                                                                 , localHandlePoint[1].x
                                                                                 , localHandlePoint[1].y
-                                                                                , newVertex
+                                                                                , iEndVertex
                                                                                 , true );
 
-    mCubicPath->AddVertex( newVertex );
+
     mCubicPath->AddSegment( newCubicSegment );
 
     newCubicSegment->Update();
 
     ClearTo( mBestBezier.lastRecordID, mBestBezier.lastEdgeID );
 
-    mPreviousVertex = newVertex;
+    mPreviousVertex = iEndVertex;
     mSmoothVector = mBestBezier.pt[3] - mBestBezier.pt[2];
 
     if( mSmoothVector.Distance() )
@@ -479,9 +498,12 @@ FOdysseyVectorPathTracer::CommitSegment()
 
     // very important. there is no best bezier anymore.
     mBestBezier.inited = false;
+
+
+    return newCubicSegment;
 }
 
-void
+FOdysseyVectorSegment*
 FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                                , double iWorldX
                                , double iWorldY
@@ -489,6 +511,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
 {
     BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
     uint32 indexn = mPointArray.size();
+    FOdysseyVectorSegment* newSegment = nullptr;
 
     mPointArray.emplace_back( mPointID, iWorldX, iWorldY, iRadius );
 
@@ -533,6 +556,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
             // draw alpha to pixel buffer
             TraceEdge( &newEdge, 1.0f );
 
+            // unsure if useful
             mBLContext.flush(BL_CONTEXT_FLUSH_SYNC);
 
             ClearPointsTo( mPointID );
@@ -548,8 +572,12 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
 
             if( ( lastRecord->smooth == false ) && ( lastEdge != nullptr ) )
             {
+                FOdysseyVectorVertex* newVertex;
+
                 MakeBezier( true );
-                CommitSegment();
+
+                newVertex = CommitVertex();
+                newSegment = CommitSegment( newVertex );
 
                 mRecordArray.push_back( newRecord );
                 mEdgeArray.push_back( newEdge );
@@ -561,13 +589,18 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
 
                 if( MakeBezier( false ) == false )
                 {
-                    CommitSegment();
+                    FOdysseyVectorVertex* newVertex;
+
+                    newVertex = CommitVertex();
+                    newSegment = CommitSegment( newVertex );
                 }
             }
         }
     }
 
     mPointID++;
+
+    return newSegment;
 }
 
 BLImage*

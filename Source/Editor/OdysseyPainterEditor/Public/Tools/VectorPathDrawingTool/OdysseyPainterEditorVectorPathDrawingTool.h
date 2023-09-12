@@ -12,6 +12,7 @@
 #include "OdysseyPainterEditorVectorPathDrawingTool.generated.h"
 
 class FOdysseyPainterEditorVectorPathDrawingToolHUD;
+class FOdysseyVectorUndoPathExtend;
 
 UENUM()
 enum class eTracingType : uint8
@@ -47,12 +48,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         virtual bool IsActivable() const override;
         virtual void Load() override;
         virtual void Unload() override;
+        virtual bool OnKeyDown( const FKey& iKey ) override;
+        virtual bool OnKeyUp( const FKey& iKey ) override;
         virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
         virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
         virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
         virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
+        bool OnKeyDownVector( FOdysseyVectorScene* iScene, const FKey& iKey );
+        bool OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey );
         void UnloadVector( FOdysseyVectorScene* iScene );
         void LoadVector( FOdysseyVectorScene* iScene );
         bool OnMouseDownVector( FOdysseyVectorScene* iScene, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
@@ -68,6 +73,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
     protected:
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
         void PropertyChangedVector( FOdysseyVectorScene* iScene, const FName& iPropertyName );
+
     private:
         void OnSizeChanged();
         bool HasMedia() const;
@@ -77,9 +83,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                         , double iWorldY
                                         , double iPickingRadius );
         void SetPathColor( FOdysseyVectorPath* iPath );
-
+        void RecordUndoPathAdd( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath  );
+        void RecordUndoPathExtend( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath );
     public:
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         eTracingType TracingType;
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
@@ -104,6 +111,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         bool Stitch;
+        bool StitchAtKeyDown;
 
         UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         bool AverageStitchedRadius;
@@ -118,4 +126,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         FOdysseyPainterEditorVectorPathDrawingToolHUD* mPathDrawingHUD;
         FOdysseyVectorPathTracer mPathTracer;
         FOdysseyVectorVertex* mStitchedVertex;
+        FOdysseyVectorUndoPathExtend* mUndoPathExtend;
 };

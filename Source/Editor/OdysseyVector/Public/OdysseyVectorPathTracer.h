@@ -115,18 +115,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         void AttachPath( FOdysseyVectorPath* iCubicPath );
         FOdysseyVectorPath* GetPath();
         BLImage* GetBLImage();
-        void Trace( FOdysseyVectorVertex* iStitchedVertex
-                  , double iWorldX
-                  , double iWorldY
-                  , double iRadius );
+        FOdysseyVectorSegment* Trace( FOdysseyVectorVertex* iStitchedVertex
+                                    , double iWorldX
+                                    , double iWorldY
+                                    , double iRadius );
         bool MakeBezier( bool iForce );
         bool TestBezier( ::ULIS::FVec2D iBezier[4] );
         void Init( FOdysseyVectorScene* iScene );
         std::vector<FTracerPoint>& GetPointArray();
         std::vector<FTracerRecord>& GetRecordArray();
         std::vector<FTracerEdge>& GetEdgeArray();
-        void Flush();
-        void CommitSegment();
+        FOdysseyVectorSegment* Flush( FOdysseyVectorVertex* iEndVertex );
+        FOdysseyVectorSegment* CommitSegment( FOdysseyVectorVertex* iEndVertex );
+        FOdysseyVectorVertex* CommitVertex();
+        void Reset();
         void ClearPointsTo( uint32 iPointID );
         void ClearTo( uint32 iRecordID, uint32 iEdgeID );
         void AdjustBezier( ::ULIS::FVec2D iBezier[4], double iEdgeChainLength );
