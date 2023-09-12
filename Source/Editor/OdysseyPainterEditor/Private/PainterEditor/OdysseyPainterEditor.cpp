@@ -124,6 +124,8 @@ FOdysseyPainterEditor::CreateLayout()
 void
 FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
+    FOdysseyEditor::BindShortcuts(iToolkit);
+
     GetGUI()->BindShortcuts(iToolkit);
 
     mRasterDrawingTool->BindShortcuts(iToolkit);

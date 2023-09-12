@@ -50,6 +50,9 @@ private:
     virtual void CreateNewLayer();
     virtual void ChangeLayerOpacity(float iOpacity);
 
+    void StepForward();
+    void StepBackward();
+
 private:
     FOdysseyAnimationEditorExtension* mExtension;
 };

@@ -63,6 +63,8 @@ FOdysseyAnimationEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     MAP_ACTION(AnimationEditorCommands.ImportTextureSequence, ImportTextureSequence )
     MAP_ACTION(AnimationEditorCommands.CreateNewAnimationLayerImageRaster, CreateNewLayer )
+    MAP_ACTION(AnimationEditorCommands.StepForward, StepForward )
+    MAP_ACTION(AnimationEditorCommands.StepBackward, StepBackward )
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
@@ -227,6 +229,20 @@ FOdysseyAnimationEditorTimelineTab::ChangeLayerOpacity( float iOpacity )
         return;
 
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::StepForward()
+{
+    int frame = mExtension->Animation()->CurrentFrame + 1;
+    FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::StepBackward()
+{
+    int frame = FMath::Max(0, mExtension->Animation()->CurrentFrame - 1);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
 }
 
 void
