@@ -467,21 +467,20 @@ FBlockData::Render(bool iForceRender)
         rasterBlockMutator.EditTilesFromRects(
             invalidRects,
             FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                [&](const FULISInvalidTileMap& iTileMap)
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
                 {
-                    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
-                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
                     TArray<::ULIS::FRectI> rects = iTileMap.InvalidRects();
 
                     TArray<::ULIS::FEvent> clearEvents;
                     for (const ::ULIS::FRectI& rect : rects)
                     {    
-                        ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(block).Build();
-                        ctx.Clear(*block, rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
+                        ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(iBlock).Build();
+                        ctx.Clear(*iBlock, rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
                         clearEvents.Add(eventClearBlock);
                     }
 
-                    return renderer->Copy(block, rects, clearEvents);
+                    return renderer->Copy(iBlock, rects, clearEvents);
                 }
             )
         );

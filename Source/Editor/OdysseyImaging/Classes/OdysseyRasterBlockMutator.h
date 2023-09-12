@@ -11,7 +11,7 @@ class FOdysseyRasterBlock;
 class ODYSSEYIMAGING_API FOdysseyRasterBlockMutator
 {
 public:
-    DECLARE_DELEGATE_RetVal_OneParam(TArray<::ULIS::FEvent>, FEditDelegate, const FULISInvalidTileMap&)
+    DECLARE_DELEGATE_RetVal_TwoParams(TArray<::ULIS::FEvent>, FEditDelegate, TSharedPtr<::ULIS::FBlock>, const FULISInvalidTileMap&)
 
 public:
     ~FOdysseyRasterBlockMutator();
@@ -36,6 +36,6 @@ private:
     FULISInvalidTileMap mInvalidTileMap;
     TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>> mOriginalTileBlocks;
     FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
-    TSharedPtr<IOdysseyHandle> mHandle;
+    TSharedPtr<::ULIS::FBlock> mBlock;
     bool mStoreUndo;
 };

@@ -236,10 +236,8 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
         blockMutator.EditTilesFromRects(
             { rect },
             FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                [&](const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
-                    TSharedPtr<::ULIS::FBlock> ULISBlock = rasterBlock->GetBlock();
-
                     TArray<::ULIS::FEvent> lastEvent;
                     for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
                     {
@@ -249,7 +247,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
                         TSharedPtr<IOdysseyImageRenderer> renderer = layer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, frame);
 
-                        lastEvent = renderer->Blend(ULISBlock, layer->GetImageRenderingBlendMode(), layer->GetImageRenderingOpacity(), rect, lastEvent);
+                        lastEvent = renderer->Blend(iBlock, layer->GetImageRenderingBlendMode(), layer->GetImageRenderingOpacity(), rect, lastEvent);
                     }
 
                     return lastEvent;

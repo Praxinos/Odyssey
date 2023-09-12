@@ -20,17 +20,6 @@
 #define FOdysseyRasterBlock_CACHE_NAME TEXT("OdysseyRasterBlock")
 #define FOdysseyRasterBlock_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
 
-class FOdysseyRasterBlockPreloadHandle : public IOdysseyHandle
-{
-public:
-    FOdysseyRasterBlockPreloadHandle(FOdysseyRasterBlock* iBlock)
-        : mBlock(iBlock->GetBlock())
-    {}
-
-private:
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
-};
-
 void
 RemoveValueFromCache(const FString& iId)
 {
@@ -378,18 +367,6 @@ FOdysseyRasterBlock::ResetUndoableBlock()
     mInvalidTileMap.Clear();
     mOnUndoableBlockChanged.Broadcast(rects);
 } */
-
-TSharedPtr<IOdysseyHandle>
-FOdysseyRasterBlock::Preload()
-{
-    TSharedPtr<IOdysseyHandle> handle = mPreloadHandle.Pin();
-    if (handle)
-        return handle;
-
-    handle = MakeShared<FOdysseyRasterBlockPreloadHandle>(this);
-    mPreloadHandle = handle;
-    return handle;
-}
 
 FOdysseyRasterBlock::FOnBlockChanged&
 FOdysseyRasterBlock::OnBlockChanged()

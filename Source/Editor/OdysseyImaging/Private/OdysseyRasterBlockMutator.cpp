@@ -15,6 +15,7 @@ FOdysseyRasterBlockMutator::FOdysseyRasterBlockMutator(bool iStoreUndo)
     , mInvalidTileMap()
     , mOriginalTileBlocks()
     , mRasterBlockUndoBuilder()
+    , mBlock(nullptr)
     , mStoreUndo(iStoreUndo)
 {
 
@@ -25,7 +26,7 @@ FOdysseyRasterBlockMutator::FOdysseyRasterBlockMutator(TSharedPtr<FOdysseyRaster
     , mInvalidTileMap(64, iRasterBlock->GetWidth(), iRasterBlock->GetHeight())
     , mOriginalTileBlocks()
     , mRasterBlockUndoBuilder()
-    , mHandle(iRasterBlock->Preload())
+    , mBlock(iRasterBlock->GetBlock())
     , mStoreUndo(iStoreUndo)
 {
 
@@ -39,12 +40,12 @@ FOdysseyRasterBlockMutator::SetRasterBlock(TSharedPtr<FOdysseyRasterBlock> iRast
     if ( mRasterBlock )
     {
         mInvalidTileMap = FULISInvalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
-        mHandle = iRasterBlock->Preload();
+        mBlock = iRasterBlock->GetBlock();
     }
     else
     {
         mInvalidTileMap = FULISInvalidTileMap();
-        mHandle = nullptr;
+        mBlock = nullptr;
     }
 }
 
@@ -72,11 +73,6 @@ FOdysseyRasterBlockMutator::ResetTilesFromRects(const TArray<::ULIS::FRectI>& iR
     if (!mRasterBlock)
         return;
 
-    //Retrieve intersections between rects
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mRasterBlock->GetBlock();
-    if ( !block )
-        return;
-
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mRasterBlock->GetFormat());
     FULISInvalidTileMap invalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
     invalidTileMap.Invalidate(iRects);
@@ -88,7 +84,7 @@ FOdysseyRasterBlockMutator::ResetTilesFromRects(const TArray<::ULIS::FRectI>& iR
 
         TSharedPtr<::ULIS::FBlock> originalBlock = mOriginalTileBlocks[tile];
         ULIS::FRectI rect = invalidTileMap.GetTileRect(tile);
-        ctx.Copy( *originalBlock, *block, originalBlock->Rect(), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient );
+        ctx.Copy( *originalBlock, *mBlock, originalBlock->Rect(), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient );
     }
     ctx.Finish();
 }
@@ -97,11 +93,6 @@ void
 FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, const FEditDelegate& iDelegate)
 {
     if (!mRasterBlock)
-        return;
-
-    //Retrieve intersections between rects
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mRasterBlock->GetBlock();
-    if ( !block )
         return;
 
     FULISInvalidTileMap invalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
@@ -119,14 +110,14 @@ FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRe
         
         ::ULIS::FRectI rect = mInvalidTileMap.GetTileRect(tileIndex);
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> tileBlock = MakeShared<::ULIS::FBlock>(tileSize, tileSize, mRasterBlock->GetFormat());
-        ctx.Copy(*block, *tileBlock, rect, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        ctx.Copy(*mBlock, *tileBlock, rect, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
         mOriginalTileBlocks.Add(tileIndex, tileBlock);
     }
     ctx.Finish();
 
     if (iDelegate.IsBound())
     {
-        TArray<::ULIS::FEvent> delegateEvents = iDelegate.Execute(invalidTileMap);
+        TArray<::ULIS::FEvent> delegateEvents = iDelegate.Execute(mBlock, invalidTileMap);
         if (mRasterBlock->PostProcess().IsBound())
             mRasterBlock->PostProcess().Execute(mOriginalTileBlocks, invalidTileMap, delegateEvents);
     }
@@ -164,11 +155,7 @@ FOdysseyRasterBlockMutator::Abort()
     if (mOriginalTileBlocks.IsEmpty())
         return;
 
-    TSharedPtr<::ULIS::FBlock> block = mRasterBlock->GetBlock();
-    if ( !block )
-        return;
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
     TArray<FIntPoint> tileIndexes;
     TArray<::ULIS::FRectI> rects;
     mOriginalTileBlocks.GetKeys(tileIndexes);
@@ -182,7 +169,7 @@ FOdysseyRasterBlockMutator::Abort()
 
         ::ULIS::FRectI rect = mInvalidTileMap.GetTileRect(tileIndex);
         rects.Add(rect);
-        ctx.Copy(*originalBlock, *block, originalBlock->Rect(), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        ctx.Copy(*originalBlock, *mBlock, originalBlock->Rect(), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
     }
     ctx.Finish();
 
