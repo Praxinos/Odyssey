@@ -6,6 +6,7 @@
 #include "Widgets/SOdysseyLayerStackAddLayerButton.h"
 #include "Widgets/SOdysseyAnimationPlaybackControls.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerStack"
 
@@ -132,6 +133,10 @@ SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedR
     {
         return SNew(SOdysseyAnimationLayerImageRasterRow, GetTreeView().ToSharedRef(), mExtension, Cast<UOdysseyAnimationLayerImageRaster>(iLayer));
     }
+    else if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
+    {
+        return SNew(SOdysseyAnimationLayerImageVectorRow, GetTreeView().ToSharedRef(), mExtension, Cast<UOdysseyAnimationLayerImageVector>(iLayer));
+    }
 
     return SNew(SOdysseyAnimationLayerRow, GetTreeView().ToSharedRef(), mExtension, Cast<UOdysseyAnimationLayer>(iLayer)); //Default widget
 }
@@ -206,6 +211,21 @@ SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
 
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
+#endif
+        FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
+        mutator.Add({ cell });
+        mutator.Commit();
+
+        return;
+    }
+
+    if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
+    {
+        UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
+        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(layer, mExtension->Animation()->Width(), mExtension->Animation()->Height());
+
+#ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Vector", "Add Frame"));
 #endif
         FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
         mutator.Add({ cell });

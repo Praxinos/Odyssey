@@ -170,4 +170,19 @@ FOdysseyAnimationCellImageRaster::GetMediaProvider(uint32 iFrameIndex) const
     return mediaProvider;
 }
 
+TSharedPtr<FOdysseyAnimationCell>
+FOdysseyAnimationCellImageRaster::CreateCellFromFrame(uint32 iFrameIndex) const
+{
+    //Copy Current Cell block at given frameindex
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mRasterBlock->GetWidth(), mRasterBlock->GetHeight(), mRasterBlock->GetFormat());
+    TSharedPtr<::ULIS::FBlock> currentBlock = mRasterBlock->GetBlock();
+    
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
+    ctx.Copy(*currentBlock, *block);
+    ctx.Finish();
+
+    //Create a new raster cell from the given block
+    return FOdysseyAnimationCellImageRaster::Create(mLayer, block);
+}
+
 #undef LOCTEXT_NAMESPACE

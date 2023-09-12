@@ -562,6 +562,18 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     int currentCellLength = cellFrameIndex;
     int newCellLength = currentCell->GetLength() - currentCellLength;
 
+    TSharedPtr<FOdysseyAnimationCell> cell = currentCell->CreateCellFromFrame(cellFrameIndex);
+    cell->SetLength(newCellLength);
+
+    FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
+    mutator.SetLength(cellIndex, currentCellLength);
+    mutator.Add({ cell }, cellIndex + 1);
+    mutator.Commit();
+
+    /* TSharedPtr<FOdysseyAnimationCell> currentCell = mCellsContainer->GetCells()[cellIndex];
+    int currentCellLength = cellFrameIndex;
+    int newCellLength = currentCell->GetLength() - currentCellLength;
+
     //Copy Current Cell block at given frameindex
     TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
     TSharedPtr<IOdysseyImageRenderer> renderer = currentCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrameIndex);
@@ -576,7 +588,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
     mutator.SetLength(cellIndex, currentCellLength);
     mutator.Add({ cell }, cellIndex + 1);
-    mutator.Commit();
+    mutator.Commit(); */
 }
 
 #undef LOCTEXT_NAMESPACE

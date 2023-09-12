@@ -15,7 +15,7 @@ UOdysseyAnimationLayerStack::UOdysseyAnimationLayerStack()
 {
     CompatibleLayers.Add(UOdysseyAnimationLayerFolder::StaticClass());
     CompatibleLayers.Add(UOdysseyAnimationLayerImageRaster::StaticClass());
-    //CompatibleLayers.Add(UOdysseyAnimationLayerImageVector::StaticClass());
+    CompatibleLayers.Add(UOdysseyAnimationLayerImageVector::StaticClass());
 
     LayerRootClass = UOdysseyAnimationLayerRoot::StaticClass();
 }

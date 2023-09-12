@@ -25,6 +25,7 @@ public:
     void Init(TSharedPtr<::ULIS::FBlock> iBlock);
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
+    virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const override;
 
 public:
     virtual const FName& GetType() const override;
