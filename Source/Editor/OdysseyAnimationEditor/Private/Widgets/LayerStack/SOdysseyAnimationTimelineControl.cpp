@@ -70,6 +70,13 @@ SOdysseyAnimationTimelineControl::OnPreviewMouseButtonDown(const FGeometry& MyGe
 	return FReply::Unhandled();
 }
 
+FReply 
+SOdysseyAnimationTimelineControl::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	//Take the focus
+	return FReply::Handled().SetUserFocus(AsShared());
+}
+
 FReply
 SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
@@ -93,4 +100,20 @@ SOdysseyAnimationTimelineControl::OnMouseButtonUp(const FGeometry& MyGeometry, c
     	return FReply::Handled().ReleaseMouseCapture();
 	}
     return FReply::Unhandled();
+}
+
+FNavigationReply
+SOdysseyAnimationTimelineControl::OnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent)
+{
+    if (InNavigationEvent.GetNavigationType() == EUINavigation::Left)
+    {
+        int frame = FMath::Max(0, mExtension->Animation()->CurrentFrame - 1);
+        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
+    }
+    else if (InNavigationEvent.GetNavigationType() == EUINavigation::Right)
+    {
+        int frame = mExtension->Animation()->CurrentFrame + 1;
+        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
+    }
+	return FNavigationReply::Stop();
 }
