@@ -136,7 +136,7 @@ FOdysseyRasterBlockMutator::Commit()
         return;
 
     
-    mRasterBlock->mIsCacheInvalid = true;
+    mRasterBlock->InvalidateCache();
     mRasterBlock->OnBlockCommited().Broadcast(mInvalidTileMap.InvalidRects());
     if ( mStoreUndo )
     {

@@ -131,6 +131,8 @@ public:
     //(because width/height/format changed) and must be retrieved again by that "someone"
     FSimpleMulticastDelegate& OnBlockPtrChanged();
 
+    void InvalidateCache();
+
 private:
     //--- Block Caching / Loading
     
@@ -155,8 +157,8 @@ public:
 private:
     friend class FOdysseyRasterBlockMutator;
 
-    FOdysseyDiskCache mCache;
-    FSharedBuffer mSharedBuffer;
+    //FOdysseyDiskCache mCache;
+    //FSharedBuffer mSharedBuffer;
 
     UObject* mOwner;
 
@@ -192,8 +194,16 @@ private:
     //
 
     FCriticalSection mMutex;
-    FThreadSafeCounter mAvailableCounter;
-    bool mIsCacheInvalid;
+    //bool mIsCacheInvalid;
+
+    struct FBlockData
+    {
+        bool mIsCacheInvalid;
+        FUniqueBuffer mBuffer;
+        FGuid mId;
+    };
+
+    FBlockData* mBlockData;
 };
 
 
