@@ -301,7 +301,7 @@ UOdysseyAnimationLayerImageRaster::CellsChanged()
 {
     OnCellsChanged().Broadcast(this);
     
-    ImageRenderingChanged();
+    ImageRenderingCompositionChanged();
 }
 
 void
