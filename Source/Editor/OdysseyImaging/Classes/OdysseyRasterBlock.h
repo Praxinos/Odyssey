@@ -8,6 +8,7 @@
 #include "Misc/OdysseyHandle.h"
 #include "ULISInvalidTileMap.h"
 #include "OdysseyRasterBlockUndo.h"
+#include "OdysseyDiskCache.h"
 #include <ULIS>
 
 //#include "OdysseyRasterBlock.generated.h"
@@ -31,17 +32,6 @@
  * Please avoid using keeping the block in an Interactive state for too long,
  * because it will only cache its data when a Non-Interactive Update() or Commit() is called.
  */
-
-
-struct FBlockCleanupInfo
-{
-    FGuid mId;
-    int mWidth;
-    int mHeight;
-    int mFormat;
-    bool mIsCacheInvalid;
-    TSharedPtr<FThreadSafeCounter> mAvailableCounter;
-};
 
 class ODYSSEYIMAGING_API FOdysseyRasterBlock : public TSharedFromThis<FOdysseyRasterBlock>
 {
@@ -145,14 +135,14 @@ private:
     //--- Block Caching / Loading
     
     //Loads and returns a block from cache
-    bool LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock, const FString& iId);
+    //bool LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock, const FString& iId);
 
     //Loads and return a block from bulkdata
-    bool LoadBlockFromBulkData(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock);
+    bool LoadBlockFromBulkData(FUniqueBuffer& oBuffer);
 
     static void CleanupBlock(uint8* iData, void* iInfo);
     //Saves the block corresponding to the tile at iTileIndex into the cache and removes the block from memory
-    static void SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FString& iId);
+    //static void SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FString& iId);
 
 public:
     /**
@@ -164,6 +154,9 @@ public:
 
 private:
     friend class FOdysseyRasterBlockMutator;
+
+    FOdysseyDiskCache mCache;
+    FSharedBuffer mSharedBuffer;
 
     UObject* mOwner;
 
@@ -199,8 +192,8 @@ private:
     //
 
     FCriticalSection mMutex;
-    TSharedPtr<FThreadSafeCounter> mAvailableCounter;
-    FBlockCleanupInfo* mCleanupInfos;
+    FThreadSafeCounter mAvailableCounter;
+    bool mIsCacheInvalid;
 };
 
 

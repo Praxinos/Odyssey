@@ -20,52 +20,25 @@
 #define FOdysseyRasterBlock_CACHE_NAME TEXT("OdysseyRasterBlock")
 #define FOdysseyRasterBlock_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
 
-void
-RemoveValueFromCache(const FString& iId)
-{
-    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-        FOdysseyRasterBlock_CACHE_NAME,
-        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
-        iId
-    );
-
-    uint8 dummy = 0;
-    FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(&dummy, 1);
-    UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
-
-    //Store the tile in cache
-    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Blocking);
-    UE::DerivedData::GetCache().PutValue(
-        {
-            {
-                UE::DerivedData::FSharedString(), //Not needed
-                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
-                MoveTemp(derivedDataValue),
-                UE::DerivedData::ECachePolicy::StoreLocal //Use "StoreLocal" instead of "Local" to store and override existing value
-            }
-        },
-        putOwner
-    );
-    putOwner.Wait();
-}
-
 FOdysseyRasterBlock::~FOdysseyRasterBlock()
 {
 }
 
 FOdysseyRasterBlock::FOdysseyRasterBlock()
-    : mOwner(nullptr)
+    : mCache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION)
+    , mOwner(nullptr)
     , Id(FGuid::NewGuid())
-    , mAvailableCounter(MakeShared<FThreadSafeCounter>(0))
-    , mCleanupInfos(nullptr)
+    , mAvailableCounter(0)
+    , mIsCacheInvalid(false)
 {
 }
 
 FOdysseyRasterBlock::FOdysseyRasterBlock(UObject* iOwner)
-    : mOwner(iOwner)
+    : mCache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION)
+    , mOwner(iOwner)
     , Id(FGuid::NewGuid())
-    , mAvailableCounter(MakeShared<FThreadSafeCounter>(0))
-    , mCleanupInfos(nullptr)
+    , mAvailableCounter(0)
+    , mIsCacheInvalid(false)
 {
 }
 
@@ -108,20 +81,26 @@ FOdysseyRasterBlock::GetFormat() const
 void
 FOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
 {
-    FBlockCleanupInfo* infos = static_cast<FBlockCleanupInfo*>(iInfo);
+    FOdysseyRasterBlock* rasterBlock = static_cast<FOdysseyRasterBlock*>(iInfo);
 
-    if ( infos->mIsCacheInvalid )
+    if ( rasterBlock->mIsCacheInvalid )
     {
-        ::ULIS::FBlock block(iData, infos->mWidth, infos->mHeight, (::ULIS::eFormat)infos->mFormat);
-        SaveBlockToCache(block, infos->mId.ToString());
-        infos->mIsCacheInvalid = false;
+        rasterBlock->mCache.Save(rasterBlock->GetId().ToString(), rasterBlock->mSharedBuffer);
+        rasterBlock->mIsCacheInvalid = false;
+    }
+    
+    //we have the responsability to delete the block data
+    if (rasterBlock->mSharedBuffer.IsOwned())
+    {
+        //Data is owned by the sharedBuffer
+    }
+    else
+    {
+        //Data is owned by the block
+        ::ULIS::OnCleanup_FreeMemory(iData, iInfo); 
     }
 
-    infos->mAvailableCounter->Set(0);
-
-    ::ULIS::OnCleanup_FreeMemory(iData, iInfo); //we have the responsability to delete the block data
-    //TODO: check if we really need to free iInfo: it's void*, we shouldn't
-    //delete iInfo;
+    rasterBlock->mAvailableCounter.Set(0);
 }
 
 void
@@ -136,7 +115,7 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         if ( currentBlock )
             break;
     }
-    while ( mAvailableCounter->GetValue() == 1 );
+    while ( mAvailableCounter.GetValue() == 1 );
     
     if (iBlock == currentBlock)
         return;
@@ -145,14 +124,11 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
     {
         //remove OnCleanup Callback
         currentBlock->OnCleanup(::ULIS::FOnCleanupData(&::ULIS::OnCleanup_FreeMemory));
-        delete mCleanupInfos;
-        mCleanupInfos = nullptr;
 
         //Cleanup everything else
         mBlock = nullptr;
         Width = -1;
         Height = -1;
-        //mInvalidTileMap.Clear();
     }
 
     if (iBlock)
@@ -162,58 +138,15 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
         Height = iBlock->Height();
         Format = iBlock->Format();
 
-        mCleanupInfos = new FBlockCleanupInfo();
-        mCleanupInfos->mId = Id;
-        mCleanupInfos->mWidth = Width;
-        mCleanupInfos->mHeight = Height;
-        mCleanupInfos->mFormat = Format;
-        mCleanupInfos->mAvailableCounter = mAvailableCounter;
-        mCleanupInfos->mIsCacheInvalid = true;
-        iBlock->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, mCleanupInfos));
-        mAvailableCounter->Set(1);
+        mSharedBuffer = FSharedBuffer::MakeView(iBlock->Bits(), iBlock->BytesTotal());
+        iBlock->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, this));
 
-        //mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
+        mIsCacheInvalid = true;
+        mAvailableCounter.Set(1);
     }
-
-    //If an undoableBlock was set, don't consider it as the undoableBlock anymore
-    //Let the user reload the block
-    //mUndoableBlock = nullptr;
     
     mOnBlockPtrChanged.Broadcast();
 }
-
-/* bool
-FOdysseyRasterBlock::IsBeingEdited()
-{
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
-    return !!undoableBlock; //returns true if undoableblock is valid (don't use IsValid() as it can be wrong sometimes)
-}
-
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyRasterBlock::GetUndoableBlock()
-{
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
-    if ( undoableBlock )
-        return undoableBlock;
-
-    //Create a copy of the internal block
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
-    if (!block)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("No block available. Did you forget to call SetBlock() ?") );
-        return nullptr;
-    }
-
-    undoableBlock = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-    ctx.Copy(*block, *undoableBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-    ctx.Finish();
-
-    mUndoableBlock = undoableBlock; //Keep Weak Reference
-
-    return undoableBlock;
-} */
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyRasterBlock::GetBlock()
@@ -230,143 +163,25 @@ FOdysseyRasterBlock::GetBlock()
         if ( block )
             return block;
     }
-    while ( mAvailableCounter->GetValue() == 1 );
+    while ( mAvailableCounter.GetValue() == 1 );
 
-    mAvailableCounter->Set(1);
+    mAvailableCounter.Set(1);
 
-    //Load Block from DDC
-    block = MakeShared<::ULIS::FBlock>(Width, Height, (::ULIS::eFormat)Format);
-    //mDebugBlock = block;
-
-    mCleanupInfos = new FBlockCleanupInfo();
-    mCleanupInfos->mId = Id;
-    mCleanupInfos->mWidth = Width;
-    mCleanupInfos->mHeight = Height;
-    mCleanupInfos->mFormat = Format;
-    mCleanupInfos->mAvailableCounter = mAvailableCounter;
-    mCleanupInfos->mIsCacheInvalid = false;
-    block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, mCleanupInfos));
-    mBlock = block; //watch the loaded block
-
-    if ( LoadBlockFromCache(block.ToSharedRef(), Id.ToString()) )
-        return block;
-
-    mCleanupInfos->mIsCacheInvalid = true;
-
-    if ( LoadBlockFromBulkData(block.ToSharedRef()) )
-        return block;
-
-    return block; //return the currently loaded block, the reveiver can release it whenever he wants
-}
-
-/* const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>>&
-FOdysseyRasterBlock::GetOriginalTileBlocks() const
-{
-    return mOriginalTileBlocks;
-}
-
-const FULISInvalidTileMap&
-FOdysseyRasterBlock::GetInvalidTileMap() const
-{
-    return mInvalidTileMap;
-}
-
-void
-FOdysseyRasterBlock::UpdateFromUndoableBlock(const TArray<::ULIS::FRectI>& iRects)
-{
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
-    if ( !block )
-        return;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
-    if ( !undoableBlock )
-        return;
-    
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-
-    //Non-Interactive update
-    mInvalidTileMap.Invalidate(iRects);
-
-    //Save original tiles
-    TArray<FIntPoint> tileIndexes = mInvalidTileMap.InvalidTiles();
-    int tileSize = mInvalidTileMap.TileSize();
-    //const TArray<::ULIS::FRectI>& rects = mInvalidTileMap.InvalidRects();
-    for (const FIntPoint& tileIndex : tileIndexes )
+    FUniqueBuffer buffer;
+    if ( !mCache.Load(Id.ToString(), buffer) )
     {
-        if (mOriginalTileBlocks.Contains(tileIndex))
-            continue;
-
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> tileBlock = MakeShared<::ULIS::FBlock>(tileSize, tileSize, (::ULIS::eFormat)Format);
-        ctx.Copy(*block, *tileBlock, mInvalidTileMap.GetTileRect(tileIndex), ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-
-        mOriginalTileBlocks.Add(tileIndex, tileBlock);
+        mIsCacheInvalid = true;
+        if (!LoadBlockFromBulkData(buffer))
+            return nullptr;
     }
-    ctx.Finish();
 
-    //Copy undoableBlock to block
-    for (const ::ULIS::FRectI& rect : iRects)
-    {
-        ctx.Copy(*undoableBlock, *block, rect, rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-    }
-    ctx.Finish();
+    block = MakeShared<::ULIS::FBlock>((uint8*)buffer.GetData(), Width, Height, (::ULIS::eFormat)Format);
+    mSharedBuffer = buffer.MoveToShared();
+    block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, this));
+    mBlock = block;
 
-    //Send Interactive Update event
-    if (iRects.Num() > 0)
-        OnBlockChanged().Broadcast(iRects); //always send at least one interactive event
+    return block; //return the currently loaded block, the receiver can release it whenever he wants
 }
-
-void
-FOdysseyRasterBlock::CommitUndoableBlock(const TArray<::ULIS::FRectI>& iRects)
-{
-    UpdateFromUndoableBlock(iRects);
-    CommitUndoableBlock();
-}
-
-void
-FOdysseyRasterBlock::CommitUndoableBlock()
-{
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
-    if ( !block )
-        return;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
-    if ( !undoableBlock )
-        return;
-
-    if (mInvalidTileMap.InvalidRects().Num() <= 0)
-        return;
-
-    OnBlockCommited().Broadcast(mInvalidTileMap.InvalidRects());
-    mRasterBlockUndoBuilder.StoreUndo(AsShared());
-    mInvalidTileMap.Clear();
-    mOriginalTileBlocks.Empty();
-}
-
-void
-FOdysseyRasterBlock::ResetUndoableBlock()
-{
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = mUndoableBlock.Pin();
-    if ( !undoableBlock )
-        return;
-
-    if (mOriginalTileBlocks.IsEmpty())
-        return;
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext((::ULIS::eFormat)Format);
-    TArray<FIntPoint> tileIndexes;
-    TArray<::ULIS::FRectI> rects;
-    mOriginalTileBlocks.GetKeys(tileIndexes);
-    for (const FIntPoint& tileIndex : tileIndexes)
-    {
-        ::ULIS::FRectI rect = mInvalidTileMap.GetTileRect(tileIndex);
-        rects.Add(rect);
-        ctx.Copy(*mOriginalTileBlocks[tileIndex], *undoableBlock, mInvalidTileMap.GetTileRect(tileIndex), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-    }
-    ctx.Finish();
-
-    mInvalidTileMap.Clear();
-    mOnUndoableBlockChanged.Broadcast(rects);
-} */
 
 FOdysseyRasterBlock::FOnBlockChanged&
 FOdysseyRasterBlock::OnBlockChanged()
@@ -386,104 +201,18 @@ FOdysseyRasterBlock::PostProcess()
     return mPostProcess;
 }
 
-/*
-FOdysseyRasterBlock::FOnUndoableBlockChanged&
-FOdysseyRasterBlock::OnUndoableBlockChanged()
-{
-    return mOnUndoableBlockChanged;
-}
-*/
-
 FSimpleMulticastDelegate&
 FOdysseyRasterBlock::OnBlockPtrChanged()
 {
     return mOnBlockPtrChanged;
 }
 
-void
-FOdysseyRasterBlock::SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FString& iId)
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlock::SaveBlockToCache);
-    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-        FOdysseyRasterBlock_CACHE_NAME,
-        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
-        iId
-    );
-
-    FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(iBlock.Bits(), iBlock.BytesTotal());
-    UE::DerivedData::FValue derivedDataValue = UE::DerivedData::FValue::Compress(sharedBuffer);
-    //UE::DerivedData::FValue derivedDataValue(FCompressedBuffer::Compress(sharedBuffer, ECompressedBufferCompressor::Selkie, ECompressedBufferCompressionLevel::Normal, 0));
-
-    //Store the tile in cache
-    UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Highest);
-    
-    UE::DerivedData::GetCache().PutValue(
-        {
-            UE::DerivedData::FCachePutValueRequest
-            {
-                UE::DerivedData::FSharedString(TEXT("FOdysseyRasterBlock")),
-                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
-                MoveTemp(derivedDataValue),
-                UE::DerivedData::ECachePolicy::StoreLocal //Use "StoreLocal" instead of "Local" to store and override existing value
-            }
-        },
-        putOwner
-    );
-    putOwner.KeepAlive();
-}
-
 bool
-FOdysseyRasterBlock::LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock, const FString& iId)
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlock::LoadBlockFromCache);
-
-    bool success = false;
-
-    // put code you want to time here.
-
-    //Load Block from DDC
-    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-		FOdysseyRasterBlock_CACHE_NAME,
-        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
-		iId
-	);
-
-    UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
-    UE::DerivedData::GetCache().GetValue(
-		{
-            UE::DerivedData::FCacheGetValueRequest
-            {
-                UE::DerivedData::FSharedString(TEXT("FOdysseyRasterBlock")),
-                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
-                UE::DerivedData::ECachePolicy::Local
-            }
-        },
-		getOwner,
-		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
-        {
-            if (iResponse.Status != UE::DerivedData::EStatus::Ok)
-                return;
-    
-            if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1) //assume the block is empty, see RemoveValueFromCache()
-                return;
-
-            FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
-            if ( !iResponse.Value.GetData().TryDecompressTo(uniqueBuffer) )
-                return;
-
-            success = true;
-        }
-    );
-    getOwner.Wait();
-    return success;
-}
-
-bool
-FOdysseyRasterBlock::LoadBlockFromBulkData(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock)
+FOdysseyRasterBlock::LoadBlockFromBulkData(FUniqueBuffer& oBuffer)
 {
     FSharedBuffer buffer = mBulkData.GetPayload().Get();
-    FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
-    uniqueBuffer.GetView().CopyFrom(buffer);
+    oBuffer = FUniqueBuffer::Alloc(buffer.GetSize());
+    oBuffer.GetView().CopyFrom(buffer);
 
     return true;
 }
@@ -515,11 +244,11 @@ FOdysseyRasterBlock::Serialize(FArchive& Ar)
         if ( !block )
             return;
 
-        FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(block->Bits(), block->BytesTotal());
+        //FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(block->Bits(), block->BytesTotal());
 
         //Updates the payload
         //The payload stored in mBulkData will then be removed from memory once mBulkData.Serialize() is called
-        mBulkData.UpdatePayload(sharedBuffer, mOwner);
+        mBulkData.UpdatePayload(mSharedBuffer, mOwner);
     
         /**
          * @brief Here is a simple explanation of ECompressedBufferCompressor values
@@ -548,6 +277,6 @@ FOdysseyRasterBlock::Serialize(FArchive& Ar)
     {       
         mBulkData.Serialize(Ar, mOwner);
         //mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
-        RemoveValueFromCache(Id.ToString());
+        mCache.Remove(Id.ToString());
     }
 }
