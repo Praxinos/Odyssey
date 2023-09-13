@@ -297,6 +297,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         void Render( BLImage* iBLImage, uint64 iDrawingFlags );
 
+        void EraseSections( FOdysseyVectorScene* iScene
+                          , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                          , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                          , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                          , bool iSelectedOnly );
+
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
@@ -313,6 +321,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                   , const ::ULIS::FRectD &iRoi
                                   , bool iSelectedOnly );
+
+        static void RecursiveEraseSections( FOdysseyVectorObject* iObject
+                                          , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                          , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                          , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                                          , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                          , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                          , bool iSelectedOnly );
 
 
 

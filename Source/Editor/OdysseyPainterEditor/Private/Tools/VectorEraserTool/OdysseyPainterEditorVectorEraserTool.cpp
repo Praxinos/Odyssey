@@ -237,15 +237,30 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iE
     mEraserHUD.BlendMask( false );
 
     iEngine->UseMaskImage();
-    iEngine->Erase( iScene
-                  , addedObjectArray
-                  , addedVertexArray
-                  , addedSegmentArray
-                  , removedObjectArray
-                  , removedVertexArray
-                  , removedSegmentArray
-                  , roi
-                  , false );
+
+    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    {
+        iEngine->EraseSections( iScene
+                              , addedVertexArray
+                              , addedSegmentArray
+                              , removedObjectArray
+                              , removedVertexArray
+                              , removedSegmentArray
+                              , false );
+    }
+    else
+    {
+        iEngine->Erase( iScene
+                      , addedObjectArray
+                      , addedVertexArray
+                      , addedSegmentArray
+                      , removedObjectArray
+                      , removedVertexArray
+                      , removedSegmentArray
+                      , roi
+                      , false );
+    }
+
     iEngine->UseColorImage();
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

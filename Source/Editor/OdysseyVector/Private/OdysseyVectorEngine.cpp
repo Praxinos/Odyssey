@@ -456,6 +456,90 @@ FOdysseyVectorEngine::Erase( FOdysseyVectorScene* iScene
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
 
+void
+FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
+                                            , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                            , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                            , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                                            , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                            , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                            , bool iSelectedOnly )
+{
+    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
+    {
+        FOdysseyVectorObject *child = (*it);
+
+        RecursiveEraseSections( child
+                              , iAddedVertexArray
+                              , iAddedSegmentArray
+                              , iRemovedObjectArray
+                              , iRemovedVertexArray
+                              , iRemovedSegmentArray
+                              , iSelectedOnly );
+    }
+
+    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) ) 
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
+        std::vector<FOdysseyVectorSection*> trimmedSectionArray;
+        std::vector<FOdysseyVectorVertex*> removedVertexArray;
+        std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+        std::vector<FOdysseyVectorVertex*> addedVertexArray;
+        std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+
+        if( iSelectedOnly == true )
+        {
+            if( paintGroup->IsSelected() == true )
+            {
+                paintGroup->PickSections( trimmedSectionArray );
+                paintGroup->EraseSections( trimmedSectionArray
+                                         , removedVertexArray
+                                         , removedSegmentArray
+                                         , addedVertexArray
+                                         , addedSegmentArray );
+            }
+        }
+        else
+        {
+            paintGroup->PickSections( trimmedSectionArray );
+            paintGroup->EraseSections( trimmedSectionArray
+                                     , removedVertexArray
+                                     , removedSegmentArray
+                                     , addedVertexArray
+                                     , addedSegmentArray );
+        }
+    }
+}
+
+void
+FOdysseyVectorEngine::EraseSections( FOdysseyVectorScene* iScene
+                                   , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                   , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                   , bool iSelectedOnly )
+{
+    RecursiveEraseSections( iScene
+                          , iAddedVertexArray
+                          , iAddedSegmentArray
+                          , iRemovedObjectArray
+                          , iRemovedVertexArray
+                          , iRemovedSegmentArray
+                          , iSelectedOnly  );
+
+    // Note: this will be refactored in case a child is erased and a parent should as well be erased. We'll see.
+    for( int i = 0; i < iRemovedObjectArray.size(); i++ )
+    {
+        if( iRemovedObjectArray[i]->GetChildrenList().size() == 0 )
+        {
+            iRemovedObjectArray[i]->GetParent()->RemoveChild( iRemovedObjectArray[i] );
+        }
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+}
+
 static void
 RecursivePickPoints( FOdysseyVectorObject* iObject
                    , double iWorldX

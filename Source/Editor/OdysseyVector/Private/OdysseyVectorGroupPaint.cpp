@@ -1956,28 +1956,22 @@ FOdysseyVectorGroupPaint::GetSectionsForSegment( FOdysseyVectorSegment* iSegment
     }
 }
 
-FOdysseyVectorVertex*
-FOdysseyVectorGroupPaint::ReachVertexFromSection( FOdysseyVectorVertex* iVertex
-                                                , FOdysseyVectorSection* iFromSection
-                                                , FOdysseyVectorSegment* iOwnerSegment )
+void
+FOdysseyVectorGroupPaint::TrimSegment( FOdysseyVectorSegment* iSegment
+                                     , std::vector<FOdysseyVectorSection*>& oSectionArray )
 {
-    FOdysseyVectorSection* currentSection = iFromSection;
-    FOdysseyVectorVertex* currentVertex = iVertex;
+    double minT, maxT;
 
-    while( currentSection )
+    for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
-        currentSection = currentVertex->GetOtherSection( currentSection, true );
-
-        if( currentSection )
+        if( mSectionBuffer[i].IsErased() == true )
         {
-            if( currentSection->IsErased() == false )
-            {
-                currentVertex = currentSection->GetOtherVertex( currentVertex );
-            }
+            double t0 = mSectionBuffer[i].GetVertex(0)->GetT( iSegment );
+            double t1 = mSectionBuffer[i].GetVertex(1)->GetT( iSegment );
+
+            //if( t0 < )
         }
     }
-
-    return currentVertex;
 }
 
 void
@@ -1990,10 +1984,8 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
     std::vector<FOdysseyVectorSection*> sectionArray;
     FOdysseyVectorPath* path = iSegment->GetPath();
 
-    path->RemoveSegment( iSegment );
-
     GetSectionsForSegment( iSegment, sectionArray );
-
+/*
     for( FOdysseyVectorSection* section : sectionArray )
     {
         if( section->IsErased() == false )
@@ -2009,17 +2001,18 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
             break;
         }
     }
-
+*/
     if( ( endVertex[0] != iSegment->GetVertex(0) ) || ( endVertex[1] != iSegment->GetVertex(1) ) )
     {
         double radiusDelta = iSegment->GetVertex(1)->GetRadius() - iSegment->GetVertex(0)->GetRadius();
-        
+        double t0 = endVertex[0]->GetT( iSegment );
+        double t1 = endVertex[1]->GetT( iSegment );
 
         if( endVertex[0]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
         {
             double radius = iSegment->GetVertex(0)->GetRadius() + ( radiusDelta * endVertex[0]->GetT( iSegment ) );
 
-            endVertex[0] = new FOdysseyVectorVertex( iSegment->GetPath()
+            endVertex[0] = new FOdysseyVectorVertex( endVertex[0]->GetPath()
                                                    , endVertex[0]->GetX()
                                                    , endVertex[0]->GetY()
                                                    , radius );
@@ -2033,7 +2026,7 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
         {
             double radius = iSegment->GetVertex(0)->GetRadius() + ( radiusDelta * endVertex[1]->GetT( iSegment ) );
 
-            endVertex[1] = new FOdysseyVectorVertex( iSegment->GetPath()
+            endVertex[1] = new FOdysseyVectorVertex( endVertex[1]->GetPath()
                                                    , endVertex[1]->GetX()
                                                    , endVertex[1]->GetY()
                                                    , radius );
@@ -2046,16 +2039,16 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
         if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
-            ::ULIS::FVec2D* bezier = cubicSegment->GetBezier();
+            //::ULIS::FVec2D* bezier = cubicSegment->GetBezier();
             ::ULIS::FVec2D extractedBezier[4];
             FOdysseyVectorSegmentCubic* newSegment;
 
-            FOdysseyVector::BezierExtract( bezier[0]
-                                         , bezier[1]
-                                         , bezier[2]
-                                         , bezier[3]
-                                         , endVertex[0]->GetT( iSegment )
-                                         , endVertex[1]->GetT( iSegment )
+            FOdysseyVector::BezierExtract( cubicSegment->GetVertex(0)->GetCoords()
+                                         , cubicSegment->GetHandle(0)->GetCoords()
+                                         , cubicSegment->GetHandle(1)->GetCoords()
+                                         , cubicSegment->GetVertex(1)->GetCoords()
+                                         , t0
+                                         , t1
                                          , extractedBezier[0]
                                          , extractedBezier[1]
                                          , extractedBezier[2]
@@ -2075,21 +2068,19 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
             oAddedSegmentArray.push_back( newSegment );
         }
     }
-    else
+
+    if( endVertex[0]->GetSegmentCount() == 0 )
     {
-        if( endVertex[0]->GetSegmentCount() == 0 )
-        {
-            path->RemoveVertex( endVertex[0] );
+        path->RemoveVertex( endVertex[0] );
 
-            oRemovedVertexArray.push_back( endVertex[0] );
-        }
+        oRemovedVertexArray.push_back( endVertex[0] );
+    }
 
-        if( endVertex[1]->GetSegmentCount() == 0 )
-        {
-            path->RemoveVertex( endVertex[1] );
+    if( endVertex[1]->GetSegmentCount() == 0 )
+    {
+        path->RemoveVertex( endVertex[1] );
 
-            oRemovedVertexArray.push_back( endVertex[1] );
-        }
+        oRemovedVertexArray.push_back( endVertex[1] );
     }
 }
 
@@ -2098,24 +2089,26 @@ FOdysseyVectorGroupPaint::ExtendErasedSection( FOdysseyVectorVertex* iVertex
                                              , FOdysseyVectorSection* iFromSection
                                              , std::vector<FOdysseyVectorSection*>& oErasedSectionArray )
 {
-    FOdysseyVectorSection* currentSection = iFromSection;
+    FOdysseyVectorSection* fromSection = iFromSection;
     FOdysseyVectorVertex* currentVertex = iVertex;
 
-    while( currentSection && ( currentVertex->GetClass() == FOdysseyVectorVertex::StaticClass() ) )
+    while( fromSection && ( currentVertex->GetClass() != FOdysseyVectorVertexIntersection::StaticClass() ) )
     {
-        currentSection = currentVertex->GetOtherSection( currentSection, false );
+        FOdysseyVectorSection* nextSection = currentVertex->GetOtherSection( fromSection, false );
 
-        if( currentSection )
+        if( nextSection )
         {
-            if( currentSection->IsErased() == false )
+            if( nextSection->IsErased() == false )
             {
-                oErasedSectionArray.push_back( currentSection );
+                oErasedSectionArray.push_back( nextSection );
 
-                currentSection->SetErased( true );
+                nextSection->SetErased( true );
 
-                currentVertex = currentSection->GetOtherVertex( currentVertex );
+                currentVertex = nextSection->GetOtherVertex( currentVertex );
             }
         }
+
+        fromSection = nextSection;
     }
 }
 
@@ -2127,6 +2120,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iE
                                        , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray )
 {
     std::vector<FOdysseyVectorSection*> extendedErasedSectionArray;
+    std::vector<FOdysseyVectorSegment*> processedSegmentArray;
                                         // Arbitrary value
     extendedErasedSectionArray.reserve( iErasedSectionArray.size() * 2 );
 
@@ -2152,6 +2146,8 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iE
             // check if not already removed.
             if( std::find( oRemovedSegmentArray.begin(), oRemovedSegmentArray.end(), cubicSegment ) == oRemovedSegmentArray.end() )
             {
+                cubicSegment->GetPath()->RemoveSegment( cubicSegment );
+
                 oRemovedSegmentArray.push_back( cubicSegment );
             }
         }
@@ -2161,7 +2157,109 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iE
     for( FOdysseyVectorSegment* segment : oRemovedSegmentArray )
     {
         EraseSegment( segment, oRemovedVertexArray, oAddedVertexArray, oAddedSegmentArray );
+    }
+}
 
-        oRemovedSegmentArray.push_back( segment );
+
+
+bool
+FOdysseyVectorGroupPaint::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
+                                    , BLImage* iMaskImage
+                                    , const ::ULIS::FRectD& iMaskRect
+                                    , uint8* iPixelData )
+{
+    double xmin = ::ULIS::FMath::Min4( iWorldBezier[0].x, iWorldBezier[1].x
+                                     , iWorldBezier[2].x, iWorldBezier[3].x );
+    double ymin = ::ULIS::FMath::Min4( iWorldBezier[0].y, iWorldBezier[1].y
+                                     , iWorldBezier[2].y, iWorldBezier[3].y );
+    double xmax = ::ULIS::FMath::Max4( iWorldBezier[0].x, iWorldBezier[1].x
+                                     , iWorldBezier[2].x, iWorldBezier[3].x );
+    double ymax = ::ULIS::FMath::Max4( iWorldBezier[0].y, iWorldBezier[1].y
+                                     , iWorldBezier[2].y, iWorldBezier[3].y );
+
+    ::ULIS::FRectD bezierRect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+    ::ULIS::FRectD intersectRect = bezierRect & iMaskRect;
+
+    if( intersectRect.Area() )
+    {
+        if( ( fabs( iWorldBezier[0].x - iWorldBezier[1].x ) < 1.0f )
+         && ( fabs( iWorldBezier[0].x - iWorldBezier[2].x ) < 1.0f )
+         && ( fabs( iWorldBezier[0].x - iWorldBezier[3].x ) < 1.0f )
+         && ( fabs( iWorldBezier[0].y - iWorldBezier[1].y ) < 1.0f )
+         && ( fabs( iWorldBezier[0].y - iWorldBezier[2].y ) < 1.0f )
+         && ( fabs( iWorldBezier[0].y - iWorldBezier[3].y ) < 1.0f ) )
+        {
+            int32 x = (int)iWorldBezier[0].x;
+            int32 y = (int)iWorldBezier[0].y;
+
+            if( ( x >= 0 ) && ( x < (int)iMaskRect.w ) && ( y >= 0 ) && ( y < (int)iMaskRect.h ) )
+            {
+                uint32 offset = ( y * iMaskRect.w ) + x;
+
+                if ( iPixelData[offset] != 0 ) 
+                {
+                    return true;
+                }
+            }
+        }
+        else // refine
+        {
+            ::ULIS::FVec2D childBezier[2][4];
+
+            memcpy( childBezier[0], iWorldBezier, sizeof( childBezier[0] ) );
+            memcpy( childBezier[1], iWorldBezier, sizeof( childBezier[1] ) );
+
+            ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
+                                                                      , &childBezier[0][1]
+                                                                      , &childBezier[0][2]
+                                                                      , &childBezier[0][3]
+                                                                      , 0.5f );
+            if( PickBezier( childBezier[0], iMaskImage, iMaskRect, iPixelData ) == true )
+            {
+                return true;
+            }
+
+            ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
+                                                                      , &childBezier[1][1]
+                                                                      , &childBezier[1][2]
+                                                                      , &childBezier[1][3]
+                                                                      , 0.5f );
+            if( PickBezier( childBezier[1], iMaskImage, iMaskRect, iPixelData ) == true )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void
+FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
+{
+    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    BLImageData maskData;
+    ::ULIS::FRectD maskRect;
+
+    maskImage->getData( &maskData );
+
+    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
+
+    for( int i = 0; i < mSectionBuffer.size(); i++ )
+    {
+        ::ULIS::FVec2D* bezier = mSectionBuffer[i].GetBezier();
+        BLPoint pt[4] = { mWorldMatrix.mapPoint( bezier[0].x, bezier[0].y )
+                        , mWorldMatrix.mapPoint( bezier[1].x, bezier[1].y )
+                        , mWorldMatrix.mapPoint( bezier[2].x, bezier[2].y )
+                        , mWorldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
+        ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
+                                        , ::ULIS::FVec2D( pt[1].x, pt[1].y )
+                                        , ::ULIS::FVec2D( pt[2].x, pt[2].y )
+                                        , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
+
+        if( PickBezier( worldBezier, maskImage, maskRect, (uint8*)maskData.pixelData ) )
+        {
+            oPickedSectionArray.push_back( &mSectionBuffer[i] );
+        }
     }
 }
