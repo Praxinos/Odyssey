@@ -235,6 +235,44 @@ FOdysseyVectorSection::IsLinked()
     return ( mFlags & LINKED ) ? true : false;
 }
 
+bool
+FOdysseyVectorSection::IsErased()
+{
+    return ( mFlags & ERASED ) ? true : false;
+}
+
+void
+FOdysseyVectorSection::SetErased( bool iErased )
+{
+    if( iErased )
+    {
+        mFlags |= ERASED;
+    }
+    else
+    {
+        mFlags &= (~ERASED);
+    }
+}
+
+bool
+FOdysseyVectorSection::IsTrimmed()
+{
+    return ( mFlags & TRIMMED ) ? true : false;
+}
+
+void
+FOdysseyVectorSection::SetTrimmed( bool iTrimmed )
+{
+    if( iTrimmed )
+    {
+        mFlags |= TRIMMED;
+    }
+    else
+    {
+        mFlags &= (~TRIMMED);
+    }
+}
+
 void
 FOdysseyVectorSection::AddCycle( FOdysseyVectorCycle* iCycle )
 {

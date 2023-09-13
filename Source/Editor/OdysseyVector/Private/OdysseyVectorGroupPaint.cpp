@@ -1696,6 +1696,7 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
                         keepSimplifying = true;
 
                         section->Unlink();
+                        section->SetTrimmed( true );
                     }
                 }
             }
@@ -1929,29 +1930,191 @@ FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
 
     return nullptr;
 }
-/*
+
 void
-FOdysseyVectorGroupPaint::ExtendErasedSection( FOdysseyVectorVertex* iVertex
-                                             , FOdysseyVectorSection* iFromSection
-                                             , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                                             , std::vector<FOdysseyVectorSection*>& oRemovedSectionArray )
+FOdysseyVectorGroupPaint::GetTrimmedSections( std::vector<FOdysseyVectorSection*>& oSectionArray )
+{
+    for( int i = 0; i < mSectionBuffer.size(); i++ )
+    {
+        if( mSectionBuffer[i].IsTrimmed() == true )
+        {
+            oSectionArray.push_back( &mSectionBuffer[i] );
+        }
+    }
+}
+
+void
+FOdysseyVectorGroupPaint::GetSectionsForSegment( FOdysseyVectorSegment* iSegment
+                                               , std::vector<FOdysseyVectorSection*>& oSectionArray )
+{
+    for( int i = 0; i < mSectionBuffer.size(); i++ )
+    {
+        if( mSectionBuffer[i].GetSegment() == iSegment )
+        {
+            oSectionArray.push_back( &mSectionBuffer[i] );
+        }
+    }
+}
+
+FOdysseyVectorVertex*
+FOdysseyVectorGroupPaint::ReachVertexFromSection( FOdysseyVectorVertex* iVertex
+                                                , FOdysseyVectorSection* iFromSection
+                                                , FOdysseyVectorSegment* iOwnerSegment )
 {
     FOdysseyVectorSection* currentSection = iFromSection;
     FOdysseyVectorVertex* currentVertex = iVertex;
 
-    while( currentVertex->GetClass() == FOdysseyVectorVertex::StaticClass() )
+    while( currentSection )
     {
-        FOdysseyVectorSection* nextSection = currentVertex->GetOtherSection( currentSection );
+        currentSection = currentVertex->GetOtherSection( currentSection, true );
 
-        if( nextSection )
+        if( currentSection )
         {
-            oRemovedSectionArray.push_back( nextSection );
-
-            currentVertex = nextSection->GetOtherVertex( currentVertex );
+            if( currentSection->IsErased() == false )
+            {
+                currentVertex = currentSection->GetOtherVertex( currentVertex );
+            }
         }
-        else
+    }
+
+    return currentVertex;
+}
+
+void
+FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
+                                      , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                                      , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                                      , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray )
+{
+    FOdysseyVectorVertex* endVertex[2] = { iSegment->GetVertex(0), iSegment->GetVertex(1) };
+    std::vector<FOdysseyVectorSection*> sectionArray;
+    FOdysseyVectorPath* path = iSegment->GetPath();
+
+    path->RemoveSegment( iSegment );
+
+    GetSectionsForSegment( iSegment, sectionArray );
+
+    for( FOdysseyVectorSection* section : sectionArray )
+    {
+        if( section->IsErased() == false )
         {
+            endVertex[0] = ReachVertexFromSection( section->GetVertex(0)
+                                                 , section
+                                                 , iSegment );
+            endVertex[1] = ReachVertexFromSection( section->GetVertex(1)
+                                                 , section
+                                                 , iSegment );
+            // any section belonging to the segment will find the boundary vertices,
+            // so we can break at the first one
             break;
+        }
+    }
+
+    if( ( endVertex[0] != iSegment->GetVertex(0) ) || ( endVertex[1] != iSegment->GetVertex(1) ) )
+    {
+        double radiusDelta = iSegment->GetVertex(1)->GetRadius() - iSegment->GetVertex(0)->GetRadius();
+        
+
+        if( endVertex[0]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+        {
+            double radius = iSegment->GetVertex(0)->GetRadius() + ( radiusDelta * endVertex[0]->GetT( iSegment ) );
+
+            endVertex[0] = new FOdysseyVectorVertex( iSegment->GetPath()
+                                                   , endVertex[0]->GetX()
+                                                   , endVertex[0]->GetY()
+                                                   , radius );
+
+            path->AddVertex( endVertex[0] );
+
+            oAddedVertexArray.push_back( endVertex[0] );
+        }
+
+        if( endVertex[1]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+        {
+            double radius = iSegment->GetVertex(0)->GetRadius() + ( radiusDelta * endVertex[1]->GetT( iSegment ) );
+
+            endVertex[1] = new FOdysseyVectorVertex( iSegment->GetPath()
+                                                   , endVertex[1]->GetX()
+                                                   , endVertex[1]->GetY()
+                                                   , radius );
+
+            path->AddVertex( endVertex[1] );
+
+            oAddedVertexArray.push_back( endVertex[1] );
+        }
+
+        if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
+            ::ULIS::FVec2D* bezier = cubicSegment->GetBezier();
+            ::ULIS::FVec2D extractedBezier[4];
+            FOdysseyVectorSegmentCubic* newSegment;
+
+            FOdysseyVector::BezierExtract( bezier[0]
+                                         , bezier[1]
+                                         , bezier[2]
+                                         , bezier[3]
+                                         , endVertex[0]->GetT( iSegment )
+                                         , endVertex[1]->GetT( iSegment )
+                                         , extractedBezier[0]
+                                         , extractedBezier[1]
+                                         , extractedBezier[2]
+                                         , extractedBezier[3] );
+
+            newSegment = new FOdysseyVectorSegmentCubic( iSegment->GetPath()
+                                                       , endVertex[0]
+                                                       , extractedBezier[1].x
+                                                       , extractedBezier[1].y
+                                                       , extractedBezier[2].x
+                                                       , extractedBezier[2].y
+                                                       , endVertex[1]
+                                                       , true );
+
+            path->AddSegment( newSegment );
+
+            oAddedSegmentArray.push_back( newSegment );
+        }
+    }
+    else
+    {
+        if( endVertex[0]->GetSegmentCount() == 0 )
+        {
+            path->RemoveVertex( endVertex[0] );
+
+            oRemovedVertexArray.push_back( endVertex[0] );
+        }
+
+        if( endVertex[1]->GetSegmentCount() == 0 )
+        {
+            path->RemoveVertex( endVertex[1] );
+
+            oRemovedVertexArray.push_back( endVertex[1] );
+        }
+    }
+}
+
+void
+FOdysseyVectorGroupPaint::ExtendErasedSection( FOdysseyVectorVertex* iVertex
+                                             , FOdysseyVectorSection* iFromSection
+                                             , std::vector<FOdysseyVectorSection*>& oErasedSectionArray )
+{
+    FOdysseyVectorSection* currentSection = iFromSection;
+    FOdysseyVectorVertex* currentVertex = iVertex;
+
+    while( currentSection && ( currentVertex->GetClass() == FOdysseyVectorVertex::StaticClass() ) )
+    {
+        currentSection = currentVertex->GetOtherSection( currentSection, false );
+
+        if( currentSection )
+        {
+            if( currentSection->IsErased() == false )
+            {
+                oErasedSectionArray.push_back( currentSection );
+
+                currentSection->SetErased( true );
+
+                currentVertex = currentSection->GetOtherVertex( currentVertex );
+            }
         }
     }
 }
@@ -1963,9 +2126,42 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iE
                                        , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                                        , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray )
 {
+    std::vector<FOdysseyVectorSection*> extendedErasedSectionArray;
+                                        // Arbitrary value
+    extendedErasedSectionArray.reserve( iErasedSectionArray.size() * 2 );
+
     for( FOdysseyVectorSection* erasedSection : iErasedSectionArray )
     {
-        ExtendErasedSection( erasedSection );
+        extendedErasedSectionArray.push_back( erasedSection );
+
+        erasedSection->SetErased( true );
+
+        ExtendErasedSection( erasedSection->GetVertex(0), erasedSection, extendedErasedSectionArray );
+        ExtendErasedSection( erasedSection->GetVertex(1), erasedSection, extendedErasedSectionArray );
+    }
+
+    // retrieve and remove all concerned segments
+    for( FOdysseyVectorSection* extendedErasedSection : extendedErasedSectionArray )
+    {
+        FOdysseyVectorSegment* segment = extendedErasedSection->GetSegment();
+
+        // filter. A segment could be a of type SegmentGap as well
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            // check if not already removed.
+            if( std::find( oRemovedSegmentArray.begin(), oRemovedSegmentArray.end(), cubicSegment ) == oRemovedSegmentArray.end() )
+            {
+                oRemovedSegmentArray.push_back( cubicSegment );
+            }
+        }
+    }
+
+    // get sections for segment (there are no gap segments in this array)
+    for( FOdysseyVectorSegment* segment : oRemovedSegmentArray )
+    {
+        EraseSegment( segment, oRemovedVertexArray, oAddedVertexArray, oAddedSegmentArray );
+
+        oRemovedSegmentArray.push_back( segment );
     }
 }
-*/

@@ -114,7 +114,7 @@ public:
                                   , std::vector<FOdysseyVectorPoint*>& iSelectedVertexArray );
     static void ClearColoring( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void ApplyTransformations( FOdysseyVectorScene* iScene );
-
+    static void Trim( FOdysseyVectorScene* iScene );
     void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
     eVectorEditionMode GetVectorEditionMode();
 

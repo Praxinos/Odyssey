@@ -163,9 +163,14 @@ FOdysseyVectorEngine::GetScene()
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( /*FOdysseyVectorScene* iScene */ )
+FOdysseyVectorEngine::RenderHUD( BLImage* iBLImage/*FOdysseyVectorScene* iScene */ )
 {
     std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
+
+    if( iBLImage )
+    {
+        UseImage( iBLImage );
+    }
 
     mBLContext->save();
     mBLContext->resetMatrix();
@@ -200,8 +205,13 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 }
 
 void
-FOdysseyVectorEngine::Render( uint64 iDrawingFlags )
+FOdysseyVectorEngine::Render( BLImage* iBLImage, uint64 iDrawingFlags )
 {
+    if( iBLImage )
+    {
+        UseImage( iBLImage );
+    }
+
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/
 

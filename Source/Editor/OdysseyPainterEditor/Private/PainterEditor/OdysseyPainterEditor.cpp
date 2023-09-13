@@ -706,6 +706,43 @@ ApplyTransformationsRecursive( FOdysseyVectorObject* iObject )
 }
 
 void
+FOdysseyPainterEditor::Trim( FOdysseyVectorScene* iScene )
+{
+    FOdysseyVectorEngine* engine = iScene->GetEngine();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList :
+                                                                                      engine->GetChildrenList();
+
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
+    {
+        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
+            std::vector<FOdysseyVectorSection*> trimmedSectionArray;
+            std::vector<FOdysseyVectorVertex*> removedVertexArray;
+            std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+            std::vector<FOdysseyVectorVertex*> addedVertexArray;
+            std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+
+            paintGroup->GetTrimmedSections( trimmedSectionArray );
+            paintGroup->EraseSections( trimmedSectionArray
+                                     , removedVertexArray
+                                     , removedSegmentArray
+                                     , addedVertexArray
+                                     , addedSegmentArray );
+        }
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    engine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    engine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                  | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+void
 FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();

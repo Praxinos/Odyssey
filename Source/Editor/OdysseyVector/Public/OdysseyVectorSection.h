@@ -99,6 +99,10 @@ class FOdysseyVectorSection
         ::ULIS::FVec2D GetPointAt( double t );
         ::ULIS::FVec2D GetTangentAt( double t, bool iNormalize );
         ::ULIS::FVec2D& GetVertexCoords( FOdysseyVectorVertex* iVertex );
+        void SetErased( bool iErased );
+        bool IsErased();
+        void SetTrimmed( bool iTrimmed );
+        bool IsTrimmed();
 
     protected:
         FOdysseyVectorSegment* mSegment;
@@ -112,4 +116,6 @@ class FOdysseyVectorSection
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );
         static const uint32 BLOCKVERTEX1 = ( 1 << 1 );
         static const uint32 LINKED       = ( 1 << 2 );
+        static const uint32 ERASED       = ( 1 << 3 );
+        static const uint32 TRIMMED      = ( 1 << 4 );
 };

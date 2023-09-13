@@ -154,6 +154,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         virtual void ApplyTransformations() override;
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
 
+        void GetTrimmedSections( std::vector<FOdysseyVectorSection*>& oSectionArray );
+        void EraseSections( std::vector<FOdysseyVectorSection*>& iErasedSectionArray
+                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
+
     protected:
         /**
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).
@@ -231,6 +238,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                , BLMatrix2D* iConversionMatrix
                                , std::vector<FOdysseyVectorSection>& iSectionBuffer
                                , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer );
+
+        void ExtendErasedSection( FOdysseyVectorVertex* iVertex
+                                , FOdysseyVectorSection* iFromSection
+                                , std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
+        void EraseSegment( FOdysseyVectorSegment* iSegment
+                         , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                         , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                         , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
+        FOdysseyVectorVertex* ReachVertexFromSection( FOdysseyVectorVertex* iVertex
+                                                    , FOdysseyVectorSection* iFromSection
+                                                    , FOdysseyVectorSegment* iOwnerSegment );
+        void GetSectionsForSegment( FOdysseyVectorSegment* iSegment
+                                  , std::vector<FOdysseyVectorSection*>& oSectionArray );
+
 
     protected:
         static const uint32 NOCYCLE  = 0;

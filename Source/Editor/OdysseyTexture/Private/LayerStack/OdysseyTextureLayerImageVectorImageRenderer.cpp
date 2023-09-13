@@ -25,11 +25,11 @@ FOdysseyTextureLayerImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> i
     if (!mBlock)
         return iWaitList;
 
-    mEngine->Render( mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
+    mEngine->Render( nullptr, mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
 
     // HUD displaying only for the current layer.
     if( mRenderHUD )
-        mEngine->RenderHUD();
+        mEngine->RenderHUD( nullptr );
 
     return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
@@ -40,11 +40,11 @@ FOdysseyTextureLayerImageVectorImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> io
     if (!mBlock)
         return iWaitList;
 
-    mEngine->Render( mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
+    mEngine->Render( nullptr, mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
 
     // HUD displaying only for the current layer.
     if( mRenderHUD )
-        mEngine->RenderHUD();
+        mEngine->RenderHUD( nullptr );
 
     return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
 }
