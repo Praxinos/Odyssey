@@ -402,7 +402,7 @@ SCinematicBoardSectionCameraTransform::RebuildMetaChannel() //override
 bool
 SCinematicBoardSectionCameraTransform::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
-    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys )
+    auto DeleteKey = [this]( TSharedPtr<FMetaChannel> iKeys )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();

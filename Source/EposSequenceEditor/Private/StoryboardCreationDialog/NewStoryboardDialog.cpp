@@ -345,8 +345,8 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
                 .ToolTipText( LOCTEXT( "thumbnail-scale-mulitplier.tooltip", "Change the size of the thumbnails." ) )
                 .MinValue( 50 )
                 .MaxValue( 250 )
-                .OnValueCommitted_Lambda( [=] ( int32 Value, ETextCommit::Type ) { SetItemScaleMultiplier( Value ); mPanelListView->RequestListRefresh(); } ) // RequestListRefresh() is only OnCommitted() to not refresh every mouse drags
-                .OnValueChanged_Lambda( [=] ( int32 Value ) { SetItemScaleMultiplier( Value ); } )
+                .OnValueCommitted_Lambda( [this] ( int32 Value, ETextCommit::Type ) { SetItemScaleMultiplier( Value ); mPanelListView->RequestListRefresh(); } ) // RequestListRefresh() is only OnCommitted() to not refresh every mouse drags
+                .OnValueChanged_Lambda( [this] ( int32 Value ) { SetItemScaleMultiplier( Value ); } )
                 .Value( this, &SNewStoryboardSettings::GetItemScaleMultiplier )
             ]
 

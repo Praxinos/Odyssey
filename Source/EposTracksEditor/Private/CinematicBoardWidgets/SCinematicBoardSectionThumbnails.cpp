@@ -593,7 +593,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
 
     //-
 
-    auto OnDurationChanged = [=]( double iNewValue )
+    auto OnDurationChanged = [this]( double iNewValue )
     {
         FFrameTime time = FFrameTime::FromDecimal( iNewValue );
 
@@ -607,7 +607,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
         GetMutableDefault<UEposTracksEditorSettings>()->SetDefaultSectionDuration( new_value_as_seconds );
     };
 
-    auto GetDuration = [=]() -> double
+    auto GetDuration = [this]() -> double
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();

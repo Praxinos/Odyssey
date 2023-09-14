@@ -85,7 +85,7 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
 
     //---
 
-    auto GetFirstLine = [=]() -> FText
+    auto GetFirstLine = [this]() -> FText
     {
         CacheLines();
 
@@ -98,7 +98,7 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
         return FText::FromString( mCachedLines[0] + TEXT("...") );
     };
 
-    auto GetTooltip = [=]() -> FText
+    auto GetTooltip = [this]() -> FText
     {
         if( !mNoteSection.IsValid() || !mNoteSection->GetNote() )
             return FText::GetEmpty();
@@ -194,7 +194,7 @@ SCinematicBoardSectionNote::CacheLines()
 void
 SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
 {
-    auto DeleteNote = [=]()
+    auto DeleteNote = [this]()
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -342,7 +342,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 
     // It's needed for notes (unlike for planes) as there is a SBorder widget as parent with a colored background
     // It's not wished for board section as everything available for board should be done directly on it)
-    auto IsNotesVisible = [=]() -> EVisibility
+    auto IsNotesVisible = [this]() -> EVisibility
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();

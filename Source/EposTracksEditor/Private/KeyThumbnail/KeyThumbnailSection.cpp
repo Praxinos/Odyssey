@@ -71,7 +71,7 @@ void FKeyThumbnailSection::BuildSectionContextMenu( FMenuBuilder& MenuBuilder, c
         MenuBuilder.AddSubMenu(
             LOCTEXT( "ThumbnailsMenu", "Thumbnails" ),
             FText(),
-            FNewMenuDelegate::CreateLambda( [=]( FMenuBuilder& InMenuBuilder )
+            FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& InMenuBuilder )
             {
                 TSharedPtr<ISequencer> Sequencer = SequencerPtr.Pin();
 
@@ -90,7 +90,7 @@ void FKeyThumbnailSection::BuildSectionContextMenu( FMenuBuilder& MenuBuilder, c
                         LOCTEXT( "SetSingleTimeTooltip", "Defines the time at which this section should draw its single thumbnail to the current cursor position" ),
                         FSlateIcon(),
                         FUIAction(
-                            FExecuteAction::CreateLambda( [=]
+                            FExecuteAction::CreateLambda( [this, Sequencer]
                     {
                         SetSingleTime( Sequencer->GetLocalTime().AsSeconds() );
                         GetMutableDefault<UMovieSceneUserThumbnailSettings>()->bDrawSingleThumbnails = true;

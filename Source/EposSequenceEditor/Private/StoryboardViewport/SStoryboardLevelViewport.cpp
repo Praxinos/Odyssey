@@ -29,6 +29,7 @@
 #include "Engine/Selection.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "AnimatedRange.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -253,7 +254,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 .OnEndSliderMovement(this, &SStoryboardLevelViewport::SetTime)
                 .Value(this, &SStoryboardLevelViewport::GetTime)
                 .ToolTipText(LOCTEXT("TimeLocalToCurrentSequence", "The current time of the sequence relative to the focused sequence."))
-                .Delta_Lambda([=]()
+                .Delta_Lambda([this]()
                 {
                     return UIData.OuterResolution.AsDecimal() * UIData.OuterPlayRate.AsInterval();
                 })
@@ -357,7 +358,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=]{ return UIData.ShotName; })
+                                    .Text_Lambda([this]{ return UIData.ShotName; })
                                     .ToolTipText(LOCTEXT("CurrentSequence", "The name of the currently evaluated sequence."))
                                 ]
 
@@ -368,7 +369,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=] { return UIData.CameraName; })
+                                    .Text_Lambda([this] { return UIData.CameraName; })
                                     .ToolTipText(LOCTEXT("CurrentCamera", "The name of the current camera."))
                                 ]
 
@@ -379,7 +380,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=] { return FText::Join( FText::FromString( TEXT(", ") ), UIData.SelectedPlanes ); })
+                                    .Text_Lambda([this] { return FText::Join( FText::FromString( TEXT(", ") ), UIData.SelectedPlanes ); })
                                     .ToolTipText(LOCTEXT("SelectedPlanes", "The name of all selected planes."))
                                 ]
                             ]
@@ -390,7 +391,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                             [
                                 SNew(STextBlock)
                                 .ColorAndOpacity(Gray)
-                                .Text_Lambda([=] { return UIData.Filmback; })
+                                .Text_Lambda([this] { return UIData.Filmback; })
                                 .ToolTipText(LOCTEXT("CurrentFilmback", "The name of the current shot's filmback (the imaging area of the frame/sensor)."))
                             ]
 
@@ -400,7 +401,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 SNew(STextBlock)
                                 .Font(FAppStyle::Get().GetFontStyle("Sequencer.FixedFont"))
                                 .ColorAndOpacity(Gray)
-                                .Text_Lambda([=] { return UIData.LocalPlaybackTime; })
+                                .Text_Lambda([this] { return UIData.LocalPlaybackTime; })
                                 .ToolTipText(LOCTEXT("LocalPlaybackTime", "The current playback time relative to the currently evaluated sequence."))
                             ]
                         ]
@@ -425,7 +426,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove.IsValid() ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
+                                    .Text_Lambda([this] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove.IsValid() ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -440,7 +441,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .SliderExponentNeutralValue( 100 )
                                     .Value( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneDistance )
                                     .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScalePlaneDistance )
-                                    .OnValueCommitted_Lambda( [=]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScalePlaneDistance( iNewValue ); } )
+                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScalePlaneDistance( iNewValue ); } )
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -478,7 +479,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=] { return FText::Format( LOCTEXT( "CameraFocalLengthLabel", "{0} Focal Length" ), mCameraToFocalLength.IsValid() ? FText::FromString( mCameraToFocalLength->GetActorLabel() ) : FText::GetEmpty() ); })
+                                    .Text_Lambda([this] { return FText::Format( LOCTEXT( "CameraFocalLengthLabel", "{0} Focal Length" ), mCameraToFocalLength.IsValid() ? FText::FromString( mCameraToFocalLength->GetActorLabel() ) : FText::GetEmpty() ); })
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -493,7 +494,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .SliderExponentNeutralValue( 100 )
                                     .Value( this, &SStoryboardLevelViewport::GetCameraFocalLength )
                                     .OnValueChanged( this, &SStoryboardLevelViewport::SetCameraFocalLength )
-                                    .OnValueCommitted_Lambda( [=]( float iNewValue, ETextCommit::Type iType ) { SetCameraFocalLength( iNewValue ); } )
+                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetCameraFocalLength( iNewValue ); } )
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -533,7 +534,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         .Value( 0.1 )
         [
             SAssignNew( mWidgetNotesInViewport, SNotesInViewport )
-            .Visibility_Lambda( [=]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport && SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0 ) ? EVisibility::Visible : EVisibility::Collapsed; } )
+            .Visibility_Lambda( [this]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport && SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0 ) ? EVisibility::Visible : EVisibility::Collapsed; } )
             .ListItemsSource( &mNotes )
         ];
 
@@ -595,8 +596,8 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                     .Delta( 1 )
                     .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
                     .SliderExponentNeutralValue( 100 )
-                    .OnValueCommitted_Lambda( [=] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
-                    .OnValueChanged_Lambda( [=] ( float Value) { SetViewportRotation(Value); } )
+                    .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
+                    .OnValueChanged_Lambda( [this] ( float Value) { SetViewportRotation(Value); } )
                     .Value( this, &SStoryboardLevelViewport::GetViewportRotation )
                 ]
                 + SHorizontalBox::Slot()

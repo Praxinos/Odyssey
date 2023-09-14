@@ -28,6 +28,9 @@
 #include "CineCameraActor.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
+#include "AnimatedRange.h"
+#include "ITimeSlider.h"
+#include "MVVM/ViewModels/SequencerEditorViewModel.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
@@ -459,7 +462,7 @@ FCinematicBoardSection::ConstructConverterForViewRange( FGeometry* oGeometry ) c
     if( oGeometry )
         *oGeometry = geometry;
 
-    TSharedPtr<UE::Sequencer::FEditorViewModel> editor_model = GetSequencer()->GetViewModel();
+    TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> editor_model = GetSequencer()->GetViewModel();
     TSharedPtr<UE::Sequencer::FTrackAreaViewModel> track_model = editor_model->GetTrackArea();
     return track_model->GetTimeToPixel( geometry.GetLocalSize().X );
 }
@@ -893,9 +896,9 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
             //FUIAction( FExecuteAction::CreateSP( mWidgetTitle.ToSharedRef(), &SCinematicBoardSectionTitle::EnterRename ) )
         );
 
-        auto SubMenuAdvanced = [=]( FMenuBuilder& ioMenuBuilder )
+        auto SubMenuAdvanced = [this]( FMenuBuilder& ioMenuBuilder )
         {
-            auto BulkEditSubSequence = [=]()
+            auto BulkEditSubSequence = [this]()
             {
                 ISequencer* sequencer = mCinematicBoardTrackEditor.Pin()->GetSequencer().Get();
 
@@ -917,7 +920,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 PropertyEditorModule.CreatePropertyEditorToolkit( TSharedPtr<IToolkitHost>(), objects );
             };
 
-            auto CanBulkEditSubSequence = [=]()
+            auto CanBulkEditSubSequence = [this]()
             {
                 ISequencer* sequencer = mCinematicBoardTrackEditor.Pin()->GetSequencer().Get();
 

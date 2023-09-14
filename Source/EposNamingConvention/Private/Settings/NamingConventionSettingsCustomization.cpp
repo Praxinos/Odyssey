@@ -104,10 +104,10 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
         }
         else
         {
-            auto IsIndexPropertyEnabled = [=]() -> bool
+            auto IsIndexPropertyEnabled = [patternHandle = mPatternHandle]() -> bool
             {
                 FText pattern;
-                mPatternHandle->GetValueAsFormattedText( pattern );
+                patternHandle->GetValueAsFormattedText( pattern );
 
                 return pattern.ToString().Contains( TEXT( "-index}" ) );
             };
@@ -225,10 +225,10 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
         }
         else
         {
-            auto IsIndexPropertyEnabled = [=]() -> bool
+            auto IsIndexPropertyEnabled = [patternHandle = mPatternHandle]() -> bool
             {
                 FText pattern;
-                mPatternHandle->GetValueAsFormattedText( pattern );
+                patternHandle->GetValueAsFormattedText( pattern );
 
                 return pattern.ToString().Contains( TEXT( "-index}" ) );
             };
@@ -362,10 +362,10 @@ FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandl
         }
         else
         {
-            auto IsIndexPropertyEnabled = [=]() -> bool
+            auto IsIndexPropertyEnabled = [patternHandle = mPatternHandle]() -> bool
             {
                 FText pattern;
-                mPatternHandle->GetValueAsFormattedText( pattern );
+                patternHandle->GetValueAsFormattedText( pattern );
 
                 return pattern.ToString().Contains( TEXT( "-index}" ) );
             };
@@ -498,10 +498,10 @@ FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHand
         }
         else
         {
-            auto IsIndexPropertyEnabled = [=]() -> bool
+            auto IsIndexPropertyEnabled = [patternHandle = mPatternHandle]() -> bool
             {
                 FText pattern;
-                mPatternHandle->GetValueAsFormattedText( pattern );
+                patternHandle->GetValueAsFormattedText( pattern );
 
                 return pattern.ToString().Contains( TEXT( "-index}" ) );
             };

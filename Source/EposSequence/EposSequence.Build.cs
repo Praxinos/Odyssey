@@ -26,6 +26,7 @@ public class EposSequence : ModuleRules
             new string[]
             {
                 "Core",
+                "LevelSequence",
                 // ... add other public dependencies that you statically link with here ...
             }
             );
@@ -41,7 +42,6 @@ public class EposSequence : ModuleRules
                 // [RUNTIME] custom engine dependencies
                 "MovieScene",
                 "MovieSceneTracks",
-                "LevelSequence",
                 "CinematicCamera",
                 "MovieRenderPipelineCore",
                 "MediaCompositing",

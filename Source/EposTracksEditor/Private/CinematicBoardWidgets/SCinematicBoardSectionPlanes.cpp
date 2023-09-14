@@ -952,7 +952,7 @@ SCinematicBoardSectionPlaneMaterialKeys::RebuildMetaChannel() //override
 bool
 SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
-    auto CloneKey = [=]( TSharedPtr<FMetaChannel> iKeys )
+    auto CloneKey = [this]( TSharedPtr<FMetaChannel> iKeys )
     {
         if( iKeys->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
             return;
@@ -977,7 +977,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         }
     };
 
-    auto CanCloneKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
+    auto CanCloneKey = [this]( TSharedPtr<FMetaChannel> iKeys ) -> bool
     {
         if( iKeys->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
             return false;
@@ -995,7 +995,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
     //-
 
-    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys )
+    auto DeleteKey = [this]( TSharedPtr<FMetaChannel> iKeys )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -1357,7 +1357,7 @@ SCinematicBoardSectionPlaneOpacityKeys::RebuildMetaChannel() //override
 bool
 SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
-    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys )
+    auto DeleteKey = [this]( TSharedPtr<FMetaChannel> iKeys )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -1387,7 +1387,7 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 
     //-
 
-    auto SetKey = [=]( TSharedPtr<FMetaChannel> iKeys, float iOpacity )
+    auto SetKey = [this](TSharedPtr<FMetaChannel> iKeys, float iOpacity)
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -1415,7 +1415,7 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
         return true;
     };
 
-    auto SetOpacitySubMenu = [=]( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys )
+    auto SetOpacitySubMenu = [this, SetKey, CanSetKey]( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();

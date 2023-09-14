@@ -64,18 +64,18 @@ SColorPickerEntry::Construct( const FArguments& iArgs )
     mUseAlpha = iArgs._UseAlpha;
     mOnColorCommitted = iArgs._OnColorCommitted;
 
-    auto GetColor = [=]()
+    auto GetColor = [this]()
     {
         return mColor;
     };
 
-    auto SetColor = [=]( FLinearColor iNewColor )
+    auto SetColor = [this]( FLinearColor iNewColor )
     {
         mColor = iNewColor;
         mOnColorCommitted.ExecuteIfBound( mColor );
     };
 
-    auto OnGetMenuContent = [=]() -> TSharedRef<SWidget>
+    auto OnGetMenuContent = [this, GetColor, SetColor]() -> TSharedRef<SWidget>
     {
         // Open a color picker
         return SNew( SColorPicker )

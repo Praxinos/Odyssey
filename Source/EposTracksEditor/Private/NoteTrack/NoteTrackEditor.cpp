@@ -50,7 +50,7 @@ FNoteTrackEditor::OnInitialize() //override
     {
         command_list->MapAction(
             FEposTracksEditorCommands::Get().NewSectionWithNoteAtCurrentFrame,
-            FExecuteAction::CreateLambda( [=]()
+            FExecuteAction::CreateLambda( [this]()
                                           {
                                               UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetRootMovieSceneSequence(), GetSequencer()->GetFocusedMovieSceneSequence() );
                                               if( !note )
