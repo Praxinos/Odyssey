@@ -712,6 +712,12 @@ FOdysseyPainterEditor::Trim( FOdysseyVectorScene* iScene )
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList :
                                                                                       engine->GetChildrenList();
+    std::vector<FOdysseyVectorPath*> removedPathArray;
+    std::vector<FOdysseyVectorVertex*> removedVertexArray;
+    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+    std::vector<FOdysseyVectorPath*> addedPathArray;
+    std::vector<FOdysseyVectorVertex*> addedVertexArray;
+    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
 
     for( FOdysseyVectorObject* focusedObject : focusedObjectList )
     {
@@ -719,10 +725,6 @@ FOdysseyPainterEditor::Trim( FOdysseyVectorScene* iScene )
         {
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
             std::vector<FOdysseyVectorSection*> trimmedSectionArray;
-            std::vector<FOdysseyVectorVertex*> removedVertexArray;
-            std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-            std::vector<FOdysseyVectorVertex*> addedVertexArray;
-            std::vector<FOdysseyVectorSegment*> addedSegmentArray;
 
             paintGroup->GetTrimmedSections( trimmedSectionArray );
             paintGroup->EraseSections( trimmedSectionArray
@@ -734,6 +736,22 @@ FOdysseyPainterEditor::Trim( FOdysseyVectorScene* iScene )
     }
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("Trim","Trim"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
+                                                                  , removedPathArray
+                                                                  , removedVertexArray
+                                                                  , removedSegmentArray
+                                                                  , addedPathArray
+                                                                  , addedVertexArray
+                                                                  , addedSegmentArray );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
 
     engine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

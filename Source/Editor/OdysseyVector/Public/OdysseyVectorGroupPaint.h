@@ -160,7 +160,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
-        void PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
+        void PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray
+                         , bool iTrimmed );
 
     protected:
         /**
@@ -244,7 +245,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                 , FOdysseyVectorSection* iFromSection
                                 , std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
         void EraseSegment( FOdysseyVectorSegment* iSegment
-                         , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
         FOdysseyVectorVertex* ReachVertexFromSection( FOdysseyVectorVertex* iVertex

@@ -491,7 +491,7 @@ FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
         {
             if( paintGroup->IsSelected() == true )
             {
-                paintGroup->PickSections( trimmedSectionArray );
+                paintGroup->PickSections( trimmedSectionArray, true );
                 paintGroup->EraseSections( trimmedSectionArray
                                          , removedVertexArray
                                          , removedSegmentArray
@@ -501,7 +501,7 @@ FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
         }
         else
         {
-            paintGroup->PickSections( trimmedSectionArray );
+            paintGroup->PickSections( trimmedSectionArray, true );
             paintGroup->EraseSections( trimmedSectionArray
                                      , removedVertexArray
                                      , removedSegmentArray
@@ -805,8 +805,11 @@ FOdysseyVectorEngine::UseMaskImage()
 void
 FOdysseyVectorEngine::UseImage( BLImage* iImage )
 {
-    mBLContext->end();
-    mBLContext->begin(*iImage);
+    if( mBLContext->targetImage() != iImage )
+    {
+        mBLContext->end();
+        mBLContext->begin(*iImage);
+    }
 }
 
 void
