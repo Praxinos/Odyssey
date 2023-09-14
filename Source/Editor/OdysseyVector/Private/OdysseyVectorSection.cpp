@@ -254,25 +254,6 @@ FOdysseyVectorSection::SetErased( bool iErased )
     }
 }
 
-bool
-FOdysseyVectorSection::IsTrimmed()
-{
-    return ( mFlags & TRIMMED ) ? true : false;
-}
-
-void
-FOdysseyVectorSection::SetTrimmed( bool iTrimmed )
-{
-    if( iTrimmed )
-    {
-        mFlags |= TRIMMED;
-    }
-    else
-    {
-        mFlags &= (~TRIMMED);
-    }
-}
-
 void
 FOdysseyVectorSection::AddCycle( FOdysseyVectorCycle* iCycle )
 {

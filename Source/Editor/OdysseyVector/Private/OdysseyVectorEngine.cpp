@@ -491,7 +491,7 @@ FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
         {
             if( paintGroup->IsSelected() == true )
             {
-                paintGroup->PickSections( trimmedSectionArray, true );
+                paintGroup->PickSections( trimmedSectionArray );
                 paintGroup->EraseSections( trimmedSectionArray
                                          , removedVertexArray
                                          , removedSegmentArray
@@ -501,7 +501,7 @@ FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
         }
         else
         {
-            paintGroup->PickSections( trimmedSectionArray, true );
+            paintGroup->PickSections( trimmedSectionArray );
             paintGroup->EraseSections( trimmedSectionArray
                                      , removedVertexArray
                                      , removedSegmentArray
