@@ -14,47 +14,47 @@
 
 //---
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FBoardSettings
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY(config, EditAnywhere, Category=Board)
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Board)
     FFrameRate DefaultTickFrameRate { 24000, 1 };
 
-    UPROPERTY(config, EditAnywhere, Category=Board)
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Board)
     FFrameRate DefaultDisplayFrameRate { 24, 1 };
 
 };
 
 //---
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FShotSettings
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY(config, EditAnywhere, Category=Shot)
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Shot)
     FFrameRate DefaultTickFrameRate { 24000, 1 };
 
-    UPROPERTY(config, EditAnywhere, Category=Shot)
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Shot)
     FFrameRate DefaultDisplayFrameRate { 24, 1 };
 };
 
 //---
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FNoteSettings
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY(config, EditAnywhere, Category=Note)
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Note)
     bool DisplayNoteInViewport { false };
 
-    UPROPERTY(config, EditAnywhere, Category=Note)
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Note)
     bool DisplayNoteAsOverlay { false };
 };
 
@@ -100,7 +100,7 @@ enum class EInfoBarPatternKeyword : uint32
 
 const FPatternKeywordList& GetInfoBarPatternKeywordList();
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FInfoBarSettings
 {
     GENERATED_BODY()
@@ -109,12 +109,12 @@ public:
     FInfoBarSettings();
 
 public:
-    UPROPERTY(config, EditAnywhere, Category=InfoBar, meta=(MultiLine="true"))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=InfoBar, meta=(MultiLine="true"))
     FString Pattern;
 
     FPatternKeywordLists mPatternKeywordLists;
 
-    UPROPERTY(config, EditAnywhere, Category=InfoBar)
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=InfoBar)
     FString Separator { TEXT( " - " ) };
 };
 
@@ -123,7 +123,7 @@ public:
 /**
  * Epos Sequence Editor settings.
  */
-UCLASS(config=Epos, meta=(DisplayName="Epos Sequence Editor"))
+UCLASS(BlueprintType, config=Epos, meta=(DisplayName="Epos Sequence Editor"))
 class UEposSequenceEditorSettings
     : public UDeveloperSettings
 {
@@ -136,18 +136,18 @@ class UEposSequenceEditorSettings
 
 public:
     /** Specifies Board stuff. */
-    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
     FBoardSettings BoardSettings;
 
     /** Specifies Shot stuff. */
-    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
     FShotSettings ShotSettings;
 
     /** Specifies Note stuff. */
-    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
     FNoteSettings NoteSettings;
 
     /** Specifies InfoBar stuff. */
-    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
     FInfoBarSettings InfoBarSettings;
 };

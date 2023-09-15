@@ -102,7 +102,7 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
 
 //static
 FBoardSectionTake*
-BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, FBoardSectionTake* iTake )
+BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, const FBoardSectionTake* iTake )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( &iSubSection );
     FBoardSectionTake* old_take = board_section->FindTake( board_section->GetSequence() );

@@ -29,6 +29,10 @@
     },
     {
       "Enabled": true,
+      "Name": "SequencerScripting"
+    },
+    {
+      "Enabled": true,
       "Name": "AppleProResMedia",
       "SupportedTargetPlatforms": [
         "Win64"

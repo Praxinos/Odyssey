@@ -15,6 +15,7 @@
 class AActor;
 class ACineCameraActor;
 class APlaneActor;
+class UBoardSequence;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 class UMovieScene;
@@ -92,7 +93,7 @@ public:
      * @param iSequencer The sequencer
      * @param iSection The section to clone
      */
-    static void CloneSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection, FFrameNumber iFrameNumber, bool iEmptyDrawings );
+    static UMovieSceneSubSection* CloneSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection, FFrameNumber iFrameNumber, bool iEmptyDrawings );
 
 private:
 
@@ -145,13 +146,16 @@ public:
     /** Stretch sequencer time range to view make the new range inside the view. */
     static void UpdateViewRange( ISequencer* iSequencer, TRange<FFrameNumber> iNewRange );
 
+    /** Create a new board sequence. */
+    static UBoardSequence* CreateBoard( const FString& iNewBoardPath, const FString& iNewBoardName );
+
 // Inside EposSequenceTools_Take
 public:
     /** Create a new take (from the current subsequence) for the board section. */
     static FBoardSectionTake* CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection );
 
     /** Switch the current take to the new one for the board section. */
-    static FBoardSectionTake* SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, FBoardSectionTake* iTake );
+    static FBoardSectionTake* SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, const FBoardSectionTake* iTake );
 
 // Inside EposSequenceTools
 public:
@@ -195,6 +199,15 @@ public:
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+
+    /**
+    *  Create a new camera (actor & track & cameracut track) in the board section
+    *
+    * @param ISequencer             iSequencer to add a new camera.
+    * @param UMovieSceneSubSection  iSubSection to add a new camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void CreateCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
 
 public:
     /**
@@ -382,6 +395,15 @@ public:
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+
+    /**
+    *  Create a new plane (actor & track) in the board section
+    *
+    * @param ISequencer             iSequencer to add a new plane.
+    * @param UMovieSceneSubSection  iSubSection to add a new plane.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void CreatePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
 
     /**
     *  Can a plane be created in the board section ?
@@ -645,8 +667,8 @@ public:
 
 //---
 
-UENUM()
-enum class EScalePlane : int32
+UENUM( BlueprintType )
+enum class EScalePlane : uint8
 {
     // The plane won't scale
     kNo                 UMETA( DisplayName = "No Scale" ),

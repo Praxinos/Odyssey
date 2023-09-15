@@ -23,7 +23,7 @@ const FPatternKeywordList& GetImportImageSequencePatternKeywordList();
 
 //---
 
-USTRUCT()
+USTRUCT( BlueprintType )
 struct FImportImageSequenceOptions
 {
     GENERATED_BODY()
@@ -33,11 +33,11 @@ public:
 
 public:
     /** Image sequence folder. */
-    UPROPERTY( EditAnywhere, Category=ImportImageSequence )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ImportImageSequence )
     FDirectoryPath ImageSequencePath;
 
     /** Image name pattern. */
-    UPROPERTY( EditAnywhere, Category=ImportImageSequence )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ImportImageSequence )
     FString FilePattern;
 
     FPatternKeywordLists mPatternKeywordLists;

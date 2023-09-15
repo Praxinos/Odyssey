@@ -80,9 +80,13 @@ public class EposSequenceEditor : ModuleRules
                 "MovieRenderPipelineEditor",
                 "LevelSequenceEditor",
                 "AssetDefinition",
+                "UMG",
+                "SequencerScripting",
+                "CurveEditor",
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
                 "EposNamingConvention",
+                "libharu",
             }
             );
 

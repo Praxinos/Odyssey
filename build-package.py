@@ -37,7 +37,7 @@ class eTarget(Enum):
 
 def GetArguments():
     global gOperatingSystem
-    
+
     class CustomArgumentDefaultsHelpFormatter( argparse.RawTextHelpFormatter ):
         """Help message formatter which adds default values to argument help.
 
@@ -156,7 +156,7 @@ def GetUEVersion( iArgs, iUPluginPathFile ):
     if branch_version_without_dot != uplugin_versions[-1]:
         print( Fore.RED + f'ue version from branch name "{current_branch}" differs from ue version in uplugin file "{uplugin_versions[-1]}", please update uplugin file' )
         sys.exit( 24 )
-        
+
     print( Fore.GREEN + f'{"Build with UE":20}: {branch_version}' )
 
     return branch_version

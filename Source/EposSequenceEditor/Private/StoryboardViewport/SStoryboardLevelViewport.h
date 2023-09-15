@@ -23,6 +23,7 @@ class FUICommandList;
 class ILevelEditor;
 class ISequencer;
 class SBox;
+class SFilmOverlayOptions;
 class SStoryboardPreviewViewport;
 class SStoryboardTransportRange;
 class SEditorViewport;
