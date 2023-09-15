@@ -6,6 +6,7 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImageRenderer.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyVectorBlock.h"
 #include "Import/v2/OdysseyVectorImport.h"
 #include "Import/v1/OdysseyVectorImport.h"
 
@@ -28,7 +29,9 @@ FOdysseyAnimationCellImageVector::StaticType()
 
 FOdysseyAnimationCellImageVector::~FOdysseyAnimationCellImageVector()
 {
-    FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
+    if (mVectorBlock)
+        mVectorBlock->OnInvalidated().RemoveAll( this );
+
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().RemoveAll( this );
     delete mEngine;
     mEngine = nullptr;
@@ -37,6 +40,7 @@ FOdysseyAnimationCellImageVector::~FOdysseyAnimationCellImageVector()
 FOdysseyAnimationCellImageVector::FOdysseyAnimationCellImageVector(UOdysseyAnimationLayerImageVector* iLayer)
     : mLayer(iLayer)
     , mEngine(nullptr)
+    , mVectorBlockId(FGuid::NewGuid())
     , mWidth(0)
     , mHeight(0)
 {
@@ -45,6 +49,8 @@ FOdysseyAnimationCellImageVector::FOdysseyAnimationCellImageVector(UOdysseyAnima
 void
 FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 {
+    UOdysseyAnimation* animation = mLayer->GetAnimation();
+
     BLImageData imgData;
 
     mWidth = iWidth;
@@ -55,17 +61,14 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
                                        , (double)iHeight );
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyAnimationCellImageVector::OnVectorSceneSignal );
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsColoredChanged );
 
     mEngine->GetBLImage()->getData( &imgData );
 
-    mBlock = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(imgData.pixelData)
-                               , iWidth
-                               , iHeight
-    // ::ULIS::eFormat::Format_BGRA8 is the same as Blend2D's BL_FORMAT_PRGB32
-                               , ::ULIS::eFormat::Format_BGRA8
-                               , nullptr);
+    mVectorBlock = MakeShared<FOdysseyVectorBlock>();
+    mVectorBlock->Init(mVectorBlockId, mEngine, iWidth, iHeight, animation->Format());
+    mVectorBlock->SetRenderFlags(mLayer->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
+    mVectorBlock->OnInvalidated().AddRaw(this, &FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);
 }
 
 const FName&
@@ -87,6 +90,7 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
     
     Ar << mWidth;
     Ar << mHeight;
+    Ar << mVectorBlockId;
 
     if( Ar.IsSaving() )
     {
@@ -139,25 +143,12 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 }
 
 void
-FOdysseyAnimationCellImageVector::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
-{
-    if (mEngine->GetScene() != iScene)
-        return;
-
-    if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )
-    {
-        mEngine->Invalidate();
-        ImageRenderingChanged(iSignalFlags & FOdysseyVectorEngine::SIGNAL_INTERACTIVE);
-    }
-}
-
-void
 FOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImageVector* iLayer)
 {
     if (iLayer != mLayer)
         return;
 
-    mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+    mVectorBlock->SetRenderFlags(mLayer->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     ImageRenderingChanged();
 }
 
@@ -165,7 +156,8 @@ TSharedPtr<IOdysseyImageRenderer>
 FOdysseyAnimationCellImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
     bool renderHUD = iRenderType == IOdysseyImageRenderer::eRenderType::Editor && mLayer->GetLayerStack()->CurrentLayer.Get() == mLayer;
-    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(mEngine, mBlock, renderHUD, mLayer->IsColored, iRenderType, GetImageRenderingRects());
+    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(/*this, */mVectorBlock, renderHUD, iRenderType, GetImageRenderingRects());
+    //return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(mEngine, mBlock, renderHUD, mLayer->IsColored, iRenderType, GetImageRenderingRects());
 }
 
 TArray<FGuid>
@@ -177,7 +169,6 @@ FOdysseyAnimationCellImageVector::GetImageRenderingComposition(IOdysseyImageRend
 TArray<::ULIS::FRectI>
 FOdysseyAnimationCellImageVector::GetImageRenderingRects() const
 {
-
     return { ::ULIS::FRectI::FromXYWH(0, 0, mWidth, mHeight) };
 }
 
@@ -201,6 +192,12 @@ FOdysseyAnimationCellImageVector::CreateCellFromFrame(uint32 iFrameIndex) const
     newScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     return cell;
+}
+
+void
+FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated(bool iIsInteractive)
+{
+    ImageRenderingChanged(iIsInteractive);
 }
 
 #undef LOCTEXT_NAMESPACE

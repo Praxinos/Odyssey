@@ -133,13 +133,13 @@ FOdysseyAnimationProxy::Run()
             continue;
         }
 
-        TSharedPtr<FBlockData> blockData;
+        /* TSharedPtr<FBlockData> blockData;
         if (!mPendingBlockData.Dequeue(blockData)) //PendingBlockData is a ThreadSafe queue
         {
             FPlatformProcess::Sleep(0.03); //Arbitrary number
             continue;
         }   
-        blockData->Render(false);
+        blockData->Render(false); */
     }
     return 0;
 }

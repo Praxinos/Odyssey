@@ -23,13 +23,15 @@ public class OdysseyImaging : ModuleRules
 
                 "OdysseyCore",
                 "OdysseyMaths",
+                "OdysseyVector",
+                "blend2d",
              }
         );
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
                 "ULIS",
-                "ULISLoader",
+                "ULISLoader"
              }
         );
 

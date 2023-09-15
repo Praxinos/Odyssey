@@ -210,6 +210,8 @@ FOdysseyVectorEngine::Render( BLImage* iBLImage, uint64 iDrawingFlags )
     if( iBLImage )
     {
         UseImage( iBLImage );
+        mScene->Draw( iDrawingFlags );
+        mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
 
     // Blend2D part

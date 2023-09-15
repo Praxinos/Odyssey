@@ -7,6 +7,7 @@
 #include "OdysseyPixelFormat.h"
 #include "EditorStyleSet.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyVectorBlock.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 #include "Import/v2/OdysseyVectorImport.h"
@@ -33,12 +34,9 @@ UOdysseyTextureLayerImageVector::OnOpacityChanged()
 
 UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 {
-    // TODO: free the scene
-
-    //mScene->OnUpdateDelegate().Remove(mOnRefreshHandle);
-
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
+    if (mVectorBlock)
+        mVectorBlock->OnInvalidated().RemoveAll( this );
 }
 
 UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
@@ -51,7 +49,14 @@ UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
 void
 UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
 {
-    BLImageData imgData;
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    if(!layerStack)
+        return;
+
+    UTexture2D* texture = layerStack->GetTexture();
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    //let's ensure the format has alpha, so add alpha channel of needed
+    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
     Width  = iWidth;
     Height = iHeight;
@@ -59,23 +64,11 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     mEngine = new FOdysseyVectorEngine( new FOdysseyVectorScene( "Scene" )
                                        , (double)iWidth
                                        , (double)iHeight );
-//UE_LOG(LogTemp, Warning, TEXT("UOdysseyTextureLayerImageVector::Init %X"), mEngine );
-    // record a callback to refresh the layer when a property of an object's details view is changed
-    //mOnRefreshHandle = mScene->OnUpdateDelegate().AddUObject( this, &UOdysseyTextureLayerImageVector::OnRefresh );
-    
-    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    FOdysseyVectorEngine::OnSignalDelegate().AddUObject( this, &UOdysseyTextureLayerImageVector::OnVectorSceneSignal );
 
-    //UE_LOG(LogTemp,Warning,TEXT("UOdysseyTextureLayerImageVector::Init %d %d %d"), iWidth, iHeight, mVEngine );
-
-    mEngine->GetBLImage()->getData( &imgData );
-
-    mBlock = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(imgData.pixelData)
-                               , iWidth
-                               , iHeight
-    // ::ULIS::eFormat::Format_BGRA8 is the same as Blend2D's BL_FORMAT_PRGB32
-                               , ::ULIS::eFormat::Format_BGRA8
-                               , nullptr);
+    mVectorBlock = MakeShared<FOdysseyVectorBlock>();
+    mVectorBlock->Init(mVectorBlockId, mEngine, iWidth, iHeight, format);
+    mVectorBlock->SetRenderFlags(IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
+    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
 }
 
 FOdysseyVectorEngine*
@@ -108,6 +101,14 @@ UOdysseyTextureLayerImageVector::OnCreated_Implementation()
     UTexture2D* texture = layerStack->GetTexture();
 
     Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+}
+
+void
+UOdysseyTextureLayerImageVector::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    mVectorBlockId = FGuid::NewGuid();
 }
 
 void
@@ -189,7 +190,8 @@ UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
 void
 UOdysseyTextureLayerImageVector::IsColoredChanged()
 {
-    mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+    //mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+    mVectorBlock->SetRenderFlags(IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     ImageRenderingChanged();
 }
 
@@ -209,23 +211,10 @@ UOdysseyTextureLayerImageVector::BlendModeChanged()
     ImageRenderingChanged();
 }
 
-void
-UOdysseyTextureLayerImageVector::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
-{
-    if (mEngine->GetScene() != iScene)
-        return;
-
-    if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )
-    {
-        mEngine->Invalidate();
-        ImageRenderingChanged(iSignalFlags & FOdysseyVectorEngine::SIGNAL_INTERACTIVE);
-    }
-}
-
 TSharedPtr<IOdysseyImageRenderer>
 UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const
 {
-    return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mBlock, iRenderType, GetImageRenderingRects());
+    return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mVectorBlock, iRenderType, GetImageRenderingRects());
 }
 
 TArray<FGuid>
@@ -244,6 +233,12 @@ float
 UOdysseyTextureLayerImageVector::GetImageRenderingOpacity() const
 {
     return Opacity;
+}
+
+void
+UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated(bool iIsInteractive)
+{
+    ImageRenderingChanged(iIsInteractive);
 }
 
 #undef LOCTEXT_NAMESPACE

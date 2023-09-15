@@ -122,9 +122,9 @@ void
 UOdysseyTextureLayerStack::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
     const FGuid& eventId =  iEvent.GetId();
-        TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor);
-        if (!composition.Contains(eventId))
-            return;
+    TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor);
+    if (!composition.Contains(eventId))
+        return;
 
     if (!iEvent.IsInteractive())
     {
