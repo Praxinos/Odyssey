@@ -66,6 +66,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         //UOdysseyLayer overrides
         virtual void OnCreated_Implementation() override;
         virtual void PostInitProperties() override;
+        virtual void PostLoad() override;
 
         FOdysseyVectorEngine* GetEngine();
  

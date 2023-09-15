@@ -49,27 +49,15 @@ UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
 void
 UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if(!layerStack)
-        return;
-
-    UTexture2D* texture = layerStack->GetTexture();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
     Width  = iWidth;
     Height = iHeight;
 
     mEngine = new FOdysseyVectorEngine( new FOdysseyVectorScene( "Scene" )
                                        , (double)iWidth
                                        , (double)iHeight );
-
-    mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-    mVectorBlock->Init(mVectorBlockId, mEngine, iWidth, iHeight, format);
-    mVectorBlock->SetRenderFlags(IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
-    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
 }
+
+
 
 FOdysseyVectorEngine*
 UOdysseyTextureLayerImageVector::GetEngine()
@@ -101,6 +89,15 @@ UOdysseyTextureLayerImageVector::OnCreated_Implementation()
     UTexture2D* texture = layerStack->GetTexture();
 
     Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+    
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    //let's ensure the format has alpha, so add alpha channel of needed
+    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+    mVectorBlock = MakeShared<FOdysseyVectorBlock>();
+    mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
+    mVectorBlock->SetRenderFlags(IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
+    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
 }
 
 void
@@ -109,6 +106,23 @@ UOdysseyTextureLayerImageVector::PostInitProperties()
     Super::PostInitProperties();
 
     mVectorBlockId = FGuid::NewGuid();
+}
+
+void
+UOdysseyTextureLayerImageVector::PostLoad()
+{
+    Super::PostLoad();
+    
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    UTexture2D* texture = layerStack->GetTexture();
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    //let's ensure the format has alpha, so add alpha channel of needed
+    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+    mVectorBlock = MakeShared<FOdysseyVectorBlock>();
+    mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
+    mVectorBlock->SetRenderFlags(IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
+    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
 }
 
 void
