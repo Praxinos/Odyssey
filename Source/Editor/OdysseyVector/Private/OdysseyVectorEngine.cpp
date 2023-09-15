@@ -484,31 +484,41 @@ FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
     {
         FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
         std::vector<FOdysseyVectorSection*> trimmedSectionArray;
-        std::vector<FOdysseyVectorVertex*> removedVertexArray;
-        std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-        std::vector<FOdysseyVectorVertex*> addedVertexArray;
-        std::vector<FOdysseyVectorSegment*> addedSegmentArray;
 
         if( iSelectedOnly == true )
         {
             if( paintGroup->IsSelected() == true )
             {
+                paintGroup->PickSectionLessPaths( iRemovedObjectArray );
+
+                for( int i = 0; i < iRemovedObjectArray.size(); i++ )
+                { 
+                    iRemovedObjectArray[i]->GetParent()->RemoveChild( iRemovedObjectArray[i] );
+                }
+
                 paintGroup->PickSections( trimmedSectionArray );
                 paintGroup->EraseSections( trimmedSectionArray
-                                         , removedVertexArray
-                                         , removedSegmentArray
-                                         , addedVertexArray
-                                         , addedSegmentArray );
+                                         , iRemovedVertexArray
+                                         , iRemovedSegmentArray
+                                         , iAddedVertexArray
+                                         , iAddedSegmentArray );
             }
         }
         else
         {
+            paintGroup->PickSectionLessPaths( iRemovedObjectArray );
+
+            for( int i = 0; i < iRemovedObjectArray.size(); i++ )
+            { 
+                iRemovedObjectArray[i]->GetParent()->RemoveChild( iRemovedObjectArray[i] );
+            }
+
             paintGroup->PickSections( trimmedSectionArray );
             paintGroup->EraseSections( trimmedSectionArray
-                                     , removedVertexArray
-                                     , removedSegmentArray
-                                     , addedVertexArray
-                                     , addedSegmentArray );
+                                     , iRemovedVertexArray
+                                     , iRemovedSegmentArray
+                                     , iAddedVertexArray
+                                     , iAddedSegmentArray );
         }
     }
 }

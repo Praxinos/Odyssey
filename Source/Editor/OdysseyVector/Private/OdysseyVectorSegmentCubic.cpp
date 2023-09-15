@@ -720,27 +720,9 @@ FOdysseyVectorSegmentCubic::MakeBLPath()
 }
 
 void
-FOdysseyVectorSegmentCubic::Draw( )
+FOdysseyVectorSegmentCubic::DrawPolygonCache()
 {
-
-    // NOTE: Might not be super fast to call this for each segment
     BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
-#ifdef unused
-    BLPath widthPath;
-
-    widthPath.moveTo ( mWidthBezier[0][0].x, mWidthBezier[0][0].y );
-    widthPath.cubicTo( mWidthBezier[0][1].x, mWidthBezier[0][1].y
-                     , mWidthBezier[0][2].x, mWidthBezier[0][2].y
-                     , mWidthBezier[0][3].x, mWidthBezier[0][3].y );
-
-    blctx->strokePath( widthPath );
-#endif
-
-    blctx->fillPath( mBLPath );
-
-
-#ifdef unused
-    uint32 segmentCount = GetVertex(0)->GetSegmentCount();
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
 
     for ( int i = 0; i < mPolygonCache.size(); i++ )
@@ -766,21 +748,18 @@ FOdysseyVectorSegmentCubic::Draw( )
                          , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
     }
     blctx->restore();
+}
 
-/*
-    blctx->save();
-    blctx->resetMatrix();
-    blctx->setStrokeStyle( BLRgba32( 0xFF00FF00 ) );
-    blctx->setStrokeWidth( 1.0f );
-    for ( int i = 0; i < mPolygonCache.size(); i++ )
-    {
-        blctx->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].lineVertex[0].x, mPolygonCache[i].lineVertex[0].y )
-                         , worldMatrix.mapPoint( mPolygonCache[i].lineVertex[1].x, mPolygonCache[i].lineVertex[1].y ) );
-    }
-    blctx->restore();
-*/
+void
+FOdysseyVectorSegmentCubic::Draw( )
+{
+    // NOTE: Might not be super fast to call this for each segment
+    BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
+
+    blctx->fillPath( mBLPath );
+#ifdef unused
+    DrawPolygonCache();
 #endif
-
 }
 
 static void

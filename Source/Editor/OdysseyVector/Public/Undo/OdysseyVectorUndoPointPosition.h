@@ -9,38 +9,13 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPoint.h"
 
-struct FPointPosition
-{
-    FOdysseyVectorPoint* point;
-    ::ULIS::FVec2D position;
-    double radius;
-
-    FPointPosition( FOdysseyVectorPoint* iPoint )
-    {
-        point = iPoint;
-        position = iPoint->GetCoords();
-        radius = iPoint->GetRadius();
-    }
-
-    FPointPosition( FOdysseyVectorPoint* iPoint, double iX, double iY, double iRadius )
-    {
-        point = iPoint;
-        position.x = iX;
-        position.y = iY;
-        radius = iRadius;
-    }
-};
-
 class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoPointPosition();
         FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorPoint*>& iPointArray );
         FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
-                                       , FOdysseyVectorPoint* iPoint
-                                       , double iX
-                                       , double iY
-                                       , double iRadius );
+                                       , FOdysseyVectorPoint* iPoint );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -52,5 +27,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorU
         virtual FString ToString() const override;
 
     private:
-        std::vector<FPointPosition> mPointPositionArray;
+        std::vector<FSnapshotPoint> mPointSnapshotArray;
 };

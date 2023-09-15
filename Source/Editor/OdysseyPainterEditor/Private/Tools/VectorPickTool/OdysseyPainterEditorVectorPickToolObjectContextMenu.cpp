@@ -36,11 +36,11 @@ FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( FOdysseyPain
             , LOCTEXT("GroupPaint", "Make Paint Group")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::GroupPaint, vectorEngine, vectorScene)));
-        menu.AddMenuEntry(
+        /*menu.AddMenuEntry(
               LOCTEXT("Trim", "Trim")
             , LOCTEXT("Trim", "Trim")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Trim, vectorScene)));
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Trim, vectorScene)));*/
         menu.AddMenuEntry(
               LOCTEXT("Group", "Group")
             , LOCTEXT("Group", "Group")

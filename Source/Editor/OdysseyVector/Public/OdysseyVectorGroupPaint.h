@@ -160,7 +160,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
-        void PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
+        bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
+
+        void GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oPathArray );
+        void PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray );
 
     protected:
         /**
@@ -241,6 +244,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer );
 
         void ExtendErasedSection( FOdysseyVectorVertex* iVertex
+                                , FOdysseyVectorSection* iInitiatorSection
                                 , FOdysseyVectorSection* iFromSection
                                 , std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
         void EraseSegment( FOdysseyVectorSegment* iSegment
@@ -260,6 +264,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
+        std::list<FOdysseyVectorPath*> mSectionLessPathList;
         std::list<FOdysseyVectorPath*> mPathList;
         std::list<FOdysseyVectorBucket*> mSelectedBucketList;
         std::list<FOdysseyVectorBucket*> mBucketList;

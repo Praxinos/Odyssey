@@ -8,29 +8,16 @@
 #include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorVertex.h"
-
-struct FVertexRadius
-{
-    FOdysseyVectorVertex* vertex;
-    double radius;
-
-    FVertexRadius( FOdysseyVectorVertex* iVertex )
-    {
-        vertex = iVertex;
-        radius = iVertex->GetRadius();
-    }
-};
+#include "OdysseyVectorPath.h"
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexRadius : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoVertexRadius();
         FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
-                                      , std::vector<FOdysseyVectorPoint*>& iPointArray
-                                      , bool iAlterAllAlong );
+                                      , std::vector<FOdysseyVectorPath*>& iPathArray );
         FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
-                                      , FOdysseyVectorVertex* iVertex
-                                      , bool iAlterAllAlong );
+                                      , std::vector<FOdysseyVectorPoint*>& iPointArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -42,6 +29,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexRadius : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
-        std::vector<FVertexRadius> mVertexRadiusArray;
-        bool mAlterAllAlong;
+        std::vector<FSnapshotPath> mPathSnapshotArray;
+        std::vector<FSnapshotVertex> mVertexSnapshotArray;
 };

@@ -1531,10 +1531,8 @@ FOdysseyVectorGroupPaint::BuildGraph()
     // we now need another loop to count and to reserve the memory in one block to create the sections.
     // we do that so that we can alloc the buffers at once instead of allocating a lot of new sections/segments.
     // This is needed especially with gaps because segments get all their intersections at the end of the whole intersecting process.
-    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    for( FOdysseyVectorPath *path : mPathList )
     {
-        FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(*oit);
-
         if( path->GetPaintingCode() == mPaintingCode )
         {
             std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
@@ -1579,10 +1577,8 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
     // create sections for exact intersections on each segment
 
-    for( std::list<FOdysseyVectorObject*>::iterator oit = mChildrenList.begin(); oit != mChildrenList.end(); ++oit )
+    for( FOdysseyVectorPath *path : mPathList )
     {
-        FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(*oit);
-
         // only for path that have intersected segments.
         if( path->GetPaintingCode() == mPaintingCode )
         {
@@ -1615,6 +1611,10 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
                 segment->ClearIntersections();
             }
+        }
+        else
+        {
+            mSectionLessPathList.push_back( path );
         }
     }
 }
@@ -1753,6 +1753,8 @@ FOdysseyVectorGroupPaint::Clear()
     }
 
     mIntersectionArray.clear();
+
+    mSectionLessPathList.clear();
 }
 
 void
@@ -2107,6 +2109,7 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
 
 void
 FOdysseyVectorGroupPaint::ExtendErasedSection( FOdysseyVectorVertex* iVertex
+                                             , FOdysseyVectorSection* iInitiatorSection
                                              , FOdysseyVectorSection* iFromSection
                                              , std::vector<FOdysseyVectorSection*>& oErasedSectionArray )
 {
@@ -2118,6 +2121,11 @@ FOdysseyVectorGroupPaint::ExtendErasedSection( FOdysseyVectorVertex* iVertex
         && ( currentVertex->GetClass() != FOdysseyVectorVertexIntersection::StaticClass() ) )
     {
         FOdysseyVectorSection* nextSection = currentVertex->GetOtherSection( fromSection, false );
+
+        if( nextSection == iInitiatorSection )
+        {
+            break;
+        }
 
         if( nextSection )
         {
@@ -2159,8 +2167,8 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iE
 
         erasedSection->SetErased( true );
 
-        ExtendErasedSection( erasedSection->GetVertex(0), erasedSection, extendedErasedSectionArray );
-        ExtendErasedSection( erasedSection->GetVertex(1), erasedSection, extendedErasedSectionArray );
+        ExtendErasedSection( erasedSection->GetVertex(0), erasedSection, erasedSection, extendedErasedSectionArray );
+        ExtendErasedSection( erasedSection->GetVertex(1), erasedSection, erasedSection, extendedErasedSectionArray );
     }
 
     // retrieve and prepare all concerned segments for removal
@@ -2308,11 +2316,21 @@ FOdysseyVectorGroupPaint::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
 }
 
 void
+FOdysseyVectorGroupPaint::GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oPathArray )
+{
+    for( FOdysseyVectorPath* path : mPathList )
+    {
+        oPathArray.push_back( path );
+    }
+}
+
+bool
 FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
 {
     BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
     BLImageData maskData;
     ::ULIS::FRectD maskRect;
+    bool picked = false;
 
     maskImage->getData( &maskData );
 
@@ -2333,6 +2351,22 @@ FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPi
         if( PickBezier( worldBezier, maskImage, maskRect, (uint8*)maskData.pixelData ) )
         {
             oPickedSectionArray.push_back( &mSectionBuffer[i] );
+
+            picked = true;
+        }
+    }
+
+    return picked;
+}
+
+void
+FOdysseyVectorGroupPaint::PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray )
+{
+    for( FOdysseyVectorPath* path : mSectionLessPathList )
+    {
+        if( path->Pick( this, ::ULIS::FRectD( 0, 0, 0, 0 ), FOdysseyVectorObject::PICK_MASK_BASED ) )
+        {
+            oObjectArray.push_back( path );
         }
     }
 }

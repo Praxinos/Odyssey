@@ -95,15 +95,19 @@ private:
                             , double iWorldX
                             , double iWorldY
                             , double iDeltaX
-                            , double iDeltaY );
+                            , double iDeltaY
+                            , bool iWidenAllAlong );
     void AlterVertexRadius( FOdysseyVectorVertex* vertex
                           , FOdysseyVectorSegment* iFromSegment
                           , double iDeltaRadius );
+    void GetPathsFromSelection( FOdysseyVectorScene* iScene
+                             , std::vector<FOdysseyVectorPath*>& oPathArray );
 
 private:
     FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
 
     std::vector<FOdysseyVectorPoint*> mPickedPointArray;
+    std::vector<FOdysseyVectorPath*> mSelectedPathArray;
     uint64 mPickingFlags;
     ePathPickingMode mPickingMode;
     ::ULIS::FVec2D mOldPointInTexture;

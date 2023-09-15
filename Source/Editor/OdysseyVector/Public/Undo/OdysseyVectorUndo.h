@@ -9,29 +9,45 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-
+class FOdysseyVectorPoint;
 class FOdysseyVectorScene;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorVertex;
 class FOdysseyVectorSegmentCubic;
 
-class ODYSSEYVECTOR_API FSnapshotVertex
+class ODYSSEYVECTOR_API FSnapshotPoint
 {
     public:
         static const uint32 SNAPSHOT_POSITION = ( 1 << 0 );
         static const uint32 SNAPSHOT_RADIUS   = ( 1 << 1 );
         static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
 
-        ~FSnapshotVertex();
-        FSnapshotVertex( FOdysseyVectorVertex* iVertex, uint32 iVertexSnapshotFlags );
+        ~FSnapshotPoint();
+        FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint32 iPointSnapshotFlags );
 
-        void Restore();
+        virtual void Restore();
+
+    private:
+        uint32 mPointSnapshotFlags;
+        FOdysseyVectorPoint* mPoint;
+        ULIS::FVec2D mCoords;
+        double mRadius;
+};
+
+class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
+{
+    public:
+        static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
+
+        ~FSnapshotVertex();
+        FSnapshotVertex( FOdysseyVectorVertex* iVertex
+                       , uint32 iPointSnapshotFlags
+                       , uint32 iVertexSnapshotFlags );
+
+        virtual void Restore() override;
 
     private:
         uint32 mVertexSnapshotFlags;
-        FOdysseyVectorVertex* mVertex;
-        ULIS::FVec2D mCoords;
-        double mRadius;
 };
 
 class ODYSSEYVECTOR_API FSnapshotSegmentCubic

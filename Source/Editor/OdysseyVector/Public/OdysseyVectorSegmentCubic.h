@@ -247,6 +247,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , const ::ULIS::FVec2D& iNormalizedTangentTo
                                   , int32   iMaxRecurseDepth );
         void MakeBLPath();
+        void DrawPolygonCache();
 
     protected:
         ::ULIS::FVec2D mBezier[4];

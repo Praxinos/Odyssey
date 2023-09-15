@@ -10,51 +10,36 @@ FOdysseyVectorUndoVertexRadius::~FOdysseyVectorUndoVertexRadius()
     {
         // nothing to do
     }
-
-    mVertexRadiusArray.clear();
 }
 
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
-                                                              , std::vector<FOdysseyVectorPoint*>& iPointArray
-                                                              , bool iAlterAllAlong )
+                                                              , std::vector<FOdysseyVectorPath*>& iPathArray )
     : FOdysseyVectorUndo( iScene )
-    , mAlterAllAlong( iAlterAllAlong )
 {
-    mVertexRadiusArray.reserve( iPointArray.size() );
+    mPathSnapshotArray.reserve( iPathArray.size() );
+
+    for( int i = 0; i < iPathArray.size(); i++ )
+    {
+        mPathSnapshotArray.emplace_back( iPathArray[i], 0, FSnapshotPath::SNAPSHOT_VERTICES );
+    }
+}
+
+FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
+                                                              , std::vector<FOdysseyVectorPoint*>& iPointArray )
+    : FOdysseyVectorUndo( iScene )
+{
+    mVertexSnapshotArray.reserve( iPointArray.size() );
 
     for( int i = 0; i < iPointArray.size(); i++ )
     {
         if( iPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
         {
-            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(iPointArray[i]);
+            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>( iPointArray[i] );
 
-            mVertexRadiusArray.push_back( FVertexRadius( vertex ) );
+            mVertexSnapshotArray.emplace_back( vertex
+                                             , FSnapshotPoint::SNAPSHOT_RADIUS
+                                             , FSnapshotVertex::SNAPSHOT_ALL );
         }
-    }
-}
-
-FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
-                                                              , FOdysseyVectorVertex* iVertex
-                                                              , bool iAlterAllAlong )
-    : FOdysseyVectorUndo( iScene )
-    , mAlterAllAlong( iAlterAllAlong )
-{
-    mVertexRadiusArray.push_back( FVertexRadius( iVertex ) );
-}
-
-static void
-LoadArray( std::vector<FVertexRadius>& iVertexRadiusArray, bool iAlterAllAlong )
-{
-    for( int i = 0; i < iVertexRadiusArray.size(); i++ )
-    {
-        FVertexRadius formerRadius = FVertexRadius( iVertexRadiusArray[i].vertex );
-        double deltaRadius = iVertexRadiusArray[i].radius - iVertexRadiusArray[i].vertex->GetRadius();
-
-        // Note: virtual function Set() will invalidate segments in needed
-        iVertexRadiusArray[i].vertex->AlterRadius( nullptr, deltaRadius, iAlterAllAlong );
-
-        // replace with former value (prepare for the counterpart operation, either Apply or Revert)
-        iVertexRadiusArray[i] = formerRadius;
     }
 }
 
@@ -64,7 +49,15 @@ FOdysseyVectorUndoVertexRadius::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    LoadArray( mVertexRadiusArray, mAlterAllAlong );
+    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    {
+        mVertexSnapshotArray[i].Restore();
+    }
+
+    for( int i = 0; i < mPathSnapshotArray.size(); i++ )
+    {
+        mPathSnapshotArray[i].Restore();
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -81,7 +74,15 @@ FOdysseyVectorUndoVertexRadius::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    LoadArray( mVertexRadiusArray, mAlterAllAlong );
+    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    {
+        mVertexSnapshotArray[i].Restore();
+    }
+
+    for( int i = 0; i < mPathSnapshotArray.size(); i++ )
+    {
+        mPathSnapshotArray[i].Restore();
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );

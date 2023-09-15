@@ -356,6 +356,29 @@ GroupPaintPickPoint( FOdysseyVectorGroupPaint* iPaintGroup
     }
 }
 
+void
+UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorScene* iScene
+                                                              , std::vector<FOdysseyVectorPath*>& oPathArray )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+
+    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
+    {
+        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
+ 
+            oPathArray.push_back( path );
+        }
+
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+ 
+            paintGroup->GetChildrenPaths( oPathArray );
+        }
+    }
+}
 
 void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorEngine* iEngine
@@ -365,6 +388,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorEng
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
+    mSelectedPathArray.clear();
     mPickedPointArray.clear();
 
     for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
@@ -412,7 +436,18 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorEng
                     GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
                     if( GUndo )
                     {
-                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexRadius( iScene, mPickedPointArray, WidenAllAlong );
+                        FOdysseyVectorUndo* undo;
+
+                        if( WidenAllAlong && ( mPickedPointArray.size() == 1 ) )
+                        {
+                            GetPathsFromSelection( iScene, mSelectedPathArray );
+
+                            undo = new FOdysseyVectorUndoVertexRadius( iScene, mSelectedPathArray );
+                        }
+                        else
+                        {
+                            undo = new FOdysseyVectorUndoVertexRadius( iScene, mPickedPointArray );
+                        }
 
                         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
                     }
@@ -556,7 +591,8 @@ UOdysseyPainterEditorVectorPathEditTool::DragPoint( FOdysseyVectorPoint *iPoint
                                                   , double iWorldX
                                                   , double iWorldY
                                                   , double iDeltaX
-                                                  , double iDeltaY )
+                                                  , double iDeltaY
+                                                  , bool iWidenAllAlong )
 {
     FOdysseyVectorObject* object = GetPointParentObject( iPoint );
     BLPoint localCoords = object->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
@@ -567,8 +603,19 @@ UOdysseyPainterEditorVectorPathEditTool::DragPoint( FOdysseyVectorPoint *iPoint
         FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
         ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
                              , cubicVertex->GetY() - localCoords.y };
+        double deltaRadius = dif.Distance() - cubicVertex->GetRadius();
 
-        cubicVertex->AlterRadius( nullptr, dif.Distance() - cubicVertex->GetRadius(), WidenAllAlong );
+        if( iWidenAllAlong )
+        {
+            for( int i = 0; i < mSelectedPathArray.size(); i++ )
+            {
+                mSelectedPathArray[i]->AlterRadius( deltaRadius );
+            }
+        }
+        else
+        {
+            cubicVertex->SetRadius( cubicVertex->GetRadius() + deltaRadius );
+        }
 
         return cubicVertex->GetBoundingBox( false );
     }
@@ -650,7 +697,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorEngine
                         // we don't use iPointInTexture.deltaPosition because for some reason,
                         // the readings are not good when a key is pressed.
                         , iPointInTexture.x - mOldPointInTexture.x
-                        , iPointInTexture.y - mOldPointInTexture.y );
+                        , iPointInTexture.y - mOldPointInTexture.y
+                        , WidenAllAlong && ( mPickedPointArray.size() == 1 ) );
 
         //localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
 
