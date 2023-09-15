@@ -331,6 +331,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual void Invalidate( uint32 iInvalidationFlags ) override;
         virtual void ApplyTransformations() override;
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
+        void AlterRadius( double iDeltaRadius );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;

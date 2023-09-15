@@ -98,39 +98,57 @@ FSnapshotObject::Restore()
     }
 }
 
+FSnapshotPoint::~FSnapshotPoint()
+{
+}
+
+FSnapshotPoint::FSnapshotPoint( FOdysseyVectorPoint* iPoint
+                              , uint32 iPointSnapshotFlags )
+    : mPointSnapshotFlags( iPointSnapshotFlags )
+    , mPoint( iPoint )
+    , mCoords( iPoint->GetCoords() )
+    , mRadius( iPoint->GetRadius() )
+{
+}
+
+void
+FSnapshotPoint::Restore()
+{
+    if( mPointSnapshotFlags & SNAPSHOT_POSITION )
+    {
+        ::ULIS::FVec2D swapCoords = mPoint->GetCoords();
+
+        mPoint->Set( mCoords.x, mCoords.y );
+
+        mCoords = swapCoords;
+    }
+
+    if( mPointSnapshotFlags & SNAPSHOT_RADIUS )
+    {
+        double swapRadius = mPoint->GetRadius();
+
+        mPoint->SetRadius( mRadius );
+
+        mRadius = swapRadius;
+    }
+}
+
 FSnapshotVertex::~FSnapshotVertex()
 {
 }
 
 FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex
+                                , uint32 iPointSnapshotFlags
                                 , uint32 iVertexSnapshotFlags )
-    : mVertexSnapshotFlags( iVertexSnapshotFlags )
-    , mVertex( iVertex )
-    , mCoords( iVertex->GetCoords() )
-    , mRadius( iVertex->GetRadius() )
+    : FSnapshotPoint( iVertex, iPointSnapshotFlags)
+    , mVertexSnapshotFlags( iVertexSnapshotFlags )
 {
 }
 
 void
 FSnapshotVertex::Restore()
 {
-    if( mVertexSnapshotFlags & SNAPSHOT_POSITION )
-    {
-        ::ULIS::FVec2D swapCoords = mVertex->GetCoords();
-
-        mVertex->Set( mCoords.x, mCoords.y );
-
-        mCoords = swapCoords;
-    }
-
-    if( mVertexSnapshotFlags & SNAPSHOT_RADIUS )
-    {
-        double swapRadius = mVertex->GetRadius();
-
-        mVertex->SetRadius( mRadius );
-
-        mRadius = swapRadius;
-    }
+    FSnapshotPoint::Restore();
 }
 
 FSnapshotSegmentCubic::~FSnapshotSegmentCubic()
@@ -180,7 +198,9 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
 
         for( FOdysseyVectorVertex* vertex : vertexList )
         {
-            mVertexSnapshotArray.emplace_back( vertex, FSnapshotVertex::SNAPSHOT_ALL );
+            mVertexSnapshotArray.emplace_back( vertex
+                                             , FSnapshotPoint::SNAPSHOT_ALL
+                                             , FSnapshotVertex::SNAPSHOT_ALL );
         }
     }
 

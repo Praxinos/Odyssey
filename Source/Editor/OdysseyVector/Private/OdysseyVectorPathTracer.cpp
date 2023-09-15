@@ -347,9 +347,9 @@ FOdysseyVectorPathTracer::MakeBezier( bool iForce )
     FTracerEdge* firstEdge = &mEdgeArray.front();
     FTracerEdge* lastEdge = &mEdgeArray.back();
     double edgeChainLength = GetEdgeChainLength();
-    ::ULIS::FVec2D firstEdgeVector = firstRecord->smooth ? mSmoothVector * edgeChainLength * 0.35f 
-                                                         : firstEdge->vector * edgeChainLength * 0.35f;
-    ::ULIS::FVec2D lastEdgeVector = lastEdge->vector * edgeChainLength * 0.35f;
+    ::ULIS::FVec2D firstEdgeVector = firstRecord->smooth ? mSmoothVector * edgeChainLength * 0.33f 
+                                                         : firstEdge->vector * edgeChainLength * 0.33f;
+    ::ULIS::FVec2D lastEdgeVector = lastEdge->vector * edgeChainLength * 0.33f;
 
     //UE_LOG(LogTemp,Warning,TEXT("mRecordArray:%d mEdgeArray:%d %f"),mRecordArray.size(),mEdgeArray.size(),edgeChainLength);
 

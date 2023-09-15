@@ -99,7 +99,13 @@ UOdysseyTextureLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType
 TArray<FGuid>
 UOdysseyTextureLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
 {
-    return { GetImageRenderingId() };
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+    UOdysseyTextureLayer* layerRoot = Cast<UOdysseyTextureLayer>(LayerRoot);
+        if ( !layerRoot )
+            return idComposition;
+    
+        idComposition.Append(layerRoot->GetImageRenderingComposition(iRenderType));
+        return idComposition;
 }
 
 TArray<::ULIS::FRectI>
@@ -115,6 +121,11 @@ UOdysseyTextureLayerStack::GetImageRenderingRects() const
 void
 UOdysseyTextureLayerStack::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+    const FGuid& eventId =  iEvent.GetId();
+    TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor);
+    if (!composition.Contains(eventId))
+        return;
+
     if (!iEvent.IsInteractive())
     {
         //PATCH BEGIN: because Unreal Undo does not make package dirty correctly

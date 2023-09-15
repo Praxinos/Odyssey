@@ -293,7 +293,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         ::ULIS::FVec2D GetWorldCoords();
         void AlignHandles( FOdysseyVectorHandleSegment* iHandle );
 
-        void AlterRadius( FOdysseyVectorSegment* iFromSegment
+        void AlterRadius( FOdysseyVectorVertex* iInitiatorVertex
+                        , FOdysseyVectorSegment* iFromSegment
                         , double iDeltaRadius
                         , bool iAlterAllAlong );
 

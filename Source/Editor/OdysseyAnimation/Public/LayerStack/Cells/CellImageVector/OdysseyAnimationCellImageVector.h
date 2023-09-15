@@ -7,6 +7,7 @@
 #include "OdysseyAnimationImageRenderingAbility.h"
 
 class UOdysseyAnimationLayerImageVector;
+class FOdysseyVectorBlock;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVector
     : public FOdysseyAnimationCell
@@ -41,9 +42,13 @@ public:
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
 private:
+    void OnVectorBlockInvalidated(bool iIsInteractive);
+
+private:
     UOdysseyAnimationLayerImageVector* mLayer;
     FOdysseyVectorEngine* mEngine;
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
+    FGuid mVectorBlockId;
+    TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
     int mWidth;
     int mHeight;
 };

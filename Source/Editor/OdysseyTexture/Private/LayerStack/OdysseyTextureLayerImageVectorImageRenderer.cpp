@@ -4,13 +4,13 @@
 #pragma once
 
 #include "LayerStack/OdysseyTextureLayerImageVectorImageRenderer.h"
+#include "OdysseyVectorBlock.h"
 
-FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorImageRenderer(const UOdysseyTextureLayerImageVector* iLayer, TSharedPtr<::ULIS::FBlock> iBlock, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorImageRenderer(const UOdysseyTextureLayerImageVector* iLayer, TSharedPtr<FOdysseyVectorBlock> iVectorBlock, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
-    , mEngine(const_cast<UOdysseyTextureLayerImageVector*>(iLayer)->GetEngine())
-    , mBlock(iBlock)
+    , mVectorBlock(iVectorBlock)
+    , mBlock(iVectorBlock->GetBlock())
     , mRenderHUD(false)
-    , mIsColored(iLayer->IsColored)
 {
     UOdysseyLayerStack* layerStack = iLayer->GetLayerStack();
     if (!layerStack)
@@ -25,11 +25,8 @@ FOdysseyTextureLayerImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> i
     if (!mBlock)
         return iWaitList;
 
-    mEngine->Render( mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
-
-    // HUD displaying only for the current layer.
-    if( mRenderHUD )
-        mEngine->RenderHUD();
+    mVectorBlock->SetRenderHUD(mRenderHUD);
+    mVectorBlock->Render();
 
     return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
@@ -40,11 +37,8 @@ FOdysseyTextureLayerImageVectorImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> io
     if (!mBlock)
         return iWaitList;
 
-    mEngine->Render( mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
-
-    // HUD displaying only for the current layer.
-    if( mRenderHUD )
-        mEngine->RenderHUD();
+    mVectorBlock->SetRenderHUD(mRenderHUD);
+    mVectorBlock->Render();
 
     return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
 }

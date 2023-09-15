@@ -163,9 +163,14 @@ FOdysseyVectorEngine::GetScene()
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( /*FOdysseyVectorScene* iScene */ )
+FOdysseyVectorEngine::RenderHUD( BLImage* iBLImage/*FOdysseyVectorScene* iScene */ )
 {
     std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
+
+    if( iBLImage )
+    {
+        UseImage( iBLImage );
+    }
 
     mBLContext->save();
     mBLContext->resetMatrix();
@@ -200,8 +205,15 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 }
 
 void
-FOdysseyVectorEngine::Render( uint64 iDrawingFlags )
+FOdysseyVectorEngine::Render( BLImage* iBLImage, uint64 iDrawingFlags )
 {
+    if( iBLImage )
+    {
+        UseImage( iBLImage );
+        mScene->Draw( iDrawingFlags );
+        mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+    }
+
     // Blend2D part
    /* BLContextCreateInfo createInfo{};*/
 
@@ -433,6 +445,100 @@ FOdysseyVectorEngine::Erase( FOdysseyVectorScene* iScene
                   , iRemovedSegmentArray
                   , iRoi
                   , iSelectedOnly  );
+
+    // Note: this will be refactored in case a child is erased and a parent should as well be erased. We'll see.
+    for( int i = 0; i < iRemovedObjectArray.size(); i++ )
+    {
+        if( iRemovedObjectArray[i]->GetChildrenList().size() == 0 )
+        {
+            iRemovedObjectArray[i]->GetParent()->RemoveChild( iRemovedObjectArray[i] );
+        }
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+}
+
+void
+FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
+                                            , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                            , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                            , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                                            , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                            , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                            , bool iSelectedOnly )
+{
+    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
+    {
+        FOdysseyVectorObject *child = (*it);
+
+        RecursiveEraseSections( child
+                              , iAddedVertexArray
+                              , iAddedSegmentArray
+                              , iRemovedObjectArray
+                              , iRemovedVertexArray
+                              , iRemovedSegmentArray
+                              , iSelectedOnly );
+    }
+
+    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) ) 
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
+        std::vector<FOdysseyVectorSection*> trimmedSectionArray;
+
+        if( iSelectedOnly == true )
+        {
+            if( paintGroup->IsSelected() == true )
+            {
+                paintGroup->PickSectionLessPaths( iRemovedObjectArray );
+
+                for( int i = 0; i < iRemovedObjectArray.size(); i++ )
+                { 
+                    iRemovedObjectArray[i]->GetParent()->RemoveChild( iRemovedObjectArray[i] );
+                }
+
+                paintGroup->PickSections( trimmedSectionArray );
+                paintGroup->EraseSections( trimmedSectionArray
+                                         , iRemovedVertexArray
+                                         , iRemovedSegmentArray
+                                         , iAddedVertexArray
+                                         , iAddedSegmentArray );
+            }
+        }
+        else
+        {
+            paintGroup->PickSectionLessPaths( iRemovedObjectArray );
+
+            for( int i = 0; i < iRemovedObjectArray.size(); i++ )
+            { 
+                iRemovedObjectArray[i]->GetParent()->RemoveChild( iRemovedObjectArray[i] );
+            }
+
+            paintGroup->PickSections( trimmedSectionArray );
+            paintGroup->EraseSections( trimmedSectionArray
+                                     , iRemovedVertexArray
+                                     , iRemovedSegmentArray
+                                     , iAddedVertexArray
+                                     , iAddedSegmentArray );
+        }
+    }
+}
+
+void
+FOdysseyVectorEngine::EraseSections( FOdysseyVectorScene* iScene
+                                   , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                   , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
+                                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                   , bool iSelectedOnly )
+{
+    RecursiveEraseSections( iScene
+                          , iAddedVertexArray
+                          , iAddedSegmentArray
+                          , iRemovedObjectArray
+                          , iRemovedVertexArray
+                          , iRemovedSegmentArray
+                          , iSelectedOnly  );
 
     // Note: this will be refactored in case a child is erased and a parent should as well be erased. We'll see.
     for( int i = 0; i < iRemovedObjectArray.size(); i++ )
@@ -711,8 +817,11 @@ FOdysseyVectorEngine::UseMaskImage()
 void
 FOdysseyVectorEngine::UseImage( BLImage* iImage )
 {
-    mBLContext->end();
-    mBLContext->begin(*iImage);
+    if( mBLContext->targetImage() != iImage )
+    {
+        mBLContext->end();
+        mBLContext->begin(*iImage);
+    }
 }
 
 void

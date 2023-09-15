@@ -1615,6 +1615,15 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
 }
 
 void
+FOdysseyVectorPath::AlterRadius( double iDeltaRadius )
+{
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        vertex->SetRadius( vertex->GetRadius() + iDeltaRadius );
+    }
+}
+
+void
 FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
 {
     if ( mPathParam.Filled )
@@ -1752,7 +1761,7 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
     {
         uint32 i = 0;
 
-        FOdysseyVector::MatrixMultiply( mergedPathWorldMatrix, mInverseWorldMatrix, conversionMatrix );
+        FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, mergedPathWorldMatrix, conversionMatrix );
 
         for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
         {

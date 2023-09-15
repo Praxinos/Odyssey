@@ -75,27 +75,6 @@ FOdysseyVectorVertex::GetPath()
     return mPath;
 }
 
-void
-FOdysseyVectorVertex::AlterRadius( FOdysseyVectorSegment* iFromSegment
-                                 , double iDeltaRadius
-                                 , bool iAlterAllAlong )
-{
-    SetRadius( GetRadius() + iDeltaRadius );
-
-    if( iAlterAllAlong )
-    {
-        for( FOdysseyVectorSegment* segment : mSegmentList )
-        {
-            if( segment != iFromSegment )
-            {
-                FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( this );
-
-                otherVertex->AlterRadius( segment, iDeltaRadius, iAlterAllAlong );
-            }
-        }
-    }
-}
-
 FOdysseyVectorSection*
 FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
 {
@@ -128,7 +107,7 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
 
             if( section != iLastSection )
             {
-                if( ( FOdysseyVector::Cross2D( -lastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
+                if( ( FOdysseyVector::Cross2D( -lastSectionVector, sectionVector ) * iOrientation >= 0.0f ) )
                 {
                     rightSideSection.push_back( section );
                 }

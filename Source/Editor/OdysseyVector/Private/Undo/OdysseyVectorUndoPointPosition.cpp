@@ -10,46 +10,25 @@ FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
     {
         // nothing to do
     }
-
-    mPointPositionArray.clear();
 }
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
                                                                 , std::vector<FOdysseyVectorPoint*>& iPointArray )
     : FOdysseyVectorUndo( iScene )
 {
-    mPointPositionArray.reserve( iPointArray.size() );
+    mPointSnapshotArray.reserve( iPointArray.size() );
 
     for( int i = 0; i < iPointArray.size(); i++ )
     {
-        mPointPositionArray.push_back( FPointPosition( iPointArray[i] ) );
+        mPointSnapshotArray.emplace_back( iPointArray[i], FSnapshotPoint::SNAPSHOT_ALL );
     }
 }
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
-                                                                , FOdysseyVectorPoint* iPoint
-                                                                , double iX
-                                                                , double iY
-                                                                , double iRadius )
+                                                                , FOdysseyVectorPoint* iPoint )
     : FOdysseyVectorUndo( iScene )
 {
-    mPointPositionArray.push_back( FPointPosition( iPoint, iX, iY, iRadius ) );
-}
-
-static void
-LoadArray( std::vector<FPointPosition>& mPointPositionArray )
-{
-    for( int i = 0; i < mPointPositionArray.size(); i++ )
-    {
-        FPointPosition formerPosition = FPointPosition( mPointPositionArray[i].point );
-
-        // Note: virtual function Set() will invalidate segments in needed
-        mPointPositionArray[i].point->Set( mPointPositionArray[i].position.x
-                                         , mPointPositionArray[i].position.y
-                                         , mPointPositionArray[i].radius  );
-        // replace with former value (prepare for the counterpart operation, either Apply or Revert)
-        mPointPositionArray[i] = formerPosition;
-    }
+    mPointSnapshotArray.emplace_back( iPoint, FSnapshotPoint::SNAPSHOT_ALL );
 }
 
 void
@@ -58,7 +37,10 @@ FOdysseyVectorUndoPointPosition::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    LoadArray( mPointPositionArray );
+    for( int i = 0; i < mPointSnapshotArray.size(); i++ )
+    {
+        mPointSnapshotArray[i].Restore();
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -75,7 +57,10 @@ FOdysseyVectorUndoPointPosition::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    LoadArray( mPointPositionArray );
+    for( int i = 0; i < mPointSnapshotArray.size(); i++ )
+    {
+        mPointSnapshotArray[i].Restore();
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );

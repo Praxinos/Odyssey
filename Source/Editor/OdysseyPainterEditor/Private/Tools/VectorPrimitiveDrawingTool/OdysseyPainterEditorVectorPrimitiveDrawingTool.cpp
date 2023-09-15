@@ -189,7 +189,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
         break;
 
         case EOdysseyVectorPrimitiveType::Line:
-            primitive = new FOdysseyVectorLine( FString("Rectangle"), 0.0f, 0.0f, width.Distance() );
+            primitive = new FOdysseyVectorLine( FString("Line"), 0.0f, 0.0f, width.Distance() );
         break;
 
         default:

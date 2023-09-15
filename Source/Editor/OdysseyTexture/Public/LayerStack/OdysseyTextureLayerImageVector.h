@@ -15,6 +15,8 @@
 
 #include "OdysseyTextureLayerImageVector.generated.h"
 
+class FOdysseyVectorBlock;
+
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     : public UOdysseyTextureLayer
@@ -41,10 +43,8 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
     private:
         // handle to a callback to refresh the layer when a property of an object's details view is changed
-        //FDelegateHandle mOnRefreshHandle;
-        //FOdysseyVectorScene* mScene;
         FOdysseyVectorEngine* mEngine;
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
+        TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
 
         void Init( uint32 iWidth, uint32 iHeight );
 
@@ -59,12 +59,16 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         UPROPERTY()
         uint32 Height;
 
+        UPROPERTY()
+        FGuid mVectorBlockId;
+
     public:
         //UOdysseyLayer overrides
         virtual void OnCreated_Implementation() override;
+        virtual void PostInitProperties() override;
+        virtual void PostLoad() override;
 
         FOdysseyVectorEngine* GetEngine();
-        //FOdysseyVectorScene* GetScene();
  
         void OpacityChanged();
         void BlendModeChanged();
@@ -75,16 +79,14 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
     public:
-        // Event Listeners
-        void OnRefresh(FOdysseyVectorScene* iScene);
-        void OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
-
-    public:
         //FOdysseyImageRenderingAbility overrides
         virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const override;
         virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
         virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
         virtual float GetImageRenderingOpacity() const override;
+
+    private:
+        void OnVectorBlockInvalidated(bool iIsInteractive);
 
     public:
         UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
