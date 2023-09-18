@@ -53,6 +53,8 @@ namespace UnrealBuildTool.Rules
 					"OdysseyStyle",
 					"OdysseyMaths",
 					"OdysseyVector",
+					"OdysseyExport",
+					"OdysseyImport",
 					"RenderCore",
                     "Slate",
                     "SlateCore",

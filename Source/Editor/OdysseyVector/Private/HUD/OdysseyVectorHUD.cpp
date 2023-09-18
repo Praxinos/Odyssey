@@ -1,4 +1,11 @@
 #include "HUD/OdysseyVectorHUD.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorPoint.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorScene.h"
+#include "OdysseyVectorEngine.h"
 
 FPointQuadTree::~FPointQuadTree()
 {

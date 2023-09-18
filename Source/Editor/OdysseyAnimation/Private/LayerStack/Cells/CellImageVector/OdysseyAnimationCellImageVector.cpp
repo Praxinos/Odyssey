@@ -7,8 +7,8 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorBlock.h"
-#include "Import/v2/OdysseyVectorImport.h"
-#include "Import/v1/OdysseyVectorImport.h"
+#include "AnimationCellImageVector/OdysseyExportAnimationCellImageVector.h"
+#include "AnimationCellImageVector/OdysseyImportAnimationCellImageVector.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageVector"
 
@@ -83,18 +83,54 @@ FOdysseyAnimationCellImageVector::GetEngine() const
     return mEngine;
 }
 
+uint32
+FOdysseyAnimationCellImageVector::GetWidth()
+{
+    return mWidth;
+}
+
+uint32
+FOdysseyAnimationCellImageVector::GetHeight()
+{
+    return mHeight;
+}
+
+FGuid
+FOdysseyAnimationCellImageVector::GetVectorBlockId()
+{
+    return mVectorBlockId;
+}
+
+void
+FOdysseyAnimationCellImageVector::SetWidth( uint32 iWidth )
+{
+    mWidth = iWidth;
+}
+
+void
+FOdysseyAnimationCellImageVector::SetHeight( uint32 iHeight )
+{
+    mHeight = iHeight;
+}
+
+void
+FOdysseyAnimationCellImageVector::SetVectorBlockId( FGuid iVectorBlockId )
+{
+    mVectorBlockId = iVectorBlockId;
+}
+
 void
 FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
     FOdysseyAnimationCell::Serialize(Ar);
     
-    Ar << mWidth;
-    Ar << mHeight;
-    Ar << mVectorBlockId;
+//    Ar << mWidth;
+//    Ar << mHeight;
+//    Ar << mVectorBlockId;
 
     if( Ar.IsSaving() )
     {
-        FOdysseyVectorExportV2::Write( mEngine ? mEngine->GetScene() : nullptr, Ar );
+        FOdysseyExportAnimationCellImageVector::Write( this, Ar );
     }
 
     if( Ar.IsLoading() )
@@ -103,7 +139,7 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
         uint64 chunkLen;
         uint64 chunkEnd;
 
-        // Reads the first chunk (CHUNK_VECTOR_MAGIC)
+        // Reads the first chunk (CHUNK_ANIMATIONCELLIMAGEVECTOR)
         Ar << chunkID;
         Ar << chunkLen;
 
@@ -116,20 +152,10 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 
         switch( chunkID )
         {
-            case FOdysseyVectorExportV1::CHUNK_VECTOR_MAGIC_V1 :
-                UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V1") );
+            case FOdysseyExportAnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR :
+                UE_LOG(LogTemp, Warning, TEXT("CHUNK_ANIMATIONCELLIMAGEVECTOR") );
 
-                FOdysseyVectorImportV1::Read( mEngine->GetScene(), Ar, chunkEnd );
-            break;
-
-            case FOdysseyVectorExportV2::CHUNK_VECTOR_MAGIC_V2 :
-            {
-                FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
-
-                UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
-
-                importerV2.Read( mEngine->GetScene(), Ar, chunkEnd );
-            }
+                FOdysseyImportAnimationCellImageVector::Read( this, Ar, chunkEnd );
             break;
 
             default:

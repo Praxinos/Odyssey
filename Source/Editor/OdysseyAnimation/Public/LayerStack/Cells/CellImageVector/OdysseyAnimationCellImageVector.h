@@ -29,6 +29,12 @@ public:
     virtual void Serialize(FArchive& Ar);
         
     FOdysseyVectorEngine* GetEngine() const;
+    uint32 GetWidth();
+    uint32 GetHeight();
+    FGuid GetVectorBlockId();
+    void SetWidth( uint32 iWidth );
+    void SetHeight( uint32 iHeight );
+    void SetVectorBlockId( FGuid iVectorBlockID );
 
 public:
     // Event Listeners
@@ -49,6 +55,6 @@ private:
     FOdysseyVectorEngine* mEngine;
     FGuid mVectorBlockId;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
-    int mWidth;
-    int mHeight;
+    uint32 mWidth;
+    uint32 mHeight;
 };
