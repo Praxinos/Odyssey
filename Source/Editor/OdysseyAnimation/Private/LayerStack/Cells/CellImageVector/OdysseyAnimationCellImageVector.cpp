@@ -4,11 +4,13 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImageRenderer.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorExport.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImport.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorBlock.h"
-#include "AnimationCellImageVector/OdysseyExportAnimationCellImageVector.h"
-#include "AnimationCellImageVector/OdysseyImportAnimationCellImageVector.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageVector"
 
@@ -130,7 +132,7 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 
     if( Ar.IsSaving() )
     {
-        FOdysseyExportAnimationCellImageVector::Write( this, Ar );
+        FOdysseyAnimationCellImageVectorExport::Write( this, Ar );
     }
 
     if( Ar.IsLoading() )
@@ -145,17 +147,12 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 
         chunkEnd = Ar.Tell() + chunkLen;
 
-        if ( mEngine == nullptr )
-        {
-            Init( mWidth, mHeight );
-        }
-
         switch( chunkID )
         {
-            case FOdysseyExportAnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR :
+            case FOdysseyFile::AnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR :
                 UE_LOG(LogTemp, Warning, TEXT("CHUNK_ANIMATIONCELLIMAGEVECTOR") );
 
-                FOdysseyImportAnimationCellImageVector::Read( this, Ar, chunkEnd );
+                FOdysseyAnimationCellImageVectorImport::Read( this, Ar, chunkEnd );
             break;
 
             default:

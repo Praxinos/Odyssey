@@ -10,9 +10,12 @@
 #include "OdysseyVectorBlock.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "Vector/OdysseyImportVectorV1.h"
-#include "Vector/OdysseyImportVectorV2.h"
 #include "LayerStack/OdysseyTextureLayerImageVectorImageRenderer.h"
+// from module OdysseyVector
+#include "Import/v1/OdysseyVectorImport.h"
+#include "Import/v2/OdysseyVectorImport.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 #include "blend2d.h"
 
@@ -132,7 +135,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
     if( Ar.IsSaving() )
     {
-        FOdysseyExportVectorV2::Write( mEngine ? mEngine->GetScene() : nullptr, Ar );
+        FOdysseyVectorExportV2::Write( mEngine ? mEngine->GetScene() : nullptr, Ar );
     }
 
     if( Ar.IsLoading() )
@@ -163,15 +166,15 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
         switch( chunkID )
         {
-            case FOdysseyExportVectorV1::CHUNK_VECTOR_MAGIC_V1 :
+            case FOdysseyFile::VectorV1::CHUNK_VECTOR_MAGIC_V1 :
                 UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V1") );
 
-                FOdysseyImportVectorV1::Read( mEngine->GetScene(), Ar, chunkEnd );
+                FOdysseyVectorImportV1::Read( mEngine->GetScene(), Ar, chunkEnd );
             break;
 
-            case FOdysseyExportVectorV2::CHUNK_VECTOR_MAGIC_V2 :
+            case FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2 :
             {
-                FOdysseyImportVectorV2 importerV2 = FOdysseyImportVectorV2();
+                FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
 
                 UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
 
