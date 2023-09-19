@@ -13,11 +13,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
         ~FOdysseyVectorImportV2();
         FOdysseyVectorImportV2();
 
-    void ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback );
     void ParseObjectChunks( FOdysseyVectorObject& iObject
                           , uint32 iChunkID
                           , uint64 iChunkLen
                           , FArchive &Ar );
+    void ParseGroupChunks( FOdysseyVectorGroup& iGroup
+                         , uint32 iChunkID
+                         , uint64 iChunkLen
+                         , FArchive &Ar );
     void ParseGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintGroup
                               , uint32 iChunkID
                               , uint64 iChunkLen
@@ -28,6 +31,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
     void ReadObjectsDeclare( uint64 iChunkEnd, FArchive &Ar );
     void ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar );
     void ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, FArchive &Ar );
+    void ReadGroup( FOdysseyVectorGroup& iGroup, uint64 iChunkEnd, FArchive &Ar );
     void ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, uint64 iChunkEnd, FArchive &Ar );
     void ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar );
 

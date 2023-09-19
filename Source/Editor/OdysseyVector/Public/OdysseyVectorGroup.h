@@ -36,6 +36,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
          */
         void Init( FString& iName );
 
+        virtual uint32 GetType() override;
+
     protected:
        /**
          * @brief Draw this group.

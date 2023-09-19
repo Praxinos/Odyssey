@@ -1,4 +1,6 @@
 #include "Import/v1/OdysseyVectorImport.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 void
 FOdysseyVectorImportV1::ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
@@ -76,13 +78,13 @@ FOdysseyVectorImportV1::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
 {
     std::vector<FOdysseyVectorVertex*> vertexArray;
 
-    FOdysseyVectorImportV1::ReadChunks( iChunkEnd
-                                    , Ar
-                                    , [&iPath, &vertexArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+    FOdysseyFile::ReadChunks( iChunkEnd
+                            , Ar
+                            , [&iPath, &vertexArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
-                case FOdysseyVectorExportV1::CHUNK_PATH_JOINT:
+                case FOdysseyFile::VectorV1::CHUNK_PATH_JOINT:
                 {
                     uint32 jointType;
 
@@ -92,14 +94,14 @@ FOdysseyVectorImportV1::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_PATH_GEOMETRY:
+                case FOdysseyFile::VectorV1::CHUNK_PATH_GEOMETRY:
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_PATH_GEOMETRY_VERTICES:
+                case FOdysseyFile::VectorV1::CHUNK_PATH_GEOMETRY_VERTICES:
                     ReadPathGeometryVertices( iPath, vertexArray, Ar );
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS:
+                case FOdysseyFile::VectorV1::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS:
                     ReadPathGeometryCubicSegments( iPath, vertexArray, Ar );
                 break;
 

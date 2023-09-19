@@ -1,4 +1,6 @@
 #include "Import/v2/OdysseyVectorImport.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 void
 FOdysseyVectorImportV2::ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
@@ -103,13 +105,13 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
     std::vector<FOdysseyVectorVertex*> vertexArray;
     static FOdysseyVectorVertex* currentVertex;
 
-    FOdysseyVectorImportV2::ReadChunks( iChunkEnd
-                                    , Ar
-                                    , [this,&iPath, &vertexArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+    FOdysseyFile::ReadChunks( iChunkEnd
+                            , Ar
+                            , [this,&iPath, &vertexArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
-                case FOdysseyVectorExportV2::CHUNK_PATH_JOINT:
+                case FOdysseyFile::VectorV2::CHUNK_PATH_JOINT:
                 {
                     uint32 jointType;
 
@@ -119,10 +121,10 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY:
+                case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY:
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX:
+                case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX:
                 {
                     currentVertex = new FOdysseyVectorVertex( &iPath, 0.0f, 0.0f, 0.0f );
 
@@ -132,19 +134,19 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX_POSITION:
+                case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX_POSITION:
                     ReadPathGeometryVertexPosition( *currentVertex, Ar );
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT:
+                case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT:
                     ReadPathGeometryVertexHandleAlignment( *currentVertex, Ar );
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTICES:
+                case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTICES:
                     ReadPathGeometryVertices( iPath, vertexArray, Ar );
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS:
+                case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS:
                     ReadPathGeometryCubicSegments( iPath, vertexArray, Ar );
                 break;
 

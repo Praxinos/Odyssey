@@ -1051,3 +1051,28 @@ FOdysseyVectorSegmentCubic::BuildVariable()
 
     MakeBLPath();
 }
+
+double
+FOdysseyVectorSegmentCubic::GetApproximateLength( uint32 iDivisions )
+{
+    ::ULIS::FVec2D p0 = mPoint[0]->GetCoords();
+    double step = 1.0f / iDivisions;
+    double length = 0.0f;
+    double t0 = 0.0f;
+
+    for( uint32 i = 0; i < iDivisions; i++ )
+    {
+        double t1 = t0 + step;
+        ::ULIS::FVec2D p1 = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( mBezier[0]
+                                                                                 , mBezier[1]
+                                                                                 , mBezier[2]
+                                                                                 , mBezier[3]
+                                                                                 , t1 );
+        length += ::ULIS::FVec2D( p1 - p0 ).Distance();
+
+        t0 = t1;
+        p0 = p1;
+    }
+
+    return length;
+}

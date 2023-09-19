@@ -1,5 +1,7 @@
 #include "Export/v2/OdysseyVectorExport.h"
 #include "OdysseyVectorSegmentCubic.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 //static
 void
@@ -7,9 +9,9 @@ FOdysseyVectorExportV2::WritePathGeometrySegments( FOdysseyVectorPath& iPath, FA
 {
     if( iPath.GetSegmentList().size() )
     {
-        FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS
-                                        , Ar
-                                        , [&iPath](FArchive &Ar) -> void
+        FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS
+                                , Ar
+                                , [&iPath](FArchive &Ar) -> void
         {
             uint32 segmentCount = iPath.GetSegmentList().size();
 
@@ -43,9 +45,9 @@ FOdysseyVectorExportV2::WritePathGeometrySegments( FOdysseyVectorPath& iPath, FA
 void
 FOdysseyVectorExportV2::WritePathGeometryVertexHandleAlignment( FOdysseyVectorVertex& iVertex, FArchive &Ar )
 {
-    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT
-                                      , Ar
-                                      , [&iVertex](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT
+                            , Ar
+                            , [&iVertex](FArchive &Ar) -> void
     {
         uint32 isHandleAligned = static_cast<uint32>(iVertex.IsHandleAligned());
 
@@ -57,9 +59,9 @@ FOdysseyVectorExportV2::WritePathGeometryVertexHandleAlignment( FOdysseyVectorVe
 void
 FOdysseyVectorExportV2::WritePathGeometryVertexPosition( FOdysseyVectorVertex& iVertex, FArchive &Ar )
 {
-    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX_POSITION
-                                      , Ar
-                                      , [&iVertex](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX_POSITION
+                            , Ar
+                            , [&iVertex](FArchive &Ar) -> void
     {
         double x = iVertex.GetX();
         double y = iVertex.GetY();
@@ -75,9 +77,9 @@ FOdysseyVectorExportV2::WritePathGeometryVertexPosition( FOdysseyVectorVertex& i
 void
 FOdysseyVectorExportV2::WritePathGeometryVertex( FOdysseyVectorVertex& iVertex, FArchive &Ar )
 {
-    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTEX
-                                      , Ar
-                                      , [&iVertex](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX
+                            , Ar
+                            , [&iVertex](FArchive &Ar) -> void
     {
         WritePathGeometryVertexPosition( iVertex, Ar );
         WritePathGeometryVertexHandleAlignment( iVertex, Ar );
@@ -90,9 +92,9 @@ FOdysseyVectorExportV2::WritePathGeometryVertices( FOdysseyVectorPath& iPath, FA
 {
     if ( iPath.GetVertexList().size() )
     {
-        FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY_VERTICES
-                                        , Ar
-                                        , [&iPath](FArchive &Ar) -> void
+        FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTICES
+                                , Ar
+                                , [&iPath](FArchive &Ar) -> void
         {
             uint32 vertexID = 0;
             uint32 vertexCount = iPath.GetVertexList().size();
@@ -126,9 +128,9 @@ FOdysseyVectorExportV2::WritePathGeometry( FOdysseyVectorPath& iPath, FArchive &
         vertex->SetID( vertexID++ );
     }
 
-    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_GEOMETRY
-                                      , Ar
-                                      , [&iPath](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY
+                            , Ar
+                            , [&iPath](FArchive &Ar) -> void
     {
         //WritePathGeometryVertices_Packed( iPath, Ar );
         for( FOdysseyVectorVertex* vertex : iPath.GetVertexList() )
@@ -144,9 +146,9 @@ FOdysseyVectorExportV2::WritePathGeometry( FOdysseyVectorPath& iPath, FArchive &
 void
 FOdysseyVectorExportV2::WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH_JOINT
-                                    , Ar
-                                    , [&iPath](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_JOINT
+                            , Ar
+                            , [&iPath](FArchive &Ar) -> void
     {
         uint32 jointType = static_cast<uint32>(iPath.GetJointType());
 
@@ -158,9 +160,9 @@ FOdysseyVectorExportV2::WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar 
 void
 FOdysseyVectorExportV2::WritePath( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExportV2::WriteChunk( FOdysseyVectorExportV2::CHUNK_PATH
-                                    , Ar
-                                    , [&iPath](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH
+                            , Ar
+                            , [&iPath](FArchive &Ar) -> void
     {
         // inherited chunks
         WriteObjectChunks( iPath, Ar );

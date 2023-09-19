@@ -1900,6 +1900,37 @@ FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
     }
 }
 
+//static
+::ULIS::FVec2D
+FOdysseyVectorPath::GetAverageHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize )
+{
+    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
+    ::ULIS::FVec2D averageHandleVector = ::ULIS::FVec2D( 0.0f, 0.0f );
+    uint32 segmentCount = segmentList.size();
+
+    if( segmentCount )
+    {
+        for( FOdysseyVectorSegment* segment : segmentList )
+        {
+            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+  
+                averageHandleVector += cubicSegment->GetHandleVector( iVertex, true );
+            }
+        }
+
+        averageHandleVector /= segmentCount;
+
+        if( iNormalize && averageHandleVector.Distance() )
+        {
+            averageHandleVector.Normalize();
+        }
+    }
+
+    return averageHandleVector;
+}
+
 // static
 void
 FOdysseyVectorPath::SharpSegments( FOdysseyVectorVertex* iVertex, bool iPreserveHandleLength )

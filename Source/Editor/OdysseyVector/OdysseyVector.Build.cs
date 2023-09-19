@@ -18,6 +18,7 @@ public class OdysseyVector : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
+                "OdysseyFile",
                 "OdysseyCore",
                 "OdysseyStyle",
                 "OdysseyPalette"

@@ -297,6 +297,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                         , FOdysseyVectorSegment* iFromSegment
                         , double iDeltaRadius
                         , bool iAlterAllAlong );
+        FOdysseyVectorHandleSegment* GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment );
 
     protected:
         /**

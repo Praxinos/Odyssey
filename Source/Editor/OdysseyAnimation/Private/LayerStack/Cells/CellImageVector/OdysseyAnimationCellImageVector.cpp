@@ -141,7 +141,7 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
         uint64 chunkLen;
         uint64 chunkEnd;
 
-        // Reads the first chunk (FOdysseyFile::AnimationCellImageVector::CHUNK_ROOT)
+        // Reads the first chunk (FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR)
         Ar << chunkID;
         Ar << chunkLen;
 

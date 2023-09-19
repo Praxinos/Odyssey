@@ -1,12 +1,14 @@
 #include "Export/v1/OdysseyVectorExport.h"
 #include "Palette/OdysseyPaletteEntry.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 void
 FOdysseyVectorExportV1::WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar)
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_PALETTEENTRY
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_BUCKET_PALETTEENTRY
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
     {
         FName idEntry = iBucket.GetPaletteEntry() ? iBucket.GetPaletteEntry()->GetFName() : FName();
 
@@ -17,9 +19,9 @@ FOdysseyVectorExportV1::WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, 
 void
 FOdysseyVectorExportV1::WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_PROPAGATED
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_BUCKET_PROPAGATED
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
     {
         uint32 propagated = iBucket.IsPropagated() ? 1 : 0;
 
@@ -30,9 +32,9 @@ FOdysseyVectorExportV1::WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FA
 void
 FOdysseyVectorExportV1::WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_SPREADING
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_BUCKET_SPREADING
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
     {
         uint32 spreadingPolicy = static_cast<uint32>(iBucket.GetSpreadingPolicy());
 
@@ -43,9 +45,9 @@ FOdysseyVectorExportV1::WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FAr
 void
 FOdysseyVectorExportV1::WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_POSITION
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_BUCKET_POSITION
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
     {
         ::ULIS::FVec2D position = iBucket.GetCoords();
 
@@ -57,9 +59,9 @@ FOdysseyVectorExportV1::WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArc
 void
 FOdysseyVectorExportV1::WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_ROTATION
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_BUCKET_ROTATION
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
     {
         double rotation = iBucket.GetRotation();
 
@@ -70,9 +72,9 @@ FOdysseyVectorExportV1::WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArc
 void
 FOdysseyVectorExportV1::WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_GRADIENT_STOP
-                                    , Ar
-                                    , [&iStopColor,iStopAt](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_BUCKET_GRADIENT_STOP
+                            , Ar
+                            , [&iStopColor,iStopAt](FArchive &Ar) -> void
     {
         double stopAt = iStopAt; //iStopAt is const in the lambda, and FArchive << doesn't like it, so we use a variable here
         uint8 R = iStopColor.R;
@@ -91,9 +93,9 @@ FOdysseyVectorExportV1::WriteBucketGradientStop( FColor& iStopColor, double iSto
 void
 FOdysseyVectorExportV1::WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_GRADIENT
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_BUCKET_GRADIENT
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
     {
         FColor gradientColor0 = iBucket.GetGradientColor0();
         FColor gradientColor1 = iBucket.GetGradientColor1();
@@ -106,9 +108,9 @@ FOdysseyVectorExportV1::WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArc
 void
 FOdysseyVectorExportV1::WriteBucketColor( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_SOLIDCOLOR
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_BUCKET_SOLIDCOLOR
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
     {
         FColor fillColor = iBucket.GetSolidColor();
         uint8 R = fillColor.R;
@@ -126,9 +128,9 @@ FOdysseyVectorExportV1::WriteBucketColor( FOdysseyVectorBucket& iBucket, FArchiv
 void
 FOdysseyVectorExportV1::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_BUCKET_ENTRY
-                                    , Ar
-                                    , [&iBucket](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_BUCKET_ENTRY
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
     {
         WriteBucketSpreading( iBucket, Ar );
         WriteBucketPaletteEntry( iBucket, Ar );

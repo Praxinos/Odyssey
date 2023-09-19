@@ -450,7 +450,7 @@ GenerateSegmentID( FOdysseyVectorSegment* iSegment, FOdysseyVectorVertex* iP0, F
 }
 
 static bool seekVertex( std::list<FOdysseyVectorVertex*>& iVertexList
-                     , FOdysseyVectorVertex* iVertex )
+                      , FOdysseyVectorVertex* iVertex )
 {
     for( std::list<FOdysseyVectorVertex*>::iterator it = iVertexList.begin(); it != iVertexList.end(); ++it )
     {
@@ -694,6 +694,24 @@ FOdysseyVectorVertex::GetOtherSegment( FOdysseyVectorSegment* iSegment )
         if( otherSegment != iSegment )
         {
             return otherSegment;
+        }
+    }
+
+    return nullptr;
+}
+
+FOdysseyVectorHandleSegment*
+FOdysseyVectorVertex::GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment )
+{
+    FOdysseyVectorSegment* otherSegment = GetOtherSegment( iSegment );
+
+    if( otherSegment )
+    {
+        if( otherSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* otherCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(otherSegment);
+
+            return otherCubicSegment->GetHandle( this );
         }
     }
 

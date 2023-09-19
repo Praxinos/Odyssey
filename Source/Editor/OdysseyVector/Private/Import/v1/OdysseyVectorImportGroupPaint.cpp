@@ -1,16 +1,17 @@
 #include "Import/v1/OdysseyVectorImport.h"
-
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 void
 FOdysseyVectorImportV1::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
 {
-    FOdysseyVectorImportV1::ReadChunks( iChunkEnd
-                                    , Ar
-                                    , [&iBucket](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+    FOdysseyFile::ReadChunks( iChunkEnd
+                            , Ar
+                            , [&iBucket](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
-                case FOdysseyVectorExportV1::CHUNK_BUCKET_PROPAGATED:
+                case FOdysseyFile::VectorV1::CHUNK_BUCKET_PROPAGATED:
                 {
                     uint32 propagated;
 
@@ -20,7 +21,7 @@ FOdysseyVectorImportV1::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 i
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_BUCKET_ROTATION:
+                case FOdysseyFile::VectorV1::CHUNK_BUCKET_ROTATION:
                 {
                     double rotation;
 
@@ -30,7 +31,7 @@ FOdysseyVectorImportV1::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 i
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_BUCKET_POSITION:
+                case FOdysseyFile::VectorV1::CHUNK_BUCKET_POSITION:
                 {
                     double x;
                     double y;
@@ -42,7 +43,7 @@ FOdysseyVectorImportV1::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 i
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_BUCKET_SOLIDCOLOR:
+                case FOdysseyFile::VectorV1::CHUNK_BUCKET_SOLIDCOLOR:
                 {
                     uint8 R, G, B, A;
 
@@ -56,11 +57,11 @@ FOdysseyVectorImportV1::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 i
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_BUCKET_GRADIENT: // container
+                case FOdysseyFile::VectorV1::CHUNK_BUCKET_GRADIENT: // container
                    iBucket.SetColorMode( eBucketColorMode::LinearGradient );
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_BUCKET_GRADIENT_STOP:
+                case FOdysseyFile::VectorV1::CHUNK_BUCKET_GRADIENT_STOP:
                 {
                     uint8 R,G,B,A;
                     double stopAt;
@@ -88,16 +89,16 @@ FOdysseyVectorImportV1::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 i
 void
 FOdysseyVectorImportV1::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, uint64 iChunkEnd, FArchive &Ar )
 {
-    FOdysseyVectorImportV1::ReadChunks( iChunkEnd
-                                    , Ar
-                                    , [&iPaintGroup](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+    FOdysseyFile::ReadChunks( iChunkEnd
+                            , Ar
+                            , [&iPaintGroup](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
-                case FOdysseyVectorExportV1::CHUNK_GROUPPAINT_BUCKETS:
+                case FOdysseyFile::VectorV1::CHUNK_GROUPPAINT_BUCKETS:
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_GROUPPAINT_WIREFRAME:
+                case FOdysseyFile::VectorV1::CHUNK_GROUPPAINT_WIREFRAME:
                 {
                     uint32 wireframe;
 
@@ -107,7 +108,7 @@ FOdysseyVectorImportV1::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, u
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_GROUPPAINT_WIREFRAMECOLOR:
+                case FOdysseyFile::VectorV1::CHUNK_GROUPPAINT_WIREFRAMECOLOR:
                 {
                     uint8 R, G, B, A;
 
@@ -120,7 +121,7 @@ FOdysseyVectorImportV1::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, u
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_GROUPPAINT_MONOCHROME:
+                case FOdysseyFile::VectorV1::CHUNK_GROUPPAINT_MONOCHROME:
                 {
                     uint32 monochrome;
 
@@ -130,7 +131,7 @@ FOdysseyVectorImportV1::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, u
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_GROUPPAINT_MONOCHROMECOLOR:
+                case FOdysseyFile::VectorV1::CHUNK_GROUPPAINT_MONOCHROMECOLOR:
                 {
                     uint8 R, G, B, A;
 
@@ -143,7 +144,7 @@ FOdysseyVectorImportV1::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, u
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_GROUPPAINT_PAINTED:
+                case FOdysseyFile::VectorV1::CHUNK_GROUPPAINT_PAINTED:
                 {
                     uint32 painted;
 
@@ -153,10 +154,10 @@ FOdysseyVectorImportV1::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, u
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_GROUPPAINT_GAP:
+                case FOdysseyFile::VectorV1::CHUNK_GROUPPAINT_GAP:
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_GROUPPAINT_GAP_TOLERANCE:
+                case FOdysseyFile::VectorV1::CHUNK_GROUPPAINT_GAP_TOLERANCE:
                 {
                     double gapTolerance;
 
@@ -166,7 +167,7 @@ FOdysseyVectorImportV1::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, u
                 }
                 break;
 
-                case FOdysseyVectorExportV1::CHUNK_BUCKET_ENTRY:
+                case FOdysseyFile::VectorV1::CHUNK_BUCKET_ENTRY:
                 {
                     FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( &iPaintGroup, 0.0f, 0.0f, false );
 

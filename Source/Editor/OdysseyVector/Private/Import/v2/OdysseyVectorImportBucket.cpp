@@ -1,17 +1,19 @@
 #include "Import/v2/OdysseyVectorImport.h"
 #include "Palette/OdysseyPalette.h"
 #include "Engine/ObjectLibrary.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 void
 FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
 {
-    FOdysseyVectorImportV2::ReadChunks( iChunkEnd
-                                    , Ar
-                                    , [&iBucket](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+    FOdysseyFile::ReadChunks( iChunkEnd
+                            , Ar
+                            , [&iBucket](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_COLORMODE:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_COLORMODE:
                 {
                     uint32 colorMode;
 
@@ -21,7 +23,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_PALETTEENTRY:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY:
                 {
                     FName nameEntry;
                     Ar << nameEntry;
@@ -49,7 +51,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_SPREADING:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_SPREADING:
                 {
                     uint32 spreadingPolicy;
 
@@ -59,7 +61,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_PROPAGATED:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PROPAGATED:
                 {
                     uint32 propagated;
 
@@ -69,7 +71,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_ROTATION:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_ROTATION:
                 {
                     double rotation;
 
@@ -79,7 +81,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_POSITION:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_POSITION:
                 {
                     double x;
                     double y;
@@ -91,7 +93,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_SOLIDCOLOR:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_SOLIDCOLOR:
                 {
                     uint8 R, G, B, A;
 
@@ -104,10 +106,10 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT: // container
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT: // container
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT_STOP:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT_STOP:
                 {
                     uint8 R,G,B,A;
                     double stopAt;
@@ -124,7 +126,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT_RADIALRADIUS:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT_RADIALRADIUS:
                 {
                     double radialRadius;
 
@@ -134,7 +136,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyVectorExportV2::CHUNK_BUCKET_GRADIENT_RADIALOFFSET:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT_RADIALOFFSET:
                 {
                     double offsetX;
                     double offsetY;

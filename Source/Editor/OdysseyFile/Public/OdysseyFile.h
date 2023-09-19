@@ -100,6 +100,8 @@ namespace FOdysseyFile
 
                             static const uint32 CHUNK_PATH_GEOMETRY_CUBICSEGMENTS = 0x76cacf19; // uint32(count), array[uint32(P0ID)-uint32(P1ID)-double(CX0)-double(CY0)-double(CX1)-double(CY1)]
 
+                    static const uint32 CHUNK_GROUP = 0x4af0b779; // container
+                        // ... +inherited chunks.
                     static const uint32 CHUNK_GROUPPAINT = 0xac92b85d; // container
                         // ... +inherited chunks.
                         static const uint32 CHUNK_GROUPPAINT_PAINTED = 0x89854E17; // uint32(bool)
