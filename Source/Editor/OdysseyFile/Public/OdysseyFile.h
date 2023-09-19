@@ -4,6 +4,7 @@
 
 namespace FOdysseyFile
 {
+    // chunk IDs for module OdysseyVector version 1 (deprecated)
     namespace VectorV1
     {
         // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
@@ -58,6 +59,7 @@ namespace FOdysseyFile
                             static const uint32 CHUNK_ELLIPSE_GEOMETRY_RADIUS = 0x831abdab ; // double(X)-double(Y)
     }
 
+    // chunk IDs for module OdysseyVector version 2 (current)
     namespace VectorV2
     {
         // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
@@ -126,16 +128,17 @@ namespace FOdysseyFile
 
     }
 
-    namespace AnimationCellImageVector
+    // chunk IDs for module OdysseyAnimation
+    namespace Animation
     {
         // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
         // Just be sure the Chunk ID is unique and any ID will make it.
         // You can use website https://crc32.online/ to generate a code
-        static const uint32 CHUNK_ANIMATIONCELLIMAGEVECTOR =  0x60fdee3a; // container
-            static const uint32 CHUNK_ANIMATIONCELLIMAGEVECTOR_RESOLUTION = 0xc1bb48e1; // uint32(Width)-uint32(Height)
-            static const uint32 CHUNK_ANIMATIONCELLIMAGEVECTOR_BLOCK = 0xf0a9e121; // container
-                static const uint32 CHUNK_ANIMATIONCELLIMAGEVECTOR_BLOCK_ID =  0x194b349c; // FGuid(VectorBlockId)
-            //static const uint32 CHUNK_VECTOR_MAGIC_V2 // see CHUNK_VECTOR_MAGIC_V2
+        static const uint32 CHUNK_CELLIMAGEVECTOR =  0x60fdee3a; // container
+            static const uint32 CHUNK_CELLIMAGEVECTOR_RESOLUTION = 0xc1bb48e1; // uint32(Width)-uint32(Height)
+            static const uint32 CHUNK_CELLIMAGEVECTOR_BLOCK = 0xf0a9e121; // container
+                static const uint32 CHUNK_CELLIMAGEVECTOR_BLOCK_ID =  0x194b349c; // FGuid(VectorBlockId)
+            //static const uint32 CHUNK_VECTOR_MAGIC_V2 //see FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2
     }
 
     void ODYSSEYFILE_API WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback );

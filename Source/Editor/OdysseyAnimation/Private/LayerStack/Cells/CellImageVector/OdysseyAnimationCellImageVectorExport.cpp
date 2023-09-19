@@ -7,7 +7,7 @@ void
 FOdysseyAnimationCellImageVectorExport::WriteResolution( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                                        , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::AnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR_RESOLUTION
+    FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_RESOLUTION
                             , Ar
                             , [iAnimationCellImageVector](FArchive &Ar) -> void
     {
@@ -23,7 +23,7 @@ void
 FOdysseyAnimationCellImageVectorExport::WriteVectorBlockID( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                                           , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::AnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR_BLOCK_ID
+    FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK_ID
                             , Ar
                             , [iAnimationCellImageVector](FArchive &Ar) -> void
     {
@@ -37,7 +37,7 @@ void
 FOdysseyAnimationCellImageVectorExport::WriteVectorBlock( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                                         , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::AnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR_BLOCK
+    FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK
                             , Ar
                             , [iAnimationCellImageVector](FArchive &Ar) -> void
     {
@@ -49,7 +49,7 @@ void
 FOdysseyAnimationCellImageVectorExport::Write( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                              , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::AnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR
+    FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR
                             , Ar
                             , [iAnimationCellImageVector](FArchive &Ar) -> void
     {

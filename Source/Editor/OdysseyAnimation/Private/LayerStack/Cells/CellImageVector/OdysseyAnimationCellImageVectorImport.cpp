@@ -14,7 +14,7 @@ FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* 
         {
             switch ( iChunkID )
             {
-                case FOdysseyFile::AnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR_RESOLUTION :
+                case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_RESOLUTION :
                 {
                     uint32 width;
                     uint32 height;
@@ -33,10 +33,10 @@ FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* 
                 break;
 
                 // container
-                case FOdysseyFile::AnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR_BLOCK:
+                case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK:
                 break;
 
-                case FOdysseyFile::AnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR_BLOCK_ID:
+                case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK_ID:
                 {
                     FGuid vectorBlockID;
 

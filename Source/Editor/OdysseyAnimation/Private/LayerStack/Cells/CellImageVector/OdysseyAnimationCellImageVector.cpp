@@ -141,7 +141,7 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
         uint64 chunkLen;
         uint64 chunkEnd;
 
-        // Reads the first chunk (CHUNK_ANIMATIONCELLIMAGEVECTOR)
+        // Reads the first chunk (FOdysseyFile::AnimationCellImageVector::CHUNK_ROOT)
         Ar << chunkID;
         Ar << chunkLen;
 
@@ -149,8 +149,8 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 
         switch( chunkID )
         {
-            case FOdysseyFile::AnimationCellImageVector::CHUNK_ANIMATIONCELLIMAGEVECTOR :
-                UE_LOG(LogTemp, Warning, TEXT("CHUNK_ANIMATIONCELLIMAGEVECTOR") );
+            case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR :
+                UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGEVECTOR") );
 
                 FOdysseyAnimationCellImageVectorImport::Read( this, Ar, chunkEnd );
             break;
