@@ -9,12 +9,19 @@
 class UOdysseyHUDPolygon;
 class UOdysseyHUDHandle;
 
-UENUM()
 enum class EOdysseyTransformConstrain
 {
     NoConstrain,
     Rectangle,
+    RectangleForcedRatio,
     Parallelogram
+};
+
+enum class EOdysseyTransformCapture
+{
+    NoCapture,
+    Inside,
+    Sides
 };
 
 UCLASS()
@@ -40,7 +47,7 @@ public:
 private:
     void ConstrainToRectangle( FVector2D iPosition );
     void ConstrainToParallelogram(FVector2D iPosition);
-
+    
 private: 
     FOdysseyPaintEngine                 mPaintEngine;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mReferenceBlock;
@@ -49,6 +56,7 @@ private:
     TArray<UOdysseyHUDHandle*> mHandles;
 
     EOdysseyTransformConstrain mAreaConstrain;
+    EOdysseyTransformCapture mTransformCaptureMode;
 
-    FVector2D mMouseReferencePoint;
+    FVector2D mMouseLastReferencePoint;
 };

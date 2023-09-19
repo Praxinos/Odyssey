@@ -4,7 +4,6 @@
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDPolygon.h"
-#include "OdysseyHUDRectangle.h"
 #include "GeomTools.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterTransformTool"
@@ -18,7 +17,8 @@ UOdysseyPainterEditorRasterTransformTool::~UOdysseyPainterEditorRasterTransformT
 UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTool() :
     mPaintEngine(),
     mTransformArea(nullptr),
-    mMouseReferencePoint( -1, -1 )
+    mAreaConstrain(EOdysseyTransformConstrain::Rectangle),
+    mTransformCaptureMode(EOdysseyTransformCapture::NoCapture)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.TransformTool32");
 }
@@ -31,8 +31,7 @@ UOdysseyPainterEditorRasterTransformTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    //Create widget slate when creating this
-    if (!mTransformArea) 
+    if (!mTransformArea) //Creating a zone for the transform
     {
         mTransformArea = NewObject<UOdysseyHUDPolygon>(GetTransientPackage(), NAME_None, RF_Transient);
         mTransformArea->AddToRoot();
@@ -71,17 +70,22 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
         mHandles.Add(handleTopRight);
         mHandles.Add(handleBottomLeft);
         mHandles.Add(handleBottomRight);
-
-        mAreaConstrain = EOdysseyTransformConstrain::Rectangle;
     }
-    else if( FGeomTools2D::IsPointInPolygon( FVector2D( iPointInTexture.x, iPointInTexture.y ), mTransformArea->mPoints ) )
+    
+    
+    if( mHUD->OnKeyDown(iPointInTexture, iKey) ) //Handling HUD events if needed
     {
-        mMouseReferencePoint = FVector2D( iPointInTexture.x, iPointInTexture.y );
+        return true;
+    }
+    else if( FGeomTools2D::IsPointInPolygon( FVector2D( iPointInTexture.x, iPointInTexture.y ), mTransformArea->mPoints ) ) //Handling clicking inside the transform zone (for dragging it)
+    {
+        mTransformCaptureMode = EOdysseyTransformCapture::Inside;
+        mMouseLastReferencePoint = FVector2D( iPointInTexture.x, iPointInTexture.y );
         return true;
     }
 
-    mMouseReferencePoint = FVector2D( -1, -1 );
-    return mHUD->OnKeyDown(iPointInTexture, iKey);
+
+    return false;
 }
 
 void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
@@ -91,8 +95,20 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint&
 
 void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
+    mHUD->CapturedMouseMove(iPointInTexture);
+
     if( mTransformArea )
     {
+        if( mTransformCaptureMode == EOdysseyTransformCapture::Inside )
+        {
+            for (int i = 0; i < mHandles.Num(); i++)
+            {
+                mHandles[i]->SetPosition(mHandles[i]->GetPosition() - (mMouseLastReferencePoint - FVector2D(iPointInTexture.x, iPointInTexture.y)));
+            }
+            mMouseLastReferencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
+            return;
+        }
+
         switch(mAreaConstrain)
         {
             case EOdysseyTransformConstrain::Rectangle:
@@ -102,19 +118,11 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
                 ConstrainToParallelogram( FVector2D( iPointInTexture.x, iPointInTexture.y ) );
             break;
             case EOdysseyTransformConstrain::NoConstrain:
-                for (int i = 0; i < mHandles.Num(); i++)
-                {
-                    mHandles[i]->SetPosition(mHandles[i]->GetPosition() - (mMouseReferencePoint - FVector2D(iPointInTexture.x, iPointInTexture.y)));
-                }
             break;
             default:
             break;
         }
-        mMouseReferencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
-        return;
     }
-
-    mHUD->CapturedMouseMove( iPointInTexture );
 }
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
@@ -189,16 +197,26 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
         //blockToMove->Dirty();
     }
 
+    mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
     return isHandled;
 }
 
 void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iPosition)
 {
+    int next;
+    int opposite;
+    int previous;
     for( int i = 0; i < mHandles.Num(); i++ )
     {
         if( mHandles[i]->IsCaptured() )
         {
-            UE_LOG(LogTemp, Display, TEXT("%d"), i );
+            next = (i + 1) % mHandles.Num();
+            opposite = (i + 2) % mHandles.Num();
+            previous = (i + 3) % mHandles.Num();
+
+            mHandles[i]->SetPosition( iPosition );
+            mHandles[next]->SetPosition( FVector2D( iPosition.X, mHandles[opposite]->GetPosition().Y ) );
+            mHandles[previous]->SetPosition( FVector2D( mHandles[opposite]->GetPosition().X, iPosition.Y ) );
         }
     }
 }
