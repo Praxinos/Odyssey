@@ -404,19 +404,19 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS::FBlo
 
     GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("OnPaintStroke", "FlooFill"), nullptr);
 
-	//::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
-/*	ctx.Fill(*paintBlock, color);*/
+    ctx.Fill(*paintBlock, color);
 
-    floodFill ( iPointInTexture.x
+    /*floodFill ( iPointInTexture.x
               , iPointInTexture.y
               , iBlock
               , paintBlock
               , nullptr
               , color
-              , Tolerance );
+              , Tolerance );*/
 
-	/*ctx.Finish();*/
+	ctx.Finish();
 
 	paintBlock->Dirty();
 

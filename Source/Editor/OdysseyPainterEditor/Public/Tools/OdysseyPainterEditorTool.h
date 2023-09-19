@@ -11,6 +11,7 @@
 #include "OdysseyPainterEditorTool.generated.h"
 
 class FOdysseyPainterEditor;
+class UOdysseyHUDElement;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorTool : public UObject
@@ -67,6 +68,7 @@ public:
     virtual void BindShortcuts(class FBaseToolkit* iToolkit);
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
     virtual TSharedRef<SWidget> CreateTopTabWidget();
+    virtual UOdysseyHUDElement* GetHUD();
 
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);
@@ -83,6 +85,7 @@ public:
 
 protected:
     FOdysseyPainterEditor*              mEditor;
+    UOdysseyHUDElement*                 mHUD;
 
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")

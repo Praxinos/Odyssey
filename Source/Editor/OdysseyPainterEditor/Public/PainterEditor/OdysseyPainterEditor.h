@@ -6,6 +6,7 @@
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
@@ -73,6 +74,7 @@ public:
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
     
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
+    virtual UOdysseyPainterEditorRasterTransformTool*                GetRasterTransformTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathEditTool*                 GetVectorPathEditTool() const;
@@ -163,6 +165,7 @@ protected:
     FSimpleMulticastDelegate        mOnSourceChanged;
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
+    UOdysseyPainterEditorRasterTransformTool* mRasterTransformTool;
     UOdysseyPainterEditorVectorPrimitiveDrawingTool* mVectorPrimitiveDrawingTool;
     UOdysseyPainterEditorVectorPathDrawingTool* mVectorPathDrawingTool;
     UOdysseyPainterEditorVectorPathEditTool* mVectorPathEditTool;

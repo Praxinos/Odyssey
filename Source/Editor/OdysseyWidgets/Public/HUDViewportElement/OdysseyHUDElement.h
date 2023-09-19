@@ -19,6 +19,14 @@ class ODYSSEYWIDGETS_API UOdysseyHUDElement : public UOdysseyHUDSlateElement,
 {
     GENERATED_BODY()
 
+public:
+    // Destructor
+    virtual ~UOdysseyHUDElement();
+
+    //Constructor
+    UOdysseyHUDElement();
+
+
 public:     
     void Init(FName iName, FTransform2D iTransform = FTransform2D());
 
@@ -30,13 +38,15 @@ public:
 public:
     virtual void Invalidate() override;
     virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
-    virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
-    virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) override;
-    virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
+    virtual void MouseMove( const FOdysseyPoint& iPointInTexture ) override;
+    virtual bool OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
+    virtual bool OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
+    virtual void CapturedMouseMove( const FOdysseyPoint& iPointInTexture ) override;
     virtual void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D());
 
 public:
     void AddElement( UOdysseyHUDElement* iElementToAdd );
+    void EmptyHUDElements();
     bool IsInvalid();
     bool IsCaptured();
 

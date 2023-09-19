@@ -23,10 +23,15 @@ public:
 public:
     TSharedPtr<SWidget> CreateWidget() override;
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
-    virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
-    virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) override;
-    virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
+    virtual void MouseMove( const FOdysseyPoint& iPointInTexture ) override;
+    virtual bool OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
+    virtual bool OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
+    virtual void CapturedMouseMove( const FOdysseyPoint& iPointInTexture ) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+
+public:
+    void SetPosition(FVector2D iNewPosition);
+    FVector2D GetPosition();
 
 private:
     UOdysseyHUDElement* mParent;

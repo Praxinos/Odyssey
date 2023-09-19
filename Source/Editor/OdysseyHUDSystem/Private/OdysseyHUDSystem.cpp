@@ -41,16 +41,27 @@ FOdysseySurfaceTexture2DEditable* FOdysseyHUDSystem::GetHUDSurface() const
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Callback Usage
 
-void FOdysseyHUDSystem::RefreshHUDSurface(FVector2D iSize)
+void FOdysseyHUDSystem::RebuildHUDSurface(FVector2D iSize)
 {
     if( mHUDSurface )
+    {
         delete mHUDSurface;
+        mHUDSurface = nullptr;
+    }
 
     SetHUDBlock( MakeShared<::ULIS::FBlock>(iSize.X, iSize.Y, ::ULIS::Format_BGRA8) );
 
+    ClearHUDSurface();
+
+    mHUDSurface = new FOdysseySurfaceTexture2DEditable( mHUDBlock );
+}
+
+void FOdysseyHUDSystem::ClearHUDSurface()
+{
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
     ctx.Clear(*mHUDBlock);
     ctx.Finish();
 
-    mHUDSurface = new FOdysseySurfaceTexture2DEditable( mHUDBlock );
+    if( mHUDSurface )
+        mHUDSurface->Invalidate();
 }

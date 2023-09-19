@@ -30,6 +30,7 @@ class FOdysseyPainterEditor;
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 {
+    mEditor->OnSelectedToolChanged().RemoveAll(this);
 }
 
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)

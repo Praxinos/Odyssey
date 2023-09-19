@@ -76,9 +76,9 @@ void UOdysseyHUDPolygon::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     UOdysseyHUDElement::Erase(ioBlock, iTransform);
 
     std::vector<::ULIS::FVec2I> vectors;
-    for ( int i = 0; i < mPoints.Num(); i++ )
+    for ( int i = 0; i < mPreviousPoints.Num(); i++ )
     {
-        FVector2D transformedPoint = iTransform.TransformPoint(mPoints[i]);
+        FVector2D transformedPoint = mPreviousTransform.TransformPoint(mPreviousPoints[i]);
         
         ::ULIS::FVec2I vec = ::ULIS::FVec2I( transformedPoint.X, transformedPoint.Y );
         vectors.push_back(vec);

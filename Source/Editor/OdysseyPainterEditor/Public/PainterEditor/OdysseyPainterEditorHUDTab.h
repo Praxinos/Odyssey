@@ -20,19 +20,17 @@ public:
     virtual ~FOdysseyPainterEditorHUDTab();
     FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* iEditor);
 
+    void Init() override;
+
 protected:
     // FOdysseyEditorTab interface
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
+    void RefreshWidgetContent();
+    void OnSelectedToolChanged();
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-
-public:
-    // Public Getters
-    TSharedPtr<UOdysseyHUDElement> GetHUD();
 
 private:
     FOdysseyPainterEditor* mEditor;
-
-    TSharedPtr<UOdysseyHUDElement> mHUD;
 };
 

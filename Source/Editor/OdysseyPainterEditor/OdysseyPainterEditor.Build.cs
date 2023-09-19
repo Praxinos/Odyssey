@@ -68,6 +68,7 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "Models"),
                 Path.Combine(ModuleDirectory, "Private", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
+                Path.Combine(ModuleDirectory, "Private", "Tools"),
             }
         );
 
@@ -75,6 +76,7 @@ public class OdysseyPainterEditor : ModuleRules
             new string[] {
                 Path.Combine(ModuleDirectory, "Public", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Public", "Settings"),
+                Path.Combine(ModuleDirectory, "Public", "Tools"),
             }
         );
 

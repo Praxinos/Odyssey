@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "HUDViewportElement/OdysseyHUDElement.h"
 
 #include "Misc/TransactionObjectEvent.h"
 
@@ -9,12 +10,16 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorTool::~UOdysseyPainterEditorTool()
 {
+    mHUD->RemoveFromRoot();
 }
 
 UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
     , mIsActivated(false)
 {
+    mHUD = NewObject<UOdysseyHUDElement>(GetTransientPackage(), NAME_None, RF_Transient);
+    mHUD->AddToRoot();
+    mHUD->Init(FName("RootHUD"));
 }
 
 void
@@ -71,7 +76,8 @@ UOdysseyPainterEditorTool::Load()
 void
 UOdysseyPainterEditorTool::Unload()
 {
-
+    mHUD->EmptyHUDElements();
+    mEditor->HUDSystem()->ClearHUDSurface();
 }
 
 bool
@@ -159,6 +165,11 @@ TSharedRef<SWidget>
 UOdysseyPainterEditorTool::CreateTopTabWidget()
 {
     return SNullWidget::NullWidget;
+}
+
+UOdysseyHUDElement* UOdysseyPainterEditorTool::GetHUD()
+{
+    return mHUD;
 }
 
 void

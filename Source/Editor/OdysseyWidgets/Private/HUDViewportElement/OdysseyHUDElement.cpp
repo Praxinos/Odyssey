@@ -3,6 +3,15 @@
 
 #include "OdysseyHUDElement.h"
 
+UOdysseyHUDElement::~UOdysseyHUDElement()
+{
+    mElements.Empty();
+}
+
+UOdysseyHUDElement::UOdysseyHUDElement()
+{
+}
+
 void UOdysseyHUDElement::Init(FName iName, FTransform2D iTransform /*= FTransform2D()*/ )
 {
     mName = iName;
@@ -18,7 +27,7 @@ TSharedPtr<SWidget> UOdysseyHUDElement::CreateWidget()
     {
         mElementsWidget->AddSlot()
         [
-            it.Value()->CreateWidget().ToSharedRef()
+            it->Value->CreateWidget().ToSharedRef()
         ];
     }
 
@@ -29,7 +38,7 @@ void UOdysseyHUDElement::Invalidate()
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        it.Value()->Invalidate();
+        it->Value->Invalidate();
     }
 
     mIsInvalid = true;
@@ -39,39 +48,48 @@ void UOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        it.Value()->Draw(ioBlock, iTransform);
+        it->Value->Draw(ioBlock, iTransform);
     }
 
     mIsInvalid = false;
 }
 
-void UOdysseyHUDElement::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyHUDElement::MouseMove( const FOdysseyPoint& iPointInTexture )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        it->Value->MouseMove(iViewport, iX, iY);
+        it->Value->MouseMove( iPointInTexture );
     }
 }
 
-FReply UOdysseyHUDElement::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply )
+bool UOdysseyHUDElement::OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        if (ioReply.IsEventHandled())
-            return ioReply;
-
-        it->Value->InputKey( iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
+        if( it->Value->OnKeyDown(iPointInTexture, iKey) )
+            return true;
     }
 
-    return ioReply;
+    return false;
 }
 
-void UOdysseyHUDElement::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
+bool UOdysseyHUDElement::OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey )
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        if (it->Value->OnKeyUp(iPointInTexture, iKey))
+            return true;
+    }
+
+    return false;
+}
+
+void UOdysseyHUDElement::CapturedMouseMove( const FOdysseyPoint& iPointInTexture )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
         if( it->Value->IsCaptured() )
-            it->Value->CapturedMouseMove(iViewport, iX, iY);
+            it->Value->CapturedMouseMove( iPointInTexture );
     }
 }
 
@@ -79,8 +97,8 @@ void UOdysseyHUDElement::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        it.Value()->Erase(ioBlock, iTransform);
-        it.Value()->mIsInvalid = true;
+        it->Value->Erase(ioBlock, iTransform);
+        it->Value->mIsInvalid = true;
     }
 }
 
@@ -90,6 +108,16 @@ void UOdysseyHUDElement::AddElement(UOdysseyHUDElement* iElementToAdd)
         mElements.Emplace( iElementToAdd->mName.ToString(), iElementToAdd );
 
     mIsInvalid = false;
+}
+
+void UOdysseyHUDElement::EmptyHUDElements()
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it->Value->EmptyHUDElements();
+        it->Value->RemoveFromRoot();
+    }
+    mElements.Empty();
 }
 
 bool UOdysseyHUDElement::IsInvalid()
@@ -120,7 +148,7 @@ void UOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
     {
         for (auto it = mElements.CreateConstIterator(); it; ++it)
         {
-            it.Value()->InternalIsInvalid( ioIsInvalid );
+            it->Value->InternalIsInvalid( ioIsInvalid );
         }
     }
 }
@@ -139,7 +167,7 @@ void UOdysseyHUDElement::InternalIsCaptured(bool& ioIsCaptured)
     {
         for (auto it = mElements.CreateConstIterator(); it; ++it)
         {
-            it.Value()->InternalIsCaptured(ioIsCaptured);
+            it->Value->InternalIsCaptured(ioIsCaptured);
         }
     }
 }

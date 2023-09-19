@@ -25,8 +25,8 @@ public:
     FOdysseySurfaceTexture2DEditable* GetHUDSurface() const;
 
 public:
-    // Callback usage
-    void RefreshHUDSurface(FVector2D iSize);
+    void RebuildHUDSurface(FVector2D iSize);
+    void ClearHUDSurface();
 
 private:
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mHUDBlock; // Holds the block in which we draw the HUD

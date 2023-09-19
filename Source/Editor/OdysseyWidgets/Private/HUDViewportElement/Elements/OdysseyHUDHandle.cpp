@@ -61,13 +61,25 @@ void UOdysseyHUDHandle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
     ctx.Finish();
 }
 
-void UOdysseyHUDHandle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+void UOdysseyHUDHandle::SetPosition(FVector2D iNewPosition)
 {
-    UOdysseyHUDElement::MouseMove( iViewport, iX, iY );
+    if( mReferencePoint )
+        mReferencePoint->Set( iNewPosition.X, iNewPosition.Y );
+}
 
-    FVector2D pointToCheck = mPreviousTransform.TransformPoint( *mReferencePoint );
+FVector2D UOdysseyHUDHandle::GetPosition()
+{
+    if( mReferencePoint )
+        return *mReferencePoint;
 
-    float distSquared = FVector2D::DistSquared(pointToCheck, FVector2D(iX, iY));
+    return FVector2D( -1, -1 );
+}
+
+void UOdysseyHUDHandle::MouseMove( const FOdysseyPoint& iPointInTexture )
+{
+    UOdysseyHUDElement::MouseMove(iPointInTexture);
+
+    float distSquared = FVector2D::DistSquared(*mReferencePoint, FVector2D(iPointInTexture.x, iPointInTexture.y));
     if ( mHandleSize != 5 && distSquared < 25)
     {
         mHandleSize = 5;
@@ -80,38 +92,43 @@ void UOdysseyHUDHandle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
     }
 }
 
-FReply UOdysseyHUDHandle::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply )
+bool UOdysseyHUDHandle::OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey )
 {
-    UOdysseyHUDElement::InputKey( iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
+    UOdysseyHUDElement::OnKeyDown( iPointInTexture, iKey );
 
-    if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed)
+    if (iKey == EKeys::LeftMouseButton)
     {
-        FVector2D pointToCheck = mPreviousTransform.TransformPoint(*mReferencePoint);
-
-        float distSquared = FVector2D::DistSquared(pointToCheck, FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()));
+        float distSquared = FVector2D::DistSquared(*mReferencePoint, FVector2D(iPointInTexture.x, iPointInTexture.y));
         if( distSquared < 25 )
         { 
             mIsCaptured = true;
-            ioReply = FReply::Handled();
+            return true;
         }
     }
-    else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released && mIsCaptured)
-    {
-        mIsCaptured = false;
-        ioReply = FReply::Handled();
-    }
 
-    return ioReply;
+    return false;
 }
 
-void UOdysseyHUDHandle::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
+bool UOdysseyHUDHandle::OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey )
 {
-    UOdysseyHUDElement::CapturedMouseMove( iViewport, iX, iY );
+    UOdysseyHUDElement::OnKeyUp(iPointInTexture, iKey);
+
+    if (iKey == EKeys::LeftMouseButton && mIsCaptured)
+    {
+        mIsCaptured = false;
+        return true;
+    }
+
+    return false;
+}
+
+void UOdysseyHUDHandle::CapturedMouseMove( const FOdysseyPoint& iPointInTexture )
+{
+    UOdysseyHUDElement::CapturedMouseMove( iPointInTexture );
 
     if (mIsCaptured)
     {
-        FVector2D position = mPreviousTransform.Inverse().TransformPoint( FVector2D(iX, iY) );
-        mReferencePoint->Set(position.X, position.Y);
+        mReferencePoint->Set(iPointInTexture.x, iPointInTexture.y);
         mIsInvalid = true;
     }
 }
