@@ -22,41 +22,29 @@ UOdysseyPainterEditorColorPickerTool::UOdysseyPainterEditorColorPickerTool()
 bool
 UOdysseyPainterEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-    bool ret = false;
+    UTexture* texture = GetEditor()->GetSource()->DisplayTexture();
 
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (hasVector)
+    if( ( iPointInTexture.x >= 0.0f ) && ( iPointInTexture.x < texture->GetSurfaceWidth() - 1.0f )
+     && ( iPointInTexture.y >= 0.0f ) && ( iPointInTexture.y < texture->GetSurfaceHeight() - 1.0f ) )
     {
-        //Should be done in OnMouseUpVector directly
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-        if (mediaVectors.Num() > 0)
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            ret = UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-        }
-    }
-    else
-    {
-        UTexture* texture = GetEditor()->GetSource()->DisplayTexture();
+        TArray<FColor> colors;
+        FRenderCommandFence fence;
 
-        TArray<FLinearColor> colors;
         ENQUEUE_RENDER_COMMAND(GetPixel)(
             [&](FRHICommandListImmediate& RHICmdList)
             {
                 RHICmdList.ReadSurfaceData(texture->GetResource()->TextureRHI, FIntRect(iPointInTexture.x, iPointInTexture.y, iPointInTexture.x + 1, iPointInTexture.y + 1), colors, FReadSurfaceDataFlags());
             }
         );
-        
-        FRenderCommandFence fence;
+
         fence.BeginFence();
         fence.Wait();
 
-        ::ULIS::FColor ulisColor = ::ULIS::FColor::RGBAF( colors[0].R, colors[0].G, colors[0].B, colors[0].A );
+        ::ULIS::FColor ulisColor = ::ULIS::FColor::RGBA8( colors[0].R, colors[0].G, colors[0].B, colors[0].A );
         GetEditor()->PaintColor(ulisColor, true);
     }
 
-    return ret;
+    return false;
 }
 
 bool

@@ -154,7 +154,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         virtual void ApplyTransformations() override;
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
 
-        void GetTrimmedSections( std::vector<FOdysseyVectorSection*>& oSectionArray );
         void EraseSections( std::vector<FOdysseyVectorSection*>& iErasedSectionArray
                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray

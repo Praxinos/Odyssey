@@ -9,6 +9,25 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 {
 }
 
+FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
+                                          , FOdysseyVectorBucket* iImportFrom )
+    : mOwner ( iOwner )
+{
+    BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
+    BLMatrix2D& importWorldMatrix = iImportFrom->GetOwner()->GetWorldMatrix();
+    BLMatrix2D conversionMatrix;
+    BLPoint ownerSpaceCoords;
+
+    FOdysseyVector::MatrixMultiply( ownerInverseWorldMatrix, importWorldMatrix, conversionMatrix );
+
+    // copy everything
+    iImportFrom->Copy( this );
+
+    // alter position
+    ownerSpaceCoords = conversionMatrix.mapPoint( iImportFrom->GetX(), iImportFrom->GetY() );
+    Set( ownerSpaceCoords.x, ownerSpaceCoords.y );
+}
+
 FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner, double iX, double iY, bool iPropagated )
     : FOdysseyVectorPoint( iX, iY, 0.0f )
     , mOwner ( iOwner )

@@ -60,8 +60,8 @@ struct FPathParam
     UPROPERTY(EditAnywhere, Category="Transform")
     eJointType JointType;
 
-    UPROPERTY(EditAnywhere,Category="General")
-    bool Filled;
+    //UPROPERTY(EditAnywhere,Category="General")
+    bool Filled; // unused for now
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject

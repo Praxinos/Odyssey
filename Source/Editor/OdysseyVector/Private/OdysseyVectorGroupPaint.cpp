@@ -1933,20 +1933,6 @@ FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
 }
 
 void
-FOdysseyVectorGroupPaint::GetTrimmedSections( std::vector<FOdysseyVectorSection*>& oSectionArray )
-{
-/*
-    for( int i = 0; i < mSectionBuffer.size(); i++ )
-    {
-        if( mSectionBuffer[i].IsTrimmed() )
-        {
-            oSectionArray.push_back( &mSectionBuffer[i] );
-        }
-    }
-*/
-}
-
-void
 FOdysseyVectorGroupPaint::GetSectionsForSegment( FOdysseyVectorSegment* iSegment
                                                , std::vector<FOdysseyVectorSection*>& oSectionArray )
 {
@@ -1986,6 +1972,7 @@ FOdysseyVectorGroupPaint::ReachVertexFromSection( FOdysseyVectorVertex* iVertex
     return currentVertex;
 }
 
+// this does not need to be in the header, internal use only.
 typedef struct _FVertexPair
 {
     FOdysseyVectorVertex* vertex[2];
@@ -2013,8 +2000,12 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
 
     GetSectionsForSegment( iSegment, sectionArray );
 
+    // first step : find to which extent the segment is erased. We check on both sides of the segment
+    // until we reach a section that is marked as erased or til the end. this is the role of
+    // ReachVertexFromSection(). We also get sure the vertexPair we found is unique.
     for( FOdysseyVectorSection* section : sectionArray )
     {
+        // only for non-erased sections
         if( section->IsErased() == false )
         {
             FOdysseyVectorVertex* endVertex[2] = { ReachVertexFromSection( section->GetVertex(0)
@@ -2032,6 +2023,7 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
         }
     }
 
+    // create new vertices and segment in between
     for( int i = 0; i < vertexPairArray.size(); i++ )
     {
         FVertexPair* vertexPair = &vertexPairArray[i];
@@ -2052,8 +2044,6 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
                                                        , endVertex[0]->GetY()
                                                        , radius );
 
-                //path->AddVertex( endVertex[0] );
-
                 oAddedVertexArray.push_back( endVertex[0] );
             }
 
@@ -2066,8 +2056,6 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
                                                        , endVertex[1]->GetY()
                                                        , radius );
 
-                //path->AddVertex( endVertex[1] );
-
                 oAddedVertexArray.push_back( endVertex[1] );
             }
 
@@ -2078,6 +2066,10 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
                 ::ULIS::FVec2D extractedBezier[4];
                 FOdysseyVectorSegmentCubic* newSegment;
 
+                // Note: the bezier we extract must not have its vertices exactly on the former
+                // intersected segment because due to floating point imprecision, it might intersect
+                // again even after the extraction. So we shorten it a little bit, hence the 
+                // t0 + ( ( t1 - t0 ) * 0.001f ) and t1 + ( ( t0 - t1 ) * 0.001f )
                 FOdysseyVector::BezierExtract( cubicSegment->GetVertex(0)->GetCoords()
                                              , cubicSegment->GetHandle(0)->GetCoords()
                                              , cubicSegment->GetHandle(1)->GetCoords()
@@ -2088,7 +2080,7 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
                                              , extractedBezier[1]
                                              , extractedBezier[2]
                                              , extractedBezier[3] );
-
+                // adjust coordinates for the reason described right above
                 endVertex[0]->Set( extractedBezier[0].x, extractedBezier[0].y );
                 endVertex[1]->Set( extractedBezier[3].x, extractedBezier[3].y );
 
@@ -2240,7 +2232,8 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iE
 }
 
 
-
+// De Casteljau algorithm. Not the fastest but for such task we didn't need speed.
+// Very accurate though.
 bool
 FOdysseyVectorGroupPaint::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
                                     , BLImage* iMaskImage
@@ -2359,6 +2352,9 @@ FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPi
     return picked;
 }
 
+// Section-less paths are listed at PaintGroup updates. They allow us to quickly determine
+// whther or no a path has section and thus we can delete it completely when using the eraser
+// on it for example, instead of trying to find which sections were erased or so. 
 void
 FOdysseyVectorGroupPaint::PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray )
 {

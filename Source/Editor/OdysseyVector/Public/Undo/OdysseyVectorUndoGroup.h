@@ -15,7 +15,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoGroup : public FOdysseyVectorUndo
                                , FOdysseyVectorGroup* iAddedGroup
                                , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray
-                               , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray );
+                               , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray );
 
         FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
                                , FOdysseyVectorGroup* iAddedGroup
@@ -32,7 +32,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoGroup : public FOdysseyVectorUndo
         virtual FString ToString() const override;
 
     private:
-        std::vector<FOdysseyVectorObject*> mRemovedObjectArray;
+        std::vector<FOdysseyVectorBucket*> mRemovedBucketArray;
         std::vector<FOdysseyVectorObject*> mAddedObjectOldParentArray;
         std::vector<FOdysseyVectorObject*> mAddedObjectArray;
         FOdysseyVectorGroup* mAddedGroup;

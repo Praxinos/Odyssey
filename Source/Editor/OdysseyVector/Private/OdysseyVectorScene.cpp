@@ -79,8 +79,11 @@ FOdysseyVectorScene::CopyShape()
 FOdysseyVectorGroupPaint*
 FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVectorObject*>& oCubicPathArray
                                                       , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
-                                                      , std::vector<FOdysseyVectorObject*>& oRemovedPaintGroupArray )
+                                                      , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray )
 {
+    // this array will help us to transfer buckets as well
+    std::vector<FOdysseyVectorGroupPaint*> parentPaintGroupArray;
+
     if( mSelectedObjectList.size() )
     {
         FOdysseyVectorGroupPaint* paintGroup = new FOdysseyVectorGroupPaint( "Paint Group" );
@@ -89,10 +92,8 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
 
         paintGroup->UpdateMatrix();
 
-        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+        for( FOdysseyVectorObject* selectedObject : mSelectedObjectList )
         {
-            FOdysseyVectorObject* selectedObject = (*it);
-
             if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
             {
                 FOdysseyVectorPath* selectedCubicPath = static_cast<FOdysseyVectorPath*>( selectedObject );
@@ -105,12 +106,68 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
 
         for( int i = 0; i < oCubicPathArray.size(); i++ )
         {
-            oCubicPathOldParentArray[i] = oCubicPathArray[i]->GetParent();
+            FOdysseyVectorObject* parentObject = oCubicPathArray[i]->GetParent();
+
+            oCubicPathOldParentArray[i] = parentObject;
 
             paintGroup->TransferChild( oCubicPathArray[i], paintGroup->GetLastChild() );
+
+            // take andvantge of this loop to also extract buckets if over
+            if( parentObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                FOdysseyVectorGroupPaint* parentPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(parentObject);
+
+                if( std::find( parentPaintGroupArray.begin(), parentPaintGroupArray.end(), parentPaintGroup ) == parentPaintGroupArray.end() )
+                {
+                    parentPaintGroupArray.push_back( parentPaintGroup );
+                }
+            }
         }
 
-        // first update to update paths' segments.
+        // update paths and detect cycles for bucket matching
+        paintGroup->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+        // extract buckets if over
+        for( FOdysseyVectorGroupPaint* parentPaintGroup : parentPaintGroupArray )
+        {
+            std::list<FOdysseyVectorBucket*>& bucketList = parentPaintGroup->GetBucketList();
+            BLMatrix2D& parentWorldMatrix = parentPaintGroup->GetWorldMatrix();
+
+            for( FOdysseyVectorBucket* bucket : bucketList )
+            {
+                ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
+                BLPoint bucketWorldCoords = parentWorldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
+
+                // TODO: that's a lot of conversion, kowing that both PickCycle 
+                // and FOdysseyVectorBucket() convert to their own space.
+                // We can optimize by creating a PickCycle
+                // with local coordinates as parameter. Same for FOdysseyVectorBucket()
+                if( paintGroup->PickCycle( bucketWorldCoords.x, bucketWorldCoords.y ) )
+                {
+                    FOdysseyVectorBucket* importedBucket = new FOdysseyVectorBucket( paintGroup, bucket );
+
+                    paintGroup->AddBucket( importedBucket );
+
+                    oRemovedBucketArray.push_back( bucket );
+                }
+            }
+        }
+
+        // we can't remove the bucket in the previous loop as it would alter the std:list
+        // we are looping into (unless we copy the list, yes I know).
+        for( int i = 0; i < oRemovedBucketArray.size(); i++ )
+        {
+            FOdysseyVectorObject* ownerObject = oRemovedBucketArray[i]->GetOwner();
+
+            if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                FOdysseyVectorGroupPaint* parentPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+            
+                parentPaintGroup->RemoveBucket( oRemovedBucketArray[i] );
+            }
+        }
+
+        // re-colorize
         Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
         ClearSelection();

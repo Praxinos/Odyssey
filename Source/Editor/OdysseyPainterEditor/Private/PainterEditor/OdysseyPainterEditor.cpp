@@ -706,61 +706,6 @@ ApplyTransformationsRecursive( FOdysseyVectorObject* iObject )
 }
 
 void
-FOdysseyPainterEditor::Trim( FOdysseyVectorScene* iScene )
-{
-    FOdysseyVectorEngine* engine = iScene->GetEngine();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList :
-                                                                                      engine->GetChildrenList();
-    std::vector<FOdysseyVectorPath*> removedPathArray;
-    std::vector<FOdysseyVectorVertex*> removedVertexArray;
-    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-    std::vector<FOdysseyVectorPath*> addedPathArray;
-    std::vector<FOdysseyVectorVertex*> addedVertexArray;
-    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
-
-    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-    {
-        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
-            std::vector<FOdysseyVectorSection*> trimmedSectionArray;
-
-            paintGroup->GetTrimmedSections( trimmedSectionArray );
-            paintGroup->EraseSections( trimmedSectionArray
-                                     , removedVertexArray
-                                     , removedSegmentArray
-                                     , addedVertexArray
-                                     , addedSegmentArray );
-        }
-    }
-
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("Trim","Trim"));
-    if( GUndo )
-    {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
-                                                                  , removedPathArray
-                                                                  , removedVertexArray
-                                                                  , removedSegmentArray
-                                                                  , addedPathArray
-                                                                  , addedVertexArray
-                                                                  , addedSegmentArray );
-
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-
-    engine->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    engine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                  | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
-}
-
-void
 FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
@@ -803,10 +748,10 @@ FOdysseyPainterEditor::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVector
 {
     std::vector<FOdysseyVectorObject*> cubicPathArray;
     std::vector<FOdysseyVectorObject*> cubicPathOldParentArray;
-    std::vector<FOdysseyVectorObject*> removedPaintGroupArray;
+    std::vector<FOdysseyVectorBucket*> removedBucketArray;
     FOdysseyVectorGroupPaint* paintGroup = iScene->MakePaintGroupFromSelectedObjects( cubicPathArray
                                                                                     , cubicPathOldParentArray
-                                                                                    , removedPaintGroupArray );
+                                                                                    , removedBucketArray );
 
     if( paintGroup )
     {
@@ -818,7 +763,7 @@ FOdysseyPainterEditor::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVector
                                                                   , paintGroup
                                                                   , cubicPathArray
                                                                   , cubicPathOldParentArray
-                                                                  , removedPaintGroupArray );
+                                                                  , removedBucketArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }

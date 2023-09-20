@@ -59,7 +59,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
                                                  , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray );
         FOdysseyVectorGroupPaint* MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVectorObject*>& oCubicPathArray
                                                                    , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
-                                                                   , std::vector<FOdysseyVectorObject*>& oRemovedPaintGroupArray );
+                                                                   , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray );
         uint32 GetType();
 
         void SetEngine( FOdysseyVectorEngine* iEngine );
