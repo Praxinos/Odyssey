@@ -8,6 +8,7 @@
 
 class UOdysseyAnimationLayerImageRaster;
 class FOdysseyRasterBlock;
+class FOdysseyMediaRaster;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRaster
     : public FOdysseyAnimationCell
@@ -36,6 +37,8 @@ public:
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    FCriticalSection* GetImageRenderingMutex() const;
+    bool IsImageRenderingGameThreadOnly() const;
 
 private:
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
@@ -46,4 +49,6 @@ private:
 private:
     UOdysseyAnimationLayerImageRaster* mLayer;
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
+    mutable FCriticalSection mImageRenderingMutex;
+    mutable TWeakPtr<FOdysseyMediaRaster> mMediaRaster;
 };

@@ -22,6 +22,26 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
         mFramesData.Add(data);
     }
 }
+    
+void
+FOdysseyAnimationLightTableImageRenderer::Init()
+{
+    for (const FFrameData& frameData : mFramesData)
+    {
+        frameData.mRenderer->Init();
+    }
+}
+
+bool
+FOdysseyAnimationLightTableImageRenderer::IsGameThreadOnly()
+{
+    for (const FFrameData& frameData : mFramesData)
+    {
+        if (frameData.mRenderer->IsGameThreadOnly())
+            return true;
+    }
+    return false;
+}
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLightTableImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)

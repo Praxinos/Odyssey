@@ -28,6 +28,26 @@ FOdysseyTextureLayerImageRenderer::FOdysseyTextureLayerImageRenderer(const UOdys
     }
 }
 
+void
+FOdysseyTextureLayerImageRenderer::Init()
+{
+    for (const FChildData& childData : mChildrenData)
+    {
+        childData.mRenderer->Init();
+    }
+}
+
+bool
+FOdysseyTextureLayerImageRenderer::IsGameThreadOnly()
+{
+    for (const FChildData& childData : mChildrenData)
+    {
+        if (childData.mRenderer->IsGameThreadOnly())
+            return true;
+    }
+    return false;
+}
+
 TArray<::ULIS::FEvent>
 FOdysseyTextureLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {

@@ -7,11 +7,22 @@
 
 FOdysseyTextureLayerImageRasterImageRenderer::FOdysseyTextureLayerImageRasterImageRenderer(const UOdysseyTextureLayerImageRaster* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
-    , mBlock()
+    , mRasterBlock(iLayer->GetRasterBlock())
+    , mBlock(nullptr)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = iLayer->GetRasterBlock();
-    if (rasterBlock)
-        mBlock = rasterBlock->GetBlock();
+}
+
+void
+FOdysseyTextureLayerImageRasterImageRenderer::Init()
+{
+    if (mRasterBlock)
+        mBlock = mRasterBlock->GetBlock();
+}
+
+bool
+FOdysseyTextureLayerImageRasterImageRenderer::IsGameThreadOnly()
+{
+    return false;
 }
 
 TArray<::ULIS::FEvent>

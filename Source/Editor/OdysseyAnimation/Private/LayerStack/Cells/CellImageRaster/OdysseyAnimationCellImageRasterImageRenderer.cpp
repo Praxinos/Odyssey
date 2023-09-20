@@ -4,17 +4,42 @@
 #pragma once
 
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImageRenderer.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
 FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(TSharedRef<const FOdysseyAnimationCellImageRaster> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
-    , mBlock()
+    , mCell(iCell)
+    , mBlock(nullptr)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = iCell->GetRasterBlock();
+}
+    
+void
+FOdysseyAnimationCellImageRasterImageRenderer::Init()
+{
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mCell->GetRasterBlock();
     if (rasterBlock)
         mBlock = rasterBlock->GetBlock();
+}
+
+void
+FOdysseyAnimationCellImageRasterImageRenderer::Lock()
+{
+    mCell->GetImageRenderingMutex()->Lock();
+}
+
+void
+FOdysseyAnimationCellImageRasterImageRenderer::Unlock()
+{
+    mCell->GetImageRenderingMutex()->Unlock();
+}
+
+bool
+FOdysseyAnimationCellImageRasterImageRenderer::IsGameThreadOnly()
+{
+    return mCell->IsImageRenderingGameThreadOnly();
 }
 
 TArray<::ULIS::FEvent>

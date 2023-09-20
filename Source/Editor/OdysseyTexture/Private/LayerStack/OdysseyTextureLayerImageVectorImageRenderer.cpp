@@ -19,6 +19,17 @@ FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorIma
     mRenderHUD = layerStack->CurrentLayer.Get() == iLayer;
 }
 
+void
+FOdysseyTextureLayerImageVectorImageRenderer::Init()
+{
+}
+
+bool
+FOdysseyTextureLayerImageVectorImageRenderer::IsGameThreadOnly()
+{
+    return false;
+}
+
 TArray<::ULIS::FEvent>
 FOdysseyTextureLayerImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {

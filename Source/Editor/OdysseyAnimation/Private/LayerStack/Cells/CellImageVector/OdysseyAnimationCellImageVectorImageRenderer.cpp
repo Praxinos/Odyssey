@@ -10,12 +10,25 @@
 
 static FCriticalSection mEngineMutex;
 
-FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(TSharedPtr<FOdysseyVectorBlock> iVectorBlock, bool iRenderHUD, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(TSharedRef<const FOdysseyAnimationCellImageVector> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
-    , mVectorBlock(iVectorBlock)
-    , mBlock(iVectorBlock->GetBlock())
-    , mRenderHUD(iRenderHUD)
+    , mCell(iCell)
+    , mBlock(nullptr)
 {
+}
+    
+void
+FOdysseyAnimationCellImageVectorImageRenderer::Init()
+{
+    TSharedPtr<FOdysseyVectorBlock> vectorBlock = mCell->GetVectorBlock();
+
+    {   
+        FScopeLock renderLock(&mEngineMutex);
+        vectorBlock->Render();
+    }
+
+    if (vectorBlock)
+        mBlock = vectorBlock->GetBlock();
 }
 
 TArray<::ULIS::FEvent>
@@ -23,14 +36,6 @@ FOdysseyAnimationCellImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> 
 {   
     if (!mBlock)
         return iWaitList;
-
-    {   
-        FScopeLock renderLock(&mEngineMutex);
-
-        mVectorBlock->SetRenderHUD(mRenderHUD);
-        mVectorBlock->Render();
-    }
-    
 
     return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
@@ -41,12 +46,23 @@ FOdysseyAnimationCellImageVectorImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> i
     if (!mBlock)
         return iWaitList;
 
-    {   
-        FScopeLock renderLock(&mEngineMutex);
-
-        mVectorBlock->SetRenderHUD(mRenderHUD);
-        mVectorBlock->Render(); //mIsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR );
-    }
-
     return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
+}
+
+void
+FOdysseyAnimationCellImageVectorImageRenderer::Lock()
+{
+    mCell->GetImageRenderingMutex()->Lock();
+}
+
+void
+FOdysseyAnimationCellImageVectorImageRenderer::Unlock()
+{
+    mCell->GetImageRenderingMutex()->Unlock();
+}
+
+bool
+FOdysseyAnimationCellImageVectorImageRenderer::IsGameThreadOnly()
+{
+    return mCell->IsImageRenderingGameThreadOnly();
 }

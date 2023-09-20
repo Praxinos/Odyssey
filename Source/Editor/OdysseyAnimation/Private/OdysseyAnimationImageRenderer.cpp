@@ -13,6 +13,12 @@ FOdysseyAnimationImageRenderer::FOdysseyAnimationImageRenderer(const UOdysseyAni
     mLayerStackRenderer = layerStack->BuildImageRenderer(iRenderType, iFrame);
 }
 
+void
+FOdysseyAnimationImageRenderer::Init()
+{
+    mLayerStackRenderer->Init();
+}
+
 TArray<::ULIS::FEvent>
 FOdysseyAnimationImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
@@ -23,4 +29,10 @@ TArray<::ULIS::FEvent>
 FOdysseyAnimationImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     return mLayerStackRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+}
+
+bool
+FOdysseyAnimationImageRenderer::IsGameThreadOnly()
+{
+    return mLayerStackRenderer->IsGameThreadOnly();
 }

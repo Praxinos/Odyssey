@@ -144,6 +144,7 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
 {
     Super::PostInitProperties();
 
+	UOdysseyLayerStack::OnCurrentLayerChanged().AddUObject(this, &UOdysseyAnimationLayerImageVector::OnCurrentLayerChanged);
     mCellsContainer->CreateCellDelegate().BindUObject(this, &UOdysseyAnimationLayerImageVector::CreateCell);
     mCellsContainer->OnCellsChanged().AddUObject(this, &UOdysseyAnimationLayerImageVector::OnCellsChanged);
     mLightTable = MakeShared<FOdysseyAnimationLightTable>(this);
@@ -156,6 +157,24 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
 
     //TODO: check undo
     mCellsContainer->Serialize(Ar);
+}
+
+void
+UOdysseyAnimationLayerImageVector::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
+{
+	if ( iLayerStack != GetLayerStack() )
+		return;
+
+    bool isCurrentLayer = iLayerStack->CurrentLayer.Get() == this;
+    const TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = mCellsContainer->GetCells();
+    for (TSharedPtr<FOdysseyAnimationCell> cell : cells)
+    {
+        if (cell->GetType() != FOdysseyAnimationCellImageVector::StaticType())
+            continue;
+
+        TSharedPtr<FOdysseyAnimationCellImageVector> cellImageVector = StaticCastSharedPtr<FOdysseyAnimationCellImageVector>(cell);
+        cellImageVector->GetVectorBlock()->SetRenderHUD(isCurrentLayer);
+    }
 }
 
 TSharedPtr<IOdysseyImageRenderer>

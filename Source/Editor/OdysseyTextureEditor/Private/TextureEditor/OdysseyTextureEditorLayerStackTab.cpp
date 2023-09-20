@@ -315,6 +315,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
             continue;
 
         TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+        renderer->Init();
         renderer->Copy(block, {});
         ctx.Finish();
 
@@ -384,6 +385,7 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
     TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+    renderer->Init();
     renderer->Copy(block, {});
     ctx.Finish();
 

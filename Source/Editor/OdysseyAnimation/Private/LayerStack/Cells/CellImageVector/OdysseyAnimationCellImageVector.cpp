@@ -43,6 +43,7 @@ FOdysseyAnimationCellImageVector::FOdysseyAnimationCellImageVector(UOdysseyAnima
     , mVectorBlockId(FGuid::NewGuid())
     , mWidth(0)
     , mHeight(0)
+    , mMediaVector(nullptr)
 {
 }
 
@@ -81,6 +82,12 @@ FOdysseyVectorEngine*
 FOdysseyAnimationCellImageVector::GetEngine() const
 {
     return mEngine;
+}
+
+TSharedPtr<FOdysseyVectorBlock>
+FOdysseyAnimationCellImageVector::GetVectorBlock() const
+{
+    return mVectorBlock;
 }
 
 void
@@ -152,12 +159,17 @@ FOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImage
     ImageRenderingChanged();
 }
 
+bool
+FOdysseyAnimationCellImageVector::IsImageRenderingGameThreadOnly() const
+{
+    TSharedPtr<FOdysseyMediaVector> mediaVector = mMediaVector.Pin();
+    return !!mediaVector;
+}
+
 TSharedPtr<IOdysseyImageRenderer>
 FOdysseyAnimationCellImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
-    bool renderHUD = iRenderType == IOdysseyImageRenderer::eRenderType::Editor && mLayer->GetLayerStack()->CurrentLayer.Get() == mLayer;
-    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(/*this, */mVectorBlock, renderHUD, iRenderType, GetImageRenderingRects());
-    //return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(mEngine, mBlock, renderHUD, mLayer->IsColored, iRenderType, GetImageRenderingRects());
+    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects());
 }
 
 TArray<FGuid>
@@ -175,10 +187,20 @@ FOdysseyAnimationCellImageVector::GetImageRenderingRects() const
 FOdysseyMediaProvider
 FOdysseyAnimationCellImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
+    //Don't create a mediaRaster if there is an image render in use
+    FScopeLock lock(&mImageRenderingMutex);
+
     TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mEngine->GetScene());
+    mMediaVector = mediaVector;
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.Add(mediaVector);
     return mediaProvider;
+}
+
+FCriticalSection*
+FOdysseyAnimationCellImageVector::GetImageRenderingMutex() const
+{
+    return &mImageRenderingMutex;
 }
 
 TSharedPtr<FOdysseyAnimationCell>

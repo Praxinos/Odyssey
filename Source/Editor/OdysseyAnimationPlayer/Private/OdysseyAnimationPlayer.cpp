@@ -270,6 +270,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
 	{
 		mImageRenderingComposition = imageRenderingComposition;
 		mRenderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
+		mRenderer->Init();
 
 		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height());
 		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->Width(), Animation->Height(), Animation->Format());
@@ -291,6 +292,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
 	if (!mInvalidTileMap.InvalidTiles().IsEmpty())
 	{
 		mRenderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
+		mRenderer->Init();
 
 		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
 		TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();

@@ -20,6 +20,31 @@ public:
     IOdysseyImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
 
 public:
+    /**
+     * @brief Initializes the renderer to load everything it needs prior to any rendering (like image blocks)
+     */
+    virtual void Init() = 0;
+
+    /**
+     * @brief 
+     * 
+     * @return true 
+     * @return false 
+     */
+    virtual bool IsGameThreadOnly() = 0;
+
+    /**
+     * @brief Locks any data that should avoid changing while Init() or any rendering.
+     * Should be called before calling Init().
+     */
+    virtual void Lock();
+
+    /**
+     * @brief Unlocks any data previously locked by Lock()
+     */
+    virtual void Unlock();
+
+public:
     virtual TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) = 0;
     TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList);
     TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);

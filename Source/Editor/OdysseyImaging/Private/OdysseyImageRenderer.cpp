@@ -12,6 +12,27 @@ IOdysseyImageRenderer::IOdysseyImageRenderer(IOdysseyImageRenderer::eRenderType 
 {
 }
 
+void
+IOdysseyImageRenderer::Init()
+{
+}
+
+void
+IOdysseyImageRenderer::Lock()
+{
+}
+
+void
+IOdysseyImageRenderer::Unlock()
+{
+}
+
+bool
+IOdysseyImageRenderer::IsGameThreadOnly()
+{
+    return false;
+}
+
 TArray<::ULIS::FEvent>
 IOdysseyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
 {

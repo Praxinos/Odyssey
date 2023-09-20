@@ -11,10 +11,17 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderer
 public:
     FOdysseyAnimationCellImageRasterImageRenderer(TSharedRef<const FOdysseyAnimationCellImageRaster> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
 
+
+    virtual void Init() override;
+    virtual void Lock() override;
+    virtual void Unlock() override;
+    virtual bool IsGameThreadOnly() override;
+
 public:
     virtual TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
     virtual TArray<::ULIS::FEvent> Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
+    TSharedPtr<const FOdysseyAnimationCellImageRaster> mCell;
     TSharedPtr<::ULIS::FBlock> mBlock;
 };

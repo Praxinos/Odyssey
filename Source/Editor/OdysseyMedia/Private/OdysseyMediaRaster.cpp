@@ -7,6 +7,11 @@ FOdysseyMediaRaster::~FOdysseyMediaRaster()
 {
 }
 
+FOdysseyMediaRaster::FOdysseyMediaRaster()
+    : mRasterBlock( nullptr )
+{
+}
+
 FOdysseyMediaRaster::FOdysseyMediaRaster(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
     : mRasterBlock( iRasterBlock )
 {

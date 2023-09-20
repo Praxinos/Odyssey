@@ -17,10 +17,11 @@ FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const U
     {
         mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(iAnimation, iFrameIndex, iRenderType, iDefaultRects);
     }
-    else
-    {
-        mBlock = mProxy->GetBlock(mFrameIndex);
-    }
+}
+
+void
+FOdysseyAnimationProxyImageRenderer::Init()
+{
 }
 
 TArray<::ULIS::FEvent>
@@ -30,12 +31,18 @@ FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
         return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 
     if ( !mBlock )
-        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block one more time
+        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory
 
     if ( !mBlock )
     {
         if (mAnimationRenderer)
-            return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+        {
+            mAnimationRenderer->Lock();
+            mAnimationRenderer->Init(); //Init only if needed, which means loading layer blocks only if needed
+            TArray<::ULIS::FEvent> events = mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+            mAnimationRenderer->Unlock();
+            return events;
+        }
 
         return iWaitList;
     }
@@ -47,18 +54,36 @@ TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
-        return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+    {
+        mAnimationRenderer->Lock();
+        mAnimationRenderer->Init(); //Init only if needed, which means loading layer blocks only if needed
+        TArray<::ULIS::FEvent> events = mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+        mAnimationRenderer->Unlock();
+        return events;
+    }
 
     if ( !mBlock )
-        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block one more time
+        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory
 
     if ( !mBlock )
     {
         if (mAnimationRenderer)
-            return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+        {
+            mAnimationRenderer->Lock();
+            mAnimationRenderer->Init(); //Init only if needed, which means loading layer blocks only if needed
+            TArray<::ULIS::FEvent> events = mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+            mAnimationRenderer->Unlock();
+            return events;
+        }
 
         return iWaitList;
     }
 
     return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
+}
+
+bool
+FOdysseyAnimationProxyImageRenderer::IsGameThreadOnly()
+{
+    return true;
 }

@@ -58,48 +58,36 @@ private:
 class FBlockData
 {
 public:
-    FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition, TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
+    FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition);
 
 public:
     TSharedPtr<::ULIS::FBlock> GetBlock();
     const TArray<FGuid>& GetComposition() const;
-
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
-
-    void AppendInvalidRects(const TArray<::ULIS::FRectI>& iInvalidRects);
 
     const TSet<int>& GetFrameIndexes();
     void AddFrameIndex(int iFrameIndex);
     void RemoveFrameIndex(int iFrameIndex);
 
-    TSharedPtr<class IOdysseyImageRenderer> BuildRenderer();
-
-    void LockPending(const FGuid& iId);
-    bool UnlockPending(const FGuid& iId);
+    void PreChange(const FGuid& iId);
+    bool PostChange(const FGuid& iId, const TArray<::ULIS::FRectI>& iInvalidRects);
 
     bool IsInvalid() const;
-    bool IsPending() const;
 
 public:
-    void Render(bool iForceRender);
+    bool Render();
 
 private:
-    enum class eState
-    {
-        kValid = 0,
-        kInvalid = 1 << 0,
-        kPending = 1 << 1
-    };
+    void Render(TSharedPtr<IOdysseyImageRenderer> iRenderer, TSharedPtr<FOdysseyRasterBlock> iRasterBlock, const TArray<::ULIS::FRectI>& iInvalidRects);
 
+private:
     UOdysseyAnimation* mAnimation;
     TArray<FGuid> mComposition;
-    int mState;
+    TArray<FGuid> mInvalidIds;
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
-    TSharedPtr<::ULIS::FBlock> mULISBlock; //DEBUG
     FULISInvalidTileMap mInvalidTileMap;
     TSet<int> mFrameIndexes;
+    TSharedPtr<IOdysseyImageRenderer> mRenderer;
     
     FCriticalSection mEditMutex;
-    FCriticalSection mRenderMutex;
-    TSet<FGuid> mLockPendingIds;
 };

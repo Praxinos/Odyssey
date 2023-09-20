@@ -8,6 +8,8 @@
 
 class UOdysseyAnimationLayerImageVector;
 class FOdysseyVectorBlock;
+class FOdysseyMediaVector;
+
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVector
     : public FOdysseyAnimationCell
@@ -29,6 +31,7 @@ public:
     virtual void Serialize(FArchive& Ar);
         
     FOdysseyVectorEngine* GetEngine() const;
+    TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;
 
 public:
     // Event Listeners
@@ -40,6 +43,8 @@ public:
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    FCriticalSection* GetImageRenderingMutex() const;
+    bool IsImageRenderingGameThreadOnly() const;
 
 private:
     void OnVectorBlockInvalidated(bool iIsInteractive);
@@ -51,4 +56,6 @@ private:
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
     int mWidth;
     int mHeight;
+    mutable FCriticalSection mImageRenderingMutex;
+    mutable TWeakPtr<FOdysseyMediaVector> mMediaVector;
 };

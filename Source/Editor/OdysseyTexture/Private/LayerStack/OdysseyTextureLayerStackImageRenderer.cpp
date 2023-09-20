@@ -13,6 +13,18 @@ FOdysseyTextureLayerStackImageRenderer::FOdysseyTextureLayerStackImageRenderer(c
     mLayerRootRenderer = layerRoot->BuildImageRenderer(iRenderType);
 }
 
+void
+FOdysseyTextureLayerStackImageRenderer::Init()
+{
+    mLayerRootRenderer->Init();
+}
+
+bool
+FOdysseyTextureLayerStackImageRenderer::IsGameThreadOnly()
+{
+    return mLayerRootRenderer->IsGameThreadOnly();
+}
+
 TArray<::ULIS::FEvent>
 FOdysseyTextureLayerStackImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {

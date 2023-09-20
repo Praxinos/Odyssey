@@ -277,6 +277,7 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height());
 	TArray<::ULIS::FEvent> events;
 	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, mCurrentFrameIndex);
+	renderer->Init();
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
 	renderer->Copy(block, rect, ::ULIS::FVec2I(0), {});
 	ctx.Finish();
@@ -383,7 +384,7 @@ FOdysseyAnimationMediaSamples::Tick(float DeltaTime)
         return;
 
 	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, mCurrentFrameIndex);
-	
+	renderer->Init();
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
 	renderer->Copy(block, mInvalidTileMap.InvalidRects(), {});
 

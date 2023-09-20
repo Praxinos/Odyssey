@@ -246,7 +246,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                             continue;
 
                         TSharedPtr<IOdysseyImageRenderer> renderer = layer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, frame);
-
+                        renderer->Init();
                         lastEvent = renderer->Blend(iBlock, layer->GetImageRenderingBlendMode(), layer->GetImageRenderingOpacity(), rect, lastEvent);
                     }
 
@@ -575,6 +575,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     //Copy Current Cell block at given frameindex
     TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
     TSharedPtr<IOdysseyImageRenderer> renderer = currentCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrameIndex);
+    renderer->Init();
     renderer->Copy(block, block->Rect(), {});
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
     ctx.Finish();

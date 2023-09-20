@@ -17,6 +17,7 @@ public:
 public:
     //Destructor
     virtual ~FOdysseyMediaRaster();
+    FOdysseyMediaRaster();
     FOdysseyMediaRaster(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
 
 public:

@@ -28,6 +28,15 @@ FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(const U
     }
 }
 
+void
+FOdysseyAnimationLayerImageRenderer::Init()
+{
+    for (const FChildData& childData : mChildrenData)
+    {
+        childData.mRenderer->Init();
+    }
+}
+
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLayerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
@@ -72,4 +81,15 @@ FOdysseyAnimationLayerImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, co
         lastEvent = childData.mRenderer->Blend(ioBlock, childData.mBlendMode, childData.mOpacity, iRects, iPos, lastEvent);
     }
     return lastEvent;
+}
+
+bool
+FOdysseyAnimationLayerImageRenderer::IsGameThreadOnly()
+{
+    for (const FChildData& childData : mChildrenData)
+    {
+        if (childData.mRenderer->IsGameThreadOnly())
+            return true;
+    }
+    return false;
 }

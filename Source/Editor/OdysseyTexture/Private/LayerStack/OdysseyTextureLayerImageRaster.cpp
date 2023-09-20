@@ -114,6 +114,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                         continue;
 
                     TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+		            renderer->Init();
                     lastEvent = renderer->Blend(iBlock, textureLayer->GetImageRenderingBlendMode(), textureLayer->GetImageRenderingOpacity(), iBlock->Rect(), lastEvent);
                 }
                 return { lastEvent };

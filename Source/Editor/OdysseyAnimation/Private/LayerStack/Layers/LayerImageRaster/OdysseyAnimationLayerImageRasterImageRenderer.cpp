@@ -24,6 +24,16 @@ FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRaste
     if ( iRenderType == IOdysseyImageRenderer::eRenderType::Editor && iLayer->bIsLightTableActivated )
         mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer->GetLightTable().ToSharedRef(), iFrame, iRenderType, iDefaultRects);
 }
+    
+void
+FOdysseyAnimationLayerImageRasterImageRenderer::Init()
+{
+    if (mCellRenderer)
+        mCellRenderer->Init();
+
+    if (mLightTableRenderer)
+        mLightTableRenderer->Init();
+}
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLayerImageRasterImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
@@ -59,4 +69,13 @@ FOdysseyAnimationLayerImageRasterImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> 
         events = mLightTableRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
 
     return events;
+}
+
+bool
+FOdysseyAnimationLayerImageRasterImageRenderer::IsGameThreadOnly()
+{
+    if (mCellRenderer)
+        return mCellRenderer->IsGameThreadOnly();
+
+    return false;
 }

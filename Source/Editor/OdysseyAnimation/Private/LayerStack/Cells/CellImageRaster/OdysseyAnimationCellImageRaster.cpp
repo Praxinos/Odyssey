@@ -49,6 +49,7 @@ FOdysseyAnimationCellImageRaster::~FOdysseyAnimationCellImageRaster()
 FOdysseyAnimationCellImageRaster::FOdysseyAnimationCellImageRaster(UOdysseyAnimationLayerImageRaster* iLayer)
     : mLayer(iLayer)
     , mRasterBlock(MakeShared<FOdysseyRasterBlock>(mLayer))
+    , mMediaRaster(nullptr)
 {
     mRasterBlock->OnBlockChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockChanged);
     mRasterBlock->OnBlockCommited().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockCommited);
@@ -122,6 +123,13 @@ FOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, T
     return events;
 }
 
+bool
+FOdysseyAnimationCellImageRaster::IsImageRenderingGameThreadOnly() const
+{
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = mMediaRaster.Pin();
+    return !!mediaRaster;
+}
+
 TSharedPtr<IOdysseyImageRenderer>
 FOdysseyAnimationCellImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
@@ -164,10 +172,20 @@ FOdysseyAnimationCellImageRaster::OnBlockPtrChanged()
 FOdysseyMediaProvider
 FOdysseyAnimationCellImageRaster::GetMediaProvider(uint32 iFrameIndex) const
 {
+    //Don't create a mediaRaster if there is an image render in use
+    FScopeLock lock(&mImageRenderingMutex);
+
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRasterBlock());
+    mMediaRaster = mediaRaster;
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.Add(mediaRaster);
     return mediaProvider;
+}
+
+FCriticalSection*
+FOdysseyAnimationCellImageRaster::GetImageRenderingMutex() const
+{
+    return &mImageRenderingMutex;
 }
 
 TSharedPtr<FOdysseyAnimationCell>

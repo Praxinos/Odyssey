@@ -45,7 +45,8 @@ FOdysseyAnimationProxy::GetBlock(int iFrameIndex)
 
     TSharedPtr<FBlockData> blockData = mFramesToBlockData[iFrameIndex];
     TSharedPtr<::ULIS::FBlock> block = blockData->GetBlock(); //To keep the block in memory
-    blockData->Render(true); //Renders only if needed, so this is safe
+    if (!blockData->Render()) //Renders only if needed, so this is safe
+        return nullptr;
 
     return block;
 }
@@ -65,7 +66,6 @@ FOdysseyAnimationProxy::PostLoad()
 {
     mAnimationRange = mAnimation->GetFrameRange();
 
-    TArray<TSharedPtr<FBlockData>> blockDataToEnqueue;
     TMap<TSharedPtr<FBlockData>, TArray<int>> frameIndexesToAdd;
 
     if ( !mAnimationRange.GetUpperBound().IsOpen() && !mAnimationRange.GetLowerBound().IsOpen() )
@@ -79,11 +79,8 @@ FOdysseyAnimationProxy::PostLoad()
             TSharedPtr<FBlockData> blockData = GetBlockDataForComposition(composition);
             if ( !blockData )
             {
-                TSharedPtr<FOdysseyRasterBlock> block = MakeShared<FOdysseyRasterBlock>(mAnimation);
-                block->SetBlock(MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format()));
-                blockData = MakeShared<FBlockData>(mAnimation, composition, block);
+                blockData = MakeShared<FBlockData>(mAnimation, composition);
                 mBlockData.Add(blockData);
-                blockDataToEnqueue.Add(blockData);
             }
 
             if ( !frameIndexesToAdd.Contains(blockData) )
@@ -105,11 +102,13 @@ FOdysseyAnimationProxy::PostLoad()
         {
             blockData->AddFrameIndex(frameIndex);
             mFramesToBlockData.Add(frameIndex, blockData);
-        }
-    }
+        }        
 
-    for ( TSharedPtr<FBlockData> blockData : blockDataToEnqueue )
-    {
+        //Call PreChange with default Guid and PostChange with default Guid
+        //to invalidate the blockdata and create its renderer
+        //so that it is ready to be enqueued
+        blockData->PreChange(FGuid()); 
+        blockData->PostChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())});
         mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe
     }
 }
@@ -133,13 +132,17 @@ FOdysseyAnimationProxy::Run()
             continue;
         }
 
-        /* TSharedPtr<FBlockData> blockData;
+        TSharedPtr<FBlockData> blockData;
         if (!mPendingBlockData.Dequeue(blockData)) //PendingBlockData is a ThreadSafe queue
         {
             FPlatformProcess::Sleep(0.03); //Arbitrary number
             continue;
         }   
-        blockData->Render(false); */
+
+        if (!blockData->Render()) //if render failed
+        {
+            mPendingBlockData.Enqueue(blockData);
+        }
     }
     return 0;
 }
@@ -173,28 +176,27 @@ FOdysseyAnimationProxy::Serialize(FArchive& Ar)
 void
 FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+    //We use OnImageRenderingPreChanged because the proxy should be invalidated before anyone react to OnImageRenderingChanged
+    //Some systems could react to OnImageRenderingChanged to ask the proxy for the block
+    //But if you don't use OnImageRenderingPreChanged the proxy block could be in a valid state instead of an invalid state
+
     const FGuid& id = iEvent.GetId();
-
-    if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
+    for (TSharedPtr<FBlockData> blockData : mBlockData)
     {
-        const TArray<::ULIS::FRectI>& rects = iEvent.GetRects();
-        for (TSharedPtr<FBlockData> blockData : mBlockData)
-        {
-            if (blockData->GetComposition().Contains(id))
-            {
-                blockData->LockPending(id);
-                blockData->AppendInvalidRects(rects);
-            }
-        }
+        if (blockData->GetComposition().Contains(id))
+            blockData->PreChange(id);
     }
-    else if(iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
-    {
-        for (TSharedPtr<FBlockData> blockData : mBlockData)
-        {
-            if (blockData->GetComposition().Contains(id))
-                blockData->LockPending(id);
-        }
+}
 
+void
+FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
+{
+    if (iEvent.IsInteractive())
+        return;
+
+    const FGuid& id = iEvent.GetId();
+    if(iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+    {
         FInt32Range range = mAnimation->GetFrameRange();
 
         TArray<FInt32Range> rangesToRemove;
@@ -253,10 +255,8 @@ FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingC
                 blockData = GetBlockDataForComposition(composition);
                 if ( !blockData )
                 {
-                    TSharedPtr<FOdysseyRasterBlock> block = MakeShared<FOdysseyRasterBlock>(mAnimation);
-                    block->SetBlock(MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format()));
-                    blockData = MakeShared<FBlockData>(mAnimation, composition, block);
-                    blockData->LockPending(id);
+                    blockData = MakeShared<FBlockData>(mAnimation, composition);
+                    blockData->PreChange(id);
                     mBlockData.Add(blockData);
                 }
 
@@ -301,46 +301,36 @@ FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingC
             }
         );
     }
-}
 
-void
-FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
-{
-    if (iEvent.IsInteractive())
-        return;
-
-    FGuid id = iEvent.GetId();
-    
+    bool isValueChanged = iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange;
+    TArray<::ULIS::FRectI> defaultRects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
     for (TSharedPtr<FBlockData> blockData : mBlockData)
     {
         if (blockData->GetComposition().Contains(id))
         {
-            if (blockData->UnlockPending(id))
-                mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe
+            bool shouldEnqueue = blockData->PostChange(id, isValueChanged ? iEvent.GetRects() : defaultRects);
+            if (shouldEnqueue)
+                mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe */
         }
     }
 }
 
 //=================================================================
 
-FBlockData::FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition, TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
+FBlockData::FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition)
     : mAnimation(iAnimation)
     , mComposition(iComposition)
-    , mState((int)eState::kInvalid | (int)eState::kPending)
-    , mRasterBlock(iRasterBlock)
-    //, mULISBlock(iRasterBlock->GetBlock())
-    , mInvalidTileMap(64, iRasterBlock->GetWidth(), iRasterBlock->GetHeight())
+    , mInvalidTileMap(64, iAnimation->Width(), iAnimation->Height())
     , mFrameIndexes()
 {
-    mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, iRasterBlock->GetWidth(), iRasterBlock->GetHeight()));
+    mRasterBlock = MakeShared<FOdysseyRasterBlock>(mAnimation);
+    mRasterBlock->SetBlock(MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format()));
 }
 
 TSharedPtr<::ULIS::FBlock>
 FBlockData::GetBlock()
 {
-    FScopeLock renderLock(&mRenderMutex);
-    TSharedPtr<::ULIS::FBlock> block = mRasterBlock->GetBlock();
-    return block;
+    return mRasterBlock->GetBlock();
 }
 
 const TArray<FGuid>&
@@ -356,41 +346,34 @@ FBlockData::GetRasterBlock() const
 }
 
 void
-FBlockData::LockPending(const FGuid& iId)
+FBlockData::PreChange(const FGuid& iId)
 {
+    //here we say that the iId part of the rendering will be modified
+    //
     FScopeLock Lock(&mEditMutex);
-    mLockPendingIds.Add(iId);
-    mState = mState & ~((int)eState::kPending);
+
+    mRenderer = nullptr;
+    mInvalidIds.AddUnique(iId); //ensures that if we get multiple chained events to OnImageRenderingChanged, we only really invalidate once the last one has been processed
 }
 
 bool
-FBlockData::UnlockPending(const FGuid& iId)
+FBlockData::PostChange(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
 {
+    //here we say that the iId part of the rendering has been modified
+    //optionnally specific rectangles to invalidate can be given
+    //otherwise the full size of the rendering will be invalidated
     FScopeLock Lock(&mEditMutex);
+    mInvalidTileMap.Invalidate(iRects);
+    mInvalidIds.Remove(iId);
 
-    mLockPendingIds.Remove(iId);
-    if ( mLockPendingIds.IsEmpty())
+    bool isRenderable = mInvalidIds.IsEmpty() && !mInvalidTileMap.InvalidTiles().IsEmpty();
+    if (isRenderable)
     {
-        if (!mInvalidTileMap.InvalidTiles().IsEmpty())
-            mState = ((int)eState::kInvalid) | ((int)eState::kPending);
-    }
+        TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
+        mRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0], IOdysseyImageRenderer::eRenderType::Render, rects );
+    }    
 
-    return mState & ((int)eState::kPending);
-}
-
-void
-FBlockData::AppendInvalidRects(const TArray<::ULIS::FRectI>& iInvalidRects)
-{
-    FScopeLock Lock(&mEditMutex);
-    mInvalidTileMap.Invalidate(iInvalidRects);
-    mState = (int)eState::kInvalid; //not pending anymore, just invalid until SetPending() is called
-}
-
-TSharedPtr<IOdysseyImageRenderer>
-FBlockData::BuildRenderer()
-{
-    TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
-    return MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0], IOdysseyImageRenderer::eRenderType::Render, rects );
+    return !!mRenderer;
 }
 
 const TSet<int>&
@@ -416,100 +399,79 @@ FBlockData::RemoveFrameIndex(int iFrameIndex)
 bool
 FBlockData::IsInvalid() const
 {
-    return mState & ((int)eState::kInvalid);
-}
-
-bool
-FBlockData::IsPending() const
-{
-    return mState & ((int)eState::kPending);
+    return !!mRenderer;
 }
 
 void
-FBlockData::Render(bool iForceRender)
+FBlockData::Render(TSharedPtr<IOdysseyImageRenderer> iRenderer, TSharedPtr<FOdysseyRasterBlock> iRasterBlock, const TArray<::ULIS::FRectI>& iInvalidRects)
 {
-    FScopeLock renderLock(&mRenderMutex);
+    FOdysseyRasterBlockMutator rasterBlockMutator(iRasterBlock, false);
+    rasterBlockMutator.EditTilesFromRects(
+        iInvalidRects,
+        FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
+            {
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+                TArray<::ULIS::FRectI> rects = iTileMap.InvalidRects();
+
+                TArray<::ULIS::FEvent> clearEvents;
+                for (const ::ULIS::FRectI& rect : rects)
+                {    
+                    ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(iBlock).Build();
+                    ctx.Clear(*iBlock, rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
+                    clearEvents.Add(eventClearBlock);
+                }
+
+                return iRenderer->Copy(iBlock, rects, clearEvents);
+            }
+        )
+    );
+    rasterBlockMutator.Commit();
+}
+
+bool
+FBlockData::Render()
+{
     mEditMutex.Lock(); //Lock any other thread from editing values (like mInvalidRects)
 
     //If it is already rendered, don't need to render it again
-    if (!IsInvalid())
-    {
-        mEditMutex.Unlock();
-        return;
-    }
-
-    if (!iForceRender && !IsPending())
-    {
-        mEditMutex.Unlock();
-        return;
-    }
-
     //If not used, it is useless to render it
-    if (mFrameIndexes.IsEmpty())
+    if (!IsInvalid() || mFrameIndexes.IsEmpty())
     {
         mEditMutex.Unlock();
-        return;
+        return true;
     }
 
-    //Get all variables we need to render, to ensure the values we use are not modified during the process
-    TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
-    TSharedPtr<IOdysseyImageRenderer> renderer = BuildRenderer();
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlock;
-
-    //Clear the invalid rects, before rendering so we can detect if new invalid rects are present when we are done
-    mInvalidTileMap.Clear();
-    mEditMutex.Unlock();
-
-    //Render until there is no invalid rects to render anymore
-    while (!invalidRects.IsEmpty())
-    {   
-        FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-        rasterBlockMutator.EditTilesFromRects(
-            invalidRects,
-            FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
-                {
-                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-                    TArray<::ULIS::FRectI> rects = iTileMap.InvalidRects();
-
-                    TArray<::ULIS::FEvent> clearEvents;
-                    for (const ::ULIS::FRectI& rect : rects)
-                    {    
-                        ::ULIS::FEvent eventClearBlock = FULISEventBuilder().RetainBlock(iBlock).Build();
-                        ctx.Clear(*iBlock, rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClearBlock);
-                        clearEvents.Add(eventClearBlock);
-                    }
-
-                    return renderer->Copy(iBlock, rects, clearEvents);
-                }
-            )
-        );
-        rasterBlockMutator.Commit();
-
-        //We are done, check if there is new rectangles to render
-        mEditMutex.Lock();
-
-        //No invalid rects to render
-        if ( mInvalidTileMap.InvalidTiles().IsEmpty() )
+    while(mRenderer)
+    {
+        //Lock any data that could change while accessing
+        mRenderer->Lock();
+        
+        if (!IsInGameThread() && mRenderer->IsGameThreadOnly())
         {
-            mState = (int)eState::kValid;
+            mRenderer->Unlock();
             mEditMutex.Unlock();
-            break;
+            return false;
         }
+        
+        mRenderer->Init();
 
-        //new invalid rects to render, get the new renderer and invalid rects
-        mInvalidTileMap.Invalidate(invalidRects);
-        invalidRects = mInvalidTileMap.InvalidRects();
+        //Get all variables we need to render, to ensure the values we use are not modified during the process
+        TSharedPtr<IOdysseyImageRenderer> renderer = mRenderer; //renderer should be created in main thread to avoid crashes
+        TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
+        TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlock;
+
+        //Clear the invalid rects, before rendering so we can detect if new invalid rects are present when we are done
+        mRenderer = nullptr;
         mInvalidTileMap.Clear();
 
-        if (!iForceRender && !IsPending())
-        {
-            mInvalidTileMap.Invalidate(invalidRects);
-            mEditMutex.Unlock();
-            break;
-        }
-
-        renderer = BuildRenderer();
         mEditMutex.Unlock();
-    }   
+
+        Render(renderer, rasterBlock, invalidRects);
+
+        renderer->Unlock();
+        mEditMutex.Lock();
+    }
+    mEditMutex.Unlock();
+    return true;
 }
