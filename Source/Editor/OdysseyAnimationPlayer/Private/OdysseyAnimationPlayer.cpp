@@ -12,6 +12,10 @@ void
 UOdysseyAnimationPlayer::PostInitProperties()
 {
     Super::PostInitProperties();
+
+    if (HasAnyFlags(RF_ClassDefaultObject))
+        return;
+
 	UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
 }
 
@@ -261,6 +265,10 @@ void
 UOdysseyAnimationPlayer::UpdateTexture()
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture);
+
+	if (!Animation)
+		return;
+
 	int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
 	if ( frameIndex == INDEX_NONE )
 		return;
@@ -291,8 +299,9 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
 	if (!mInvalidTileMap.InvalidTiles().IsEmpty())
 	{
-		mRenderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
-		mRenderer->Init();
+		TSharedPtr<IOdysseyImageRenderer> renderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
+		renderer->Init();
+		mRenderer = renderer; //Init Renderer before assigning mRenderer to avoid caching (raster / vector blocks) when unneeded
 
 		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
 		TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();

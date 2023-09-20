@@ -74,5 +74,13 @@ FOdysseyAnimationLayerImageVectorImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> 
 bool
 FOdysseyAnimationLayerImageVectorImageRenderer::IsGameThreadOnly()
 {
-    return mCellRenderer->IsGameThreadOnly();
+    bool isGameThreadOnly = false;
+
+    if (mCellRenderer)
+        isGameThreadOnly |= mCellRenderer->IsGameThreadOnly();
+
+    if (mLightTableRenderer)
+        isGameThreadOnly |= mLightTableRenderer->IsGameThreadOnly();
+
+    return isGameThreadOnly;
 }

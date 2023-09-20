@@ -22,13 +22,13 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
 {
     TSharedPtr<FOdysseyVectorBlock> vectorBlock = mCell->GetVectorBlock();
 
+    if (vectorBlock)
+        mBlock = vectorBlock->GetBlock(); //Store block before rendering to avoid looking twice for the block in cache
+
     {   
         FScopeLock renderLock(&mEngineMutex);
         vectorBlock->Render();
     }
-
-    if (vectorBlock)
-        mBlock = vectorBlock->GetBlock();
 }
 
 TArray<::ULIS::FEvent>

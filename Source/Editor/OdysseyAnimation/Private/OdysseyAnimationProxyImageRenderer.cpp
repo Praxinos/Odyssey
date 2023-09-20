@@ -22,6 +22,10 @@ FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const U
 void
 FOdysseyAnimationProxyImageRenderer::Init()
 {
+    if ( GetRenderType() != IOdysseyImageRenderer::eRenderType::Render )
+    {
+        mAnimationRenderer->Init();
+    }
 }
 
 TArray<::ULIS::FEvent>
@@ -34,18 +38,7 @@ FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
         mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory
 
     if ( !mBlock )
-    {
-        if (mAnimationRenderer)
-        {
-            mAnimationRenderer->Lock();
-            mAnimationRenderer->Init(); //Init only if needed, which means loading layer blocks only if needed
-            TArray<::ULIS::FEvent> events = mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
-            mAnimationRenderer->Unlock();
-            return events;
-        }
-
         return iWaitList;
-    }
 
     return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
@@ -54,30 +47,13 @@ TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
-    {
-        mAnimationRenderer->Lock();
-        mAnimationRenderer->Init(); //Init only if needed, which means loading layer blocks only if needed
-        TArray<::ULIS::FEvent> events = mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
-        mAnimationRenderer->Unlock();
-        return events;
-    }
+        return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 
     if ( !mBlock )
         mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory
 
     if ( !mBlock )
-    {
-        if (mAnimationRenderer)
-        {
-            mAnimationRenderer->Lock();
-            mAnimationRenderer->Init(); //Init only if needed, which means loading layer blocks only if needed
-            TArray<::ULIS::FEvent> events = mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
-            mAnimationRenderer->Unlock();
-            return events;
-        }
-
         return iWaitList;
-    }
 
     return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
 }
