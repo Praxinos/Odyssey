@@ -127,6 +127,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
 		float frame = (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mExtension->Timeline()->GetFrameWidth() + mExtension->Timeline()->GetOffset());
 		FTimespan time = FTimespan::FromSeconds(frame / mExtension->Animation()->GetFramesPerSecond());
 		mExtension->Player()->Stop();
+		mExtension->Player()->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
 		mExtension->Player()->SeekToTime(time);
 
 		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
@@ -159,7 +160,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, co
 		const float minScrub = 0.0f;
 		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mExtension->Timeline()->GetFrameWidth() + mExtension->Timeline()->GetOffset();
 		FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", (int)frame);
-		
+		mExtension->Player()->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
 		mIsScrubbing = false;
 		return FReply::Handled().ReleaseMouseCapture();
 	}

@@ -88,10 +88,18 @@ public:
     void SetRenderHUD(bool iRenderHUD);
 
 private:
+    enum eBlockState
+    {
+        kCacheUpToDate,
+        kNeedsRender,
+        kCacheInvalid
+    };
+
     static void CleanupBlock(uint8* iData, void* iInfo);
     void Render(::ULIS::FBlock& ioBlock);
     void OnVectorEngineSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
     void Invalidate(bool iIsInteractive);
+    void SetState(eBlockState iState);
 
 private:
     //The stable block for which edition is finished
@@ -110,13 +118,6 @@ private:
 
     FCriticalSection mMutex;
 
-    enum eBlockState
-    {
-        kCacheUpToDate,
-        kNeedsRender,
-        kCacheInvalid
-    };
-
     struct FBlockData
     {
         FGuid mId;
@@ -126,6 +127,7 @@ private:
         eBlockState mState;
     };
 
+    eBlockState mState;
     FBlockData* mBlockData;
     FOnInvalidated mOnInvalidated;
 };

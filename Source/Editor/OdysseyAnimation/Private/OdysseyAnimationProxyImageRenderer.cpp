@@ -23,10 +23,12 @@ void
 FOdysseyAnimationProxyImageRenderer::Init()
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Init);
-    if ( GetRenderType() != IOdysseyImageRenderer::eRenderType::Render )
-    {
+    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor )
         mAnimationRenderer->Init();
-    }
+
+    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Render )
+        mBlock = mProxy->GetBlock(mFrameIndex);
+
 }
 
 TArray<::ULIS::FEvent>

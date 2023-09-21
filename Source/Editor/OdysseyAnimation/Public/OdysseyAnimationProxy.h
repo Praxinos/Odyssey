@@ -69,10 +69,11 @@ public:
     void AddFrameIndex(int iFrameIndex);
     void RemoveFrameIndex(int iFrameIndex);
 
-    void PreChange(const FGuid& iId);
-    bool PostChange(const FGuid& iId, const TArray<::ULIS::FRectI>& iInvalidRects);
+    void PreChange(const FGuid& iId, const TArray<::ULIS::FRectI>& iInvalidRects);
+    bool PostChange(const FGuid& iId);
 
     bool IsInvalid() const;
+    bool IsReadyToRender() const;
 
 public:
     bool Render();
@@ -88,6 +89,8 @@ private:
     FULISInvalidTileMap mInvalidTileMap;
     TSet<int> mFrameIndexes;
     TSharedPtr<IOdysseyImageRenderer> mRenderer;
+    bool mIsInvalid;
     
     FCriticalSection mEditMutex;
+    FCriticalSection mRenderMutex;
 };

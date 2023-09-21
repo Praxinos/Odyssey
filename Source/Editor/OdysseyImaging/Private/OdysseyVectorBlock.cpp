@@ -19,6 +19,7 @@ FOdysseyVectorBlock::~FOdysseyVectorBlock()
 }
 
 FOdysseyVectorBlock::FOdysseyVectorBlock()
+    : mBlockData(nullptr)
 {
     FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorEngineSignal );
 }
@@ -89,19 +90,22 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
     if (mRenderHUD)
         mEngine->RenderHUD(mBlockData->mBLImage.Get());
 
-    //Get a ULIS block pointing to the BLImage
-    BLImageData imgData;
-    mBlockData->mBLImage->getData(&imgData);
-    ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+    {
+        TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
+        //Get a ULIS block pointing to the BLImage
+        BLImageData imgData;
+        mBlockData->mBLImage->getData(&imgData);
+        ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
 
-    //Unpremultiply the render block
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-    ctx.Unpremultiply(renderBlock);
-    ctx.Finish();
+        //Unpremultiply the render block
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
+        ctx.Unpremultiply(renderBlock);
+        ctx.Finish();
 
-    //Convert the right ULIS block in the expected ULIS Format
-    ctx.ConvertFormat(renderBlock, ioBlock);
-    ctx.Finish();
+        //Convert the right ULIS block in the expected ULIS Format
+        ctx.ConvertFormat(renderBlock, ioBlock);
+        ctx.Finish();
+    }
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -111,10 +115,10 @@ FOdysseyVectorBlock::Render()
     if ( !block )
         return nullptr;
 
-    if (mBlockData->mState == kNeedsRender)
+    if (mState == kNeedsRender)
     {
         Render(*block);
-        mBlockData->mState = kCacheInvalid;
+        SetState(kCacheInvalid);
     }
 
     return block;
@@ -173,7 +177,7 @@ FOdysseyVectorBlock::GetBlock()
         //ULIS Block : Used externally to read/blend the pixels in Unreal
         block = MakeShared<::ULIS::FBlock>((uint8*)mBlockData->mBuffer.GetData(), mWidth, mHeight, mFormat);
         
-        mBlockData->mState = kCacheUpToDate;
+        SetState(kCacheUpToDate);
     }
     else
     {
@@ -181,7 +185,7 @@ FOdysseyVectorBlock::GetBlock()
         mBlockData->mBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
         Render(*block);
 
-        mBlockData->mState = kCacheInvalid;
+        SetState(kCacheInvalid);
     }
 
     block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyVectorBlock::CleanupBlock, mBlockData));
@@ -204,18 +208,26 @@ FOdysseyVectorBlock::OnVectorEngineSignal( FOdysseyVectorScene* iScene, uint64 i
 }
 
 void
-FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
+FOdysseyVectorBlock::SetState(eBlockState iState)
 {
     TSharedPtr<::ULIS::FBlock> block = mBlock.Pin();
-    if (!block)
-        return;
+    if (block)
+    {
+        mBlockData->mState = iState;
+    }
+    mState = iState;
+}
 
-    if (mBlockData->mState == kCacheUpToDate)
+void
+FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
+{
+    if (mState == kCacheUpToDate)
     {
         //Remove block from cache and invalidate cache
         FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
-        cache.Remove(mBlockData->mId.ToString());
+        cache.Remove(mId.ToString());
     }
-    mBlockData->mState = kNeedsRender;
+
+    SetState(kNeedsRender);
     mOnInvalidated.Broadcast(iIsInteractive);
 }
