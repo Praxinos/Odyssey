@@ -306,8 +306,8 @@ UOdysseyAnimationPlayer::UpdateTexture()
 		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
 		TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
 		
-		TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture::Copy);
 		{
+			TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture::Copy);
 			for ( const ::ULIS::FRectI& rect : invalidRects )
 			{
 				TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->Format());
@@ -370,6 +370,7 @@ UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBl
 	//convert block to BGRA8 if needed*
 	if ( format == ::ULIS::Format_BGRA8 )
 	{
+		TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::CopyBlocks);
 		TArray<TSharedPtr<FUpdateTextureRegion2D>> regions; //Keeps region object alive until fence.Wait()
 		for ( int i = 0; i < iBlocks.Num(); i++ )
 		{
