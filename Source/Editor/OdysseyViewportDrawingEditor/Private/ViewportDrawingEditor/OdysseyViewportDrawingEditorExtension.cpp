@@ -92,14 +92,15 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
 	{
 		TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(mCurrentSource);
 		UTexture2D* texture = textureSource->GetTexture();
-		if (texture && Component())
+		if (texture)
 		{
 			texture->MipGenSettings = mPreviousMipSettings;
 			texture->UpdateResource();
 			FTextureCompilingManager::Get().FinishCompilation({ texture });
-			TArray<UPackage*> packages;
-			packages.Add(texture->GetPackage());
-			UEditorLoadingAndSavingUtils::SavePackages(packages, true);
+			texture->MarkPackageDirty();
+			//TODO: if user quits Unreal without quitting Iliad mode first, the texture stays in NoMipMaps.
+			//Not the end of the world, but if users notice it, we may want to dig deeper into this issue.
+			//This is a better alternative than forcing the save of the texture though (which was the previous version of this code)
 		}
 	}
 	
@@ -112,13 +113,13 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
 	{
 		TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(mCurrentSource);
 		UTexture2D* texture = textureSource->GetTexture();
-		if (texture && Component())
+		if (texture)
 		{
-			//TODO: Init Texture
 			mPreviousMipSettings = texture->MipGenSettings;
 			texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
 			texture->UpdateResource();
 			FTextureCompilingManager::Get().FinishCompilation({ texture });
+			texture->MarkPackageDirty();
 		}
 	}
 

@@ -10,7 +10,6 @@
 
 #include "IMeshPaintGeometryAdapter.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "UObject/SavePackage.h"
 #include "TextureCompiler.h"
 #include "FileHelpers.h"
 #include "Kismet/GameplayStatics.h"
