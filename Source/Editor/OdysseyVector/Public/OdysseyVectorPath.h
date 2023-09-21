@@ -333,6 +333,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
         void AlterRadius( double iDeltaRadius );
         static ::ULIS::FVec2D GetAverageHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
+        void PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;

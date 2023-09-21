@@ -53,8 +53,6 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 {
     UOdysseyAnimation* animation = mLayer->GetAnimation();
 
-    BLImageData imgData;
-
     mWidth = iWidth;
     mHeight = iHeight;
 
@@ -64,8 +62,6 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsColoredChanged );
-
-    mEngine->GetBLImage()->getData( &imgData );
 
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mEngine, iWidth, iHeight, animation->Format());
@@ -170,6 +166,8 @@ FOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImage
 {
     if (iLayer != mLayer)
         return;
+
+    mEngine->Invalidate();
 
     mVectorBlock->SetRenderFlags(mLayer->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     ImageRenderingChanged();

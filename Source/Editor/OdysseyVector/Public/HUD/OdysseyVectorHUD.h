@@ -4,6 +4,7 @@
 #include <ULIS>
 
 class FOdysseyVectorObject;
+class FOdysseyVectorVertex;
 class FOdysseyVectorPoint;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;

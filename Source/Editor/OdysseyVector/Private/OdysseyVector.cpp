@@ -228,3 +228,78 @@ FOdysseyVector::BezierExtract( ::ULIS::FVec2D& iP0
 
     ::ULIS::CubicBezierSplitAtParameter<::ULIS::FVec2D>( &oP0, &oP1, &oP2, &oP3, toT );
 }
+
+// De Casteljau algorithm. Not the fastest but for such task we didn't need speed.
+// Very accurate though.
+bool
+FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
+                          , const ::ULIS::FRectD& iMaskRect
+                          , uint8* iPixelData )
+{
+    double xmin = ::ULIS::FMath::Min4( iWorldBezier[0].x, iWorldBezier[1].x
+                                     , iWorldBezier[2].x, iWorldBezier[3].x );
+    double ymin = ::ULIS::FMath::Min4( iWorldBezier[0].y, iWorldBezier[1].y
+                                     , iWorldBezier[2].y, iWorldBezier[3].y );
+    double xmax = ::ULIS::FMath::Max4( iWorldBezier[0].x, iWorldBezier[1].x
+                                     , iWorldBezier[2].x, iWorldBezier[3].x );
+    double ymax = ::ULIS::FMath::Max4( iWorldBezier[0].y, iWorldBezier[1].y
+                                     , iWorldBezier[2].y, iWorldBezier[3].y );
+
+    ::ULIS::FRectD bezierRect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+    ::ULIS::FRectD intersectRect = bezierRect & iMaskRect;
+/*
+    if( intersectRect.Area() )
+    {
+*/
+        if( ( fabs( iWorldBezier[0].x - iWorldBezier[1].x ) < 1.0f )
+         && ( fabs( iWorldBezier[0].x - iWorldBezier[2].x ) < 1.0f )
+         && ( fabs( iWorldBezier[0].x - iWorldBezier[3].x ) < 1.0f )
+         && ( fabs( iWorldBezier[0].y - iWorldBezier[1].y ) < 1.0f )
+         && ( fabs( iWorldBezier[0].y - iWorldBezier[2].y ) < 1.0f )
+         && ( fabs( iWorldBezier[0].y - iWorldBezier[3].y ) < 1.0f ) )
+        {
+            int32 x = (int)iWorldBezier[0].x;
+            int32 y = (int)iWorldBezier[0].y;
+
+            if( ( x >= 0 ) && ( x < (int)iMaskRect.w ) && ( y >= 0 ) && ( y < (int)iMaskRect.h ) )
+            {
+                uint32 offset = ( y * iMaskRect.w ) + x;
+
+                if ( iPixelData[offset] != 0 ) 
+                {
+                    return true;
+                }
+            }
+        }
+        else // refine
+        {
+            ::ULIS::FVec2D childBezier[2][4];
+
+            memcpy( childBezier[0], iWorldBezier, sizeof( childBezier[0] ) );
+            memcpy( childBezier[1], iWorldBezier, sizeof( childBezier[1] ) );
+
+            ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
+                                                                      , &childBezier[0][1]
+                                                                      , &childBezier[0][2]
+                                                                      , &childBezier[0][3]
+                                                                      , 0.5f );
+            if( PickBezier( childBezier[0], iMaskRect, iPixelData ) == true )
+            {
+                return true;
+            }
+
+            ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
+                                                                      , &childBezier[1][1]
+                                                                      , &childBezier[1][2]
+                                                                      , &childBezier[1][3]
+                                                                      , 0.5f );
+            if( PickBezier( childBezier[1], iMaskRect, iPixelData ) == true )
+            {
+                return true;
+            }
+        }
+/*
+    }
+*/
+    return false;
+}

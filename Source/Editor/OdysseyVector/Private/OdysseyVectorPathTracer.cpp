@@ -41,9 +41,11 @@ FOdysseyVectorPathTracer::SetDotLimit( double iDotLimit )
 void
 FOdysseyVectorPathTracer::Init( FOdysseyVectorScene* iScene )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     BLImageData imageData;
 
-    iScene->GetEngine()->GetColorImageSize( &mWidth, &mHeight );
+    mWidth = vectorEngine->GetWidth();
+    mHeight = vectorEngine->GetHeight();
 
     if( mBLImage )
     {

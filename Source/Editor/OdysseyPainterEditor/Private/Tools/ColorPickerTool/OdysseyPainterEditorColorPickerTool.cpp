@@ -47,20 +47,6 @@ UOdysseyPainterEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointInTe
     return false;
 }
 
-bool
-UOdysseyPainterEditorColorPickerTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                                     , FOdysseyVectorScene* iScene
-                                                     , const FOdysseyPoint& iPointInTexture
-                                                     , const FKey& iKey )
-{
-    FColor color = iEngine->GetColorImagePixelValue( iPointInTexture.x, iPointInTexture.y );
-    ::ULIS::FColor ulisColor = ::ULIS::FColor::RGBA8( color.R, color.G, color.B, color.A );
-
-    GetEditor()->PaintColor(ulisColor, true);
-
-    return false;
-}
-
 void
 UOdysseyPainterEditorColorPickerTool::Commit()
 {

@@ -254,10 +254,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                                     , FOdysseyVectorSegment* iOwnerSegment );
         void GetSectionsForSegment( FOdysseyVectorSegment* iSegment
                                   , std::vector<FOdysseyVectorSection*>& oSectionArray );
-        bool PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
-                       , BLImage* iMaskImage
-                       , const ::ULIS::FRectD& iMaskRect
-                       , uint8* iPixelData );
 
     protected:
         static const uint32 NOCYCLE  = 0;

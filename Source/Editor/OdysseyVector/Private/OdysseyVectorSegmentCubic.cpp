@@ -257,6 +257,23 @@ FOdysseyVectorSegmentCubic::ResetPolygonCache( )
     mPolygonCache.reserve( 200 );
 }
 
+// mask-based version of the picking process
+bool
+FOdysseyVectorSegmentCubic::Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData )
+{
+    BLMatrix2D& worldMatrix = GetPath()->GetWorldMatrix();
+    BLPoint pt[4] = { worldMatrix.mapPoint( mBezier[0].x, mBezier[0].y )
+                    , worldMatrix.mapPoint( mBezier[1].x, mBezier[1].y )
+                    , worldMatrix.mapPoint( mBezier[2].x, mBezier[2].y )
+                    , worldMatrix.mapPoint( mBezier[3].x, mBezier[3].y ) };
+    ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
+                                    , ::ULIS::FVec2D( pt[1].x, pt[1].y )
+                                    , ::ULIS::FVec2D( pt[2].x, pt[2].y )
+                                    , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
+
+    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iPixelData );
+}
+
 bool
 FOdysseyVectorSegmentCubic::Pick( double iLocalX
                                 , double iLocalY

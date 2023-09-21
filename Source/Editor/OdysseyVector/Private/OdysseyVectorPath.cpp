@@ -2039,3 +2039,24 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
         }
     }
 }
+
+void
+FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray )
+{
+    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    BLImageData maskData;
+    ::ULIS::FRectD maskRect;
+    bool picked = false;
+
+    maskImage->getData( &maskData );
+
+    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
+
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        if( segment->Pick( maskRect, (uint8*)maskData.pixelData ) )
+        {
+            oPickedSegmentArray.push_back( segment );
+        }
+    }
+}
