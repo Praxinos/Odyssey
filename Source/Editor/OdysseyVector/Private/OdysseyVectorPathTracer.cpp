@@ -509,6 +509,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                                , double iWorldY
                                , double iRadius )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorPathTracer::Trace);
     BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
     uint32 indexn = mPointArray.size();
     FOdysseyVectorSegment* newSegment = nullptr;

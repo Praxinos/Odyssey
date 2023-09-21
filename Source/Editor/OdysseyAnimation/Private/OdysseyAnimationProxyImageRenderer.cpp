@@ -22,6 +22,7 @@ FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const U
 void
 FOdysseyAnimationProxyImageRenderer::Init()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Init);
     if ( GetRenderType() != IOdysseyImageRenderer::eRenderType::Render )
     {
         mAnimationRenderer->Init();
@@ -31,6 +32,7 @@ FOdysseyAnimationProxyImageRenderer::Init()
 TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Blend);
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
         return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 
@@ -46,6 +48,7 @@ FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
 TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Copy);
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
         return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 

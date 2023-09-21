@@ -36,6 +36,7 @@ void
 FOdysseyVectorUndoPathExtend::RecordSegment( FOdysseyVectorSegment* iNewSegment
                                            , FOdysseyVectorVertex* iNewVertex )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorUndoPathExtend::RecordSegment);
     mAddedSegmentArray.push_back( iNewSegment );
 
     if( iNewVertex )

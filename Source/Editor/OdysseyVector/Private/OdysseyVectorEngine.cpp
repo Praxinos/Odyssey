@@ -165,6 +165,7 @@ FOdysseyVectorEngine::GetScene()
 void
 FOdysseyVectorEngine::RenderHUD( BLImage* iBLImage/*FOdysseyVectorScene* iScene */ )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
     std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
 
     if( iBLImage )
@@ -207,6 +208,7 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 void
 FOdysseyVectorEngine::Render( BLImage* iBLImage, uint64 iDrawingFlags )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
     if( iBLImage )
     {
         UseImage( iBLImage );
@@ -892,5 +894,6 @@ FOdysseyVectorEngine::OnSignalDelegate()
 void
 FOdysseyVectorEngine::Signal( uint64 iSignalFlags )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Signal);
     OnSignalDelegate().Broadcast( mScene, iSignalFlags );
 }

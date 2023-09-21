@@ -277,14 +277,14 @@ UOdysseyAnimationPlayer::UpdateTexture()
 	if ( imageRenderingComposition != mImageRenderingComposition )
 	{
 		mImageRenderingComposition = imageRenderingComposition;
-		mRenderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
-		mRenderer->Init();
+		TSharedPtr<IOdysseyImageRenderer> renderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
+		renderer->Init();
+		mRenderer = renderer; //Init Renderer before assigning mRenderer to avoid caching (raster / vector blocks) when unneeded
 
 		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height());
 		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->Width(), Animation->Height(), Animation->Format());
 
 		{
-			TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture);
 			mRenderer->Copy(block, rect, {});
 
 			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
@@ -305,19 +305,27 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
 		TArray<TSharedPtr<::ULIS::FBlock>> blocks;
 		TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
-		for ( const ::ULIS::FRectI& rect : invalidRects )
-		{
-			TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->Format());
-			mRenderer->Copy(block, rect, ::ULIS::FVec2I(0), {});
-			blocks.Add(block);
-		}
 		
-		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
-		ctx.Finish();
+		TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture::Copy);
+		{
+			for ( const ::ULIS::FRectI& rect : invalidRects )
+			{
+				TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->Format());
+				mRenderer->Copy(block, rect, ::ULIS::FVec2I(0), {});
+				blocks.Add(block);
+			}
+			
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
+			ctx.Finish();
+		}
 
 		CopyBlocksToTexture(blocks, invalidRects);
+
 		mInvalidTileMap.Clear();
-		mOnTextureUpdated.Broadcast();
+		{
+			TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture::OnTextureUpdated);
+			mOnTextureUpdated.Broadcast();
+		}
 	}
 }
 
@@ -353,6 +361,7 @@ UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingCha
 void
 UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBlock>>& iBlocks, const TArray<::ULIS::FRectI>& iRects)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::CopyBlocksToTexture);
 	if ( iBlocks.IsEmpty() )
 		return;
 

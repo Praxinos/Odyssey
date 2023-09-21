@@ -98,6 +98,7 @@ UOdysseyAnimation::GetFramesPerSecond() const
 int
 UOdysseyAnimation::GetFrameIndexAtTime(FTimespan iTime) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameIndexAtTime);
 	//Add 1 tick to be sure to retrieve the right frame in case the frame starts between iTime and iTime + 1 tick
 	FTimespan time = iTime + FTimespan(1); 
 	return int(time.GetTotalSeconds() * GetFramesPerSecond());
@@ -236,12 +237,14 @@ bool UOdysseyAnimation::Validate() const
 TSharedPtr<IOdysseyImageRenderer>
 UOdysseyAnimation::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::BuildImageRenderer);
     return MakeShared<FOdysseyAnimationProxyImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
 }
 
 TArray<FGuid>
 UOdysseyAnimation::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetImageRenderingComposition);
     TArray<FGuid> idComposition = { GetImageRenderingId() };
 
     if (!mLayerStack)

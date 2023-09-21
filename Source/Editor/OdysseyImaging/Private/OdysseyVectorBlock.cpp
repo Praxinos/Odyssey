@@ -82,6 +82,7 @@ FOdysseyVectorBlock::GetRenderFlags() const
 void
 FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
 {   
+	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
     //Render in a BLImage
     mEngine->Render(mBlockData->mBLImage.Get(), mRenderFlags);
 
@@ -209,11 +210,12 @@ FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
     if (!block)
         return;
 
-    //Remove block from cache and invalidate cache
-    FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
-    cache.Remove(mBlockData->mId.ToString());
-
+    if (mBlockData->mState == kCacheUpToDate)
+    {
+        //Remove block from cache and invalidate cache
+        FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
+        cache.Remove(mBlockData->mId.ToString());
+    }
     mBlockData->mState = kNeedsRender;
-
     mOnInvalidated.Broadcast(iIsInteractive);
 }
