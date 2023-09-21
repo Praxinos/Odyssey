@@ -72,6 +72,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         virtual uint32 GetClass() { return mStaticClass; };
 
         ~FOdysseyVectorBucket();
+        FOdysseyVectorBucket( FOdysseyVectorObject* iOwner, FOdysseyVectorBucket* iImportFrom );
         FOdysseyVectorBucket( FOdysseyVectorObject* iOwner, double iX, double iY,  bool iPropagated );
         /**
          * @brief Set this bucket's solid color

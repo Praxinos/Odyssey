@@ -33,7 +33,7 @@ FOdysseyVectorBlock::Init(const FGuid& iId, FOdysseyVectorEngine* iEngine, int i
     mHeight = iHeight;
     mFormat = iFormat;
     mRenderFlags = 0;
-    mRenderHUD = false;
+    mNeedsRender = false;
 }
 
 int
@@ -64,16 +64,6 @@ FOdysseyVectorBlock::SetRenderFlags(uint64 iRenderFlags)
     Invalidate(false);
 }
 
-void
-FOdysseyVectorBlock::SetRenderHUD(bool iRenderHUD)
-{
-    if (iRenderHUD == mRenderHUD)
-        return;
-
-    mRenderHUD = iRenderHUD;
-    Invalidate(false);
-}
-
 uint64
 FOdysseyVectorBlock::GetRenderFlags() const
 {
@@ -87,8 +77,8 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
     //Render in a BLImage
     mEngine->Render(mBlockData->mBLImage.Get(), mRenderFlags);
 
-    if (mRenderHUD)
-        mEngine->RenderHUD(mBlockData->mBLImage.Get());
+    /*if (iRenderHUD)
+        mEngine->RenderHUD(mBlockData->mBLImage.Get());*/
 
     {
         TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
@@ -115,10 +105,10 @@ FOdysseyVectorBlock::Render()
     if ( !block )
         return nullptr;
 
-    if (mState == kNeedsRender)
+    if (mNeedsRender)
     {
         Render(*block);
-        SetState(kCacheInvalid);
+        mNeedsRender = false;
     }
 
     return block;
@@ -129,7 +119,7 @@ FOdysseyVectorBlock::CleanupBlock(uint8* iData, void* iInfo)
 {
     FBlockData* blockData = static_cast<FBlockData*>(iInfo);
 
-    if ( blockData->mState == kCacheInvalid )
+    if ( blockData->mNeedsCache )
     {
         FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
         FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(blockData->mBuffer.GetView());
@@ -176,16 +166,15 @@ FOdysseyVectorBlock::GetBlock()
     {
         //ULIS Block : Used externally to read/blend the pixels in Unreal
         block = MakeShared<::ULIS::FBlock>((uint8*)mBlockData->mBuffer.GetData(), mWidth, mHeight, mFormat);
-        
-        SetState(kCacheUpToDate);
+        mBlockData->mNeedsCache = false;
     }
     else
     {
         block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, mFormat);
         mBlockData->mBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
         Render(*block);
-
-        SetState(kCacheInvalid);
+        mBlockData->mNeedsCache = true;
+        mNeedsRender = false;
     }
 
     block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyVectorBlock::CleanupBlock, mBlockData));
@@ -207,6 +196,7 @@ FOdysseyVectorBlock::OnVectorEngineSignal( FOdysseyVectorScene* iScene, uint64 i
     }
 }
 
+/*
 void
 FOdysseyVectorBlock::SetState(eBlockState iState)
 {
@@ -217,17 +207,24 @@ FOdysseyVectorBlock::SetState(eBlockState iState)
     }
     mState = iState;
 }
+*/
 
 void
 FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
 {
-    if (mState == kCacheUpToDate)
+    if (!mNeedsRender)
     {
         //Remove block from cache and invalidate cache
         FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
         cache.Remove(mId.ToString());
+        mNeedsRender = true;
+        
+        TSharedPtr<::ULIS::FBlock> block = mBlock.Pin();
+        if (block)
+            mBlockData->mNeedsCache = true;
     }
 
-    SetState(kNeedsRender);
+    mEngine->Invalidate();
+    //SetState(kNeedsRender);
     mOnInvalidated.Broadcast(iIsInteractive);
 }

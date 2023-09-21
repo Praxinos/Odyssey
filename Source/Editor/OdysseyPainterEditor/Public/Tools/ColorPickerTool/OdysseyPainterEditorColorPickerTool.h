@@ -29,10 +29,6 @@ public:
 
     //OdysseyPainterEditorTool overrides
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
 
     virtual void Commit() override;
 

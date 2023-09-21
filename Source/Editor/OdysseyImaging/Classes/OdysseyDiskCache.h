@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Memory/SharedBuffer.h"
 
 /*
 struct FBlockCleanupInfo

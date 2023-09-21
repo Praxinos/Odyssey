@@ -36,8 +36,7 @@ FOdysseyTextureLayerImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> i
     if (!mBlock)
         return iWaitList;
 
-    mVectorBlock->SetRenderHUD(mRenderHUD);
-    mVectorBlock->Render();
+    mVectorBlock->Render(/*mRenderHUD*/);
 
     return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
@@ -48,8 +47,7 @@ FOdysseyTextureLayerImageVectorImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> io
     if (!mBlock)
         return iWaitList;
 
-    mVectorBlock->SetRenderHUD(mRenderHUD);
-    mVectorBlock->Render();
+    mVectorBlock->Render(/*mRenderHUD*/);
 
     return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
 }

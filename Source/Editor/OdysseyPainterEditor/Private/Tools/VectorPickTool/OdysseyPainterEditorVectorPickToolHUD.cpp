@@ -17,9 +17,9 @@ FOdysseyPainterEditorVectorPickToolHUD::FOdysseyPainterEditorVectorPickToolHUD( 
 void
 FOdysseyPainterEditorVectorPickToolHUD::Load( FOdysseyVectorScene* iScene )
 {
-    uint32 width, height;
-
-    iScene->GetEngine()->GetColorImageSize( &width, &height );
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    uint32 width = vectorEngine->GetWidth();
+    uint32 height = vectorEngine->GetHeight();
 
     if( mSelectionMask )
     {
@@ -87,7 +87,9 @@ void
 FOdysseyPainterEditorVectorPickToolHUD::DrawSelectionSpace( FOdysseyVectorScene* iScene
                                                           , uint64 iFlags )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    BLImage* currentImage = vectorEngine->GetBLImage();
     BLPoint topLeft = { 0, 0 };
 
     blctx->save();
@@ -112,7 +114,7 @@ FOdysseyPainterEditorVectorPickToolHUD::DrawSelectionSpace( FOdysseyVectorScene*
         blctx->setFillStyle( BLRgba32( 0x00000000/*0x800000FF*/ ) );
         blctx->fillRect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
 
-        iScene->GetEngine()->UseColorImage();
+        iScene->GetEngine()->UseImage( currentImage );
 
         blctx->blitImage( topLeft, *mSelectionMask );
     }

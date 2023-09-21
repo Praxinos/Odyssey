@@ -60,8 +60,8 @@ struct FPathParam
     UPROPERTY(EditAnywhere, Category="Transform")
     eJointType JointType;
 
-    UPROPERTY(EditAnywhere,Category="General")
-    bool Filled;
+    //UPROPERTY(EditAnywhere,Category="General")
+    bool Filled; // unused for now
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
@@ -332,6 +332,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual void ApplyTransformations() override;
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
         void AlterRadius( double iDeltaRadius );
+        static ::ULIS::FVec2D GetAverageHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
+        void PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;

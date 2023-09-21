@@ -52,6 +52,7 @@ namespace UnrealBuildTool.Rules
 					"OdysseyMedia",
 					"OdysseyLayerStack",
 					"OdysseyStyle",
+					"OdysseyFile",
 					"OdysseyVector",
                     "Slate",
                     "SlateCore",

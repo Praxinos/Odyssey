@@ -89,22 +89,20 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( FOdysseyVectorScene* iSce
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    BLContext* blctx = vectorEngine->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLImage* image = iScene->GetEngine()->GetBLImage();
-    BLImageData imageData;
-    ::ULIS::FRectD frame;
+    BLImage* image = vectorEngine->GetBLImage();
     ::ULIS::FVec2D frameLength;
+    ::ULIS::FRectD frame;
 
-    image->getData( &imageData );
-
-    frame.x = imageData.size.w * 0.05f;
-    frame.y = imageData.size.h * 0.05f;
-    frame.w = imageData.size.w * 0.90f;
-    frame.h = imageData.size.h * 0.90f;
+    frame.x = image->width()  * 0.05f;
+    frame.y = image->height() * 0.05f;
+    frame.w = image->width()  * 0.90f;
+    frame.h = image->height() * 0.90f;
 
     frameLength.x = frame.w * 0.125f;
     frameLength.y = frame.h * 0.125f;

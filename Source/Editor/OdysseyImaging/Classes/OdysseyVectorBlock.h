@@ -80,13 +80,6 @@ public:
      */
     uint64 GetRenderFlags() const;
 
-    /**
-     * @brief Defines if the block should also contain the vector engine HUD
-     * 
-     * @param iRenderHUD 
-     */
-    void SetRenderHUD(bool iRenderHUD);
-
 private:
     enum eBlockState
     {
@@ -110,7 +103,6 @@ private:
     int mHeight;
     ::ULIS::eFormat mFormat;
     uint64 mRenderFlags; //See DRAWING_IGNORECOLOR for example
-    bool mRenderHUD;
 
     // 
     // OPTIMIZATIONS
@@ -124,10 +116,12 @@ private:
         ::ULIS::eFormat mFormat;
         TSharedPtr<BLImage> mBLImage;
         FUniqueBuffer mBuffer;
-        eBlockState mState;
+        //eBlockState mState;
+        bool mNeedsCache;
     };
 
-    eBlockState mState;
+    //eBlockState mState;
+    bool mNeedsRender;
     FBlockData* mBlockData;
     FOnInvalidated mOnInvalidated;
 };

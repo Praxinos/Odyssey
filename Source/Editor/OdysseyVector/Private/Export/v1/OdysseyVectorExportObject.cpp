@@ -1,11 +1,13 @@
 #include "Export/v1/OdysseyVectorExport.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 void
 FOdysseyVectorExportV1::WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_DECLARE_OBJECT_ENTRY
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_DECLARE_OBJECT_ENTRY
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         uint32 objectType = iObject.GetType();
 
@@ -16,9 +18,9 @@ FOdysseyVectorExportV1::WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, 
 void
 FOdysseyVectorExportV1::WriteDeclareObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_DECLARE_OBJECTS
-                                    , Ar
-                                    , [&vectorObjectArray](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_DECLARE_OBJECTS
+                            , Ar
+                            , [&vectorObjectArray](FArchive &Ar) -> void
     {
         for( uint32 i = 0; i < vectorObjectArray.size(); i++ )
         {
@@ -35,9 +37,9 @@ FOdysseyVectorExportV1::WriteDeclareObjects( std::vector<FOdysseyVectorObject*>&
 void
 FOdysseyVectorExportV1::WriteObjectTransformScaling( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM_SCALING
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_TRANSFORM_SCALING
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         double scalingX = iObject.GetScalingX(),
                scalingY = iObject.GetScalingY();
@@ -50,9 +52,9 @@ FOdysseyVectorExportV1::WriteObjectTransformScaling( FOdysseyVectorObject& iObje
 void
 FOdysseyVectorExportV1::WriteObjectTransformRotation( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM_ROTATION
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_TRANSFORM_ROTATION
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         double rotation = iObject.GetRotation();
 
@@ -63,9 +65,9 @@ FOdysseyVectorExportV1::WriteObjectTransformRotation( FOdysseyVectorObject& iObj
 void
 FOdysseyVectorExportV1::WriteObjectTransformTranslation( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM_TRANSLATION
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_TRANSFORM_TRANSLATION
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         double translationX = iObject.GetTranslationX(),
                translationY = iObject.GetTranslationY();
@@ -78,9 +80,9 @@ FOdysseyVectorExportV1::WriteObjectTransformTranslation( FOdysseyVectorObject& i
 void
 FOdysseyVectorExportV1::WriteObjectTransform( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_TRANSFORM
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_TRANSFORM
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         WriteObjectTransformTranslation( iObject, Ar );
         WriteObjectTransformRotation( iObject, Ar );
@@ -91,9 +93,9 @@ FOdysseyVectorExportV1::WriteObjectTransform( FOdysseyVectorObject& iObject, FAr
 void
 FOdysseyVectorExportV1::WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_PARENTID
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_PARENTID
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         uint32 parentID = iObject.GetParent() ? iObject.GetParent()->GetID() : 0;
 
@@ -104,9 +106,9 @@ FOdysseyVectorExportV1::WriteObjectParentID( FOdysseyVectorObject& iObject, FArc
 void
 FOdysseyVectorExportV1::WriteObjectID( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_ID
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_ID
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         uint32 objectID = iObject.GetID();
 
@@ -117,9 +119,9 @@ FOdysseyVectorExportV1::WriteObjectID( FOdysseyVectorObject& iObject, FArchive &
 void
 FOdysseyVectorExportV1::WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_FOREGROUNDBUCKET
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_FOREGROUNDBUCKET
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         FOdysseyVectorBucket& foregroundBucket = iObject.GetForegroundBucket();
 
@@ -130,9 +132,9 @@ FOdysseyVectorExportV1::WriteObjectForegroundBucket( FOdysseyVectorObject& iObje
 void
 FOdysseyVectorExportV1::WriteObjectBackgroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_BACKGROUNDBUCKET
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_BACKGROUNDBUCKET
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         FOdysseyVectorBucket& backgroundBucket = iObject.GetBackgroundBucket();
 
@@ -143,9 +145,9 @@ FOdysseyVectorExportV1::WriteObjectBackgroundBucket( FOdysseyVectorObject& iObje
 void
 FOdysseyVectorExportV1::WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_FOREGROUNDCOLOR
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_FOREGROUNDCOLOR
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         FColor foreground = iObject.GetForegroundBucket().GetSolidColor();
 
@@ -159,9 +161,9 @@ FOdysseyVectorExportV1::WriteObjectForegroundColor( FOdysseyVectorObject& iObjec
 void
 FOdysseyVectorExportV1::WriteObjectBackgroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_BACKGROUNDCOLOR
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_BACKGROUNDCOLOR
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         FColor background = iObject.GetBackgroundBucket().GetSolidColor();
 
@@ -175,9 +177,9 @@ FOdysseyVectorExportV1::WriteObjectBackgroundColor( FOdysseyVectorObject& iObjec
 void
 FOdysseyVectorExportV1::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_DEFINE_OBJECT_ENTRY
-                                    , Ar
-                                    , [&iObject](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_DEFINE_OBJECT_ENTRY
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
     {
         WriteObjectID( iObject, Ar );
         WriteObjectParentID( iObject, Ar );
@@ -214,9 +216,9 @@ FOdysseyVectorExportV1::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, F
 void
 FOdysseyVectorExportV1::WriteDefineObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_DEFINE_OBJECTS
-                                    , Ar
-                                    , [&vectorObjectArray](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_DEFINE_OBJECTS
+                            , Ar
+                            , [&vectorObjectArray](FArchive &Ar) -> void
     {
         for( uint32 i = 0; i < vectorObjectArray.size(); i++ )
         {

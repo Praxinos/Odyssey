@@ -39,6 +39,10 @@ namespace FOdysseyVector
                                         , ::ULIS::FVec2D& oP2
                                         , ::ULIS::FVec2D& oP3 );
 
+    bool ODYSSEYVECTOR_API PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
+                                     , const ::ULIS::FRectD& iMaskRect
+                                     , uint8* iPixelData );
+
     bool ProjectPoint( const ::ULIS::FVec2D& iPt
                      , const ::ULIS::FVec2D& iSegmentP0
                      , const ::ULIS::FVec2D& iSegmentP1

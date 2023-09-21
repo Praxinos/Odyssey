@@ -5,10 +5,10 @@ FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
     // if Grouping action confirmed
     if( mApplied )
     {
-        // free memory for former groups
-        for( int i = 0; i < mRemovedObjectArray.size(); i++ )
+        // free memory for former buckets
+        for( int i = 0; i < mRemovedBucketArray.size(); i++ )
         {
-            delete mRemovedObjectArray[i];
+            delete mRemovedBucketArray[i];
         }
     }
     else
@@ -17,20 +17,20 @@ FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
         delete mAddedGroup;
     }
 
-    mRemovedObjectArray.clear();
     mAddedObjectOldParentArray.clear();
     mAddedObjectArray.clear();
+    mRemovedBucketArray.clear();
 }
 
 FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray
-                                                , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray  )
+                                                , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray  )
     : FOdysseyVectorUndo( iScene )
     , mAddedGroup( iAddedGroup )
 {
-    mRemovedObjectArray = iRemovedObjectArray;
+    mRemovedBucketArray = iRemovedBucketArray;
     mAddedObjectOldParentArray = iAddedObjectOldParentArray;
     mAddedObjectArray = iAddedObjectArray;
 }
@@ -59,10 +59,17 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
         mAddedObjectOldParentArray[i]->RemoveChild( mAddedObjectArray[i] );
     }
 
-    // remove all former groups
-    for( int i = 0; i < mRemovedObjectArray.size(); i++ )
+    // remove all former buckets
+    for( int i = 0; i < mRemovedBucketArray.size(); i++ )
     {
-        mRemovedObjectArray[i]->GetParent()->RemoveChild( mRemovedObjectArray[i] );
+        FOdysseyVectorObject* ownerObject = mRemovedBucketArray[i]->GetOwner();
+
+        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+            paintGroup->RemoveBucket( mRemovedBucketArray[i] );
+        }
     }
 
     // Add the created group
@@ -105,11 +112,17 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
     // Remove the created group
     mAddedGroup->GetParent()->RemoveChild( mAddedGroup );
 
-    // add all former groups back
-    for( int i = 0; i < mRemovedObjectArray.size(); i++ )
+    // add all former buckets back
+    for( int i = 0; i < mRemovedBucketArray.size(); i++ )
     {
-        // Note: the pointer to the parent is still valid although the object is technically orphan. We reuse it.
-        mRemovedObjectArray[i]->GetParent()->AppendChild( mRemovedObjectArray[i] );
+        FOdysseyVectorObject* ownerObject = mRemovedBucketArray[i]->GetOwner();
+
+        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+            paintGroup->AddBucket( mRemovedBucketArray[i] );
+        }
     }
 
     // reconstruct the former hierarchy.

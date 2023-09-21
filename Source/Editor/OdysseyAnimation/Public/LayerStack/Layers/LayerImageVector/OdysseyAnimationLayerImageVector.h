@@ -93,7 +93,6 @@ private:
     TSharedPtr<IOdysseyMedia> GetCellMediaVector(uint32 iFrameIndex) const;
     void AutoCreateCell(int iFrameIndex);
     void CreateCell( const FName& iCellType);
-    void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")

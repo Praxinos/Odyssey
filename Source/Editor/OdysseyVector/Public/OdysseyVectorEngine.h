@@ -56,12 +56,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         BLContext* GetBLContext();
 
         /**
-         * @brief Get the color image (the main rendering buffer)
-         * @return a pointer to the color image
-         */
-        BLImage* GetBLImage();
-
-        /**
          * @brief Get the mask image
          * @return a pointer to the mask image
          */
@@ -98,38 +92,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          * @param iPointArray a reference to the array of points.
          */
         ::ULIS::FRectD GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray );
-
-        /**
-         * @brief Get the color at coordinates.
-         * @param iX x-axis coordinates.
-         * @param iY y-axis coordinates.
-         * @param oR pointer to output 8-bit Red channel.
-         * @param oG pointer to output 8-bit Green channel.
-         * @param oB pointer to output 8-bit Blue channel.
-         * @param oA pointer to output 8-bit Alpha channel.
-         */
-        void GetColorImagePixelValue( uint32 iX, uint32 iY, uint8* oR, uint8* oG, uint8* oB, uint8* oA );
-
-        /**
-         * @brief Get the color at coordinates.
-         * @param iX x-axis coordinates.
-         * @param iY y-axis coordinates.
-         * @return the color at coordinates {iX,iY}
-         */
-        FColor GetColorImagePixelValue( uint32 iX, uint32 iY );
-
-        /**
-         * @brief Get the color image dimensions.
-         * @param oW width
-         * @param oH height
-         */
-        void GetColorImageSize( uint32* iW, uint32* iH );
-
-        /**
-         * @brief Get the color image dimensions.
-         * @param oImageRegion a rectangle receiving the image's size
-         */
-        void GetColorImageSize( ::ULIS::FRectI& oImageRegion );
 
         /**
          * @brief Pick an object
@@ -305,6 +267,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                           , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                           , bool iSelectedOnly );
 
+        uint32 GetWidth();
+        uint32 GetHeight();
+        BLImage* GetBLImage();
+
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
@@ -334,10 +300,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
     private:
         BLContext* mBLContext;
+        BLImage mDefaultBLImage; // needed outside of rendering operation (matrix ops e.g)
         BLImage* mBLImage;
         BLImage* mBLMask;
         std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
         FOdysseyVectorScene* mScene;
         FULISInvalidTileMap mInvalidTileMap;
+        uint32 mWidth;
+        uint32 mHeight;
 };

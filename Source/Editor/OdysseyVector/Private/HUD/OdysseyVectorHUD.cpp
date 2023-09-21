@@ -1,4 +1,11 @@
 #include "HUD/OdysseyVectorHUD.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorPoint.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorScene.h"
+#include "OdysseyVectorEngine.h"
 
 FPointQuadTree::~FPointQuadTree()
 {
@@ -167,11 +174,11 @@ MapPoints( FOdysseyVectorObject* iObject
 void
 FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene, bool iRestrictToSelection )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
-    uint32 width, height;
+    uint32 width = vectorEngine->GetWidth()
+         , height = vectorEngine->GetHeight();
     ::ULIS::FRectD screenRect;
-
-    iScene->GetEngine()->GetColorImageSize( &width, &height );
 
     screenRect = ::ULIS::FRectD::FromXYWH( 0, 0, width, height );
 

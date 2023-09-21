@@ -138,7 +138,8 @@ FOdysseyPainterEditorSelectedVectorObjectTab::Update( FOdysseyVectorScene* iScen
             mDetailsView->SetObject( mGroupPaintView );
         }
 
-        if( objectClass == FOdysseyVectorObject::StaticClass() )
+        if( ( objectClass == FOdysseyVectorObject::StaticClass() )
+         || ( objectClass == FOdysseyVectorGroup::StaticClass() ) )
         {
             // default
             mObjectView->Update( iScene, focusedObjectList );

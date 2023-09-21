@@ -1,14 +1,16 @@
 #include "Export/v1/OdysseyVectorExport.h"
 #include "OdysseyVectorSegmentCubic.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 void
 FOdysseyVectorExportV1::WritePathCubicGeometrySegments( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
     if( iPath.GetSegmentList().size() )
     {
-        FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS
-                                        , Ar
-                                        , [&iPath](FArchive &Ar) -> void
+        FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_PATH_GEOMETRY_CUBICSEGMENTS
+                                , Ar
+                                , [&iPath](FArchive &Ar) -> void
         {
             uint32 segmentCount = iPath.GetSegmentList().size();
 
@@ -43,9 +45,9 @@ FOdysseyVectorExportV1::WritePathCubicGeometryVertices( FOdysseyVectorPath& iPat
 {
     if ( iPath.GetVertexList().size() )
     {
-        FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_PATH_GEOMETRY_VERTICES
-                                        , Ar
-                                        , [&iPath](FArchive &Ar) -> void
+        FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_PATH_GEOMETRY_VERTICES
+                                , Ar
+                                , [&iPath](FArchive &Ar) -> void
         {
             uint32 vertexID = 0;
             uint32 vertexCount = iPath.GetVertexList().size();
@@ -73,9 +75,9 @@ FOdysseyVectorExportV1::WritePathCubicGeometryVertices( FOdysseyVectorPath& iPat
 void
 FOdysseyVectorExportV1::WritePathCubicGeometry( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_PATH_GEOMETRY
-                                    , Ar
-                                    , [&iPath](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_PATH_GEOMETRY
+                            , Ar
+                            , [&iPath](FArchive &Ar) -> void
     {
         WritePathCubicGeometryVertices( iPath, Ar );
         WritePathCubicGeometrySegments( iPath, Ar );
@@ -85,9 +87,9 @@ FOdysseyVectorExportV1::WritePathCubicGeometry( FOdysseyVectorPath& iPath, FArch
 void
 FOdysseyVectorExportV1::WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_PATH_JOINT
-                                    , Ar
-                                    , [&iPath](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_PATH_JOINT
+                            , Ar
+                            , [&iPath](FArchive &Ar) -> void
     {
         uint32 jointType = static_cast<uint32>(iPath.GetJointType());
 
@@ -98,9 +100,9 @@ FOdysseyVectorExportV1::WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar 
 void
 FOdysseyVectorExportV1::WritePath( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
-    FOdysseyVectorExportV1::WriteChunk( FOdysseyVectorExportV1::CHUNK_OBJECT_PATH
-                                    , Ar
-                                    , [&iPath](FArchive &Ar) -> void
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV1::CHUNK_OBJECT_PATH
+                            , Ar
+                            , [&iPath](FArchive &Ar) -> void
     {
         WritePathJoint( iPath, Ar );
         WritePathCubicGeometry( iPath, Ar );

@@ -21,13 +21,24 @@ void
 FOdysseyAnimationCellImageVectorImageRenderer::Init()
 {
     TSharedPtr<FOdysseyVectorBlock> vectorBlock = mCell->GetVectorBlock();
+    bool renderHUD = false;
+
+    /*
+    UOdysseyLayer* layer = mCell->GetLayer();
+    if (layer)
+    {
+        UOdysseyLayerStack* layerStack = layer->GetLayerStack();
+        if (layerStack)
+            renderHUD = layerStack->CurrentLayer.Get() == layer;
+    }
+    */
 
     if (vectorBlock)
         mBlock = vectorBlock->GetBlock(); //Store block before rendering to avoid looking twice for the block in cache
 
     {   
         FScopeLock renderLock(&mEngineMutex);
-        vectorBlock->Render();
+        vectorBlock->Render(/*renderHUD*/);
     }
 }
 

@@ -10,9 +10,12 @@
 #include "OdysseyVectorBlock.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "Import/v2/OdysseyVectorImport.h"
-#include "Import/v1/OdysseyVectorImport.h"
 #include "LayerStack/OdysseyTextureLayerImageVectorImageRenderer.h"
+// from module OdysseyVector
+#include "Import/v1/OdysseyVectorImport.h"
+#include "Import/v2/OdysseyVectorImport.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 #include "blend2d.h"
 
@@ -163,13 +166,13 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
         switch( chunkID )
         {
-            case FOdysseyVectorExportV1::CHUNK_VECTOR_MAGIC_V1 :
+            case FOdysseyFile::VectorV1::CHUNK_VECTOR_MAGIC_V1 :
                 UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V1") );
 
                 FOdysseyVectorImportV1::Read( mEngine->GetScene(), Ar, chunkEnd );
             break;
 
-            case FOdysseyVectorExportV2::CHUNK_VECTOR_MAGIC_V2 :
+            case FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2 :
             {
                 FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
 
@@ -204,7 +207,7 @@ UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
 void
 UOdysseyTextureLayerImageVector::IsColoredChanged()
 {
-    //mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+    mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
     mVectorBlock->SetRenderFlags(IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     ImageRenderingChanged();
 }

@@ -3,11 +3,14 @@
 #include <blend2d.h>
 #include <ULIS>
 
-#include "OdysseyVectorObject.h"
-#include "OdysseyVectorPoint.h"
-#include "OdysseyVectorSegmentCubic.h"
-#include "OdysseyVectorPath.h"
-#include "OdysseyVectorGroupPaint.h"
+class FOdysseyVectorObject;
+class FOdysseyVectorVertex;
+class FOdysseyVectorPoint;
+class FOdysseyVectorSegmentCubic;
+class FOdysseyVectorPath;
+class FOdysseyVectorGroupPaint;
+class FOdysseyVectorScene;
+class FOdysseyVectorEngine;
 
 typedef struct _FPointQuadTreeEntry
 {

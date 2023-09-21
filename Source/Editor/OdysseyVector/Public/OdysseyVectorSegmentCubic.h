@@ -120,7 +120,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iY
          * @param iRadius ignored.
          */
-        bool Pick( double iX, double iY, double iRadius );
+        virtual bool Pick( double iX, double iY, double iRadius ) override;
+        virtual bool Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData ) override;
 
        /**
          * @brief Increase the polygon cache.
@@ -236,6 +237,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         ::ULIS::FVec2D GetPolygonCacheEndPointInParent();
         ::ULIS::FVec2D* GetBezier();
         virtual bool HasBaseClass( uint32 iBaseClassID ) override;
+        double GetApproximateLength( uint32 iDivisions );
+
 
     private:
         void BuildVariableAdaptive( double  iFromT

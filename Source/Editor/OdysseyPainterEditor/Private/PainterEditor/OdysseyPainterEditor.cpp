@@ -38,7 +38,6 @@
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
-#include "Tools/VectorPathWidthTool/OdysseyPainterEditorVectorPathWidthTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
@@ -69,15 +68,14 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEdite
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
 	, mRasterDrawingTool(nullptr)
+    , mVectorPathDrawingTool(nullptr)
+    , mVectorPathEditTool(nullptr)
 	, mVectorPrimitiveDrawingTool(nullptr)
-	, mVectorPathDrawingTool(nullptr)
-	, mVectorPathEditTool(nullptr)
 	, mVectorPathCutTool(nullptr)
 	, mVectorPickTool(nullptr)
 	, mVectorScenePanTool(nullptr)
 	, mVectorEraserTool(nullptr)
 	, mVectorPathPushTool(nullptr)
-	, mVectorPathWidthTool(nullptr)
 	, mVectorPathSmoothTool(nullptr)
 	, mVectorPathStitchTool(nullptr)
 	, mPaintBucketTool(nullptr)
@@ -128,15 +126,14 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
     GetGUI()->BindShortcuts(iToolkit);
 
     mRasterDrawingTool->BindShortcuts(iToolkit);
+    mVectorPathDrawingTool->BindShortcuts(iToolkit);
+    mVectorPathEditTool->BindShortcuts(iToolkit);
 	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
-	mVectorPathDrawingTool->BindShortcuts(iToolkit);
-	mVectorPathEditTool->BindShortcuts(iToolkit);
 	mVectorPathCutTool->BindShortcuts(iToolkit);
 	mVectorPickTool->BindShortcuts(iToolkit);
 	mVectorScenePanTool->BindShortcuts(iToolkit);
 	mVectorEraserTool->BindShortcuts(iToolkit);
 	mVectorPathPushTool->BindShortcuts(iToolkit);
-	mVectorPathWidthTool->BindShortcuts(iToolkit);
 	mVectorPathSmoothTool->BindShortcuts(iToolkit);
 	mVectorPathStitchTool->BindShortcuts(iToolkit);
 	mPaintBucketTool->BindShortcuts(iToolkit);
@@ -162,15 +159,14 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
     GetGUI()->ExtendMenu(iOwner, iMenuName);
 
     mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+    mVectorPathDrawingTool->ExtendMenu(iOwner,iMenuName);
+    mVectorPathEditTool->ExtendMenu(iOwner,iMenuName);
 	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathEditTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPickTool->ExtendMenu(iOwner, iMenuName);
 	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
 	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathWidthTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathSmoothTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathStitchTool->ExtendMenu(iOwner, iMenuName);
 	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
@@ -206,15 +202,14 @@ void
 FOdysseyPainterEditor::InitTools()
 {
     mRasterDrawingTool = NewObject<UOdysseyPainterEditorRasterDrawingTool>();
+    mVectorPathDrawingTool = NewObject<UOdysseyPainterEditorVectorPathDrawingTool>();
+    mVectorPathEditTool = NewObject<UOdysseyPainterEditorVectorPathEditTool>();
 	mVectorPrimitiveDrawingTool = NewObject<UOdysseyPainterEditorVectorPrimitiveDrawingTool>();
-	mVectorPathDrawingTool = NewObject<UOdysseyPainterEditorVectorPathDrawingTool>();
-	mVectorPathEditTool = NewObject<UOdysseyPainterEditorVectorPathEditTool>();
 	mVectorPathCutTool = NewObject<UOdysseyPainterEditorVectorPathCutTool>();
 	mVectorPickTool = NewObject<UOdysseyPainterEditorVectorPickTool>();
     mVectorScenePanTool = NewObject<UOdysseyPainterEditorVectorScenePanTool>();
     mVectorEraserTool = NewObject<UOdysseyPainterEditorVectorEraserTool>();
     mVectorPathPushTool = NewObject<UOdysseyPainterEditorVectorPathPushTool>();
-    mVectorPathWidthTool = NewObject<UOdysseyPainterEditorVectorPathWidthTool>();
     mVectorPathSmoothTool = NewObject<UOdysseyPainterEditorVectorPathSmoothTool>();
     mVectorPathStitchTool = NewObject<UOdysseyPainterEditorVectorPathStitchTool>();
 	mPaintBucketTool = NewObject<UOdysseyPainterEditorPaintBucketTool>();
@@ -223,15 +218,14 @@ FOdysseyPainterEditor::InitTools()
 	mVectorTransformTool = NewObject<UOdysseyPainterEditorVectorTransformTool>();
 
 	mRasterDrawingTool->SetEditor(this);
-    mVectorPrimitiveDrawingTool->SetEditor(this);
     mVectorPathDrawingTool->SetEditor(this);
     mVectorPathEditTool->SetEditor(this);
+    mVectorPrimitiveDrawingTool->SetEditor(this);
     mVectorPathCutTool->SetEditor(this);
     mVectorPickTool->SetEditor(this);
     mVectorScenePanTool->SetEditor(this);
     mVectorEraserTool->SetEditor(this);
     mVectorPathPushTool->SetEditor(this);
-    mVectorPathWidthTool->SetEditor(this);
     mVectorPathSmoothTool->SetEditor(this);
     mVectorPathStitchTool->SetEditor(this);
 	mPaintBucketTool->SetEditor(this);
@@ -241,15 +235,14 @@ FOdysseyPainterEditor::InitTools()
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
 	mTools.Add(mRasterDrawingTool);
-    mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathDrawingTool);
     mTools.Add(mVectorPathEditTool);
+    mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathCutTool);
     mTools.Add(mVectorPickTool);
     mTools.Add(mVectorScenePanTool);
     mTools.Add(mVectorEraserTool);
     mTools.Add(mVectorPathPushTool);
-    mTools.Add(mVectorPathWidthTool);
     mTools.Add(mVectorPathSmoothTool);
     mTools.Add(mVectorPathStitchTool);
 	mTools.Add(mPaintBucketTool);
@@ -343,12 +336,6 @@ UOdysseyPainterEditorVectorPathPushTool*
 FOdysseyPainterEditor::GetVectorPathPushTool() const
 {
     return mVectorPathPushTool;
-}
-
-UOdysseyPainterEditorVectorPathWidthTool*
-FOdysseyPainterEditor::GetVectorPathWidthTool() const
-{
-    return mVectorPathWidthTool;
 }
 
 UOdysseyPainterEditorVectorPathSmoothTool*
@@ -706,61 +693,6 @@ ApplyTransformationsRecursive( FOdysseyVectorObject* iObject )
 }
 
 void
-FOdysseyPainterEditor::Trim( FOdysseyVectorScene* iScene )
-{
-    FOdysseyVectorEngine* engine = iScene->GetEngine();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList :
-                                                                                      engine->GetChildrenList();
-    std::vector<FOdysseyVectorPath*> removedPathArray;
-    std::vector<FOdysseyVectorVertex*> removedVertexArray;
-    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-    std::vector<FOdysseyVectorPath*> addedPathArray;
-    std::vector<FOdysseyVectorVertex*> addedVertexArray;
-    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
-
-    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-    {
-        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
-            std::vector<FOdysseyVectorSection*> trimmedSectionArray;
-
-            paintGroup->GetTrimmedSections( trimmedSectionArray );
-            paintGroup->EraseSections( trimmedSectionArray
-                                     , removedVertexArray
-                                     , removedSegmentArray
-                                     , addedVertexArray
-                                     , addedSegmentArray );
-        }
-    }
-
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("Trim","Trim"));
-    if( GUndo )
-    {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
-                                                                  , removedPathArray
-                                                                  , removedVertexArray
-                                                                  , removedSegmentArray
-                                                                  , addedPathArray
-                                                                  , addedVertexArray
-                                                                  , addedSegmentArray );
-
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-
-    engine->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    engine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                  | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
-}
-
-void
 FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
@@ -803,10 +735,10 @@ FOdysseyPainterEditor::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVector
 {
     std::vector<FOdysseyVectorObject*> cubicPathArray;
     std::vector<FOdysseyVectorObject*> cubicPathOldParentArray;
-    std::vector<FOdysseyVectorObject*> removedPaintGroupArray;
+    std::vector<FOdysseyVectorBucket*> removedBucketArray;
     FOdysseyVectorGroupPaint* paintGroup = iScene->MakePaintGroupFromSelectedObjects( cubicPathArray
                                                                                     , cubicPathOldParentArray
-                                                                                    , removedPaintGroupArray );
+                                                                                    , removedBucketArray );
 
     if( paintGroup )
     {
@@ -818,7 +750,7 @@ FOdysseyPainterEditor::GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVector
                                                                   , paintGroup
                                                                   , cubicPathArray
                                                                   , cubicPathOldParentArray
-                                                                  , removedPaintGroupArray );
+                                                                  , removedBucketArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
@@ -1480,7 +1412,6 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
     Collector.AddReferencedObject(mVectorScenePanTool);
     Collector.AddReferencedObject(mVectorEraserTool);
     Collector.AddReferencedObject(mVectorPathPushTool);
-    Collector.AddReferencedObject(mVectorPathWidthTool);
     Collector.AddReferencedObject(mVectorPathSmoothTool);
     Collector.AddReferencedObject(mVectorPathStitchTool);
 	Collector.AddReferencedObject(mPaintBucketTool);

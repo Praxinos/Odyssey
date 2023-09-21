@@ -32,6 +32,12 @@ public:
         
     FOdysseyVectorEngine* GetEngine() const;
     TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;
+    uint32 GetWidth();
+    uint32 GetHeight();
+    FGuid GetVectorBlockId();
+    void SetWidth( uint32 iWidth );
+    void SetHeight( uint32 iHeight );
+    void SetVectorBlockId( FGuid iVectorBlockID );
 
 public:
     // Event Listeners
@@ -45,6 +51,7 @@ public:
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     FCriticalSection* GetImageRenderingMutex() const;
     bool IsImageRenderingGameThreadOnly() const;
+    UOdysseyAnimationLayerImageVector* GetLayer() const;
 
 private:
     void OnVectorBlockInvalidated(bool iIsInteractive);
@@ -54,8 +61,8 @@ private:
     FOdysseyVectorEngine* mEngine;
     FGuid mVectorBlockId;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
-    int mWidth;
-    int mHeight;
+    uint32 mWidth;
+    uint32 mHeight;
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaVector> mMediaVector;
 };

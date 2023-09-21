@@ -105,6 +105,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorEngine* 
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
+    BLImage* currentImage = iEngine->GetBLImage();
+
     mEraserHUD.SetRadius( Radius );
     mEraserHUD.BlendMask( true );
 
@@ -113,7 +115,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorEngine* 
     iEngine->GetBLContext()->clearAll();
     iEngine->GetBLContext()->setFillAlpha( 1.0f );
     iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
-    iEngine->UseColorImage();
+    iEngine->UseImage( currentImage );
 
     iScene->Update( 0 );
 
@@ -187,18 +189,22 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* 
                                                         , FOdysseyVectorScene* iScene
                                                         , const FOdysseyPoint& iPointInTexture )
 {
+    BLImage* currentImage = iEngine->GetBLImage();
     BLPoint pt = { 0, 0 };
 
     mEraserHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
 
     iEngine->UseMaskImage();
+
     iEngine->GetBLContext()->setStrokeWidth( Radius * 2 );
     iEngine->GetBLContext()->strokeLine( iPointInTexture.x - iPointInTexture.deltaPosition.X
                                        , iPointInTexture.y - iPointInTexture.deltaPosition.Y
                                        , iPointInTexture.x 
                                        , iPointInTexture.y );
     iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
-    iEngine->UseColorImage();
+
+    iEngine->UseImage( currentImage );
+
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
@@ -232,6 +238,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iE
     std::vector<FOdysseyVectorObject*> removedObjectArray;
     std::vector<FOdysseyVectorVertex*> removedVertexArray;
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+    BLImage* currentImage = iEngine->GetBLImage();
     ::ULIS::FRectD roi;
 
     mEraserHUD.BlendMask( false );
@@ -261,7 +268,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iE
                       , false );
     }
 
-    iEngine->UseColorImage();
+    iEngine->UseImage( currentImage );
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY

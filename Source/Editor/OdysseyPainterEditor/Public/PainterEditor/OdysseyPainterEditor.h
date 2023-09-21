@@ -14,7 +14,6 @@
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
-#include "Tools/VectorPathWidthTool/OdysseyPainterEditorVectorPathWidthTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
 #include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
@@ -84,7 +83,6 @@ public:
     virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const;
     virtual UOdysseyPainterEditorVectorEraserTool*                   GetVectorEraserTool() const;
     virtual UOdysseyPainterEditorVectorPathPushTool*                 GetVectorPathPushTool() const;
-    virtual UOdysseyPainterEditorVectorPathWidthTool*                GetVectorPathWidthTool() const;
     virtual UOdysseyPainterEditorVectorPathSmoothTool*               GetVectorPathSmoothTool() const;
     virtual UOdysseyPainterEditorVectorPathStitchTool*               GetVectorPathStitchTool() const;
     virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const;
@@ -114,7 +112,6 @@ public:
                                   , std::vector<FOdysseyVectorPoint*>& iSelectedVertexArray );
     static void ClearColoring( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     static void ApplyTransformations( FOdysseyVectorScene* iScene );
-    static void Trim( FOdysseyVectorScene* iScene );
     void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
     eVectorEditionMode GetVectorEditionMode();
 
@@ -174,7 +171,6 @@ protected:
     UOdysseyPainterEditorVectorScenePanTool* mVectorScenePanTool;
     UOdysseyPainterEditorVectorEraserTool* mVectorEraserTool;
     UOdysseyPainterEditorVectorPathPushTool* mVectorPathPushTool;
-    UOdysseyPainterEditorVectorPathWidthTool* mVectorPathWidthTool;
     UOdysseyPainterEditorVectorPathSmoothTool* mVectorPathSmoothTool;
     UOdysseyPainterEditorVectorPathStitchTool* mVectorPathStitchTool;
     UOdysseyPainterEditorPaintBucketTool* mPaintBucketTool;

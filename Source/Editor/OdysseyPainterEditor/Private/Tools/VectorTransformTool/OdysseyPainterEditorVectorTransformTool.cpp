@@ -192,7 +192,14 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorEngi
 
     if( mDragging == false )
     {
-        iEngine->GetColorImageSize( imageRegion );
+        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+        uint32 width = vectorEngine->GetWidth();
+        uint32 height = vectorEngine->GetHeight();
+
+        imageRegion.x = 0;
+        imageRegion.y = 0;
+        imageRegion.w = width;
+        imageRegion.h = height;
 
         if( mTransformHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y ) )
         {

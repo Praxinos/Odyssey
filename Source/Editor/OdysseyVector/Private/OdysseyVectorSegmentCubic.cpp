@@ -257,6 +257,23 @@ FOdysseyVectorSegmentCubic::ResetPolygonCache( )
     mPolygonCache.reserve( 200 );
 }
 
+// mask-based version of the picking process
+bool
+FOdysseyVectorSegmentCubic::Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData )
+{
+    BLMatrix2D& worldMatrix = GetPath()->GetWorldMatrix();
+    BLPoint pt[4] = { worldMatrix.mapPoint( mBezier[0].x, mBezier[0].y )
+                    , worldMatrix.mapPoint( mBezier[1].x, mBezier[1].y )
+                    , worldMatrix.mapPoint( mBezier[2].x, mBezier[2].y )
+                    , worldMatrix.mapPoint( mBezier[3].x, mBezier[3].y ) };
+    ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
+                                    , ::ULIS::FVec2D( pt[1].x, pt[1].y )
+                                    , ::ULIS::FVec2D( pt[2].x, pt[2].y )
+                                    , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
+
+    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iPixelData );
+}
+
 bool
 FOdysseyVectorSegmentCubic::Pick( double iLocalX
                                 , double iLocalY
@@ -1050,4 +1067,29 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                           , 0 );
 
     MakeBLPath();
+}
+
+double
+FOdysseyVectorSegmentCubic::GetApproximateLength( uint32 iDivisions )
+{
+    ::ULIS::FVec2D p0 = mPoint[0]->GetCoords();
+    double step = 1.0f / iDivisions;
+    double length = 0.0f;
+    double t0 = 0.0f;
+
+    for( uint32 i = 0; i < iDivisions; i++ )
+    {
+        double t1 = t0 + step;
+        ::ULIS::FVec2D p1 = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( mBezier[0]
+                                                                                 , mBezier[1]
+                                                                                 , mBezier[2]
+                                                                                 , mBezier[3]
+                                                                                 , t1 );
+        length += ::ULIS::FVec2D( p1 - p0 ).Distance();
+
+        t0 = t1;
+        p0 = p1;
+    }
+
+    return length;
 }

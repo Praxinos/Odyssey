@@ -11,15 +11,27 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double 
     : FOdysseyVectorObject( "Engine" )
     , mSelectionSpace( nullptr )
     , mInvalidTileMap( 64, iWidth, iHeight )
+    , mWidth( iWidth )
+    , mHeight( iHeight )
 {
     BLContextCreateInfo createInfo {};
 
     // Configure the number of threads to use.
     createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
 
+    // create an empty default image. An image is always needed for matrix operations
+    mDefaultBLImage.createFromData( mWidth
+                                  , mHeight
+                                  , BL_FORMAT_PRGB32
+                                  , nullptr
+                                  , 0
+                                  , nullptr
+                                  , nullptr );
+
     mBLContext = new BLContext();
-    mBLImage = new BLImage( iWidth, iHeight, BL_FORMAT_PRGB32 );
     mBLMask  = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
+
+    UseImage( &mDefaultBLImage );
 
     /*mScene = NewObject<FOdysseyVectorScene>();
     mScene->Init("Vector Scene");*/
@@ -59,16 +71,16 @@ FOdysseyVectorEngine::GetInvalidTileMap()
     return mInvalidTileMap;
 }
 
-BLContext*
-FOdysseyVectorEngine::GetBLContext()
-{
-    return mBLContext;
-}
-
 BLImage*
 FOdysseyVectorEngine::GetBLImage()
 {
     return mBLImage;
+}
+
+BLContext*
+FOdysseyVectorEngine::GetBLContext()
+{
+    return mBLContext;
 }
 
 BLImage*
@@ -77,69 +89,16 @@ FOdysseyVectorEngine::GetBLMask()
     return mBLMask;
 }
 
-void
-FOdysseyVectorEngine::GetColorImageSize( ::ULIS::FRectI& oImageRegion )
+uint32
+FOdysseyVectorEngine::GetWidth()
 {
-    uint32 width, height;
-
-    GetColorImageSize( &width, &height );
-
-    oImageRegion.x = 0;
-    oImageRegion.y = 0;
-    oImageRegion.w = width;
-    oImageRegion.h = height;
+    return mWidth;
 }
 
-void
-FOdysseyVectorEngine::GetColorImageSize( uint32* iW, uint32* iH )
+uint32
+FOdysseyVectorEngine::GetHeight()
 {
-    BLImageData imageData;
-
-    mBLImage->getData( &imageData );
-
-    *iW = (uint32) imageData.size.w;
-    *iH = (uint32) imageData.size.h;
-}
-
-void
-FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY, uint8* oR, uint8* oG, uint8* oB, uint8* oA )
-{
-    BLImageData imageData;
-
-    mBLImage->getData( &imageData );
-
-    if( ( iX >= 0 ) && ( iX < static_cast<uint32>(imageData.size.w) )
-     && ( iY >= 0 ) && ( iY < static_cast<uint32>(imageData.size.h) ) ) 
-    {
-        switch( imageData.format )
-        {
-            case BL_FORMAT_PRGB32:
-            {
-                uint32 offset = ( iY * imageData.stride ) + ( iX * sizeof( uint32 ) );
-
-                uint8 *imgBuffer =  &((uint8*)imageData.pixelData)[offset];
-
-                *oB = imgBuffer[0];
-                *oG = imgBuffer[1];
-                *oR = imgBuffer[2];
-                *oA = imgBuffer[3];
-            }
-            break;
-
-            default:
-            break;
-        }
-    }
-}
-
-FColor
-FOdysseyVectorEngine::GetColorImagePixelValue( uint32 iX, uint32 iY )
-{
-    uint8 R, G, B, A;
-
-    GetColorImagePixelValue( iX, iY, &R, &G, &B, &A );
-
-    return FColor( R, G, B, A ); //::ULIS::FColor::RGBA8( R, G, B, A );
+    return mHeight;
 }
 
 void
@@ -168,10 +127,7 @@ FOdysseyVectorEngine::RenderHUD( BLImage* iBLImage/*FOdysseyVectorScene* iScene 
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
     std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
 
-    if( iBLImage )
-    {
-        UseImage( iBLImage );
-    }
+    UseImage( iBLImage );
 
     mBLContext->save();
     mBLContext->resetMatrix();
@@ -186,6 +142,8 @@ FOdysseyVectorEngine::RenderHUD( BLImage* iBLImage/*FOdysseyVectorScene* iScene 
     mBLContext->restore();
 
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+
+    UseImage( &mDefaultBLImage );
 }
 
 void
@@ -209,55 +167,24 @@ void
 FOdysseyVectorEngine::Render( BLImage* iBLImage, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
-    if( iBLImage )
-    {
-        UseImage( iBLImage );
-        mScene->Draw( iDrawingFlags );
-        mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
-    }
-
-    // Blend2D part
-   /* BLContextCreateInfo createInfo{};*/
-
-    // Configure the number of threads to use.
-    /*createInfo.threadCount = 1;*/
-
-    /*if( iRegion.Area() != 0 )
-    {
-        mBLContext->clipToRect( iRegion.x, iRegion.y, iRegion.w, iRegion.h );
-    }*/
-
-    //mBLContext->begin( *mBLImage );
+    UseImage( iBLImage );
 
     if( mInvalidationFlags )
     {
         mScene->Draw( iDrawingFlags );
-    /*
-        mBLContext->save();
-        mBLContext->resetMatrix();
-    UE_LOG(LogTemp, Warning, TEXT("Some warning message %d %d %d %d"), mRoi.x, mRoi.y, mRoi.w, mRoi.h );
-        mBLContext->setStrokeStyle(BLRgba32(0xFF0000FF));
-        mBLContext->setStrokeWidth(2.0f);
-        mBLContext->strokeRect(mRoi.x,mRoi.y,mRoi.w,mRoi.h);
-        mBLContext->restore();
-    */
-        //RenderHUD( iScene );
-
-        //mBLContext->restoreClipping();
-
-        //mBLMask->swap(*mBLImage);
-
-        //mBLContext->blitImage( BLPoint(0,0), *mBLMask );
-
         mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
 
     mInvalidationFlags = 0;
+
+    UseImage( &mDefaultBLImage );
 }
 
 void
 FOdysseyVectorEngine::ClearMask()
 {
+    BLImage* currentImage = GetBLImage();
+
     UseMaskImage();
 
     mBLContext->save();
@@ -270,12 +197,14 @@ FOdysseyVectorEngine::ClearMask()
 
     mBLContext->restore();
 
-    UseColorImage();
+    UseImage( currentImage );
 }
 
 ::ULIS::FRectD
 FOdysseyVectorEngine::GenerateCircleMask( double iX, double iY, double iRadius )
 {
+    BLImage* currentImage = GetBLImage();
+
     UseMaskImage();
 
     mBLContext->save();
@@ -288,7 +217,7 @@ FOdysseyVectorEngine::GenerateCircleMask( double iX, double iY, double iRadius )
 
     mBLContext->restore();
 
-    UseColorImage();
+    UseImage( currentImage );
 
     return ::ULIS::FRectD::FromMinMax( iX - iRadius, iY - iRadius
                                      , iX + iRadius, iY + iRadius );
@@ -297,6 +226,8 @@ FOdysseyVectorEngine::GenerateCircleMask( double iX, double iY, double iRadius )
 ::ULIS::FRectD
 FOdysseyVectorEngine::GenerateRectangleMask( const ::ULIS::FRectD& iRect )
 {
+    BLImage* currentImage = GetBLImage();
+
     UseMaskImage();
 
     mBLContext->save();
@@ -311,7 +242,7 @@ FOdysseyVectorEngine::GenerateRectangleMask( const ::ULIS::FRectD& iRect )
 
     mBLContext->restore();
 
-    UseColorImage();
+    UseImage( currentImage );
 
     return iRect;
 }
@@ -319,8 +250,9 @@ FOdysseyVectorEngine::GenerateRectangleMask( const ::ULIS::FRectD& iRect )
 ::ULIS::FRectD
 FOdysseyVectorEngine::GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray )
 {
-    BLPath path;
+    BLImage* currentImage = GetBLImage();
     ::ULIS::FRectD rect = { 0, 0, 0, 0 };
+    BLPath path;
 
     UseMaskImage();
 
@@ -372,7 +304,7 @@ FOdysseyVectorEngine::GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointA
     mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     mBLContext->restore();
 
-    UseColorImage();
+    UseImage( currentImage );
 
     return rect;
 }
@@ -448,7 +380,6 @@ FOdysseyVectorEngine::Erase( FOdysseyVectorScene* iScene
                   , iRoi
                   , iSelectedOnly  );
 
-    // Note: this will be refactored in case a child is erased and a parent should as well be erased. We'll see.
     for( int i = 0; i < iRemovedObjectArray.size(); i++ )
     {
         if( iRemovedObjectArray[i]->GetChildrenList().size() == 0 )
@@ -481,7 +412,15 @@ FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
                               , iRemovedSegmentArray
                               , iSelectedOnly );
     }
+/*
+    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+        std::vector<FOdysseyVectorSegment*> removedSegmentArray;
 
+        path->PickSegments( iRemovedObjectArray );
+    }
+*/
     if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) ) 
     {
         FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
@@ -508,6 +447,7 @@ FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
         }
         else
         {
+
             paintGroup->PickSectionLessPaths( iRemovedObjectArray );
 
             for( int i = 0; i < iRemovedObjectArray.size(); i++ )
@@ -542,7 +482,6 @@ FOdysseyVectorEngine::EraseSections( FOdysseyVectorScene* iScene
                           , iRemovedSegmentArray
                           , iSelectedOnly  );
 
-    // Note: this will be refactored in case a child is erased and a parent should as well be erased. We'll see.
     for( int i = 0; i < iRemovedObjectArray.size(); i++ )
     {
         if( iRemovedObjectArray[i]->GetChildrenList().size() == 0 )
@@ -700,8 +639,7 @@ RecursivePickSegments( FOdysseyVectorObject* iObject
                      , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
                      , std::vector<double>* oDistanceArray )
 {
-    if( ( iObject->GetClass() == FOdysseyVectorPath::StaticClass()      )
-     || ( iObject->GetClass() == FOdysseyVectorPath::StaticClass() ) )
+    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
         BLPoint localVector = iObject->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
@@ -819,18 +757,10 @@ FOdysseyVectorEngine::UseMaskImage()
 void
 FOdysseyVectorEngine::UseImage( BLImage* iImage )
 {
-    if( mBLContext->targetImage() != iImage )
-    {
-        mBLContext->end();
-        mBLContext->begin(*iImage);
-    }
-}
-
-void
-FOdysseyVectorEngine::UseColorImage()
-{
     mBLContext->end();
-    mBLContext->begin( *mBLImage );
+    mBLContext->begin(*iImage);
+
+    mBLImage = iImage;
 }
 
 void
@@ -895,5 +825,12 @@ void
 FOdysseyVectorEngine::Signal( uint64 iSignalFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Signal);
+    // Force invalidation when we need redrawing
+    // This should be removed once we have per-rectangle invalidation
+    if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )
+    {
+        Invalidate();
+    }
+
     OnSignalDelegate().Broadcast( mScene, iSignalFlags );
 }

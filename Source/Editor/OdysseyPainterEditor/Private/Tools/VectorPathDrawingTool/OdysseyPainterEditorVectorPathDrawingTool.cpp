@@ -371,10 +371,15 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorSc
                                                               , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    uint32 width = vectorEngine->GetWidth();
+    uint32 height = vectorEngine->GetHeight();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     ::ULIS::FRectI imageRegion;
 
-    vectorEngine->GetColorImageSize( imageRegion );
+    imageRegion.x = 0;
+    imageRegion.y = 0;
+    imageRegion.w = width;
+    imageRegion.h = height;
 
     if( mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y ) == true )
     {

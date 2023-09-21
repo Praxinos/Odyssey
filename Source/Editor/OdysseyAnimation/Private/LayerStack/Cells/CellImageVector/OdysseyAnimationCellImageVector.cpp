@@ -4,11 +4,13 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImageRenderer.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorExport.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImport.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorBlock.h"
-#include "Import/v2/OdysseyVectorImport.h"
-#include "Import/v1/OdysseyVectorImport.h"
+// from module OdysseyFile
+#include "OdysseyFile.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageVector"
 
@@ -47,12 +49,16 @@ FOdysseyAnimationCellImageVector::FOdysseyAnimationCellImageVector(UOdysseyAnima
 {
 }
 
+UOdysseyAnimationLayerImageVector*
+FOdysseyAnimationCellImageVector::GetLayer() const
+{
+    return mLayer;
+}
+
 void
 FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 {
     UOdysseyAnimation* animation = mLayer->GetAnimation();
-
-    BLImageData imgData;
 
     mWidth = iWidth;
     mHeight = iHeight;
@@ -63,8 +69,6 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsColoredChanged );
-
-    mEngine->GetBLImage()->getData( &imgData );
 
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mEngine, iWidth, iHeight, animation->Format());
@@ -90,18 +94,54 @@ FOdysseyAnimationCellImageVector::GetVectorBlock() const
     return mVectorBlock;
 }
 
+uint32
+FOdysseyAnimationCellImageVector::GetWidth()
+{
+    return mWidth;
+}
+
+uint32
+FOdysseyAnimationCellImageVector::GetHeight()
+{
+    return mHeight;
+}
+
+FGuid
+FOdysseyAnimationCellImageVector::GetVectorBlockId()
+{
+    return mVectorBlockId;
+}
+
+void
+FOdysseyAnimationCellImageVector::SetWidth( uint32 iWidth )
+{
+    mWidth = iWidth;
+}
+
+void
+FOdysseyAnimationCellImageVector::SetHeight( uint32 iHeight )
+{
+    mHeight = iHeight;
+}
+
+void
+FOdysseyAnimationCellImageVector::SetVectorBlockId( FGuid iVectorBlockId )
+{
+    mVectorBlockId = iVectorBlockId;
+}
+
 void
 FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
     FOdysseyAnimationCell::Serialize(Ar);
     
-    Ar << mWidth;
-    Ar << mHeight;
-    Ar << mVectorBlockId;
+//    Ar << mWidth;
+//    Ar << mHeight;
+//    Ar << mVectorBlockId;
 
     if( Ar.IsSaving() )
     {
-        FOdysseyVectorExportV2::Write( mEngine ? mEngine->GetScene() : nullptr, Ar );
+        FOdysseyAnimationCellImageVectorExport::Write( this, Ar );
     }
 
     if( Ar.IsLoading() )
@@ -110,33 +150,18 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
         uint64 chunkLen;
         uint64 chunkEnd;
 
-        // Reads the first chunk (CHUNK_VECTOR_MAGIC)
+        // Reads the first chunk (FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR)
         Ar << chunkID;
         Ar << chunkLen;
 
         chunkEnd = Ar.Tell() + chunkLen;
 
-        if ( mEngine == nullptr )
-        {
-            Init( mWidth, mHeight );
-        }
-
         switch( chunkID )
         {
-            case FOdysseyVectorExportV1::CHUNK_VECTOR_MAGIC_V1 :
-                UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V1") );
+            case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR :
+                UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGEVECTOR") );
 
-                FOdysseyVectorImportV1::Read( mEngine->GetScene(), Ar, chunkEnd );
-            break;
-
-            case FOdysseyVectorExportV2::CHUNK_VECTOR_MAGIC_V2 :
-            {
-                FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
-
-                UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
-
-                importerV2.Read( mEngine->GetScene(), Ar, chunkEnd );
-            }
+                FOdysseyAnimationCellImageVectorImport::Read( this, Ar, chunkEnd );
             break;
 
             default:
@@ -154,6 +179,8 @@ FOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImage
 {
     if (iLayer != mLayer)
         return;
+
+    mEngine->Invalidate();
 
     mVectorBlock->SetRenderFlags(mLayer->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     ImageRenderingChanged();
