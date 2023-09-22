@@ -12,6 +12,8 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "OdysseyLayerFunctionLibrary.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorExport.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImport.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageVector"
 
@@ -154,8 +156,20 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
 
-    //TODO: check undo
-    mCellsContainer->Serialize(Ar);
+    if( Ar.IsSaving() )
+    {
+        FOdysseyAnimationLayerImageVectorExport::Write( this, Ar );
+    }
+
+    if( Ar.IsLoading() )
+    {
+        if (!FOdysseyAnimationLayerImageVectorImport::Read( this, Ar ))
+        {
+            //Old Style No Chunk Loading
+            mCellsContainer->Serialize(Ar);
+            return;
+        }
+    }
 }
 
 /* void
