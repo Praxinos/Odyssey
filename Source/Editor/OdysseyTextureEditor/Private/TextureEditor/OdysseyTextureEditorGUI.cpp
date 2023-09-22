@@ -9,7 +9,7 @@
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "PainterEditor/OdysseyPainterEditorSelectedVectorObjectTab.h"
 #include "Framework/Docking/LayoutExtender.h"
-#include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
+#include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorGUI"
 

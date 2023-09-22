@@ -7,6 +7,10 @@
 #include "AnimationEditor/OdysseyAnimationEditorLightTableTab.h"
 #include "AnimationEditor/OdysseyAnimationEditorTimelineTab.h"
 #include "Framework/Docking/LayoutExtender.h"
+#include "PainterEditor/OdysseyPainterEditorSelectedVectorObjectTab.h"
+#include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
+#include "OdysseyMediaVector.h"
+#include "OdysseyVectorEngine.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorGUI"
 
@@ -16,11 +20,14 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 {
+	FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
 }
 
 FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension)
 	: mExtension(iExtension)
 {
+    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
+    FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyAnimationEditorGUI::OnVectorSceneSignal );
 }
 
 //--------------------------------------------------------------------------------------
@@ -99,6 +106,39 @@ TSharedPtr<FOdysseyAnimationEditorLightTableTab>&
 FOdysseyAnimationEditorGUI::GetLightTableTab()
 {
 	return mLightTableTab;
+}
+
+void
+FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source)
+        return;
+
+    // layerStack might be NULL when closing the program
+    if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab> vectorObjectTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorSelectedVectorObjectTab>();
+        TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
+
+        if( mediaVectors.Num() )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+
+            if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
+            {
+                vectorSceneTreeViewTab.Get()->Update( iScene );
+            }
+
+            if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
+             || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
+             || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
+            {
+                vectorObjectTab.Get()->Update( iScene );
+            }
+        }
+    }
 }
 
 #undef LOCTEXT_NAMESPACE
