@@ -131,6 +131,9 @@ FOdysseyVectorEngine::RenderHUD( BLImage* iBLImage/*FOdysseyVectorScene* iScene 
 
     mBLContext->save();
     mBLContext->resetMatrix();
+    //mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+    //mBLContext->setFillAlpha( 0.0f );
+    mBLContext->clearAll();
 
     for( std::list<FOdysseyVectorHUD*>::iterator hit = GetHUDList().begin(); hit != GetHUDList().end(); ++hit )
     {

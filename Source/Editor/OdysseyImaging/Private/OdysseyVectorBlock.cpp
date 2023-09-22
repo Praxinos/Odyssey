@@ -77,14 +77,35 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
     //Render in a BLImage
     mEngine->Render(mBlockData->mBLImage.Get(), mRenderFlags);
 
-    /*if (iRenderHUD)
-        mEngine->RenderHUD(mBlockData->mBLImage.Get());*/
-
     {
         TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
         //Get a ULIS block pointing to the BLImage
         BLImageData imgData;
         mBlockData->mBLImage->getData(&imgData);
+        ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+
+        //Unpremultiply the render block
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
+        ctx.Unpremultiply(renderBlock);
+        ctx.Finish();
+
+        //Convert the right ULIS block in the expected ULIS Format
+        ctx.ConvertFormat(renderBlock, ioBlock);
+        ctx.Finish();
+    }
+}
+
+void
+FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
+{   
+	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
+    mEngine->RenderHUD(mHUDBlockData->mBLImage.Get());
+
+    {
+        TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertHUDBlock);
+        //Get a ULIS block pointing to the BLImage
+        BLImageData imgData;
+        mHUDBlockData->mBLImage->getData(&imgData);
         ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
 
         //Unpremultiply the render block
@@ -108,6 +129,11 @@ FOdysseyVectorBlock::Render()
     if (mNeedsRender)
     {
         Render(*block);
+
+        TSharedPtr<::ULIS::FBlock> hudBlock = mHUDBlock.Pin();
+        if ( hudBlock )
+            RenderHUD(*hudBlock);
+
         mNeedsRender = false;
     }
 
@@ -138,6 +164,42 @@ FOdysseyVectorBlock::CleanupBlock(uint8* iData, void* iInfo)
     }
     
     delete blockData;
+}
+
+
+
+void
+FOdysseyVectorBlock::CleanupHUDBlock(uint8* iData, void* iInfo)
+{
+    FHUDBlockData* blockData = static_cast<FHUDBlockData*>(iInfo);
+
+    //Data is owned by the block
+    ::ULIS::OnCleanup_FreeMemory(iData, iInfo); 
+    
+    delete blockData; //will also delete the associated BLImage
+}
+
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
+FOdysseyVectorBlock::GetHUDBlock()
+{
+	FScopeLock Lock(&mMutex);
+
+    if ( mWidth <= 0 || mHeight <= 0 )
+        return nullptr;
+        
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block;
+    block = mHUDBlock.Pin();
+    if ( block )
+        return block;
+
+    mHUDBlockData = new FHUDBlockData();
+    mHUDBlockData->mBLImage = MakeShared<BLImage>(mWidth, mHeight, BL_FORMAT_PRGB32);
+    block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, mFormat);
+    block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyVectorBlock::CleanupHUDBlock, mHUDBlockData));
+    RenderHUD(*block);
+    mHUDBlock = block;
+
+    return block;
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>

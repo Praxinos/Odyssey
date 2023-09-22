@@ -9,7 +9,8 @@
 FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorImageRenderer(const UOdysseyTextureLayerImageVector* iLayer, TSharedPtr<FOdysseyVectorBlock> iVectorBlock, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mVectorBlock(iVectorBlock)
-    , mBlock(iVectorBlock->GetBlock())
+    , mBlock(nullptr)
+    , mHUDBlock(nullptr)
     , mRenderHUD(false)
 {
     UOdysseyLayerStack* layerStack = iLayer->GetLayerStack();
@@ -22,6 +23,11 @@ FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorIma
 void
 FOdysseyTextureLayerImageVectorImageRenderer::Init()
 {
+    mBlock = mVectorBlock->GetBlock();
+    if (mRenderHUD)
+        mHUDBlock = mVectorBlock->GetHUDBlock();
+    
+    mVectorBlock->Render();
 }
 
 bool
@@ -36,9 +42,12 @@ FOdysseyTextureLayerImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> i
     if (!mBlock)
         return iWaitList;
 
-    mVectorBlock->Render(/*mRenderHUD*/);
+    TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    
+    if (!mHUDBlock)
+        return events;
 
-    return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    return ConvertAndBlend(mHUDBlock, ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
 }
 
 TArray<::ULIS::FEvent>
@@ -46,8 +55,6 @@ FOdysseyTextureLayerImageVectorImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> io
 {
     if (!mBlock)
         return iWaitList;
-
-    mVectorBlock->Render(/*mRenderHUD*/);
 
     return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
 }

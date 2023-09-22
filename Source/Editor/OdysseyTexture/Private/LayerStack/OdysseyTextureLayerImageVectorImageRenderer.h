@@ -20,5 +20,6 @@ public:
 public:
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock;
     TSharedPtr<::ULIS::FBlock> mBlock;
+    TSharedPtr<::ULIS::FBlock> mHUDBlock;
     bool mRenderHUD;
 };

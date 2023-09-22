@@ -64,6 +64,13 @@ public:
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock();
 
     /**
+     * @brief Get the Block object
+     * 
+     * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
+     */
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetHUDBlock();
+
+    /**
      * @brief Renders the Scene into the internal block and returns the block
      * 
      * @return TSharedPtr<::ULIS::FBlock> 
@@ -89,7 +96,9 @@ private:
     };
 
     static void CleanupBlock(uint8* iData, void* iInfo);
+    static void CleanupHUDBlock(uint8* iData, void* iInfo);
     void Render(::ULIS::FBlock& ioBlock);
+    void RenderHUD(::ULIS::FBlock& ioBlock);
     void OnVectorEngineSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
     void Invalidate(bool iIsInteractive);
     void SetState(eBlockState iState);
@@ -98,6 +107,7 @@ private:
     //The stable block for which edition is finished
     FGuid mId;
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
+    TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mHUDBlock; //Loaded on demand
     FOdysseyVectorEngine* mEngine;
     int mWidth;
     int mHeight;
@@ -120,8 +130,14 @@ private:
         bool mNeedsCache;
     };
 
+    struct FHUDBlockData
+    {
+        TSharedPtr<BLImage> mBLImage;
+    };
+
     //eBlockState mState;
     bool mNeedsRender;
     FBlockData* mBlockData;
+    FHUDBlockData* mHUDBlockData;
     FOnInvalidated mOnInvalidated;
 };

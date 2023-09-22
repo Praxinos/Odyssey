@@ -4,6 +4,7 @@
 #pragma once
 
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImageRenderer.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
@@ -14,31 +15,42 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCell(iCell)
     , mBlock(nullptr)
+    , mHUDBlock(nullptr)
+    , mRenderHUD(false)
 {
+    /* TEMPORARY FOR DISPLAYING TOOLS HUD */
+    UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(mCell->GetLayer());
+    if (layer)
+    {
+        UOdysseyAnimation* animation = layer->GetAnimation();
+        UOdysseyLayerStack* layerStack = layer->GetLayerStack();
+        if (animation && layerStack)
+        {
+            TSharedPtr<FOdysseyAnimationCell> cell = layer->GetCellsContainer()->GetCellAtFrame(animation->CurrentFrame);
+            int frame = layer->GetCellsContainer()->GetCellFrameAtFrame(animation->CurrentFrame);
+
+            mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+        }
+    }
 }
     
 void
 FOdysseyAnimationCellImageVectorImageRenderer::Init()
 {
     TSharedPtr<FOdysseyVectorBlock> vectorBlock = mCell->GetVectorBlock();
-    bool renderHUD = false;
-
-    /*
-    UOdysseyLayer* layer = mCell->GetLayer();
-    if (layer)
-    {
-        UOdysseyLayerStack* layerStack = layer->GetLayerStack();
-        if (layerStack)
-            renderHUD = layerStack->CurrentLayer.Get() == layer;
-    }
-    */
+    
 
     if (vectorBlock)
+    {
         mBlock = vectorBlock->GetBlock(); //Store block before rendering to avoid looking twice for the block in cache
+        /* TEMPORARY FOR DISPLAYING TOOLS HUD */
+        if (mRenderHUD)
+            mHUDBlock = vectorBlock->GetHUDBlock();
+    }
 
     {   
         FScopeLock renderLock(&mEngineMutex);
-        vectorBlock->Render(/*renderHUD*/);
+        vectorBlock->Render();
     }
 }
 
@@ -48,7 +60,12 @@ FOdysseyAnimationCellImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> 
     if (!mBlock)
         return iWaitList;
 
-    return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    
+    if (!mHUDBlock)
+        return events;
+
+    return ConvertAndBlend(mHUDBlock, ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
 }
 
 TArray<::ULIS::FEvent>
