@@ -21,7 +21,7 @@ private:
      * Private import functions
      */
 
-    static void ODYSSEYANIMATION_API Read( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
+    static void Read( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

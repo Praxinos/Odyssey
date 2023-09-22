@@ -20,7 +20,7 @@ private:
     /**
      * Private import functions
      */
-    static void ODYSSEYANIMATION_API Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+    static void Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

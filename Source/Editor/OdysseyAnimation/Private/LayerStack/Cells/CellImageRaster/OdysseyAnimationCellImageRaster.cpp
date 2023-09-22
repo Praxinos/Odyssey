@@ -99,7 +99,6 @@ FOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
         {
             //Old Style No Chunk Loading
             Ar << *mRasterBlock;
-            return;
         }
     }
 }

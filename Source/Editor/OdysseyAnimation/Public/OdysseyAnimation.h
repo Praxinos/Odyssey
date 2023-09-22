@@ -85,7 +85,6 @@ public:
 	 *
 	 * @param Ar
 	 */
-	virtual void Serialize(FArchive& Ar) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 	virtual void PostInitProperties() override;

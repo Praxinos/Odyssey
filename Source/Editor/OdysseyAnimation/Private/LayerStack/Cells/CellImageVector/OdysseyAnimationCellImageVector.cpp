@@ -146,7 +146,6 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
         {
             //Old Style No Chunk Loading
             checkf(false, TEXT("Failed to read chunks"));
-            return;
         }
 
         mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

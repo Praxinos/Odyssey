@@ -180,7 +180,6 @@ FOdysseyAnimationCellsContainer::Serialize(FArchive& Ar)
                     mCells[i]->Serialize(Ar);
                 }
             }
-            return;
         }
     }
 

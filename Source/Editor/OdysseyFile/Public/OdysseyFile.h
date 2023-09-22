@@ -161,6 +161,15 @@ namespace FOdysseyFile
             static const uint32 CHUNK_LAYERIMAGEVECTOR_CELLSCONTAINER = 0x75494fd4; //FOdysseyAnimationCellsContainer(CellContainer)
     }
 
+    namespace RasterBlock
+    {
+        static const uint32 CHUNK_RASTERBLOCK = 0x97c86c9c; //container
+            static const uint32 CHUNK_RASTERBLOCK_ID = 0x6055ee70; //FGuid(Id)
+            static const uint32 CHUNK_RASTERBLOCK_RESOLUTION = 0xab8b7918; //uint32(Width) + uint32(Height)
+            static const uint32 CHUNK_RASTERBLOCK_FORMAT = 0x79ddfbb4; //uint32(Format)
+            static const uint32 CHUNK_RASTERBLOCK_BULKDATA = 0xe85808c4; //FEditorBulkData(BulkData)
+    }
+
     void ODYSSEYFILE_API WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback );
     void ODYSSEYFILE_API ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback );
 }

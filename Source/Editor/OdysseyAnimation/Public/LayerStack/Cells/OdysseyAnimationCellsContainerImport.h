@@ -21,7 +21,7 @@ private:
      * Private import functions
      */
 
-    static void ODYSSEYANIMATION_API Read( FOdysseyAnimationCellsContainer* iAnimationCellsContainer
+    static void Read( FOdysseyAnimationCellsContainer* iAnimationCellsContainer
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

@@ -50,7 +50,6 @@ FOdysseyAnimationCell::Serialize(FArchive& Ar)
         {
             //Old Style No Chunk Loading
             Ar << mLength;
-            return;
         }
     }
 }

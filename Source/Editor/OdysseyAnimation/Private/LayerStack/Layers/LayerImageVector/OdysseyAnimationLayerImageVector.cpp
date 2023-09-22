@@ -167,7 +167,6 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
         {
             //Old Style No Chunk Loading
             mCellsContainer->Serialize(Ar);
-            return;
         }
     }
 }

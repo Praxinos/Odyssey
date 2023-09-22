@@ -22,6 +22,7 @@ public class OdysseyImaging : ModuleRules
                 "TextureCompressor",
 
                 "OdysseyCore",
+                "OdysseyFile",
                 "OdysseyMaths",
                 "OdysseyVector",
                 "blend2d",

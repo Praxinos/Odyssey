@@ -21,7 +21,7 @@ private:
      * Private import functions
      */
 
-    static void ODYSSEYANIMATION_API Read( UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
+    static void Read( UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };
