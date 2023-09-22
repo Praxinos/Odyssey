@@ -170,6 +170,21 @@ namespace FOdysseyFile
             static const uint32 CHUNK_RASTERBLOCK_BULKDATA = 0xe85808c4; //FEditorBulkData(BulkData)
     }
 
+    namespace Texture
+    {
+        // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
+        // Just be sure the Chunk ID is unique and any ID will make it.
+        // You can use website https://crc32.online/ to generate a code
+        static const uint32 CHUNK_TEXTURELAYERIMAGEVECTOR =  0x42c274ca; // container
+            static const uint32 CHUNK_TEXTURELAYERIMAGEVECTOR_RESOLUTION = 0xd42a5d85; // uint32(Width)-uint32(Height)
+            static const uint32 CHUNK_TEXTURELAYERIMAGEVECTOR_BLOCK = 0xed0cbdf0; // container
+                static const uint32 CHUNK_TEXTURELAYERIMAGEVECTOR_BLOCK_ID =  0x25b22eb9; // FGuid(VectorBlockId)
+            //static const uint32 CHUNK_VECTOR_MAGIC_V2 //see FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2
+
+        static const uint32 CHUNK_TEXTURELAYERIMAGERASTER =  0x86252f09; // container
+            static const uint32 CHUNK_TEXTURELAYERIMAGERASTER_RASTERBLOCK = 0x2fcd2a9a; // FOdysseyRasterBlock(Block)
+    }
+
     void ODYSSEYFILE_API WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback );
     void ODYSSEYFILE_API ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback );
 }
