@@ -1,0 +1,66 @@
+#include "LayerStack/OdysseyTextureLayerImageVectorImport.h"
+#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "OdysseyFile.h"
+
+bool
+FOdysseyTextureLayerImageVectorImport::Read( UOdysseyTextureLayerImageVector* iTextureLayerImageVector
+                                            , FArchive &Ar )
+{
+    uint64 start = Ar.Tell();
+
+    uint32 chunkID;
+    uint64 chunkLen;
+    uint64 chunkEnd;
+
+    // Reads the first chunk (FOdysseyFile::Texture::CHUNK_TEXTURELAYERIMAGEVECTOR)
+    Ar << chunkID;
+    Ar << chunkLen;
+
+    chunkEnd = Ar.Tell() + chunkLen;
+
+    switch( chunkID )
+    {
+        case FOdysseyFile::Texture::CHUNK_TEXTURELAYERIMAGEVECTOR :
+            UE_LOG(LogTemp, Warning, TEXT("CHUNK_TEXTURELAYERIMAGEVECTOR") );
+
+            FOdysseyTextureLayerImageVectorImport::Read( iTextureLayerImageVector, Ar, chunkEnd );
+        break;
+
+        default:
+            //No chunk found, seek back to the beginning and return false
+            Ar.Seek( start );
+            return false;
+    }
+    return true;
+}
+
+void
+FOdysseyTextureLayerImageVectorImport::Read( UOdysseyTextureLayerImageVector* iTextureLayerImageVector
+                                            , FArchive &Ar
+                                            , uint64 iChunkEnd )
+{
+    FOdysseyFile::ReadChunks( iChunkEnd
+                              , Ar
+                              , [iTextureLayerImageVector](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+        {
+            switch ( iChunkID )
+            {
+                case FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2:
+                {
+                    FOdysseyVectorEngine* vectorEngine = iTextureLayerImageVector->GetEngine();
+                    FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
+
+                    UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
+
+                    importerV2.Read( vectorEngine->GetScene(), Ar, Ar.Tell() + iChunkLen );
+                }
+                break;
+
+                default:
+				// Mandatory
+                    Ar.Seek( Ar.Tell() + iChunkLen );
+                break;
+            }
+        } );
+}
+

@@ -88,6 +88,11 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     private:
         void OnVectorBlockInvalidated(bool iIsInteractive);
 
+    private:
+        //Import/Export
+        friend class FOdysseyTextureLayerImageVectorExport;
+        friend class FOdysseyTextureLayerImageVectorImport;
+
     public:
         UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
         bool IsColored = true;

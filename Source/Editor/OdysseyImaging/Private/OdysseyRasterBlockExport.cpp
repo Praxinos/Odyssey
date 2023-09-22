@@ -11,7 +11,8 @@ FOdysseyRasterBlockExport::WriteBulkData( FOdysseyRasterBlock* iRasterBlock
                             , [iRasterBlock](FArchive &Ar) -> void
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = iRasterBlock->GetBlock();
-        checkf(!!block, TEXT("No block to save"));
+        if (!block) //block can be nullptr in some cases
+            return;
 
         FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(block->Bits(), block->BytesTotal());
 

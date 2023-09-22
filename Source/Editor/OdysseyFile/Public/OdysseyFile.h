@@ -176,9 +176,6 @@ namespace FOdysseyFile
         // Just be sure the Chunk ID is unique and any ID will make it.
         // You can use website https://crc32.online/ to generate a code
         static const uint32 CHUNK_TEXTURELAYERIMAGEVECTOR =  0x42c274ca; // container
-            static const uint32 CHUNK_TEXTURELAYERIMAGEVECTOR_RESOLUTION = 0xd42a5d85; // uint32(Width)-uint32(Height)
-            static const uint32 CHUNK_TEXTURELAYERIMAGEVECTOR_BLOCK = 0xed0cbdf0; // container
-                static const uint32 CHUNK_TEXTURELAYERIMAGEVECTOR_BLOCK_ID =  0x25b22eb9; // FGuid(VectorBlockId)
             //static const uint32 CHUNK_VECTOR_MAGIC_V2 //see FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2
 
         static const uint32 CHUNK_TEXTURELAYERIMAGERASTER =  0x86252f09; // container
