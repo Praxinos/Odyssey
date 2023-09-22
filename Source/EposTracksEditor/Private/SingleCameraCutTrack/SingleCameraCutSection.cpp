@@ -113,11 +113,19 @@ void FSingleCameraCutSection::BuildSectionContextMenu(FMenuBuilder& MenuBuilder,
     {
         MenuBuilder.AddMenuSeparator();
 
+        // GetCameraForFrame will return the Spawnable Template (for names) but we can't select those.
+        const bool bCanSelect = CameraActor->GetWorld() != nullptr;
+        const FText CameraNameLabel = FText::FromString( CameraActor->GetActorLabel() );
+        const FText Tooltip = bCanSelect ?
+            FText::Format( LOCTEXT( "SelectCameraTooltipFormat", "Select {0}" ), CameraNameLabel ) :
+            FText::Format( LOCTEXT( "SelectCameraInvalidTooltipFormat", "Cannot Select {0} (Currently Unspawned)" ), CameraNameLabel );
+
         MenuBuilder.AddMenuEntry(
-            FText::Format(LOCTEXT("SelectCameraTextFormat", "Select {0}"), FText::FromString(CameraActor->GetActorLabel())),
-            FText::Format(LOCTEXT("SelectCameraTooltipFormat", "Select {0}"), FText::FromString(CameraActor->GetActorLabel())),
+            FText::Format(LOCTEXT("SelectCameraTextFormat", "Select {0}"), CameraNameLabel),
+            Tooltip,
             FSlateIcon(),
-            FUIAction(FExecuteAction::CreateRaw(this, &FSingleCameraCutSection::HandleSelectCameraMenuEntryExecute, CameraActor))
+            FUIAction(FExecuteAction::CreateRaw(this, &FSingleCameraCutSection::HandleSelectCameraMenuEntryExecute, CameraActor),
+            FCanExecuteAction::CreateRaw( this, &FSingleCameraCutSection::CanSelectCameraActor, CameraActor ))
         );
     }
 
@@ -263,9 +271,17 @@ FText FSingleCameraCutSection::HandleThumbnailTextBlockText() const
 /* FCameraCutSection callbacks
  *****************************************************************************/
 
+bool FSingleCameraCutSection::CanSelectCameraActor( AActor* InCamera ) const
+{
+    return InCamera && InCamera->GetWorld();
+}
+
 void FSingleCameraCutSection::HandleSelectCameraMenuEntryExecute(AActor* InCamera)
 {
-    GEditor->SelectActor(InCamera, true, true);
+    const bool bInSelected = true;
+    const bool bNotify = true;
+    const bool bSelectEventIfHidden = true;
+    GEditor->SelectActor( InCamera, bInSelected, bNotify, bSelectEventIfHidden );
 }
 
 void FSingleCameraCutSection::HandleSetCameraMenuEntryExecute(AActor* InCamera)
