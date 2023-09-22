@@ -6,6 +6,8 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImageRenderer.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaRaster.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterExport.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImport.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageRaster"
 
@@ -85,7 +87,21 @@ void
 FOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
 {
     FOdysseyAnimationCell::Serialize(Ar);
-    Ar << *mRasterBlock;
+
+    if( Ar.IsSaving() )
+    {
+        FOdysseyAnimationCellImageRasterExport::Write( this, Ar );
+    }
+
+    if( Ar.IsLoading() )
+    {
+        if (!FOdysseyAnimationCellImageRasterImport::Read( this, Ar ))
+        {
+            //Old Style No Chunk Loading
+            Ar << *mRasterBlock;
+            return;
+        }
+    }
 }
 
 TArray<::ULIS::FEvent>

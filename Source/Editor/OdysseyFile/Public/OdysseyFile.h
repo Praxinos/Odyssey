@@ -141,6 +141,9 @@ namespace FOdysseyFile
             static const uint32 CHUNK_CELLIMAGEVECTOR_BLOCK = 0xf0a9e121; // container
                 static const uint32 CHUNK_CELLIMAGEVECTOR_BLOCK_ID =  0x194b349c; // FGuid(VectorBlockId)
             //static const uint32 CHUNK_VECTOR_MAGIC_V2 //see FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2
+
+        static const uint32 CHUNK_CELLIMAGERASTER =  0xa37598ec; // container
+            static const uint32 CHUNK_CELLIMAGERASTER_RASTERBLOCK = 0xf83974c6; // FOdysseyRasterBlock
     }
 
     void ODYSSEYFILE_API WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback );
