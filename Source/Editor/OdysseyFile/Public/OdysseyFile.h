@@ -136,6 +136,9 @@ namespace FOdysseyFile
         // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
         // Just be sure the Chunk ID is unique and any ID will make it.
         // You can use website https://crc32.online/ to generate a code
+        static const uint32 CHUNK_CELL =  0xf93591b3; // container
+            static const uint32 CHUNK_CELL_LENGTH = 0x5dbe40b7; // FOdysseyRasterBlock
+
         static const uint32 CHUNK_CELLIMAGEVECTOR =  0x60fdee3a; // container
             static const uint32 CHUNK_CELLIMAGEVECTOR_RESOLUTION = 0xc1bb48e1; // uint32(Width)-uint32(Height)
             static const uint32 CHUNK_CELLIMAGEVECTOR_BLOCK = 0xf0a9e121; // container
