@@ -98,6 +98,11 @@ private:
     void AutoCreateCell(int iFrameIndex);
     void CreateCell( const FName& iCellType);
 
+private:
+    //Import/Export
+    friend class FOdysseyAnimationLayerImageRasterExport;
+    friend class FOdysseyAnimationLayerImageRasterImport;
+
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
     bool IsAlphaLocked = false;

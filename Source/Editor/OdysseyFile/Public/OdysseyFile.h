@@ -153,6 +153,9 @@ namespace FOdysseyFile
             static const uint32 CHUNK_CELLSCONTAINER_CELLS =  0x13bb0a63; // container
                 static const uint32 CHUNK_CELLSCONTAINER_CELLTYPE =  0x513beb3b; // FName(CellType)
                 static const uint32 CHUNK_CELLSCONTAINER_CELL =  0xd8f8456d; // FOdysseyAnimationCell(Cell)
+
+        static const uint32 CHUNK_LAYERIMAGERASTER = 0xc19199d8; //container
+            static const uint32 CHUNK_LAYERIMAGERASTER_CELLSCONTAINER = 0x8334465; //container
     }
 
     void ODYSSEYFILE_API WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback );

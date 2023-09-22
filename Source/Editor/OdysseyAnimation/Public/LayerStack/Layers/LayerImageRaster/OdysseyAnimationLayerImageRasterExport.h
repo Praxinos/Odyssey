@@ -1,0 +1,15 @@
+#pragma once
+
+#include "CoreMinimal.h"
+
+class FOdysseyAnimationLayerImageRaster;
+
+class FOdysseyAnimationLayerImageRasterExport
+{
+public:
+    static void ODYSSEYANIMATION_API Write( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster, FArchive &Ar );
+
+private:
+    ////////////////////////////////////
+    static void WriteCellsContainer( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster, FArchive &Ar );
+};

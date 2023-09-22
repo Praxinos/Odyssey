@@ -13,6 +13,8 @@
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyLayerFunctionLibrary.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterExport.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImport.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageRaster"
 
@@ -343,46 +345,20 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
 
-    //TODO: check undo
-    mCellsContainer->Serialize(Ar);
-
-    /* if ( Ar.IsTransacting() || !Ar.IsPersistent() )
-        return;
-
-    Ar << mOffset;
-
-    if ( Ar.IsLoading() )
+    if( Ar.IsSaving() )
     {
-        mCells.Empty();
+        FOdysseyAnimationLayerImageRasterExport::Write( this, Ar );
     }
 
-    int32 numCells = mCells.Num();
-    Ar << numCells;
-    for ( int i = 0; i < numCells; i++ )
+    if( Ar.IsLoading() )
     {
-        if ( Ar.IsLoading() )
+        if (!FOdysseyAnimationLayerImageRasterImport::Read( this, Ar ))
         {
-            FName cellType;
-            Ar << cellType;
-            TSharedPtr<FOdysseyAnimationCell> cell;
-            if ( cellType == FOdysseyAnimationCellImageRaster::StaticType() )
-            {
-                cell = MakeShared<FOdysseyAnimationCellImageRaster>(this);
-            }
-            else
-            {
-                checkf(false, TEXT(""))
-            }
-            cell->Serialize(Ar);
-            mCells.Add(cell);
+            //Old Style No Chunk Loading
+            mCellsContainer->Serialize(Ar);
+            return;
         }
-        else
-        {
-            FName cellType = mCells[i]->GetType();
-            Ar << cellType;
-            mCells[i]->Serialize(Ar);
-        }
-    } */
+    }
 }
 
 TSharedPtr<IOdysseyImageRenderer>
