@@ -33,6 +33,11 @@ void
 FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder )
 {
     mSequencer = &ioBuilder.GetSequencer();
+    // From 5.3, the registration is only done if the new focused sequence is NOT the same type than the previous one
+    // It means that:
+    // - going from board to inner board, NOT called
+    // - going from board to inner shot, called
+    // - going from shot to upper board, called
     mShotSequence = Cast<UShotSequence>( &ioBuilder.GetFocusedSequence() );
 
     //---

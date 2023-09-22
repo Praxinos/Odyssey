@@ -44,6 +44,11 @@ void
 FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder ) // This is called each time the focused sequence changed (ie. when double-clicking on a section to go inside its subsequence)
 {
     mSequencer = &ioBuilder.GetSequencer();
+    // From 5.3, the registration is only done if the new focused sequence is NOT the same type than the previous one
+    // It means that:
+    // - going from board to inner board, NOT called
+    // - going from board to inner shot, called
+    // - going from shot to upper board, called
     mBoardSequence = Cast<UBoardSequence>( &ioBuilder.GetFocusedSequence() );
 
     //---
@@ -241,7 +246,6 @@ FBoardSequenceCustomization::CreateInfoText() const
     const UMovieScene* root_moviescene = root_board ? root_board->GetMovieScene() : nullptr;
 
     const UBoardSequence* current_board = CastChecked<UBoardSequence>( mSequencer->GetFocusedMovieSceneSequence() );
-    check( current_board == mBoardSequence );
     const UMovieScene* current_moviescene = current_board ? current_board->GetMovieScene() : nullptr;
 
     UMovieSceneCinematicBoardTrack* board_track = current_moviescene ? current_moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
