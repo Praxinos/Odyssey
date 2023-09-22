@@ -134,10 +134,6 @@ void
 FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
     FOdysseyAnimationCell::Serialize(Ar);
-    
-//    Ar << mWidth;
-//    Ar << mHeight;
-//    Ar << mVectorBlockId;
 
     if( Ar.IsSaving() )
     {
@@ -146,27 +142,11 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 
     if( Ar.IsLoading() )
     {
-        uint32 chunkID;
-        uint64 chunkLen;
-        uint64 chunkEnd;
-
-        // Reads the first chunk (FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR)
-        Ar << chunkID;
-        Ar << chunkLen;
-
-        chunkEnd = Ar.Tell() + chunkLen;
-
-        switch( chunkID )
+        if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
         {
-            case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR :
-                UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGEVECTOR") );
-
-                FOdysseyAnimationCellImageVectorImport::Read( this, Ar, chunkEnd );
-            break;
-
-            default:
-                Ar.Seek( chunkEnd );
-            break;
+            //Old Style No Chunk Loading
+            checkf(false, TEXT("Failed to read chunks"));
+            return;
         }
 
         mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

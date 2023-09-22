@@ -3,6 +3,38 @@
 #include "Import/v2/OdysseyVectorImport.h"
 #include "OdysseyFile.h"
 
+bool
+FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+                                            , FArchive &Ar )
+{
+    uint64 start = Ar.Tell();
+
+    uint32 chunkID;
+    uint64 chunkLen;
+    uint64 chunkEnd;
+
+    // Reads the first chunk (FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR)
+    Ar << chunkID;
+    Ar << chunkLen;
+
+    chunkEnd = Ar.Tell() + chunkLen;
+
+    switch( chunkID )
+    {
+        case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR :
+            UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGEVECTOR") );
+
+            FOdysseyAnimationCellImageVectorImport::Read( iAnimationCellImageVector, Ar, chunkEnd );
+        break;
+
+        default:
+            //No chunk found, seek back to the beginning and return false
+            Ar.Seek( start );
+            return false;
+    }
+    return true;
+}
+
 void
 FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                             , FArchive &Ar

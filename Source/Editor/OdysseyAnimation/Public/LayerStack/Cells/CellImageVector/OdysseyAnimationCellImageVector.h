@@ -57,6 +57,11 @@ private:
     void OnVectorBlockInvalidated(bool iIsInteractive);
 
 private:
+    //Import/Export
+    friend class FOdysseyAnimationCellImageVectorExport;
+    friend class FOdysseyAnimationCellImageVectorImport;
+
+private:
     UOdysseyAnimationLayerImageVector* mLayer;
     FOdysseyVectorEngine* mEngine;
     FGuid mVectorBlockId;
