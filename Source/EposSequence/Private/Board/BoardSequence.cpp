@@ -82,8 +82,7 @@ void UBoardSequence::LocateBoundObjects(const FGuid& ObjectId, UObject* Context,
     const FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        FTopLevelAssetPath streamedLevelAssetPath;
-        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
+        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
         if( ResolvedObject && ResolvedObject->GetWorld() )
         {
             OutObjects.Add( ResolvedObject );
@@ -116,8 +115,7 @@ void UBoardSequence::UnbindObjects(const FGuid& ObjectId, const TArray<UObject*>
     FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        FTopLevelAssetPath streamedLevelAssetPath;
-        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
+        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
         if( InObjects.Contains( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
@@ -132,8 +130,7 @@ void UBoardSequence::UnbindInvalidObjects(const FGuid& ObjectId, UObject* Contex
     FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
-        FTopLevelAssetPath streamedLevelAssetPath;
-        UObject* ResolvedObject = Reference->Resolve( Context, streamedLevelAssetPath );
+        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
         if( !IsValid( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
