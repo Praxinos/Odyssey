@@ -459,6 +459,12 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorScene
                                                    , iPointInTexture.y
                                                    , StitchingRadius );
 
+    // stitching to another path at MouseUp is CURRENTLY not supported
+    if( endingVertex && ( endingVertex->GetPath() != mPathTracer.GetPath() ) )
+    {
+        endingVertex = nullptr;
+    }
+
     newSegment = mPathTracer.Flush( endingVertex );
 
     if( newSegment && mStitchedVertex )

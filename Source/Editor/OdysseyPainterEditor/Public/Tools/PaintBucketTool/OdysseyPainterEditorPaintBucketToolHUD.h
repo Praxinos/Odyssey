@@ -40,6 +40,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolHUD : public 
         uint32 PickBucketArea( FOdysseyVectorBucket* iBucket
                              , double iWorldX
                              , double iWorldY );
+        void SetPickedCycles( std::vector<FOdysseyVectorCycle*>& pickedCycleArray );
 
     private:
         void RecursiveDrawObject( FOdysseyVectorObject* iObject
@@ -68,6 +69,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolHUD : public 
         ::ULIS::FVec2D GetRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld );
 
     private:
+        std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
         UOdysseyPainterEditorPaintBucketTool* mPaintBucketTool;
-        FOdysseyVectorCycle* mCycle;
 };
