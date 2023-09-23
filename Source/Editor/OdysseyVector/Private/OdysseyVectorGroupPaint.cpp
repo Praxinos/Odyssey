@@ -693,6 +693,8 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
                                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
                                 std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
 
+                                // convert polygon cache coordinates to paintgroup's coordinates
+                                // for faster intersection test
                                 for( int i = 0; i < polygonCache.size(); i++ )
                                 {
                                     FPolygon* polygon = &polygonCache[i];
