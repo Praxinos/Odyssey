@@ -448,10 +448,12 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
             [this, strokeRenderTargetResource](FRHICommandListImmediate& RHICmdList)
             {
                 // Copy (resolve) the rendered image from the frame buffer to its render target texture
-                RHICmdList.CopyToResolveTarget(
+				TransitionAndCopyTexture(
+					RHICmdList,
                     strokeRenderTargetResource->GetRenderTargetTexture(),		// Source texture
                     strokeRenderTargetResource->TextureRHI,
-                    FResolveParams());									// Resolve parameters
+					{}
+				);									// Resolve parameters
             });
     }
 

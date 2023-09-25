@@ -18,6 +18,8 @@
 #include "Interfaces/ITextureFormat.h"
 #include "ChildTextureFormat.h"
 #include "VT/LightmapVirtualTexture.h"
+#include "TextureBuildUtilities.h"
+#include "ImageCoreUtils.h"
 
 //START COPIED FROM TextureDerivedData.cpp
 
@@ -28,7 +30,7 @@ static bool IsUsingNewDerivedData()
 		FTextureDerivedDataSetting()
 		{
 			bUseNewDerivedData = FParse::Param(FCommandLine::Get(), TEXT("DDC2AsyncTextureBuilds")) || FParse::Param(FCommandLine::Get(), TEXT("DDC2TextureBuilds"));
-			if ( !bUseNewDerivedData )
+			if (!bUseNewDerivedData)
 			{
 				GConfig->GetBool(TEXT("TextureBuild"), TEXT("NewTextureBuilds"), bUseNewDerivedData, GEditorIni);
 			}
@@ -77,79 +79,23 @@ struct FTextureEncodeSpeedOptions
 // InEncodeSpeed must be fast or final.
 static void GetEncodeSpeedOptions(ETextureEncodeSpeed InEncodeSpeed, FTextureEncodeSpeedOptions* OutOptions)
 {
-	// We have to cache this because we are hitting the options on a worker thread, and it'll
-	// crash if we use GetDefault while someone edits the project settings.
-	// At the moment there's no guaranteed game thread place to do this as jobs can be kicked
-	// off from worker threads (async encodes shader/light map).
-	static struct ThreadSafeInitCSO
-	{
-		FTextureEncodeSpeedOptions Fast, Final;
-		ThreadSafeInitCSO()
-		{
-
-			const UTextureEncodingProjectSettings* Settings = GetDefault<UTextureEncodingProjectSettings>();
-			Fast.Effort = Settings->FastEffortLevel;
-			Fast.Tiling = Settings->FastUniversalTiling;
-			Fast.bUsesRDO = Settings->bFastUsesRDO;
-			Fast.RDOLambda = Settings->FastRDOLambda;
-
-			Final.Effort = Settings->FinalEffortLevel;
-			Final.Tiling = Settings->FinalUniversalTiling;
-			Final.bUsesRDO = Settings->bFinalUsesRDO;
-			Final.RDOLambda = Settings->FinalRDOLambda;
-			
-			// log settings once at startup
-			UEnum* EncodeEffortEnum = StaticEnum<ETextureEncodeEffort>();
-			
-			UEnum* UniversalTilingEnum = StaticEnum<ETextureUniversalTiling>();
-
-			FString FastRDOString;
-			if ( Fast.bUsesRDO )
-			{
-				FastRDOString = FString(TEXT("On"));
-				if ( Fast.Tiling != ETextureUniversalTiling::Disabled )
-				{
-					FastRDOString += TEXT(" UT=");
-					FastRDOString += UniversalTilingEnum->GetNameStringByValue((int64)Fast.Tiling);
-				}
-			}
-			else
-			{
-				FastRDOString = FString(TEXT("Off"));
-			}
-			
-			FString FinalRDOString;
-			if ( Final.bUsesRDO )
-			{
-				FinalRDOString = FString(TEXT("On"));
-				if ( Final.Tiling != ETextureUniversalTiling::Disabled )
-				{
-					FinalRDOString += TEXT(" UT=");
-					FinalRDOString += UniversalTilingEnum->GetNameStringByValue((int64)Final.Tiling);
-				}
-			}
-			else
-			{
-				FinalRDOString = FString(TEXT("Off"));
-			}
-
-			UE_LOG(LogTexture, Display, TEXT("Oodle Texture Encode Speed settings: Fast: RDO %s Lambda=%d, Effort=%s Final: RDO %s Lambda=%d, Effort=%s"), \
-				*FastRDOString, Fast.bUsesRDO ? Fast.RDOLambda : 0,  *(EncodeEffortEnum->GetNameStringByValue((int64)Fast.Effort)), \
-				*FinalRDOString, Final.bUsesRDO ? Final.RDOLambda : 0,  *(EncodeEffortEnum->GetNameStringByValue((int64)Final.Effort)) );
-
-
-		}
-	} EncodeSpeedOptions;
-
+	FResolvedTextureEncodingSettings const& EncodeSettings = FResolvedTextureEncodingSettings::Get();
 	if (InEncodeSpeed == ETextureEncodeSpeed::Final)
 	{
-		*OutOptions = EncodeSpeedOptions.Final;
+		OutOptions->bUsesRDO = EncodeSettings.Project.bFinalUsesRDO;
+		OutOptions->Effort = EncodeSettings.Project.FinalEffortLevel;
+		OutOptions->Tiling = EncodeSettings.Project.FinalUniversalTiling;
+		OutOptions->RDOLambda = EncodeSettings.Project.FinalRDOLambda;
 	}
 	else
 	{
-		*OutOptions = EncodeSpeedOptions.Fast;
+		OutOptions->bUsesRDO = EncodeSettings.Project.bFastUsesRDO;
+		OutOptions->Effort = EncodeSettings.Project.FastEffortLevel;
+		OutOptions->Tiling = EncodeSettings.Project.FastUniversalTiling;
+		OutOptions->RDOLambda = EncodeSettings.Project.FastRDOLambda;
 	}
 }
+
 
 // Convert the baseline build settings for all layers to one for the given layer.
 // Note this gets called twice for layer 0, so needs to be idempotent.
@@ -180,9 +126,27 @@ static void FinalizeBuildSettingsForLayer(
 		OutSettings.bReplicateRed = true;
 	}
 
-	if (OutSettings.bVirtualStreamable)
+	// this is called once per Texture with OutSettings.TextureFormatName == None
+	//	and then called again (per Layer) with OutSettings.TextureFormatName filled out
+
+	if (OutSettings.bVirtualStreamable && ! OutSettings.TextureFormatName.IsNone())
 	{
-		OutSettings.TextureFormatName = TargetPlatform->FinalizeVirtualTextureLayerFormat(OutSettings.TextureFormatName);
+		// note : FinalizeVirtualTextureLayerFormat is run outside of the normal TextureFormatName set up ; fix?
+		//	should be done inside GetPlatformTextureFormatNamesWithPrefix
+		//	this is only used by Android & iOS
+		//  the reason to do it here is we now have bVirtualStreamable, which is not available at the earlier call
+		
+		// FinalizeVirtualTextureLayerFormat assumes (incorrectly) that it gets non-prefixed names, so remove them :
+
+		// VT does not tile so should never have a platform prefix, but could have an Oodle prefix
+		checkSlow( OutSettings.TextureFormatName == UE::TextureBuildUtilities::TextureFormatRemovePlatformPrefixFromName(OutSettings.TextureFormatName) );
+		
+		FName NameWithoutPrefix = UE::TextureBuildUtilities::TextureFormatRemovePrefixFromName(OutSettings.TextureFormatName);
+		FName ModifiedName = TargetPlatform->FinalizeVirtualTextureLayerFormat(NameWithoutPrefix);
+		if ( NameWithoutPrefix != ModifiedName )
+		{
+			OutSettings.TextureFormatName = ModifiedName;
+		}
 	}
 
 	// Now that we know the texture format, we can make decisions based on it.
@@ -197,6 +161,16 @@ static void FinalizeBuildSettingsForLayer(
 			if (TextureFormat)
 			{
 				bSupportsEncodeSpeed = TextureFormat->SupportsEncodeSpeed(OutSettings.TextureFormatName);
+				const FChildTextureFormat* ChildTextureFormat = TextureFormat->GetChildFormat();
+
+				if (ChildTextureFormat)
+				{
+					OutSettings.BaseTextureFormatName = ChildTextureFormat->GetBaseFormatName(OutSettings.TextureFormatName);
+				}
+				else
+				{
+					OutSettings.BaseTextureFormatName = OutSettings.TextureFormatName;
+				}
 
 				if (OutBuildResultMetadata)
 				{
@@ -205,23 +179,24 @@ static void FinalizeBuildSettingsForLayer(
 					OutBuildResultMetadata->bSupportsEncodeSpeed = bSupportsEncodeSpeed;
 				}
 			
-				
 				{
-					static auto CVarSharedLinearTextureEncoding = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("r.SharedLinearTextureEncoding"));
-					if (CVarSharedLinearTextureEncoding->GetValueOnAnyThread())
+					if (FResolvedTextureEncodingSettings::Get().Project.bSharedLinearTextureEncoding)
 					{
+						//
+						// We want to separate out textures involved in shared linear encoding in order to facilitate
+						// fixing bugs without invalidating the world (even though we expect the exact same data to
+						// get generated). However, virtual textures never tile, and so are exempt from this separation.
+						//
+						if (OutSettings.bVirtualStreamable == false)
+						{
+							OutSettings.bAffectedBySharedLinearEncoding = true;
+						}
+
 						// Shared linear encoding can only work if the base texture format does not expect to
 						// do the tiling itself (SupportsTiling == false).
-						const FChildTextureFormat* ChildTextureFormat = TextureFormat->GetChildFormat();
 						if (ChildTextureFormat && ChildTextureFormat->GetBaseFormatObject(OutSettings.TextureFormatName)->SupportsTiling() == false)
 						{
 							OutSettings.Tiler = ChildTextureFormat->GetTiler();
-							if (OutSettings.Tiler && IsUsingNewDerivedData())
-							{
-								// New derived data wants to treat everything as the base format and then have a separate tiling function
-								// afterwards.
-								OutSettings.TextureFormatName = ChildTextureFormat->GetBaseFormatName(OutSettings.TextureFormatName);
-							}
 						}
 					} // end if enabled
 				} // end if ddc2
@@ -278,6 +253,7 @@ static void FinalizeBuildSettingsForLayer(
 	}
 }
 
+
 /**
  * Sets texture build settings.
  * @param Texture - The texture for which to build compressor settings.
@@ -328,8 +304,8 @@ static void GetTextureBuildSettings(
 		OutBuildSettings.AlphaCoverageThresholds = FVector4f(0,0,0,0);
 	}
 
-	OutBuildSettings.CompressionCacheId = Texture.CompressionCacheId;
 	OutBuildSettings.bUseNewMipFilter = Texture.bUseNewMipFilter;
+	OutBuildSettings.bNormalizeNormals = Texture.bNormalizeNormals && Texture.IsNormalMap();
 	OutBuildSettings.bComputeBokehAlpha = (Texture.LODGroup == TEXTUREGROUP_Bokeh);
 	OutBuildSettings.bReplicateAlpha = false;
 	OutBuildSettings.bReplicateRed = false;
@@ -411,6 +387,36 @@ static void GetTextureBuildSettings(
 	// A ULightMapVirtualTexture2D with multiple layers saved in MapBuildData could be loaded with the r.VirtualTexture disabled, it will generate DDC before we decide to invalidate the light map data, to skip the ensure failure let it generate VT DDC anyway.
 	const bool bForVirtualTextureStreamingBuild = ULightMapVirtualTexture2D::StaticClass() == Texture.GetClass();
 	const bool bVirtualTextureStreaming = bForVirtualTextureStreamingBuild || (CVarVirtualTexturesEnabled->GetValueOnAnyThread() && bPlatformSupportsVirtualTextureStreaming && Texture.VirtualTextureStreaming);
+
+
+	// Virtual textures must have mips as VT memory management relies on a 1:1 texel/pixel mapping, which in turn
+	// requires that we be able to swap in lower mips when that density gets too high for a given texture.
+	if (bVirtualTextureStreaming && MipGenSettings == TMGS_NoMipmaps)
+	{
+		MipGenSettings = TMGS_SimpleAverage;
+		UE_LOG(LogTexture, Display, TEXT("Texture %s is virtual and has NoMips - forcing to SimpleAverage."), *Texture.GetPathName());
+	}
+	if (bVirtualTextureStreaming && MipGenSettings == TMGS_LeaveExistingMips)
+	{
+		for (int32 BlockIndex = 0; BlockIndex < Texture.Source.GetNumBlocks(); BlockIndex++)
+		{
+			FTextureSourceBlock Block;
+			Texture.Source.GetBlock(BlockIndex, Block);
+
+			int32 ExpectedNumMips = FImageCoreUtils::GetMipCountFromDimensions(Block.SizeX, Block.SizeY, 0, false);
+			if (Block.NumMips != ExpectedNumMips)
+			{
+				MipGenSettings = TMGS_SimpleAverage;
+				UE_LOG(LogTexture, Warning, TEXT("Texture %s is virtual and has LeaveExistingMips with an incomplete mip chain - forcing to SimpleAverage (Block %d has %d mips, expected %d)."), 
+					*Texture.GetPathName(),
+					BlockIndex,
+					Block.NumMips,
+					ExpectedNumMips
+					);
+			}
+		}
+	}
+
 	const FIntPoint SourceSize = Texture.Source.GetLogicalSize();
 
 	OutBuildSettings.MipGenSettings = MipGenSettings;
@@ -418,8 +424,18 @@ static void GetTextureBuildSettings(
 	OutBuildSettings.bSharpenWithoutColorShift = bSharpenWithoutColorShift;
 	OutBuildSettings.bBorderColorBlack = bBorderColorBlack;
 	OutBuildSettings.bFlipGreenChannel = Texture.bFlipGreenChannel;
+	
+	// these are set even if Texture.CompositeTexture == null
+	//	we should not do that, but keep it the same for now to preserve DDC keys
 	OutBuildSettings.CompositeTextureMode = Texture.CompositeTextureMode;
 	OutBuildSettings.CompositePower = Texture.CompositePower;
+
+	if ( Texture.GetCompositeTexture() && !Texture.GetCompositeTexture()->Source.IsValid() )
+	{
+		// have a CompositeTexture but it has no source, don't use it :
+		OutBuildSettings.CompositeTextureMode = CTM_Disabled;
+	}
+
 	OutBuildSettings.LODBias = TextureLODSettings.CalculateLODBias(SourceSize.X, SourceSize.Y, Texture.MaxTextureSize, Texture.LODGroup, Texture.LODBias, Texture.NumCinematicMipLevels, Texture.MipGenSettings, bVirtualTextureStreaming);
 	OutBuildSettings.LODBiasWithCinematicMips = TextureLODSettings.CalculateLODBias(SourceSize.X, SourceSize.Y, Texture.MaxTextureSize, Texture.LODGroup, Texture.LODBias, 0, Texture.MipGenSettings, bVirtualTextureStreaming);
 	OutBuildSettings.bVirtualStreamable = bVirtualTextureStreaming;
@@ -505,9 +521,63 @@ static void GetTextureBuildSettings(
 		OutBuildSettings.VirtualTextureTileSize = 0;
 		OutBuildSettings.VirtualTextureBorderSize = 0;
 	}
+	
+	OutBuildSettings.TextureAddressModeX = Texture.GetTextureAddressX();
+	OutBuildSettings.TextureAddressModeY = Texture.GetTextureAddressY();
+	OutBuildSettings.TextureAddressModeZ = Texture.GetTextureAddressZ();
 
 	// By default, initialize settings for layer0
 	FinalizeBuildSettingsForLayer(Texture, 0, &TargetPlatform, InEncodeSpeed, OutBuildSettings, OutBuildResultMetadata);
+}
+
+/**
+ * Sets build settings for a texture on the target platform
+ * @param Texture - The texture for which to build compressor settings.
+ * @param OutBuildSettings - Array of desired texture settings
+ */
+static void GetBuildSettingsForTargetPlatform(
+	const UTexture& Texture,
+	const ITargetPlatform* TargetPlatform,
+	ETextureEncodeSpeed InEncodeSpeed, //  must be Fast or Final
+	TArray<FTextureBuildSettings>& OutSettingPerLayer,
+	TArray<FTexturePlatformData::FTextureEncodeResultMetadata>* OutResultMetadataPerLayer // can be nullptr if not needed
+)
+{
+	check(TargetPlatform != NULL);
+
+	const UTextureLODSettings* LODSettings = (UTextureLODSettings*)UDeviceProfileManager::Get().FindProfile(TargetPlatform->PlatformName());
+	FTextureBuildSettings SourceBuildSettings;
+	FTexturePlatformData::FTextureEncodeResultMetadata SourceMetadata;
+	GetTextureBuildSettings(Texture, *LODSettings, *TargetPlatform, InEncodeSpeed, SourceBuildSettings, &SourceMetadata);
+
+	TArray< TArray<FName> > PlatformFormats;
+	Texture.GetPlatformTextureFormatNamesWithPrefix(TargetPlatform, PlatformFormats);
+
+	// this code only uses PlatformFormats[0] , so it would be wrong for Android_Multi
+	//	but it's only used for the platform running the Editor
+	check(PlatformFormats.Num() == 1);
+
+	const int32 NumLayers = Texture.Source.GetNumLayers();
+	check(PlatformFormats[0].Num() == NumLayers);
+
+	OutSettingPerLayer.Reserve(NumLayers);
+	if ( OutResultMetadataPerLayer )
+	{
+		OutResultMetadataPerLayer->Reserve(NumLayers);
+	}
+	for ( int32 LayerIndex = 0; LayerIndex < NumLayers; ++LayerIndex )
+	{
+		FTextureBuildSettings& OutSettings = OutSettingPerLayer.Add_GetRef(SourceBuildSettings);
+		OutSettings.TextureFormatName = PlatformFormats[0][LayerIndex];
+
+		FTexturePlatformData::FTextureEncodeResultMetadata* OutMetadata = nullptr;
+		if ( OutResultMetadataPerLayer )
+		{
+			OutMetadata = &OutResultMetadataPerLayer->Add_GetRef(SourceMetadata);
+		}
+
+		FinalizeBuildSettingsForLayer(Texture, LayerIndex, TargetPlatform, InEncodeSpeed, OutSettings, OutMetadata);
+	}
 }
 
 /**
@@ -526,54 +596,11 @@ static void GetBuildSettingsForRunningPlatform(
 	ITargetPlatformManagerModule* TPM = GetTargetPlatformManager();
 	if (TPM)
 	{
-		ITargetPlatform* TargetPlatform = NULL;
-		const TArray<ITargetPlatform*>& Platforms = TPM->GetActiveTargetPlatforms();
-
-		check(Platforms.Num());
-
-		TargetPlatform = Platforms[0];
-
-		for (int32 Index = 1; Index < Platforms.Num(); Index++)
-		{
-			if (Platforms[Index]->IsRunningPlatform())
-			{
-				TargetPlatform = Platforms[Index];
-				break;
-			}
-		}
+		ITargetPlatform* TargetPlatform = TPM->GetRunningTargetPlatform();
 
 		check(TargetPlatform != NULL);
 
-		const UTextureLODSettings* LODSettings = (UTextureLODSettings*)UDeviceProfileManager::Get().FindProfile(TargetPlatform->PlatformName());
-		FTextureBuildSettings SourceBuildSettings;
-		FTexturePlatformData::FTextureEncodeResultMetadata SourceMetadata;
-		GetTextureBuildSettings(Texture, *LODSettings, *TargetPlatform, InEncodeSpeed, SourceBuildSettings, &SourceMetadata);
-
-		TArray< TArray<FName> > PlatformFormats;
-		TargetPlatform->GetTextureFormats(&Texture, PlatformFormats);
-		check(PlatformFormats.Num() > 0);
-
-		const int32 NumLayers = Texture.Source.GetNumLayers();
-		check(PlatformFormats[0].Num() == NumLayers);
-
-		OutSettingPerLayer.Reserve(NumLayers);
-		if (OutResultMetadataPerLayer)
-		{
-			OutResultMetadataPerLayer->Reserve(NumLayers);
-		}
-		for (int32 LayerIndex = 0; LayerIndex < NumLayers; ++LayerIndex)
-		{
-			FTextureBuildSettings& OutSettings = OutSettingPerLayer.Add_GetRef(SourceBuildSettings);
-			OutSettings.TextureFormatName = PlatformFormats[0][LayerIndex];
-
-			FTexturePlatformData::FTextureEncodeResultMetadata* OutMetadata = nullptr;
-			if (OutResultMetadataPerLayer)
-			{
-				OutMetadata = &OutResultMetadataPerLayer->Add_GetRef(SourceMetadata);
-			}
-			
-			FinalizeBuildSettingsForLayer(Texture, LayerIndex, TargetPlatform, InEncodeSpeed, OutSettings, OutMetadata);
-		}
+		GetBuildSettingsForTargetPlatform(Texture, TargetPlatform, InEncodeSpeed, OutSettingPerLayer, OutResultMetadataPerLayer);
 	}
 }
 //END COPIED FROM TextureDerivedData.cpp

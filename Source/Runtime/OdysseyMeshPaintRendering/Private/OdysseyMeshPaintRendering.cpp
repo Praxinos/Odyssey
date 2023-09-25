@@ -10,6 +10,7 @@
 #include "TextureResource.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "PipelineStateCache.h"
+#include "DataDrivenShaderPlatformInfo.h"
 
 namespace OdysseyMeshPaintRendering
 {

@@ -6,7 +6,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "ToolMenus.h"
 #include "Framework/Commands/GenericCommands.h"
-#include "ToolMenus/Public/ToolMenuContext.h"
+#include "ToolMenuContext.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Widgets/Views/STileView.h"
 

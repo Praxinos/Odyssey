@@ -154,7 +154,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         bool isVTSPS = texture2D ? texture2D->IsVirtualTexturedWithSinglePhysicalSpace() : false;
         bool isTextureArray = false;
         float layerIndex = 0.f;
-        batchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, layerIndex, isNormalMap, isSingleChannel, isVTSPS, isVirtual, isTextureArray );
+        batchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, layerIndex, isNormalMap, isSingleChannel, isVTSPS, isVirtual, isTextureArray, false );
     }
 
     FVector2D viewport_center( iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2 );

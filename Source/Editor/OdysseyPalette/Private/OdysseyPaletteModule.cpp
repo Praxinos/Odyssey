@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyPaletteModule.h"
-#include "AssetTools/Public/IAssetTools.h"
+#include "IAssetTools.h"
 #include "OdysseyPaletteAssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPaletteModule"

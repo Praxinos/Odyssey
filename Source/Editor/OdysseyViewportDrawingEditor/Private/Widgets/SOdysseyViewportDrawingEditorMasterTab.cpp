@@ -136,7 +136,7 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
                     SNew(STextBlock)
                     .TextStyle(FAppStyle::Get(), "PropertyEditor.AssetClass")
                     .Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
-                    .Text_Lambda([=] { return SOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mExtension->PaintingAdapterMethod());})
+                    .Text_Lambda([this] { return SOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mExtension->PaintingAdapterMethod());})
                 ]
             ]
         ]

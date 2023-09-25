@@ -3,9 +3,11 @@
 
 #include "OdysseyViewportDrawingEditorUtils.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
+#include "Materials/MaterialExpressionTextureBase.h"
+#include "Materials/MaterialExpressionTextureSample.h"
+#include "Materials/MaterialExpressionTextureSampleParameter.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorUtils"
-
 
 void FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(UTexture* SourceTexture, UTextureRenderTarget2D* RenderTargetTexture, ERHIFeatureLevel::Type FeatureLevel)
 {

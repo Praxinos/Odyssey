@@ -27,7 +27,8 @@ public class OdysseyWidgets : ModuleRules
                 "GraphEditor",
                 "Projects",
                 "PropertyEditor",
-                "OdysseyBrush",
+				"RHI",
+				"OdysseyBrush",
                 "OdysseyImaging",
                 "OdysseyLayerStack",
                 "OdysseyPaintEngine",
@@ -45,7 +46,7 @@ public class OdysseyWidgets : ModuleRules
                 "ULIS",
                 "ULISLoader",
                 "EditorWidgets",
-             }
+			 }
         );
 
         PrivateIncludePaths.AddRange(

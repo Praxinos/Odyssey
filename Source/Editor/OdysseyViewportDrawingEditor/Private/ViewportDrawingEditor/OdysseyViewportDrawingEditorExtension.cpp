@@ -11,6 +11,7 @@
 #include "MediaPlayer.h"
 #include "MediaPlaylist.h"
 #include "OdysseyAnimation.h"
+#include "ComponentReregisterContext.h"
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 

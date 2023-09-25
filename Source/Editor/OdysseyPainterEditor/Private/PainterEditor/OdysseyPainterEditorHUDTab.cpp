@@ -8,7 +8,7 @@
 #include "OdysseyHUDPolygon.h"
 #include "OdysseyHUDHandle.h"
 
-#include "ULIS/include/Math/ShapeGeneration/Line.h"
+#include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorHUDTab"
 

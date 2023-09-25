@@ -8,12 +8,12 @@
 
 /////////////////////////////////////////////////////
 // FOdysseySceneViewport
-class ODYSSEYWIDGETS_API FOdysseySceneViewport : public FSceneViewport
+class FOdysseySceneViewport : public FSceneViewport
 {
 public:
-    FOdysseySceneViewport( FViewportClient* InViewportClient, TSharedPtr<SViewport> InViewportWidget );
+    ODYSSEYWIDGETS_API FOdysseySceneViewport( FViewportClient* InViewportClient, TSharedPtr<SViewport> InViewportWidget );
 protected:
-    virtual FReply OnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& MouseEvent ) override;
-    virtual FReply OnMouseButtonUp( const FGeometry& InGeometry, const FPointerEvent& MouseEvent ) override;
-	virtual FNavigationReply OnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent) override;
+    ODYSSEYWIDGETS_API virtual FReply OnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& MouseEvent ) override;
+    ODYSSEYWIDGETS_API virtual FReply OnMouseButtonUp( const FGeometry& InGeometry, const FPointerEvent& MouseEvent ) override;
+	ODYSSEYWIDGETS_API virtual FNavigationReply OnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent) override;
 };

@@ -20,6 +20,7 @@ public class OdysseyImaging : ModuleRules
                 "RHI",
                 "TargetPlatform",
                 "TextureCompressor",
+                "TextureBuildUtilities",
 
                 "OdysseyCore",
                 "OdysseyFile",
