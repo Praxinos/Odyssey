@@ -98,8 +98,8 @@ FPanelThumbnail::ResizeRenderTarget(const FIntPoint& iSize)
         {
             if (InThumbnailTexture && InThumbnailRenderTarget)
             {
-                InThumbnailTexture->InitResource();
-                InThumbnailRenderTarget->InitResource();
+                InThumbnailTexture->InitResource( RHICmdList );
+                InThumbnailRenderTarget->InitResource( RHICmdList );
                 InThumbnailTexture->SetRHIRef(InThumbnailRenderTarget->GetTextureRHI(), InThumbnailRenderTarget->GetSizeX(), InThumbnailRenderTarget->GetSizeY());
             }
         }
