@@ -205,38 +205,12 @@ FCinematicBoardSection::GetSectionTitle() const
 FText
 FCinematicBoardSection::GetSectionToolTip() const
 {
+    FText range_text = TSubSectionMixin<FKeyThumbnailSection>::GetSectionToolTip();
+
     const UMovieSceneCinematicBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
-    const UMovieScene* MovieScene = SectionObject.GetTypedOuter<UMovieScene>();
+    //const UMovieScene* MovieScene = SectionObject.GetTypedOuter<UMovieScene>();
     const UMovieSceneSequence* InnerSequence = SectionObject.GetSequence();
-    const UMovieScene* InnerMovieScene = InnerSequence ? InnerSequence->GetMovieScene() : nullptr;
-
-    if( !MovieScene || !InnerMovieScene || !SectionObject.HasStartFrame() || !SectionObject.HasEndFrame() )
-    {
-        return FText::GetEmpty();
-    }
-
-    FFrameRate InnerTickResolution = InnerMovieScene->GetTickResolution();
-
-    // Calculate the length of this section and convert it to the timescale of the sequence's internal sequence
-    FFrameTime SectionLength = ConvertFrameTime( SectionObject.GetExclusiveEndFrame() - SectionObject.GetInclusiveStartFrame(), MovieScene->GetTickResolution(), InnerTickResolution );
-
-    // Calculate the inner start time of the sequence in both full tick resolution and frame number
-    FFrameTime StartOffset = SectionObject.GetOffsetTime().Get( 0 );
-    FFrameTime InnerStartTime = InnerMovieScene->GetPlaybackRange().GetLowerBoundValue() + StartOffset;
-    int32 InnerStartFrame = ConvertFrameTime( InnerStartTime, InnerTickResolution, InnerMovieScene->GetDisplayRate() ).RoundToFrame().Value;
-
-    // Calculate the length, which is limited by both the outer section length and internal sequence length, in terms of internal frames
-    int32 InnerFrameLength = ConvertFrameTime( FMath::Min( SectionLength, InnerMovieScene->GetPlaybackRange().GetUpperBoundValue() - InnerStartTime ), InnerTickResolution, InnerMovieScene->GetDisplayRate() ).RoundToFrame().Value;
-
-    // Calculate the inner frame number of the end frame
-    int32 InnerEndFrame = InnerStartFrame + InnerFrameLength;
-
-    FText range_text = FText::Format( LOCTEXT( "ToolTipContentFormat", "{0} - {1} ({2} frames @ {3})\n" ),
-                          InnerStartFrame,
-                          InnerEndFrame,
-                          InnerFrameLength,
-                          InnerMovieScene->GetDisplayRate().ToPrettyText()
-    );
+    //const UMovieScene* InnerMovieScene = InnerSequence ? InnerSequence->GetMovieScene() : nullptr;
 
     //---
 
@@ -294,7 +268,7 @@ FCinematicBoardSection::GetSectionToolTip() const
     //---
 
     FText name_elements_text = FText::Join( FText::FromString( TEXT( "\n" ) ), name_elements_texts );
-    FText tooltip_text = FText::Join( FText::FromString( TEXT( "\n" ) ), range_text, name_elements_text );
+    FText tooltip_text = FText::Join( FText::FromString( TEXT( "\n\n" ) ), range_text, name_elements_text );
 
     return tooltip_text;
 }
