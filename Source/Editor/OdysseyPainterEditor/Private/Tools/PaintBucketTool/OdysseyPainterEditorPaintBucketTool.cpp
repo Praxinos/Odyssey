@@ -138,8 +138,6 @@ UOdysseyPainterEditorPaintBucketTool::LoadVector( FOdysseyVectorEngine* iEngine,
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
-    mPickedCycleArray.clear();
-
     iEngine->ClearHUD();
     iEngine->AddHUD( mBucketHUD );
 
@@ -509,10 +507,6 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( FOdysseyVectorEngine* i
                 break;
             }
         }
-        else
-        {
-            mBucketHUD->PickCycles( iScene, iPointInTexture.x, iPointInTexture.y, mPickedCycleArray );
-        }
     }
 
 /*
@@ -575,17 +569,13 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseDownVector( FOdysseyVectorEngine* i
     return true;
 }
 
-std::vector<FOdysseyVectorCycle*>&
-UOdysseyPainterEditorPaintBucketTool::GetPickedCycleArray()
-{
-    return mPickedCycleArray;
-}
-
 void
 UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
                                                         , FOdysseyVectorScene* iScene
                                                         , const FOdysseyPoint& iPointInTexture )
 {
+    std::vector<FOdysseyVectorCycle*> pickedCycleArray;
+
     if( mShowControls == false )
     {
         ::ULIS::FRectD roi;
@@ -593,18 +583,13 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorEngine* 
         roi.x = iPointInTexture.x;
         roi.y = iPointInTexture.y;
 
-        mBucketHUD->PickCycles( iScene, iPointInTexture.x, iPointInTexture.y, mPickedCycleArray );
-
-        for( int i = 0; i < mPickedCycleArray.size(); i++ )
-        {
-            FOdysseyVectorCycle* hoveredCycle = mPickedCycleArray[i];
-
-            mBucketHUD->SetCycle( hoveredCycle );
-        }
+        mBucketHUD->PickCycles( iScene, iPointInTexture.x, iPointInTexture.y, pickedCycleArray );
+        mBucketHUD->SetPickedCycles( pickedCycleArray );
     }
 
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                    | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+
 }
 
 double
@@ -750,6 +735,7 @@ UOdysseyPainterEditorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBuc
 
 void
 UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
+                                                                 , std::vector<FOdysseyVectorCycle*>& iPickedCycleArray
                                                                  , const FOdysseyPoint& iPointInTexture
                                                                  , const FKey& iKey )
 {
@@ -758,12 +744,12 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysseyVecto
 
     //mBucketHUD->PickCycles( iScene, iPointInTexture.x, iPointInTexture.y, mPickedCycleArray );
 
-    addedBucketArray.reserve( mPickedCycleArray.size() );
-    paramBucketArray.reserve( mPickedCycleArray.size() );
+    addedBucketArray.reserve( iPickedCycleArray.size() );
+    paramBucketArray.reserve( iPickedCycleArray.size() );
 
-    for( int i = 0; i < mPickedCycleArray.size(); i++ )
+    for( int i = 0; i < iPickedCycleArray.size(); i++ )
     {
-        FOdysseyVectorCycle* cycle = mPickedCycleArray[i];
+        FOdysseyVectorCycle* cycle = iPickedCycleArray[i];
         FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(cycle->GetOwner());
         FOdysseyVectorBucket* bucket = cycle->GetBucket();
 
@@ -966,14 +952,23 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
             switch( mPickedArea )
             {
                 case FOdysseyPainterEditorPaintBucketToolHUD::PICK_NONE:
-                    if( mPickedCycleArray.size() )
+                {
+                    std::vector<FOdysseyVectorCycle*> pickedCycleArray;
+
+                    mBucketHUD->PickCycles( iScene
+                                          , iPointInTexture.x
+                                          , iPointInTexture.y
+                                          , pickedCycleArray );
+
+                    if( pickedCycleArray.size() )
                     {
-                        OnMouseUpVectorCreateBucket( iScene, iPointInTexture, iKey );
+                        OnMouseUpVectorCreateBucket( iScene, pickedCycleArray, iPointInTexture, iKey );
                     }
                     else
                     {
                         OnMouseUpVectorColorBucket( iScene, &iScene->GetBackgroundBucket() );
                     }
+                }
                 break;
 
                 default:
@@ -1050,7 +1045,6 @@ UOdysseyPainterEditorPaintBucketTool::OnMouseUpVector( FOdysseyVectorEngine* iEn
 */
 
     mPickedBucket = nullptr;
-    mPickedCycleArray.clear();
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 

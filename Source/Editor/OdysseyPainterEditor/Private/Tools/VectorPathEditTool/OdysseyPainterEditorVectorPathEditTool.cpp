@@ -600,24 +600,27 @@ UOdysseyPainterEditorVectorPathEditTool::DragPoint( FOdysseyVectorPoint *iPoint
 
     if( mPickingMode == ePathPickingMode::VertexHandle  )
     {
-        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
-        ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
-                             , cubicVertex->GetY() - localCoords.y };
-        double deltaRadius = dif.Distance() - cubicVertex->GetRadius();
-
-        if( iWidenAllAlong )
+        if( iPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
         {
-            for( int i = 0; i < mSelectedPathArray.size(); i++ )
+            FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>( iPoint );
+            ::ULIS::FVec2D dif = { cubicVertex->GetX() - localCoords.x
+                                 , cubicVertex->GetY() - localCoords.y };
+            double deltaRadius = dif.Distance() - cubicVertex->GetRadius();
+
+            if( iWidenAllAlong )
             {
-                mSelectedPathArray[i]->AlterRadius( deltaRadius );
+                for( int i = 0; i < mSelectedPathArray.size(); i++ )
+                {
+                    mSelectedPathArray[i]->AlterRadius( deltaRadius );
+                }
             }
-        }
-        else
-        {
-            cubicVertex->SetRadius( cubicVertex->GetRadius() + deltaRadius );
-        }
+            else
+            {
+                cubicVertex->SetRadius( cubicVertex->GetRadius() + deltaRadius );
+            }
 
-        return cubicVertex->GetBoundingBox( false );
+            return cubicVertex->GetBoundingBox( false );
+        }
     }
 
     if( mPickingMode == ePathPickingMode::Vertex )

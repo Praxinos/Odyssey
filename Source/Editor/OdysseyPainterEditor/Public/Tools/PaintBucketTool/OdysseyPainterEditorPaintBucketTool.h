@@ -94,6 +94,7 @@ protected:
     void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
                                     , FOdysseyVectorBucket* iBucket );
     void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
+                                    , std::vector<FOdysseyVectorCycle*>& iPickedCycleArray
                                     , const FOdysseyPoint& iPointInTexture
                                     , const FKey& iKey );
     void OnMouseUpVectorRemoveBucket( FOdysseyVectorScene* iScene
@@ -134,7 +135,7 @@ public:
     double PickingRadius;
 
 protected:
-    std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
+    //std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
     FOdysseyPaintEngine mPaintEngine;
     FOdysseyVectorBucket* mPickedBucket;
     //FOdysseyVectorObject* mPickedObject;

@@ -7,24 +7,18 @@ FOdysseyPainterEditorPaintBucketToolHUD::~FOdysseyPainterEditorPaintBucketToolHU
 
 FOdysseyPainterEditorPaintBucketToolHUD::FOdysseyPainterEditorPaintBucketToolHUD( UOdysseyPainterEditorPaintBucketTool* iPaintBucketTool )
     : mPaintBucketTool( iPaintBucketTool )
-    , mCycle ( nullptr )
 {
 }
 
 void
 FOdysseyPainterEditorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+    mPickedCycleArray.clear();
 }
 
 void
 FOdysseyPainterEditorPaintBucketToolHUD::Load(FOdysseyVectorScene* iScene)
 {
-}
-
-void
-FOdysseyPainterEditorPaintBucketToolHUD::SetCycle( FOdysseyVectorCycle* iCycle )
-{
-    mCycle = iCycle;
 }
 
 ::ULIS::FVec2D
@@ -486,6 +480,13 @@ FOdysseyPainterEditorPaintBucketToolHUD::RecursiveDrawObject( FOdysseyVectorObje
     }
 }
 
+// must be set at eache mouse hover event for memory safety issues.
+void
+FOdysseyPainterEditorPaintBucketToolHUD::SetPickedCycles( std::vector<FOdysseyVectorCycle*>& pickedCycleArray )
+{
+    mPickedCycleArray = pickedCycleArray;
+}
+
 void
 FOdysseyPainterEditorPaintBucketToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
 {
@@ -497,14 +498,13 @@ FOdysseyPainterEditorPaintBucketToolHUD::Draw( FOdysseyVectorScene* iScene, uint
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    std::vector<FOdysseyVectorCycle*>& pickedCycleArray = mPaintBucketTool->GetPickedCycleArray();
 
     blctx->save();
     blctx->resetMatrix();
 
-    for( int i = 0; i < pickedCycleArray.size(); i++ )
+    for( int i = 0; i < mPickedCycleArray.size(); i++ )
     {
-        FOdysseyVectorCycle* cycle = pickedCycleArray[i];
+        FOdysseyVectorCycle* cycle = mPickedCycleArray[i];
         FOdysseyVectorObject* owner = cycle->GetOwner();
         BLMatrix2D& worldMatrix = owner->GetWorldMatrix();
 
