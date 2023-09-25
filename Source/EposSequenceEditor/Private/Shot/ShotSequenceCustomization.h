@@ -18,9 +18,6 @@ class FShotSequenceCustomization
     : public ISequencerCustomization
 {
 public:
-    ~FShotSequenceCustomization();
-
-public:
     virtual void RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder ) override;
     virtual void UnregisterSequencerCustomization() override;
 
@@ -78,6 +75,9 @@ private:
     ESequencerDropResult OnSequencerAssetsDrop( const TArray<UObject*>& iAssets, const FAssetDragDropOp& iDragDropOp );
     ESequencerDropResult OnSequencerClassesDrop( const TArray<TWeakObjectPtr<UClass>>& iClasses, const FClassDragDropOp& iDragDropOp );
     ESequencerDropResult OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropOp& iDragDropOp );
+
+private:
+    void OnSequencerClosed( TSharedRef<ISequencer> iSequencer );
 
 private:
     ISequencer*     mSequencer;
