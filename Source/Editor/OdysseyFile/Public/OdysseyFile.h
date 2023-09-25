@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <functional>
 
 namespace FOdysseyFile
 {

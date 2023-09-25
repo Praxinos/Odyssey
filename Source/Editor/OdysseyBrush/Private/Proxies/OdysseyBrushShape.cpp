@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Proxies/OdysseyBrushShape.h"
+#include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyBrushShape"
 
