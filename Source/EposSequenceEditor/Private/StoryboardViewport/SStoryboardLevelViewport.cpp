@@ -43,6 +43,7 @@
 #include "StoryboardViewport/SNotes.h"
 #include "StoryboardViewport/SNoteSettings.h"
 #include "StoryboardViewport/SStoryboardTransportRange.h"
+#include "StoryboardViewport/StoryboardViewportCommands.h"
 #include "Styles/EposSequenceEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 
@@ -660,7 +661,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                     [
                         SNew(STextBlock)
                         .ColorAndOpacity(Gray)
-                        .Text(LOCTEXT("NoSequencerMessage", "No active Board/Shot Sequencer detected. Please edit a Board/Shot Sequence to enable full controls."))
+                        .Text(LOCTEXT("NoSequencerMessage", "No active Board/Shot Sequence Editor detected. Please edit a Board/Shot Sequence to enable full controls."))
                     ]
                 ]
             ]
@@ -727,7 +728,10 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     }
 
     // Ensure the commands are registered
+    FStoryboardViewportCommands::Register();
     //FLevelSequenceEditorCommands::Register(); //TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    FilmOverlayOptions->BindCommands( CommandList.ToSharedRef() );
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
