@@ -21,16 +21,6 @@ FOdysseyModeToolkit::~FOdysseyModeToolkit()
     }
     mEditor->OnAddEditedObjectDelegate().RemoveAll(this);
     mEditor->OnRemoveEditedObjectDelegate().RemoveAll(this);
-
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-
-    if (!mTabSaved)
-    {
-        mEditor->SaveOpenedTabs();
-        mTabSaved = true;
-    }
-    mEditor->CloseAllTabs();
-    mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
 }
 
 FOdysseyModeToolkit::FOdysseyModeToolkit(TSharedRef<FOdysseyEditor> iEditor)
@@ -59,7 +49,7 @@ FOdysseyModeToolkit::Initialize(
     Init(iInitToolkitHost);
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-    mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
+    //mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
     //mEditor->LoadOpenedTabs();
 
     mEditor->ExtendMenu( this, FName("LevelEditor.MainMenu") );
@@ -78,12 +68,8 @@ FOdysseyModeToolkit::Initialize(
 void
 FOdysseyModeToolkit::OnWindowClosed(const TSharedRef<SWindow>& Window)
 {
-    //PATCH: Needed to save layout when closing Unreal Engine directly while being in ILIAD Mode
-    if (!mTabSaved)
-    {
-        mEditor->SaveOpenedTabs();
-        mTabSaved = true;
-    }
+    //PATCH: Saves tabs state when closing Unreal Main Window while being in ILIAD Mode
+    OnToolkitHostShutdownUI();
 }
 
 TSharedPtr<SWidget>
@@ -170,17 +156,78 @@ void
 FOdysseyModeToolkit::RequestModeUITabs()
 {
 	FModeToolkit::RequestModeUITabs();
-	if (TSharedPtr<FAssetEditorModeUILayer> modeUILayerPtr = ModeUILayer.Pin())
-	{
-        mEditor->BuildModeLayout(modeUILayerPtr);
-    }
+	/* if (TSharedPtr<FAssetEditorModeUILayer> modeUILayerPtr = ModeUILayer.Pin())
+        mEditor->BuildModeLayout(modeUILayerPtr); */
 }
 
 void
 FOdysseyModeToolkit::InvokeUI()
 {
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+    mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
+
 	FModeToolkit::InvokeUI();
-    mEditor->InvokeModeLayout();
+    //mEditor->InvokeModeLayout();
+    LoadOpenedTabs();
+}
+
+void
+FOdysseyModeToolkit::SetModeUILayer(const TSharedPtr<FAssetEditorModeUILayer> InLayer)
+{
+    FModeToolkit::SetModeUILayer(InLayer);
+
+    if(!InLayer)
+        return;
+
+    checkf(!InLayer->ToolkitHostShutdownUI().IsBound(), TEXT("ToolkitHostShutdownUI is already bound, search for who bound it before us"));
+    InLayer->ToolkitHostShutdownUI().BindSP(SharedThis(this), &FOdysseyModeToolkit::OnToolkitHostShutdownUI);
+}
+
+void FOdysseyModeToolkit::OnToolkitHostShutdownUI()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+
+    /* Save Opened Tabs Ids */
+    SaveOpenedTabs();
+
+    mEditor->CloseAllTabs();
+    mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
+}
+
+void
+FOdysseyModeToolkit::SaveOpenedTabs()
+{
+    TArray<FName> tabIds;
+    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
+    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
+    {
+        if (tab->IsOpened())
+            tabIds.Add(tab->GetId());
+    }
+
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::LoadModuleChecked<FOdysseyEditorModule>("OdysseyEditor");
+    odysseyEditorModule.SetOpenedTabIds(mEditor->GetId(), tabIds);
+}
+
+void
+FOdysseyModeToolkit::LoadOpenedTabs()
+{
+    TArray<FName> defaultOpenedTabIds;
+    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
+    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
+    {
+        if (tab->ShouldOpenByDefault())
+            defaultOpenedTabIds.Add(tab->GetId());
+    }
+
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::LoadModuleChecked<FOdysseyEditorModule>("OdysseyEditor");
+    const TArray<FName>& tabIds = odysseyEditorModule.GetOpenedTabIds(mEditor->GetId(), defaultOpenedTabIds);
+    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
+    {
+        if (!tabIds.Contains(tab->GetId()))
+            continue;
+        tab->Open();
+    }
 }
 
 #undef LOCTEXT_NAMESPACE // "OdysseyModeToolkit"

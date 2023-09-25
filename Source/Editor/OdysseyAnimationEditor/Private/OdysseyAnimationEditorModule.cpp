@@ -29,6 +29,7 @@ TSharedRef<FOdysseyAnimationEditorToolkit>
 FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation )
 {
 	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+		TEXT("OdysseyAnimationEditor"),
 		LOCTEXT("WorkspaceMenu_OdysseyAnimationEditor", "Odyssey Animation Editor"),
 		iAnimation,
 		"OdysseyAnimationEditor_Layout"

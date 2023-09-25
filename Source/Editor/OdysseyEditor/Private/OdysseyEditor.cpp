@@ -19,8 +19,9 @@ FOdysseyEditor::~FOdysseyEditor()
 {
 }
 
-FOdysseyEditor::FOdysseyEditor(const FText& iName, UObject* iEditedObject)
-    : mName(iName)
+FOdysseyEditor::FOdysseyEditor(const FName& iId, const FText& iName, UObject* iEditedObject)
+    : mId(iId)
+    , mName(iName)
     , mEditedObject(iEditedObject)
 {
 }
@@ -107,12 +108,6 @@ FOdysseyEditor::CloseAllTabs()
 }
 
 void
-FOdysseyEditor::SetTabsSaveFilename(const FString& iFilename)
-{
-    mTabsSaveFilename = iFilename;
-}
-
-void
 FOdysseyEditor::RegisterTabSpawners( const TSharedRef< FTabManager >& iTabManager)
 {
     TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(mName);
@@ -142,104 +137,10 @@ FOdysseyEditor::BuildModeLayout(TSharedPtr<FAssetEditorModeUILayer> iModeUILayer
 	}
 }
 
-void
-FOdysseyEditor::SaveOpenedTabs()
+const FName&
+FOdysseyEditor::GetId() const
 {
-    FString tabsOpenedPath = FPaths::Combine(FPaths::EngineSavedDir(), *mTabsSaveFilename);
-    IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
-    FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*tabsOpenedPath);
-    IFileHandle* fileHandle = platformFile.OpenWrite(*tabsOpenedPath);
-
-    if( !fileHandle )
-        return;
-
-    FBufferArchive buffer;
-    FString str;
-
-    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = GetTabs();
-
-    int numTabs = tabs.Num();
-    buffer << numTabs;
-    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
-    {
-        str = tab->GetId().ToString();
-        buffer << str;
-
-        bool isOpened = tab->IsOpened();
-        buffer << isOpened;
-    }
-
-    fileHandle->Seek(0);
-    fileHandle->Write(buffer.GetData(), buffer.Num());
-
-    fileHandle->Flush(true);
-    delete fileHandle;
-
-}
-
-void
-FOdysseyEditor::InvokeModeLayout()
-{
-    LoadOpenedTabs();
-}
-
-void
-FOdysseyEditor::LoadOpenedTabs()
-{
-    FString tabsOpenedPath = FPaths::Combine(FPaths::EngineSavedDir(), *mTabsSaveFilename);
-    IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
-    IFileHandle* fileHandle = platformFile.OpenRead(*tabsOpenedPath, true);
-
-    if( !fileHandle )
-    {
-        const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = GetTabs();
-        for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
-        {
-            if (tab->ShouldOpenByDefault())
-                tab->Open();
-        }
-        return;
-    }
-
-    FBufferArchive buffer;
-    buffer.SetNum( fileHandle->Size() );
-
-    FBufferReader bufferReader( buffer.GetData(), fileHandle->Size(), false );
-
-    fileHandle->Seek(0);
-    fileHandle->Read(buffer.GetData(), fileHandle->Size() );
-
-    int numTabs = 0;
-    bufferReader << numTabs;
-
-    TMap<FString, bool> tabStates;
-    for(int i = 0; i < numTabs; i++)
-    {
-        FString str;
-        bufferReader << str;
-
-        bool isOpened = false;
-        bufferReader << isOpened;
-
-        tabStates.Add(str, isOpened);
-    }
-
-    fileHandle->Flush(true);
-    delete fileHandle;
-
-    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = GetTabs();
-    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
-    {
-        if (tabStates.Contains(tab->GetId().ToString()))
-        {
-            if (tabStates[tab->GetId().ToString()])
-                tab->Open();
-            continue;
-        }
-
-        if (tab->ShouldOpenByDefault())
-            tab->Open();
-    }
+    return mId;
 }
 
 UObject*

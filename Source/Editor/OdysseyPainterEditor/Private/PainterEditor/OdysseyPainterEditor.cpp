@@ -57,8 +57,8 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
     
 }
 
-FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEditedObject, const FName& iLayoutName)
-    : FOdysseyEditor(iName, iEditedObject)
+FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iName, UObject* iEditedObject, const FName& iLayoutName)
+    : FOdysseyEditor(iId, iName, iEditedObject)
     , mLayoutName(iLayoutName)
     , mSource(nullptr)
     , mMeshSelector(MakeShared<FOdysseyMeshSelector>())

@@ -13,8 +13,6 @@ FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TShar
 	: FOdysseyModeToolkit(iEditor)
     , mEdMode(iEdMode)
 {
-    iEditor->SetTabsSaveFilename("IliadEditorModeLayout.save");
-
 	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(&iEditor.Get());
     TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(&iEditor.Get());
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(&iEditor.Get());

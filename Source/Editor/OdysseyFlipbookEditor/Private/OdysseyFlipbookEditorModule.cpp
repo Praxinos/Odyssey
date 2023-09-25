@@ -132,6 +132,7 @@ TSharedRef<FOdysseyFlipbookEditorToolkit>
 FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook )
 {
 	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+		TEXT("OdysseyFlipbookEditor"),
 		LOCTEXT("WorkspaceMenu_OdysseyFlipbookEditor", "Odyssey Flipbook Editor"),
 		iFlipbook,
 		"OdysseyFlipbookEditor_Layout"

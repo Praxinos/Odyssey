@@ -135,6 +135,7 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
     //checkf(mViewportDrawingEditorPainter != nullptr, TEXT("ViewportDrawingEditorPainter was not created"));
 
     mEditor = MakeShared<FOdysseyPainterEditor>(
+		TEXT("OdysseyViewportDrawingEditor"),
 		LOCTEXT("WorkspaceMenu_OdysseyViewportDrawingEditor", "Odyssey Viewport Drawing Editor"),
 		nullptr,
 		"OdysseyViewportDrawingEditor_Layout"

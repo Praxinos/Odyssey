@@ -44,6 +44,14 @@ public:
 	virtual void ExtendMenu();
 	virtual void RequestModeUITabs() override;
 	virtual void InvokeUI() override;
+	virtual void SetModeUILayer(const TSharedPtr<FAssetEditorModeUILayer> InLayer) override;
+	
+	void OnToolkitHostReadyForUI();
+	void OnToolkitHostShutdownUI();
+
+	void SaveOpenedTabs();
+	void LoadOpenedTabs();
+
 
 private:
 	void OnWindowClosed(const TSharedRef<SWindow>& Window);

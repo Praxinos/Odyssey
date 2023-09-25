@@ -23,10 +23,11 @@ public:
 public:
     // Construction / Destruction
     virtual ~FOdysseyEditor();
-    FOdysseyEditor(const FText& iName, UObject* iEditedObject);
+    FOdysseyEditor(const FName& iId, const FText& iName, UObject* iEditedObject);
 
 public:
     //Non Overridable Methods
+    const FName& GetId() const;
     UObject* GetEditedObject() const;
 
     void AddEditedObject(UObject* iObject);
@@ -36,11 +37,6 @@ public:
     template<class T> TSharedPtr<T> FindTab() const;
     const TArray<TSharedPtr<FOdysseyEditorTab>>& GetTabs() const;
     void CloseAllTabs();
-
-    void SetTabsSaveFilename(const FString& iFilename);
-    void SaveOpenedTabs();
-    void LoadOpenedTabs();
-    void InvokeModeLayout();
 
     void RegisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
     void UnregisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
@@ -72,6 +68,7 @@ protected:
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyEditor, STATGROUP_Tickables); }
 
 public:
+    FName mId;
     FText mName;
     UObject* mEditedObject;
     TArray<TSharedPtr<FOdysseyEditorTab>> mTabs;

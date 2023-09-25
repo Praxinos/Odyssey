@@ -47,7 +47,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditor
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditor();
-    FOdysseyPainterEditor(const FText& iName, UObject* iEditedObject, const FName& iLayoutName);
+    FOdysseyPainterEditor(const FName& iId, const FText& iName, UObject* iEditedObject, const FName& iLayoutName);
 
 public:
     virtual void Initialize() override;
