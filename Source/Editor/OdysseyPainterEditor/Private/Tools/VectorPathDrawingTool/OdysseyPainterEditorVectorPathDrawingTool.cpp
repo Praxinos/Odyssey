@@ -224,8 +224,6 @@ bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorScene* iScene
                                                            , const FKey& iKey )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     StitchAtKeyDown = Stitch;
 
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
@@ -233,7 +231,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorScene
         Stitch = !Stitch; // flip the value
     }
 
-    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, iScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
@@ -261,11 +259,9 @@ bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorScene* iScene
                                                          , const FKey& iKey )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     Stitch = StitchAtKeyDown;
 
-    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, iScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iScene, iKey );
 
     return false;
 }

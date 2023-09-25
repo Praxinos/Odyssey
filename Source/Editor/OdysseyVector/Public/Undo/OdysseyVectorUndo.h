@@ -22,7 +22,7 @@ class ODYSSEYVECTOR_API FSnapshotPoint
         static const uint32 SNAPSHOT_RADIUS   = ( 1 << 1 );
         static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
 
-        ~FSnapshotPoint();
+        virtual ~FSnapshotPoint();
         FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint32 iPointSnapshotFlags );
 
         virtual void Restore();
@@ -39,7 +39,7 @@ class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
     public:
         static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
 
-        ~FSnapshotVertex();
+        virtual ~FSnapshotVertex();
         FSnapshotVertex( FOdysseyVectorVertex* iVertex
                        , uint32 iPointSnapshotFlags
                        , uint32 iVertexSnapshotFlags );
@@ -93,14 +93,14 @@ class ODYSSEYVECTOR_API FSnapshotObject
         static const uint32 SNAPSHOT_CHILDREN_TRANSFORMATIONS = ( 1 << 1 );
         static const uint32 SNAPSHOT_ALL                      = 0xFFFFFFFF;
 
-        ~FSnapshotObject();
+        virtual ~FSnapshotObject();
         FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectSnapshotFlags );
 
         virtual void Restore();
 
     private:
-        uint32 mObjectSnapshotFlags;
         FOdysseyVectorObject* mObject;
+        uint32 mObjectSnapshotFlags;
         std::vector<FSnapshotObject*> mChildrenSnapshotArray;
         double mTranslationX;
         double mTranslationY;
@@ -116,7 +116,7 @@ class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
         static const uint32 SNAPSHOT_SEGMENTS = ( 1 << 1 );
         static const uint32 SNAPSHOT_ALL     = 0xFFFFFFFF;
 
-        ~FSnapshotPath();
+        virtual ~FSnapshotPath();
         FSnapshotPath( FOdysseyVectorPath* iPath
                       , uint32 iObjectSnapshotFlags
                       , uint32 iPathSnapshotFlags );
@@ -135,7 +135,7 @@ class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotObject
         static const uint32 SNAPSHOT_BUCKETS = ( 1 << 0 );
         static const uint32 SNAPSHOT_ALL     = 0xFFFFFFFF;
 
-        ~FSnapshotGroupPaint();
+        virtual ~FSnapshotGroupPaint();
         FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
                            , uint32 iObjectSnapshotFlags
                            , uint32 iPaintGroupSnapshotFlags );

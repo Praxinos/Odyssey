@@ -41,8 +41,7 @@ UOdysseyPainterEditorDefaultTool::OnKeyDown( const FKey& iKey )
         if (mediaVectors.Num() > 0)
         {
             FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            ret = UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+            ret = UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorScene, iKey );
         }
     }
 
@@ -50,25 +49,24 @@ UOdysseyPainterEditorDefaultTool::OnKeyDown( const FKey& iKey )
 }
 
 bool
-UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                                 , FOdysseyVectorScene* iScene
+UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorScene* iScene
                                                  , const FKey& iKey )
 {
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
     {
         if( iKey == EKeys::C )
         {
-            FOdysseyPainterEditor::CopyObjectSelection( iEngine, iScene );
+            FOdysseyPainterEditor::CopyObjectSelection( iScene->GetEngine(), iScene );
         }
 
         if( iKey == EKeys::V )
         {
-            FOdysseyPainterEditor::PasteObjectSelection( iEngine, iScene );
+            FOdysseyPainterEditor::PasteObjectSelection( iScene->GetEngine(), iScene );
         }
 
         if( iKey == EKeys::A )
         {
-            GetEditor()->SelectAll( iEngine, iScene );
+            GetEditor()->SelectAll( iScene->GetEngine(), iScene );
         }
     }
 
@@ -77,11 +75,11 @@ UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
         switch( GetEditor()->GetVectorEditionMode() )
         {
             case eVectorEditionMode::Object :
-                GetEditor()->DeleteObjectSelection( iEngine, iScene );
+                GetEditor()->DeleteObjectSelection( iScene->GetEngine(), iScene );
             break;
 
             case eVectorEditionMode::Vertex :
-                GetEditor()->DeletePointSelection( iEngine, iScene );
+                GetEditor()->DeletePointSelection( iScene->GetEngine(), iScene );
             break;
 
             default:
@@ -106,8 +104,7 @@ UOdysseyPainterEditorDefaultTool::OnKeyUp( const FKey& iKey )
         if (mediaVectors.Num() > 0)
         {
             FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            ret = UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+            ret = UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorScene, iKey );
         }
     }
 
@@ -115,8 +112,7 @@ UOdysseyPainterEditorDefaultTool::OnKeyUp( const FKey& iKey )
 }
 
 bool
-UOdysseyPainterEditorDefaultTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                                               , FOdysseyVectorScene* iScene
+UOdysseyPainterEditorDefaultTool::OnKeyUpVector( FOdysseyVectorScene* iScene
                                                , const FKey& iKey )
 {
     return false;

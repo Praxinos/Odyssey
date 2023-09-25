@@ -54,11 +54,9 @@ public:
                                 , FOdysseyVectorScene* iScene
                                 , const FOdysseyPoint& iPointInTexture
                                 , const FKey& iKey );
-    virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                , FOdysseyVectorScene* iScene
+    virtual bool OnKeyDownVector( FOdysseyVectorScene* iScene
                                 , const FKey& iKey );
-    virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
+    virtual bool OnKeyUpVector( FOdysseyVectorScene* iScene
                               , const FKey& iKey );
 
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;

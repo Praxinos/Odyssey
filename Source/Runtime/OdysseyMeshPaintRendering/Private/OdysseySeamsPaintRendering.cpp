@@ -36,9 +36,9 @@ namespace OdysseySeamsPaintRendering
             TransformParameter.Bind(Initializer.ParameterMap, TEXT("c_Transform"));
         }
 
-        void SetParameters(FRHICommandList& RHICmdList, const FMatrix& InTransform)
+        void SetParameters(FRHIBatchedShaderParameters& BatchedParameters, const FMatrix44f& InTransform)
         {
-            SetShaderValue(RHICmdList, RHICmdList.GetBoundVertexShader(), TransformParameter, (FMatrix44f)InTransform);
+            SetShaderValue(BatchedParameters, TransformParameter, InTransform);
         }
 
     private:
@@ -75,13 +75,10 @@ namespace OdysseySeamsPaintRendering
             HeightPixelOffsetParameter.Bind(Initializer.ParameterMap, TEXT("c_HeightPixelOffset"));
         }
 
-        void SetParameters(FRHICommandList& RHICmdList, const float InGamma, const FOdysseySeamsPaintShaderParameters& InShaderParams)
+        void SetParameters(FRHIBatchedShaderParameters& BatchedParameters, const float InGamma, const FOdysseySeamsPaintShaderParameters& InShaderParams)
         {
-            FRHIPixelShader* ShaderRHI = RHICmdList.GetBoundPixelShader();
-
             SetTextureParameter(
-                RHICmdList,
-                ShaderRHI,
+                BatchedParameters,
                 Stroke2DParameter,
                 Stroke2DParameterSampler,
                 TStaticSamplerState< SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp >::GetRHI(),
@@ -89,16 +86,15 @@ namespace OdysseySeamsPaintRendering
                 InShaderParams.Stroke2D->GetRenderTargetResource()->TextureRHI);
 
             SetTextureParameter(
-                RHICmdList,
-                ShaderRHI,
+                BatchedParameters,
                 SeamMaskParameter,
                 SeamMaskParameterSampler,
                 TStaticSamplerState< SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp >::GetRHI(),
                 InShaderParams.SeamMaskRenderTarget->GetRenderTargetResource()->TextureRHI);
 
-            SetShaderValue(RHICmdList, ShaderRHI, WidthPixelOffsetParameter, InShaderParams.WidthPixelOffset);
+            SetShaderValue(BatchedParameters, WidthPixelOffsetParameter, InShaderParams.WidthPixelOffset);
 
-            SetShaderValue(RHICmdList, ShaderRHI, HeightPixelOffsetParameter, InShaderParams.HeightPixelOffset);
+            SetShaderValue(BatchedParameters, HeightPixelOffsetParameter, InShaderParams.HeightPixelOffset);
         }
 
     private:
@@ -137,11 +133,8 @@ namespace OdysseySeamsPaintRendering
 
         SetGraphicsPipelineState(iRHICmdList, iGraphicsPSOInit, 0, EApplyRendertargetOption::ForceApply);
 
-        // Set vertex shader parameters
-        VertexShader->SetParameters(iRHICmdList, iTransform);
-
-        // Set pixel shader parameters
-        PixelShader->SetParameters(iRHICmdList, iGamma, iShaderParams);
+        SetShaderParametersLegacyVS(iRHICmdList, VertexShader, FMatrix44f(iTransform));
+        SetShaderParametersLegacyPS(iRHICmdList, PixelShader, iGamma, iShaderParams);
     }
 }
 

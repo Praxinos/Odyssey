@@ -136,10 +136,10 @@ SOdysseyLayerStackTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& Al
 
     if (mDisplayDropZone)
     {
-        if (!ItemsSource || ItemsSource->Num() <= 0)
+        if ( GetRootItems().Num() == 0 )
             return layerId;
 
-        TSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>>(WidgetFromItem(ItemsSource->Last()));
+        TSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>>(WidgetFromItem(GetRootItems().Last()));
         if (!rowWidget)
             return layerId;
 
@@ -212,10 +212,10 @@ SOdysseyLayerStackTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragD
 	if ( !operationLayerStack )
 		return FReply::Unhandled();
 
-    if (!ItemsSource || ItemsSource->Num() <= 0)
+    if ( GetRootItems().Num() == 0 )
         return FReply::Unhandled();
 
-    TSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>>(WidgetFromItem(ItemsSource->Last()));
+    TSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>>(WidgetFromItem(GetRootItems().Last()));
     if (!rowWidget)
         return FReply::Unhandled();
 
@@ -257,7 +257,7 @@ SOdysseyLayerStackTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropE
 	if ( !operationLayerStack )
 		return FReply::Unhandled();
 
-    TSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>>(WidgetFromItem(ItemsSource->Last()));
+    TSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>>(WidgetFromItem(GetRootItems().Last()));
     if (!rowWidget)
         return FReply::Unhandled();
 
@@ -521,7 +521,7 @@ SOdysseyLayerStackTreeView::SelectAllLayers()
 
     //ItemsSource is the ListView::ItemsSource, which contains all displayed items, even deep children
     //It is NOT the same as TreeItemsSource or mRootLayers which only contain root elements
-    SetItemSelection(*ItemsSource, true);
+    SetItemSelection(SListView<UOdysseyLayer*>::GetItems(), true);
 }
 
 void

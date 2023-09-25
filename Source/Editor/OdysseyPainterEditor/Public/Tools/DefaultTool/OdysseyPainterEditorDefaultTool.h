@@ -32,11 +32,9 @@ public:
     virtual bool OnKeyUp( const FKey& iKey ) override;
     
     static bool DoubleClicked();
-    virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                , FOdysseyVectorScene* iScene
+    virtual bool OnKeyDownVector( FOdysseyVectorScene* iScene
                                 , const FKey& iKey );
-    virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
+    virtual bool OnKeyUpVector( FOdysseyVectorScene* iScene
                               , const FKey& iKey );
 
 };

@@ -116,23 +116,21 @@ UOdysseyPainterEditorVectorPickTool::CreateTopTabWidget()
 }
 
 bool
-UOdysseyPainterEditorVectorPickTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPickTool::OnKeyDownVector( FOdysseyVectorScene* iScene
                                                     , const FKey& iKey )
 {
     // Note: this also calls iScene->Update(0)
-    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iScene, iKey );
 
     return false;
 }
 
 bool
-UOdysseyPainterEditorVectorPickTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPickTool::OnKeyUpVector( FOdysseyVectorScene* iScene
                                                   , const FKey& iKey )
 {
     // Note: this also calls iScene->Update(0)
-    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iScene, iKey );
 
     return false;
 }

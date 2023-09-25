@@ -31,8 +31,8 @@ UOdysseyPainterEditorPaintBucketTool::UOdysseyPainterEditorPaintBucketTool()
     , Color1( 255, 255, 255, 255 )
     , Color2( 255, 255, 255, 255 )
     , PickingRadius( 10.0f )
-    , mShowControls( false )
     , mPickedBucket( nullptr )
+    , mShowControls(false)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 

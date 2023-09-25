@@ -16,8 +16,8 @@ FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
     , mPointID( 0 )
     , mSampleDistance( 6.0f )
     , mTracingWidth( 6.0f )
-    , mCubicPath ( nullptr )
     , mPreviousVertex ( nullptr )
+    , mCubicPath(nullptr)
 {
     mPointArray.reserve(100);
     mRecordArray.reserve(100);

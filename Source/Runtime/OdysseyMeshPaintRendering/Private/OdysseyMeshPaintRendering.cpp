@@ -37,9 +37,9 @@ namespace OdysseyMeshPaintRendering
             TransformParameter.Bind(Initializer.ParameterMap, TEXT("c_Transform"));
         }
 
-        void SetParameters(FRHICommandList& RHICmdList, const FMatrix& InTransform)
+        void SetParameters(FRHIBatchedShaderParameters& BatchedParameters, const FMatrix44f& InTransform)
         {
-            SetShaderValue(RHICmdList, RHICmdList.GetBoundVertexShader(), TransformParameter, (FMatrix44f)InTransform);
+            SetShaderValue(BatchedParameters, TransformParameter, (FMatrix44f)InTransform);
         }
 
     private:
@@ -74,24 +74,21 @@ namespace OdysseyMeshPaintRendering
             StampQualityParameter.Bind(Initializer.ParameterMap, TEXT("c_StampQuality"));
         }
 
-        void SetParameters(FRHICommandList& RHICmdList, const float InGamma, const FOdysseyMeshPaintShaderParameters& InShaderParams)
+        void SetParameters(FRHIBatchedShaderParameters& BatchedParameters, const float InGamma, const FOdysseyMeshPaintShaderParameters& InShaderParams)
         {
-            FRHIPixelShader* ShaderRHI = RHICmdList.GetBoundPixelShader();
-
             SetTextureParameter(
-                RHICmdList,
-                ShaderRHI,
+                BatchedParameters,
                 Stroke2DParameter,
                 TextureParameterSampler,
                 TStaticSamplerState< SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp >::GetRHI(),
                 InShaderParams.Stroke2D->GetResource()->GetTextureRHI());
             //InShaderParams.Stroke2D->GetRenderTargetResource()->TextureRHI);
 
-            SetShaderValue(RHICmdList, ShaderRHI, WorldToBrushMatrixParameter, (FMatrix44f)InShaderParams.WorldToBrushMatrix);
+            SetShaderValue(BatchedParameters, WorldToBrushMatrixParameter, (FMatrix44f)InShaderParams.WorldToBrushMatrix);
 
-            SetShaderValue(RHICmdList, ShaderRHI, TextureHitPointParameter, (FVector2f)InShaderParams.TextureHitPoint);
+            SetShaderValue(BatchedParameters, TextureHitPointParameter, (FVector2f)InShaderParams.TextureHitPoint);
 
-            SetShaderValue(RHICmdList, ShaderRHI, StampQualityParameter, InShaderParams.StampQuality);
+            SetShaderValue(BatchedParameters, StampQualityParameter, InShaderParams.StampQuality);
         }
 
     private:
@@ -131,11 +128,8 @@ namespace OdysseyMeshPaintRendering
 
         SetGraphicsPipelineState(iRHICmdList, iGraphicsPSOInit, 0, EApplyRendertargetOption::ForceApply);
 
-        // Set vertex shader parameters
-        VertexShader->SetParameters(iRHICmdList, iTransform);
-
-        // Set pixel shader parameters
-        PixelShader->SetParameters(iRHICmdList, iGamma, iShaderParams);
+        SetShaderParametersLegacyVS(iRHICmdList, VertexShader, FMatrix44f(iTransform));
+        SetShaderParametersLegacyPS(iRHICmdList, PixelShader, iGamma, iShaderParams);    
     }
 }
 

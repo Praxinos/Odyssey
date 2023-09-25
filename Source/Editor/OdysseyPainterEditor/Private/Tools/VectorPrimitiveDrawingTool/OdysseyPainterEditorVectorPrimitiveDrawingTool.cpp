@@ -99,7 +99,6 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
         return false;
 
     FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
     UniformAtKeyDown = Uniform;
 
@@ -108,7 +107,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
         Uniform = !Uniform; // flip the value
     }
 
-    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
@@ -126,11 +125,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUp( const FKey& iKey )
         return false;
 
     FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
     Uniform = UniformAtKeyDown;
 
-    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;

@@ -20,10 +20,10 @@ UOdysseyPainterEditorVectorTransformTool::~UOdysseyPainterEditorVectorTransformT
 }
 
 UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTool()
-    : mPickedPivot( nullptr )
+    : mUndo(nullptr)
+    , mPickedPivot( nullptr )
     , mDragging( false )
-    , PickingRadius( 10.0f )
-    , mUndo ( nullptr )
+    , PickingRadius(10.0f)
     , Uniform( true )
     
 {
@@ -128,7 +128,6 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyDown( const FKey& iKey )
         return false;
 
     FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
     UniformAtKeyDown = Uniform;
 
@@ -137,7 +136,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyDown( const FKey& iKey )
         Uniform = !Uniform; // flip the value
     }
 
-    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
@@ -155,11 +154,10 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyUp( const FKey& iKey )
         return false;
 
     FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
     Uniform = UniformAtKeyDown;
 
-    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
@@ -326,7 +324,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
     BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
     BLMatrix2D inverseSpaceMatrix;
     BLMatrix2D translateMatrix;
-    BLPoint translateBy;
+    BLPoint translateBy(0,0);
     BLPoint localDelta;
 
     BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );

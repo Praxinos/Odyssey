@@ -91,8 +91,7 @@ FEditFlipbookExtension::Execute()
 void
 EditFlipbooksWarning()
 {
-    FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Flipbook Already Opened");
-    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The flipbook or one of its sprite or textures is already opened in an other editor. Please close the editor before opening the flipbook with ILIAD."), &Title);
+    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The flipbook or one of its sprite or textures is already opened in an other editor. Please close the editor before opening the flipbook with ILIAD."), LOCTEXT("TitleDeletingCurrentLayer", "Flipbook Already Opened"));
 }
 
 void
