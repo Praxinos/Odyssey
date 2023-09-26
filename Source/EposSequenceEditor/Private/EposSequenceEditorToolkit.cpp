@@ -603,7 +603,7 @@ void FEposSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChange
     if( ( iMapChangeType == EMapChangeType::LoadMap || iMapChangeType == EMapChangeType::NewMap || iMapChangeType == EMapChangeType::TearDownWorld ) )
     {
         mSequencer->GetSpawnRegister().CleanUp( *mSequencer );
-        CloseWindow();
+        CloseWindow( EAssetEditorCloseReason::AssetUnloadingOrInvalid );
     }
 }
 

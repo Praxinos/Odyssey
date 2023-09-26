@@ -107,7 +107,7 @@ private:
 private:
 
     /** Board or Shot sequence for our edit operation. */
-    UEposMovieSceneSequence* mSequence;
+    TObjectPtr<UEposMovieSceneSequence> mSequence;
 
     /** The sequencer used by this editor. */
     TSharedPtr<ISequencer> mSequencer;

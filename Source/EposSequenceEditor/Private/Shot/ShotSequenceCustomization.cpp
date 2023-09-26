@@ -18,20 +18,13 @@
 
 //---
 
-FShotSequenceCustomization::~FShotSequenceCustomization()
-{
-    //PATCH: unregister is not called if
-    // - a board sequence is opened
-    // - open a level sequence which replace the board sequence
-    // - UnregisterSequencerCustomization() of the board sequence is not called
-    // So, call it inside the destructor and check is wasn't called before
-    if( mSequencer )
-        UnregisterSequencerCustomization();
-}
+static int32 sgRegistrationCountDebug = 0; // Just to be sure to always register (and unregister) customization synchronously
 
 void
 FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder )
 {
+    sgRegistrationCountDebug++;
+
     mSequencer = &ioBuilder.GetSequencer();
     // From 5.3, the registration is only done if the new focused sequence is NOT the same type than the previous one
     // It means that:
@@ -41,6 +34,8 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     mShotSequence = Cast<UShotSequence>( &ioBuilder.GetFocusedSequence() );
 
     //---
+
+    mSequencer->OnCloseEvent().AddRaw( this, &FShotSequenceCustomization::OnSequencerClosed );
 
     // Listen for actor/component movement
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FShotSequenceCustomization::OnPrePropertyChanged );
@@ -71,13 +66,32 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 void
 FShotSequenceCustomization::UnregisterSequencerCustomization()
 {
+    sgRegistrationCountDebug--;
+    check( sgRegistrationCountDebug == 0 );
+
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll( this );
     FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll( this );
 
-    ProcessCommands( mSequencer->GetCommandBindings(), kUnmap );
+    if( mSequencer )
+    {
+        ProcessCommands( mSequencer->GetCommandBindings(), kUnmap );
+    }
+
+    //---
 
     mSequencer = nullptr;
     mShotSequence = nullptr;
+}
+
+void
+FShotSequenceCustomization::OnSequencerClosed( TSharedRef<ISequencer> iSequencer )
+{
+    if( &iSequencer.Get() == mSequencer )
+    {
+        mSequencer->OnCloseEvent().RemoveAll( this );
+
+        mSequencer = nullptr;
+    }
 }
 
 //---

@@ -29,20 +29,13 @@
 
 //---
 
-FBoardSequenceCustomization::~FBoardSequenceCustomization()
-{
-    //PATCH: unregister is not called if
-    // - a board sequence is opened
-    // - open a level sequence which replace the board sequence
-    // - UnregisterSequencerCustomization() of the board sequence is not called
-    // So, call it inside the destructor and check is wasn't called before
-    if( mSequencer )
-        UnregisterSequencerCustomization();
-}
+static int32 sgRegistrationCountDebug = 0; // Just to be sure to always register (and unregister) customization synchronously
 
 void
 FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder ) // This is called each time the focused sequence changed (ie. when double-clicking on a section to go inside its subsequence)
 {
+    sgRegistrationCountDebug++;
+
     mSequencer = &ioBuilder.GetSequencer();
     // From 5.3, the registration is only done if the new focused sequence is NOT the same type than the previous one
     // It means that:
@@ -52,6 +45,8 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     mBoardSequence = Cast<UBoardSequence>( &ioBuilder.GetFocusedSequence() );
 
     //---
+
+    mSequencer->OnCloseEvent().AddRaw( this, &FBoardSequenceCustomization::OnSequencerClosed );
 
     // Listen for actor/component movement
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FBoardSequenceCustomization::OnPrePropertyChanged );
@@ -80,15 +75,32 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 void
 FBoardSequenceCustomization::UnregisterSequencerCustomization()
 {
+    sgRegistrationCountDebug--;
+    check( sgRegistrationCountDebug == 0 );
+
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll( this );
     FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll( this );
 
-    ProcessCommands( mSequencer->GetCommandBindings(), kUnmap );
+    if( mSequencer )
+    {
+        ProcessCommands( mSequencer->GetCommandBindings(), kUnmap );
+    }
 
     //---
 
     mSequencer = nullptr;
     mBoardSequence = nullptr;
+}
+
+void
+FBoardSequenceCustomization::OnSequencerClosed( TSharedRef<ISequencer> iSequencer )
+{
+    if( &iSequencer.Get() == mSequencer )
+    {
+        mSequencer->OnCloseEvent().RemoveAll( this );
+
+        mSequencer = nullptr;
+    }
 }
 
 //---
