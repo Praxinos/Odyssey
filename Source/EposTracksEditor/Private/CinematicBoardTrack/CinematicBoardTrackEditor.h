@@ -11,7 +11,7 @@
 #include "ISequencerSection.h"
 #include "MovieSceneTrack.h"
 #include "ISequencerTrackEditor.h"
-#include "MovieSceneTrackEditor.h"
+#include "TrackEditors/SubTrackEditor.h"
 
 #include "ArrangeSectionsType.h"
 
@@ -27,7 +27,7 @@ class UMovieSceneSubSection;
  * Tools for boards.
  */
 class FCinematicBoardTrackEditor
-    : public FMovieSceneTrackEditor
+    : public FSubTrackEditor
 {
 public:
 
@@ -63,87 +63,50 @@ public:
     virtual TSharedRef<ISequencerSection> MakeSectionInterface( UMovieSceneSection& ioSectionObject, UMovieSceneTrack& ioTrack, FGuid iObjectBinding ) override;
     virtual bool HandleAssetAdded( UObject* iAsset, const FGuid& iTargetObjectGuid ) override;
     virtual bool SupportsSequence( UMovieSceneSequence* iSequence ) const override;
-    virtual bool SupportsType( TSubclassOf<UMovieSceneTrack> iType ) const override;
+    //virtual bool SupportsType( TSubclassOf<UMovieSceneTrack> iType ) const override;
     virtual void Tick( float iDeltaTime ) override;
     virtual void BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, UMovieSceneTrack* iTrack ) override;
     virtual const FSlateBrush* GetIconBrush() const override;
     virtual bool OnAllowDrop( const FDragDropEvent& iDragDropEvent, FSequencerDragDropParams& DragDropParams ) override;
     virtual FReply OnDrop( const FDragDropEvent& iDragDropEvent, const FSequencerDragDropParams& DragDropParams ) override;
 
-    /** Insert board. */
-    void InsertBoard();
+public:
 
-    /** Insert shot. */
-    void InsertShot();
+    /** Insert sequence into this track */
+    virtual void InsertSection( UMovieSceneTrack* Track )
+    {
+        checkNoEntry();
+    }
 
-    /*
-     * Duplicate board.
-     *
-     * @param Section The section to duplicate
-     */
-    //void DuplicateBoard( UMovieSceneCinematicBoardSection* iSection );
+    /** Duplicate the section into this track */
+    virtual void DuplicateSection( UMovieSceneSubSection* Section )
+    {
+        checkNoEntry();
+    }
 
-    /*
-     * Duplicate board.
-     *
-     * @param Section The section to duplicate
-     */
-    //void CloneSection( UMovieSceneCinematicBoardSection* iSection );
+    /** Create a new take of the given section */
+    virtual void CreateNewTake( UMovieSceneSubSection* Section )
+    {
+        checkNoEntry();
+    }
 
-    /*
-     * Render board.
-     *
-     * @param Section The section to render
-     */
-    //void RenderBoards( const TArray<UMovieSceneCinematicBoardSection*>& Sections );
+    /** Switch the selected section's take sequence */
+    virtual void ChangeTake( UMovieSceneSequence* Sequence )
+    {
+        checkNoEntry();
+    }
 
-    /*
-     * Rename board.
-     *
-     * @param Section The section to rename.
-     */
-    void RenameBoard( UMovieSceneCinematicBoardSection* iSection );
+    /** Generate a menu for takes for this section */
+    virtual void AddTakesMenu( UMovieSceneSubSection* Section, FMenuBuilder& MenuBuilder )
+    {
+        checkNoEntry();
+    }
 
-    /*
-     * New take.
-     *
-     * @param Section The section to create a new take of.
-     */
-    //void NewTake( UMovieSceneCinematicBoardSection* iSection );
-
-    /*
-    * Switch take for the selected sections
-    *
-    * @param TakeObject The take object to switch to.
-    */
-    //void SwitchTake( UObject* iTakeObject );
-
-
-private:
-
-    /** Callback for determining whether the "Add Board" menu entry can execute. */
-    bool HandleAddCinematicBoardTrackMenuEntryCanExecute() const;
-
-    /** Callback for executing the "Add Board Track" menu entry. */
-    void HandleAddCinematicBoardTrackMenuEntryExecute();
-
-    /** Callback for generating the menu of the "Add Board" combo button. */
-    TSharedRef<SWidget> HandleAddBoardComboButtonGetMenuContent();
-
-    void SetArrangeSections( EArrangeSections iArrangeSections );
-    bool IsArrangeSections( EArrangeSections iArrangeSections );
-
-    /** Delegate for AnimatablePropertyChanged in AddKey */
-    FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex, TOptional<FFrameNumber> iDroppedFrame );
-
-    /** Delegate for boards button lock state */
-    ECheckBoxState AreBoardsLocked() const;
-
-    /** Delegate for locked boards button */
-    void OnLockBoardsClicked( ECheckBoxState iCheckBoxState );
-
-    /** Delegate for boards button lock tooltip */
-    FText GetLockBoardsToolTip() const;
+    /** Edit the section's metadata */
+    virtual void EditMetaData( UMovieSceneSubSection* Section )
+    {
+        checkNoEntry();
+    }
 
     /**
      * Check whether the given sequence can be added as a sub-sequence.
@@ -154,13 +117,78 @@ private:
      * @param Sequence The sequence to check.
      * @return true if the sequence can be added as a sub-sequence, false otherwise.
      */
-    bool CanAddSubSequence( const UMovieSceneSequence& iSequence ) const;
+     // No more needed, defined & used in FSubTrackEditor
+     // in addition it's not virtual ...
+     //bool CanAddSubSequence( const UMovieSceneSequence& iSequence ) const;
+
+    //---
+
+    /** Insert board. */
+    void InsertBoard();
+
+    /** Insert shot. */
+    void InsertShot();
+
+public:
+
+    // FSubTrackEditor interface
+    virtual FText GetSubTrackName() const override;
+    virtual FText GetSubTrackToolTip() const override;
+    virtual FName GetSubTrackBrushName() const override;
+    virtual FString GetSubSectionDisplayName( const UMovieSceneSubSection* Section ) const override;
+    virtual FString GetDefaultSubsequenceName() const override;
+    virtual FString GetDefaultSubsequenceDirectory() const override;
+    virtual TSubclassOf<UMovieSceneSubTrack> GetSubTrackClass() const;
+
+protected:
+
+    /** Get the list of supported sequence class paths */
+    virtual void GetSupportedSequenceClassPaths( TArray<FTopLevelAssetPath>& OutClassPaths ) const;
+
+    /** Callback for executing the "Add Subsequence" menu entry. */
+    virtual void HandleAddSubTrackMenuEntryExecute();
+
+    /** Callback for determining whether the "Add Subsequence" menu entry can execute. */
+    virtual bool HandleAddSubTrackMenuEntryCanExecute() const;
+
+    /** Whether to handle this asset being dropped onto the sequence as opposed to a specific track. */
+    virtual bool CanHandleAssetAdded( UMovieSceneSequence* Sequence ) const;
+
+    /** Find or create a sub track. If the given track is a subtrack, it will be returned. */
+    UMovieSceneSubTrack* FindOrCreateSubTrack( UMovieScene* MovieScene, UMovieSceneTrack* Track ) const;
+
+    /** Callback for generating the menu of the "Add Sequence" combo button. */
+    TSharedRef<SWidget> HandleAddSubSequenceComboButtonGetMenuContent( UMovieSceneTrack* InTrack );
+
+private:
+
+    /** Delegate for AnimatablePropertyChanged in AddKey */
+    // add:
+    // - == TEXT( "BoardSequence" ) / TEXT( "ShotSequence" )
+    // - BoardSequenceTools::UpdateViewRange( GetSequencer().Get(), newSection->GetTrueRange() );
+    //FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, UMovieSceneTrack* iTrack, int32 iRowIndex, TOptional<FFrameNumber> iDroppedFrame );
+
+    /** Callback for AnimatablePropertyChanged in HandleAssetAdded. */
+    // add:
+    // - BoardSequenceTools::UpdateViewRange( GetSequencer().Get(), newSection->GetTrueRange() );
+    FKeyPropertyResult HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSceneSequence* iSequence, UMovieSceneTrack* iTrack, int32 iRowIndex );
+
+private:
+
+    void SetArrangeSections( EArrangeSections iArrangeSections );
+    bool IsArrangeSections( EArrangeSections iArrangeSections );
+
+    /** Delegate for boards button lock state */
+    ECheckBoxState AreBoardsLocked() const;
+
+    /** Delegate for locked boards button */
+    void OnLockBoardsClicked( ECheckBoxState iCheckBoxState );
+
+    /** Delegate for boards button lock tooltip */
+    FText GetLockBoardsToolTip() const;
 
     /** Called when our sequencer wants to switch cameras */
     void OnUpdateCameraCut( UObject* iCameraObject, bool iJumpCut );
-
-    /** Callback for AnimatablePropertyChanged in HandleAssetAdded. */
-    FKeyPropertyResult HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSceneSequence* iSequence, int32 iRowIndex );
 
 private:
 
