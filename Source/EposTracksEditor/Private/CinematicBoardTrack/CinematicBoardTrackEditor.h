@@ -61,13 +61,13 @@ public:
     virtual void BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder ) override;
     virtual TSharedPtr<SWidget> BuildOutlinerEditWidget( const FGuid& iObjectBinding, UMovieSceneTrack* iTrack, const FBuildEditWidgetParams& iParams ) override;
     virtual TSharedRef<ISequencerSection> MakeSectionInterface( UMovieSceneSection& ioSectionObject, UMovieSceneTrack& ioTrack, FGuid iObjectBinding ) override;
-    virtual bool HandleAssetAdded( UObject* iAsset, const FGuid& iTargetObjectGuid ) override;
+    //virtual bool HandleAssetAdded( UObject* iAsset, const FGuid& iTargetObjectGuid ) override;
     virtual bool SupportsSequence( UMovieSceneSequence* iSequence ) const override;
     //virtual bool SupportsType( TSubclassOf<UMovieSceneTrack> iType ) const override;
     virtual void Tick( float iDeltaTime ) override;
     virtual void BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, UMovieSceneTrack* iTrack ) override;
     virtual const FSlateBrush* GetIconBrush() const override;
-    virtual bool OnAllowDrop( const FDragDropEvent& iDragDropEvent, FSequencerDragDropParams& DragDropParams ) override;
+    //virtual bool OnAllowDrop( const FDragDropEvent& iDragDropEvent, FSequencerDragDropParams& DragDropParams ) override;
     virtual FReply OnDrop( const FDragDropEvent& iDragDropEvent, const FSequencerDragDropParams& DragDropParams ) override;
 
 public:
@@ -171,7 +171,7 @@ private:
     /** Callback for AnimatablePropertyChanged in HandleAssetAdded. */
     // add:
     // - BoardSequenceTools::UpdateViewRange( GetSequencer().Get(), newSection->GetTrueRange() );
-    FKeyPropertyResult HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSceneSequence* iSequence, UMovieSceneTrack* iTrack, int32 iRowIndex );
+    //FKeyPropertyResult HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSceneSequence* iSequence, UMovieSceneTrack* iTrack, int32 iRowIndex );
 
 private:
 

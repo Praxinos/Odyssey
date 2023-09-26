@@ -308,10 +308,15 @@ FCinematicBoardTrackEditor::GetSupportedSequenceClassPaths( TArray<FTopLevelAsse
 }
 
 bool
-FCinematicBoardTrackEditor::CanHandleAssetAdded( UMovieSceneSequence* Sequence ) const
+FCinematicBoardTrackEditor::CanHandleAssetAdded( UMovieSceneSequence* iSequence ) const
 {
     // Only allow sequences with a camera cut track to be dropped as a shot. Otherwise, it'll be dropped as a subsequence.
-    return Sequence->GetMovieScene()->GetCameraCutTrack() != nullptr;
+    //return iSequence->GetMovieScene()->GetCameraCutTrack() != nullptr;
+
+    // Handle asset added only if there is no already existing cinematic board track
+    // Because in FSubTrackEditor::HandleAssetAdded(), a new track is always created (also bug with level sequence)
+    // And if a cinematic board track already exists, just drop on this track
+    return !BoardSequenceTools::FindCinematicBoardTrack( GetSequencer().Get() );
 }
 
 UMovieSceneSubTrack*
@@ -324,97 +329,107 @@ FCinematicBoardTrackEditor::FindOrCreateSubTrack( UMovieScene* MovieScene, UMovi
     }
     return SubTrack;
 }
-
-bool
-FCinematicBoardTrackEditor::HandleAssetAdded( UObject* iAsset, const FGuid& iTargetObjectGuid ) //override
-{
-    UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( iAsset );
-
-    if( sequence == nullptr )
-    {
-        return false;
-    }
-
-    if( !( ( sequence->GetClass()->GetName() == TEXT( "BoardSequence" ) ) || ( sequence->GetClass()->GetName() == TEXT( "ShotSequence" ) ) ) )
-    //if( !SupportsSequence( sequence ) ) // ??????????????????????????????????????????????
-    {
-        return false;
-    }
-
-    if( !CanHandleAssetAdded( sequence ) )
-    {
-        return false;
-    }
-
-    if( sequence->GetMovieScene()->GetPlaybackRange().IsEmpty() )
-    {
-        FNotificationInfo info( FText::Format( LOCTEXT( "InvalidSequenceDuration", "Invalid level sequence {0}. The sequence has no duration." ), sequence->GetDisplayName() ) );
-        info.bUseLargeFont = false;
-        FSlateNotificationManager::Get().AddNotification( info );
-        return false;
-    }
-
-    if( CanAddSubSequence( *sequence ) )
-    {
-        const FScopedTransaction transaction( FText::Join( FText::FromString( " " ), LOCTEXT( "AddText", "Add" ), GetSubTrackName(), LOCTEXT( "TrackText", "Track" ) ) );
-
-        int32 rowIndex = INDEX_NONE;
-        UMovieSceneTrack* track = nullptr;
-        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::HandleSequenceAdded, sequence, track, rowIndex ) );
-
-        return true;
-    }
-
-    FNotificationInfo info( FText::Format( LOCTEXT( "InvalidSequence", "Invalid level sequence {0}. There could be a circular dependency." ), sequence->GetDisplayName() ) );
-    info.bUseLargeFont = false;
-    FSlateNotificationManager::Get().AddNotification( info );
-
-    return false;
-}
-
-FKeyPropertyResult
-FCinematicBoardTrackEditor::HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSceneSequence* iSequence, UMovieSceneTrack* iTrack, int32 iRowIndex )
-{
-    FKeyPropertyResult keyPropertyResult;
-
-    UMovieScene* movieScene = GetFocusedMovieScene();
-
-    UMovieSceneSubTrack* subTrack = FindOrCreateSubTrack( movieScene, iTrack );
-    //auto boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
-
-    const FFrameRate tickResolution = iSequence->GetMovieScene()->GetTickResolution();
-    const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
-        UE::MovieScene::DiscreteSize( iSequence->GetMovieScene()->GetPlaybackRange() ),
-        tickResolution );
-
-    const FFrameRate outerFrameRate = subTrack->GetTypedOuter<UMovieScene>()->GetTickResolution();
-    const int32      outerDuration = innerDuration.ConvertTo( outerFrameRate ).FrameNumber.Value;
-
-    UMovieSceneSubSection* newSection = subTrack->AddSequenceOnRow( iSequence, iKeyTime, outerDuration, iRowIndex );
-    keyPropertyResult.bTrackModified = true;
-    keyPropertyResult.SectionsCreated.Add( newSection );
-
-    BoardSequenceTools::UpdateViewRange( GetSequencer().Get(), newSection->GetTrueRange() );
-    GetSequencer()->EmptySelection();
-    GetSequencer()->SelectSection( newSection );
-    GetSequencer()->ThrobSectionSelection();
-
-    if( tickResolution != outerFrameRate )
-    {
-        FNotificationInfo info( FText::Format( LOCTEXT( "TickResolutionMismatch", "The parent sequence has a different tick resolution {0} than the newly added sequence {1}" ), outerFrameRate.ToPrettyText(), tickResolution.ToPrettyText() ) );
-        info.bUseLargeFont = false;
-        FSlateNotificationManager::Get().AddNotification( info );
-    }
-
-    return keyPropertyResult;
-}
+//
+//bool
+//FCinematicBoardTrackEditor::HandleAssetAdded( UObject* iAsset, const FGuid& iTargetObjectGuid ) //override
+//{
+//    UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( iAsset );
+//
+//    if( sequence == nullptr )
+//    {
+//        return false;
+//    }
+//
+//    if( !( ( sequence->GetClass()->GetName() == TEXT( "BoardSequence" ) ) || ( sequence->GetClass()->GetName() == TEXT( "ShotSequence" ) ) ) )
+//    //if( !SupportsSequence( sequence ) ) // ??????????????????????????????????????????????
+//    {
+//        return false;
+//    }
+//
+//    if( !CanHandleAssetAdded( sequence ) )
+//    {
+//        return false;
+//    }
+//
+//    if( sequence->GetMovieScene()->GetPlaybackRange().IsEmpty() )
+//    {
+//        FNotificationInfo info( FText::Format( LOCTEXT( "InvalidSequenceDuration", "Invalid level sequence {0}. The sequence has no duration." ), sequence->GetDisplayName() ) );
+//        info.bUseLargeFont = false;
+//        FSlateNotificationManager::Get().AddNotification( info );
+//        return false;
+//    }
+//
+//    if( CanAddSubSequence( *sequence ) )
+//    {
+//        const FScopedTransaction transaction( FText::Join( FText::FromString( " " ), LOCTEXT( "AddText", "Add" ), GetSubTrackName(), LOCTEXT( "TrackText", "Track" ) ) );
+//
+//        int32 rowIndex = INDEX_NONE;
+//        UMovieSceneTrack* track = nullptr;
+//        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::HandleSequenceAdded, sequence, track, rowIndex ) );
+//
+//        return true;
+//    }
+//
+//    FNotificationInfo info( FText::Format( LOCTEXT( "InvalidSequence", "Invalid level sequence {0}. There could be a circular dependency." ), sequence->GetDisplayName() ) );
+//    info.bUseLargeFont = false;
+//    FSlateNotificationManager::Get().AddNotification( info );
+//
+//    return false;
+//}
+//
+//FKeyPropertyResult
+//FCinematicBoardTrackEditor::HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSceneSequence* iSequence, UMovieSceneTrack* iTrack, int32 iRowIndex )
+//{
+//    FKeyPropertyResult keyPropertyResult;
+//
+//    UMovieScene* movieScene = GetFocusedMovieScene();
+//
+//    UMovieSceneSubTrack* subTrack = FindOrCreateSubTrack( movieScene, iTrack );
+//    //auto boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
+//
+//    const FFrameRate tickResolution = iSequence->GetMovieScene()->GetTickResolution();
+//    const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
+//        UE::MovieScene::DiscreteSize( iSequence->GetMovieScene()->GetPlaybackRange() ),
+//        tickResolution );
+//
+//    const FFrameRate outerFrameRate = subTrack->GetTypedOuter<UMovieScene>()->GetTickResolution();
+//    const int32      outerDuration = innerDuration.ConvertTo( outerFrameRate ).FrameNumber.Value;
+//
+//    UMovieSceneSubSection* newSection = subTrack->AddSequenceOnRow( iSequence, iKeyTime, outerDuration, iRowIndex );
+//    keyPropertyResult.bTrackModified = true;
+//    keyPropertyResult.SectionsCreated.Add( newSection );
+//
+//    BoardSequenceTools::UpdateViewRange( GetSequencer().Get(), newSection->GetTrueRange() );
+//    GetSequencer()->EmptySelection();
+//    GetSequencer()->SelectSection( newSection );
+//    GetSequencer()->ThrobSectionSelection();
+//
+//    if( tickResolution != outerFrameRate )
+//    {
+//        FNotificationInfo info( FText::Format( LOCTEXT( "TickResolutionMismatch", "The parent sequence has a different tick resolution {0} than the newly added sequence {1}" ), outerFrameRate.ToPrettyText(), tickResolution.ToPrettyText() ) );
+//        info.bUseLargeFont = false;
+//        FSlateNotificationManager::Get().AddNotification( info );
+//    }
+//
+//    return keyPropertyResult;
+//}
 
 
 bool
 FCinematicBoardTrackEditor::SupportsSequence( UMovieSceneSequence* iSequence ) const //override
 {
-    ETrackSupport TrackSupported = iSequence ? iSequence->IsTrackSupported( UMovieSceneCinematicBoardTrack::StaticClass() ) : ETrackSupport::NotSupported;
-    return TrackSupported == ETrackSupport::Supported;
+    UMovieSceneSequence* focusedSequence = GetSequencer()->GetFocusedMovieSceneSequence();
+    ETrackSupport trackSupported = focusedSequence ? focusedSequence->IsTrackSupported( UMovieSceneCinematicBoardTrack::StaticClass() ) : ETrackSupport::NotSupported;
+
+    // This means that the [Add Track] button is pressed
+    if( iSequence == focusedSequence )
+        return trackSupported == ETrackSupport::Supported;
+
+    if( !iSequence )
+        return false;
+
+    // Here it should be: iSequence is dropped on focusedSequence
+    return ( trackSupported == ETrackSupport::Supported ) && ( ( iSequence->GetClass()->GetName() == TEXT( "BoardSequence" ) ) || ( iSequence->GetClass()->GetName() == TEXT( "ShotSequence" ) ) );
 }
 
 //
@@ -530,133 +545,144 @@ FCinematicBoardTrackEditor::GetIconBrush() const //override
 {
     return FEposTracksEditorStyle::Get().GetBrush( GetSubTrackBrushName() );
 }
-
-bool
-FCinematicBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, FSequencerDragDropParams& DragDropParams ) //override
-{
-    if( !DragDropParams.Track.IsValid() )
-    {
-        return false;
-    }
-
-    if( !DragDropParams.Track.Get()->IsA( GetSubTrackClass() ) )
-    {
-        return false;
-    }
-
-    TSharedPtr<FDragDropOperation> operation = iDragDropEvent.GetOperation();
-
-    if( !operation.IsValid() || !operation->IsOfType<FAssetDragDropOp>() )
-    {
-        return false;
-    }
-
-    TSharedPtr<ISequencer> sequencerPtr = GetSequencer();
-    if( !sequencerPtr )
-    {
-        return false;
-    }
-
-    UMovieSceneSequence* focusedSequence = sequencerPtr->GetFocusedMovieSceneSequence();
-    if( !focusedSequence )
-    {
-        return false;
-    }
-
-    TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
-
-    TOptional<FFrameNumber> LongestLengthInFrames;
-    for( const FAssetData& assetData : dragDropOp->GetAssets() )
-    {
-        if( !MovieSceneToolHelpers::IsValidAsset( focusedSequence, assetData ) )
-        {
-            continue;
-        }
-
-        UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() );
-        if( sequence && CanAddSubSequence( *sequence ) )
-        {
-            FFrameRate TickResolution = sequencerPtr->GetFocusedTickResolution();
-
-            const FQualifiedFrameTime InnerDuration = FQualifiedFrameTime(
-                UE::MovieScene::DiscreteSize( sequence->GetMovieScene()->GetPlaybackRange() ),
-                sequence->GetMovieScene()->GetTickResolution() );
-
-            FFrameNumber LengthInFrames = InnerDuration.ConvertTo( TickResolution ).FrameNumber;
-
-            // Keep track of the longest sub-sequence asset we're trying to drop onto it for preview display purposes.
-            LongestLengthInFrames = FMath::Max( LongestLengthInFrames.Get( FFrameNumber( 0 ) ), LengthInFrames );
-        }
-    }
-
-    if( LongestLengthInFrames.IsSet() )
-    {
-        DragDropParams.FrameRange = TRange<FFrameNumber>( DragDropParams.FrameNumber, DragDropParams.FrameNumber + LongestLengthInFrames.GetValue() );
-        return true;
-    }
-
-    return false;
-}
+//
+//bool
+//FCinematicBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, FSequencerDragDropParams& DragDropParams ) //override
+//{
+//    if( !DragDropParams.Track.IsValid() )
+//    {
+//        return false;
+//    }
+//
+//    if( !DragDropParams.Track.Get()->IsA( GetSubTrackClass() ) )
+//    {
+//        return false;
+//    }
+//
+//    TSharedPtr<FDragDropOperation> operation = iDragDropEvent.GetOperation();
+//
+//    if( !operation.IsValid() || !operation->IsOfType<FAssetDragDropOp>() )
+//    {
+//        return false;
+//    }
+//
+//    TSharedPtr<ISequencer> sequencerPtr = GetSequencer();
+//    if( !sequencerPtr )
+//    {
+//        return false;
+//    }
+//
+//    UMovieSceneSequence* focusedSequence = sequencerPtr->GetFocusedMovieSceneSequence();
+//    if( !focusedSequence )
+//    {
+//        return false;
+//    }
+//
+//    TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
+//
+//    TOptional<FFrameNumber> LongestLengthInFrames;
+//    for( const FAssetData& assetData : dragDropOp->GetAssets() )
+//    {
+//        if( !MovieSceneToolHelpers::IsValidAsset( focusedSequence, assetData ) )
+//        {
+//            continue;
+//        }
+//
+//        UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() );
+//        if( sequence && CanAddSubSequence( *sequence ) )
+//        {
+//            FFrameRate TickResolution = sequencerPtr->GetFocusedTickResolution();
+//
+//            const FQualifiedFrameTime InnerDuration = FQualifiedFrameTime(
+//                UE::MovieScene::DiscreteSize( sequence->GetMovieScene()->GetPlaybackRange() ),
+//                sequence->GetMovieScene()->GetTickResolution() );
+//
+//            FFrameNumber LengthInFrames = InnerDuration.ConvertTo( TickResolution ).FrameNumber;
+//
+//            // Keep track of the longest sub-sequence asset we're trying to drop onto it for preview display purposes.
+//            LongestLengthInFrames = FMath::Max( LongestLengthInFrames.Get( FFrameNumber( 0 ) ), LengthInFrames );
+//        }
+//    }
+//
+//    if( LongestLengthInFrames.IsSet() )
+//    {
+//        DragDropParams.FrameRange = TRange<FFrameNumber>( DragDropParams.FrameNumber, DragDropParams.FrameNumber + LongestLengthInFrames.GetValue() );
+//        return true;
+//    }
+//
+//    return false;
+//}
+//
+//FReply
+//FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, const FSequencerDragDropParams& DragDropParams ) //override
+//{
+//    if( !DragDropParams.Track.IsValid() )
+//    {
+//        return FReply::Unhandled();
+//    }
+//
+//    if( !DragDropParams.Track.Get()->IsA( GetSubTrackClass() ) )
+//    {
+//        return FReply::Unhandled();
+//    }
+//
+//    TSharedPtr<FDragDropOperation> operation = iDragDropEvent.GetOperation();
+//
+//    if( !operation.IsValid() || !operation->IsOfType<FAssetDragDropOp>() )
+//    {
+//        return FReply::Unhandled();
+//    }
+//
+//    TSharedPtr<ISequencer> sequencerPtr = GetSequencer();
+//    if( !sequencerPtr )
+//    {
+//        return FReply::Unhandled();
+//    }
+//
+//    UMovieSceneSequence* focusedSequence = sequencerPtr->GetFocusedMovieSceneSequence();
+//    if( !focusedSequence )
+//    {
+//        return FReply::Unhandled();
+//    }
+//
+//    const FScopedTransaction Transaction( LOCTEXT( "DropAssets", "Drop Assets" ) );
+//
+//    TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
+//
+//    FMovieSceneTrackEditor::BeginKeying( DragDropParams.FrameNumber );
+//
+//    bool anyDropped = false;
+//    for( const FAssetData& assetData : dragDropOp->GetAssets() )
+//    {
+//        if( !MovieSceneToolHelpers::IsValidAsset( focusedSequence, assetData ) )
+//        {
+//            continue;
+//        }
+//
+//        UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() );
+//        if( CanAddSubSequence( *sequence ) )
+//        {
+//            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::HandleSequenceAdded, sequence, DragDropParams.Track.Get(), DragDropParams.RowIndex ) );
+//            //AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, sequence, DragDropParams.Track.Get(), DragDropParams.RowIndex, TOptional<FFrameNumber>( DragDropParams.FrameNumber ) ) );
+//
+//            anyDropped = true;
+//        }
+//    }
+//
+//    FMovieSceneTrackEditor::EndKeying();
+//
+//    return anyDropped ? FReply::Handled() : FReply::Unhandled();
+//}
 
 FReply
 FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, const FSequencerDragDropParams& DragDropParams ) //override
 {
-    if( !DragDropParams.Track.IsValid() )
-    {
-        return FReply::Unhandled();
-    }
+    FReply reply = FSubTrackEditor::OnDrop( iDragDropEvent, DragDropParams );
 
-    if( !DragDropParams.Track.Get()->IsA( GetSubTrackClass() ) )
-    {
-        return FReply::Unhandled();
-    }
+    if( reply.IsEventHandled() )
+        BoardSequenceTools::UpdateViewRange( GetSequencer().Get(), DragDropParams.FrameRange );
 
-    TSharedPtr<FDragDropOperation> operation = iDragDropEvent.GetOperation();
-
-    if( !operation.IsValid() || !operation->IsOfType<FAssetDragDropOp>() )
-    {
-        return FReply::Unhandled();
-    }
-
-    TSharedPtr<ISequencer> sequencerPtr = GetSequencer();
-    if( !sequencerPtr )
-    {
-        return FReply::Unhandled();
-    }
-
-    UMovieSceneSequence* focusedSequence = sequencerPtr->GetFocusedMovieSceneSequence();
-    if( !focusedSequence )
-    {
-        return FReply::Unhandled();
-    }
-
-    const FScopedTransaction Transaction( LOCTEXT( "DropAssets", "Drop Assets" ) );
-
-    TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
-
-    FMovieSceneTrackEditor::BeginKeying( DragDropParams.FrameNumber );
-
-    bool anyDropped = false;
-    for( const FAssetData& assetData : dragDropOp->GetAssets() )
-    {
-        if( !MovieSceneToolHelpers::IsValidAsset( focusedSequence, assetData ) )
-        {
-            continue;
-        }
-
-        UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() );
-        if( CanAddSubSequence( *sequence ) )
-        {
-            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::HandleSequenceAdded, sequence, DragDropParams.Track.Get(), DragDropParams.RowIndex ) );
-            //AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, sequence, DragDropParams.Track.Get(), DragDropParams.RowIndex, TOptional<FFrameNumber>( DragDropParams.FrameNumber ) ) );
-
-            anyDropped = true;
-        }
-    }
-
-    FMovieSceneTrackEditor::EndKeying();
-
-    return anyDropped ? FReply::Handled() : FReply::Unhandled();
+    return reply;
 }
 
 //---
