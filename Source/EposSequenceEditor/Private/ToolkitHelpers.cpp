@@ -10,6 +10,7 @@
 #include "CineCameraActor.h"
 #include "Containers/ArrayBuilder.h"
 #include "GameFramework/Actor.h"
+#include "IMovieScenePlaybackClient.h"
 #include "ISequencer.h"
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
@@ -19,6 +20,7 @@
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
+#include "Tracks/IMovieSceneTransformOrigin.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
@@ -32,6 +34,24 @@
 #include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "ToolkitHelpers"
+
+FTransform GetTransformOrigin( TSharedPtr<ISequencer> Sequencer )
+{
+    FTransform TransformOrigin;
+
+    const IMovieScenePlaybackClient* Client = Sequencer->GetPlaybackClient();
+    const UObject* InstanceData = Client ? Client->GetInstanceData() : nullptr;
+    const IMovieSceneTransformOrigin* RawInterface = Cast<const IMovieSceneTransformOrigin>( InstanceData );
+
+    const bool bHasInterface = RawInterface || ( InstanceData && InstanceData->GetClass()->ImplementsInterface( UMovieSceneTransformOrigin::StaticClass() ) );
+    if( bHasInterface )
+    {
+        // Retrieve the current origin
+        TransformOrigin = RawInterface ? RawInterface->GetTransformOrigin() : IMovieSceneTransformOrigin::Execute_BP_GetTransformOrigin( InstanceData );
+    }
+
+    return TransformOrigin;
+}
 
 //static
 UMovieSceneTrack*
@@ -78,18 +98,21 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
         {
             auto TransformSection = Cast<UMovieScene3DTransformSection>( NewSection );
 
-            FVector Location = iActor->GetActorLocation();
-            FRotator Rotation = iActor->GetActorRotation();
-            FVector Scale = iActor->GetActorScale();
+            FTransform Transform = iActor->GetTransform();
 
-            if( iActor->GetRootComponent() )
+            if( USceneComponent* SceneComponent = Cast<USceneComponent>( iActor->GetRootComponent() ) )
             {
-                FTransform ActorRelativeTransform = iActor->GetRootComponent()->GetRelativeTransform();
+                Transform = iActor->GetRootComponent()->GetRelativeTransform();
 
-                Location = ActorRelativeTransform.GetTranslation();
-                Rotation = ActorRelativeTransform.GetRotation().Rotator();
-                Scale = ActorRelativeTransform.GetScale3D();
+                if( !SceneComponent->GetAttachParent() )
+                {
+                    Transform *= GetTransformOrigin( iSequencer->AsShared() ).Inverse();
+                }
             }
+
+            FVector Location = Transform.GetTranslation();
+            FRotator Rotation = Transform.GetRotation().Rotator();
+            FVector Scale = Transform.GetScale3D();
 
             TArrayView<FMovieSceneDoubleChannel*> DoubleChannels = TransformSection->GetChannelProxy().GetChannels<FMovieSceneDoubleChannel>();
 
