@@ -143,7 +143,7 @@ FCinematicBoardTrackEditor::BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder ) //o
     ioMenuBuilder.AddMenuEntry(
         FText::Join( FText::FromString( " " ), GetSubTrackName(), LOCTEXT( "TrackText", "Track" ) ),
         GetSubTrackToolTip(),
-        FSlateIcon( FAppStyle::GetAppStyleSetName(), GetSubTrackBrushName() ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), GetSubTrackBrushName() ),
         FUIAction(
             FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddSubTrackMenuEntryExecute ),
             FCanExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddSubTrackMenuEntryCanExecute )
@@ -528,7 +528,7 @@ FCinematicBoardTrackEditor::IsArrangeSections( EArrangeSections iArrangeSections
 const FSlateBrush*
 FCinematicBoardTrackEditor::GetIconBrush() const //override
 {
-    return FAppStyle::GetBrush( GetSubTrackBrushName() );
+    return FEposTracksEditorStyle::Get().GetBrush( GetSubTrackBrushName() );
 }
 
 bool
