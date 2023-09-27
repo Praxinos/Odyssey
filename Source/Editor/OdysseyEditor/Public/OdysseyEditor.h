@@ -4,9 +4,9 @@
 #pragma once
 
 #include "ToolMenuOwner.h"
+#include "OdysseyEditorTab.h"
 
 class FOdysseyEditorGUI;
-class FOdysseyEditorTab;
 class FTabManager;
 
 /**
