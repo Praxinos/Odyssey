@@ -677,6 +677,21 @@ FCinematicBoardTrackEditor::GetIconBrush() const //override
 FReply
 FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, const FSequencerDragDropParams& DragDropParams ) //override
 {
+    TSharedPtr<FDragDropOperation> operation = iDragDropEvent.GetOperation();
+    if( !operation.IsValid() || !operation->IsOfType<FAssetDragDropOp>() )
+        return FReply::Unhandled();
+
+    TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
+
+    for( const FAssetData& assetData : dragDropOp->GetAssets() )
+    {
+        UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() );
+        if( !SupportsSequence( sequence ) )
+            return FReply::Unhandled();
+    }
+
+    //---
+
     FReply reply = FSubTrackEditor::OnDrop( iDragDropEvent, DragDropParams );
 
     if( reply.IsEventHandled() )
