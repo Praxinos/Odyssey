@@ -57,18 +57,19 @@ ShotSequenceTools::cTemporarySwitchInner::~cTemporarySwitchInner()
     if( focused_id == mOriginalId )
         return;
 
-    mSequencer.PopToSequenceInstance( mOriginalId );
+    //mSequencer.PopToSequenceInstance( mOriginalId );
 
-    //if( mOriginalId == MovieSceneSequenceID::Root )
-    //{
-    //    mSequencer.ResetToNewRootSequence( *mSequencer.GetRootMovieSceneSequence() );
-    //}
-    //else
-    //{
-    //    UMovieSceneSubSection* subsection = mSequencer.FindSubSection( mOriginalId );
-    //    check( subsection );
-    //    mSequencer.FocusSequenceInstance( *subsection );
-    //}
+    if( mOriginalId == MovieSceneSequenceID::Root )
+    {
+        //mSequencer.ResetToNewRootSequence( *mSequencer.GetRootMovieSceneSequence() );
+        mSequencer.PopToSequenceInstance( mOriginalId );
+    }
+    else
+    {
+        UMovieSceneSubSection* subsection = mSequencer.FindSubSection( mOriginalId );
+        check( subsection );
+        mSequencer.FocusSequenceInstance( *subsection );
+    }
 
     FFrameRate display_rate = mSequencer.GetFocusedDisplayRate();
     FFrameRate tick_resolution = mSequencer.GetFocusedTickResolution();
