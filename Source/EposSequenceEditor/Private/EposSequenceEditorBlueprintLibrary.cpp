@@ -1224,3 +1224,44 @@ void UEposSequenceEditorBlueprintLibrary::SetLockCameraCutToViewport(bool bLock)
         Sequencer->ForceEvaluate();
     }
 }
+
+bool UEposSequenceEditorBlueprintLibrary::IsBoardInnerCameraCutLockedToViewport()
+{
+    if (CurrentSequencer.IsValid())
+    {
+        TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+        return Sequencer->IsPerspectiveViewportCameraCutEnabled();
+    }
+
+    return false;
+}
+
+void UEposSequenceEditorBlueprintLibrary::SetLockBoardInnerCameraCutToViewport(bool bLock)
+{
+    if (CurrentSequencer.IsValid())
+    {
+        TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+
+        if (bLock)
+        {
+            for(FLevelEditorViewportClient* LevelVC : GEditor->GetLevelViewportClients())
+            {
+                if (LevelVC && LevelVC->AllowsCinematicControl() && LevelVC->GetViewMode() != VMI_Unknown)
+                {
+                    LevelVC->SetActorLock(nullptr);
+                    LevelVC->bLockedCameraView = false;
+                    LevelVC->UpdateViewForLockedActor();
+                    LevelVC->Invalidate();
+                }
+            }
+            Sequencer->SetPerspectiveViewportCameraCutEnabled(true);
+        }
+        else
+        {
+            Sequencer->UpdateCameraCut(nullptr, EMovieSceneCameraCutParams());
+            Sequencer->SetPerspectiveViewportCameraCutEnabled(false);
+        }
+
+        Sequencer->ForceEvaluate();
+    }
+}
