@@ -279,23 +279,32 @@ SOdysseyLayerRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone
 {
     StaticCastSharedPtr<SOdysseyLayerStackTreeView>(OwnerTablePtr.Pin())->ResetDropZone();
 
-    EItemDropZone emptyDropZone;
 	if ( !mLayer )
-		return emptyDropZone;
+		return TOptional<EItemDropZone>();
 
 	UOdysseyLayerStack* layerStack = mLayer->GetLayerStack();
 	if ( !layerStack )
-		return emptyDropZone;
+		return TOptional<EItemDropZone>();
     //check if CanHaveChildren
     //allow Onto
     
 	TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyLayerStackDragDropOperation>();
     if (!operation)
-        return emptyDropZone;
+        return TOptional<EItemDropZone>();
 
 	UOdysseyLayerStack* operationLayerStack = operation->GetLayerStack();
 	if ( !operationLayerStack )
-		return emptyDropZone;
+		return TOptional<EItemDropZone>();
+
+	bool isNotSupported = operation->GetLayers().ContainsByPredicate(
+		[layerStack](UOdysseyLayer* iLayer)
+		{
+			return !layerStack->SupportsLayerClass(iLayer->GetClass());
+		}
+	);
+
+	if ( isNotSupported )
+		return TOptional<EItemDropZone>();
 
 	FGeometry geometry = GetTickSpaceGeometry();
 	const FVector2D localPointerPos = geometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition());
@@ -311,14 +320,14 @@ SOdysseyLayerRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone
 			case EItemDropZone::BelowItem:
 			{
 				if ( !operationLayerStack->CanMoveLayers(layers, parent) )
-					return emptyDropZone;
+					return TOptional<EItemDropZone>();
 			}
 			break;
 
 			case EItemDropZone::OntoItem:
 			{
 				if ( !operationLayerStack->CanMoveLayers(layers, parent) )
-					return emptyDropZone;
+					return TOptional<EItemDropZone>();
 			}
 			break;
 		}

@@ -219,6 +219,16 @@ SOdysseyLayerStackTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragD
     if (!rowWidget)
         return FReply::Unhandled();
 
+    bool isNotSupported = operation->GetLayers().ContainsByPredicate(
+        [this](UOdysseyLayer* iLayer)
+        {
+            return !mLayerStack->SupportsLayerClass(iLayer->GetClass());
+        }
+    );
+
+    if ( isNotSupported )
+        return FReply::Unhandled();
+
     FGeometry geometry = rowWidget->GetTickSpaceGeometry();
     const FVector2D localPointerPos = geometry.AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition());
     const FVector2D& widgetSize = geometry.GetLocalSize();
@@ -259,6 +269,16 @@ SOdysseyLayerStackTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropE
 
     TSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>>(WidgetFromItem(GetRootItems().Last()));
     if (!rowWidget)
+        return FReply::Unhandled();
+
+    bool isNotSupported = operation->GetLayers().ContainsByPredicate(
+        [this](UOdysseyLayer* iLayer)
+        {
+            return !mLayerStack->SupportsLayerClass(iLayer->GetClass());
+        }
+    );
+
+    if ( isNotSupported )
         return FReply::Unhandled();
 
     FGeometry geometry = rowWidget->GetTickSpaceGeometry();

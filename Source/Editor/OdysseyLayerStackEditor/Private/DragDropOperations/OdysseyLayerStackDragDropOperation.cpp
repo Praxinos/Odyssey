@@ -80,7 +80,7 @@ FOdysseyLayerStackDragDropOperation::GetTopmostLayers() const
 	return topmostLayers;
 }
 
-TArray< UOdysseyLayer* >
+const TArray< UOdysseyLayer* >&
 FOdysseyLayerStackDragDropOperation::GetLayers() const
 {
 	return mLayers;

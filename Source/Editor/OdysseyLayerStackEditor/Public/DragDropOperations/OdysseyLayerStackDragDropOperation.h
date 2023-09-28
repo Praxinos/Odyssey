@@ -29,7 +29,7 @@ public:
      * 
      * @return TArray< UOdysseyLayer* > 
      */
-    TArray< UOdysseyLayer* > GetLayers() const;
+    const TArray< UOdysseyLayer* >& GetLayers() const;
 
     /**
      * @brief Get the Layer Stack object

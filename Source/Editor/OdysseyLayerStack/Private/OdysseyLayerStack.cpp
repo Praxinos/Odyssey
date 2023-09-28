@@ -68,7 +68,7 @@ UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
     if (CompatibleLayers.Contains(iClass))
         return true;
 
-    UOdysseyCustomLayer* layerCDO = iClass->GetDefaultObject<UOdysseyCustomLayer>();
+    UOdysseyCustomLayer* layerCDO = UOdysseyCustomLayer::StaticClass()->GetDefaultObject<UOdysseyCustomLayer>();
     if (layerCDO && layerCDO->CompatibleLayerStacks.Contains(GetClass()))
         return true;
 
