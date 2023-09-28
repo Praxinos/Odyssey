@@ -201,6 +201,7 @@ FOdysseyAnimationMediaPlayer::GetPlayerFeatureFlag(EFeatureFlag iFlag) const
 		//Timing is now managed by the Media Framework instead of the player itself
 		//V1 is meant to disappear in the future
 		case EFeatureFlag::UsePlaybackTimingV2:
+		case EFeatureFlag::PlayerUsesInternalFlushOnSeek:
 		return true;
 
 		default:
