@@ -8,17 +8,6 @@
 
 #include "ULISLoaderModule.h"
 
-void
-UOdysseyAnimationPlayer::PostInitProperties()
-{
-    Super::PostInitProperties();
-
-    if (HasAnyFlags(RF_ClassDefaultObject))
-        return;
-
-	UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
-}
-
 FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnAnimationChanged()
 {
@@ -81,6 +70,9 @@ UOdysseyAnimationPlayer::SetAnimation(UOdysseyAnimation* iAnimation)
 	{
 		Animation = nullptr;
 		Texture = nullptr;
+
+		UOdysseyAnimation::OnImageRenderingChangedDelegate().RemoveAll(this);
+
 		mOnAnimationChanged.Broadcast();
 		mOnTextureChanged.Broadcast();
 		return;
@@ -91,6 +83,8 @@ UOdysseyAnimationPlayer::SetAnimation(UOdysseyAnimation* iAnimation)
 	Texture->UpdateResource();
 	FramesPerSecond = Animation->GetFramesPerSecond();
 	mInvalidTileMap = FULISInvalidTileMap(64, Animation->Width(), Animation->Height());
+
+	UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
 
 	mOnAnimationChanged.Broadcast();
 	mOnTextureChanged.Broadcast();
@@ -332,6 +326,9 @@ UOdysseyAnimationPlayer::UpdateTexture()
 void
 UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	if ( !Animation )
+		return;
+
 	if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
 	{
 		if (mImageRenderingComposition.Contains(iEvent.GetId()))

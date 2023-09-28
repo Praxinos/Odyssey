@@ -79,10 +79,6 @@ public:
 	void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
 	IOdysseyImageRenderer::eRenderType GetRenderType() const;
 
-public:
-	//Uobject Overrides
-	virtual void PostInitProperties() override;
-
 protected:
 	// FTickableEditorObject implementation
 	virtual void Tick(float DeltaTime) override;
