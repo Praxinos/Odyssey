@@ -31,6 +31,7 @@ public:
 public:
     virtual const FName& GetType() const override;
     virtual void Serialize(FArchive& Ar);
+    virtual void PostDuplicate() override;
 
 public:
 	//FOdysseyImageRenderingAbility overrides

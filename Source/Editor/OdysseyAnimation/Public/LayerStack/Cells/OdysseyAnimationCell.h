@@ -26,6 +26,7 @@ public:
     virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const;
 
 public:
+    virtual void PostDuplicate();
     virtual void Serialize(FArchive& Ar);
 
 private:

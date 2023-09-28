@@ -181,6 +181,8 @@ UOdysseyTextureLayerImageRaster::PostLoad()
 void
 UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 {
+    Super::PostDuplicate(bDuplicateForPIE);
+
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if (!layerStack)
         return;
@@ -189,14 +191,16 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
     if (!texture)
         return;
 
-    //At the start of this method, RasterBlock is a pointer to the original object
-    //We have to create a new owned RasterBlock to avoid blocks to be shared between several layers
-
+    //The layer a different texture with different parameters
+    //Ensure the block uses those parameters
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
     //let's ensure the format has alpha, so add alpha channel of needed
     format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+    int width = texture->Source.GetSizeX();
+    int height = texture->Source.GetSizeY();
+    RasterBlock->PostDuplicate(width, height, format);
     
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> originalBlock = RasterBlock->GetBlock();
+    /* TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> originalBlock = RasterBlock->GetBlock();
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> duplicatedBlock = MakeShared<::ULIS::FBlock>( texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
@@ -210,7 +214,7 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
     ctx.Finish();
 
     //Replace old rasterblock with an owned one
-    RasterBlock->SetBlock(duplicatedBlock);
+    RasterBlock->SetBlock(duplicatedBlock); */
 }
 
 FOdysseyMediaProvider

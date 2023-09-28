@@ -126,6 +126,16 @@ FOdysseyAnimationCellsContainer::IsCellHeadAtFrame(int iFrame) const
 }
 
 void
+FOdysseyAnimationCellsContainer::PostDuplicate()
+{
+    for ( int i = 0; i < mCells.Num(); i++ )
+    {
+        TSharedPtr<FOdysseyAnimationCell> cell = mCells[i];
+        cell->PostDuplicate();
+    }
+}
+
+void
 FOdysseyAnimationCellsContainer::Serialize(FArchive& Ar)
 {
     if ( Ar.IsTransacting() || !Ar.IsPersistent() )

@@ -37,6 +37,12 @@ FOdysseyAnimationCell::GetLength() const
 }
 
 void
+FOdysseyAnimationCell::PostDuplicate()
+{
+
+}
+
+void
 FOdysseyAnimationCell::Serialize(FArchive& Ar)
 {
     if( Ar.IsSaving() )

@@ -49,9 +49,41 @@ FOdysseyRasterBlock::GetOwner() const
 }
 
 void
-FOdysseyRasterBlock::PostDuplicate()
+FOdysseyRasterBlock::PostDuplicate(int iWidth, int iHeight, ::ULIS::eFormat iFormat)
 {
+    if ( iWidth == GetWidth() && iHeight == GetHeight() && iFormat == GetFormat() )
+    {
+        //GetBlock using old Id (having it in memory is needed when changing the Id)
+        TSharedPtr<::ULIS::FBlock> originalBlock = GetBlock();
+
+        //Set new Id
+        Id = FGuid::NewGuid();
+
+        return; //will save the block using the new Id
+    }
+
+    //GetBlock using old Id
+    TSharedPtr<::ULIS::FBlock> originalBlock = GetBlock();
+
+    //Set new Id
     Id = FGuid::NewGuid();
+
+    //Duplicate block
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(iWidth, iHeight, iFormat);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iFormat);
+    ctx.ConvertFormat(
+        *originalBlock.Get(),
+        *block.Get(),
+        ::ULIS::FRectI::Auto,
+        ::ULIS::FVec2I(0),
+        ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+    );
+    ctx.Finish();
+
+    //Set and save block using new Id
+    SetBlock(block);
+    originalBlock = nullptr;
+    block = nullptr;
 }
 
 const FGuid&
@@ -116,13 +148,24 @@ FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iB
     
     if (currentBlock)
     {
-        //remove OnCleanup Callback
-        currentBlock->OnCleanup(::ULIS::FOnCleanupData(&::ULIS::OnCleanup_FreeMemory));
+        //we have the responsability to delete the block data
+        if ( mBlockData->mBuffer.IsOwned() )
+        {
+            //Data is owned by the sharedBuffer
+            currentBlock->OnCleanup(::ULIS::FOnCleanupData());
+        }
+        else
+        {
+            //Data is not owned by the sharedBuffer, destroy it ourself
+            currentBlock->OnCleanup(::ULIS::FOnCleanupData(&::ULIS::OnCleanup_FreeMemory));
+        }
 
         //Cleanup everything else
         mBlock = nullptr;
         Width = -1;
         Height = -1;
+        delete mBlockData;
+        mBlockData = nullptr;
     }
 
     if (iBlock)

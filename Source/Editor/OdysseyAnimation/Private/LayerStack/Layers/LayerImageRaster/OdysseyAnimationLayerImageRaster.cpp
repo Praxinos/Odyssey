@@ -341,6 +341,13 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
 }
 
 void
+UOdysseyAnimationLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
+{
+    Super::PostDuplicate(bDuplicateForPIE);
+    mCellsContainer->PostDuplicate();
+}
+
+void
 UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);

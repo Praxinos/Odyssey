@@ -98,6 +98,14 @@ public:
      */
     bool IsCellHeadAtFrame(int iFrame) const;
 
+
+    /**
+     * @brief PostDuplicate
+     *
+     * @param Ar
+     */
+    void PostDuplicate();
+
     /**
      * @brief Serialize
      * 

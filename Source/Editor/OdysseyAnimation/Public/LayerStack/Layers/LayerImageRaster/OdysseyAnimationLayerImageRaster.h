@@ -44,6 +44,7 @@ public:
 public:
     // UObject overrides
 	virtual void PostInitProperties() override;
+    virtual void PostDuplicate(bool bDuplicateForPIE) override;
 
     /**
      * @brief Serialize this object

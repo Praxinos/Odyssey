@@ -71,9 +71,15 @@ public:
     UObject* GetOwner() const;
 
     /**
-    * Needs to be called in owner PostDuplicate()
+    * 
     */
-    void PostDuplicate();
+    void ConvertTo();
+
+    /**
+    * Needs to be called in owner PostDuplicate()
+    * Also converts the block to the given size and format if needed
+    */
+    void PostDuplicate(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
 
     /**
      * @brief Returns the block unique ID

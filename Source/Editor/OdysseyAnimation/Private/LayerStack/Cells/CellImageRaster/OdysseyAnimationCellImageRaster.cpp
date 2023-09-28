@@ -84,6 +84,19 @@ FOdysseyAnimationCellImageRaster::GetType() const
 }
 
 void
+FOdysseyAnimationCellImageRaster::PostDuplicate()
+{
+    FOdysseyAnimationCell::PostDuplicate();
+
+    //The cell could be duplicated in a different animation with different parameters
+    //Ensure the block uses those parameters
+    ::ULIS::eFormat format = mLayer->GetAnimation()->Format();
+    int width = mLayer->GetAnimation()->Width();
+    int height = mLayer->GetAnimation()->Height();
+    mRasterBlock->PostDuplicate(width, height, format);
+}
+
+void
 FOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
 {
     FOdysseyAnimationCell::Serialize(Ar);
