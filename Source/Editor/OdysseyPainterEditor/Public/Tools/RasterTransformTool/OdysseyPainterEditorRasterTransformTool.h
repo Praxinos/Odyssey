@@ -44,9 +44,16 @@ public:
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
 
+    virtual void Load() override;
+    virtual void Unload() override;
+
 private:
     void ConstrainToRectangle( FVector2D iPosition );
     void ConstrainToParallelogram(FVector2D iPosition);
+    ::ULIS::FRectI GetTransformAreaBoundingRect();
+    void BlendTransformAreaToPaintBlock();
+
+    void CommitTransform();
     
 private: 
     FOdysseyPaintEngine                 mPaintEngine;
@@ -55,8 +62,11 @@ private:
     UOdysseyHUDPolygon* mTransformArea;
     TArray<UOdysseyHUDHandle*> mHandles;
 
+    FOdysseyRasterBlockMutator mRasterMutator;
+
     EOdysseyTransformConstrain mAreaConstrain;
     EOdysseyTransformCapture mTransformCaptureMode;
 
     FVector2D mMouseLastReferencePoint;
+
 };
