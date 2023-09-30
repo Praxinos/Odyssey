@@ -10,16 +10,14 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorTool::~UOdysseyPainterEditorTool()
 {
-    mHUD->RemoveFromRoot();
+    delete mHUD;
 }
 
 UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
     , mIsActivated(false)
 {
-    mHUD = NewObject<UOdysseyHUDElement>(GetTransientPackage(), NAME_None, RF_Transient);
-    mHUD->AddToRoot();
-    mHUD->Init(FName("RootHUD"));
+    mHUD = new FOdysseyHUDElement( FName("RootHUD") );
 }
 
 void
@@ -167,7 +165,7 @@ UOdysseyPainterEditorTool::CreateTopTabWidget()
     return SNullWidget::NullWidget;
 }
 
-UOdysseyHUDElement* UOdysseyPainterEditorTool::GetHUD()
+FOdysseyHUDElement* UOdysseyPainterEditorTool::GetHUD()
 {
     return mHUD;
 }

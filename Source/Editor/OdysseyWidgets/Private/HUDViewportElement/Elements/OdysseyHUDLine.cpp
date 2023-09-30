@@ -4,34 +4,20 @@
 #include "OdysseyHUDLine.h"
 
 
-void UOdysseyHUDLine::Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform )
+FOdysseyHUDLine::~FOdysseyHUDLine()
 {
-    UOdysseyHUDElement::Init( iName, iTransform );
+
+}
+
+FOdysseyHUDLine::FOdysseyHUDLine(FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform /*= FTransform2D() */) :
+    FOdysseyHUDElement(iName, iTransform)
+{
     mStartPoint = mPreviousStartPoint = iStartPoint;
     mFinishPoint = mPreviousFinishPoint = iFinishPoint;
 }
 
-TSharedPtr<SWidget> UOdysseyHUDLine::CreateWidget()
-{
-    UOdysseyHUDElement::CreateWidget();
 
-    //TODO: custom widget instead of property view. Will be cleaner.
-    FPropertyEditorModule& propertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-    FDetailsViewArgs args;
-
-    mDetailsView = propertyModule.CreateDetailView(args);
-    mDetailsView->SetObject(this);
-
-    mElementsWidget->AddSlot()
-    [
-        mDetailsView->AsShared()
-    ];
-
-    return mElementsWidget;
-}
-
-void UOdysseyHUDLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if( !ioBlock )
         return;
@@ -40,12 +26,12 @@ void UOdysseyHUDLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= 
     {
         Erase(ioBlock, iTransform);
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
     }
     else
     {
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
         return;
     }
 
@@ -63,13 +49,13 @@ void UOdysseyHUDLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= 
     ioBlock->Dirty();
 }
 
-void UOdysseyHUDLine::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDLine::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if (!ioBlock)
         return;
  
     //Erase the children of this HUDElement
-    UOdysseyHUDElement::Erase(ioBlock, iTransform);
+    FOdysseyHUDElement::Erase(ioBlock, iTransform);
 
     FVector2D transformedStartPoint = mPreviousTransform.TransformPoint(mPreviousStartPoint);
     FVector2D transformedFinishPoint = mPreviousTransform.TransformPoint(mPreviousFinishPoint);

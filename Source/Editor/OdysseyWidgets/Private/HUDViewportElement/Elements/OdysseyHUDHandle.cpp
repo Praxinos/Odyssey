@@ -3,24 +3,21 @@
 
 #include "OdysseyHUDHandle.h"
 
-
-void UOdysseyHUDHandle::Init( FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FTransform2D iTransform )
+FOdysseyHUDHandle::~FOdysseyHUDHandle()
 {
-    UOdysseyHUDElement::Init( iName, iTransform );
+
+}
+
+FOdysseyHUDHandle::FOdysseyHUDHandle(FName iName, FOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FTransform2D iTransform /*= FTransform2D() */) :
+    FOdysseyHUDElement(iName, iTransform)
+{
     mParent = iParent;
     mPreviousHandleSize = mHandleSize = 2;
     mReferencePoint = iReferencePoint;
     mPreviousPosition = *mReferencePoint;
 }
 
-TSharedPtr<SWidget> UOdysseyHUDHandle::CreateWidget()
-{
-    UOdysseyHUDElement::CreateWidget();
-
-    return mElementsWidget;
-}
-
-void UOdysseyHUDHandle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDHandle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if (!ioBlock)
         return;
@@ -29,12 +26,12 @@ void UOdysseyHUDHandle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
     {
         Erase(ioBlock, iTransform);
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
     }
     else
     {
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
         return;
     }
 
@@ -50,10 +47,10 @@ void UOdysseyHUDHandle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
     ioBlock->Dirty();
 }
 
-void UOdysseyHUDHandle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDHandle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     //Erase the children of this HUDElement
-    UOdysseyHUDElement::Erase(ioBlock, iTransform);
+    FOdysseyHUDElement::Erase(ioBlock, iTransform);
 
     FVector2D transformedReferencePoint = mPreviousTransform.TransformPoint(mPreviousPosition);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
@@ -61,13 +58,13 @@ void UOdysseyHUDHandle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
     ctx.Finish();
 }
 
-void UOdysseyHUDHandle::SetPosition(FVector2D iNewPosition)
+void FOdysseyHUDHandle::SetPosition(FVector2D iNewPosition)
 {
     if( mReferencePoint )
         mReferencePoint->Set( iNewPosition.X, iNewPosition.Y );
 }
 
-FVector2D UOdysseyHUDHandle::GetPosition()
+FVector2D FOdysseyHUDHandle::GetPosition()
 {
     if( mReferencePoint )
         return *mReferencePoint;
@@ -75,9 +72,9 @@ FVector2D UOdysseyHUDHandle::GetPosition()
     return FVector2D( -1, -1 );
 }
 
-void UOdysseyHUDHandle::MouseMove( const FOdysseyPoint& iPointInTexture )
+void FOdysseyHUDHandle::MouseMove( const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyHUDElement::MouseMove(iPointInTexture);
+    FOdysseyHUDElement::MouseMove(iPointInTexture);
 
     float distSquared = FVector2D::DistSquared(*mReferencePoint, FVector2D(iPointInTexture.x, iPointInTexture.y));
     if ( mHandleSize != 5 && distSquared < 25)
@@ -92,9 +89,9 @@ void UOdysseyHUDHandle::MouseMove( const FOdysseyPoint& iPointInTexture )
     }
 }
 
-bool UOdysseyHUDHandle::OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey )
+bool FOdysseyHUDHandle::OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey )
 {
-    UOdysseyHUDElement::OnKeyDown( iPointInTexture, iKey );
+    FOdysseyHUDElement::OnKeyDown( iPointInTexture, iKey );
 
     if (iKey == EKeys::LeftMouseButton)
     {
@@ -109,9 +106,9 @@ bool UOdysseyHUDHandle::OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iK
     return false;
 }
 
-bool UOdysseyHUDHandle::OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey )
+bool FOdysseyHUDHandle::OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey )
 {
-    UOdysseyHUDElement::OnKeyUp(iPointInTexture, iKey);
+    FOdysseyHUDElement::OnKeyUp(iPointInTexture, iKey);
 
     if (iKey == EKeys::LeftMouseButton && mIsCaptured)
     {
@@ -122,9 +119,9 @@ bool UOdysseyHUDHandle::OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey
     return false;
 }
 
-void UOdysseyHUDHandle::CapturedMouseMove( const FOdysseyPoint& iPointInTexture )
+void FOdysseyHUDHandle::CapturedMouseMove( const FOdysseyPoint& iPointInTexture )
 {
-    UOdysseyHUDElement::CapturedMouseMove( iPointInTexture );
+    FOdysseyHUDElement::CapturedMouseMove( iPointInTexture );
 
     if (mIsCaptured)
     {

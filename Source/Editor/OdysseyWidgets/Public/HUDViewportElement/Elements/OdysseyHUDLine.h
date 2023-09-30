@@ -7,29 +7,27 @@
 
 #include "OdysseyHUDElement.h"
 
-#include "OdysseyHUDLine.generated.h"
-
 /////////////////////////////////////////////////////
-// UOdysseyHUDLine
-UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUDElement
+// FOdysseyHUDLine
+class ODYSSEYWIDGETS_API FOdysseyHUDLine : public FOdysseyHUDElement
 {
-    GENERATED_BODY()
+public:
+    // Destructor
+    virtual ~FOdysseyHUDLine();
+
+    //Constructor
+    FOdysseyHUDLine( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform = FTransform2D() );
 
 public:
     void Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform = FTransform2D() );
 
-//UOdysseyHUDElement overrides
+//FOdysseyHUDElement overrides
 public:
-    TSharedPtr<SWidget> CreateWidget() override;
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
-public:
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Line" )
+private:
     FVector2D mStartPoint;
-
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Line" )
     FVector2D mFinishPoint;
 
 private:

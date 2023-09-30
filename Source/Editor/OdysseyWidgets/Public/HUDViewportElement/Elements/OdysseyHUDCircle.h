@@ -7,32 +7,26 @@
 
 #include "OdysseyHUDElement.h"
 
-#include "OdysseyHUDCircle.generated.h"
-
 /////////////////////////////////////////////////////
-// UOdysseyHUDCircle
-UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDCircle : public UOdysseyHUDElement
+// FOdysseyHUDCircle
+class ODYSSEYWIDGETS_API FOdysseyHUDCircle : public FOdysseyHUDElement
 {
-    GENERATED_BODY()
-
 public:
-    void Init( FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint, FTransform2D iTransform = FTransform2D() );
-    void Init( FName iName, FVector2D iCenterPoint, int iRadius, FTransform2D iTransform = FTransform2D() );
+    // Destructor
+    virtual ~FOdysseyHUDCircle();
 
-//UOdysseyHUDElement overrides
+    //Constructor
+    FOdysseyHUDCircle( FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint, FTransform2D iTransform = FTransform2D() );
+    FOdysseyHUDCircle( FName iName, FVector2D iCenterPoint, int iRadius, FTransform2D iTransform = FTransform2D() );
+
+//FOdysseyHUDElement overrides
 public:
-    TSharedPtr<SWidget> CreateWidget() override;
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
-public:
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Circle" )
+private:
     FVector2D mCenterPoint;
-
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Circle" )
     int mRadius;
-
     FVector2D mBorderPoint;
 
 private:

@@ -5,47 +5,31 @@
 
 #include "CoreMinimal.h"
 
-#include "OdysseyHUDSlateElement.h"
-#include "IOdysseyHUDViewportElement.h"
-#include "Widgets/Layout/SScrollBox.h"
-
-#include "OdysseyHUDElement.generated.h"
+#include "Input/OdysseyPoint.h"
+#include <ULIS>
 
 /////////////////////////////////////////////////////
 // UOdysseyHUDElement
-UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDElement : public UOdysseyHUDSlateElement,
-                                              public IOdysseyHUDViewportElement
+class ODYSSEYWIDGETS_API FOdysseyHUDElement
 {
-    GENERATED_BODY()
-
 public:
     // Destructor
-    virtual ~UOdysseyHUDElement();
+    virtual ~FOdysseyHUDElement();
 
     //Constructor
-    UOdysseyHUDElement();
+    FOdysseyHUDElement(FName iName, FTransform2D iTransform = FTransform2D());
 
-
-public:     
-    void Init(FName iName, FTransform2D iTransform = FTransform2D());
-
-//UOdysseyHUDSlateElement overrides
 public:
-    TSharedPtr<SWidget> CreateWidget() override;
-
-//IOdysseyHUDViewportElement overrides
-public:
-    virtual void Invalidate() override;
-    virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
-    virtual void MouseMove( const FOdysseyPoint& iPointInTexture ) override;
-    virtual bool OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
-    virtual bool OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
-    virtual void CapturedMouseMove( const FOdysseyPoint& iPointInTexture ) override;
+    virtual void Invalidate();
+    virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D());
+    virtual void MouseMove( const FOdysseyPoint& iPointInTexture );
+    virtual bool OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey );
+    virtual bool OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey );
+    virtual void CapturedMouseMove( const FOdysseyPoint& iPointInTexture );
     virtual void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D());
 
 public:
-    void AddElement( UOdysseyHUDElement* iElementToAdd );
+    void AddElement( FOdysseyHUDElement* iElementToAdd );
     void EmptyHUDElements();
     bool IsInvalid();
     bool IsCaptured();
@@ -56,8 +40,16 @@ private:
 
 
 protected:
-    TMap<FString, UOdysseyHUDElement*> mElements;
+    FName mName;
+
+    TMap<FString, FOdysseyHUDElement*> mElements;
     TSharedPtr<SScrollBox> mElementsWidget;
+
+    /** The previous transform applied to the element*/
+    FTransform2D mPreviousTransform;
+
+    /** If this element is invalid, then, we'll need to redraw it*/
+    bool mIsInvalid;
 
     /** If this element is captured by mouse or keyboard shortcut, then the associated viewport shouldn't do anything else than manipulating this HUD */
     bool mIsCaptured;

@@ -3,35 +3,19 @@
 
 #include "OdysseyHUDRectangle.h"
 
-
-void UOdysseyHUDRectangle::Init( FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint, FTransform2D iTransform )
+FOdysseyHUDRectangle::~FOdysseyHUDRectangle()
 {
-    UOdysseyHUDElement::Init( iName, iTransform );
+
+}
+
+FOdysseyHUDRectangle::FOdysseyHUDRectangle(FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint, FTransform2D iTransform /*= FTransform2D() */) :
+    FOdysseyHUDElement(iName, iTransform)
+{
     mTopLeftPoint = mPreviousTopLeftPoint = iTopLeftPoint;
     mBottomRightPoint = mPreviousBottomRightPoint = iBottomRightPoint;
 }
 
-TSharedPtr<SWidget> UOdysseyHUDRectangle::CreateWidget()
-{
-    UOdysseyHUDElement::CreateWidget();
-
-    //TODO: custom widget instead of property view. Will be cleaner.
-    FPropertyEditorModule& propertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-    FDetailsViewArgs args;
-
-    mDetailsView = propertyModule.CreateDetailView(args);
-    mDetailsView->SetObject(this);
-
-    mElementsWidget->AddSlot()
-    [
-        mDetailsView->AsShared()
-    ];
-
-    return mElementsWidget;
-}
-
-void UOdysseyHUDRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if( !ioBlock )
         return;
@@ -40,12 +24,12 @@ void UOdysseyHUDRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform
     {
         Erase(ioBlock, iTransform);
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
     }
     else
     {
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
         return;
     }
 
@@ -63,13 +47,13 @@ void UOdysseyHUDRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform
     ioBlock->Dirty();
 }
 
-void UOdysseyHUDRectangle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDRectangle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if (!ioBlock)
         return;
  
     //Erase the children of this HUDElement
-    UOdysseyHUDElement::Erase(ioBlock, iTransform);
+    FOdysseyHUDElement::Erase(ioBlock, iTransform);
 
     FVector2D transformedTopLeftPoint = mPreviousTransform.TransformPoint(mPreviousTopLeftPoint);
     FVector2D transformedBottomRightPoint = mPreviousTransform.TransformPoint(mPreviousBottomRightPoint);

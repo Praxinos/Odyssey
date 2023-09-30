@@ -7,21 +7,19 @@
 
 #include "OdysseyHUDElement.h"
 
-#include "OdysseyHUDHandle.generated.h"
-
 /////////////////////////////////////////////////////
-// UOdysseyHUDHandle
-UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDHandle : public UOdysseyHUDElement
+// FOdysseyHUDHandle
+class ODYSSEYWIDGETS_API FOdysseyHUDHandle : public FOdysseyHUDElement
 {
-    GENERATED_BODY()
-
 public:
-    void Init(FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FTransform2D iTransform = FTransform2D());
+    // Destructor
+    virtual ~FOdysseyHUDHandle();
 
-//UOdysseyHUDElement overrides
+    //Constructor
+    FOdysseyHUDHandle( FName iName, FOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FTransform2D iTransform = FTransform2D() );
+
+//FOdysseyHUDElement overrides
 public:
-    TSharedPtr<SWidget> CreateWidget() override;
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     virtual void MouseMove( const FOdysseyPoint& iPointInTexture ) override;
     virtual bool OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
@@ -34,13 +32,12 @@ public:
     FVector2D GetPosition();
 
 private:
-    UOdysseyHUDElement* mParent;
+    FOdysseyHUDElement* mParent;
 
     FVector2D* mReferencePoint;
     FVector2D mPreviousPosition;
     int mPreviousHandleSize;
 
-public:
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Handle" )
+private:
     int mHandleSize;
 };

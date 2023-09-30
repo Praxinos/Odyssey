@@ -35,33 +35,19 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
 {
     if (!mTransformArea) //Creating a zone for the transform
     {
-        mTransformArea = NewObject<UOdysseyHUDPolygon>(GetTransientPackage(), NAME_None, RF_Transient);
-        mTransformArea->AddToRoot();
-        mHUD->AddElement(mTransformArea);
-
         TArray<FVector2D> areaPoints;
         for( int i = 0; i < 4; i++ )
         {
             areaPoints.Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
         }
 
-        mTransformArea->Init(FName("TransformArea"), areaPoints );
+        mTransformArea = new FOdysseyHUDPolygon(FName("TransformArea"), areaPoints );
+        mHUD->AddElement(mTransformArea);
 
-        UOdysseyHUDHandle* handleTopLeft = NewObject<UOdysseyHUDHandle>(GetTransientPackage(), NAME_None, RF_Transient);
-        handleTopLeft->AddToRoot();
-        handleTopLeft->Init(FName("handleTopLeft"), mTransformArea, &(mTransformArea->mPoints[0]));
-
-        UOdysseyHUDHandle* handleTopRight = NewObject<UOdysseyHUDHandle>(GetTransientPackage(), NAME_None, RF_Transient);
-        handleTopRight->AddToRoot();
-        handleTopRight->Init(FName("handleTopRight"), mTransformArea, &(mTransformArea->mPoints[1]));
-
-        UOdysseyHUDHandle* handleBottomLeft = NewObject<UOdysseyHUDHandle>(GetTransientPackage(), NAME_None, RF_Transient);
-        handleBottomLeft->AddToRoot();
-        handleBottomLeft->Init(FName("handleBottomLeft"), mTransformArea, &(mTransformArea->mPoints[2]));
-
-        UOdysseyHUDHandle* handleBottomRight = NewObject<UOdysseyHUDHandle>(GetTransientPackage(), NAME_None, RF_Transient);
-        handleBottomRight->AddToRoot();
-        handleBottomRight->Init(FName("handleBottomRight"), mTransformArea, &(mTransformArea->mPoints[3]));
+        FOdysseyHUDHandle* handleTopLeft = new FOdysseyHUDHandle(FName("handleTopLeft"), mTransformArea, &(mTransformArea->GetPoints()[0]));
+        FOdysseyHUDHandle* handleTopRight = new FOdysseyHUDHandle(FName("handleTopRight"), mTransformArea, &(mTransformArea->GetPoints()[1]));
+        FOdysseyHUDHandle* handleBottomLeft = new FOdysseyHUDHandle(FName("handleBottomLeft"), mTransformArea, &(mTransformArea->GetPoints()[2]));
+        FOdysseyHUDHandle* handleBottomRight = new FOdysseyHUDHandle(FName("handleBottomRight"), mTransformArea, &(mTransformArea->GetPoints()[3]));
 
         mTransformArea->AddElement(handleTopLeft);
         mTransformArea->AddElement(handleTopRight);
@@ -79,7 +65,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
     {
         return true;
     }
-    else if( FGeomTools2D::IsPointInPolygon( FVector2D( iPointInTexture.x, iPointInTexture.y ), mTransformArea->mPoints ) ) //Handling clicking inside the transform zone (for dragging it)
+    else if( FGeomTools2D::IsPointInPolygon( FVector2D( iPointInTexture.x, iPointInTexture.y ), mTransformArea->GetPoints() ) ) //Handling clicking inside the transform zone (for dragging it)
     {
         mTransformCaptureMode = EOdysseyTransformCapture::Inside;
         mMouseLastReferencePoint = FVector2D( iPointInTexture.x, iPointInTexture.y );
@@ -154,11 +140,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
             ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
             
             if( mReferenceBlock )
-            {
                 return true;
-                //mReferenceBlock.Reset();
-                //mReferenceBlock = nullptr;
-            }
 
             mReferenceBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
 
@@ -278,16 +260,16 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToParallelogram(FVector2
 {
     if( mTransformArea )
     {   
-        int minX = mTransformArea->mPoints[0].X;
-        int maxX = mTransformArea->mPoints[0].X;
-        int minY = mTransformArea->mPoints[0].Y;
-        int maxY = mTransformArea->mPoints[0].Y;
-        for( int i = 1; i < mTransformArea->mPoints.Num(); i++ )
+        int minX = mTransformArea->GetPoints()[0].X;
+        int maxX = mTransformArea->GetPoints()[0].X;
+        int minY = mTransformArea->GetPoints()[0].Y;
+        int maxY = mTransformArea->GetPoints()[0].Y;
+        for( int i = 1; i < mTransformArea->GetPoints().Num(); i++ )
         {
-            minX = FMath::Min( minX, mTransformArea->mPoints[i].X );
-            maxX = FMath::Max( maxX, mTransformArea->mPoints[i].X );
-            minY = FMath::Min( minY, mTransformArea->mPoints[i].Y );
-            maxY = FMath::Max( maxY, mTransformArea->mPoints[i].Y );
+            minX = FMath::Min( minX, mTransformArea->GetPoints()[i].X );
+            maxX = FMath::Max( maxX, mTransformArea->GetPoints()[i].X );
+            minY = FMath::Min( minY, mTransformArea->GetPoints()[i].Y );
+            maxY = FMath::Max( maxY, mTransformArea->GetPoints()[i].Y );
         }
         return ::ULIS::FRectI::FromMinMax( minX, minY, maxX, maxY );
     }

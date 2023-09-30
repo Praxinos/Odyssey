@@ -7,32 +7,25 @@
 
 #include "OdysseyHUDElement.h"
 
-#include "OdysseyHUDBezier.generated.h"
-
 /////////////////////////////////////////////////////
-// UOdysseyHUDBezier
-UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDBezier : public UOdysseyHUDElement
+// FOdysseyHUDBezier
+class ODYSSEYWIDGETS_API FOdysseyHUDBezier : public FOdysseyHUDElement
 {
-    GENERATED_BODY()
-
 public:
-    void Init( FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint, FTransform2D iTransform = FTransform2D() );
+    // Destructor
+    virtual ~FOdysseyHUDBezier();
 
-//UOdysseyHUDElement overrides
+    //Constructor
+    FOdysseyHUDBezier(FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint, FTransform2D iTransform = FTransform2D());
+
+//FOdysseyHUDElement overrides
 public:
-    TSharedPtr<SWidget> CreateWidget() override;
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
-public:
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Bezier" )
+private:
     FVector2D mStartPoint;
-
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Bezier" )
     FVector2D mEndPoint;
-
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Bezier" )
     FVector2D mControlPoint;
 
 private:

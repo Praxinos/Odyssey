@@ -3,33 +3,18 @@
 
 #include "OdysseyHUDPolygon.h"
 
-void UOdysseyHUDPolygon::Init( FName iName, TArray<FVector2D> iPoints, FTransform2D iTransform )
+FOdysseyHUDPolygon::~FOdysseyHUDPolygon()
 {
-    UOdysseyHUDElement::Init( iName, iTransform );
+
+}
+
+FOdysseyHUDPolygon::FOdysseyHUDPolygon(FName iName, TArray<FVector2D> iPoints, FTransform2D iTransform /*= FTransform2D() */) :
+    FOdysseyHUDElement(iName, iTransform)
+{
     mPoints = mPreviousPoints = iPoints;
 }
 
-TSharedPtr<SWidget> UOdysseyHUDPolygon::CreateWidget()
-{
-    UOdysseyHUDElement::CreateWidget();
-
-    //TODO: custom widget instead of property view. Will be cleaner.
-    FPropertyEditorModule& propertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-    FDetailsViewArgs args;
-
-    mDetailsView = propertyModule.CreateDetailView(args);
-    mDetailsView->SetObject(this);
-
-    mElementsWidget->AddSlot()
-    [
-        mDetailsView->AsShared()
-    ];
-
-    return mElementsWidget;
-}
-
-void UOdysseyHUDPolygon::Draw( ::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/ )
+void FOdysseyHUDPolygon::Draw( ::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/ )
 {
     if( !ioBlock )
         return;
@@ -38,12 +23,12 @@ void UOdysseyHUDPolygon::Draw( ::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     {
         Erase(ioBlock, iTransform);
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
     }
     else
     {
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
         return;
     }
 
@@ -67,13 +52,13 @@ void UOdysseyHUDPolygon::Draw( ::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     ioBlock->Dirty();
 }
 
-void UOdysseyHUDPolygon::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDPolygon::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if (!ioBlock)
         return;
  
     //Erase the children of this HUDElement
-    UOdysseyHUDElement::Erase(ioBlock, iTransform);
+    FOdysseyHUDElement::Erase(ioBlock, iTransform);
 
     std::vector<::ULIS::FVec2I> vectors;
     for ( int i = 0; i < mPreviousPoints.Num(); i++ )
@@ -87,4 +72,9 @@ void UOdysseyHUDPolygon::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
     ctx.DrawPolygon(*(ioBlock), vectors, ::ULIS::FColor::RGBA8(0, 0, 0, 0));
     ctx.Finish();
+}
+
+TArray<FVector2D>& FOdysseyHUDPolygon::GetPoints()
+{
+    return mPoints;
 }

@@ -3,44 +3,28 @@
 
 #include "OdysseyHUDCircle.h"
 
-
-void UOdysseyHUDCircle::Init( FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint, FTransform2D iTransform )
+FOdysseyHUDCircle::~FOdysseyHUDCircle()
 {
-    UOdysseyHUDElement::Init( iName, iTransform );
+
+}
+
+FOdysseyHUDCircle::FOdysseyHUDCircle(FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint, FTransform2D iTransform /*= FTransform2D() */) :
+    FOdysseyHUDElement(iName, iTransform)
+{
     mCenterPoint = mPreviousCenterPoint = iCenterPoint;
     mBorderPoint = mPreviousBorderPoint = iBorderPoint;
-    mRadius = mPreviousRadius = (int)::ULIS::FMath::Dist( mCenterPoint.X, mCenterPoint.Y, mBorderPoint.X, mBorderPoint.Y );
+    mRadius = mPreviousRadius = (int)::ULIS::FMath::Dist(mCenterPoint.X, mCenterPoint.Y, mBorderPoint.X, mBorderPoint.Y);
 }
 
-void UOdysseyHUDCircle::Init( FName iName, FVector2D iCenterPoint, int iRadius, FTransform2D iTransform )
+FOdysseyHUDCircle::FOdysseyHUDCircle(FName iName, FVector2D iCenterPoint, int iRadius, FTransform2D iTransform /*= FTransform2D() */) :
+    FOdysseyHUDElement(iName, iTransform)
 {
-    UOdysseyHUDElement::Init( iName, iTransform );
     mCenterPoint = mPreviousCenterPoint = iCenterPoint;
     mRadius = mPreviousRadius = iRadius;
-    mBorderPoint = FVector2D( mCenterPoint.X + iRadius, mCenterPoint.Y );
+    mBorderPoint = FVector2D(mCenterPoint.X + iRadius, mCenterPoint.Y);
 }
 
-TSharedPtr<SWidget> UOdysseyHUDCircle::CreateWidget()
-{
-    UOdysseyHUDElement::CreateWidget();
-
-    //TODO: custom widget instead of property view. Will be cleaner.
-    FPropertyEditorModule& propertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-    FDetailsViewArgs args;
-
-    mDetailsView = propertyModule.CreateDetailView(args);
-    mDetailsView->SetObject(this);
-
-    mElementsWidget->AddSlot()
-    [
-        mDetailsView->AsShared()
-    ];
-
-    return mElementsWidget;
-}
-
-void UOdysseyHUDCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if( !ioBlock )
         return;
@@ -49,12 +33,12 @@ void UOdysseyHUDCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
     {
         Erase(ioBlock, iTransform);
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
     }
     else
     {
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
         return;
     }
 
@@ -75,13 +59,13 @@ void UOdysseyHUDCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
     ioBlock->Dirty();
 }
 
-void UOdysseyHUDCircle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDCircle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if (!ioBlock)
         return;
  
     //Erase the children of this HUDElement
-    UOdysseyHUDElement::Erase(ioBlock, iTransform);
+    FOdysseyHUDElement::Erase(ioBlock, iTransform);
 
     FVector2D previousTransformedCenterPoint = mPreviousTransform.TransformPoint(mPreviousCenterPoint);
     FVector2D previousTransformedBorderPoint = mPreviousTransform.TransformPoint(mPreviousBorderPoint);

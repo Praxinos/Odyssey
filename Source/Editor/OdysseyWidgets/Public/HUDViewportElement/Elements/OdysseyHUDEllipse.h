@@ -7,33 +7,26 @@
 
 #include "OdysseyHUDElement.h"
 
-#include "OdysseyHUDEllipse.generated.h"
-
 /////////////////////////////////////////////////////
-// UOdysseyHUDCircle
-UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDEllipse : public UOdysseyHUDElement
+// FOdysseyHUDEllipse
+class ODYSSEYWIDGETS_API FOdysseyHUDEllipse : public FOdysseyHUDElement
 {
-    GENERATED_BODY()
-
 public:
-    void Init( FName iName, FVector2D iCenterPoint, FVector2D iEndPoint, FTransform2D iTransform = FTransform2D() );
-    void Init( FName iName, FVector2D iCenterPoint, int iEllipseAaxis, int EllipseBaxis, FTransform2D iTransform = FTransform2D() );
+    // Destructor
+    virtual ~FOdysseyHUDEllipse();
 
-//UOdysseyHUDElement overrides
+    //Constructor
+    FOdysseyHUDEllipse( FName iName, FVector2D iCenterPoint, FVector2D iEndPoint, FTransform2D iTransform = FTransform2D() );
+    FOdysseyHUDEllipse( FName iName, FVector2D iCenterPoint, int iEllipseAaxis, int iEllipseBaxis, FTransform2D iTransform = FTransform2D() );
+
+//FOdysseyHUDElement overrides
 public:
-    TSharedPtr<SWidget> CreateWidget() override;
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
-public:
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Ellipse" )
+private:
     FVector2D mCenterPoint;
-
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Ellipse" )
     int mEllipseAaxis;
-
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Ellipse" )
     int mEllipseBaxis;
 
     FVector2D mBorderPoint;

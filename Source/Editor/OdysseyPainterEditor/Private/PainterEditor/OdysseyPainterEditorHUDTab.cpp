@@ -53,11 +53,6 @@ FOdysseyPainterEditorHUDTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorHUDTab::CreateWidget()
 {   
-    if (mEditor->GetSelectedTool() && mEditor->GetSelectedTool()->GetHUD())
-    {
-        return mEditor->GetSelectedTool()->GetHUD()->CreateWidget();
-    }
-    
     return SNullWidget::NullWidget;
 }
 

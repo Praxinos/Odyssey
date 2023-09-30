@@ -3,46 +3,30 @@
 
 #include "OdysseyHUDEllipse.h"
 
-
-void UOdysseyHUDEllipse::Init( FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint, FTransform2D iTransform )
+FOdysseyHUDEllipse::~FOdysseyHUDEllipse()
 {
-    UOdysseyHUDElement::Init( iName, iTransform );
+
+}
+
+FOdysseyHUDEllipse::FOdysseyHUDEllipse(FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint, FTransform2D iTransform /*= FTransform2D() */) :
+    FOdysseyHUDElement(iName, iTransform)
+{
     mCenterPoint = mPreviousCenterPoint = iCenterPoint;
     mBorderPoint = mPreviousBorderPoint = iBorderPoint;
     mEllipseAaxis = mPreviousEllipseAaxis = (int)(mCenterPoint.X - mBorderPoint.X);
     mEllipseBaxis = mPreviousEllipseBaxis = (int)(mCenterPoint.Y - mBorderPoint.Y);
 }
 
-void UOdysseyHUDEllipse::Init( FName iName, FVector2D iCenterPoint, int iEllipseAaxis, int iEllipseBaxis, FTransform2D iTransform )
+FOdysseyHUDEllipse::FOdysseyHUDEllipse(FName iName, FVector2D iCenterPoint, int iEllipseAaxis, int iEllipseBaxis, FTransform2D iTransform /*= FTransform2D() */) :
+    FOdysseyHUDElement(iName, iTransform)
 {
-    UOdysseyHUDElement::Init( iName, iTransform );
     mCenterPoint = mPreviousCenterPoint = iCenterPoint;
     mEllipseAaxis = mPreviousEllipseAaxis = iEllipseAaxis;
     mEllipseBaxis = mPreviousEllipseBaxis = iEllipseBaxis;
-    mBorderPoint = mPreviousBorderPoint = FVector2D( iCenterPoint.X + iEllipseAaxis, iCenterPoint.Y + iEllipseBaxis);
+    mBorderPoint = mPreviousBorderPoint = FVector2D(iCenterPoint.X + iEllipseAaxis, iCenterPoint.Y + iEllipseBaxis);
 }
 
-TSharedPtr<SWidget> UOdysseyHUDEllipse::CreateWidget()
-{
-    UOdysseyHUDElement::CreateWidget();
-
-    //TODO: custom widget instead of property view. Will be cleaner.
-    FPropertyEditorModule& propertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-    FDetailsViewArgs args;
-
-    mDetailsView = propertyModule.CreateDetailView(args);
-    mDetailsView->SetObject(this);
-
-    mElementsWidget->AddSlot()
-    [
-        mDetailsView->AsShared()
-    ];
-
-    return mElementsWidget;
-}
-
-void UOdysseyHUDEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if( !ioBlock )
         return;
@@ -51,12 +35,12 @@ void UOdysseyHUDEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
     {
         Erase(ioBlock, iTransform);
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
     }
     else
     {
         //Draw the children of this HUDElement
-        UOdysseyHUDElement::Draw(ioBlock, iTransform);
+        FOdysseyHUDElement::Draw(ioBlock, iTransform);
         return;
     }
 
@@ -78,13 +62,13 @@ void UOdysseyHUDEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
     ioBlock->Dirty();
 }
 
-void UOdysseyHUDEllipse::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDEllipse::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     if (!ioBlock)
         return;
  
     //Erase the children of this HUDElement
-    UOdysseyHUDElement::Erase(ioBlock, iTransform);
+    FOdysseyHUDElement::Erase(ioBlock, iTransform);
 
     FVector2D previousTransformedCenterPoint = mPreviousTransform.TransformPoint(mPreviousCenterPoint);
     FVector2D previousTransformedBorderPoint = mPreviousTransform.TransformPoint(mPreviousBorderPoint);

@@ -7,26 +7,26 @@
 
 #include "OdysseyHUDElement.h"
 
-#include "OdysseyHUDPolygon.generated.h"
-
 /////////////////////////////////////////////////////
-// UOdysseyHUDPolygon
-UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDPolygon : public UOdysseyHUDElement
+// FOdysseyHUDPolygon
+class ODYSSEYWIDGETS_API FOdysseyHUDPolygon : public FOdysseyHUDElement
 {
-    GENERATED_BODY()
-
 public:
-    void Init( FName iName, TArray<FVector2D> iPoints, FTransform2D iTransform = FTransform2D() );
+    // Destructor
+    virtual ~FOdysseyHUDPolygon();
 
-//UOdysseyHUDElement overrides
+    //Constructor
+    FOdysseyHUDPolygon( FName iName, TArray<FVector2D> iPoints, FTransform2D iTransform = FTransform2D() );
+
+//FOdysseyHUDElement overrides
 public:
-    TSharedPtr<SWidget> CreateWidget() override;
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
 public:
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Polygon" )
+    TArray<FVector2D>& GetPoints();
+
+private:
     TArray<FVector2D> mPoints;
 
 private:

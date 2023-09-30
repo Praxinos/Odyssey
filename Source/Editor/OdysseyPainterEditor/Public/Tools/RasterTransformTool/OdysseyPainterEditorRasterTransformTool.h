@@ -6,8 +6,8 @@
 #include "CoreMinimal.h"
 #include "OdysseyPainterEditorRasterTransformTool.generated.h"
 
-class UOdysseyHUDPolygon;
-class UOdysseyHUDHandle;
+class FOdysseyHUDPolygon;
+class FOdysseyHUDHandle;
 
 enum class EOdysseyTransformConstrain
 {
@@ -64,8 +64,8 @@ private:
     FOdysseyPaintEngine                 mPaintEngine;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mReferenceBlock;
 
-    UOdysseyHUDPolygon* mTransformArea;
-    TArray<UOdysseyHUDHandle*> mHandles;
+    FOdysseyHUDPolygon* mTransformArea;
+    TArray<FOdysseyHUDHandle*> mHandles;
 
     FOdysseyRasterBlockMutator mRasterMutator;
 

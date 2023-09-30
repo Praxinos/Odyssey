@@ -3,38 +3,20 @@
 
 #include "OdysseyHUDElement.h"
 
-UOdysseyHUDElement::~UOdysseyHUDElement()
+FOdysseyHUDElement::~FOdysseyHUDElement()
 {
     mElements.Empty();
 }
 
-UOdysseyHUDElement::UOdysseyHUDElement()
+FOdysseyHUDElement::FOdysseyHUDElement(FName iName, FTransform2D iTransform) :
+    mName( iName ),
+    mPreviousTransform(iTransform),
+    mIsInvalid( true ),
+    mIsCaptured( false )
 {
 }
 
-void UOdysseyHUDElement::Init(FName iName, FTransform2D iTransform /*= FTransform2D()*/ )
-{
-    mName = iName;
-    mIsInvalid = true;
-    mIsCaptured = false;
-    mPreviousTransform = iTransform;
-}
-
-TSharedPtr<SWidget> UOdysseyHUDElement::CreateWidget()
-{
-    mElementsWidget = SNew(SScrollBox);
-    for (auto it = mElements.CreateConstIterator(); it; ++it)
-    {
-        mElementsWidget->AddSlot()
-        [
-            it->Value->CreateWidget().ToSharedRef()
-        ];
-    }
-
-    return mElementsWidget;
-}
-
-void UOdysseyHUDElement::Invalidate()
+void FOdysseyHUDElement::Invalidate()
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -44,7 +26,7 @@ void UOdysseyHUDElement::Invalidate()
     mIsInvalid = true;
 }
 
-void UOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -54,7 +36,7 @@ void UOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
     mIsInvalid = false;
 }
 
-void UOdysseyHUDElement::MouseMove( const FOdysseyPoint& iPointInTexture )
+void FOdysseyHUDElement::MouseMove( const FOdysseyPoint& iPointInTexture )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -62,7 +44,7 @@ void UOdysseyHUDElement::MouseMove( const FOdysseyPoint& iPointInTexture )
     }
 }
 
-bool UOdysseyHUDElement::OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey )
+bool FOdysseyHUDElement::OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -73,7 +55,7 @@ bool UOdysseyHUDElement::OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey i
     return false;
 }
 
-bool UOdysseyHUDElement::OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey )
+bool FOdysseyHUDElement::OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -84,7 +66,7 @@ bool UOdysseyHUDElement::OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKe
     return false;
 }
 
-void UOdysseyHUDElement::CapturedMouseMove( const FOdysseyPoint& iPointInTexture )
+void FOdysseyHUDElement::CapturedMouseMove( const FOdysseyPoint& iPointInTexture )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -93,7 +75,7 @@ void UOdysseyHUDElement::CapturedMouseMove( const FOdysseyPoint& iPointInTexture
     }
 }
 
-void UOdysseyHUDElement::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDElement::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -102,7 +84,7 @@ void UOdysseyHUDElement::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     }
 }
 
-void UOdysseyHUDElement::AddElement(UOdysseyHUDElement* iElementToAdd)
+void FOdysseyHUDElement::AddElement(FOdysseyHUDElement* iElementToAdd)
 {
     if( iElementToAdd != nullptr )
         mElements.Emplace( iElementToAdd->mName.ToString(), iElementToAdd );
@@ -110,23 +92,23 @@ void UOdysseyHUDElement::AddElement(UOdysseyHUDElement* iElementToAdd)
     mIsInvalid = false;
 }
 
-void UOdysseyHUDElement::EmptyHUDElements()
+void FOdysseyHUDElement::EmptyHUDElements()
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
         it->Value->EmptyHUDElements();
-        it->Value->RemoveFromRoot();
+        delete it->Value;
     }
     mElements.Empty();
 }
 
-bool UOdysseyHUDElement::IsInvalid()
+bool FOdysseyHUDElement::IsInvalid()
 {
     InternalIsInvalid( mIsInvalid );
     return mIsInvalid;
 }
 
-bool UOdysseyHUDElement::IsCaptured()
+bool FOdysseyHUDElement::IsCaptured()
 {
     bool isCaptured = mIsCaptured;
 
@@ -134,7 +116,7 @@ bool UOdysseyHUDElement::IsCaptured()
     return isCaptured;
 }
 
-void UOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
+void FOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
 {
     if( ioIsInvalid )
         return;
@@ -153,7 +135,7 @@ void UOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
     }
 }
 
-void UOdysseyHUDElement::InternalIsCaptured(bool& ioIsCaptured)
+void FOdysseyHUDElement::InternalIsCaptured(bool& ioIsCaptured)
 {
     if (ioIsCaptured)
         return;

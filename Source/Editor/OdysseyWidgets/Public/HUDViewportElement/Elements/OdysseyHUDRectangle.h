@@ -7,29 +7,24 @@
 
 #include "OdysseyHUDElement.h"
 
-#include "OdysseyHUDRectangle.generated.h"
-
 /////////////////////////////////////////////////////
-// UOdysseyHUDRectangle
-UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDRectangle : public UOdysseyHUDElement
+// FOdysseyHUDRectangle
+class ODYSSEYWIDGETS_API FOdysseyHUDRectangle : public FOdysseyHUDElement
 {
-    GENERATED_BODY()
-
 public:
-    void Init( FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint, FTransform2D iTransform = FTransform2D() );
+    // Destructor
+    virtual ~FOdysseyHUDRectangle();
 
-//UOdysseyHUDElement overrides
+    //Constructor
+    FOdysseyHUDRectangle( FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint, FTransform2D iTransform = FTransform2D() );
+
+//FOdysseyHUDElement overrides
 public:
-    TSharedPtr<SWidget> CreateWidget() override;
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
-public:
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Rectangle" )
+private:
     FVector2D mTopLeftPoint;
-
-    UPROPERTY( EditAnywhere, Category="Odyssey HUD Rectangle" )
     FVector2D mBottomRightPoint;
 
 private:
