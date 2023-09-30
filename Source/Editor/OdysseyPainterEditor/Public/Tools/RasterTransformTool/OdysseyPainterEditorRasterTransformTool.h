@@ -43,6 +43,7 @@ public:
     virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual bool OnKeyUp(const FKey& iKey);
 
     virtual void Load() override;
     virtual void Unload() override;
@@ -54,7 +55,11 @@ private:
     void BlendTransformAreaToPaintBlock();
 
     void CommitTransform();
-    
+    void AbortTransform();
+
+    //Resets the tool and its HUD
+    void ClearTransform();
+
 private: 
     FOdysseyPaintEngine                 mPaintEngine;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mReferenceBlock;

@@ -222,6 +222,22 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
     return isHandled;
 }
 
+bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
+{
+    if( iKey == EKeys::Enter || iKey == EKeys::SpaceBar )
+    {
+        CommitTransform();
+        return true;
+    }
+    else if( iKey == EKeys::Escape )
+    {
+        AbortTransform();
+        return true;
+    }
+
+    return false;
+}
+
 void UOdysseyPainterEditorRasterTransformTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
@@ -229,16 +245,7 @@ void UOdysseyPainterEditorRasterTransformTool::Load()
 
 void UOdysseyPainterEditorRasterTransformTool::Unload()
 {
-    if (mReferenceBlock)
-    {
-        mReferenceBlock.Reset();
-        mReferenceBlock = nullptr;
-    }
-    mHandles.Empty();
-    mTransformArea = nullptr;
-    mAreaConstrain = EOdysseyTransformConstrain::Rectangle;
-    mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
-    CommitTransform();
+    AbortTransform();
     UOdysseyPainterEditorTool::Unload();
 }
 
@@ -333,11 +340,39 @@ void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
 
 void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
 {
-    GEditor->BeginTransaction(LOCTEXT("CommitTransform", "Transform"));
-    mRasterMutator.Commit();
-    mPaintEngine.Commit( FOdysseyBlendParameters() );
-    GEditor->EndTransaction();
-    mRasterMutator.SetRasterBlock( nullptr );
+    if( mRasterMutator.GetRasterBlock() != nullptr )
+    {
+        GEditor->BeginTransaction(LOCTEXT("CommitTransform", "Transform"));
+        mRasterMutator.Commit();
+        mPaintEngine.Commit(FOdysseyBlendParameters());
+        GEditor->EndTransaction();
+        mRasterMutator.SetRasterBlock(nullptr);
+    }
+    ClearTransform();
+}
+
+void UOdysseyPainterEditorRasterTransformTool::AbortTransform()
+{
+    if (mRasterMutator.GetRasterBlock() != nullptr)
+    {
+        mRasterMutator.Abort();
+        mRasterMutator.SetRasterBlock(nullptr);
+    }
+    ClearTransform();
+}
+
+void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
+{
+    if (mReferenceBlock)
+    {
+        mReferenceBlock.Reset();
+        mReferenceBlock = nullptr;
+    }
+    mHandles.Empty();
+    mTransformArea = nullptr;
+    mAreaConstrain = EOdysseyTransformConstrain::Rectangle;
+    mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
+    mEditor->HUDSystem()->ClearHUDSurface();
 }
 
 #undef LOCTEXT_NAMESPACE
