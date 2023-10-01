@@ -15,6 +15,7 @@
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyEditorLayoutBuilder.h"
+#include "BrushContext/OdysseyPainterEditorBrushContext.h"
 
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoGroup.h"
@@ -69,6 +70,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
 	, mPaintColor(::ULIS::FColor::Black)
 	, mRasterDrawingTool(nullptr)
     , mRasterTransformTool(nullptr)
+    , mRasterLineTool(nullptr)
 	, mVectorPrimitiveDrawingTool(nullptr)
     , mVectorPathDrawingTool(nullptr)
     , mVectorPathEditTool(nullptr)
@@ -130,6 +132,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
     mVectorPathDrawingTool->BindShortcuts(iToolkit);
     mVectorPathEditTool->BindShortcuts(iToolkit);
     mRasterTransformTool->BindShortcuts(iToolkit);
+    mRasterLineTool->BindShortcuts(iToolkit);
 	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
 	mVectorPathCutTool->BindShortcuts(iToolkit);
 	mVectorPickTool->BindShortcuts(iToolkit);
@@ -162,6 +165,7 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 
     mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
     mRasterTransformTool->ExtendMenu(iOwner, iMenuName);
+    mRasterLineTool->ExtendMenu(iOwner, iMenuName);
     mVectorPathDrawingTool->ExtendMenu(iOwner,iMenuName);
     mVectorPathEditTool->ExtendMenu(iOwner,iMenuName);
 	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
@@ -206,6 +210,7 @@ FOdysseyPainterEditor::InitTools()
 {
     mRasterDrawingTool = NewObject<UOdysseyPainterEditorRasterDrawingTool>();
     mRasterTransformTool = NewObject<UOdysseyPainterEditorRasterTransformTool>();
+    mRasterLineTool = NewObject<UOdysseyPainterEditorRasterLineTool>();
     mVectorPathDrawingTool = NewObject<UOdysseyPainterEditorVectorPathDrawingTool>();
     mVectorPathEditTool = NewObject<UOdysseyPainterEditorVectorPathEditTool>();
 	mVectorPrimitiveDrawingTool = NewObject<UOdysseyPainterEditorVectorPrimitiveDrawingTool>();
@@ -223,6 +228,7 @@ FOdysseyPainterEditor::InitTools()
 
 	mRasterDrawingTool->SetEditor(this);
     mRasterTransformTool->SetEditor(this);
+    mRasterLineTool->SetEditor(this);
     mVectorPrimitiveDrawingTool->SetEditor(this);
     mVectorPathDrawingTool->SetEditor(this);
     mVectorPathEditTool->SetEditor(this);
@@ -242,6 +248,7 @@ FOdysseyPainterEditor::InitTools()
 
 	mTools.Add(mRasterDrawingTool);
     mTools.Add(mRasterTransformTool);
+    mTools.Add(mRasterLineTool);
     mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathDrawingTool);
     mTools.Add(mVectorPathEditTool);
@@ -289,6 +296,11 @@ FOdysseyPainterEditor::GetRasterDrawingTool() const
 UOdysseyPainterEditorRasterTransformTool* FOdysseyPainterEditor::GetRasterTransformTool() const
 {
     return mRasterTransformTool;
+}
+
+UOdysseyPainterEditorRasterLineTool* FOdysseyPainterEditor::GetRasterLineTool() const
+{
+    return mRasterLineTool;
 }
 
 UOdysseyPainterEditorVectorPrimitiveDrawingTool*
@@ -1418,6 +1430,7 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	FOdysseyEditor::AddReferencedObjects(Collector);
 	Collector.AddReferencedObject(mRasterDrawingTool);
     Collector.AddReferencedObject(mRasterTransformTool);
+    Collector.AddReferencedObject(mRasterLineTool);
 	Collector.AddReferencedObject(mVectorPrimitiveDrawingTool);
 	Collector.AddReferencedObject(mVectorPathDrawingTool);
 	Collector.AddReferencedObject(mVectorPathEditTool);

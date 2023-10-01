@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyPainterEditorTool.h"
 #include "OdysseyPainterEditorRasterTransformTool.generated.h"
 
 class FOdysseyHUDPolygon;

@@ -4,6 +4,8 @@
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushToolHUD.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathPushTool"
 

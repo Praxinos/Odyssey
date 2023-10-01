@@ -338,6 +338,7 @@ void UOdysseyPainterEditorRasterTransformTool::AbortTransform()
     if (mRasterMutator.GetRasterBlock() != nullptr)
     {
         mRasterMutator.Abort();
+        mPaintEngine.Update(FOdysseyBlendParameters());
         mRasterMutator.SetRasterBlock(nullptr);
     }
     ClearTransform();

@@ -46,6 +46,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
     TArray<UOdysseyPainterEditorTool*> tools = {
         mEditor->GetRasterDrawingTool(),
         mEditor->GetRasterTransformTool(),
+        mEditor->GetRasterLineTool(),
         mEditor->GetVectorPathDrawingTool(),
         mEditor->GetVectorPathEditTool(),
         mEditor->GetVectorPathCutTool(),
