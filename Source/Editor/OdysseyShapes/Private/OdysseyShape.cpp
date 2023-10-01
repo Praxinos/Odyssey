@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyShape.h"
+#include "HUDViewportElement/OdysseyHUDElement.h"
+
 
 UOdysseyShape::~UOdysseyShape()
 {
@@ -53,4 +55,10 @@ void
 UOdysseyShape::ApplyOverrides(const TMap< TObjectPtr<UClass>, TObjectPtr<UObject>>& iOverrides)
 {
 
+}
+
+void 
+UOdysseyShape::SetHUD(FOdysseyHUDElement* iHUD)
+{
+	mHUD = iHUD;
 }

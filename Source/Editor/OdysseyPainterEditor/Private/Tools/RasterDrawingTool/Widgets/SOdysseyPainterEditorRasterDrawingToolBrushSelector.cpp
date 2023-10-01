@@ -7,8 +7,6 @@
 #include "PropertyEditorModule.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Brush/SOdysseyBrushSelector.h"
-#include "Widgets/SOdysseyShapeSelector.h"
-#include "Widgets/SOdysseyShape.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPainterEditorRasterDrawingToolBrushSelector"
 

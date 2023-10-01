@@ -7,6 +7,7 @@
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "Tools/RasterDrawingTool/SOdysseyPainterEditorRasterDrawingToolTopTab.h"
 #include "FreehandShape/OdysseyFreehandShape.h"
+#include "LineShape/OdysseyLineShape.h"
 #include "ISinglePropertyView.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Layout/SWrapBox.h"
@@ -34,6 +35,7 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
 
     AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterDrawingTool::FreehandShape"));
+    AvailableShapes.Add(EOdysseyShape::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterDrawingTool::LineShape"));
     SelectedShapeInstance = AvailableShapes[SelectedShape];
 }
 
@@ -50,6 +52,8 @@ UOdysseyPainterEditorRasterDrawingTool::CreateShape(FName iName)
     shape->OnPathResetDelegate().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnShapePathReset);
 
     shape->AdaptStepDelegate().BindUObject(this, &UOdysseyPainterEditorRasterDrawingTool::AdaptShapeStep);
+
+    shape->SetHUD( mHUD );
 
     return shape;
 }

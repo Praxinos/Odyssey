@@ -4,34 +4,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Input/OdysseyPoint.h"
-#include "OdysseyShape.generated.h"
+#include "OdysseyShape.h"
 
-class FOdysseyHUDElement;
+#include "OdysseyLineShape.generated.h"
 
-UENUM()
-enum class EOdysseyShape : uint8
+class FOdysseyHUDLine;
+class FOdysseyHUDHandle;
+
+UCLASS(meta=(DisplayName="Line Shape"))
+class ODYSSEYSHAPES_API UOdysseyLineShape : public UOdysseyShape
 {
-    kFreehand       UMETA(DisplayName = "Freehand"),
-    kLine           UMETA(DisplayName = "Line"),
-    kRectangle      UMETA(DisplayName = "Rectangle"),
-};
-
-UCLASS(Abstract)
-class ODYSSEYSHAPES_API UOdysseyShape : public UObject
-{
-    GENERATED_BODY()
+    GENERATED_UCLASS_BODY()
 
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathBegin, const FOdysseyPoint&);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathTo, const TArray<FOdysseyPoint>&);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathEnd, const FOdysseyPoint&);
-    DECLARE_MULTICAST_DELEGATE(FOnPathAbort);
-    DECLARE_MULTICAST_DELEGATE(FOnPathReset);
+    DECLARE_MULTICAST_DELEGATE(FOnReset);
+
+    DECLARE_DELEGATE_RetVal_OneParam(float, FAdaptStep, float);
 
 public:
     // Destructor
-    virtual ~UOdysseyShape();
+    virtual ~UOdysseyLineShape();
 
 public:
     //Mouse events
@@ -42,21 +37,29 @@ public:
     virtual bool OnKeyDown(const FKey& iKey);
     virtual bool OnKeyUp(const FKey& iKey);
 
-    // Tick
-    virtual void Tick(float iDeltaTime);
-    
-    // Applies the shapes specific overrides
-    virtual void ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<UObject>>& iOverrides);
-
-    void SetHUD( FOdysseyHUDElement* iHUD );
-
 public:
-    // Getters
     FOnPathBegin& OnPathBeginDelegate() { return mOnPathBeginDelegate; }
     FOnPathTo& OnPathToDelegate() { return mOnPathToDelegate; }
     FOnPathEnd& OnPathEndDelegate() { return mOnPathEndDelegate; }
-    FOnPathAbort& OnPathAbortDelegate() { return mOnPathAbortDelegate; }
-    FOnPathReset& OnPathResetDelegate() { return mOnPathResetDelegate; }
+    FOnReset& OnResetDelegate() { return mOnResetDelegate; }
+
+    FAdaptStep& AdaptStepDelegate() { return mAdaptStepDelegate; }
+
+private:
+    // Internal - Stroke Construction
+
+    //Begins a stroke at iPoint
+    //Some value are computed from the last call to MoveTo(), like direction for example
+    bool BeginStroke(const FOdysseyPoint& iPoint);
+
+    //Draws a Stroke from the last position to iPoint
+    bool StrokeTo(const FOdysseyPoint& iPoint);
+
+    //Ends the stroke
+    bool EndStroke();
+
+    //Aborts the stroke
+    bool AbortStroke();
 
 protected:
     // protected Data Members
@@ -64,13 +67,18 @@ protected:
     //---
 
     //Internal
+    TArray< FOdysseyPoint >             mRawStroke; //Raw Stroke (basically mouse positions)
+
+    bool                                mHasStrokeBegun;
+
     FOnPathBegin                        mOnPathBeginDelegate;
     FOnPathTo                           mOnPathToDelegate;
     FOnPathEnd                          mOnPathEndDelegate;
-    FOnPathAbort                        mOnPathAbortDelegate;
-    FOnPathReset                        mOnPathResetDelegate;
+    FOnReset                            mOnResetDelegate;
 
-protected:
-    //Borrowed HUD from the tool
-    FOdysseyHUDElement* mHUD;
+    FAdaptStep                          mAdaptStepDelegate;
+
+private:
+    FOdysseyHUDLine* mLine;
+    TArray<FOdysseyHUDHandle*> mHandles;
 };

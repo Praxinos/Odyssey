@@ -196,12 +196,11 @@ protected:
     UPROPERTY()
     UOdysseyBrushOptions* BrushOptions;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, Category="Shape")
     EOdysseyShape SelectedShape;
 
     UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
-
 
     // Hidden properties
     UPROPERTY()
