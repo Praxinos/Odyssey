@@ -6,13 +6,13 @@
 #include "CoreMinimal.h"
 #include "OdysseyShape.h"
 
-#include "OdysseyLineShape.generated.h"
+#include "OdysseyBezierShape.generated.h"
 
-class FOdysseyHUDLine;
+class FOdysseyHUDBezier;
 class FOdysseyHUDHandle;
 
-UCLASS(meta=(DisplayName="Line Shape"))
-class ODYSSEYSHAPES_API UOdysseyLineShape : public UOdysseyShape
+UCLASS(meta=(DisplayName="Bezier Shape"))
+class ODYSSEYSHAPES_API UOdysseyBezierShape : public UOdysseyShape
 {
     GENERATED_UCLASS_BODY()
 
@@ -26,7 +26,7 @@ public:
 
 public:
     // Destructor
-    virtual ~UOdysseyLineShape();
+    virtual ~UOdysseyBezierShape();
 
 public:
     //Mouse events
@@ -46,7 +46,7 @@ public:
     FAdaptStep& AdaptStepDelegate() { return mAdaptStepDelegate; }
 
 private:
-    void CommitLine();
+    void CommitBezier();
     virtual bool AbortShape() override;
 
 protected:
@@ -58,6 +58,7 @@ protected:
     TArray< FOdysseyPoint >             mRawStroke; //Raw Stroke (basically mouse positions)
 
     bool                                mHasStrokeBegun;
+    bool                                mHasControlBegun;
 
     FOnPathBegin                        mOnPathBeginDelegate;
     FOnPathTo                           mOnPathToDelegate;
@@ -67,5 +68,6 @@ protected:
     FAdaptStep                          mAdaptStepDelegate;
 
 private:
-    FOdysseyHUDLine* mLine;
+    FOdysseyHUDBezier* mBezier;
+    TArray<FOdysseyHUDHandle*> mHandles;
 };

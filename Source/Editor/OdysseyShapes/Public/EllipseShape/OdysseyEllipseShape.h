@@ -6,13 +6,13 @@
 #include "CoreMinimal.h"
 #include "OdysseyShape.h"
 
-#include "OdysseyLineShape.generated.h"
+#include "OdysseyEllipseShape.generated.h"
 
-class FOdysseyHUDLine;
+class FOdysseyHUDEllipse;
 class FOdysseyHUDHandle;
 
-UCLASS(meta=(DisplayName="Line Shape"))
-class ODYSSEYSHAPES_API UOdysseyLineShape : public UOdysseyShape
+UCLASS(meta=(DisplayName="Ellipse Shape"))
+class ODYSSEYSHAPES_API UOdysseyEllipseShape : public UOdysseyShape
 {
     GENERATED_UCLASS_BODY()
 
@@ -26,7 +26,7 @@ public:
 
 public:
     // Destructor
-    virtual ~UOdysseyLineShape();
+    virtual ~UOdysseyEllipseShape();
 
 public:
     //Mouse events
@@ -46,7 +46,7 @@ public:
     FAdaptStep& AdaptStepDelegate() { return mAdaptStepDelegate; }
 
 private:
-    void CommitLine();
+    void CommitEllipse();
     virtual bool AbortShape() override;
 
 protected:
@@ -67,5 +67,6 @@ protected:
     FAdaptStep                          mAdaptStepDelegate;
 
 private:
-    FOdysseyHUDLine* mLine;
+    FOdysseyHUDEllipse* mEllipse;
+    TArray<FOdysseyHUDHandle*> mHandles;
 };

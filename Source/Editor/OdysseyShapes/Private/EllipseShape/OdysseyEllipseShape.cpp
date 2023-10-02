@@ -1,18 +1,18 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "LineShape/OdysseyLineShape.h"
+#include "EllipseShape/OdysseyEllipseShape.h"
 #include "HUDViewportElement/Elements/OdysseyHUDHandle.h"
-#include "HUDViewportElement/Elements/OdysseyHUDLine.h"
+#include "HUDViewportElement/Elements/OdysseyHUDEllipse.h"
 #include <ULIS>
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyLineShape::~UOdysseyLineShape()
+UOdysseyEllipseShape::~UOdysseyEllipseShape()
 {
 }
 
-UOdysseyLineShape::UOdysseyLineShape(const FObjectInitializer& iObjectInitializer)
+UOdysseyEllipseShape::UOdysseyEllipseShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
     //Internal
     , mRawStroke()
@@ -25,21 +25,15 @@ UOdysseyLineShape::UOdysseyLineShape(const FObjectInitializer& iObjectInitialize
 //------------------------------------------------------------------------- Mouse Events
 
 bool
-UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyEllipseShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if( !mHasStrokeBegun )
     {
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mLine = new FOdysseyHUDLine(FName("Line"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
-        mHUD->AddElement(mLine);
-
-        FOdysseyHUDHandle* handleStart = new FOdysseyHUDHandle(FName("handleStart"), mLine, &(mLine->mStartPoint));
-        FOdysseyHUDHandle* handleFinish = new FOdysseyHUDHandle(FName("handleFinish"), mLine, &(mLine->mFinishPoint));
-
-        mLine->AddElement(handleStart);
-        mLine->AddElement(handleFinish);
+        mEllipse = new FOdysseyHUDEllipse(FName("Ellipse"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
+        mHUD->AddElement(mEllipse);
 
         mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
@@ -49,19 +43,19 @@ UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey&
 }
 
 bool
-UOdysseyLineShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyEllipseShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if( mHasStrokeBegun )
     {
         mHUD->OnKeyUp(iPointInTexture, iKey);
-        CommitLine();
+        CommitEllipse();
         return true;
     }
     return false;
 }
 
 void
-UOdysseyLineShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+UOdysseyEllipseShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     mHUD->MouseMove(iPointInTexture);
 
@@ -69,18 +63,19 @@ UOdysseyLineShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 }
 
 void
-UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyEllipseShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if( mHasStrokeBegun )
     {
         mHUD->CapturedMouseMove(iPointInTexture);
+        mEllipse->mBorderPoint = FVector2D( iPointInTexture.x, iPointInTexture.y );
 
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
 }
 
 bool
-UOdysseyLineShape::OnKeyDown(const FKey& iKey)
+UOdysseyEllipseShape::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::Escape)
     {
@@ -91,19 +86,17 @@ UOdysseyLineShape::OnKeyDown(const FKey& iKey)
 }
 
 bool
-UOdysseyLineShape::OnKeyUp(const FKey& iKey)
+UOdysseyEllipseShape::OnKeyUp(const FKey& iKey)
 {
     return UOdysseyShape::OnKeyUp(iKey);
 }
 
-void UOdysseyLineShape::CommitLine()
+void UOdysseyEllipseShape::CommitEllipse()
 {
     if( mHasStrokeBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        ::ULIS::GenerateLinePoints(::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), pointsArray);
-
-        //Todo ? Compute relative parameters
+        ::ULIS::GenerateEllipsePoints(::ULIS::FVec2I(mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), mEllipse->GetAAxis(), mEllipse->GetBAxis(), pointsArray);
 
         FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
         for (float i = 0.f; i < pointsArray.Size(); i+=Step)
@@ -126,7 +119,7 @@ void UOdysseyLineShape::CommitLine()
     }
 }
 
-bool UOdysseyLineShape::AbortShape()
+bool UOdysseyEllipseShape::AbortShape()
 {
     if( mHasStrokeBegun )
     {

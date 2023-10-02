@@ -15,6 +15,9 @@ enum class EOdysseyShape : uint8
     kFreehand       UMETA(DisplayName = "Freehand"),
     kLine           UMETA(DisplayName = "Line"),
     kRectangle      UMETA(DisplayName = "Rectangle"),
+    kPolygon        UMETA(DisplayName = "Polygon"),
+    kEllipse        UMETA(DisplayName = "Ellipse"),
+    kBezier         UMETA(DisplayName = "Bezier"),
 };
 
 UCLASS(Abstract)
@@ -49,6 +52,8 @@ public:
     virtual void ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<UObject>>& iOverrides);
 
     void SetHUD( FOdysseyHUDElement* iHUD );
+    virtual float GetStep() const;
+    virtual bool AbortShape();
 
 public:
     // Getters
@@ -57,6 +62,11 @@ public:
     FOnPathEnd& OnPathEndDelegate() { return mOnPathEndDelegate; }
     FOnPathAbort& OnPathAbortDelegate() { return mOnPathAbortDelegate; }
     FOnPathReset& OnPathResetDelegate() { return mOnPathResetDelegate; }
+
+
+public:
+    UPROPERTY(EditInstanceOnly, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
+    float   Step = 20.f;
 
 protected:
     // protected Data Members

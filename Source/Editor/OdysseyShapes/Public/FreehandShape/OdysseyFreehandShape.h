@@ -51,9 +51,6 @@ public:
     //Returns the SmoothingOptions
     FOdysseySmoothingOptions& GetSmoothingOptions();
 
-    //Returns the interpolation step
-    float GetStep() const;
-
     FOnPathBegin& OnPathBeginDelegate() { return mOnPathBeginDelegate; }
     FOnPathTo& OnPathToDelegate() { return mOnPathToDelegate; }
     FOnPathEnd& OnPathEndDelegate() { return mOnPathEndDelegate; }
@@ -75,7 +72,7 @@ private:
     bool EndStroke();
 
     //Aborts the stroke
-    bool AbortStroke();
+    virtual bool AbortShape() override;
 
 private:
     // Internal - Smoothing
@@ -128,10 +125,6 @@ private:
 
 private:
     //PROPERTIES
-    /** Should smoothing be enabled. */
-    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1" ) )
-    float   Step = 20.f;
-
     UPROPERTY( EditInstanceOnly, Category="Interpolation")
     bool    AdaptativeStep = false;
 

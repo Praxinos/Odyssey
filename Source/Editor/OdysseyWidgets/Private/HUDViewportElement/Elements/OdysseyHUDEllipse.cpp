@@ -79,3 +79,13 @@ void FOdysseyHUDEllipse::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     ctx.DrawEllipse(*(ioBlock), ::ULIS::FVec2I( previousTransformedCenterPoint.X, previousTransformedCenterPoint.Y ), previousTransformedEllipseAaxis, previousTransformedEllipseBaxis, ::ULIS::FColor::RGBA8(0, 255, 0, 0));
     ctx.Finish();
 }
+
+int FOdysseyHUDEllipse::GetAAxis()
+{
+    return abs((int)(mCenterPoint.X - mBorderPoint.X));
+}
+
+int FOdysseyHUDEllipse::GetBAxis()
+{
+    return abs((int)(mCenterPoint.Y - mBorderPoint.Y));
+}

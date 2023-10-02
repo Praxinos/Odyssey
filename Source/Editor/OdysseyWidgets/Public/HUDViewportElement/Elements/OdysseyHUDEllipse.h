@@ -24,7 +24,10 @@ public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
-private:
+    int GetAAxis();
+    int GetBAxis();
+
+public:
     FVector2D mCenterPoint;
     int mEllipseAaxis;
     int mEllipseBaxis;

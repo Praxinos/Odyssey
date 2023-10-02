@@ -351,6 +351,7 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
         mReferenceBlock.Reset();
         mReferenceBlock = nullptr;
     }
+    mHUD->EmptyHUDElements();
     mHandles.Empty();
     mTransformArea = nullptr;
     mAreaConstrain = EOdysseyTransformConstrain::Rectangle;

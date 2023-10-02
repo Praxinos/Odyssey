@@ -23,7 +23,7 @@ public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
-private:
+public:
     FVector2D mStartPoint;
     FVector2D mEndPoint;
     FVector2D mControlPoint;

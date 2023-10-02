@@ -1,18 +1,18 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "LineShape/OdysseyLineShape.h"
+#include "RectangleShape/OdysseyRectangleShape.h"
 #include "HUDViewportElement/Elements/OdysseyHUDHandle.h"
-#include "HUDViewportElement/Elements/OdysseyHUDLine.h"
+#include "HUDViewportElement/Elements/OdysseyHUDRectangle.h"
 #include <ULIS>
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyLineShape::~UOdysseyLineShape()
+UOdysseyRectangleShape::~UOdysseyRectangleShape()
 {
 }
 
-UOdysseyLineShape::UOdysseyLineShape(const FObjectInitializer& iObjectInitializer)
+UOdysseyRectangleShape::UOdysseyRectangleShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
     //Internal
     , mRawStroke()
@@ -25,21 +25,21 @@ UOdysseyLineShape::UOdysseyLineShape(const FObjectInitializer& iObjectInitialize
 //------------------------------------------------------------------------- Mouse Events
 
 bool
-UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyRectangleShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if( !mHasStrokeBegun )
     {
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mLine = new FOdysseyHUDLine(FName("Line"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
-        mHUD->AddElement(mLine);
+        mRectangle = new FOdysseyHUDRectangle(FName("Rectangle"), FVector2D( iPointInTexture.x, iPointInTexture.y), FVector2D( iPointInTexture.x, iPointInTexture.y) );
+        mHUD->AddElement(mRectangle);
 
-        FOdysseyHUDHandle* handleStart = new FOdysseyHUDHandle(FName("handleStart"), mLine, &(mLine->mStartPoint));
-        FOdysseyHUDHandle* handleFinish = new FOdysseyHUDHandle(FName("handleFinish"), mLine, &(mLine->mFinishPoint));
+        FOdysseyHUDHandle* handleTopLeft = new FOdysseyHUDHandle(FName("handleTopLeft"), mRectangle, &(mRectangle->mTopLeftPoint));
+        FOdysseyHUDHandle* handleBottomRight = new FOdysseyHUDHandle(FName("handleBottomRight"), mRectangle, &(mRectangle->mBottomRightPoint));
 
-        mLine->AddElement(handleStart);
-        mLine->AddElement(handleFinish);
+        mRectangle->AddElement(handleTopLeft);
+        mRectangle->AddElement(handleBottomRight);
 
         mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
@@ -49,19 +49,19 @@ UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey&
 }
 
 bool
-UOdysseyLineShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyRectangleShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if( mHasStrokeBegun )
     {
         mHUD->OnKeyUp(iPointInTexture, iKey);
-        CommitLine();
+        CommitRectangle();
         return true;
     }
     return false;
 }
 
 void
-UOdysseyLineShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+UOdysseyRectangleShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     mHUD->MouseMove(iPointInTexture);
 
@@ -69,7 +69,7 @@ UOdysseyLineShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 }
 
 void
-UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyRectangleShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if( mHasStrokeBegun )
     {
@@ -80,7 +80,7 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 }
 
 bool
-UOdysseyLineShape::OnKeyDown(const FKey& iKey)
+UOdysseyRectangleShape::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::Escape)
     {
@@ -91,19 +91,17 @@ UOdysseyLineShape::OnKeyDown(const FKey& iKey)
 }
 
 bool
-UOdysseyLineShape::OnKeyUp(const FKey& iKey)
+UOdysseyRectangleShape::OnKeyUp(const FKey& iKey)
 {
     return UOdysseyShape::OnKeyUp(iKey);
 }
 
-void UOdysseyLineShape::CommitLine()
+void UOdysseyRectangleShape::CommitRectangle()
 {
     if( mHasStrokeBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        ::ULIS::GenerateLinePoints(::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), pointsArray);
-
-        //Todo ? Compute relative parameters
+        ::ULIS::GenerateRectanglePoints(::ULIS::FVec2I(mRectangle->mTopLeftPoint.X, mRectangle->mTopLeftPoint.Y), ::ULIS::FVec2I(mRectangle->mBottomRightPoint.X, mRectangle->mBottomRightPoint.Y), pointsArray);
 
         FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
         for (float i = 0.f; i < pointsArray.Size(); i+=Step)
@@ -126,7 +124,7 @@ void UOdysseyLineShape::CommitLine()
     }
 }
 
-bool UOdysseyLineShape::AbortShape()
+bool UOdysseyRectangleShape::AbortShape()
 {
     if( mHasStrokeBegun )
     {

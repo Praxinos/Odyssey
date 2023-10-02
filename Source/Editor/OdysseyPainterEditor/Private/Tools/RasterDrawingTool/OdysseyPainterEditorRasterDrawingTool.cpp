@@ -6,11 +6,18 @@
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "Tools/RasterDrawingTool/SOdysseyPainterEditorRasterDrawingToolTopTab.h"
+
 #include "FreehandShape/OdysseyFreehandShape.h"
 #include "LineShape/OdysseyLineShape.h"
+#include "RectangleShape/OdysseyRectangleShape.h"
+#include "PolygonShape/OdysseyPolygonShape.h"
+#include "EllipseShape/OdysseyEllipseShape.h"
+#include "BezierShape/OdysseyBezierShape.h"
+
 #include "ISinglePropertyView.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Layout/SWrapBox.h"
+
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingTool"
 
@@ -36,6 +43,11 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
 
     AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterDrawingTool::FreehandShape"));
     AvailableShapes.Add(EOdysseyShape::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterDrawingTool::LineShape"));
+    AvailableShapes.Add(EOdysseyShape::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterDrawingTool::RectangleShape"));
+    AvailableShapes.Add(EOdysseyShape::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterDrawingTool::PolygonShape"));
+    AvailableShapes.Add(EOdysseyShape::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterDrawingTool::EllipseShape"));
+    AvailableShapes.Add(EOdysseyShape::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterDrawingTool::BezierShape"));
+
     SelectedShapeInstance = AvailableShapes[SelectedShape];
 }
 
@@ -370,6 +382,9 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPo
     Commit();
 
     GEditor->EndTransaction();
+
+    mHUD->EmptyHUDElements();
+    mEditor->HUDSystem()->ClearHUDSurface();
 }
 
 void
@@ -386,6 +401,9 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathAbort()
 
     //Update immediately the changes
     mPaintEngine.Update(BlendParameters);
+
+    mHUD->EmptyHUDElements();
+    mEditor->HUDSystem()->ClearHUDSurface();
 }
 
 void
@@ -622,6 +640,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced(const FCoreUObjec
 void
 UOdysseyPainterEditorRasterDrawingTool::SelectedShapeChanged()
 {
+    SelectedShapeInstance->AbortShape();
     FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
     mOnShapeChanged.Broadcast();
 }

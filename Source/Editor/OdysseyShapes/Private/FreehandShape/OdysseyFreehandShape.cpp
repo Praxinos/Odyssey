@@ -60,7 +60,7 @@ bool
 UOdysseyFreehandShape::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::Escape)
-        return AbortStroke();
+        return AbortShape();
 
     return UOdysseyShape::OnKeyDown(iKey);
 }
@@ -145,7 +145,7 @@ UOdysseyFreehandShape::EndStroke()
 }
 
 bool
-UOdysseyFreehandShape::AbortStroke()
+UOdysseyFreehandShape::AbortShape()
 {
     if (!mHasStrokeBegun)
         return false;
@@ -155,8 +155,8 @@ UOdysseyFreehandShape::AbortStroke()
 
     mHasStrokeBegun = false;
     
-    mOnPathResetDelegate.Broadcast(); //just to be sure
-    mOnPathAbortDelegate.Broadcast();
+    UOdysseyShape::AbortShape();
+
     return true;
 }
 
@@ -186,13 +186,6 @@ UOdysseyFreehandShape::GetSmoothingOptions()
 {
     return SmoothingOptions;
 }
-
-float
-UOdysseyFreehandShape::GetStep() const
-{
-    return Step;
-}
-
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------- Internal - Smoothing

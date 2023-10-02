@@ -62,3 +62,16 @@ UOdysseyShape::SetHUD(FOdysseyHUDElement* iHUD)
 {
 	mHUD = iHUD;
 }
+
+float UOdysseyShape::GetStep() const
+{
+	return Step;
+}
+
+bool UOdysseyShape::AbortShape()
+{
+    mOnPathResetDelegate.Broadcast();
+    mOnPathAbortDelegate.Broadcast();
+
+	return true;
+}

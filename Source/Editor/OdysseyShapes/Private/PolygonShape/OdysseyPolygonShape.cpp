@@ -1,18 +1,18 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "LineShape/OdysseyLineShape.h"
+#include "PolygonShape/OdysseyPolygonShape.h"
 #include "HUDViewportElement/Elements/OdysseyHUDHandle.h"
-#include "HUDViewportElement/Elements/OdysseyHUDLine.h"
+#include "HUDViewportElement/Elements/OdysseyHUDPolygon.h"
 #include <ULIS>
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyLineShape::~UOdysseyLineShape()
+UOdysseyPolygonShape::~UOdysseyPolygonShape()
 {
 }
 
-UOdysseyLineShape::UOdysseyLineShape(const FObjectInitializer& iObjectInitializer)
+UOdysseyPolygonShape::UOdysseyPolygonShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
     //Internal
     , mRawStroke()
@@ -25,23 +25,10 @@ UOdysseyLineShape::UOdysseyLineShape(const FObjectInitializer& iObjectInitialize
 //------------------------------------------------------------------------- Mouse Events
 
 bool
-UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if( !mHasStrokeBegun )
     {
-        mHasStrokeBegun = true;
-        mRawStroke.Empty();
-
-        mLine = new FOdysseyHUDLine(FName("Line"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
-        mHUD->AddElement(mLine);
-
-        FOdysseyHUDHandle* handleStart = new FOdysseyHUDHandle(FName("handleStart"), mLine, &(mLine->mStartPoint));
-        FOdysseyHUDHandle* handleFinish = new FOdysseyHUDHandle(FName("handleFinish"), mLine, &(mLine->mFinishPoint));
-
-        mLine->AddElement(handleStart);
-        mLine->AddElement(handleFinish);
-
-        mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
     }
 
@@ -49,19 +36,19 @@ UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey&
 }
 
 bool
-UOdysseyLineShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyPolygonShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if( mHasStrokeBegun )
     {
         mHUD->OnKeyUp(iPointInTexture, iKey);
-        CommitLine();
+        CommitPolygon();
         return true;
     }
     return false;
 }
 
 void
-UOdysseyLineShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+UOdysseyPolygonShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     mHUD->MouseMove(iPointInTexture);
 
@@ -69,7 +56,7 @@ UOdysseyLineShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 }
 
 void
-UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+UOdysseyPolygonShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if( mHasStrokeBegun )
     {
@@ -80,7 +67,7 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 }
 
 bool
-UOdysseyLineShape::OnKeyDown(const FKey& iKey)
+UOdysseyPolygonShape::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::Escape)
     {
@@ -91,22 +78,20 @@ UOdysseyLineShape::OnKeyDown(const FKey& iKey)
 }
 
 bool
-UOdysseyLineShape::OnKeyUp(const FKey& iKey)
+UOdysseyPolygonShape::OnKeyUp(const FKey& iKey)
 {
     return UOdysseyShape::OnKeyUp(iKey);
 }
 
-void UOdysseyLineShape::CommitLine()
+void UOdysseyPolygonShape::CommitPolygon()
 {
     if( mHasStrokeBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        ::ULIS::GenerateLinePoints(::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), pointsArray);
-
-        //Todo ? Compute relative parameters
+        //::ULIS::GeneratePolygonPoints(::ULIS::FVec2I(mPolygon->mStartPoint.X, mPolygon->mStartPoint.Y), ::ULIS::FVec2I(mPolygon->mFinishPoint.X, mPolygon->mFinishPoint.Y), pointsArray);
 
         FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
-        for (float i = 0.f; i < pointsArray.Size(); i+=Step)
+        for (float i = 0.f; i < pointsArray.Size() - 1; i+=Step)
         {
             pointToAdd.x = pointsArray[i].x;
             pointToAdd.y = pointsArray[i].y;
@@ -126,12 +111,14 @@ void UOdysseyLineShape::CommitLine()
     }
 }
 
-bool UOdysseyLineShape::AbortShape()
+bool UOdysseyPolygonShape::AbortShape()
 {
     if( mHasStrokeBegun )
     {
+        mOnPathResetDelegate.Broadcast();
+        mOnPathAbortDelegate.Broadcast();
         mHasStrokeBegun = false;
-        return UOdysseyShape::AbortShape();
+        return true;
     }
     return false;
 }
