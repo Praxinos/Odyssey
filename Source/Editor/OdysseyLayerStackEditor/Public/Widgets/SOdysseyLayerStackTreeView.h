@@ -102,6 +102,24 @@ protected:
     virtual void MapActionsToCommandList();
 
     /**
+     * @brief Copy selected layers in clipboard
+     * 
+     */
+    void CopyLayers();
+
+    /**
+     * @brief Cut selected layers in clipboard
+     * 
+     */
+    void CutLayers();
+
+    /**
+     * @brief Paste layers in clipboard
+     * 
+     */
+    void PasteLayers();
+
+    /**
      * @brief Selects all visible layers
      * 
      */

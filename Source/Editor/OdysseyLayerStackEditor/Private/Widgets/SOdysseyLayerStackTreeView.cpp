@@ -8,6 +8,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "Commands/OdysseyLayerStackEditorCommands.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
+#include "OdysseyLayerStackClipboard.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyLayerStackTreeView"
 
@@ -476,9 +477,14 @@ void SOdysseyLayerStackTreeView::CreateContextMenu()
 
     FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("LayerStackCommonSection", "Common"));
     {
-        commonSection.AddMenuEntry(FGenericCommands::Get().Delete);
         commonSection.AddMenuEntry(FGenericCommands::Get().Duplicate);
         commonSection.AddMenuEntry(FGenericCommands::Get().Rename);
+        commonSection.AddSeparator("");
+        commonSection.AddMenuEntry(FGenericCommands::Get().Cut);
+        commonSection.AddMenuEntry(FGenericCommands::Get().Copy);
+        commonSection.AddMenuEntry(FGenericCommands::Get().Paste);
+        commonSection.AddSeparator("");
+        commonSection.AddMenuEntry(FGenericCommands::Get().Delete);
     }
 
     FToolMenuSection& layerSection = Menu->AddSection("Layer", LOCTEXT("LayerStackLayerSection", "Layer"));
@@ -497,6 +503,21 @@ SOdysseyLayerStackTreeView::ExtendContextMenu()
 void
 SOdysseyLayerStackTreeView::MapActionsToCommandList()
 {
+    mCommandList->MapAction(
+        FGenericCommands::Get().Copy,
+        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CopyLayers)
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Paste,
+        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::PasteLayers)
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Cut,
+        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CutLayers)
+    );
+
     mCommandList->MapAction(
         FGenericCommands::Get().SelectAll,
         FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::SelectAllLayers)
@@ -532,6 +553,53 @@ SOdysseyLayerStackTreeView::MapActionsToCommandList()
 }
 
 // Commands
+
+void
+SOdysseyLayerStackTreeView::CopyLayers()
+{
+    FOdysseyLayerStackClipboard::Get()->Copy(GetSelectedItems());
+}
+
+void
+SOdysseyLayerStackTreeView::CutLayers()
+{
+    FOdysseyLayerStackClipboard::Get()->Copy(GetSelectedItems());
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Cut Layers"));
+#endif
+    DeleteSelectedLayers();
+}
+
+void
+SOdysseyLayerStackTreeView::PasteLayers()
+{
+    //First check if the copied layers can be pasted in this layerstack
+    const TArray<UOdysseyLayer*>& originalLayers = FOdysseyLayerStackClipboard::Get()->GetLayers();
+
+    if (originalLayers.Num() == 0)
+        return;
+
+    bool notSupported = originalLayers.ContainsByPredicate(
+        [this](UOdysseyLayer* iLayer)
+        {
+            return !mLayerStack->SupportsLayerClass(iLayer->GetClass());
+        }
+    );
+
+    if (notSupported)
+        return;
+
+    UOdysseyLayer* parent = mLayerStack->CurrentLayer.Get()->GetParent();
+    int indexInParent = mLayerStack->CurrentLayer.Get()->GetIndexInParent();
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Paste Layers"));
+#endif
+
+    TArray<UOdysseyLayer*> pastedLayers = mLayerStack->CopyLayers(originalLayers, parent, indexInParent);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(pastedLayers[0]));
+    SetItemSelection(pastedLayers, true);
+}
 
 void
 SOdysseyLayerStackTreeView::SelectAllLayers()
