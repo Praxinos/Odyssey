@@ -116,6 +116,11 @@ bool FOdysseyHUDElement::IsCaptured()
     return isCaptured;
 }
 
+void FOdysseyHUDElement::Capture()
+{
+    mIsCaptured = true;
+}
+
 void FOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
 {
     if( ioIsInvalid )

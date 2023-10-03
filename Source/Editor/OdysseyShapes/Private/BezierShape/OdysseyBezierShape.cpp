@@ -17,7 +17,7 @@ UOdysseyBezierShape::UOdysseyBezierShape(const FObjectInitializer& iObjectInitia
     //Internal
     , mRawStroke()
     , mHasStrokeBegun( false )
-    , mHasControlBegun(false)
+    , mHasControlBegun( false )
 {
     Step = 1.0f;
 }
@@ -51,10 +51,6 @@ UOdysseyBezierShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKe
         mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
     }
-    else if( !mHasControlBegun )
-    {
-        mHasControlBegun = true;
-    }
 
     return false;
 }
@@ -62,32 +58,42 @@ UOdysseyBezierShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKe
 bool
 UOdysseyBezierShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if( mHasStrokeBegun )
-    {
-        if (mHandles[0]->GetPosition() == FVector2D(iPointInTexture.x, iPointInTexture.y) )
-        {
-            mHasControlBegun = true;
-            FOdysseyPoint point = iPointInTexture;
-            point.x = mHandles[2]->GetPosition().X;
-            point.y = mHandles[2]->GetPosition().Y;
-            mHandles[2]->OnKeyDown( point, iKey );
-            return true;
-        }
-        mHUD->OnKeyUp(iPointInTexture, iKey);
-        return true;
-    }
-    else if( mHasControlBegun )
+    if (mHasControlBegun)
     {
         CommitBezier();
     }
+    else if( mHasStrokeBegun )
+    {
+        mHUD->OnKeyUp(iPointInTexture, iKey);
+        if ( mHandles[2]->GetPosition() == mHandles[0]->GetPosition() )
+        {
+            mHandles[2]->Capture();
+            return true;
+        }
+        else
+        {
+            mHasControlBegun = true;
+            mHandles[1]->Capture();
+            return true;
+        }
+    }
+
+    mHUD->OnKeyUp(iPointInTexture, iKey);
+
     return false;
 }
 
 void
 UOdysseyBezierShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    mHUD->MouseMove(iPointInTexture);
-
+    if (mHasStrokeBegun || mHasControlBegun)
+    {
+        mHUD->CapturedMouseMove(iPointInTexture);
+    }
+    else
+    {
+        mHUD->MouseMove(iPointInTexture);
+    }
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
 
@@ -124,10 +130,10 @@ void UOdysseyBezierShape::CommitBezier()
     if( mHasStrokeBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        //::ULIS::GenerateBezierPoints(::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mFinishPoint.X, mBezier->mFinishPoint.Y), pointsArray);
+        ::ULIS::GenerateQuadraticBezierPoints(::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mControlPoint.X, mBezier->mControlPoint.Y), ::ULIS::FVec2I(mBezier->mEndPoint.X, mBezier->mEndPoint.Y), 1.f, pointsArray);
 
         FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
-        for (float i = 0.f; i < pointsArray.Size() - 1; i+=Step)
+        for (float i = 0.f; i < pointsArray.Size(); i+=Step)
         {
             pointToAdd.x = pointsArray[i].x;
             pointToAdd.y = pointsArray[i].y;
@@ -144,6 +150,8 @@ void UOdysseyBezierShape::CommitBezier()
             AbortShape();
         }
         mHasStrokeBegun = false;
+        mHasControlBegun = false;
+        mHandles.Empty();
     }
 }
 
@@ -151,12 +159,10 @@ bool UOdysseyBezierShape::AbortShape()
 {
     if( mHasStrokeBegun || mHasControlBegun )
     {
-        mOnPathResetDelegate.Broadcast();
-        mOnPathAbortDelegate.Broadcast();
         mHasStrokeBegun = false;
         mHasControlBegun = false;
         mHandles.Empty();
-        return true;
+        return UOdysseyShape::AbortShape();
     }
     return false;
 }

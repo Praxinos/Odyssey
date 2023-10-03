@@ -26,7 +26,7 @@ public:
 public:
     TArray<FVector2D>& GetPoints();
 
-private:
+public:
     TArray<FVector2D> mPoints;
 
 private:

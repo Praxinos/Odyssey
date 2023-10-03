@@ -27,8 +27,29 @@ UOdysseyPolygonShape::UOdysseyPolygonShape(const FObjectInitializer& iObjectInit
 bool
 UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if( !mHasStrokeBegun )
+    if (!mHasStrokeBegun)
     {
+        mHasStrokeBegun = true;
+        mRawStroke.Empty();
+
+        TArray<FVector2D> points;
+
+        mPolygon = new FOdysseyHUDPolygon(FName("Polygon"), TArray<FVector2D>() );
+        mPolygon->mPoints.Reserve(100);
+        mHUD->AddElement(mPolygon);
+
+        mPolygon->mPoints.Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
+        FOdysseyHUDHandle* handle1 = new FOdysseyHUDHandle(FName("handle" + mPolygon->mPoints.Num()), mPolygon, &(mPolygon->mPoints.Last()));
+        mPolygon->mPoints.Add(FVector2D(iPointInTexture.x, iPointInTexture.y));
+        FOdysseyHUDHandle* handle2 = new FOdysseyHUDHandle(FName("handle" + mPolygon->mPoints.Num()), mPolygon, &(mPolygon->mPoints.Last()));
+
+        mPolygon->AddElement(handle1);
+        mPolygon->AddElement(handle2);
+
+        mHandles.Add(handle1);
+        mHandles.Add(handle2);
+
+        mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
     }
 
@@ -38,20 +59,47 @@ UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FK
 bool
 UOdysseyPolygonShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if( mHasStrokeBegun )
+    if (mHasStrokeBegun)
     {
         mHUD->OnKeyUp(iPointInTexture, iKey);
-        CommitPolygon();
-        return true;
+        if( mHandles.Last()->GetPosition() == mHandles.Last(1)->GetPosition() )
+        {
+            if( mHandles.Num() == 2 )
+            {
+                mHandles.Last()->Capture();
+                return true;
+            }
+
+            CommitPolygon();
+            return true;
+        }
+        else
+        {
+            mPolygon->mPoints.Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
+            FOdysseyHUDHandle* handle = new FOdysseyHUDHandle(FName("handle" + mPolygon->mPoints.Num()), mPolygon, &(mPolygon->mPoints.Last()));
+            mPolygon->AddElement(handle);
+            mHandles.Add(handle);
+            mHandles.Last()->Capture();
+            return true;
+        }
     }
+
+    mHUD->OnKeyUp(iPointInTexture, iKey);
+
     return false;
 }
 
 void
 UOdysseyPolygonShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    mHUD->MouseMove(iPointInTexture);
-
+    if (mHasStrokeBegun)
+    {
+        mHUD->CapturedMouseMove(iPointInTexture);
+    }
+    else
+    {
+        mHUD->MouseMove(iPointInTexture);
+    }
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
 
@@ -73,6 +121,11 @@ UOdysseyPolygonShape::OnKeyDown(const FKey& iKey)
     {
         return AbortShape();
     }
+    else if( iKey == EKeys::Enter )
+    {
+        CommitPolygon();
+        return true;
+    }
 
     return UOdysseyShape::OnKeyDown(iKey);
 }
@@ -88,10 +141,15 @@ void UOdysseyPolygonShape::CommitPolygon()
     if( mHasStrokeBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        //::ULIS::GeneratePolygonPoints(::ULIS::FVec2I(mPolygon->mStartPoint.X, mPolygon->mStartPoint.Y), ::ULIS::FVec2I(mPolygon->mFinishPoint.X, mPolygon->mFinishPoint.Y), pointsArray);
+        std::vector<::ULIS::FVec2I> polygonPoints;
+
+        for (int i = 0; i < mPolygon->mPoints.Num(); i++)
+            polygonPoints.push_back(::ULIS::FVec2I(mPolygon->mPoints[i].X, mPolygon->mPoints[i].Y));
+
+        ::ULIS::GeneratePolygonPoints(polygonPoints, pointsArray);
 
         FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
-        for (float i = 0.f; i < pointsArray.Size() - 1; i+=Step)
+        for (float i = 0.f; i < pointsArray.Size(); i+=Step)
         {
             pointToAdd.x = pointsArray[i].x;
             pointToAdd.y = pointsArray[i].y;
@@ -108,6 +166,7 @@ void UOdysseyPolygonShape::CommitPolygon()
             AbortShape();
         }
         mHasStrokeBegun = false;
+        mHandles.Empty();
     }
 }
 
@@ -115,10 +174,9 @@ bool UOdysseyPolygonShape::AbortShape()
 {
     if( mHasStrokeBegun )
     {
-        mOnPathResetDelegate.Broadcast();
-        mOnPathAbortDelegate.Broadcast();
         mHasStrokeBegun = false;
-        return true;
+        mHandles.Empty();
+        return UOdysseyShape::AbortShape();
     }
     return false;
 }

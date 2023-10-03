@@ -33,6 +33,8 @@ public:
     void EmptyHUDElements();
     bool IsInvalid();
     bool IsCaptured();
+    void Capture();
+
 
 private:
     void InternalIsInvalid( bool &ioIsInvalid );

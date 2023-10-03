@@ -41,10 +41,20 @@ void FOdysseyHUDPolygon::Draw( ::ULIS::FBlock* ioBlock, FTransform2D iTransform 
         ::ULIS::FVec2I vec = ::ULIS::FVec2I( transformedPoint.X, transformedPoint.Y );
         vectors.push_back(vec);
     }
+    UE_LOG(LogTemp, Display, TEXT("%d"), mPoints.Num());
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawPolygon(*(ioBlock), vectors, ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+
+    if( vectors.size() == 2 )
+    {
+        ctx.DrawLine(*(ioBlock), vectors[0], vectors[1], ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+    }
+    else
+    {
+        ctx.DrawPolygon(*(ioBlock), vectors, ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+    }
     ctx.Finish();
+
 
     mPreviousPoints = mPoints;
     mPreviousTransform = iTransform;
@@ -70,7 +80,15 @@ void FOdysseyHUDPolygon::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     }
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawPolygon(*(ioBlock), vectors, ::ULIS::FColor::RGBA8(0, 0, 0, 0));
+    if (vectors.size() == 2)
+    {
+        ctx.DrawLine(*(ioBlock), vectors[0], vectors[1], ::ULIS::FColor::RGBA8(0, 0, 0, 0));
+    }
+    else
+    {
+        ctx.DrawPolygon(*(ioBlock), vectors, ::ULIS::FColor::RGBA8(0, 0, 0, 0));
+    }
+
     ctx.Finish();
 }
 
