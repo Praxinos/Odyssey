@@ -41,7 +41,6 @@ void FOdysseyHUDPolygon::Draw( ::ULIS::FBlock* ioBlock, FTransform2D iTransform 
         ::ULIS::FVec2I vec = ::ULIS::FVec2I( transformedPoint.X, transformedPoint.Y );
         vectors.push_back(vec);
     }
-    UE_LOG(LogTemp, Display, TEXT("%d"), mPoints.Num());
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
 

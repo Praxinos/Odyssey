@@ -5,6 +5,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDPolygon.h"
 #include "GeomTools.h"
+#include "OdysseyBrushTransform.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterTransformTool"
 
@@ -17,6 +18,7 @@ UOdysseyPainterEditorRasterTransformTool::~UOdysseyPainterEditorRasterTransformT
 UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTool() :
     mPaintEngine(),
     mReferenceBlock(nullptr),
+    mTransformedBlock(nullptr),
     mTransformArea(nullptr),
     mRasterMutator(true),
     mAreaConstrain(EOdysseyTransformConstrain::Rectangle),
@@ -94,9 +96,7 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
                 mHandles[i]->SetPosition(mHandles[i]->GetPosition() - (mMouseLastReferencePoint - FVector2D(iPointInTexture.x, iPointInTexture.y)));
             }
             mMouseLastReferencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
-            
             BlendTransformAreaToPaintBlock();
-            
             return;
         }
 
@@ -104,15 +104,17 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
         {
             case EOdysseyTransformConstrain::Rectangle:
                 ConstrainToRectangle( FVector2D( iPointInTexture.x, iPointInTexture.y ) );
-            break;
+                break;
             case EOdysseyTransformConstrain::Parallelogram:
                 ConstrainToParallelogram( FVector2D( iPointInTexture.x, iPointInTexture.y ) );
-            break;
+                break;
             case EOdysseyTransformConstrain::NoConstrain:
-            break;
+                break;
             default:
-            break;
+                break;
         }
+        CreateTransformBlockFromReferenceBlock();
+        BlendTransformAreaToPaintBlock();
     }
 }
 
@@ -196,8 +198,8 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
 
             paintBlock->Dirty();
             mPaintEngine.Update(FOdysseyBlendParameters());
-
         }
+        CreateTransformBlockFromReferenceBlock();
         return true;
     }
 
@@ -256,6 +258,44 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToParallelogram(FVector2
 
 }
 
+void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromReferenceBlock()
+{
+    if( !mReferenceBlock )
+        return;
+
+    ::ULIS::eFormat format = mReferenceBlock->Format();
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+    ::ULIS::FEvent transformEvent;
+
+    if( mTransformedBlock )
+    {
+        mTransformedBlock.Reset();
+        mTransformedBlock = nullptr;
+    }
+    
+    ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
+    mTransformedBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
+
+    float scaleX = (float)mTransformedBlock->Width() / (float)mReferenceBlock->Width();
+    float scaleY = (float)mTransformedBlock->Height() / (float)mReferenceBlock->Height();
+    FOdysseyMatrix scale = UOdysseyTransformProxyLibrary::MakeScaleMatrix( scaleX, scaleY );
+    
+    ctx.TransformAffine(
+        *mReferenceBlock
+        , *mTransformedBlock
+        , mReferenceBlock->Rect()
+        , scale.m
+        , ::ULIS::eResamplingMethod::Resampling_Bilinear
+        , ::ULIS::eBorderMode::Border_Transparent
+        , ::ULIS::FColor::Transparent
+        , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+        , 0
+        , nullptr
+        , &transformEvent
+    );
+    ctx.Finish();
+}
+
 ::ULIS::FRectI UOdysseyPainterEditorRasterTransformTool::GetTransformAreaBoundingRect()
 {
     if( mTransformArea )
@@ -282,7 +322,7 @@ void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
 
-        if( !paintBlock || !mReferenceBlock )
+        if( !paintBlock || !mReferenceBlock || !mTransformedBlock )
             return;
 
         ::ULIS::eFormat format = paintBlock->Format();
@@ -300,9 +340,9 @@ void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
             &clearEvent);
 
         ctx.Blend(
-            *mReferenceBlock,
+            *mTransformedBlock,
             *paintBlock,
-            mReferenceBlock->Rect(),
+            mTransformedBlock->Rect(),
             ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
             ::ULIS::Blend_Normal,
             ::ULIS::Alpha_Normal,
@@ -350,6 +390,11 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
     {
         mReferenceBlock.Reset();
         mReferenceBlock = nullptr;
+    }
+    if (mTransformedBlock)
+    {
+        mTransformedBlock.Reset();
+        mTransformedBlock = nullptr;
     }
     mHUD->EmptyHUDElements();
     mHandles.Empty();

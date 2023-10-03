@@ -52,6 +52,7 @@ public:
 private:
     void ConstrainToRectangle( FVector2D iPosition );
     void ConstrainToParallelogram(FVector2D iPosition);
+    void CreateTransformBlockFromReferenceBlock();
     ::ULIS::FRectI GetTransformAreaBoundingRect();
     void BlendTransformAreaToPaintBlock();
 
@@ -64,6 +65,7 @@ private:
 private: 
     FOdysseyPaintEngine                 mPaintEngine;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mReferenceBlock;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
 
     FOdysseyHUDPolygon* mTransformArea;
     TArray<FOdysseyHUDHandle*> mHandles;

@@ -1,6 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
+using System.IO;
 using UnrealBuildTool;
 
 public class OdysseyBrush : ModuleRules
@@ -33,6 +34,13 @@ public class OdysseyBrush : ModuleRules
             new string[] {
                 "ULIS",
                 "ULISLoader",
+            }
+        );
+
+        PublicIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Classes"),
+                Path.Combine(ModuleDirectory, "Classes", "Proxies"),
             }
         );
     }
