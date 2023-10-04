@@ -56,6 +56,8 @@ private:
     ::ULIS::FRectI GetTransformAreaBoundingRect();
     void BlendTransformAreaToPaintBlock();
 
+    void ClearBlock( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock );
+
     void CommitTransform();
     void AbortTransform();
 

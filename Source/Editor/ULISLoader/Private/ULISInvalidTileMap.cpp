@@ -96,10 +96,11 @@ FULISInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
 
     FIntPoint tileCount = mTileMap.Size();
 
-    int x = xf;
-    int y = yf;
-    int w = FMath::Min( tileCount.X, int( ceil( xf + wf ) ) ) - x;
-    int h = FMath::Min( tileCount.Y, int( ceil( yf + hf ) ) ) - y;
+    int x = FMath::Max(0, xf);
+    int y = FMath::Max(0, yf);
+    int w = FMath::Min( tileCount.X, int( ceil( xf + wf ) ) ) - abs((int)xf);
+    int h = FMath::Min( tileCount.Y, int( ceil( yf + hf ) ) ) - abs((int)yf);
+
 
     for( int i = 0; i < h; ++i ) //y
     {
