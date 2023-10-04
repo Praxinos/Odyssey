@@ -20,11 +20,20 @@ FOdysseyAnimationCellClipboard::Copy(TSharedRef<FOdysseyAnimationCellsContainer>
 {
     mCellCopies.Empty();
 
+    if (iCellContainer->GetCells().Num() == 0)
+        return;
+
     const TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = iCellContainer->GetCells();
     int startCellIndex = iCellContainer->GetCellIndexAtFrame(iSelectedFrames.GetLowerBoundValue());
     int startCellFrameIndex = iCellContainer->GetCellFrameAtFrame(iSelectedFrames.GetLowerBoundValue());
     int endCellIndex = iCellContainer->GetCellIndexAtFrame(iSelectedFrames.GetUpperBoundValue());
     int endCellFrameIndex = iCellContainer->GetCellFrameAtFrame(iSelectedFrames.GetUpperBoundValue());
+
+    if (startCellIndex == INDEX_NONE)
+        startCellIndex = 0;
+
+    if (endCellIndex == INDEX_NONE)
+        endCellIndex = iCellContainer->GetCells().Num() - 1;
 
     if (startCellIndex == endCellIndex)
     {
