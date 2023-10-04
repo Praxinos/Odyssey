@@ -16,6 +16,7 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyEditorLayoutBuilder.h"
 #include "BrushContext/OdysseyPainterEditorBrushContext.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoGroup.h"

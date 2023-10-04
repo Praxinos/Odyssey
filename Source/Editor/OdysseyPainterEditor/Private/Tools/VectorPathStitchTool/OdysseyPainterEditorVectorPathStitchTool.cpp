@@ -4,6 +4,9 @@
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchToolHUD.h"
 
+#include "OdysseyMediaVector.h"
+#include "OdysseyPainterEditor.h"
+
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathStitchTool"
 
 //--------------------------------------------------------------------------------------
