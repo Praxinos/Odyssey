@@ -226,8 +226,8 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     
     for (const FInt32Range& cellRange : cellRanges)
     {
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format());
-        cell->SetLength(cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
+        int cellLength = cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1;
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, cellLength, animation->Width(), animation->Height(), animation->Format());
 
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
         FOdysseyRasterBlockMutator blockMutator(rasterBlock);
@@ -322,10 +322,10 @@ UOdysseyAnimationLayerImageRaster::CreateCell( const FName& iCellType, bool iFor
     if (iCellType == FOdysseyAnimationCellImageRaster::StaticType())
     {
         if (iForSerialization)
-            return MakeShared<FOdysseyAnimationCellImageRaster>(this);
+            return MakeShared<FOdysseyAnimationCellImageRaster>(this, 1);
 
         UOdysseyAnimation* animation = GetAnimation();
-        return FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format());
+        return FOdysseyAnimationCellImageRaster::Create(this, 1, animation->Width(), animation->Height(), animation->Format());
     }
     return nullptr;
 }
@@ -492,8 +492,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
         int length = range.GetLowerBoundValue() - iFrameIndex;
 
         //Add a frame at current frame and extend it 
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format());
-        cell->SetLength(length);
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, length, animation->Width(), animation->Height(), animation->Format());
 
         FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
         mutator.Add({cell}, 0);
@@ -508,8 +507,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
             return;
 
         //Add a frame at current frame and extend previous frame to it 
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, animation->Width(), animation->Height(), animation->Format());
-        cell->SetLength(1);
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, 1, animation->Width(), animation->Height(), animation->Format());
         
         int cellCount = mCellsContainer->GetCells().Num();
         int lastCellLength = mCellsContainer->GetCells().Last()->GetLength();
@@ -543,11 +541,11 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     int newCellLength = currentCell->GetLength() - currentCellLength;
 
     TSharedPtr<FOdysseyAnimationCell> cell = currentCell->CreateCellFromFrame(cellFrameIndex);
-    cell->SetLength(newCellLength);
 
     FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
     mutator.SetLength(cellIndex, currentCellLength);
     mutator.Add({ cell }, cellIndex + 1);
+    mutator.SetLength(cellIndex + 1, newCellLength);
     mutator.Commit();
 
     /* TSharedPtr<FOdysseyAnimationCell> currentCell = mCellsContainer->GetCells()[cellIndex];

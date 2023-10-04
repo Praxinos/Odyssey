@@ -53,7 +53,7 @@ TSharedRef<FOdysseyAnimationCell>
 SOdysseyAnimationLayerImageVectorTimeline::OnCreateCell()
 {
     UOdysseyAnimation* animation = mAnimationLayerImageVector->GetAnimation();
-    return FOdysseyAnimationCellImageVector::Create(mAnimationLayerImageVector, animation->Width(), animation->Height());
+    return FOdysseyAnimationCellImageVector::Create(mAnimationLayerImageVector, 1, animation->Width(), animation->Height());
 }
 
 TSharedRef<SWidget>

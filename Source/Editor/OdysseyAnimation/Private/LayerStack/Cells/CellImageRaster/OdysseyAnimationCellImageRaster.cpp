@@ -8,21 +8,23 @@
 #include "OdysseyMediaRaster.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterExport.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImport.h"
+#include "Misc/OdysseyDuplicate.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageRaster"
 
 TSharedRef<FOdysseyAnimationCellImageRaster>
-FOdysseyAnimationCellImageRaster::Create(UOdysseyAnimationLayerImageRaster* iLayer, int iWidth, int iHeight, ::ULIS::eFormat iFormat)
+FOdysseyAnimationCellImageRaster::Create(UOdysseyAnimationLayerImageRaster* iLayer, int iLength, int iWidth, int iHeight, ::ULIS::eFormat iFormat)
 {
-    TSharedRef<FOdysseyAnimationCellImageRaster> cell = MakeShared<FOdysseyAnimationCellImageRaster>(iLayer);
+    TSharedRef<FOdysseyAnimationCellImageRaster> cell = MakeShared<FOdysseyAnimationCellImageRaster>(iLayer, iLength);
     cell->Init(iWidth, iHeight, iFormat);
     return cell;
 }
 
 TSharedRef<FOdysseyAnimationCellImageRaster>
-FOdysseyAnimationCellImageRaster::Create(UOdysseyAnimationLayerImageRaster* iLayer, TSharedPtr<::ULIS::FBlock> iBlock)
+FOdysseyAnimationCellImageRaster::Create(UOdysseyAnimationLayerImageRaster* iLayer, int iLength, TSharedPtr<::ULIS::FBlock> iBlock)
 {
-    TSharedRef<FOdysseyAnimationCellImageRaster> cell = MakeShared<FOdysseyAnimationCellImageRaster>(iLayer);
+    TSharedRef<FOdysseyAnimationCellImageRaster> cell = MakeShared<FOdysseyAnimationCellImageRaster>(iLayer, iLength);
     cell->Init(iBlock);
     return cell;
 }
@@ -48,8 +50,9 @@ FOdysseyAnimationCellImageRaster::~FOdysseyAnimationCellImageRaster()
     mRasterBlock->PostProcess().Unbind();
 }
 
-FOdysseyAnimationCellImageRaster::FOdysseyAnimationCellImageRaster(UOdysseyAnimationLayerImageRaster* iLayer)
-    : mLayer(iLayer)
+FOdysseyAnimationCellImageRaster::FOdysseyAnimationCellImageRaster(UOdysseyAnimationLayerImageRaster* iLayer, int iLength)
+    : FOdysseyAnimationCell(iLength)
+    , mLayer(iLayer)
     , mRasterBlock(MakeShared<FOdysseyRasterBlock>(mLayer))
     , mMediaRaster(nullptr)
 {
@@ -57,6 +60,15 @@ FOdysseyAnimationCellImageRaster::FOdysseyAnimationCellImageRaster(UOdysseyAnima
     mRasterBlock->OnBlockCommited().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockCommited);
     mRasterBlock->OnBlockPtrChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockPtrChanged);
     mRasterBlock->PostProcess().BindRaw(this, &FOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
+}
+
+TSharedPtr<FOdysseyAnimationCell>
+FOdysseyAnimationCellImageRaster::Clone(UOdysseyAnimationLayer* iLayer, int iLength) const
+{
+    TSharedPtr<FOdysseyAnimationCellImageRaster> cloneCell = MakeShared<FOdysseyAnimationCellImageRaster>(Cast<UOdysseyAnimationLayerImageRaster>(iLayer), 1);
+    ::Odyssey::Duplicate(const_cast<FOdysseyAnimationCellImageRaster*>(this), cloneCell.Get());
+    cloneCell->mLength = iLength;
+    return cloneCell;
 }
 
 void
@@ -228,7 +240,7 @@ FOdysseyAnimationCellImageRaster::CreateCellFromFrame(uint32 iFrameIndex) const
     ctx.Finish();
 
     //Create a new raster cell from the given block
-    return FOdysseyAnimationCellImageRaster::Create(mLayer, block);
+    return FOdysseyAnimationCellImageRaster::Create(mLayer, 1, block);
 }
 
 #undef LOCTEXT_NAMESPACE

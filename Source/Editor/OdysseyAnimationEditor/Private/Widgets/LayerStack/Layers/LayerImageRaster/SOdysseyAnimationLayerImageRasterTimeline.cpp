@@ -52,7 +52,7 @@ TSharedRef<FOdysseyAnimationCell>
 SOdysseyAnimationLayerImageRasterTimeline::OnCreateCell()
 {
     UOdysseyAnimation* animation = mAnimationLayerImageRaster->GetAnimation();
-    return FOdysseyAnimationCellImageRaster::Create(mAnimationLayerImageRaster, animation->Width(), animation->Height(), animation->Format());
+    return FOdysseyAnimationCellImageRaster::Create(mAnimationLayerImageRaster, 1, animation->Width(), animation->Height(), animation->Format());
 }
 
 TSharedRef<SWidget>
@@ -147,15 +147,50 @@ SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames()
 }
 
 void
+SOdysseyAnimationLayerImageRasterTimeline::CopyFrames()
+{
+    FOdysseyAnimationCellClipboard::Get()->Copy(mAnimationLayerImageRaster->GetCellsContainer(), mExtension->Timeline()->GetSelectedFrames());
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::CutFrames()
+{
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Cut Frames"));
+#endif
+    FOdysseyAnimationCellClipboard::Get()->Copy(mAnimationLayerImageRaster->GetCellsContainer(), mExtension->Timeline()->GetSelectedFrames());
+    DeleteSelectedFrames();
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::PasteFrames()
+{
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Paste Frames"));
+#endif
+    FOdysseyAnimationCellClipboard::Get()->Paste(mAnimationLayerImageRaster, mAnimationLayerImageRaster->GetCellsContainer(), mExtension->Animation()->CurrentFrame);
+}
+
+void
 SOdysseyAnimationLayerImageRasterTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
 {
     const FText commonSectionTitle = LOCTEXT("OdysseyAnimationTimelineCommonSection", "Common");
-    iMenuBuilder.BeginSection("Common", commonSectionTitle);
-        iMenuBuilder.PushCommandList(mCommandList);
+    iMenuBuilder.PushCommandList(mCommandList);
+    iMenuBuilder.BeginSection("Selection", LOCTEXT("LayerStackCommonSection", "Selection"));
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
-        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
-        iMenuBuilder.PopCommandList();
     iMenuBuilder.EndSection();
+
+    iMenuBuilder.BeginSection("Common", LOCTEXT("LayerStackCommonSection", "Common"));
+        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Duplicate);
+        iMenuBuilder.AddSeparator("");
+        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Cut);
+        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Copy);
+        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Paste);
+        iMenuBuilder.AddSeparator("");
+        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
+
+    iMenuBuilder.EndSection();
+    iMenuBuilder.PopCommandList();
 }
 
 void
@@ -169,6 +204,21 @@ SOdysseyAnimationLayerImageRasterTimeline::MapActions(TSharedPtr<FUICommandList>
     iCommandList->MapAction(
         FGenericCommands::Get().Delete,
         FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames)
+    );
+
+	iCommandList->MapAction(
+        FGenericCommands::Get().Copy,
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::CopyFrames)
+    );
+
+    iCommandList->MapAction(
+        FGenericCommands::Get().Cut,
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::CutFrames)
+    );
+
+    iCommandList->MapAction(
+        FGenericCommands::Get().Paste,
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageRasterTimeline::PasteFrames)
     );
 }
 

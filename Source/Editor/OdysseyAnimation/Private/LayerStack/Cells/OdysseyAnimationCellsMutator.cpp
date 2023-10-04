@@ -26,6 +26,95 @@ FOdysseyAnimationCellsMutator::Add(TArray<TSharedPtr<FOdysseyAnimationCell>> iCe
 }
 
 void
+FOdysseyAnimationCellsMutator::AddAtFrame(TArray<TSharedPtr<FOdysseyAnimationCell>> iCells, int iFrame)
+{
+    checkf(iFrame != INDEX_NONE, TEXT("Needs a valid frame Index"));
+    if (iFrame == INDEX_NONE)
+        return;
+
+    BreakCellAtFrame(iFrame); //break cell if needed
+
+    /**
+     * @brief Get the Range of frames covered by cells
+     */
+    FInt32Range frameRange = mContainer->GetFrameRange();
+
+    if (iFrame < frameRange.GetLowerBoundValue()) //out of container bounds
+    {
+        //The behaviour we chose is to :
+        // - offset the cells to the right if needed to insert all the cells
+        // - extend the first cell to join to the inserted cells if needed
+
+        TSharedPtr<FOdysseyAnimationCell> firstCell = mContainer->mCells.Num() > 0 ? mContainer->mCells[0] : nullptr;
+        if (firstCell)
+        {
+            int cellsLength = 0;
+            for (TSharedPtr<FOdysseyAnimationCell> cell : iCells)
+                cellsLength += cell->GetLength();
+
+            int firstCellExtension = (mContainer->GetOffset() - iFrame) - cellsLength;
+            if (firstCellExtension > 0)
+                SetLength(0, firstCell->GetLength() + firstCellExtension);
+        }
+        
+        SetOffset(iFrame); //Offset will always be at iFrame
+        Add(iCells, 0); //Insert all the cells the beginning of the container
+        return;
+    }
+
+    if (iFrame > frameRange.GetUpperBoundValue() + 1) //out of container bounds and needs frame extension
+    {
+        TSharedPtr<FOdysseyAnimationCell> lastCell = mContainer->mCells.Num() > 0 ? mContainer->mCells.Last() : nullptr;
+        if (lastCell)
+        {
+            int lastCellExtension = iFrame - frameRange.GetUpperBoundValue() - 1;
+            SetLength(mContainer->mCells.Num() - 1, lastCell->GetLength() +  lastCellExtension);
+            Add(iCells); //Insert all the cells the end of the container
+            return;
+        }
+        else
+        {
+            SetOffset(iFrame); //Offset will always be at iFrame
+            Add(iCells, 0); //Insert all the cells the beginning of the container*
+            return;
+        }
+    }
+
+    int cellIndex = mContainer->GetCellIndexAtFrame(iFrame);
+    Add(iCells, cellIndex);
+}
+
+void
+FOdysseyAnimationCellsMutator::BreakCellAtFrame(int iFrame)
+{
+    FInt32Range frameRange = mContainer->GetFrameRange();
+
+    if (iFrame < frameRange.GetLowerBoundValue() || iFrame > frameRange.GetUpperBoundValue()) //out of container bounds
+        return;
+
+    int cellFrame = mContainer->GetCellFrameAtFrame(iFrame);
+    if (cellFrame == INDEX_NONE || cellFrame == 0)
+        return;
+
+    int cellIndex = mContainer->GetCellIndexAtFrame(iFrame);
+    if (cellIndex == 0)
+        return;
+
+    TSharedPtr<FOdysseyAnimationCell> cell = mContainer->mCells[cellIndex];
+    if (!cell)
+        return;
+
+    TSharedPtr<FOdysseyAnimationCell> newCell = cell->CreateCellFromFrame(cellFrame);
+    if (!newCell)
+        return;
+
+    int newCellLength = cell->GetLength() - cellFrame;
+    SetLength(cellIndex, cellFrame);
+    Add({newCell}, cellIndex + 1);
+    SetLength(cellIndex + 1, newCellLength);
+}
+
+void
 FOdysseyAnimationCellsMutator::Remove(int iIndex, int iNumCells)
 {
     if (iNumCells < 1 || iIndex < 0 || iIndex + iNumCells > mContainer->mCells.Num())
@@ -201,13 +290,13 @@ FOdysseySetCellLengthMutation::FOdysseySetCellLengthMutation(TSharedRef<FOdyssey
 void
 FOdysseySetCellLengthMutation::Apply()
 {
-    mContainer->mCells[mIndex]->SetLength(mNewLength);
+    mContainer->mCells[mIndex]->mLength = mNewLength;
 }
 
 void
 FOdysseySetCellLengthMutation::Revert()
 {
-    mContainer->mCells[mIndex]->SetLength(mOldLength);
+    mContainer->mCells[mIndex]->mLength = mOldLength;
 }
 
 //=======================================================================================

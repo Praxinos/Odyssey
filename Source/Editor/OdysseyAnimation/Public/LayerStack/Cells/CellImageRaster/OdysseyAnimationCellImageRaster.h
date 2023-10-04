@@ -14,13 +14,13 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRaster
     : public FOdysseyAnimationCell
 {    
 public:
-    static TSharedRef<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
-    static TSharedRef<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, TSharedPtr<::ULIS::FBlock> iBlock);
+    static TSharedRef<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, int iLength, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
+    static TSharedRef<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, int iLength, TSharedPtr<::ULIS::FBlock> iBlock);
     static const FName& StaticType();
 
 public:
     virtual ~FOdysseyAnimationCellImageRaster();
-    FOdysseyAnimationCellImageRaster(UOdysseyAnimationLayerImageRaster* iLayer);
+    FOdysseyAnimationCellImageRaster(UOdysseyAnimationLayerImageRaster* iLayer, int iLength);
 
     void Init(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
     void Init(TSharedPtr<::ULIS::FBlock> iBlock);
@@ -29,6 +29,7 @@ public:
     virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const override;
 
 public:
+    virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const override;
     virtual const FName& GetType() const override;
     virtual void Serialize(FArchive& Ar);
     virtual void PostDuplicate() override;

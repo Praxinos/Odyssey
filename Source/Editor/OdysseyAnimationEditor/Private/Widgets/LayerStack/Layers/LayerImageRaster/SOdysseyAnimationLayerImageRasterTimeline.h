@@ -45,6 +45,9 @@ private:
 
     void SelectAllFrames();
     void DeleteSelectedFrames();
+    void CopyFrames();
+    void CutFrames();
+    void PasteFrames();
     void BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
     void MapActions(TSharedPtr<FUICommandList> iCommandList);
 

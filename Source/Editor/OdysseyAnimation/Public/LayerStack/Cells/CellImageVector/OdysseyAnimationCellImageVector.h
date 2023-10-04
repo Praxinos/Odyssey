@@ -15,14 +15,15 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVector
     : public FOdysseyAnimationCell
 {    
 public:
-    static TSharedRef<FOdysseyAnimationCellImageVector> Create(UOdysseyAnimationLayerImageVector* iLayer, int iWidth, int iHeight);
+    static TSharedRef<FOdysseyAnimationCellImageVector> Create(UOdysseyAnimationLayerImageVector* iLayer, int iLength, int iWidth, int iHeight);
     static const FName& StaticType();
 
 public:
     virtual ~FOdysseyAnimationCellImageVector();
-    FOdysseyAnimationCellImageVector(UOdysseyAnimationLayerImageVector* iLayer);
+    FOdysseyAnimationCellImageVector(UOdysseyAnimationLayerImageVector* iLayer, int iLength);
 
     void Init(int iWidth, int iHeight);
+    virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
     virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const override;
 

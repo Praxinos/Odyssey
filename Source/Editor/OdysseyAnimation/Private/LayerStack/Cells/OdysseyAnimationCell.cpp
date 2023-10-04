@@ -7,28 +7,30 @@
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCell"
 
-FOdysseyAnimationCell::FOnLengthChanged&
+/* FOdysseyAnimationCell::FOnLengthChanged&
 FOdysseyAnimationCell::OnLengthChanged()
 {
     static FOnLengthChanged onLengthChanged;
     return onLengthChanged;
-}
+} */
 
 FOdysseyAnimationCell::~FOdysseyAnimationCell()
 {
 }
 
-FOdysseyAnimationCell::FOdysseyAnimationCell()
-    : mLength(1)
+FOdysseyAnimationCell::FOdysseyAnimationCell(int iLength)
+    : mLength(iLength)
 {
 }
 
+/*
 void
 FOdysseyAnimationCell::SetLength(int iLength)
 {
     mLength = iLength;
     OnLengthChanged().Broadcast(AsShared());
 }
+*/
 
 int
 FOdysseyAnimationCell::GetLength() const

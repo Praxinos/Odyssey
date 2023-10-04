@@ -15,6 +15,8 @@ public:
 
 public:
     void Add(TArray<TSharedPtr<FOdysseyAnimationCell>> iCells, int iIndex = INDEX_NONE);
+    void AddAtFrame(TArray<TSharedPtr<FOdysseyAnimationCell>> iCells, int iFrame);
+    void BreakCellAtFrame(int iFrame);
     void Remove(int iIndex, int iNumCells = 1);
     void RemoveFrame(int iFrameIndex);
     void RemoveFrameRange(const FInt32Range& iRange);

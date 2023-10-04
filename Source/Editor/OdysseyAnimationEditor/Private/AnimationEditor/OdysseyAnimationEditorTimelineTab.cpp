@@ -171,12 +171,12 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
         TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, animation->Format()));
         if (textureBlock->Width() == animation->Width() && textureBlock->Height() == animation->Height() && textureBlock->Format() == animation->Format())
         {
-            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, textureBlock);
+            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, 1, textureBlock);
             cells.Add(cell);
         }
         else
         {
-            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, animation->Width(), animation->Height(), animation->Format());
+            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, 1, animation->Width(), animation->Height(), animation->Format());
             TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
             FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
             ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
@@ -250,7 +250,7 @@ FOdysseyAnimationEditorTimelineTab::OnLayerAdded(UOdysseyLayer* iLayer)
     if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
         UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, Animation()->Width(), Animation()->Height(), Animation()->Format());
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, Animation()->Width(), Animation()->Height(), Animation()->Format());
 
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));

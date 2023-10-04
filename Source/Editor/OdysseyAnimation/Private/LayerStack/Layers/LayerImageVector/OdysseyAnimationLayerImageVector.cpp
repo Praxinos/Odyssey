@@ -133,10 +133,10 @@ UOdysseyAnimationLayerImageVector::CreateCell( const FName& iCellType, bool iFor
     if (iCellType == FOdysseyAnimationCellImageVector::StaticType())
     {
         if (iForSerialization)
-            return MakeShared<FOdysseyAnimationCellImageVector>(this);
+            return MakeShared<FOdysseyAnimationCellImageVector>(this, 1);
 
         UOdysseyAnimation* animation = GetAnimation();
-        return FOdysseyAnimationCellImageVector::Create(this, animation->Width(), animation->Height());
+        return FOdysseyAnimationCellImageVector::Create(this, 1, animation->Width(), animation->Height());
     }
     return nullptr;
 }
@@ -313,8 +313,7 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
         int length = range.GetLowerBoundValue() - iFrameIndex;
 
         //Add a frame at current frame and extend it 
-        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(this, animation->Width(), animation->Height());
-        cell->SetLength(length);
+        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(this, length, animation->Width(), animation->Height());
 
         FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
         mutator.Add({cell}, 0);
@@ -329,8 +328,7 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
             return;
 
         //Add a frame at current frame and extend previous frame to it 
-        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(this, animation->Width(), animation->Height());
-        cell->SetLength(1);
+        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(this, 1, animation->Width(), animation->Height());
         
         int cellCount = mCellsContainer->GetCells().Num();
         int lastCellLength = mCellsContainer->GetCells().Last()->GetLength();
@@ -364,11 +362,11 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
     int newCellLength = currentCell->GetLength() - currentCellLength;
 
     TSharedPtr<FOdysseyAnimationCell> cell = currentCell->CreateCellFromFrame(cellFrameIndex); //TODO: Find a better name than "Break" to extract a cell from a single frame of another cell
-    cell->SetLength(newCellLength);
 
     FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
     mutator.SetLength(cellIndex, currentCellLength);
     mutator.Add({ cell }, cellIndex + 1);
+    mutator.SetLength(cellIndex + 1, newCellLength);
     mutator.Commit();
 }
 

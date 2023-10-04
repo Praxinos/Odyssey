@@ -6,18 +6,20 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImageRenderer.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorExport.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImport.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorBlock.h"
+#include "Misc/OdysseyDuplicate.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageVector"
 
 TSharedRef<FOdysseyAnimationCellImageVector>
-FOdysseyAnimationCellImageVector::Create(UOdysseyAnimationLayerImageVector* iLayer, int iWidth, int iHeight)
+FOdysseyAnimationCellImageVector::Create(UOdysseyAnimationLayerImageVector* iLayer, int iLength, int iWidth, int iHeight)
 {
-    TSharedRef<FOdysseyAnimationCellImageVector> cell = MakeShared<FOdysseyAnimationCellImageVector>(iLayer);
+    TSharedRef<FOdysseyAnimationCellImageVector> cell = MakeShared<FOdysseyAnimationCellImageVector>(iLayer, iLength);
     cell->Init(iWidth, iHeight);
     return cell;
 }
@@ -39,14 +41,24 @@ FOdysseyAnimationCellImageVector::~FOdysseyAnimationCellImageVector()
     mEngine = nullptr;
 }
 
-FOdysseyAnimationCellImageVector::FOdysseyAnimationCellImageVector(UOdysseyAnimationLayerImageVector* iLayer)
-    : mLayer(iLayer)
+FOdysseyAnimationCellImageVector::FOdysseyAnimationCellImageVector(UOdysseyAnimationLayerImageVector* iLayer, int iLength)
+    : FOdysseyAnimationCell(iLength)
+    , mLayer(iLayer)
     , mEngine(nullptr)
     , mVectorBlockId(FGuid::NewGuid())
     , mWidth(0)
     , mHeight(0)
     , mMediaVector(nullptr)
 {
+}
+
+TSharedPtr<FOdysseyAnimationCell>
+FOdysseyAnimationCellImageVector::Clone(UOdysseyAnimationLayer* iLayer, int iLength) const
+{
+    TSharedPtr<FOdysseyAnimationCellImageVector> cloneCell = MakeShared<FOdysseyAnimationCellImageVector>(Cast<UOdysseyAnimationLayerImageVector>(iLayer), 1);
+    ::Odyssey::Duplicate(const_cast<FOdysseyAnimationCellImageVector*>(this), cloneCell.Get());
+    cloneCell->mLength = iLength;
+    return cloneCell;
 }
 
 UOdysseyAnimationLayerImageVector*
@@ -214,7 +226,7 @@ FOdysseyAnimationCellImageVector::CreateCellFromFrame(uint32 iFrameIndex) const
 {
     //Copy Current Cell block at given frameindex
     //Create a new Vector cell from the given block
-    TSharedRef<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(mLayer, mWidth, mHeight);
+    TSharedRef<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(mLayer, 1, mWidth, mHeight);
     FOdysseyVectorScene* newScene = static_cast<FOdysseyVectorScene*>(mEngine->GetScene()->Copy());
     cell->GetEngine()->SetScene(newScene);
     newScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );

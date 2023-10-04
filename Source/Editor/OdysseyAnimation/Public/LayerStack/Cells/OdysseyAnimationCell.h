@@ -10,17 +10,18 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCell
     : public TSharedFromThis<FOdysseyAnimationCell>
     , public FOdysseyAnimationImageRenderingAbility
 {
-public:
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnLengthChanged, TSharedRef<FOdysseyAnimationCell>)
-    static FOnLengthChanged& OnLengthChanged();
+//public:
+    //DECLARE_MULTICAST_DELEGATE_OneParam(FOnLengthChanged, TSharedRef<FOdysseyAnimationCell>)
+    //static FOnLengthChanged& OnLengthChanged();
 
 public:
     virtual ~FOdysseyAnimationCell();
-    FOdysseyAnimationCell();
+    FOdysseyAnimationCell(int iLength);
 
 public:
-    void SetLength(int iLength);
+    //void SetLength(int iLength);
     int GetLength() const;
+    virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const = 0;
     virtual const FName& GetType() const = 0;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
     virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const;
@@ -33,7 +34,8 @@ private:
     //Import/Export
     friend class FOdysseyAnimationCellExport;
     friend class FOdysseyAnimationCellImport;
+    friend class FOdysseySetCellLengthMutation;
 
-private:
+protected:
     uint32 mLength;
 };

@@ -207,7 +207,7 @@ SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
     if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
         UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, mExtension->Animation()->Width(), mExtension->Animation()->Height(), mExtension->Animation()->Format());
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, mExtension->Animation()->Width(), mExtension->Animation()->Height(), mExtension->Animation()->Format());
 
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
@@ -222,7 +222,7 @@ SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
     if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
     {
         UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
-        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(layer, mExtension->Animation()->Width(), mExtension->Animation()->Height());
+        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(layer, 1, mExtension->Animation()->Width(), mExtension->Animation()->Height());
 
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Vector", "Add Frame"));
