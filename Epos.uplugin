@@ -51,6 +51,10 @@
     },
     {
       "Enabled": true,
+      "Name": "MediaPlate"
+    },
+    {
+      "Enabled": true,
       "Name": "Niagara"
     },
     {

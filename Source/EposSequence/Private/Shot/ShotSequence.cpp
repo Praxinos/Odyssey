@@ -8,6 +8,7 @@
 #include "Components/ActorComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "GameFramework/Actor.h"
+#include "MediaPlate.h"
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 #include "MovieScene.h"
@@ -106,6 +107,7 @@ bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContex
         || Object.IsA<UActorComponent>()
         || Object.IsA<ANiagaraActor>()
         || Object.IsA<APaperFlipbookActor>()
+        || Object.IsA<AMediaPlate>()
         || ExactCast<AActor>( &Object ); // Empty Actor
 }
 
