@@ -140,7 +140,7 @@ UOdysseyAnimationLayerImageRaster::GetOffset() const
 }
 */
 
-TSharedRef<FOdysseyAnimationCellsContainer>
+TSharedPtr<FOdysseyAnimationCellsContainer>
 UOdysseyAnimationLayerImageRaster::GetCellsContainer() const
 {
     return mCellsContainer;

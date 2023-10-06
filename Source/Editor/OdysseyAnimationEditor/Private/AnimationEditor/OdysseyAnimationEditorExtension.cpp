@@ -176,7 +176,7 @@ FOdysseyAnimationEditorExtension::OnCurrentLayerChanged(UOdysseyLayerStack* iLay
 	if ( iLayerStack != LayerStack() )
 		return;
 
-    Timeline()->SetSelectedFrames(FInt32Range()); //Clear Selected frames when changing layer
+    Timeline()->SetSelectedFrames(FInt32Range::Empty()); //Clear Selected frames when changing layer
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -9,6 +9,7 @@
 #include "DragDropOperations/OdysseyLayerStackDragDropOperation.h"
 
 class UOdysseyLayerStack;
+class FOdysseyLayerStackShortcuts;
 
 /**
  * Implements the Layer stack widget
@@ -44,6 +45,7 @@ public:
     void Construct(const FArguments& InArgs);
     
 public:
+    void SetIsRenamePending(bool iValue);
     TSharedPtr<FOdysseyLayerStackDragDropOperation> CreateDragDropOperation() const;
 
 protected:
@@ -82,104 +84,10 @@ private:
     void SetCurrentLayerFromSelectorItem();
 
     /**
-     * @brief Refresh the list of root layers
-     * 
-     */
-    void RefreshRootLayersArray();
-
-    /**
      * @brief Refreshes all rows expansion states from the state stored in the Layer
      * 
      */
 	void RefreshAllExpansionStates();
-
-protected:
-    //CommandList Actions
-    /**
-     * @brief Maps layerstacks actions to the commandList
-     * 
-     */
-    virtual void MapActionsToCommandList();
-
-    /**
-     * @brief Copy selected layers in clipboard
-     * 
-     */
-    void CopyLayers();
-
-    /**
-     * @brief Cut selected layers in clipboard
-     * 
-     */
-    void CutLayers();
-
-    /**
-     * @brief Paste layers in clipboard
-     * 
-     */
-    void PasteLayers();
-
-    /**
-     * @brief Selects all visible layers
-     * 
-     */
-    void SelectAllLayers();
-
-    /**
-     * @brief Delete Selected Layers
-     * 
-     */
-    void DeleteSelectedLayers();
-
-    /**
-     * @brief Defines wether the "DeleteSelectedLayers" can be called
-     * 
-     * @return true 
-     * @return false 
-     */
-    bool CanDeleteSelectedLayers();
-
-    /**
-     * @brief Duplicates Selected Layers and Select them afterward
-     * Also changes the current layer to be the duplicated version of the former current layer
-     * 
-     */
-    void DuplicateSelectedLayers();
-
-    /**
-     * @brief Start renaming the current layer
-     * Also, will scroll the layer into view first.
-     * 
-     */
-    void RenameCurrentLayer();
-
-    /**
-     * @brief Merge Selected Layers
-     * 
-     */
-    void MergeSelectedLayers();
-
-    /**
-     * @brief Defines wether the "MergeSelectedLayers" can be called
-     * 
-     * @return true 
-     * @return false 
-     */
-    bool CanMergeSelectedLayers();
-
-    /**
-     * @brief Flatten Selected Layers
-     * 
-     */
-    void FlattenSelectedLayers();
-
-    /**
-     * @brief Defines wether the "FlattenSelectedLayers" can be called
-     * 
-     * @return true 
-     * @return false 
-     */
-    bool CanFlattenSelectedLayers();
 
 protected:
     //Callbacks
@@ -245,13 +153,11 @@ public:
     void ResetDropZone();
 
 protected:
-    //TSlateAttribute<UOdysseyLayerStack*> mLayerStack;
     UOdysseyLayerStack* mLayerStack;
-
-    //const TArray<UOdysseyLayer*>* mRootLayers = nullptr;
-    TSharedRef<FUICommandList> mCommandList;
 
     bool mNeedsRefresh = false;
     bool mIsRenamePending = false;
     bool mDisplayDropZone = false;
+
+    TSharedPtr<FOdysseyLayerStackShortcuts> mLayerStackShortcuts;
 };

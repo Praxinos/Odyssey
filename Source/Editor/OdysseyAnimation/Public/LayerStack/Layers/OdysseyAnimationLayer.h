@@ -11,16 +11,20 @@
 
 #include "OdysseyAnimationLayer.generated.h"
 
+class FOdysseyAnimationCellsContainer;
+
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     : public UOdysseyLayer
     , public FOdysseyAnimationImageRenderingAbility
 {
     GENERATED_BODY()
+
 public:
     //Getters
     UOdysseyAnimation* GetAnimation() const;
     virtual FInt32Range GetFrameRange() const;
+    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const { return nullptr; }
     
 protected:
     //Property changes

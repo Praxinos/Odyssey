@@ -7,25 +7,12 @@
 #include "ToolMenus.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Commands/OdysseyLayerStackEditorCommands.h"
+#include "Commands/OdysseyLayerStackShortcuts.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
-#include "OdysseyLayerStackClipboard.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyLayerStackTreeView"
 
 static FName contextMenuName = "OdysseyLayerStackContextMenu";
-
-/*SLATE_IMPLEMENT_WIDGET(SOdysseyLayerStackTreeView)
-void
-SOdysseyLayerStackTreeView::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
-{
-	SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mLayerStack, EInvalidateWidgetReason::Layout)
-    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
-        [](SWidget& Widget)
-        {
-            static_cast<SOdysseyLayerStackTreeView&>(Widget).LoadLayerStack();
-        }
-    ));
-} */
 
 SOdysseyLayerStackTreeView::~SOdysseyLayerStackTreeView()
 {
@@ -37,9 +24,8 @@ SOdysseyLayerStackTreeView::~SOdysseyLayerStackTreeView()
 SOdysseyLayerStackTreeView::SOdysseyLayerStackTreeView()
     //: mLayerStack(*this, nullptr)
     : mLayerStack(nullptr)
-    , mCommandList(MakeShared<FUICommandList>())
+    , mLayerStackShortcuts(nullptr)
 {
-    MapActionsToCommandList();
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnCurrentLayerChanged);
     UOdysseyLayerStack::OnHierarchyChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerStackHierarchyChanged);
 	UOdysseyLayer::OnIsExpandedChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerIsExpandedChanged);
@@ -50,6 +36,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
 {
     //mLayerStack.Assign(*this, InArgs._LayerStack);
     mLayerStack = InArgs._LayerStack;
+    mLayerStackShortcuts = MakeShared<FOdysseyLayerStackShortcuts>(SharedThis(this), mLayerStack);
 
     TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
         .SplitterHandleSize(0.f) //Fixes alignment between header row and actual rows
@@ -127,6 +114,12 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
     CreateContextMenu();
 }
 
+void
+SOdysseyLayerStackTreeView::SetIsRenamePending(bool iValue)
+{
+    mIsRenamePending = iValue;
+}
+
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- SWidget overrides
 
@@ -193,7 +186,7 @@ SOdysseyLayerStackTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& Al
 FReply
 SOdysseyLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
-	if (mCommandList->ProcessCommandBindings(iKeyEvent))
+	if (mLayerStackShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
     return STreeView<UOdysseyLayer*>::OnKeyDown(iGeometry, iKeyEvent);
@@ -321,19 +314,6 @@ SOdysseyLayerStackTreeView::OnGetChildren(UOdysseyLayer* iParent, TArray<UOdysse
 }
 
 void
-SOdysseyLayerStackTreeView::RefreshRootLayersArray()
-{
-    /* mRootLayers.Empty();
-
-    UOdysseyLayerStack* mLayerStack = mLayerStack.Get();
-    if ( !layerstack )
-        return;
-
-    mRootLayers = mLayerStack->GetRootLayers();
-    RefreshAllExpansionStates(); */
-}
-
-void
 SOdysseyLayerStackTreeView::RefreshAllExpansionStates()
 {
     if ( !mLayerStack )
@@ -434,20 +414,12 @@ SOdysseyLayerStackTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStac
 
 // ContextMenu
 
-/*
-TArray<SOdysseyLayerStackTreeView::FOnExtendContextMenu>&
-SOdysseyLayerStackTreeView::GetOnExtendContextMenuDelegates()
-{
-    static TArray<FOnExtendContextMenu> onExtendContextMenuDelegates;
-    return onExtendContextMenuDelegates;
-}*/
-
 TSharedPtr<SWidget>
 SOdysseyLayerStackTreeView::OnContextMenuOpening()
 {
     //Create a new command, so that we can add context menu specific entries 
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
-    commandList->Append(mCommandList);
+    commandList->Append(mLayerStackShortcuts->GetCommandList());
 
     //Allows us to extend the menu context by inserting entries everywhere we want
     //Overriding CreateContextMenu does not allow that
@@ -500,228 +472,6 @@ SOdysseyLayerStackTreeView::ExtendContextMenu()
 	return TArray< TSharedPtr<FExtender> >();
 }
 
-void
-SOdysseyLayerStackTreeView::MapActionsToCommandList()
-{
-    mCommandList->MapAction(
-        FGenericCommands::Get().Copy,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CopyLayers)
-    );
-
-    mCommandList->MapAction(
-        FGenericCommands::Get().Paste,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::PasteLayers)
-    );
-
-    mCommandList->MapAction(
-        FGenericCommands::Get().Cut,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CutLayers)
-    );
-
-    mCommandList->MapAction(
-        FGenericCommands::Get().SelectAll,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::SelectAllLayers)
-    );
-
-    mCommandList->MapAction(
-        FGenericCommands::Get().Delete,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::DeleteSelectedLayers),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CanDeleteSelectedLayers)
-    );
-
-    mCommandList->MapAction(
-        FGenericCommands::Get().Duplicate,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::DuplicateSelectedLayers)
-    );
-
-    mCommandList->MapAction(
-        FGenericCommands::Get().Rename,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::RenameCurrentLayer)
-    );
-
-    mCommandList->MapAction(
-        FOdysseyLayerStackEditorCommands::Get().MergeSelectedLayers,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::MergeSelectedLayers),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CanMergeSelectedLayers)
-    );
-
-    mCommandList->MapAction(
-        FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers,
-        FExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::FlattenSelectedLayers),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyLayerStackTreeView::CanFlattenSelectedLayers)
-    );
-}
-
-// Commands
-
-void
-SOdysseyLayerStackTreeView::CopyLayers()
-{
-    FOdysseyLayerStackClipboard::Get()->Copy(GetSelectedItems());
-}
-
-void
-SOdysseyLayerStackTreeView::CutLayers()
-{
-    FOdysseyLayerStackClipboard::Get()->Copy(GetSelectedItems());
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Cut Layers"));
-#endif
-    DeleteSelectedLayers();
-}
-
-void
-SOdysseyLayerStackTreeView::PasteLayers()
-{
-    //First check if the copied layers can be pasted in this layerstack
-    const TArray<UOdysseyLayer*>& originalLayers = FOdysseyLayerStackClipboard::Get()->GetLayers();
-
-    if (originalLayers.Num() == 0)
-        return;
-
-    bool notSupported = originalLayers.ContainsByPredicate(
-        [this](UOdysseyLayer* iLayer)
-        {
-            return !mLayerStack->SupportsLayerClass(iLayer->GetClass());
-        }
-    );
-
-    if (notSupported)
-        return;
-
-    UOdysseyLayer* parent = mLayerStack->CurrentLayer.Get()->GetParent();
-    int indexInParent = mLayerStack->CurrentLayer.Get()->GetIndexInParent();
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Paste Layers"));
-#endif
-
-    TArray<UOdysseyLayer*> pastedLayers = mLayerStack->CopyLayers(originalLayers, parent, indexInParent);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(pastedLayers[0]));
-    SetItemSelection(pastedLayers, true);
-}
-
-void
-SOdysseyLayerStackTreeView::SelectAllLayers()
-{
-    if ( !mLayerStack )
-        return;
-
-    //ItemsSource is the ListView::ItemsSource, which contains all displayed items, even deep children
-    //It is NOT the same as TreeItemsSource or mRootLayers which only contain root elements
-    SetItemSelection(SListView<UOdysseyLayer*>::GetItems(), true);
-}
-
-void
-SOdysseyLayerStackTreeView::DeleteSelectedLayers()
-{
-    if ( !mLayerStack )
-        return;
-
-    TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
-    mLayerStack->RemoveLayers(selectedLayers);
-}
-
-bool
-SOdysseyLayerStackTreeView::CanDeleteSelectedLayers()
-{
-    if ( !mLayerStack )
-        return false;
-
-    TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
-        return false;
-
-    //If one of the root layers is not selected, we can delete selected layers
-    const TArray<UOdysseyLayer*>& rootLayers = mLayerStack->GetRootLayers();
-    for (UOdysseyLayer* rootLayer : rootLayers)
-    {
-        if (!selectedLayers.Contains(rootLayer))
-            return true;
-    }
-    
-    return false;
-}
-
-void
-SOdysseyLayerStackTreeView::DuplicateSelectedLayers()
-{
-    if ( !mLayerStack )
-        return;
-
-    TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
-        return;
-
-	//manage current layer seperately
-	TArray<UOdysseyLayer*> duplicatedLayers = mLayerStack->DuplicateLayers(selectedLayers);
-}
-
-void
-SOdysseyLayerStackTreeView::RenameCurrentLayer()
-{
-    if ( !mLayerStack )
-        return;
-
-    if (!mLayerStack->CurrentLayer)
-        return;
-    
-    mIsRenamePending = true; //has to come before ScrollItemIntoView() in case the item is already into view, which will trigger OnItemScrolledIntoView() immediately
-	RequestScrollIntoView(mLayerStack->CurrentLayer.Get());
-}
-
-void
-SOdysseyLayerStackTreeView::MergeSelectedLayers()
-{
-    if ( !mLayerStack )
-        return;
-
-    TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
-        return;
-
-    mLayerStack->MergeLayers(selectedLayers);
-}
-
-bool
-SOdysseyLayerStackTreeView::CanMergeSelectedLayers()
-{
-    if ( !mLayerStack )
-        return false;
-
-    TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
-        return false;
-
-    return mLayerStack->CanMergeLayers(selectedLayers);
-}
-
-void
-SOdysseyLayerStackTreeView::FlattenSelectedLayers()
-{
-    if ( !mLayerStack )
-        return;
-
-    TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
-        return;
-
-    mLayerStack->FlattenLayers(selectedLayers);
-}
-
-bool
-SOdysseyLayerStackTreeView::CanFlattenSelectedLayers()
-{
-    if ( !mLayerStack )
-        return false;
-
-    TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
-        return false;
-
-    return mLayerStack->CanFlattenLayers(selectedLayers);
-}
-    
 void
 SOdysseyLayerStackTreeView::OnLayerIsExpandedChanged(UOdysseyLayer* iLayerNode)
 {

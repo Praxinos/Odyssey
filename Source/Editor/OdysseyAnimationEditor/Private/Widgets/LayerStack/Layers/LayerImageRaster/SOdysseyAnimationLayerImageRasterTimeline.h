@@ -32,9 +32,6 @@ public:
 
 public:
     virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
-    virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
-    
-    virtual bool SupportsKeyboardFocus() const override;
 
 private:
     TSharedRef<FOdysseyAnimationCell> OnCreateCell();
@@ -43,6 +40,8 @@ private:
     void OnBuildCellsContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
     void OnBuildFrameSelectorContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
 
+private:
+    //Context Menu
     void SelectAllFrames();
     void DeleteSelectedFrames();
     void CopyFrames();

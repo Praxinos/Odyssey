@@ -7,9 +7,9 @@
 #include "Widgets/SOdysseyAnimationPlaybackControls.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerStack"
-
 
 SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationLayerStack)
 void
@@ -79,7 +79,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
         +SVerticalBox::Slot()
         .FillHeight(1.0f)
         [
-            SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
+            SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView, mExtension)
             .LayerStack(mExtension->LayerStack())
             .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
             .HeaderManualWidth(200.f)

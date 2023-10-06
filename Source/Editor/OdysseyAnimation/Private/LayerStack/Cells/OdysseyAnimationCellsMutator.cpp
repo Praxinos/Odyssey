@@ -5,7 +5,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 
 
-FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UObject* iOwner, TSharedRef<FOdysseyAnimationCellsContainer> iContainer)
+FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UObject* iOwner, TSharedPtr<FOdysseyAnimationCellsContainer> iContainer)
     : FOdysseyMutator(iOwner, "FOdysseyAnimationCellsMutator")
     , mContainer(iContainer)
 {
@@ -237,7 +237,7 @@ FOdysseyAnimationCellsMutator::SetOffset(int iOffset)
 
 //=======================================================================================
 
-FOdysseyAddCellsMutation::FOdysseyAddCellsMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells)
+FOdysseyAddCellsMutation::FOdysseyAddCellsMutation(TSharedPtr<FOdysseyAnimationCellsContainer> iContainer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells)
     : mContainer(iContainer)
     , mIndex(iIndex)
     , mCells(iCells)
@@ -258,7 +258,7 @@ FOdysseyAddCellsMutation::Revert()
 
 //=======================================================================================
 
-FOdysseyRemoveCellsMutation::FOdysseyRemoveCellsMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells)
+FOdysseyRemoveCellsMutation::FOdysseyRemoveCellsMutation(TSharedPtr<FOdysseyAnimationCellsContainer> iContainer, int iIndex, TArray<TSharedPtr<FOdysseyAnimationCell>> iCells)
     : mContainer(iContainer)
     , mIndex(iIndex)
     , mCells(iCells)
@@ -279,7 +279,7 @@ FOdysseyRemoveCellsMutation::Revert()
 
 //=======================================================================================
 
-FOdysseySetCellLengthMutation::FOdysseySetCellLengthMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iIndex, int iNewLength, int iOldLength)
+FOdysseySetCellLengthMutation::FOdysseySetCellLengthMutation(TSharedPtr<FOdysseyAnimationCellsContainer> iContainer, int iIndex, int iNewLength, int iOldLength)
     : mContainer(iContainer)
     , mIndex(iIndex)
     , mNewLength(iNewLength)
@@ -302,7 +302,7 @@ FOdysseySetCellLengthMutation::Revert()
 //=======================================================================================
 
 
-FOdysseySetCellsOffsetMutation::FOdysseySetCellsOffsetMutation(TSharedRef<FOdysseyAnimationCellsContainer> iContainer, int iNewOffset, int iOldOffset)
+FOdysseySetCellsOffsetMutation::FOdysseySetCellsOffsetMutation(TSharedPtr<FOdysseyAnimationCellsContainer> iContainer, int iNewOffset, int iOldOffset)
     : mContainer(iContainer)
     , mNewOffset(iNewOffset)
     , mOldOffset(iOldOffset)

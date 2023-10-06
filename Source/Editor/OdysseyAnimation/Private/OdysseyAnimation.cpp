@@ -75,7 +75,7 @@ UOdysseyAnimation::GetFrameRange() const
 	// - startPoint / endPoint
 
 	if ( !mLayerStack )
-		return FInt32Range();
+		return FInt32Range::Empty();
 
 	return mLayerStack->GetFrameRange();
 }

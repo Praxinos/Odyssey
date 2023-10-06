@@ -66,7 +66,7 @@ UOdysseyAnimationLayerImageVector::GetLightTable() const
     return mLightTable;
 }
 
-TSharedRef<FOdysseyAnimationCellsContainer>
+TSharedPtr<FOdysseyAnimationCellsContainer>
 UOdysseyAnimationLayerImageVector::GetCellsContainer() const
 {
     return mCellsContainer;

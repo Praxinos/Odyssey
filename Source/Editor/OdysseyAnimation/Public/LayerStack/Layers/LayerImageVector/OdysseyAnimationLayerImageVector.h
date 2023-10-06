@@ -68,7 +68,7 @@ public:
 
 public:
     TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
-    TSharedRef<FOdysseyAnimationCellsContainer> GetCellsContainer() const;
+    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override;
 
 public:
 	//FOdysseyImageRenderingAbility overrides

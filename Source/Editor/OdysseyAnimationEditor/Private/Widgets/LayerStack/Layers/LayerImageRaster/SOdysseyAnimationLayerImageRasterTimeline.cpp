@@ -80,20 +80,11 @@ SOdysseyAnimationLayerImageRasterTimeline::OnBuildFrameSelectorContextMenu(FMenu
     BuildContextMenu(iMenuBuilder, iFrame);
 }
 
-bool
+/*bool
 SOdysseyAnimationLayerImageRasterTimeline::SupportsKeyboardFocus() const
 {
     return true;
-}
-
-FReply
-SOdysseyAnimationLayerImageRasterTimeline::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
-{
-	if (mCommandList->ProcessCommandBindings(iKeyEvent))
-        return FReply::Handled();
-
-    return SCompoundWidget::OnKeyDown(iGeometry, iKeyEvent);
-}
+} */
 
 FReply
 SOdysseyAnimationLayerImageRasterTimeline::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
@@ -149,7 +140,8 @@ SOdysseyAnimationLayerImageRasterTimeline::DeleteSelectedFrames()
 void
 SOdysseyAnimationLayerImageRasterTimeline::CopyFrames()
 {
-    FOdysseyAnimationCellClipboard::Get()->Copy(mAnimationLayerImageRaster->GetCellsContainer(), mExtension->Timeline()->GetSelectedFrames());
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(mAnimationLayerImageRaster, mExtension->Timeline()->GetSelectedFrames());
+    FOdysseyClipboard::Get().SetData(clipboardData);
 }
 
 void
@@ -158,17 +150,23 @@ SOdysseyAnimationLayerImageRasterTimeline::CutFrames()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Cut Frames"));
 #endif
-    FOdysseyAnimationCellClipboard::Get()->Copy(mAnimationLayerImageRaster->GetCellsContainer(), mExtension->Timeline()->GetSelectedFrames());
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(mAnimationLayerImageRaster, mExtension->Timeline()->GetSelectedFrames());
+    FOdysseyClipboard::Get().SetData(clipboardData);
     DeleteSelectedFrames();
 }
 
 void
 SOdysseyAnimationLayerImageRasterTimeline::PasteFrames()
 {
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyAnimationCellClipboardData>();
+    if (!clipboardData)
+        return;
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Paste Frames"));
 #endif
-    FOdysseyAnimationCellClipboard::Get()->Paste(mAnimationLayerImageRaster, mAnimationLayerImageRaster->GetCellsContainer(), mExtension->Animation()->CurrentFrame);
+
+    clipboardData->Paste(mAnimationLayerImageRaster, mExtension->Animation()->CurrentFrame);
 }
 
 void

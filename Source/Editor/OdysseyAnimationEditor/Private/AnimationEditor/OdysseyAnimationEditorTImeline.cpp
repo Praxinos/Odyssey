@@ -11,6 +11,7 @@
 FOdysseyAnimationEditorTimeline::FOdysseyAnimationEditorTimeline()
     : mZoom(1.f)
     , mOffset(0.f)
+    , mSelectedFrames(FInt32Range::Empty())
 {
 }
 

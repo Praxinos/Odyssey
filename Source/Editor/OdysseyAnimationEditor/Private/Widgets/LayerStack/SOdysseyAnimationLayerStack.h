@@ -10,6 +10,8 @@
  */
 
 class FOdysseyAnimationEditorExtension;
+class SOdysseyLayerStackTreeView;
+
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget
 {

@@ -57,6 +57,8 @@ public:
 
     virtual float GetImageRenderingOpacity() const override;
 
+    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override { return nullptr; }
+
 private:
     //Property changed methods
     void OpacityChanged();

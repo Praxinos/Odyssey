@@ -1,22 +1,30 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "LayerStack/Cells/OdysseyAnimationCellClipboard.h"
+#include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
 
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 
-FOdysseyAnimationCellClipboard*
-FOdysseyAnimationCellClipboard::Get()
+FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData()
+    : IOdysseyClipboardData(StaticId())
 {
-    static FOdysseyAnimationCellClipboard clipboard;
-    return &clipboard;
+
 }
 
-FOdysseyAnimationCellClipboard::FOdysseyAnimationCellClipboard()
+FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData(UOdysseyAnimationLayer* iLayer, const FInt32Range& iSelectedFrames)
+    : IOdysseyClipboardData(StaticId())
 {
+    Copy(iLayer->GetCellsContainer(), iSelectedFrames);
+}
+
+const FGuid&
+FOdysseyAnimationCellClipboardData::StaticId()
+{
+    static FGuid id = FGuid::NewGuid();
+    return id;
 }
 
 void
-FOdysseyAnimationCellClipboard::Copy(TSharedRef<FOdysseyAnimationCellsContainer> iCellContainer, const FInt32Range& iSelectedFrames)
+FOdysseyAnimationCellClipboardData::Copy(TSharedPtr<FOdysseyAnimationCellsContainer> iCellContainer, const FInt32Range& iSelectedFrames)
 {
     mCellCopies.Empty();
 
@@ -51,9 +59,9 @@ FOdysseyAnimationCellClipboard::Copy(TSharedRef<FOdysseyAnimationCellsContainer>
 }
 
 void
-FOdysseyAnimationCellClipboard::Paste(UOdysseyAnimationLayer* iLayer, TSharedRef<FOdysseyAnimationCellsContainer> iCellContainer, int iFrame)
+FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iFrame) const
 {
-    FOdysseyAnimationCellsMutator mutator(iLayer, iCellContainer);
+    FOdysseyAnimationCellsMutator mutator(iLayer, iLayer->GetCellsContainer());
 
     TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
     for (const FCellCopy& cellCopy : mCellCopies)
@@ -64,14 +72,9 @@ FOdysseyAnimationCellClipboard::Paste(UOdysseyAnimationLayer* iLayer, TSharedRef
     mutator.AddAtFrame(cells, iFrame);
 }
 
-TArray<TSharedPtr<FOdysseyAnimationCell>>
-FOdysseyAnimationCellClipboard::GetCells() const
+bool
+FOdysseyAnimationCellClipboardData::CanPaste(UOdysseyAnimationLayer* iLayer) const
 {
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
-    for (const FCellCopy& cellCopy : mCellCopies)
-    {
-        cells.Add(cellCopy.mCell);
-    }
-
-    return cells;
+    //TODO: check if iLayer cells types are compatible with the copied cells
+    return true;
 }

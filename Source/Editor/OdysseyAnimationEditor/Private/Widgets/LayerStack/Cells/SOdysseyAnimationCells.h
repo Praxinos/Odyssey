@@ -32,7 +32,7 @@ public:
         const FArguments& iArgs, 
         FOdysseyAnimationEditorExtension* iExtension,
         class UOdysseyAnimationLayer* iLayer,
-        TSharedRef<FOdysseyAnimationCellsContainer> iCellsContainer
+        TSharedPtr<FOdysseyAnimationCellsContainer> iCellsContainer
     );
 
 private:
@@ -41,7 +41,6 @@ private:
 public:
     //SWidget overrides
 	virtual bool SupportsKeyboardFocus() const override;
-    virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
     virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 

@@ -36,7 +36,7 @@ SOdysseyAnimationCells::Construct(
     const FArguments& InArgs,
     FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayer* iAnimationLayer,
-    TSharedRef<FOdysseyAnimationCellsContainer> iCellsContainer
+    TSharedPtr<FOdysseyAnimationCellsContainer> iCellsContainer
 )
 {
     ensure(iAnimationLayer);
@@ -393,15 +393,6 @@ bool
 SOdysseyAnimationCells::SupportsKeyboardFocus() const
 {
     return true;
-}
-
-FReply
-SOdysseyAnimationCells::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
-{
-	if (mCommandList->ProcessCommandBindings(iKeyEvent))
-        return FReply::Handled();
-
-    return SCompoundWidget::OnKeyDown(iGeometry, iKeyEvent);
 }
 
 FReply

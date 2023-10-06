@@ -151,9 +151,7 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseButtonUp(const FGeometry& iGeomet
 bool
 SOdysseyAnimationTimelineFrameSelector::GetSelectedFrames(int& oStartFrame, int& oEndFrame) const
 {
-	bool isLowerClosed = mExtension->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
-	bool isUpperClosed = mExtension->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
-	if (!mIsSelecting && (!isLowerClosed || !isUpperClosed))
+	if (!mIsSelecting && mExtension->Timeline()->GetSelectedFrames().IsEmpty())
 		return false;
 
 	oStartFrame = mIsSelecting ? mSelectionData.mSelectedFrames.GetLowerBoundValue() : mExtension->Timeline()->GetSelectedFrames().GetLowerBoundValue();
