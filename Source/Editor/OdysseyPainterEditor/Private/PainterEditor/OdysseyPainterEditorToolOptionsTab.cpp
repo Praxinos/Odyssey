@@ -49,6 +49,7 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
         ];
 
     SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterDrawingTool()));
+    SetWidgetForTool(mEditor->GetRasterTransformTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterTransformTool()));
     SetWidgetForTool(mEditor->GetVectorPathDrawingTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathDrawingTool()));
     SetWidgetForTool(mEditor->GetVectorPathEditTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathEditTool()));
     SetWidgetForTool(mEditor->GetVectorPrimitiveDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPrimitiveDrawingTool()));

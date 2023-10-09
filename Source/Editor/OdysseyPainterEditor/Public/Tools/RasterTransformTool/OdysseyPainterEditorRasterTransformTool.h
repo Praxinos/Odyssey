@@ -10,6 +10,14 @@
 class FOdysseyHUDPolygon;
 class FOdysseyHUDHandle;
 
+UENUM()
+enum class EOdysseySelectionShape : uint8
+{
+    Rectangle,
+    FreeHand,
+    Ellipse
+};
+
 enum class EOdysseyTransformConstrain
 {
     NoConstrain,
@@ -54,6 +62,7 @@ private:
     void ConstrainToParallelogram(FVector2D iPosition);
     void CreateTransformBlockFromReferenceBlock();
     ::ULIS::FRectI GetTransformAreaBoundingRect();
+    TArray<::ULIS::FRectI> GetTransformAreaAsRectangles();
     void BlendTransformAreaToPaintBlock();
 
     void ClearBlock( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock );
@@ -64,12 +73,18 @@ private:
     //Resets the tool and its HUD
     void ClearTransform();
 
+public:
+    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    EOdysseySelectionShape SelectionShape;
+
 private: 
-    FOdysseyPaintEngine                 mPaintEngine;
+
+    FOdysseyPaintEngine mPaintEngine;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mReferenceBlock;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
 
     FOdysseyHUDPolygon* mTransformArea;
+    bool mTransformAreaSet;
     TArray<FOdysseyHUDHandle*> mHandles;
 
     FOdysseyRasterBlockMutator mRasterMutator;
