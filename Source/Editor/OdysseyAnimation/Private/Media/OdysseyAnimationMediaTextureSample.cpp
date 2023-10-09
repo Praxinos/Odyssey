@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Media/OdysseyAnimationMediaTextureSample.h"
 #include "Engine/Texture2D.h"
@@ -9,13 +10,14 @@ FOdysseyAnimationMediaTextureSample::~FOdysseyAnimationMediaTextureSample()
 {
 }
 
-FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2D* iTexture1, UTexture2D* iTexture2)
+FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2D* iTexture)
     : mDimensions(iWidth, iHeight)
     , mTime(0)
     , mDuration(0)
-    , mTexture1(iTexture1)
-    , mTexture2(iTexture2)
-    , mCurrentTexture(false)
+    , mTexture(iTexture)
+    //, mTexture2(iTexture2)
+    //, mCurrentTexture(false)
+    , mConverter(this)
 {
 }
 
@@ -73,19 +75,26 @@ FOdysseyAnimationMediaTextureSample::GetStride() const
 FRHITexture*
 FOdysseyAnimationMediaTextureSample::GetTexture() const
 {
-    FTexture2DResource* resource1 = static_cast<FTexture2DResource*>(mTexture1->GetResource());
-    if (!resource1)
+    FTexture2DResource* resource = static_cast<FTexture2DResource*>(mTexture->GetResource());
+    if (!resource)
         return nullptr;
 
-    FTexture2DResource* resource2 = static_cast<FTexture2DResource*>(mTexture2->GetResource());
+    /* FTexture2DResource* resource2 = static_cast<FTexture2DResource*>(mTexture2->GetResource());
     if (!resource2)
-        return nullptr;
+        return nullptr; */
 
-    mCurrentTexture = !mCurrentTexture;
-    return mCurrentTexture ? resource1->GetTexture2DRHI() : resource2->GetTexture2DRHI();
+    //mCurrentTexture = !mCurrentTexture;
+    return resource->GetTexture2DRHI();//mCurrentTexture ? resource1->GetTexture2DRHI() : resource2->GetTexture2DRHI();
 }
 
 #endif //WITH_ENGINE
+
+IMediaTextureSampleConverter*
+FOdysseyAnimationMediaTextureSample::GetMediaTextureSampleConverter()
+{
+    return &mConverter;
+}
+
 
 FMediaTimeStamp
 FOdysseyAnimationMediaTextureSample::GetTime() const

@@ -49,7 +49,7 @@ private:
 	TSharedPtr<class FOdysseyAnimationMediaTextureSample> mSample;
 	int mCurrentFrameIndex;
 	TArray<FGuid> mImageRenderingComposition;
-	TStrongObjectPtr<UTexture2D> mTexture1; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
-	TStrongObjectPtr<UTexture2D> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
+	TStrongObjectPtr<UTexture2D> mTexture; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
+	//TStrongObjectPtr<UTexture2D> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
 	FULISInvalidTileMap mInvalidTileMap;
 };

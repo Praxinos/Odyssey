@@ -13,8 +13,8 @@ FOdysseyAnimationMediaSamples::FOdysseyAnimationMediaSamples()
 	: mAnimation(nullptr)
     , mCurrentFrameIndex(INDEX_NONE)
     , mImageRenderingComposition()
-    , mTexture1()
-    , mTexture2()
+    , mTexture()
+    //, mTexture2()
 {
 }
 
@@ -31,14 +31,13 @@ FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
 	mAnimation = iAnimation;
 	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationMediaSamples::OnImageRenderingChanged);
 	//IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddRaw(this, &FOdysseyAnimationMediaSamples::OnImageRenderingCompositionChanged);
-	mTexture1 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
-	mTexture2 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
-	mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->Width(), mAnimation->Height(), mTexture1.Get(), mTexture2.Get());
+	mTexture = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
+	//mTexture2 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
+	mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->Width(), mAnimation->Height(), mTexture.Get());
 
 	mInvalidTileMap = FULISInvalidTileMap(64, mAnimation->Width(), mAnimation->Height());
 
-	mTexture1->UpdateResource();
-	mTexture2->UpdateResource();
+	mTexture->UpdateResource();
 }
 
 void
@@ -50,8 +49,7 @@ FOdysseyAnimationMediaSamples::OnClose()
 
 	mAnimation = nullptr;
 	mSample = nullptr;
-	mTexture1 = nullptr;
-	mTexture2 = nullptr;
+	mTexture = nullptr;
 }
 
 void
@@ -299,8 +297,7 @@ FOdysseyAnimationMediaSamples::CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBl
 		{
 			regions.Emplace(rect.x, rect.y, rect.x, rect.y, rect.w, rect.h);
 		}
-		mTexture1->UpdateTextureRegions(0, regions.Num(), regions.GetData(), iBlock->BytesPerScanLine(), iBlock->BytesPerPixel(), iBlock->Bits());
-		mTexture2->UpdateTextureRegions(0, regions.Num(), regions.GetData(), iBlock->BytesPerScanLine(), iBlock->BytesPerPixel(), iBlock->Bits());
+		mTexture->UpdateTextureRegions(0, regions.Num(), regions.GetData(), iBlock->BytesPerScanLine(), iBlock->BytesPerPixel(), iBlock->Bits());
 
 		FRenderCommandFence fence;
 		fence.BeginFence();
@@ -325,16 +322,7 @@ FOdysseyAnimationMediaSamples::CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBl
 
 	for (int i = 0; i < regions.Num(); i++)
 	{
-		mTexture1->UpdateTextureRegions(
-			0,
-			1,
-			&regions[i],
-			blocks[i]->BytesPerScanLine(),
-			blocks[i]->BytesPerPixel(),
-			blocks[i]->Bits()
-		);
-
-		mTexture2->UpdateTextureRegions(
+		mTexture->UpdateTextureRegions(
 			0,
 			1,
 			&regions[i],

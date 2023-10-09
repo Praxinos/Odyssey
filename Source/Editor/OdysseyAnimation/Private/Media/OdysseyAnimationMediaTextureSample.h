@@ -1,16 +1,21 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #pragma once
 
 #include "IMediaTextureSample.h"
+#include "Media/OdysseyAnimationMediaTextureSampleConverter.h"
+
+class FOdysseyAnimationMediaTextureSampleConverter;
 
 class FOdysseyAnimationMediaTextureSample
 	: public IMediaTextureSample
+	, public TSharedFromThis<FOdysseyAnimationMediaTextureSample>
 {
 public:
 	//Constructor / Destructor
 	virtual ~FOdysseyAnimationMediaTextureSample();
-	FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2D* iTexture1, UTexture2D* iTexture2);
+	FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2D* iTexture);
 
 public:
 	void SetTime(FMediaTimeStamp iTime);
@@ -28,6 +33,14 @@ public:
 	 * @see GetDim, GetDuration, GetFormat, GetOutputDim, GetStride, GetTexture, GetTime
 	 */
 	virtual const void* GetBuffer();
+
+	/**
+	 * Get media texture sample converter
+	 * Allows us to provide directly the texture instead of having to copy it
+	 *
+	 * @return texture sample converter
+	 */
+	virtual IMediaTextureSampleConverter* GetMediaTextureSampleConverter() override;
 
 	/**
 	 * Get the width and height of the sample.
@@ -123,7 +136,8 @@ private:
 	FIntPoint mDimensions;
 	FMediaTimeStamp mTime;
 	FTimespan mDuration;
-	UTexture2D* mTexture1; 
-	UTexture2D* mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
-	mutable bool mCurrentTexture; //PATCH: true => use mTexture1, false => use mTexture2
+	UTexture2D* mTexture; 
+	//UTexture2D* mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
+	//mutable bool mCurrentTexture; //PATCH: true => use mTexture1, false => use mTexture2
+	FOdysseyAnimationMediaTextureSampleConverter mConverter;
 };
