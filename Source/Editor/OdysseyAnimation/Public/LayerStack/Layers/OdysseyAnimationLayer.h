@@ -12,6 +12,7 @@
 #include "OdysseyAnimationLayer.generated.h"
 
 class FOdysseyAnimationCellsContainer;
+class FOdysseyAnimationLightTable;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayer
@@ -36,4 +37,5 @@ public:
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
 };

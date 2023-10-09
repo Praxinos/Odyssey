@@ -3,7 +3,7 @@
 
 #include "Widgets/SOdysseyAnimationLightTable.h"
 
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
 #include "Widgets/Input/SEditableTextBox.h"
@@ -57,7 +57,7 @@ SOdysseyAnimationLightTable::GetLightTable() const
 	if (!layerStack)
 		return nullptr;
 
-	UOdysseyAnimationLayerImageRaster* currentLayer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
 	if (!currentLayer)
 		return nullptr;
 

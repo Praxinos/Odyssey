@@ -67,7 +67,7 @@ public:
     virtual FInt32Range GetFrameRange() const override;
 
 public:
-    TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
+    virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const override;
     virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override;
 
 public:

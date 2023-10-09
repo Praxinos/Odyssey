@@ -38,6 +38,12 @@ UOdysseyAnimationLayer::GetFrameRange() const
     return FInt32Range::Hull(ranges);
 }
 
+TSharedPtr<FOdysseyAnimationLightTable>
+UOdysseyAnimationLayer::GetLightTable() const
+{
+    return nullptr;
+}
+
 void
 UOdysseyAnimationLayer::ChildrenChanged()
 {
