@@ -11,7 +11,6 @@
 SOdysseyAnimationTimelineFrameSelector::SOdysseyAnimationTimelineFrameSelector()
 	: mCommandList(MakeShared<FUICommandList>())
 {
-	MapActions(mCommandList);
 }
 
 void
@@ -21,7 +20,6 @@ SOdysseyAnimationTimelineFrameSelector::Construct(
 )
 {
 	mExtension = iExtension;
-	mOnBuildContextMenu = InArgs._OnBuildContextMenu;
 
 	ChildSlot
 	[
@@ -130,20 +128,6 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseButtonUp(const FGeometry& iGeomet
 		mExtension->Timeline()->SetSelectedFrames(mSelectionData.mSelectedFrames);
 		return FReply::Handled().ReleaseMouseCapture();
 	}
-	else if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
-    {
-		int frame = mExtension->Timeline()->GetFrameIndexAtMousePosition(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
-        if (frame == INDEX_NONE)
-            return FReply::Unhandled();
-
-		FMenuBuilder menuBuilder(true, mCommandList);
-		BuildContextMenu(menuBuilder, frame);
-
-		TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
-		FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
-		FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
-    	return FReply::Handled();
-	}
 	
 	return FReply::Unhandled();
 }
@@ -159,16 +143,6 @@ SOdysseyAnimationTimelineFrameSelector::GetSelectedFrames(int& oStartFrame, int&
 	return true;
 }
 
-void
-SOdysseyAnimationTimelineFrameSelector::BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
-{
-    mOnBuildContextMenu.ExecuteIfBound(iMenuBuilder, iFrame);
-}
-
-void
-SOdysseyAnimationTimelineFrameSelector::MapActions(TSharedPtr<FUICommandList> iCommandList)
-{
-}
 //////////////////////////////////////////////////////////////////////////
 
 #undef LOCTEXT_NAMESPACE

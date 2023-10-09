@@ -3,17 +3,15 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.h"
 
-class FOdysseyAnimationEditorExtension;
-class FOdysseyAnimationCell;
 class UOdysseyAnimationLayerImageVector;
 
 /**
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimeline
-    : public SCompoundWidget
+    : public SOdysseyAnimationLayerImageTimeline
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimeline)
@@ -22,7 +20,7 @@ public:
 
 public:
     // Construction / Destruction
-    ~SOdysseyAnimationLayerImageVectorTimeline();
+    virtual ~SOdysseyAnimationLayerImageVectorTimeline();
     SOdysseyAnimationLayerImageVectorTimeline();
     void Construct(
         const FArguments& iArgs, 
@@ -30,27 +28,7 @@ public:
         UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
     );
 
-public:
-    virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
-    virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
-    
-    virtual bool SupportsKeyboardFocus() const override;
-
 private:
-    TSharedRef<FOdysseyAnimationCell> OnCreateCell();
-    TSharedRef<SWidget> OnCreateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell);
-    EVisibility GetFrameSelectorVisibility() const;
-    void OnBuildCellsContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
-    void OnBuildFrameSelectorContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
-
-    void SelectAllFrames();
-    void DeleteSelectedFrames();
-    void BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
-    void MapActions(TSharedPtr<FUICommandList> iCommandList);
-
-private:
-    FOdysseyAnimationEditorExtension* mExtension;
-    UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
-	
-	TSharedRef<FUICommandList> mCommandList;
+    virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() override;
+    virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) override;
 };

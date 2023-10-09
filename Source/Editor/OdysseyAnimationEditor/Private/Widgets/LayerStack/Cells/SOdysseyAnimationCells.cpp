@@ -28,7 +28,6 @@ SOdysseyAnimationCells::SOdysseyAnimationCells()
     , mOffsettingLayer(false)
     , mOffset(0)
 {
-    MapActions(mCommandList);
 }
 
 void
@@ -51,7 +50,6 @@ SOdysseyAnimationCells::Construct(
 
     mOnCreateCellWidget = InArgs._OnCreateCellWidget;
     mOnCreateCell = InArgs._OnCreateCell;
-    mOnBuildContextMenu = InArgs._OnBuildContextMenu;
     
     ChildSlot
     [
@@ -395,26 +393,6 @@ SOdysseyAnimationCells::SupportsKeyboardFocus() const
     return true;
 }
 
-FReply
-SOdysseyAnimationCells::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
-{
-	if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
-    {
-        int frame = mExtension->Timeline()->GetFrameIndexAtMousePosition(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
-        if (frame == INDEX_NONE)
-            return FReply::Unhandled();
-
-		FMenuBuilder menuBuilder(true, mCommandList);
-		BuildContextMenu(menuBuilder, frame);
-
-		TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
-		FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
-		FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
-    	return FReply::Handled();
-	}
-	return FReply::Unhandled();
-}
-
 void
 SOdysseyAnimationCells::OnCellsChanged()
 {
@@ -472,17 +450,6 @@ SOdysseyAnimationCells::OnCellsMouseButtonUp(const FGeometry& iGeometry, const F
         return FReply::Handled().ReleaseMouseCapture();
     }
     return FReply::Unhandled();
-}
-
-void
-SOdysseyAnimationCells::MapActions(TSharedPtr<FUICommandList> iCommandList)
-{
-}
-
-void
-SOdysseyAnimationCells::BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
-{
-    mOnBuildContextMenu.ExecuteIfBound(iMenuBuilder, iFrame);
 }
 
 EVisibility

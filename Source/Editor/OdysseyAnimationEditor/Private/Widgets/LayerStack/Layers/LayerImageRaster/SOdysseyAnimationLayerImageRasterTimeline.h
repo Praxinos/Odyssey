@@ -3,17 +3,15 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.h"
 
-class FOdysseyAnimationEditorExtension;
-class FOdysseyAnimationCell;
 class UOdysseyAnimationLayerImageRaster;
 
 /**
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterTimeline
-    : public SCompoundWidget
+    : public SOdysseyAnimationLayerImageTimeline
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterTimeline)
@@ -22,7 +20,7 @@ public:
 
 public:
     // Construction / Destruction
-    ~SOdysseyAnimationLayerImageRasterTimeline();
+    virtual ~SOdysseyAnimationLayerImageRasterTimeline();
     SOdysseyAnimationLayerImageRasterTimeline();
     void Construct(
         const FArguments& iArgs, 
@@ -30,29 +28,7 @@ public:
         UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
     );
 
-public:
-    virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
-
 private:
-    TSharedRef<FOdysseyAnimationCell> OnCreateCell();
-    TSharedRef<SWidget> OnCreateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell);
-    EVisibility GetFrameSelectorVisibility() const;
-    void OnBuildCellsContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
-    void OnBuildFrameSelectorContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
-
-private:
-    //Context Menu
-    void SelectAllFrames();
-    void DeleteSelectedFrames();
-    void CopyFrames();
-    void CutFrames();
-    void PasteFrames();
-    void BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
-    void MapActions(TSharedPtr<FUICommandList> iCommandList);
-
-private:
-    FOdysseyAnimationEditorExtension* mExtension;
-    UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
-	
-	TSharedRef<FUICommandList> mCommandList;
+    virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() override;
+    virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) override;
 };

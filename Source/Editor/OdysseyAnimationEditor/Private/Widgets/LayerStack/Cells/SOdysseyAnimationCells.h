@@ -14,14 +14,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCells
 {
     DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<SWidget>, FOnCreateCellWidget, TSharedPtr<FOdysseyAnimationCell>)
     DECLARE_DELEGATE_RetVal(TSharedRef<FOdysseyAnimationCell>, FOnCreateCell)
-    DECLARE_DELEGATE_TwoParams(FOnBuildContextMenu, FMenuBuilder& /*iMenuBuilder*/, int /*iFrameIndex*/)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCells)
         {}
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
         SLATE_EVENT(FOnCreateCell, OnCreateCell)
-        SLATE_EVENT(FOnBuildContextMenu, OnBuildContextMenu)
     SLATE_END_ARGS()
 
 public:
@@ -41,7 +39,6 @@ private:
 public:
     //SWidget overrides
 	virtual bool SupportsKeyboardFocus() const override;
-    virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
 private:
@@ -63,9 +60,6 @@ private:
     void InsertCellSection(int iIndex, TSharedPtr<FCellData> iCellData);
     void AddCellSection(TSharedPtr<FCellData> iCellData);
     void RemoveCellSection(TSharedPtr<FCellData> iCellData);
-
-    void MapActions(TSharedPtr<FUICommandList> iCommandList);
-    void BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
 
     void SelectAllFrames();
     void DeleteSelectedFrames();
@@ -102,8 +96,6 @@ private:
     FReply OnCellsMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     FReply OnCellsMouseMove(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
     FReply OnCellsMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
-    //void OnCellBuildContextMenu(FMenuBuilder& iMenuBuilder, TSharedPtr<FCellData> iCellData);
-    //void OnFrameSelectorBuildContextMenu(FMenuBuilder& iMenuBuilder);
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;
@@ -112,7 +104,6 @@ private:
 
     FOnCreateCellWidget mOnCreateCellWidget;
     FOnCreateCell mOnCreateCell;
-    FOnBuildContextMenu mOnBuildContextMenu;
 
     TSharedPtr<SBorder> mCellsBorder;
     TSharedPtr<SHorizontalBox> mCellsBox;
