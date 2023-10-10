@@ -60,18 +60,21 @@ public:
 private:
     void ConstrainToRectangle( FVector2D iPosition );
     void ConstrainToParallelogram(FVector2D iPosition);
-    void CreateTransformBlockFromReferenceBlock();
+
+    void CreateTransformBlockFromReferenceBlock(); //Get a temporary block for the transformation, so we don't lose quality when transforming our reference block
     ::ULIS::FRectI GetTransformAreaBoundingRect();
-    TArray<::ULIS::FRectI> GetTransformAreaAsRectangles();
+
+    TArray<::ULIS::FRectI> GetTransformAreaAsScanlines(); //Returns rectangles with height of 1 that cover the entire transform area. Useful for freehand selection
+    
     void BlendTransformAreaToPaintBlock();
 
     void ClearBlock( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock );
 
+    bool IsSelectionValid(::ULIS::FRectI iSelectionArea); //Checks if the selection has a relevant position in the canvas. ULIS needs it to determine if their operations make sense.
+
     void CommitTransform();
     void AbortTransform();
-
-    //Resets the tool and its HUD
-    void ClearTransform();
+    void ClearTransform(); //Resets the tool and its HUD
 
 public:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
