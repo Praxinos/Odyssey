@@ -283,6 +283,8 @@ def Build( iUPluginPathFile, iUEVersion, iOutputPath ):
             bat = Path( 'D:\\' ) / 'Epic Games' / f'UE_{iUEVersion}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat'
         if not bat.exists():
             bat = Path( 'D:\\' ) / 'Epic Games' / f'UE_{iUEVersion}EA' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat'
+        if not bat.exists():
+            bat = Path( 'E:\\' ) / 'Epic Games (UE builds)' / f'UE_{iUEVersion}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat'
         uat = [ str( bat ) ]
     elif gOperatingSystem == 'darwin':
         sh = Path( '/' ) / 'Users' / 'Shared' / 'Epic Games' / f'UE_{iUEVersion}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.sh'
