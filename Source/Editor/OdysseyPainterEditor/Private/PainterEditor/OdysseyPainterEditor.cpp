@@ -242,10 +242,21 @@ FOdysseyPainterEditor::InitTools()
 	mVectorTransformTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
+    //Default Tools a defined by their position in mTools
+    //example: mRasterDrawingTool appears before mRasterTransformTool
+    //so mRasterDrawingTool will be the default tool
+
+    //Default Raster Tool
 	mTools.Add(mRasterDrawingTool);
-    mTools.Add(mRasterTransformTool);
-    mTools.Add(mVectorPrimitiveDrawingTool);
+
+    //Default Vector Tool
     mTools.Add(mVectorPathDrawingTool);
+
+    //Other Raster Tools
+    mTools.Add(mRasterTransformTool);
+    
+    //Other Vector Tools
+    mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathEditTool);
     mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathCutTool);
@@ -255,10 +266,12 @@ FOdysseyPainterEditor::InitTools()
     mTools.Add(mVectorPathPushTool);
     mTools.Add(mVectorPathSmoothTool);
     mTools.Add(mVectorPathStitchTool);
-	mTools.Add(mPaintBucketTool);
-	mTools.Add(mColorPickerTool);
 	mTools.Add(mVectorGridTool);
 	mTools.Add(mVectorTransformTool);
+
+    //Generic Tools
+	mTools.Add(mPaintBucketTool);
+	mTools.Add(mColorPickerTool);
 }
 
 FSimpleMulticastDelegate&
