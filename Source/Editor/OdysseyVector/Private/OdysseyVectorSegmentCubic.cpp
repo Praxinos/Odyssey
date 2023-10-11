@@ -1,8 +1,14 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 
-#define MINRECURSE 3
+#define MINRECURSE 4
 #define MAXRECURSE 7
+
+static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
+                            , const ::ULIS::FVec2D& iLine0p1
+                            , const ::ULIS::FVec2D& iLine1p0
+                            , const ::ULIS::FVec2D& iLine1p1
+                            , ::ULIS::FVec2D& oIntersection );
 
 FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 {
@@ -742,6 +748,8 @@ FOdysseyVectorSegmentCubic::DrawPolygonCache()
     BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
 
+    blctx->setStrokeWidth( 1.0f );
+
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
         // the stroke thing is very slow and slows the all thing, we have to find something better
@@ -770,39 +778,85 @@ FOdysseyVectorSegmentCubic::DrawPolygonCache()
 void
 FOdysseyVectorSegmentCubic::Draw( )
 {
+    std::vector<FOdysseyVectorBezierFragment>& offsetCurve0FragmentArray = mOffsetCurve[0].GetBezierFragmentArray();
+    std::vector<FOdysseyVectorBezierFragment>& offsetCurve1FragmentArray = mOffsetCurve[1].GetBezierFragmentArray();
     // NOTE: Might not be super fast to call this for each segment
     BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
 
+/*
     blctx->fillPath( mBLPath );
-#ifdef unused
+*/
+
     DrawPolygonCache();
-#endif
+/*
+    for( int i = 0; i < offsetCurve0FragmentArray.size(); i++ )
+    {
+        BLPath offsetPath;
+        BLPath handlePath;
+
+        offsetPath.moveTo ( offsetCurve0FragmentArray[i].bezier[0].x, offsetCurve0FragmentArray[i].bezier[0].y );
+        offsetPath.cubicTo( offsetCurve0FragmentArray[i].bezier[1].x, offsetCurve0FragmentArray[i].bezier[1].y
+                          , offsetCurve0FragmentArray[i].bezier[2].x, offsetCurve0FragmentArray[i].bezier[2].y
+                          , offsetCurve0FragmentArray[i].bezier[3].x, offsetCurve0FragmentArray[i].bezier[3].y );
+
+        blctx->setStrokeWidth( 0.5f );
+        blctx->setStrokeStyle( BLRgba32( 255, 255, 0, 255 ) );
+        blctx->strokePath( offsetPath );
+        handlePath.moveTo ( offsetCurve0FragmentArray[i].bezier[0].x, offsetCurve0FragmentArray[i].bezier[0].y );
+        handlePath.lineTo ( offsetCurve0FragmentArray[i].bezier[1].x, offsetCurve0FragmentArray[i].bezier[1].y );
+
+        blctx->setStrokeWidth( 0.5f );
+        blctx->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
+        blctx->strokePath( handlePath );
+
+        handlePath.moveTo ( offsetCurve0FragmentArray[i].bezier[3].x, offsetCurve0FragmentArray[i].bezier[3].y );
+        handlePath.lineTo ( offsetCurve0FragmentArray[i].bezier[2].x, offsetCurve0FragmentArray[i].bezier[2].y );
+
+        blctx->setStrokeWidth( 0.5f );
+        blctx->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
+        blctx->strokePath( handlePath );
+    }
+*/
+
+/*
+    for( int i = 0; i < offsetCurve1FragmentArray.size(); i++ )
+    {
+        BLPath offsetPath;
+        BLPath handlePath;
+
+        offsetPath.moveTo ( offsetCurve1FragmentArray[i].bezier[0].x, offsetCurve1FragmentArray[i].bezier[0].y );
+        offsetPath.cubicTo( offsetCurve1FragmentArray[i].bezier[1].x, offsetCurve1FragmentArray[i].bezier[1].y
+                          , offsetCurve1FragmentArray[i].bezier[2].x, offsetCurve1FragmentArray[i].bezier[2].y
+                          , offsetCurve1FragmentArray[i].bezier[3].x, offsetCurve1FragmentArray[i].bezier[3].y );
+
+        blctx->setStrokeWidth( 0.5f );
+        blctx->setStrokeStyle( BLRgba32( 255, 255, 0, 255 ) );
+        blctx->strokePath( offsetPath );
+
+        handlePath.moveTo ( offsetCurve1FragmentArray[i].bezier[0].x, offsetCurve1FragmentArray[i].bezier[0].y );
+        handlePath.lineTo ( offsetCurve1FragmentArray[i].bezier[1].x, offsetCurve1FragmentArray[i].bezier[1].y );
+
+        blctx->setStrokeWidth( 0.5f );
+        blctx->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
+        blctx->strokePath( handlePath );
+
+        handlePath.moveTo ( offsetCurve1FragmentArray[i].bezier[3].x, offsetCurve1FragmentArray[i].bezier[3].y );
+        handlePath.lineTo ( offsetCurve1FragmentArray[i].bezier[2].x, offsetCurve1FragmentArray[i].bezier[2].y );
+
+        blctx->setStrokeWidth( 0.5f );
+        blctx->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
+        blctx->strokePath( handlePath );
+    }
+*/
 }
 
-static void
-ThickenPolygon( FPolygon* iPolygon
-              , double iRadiusFrom
-              , double iRadiusTo
-              , const ::ULIS::FVec2D& iNormalizedTangentFrom
-              , const ::ULIS::FVec2D& iNormalizedTangentTo )
+void
+FOdysseyVectorSegmentCubic::ThickenPolygon( FPolygon* iPolygon )
 {
-    ::ULIS::FVec2D perpendicularVecFrom = { iNormalizedTangentFrom.y, -iNormalizedTangentFrom.x };
-    ::ULIS::FVec2D perpendicularVecTo   = { iNormalizedTangentTo.y  , -iNormalizedTangentTo.x   };
-
-    perpendicularVecFrom *= iRadiusFrom;
-    perpendicularVecTo   *= iRadiusTo;
-
-    iPolygon->quadVertex[0].x = iPolygon->lineVertex[0].x + perpendicularVecFrom.x;
-    iPolygon->quadVertex[0].y = iPolygon->lineVertex[0].y + perpendicularVecFrom.y;
-
-    iPolygon->quadVertex[1].x = iPolygon->lineVertex[1].x + perpendicularVecTo.x;
-    iPolygon->quadVertex[1].y = iPolygon->lineVertex[1].y + perpendicularVecTo.y;
-
-    iPolygon->quadVertex[2].x = iPolygon->lineVertex[1].x - perpendicularVecTo.x;
-    iPolygon->quadVertex[2].y = iPolygon->lineVertex[1].y - perpendicularVecTo.y;
-
-    iPolygon->quadVertex[3].x = iPolygon->lineVertex[0].x - perpendicularVecFrom.x;
-    iPolygon->quadVertex[3].y = iPolygon->lineVertex[0].y - perpendicularVecFrom.y;
+    iPolygon->quadVertex[0] = mOffsetCurve[0].GetPointAt( iPolygon->fromT );
+    iPolygon->quadVertex[1] = mOffsetCurve[0].GetPointAt( iPolygon->toT   );
+    iPolygon->quadVertex[2] = mOffsetCurve[1].GetPointAt( iPolygon->toT   );
+    iPolygon->quadVertex[3] = mOffsetCurve[1].GetPointAt( iPolygon->fromT );
 }
 
 // De Casteljau algorithm. Stopping condition : dot product between p0p3-p0p1 is bigger than some limit value. Same for p3p0-p3p2.
@@ -820,7 +874,7 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
     ::ULIS::FVec2D straightVector = iBezier[3] - iBezier[0];
     ::ULIS::FVec2D ctrlVector[2] = { iBezier[1] - iBezier[0]
                                    , iBezier[2] - iBezier[3] };
-    double dotLimit = 0.99975f;
+    double dotLimit = 0.9996f; // cos 1.62 deg
 
     if( straightVector.DistanceSquared() )
     {
@@ -909,29 +963,369 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
         polygon->fromT = iFromT;
         polygon->toT = iToT;
 
-        // InParent
-/*
-        if( iInParentConversionMatrix )
-        {
-            BLPoint inParent0 = iInParentConversionMatrix->mapPoint( polygon->lineVertex[0].x
-                                                                   , polygon->lineVertex[0].y );
-            polygon->lineVertexInParent[0].x = inParent0.x;
-            polygon->lineVertexInParent[0].y = inParent0.y;
+        ThickenPolygon( polygon );
+    }
+}
 
-            BLPoint inParent1 = iInParentConversionMatrix->mapPoint( polygon->lineVertex[1].x
-                                                                   , polygon->lineVertex[1].y );
-            polygon->lineVertexInParent[1].x = inParent1.x;
-            polygon->lineVertexInParent[1].y = inParent1.y;
+// De Casteljau algorithm. Stopping condition : dot product between p0p3-p0p1 is bigger than some limit value. Same for p3p0-p3p2.
+void
+FOdysseyVectorSegmentCubic::BuildOffsetCurvesRecursive( ::ULIS::FVec2D iBezier[4]
+                                                      , double iFromT
+                                                      , double iToT
+                                                      , double iDotLimit
+                                                      , uint32 iMinRecurse
+                                                      , uint32 iMaxRecurse
+                                                      , uint32 iCurrentRecurse
+                                                      , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray )
+{
+    ::ULIS::FVec2D childBezier[2][4];
+    ::ULIS::FVec2D straightVector = iBezier[3] - iBezier[0];
+    ::ULIS::FVec2D ctrlVector[2] = { iBezier[1] - iBezier[0]
+                                   , iBezier[2] - iBezier[3] };
+
+    if( straightVector.DistanceSquared() )
+    {
+        straightVector.Normalize();
+    }
+
+    if( ctrlVector[0].DistanceSquared() )
+    {
+        ctrlVector[0].Normalize();
+    }
+
+    if( ctrlVector[1].DistanceSquared() )
+    {
+        ctrlVector[1].Normalize();
+    }
+
+    if( ( iCurrentRecurse < iMinRecurse ) // <-- Force at least 4 subdivisions because the intersections for paint groups are tested 
+                                          // linearly and we need precision. If the cubic segment is made of few linear sub-segments, 
+                                          // then the T value at intersection does not match the T value we would get with mathematically
+                                          // accurate Bezier-Bezier intersection, but these are very complicated to implement so we just 
+                                          // stick with linear intersections. By dividing the bezier segment with smaller liner segments
+                                          // whose T values at end points are known, we get almost correct values for T at intersections.
+     || ( ( iCurrentRecurse < iMaxRecurse ) // <--- do not subdivide forever though.
+       && ( ( ctrlVector[0].DotProduct(  straightVector ) < iDotLimit )
+         || ( ctrlVector[1].DotProduct( -straightVector ) < iDotLimit ) ) ) )
+    {
+        ::ULIS::FVec2D tangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iBezier[0]
+                                                                                      , iBezier[1]
+                                                                                      , iBezier[2]
+                                                                                      , iBezier[3]
+                                                                                      , 0.5f );
+        if( tangent.DistanceSquared() )
+        {
+            double splitsAt = ( iToT + iFromT ) * 0.5f;
+
+            tangent.Normalize();
+
+            memcpy( childBezier[0], iBezier, sizeof( childBezier[0] ) );
+            memcpy( childBezier[1], iBezier, sizeof( childBezier[1] ) );
+
+            // First sub-bezier from the divided parent bezier
+            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+            ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
+                                                                      , &childBezier[0][1]
+                                                                      , &childBezier[0][2]
+                                                                      , &childBezier[0][3]
+                                                                      , 0.5f );
+            BuildOffsetCurvesRecursive( childBezier[0]
+                                      , iFromT
+                                      , splitsAt
+                                      , iDotLimit
+                                      , iMinRecurse
+                                      , iMaxRecurse
+                                      , iCurrentRecurse + 1
+                                      , oBezierFragmentArray );
+
+            // Second sub-bezier from the divided parent bezier
+            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+            ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
+                                                                      , &childBezier[1][1]
+                                                                      , &childBezier[1][2]
+                                                                      , &childBezier[1][3]
+                                                                      , 0.5f );
+            BuildOffsetCurvesRecursive( childBezier[1]
+                                      , splitsAt
+                                      , iToT
+                                      , iDotLimit
+                                      , iMinRecurse
+                                      , iMaxRecurse
+                                      , iCurrentRecurse + 1
+                                      , oBezierFragmentArray );
         }
-*/
-        // this may be a bit too memory-consuming. Don't know. Keep it for now.
-/*
-        polygon->xmax = ::ULIS::FMath::Max( polygon->lineVertex[0].x, polygon->lineVertex[1].x );
-        polygon->ymax = ::ULIS::FMath::Max( polygon->lineVertex[0].y, polygon->lineVertex[1].y );
-        polygon->xmin = ::ULIS::FMath::Min( polygon->lineVertex[0].x, polygon->lineVertex[1].x );
-        polygon->ymin = ::ULIS::FMath::Min( polygon->lineVertex[0].y, polygon->lineVertex[1].y );
-*/
-        ThickenPolygon( polygon, iRadiusFrom, iRadiusTo, iNormalizedTangentFrom, iNormalizedTangentTo );
+    }
+    else
+    {
+        oBezierFragmentArray.emplace_back( iBezier, iFromT, iToT );
+    }
+}
+
+void
+FOdysseyVectorSegmentCubic::PrepareOffsetBeziers( double iSegmentStartRadius
+                                                , double iSegmentEndRadius
+                                                , FOdysseyVectorBezierFragment& iFragment
+                                                , FOdysseyVectorBezierFragment& oFragment0
+                                                , FOdysseyVectorBezierFragment& oFragment1 )
+{
+    ::ULIS::FVec2D tangent[2] = { ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iFragment.bezier[0]
+                                                                                       , iFragment.bezier[1]
+                                                                                       , iFragment.bezier[2]
+                                                                                       , iFragment.bezier[3]
+                                                                                       , 0.0f )
+                                , ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iFragment.bezier[0]
+                                                                                       , iFragment.bezier[1]
+                                                                                       , iFragment.bezier[2]
+                                                                                       , iFragment.bezier[3]
+                                                                                       , 1.0f ) };
+    ::ULIS::FVec2D perpendicular[2] = { ::ULIS::FVec2D( -tangent[0].y, tangent[0].x )
+                                      , ::ULIS::FVec2D( -tangent[1].y, tangent[1].x ) };
+    ::ULIS::FVec2D tanvec[2] = { iFragment.bezier[1] - iFragment.bezier[0]
+                               , iFragment.bezier[2] - iFragment.bezier[3] };
+    //double ratio[2];
+    ::ULIS::FVec2D widthPointStart[2];
+    ::ULIS::FVec2D widthPointEnd[2];
+    double fragmentStartRadius = ( iSegmentStartRadius * ( 1.0f - iFragment.fromT ) )
+                               + ( iSegmentEndRadius * iFragment.fromT );
+    double fragmentEndRadius = ( iSegmentStartRadius * ( 1.0f - iFragment.toT ) )
+                             + ( iSegmentEndRadius * iFragment.toT );
+    //--
+
+    widthPointStart[0] = iFragment.bezier[0];
+    widthPointStart[1] = iFragment.bezier[0];
+    widthPointEnd[0]   = iFragment.bezier[3];
+    widthPointEnd[1]   = iFragment.bezier[3];
+
+    if( perpendicular[0].Distance() )
+    {
+        perpendicular[0].Normalize();
+
+        widthPointStart[0] = iFragment.bezier[0] + ( perpendicular[0] * fragmentStartRadius );
+        widthPointStart[1] = iFragment.bezier[0] - ( perpendicular[0] * fragmentStartRadius );
+    }
+
+    if( perpendicular[1].Distance() )
+    {
+        perpendicular[1].Normalize();
+
+        widthPointEnd[0] = iFragment.bezier[3] + ( perpendicular[1] * fragmentEndRadius );
+        widthPointEnd[1] = iFragment.bezier[3] - ( perpendicular[1] * fragmentEndRadius );
+    }
+
+    oFragment0.bezier[0] = widthPointStart[0];
+    oFragment0.bezier[3] = widthPointEnd[0];
+    oFragment0.fromT = iFragment.fromT;
+    oFragment0.toT = iFragment.toT;
+
+    oFragment1.bezier[0] = widthPointStart[1];
+    oFragment1.bezier[3] = widthPointEnd[1];
+    oFragment1.fromT = iFragment.fromT;
+    oFragment1.toT = iFragment.toT;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorSegmentCubic::GetFragmentStraightVector( FOdysseyVectorBezierFragment* iFragment
+                                                     , bool iNormalize )
+{
+    ::ULIS::FVec2D straightVector = iFragment->bezier[3] - iFragment->bezier[0];
+
+    if( iNormalize == true )
+    {
+        if( straightVector.DistanceSquared() )
+        {
+            straightVector.Normalize();
+        }
+    }
+
+    return straightVector;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorSegmentCubic::GetOffsetPointAt( double iT, double iSide )
+{
+    ::ULIS::FVec2D sampleVector = GetTangentAt( iT, true );
+    ::ULIS::FVec2D samplePoint = GetPointAt( iT );
+    double radius0 = mPoint[0]->GetRadius();
+    double radius1 = mPoint[1]->GetRadius();
+    ::ULIS::FVec2D offsetPoint = samplePoint; // init with some value
+
+    if( sampleVector.DistanceSquared() )
+    {
+        ::ULIS::FVec2D perpendicularVector;
+        double radiusAt = ( radius0 * ( 1.0f - iT ) + ( radius1 * iT ) );
+
+        perpendicularVector.x = -sampleVector.y;
+        perpendicularVector.y =  sampleVector.x;
+
+        offsetPoint = samplePoint + ( iSide * ( perpendicularVector * radiusAt ) ); 
+    }
+
+    return offsetPoint;
+}
+
+// vector inclination is adjusted related to vertices radii
+::ULIS::FVec2D
+FOdysseyVectorSegmentCubic::GetOffsetVectorAtVertex( FOdysseyVectorVertex* iVertex
+                                                   , double iSide // 1.0f or -1.0f
+                                                   , ::ULIS::FVec2D& iVertexOffsetPoint )
+{
+    FOdysseyVectorSegment* otherSegment = iVertex->GetOtherSegment( this );
+    ::ULIS::FVec2D& vertexCoords = iVertex->GetCoords();
+    double sampleT = ( iVertex->GetT( this ) == 0.0f ) ? 0.01f : 0.99f;
+    ::ULIS::FVec2D point = GetPointAt( sampleT );
+    ::ULIS::FVec2D offsetPoint = GetOffsetPointAt( sampleT, iSide );
+    ::ULIS::FVec2D offsetVector = offsetPoint - iVertexOffsetPoint;
+    ::ULIS::FVec2D segmentVector = /*::ULIS::FVec2D( point - vertexCoords )*/  GetHandle(iVertex)->GetCoords() - iVertex->GetCoords();
+
+    if( segmentVector.DotProduct( offsetVector ) < 0.0f )
+    {
+        offsetVector = -offsetVector;
+    }
+
+    if( offsetVector.DistanceSquared() )
+    {
+        offsetVector.Normalize();
+    }
+
+    if( otherSegment )
+    {
+        double otherSampleT = ( iVertex->GetT( otherSegment ) == 0.0f ) ? 0.01f : 0.99f;
+        ::ULIS::FVec2D otherSegmentPoint = otherSegment->GetPointAt( otherSampleT );
+        //::ULIS::FVec2D otherSegmentVector = ::ULIS::FVec2D( vertexCoords - otherSegmentPoint );
+
+        // IsHandleAligned() is faster than IsSmooth() because it is based on a boolean value.
+        // It is less reliable though, form the same reason.
+        if( iVertex->IsHandleAligned()/*IsSmooth()*/ )
+        {
+            if( otherSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FOdysseyVectorSegmentCubic* otherCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(otherSegment);
+                ::ULIS::FVec2D otherCubicSegmentOffsetPoint = otherCubicSegment->GetOffsetPointAt( otherSampleT, iSide );
+                ::ULIS::FVec2D otherOffsetVector = iVertexOffsetPoint - otherCubicSegmentOffsetPoint;
+
+                if( segmentVector.DotProduct( otherOffsetVector ) < 0.0f )
+                {
+                    otherOffsetVector = -otherOffsetVector;
+                }
+
+                if( otherOffsetVector.DistanceSquared() )
+                {
+                    otherOffsetVector.Normalize();
+
+                    return offsetVector - otherOffsetVector;
+                }
+            }
+        }
+    }
+
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
+void
+FOdysseyVectorSegmentCubic::RoundOffsetFragment( FOdysseyVectorBezierFragment* iFragment
+                                               , FOdysseyVectorBezierFragment* iPrevFragment
+                                               , FOdysseyVectorBezierFragment* iNextFragment
+                                               , const ::ULIS::FVec2D& iPrevCombinedVector
+                                               , const ::ULIS::FVec2D& iNextCombinedVector )
+{
+    ::ULIS::FVec2D fragmentStraightVector = ::ULIS::FVec2D( iFragment->bezier[3] - iFragment->bezier[0] );
+    double straightDistance = fragmentStraightVector.Distance();
+
+    if( straightDistance )
+    {
+        ::ULIS::FVec2D prevAverageVector = fragmentStraightVector;
+        ::ULIS::FVec2D nextAverageVector = fragmentStraightVector;
+
+        if( iPrevCombinedVector.Distance() > 0.0001f )
+        {
+            prevAverageVector = ::ULIS::FVec2D( -iPrevCombinedVector.y, iPrevCombinedVector.x );
+
+            if( prevAverageVector.DotProduct( fragmentStraightVector ) < 0.0f )
+            {
+                prevAverageVector = -prevAverageVector;
+            }
+        }
+
+        if( iNextCombinedVector.Distance() > 0.0001f )
+        {
+            nextAverageVector = ::ULIS::FVec2D( -iNextCombinedVector.y, iNextCombinedVector.x );
+
+            if( nextAverageVector.DotProduct( fragmentStraightVector ) < 0.0f )
+            {
+                nextAverageVector = -nextAverageVector;
+            }
+        }
+
+        prevAverageVector.Normalize();
+        nextAverageVector.Normalize();
+
+        iFragment->bezier[1] = iFragment->bezier[0] + ( prevAverageVector * straightDistance * 0.38f );
+        iFragment->bezier[2] = iFragment->bezier[3] - ( nextAverageVector * straightDistance * 0.38f );
+    }
+}
+
+void
+FOdysseyVectorSegmentCubic::BuildOffsetCurves()
+{
+    std::vector<FOdysseyVectorBezierFragment> bezierFragmentArray;
+    int bezierFragmentCount;
+    FOdysseyVectorSegmentCubic* prevSegment = static_cast<FOdysseyVectorSegmentCubic*>(GetVertex(0)->GetOtherSegment( this ));
+    FOdysseyVectorSegmentCubic* nextSegment = static_cast<FOdysseyVectorSegmentCubic*>(GetVertex(1)->GetOtherSegment( this ));
+
+    bezierFragmentArray.reserve( 20 );
+
+    BuildOffsetCurvesRecursive( mBezier
+                              , 0.0f
+                              , 1.0f
+                              , 0.97814760073f // 12deg //0.9945f // 6deg - // 
+                              , 3 // min recurse
+                              , 4 // max recurse
+                              , 0 // current recurse
+                              , bezierFragmentArray );
+
+    bezierFragmentCount = bezierFragmentArray.size();
+
+    if( bezierFragmentCount )
+    {
+        std::vector<FOdysseyVectorBezierFragment>& offsetCurve0BezierFragmentArray = mOffsetCurve[0].GetBezierFragmentArray();
+        std::vector<FOdysseyVectorBezierFragment>& offsetCurve1BezierFragmentArray = mOffsetCurve[1].GetBezierFragmentArray();
+        double segmentStartRadius = mPoint[0]->GetRadius();
+        double segmentEndRadius = mPoint[1]->GetRadius();
+
+        mOffsetCurve[0].Resize( bezierFragmentCount );
+        mOffsetCurve[1].Resize( bezierFragmentCount );
+
+        for( int i = 0; i < bezierFragmentCount; i++ )
+        {
+            PrepareOffsetBeziers( segmentStartRadius
+                                , segmentEndRadius
+                                , bezierFragmentArray[i]
+                                , offsetCurve0BezierFragmentArray[i]
+                                , offsetCurve1BezierFragmentArray[i] );
+        }
+
+        for( int i = 0; i < bezierFragmentCount; i++ )
+        {
+            int p = i - 1;
+            int n = i + 1;
+            FOdysseyVectorBezierFragment* fragment0 = &offsetCurve0BezierFragmentArray[i];
+            FOdysseyVectorBezierFragment* prevFragment0 = ( i == 0                   ) ? nullptr : &offsetCurve0BezierFragmentArray[p];
+            FOdysseyVectorBezierFragment* nextFragment0 = ( n == bezierFragmentCount ) ? nullptr : &offsetCurve0BezierFragmentArray[n];
+            ::ULIS::FVec2D fragment0StraightVector = GetFragmentStraightVector( fragment0, true );
+            ::ULIS::FVec2D prevCombinedVector0 = ( prevFragment0 == nullptr ) ? GetOffsetVectorAtVertex( GetVertex(0),  1.0f, fragment0->bezier[0] ) : fragment0StraightVector - GetFragmentStraightVector( prevFragment0, true );
+            ::ULIS::FVec2D nextCombinedVector0 = ( nextFragment0 == nullptr ) ? GetOffsetVectorAtVertex( GetVertex(1),  1.0f, fragment0->bezier[3] ) : GetFragmentStraightVector( nextFragment0, true ) - fragment0StraightVector;
+
+            RoundOffsetFragment( fragment0, prevFragment0, nextFragment0, prevCombinedVector0, nextCombinedVector0 );
+
+            FOdysseyVectorBezierFragment* fragment1 = &offsetCurve1BezierFragmentArray[i];
+            FOdysseyVectorBezierFragment* prevFragment1 = ( i == 0                   ) ? nullptr : &offsetCurve1BezierFragmentArray[p];
+            FOdysseyVectorBezierFragment* nextFragment1 = ( n == bezierFragmentCount ) ? nullptr : &offsetCurve1BezierFragmentArray[n];
+            ::ULIS::FVec2D fragment1StraightVector = GetFragmentStraightVector( fragment1, true );
+            ::ULIS::FVec2D prevCombinedVector1 = ( prevFragment1 == nullptr ) ? GetOffsetVectorAtVertex( GetVertex(0), -1.0f, fragment1->bezier[0] ) : fragment1StraightVector - GetFragmentStraightVector( prevFragment1, true );
+            ::ULIS::FVec2D nextCombinedVector1 = ( nextFragment1 == nullptr ) ? GetOffsetVectorAtVertex( GetVertex(1), -1.0f, fragment1->bezier[3] ) : GetFragmentStraightVector( nextFragment1, true ) - fragment1StraightVector;
+
+            RoundOffsetFragment( fragment1, prevFragment1, nextFragment1, prevCombinedVector1, nextCombinedVector1 );
+        }
     }
 }
 
@@ -979,6 +1373,55 @@ FOdysseyVectorSegmentCubic::Update()
     }
 }
 
+static void
+SpliBezierInHalf( ::ULIS::FVec2D iBezier[4]
+                , ::ULIS::FVec2D oBezier0[4]
+                , ::ULIS::FVec2D oBezier1[4] )
+{
+    oBezier0[0] = iBezier[0];
+    oBezier0[1] = iBezier[1];
+    oBezier0[2] = iBezier[2];
+    oBezier0[3] = iBezier[3];
+
+    ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &oBezier0[0]
+                                                              , &oBezier0[1]
+                                                              , &oBezier0[2]
+                                                              , &oBezier0[3]
+                                                              , 0.5f );
+
+    oBezier1[0] = iBezier[0];
+    oBezier1[1] = iBezier[1];
+    oBezier1[2] = iBezier[2];
+    oBezier1[3] = iBezier[3];
+
+    ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &oBezier1[0]
+                                                              , &oBezier1[1]
+                                                              , &oBezier1[2]
+                                                              , &oBezier1[3]
+                                                              , 0.5f );
+}
+
+static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
+                            , const ::ULIS::FVec2D& iLine0p1
+                            , const ::ULIS::FVec2D& iLine1p0
+                            , const ::ULIS::FVec2D& iLine1p1
+                            , ::ULIS::FVec2D& oIntersection )
+{
+    ::ULIS::FVec2D L0Vec   = { iLine0p1.x - iLine0p0.x, iLine0p1.y - iLine0p0.y };
+    ::ULIS::FVec2D L1Vec   = { iLine1p0.x - iLine1p1.x, iLine1p0.y - iLine1p1.y }; // reverted order is normal
+    ::ULIS::FVec2D L0L1Vec = { iLine1p0.x - iLine0p0.x, iLine1p0.y - iLine0p0.y };
+
+    double det = L0Vec.x * L1Vec.y - L0Vec.y * L1Vec.x;
+
+    if( fabs(det) == 0.0f ) return false;
+
+    double t = ( L0L1Vec.x * L1Vec.y   - L0L1Vec.y * L1Vec.x ) / det;
+
+    oIntersection = iLine0p0 + ( t * L0Vec );
+
+    return true;
+}
+
 void
 FOdysseyVectorSegmentCubic::BuildVariable()
 {
@@ -995,10 +1438,13 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                                                                                        , mBezier[2]
                                                                                        , mBezier[3]
                                                                                        , 1.0f ) };
-#ifdef unused
     ::ULIS::FVec2D perpendicular[2] = { ::ULIS::FVec2D( -tangent[0].y, tangent[0].x )
                                       , ::ULIS::FVec2D( -tangent[1].y, tangent[1].x ) };
-#endif
+    ::ULIS::FVec2D tanvec[2] = { mBezier[1] - mBezier[0], mBezier[2] - mBezier[3] };
+    //double ratio[2];
+    ::ULIS::FVec2D widthPointStart[2];
+    ::ULIS::FVec2D widthPointEnd[2];
+    //--
 
     if( tangent[0].DistanceSquared() )
     {
@@ -1013,49 +1459,79 @@ FOdysseyVectorSegmentCubic::BuildVariable()
     ResetPolygonCache();
     UpdateBoundingBox();
 
-#ifdef unused
-    mWidthBezier[0][0] = ::ULIS::FVec2D( 0.0f, 0.0f);
-    mWidthBezier[0][1] = ::ULIS::FVec2D( 0.0f, 0.0f );
-    mWidthBezier[0][2] = ::ULIS::FVec2D( 0.0f, 0.0f );
-    mWidthBezier[0][3] = ::ULIS::FVec2D( 0.0f, 0.0f );
 
-    if( perpendicular[0].Distance() && perpendicular[1].Distance() )
+    widthPointStart[0] = mBezier[0];
+    widthPointStart[1] = mBezier[0];
+    widthPointEnd[0]   = mBezier[3];
+    widthPointEnd[1]   = mBezier[3];
+
+    if( perpendicular[0].Distance() )
     {
-        ::ULIS::FVec2D tanvec[2] = { bezier[1] - bezier[0], bezier[3] - bezier[2] };
-        double straightDistance = GetStraightDistance();
-        double widthBezierDistance;
-        double ratio[2] = { 1.0f, 1.0f };
-
         perpendicular[0].Normalize();
+
+        widthPointStart[0] = mBezier[0] + ( perpendicular[0] * segmentStartRadius );
+        widthPointStart[1] = mBezier[0] - ( perpendicular[0] * segmentStartRadius );
+    }
+
+    if( perpendicular[1].Distance() )
+    {
         perpendicular[1].Normalize();
 
-        mWidthBezier[0][0] = bezier[0] + ( perpendicular[0] * segmentStartRadius );
-        mWidthBezier[0][3] = bezier[3] + ( perpendicular[1] * segmentEndRadius   );
-
-        widthBezierDistance = ::ULIS::FVec2D( mWidthBezier[0][0] - mWidthBezier[0][3] ).Distance();
-
-        ratio[0] = tanvec[0].Distance() / straightDistance;
-        ratio[1] = tanvec[1].Distance() / straightDistance;
-/*
-        ratio[0] = ::ULIS::FVec2D( mWidthBezier[0][0].x - bezier[3].x
-                                 , mWidthBezier[0][0].y - bezier[3].y ).Distance()
-                 / ::ULIS::FVec2D( bezier[0].x - bezier[3].x
-                                 , bezier[0].y - bezier[3].y ).Distance();
-
-
-        ratio[1] = ::ULIS::FVec2D( mWidthBezier[0][3].x - bezier[0].x
-                                 , mWidthBezier[0][3].y - bezier[0].y ).Distance()
-                 / ::ULIS::FVec2D( bezier[0].x - bezier[3].x
-                                 , bezier[0].y - bezier[3].y ).Distance();
-*/
-//UE_LOG(LogTemp, Warning, TEXT("Some warning message %f %f"), ratio[0], ratio[1] );
-        tanvec[0].Normalize();
-        tanvec[1].Normalize();
-
-        mWidthBezier[0][1] = mWidthBezier[0][0] + ( tanvec[0] * ratio[0] * ratio[0] * widthBezierDistance );
-        mWidthBezier[0][2] = mWidthBezier[0][3] - ( tanvec[1] * ratio[1] * ratio[1] * widthBezierDistance );
+        widthPointEnd[0] = mBezier[3] + ( perpendicular[1] * segmentEndRadius );
+        widthPointEnd[1] = mBezier[3] - ( perpendicular[1] * segmentEndRadius );
     }
-#endif
+
+    mOffsetBezier[0][0] = widthPointStart[0];
+    mOffsetBezier[0][1] = widthPointStart[0] + tanvec[0];
+    mOffsetBezier[0][2] = widthPointEnd[0] + tanvec[1];
+    mOffsetBezier[0][3] = widthPointEnd[0];
+
+    mOffsetBezier[1][0] = widthPointStart[1];
+    mOffsetBezier[1][1] = widthPointStart[1] + tanvec[0];
+    mOffsetBezier[1][2] = widthPointEnd[1] + tanvec[1];
+    mOffsetBezier[1][3] = widthPointEnd[1];
+
+    ::ULIS::FVec2D p1p2 = mBezier[2] - mBezier[1];
+
+    if( p1p2.Distance() )
+    {
+        ::ULIS::FVec2D perpependicularP1p2 = ::ULIS::FVec2D( -p1p2.y, p1p2.x );
+        ::ULIS::FVec2D p1Prime;
+        ::ULIS::FVec2D p2Prime;
+        ::ULIS::FVec2D pout;
+
+        perpependicularP1p2.Normalize();
+
+        p1Prime = mBezier[1] + ( perpependicularP1p2 * segmentStartRadius );
+        p2Prime = mBezier[2] + ( perpependicularP1p2 * segmentEndRadius );
+
+        if( IntersectSegment( p1Prime, p2Prime, mOffsetBezier[0][0], mOffsetBezier[0][1], pout ) )
+        {
+            mOffsetBezier[0][1] = pout;
+        }
+
+        if( IntersectSegment( p1Prime, p2Prime, mOffsetBezier[0][3], mOffsetBezier[0][2], pout ) )
+        {
+            mOffsetBezier[0][2] = pout;
+        }
+
+
+
+        p1Prime = mBezier[1] - ( perpependicularP1p2 * segmentStartRadius );
+        p2Prime = mBezier[2] - ( perpependicularP1p2 * segmentEndRadius );
+
+        if( IntersectSegment( p1Prime, p2Prime, mOffsetBezier[1][0], mOffsetBezier[1][1], pout ) )
+        {
+            mOffsetBezier[1][1] = pout;
+        }
+
+        if( IntersectSegment( p1Prime, p2Prime, mOffsetBezier[1][3], mOffsetBezier[1][2], pout ) )
+        {
+            mOffsetBezier[1][2] = pout;
+        }
+    }
+
+    BuildOffsetCurves();
 
     BuildVariableAdaptive ( 0.0f
                           , 1.0f
@@ -1066,30 +1542,13 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                           , tangent[1]
                           , 0 );
 
-    MakeBLPath();
+
+
+    //MakeBLPath();
 }
 
 double
 FOdysseyVectorSegmentCubic::GetApproximateLength( uint32 iDivisions )
 {
-    ::ULIS::FVec2D p0 = mPoint[0]->GetCoords();
-    double step = 1.0f / iDivisions;
-    double length = 0.0f;
-    double t0 = 0.0f;
-
-    for( uint32 i = 0; i < iDivisions; i++ )
-    {
-        double t1 = t0 + step;
-        ::ULIS::FVec2D p1 = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( mBezier[0]
-                                                                                 , mBezier[1]
-                                                                                 , mBezier[2]
-                                                                                 , mBezier[3]
-                                                                                 , t1 );
-        length += ::ULIS::FVec2D( p1 - p0 ).Distance();
-
-        t0 = t1;
-        p0 = p1;
-    }
-
-    return length;
+    return FOdysseyVector::GetBezierApproximateLength( mBezier, iDivisions );
 }

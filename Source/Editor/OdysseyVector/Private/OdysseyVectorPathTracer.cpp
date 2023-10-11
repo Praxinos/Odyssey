@@ -84,7 +84,7 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
     if( mEdgeArray.size() )
     {
         MakeBezier( true );
-        newSegment = CommitSegment( iEndVertex ? iEndVertex : CommitVertex() );
+        newSegment = CommitSegment( iEndVertex ? iEndVertex : CommitVertex( false ) );
     }
 
     Reset();
@@ -448,7 +448,7 @@ FOdysseyVectorPathTracer::ClearTo( uint32 iRecordID, uint32 iEdgeID )
 }
 
 FOdysseyVectorVertex*
-FOdysseyVectorPathTracer::CommitVertex()
+FOdysseyVectorPathTracer::CommitVertex( bool iIsHandleAligned )
 {
     BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
     BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[3].x
@@ -460,6 +460,8 @@ FOdysseyVectorPathTracer::CommitVertex()
                                                               , localPoint.x
                                                               , localPoint.y
                                                               , localRadius );
+
+    newVertex->SetHandleAligned( iIsHandleAligned );
 
     mCubicPath->AddVertex( newVertex );
 
@@ -579,7 +581,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
 
                 MakeBezier( true );
 
-                newVertex = CommitVertex();
+                newVertex = CommitVertex( lastRecord->smooth );
                 newSegment = CommitSegment( newVertex );
 
                 mRecordArray.push_back( newRecord );
@@ -594,7 +596,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                 {
                     FOdysseyVectorVertex* newVertex;
 
-                    newVertex = CommitVertex();
+                    newVertex = CommitVertex( lastRecord->smooth );
                     newSegment = CommitSegment( newVertex );
                 }
             }

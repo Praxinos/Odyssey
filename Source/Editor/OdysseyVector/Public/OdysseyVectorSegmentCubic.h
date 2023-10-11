@@ -8,6 +8,7 @@
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorIntersection.h"
+#include "OdysseyVectorOffsetCurveCubic.h"
 
 class FOdysseyVectorPathCubic;
 
@@ -239,7 +240,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         virtual bool HasBaseClass( uint32 iBaseClassID ) override;
         double GetApproximateLength( uint32 iDivisions );
 
-
     private:
         void BuildVariableAdaptive( double  iFromT
                                   , double  iToT
@@ -251,11 +251,38 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , int32   iMaxRecurseDepth );
         void MakeBLPath();
         void DrawPolygonCache();
+        void PrepareOffsetBeziers( double iSegmentStartRadius
+                                 , double iSegmentEndRadius
+                                 , FOdysseyVectorBezierFragment& iFragment
+                                 , FOdysseyVectorBezierFragment& oFragment0
+                                 , FOdysseyVectorBezierFragment& oFragment1 );
+        void BuildOffsetCurves();
+        void BuildOffsetCurvesRecursive( ::ULIS::FVec2D iBezier[4]
+                                       , double iDotLimit
+                                       , double iFromT
+                                       , double iToT
+                                       , uint32 iMinRecurse
+                                       , uint32 iMaxRecurse
+                                       , uint32 iCurrentRecurse
+                                       , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray );
+        void RoundOffsetFragment( FOdysseyVectorBezierFragment* iFragment
+                                , FOdysseyVectorBezierFragment* iPrevFragment
+                                , FOdysseyVectorBezierFragment* iNextFragment
+                                , const ::ULIS::FVec2D& iPrevCombinedVector
+                                , const ::ULIS::FVec2D& iNextCombinedVector );
+        ::ULIS::FVec2D GetFragmentStraightVector( FOdysseyVectorBezierFragment* iFragment
+                                                , bool iNormalize );
+        ::ULIS::FVec2D GetOffsetPointAt( double iT, double iSide );
+        ::ULIS::FVec2D GetOffsetVectorAtVertex( FOdysseyVectorVertex* iVertex
+                                              , double iSide // 1.0f or -1.0f
+                                              , ::ULIS::FVec2D& iVertexOffsetPoint );
+        void ThickenPolygon( FPolygon* iPolygon );
 
     protected:
+        FOdysseyVectorOffsetCurveCubic mOffsetCurve[2];
         ::ULIS::FVec2D mBezier[4];
         bool mNeedWidth;
-        //::ULIS::FVec2D mWidthBezier[2][4];
+        ::ULIS::FVec2D mOffsetBezier[2][4];
         FOdysseyVectorHandleSegment mCtrlPoint[2];
         std::vector<FPolygon> mPolygonCache;
         BLPath mBLPath;

@@ -301,7 +301,7 @@ FOdysseyVectorVertex::IsSmooth()
         ::ULIS::FVec2D lastSegmentVector = GetVectorOnSegment( GetLastSegment(), true );
         double dot = firstSegmentVector.DotProduct( lastSegmentVector );
 
-        if( fabs(dot) > 0.99f )
+        if( dot < -0.9999f )
         {
             return true;
         }

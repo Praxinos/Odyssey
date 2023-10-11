@@ -303,3 +303,28 @@ FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
 */
     return false;
 }
+
+double
+FOdysseyVector::GetBezierApproximateLength( ::ULIS::FVec2D iBezier[4], uint32 iDivisions )
+{
+    ::ULIS::FVec2D p0 = iBezier[0];
+    double step = 1.0f / iDivisions;
+    double length = 0.0f;
+    double t0 = 0.0f;
+
+    for( uint32 i = 0; i < iDivisions; i++ )
+    {
+        double t1 = t0 + step;
+        ::ULIS::FVec2D p1 = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iBezier[0]
+                                                                                 , iBezier[1]
+                                                                                 , iBezier[2]
+                                                                                 , iBezier[3]
+                                                                                 , t1 );
+        length += ::ULIS::FVec2D( p1 - p0 ).Distance();
+
+        t0 = t1;
+        p0 = p1;
+    }
+
+    return length;
+}
