@@ -4,23 +4,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 
 /////////////////////////////////////////////////////
-// SOdysseyPainterEditorVectorPickToolTopTab
-class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorPickToolTopTab : public SCompoundWidget
+// SOdysseyPainterEditorVectorSelectionToolTopTab
+class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSelectionToolTopTab : public SCompoundWidget
 {
     typedef SCompoundWidget             tSuperClass;
 
 public:
     // Construction / Destruction
-    SLATE_BEGIN_ARGS( SOdysseyPainterEditorVectorPickToolTopTab )
+    SLATE_BEGIN_ARGS( SOdysseyPainterEditorVectorSelectionToolTopTab )
         {}
     SLATE_END_ARGS()
 
-    void  Construct( const  FArguments&  InArgs, UOdysseyPainterEditorVectorPickTool* iTool);
+    void  Construct( const  FArguments&  InArgs, UOdysseyPainterEditorVectorSelectionTool* iTool);
     TSharedPtr<SWidget> CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle, const TSharedPtr<ISinglePropertyView> iView);
 
 private:
-    UOdysseyPainterEditorVectorPickTool* mTool;
+    UOdysseyPainterEditorVectorSelectionTool* mTool;
 };

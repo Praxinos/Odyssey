@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 
@@ -13,8 +13,8 @@
 class FGridNode;
 class FOdysseyPainterEditorVectorGridToolHUD;
 
-UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdysseyPainterEditorVectorPickTool
+UCLASS( HideCategories = (SelectionTool) )
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdysseyPainterEditorVectorSelectionTool
 {
 public:
     GENERATED_BODY()
@@ -60,12 +60,15 @@ private:
     bool mMultipleSelectionMode;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool", meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
+    UPROPERTY( EditAnywhere, Category = GridTool, meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
     uint32 DivisionsX;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool", meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
+    UPROPERTY( EditAnywhere, Category = GridTool, meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
     uint32 DivisionsY;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey Grid Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+    UPROPERTY( EditAnywhere, Category = GridTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
     double PickingRadius;
+
+    UPROPERTY( EditAnywhere, Category = GridTool )
+    bool World;
 };

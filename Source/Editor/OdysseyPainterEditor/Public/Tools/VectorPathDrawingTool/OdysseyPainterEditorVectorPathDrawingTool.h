@@ -89,34 +89,34 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         eTracingType TracingType;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         eTracingFidelity TracingFidelity;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
         double Radius;
         // computed based upon whether or not the pencil size is relative to the object's transformation matrix
         double mRealSize;
 
-        UPROPERTY(EditAnywhere,Category="Odyssey PathDrawing Tool",meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         bool PressureSensitive;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         bool Absolute;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         bool UpdatePaintGroups;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         bool Stitch;
         bool StitchAtKeyDown;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         bool AverageStitchedRadius;
 
-        UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
         double StitchingRadius;
 
         //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )

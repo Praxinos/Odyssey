@@ -84,6 +84,9 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == "BackgroundColor" )
             selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
 
+        if( iPropertyName == "Opacity" )
+            selectedObject->SetOpacity( ObjectParam.Opacity );
+
         if( iCategory == "Transform" )
             selectedObject->UpdateMatrix();
     }

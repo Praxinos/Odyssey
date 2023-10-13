@@ -6,12 +6,17 @@ FOdysseyVectorOffsetCurveCubic::~FOdysseyVectorOffsetCurveCubic()
 }
 
 FOdysseyVectorOffsetCurveCubic::FOdysseyVectorOffsetCurveCubic()
+    : mLastFragment ( nullptr )
+    , mNextFragment ( nullptr )
 {
 }
 
 void
 FOdysseyVectorOffsetCurveCubic::Resize( uint32 iBezierCount )
 {
+    mLastFragment = nullptr;
+    mNextFragment = nullptr;
+
     mBezierFragmentArray.resize( iBezierCount );
 }
 
@@ -21,13 +26,48 @@ FOdysseyVectorOffsetCurveCubic::GetBezierFragmentArray()
     return mBezierFragmentArray;
 }
 
+inline ::ULIS::FVec2D
+FOdysseyVectorOffsetCurveCubic::GetFragmentPointAt( FOdysseyVectorBezierFragment* iFragment, double iT )
+{
+    return ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( iFragment->bezier[0]
+                                                              , iFragment->bezier[1]
+                                                              , iFragment->bezier[2]
+                                                              , iFragment->bezier[3]
+                                                              , ( iT - iFragment->fromT ) / ( iFragment->toT - iFragment->fromT ) );
+}
+
 ::ULIS::FVec2D
 FOdysseyVectorOffsetCurveCubic::GetPointAt( double iT )
 {
-    for( int i = 0; i < mBezierFragmentArray.size(); i++ )
+    int fragmentCount = mBezierFragmentArray.size();
+
+    // for faster finding, we first check on the last fragment that was met
+    if( mLastFragment )
     {
+        if( ( iT >= mLastFragment->fromT ) && ( iT <= mLastFragment->toT ) )
+        {
+            return GetFragmentPointAt( mLastFragment, iT );
+        }
+    }
+
+    // for faster finding, we also check on the fragment next to the last fragment that was met
+    if( mNextFragment )
+    {
+        if( ( iT >= mNextFragment->fromT ) && ( iT <= mNextFragment->toT ) )
+        {
+            return GetFragmentPointAt( mNextFragment, iT );
+        }
+    }
+
+    for( int i = 0; i < fragmentCount; i++ )
+    {
+        int n = ( i + 1 ) % fragmentCount;
+
         if( ( iT >= mBezierFragmentArray[i].fromT ) && ( iT <= mBezierFragmentArray[i].toT ) )
         {
+            mLastFragment = &mBezierFragmentArray[i];
+            mNextFragment = &mBezierFragmentArray[n];
+
             return ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( mBezierFragmentArray[i].bezier[0]
                                                                       , mBezierFragmentArray[i].bezier[1]
                                                                       , mBezierFragmentArray[i].bezier[2]

@@ -56,15 +56,17 @@ public:
 
 protected:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-    void PropertyChanged( const FName& iPropertyName );
+    void PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                              , FOdysseyVectorScene* iScene
+                              , const FName& iPropertyName );
 
 private:
         FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathStitch Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+    UPROPERTY( EditAnywhere, Category = PathStitchTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
     double PickingRadius;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathStitch Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+    UPROPERTY( EditAnywhere, Category = PathStitchTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
     bool RestrictToSelection;
 };

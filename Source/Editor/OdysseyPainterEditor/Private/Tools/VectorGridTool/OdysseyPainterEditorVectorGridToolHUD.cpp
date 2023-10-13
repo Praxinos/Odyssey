@@ -6,7 +6,7 @@ FOdysseyPainterEditorVectorGridToolHUD::~FOdysseyPainterEditorVectorGridToolHUD(
 }
 
 FOdysseyPainterEditorVectorGridToolHUD::FOdysseyPainterEditorVectorGridToolHUD( UOdysseyPainterEditorVectorGridTool* iGridTool )
-    : FOdysseyPainterEditorVectorPickToolHUD( iGridTool )
+    : FOdysseyPainterEditorVectorSelectionToolHUD( iGridTool )
 {
     mGridTool = iGridTool;
 }
@@ -334,7 +334,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject,
 void
 FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorScene* iScene )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mPickTool->GetFocusedObjectList( iScene );
+    std::list<FOdysseyVectorObject*>& selectedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
 
     mPointCount = 0;
 
@@ -557,7 +557,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeCells()
 void
 FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene )
 {
-    UpdateSelectionBox( iScene, false );
+    UpdateSelectionBox( iScene, mGridTool->World );
 
     if( mSelectionBox.rect.Area() )
     {

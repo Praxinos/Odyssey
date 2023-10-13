@@ -19,6 +19,9 @@ struct FObjectParam
     UPROPERTY(EditAnywhere, Category="Identity")
     FString Name;
 
+    UPROPERTY(EditAnywhere,Category="Appearance", meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+    double Opacity;
+
     UPROPERTY(EditAnywhere, Category="Transform")
     double TranslationX;
 
@@ -214,4 +217,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* GetPreviousChild( FOdysseyVectorObject* iChild );
         virtual void ApplyTransformations();
         virtual void ApplyMatrix( BLMatrix2D& iMatrix );
+        void SetOpacity( double iOpacity );
 };

@@ -33,6 +33,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorOffsetCurveCubic
         std::vector<FOdysseyVectorBezierFragment>& GetBezierFragmentArray();
         ::ULIS::FVec2D GetPointAt( double iT );
 
+    private:
+        ::ULIS::FVec2D GetFragmentPointAt( FOdysseyVectorBezierFragment* iFragment, double iT );
+
     protected:
         std::vector<FOdysseyVectorBezierFragment> mBezierFragmentArray;
+        FOdysseyVectorBezierFragment* mLastFragment;
+        FOdysseyVectorBezierFragment* mNextFragment;
 };

@@ -17,7 +17,9 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double 
     BLContextCreateInfo createInfo {};
 
     // Configure the number of threads to use.
-    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    mProcessorCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+
+    createInfo.threadCount = mProcessorCount;
 
     // create an empty default image. An image is always needed for matrix operations
     mDefaultBLImage.createFromData( mWidth
@@ -40,6 +42,8 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double 
 
     mBLContext->begin( *mBLImage, createInfo );
     //UseColorImage();
+
+    mHorizontalLineBuffer.resize( iHeight );
 }
 
 bool
@@ -836,4 +840,390 @@ FOdysseyVectorEngine::Signal( uint64 iSignalFlags )
     }
 
     OnSignalDelegate().Broadcast( mScene, iSignalFlags );
+}
+
+void
+FOdysseyVectorEngine::TraceLine ( int32 iX0
+                                , int32 iY0
+                                , double iU0
+                                , double iV0
+                                , int32 iX1
+                                , int32 iY1
+                                , double iU1
+                                , double iV1 )
+{
+    int32 dx  = ( iX1 - iX0 ),
+          ddx = abs ( dx ),
+          dy  = ( iY1 - iY0 ),
+          ddy = abs ( dy ),
+          dd  = ( ddx > ddy ) ? ddx : ddy;
+    double du  = iU1  - iU0, pu = ( dd ) ? ( du / dd ) : 0.0f;
+    double dv  = iV1  - iV0, pv = ( dd ) ? ( dv / dd ) : 0.0f;
+    int px = ( dx > 0 ) ? 1 : -1, 
+        py = ( dy > 0 ) ? 1 : -1;
+    int32 x = iX0,
+          y = iY0;
+    double u = iU0;
+    double v = iV0;
+    int cumul = 0;
+
+    if( ddx > ddy )
+    {
+        for( int i = 0; i <= ddx; i++ )
+        {
+            if( ( y >= 0 ) && ( y < (int32) mHeight ) )
+            {
+                uint32 offset = ( y * mWidth ) + x;
+
+                if( mHorizontalLineBuffer[y].inited == 0 )
+                {
+                    mHorizontalLineBuffer[y].inited = 1;
+
+                    mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
+                    mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
+                    mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
+                }
+                else
+                {
+                    if( x < mHorizontalLineBuffer[y].x0 )
+                    {
+                        mHorizontalLineBuffer[y].x0 = x;
+                        mHorizontalLineBuffer[y].u0 = u;
+                        mHorizontalLineBuffer[y].v0 = v;
+                    }
+
+                    if( x > mHorizontalLineBuffer[y].x1 )
+                    {
+                        mHorizontalLineBuffer[y].x1 = x;
+                        mHorizontalLineBuffer[y].u1 = u;
+                        mHorizontalLineBuffer[y].v1 = v;
+                    }
+
+                    mHorizontalLineBuffer[y].inited = 2;
+                }
+            }
+
+            cumul += ddy;
+            x     += px;
+            u     += pu;
+            v     += pv;
+
+            if( cumul >= ddx )
+            {
+                cumul -= ddx;
+                y     += py;
+            }
+        }
+    }
+    else
+    {
+        for( int i = 0x00; i <= ddy; i++ )
+        {
+            if( ( y >= 0x00 ) && ( y < (int32) mHeight ) )
+            {
+                uint32 offset = ( y * mWidth ) + x;
+
+                if( mHorizontalLineBuffer[y].inited == 0 )
+                {
+                     mHorizontalLineBuffer[y].inited = 1;
+
+                     mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
+                     mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
+                     mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
+                }
+                else
+                {
+                    if( x < mHorizontalLineBuffer[y].x0 )
+                    {
+                        mHorizontalLineBuffer[y].x0 = x;
+                        mHorizontalLineBuffer[y].u0 = u;
+                        mHorizontalLineBuffer[y].v0 = v;
+                    }
+
+                    if( x > mHorizontalLineBuffer[y].x1 )
+                    {
+                        mHorizontalLineBuffer[y].x1 = x;
+                        mHorizontalLineBuffer[y].u1 = u;
+                        mHorizontalLineBuffer[y].v1 = v;
+                    }
+
+                    mHorizontalLineBuffer[y].inited = 2;
+                }
+            }
+
+            cumul += ddx;
+            y     += py;
+            u     += pu;
+            v     += pv;
+
+            if( cumul >= ddy )
+            {
+                cumul -= ddy;
+                x     += px;
+            }
+        }
+    }
+}
+
+// Macro for faster execution. Indeed, an inline function is not guaranteed to be inlined.
+#define GETPIXEL(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,U,V,R,G,B,A)             \
+    switch ( BITSPERPIXEL )                                                \
+    {                                                                      \
+        case 32 :                                                          \
+        {                                                                  \
+            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4]) PIXELS; \
+            int32 TEXU = U * ( WIDTH  - 1 );                               \
+            int32 TEXV = V * ( HEIGHT - 1 );                               \
+            uint32 TEXOFFSET = ( TEXV * WIDTH ) + TEXU;                    \
+                                                                           \
+            B = PIXELS32[TEXOFFSET][0];                                    \
+            G = PIXELS32[TEXOFFSET][1];                                    \
+            R = PIXELS32[TEXOFFSET][2];                                    \
+            A = PIXELS32[TEXOFFSET][3];                                    \
+        }                                                                  \
+        break;                                                             \
+                                                                           \
+        default :                                                          \
+        break;                                                             \
+    }                                                                      \
+
+
+void
+FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
+                                          , double iOpacity
+                                          , int8*  iPixelData
+                                          , int32  iBitsPerPixel
+                                          // Temp
+                                          , int8*  iBrushPixelData
+                                          , uint32 iBrushWidth
+                                          , uint32 iBrushHeight
+                                          , int32  iBrushBitsPerPixel )
+{
+    FHorizontalLine *hline = &mHorizontalLineBuffer[iLineNumber];
+    int32 x0 = hline->x0,
+          x1 = hline->x1;
+    double u0 = hline->u0;
+    double v0 = hline->v0;
+    int32 dx = x1 - x0, ddx = abs ( dx );
+    int32 x = x0;
+    double du  = hline->u1 - hline->u0, pu = ( ddx ) ? ( du / ddx ) : 0.0f;
+    double dv  = hline->v1 - hline->v0, pv = ( ddx ) ? ( dv / ddx ) : 0.0f;
+    long  px = ( dx > 0 ) ? 1 : -1;
+    double u = u0;
+    double v = v0;
+    double opacityFactor = iOpacity / 255.0f;
+
+    uint32 offset = ( iLineNumber * mWidth );
+
+    // Commented out: we don't drow from edge-to-edge, we stop 1 pixel before to prevent overlapping,
+    // which would lead to double stroke and would produce artefact when alpha is semi-transparent.
+    //for( int i = 0; i <= ddx; i++ )
+    for( int i = 0; i < ddx; i++ )
+    {
+        if( ( x >= 0 ) && ( x < (int32) mWidth ) )
+        {
+            uint32 aoffset = offset + x;
+            unsigned char BA = 255, BR = 0, BG = 0, BB = 0;
+
+            if( iBrushPixelData && iBrushWidth && iBrushHeight )
+            {
+                GETPIXEL( iBrushPixelData
+                        , iBrushWidth
+                        , iBrushHeight
+                        , iBrushBitsPerPixel
+                        , u
+                        , v
+                        , BR
+                        , BG
+                        , BB
+                        , BA );
+            }
+
+            switch ( iBitsPerPixel )
+            {
+                case 32 :
+                {
+                    unsigned char (*srcimg)[4] = ( unsigned char (*)[4]) iPixelData;
+
+                    if( BA )
+                    {
+                        double alpha = (double) BA * opacityFactor;
+                        double invAlpha = 1.0f - alpha;
+
+                        srcimg[aoffset][0] = /*BB*/( invAlpha * srcimg[aoffset][0] ) + ( BB * alpha );
+                        srcimg[aoffset][1] = /*BG*/( invAlpha * srcimg[aoffset][1] ) + ( BG * alpha );
+                        srcimg[aoffset][2] = /*BR*/( invAlpha * srcimg[aoffset][2] ) + ( BR * alpha );
+                        srcimg[aoffset][3] = /*BA*/( invAlpha * srcimg[aoffset][3] ) + ( BA * alpha );
+                    }
+                }
+                break;
+
+                default :
+                break;
+            }
+        }
+
+        x += px;
+        u += pu;
+        v += pv;
+    }
+}
+/*
+void
+FOdysseyVectorEngine::DrawQuadThread( uint32 iProcessorID
+                                    , uint32 iProcessorCount
+                                    , int32  iFirstLine
+                                    , int32  iLastLine
+                                    , double iOpacity
+                                    , int8*  iPixelData
+                                    , int32  iBitsPerPixel
+                                    // Temp
+                                    , int8*  iBrushPixelData
+                                    , uint32 iBrushWidth
+                                    , uint32 iBrushHeight
+                                    , int32  iBrushBitsPerPixel )
+{
+    for( int i = iFirstLine + iProcessorID; i <= iLastLine ; i += iProcessorCount )
+    {
+        if( mHorizontalLineBuffer[i].inited == 2 )
+        {
+            TraceHorizontalLine( i
+                               , iOpacity
+                               , iPixelData
+                               , iBitsPerPixel
+                               , iBrushPixelData
+                               , iBrushWidth
+                               , iBrushHeight
+                               , iBrushBitsPerPixel );
+        }
+
+        mHorizontalLineBuffer[i].inited = 0;
+    }
+}
+*/
+
+void
+FOdysseyVectorEngine::DrawQuad( ::ULIS::FVec2I iPoint[4]
+                              , double iU[4]
+                              , double iV[4]
+                              , double iOpacity
+                              , int8*  iPixelData
+                              , int32  iBitsPerPixel
+                              // temp
+                              , int8*  iBrushPixelData
+                              , uint32 iBrushWidth
+                              , uint32 iBrushHeight
+                              , int32  iBrushBitsPerPixel )
+{
+    int32 ymin = iPoint[0].y,
+          ymax = ymin;
+
+    for( int i = 0; i < 4; i++ )
+    {
+        uint32 n = ( i + 1 ) % 4;
+
+        if ( iPoint[i].y < ymin ) ymin = iPoint[i].y;
+        if ( iPoint[i].y > ymax ) ymax = iPoint[i].y;
+
+        // always draw in the same direction (left to right ) to avoid bad overlapping
+        if( iPoint[i].x < iPoint[n].x )
+        {
+            TraceLine ( iPoint[i].x, iPoint[i].y, iU[i], iV[i]
+                      , iPoint[n].x, iPoint[n].y, iU[n], iV[n] );
+        }
+        else
+        {
+            TraceLine ( iPoint[n].x, iPoint[n].y, iU[n], iV[n]
+                      , iPoint[i].x, iPoint[i].y, iU[i], iV[i] );
+        }
+    }
+
+    if ( ymin <  0               ) ymin = 0;
+    if ( ymin >= (int32) mHeight ) ymin = (int32) mHeight - 1;
+    if ( ymax <  0               ) ymax = 0;
+    if ( ymax >= (int32) mHeight ) ymax = (int32) mHeight - 1;
+
+    if ( ymin <= ymax )
+    {
+/*
+        std::vector<std::thread> threads;
+
+mProcessorCount = 2;
+
+        threads.resize( mProcessorCount );
+
+        //for( int32 i = 0, j = ymin; i < (int32) mProcessorCount, j <= ymax; i++, j++ )
+        for( uint32 i = 0; i < threads.size(); i++ )
+        {
+            threads[i] = std::thread( &FOdysseyVectorEngine::DrawQuadThread
+                                  , this
+                                  , i
+                                  , mProcessorCount
+                                  , ymin
+                                  , ymax
+                                  , iOpacity
+                                  , iPixelData
+                                  , iBitsPerPixel
+                                  , iBrushPixelData
+                                  , iBrushWidth
+                                  , iBrushHeight
+                                  , iBrushBitsPerPixel );
+        }
+
+        //for( int32 i = 0, j = ymin; i < (int32) mProcessorCount, j <= ymax; i++, j++ )
+        for( uint32 i = 0; i < threads.size(); i++ )
+        {
+            threads[i].join();
+        }
+*/
+/*
+        int32 lineCount = ( ymax - ymin ) + 1;
+
+        ParallelFor( lineCount
+                  , [ this
+                    , &ymin
+                    , &iOpacity
+                    , iPixelData
+                    , &iBitsPerPixel
+                    , iBrushPixelData
+                    , &iBrushWidth
+                    , &iBrushHeight
+                    , &iBrushBitsPerPixel ]( int32 iIndex )
+                      {
+                          int32 lineID = iIndex + ymin;
+
+                          if( mHorizontalLineBuffer[lineID].inited == 2 )
+                          {
+                              TraceHorizontalLine( lineID
+                                                 , iOpacity
+                                                 , iPixelData
+                                                 , iBitsPerPixel
+                                                 , iBrushPixelData
+                                                 , iBrushWidth
+                                                 , iBrushHeight
+                                                 , iBrushBitsPerPixel );
+                          }
+
+                          mHorizontalLineBuffer[lineID].inited = 0;
+                      } );
+*/
+
+        for ( int i = ymin; i <= ymax; i++ )
+        {
+            if( mHorizontalLineBuffer[i].inited == 2 )
+            {
+                TraceHorizontalLine( i
+                                   , iOpacity
+                                   , iPixelData
+                                   , iBitsPerPixel
+                                   , iBrushPixelData
+                                   , iBrushWidth
+                                   , iBrushHeight
+                                   , iBrushBitsPerPixel );
+            }
+
+            mHorizontalLineBuffer[i].inited = 0;
+        }
+
+    }
 }

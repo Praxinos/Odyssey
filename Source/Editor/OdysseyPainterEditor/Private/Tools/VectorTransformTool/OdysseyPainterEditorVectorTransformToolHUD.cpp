@@ -6,10 +6,12 @@ FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransfo
 }
 
 FOdysseyPainterEditorVectorTransformToolHUD::FOdysseyPainterEditorVectorTransformToolHUD( UOdysseyPainterEditorVectorTransformTool* iTransformTool )
-    : FOdysseyPainterEditorVectorPickToolHUD( iTransformTool )
+    : FOdysseyPainterEditorVectorSelectionToolHUD( iTransformTool )
     , mFlags( 0 )
 {
     mTransformTool = iTransformTool;
+
+    mShowSelectionIfEmpty = true;
 }
 
 uint32
@@ -323,7 +325,9 @@ FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
-    FOdysseyPainterEditorVectorPickToolHUD::Reset( iScene ); // Updates the selection box
+    UpdateSelectionBox( iScene, mTransformTool->World );
+
+    //FOdysseyPainterEditorVectorSelectionToolHUD::Reset( iScene ); // Updates the selection box
 /*
     SetGizmo( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
             , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
@@ -336,7 +340,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( FOdysseyVectorScene* iScene, 
     BLContext* blctx = iScene->GetEngine()->GetBLContext();
 
     // draws nothing in object mode, vertices in vertex mode
-    FOdysseyPainterEditorVectorPickToolHUD::Draw( iScene, iFlags );
+    FOdysseyPainterEditorVectorSelectionToolHUD::Draw( iScene, iFlags );
 
     blctx->save();
     blctx->resetMatrix();

@@ -17,10 +17,6 @@ public:
     GENERATED_BODY()
 
 public:
-    UPROPERTY(EditAnywhere, Category="Eraser Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
-    double Radius;
-
-public:
     // Destructor
     virtual ~UOdysseyPainterEditorVectorEraserTool();
 
@@ -60,6 +56,10 @@ public:
 protected:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     void PropertyChanged( const FName& iPropertyName );
+
+public:
+    UPROPERTY( EditAnywhere, Category = EraserTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+    double Radius;
 
 private:
     FOdysseyVectorHUDEraser mEraserHUD;

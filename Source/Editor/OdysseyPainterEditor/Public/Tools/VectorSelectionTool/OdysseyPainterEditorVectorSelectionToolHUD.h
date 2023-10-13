@@ -3,7 +3,7 @@
 #include <blend2d.h>
 #include <ULIS>
 #include "HUD/OdysseyVectorHUD.h"
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 
 typedef struct _FSelectionBox
 {
@@ -12,11 +12,11 @@ typedef struct _FSelectionBox
     BLMatrix2D inverseWorldMatrix;
 } FSelectionBox;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolHUD : public FOdysseyVectorHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : public FOdysseyVectorHUD
 {
     public:
-        virtual ~FOdysseyPainterEditorVectorPickToolHUD();
-        FOdysseyPainterEditorVectorPickToolHUD(  UOdysseyPainterEditorVectorPickTool* iPickTool );
+        virtual ~FOdysseyPainterEditorVectorSelectionToolHUD();
+        FOdysseyPainterEditorVectorSelectionToolHUD(  UOdysseyPainterEditorVectorSelectionTool* iSelectionTool );
 
         virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
@@ -43,10 +43,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPickToolHUD : public F
         bool GroupPaintGetBBoxFromSelectedVertices( FOdysseyVectorGroupPaint* iPaintGroup, ::ULIS::FRectD& oBBox );
 
     protected:
-        UOdysseyPainterEditorVectorPickTool* mPickTool;
+        UOdysseyPainterEditorVectorSelectionTool* mSelectionTool;
         std::vector<::ULIS::FVec2D>* mPointArray;
         //bool mSelecting;
         BLImage* mSelectionMask;
         FSelectionBox mSelectionBox;
         bool mShowSelectionBox;
+        bool mShowSelectionIfEmpty;
 };

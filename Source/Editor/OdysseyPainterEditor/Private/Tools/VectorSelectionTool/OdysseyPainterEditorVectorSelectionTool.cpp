@@ -1,35 +1,35 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
-#include "Tools/VectorPickTool/SOdysseyPainterEditorVectorPickToolTopTab.h"
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolObjectContextMenu.h"
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolVertexContextMenu.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
+#include "Tools/VectorSelectionTool/SOdysseyPainterEditorVectorSelectionToolTopTab.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolObjectContextMenu.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolVertexContextMenu.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
 
 #include <chrono>
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPickTool"
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorSelectionTool"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyPainterEditorVectorPickTool::~UOdysseyPainterEditorVectorPickTool()
+UOdysseyPainterEditorVectorSelectionTool::~UOdysseyPainterEditorVectorSelectionTool()
 {
 }
 
-UOdysseyPainterEditorVectorPickTool::UOdysseyPainterEditorVectorPickTool()
-    : PickingMode( EOdysseyVectorPickingMode::Freehand )
+UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool()
+    : SelectionShape( EOdysseyVectorSelectionShape::Freehand )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
-    mPickHUD = new FOdysseyPainterEditorVectorPickToolHUD( this );
+    mPickHUD = new FOdysseyPainterEditorVectorSelectionToolHUD( this );
 }
 
 std::list<FOdysseyVectorObject*>&
-UOdysseyPainterEditorVectorPickTool::GetFocusedObjectList( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorSelectionTool::GetFocusedObjectList( FOdysseyVectorScene* iScene )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
@@ -46,46 +46,52 @@ UOdysseyPainterEditorVectorPickTool::GetFocusedObjectList( FOdysseyVectorScene* 
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 void
-UOdysseyPainterEditorVectorPickTool::Load()
+UOdysseyPainterEditorVectorSelectionTool::Load()
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
 
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPickTool::LoadVector( vectorEngine, vectorScene );
+        if( mediaVectors.Num() )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            LoadVector( vectorEngine, vectorScene );
+        }
+    }
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::Unload()
+UOdysseyPainterEditorVectorSelectionTool::Unload()
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
 
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPickTool::UnloadVector( vectorEngine, vectorScene );
+        if( mediaVectors.Num() )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            UnloadVector( vectorEngine, vectorScene );
+        }
+    }
 }
 
 bool
-UOdysseyPainterEditorVectorPickTool::IsActivable() const
+UOdysseyPainterEditorVectorSelectionTool::IsActivable() const
 {
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::UnloadVector( FOdysseyVectorEngine* iEngine
-                                                 , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene )
 {
     iEngine->RemoveHUD( mPickHUD );
 
@@ -93,8 +99,8 @@ UOdysseyPainterEditorVectorPickTool::UnloadVector( FOdysseyVectorEngine* iEngine
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
-                                               , FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene )
 {
     mPickHUD->Load( iScene );
 
@@ -110,15 +116,15 @@ UOdysseyPainterEditorVectorPickTool::LoadVector( FOdysseyVectorEngine* iEngine
 }
 
 TSharedRef<SWidget>
-UOdysseyPainterEditorVectorPickTool::CreateTopTabWidget()
+UOdysseyPainterEditorVectorSelectionTool::CreateTopTabWidget()
 {
-    return SNew(SOdysseyPainterEditorVectorPickToolTopTab, this);
+    return SNew(SOdysseyPainterEditorVectorSelectionToolTopTab, this);
 }
 
 bool
-UOdysseyPainterEditorVectorPickTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
-                                                    , const FKey& iKey )
+UOdysseyPainterEditorVectorSelectionTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                                                         , FOdysseyVectorScene* iScene
+                                                         , const FKey& iKey )
 {
     // Note: this also calls iScene->Update(0)
     UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
@@ -127,9 +133,9 @@ UOdysseyPainterEditorVectorPickTool::OnKeyDownVector( FOdysseyVectorEngine* iEng
 }
 
 bool
-UOdysseyPainterEditorVectorPickTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , const FKey& iKey )
+UOdysseyPainterEditorVectorSelectionTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                                                       , FOdysseyVectorScene* iScene
+                                                       , const FKey& iKey )
 {
     // Note: this also calls iScene->Update(0)
     UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
@@ -138,23 +144,28 @@ UOdysseyPainterEditorVectorPickTool::OnKeyUpVector( FOdysseyVectorEngine* iEngin
 }
 
 bool
-UOdysseyPainterEditorVectorPickTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+UOdysseyPainterEditorVectorSelectionTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return false;
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return false;
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
 
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    return UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            return OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
+        }
+    }
+
+    return false;
 }
 
 bool
-UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
                                                       , FOdysseyVectorScene* iScene
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
@@ -188,23 +199,26 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDownVector( FOdysseyVectorEngine* iE
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorSelectionTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
 
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+        }
+    }
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
                                                       , FOdysseyVectorScene* iScene
                                                       , const FOdysseyPoint& iPointInTexture )
 {
@@ -214,10 +228,10 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( FOdysseyVectorEngine* iE
     {
         ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
 
-        switch( PickingMode )
+        switch( SelectionShape )
         {
-            case EOdysseyVectorPickingMode::Rectangle:
-            case EOdysseyVectorPickingMode::Circle :
+            case EOdysseyVectorSelectionShape::Rectangle:
+            case EOdysseyVectorSelectionShape::Circle :
             {
                 ::ULIS::FVec2D downPoint = mPointArray[0];
 
@@ -227,7 +241,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseDragVector( FOdysseyVectorEngine* iE
             }
             break;
 
-            case EOdysseyVectorPickingMode::Freehand :
+            case EOdysseyVectorSelectionShape::Freehand :
                 mPointArray.push_back( point );
             break;
 
@@ -262,7 +276,7 @@ SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iS
 }
 
 ::ULIS::FRectD
-UOdysseyPainterEditorVectorPickTool::GenerateMask( FOdysseyVectorEngine* iEngine )
+UOdysseyPainterEditorVectorSelectionTool::GenerateMask( FOdysseyVectorEngine* iEngine )
 {
     ::ULIS::FRectD roi = ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0 );
 
@@ -270,9 +284,9 @@ UOdysseyPainterEditorVectorPickTool::GenerateMask( FOdysseyVectorEngine* iEngine
 
     if( mPointArray.size() > 1 )
     {
-        switch( PickingMode )
+        switch( SelectionShape )
         {
-            case EOdysseyVectorPickingMode::Rectangle:
+            case EOdysseyVectorSelectionShape::Rectangle:
             {
                 double xmin = ::ULIS::FMath::Min( mPointArray[0].x, mPointArray[1].x );
                 double ymin = ::ULIS::FMath::Min( mPointArray[0].y, mPointArray[1].y );
@@ -284,7 +298,7 @@ UOdysseyPainterEditorVectorPickTool::GenerateMask( FOdysseyVectorEngine* iEngine
             }
             break;
 
-            case EOdysseyVectorPickingMode::Circle:
+            case EOdysseyVectorSelectionShape::Circle:
             {
                 ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( mPointArray[1] - mPointArray[0] );
 
@@ -292,7 +306,7 @@ UOdysseyPainterEditorVectorPickTool::GenerateMask( FOdysseyVectorEngine* iEngine
             }
             break;
 
-            case EOdysseyVectorPickingMode::Freehand:
+            case EOdysseyVectorSelectionShape::Freehand:
                 return iEngine->GenerateFreehandMask( mPointArray );
             break;
 
@@ -305,7 +319,7 @@ UOdysseyPainterEditorVectorPickTool::GenerateMask( FOdysseyVectorEngine* iEngine
 }
 
 bool
-UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+UOdysseyPainterEditorVectorSelectionTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {   
     bool ret = false;
 
@@ -315,7 +329,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTex
     {
         if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
         {
-            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorPickToolObjectContextMenu::CreateWidget( GetEditor() );
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorSelectionToolObjectContextMenu::CreateWidget( GetEditor() );
             
             TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
             FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
@@ -327,7 +341,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTex
 
         if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
         {
-            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorPickToolVertexContextMenu::CreateWidget( GetEditor() );
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorSelectionToolVertexContextMenu::CreateWidget( GetEditor() );
 
             TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
             FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
@@ -341,24 +355,26 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUp( const FOdysseyPoint& iPointInTex
     else
     {
         bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-        if (!hasVector)
-            return false;
 
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-        if (mediaVectors.Num() <= 0)
-            return false;
+        if( hasVector )
+        {
+            TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
 
-        FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-        FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+            {
+                FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+                FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
-        return UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+                return OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+            }
+        }
     }
 
     return ret;
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorObjectMode( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVectorEngine* iEngine
                                                               , FOdysseyVectorScene* iScene
                                                               , const FOdysseyPoint& iPointInTexture
                                                               , const FKey& iKey )
@@ -367,7 +383,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorObjectMode( FOdysseyVectorEn
     ::ULIS::FRectD roi;
 
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorObjectPickTool","Vector Object Pick Tool"));
+    GEditor->BeginTransaction(LOCTEXT("VectorObjectSelectionTool","Vector Object Pick Tool"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
@@ -415,7 +431,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorObjectMode( FOdysseyVectorEn
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::SelectVertexFromPath( FOdysseyVectorPath* iPath )
+UOdysseyPainterEditorVectorSelectionTool::SelectVertexFromPath( FOdysseyVectorPath* iPath )
 {
     std::vector<FOdysseyVectorVertex*> pickedVertexArray;
 
@@ -442,7 +458,7 @@ UOdysseyPainterEditorVectorPickTool::SelectVertexFromPath( FOdysseyVectorPath* i
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::SelectVertexFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
+UOdysseyPainterEditorVectorSelectionTool::SelectVertexFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
 {
     std::list<FOdysseyVectorObject*>& childrenObjectList = iPaintGroup->GetChildrenList();
     std::list<FOdysseyVectorObject*>::iterator it;
@@ -461,7 +477,7 @@ UOdysseyPainterEditorVectorPickTool::SelectVertexFromPaintGroup( FOdysseyVectorG
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
+UOdysseyPainterEditorVectorSelectionTool::SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
 {
     std::vector<FOdysseyVectorBucket*> pickedBucketArray;
 
@@ -484,7 +500,7 @@ UOdysseyPainterEditorVectorPickTool::SelectBucketFromPaintGroup( FOdysseyVectorG
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVectorEngine* iEngine
                                                               , FOdysseyVectorScene* iScene
                                                               , const FOdysseyPoint& iPointInTexture
                                                               , const FKey& iKey )
@@ -515,7 +531,7 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVectorVertexMode( FOdysseyVectorEn
 }
 
 bool
-UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                                     , FOdysseyVectorScene* iScene
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
@@ -549,48 +565,53 @@ UOdysseyPainterEditorVectorPickTool::OnMouseUpVector( FOdysseyVectorEngine* iEng
 }
 
 std::vector<::ULIS::FVec2D>&
-UOdysseyPainterEditorVectorPickTool::GetPointArray()
+UOdysseyPainterEditorVectorSelectionTool::GetPointArray()
 {
     return mPointArray;
 }
 
-EOdysseyVectorPickingMode
-UOdysseyPainterEditorVectorPickTool::GetPickingMode()
+EOdysseyVectorSelectionShape
+UOdysseyPainterEditorVectorSelectionTool::GetSelectionShape()
 {
-    return PickingMode;
+    return SelectionShape;
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::Commit()
+UOdysseyPainterEditorVectorSelectionTool::Commit()
 {
 
 }
 
 void
-UOdysseyPainterEditorVectorPickTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+UOdysseyPainterEditorVectorSelectionTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
-    
+
+    // Redraw
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
 
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName() );
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        }
+    }
 }
-
+/*
 void
-UOdysseyPainterEditorVectorPickTool::PropertyChangedVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
-                                                          , const FName& iPropertyName )
+UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( FOdysseyVectorEngine* iEngine
+                                                               , FOdysseyVectorScene* iScene
+                                                               , const FName& iPropertyName )
 {
     iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
+*/
 
 #undef LOCTEXT_NAMESPACE

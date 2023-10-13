@@ -5,6 +5,7 @@
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyVector.h"
+#include "Undo/OdysseyVectorUndoObjectAdd.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorSceneTreeView"
 

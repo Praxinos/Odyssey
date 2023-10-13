@@ -3,9 +3,9 @@
 #include <blend2d.h>
 #include <ULIS>
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : public FOdysseyPainterEditorVectorPickToolHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : public FOdysseyPainterEditorVectorSelectionToolHUD
 {
     public:
         static const uint32 AXIS_LENGTH   = 70;

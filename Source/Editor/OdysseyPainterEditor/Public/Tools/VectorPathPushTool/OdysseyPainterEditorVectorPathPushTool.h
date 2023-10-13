@@ -84,12 +84,12 @@ private:
     FOdysseyPainterEditorVectorPathPushToolHUD *mPathPushHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
+    UPROPERTY( EditAnywhere, Category = PathPushTool, meta = (ClampMin = "0.0", UIMin = "0.0"))
     double Radius;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")
+    UPROPERTY( EditAnywhere, Category = PathPushTool )
     bool PreserveSmoothness;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathPush Tool")
+    UPROPERTY( EditAnywhere, Category = PathPushTool )
     bool RestrictToSelection;
 };

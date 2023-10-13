@@ -72,16 +72,16 @@ private:
     FOdysseyVectorUndoSegmentReshape* mUndoSegmentReshape;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool")
+    UPROPERTY( EditAnywhere, Category = PathSmoothTool )
     ePathSmoothingMode SmoothingMode;
     ePathSmoothingMode SmoothingModeAtKeyDown; // when pressing shift
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
+    UPROPERTY( EditAnywhere, Category = PathSmoothTool, meta = (ClampMin = "0.0", UIMin = "0.0"))
     double PickingRadius;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool")
+    UPROPERTY( EditAnywhere, Category = PathSmoothTool )
     bool RestrictToSelection;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathSmooth Tool")
+    UPROPERTY( EditAnywhere, Category = PathSmoothTool )
     bool PreserveHandleLength;
 };

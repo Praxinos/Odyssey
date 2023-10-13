@@ -14,7 +14,7 @@ FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
     : mDotLimit ( 0.0 ) // 90 deg
     //, mDotLimit ( 0.7071f ) // cos 45deg
     , mPointID( 0 )
-    , mSampleDistance( 6.0f )
+    , mSampleDistance( 3.0f )
     , mTracingWidth( 6.0f )
     , mCubicPath ( nullptr )
     , mPreviousVertex ( nullptr )

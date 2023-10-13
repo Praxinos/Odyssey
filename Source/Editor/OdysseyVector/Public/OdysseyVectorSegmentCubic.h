@@ -14,6 +14,8 @@ class FOdysseyVectorPathCubic;
 
 typedef struct _FPolygon {
     ::ULIS::FVec2D quadVertex[4];
+    double quadU[4];
+    double quadV[4];
     ::ULIS::FVec2D lineVertex[2];
     ::ULIS::FVec2D lineVertexInParent[2];
     double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;

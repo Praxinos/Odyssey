@@ -857,6 +857,18 @@ FOdysseyVectorSegmentCubic::ThickenPolygon( FPolygon* iPolygon )
     iPolygon->quadVertex[1] = mOffsetCurve[0].GetPointAt( iPolygon->toT   );
     iPolygon->quadVertex[2] = mOffsetCurve[1].GetPointAt( iPolygon->toT   );
     iPolygon->quadVertex[3] = mOffsetCurve[1].GetPointAt( iPolygon->fromT );
+
+    iPolygon->quadU[0] = iPolygon->fromT;
+    iPolygon->quadV[0] = 0.0f;
+
+    iPolygon->quadU[1] = iPolygon->toT;
+    iPolygon->quadV[1] = 0.0f;
+
+    iPolygon->quadU[2] = iPolygon->toT;
+    iPolygon->quadV[2] = 1.0f;
+
+    iPolygon->quadU[3] = iPolygon->fromT;
+    iPolygon->quadV[3] = 1.0f;
 }
 
 // De Casteljau algorithm. Stopping condition : dot product between p0p3-p0p1 is bigger than some limit value. Same for p3p0-p3p2.

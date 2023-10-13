@@ -1,20 +1,20 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorPickTool/SOdysseyPainterEditorVectorPickToolTopTab.h"
+#include "Tools/VectorSelectionTool/SOdysseyPainterEditorVectorSelectionToolTopTab.h"
 #include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorPickToolTopTab"
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorSelectionToolTopTab"
 
 /////////////////////////////////////////////////////
-// SOdysseyPainterEditorVectorPickToolTopTab
+// SOdysseyPainterEditorVectorSelectionToolTopTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
 void
-SOdysseyPainterEditorVectorPickToolTopTab::Construct( const FArguments& InArgs, UOdysseyPainterEditorVectorPickTool* iTool )
+SOdysseyPainterEditorVectorSelectionToolTopTab::Construct( const FArguments& InArgs, UOdysseyPainterEditorVectorSelectionTool* iTool )
 {
     mTool = iTool;
 

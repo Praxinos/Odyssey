@@ -67,13 +67,13 @@ public:
         double GetLineRotationAngle( FOdysseyVectorLine* iLine, const FOdysseyPoint& iPointInTexture );
 
     public:
-        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
+        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
         EOdysseyVectorPrimitiveType PrimitiveType;
 
-        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
+        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool , meta = (ClampMin = "0.0", UIMin = "0.0"))
         double StrokeWidth;
 
-        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
+        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
         bool Uniform;
         bool UniformAtKeyDown;
 

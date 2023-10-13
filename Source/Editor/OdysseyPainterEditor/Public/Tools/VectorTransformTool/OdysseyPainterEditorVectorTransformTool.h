@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
@@ -13,8 +13,8 @@
 
 class FOdysseyPainterEditorVectorTransformToolHUD;
 
-UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorVectorPickTool
+UCLASS( HideCategories = (SelectionTool) )
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorVectorSelectionTool
 {
 public:
     GENERATED_BODY()
@@ -40,6 +40,10 @@ public:
     virtual void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene ) override;
     virtual void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene ) override;
     virtual bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
+                                  , FOdysseyVectorScene* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey ) override;
+    virtual bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
                                   , FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey ) override;
@@ -83,10 +87,13 @@ private:
     FVector2D mScreenMouseAtDown;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey Transform Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+    UPROPERTY( EditAnywhere, Category = TransformTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
     double PickingRadius;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey ObjectScale Tool")
+    UPROPERTY( EditAnywhere, Category = TransformTool)
     bool Uniform;
     bool UniformAtKeyDown;
+
+    UPROPERTY( EditAnywhere, Category = TransformTool )
+    bool World;
 };

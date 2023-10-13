@@ -353,6 +353,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         std::list<FOdysseyVectorVertex*> mSelectedVertexList;
         uint32 mPaintingCode;
         BLPath mBLPath;
+        BLImage *mBrush;
 
     public:
         FPathParam mPathParam;

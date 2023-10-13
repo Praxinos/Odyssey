@@ -94,7 +94,6 @@ protected:
     void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
                                     , FOdysseyVectorBucket* iBucket );
     void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
-                                    , std::vector<FOdysseyVectorCycle*>& iPickedCycleArray
                                     , const FOdysseyPoint& iPointInTexture
                                     , const FKey& iKey );
     void OnMouseUpVectorRemoveBucket( FOdysseyVectorScene* iScene
@@ -113,25 +112,25 @@ protected:
                             , const FOdysseyPoint& iPointInTexture );
 
 public:
-    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
     uint8 Tolerance;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
     bool RestrictToSelection;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
     bool Propagate;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
     eBucketColorMode ColorMode;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
     FColor Color1;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
     FColor Color2;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey BucketFill Tool")
+    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
     double PickingRadius;
 
 protected:

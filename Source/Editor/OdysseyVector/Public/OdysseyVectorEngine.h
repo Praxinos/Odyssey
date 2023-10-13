@@ -14,6 +14,25 @@
 
 //#include "OdysseyVectorScene.generated.h"
 
+typedef struct _FHorizontalLine
+{
+    int32 x0;
+    int32 y0;
+    double u0;
+    double v0;
+    int32 x1;
+    int32 y1;
+    double u1;
+    double v1;
+    int inited;
+
+    _FHorizontalLine()
+    {
+        inited = 0;
+    }
+}
+FHorizontalLine;
+
 class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 {
     public:
@@ -271,6 +290,47 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         uint32 GetHeight();
         BLImage* GetBLImage();
 
+        void TraceLine ( int32 iX0
+                       , int32 iY0
+                       , double iU0
+                       , double iV0
+                       , int32 iX1
+                       , int32 iY1
+                       , double iU1
+                       , double iV1 );
+
+        void TraceHorizontalLine ( int32 iLineNumber
+                                 , double iOpacity
+                                 , int8*  iPixelData
+                                 , int32  iBitsPerPixel
+                                 , int8*  iBrushPixelData
+                                 , uint32 iBrushWidth
+                                 , uint32 iBrushHeight
+                                 , int32  iBrushBitsPerPixel );
+        void DrawQuad( ::ULIS::FVec2I iPoint[4]
+                     , double iU[4]
+                     , double iV[4]
+                     , double iOpacity
+                     , int8* iPixelData
+                     , int32 iBitsPerPixel
+                     , int8*  iBrushPixelData
+                     , uint32 iBrushWidth
+                     , uint32 iBrushHeight
+                     , int32  iBrushBitsPerPixel );
+
+        void DrawQuadThread( uint32 iProcessorID
+                           , uint32 iProcessorCount
+                           , int32  iFirstLine
+                           , int32  iLastLine
+                           , double iOpacity
+                           , int8*  iPixelData
+                           , int32  iBitsPerPixel
+                           // Temp
+                           , int8*  iBrushPixelData
+                           , uint32 iBrushWidth
+                           , uint32 iBrushHeight
+                           , int32  iBrushBitsPerPixel );
+
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
@@ -309,4 +369,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         FULISInvalidTileMap mInvalidTileMap;
         uint32 mWidth;
         uint32 mHeight;
+        std::vector<FHorizontalLine> mHorizontalLineBuffer;
+        uint32 mProcessorCount;
 };

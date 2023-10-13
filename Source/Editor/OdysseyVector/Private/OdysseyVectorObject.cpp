@@ -31,6 +31,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     mInverseWorldMatrix.reset();
 
     SetName( iName );
+    SetOpacity( 1.0f );
 
     SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
 
@@ -51,6 +52,12 @@ FOdysseyVectorBucket&
 FOdysseyVectorObject::GetForegroundBucket()
 {
     return mForegroundBucket;
+}
+
+void
+FOdysseyVectorObject::SetOpacity( double iOpacity )
+{
+    mObjectParam.Opacity = iOpacity;
 }
 
 void
@@ -347,6 +354,7 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
     iDestinationObject.mBBox = mBBox;
 
     iDestinationObject.SetName( mObjectParam.Name );
+    iDestinationObject.SetOpacity( mObjectParam.Opacity );
 }
 
 double

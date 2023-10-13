@@ -24,6 +24,12 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
     SetJointType( eJointType::Miter );
 
     mPathParam.Filled = false;
+
+    mBrush = new BLImage();
+    if( mBrush )
+    {
+        mBrush->readFromFile("C:\\Users\\Eric\\Desktop\\brush_test.png");
+    }
 }
 
 bool
@@ -1626,13 +1632,24 @@ FOdysseyVectorPath::AlterRadius( double iDeltaRadius )
 void
 FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
 {
+    FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
+
+    // testing brushes
+    BLImage* image = vectorEngine->GetBLImage();
+    BLImageData imageData;
+    BLImageData brushData;
+
+    image->getData( &imageData );
+    mBrush->getData( &brushData );
+    //
+
     if ( mPathParam.Filled )
     {
         // TODO: precompute the filling (build the BLPath )
         Fill();
     }
 
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+    BLContext* blctx = vectorEngine->GetBLContext();
     FColor color = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? FColor( 0, 0, 0, 255 )
                                                                                  : mForegroundBucket.GetColor();
     BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A );
@@ -1648,17 +1665,51 @@ FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
         for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+            //FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
 
-            segment->Draw();
+            //segment->Draw();
+
+            // Testing Brushes
+            {
+                std::vector<FPolygon>& polygonCache = segment->GetPolygonCache();
+
+                for( int i = 0; i < polygonCache.size(); i++ )
+                {
+                    FPolygon* poly = &polygonCache[i];
+                    BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( poly->quadVertex[0].x, poly->quadVertex[0].y )
+                                            , mWorldMatrix.mapPoint( poly->quadVertex[1].x, poly->quadVertex[1].y ) 
+                                            , mWorldMatrix.mapPoint( poly->quadVertex[2].x, poly->quadVertex[2].y ) 
+                                            , mWorldMatrix.mapPoint( poly->quadVertex[3].x, poly->quadVertex[3].y ) };
+                    ::ULIS::FVec2I intPoint[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                                                 , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                                                 , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
+                                                 , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
+
+                    vectorEngine->DrawQuad( intPoint
+                                          , poly->quadU
+                                          , poly->quadV
+                                          , mObjectParam.Opacity
+                                          , (int8*)imageData.pixelData
+                                          , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                          , (int8*)brushData.pixelData
+                                          , brushData.size.w
+                                          , brushData.size.h
+                                          , ( brushData.format == BL_FORMAT_PRGB32 ) ? 32 : 0 );
+                }
+            }
+
         }
 
-        for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+        if( mBrush == nullptr )
         {
-            FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
+            for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+            {
+                FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
 
-            DrawJoint( cubicVertex, iDrawingFlags );
+                DrawJoint( cubicVertex, iDrawingFlags );
+            }
         }
+
     }
 }
 

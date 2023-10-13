@@ -59,6 +59,12 @@ public:
                         , FOdysseyVectorScene* iScene
                         , const FOdysseyPoint& iPointInTexture
                         , const FKey& iKey );
+    bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
+                        , FOdysseyVectorScene* iScene
+                        , const FKey& iKey );
+    bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                      , FOdysseyVectorScene* iScene
+                      , const FKey& iKey );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
@@ -113,9 +119,9 @@ private:
     ::ULIS::FVec2D mOldPointInTexture;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
+    UPROPERTY( EditAnywhere, Category = PathEditTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
     double PickingRadius;
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool" )
+    UPROPERTY( EditAnywhere, Category = PathEditTool )
     bool WidenAllAlong;
 };

@@ -7,20 +7,20 @@
 #include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoSelect.h"
-#include "OdysseyPainterEditorVectorPickTool.generated.h"
+#include "OdysseyPainterEditorVectorSelectionTool.generated.h"
 
 UENUM()
-enum class EOdysseyVectorPickingMode : uint8
+enum class EOdysseyVectorSelectionShape : uint8
 {
     Freehand,
     Circle,
     Rectangle
 };
 
-class FOdysseyPainterEditorVectorPickToolHUD;
+class FOdysseyPainterEditorVectorSelectionToolHUD;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPickTool : public UOdysseyPainterEditorDefaultTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public UOdysseyPainterEditorDefaultTool
 {
 public:
     GENERATED_BODY()
@@ -28,10 +28,10 @@ public:
 public:
     static bool DoubleClicked();
     // Destructor
-    virtual ~UOdysseyPainterEditorVectorPickTool();
+    virtual ~UOdysseyPainterEditorVectorSelectionTool();
 
     //Constructor
-    UOdysseyPainterEditorVectorPickTool();
+    UOdysseyPainterEditorVectorSelectionTool();
 
     virtual bool IsActivable() const override;
     virtual void Load() override;
@@ -62,9 +62,6 @@ public:
                               , const FKey& iKey );
 
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-    void PropertyChangedVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
-                              , const FName& iPropertyName );
 
     //OdysseyPainterEditorTool overrides
     virtual void Commit() override;
@@ -76,7 +73,7 @@ public:
 
     std::vector<::ULIS::FVec2D>& GetPointArray();
 
-    EOdysseyVectorPickingMode GetPickingMode();
+    EOdysseyVectorSelectionShape GetSelectionShape();
 
     std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
 
@@ -96,14 +93,14 @@ protected:
     void SelectVertexFromPath( FOdysseyVectorPath* iPath );
 
 protected:
-    FOdysseyPainterEditorVectorPickToolHUD* mPickHUD;
+    FOdysseyPainterEditorVectorSelectionToolHUD* mPickHUD;
     std::vector<::ULIS::FVec2D> mPointArray;
     ::ULIS::FVec2D mPressedMouseCoords;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Picking Tool")
-    EOdysseyVectorPickingMode PickingMode;
+    UPROPERTY( EditAnywhere, Category = SelectionTool )
+    EOdysseyVectorSelectionShape SelectionShape;
 
-    UPROPERTY(EditAnywhere,Category="Odyssey ObjectMove Tool")
-    bool World;
+    //UPROPERTY( EditAnywhere, Category="Selection Tool" )
+    //bool World;
 };

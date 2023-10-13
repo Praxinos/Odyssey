@@ -31,22 +31,23 @@ UOdysseyPainterEditorDefaultTool::DoubleClicked()
 bool
 UOdysseyPainterEditorDefaultTool::OnKeyDown( const FKey& iKey )
 {
-    bool ret = false;
-
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (hasVector)
+
+    if( hasVector )
     {
         //Should be done in OnKeyDownVector directly
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-        if (mediaVectors.Num() > 0)
+
+        if( mediaVectors.Num() > 0 )
         {
             FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            ret = UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
+
+            OnKeyDownVector( vectorEngine, vectorScene, iKey );
         }
     }
 
-    return ret;
+    return false;
 }
 
 bool
