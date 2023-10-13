@@ -29,5 +29,10 @@ public:
     virtual void Serialize(FArchive& Ar);
 
 private:
+    //Import/Export
+    friend class FOdysseyAnimationCellExport;
+    friend class FOdysseyAnimationCellImport;
+
+private:
     uint32 mLength;
 };

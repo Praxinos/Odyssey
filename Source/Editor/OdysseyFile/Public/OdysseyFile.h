@@ -136,11 +136,50 @@ namespace FOdysseyFile
         // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
         // Just be sure the Chunk ID is unique and any ID will make it.
         // You can use website https://crc32.online/ to generate a code
+        static const uint32 CHUNK_CELL =  0xf93591b3; // container
+            static const uint32 CHUNK_CELL_LENGTH = 0x5dbe40b7; // uint32 (Length)
+
         static const uint32 CHUNK_CELLIMAGEVECTOR =  0x60fdee3a; // container
             static const uint32 CHUNK_CELLIMAGEVECTOR_RESOLUTION = 0xc1bb48e1; // uint32(Width)-uint32(Height)
             static const uint32 CHUNK_CELLIMAGEVECTOR_BLOCK = 0xf0a9e121; // container
                 static const uint32 CHUNK_CELLIMAGEVECTOR_BLOCK_ID =  0x194b349c; // FGuid(VectorBlockId)
             //static const uint32 CHUNK_VECTOR_MAGIC_V2 //see FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2
+
+        static const uint32 CHUNK_CELLIMAGERASTER =  0xa37598ec; // container
+            static const uint32 CHUNK_CELLIMAGERASTER_RASTERBLOCK = 0xf83974c6; // FOdysseyRasterBlock(Block)
+
+        static const uint32 CHUNK_CELLSCONTAINER =  0x5024f733; // container
+            static const uint32 CHUNK_CELLSCONTAINER_OFFSET =  0x3e91fadd; // uint32 (offset)
+            static const uint32 CHUNK_CELLSCONTAINER_CELLS =  0x13bb0a63; // container
+                static const uint32 CHUNK_CELLSCONTAINER_CELLTYPE =  0x513beb3b; // FName(CellType)
+                static const uint32 CHUNK_CELLSCONTAINER_CELL =  0xd8f8456d; // FOdysseyAnimationCell(Cell)
+
+        static const uint32 CHUNK_LAYERIMAGERASTER = 0xc19199d8; //container
+            static const uint32 CHUNK_LAYERIMAGERASTER_CELLSCONTAINER = 0x8334465; //FOdysseyAnimationCellsContainer(CellContainer)
+
+        static const uint32 CHUNK_LAYERIMAGEVECTOR = 0x576c21b; //container
+            static const uint32 CHUNK_LAYERIMAGEVECTOR_CELLSCONTAINER = 0x75494fd4; //FOdysseyAnimationCellsContainer(CellContainer)
+    }
+
+    namespace RasterBlock
+    {
+        static const uint32 CHUNK_RASTERBLOCK = 0x97c86c9c; //container
+            static const uint32 CHUNK_RASTERBLOCK_ID = 0x6055ee70; //FGuid(Id)
+            static const uint32 CHUNK_RASTERBLOCK_RESOLUTION = 0xab8b7918; //uint32(Width) + uint32(Height)
+            static const uint32 CHUNK_RASTERBLOCK_FORMAT = 0x79ddfbb4; //uint32(Format)
+            static const uint32 CHUNK_RASTERBLOCK_BULKDATA = 0xe85808c4; //FEditorBulkData(BulkData)
+    }
+
+    namespace Texture
+    {
+        // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
+        // Just be sure the Chunk ID is unique and any ID will make it.
+        // You can use website https://crc32.online/ to generate a code
+        static const uint32 CHUNK_TEXTURELAYERIMAGEVECTOR =  0x42c274ca; // container
+            //static const uint32 CHUNK_VECTOR_MAGIC_V2 //see FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2
+
+        static const uint32 CHUNK_TEXTURELAYERIMAGERASTER =  0x86252f09; // container
+            static const uint32 CHUNK_TEXTURELAYERIMAGERASTER_RASTERBLOCK = 0x2fcd2a9a; // FOdysseyRasterBlock(Block)
     }
 
     void ODYSSEYFILE_API WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArchive &Ar)> iCallback );

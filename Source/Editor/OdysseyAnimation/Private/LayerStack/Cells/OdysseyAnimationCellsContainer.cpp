@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainerExport.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainerImport.h"
 
 FOdysseyAnimationCellsContainer::FOnCellsChanged&
 FOdysseyAnimationCellsContainer::OnCellsChanged()
@@ -129,43 +131,57 @@ FOdysseyAnimationCellsContainer::Serialize(FArchive& Ar)
     if ( Ar.IsTransacting() || !Ar.IsPersistent() )
         return;
 
-    //Load or Save the offset
-    Ar << mOffset;
-
-    //Empty Cells to prepare for loading
-    if ( Ar.IsLoading() )
-        mCells.Empty();
-
-    //Load or Save number of cells
-    int32 numCells = mCells.Num();
-    Ar << numCells;
-
-    for ( int i = 0; i < numCells; i++ )
+    if( Ar.IsSaving() )
     {
-        if ( Ar.IsLoading() )
+        FOdysseyAnimationCellsContainerExport::Write( this, Ar );
+    }
+
+    if( Ar.IsLoading() )
+    {
+        if (!FOdysseyAnimationCellsContainerImport::Read( this, Ar ))
         {
-            //Load the cell type
-            FName cellType;
-            Ar << cellType;
+            //Old Style No Chunk Loading
+            //Load or Save the offset
+            Ar << mOffset;
 
-            //Create a cell of the given type
-            TSharedPtr<FOdysseyAnimationCell> cell = mCreateCell.Execute(cellType, true);
-            checkf(!!cell, TEXT("Failed to create a cell of the given type"));
+            //Empty Cells to prepare for loading
+            if ( Ar.IsLoading() )
+                mCells.Empty();
 
-            //Load the cell
-            cell->Serialize(Ar);
+            //Load or Save number of cells
+            int32 numCells = mCells.Num();
+            Ar << numCells;
 
-            //Add the cell to the cell list
-            mCells.Add(cell);
-        }
-        else
-        {
-            //Save the Cell Type
-            FName cellType = mCells[i]->GetType();
-            Ar << cellType;
+            for ( int i = 0; i < numCells; i++ )
+            {
+                if ( Ar.IsLoading() )
+                {
+                    //Load the cell type
+                    FName cellType;
+                    Ar << cellType;
 
-            //Save the Cell
-            mCells[i]->Serialize(Ar);
+                    //Create a cell of the given type
+                    TSharedPtr<FOdysseyAnimationCell> cell = mCreateCell.Execute(cellType, true);
+                    checkf(!!cell, TEXT("Failed to create a cell of the given type"));
+
+                    //Load the cell
+                    cell->Serialize(Ar);
+
+                    //Add the cell to the cell list
+                    mCells.Add(cell);
+                }
+                else
+                {
+                    //Save the Cell Type
+                    FName cellType = mCells[i]->GetType();
+                    Ar << cellType;
+
+                    //Save the Cell
+                    mCells[i]->Serialize(Ar);
+                }
+            }
         }
     }
+
+    
 }

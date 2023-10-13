@@ -112,6 +112,11 @@ private:
     FCreateCell mCreateCell;
 
 private:
+    //Import/Export
+    friend class FOdysseyAnimationCellsContainerExport;
+    friend class FOdysseyAnimationCellsContainerImport;
+
+private:
     friend class FOdysseyAnimationCellsMutator;
     friend class FOdysseyAddCellsMutation;
     friend class FOdysseyRemoveCellsMutation;

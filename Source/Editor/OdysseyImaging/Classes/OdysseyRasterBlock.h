@@ -155,6 +155,11 @@ public:
     void Serialize(FArchive& Ar);
 
 private:
+    //Import/Export
+    friend class FOdysseyRasterBlockExport;
+    friend class FOdysseyRasterBlockImport;
+
+private:
     friend class FOdysseyRasterBlockMutator;
 
     //FOdysseyDiskCache mCache;

@@ -15,6 +15,8 @@
 #include "OdysseyLayerFunctionLibrary.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "LayerStack/OdysseyTextureLayerImageRasterImageRenderer.h"
+#include "OdysseyTextureLayerImageRasterImport.h"
+#include "OdysseyTextureLayerImageRasterExport.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyTextureLayerImageRaster"
 
@@ -228,7 +230,19 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
     
-    Ar << *RasterBlock;
+    if( Ar.IsSaving() )
+    {
+        FOdysseyTextureLayerImageRasterExport::Write( this, Ar );
+    }
+
+    if( Ar.IsLoading() )
+    {
+        if (!FOdysseyTextureLayerImageRasterImport::Read( this, Ar ))
+        {
+            //Old Style No Chunk Loading
+            Ar << *RasterBlock;
+        }
+    }
 }
 
 TArray<::ULIS::FEvent>

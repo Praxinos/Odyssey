@@ -94,6 +94,11 @@ private:
     void AutoCreateCell(int iFrameIndex);
     void CreateCell( const FName& iCellType);
 
+private:
+    //Import/Export
+    friend class FOdysseyAnimationLayerImageVectorExport;
+    friend class FOdysseyAnimationLayerImageVectorImport;
+
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
     bool IsColored = true;

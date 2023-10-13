@@ -11,6 +11,8 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 #include "LayerStack/OdysseyTextureLayerImageVectorImageRenderer.h"
+#include "OdysseyTextureLayerImageVectorImport.h"
+#include "OdysseyTextureLayerImageVectorExport.h"
 // from module OdysseyVector
 #include "Import/v1/OdysseyVectorImport.h"
 #include "Import/v2/OdysseyVectorImport.h"
@@ -132,24 +134,14 @@ void
 UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize( Ar );
-
+    
     if( Ar.IsSaving() )
     {
-        FOdysseyVectorExportV2::Write( mEngine ? mEngine->GetScene() : nullptr, Ar );
+        FOdysseyTextureLayerImageVectorExport::Write( this, Ar );
     }
 
     if( Ar.IsLoading() )
     {
-        uint32 chunkID;
-        uint64 chunkLen;
-        uint64 chunkEnd;
-
-        // Reads the first chunk (CHUNK_VECTOR_MAGIC)
-        Ar << chunkID;
-        Ar << chunkLen;
-
-        chunkEnd = Ar.Tell() + chunkLen;
-
         if ( mEngine == nullptr )
         {
             // commented out: at that point, the texture owning the layer stack doe snot have width and height values. 
@@ -163,30 +155,43 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
             Init( Width, Height );
         }
-
-        switch( chunkID )
+        
+        if (!FOdysseyTextureLayerImageVectorImport::Read( this, Ar ))
         {
-            case FOdysseyFile::VectorV1::CHUNK_VECTOR_MAGIC_V1 :
-                UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V1") );
+            //Old Style Chunk Loading
+            uint32 chunkID;
+            uint64 chunkLen;
+            uint64 chunkEnd;
 
-                FOdysseyVectorImportV1::Read( mEngine->GetScene(), Ar, chunkEnd );
-            break;
+            // Reads the first chunk (CHUNK_VECTOR_MAGIC)
+            Ar << chunkID;
+            Ar << chunkLen;
 
-            case FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2 :
+            chunkEnd = Ar.Tell() + chunkLen;
+
+            switch( chunkID )
             {
-                FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
+                case FOdysseyFile::VectorV1::CHUNK_VECTOR_MAGIC_V1 :
+                    UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V1") );
 
-                UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
+                    FOdysseyVectorImportV1::Read( mEngine->GetScene(), Ar, chunkEnd );
+                break;
 
-                importerV2.Read( mEngine->GetScene(), Ar, chunkEnd );
+                case FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2 :
+                {
+                    FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
+
+                    UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
+
+                    importerV2.Read( mEngine->GetScene(), Ar, chunkEnd );
+                }
+                break;
+
+                default:
+                    Ar.Seek( chunkEnd );
+                break;
             }
-            break;
-
-            default:
-                Ar.Seek( chunkEnd );
-            break;
         }
-
         mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                        | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
     }

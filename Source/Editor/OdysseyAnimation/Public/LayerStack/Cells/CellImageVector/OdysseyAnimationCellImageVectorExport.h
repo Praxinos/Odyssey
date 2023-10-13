@@ -4,12 +4,14 @@
 
 class FOdysseyAnimationCellImageVector;
 
-namespace FOdysseyAnimationCellImageVectorExport
+class FOdysseyAnimationCellImageVectorExport
 {
-    void ODYSSEYANIMATION_API Write( FOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
+public:
+    static void ODYSSEYANIMATION_API Write( FOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
 
+private:
     ////////////////////////////////////
-    void WriteResolution( FOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
-    void WriteVectorBlock( FOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
-    void WriteVectorBlockID( FOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
-}
+    static void WriteResolution( FOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
+    static void WriteVectorBlock( FOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
+    static void WriteVectorBlockID( FOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
+};

@@ -16,6 +16,8 @@
 #include "OdysseyPerformanceMode.h"
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
+#include "OdysseyRasterBlockExport.h"
+#include "OdysseyRasterBlockImport.h"
 
 #define FOdysseyRasterBlock_CACHE_NAME TEXT("OdysseyRasterBlock")
 #define FOdysseyRasterBlock_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
@@ -233,56 +235,28 @@ operator<<(FArchive& Ar, FOdysseyRasterBlock& iRasterBlock)
 void
 FOdysseyRasterBlock::Serialize(FArchive& Ar)
 {
-    //Load/Save all UPROPERTIES
-	//Super::Serialize(Ar);
-
-    Ar << Id; //unique ID identifying the block
-    Ar << Width;
-    Ar << Height;
-    Ar << Format;
-
     if ( Ar.IsTransacting() || !Ar.IsPersistent() )
         return;
 
-    if ( Ar.IsSaving() )
+    if( Ar.IsSaving() )
     {
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = GetBlock();
-        if ( !block )
-            return;
-
-        FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(block->Bits(), block->BytesTotal());
-
-        //Updates the payload
-        //The payload stored in mBulkData will then be removed from memory once mBulkData.Serialize() is called
-        mBulkData.UpdatePayload(sharedBuffer, mOwner);
-    
-        /**
-         * @brief Here is a simple explanation of ECompressedBufferCompressor values
-         * see http://www.radgametools.com/oodlecompressors.htm
-         * 
-         * NotSet = 0, //No Compression
-         * Selkie = 1, //Ultra-fast decompression, compression ratio > zlib but < lzma
-         * Mermaid = 2, //Slower than selkie, faster than zlib/lzma, slightly better compression ratio than selkie but < lzma
-         * Kraken  = 3, //Slower than Mermaid, faster than zlib/lzma, slightly better compression ratio than Mermaid but < lzma
-         * Leviathan = 4 //Slower than Kraken, faster than zlib/lzma, slightly better compression ratio than Kraken and slightly > lzma
-        */
-
-        //Zlib ration compression is enough, but speed is ultra important, so Selkie compressor is what we need here
-        //Unreal defaults for FCompressedBuffer is ECompressedBufferCompressor::Mermaid, ECompressedBufferCompressionLevel::VeryFast
-        //But we will use custom values to balance performance at its best between compression tim, decompression time and size
-        
-        //Needs to be called everytime UpdatePayload is called to ensure the correct compression is selected
-        mBulkData.SetCompressionOptions(ECompressedBufferCompressor::Selkie, FOodleDataCompression::ECompressionLevel::Normal);
-        
-        //Eric: I don't understand what bAllowRegister is
-        //but it seems UTexture sets it to false on saving and on true on loading
-        //so I'll do the same, but correct me if I'm wrong
-        mBulkData.Serialize(Ar, mOwner, false /* bAllowRegister */);
+        FOdysseyRasterBlockExport::Write( this, Ar );
     }
-    else if ( Ar.IsLoading() )
-    {       
-        mBulkData.Serialize(Ar, mOwner);
-        //mInvalidTileMap = FULISInvalidTileMap(64, Width, Height);
+
+    if( Ar.IsLoading() )
+    {
+        if (!FOdysseyRasterBlockImport::Read( this, Ar ))
+        {
+            //Old Style No Chunk Loading
+
+            Ar << Id; //unique ID identifying the block
+            Ar << Width;
+            Ar << Height;
+            Ar << Format;
+
+            mBulkData.Serialize(Ar, mOwner);
+        }
+
         FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
         cache.Remove(Id.ToString());
     }

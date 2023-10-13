@@ -2,25 +2,26 @@
 
 #include <Core/Core.h>
 
-class FOdysseyAnimationCellImageVector;
+class FOdysseyRasterBlock;
 
-class FOdysseyAnimationCellImageVectorImport
+class FOdysseyRasterBlockImport
 {
 public:
     /**
      * @brief Imports Data from the given archive into the given object
      * 
-     * @param iAnimationCellImageVector 
+     * @param iRasterBlock 
      * @param Ar 
      */
-    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+    static bool ODYSSEYIMAGING_API Read( FOdysseyRasterBlock* iRasterBlock
                                   , FArchive &Ar );
 
 private:
     /**
      * Private import functions
      */
-    static void Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+
+    static void Read( FOdysseyRasterBlock* iRasterBlock
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

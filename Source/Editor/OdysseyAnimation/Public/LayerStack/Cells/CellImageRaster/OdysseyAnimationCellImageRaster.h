@@ -47,6 +47,11 @@ private:
     void OnBlockPtrChanged();
 
 private:
+    //Import/Export
+    friend class FOdysseyAnimationCellImageRasterExport;
+    friend class FOdysseyAnimationCellImageRasterImport;
+
+private:
     UOdysseyAnimationLayerImageRaster* mLayer;
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
     mutable FCriticalSection mImageRenderingMutex;

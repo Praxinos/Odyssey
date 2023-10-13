@@ -128,12 +128,6 @@ UOdysseyAnimation::GetProxy() const
 }
 
 void
-UOdysseyAnimation::Serialize(FArchive& Ar)
-{
-	Super::Serialize(Ar);
-}
-
-void
 UOdysseyAnimation::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);

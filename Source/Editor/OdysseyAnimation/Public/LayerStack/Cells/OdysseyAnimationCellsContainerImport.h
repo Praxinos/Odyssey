@@ -2,25 +2,26 @@
 
 #include <Core/Core.h>
 
-class FOdysseyAnimationCellImageVector;
+class FOdysseyAnimationCellsContainer;
 
-class FOdysseyAnimationCellImageVectorImport
+class FOdysseyAnimationCellsContainerImport
 {
 public:
     /**
      * @brief Imports Data from the given archive into the given object
      * 
-     * @param iAnimationCellImageVector 
+     * @param iAnimationCell 
      * @param Ar 
      */
-    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationCellsContainer* iAnimationCellsContainer
                                   , FArchive &Ar );
 
 private:
     /**
      * Private import functions
      */
-    static void Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+
+    static void Read( FOdysseyAnimationCellsContainer* iAnimationCellsContainer
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

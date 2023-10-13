@@ -167,13 +167,6 @@ FOdysseyAnimationProxy::Pause()
 }
 
 void
-FOdysseyAnimationProxy::Serialize(FArchive& Ar)
-{
-    //TODO: Save/Load proxy blocks and Ids
-    //How about the undos ?
-}
-
-void
 FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
     //We use OnImageRenderingPreChanged because the proxy should be invalidated before anyone react to OnImageRenderingChanged

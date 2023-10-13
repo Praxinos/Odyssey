@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Cells/OdysseyAnimationCellExport.h"
+#include "LayerStack/Cells/OdysseyAnimationCellImport.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyAnimationCell"
 
@@ -37,7 +39,19 @@ FOdysseyAnimationCell::GetLength() const
 void
 FOdysseyAnimationCell::Serialize(FArchive& Ar)
 {
-    Ar << mLength;
+    if( Ar.IsSaving() )
+    {
+        FOdysseyAnimationCellExport::Write( this, Ar );
+    }
+
+    if( Ar.IsLoading() )
+    {
+        if (!FOdysseyAnimationCellImport::Read( this, Ar ))
+        {
+            //Old Style No Chunk Loading
+            Ar << mLength;
+        }
+    }
 }
 
 FOdysseyMediaProvider

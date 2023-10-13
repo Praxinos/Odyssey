@@ -28,8 +28,6 @@ public:
     void Resume();
     void Pause();
 
-	void Serialize(FArchive& Ar);
-
 private:
     TSharedPtr<FBlockData> GetBlockDataForComposition(const TArray<FGuid>& iComposition);
     void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);

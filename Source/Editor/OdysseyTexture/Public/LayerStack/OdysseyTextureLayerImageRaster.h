@@ -96,6 +96,11 @@ private:
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
 
 private:
+    //Import/Export
+    friend class FOdysseyTextureLayerImageRasterExport;
+    friend class FOdysseyTextureLayerImageRasterImport;
+
+private:
     TSharedPtr<FOdysseyRasterBlock> RasterBlock;
 
 public:
