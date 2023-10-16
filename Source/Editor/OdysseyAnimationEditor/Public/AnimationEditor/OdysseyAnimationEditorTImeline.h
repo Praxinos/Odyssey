@@ -4,10 +4,18 @@
 
 #include "CoreMinimal.h"
 
+class FOdysseyAnimationEditorExtension;
+class UOdysseyLayerStack;
+class FOdysseyAnimationCellsContainer;
+
 class FOdysseyAnimationEditorTimeline
 {
 public:
-    FOdysseyAnimationEditorTimeline();
+    ~FOdysseyAnimationEditorTimeline();
+    FOdysseyAnimationEditorTimeline(FOdysseyAnimationEditorExtension* iExtension);
+
+    void  Initialize();
+    void  Finalize();
 
 public:
     void ZoomIn();
@@ -22,6 +30,7 @@ public:
 	float GetZoom() const;
 	float GetOffset() const;
     FInt32Range GetSelectedFrames() const;
+    FInt32Range GetSelectableFrames() const;
 
     int GetFrameIndexAtMousePosition(float iX) const;
 
@@ -32,6 +41,16 @@ public:
     FSimpleMulticastDelegate& OnZoomChanged();
 
 private:
+    void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
+    void OnCellsChanged();
+    void BindCurrentLayerChanged();
+    void UnbindCurrentLayerChanged();
+    void BindOnCellsChanged();
+    void UnbindOnCellsChanged();
+
+private:
+    FOdysseyAnimationEditorExtension* mExtension;
+
     float mZoom;
 	float mOffset;
     FInt32Range mSelectedFrames;
@@ -39,4 +58,6 @@ private:
     FSimpleMulticastDelegate mOnZoomChanged;
     FSimpleMulticastDelegate mOnOffsetChanged;
     FSimpleMulticastDelegate mOnSelectedFramesChanged;
+
+    TWeakPtr<FOdysseyAnimationCellsContainer> mCellsContainer; 
 };

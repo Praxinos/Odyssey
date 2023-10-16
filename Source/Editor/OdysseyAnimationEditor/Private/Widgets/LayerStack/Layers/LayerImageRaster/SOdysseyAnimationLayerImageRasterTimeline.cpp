@@ -37,4 +37,19 @@ SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(TSharedPtr<FOdys
     return SNew(SOdysseyAnimationLayerImageRasterCell);
 }
 
+FReply
+SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+    UOdysseyLayerStack* layerStack = mLayer->GetLayerStack();
+    if (!layerStack)
+        return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+
+    if (layerStack->CurrentLayer.Get() == mLayer)
+        return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(mLayer));
+
+    return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+}
+
 #undef LOCTEXT_NAMESPACE

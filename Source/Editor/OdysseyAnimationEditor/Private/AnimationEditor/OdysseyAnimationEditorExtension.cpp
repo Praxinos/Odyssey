@@ -22,6 +22,7 @@ FOdysseyAnimationEditorExtension::FOdysseyAnimationEditorExtension(FOdysseyPaint
 	: FOdysseyPainterEditorExtension(iEditor)
 	, mAnimationSource(nullptr)
 	, mGUI(nullptr)
+	, mTimeline(this)
 	, mPlaybackFramesPerSecond(0)
 {
 }
@@ -43,7 +44,6 @@ FOdysseyAnimationEditorExtension::Finalize()
 	mAnimationSource = nullptr;
 	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
 	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
-	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 	UOdysseyLayer::OnMediaChanged().RemoveAll(this);
 }
 
@@ -64,15 +64,17 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 	if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
 	{
 		mAnimationSource = nullptr;
+		mTimeline.Finalize();
 		UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
 		FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
-        UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
         UOdysseyLayer::OnMediaChanged().RemoveAll(this);
 		return;
 	}
 
 	mAnimationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(source);
-    
+
+	mTimeline.Initialize();
+
     UOdysseyAnimation* animation = Animation();
 	mImageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	mPlaybackFramesPerSecond = animation->GetFramesPerSecond();
@@ -81,7 +83,6 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 	UOdysseyAnimation::OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnCurrentFrameChanged);
 	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationEditorExtension::OnImageRenderingChanged);
 	UOdysseyLayer::OnMediaChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnLayerMediaChanged);
-	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnCurrentLayerChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -168,15 +169,6 @@ FOdysseyAnimationEditorExtension::OnCurrentFrameChanged(UOdysseyAnimation* iAnim
 
 	mImageRenderingComposition = imageRenderingComposition;
 	GetEditor()->RefreshCurrentTool();
-}
-
-void
-FOdysseyAnimationEditorExtension::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
-{
-	if ( iLayerStack != LayerStack() )
-		return;
-
-    Timeline()->SetSelectedFrames(FInt32Range::Empty()); //Clear Selected frames when changing layer
 }
 
 #undef LOCTEXT_NAMESPACE

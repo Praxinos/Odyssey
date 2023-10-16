@@ -10,8 +10,20 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineFrameSelector
 	: public SCompoundWidget
 {
 public:
+	DECLARE_DELEGATE_OneParam(FOnSelectionChanged, FInt32Range)
+	DECLARE_DELEGATE_OneParam(FOnSelectionStarted, int /* iFrame */)
+	DECLARE_DELEGATE_OneParam(FOnSelectionEnded, int /* iFrame */)
+
+public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineFrameSelector)
+		: _Content()
 	{}
+		SLATE_DEFAULT_SLOT( FArguments, Content )
+		SLATE_ATTRIBUTE(FInt32Range, SelectedFrames)
+		SLATE_ATTRIBUTE(FInt32Range, SelectableFrames)
+		SLATE_EVENT(FOnSelectionStarted, OnSelectionStarted)
+		SLATE_EVENT(FOnSelectionEnded, OnSelectionEnded)
+		SLATE_EVENT(FOnSelectionChanged, OnSelectionChanged)
 	SLATE_END_ARGS()
 
 	SOdysseyAnimationTimelineFrameSelector();
@@ -22,22 +34,28 @@ public:
 
 	// SWidget interface
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
-	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	// End of SWidget interfacepublic:
 
 private:
 	bool GetSelectedFrames(int& oStartFrame, int& oEndFrame) const;
+	void OnFrameSelectionChanged(FInt32Range iSelectedFrames);
+	void OnFrameSelectionStarted(int iFrame);
+	void OnFrameSelectionEnded(int iFrame);
 
 private:
-	bool mIsSelecting = false;
+	TAttribute<FInt32Range> mSelectedFrames;
+	TAttribute<FInt32Range> mSelectableFrames;
+	
 	FOdysseyAnimationEditorExtension* mExtension;
 	TSharedRef<FUICommandList> mCommandList;
+	
+	struct FSeletionData
+	{
+		bool mIsSelecting = false;
+		FInt32Range mSelectedFrames;
+	} mSelectionData;
 
-    struct
-    {
-		int mCursorFrame;
-        FInt32Range mSelectedFrames;
-    } mSelectionData;
+	FOnSelectionChanged mOnSelectionChanged;
+	FOnSelectionStarted mOnSelectionStarted;
+	FOnSelectionEnded mOnSelectionEnded;
 };

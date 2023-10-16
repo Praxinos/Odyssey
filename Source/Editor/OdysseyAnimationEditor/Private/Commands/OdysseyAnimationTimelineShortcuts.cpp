@@ -8,6 +8,7 @@
 #include "OdysseyAnimationEditorTimeline.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
+#include "Framework/Commands/GenericCommands.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyLayerStackShortcuts"
 

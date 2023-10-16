@@ -34,7 +34,10 @@ protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) = 0;
 
 private:
-    EVisibility GetFrameSelectorVisibility() const;
+    FInt32Range GetSelectableFrames() const;
+    FInt32Range GetSelectedFrames() const;
+    void OnFramesSelectionChanged(FInt32Range iSelectedFrames);
+    void OnFramesSelectionEnded(int iFrame);
 
 private:
     //Context Menu

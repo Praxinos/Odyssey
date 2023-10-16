@@ -28,28 +28,51 @@ SOdysseyAnimationLayerImageTimeline::Construct(
     
     ChildSlot
     [
-        SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .AutoHeight()
+        SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
+        .SelectableFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectableFrames)
+        .SelectedFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectedFrames)
+        .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
+        .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
         [
             SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
             .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
             .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
         ]
+
+        /*
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SOverlay)
+            + SOverlay::Slot()
+            [
+                SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
+                .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
+                .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
+            ]
+            + SOverlay::Slot()
+            [
+                SNew(SBorder)
+                .OnMouseButtonDown_Lambda(
+                    [](const FGeometry&, const FPointerEvent&) -> FReply
+                    {
+                        return FReply::Unhandled();
+                    }
+                )
+            ]
+        ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
             SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
-            .Visibility(this, &SOdysseyAnimationLayerImageTimeline::GetFrameSelectorVisibility)
+            .SelectableFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectableFrames)
+            .SelectedFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectedFrames)
+            .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
+            .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
         ]
+        */
     ];
-}
-
-EVisibility
-SOdysseyAnimationLayerImageTimeline::GetFrameSelectorVisibility() const
-{
-    bool isCurrentLayer = mLayer->GetLayerStack()->CurrentLayer == mLayer;
-	return isCurrentLayer ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 FReply
@@ -69,6 +92,10 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
 		FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
     	return FReply::Handled();
 	}
+    else
+    {
+        mExtension->Timeline()->SetSelectedFrames(FInt32Range::Empty());
+    }
 	return FReply::Unhandled();
 }
 
@@ -136,6 +163,37 @@ SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames()
     }
 
     mutator.Commit();
+}
+
+FInt32Range
+SOdysseyAnimationLayerImageTimeline::GetSelectableFrames() const
+{
+    return mExtension->Timeline()->GetSelectableFrames();
+}
+
+FInt32Range
+SOdysseyAnimationLayerImageTimeline::GetSelectedFrames() const
+{
+    bool isCurrentLayer = mLayer->GetLayerStack()->CurrentLayer == mLayer;
+	return isCurrentLayer ? mExtension->Timeline()->GetSelectedFrames() : FInt32Range::Empty();
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged(FInt32Range iSelectedFrames)
+{
+    mExtension->Timeline()->SetSelectedFrames(iSelectedFrames);
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded(int iFrame)
+{
+    if (mExtension->Timeline()->GetSelectedFrames().IsEmpty())
+        return; //Only change currentframe if the selection has been set
+
+    FInt32Range frameRange = mLayer->GetFrameRange();
+    int frame = FMath::Clamp(iFrame, frameRange.GetLowerBoundValue(), frameRange.GetUpperBoundValue());
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
 }
 
 void

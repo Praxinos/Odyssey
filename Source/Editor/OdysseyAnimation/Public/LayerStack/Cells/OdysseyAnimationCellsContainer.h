@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+class FOdysseyAnimationCell;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationCellsContainer
 {
 public:

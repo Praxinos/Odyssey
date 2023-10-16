@@ -1,6 +1,7 @@
 #include "OdysseyAnimationEditorTimeline.h"
 
-#include "Framework/Commands/GenericCommands.h"
+#include "OdysseyLayerStack.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 
 //Define base frame width to be 50 pixels
 #define BASE_FRAMEWIDTH 50.f
@@ -8,11 +9,102 @@
 #define MAX_ZOOM 1.0f
 #define ZOOM_STEP 0.08f
 
-FOdysseyAnimationEditorTimeline::FOdysseyAnimationEditorTimeline()
-    : mZoom(1.f)
+FOdysseyAnimationEditorTimeline::~FOdysseyAnimationEditorTimeline()
+{
+    Finalize();
+}
+
+FOdysseyAnimationEditorTimeline::FOdysseyAnimationEditorTimeline(FOdysseyAnimationEditorExtension* iExtension)
+    : mExtension(iExtension)
+    , mZoom(1.f)
     , mOffset(0.f)
     , mSelectedFrames(FInt32Range::Empty())
+    , mCellsContainer(nullptr)
 {
+}
+
+void 
+FOdysseyAnimationEditorTimeline::Initialize()
+{
+    BindCurrentLayerChanged();
+    BindOnCellsChanged();
+}
+
+void 
+FOdysseyAnimationEditorTimeline::Finalize()
+{
+    UnbindCurrentLayerChanged();
+    UnbindOnCellsChanged();
+}
+
+void 
+FOdysseyAnimationEditorTimeline::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
+{
+    UOdysseyAnimation* animation = mExtension->Animation();
+    if (!animation)
+        return;
+
+    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
+    if (!layerStack)
+        return;
+
+    if (iLayerStack != layerStack)
+        return;
+
+    UnbindOnCellsChanged();
+    BindOnCellsChanged();
+}
+
+void 
+FOdysseyAnimationEditorTimeline::OnCellsChanged()
+{
+    SetSelectedFrames(FInt32Range::Empty());
+}
+
+void 
+FOdysseyAnimationEditorTimeline::BindCurrentLayerChanged()
+{
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyAnimationEditorTimeline::OnCurrentLayerChanged);
+}
+
+void 
+FOdysseyAnimationEditorTimeline::UnbindCurrentLayerChanged()
+{
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+}
+
+void 
+FOdysseyAnimationEditorTimeline::BindOnCellsChanged()
+{
+    UOdysseyAnimation* animation = mExtension->Animation();
+    if (!animation)
+        return;
+
+    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
+    if (!layerStack)
+        return;
+
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());    
+    if (!currentLayer)
+        return;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return;
+
+    
+    cellsContainer->OnCellsChanged().AddRaw(this, &FOdysseyAnimationEditorTimeline::OnCellsChanged);
+    mCellsContainer = cellsContainer;
+}
+
+void 
+FOdysseyAnimationEditorTimeline::UnbindOnCellsChanged()
+{
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mCellsContainer.Pin();
+    if (!cellsContainer)
+        return;
+
+    cellsContainer->OnCellsChanged().RemoveAll(this);
 }
 
 void 
@@ -44,7 +136,8 @@ FOdysseyAnimationEditorTimeline::SetOffset(float iOffset)
 void
 FOdysseyAnimationEditorTimeline::SetSelectedFrames(const FInt32Range& iSelectedFrames)
 {
-    mSelectedFrames = iSelectedFrames;
+    mSelectedFrames = FInt32Range::Intersection(iSelectedFrames, GetSelectableFrames());
+
     mOnSelectedFramesChanged.Broadcast();
 }
 
@@ -87,6 +180,24 @@ FInt32Range
 FOdysseyAnimationEditorTimeline::GetSelectedFrames() const
 {
     return mSelectedFrames;
+}
+
+FInt32Range
+FOdysseyAnimationEditorTimeline::GetSelectableFrames() const
+{
+    UOdysseyAnimation* animation = mExtension->Animation();
+    if (!animation)
+        return FInt32Range::Empty();
+
+    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
+    if (!layerStack)
+        return FInt32Range::Empty();
+
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());    
+    if (!currentLayer)
+        return FInt32Range::Empty();
+
+    return currentLayer->GetFrameRange();
 }
 
 FSimpleMulticastDelegate&
