@@ -302,6 +302,7 @@ UOdysseyAnimationLayerImageVector::CreateMediaVector(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 {
+    FScopedTransaction transaction(LOCTEXT("CreateCell", "Create Cell"));
     UOdysseyAnimation* animation = GetAnimation();
     //Check if iFrameIndex is Out Of Range
     FInt32Range range = mCellsContainer->GetFrameRange();
