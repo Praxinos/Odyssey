@@ -83,8 +83,8 @@ public:
 private: 
 
     FOdysseyPaintEngine mPaintEngine;
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mReferenceBlock;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mReferenceBlock;
 
     FOdysseyHUDPolygon* mTransformArea;
     bool mTransformAreaSet;
