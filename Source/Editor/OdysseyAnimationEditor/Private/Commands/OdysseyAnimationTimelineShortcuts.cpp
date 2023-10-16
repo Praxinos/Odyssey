@@ -108,6 +108,9 @@ FOdysseyAnimationTimelineShortcuts::Action_Paste()
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyAnimationCellClipboardData>();
     if (!clipboardData)
         return;
+    
+    if (!clipboardData->CanPaste(layer))
+        return;
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Paste Frames"));

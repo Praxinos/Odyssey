@@ -20,6 +20,18 @@ FOdysseyAnimationCellsContainer::FOdysseyAnimationCellsContainer()
 {
 }
 
+void
+FOdysseyAnimationCellsContainer::AddSupportedType(const FName& iCellId)
+{
+    mSupportedTypes.Add(iCellId);
+}
+
+bool
+FOdysseyAnimationCellsContainer::SupportsType(const FName& iCellType) const
+{
+    return mSupportedTypes.Contains(iCellType);
+}
+
 FOdysseyAnimationCellsContainer::FCreateCell&
 FOdysseyAnimationCellsContainer::CreateCellDelegate()
 {

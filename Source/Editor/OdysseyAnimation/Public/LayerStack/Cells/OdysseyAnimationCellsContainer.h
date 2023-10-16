@@ -23,6 +23,15 @@ public:
 
 public:
     //Public API - Cells
+    void AddSupportedType(const FName& iCellId);
+    
+    bool SupportsType(const FName& ) const;
+    template<class T> 
+    bool SupportsType() const
+    {
+        return SupportsType(T::StaticType());
+    }
+
     /**
      * @brief The create cell callback
      * Needs to be bound to make the container work properly
@@ -118,6 +127,7 @@ private:
     int mOffset;
     FOnCellsChanged mOnCellsChanged;
     FCreateCell mCreateCell;
+    TArray<FName> mSupportedTypes;
 
 private:
     //Import/Export

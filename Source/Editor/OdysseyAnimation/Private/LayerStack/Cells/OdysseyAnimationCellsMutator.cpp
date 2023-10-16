@@ -20,6 +20,11 @@ FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UObject* iOwner, TS
 void
 FOdysseyAnimationCellsMutator::Add(TArray<TSharedPtr<FOdysseyAnimationCell>> iCells, int iIndex)
 {
+    for(TSharedPtr<FOdysseyAnimationCell> cell : iCells)
+    {
+        checkf(mContainer->SupportsType(cell->GetType()), TEXT("cell type not supported"));
+    }
+
     int index = iIndex < 0 ? mContainer->mCells.Num() : iIndex;
     TSharedPtr<FOdysseyAddCellsMutation> mutation = MakeShared<FOdysseyAddCellsMutation>(mContainer, index, iCells);
     AddAndApplyMutation(mutation);
@@ -28,6 +33,11 @@ FOdysseyAnimationCellsMutator::Add(TArray<TSharedPtr<FOdysseyAnimationCell>> iCe
 void
 FOdysseyAnimationCellsMutator::AddAtFrame(TArray<TSharedPtr<FOdysseyAnimationCell>> iCells, int iFrame)
 {
+    for(TSharedPtr<FOdysseyAnimationCell> cell : iCells)
+    {
+        checkf(mContainer->SupportsType(cell->GetType()), TEXT("cell type not supported"));
+    }
+
     checkf(iFrame != INDEX_NONE, TEXT("Needs a valid frame Index"));
     if (iFrame == INDEX_NONE)
         return;

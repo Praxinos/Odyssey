@@ -104,6 +104,9 @@ SOdysseyAnimationLayerImageTimeline::PasteFrames()
     if (!clipboardData)
         return;
 
+    if (!clipboardData->CanPaste(mLayer))
+        return;
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Paste Frames"));
 #endif

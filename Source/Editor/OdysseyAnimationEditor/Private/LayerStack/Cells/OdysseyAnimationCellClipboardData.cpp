@@ -61,6 +61,8 @@ FOdysseyAnimationCellClipboardData::Copy(TSharedPtr<FOdysseyAnimationCellsContai
 void
 FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iFrame) const
 {
+    checkf(CanPaste(iLayer), TEXT("Can't Paste"));
+
     FOdysseyAnimationCellsMutator mutator(iLayer, iLayer->GetCellsContainer());
 
     TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
@@ -76,5 +78,15 @@ bool
 FOdysseyAnimationCellClipboardData::CanPaste(UOdysseyAnimationLayer* iLayer) const
 {
     //TODO: check if iLayer cells types are compatible with the copied cells
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellContainer = iLayer->GetCellsContainer();
+    if (!cellContainer)
+        return false;
+        
+    for (const FCellCopy& cellCopy : mCellCopies)
+    {
+        if (!cellContainer->SupportsType(cellCopy.mCell->GetType()))
+            return false;
+    }
+
     return true;
 }

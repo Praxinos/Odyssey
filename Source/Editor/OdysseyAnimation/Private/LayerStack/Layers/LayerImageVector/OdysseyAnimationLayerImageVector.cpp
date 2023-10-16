@@ -47,6 +47,8 @@ UOdysseyAnimationLayerImageVector::UOdysseyAnimationLayerImageVector()
 {
 	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerVector16");
+
+    mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageVector::StaticType());
 }
 
 void
