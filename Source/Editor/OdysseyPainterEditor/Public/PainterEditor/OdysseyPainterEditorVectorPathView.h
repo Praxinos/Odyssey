@@ -25,6 +25,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
         virtual uint64 PropertyChanged( const FName& iPropertyName, const FName& iCategory ) override;
 
     public:
-        UPROPERTY(EditAnywhere, Category="Path")
-        FPathParam PathParam; // UStruct from OdysseyVectorPath.h
+        UPROPERTY( EditAnywhere, Category = Path )
+        eJointType JointType;
+
+        UPROPERTY( EditAnywhere, Category = Path )
+        FOdysseyVectorBrush Brush;
+
+        //UPROPERTY(EditAnywhere,Category = Path, meta = (ContentDir = ))
+        //UTexture* Brush2;
 };

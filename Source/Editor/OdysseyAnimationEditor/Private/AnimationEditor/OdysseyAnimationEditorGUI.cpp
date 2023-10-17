@@ -7,7 +7,6 @@
 #include "AnimationEditor/OdysseyAnimationEditorLightTableTab.h"
 #include "AnimationEditor/OdysseyAnimationEditorTimelineTab.h"
 #include "Framework/Docking/LayoutExtender.h"
-#include "PainterEditor/OdysseyPainterEditorSelectedVectorObjectTab.h"
 #include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorEngine.h"
@@ -119,7 +118,6 @@ FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, ui
     if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
     {
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-        TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab> vectorObjectTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorSelectedVectorObjectTab>();
         TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
         if( mediaVectors.Num() )
@@ -128,14 +126,14 @@ FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, ui
 
             if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
             {
-                vectorSceneTreeViewTab.Get()->Update( iScene );
+                vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
             }
 
             if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
              || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
              || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
             {
-                vectorObjectTab.Get()->Update( iScene );
+                vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
             }
         }
     }

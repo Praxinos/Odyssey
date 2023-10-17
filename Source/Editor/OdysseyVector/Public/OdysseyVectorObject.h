@@ -218,4 +218,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void ApplyTransformations();
         virtual void ApplyMatrix( BLMatrix2D& iMatrix );
         void SetOpacity( double iOpacity );
+        double GetOpacity();
 };

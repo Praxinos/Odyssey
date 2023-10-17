@@ -24,7 +24,8 @@ UOdysseyPainterEditorVectorPathView::ImportParam()
         {
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            PathParam = selectedPath->mPathParam;
+            JointType = selectedPath->GetJointType();
+            Brush = selectedPath->GetBrush();
 
             break; // only one
         }
@@ -43,10 +44,10 @@ UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
 
             if( iPropertyName == "JointType" )
-                selectedPath->mPathParam.JointType = PathParam.JointType;
+                selectedPath->SetJointType( JointType );
 
-            if( iPropertyName == "Filled" )
-                selectedPath->mPathParam.Filled = PathParam.Filled;
+            if( iPropertyName == "Brush" )
+                selectedPath->SetBrush( Brush );
         }
     }
 

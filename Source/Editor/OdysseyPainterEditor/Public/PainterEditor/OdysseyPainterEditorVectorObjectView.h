@@ -31,12 +31,30 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         std::list<FOdysseyVectorObject*> mFocusedObjectList;
 
     public:
-        UPROPERTY(EditAnywhere, Category="Object")
-        FObjectParam ObjectParam; // UStruct from OdysseyVectorObject.h
+        UPROPERTY( EditAnywhere, Category = Identity )
+        FString Name;
 
-        UPROPERTY(EditAnywhere, Category="Object")
+        UPROPERTY( EditAnywhere, Category= Transform )
+        double TranslationX;
+
+        UPROPERTY( EditAnywhere, Category= Transform )
+        double TranslationY;
+
+        UPROPERTY( EditAnywhere, Category= Transform )
+        double Rotation;
+
+        UPROPERTY( EditAnywhere, Category= Transform )
+        double ScalingX;
+
+        UPROPERTY( EditAnywhere, Category= Transform )
+        double ScalingY;
+
+        UPROPERTY( EditAnywhere, Category = Appearance , meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        double Opacity;
+
+        UPROPERTY( EditAnywhere, Category = Appearance )
         FColor ForegroundColor;
 
-        UPROPERTY(EditAnywhere,Category="Object")
+        UPROPERTY( EditAnywhere, Category = Appearance )
         FColor BackgroundColor;
 };

@@ -177,41 +177,42 @@ SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged( TSharedPtr<FVector
 void
 SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo )
 {
-    // can be null if no selection, from what I understand
-    if( iItem )
+    if( mRootItem )
     {
-        TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
+        FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        // no need to create an undo record or do anything if the selection is empty
-        if( selectedItems.Num() )
+        scene->ClearSelection();
+
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
+        if( GUndo )
         {
-            FOdysseyVectorObject* vectorObject = iItem.Get()->GetVectorObject();
-            FOdysseyVectorScene* scene = vectorObject->GetScene();
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( scene );
 
-            scene->ClearSelection();
-
-            // needed for valid GUndo pointer
-            GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
-            if( GUndo )
-            {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( scene );
-
-                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            }
-            GEditor->EndTransaction();
-
-            for( int i = 0; i < selectedItems.Num(); i++ )
-            {
-                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
-
-                scene->Select( selectedObject );
-            }
-
-            scene->GetEngine()->ResetHUD();
-
-            scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                      | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
+        GEditor->EndTransaction();
+
+        // iTtem is null when selection is empty
+        if( iItem )
+        {
+            TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
+
+            // no need to create an undo record or do anything if the selection is empty
+            if( selectedItems.Num() )
+            {
+                for( int i = 0; i < selectedItems.Num(); i++ )
+                {
+                    FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
+
+                    scene->Select( selectedObject );
+                }
+            }
+        }
+
+        scene->GetEngine()->ResetHUD();
+        scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
     }
 }
 

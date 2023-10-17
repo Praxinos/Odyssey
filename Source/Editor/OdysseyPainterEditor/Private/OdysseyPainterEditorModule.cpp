@@ -3,6 +3,8 @@
 
 #include "OdysseyPainterEditorModule.h"
 
+#include "BLImageCustomization.h"
+
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
 #include "ISettingsModule.h"
@@ -34,6 +36,9 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterSettings();
     RegisterCommands();
     RegisterLevelEditorLayoutExtensions();
+
+    // test
+    FBLImageCustomization::Register();
 }
 
 void

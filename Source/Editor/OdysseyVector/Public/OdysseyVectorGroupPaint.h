@@ -163,6 +163,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oPathArray );
         void PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray );
+        void SetRealtime( bool iRealtime );
+
+        bool IsRealtime();
+        void SetWireframeColor( const FColor& iWireframeColor );
+        void SetMonochromeColor( const FColor& iMonochromeColor );
 
     protected:
         /**

@@ -1,4 +1,5 @@
 #include "OdysseyVectorEngine.h"
+//#include <future>
 
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
@@ -1146,34 +1147,96 @@ FOdysseyVectorEngine::DrawQuad( ::ULIS::FVec2I iPoint[4]
     if ( ymin <= ymax )
     {
 /*
-        std::vector<std::thread> threads;
+        FOdysseyVectorComputer& mainComputer = FOdysseyVectorComputer::GetMainComputer();
 
-mProcessorCount = 2;
+        mainComputer.Run( [ this
+                          , &ymin
+                          , &ymax
+                          , &iOpacity
+                          , &iPixelData
+                          , &iBitsPerPixel
+                          , &iBrushPixelData
+                          , &iBrushWidth
+                          , &iBrushHeight
+                          , &iBrushBitsPerPixel]( uint32 iProcessorID, uint32 iProcessorCount ) -> bool
+                          {
+                              for( int i = ymin + iProcessorID; i <= ymax ; i += iProcessorCount )
+                              {
+                                  if( mHorizontalLineBuffer[i].inited == 2 )
+                                  {
+                                      TraceHorizontalLine( i
+                                                         , iOpacity
+                                                         , iPixelData
+                                                         , iBitsPerPixel
+                                                         , iBrushPixelData
+                                                         , iBrushWidth
+                                                         , iBrushHeight
+                                                         , iBrushBitsPerPixel );
+                                  }
+
+                                  mHorizontalLineBuffer[i].inited = 0;
+
+                                  if( i == ymax )
+                                  {
+                                      return true;
+                                  }
+                              }
+
+                              return false;
+                          } );
+*/
+
+/*
+        std::vector<std::future<void>> threads;
+
+//mProcessorCount = 2;
 
         threads.resize( mProcessorCount );
 
-        //for( int32 i = 0, j = ymin; i < (int32) mProcessorCount, j <= ymax; i++, j++ )
-        for( uint32 i = 0; i < threads.size(); i++ )
+        int totalThreads = ( ymax - ymin  + 1 ) < (int) mProcessorCount ? ( ymax - ymin  + 1 ) :  (int)mProcessorCount;
+
+        for( int32 i = 0; i < totalThreads; i++ )
+        //for( uint32 i = 0; i < threads.size(); i++ )
         {
-            threads[i] = std::thread( &FOdysseyVectorEngine::DrawQuadThread
-                                  , this
+            threads[i] = std::async( std::launch::async
+                                    , [ this
+                                      , &ymin
+                                      , &ymax
+                                      , &iOpacity
+                                      , &iPixelData
+                                      , &iBitsPerPixel
+                                      , &iBrushPixelData
+                                      , &iBrushWidth
+                                      , &iBrushHeight
+                                      , &iBrushBitsPerPixel]( uint32 iProcessorID, uint32 iProcessorCount )
+                                      {
+
+                                          FGenericPlatformProcess::SetThreadAffinityMask( (uint64) 1 << iProcessorID );
+
+                                          for( int i = ymin + iProcessorID; i <= ymax ; i += iProcessorCount )
+                                          {
+                                              if( mHorizontalLineBuffer[i].inited == 2 )
+                                              {
+                                                    TraceHorizontalLine( i
+                                                                     , iOpacity
+                                                                     , iPixelData
+                                                                     , iBitsPerPixel
+                                                                     , iBrushPixelData
+                                                                     , iBrushWidth
+                                                                     , iBrushHeight
+                                                                     , iBrushBitsPerPixel );
+                                              }
+
+                                              mHorizontalLineBuffer[i].inited = 0;
+                                          }
+                                      }
                                   , i
-                                  , mProcessorCount
-                                  , ymin
-                                  , ymax
-                                  , iOpacity
-                                  , iPixelData
-                                  , iBitsPerPixel
-                                  , iBrushPixelData
-                                  , iBrushWidth
-                                  , iBrushHeight
-                                  , iBrushBitsPerPixel );
+                                  , mProcessorCount );
         }
 
-        //for( int32 i = 0, j = ymin; i < (int32) mProcessorCount, j <= ymax; i++, j++ )
-        for( uint32 i = 0; i < threads.size(); i++ )
+        for( uint32 i = 0; i < (uint32)totalThreads; i++ )
         {
-            threads[i].join();
+            threads[i].wait();
         }
 */
 /*
@@ -1208,6 +1271,7 @@ mProcessorCount = 2;
                       } );
 */
 
+    // Single CPU version. The one that actually works.
         for ( int i = ymin; i <= ymax; i++ )
         {
             if( mHorizontalLineBuffer[i].inited == 2 )

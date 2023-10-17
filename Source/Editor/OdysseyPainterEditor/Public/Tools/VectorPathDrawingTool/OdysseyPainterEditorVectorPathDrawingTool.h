@@ -86,6 +86,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         void RecordUndoPathAdd( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath  );
         void RecordUndoPathExtend( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath );
     public:
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool )
+        FOdysseyVectorBrush Brush;
+
         //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
         eTracingType TracingType;
 

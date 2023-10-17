@@ -330,6 +330,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorSce
         SetPathColor( path );
     }
 
+    path->SetBrush( Brush );
+
     mPathTracer.AttachPath( path );
 
     iScene->ClearSelection();

@@ -54,6 +54,12 @@ FOdysseyVectorObject::GetForegroundBucket()
     return mForegroundBucket;
 }
 
+double
+FOdysseyVectorObject::GetOpacity()
+{
+    return mObjectParam.Opacity;
+}
+
 void
 FOdysseyVectorObject::SetOpacity( double iOpacity )
 {

@@ -279,6 +279,18 @@ DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
     return t;
 }
 
+void
+FOdysseyVectorGroupPaint::SetRealtime( bool iRealtime )
+{
+    mGroupPaintParam.Realtime = iRealtime;
+}
+
+bool
+FOdysseyVectorGroupPaint::IsRealtime()
+{
+    return mGroupPaintParam.Realtime;
+}
+
 // CubicSegment-CubicSegment intersection test. The test is performed using straight sub-segments
 // that are precomputed by the PaintGroup object when updated and stored in the path's PolygonCache,
 // as it would be too complicated to do maths using the parametric bezier and I'm not that smart.
@@ -1376,6 +1388,12 @@ FOdysseyVectorGroupPaint::GetMonochromeColor()
 }
 
 void
+FOdysseyVectorGroupPaint::SetMonochromeColor( const FColor& iMonochromeColor )
+{
+    mGroupPaintParam.MonochromeColor = iMonochromeColor;
+}
+
+void
 FOdysseyVectorGroupPaint::SetMonochromeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     mGroupPaintParam.MonochromeColor.R = iR;
@@ -1409,6 +1427,12 @@ FColor&
 FOdysseyVectorGroupPaint::GetWireframeColor()
 {
     return mGroupPaintParam.WireframeColor;
+}
+
+void
+FOdysseyVectorGroupPaint::SetWireframeColor( const FColor& iWireframeColor )
+{
+    mGroupPaintParam.WireframeColor = iWireframeColor;
 }
 
 void

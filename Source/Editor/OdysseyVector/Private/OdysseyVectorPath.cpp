@@ -25,11 +25,13 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
 
     mPathParam.Filled = false;
 
+/*
     mBrush = new BLImage();
     if( mBrush )
     {
         mBrush->readFromFile("C:\\Users\\Eric\\Desktop\\brush_test.png");
     }
+*/
 }
 
 bool
@@ -118,6 +120,18 @@ bool
 FOdysseyVectorPath::IsFilled()
 {
     return mPathParam.Filled;
+}
+
+FOdysseyVectorBrush
+FOdysseyVectorPath::GetBrush()
+{
+    return mBrush;
+}
+
+void
+FOdysseyVectorPath::SetBrush( const FOdysseyVectorBrush& iBrush )
+{
+    mBrush = iBrush;
 }
 
 void
@@ -1637,10 +1651,10 @@ FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
     // testing brushes
     BLImage* image = vectorEngine->GetBLImage();
     BLImageData imageData;
-    BLImageData brushData;
+    //BLImageData brushData;
 
     image->getData( &imageData );
-    mBrush->getData( &brushData );
+    //mBrush->getData( &brushData );
     //
 
     if ( mPathParam.Filled )
@@ -1667,10 +1681,13 @@ FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
             FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
             //FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
 
-            //segment->Draw();
-
-            // Testing Brushes
+            if( mBrush.texture == nullptr )
             {
+                segment->Draw();
+            }
+            else
+            {
+                const FColor* brushData = static_cast<const FColor*>( mBrush.texture->PlatformData->Mips[0].BulkData.LockReadOnly() );
                 std::vector<FPolygon>& polygonCache = segment->GetPolygonCache();
 
                 for( int i = 0; i < polygonCache.size(); i++ )
@@ -1691,16 +1708,17 @@ FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
                                           , mObjectParam.Opacity
                                           , (int8*)imageData.pixelData
                                           , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                          , (int8*)brushData.pixelData
-                                          , brushData.size.w
-                                          , brushData.size.h
-                                          , ( brushData.format == BL_FORMAT_PRGB32 ) ? 32 : 0 );
+                                          , (int8*) brushData
+                                          , mBrush.texture->GetSurfaceWidth()
+                                          , mBrush.texture->GetSurfaceHeight()
+                                          , /*( brushData.format == BL_FORMAT_PRGB32 ) ? 32 : 0*/32 );
                 }
-            }
 
+                mBrush.texture->PlatformData->Mips[0].BulkData.Unlock();
+            }
         }
 
-        if( mBrush == nullptr )
+        if( mBrush.texture == nullptr )
         {
             for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
             {

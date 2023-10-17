@@ -24,7 +24,14 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
         {
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
-            GroupPaintParam = selectedPaintGroup->mGroupPaintParam;
+            // Category "PaintGroup"
+            Painted         = selectedPaintGroup->IsPainted();
+            Monochrome      = selectedPaintGroup->IsMonochrome();
+            MonochromeColor = selectedPaintGroup->GetMonochromeColor();
+            Realtime        = selectedPaintGroup->IsRealtime();
+            GapTolerance    = selectedPaintGroup->GetGapTolerance();
+            Wireframe       = selectedPaintGroup->IsWireframe();
+            WireframeColor  = selectedPaintGroup->GetWireframeColor();
 
             break; // only one for now
         }
@@ -43,25 +50,25 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
             if( iPropertyName == "Painted" )
-                selectedPaintGroup->SetPainted( GroupPaintParam.Painted );
+                selectedPaintGroup->SetPainted( Painted );
 
             if( iPropertyName == "Monochrome" )
-                selectedPaintGroup->SetMonochrome( GroupPaintParam.Monochrome );
+                selectedPaintGroup->SetMonochrome( Monochrome );
 
             if( iPropertyName == "MonochromeColor" )
-                selectedPaintGroup->mGroupPaintParam.MonochromeColor =  GroupPaintParam.MonochromeColor;
+                selectedPaintGroup->SetMonochromeColor( MonochromeColor );
 
             if( iPropertyName == "Realtime" )
-                selectedPaintGroup->mGroupPaintParam.Realtime =  GroupPaintParam.Realtime;
+                selectedPaintGroup->SetRealtime( Realtime );
 
             if( iPropertyName == "GapTolerance" )
-                selectedPaintGroup->SetGapTolerance( GroupPaintParam.GapTolerance );
+                selectedPaintGroup->SetGapTolerance( GapTolerance );
 
             if( iPropertyName == "Wireframe" )
-                selectedPaintGroup->mGroupPaintParam.Wireframe =  GroupPaintParam.Wireframe;
+                selectedPaintGroup->SetWireframe( Wireframe );
 
             if( iPropertyName == "WireframeColor" )
-                selectedPaintGroup->mGroupPaintParam.WireframeColor =  GroupPaintParam.WireframeColor;
+                selectedPaintGroup->SetWireframeColor( WireframeColor );
         }
     }
 

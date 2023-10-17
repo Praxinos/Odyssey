@@ -25,6 +25,24 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
         virtual uint64 PropertyChanged( const FName& iPropertyName, const FName& iCategory ) override;
 
     public:
-        UPROPERTY(EditAnywhere, Category="Paint Group")
-        FGroupPaintParam GroupPaintParam; // UStruct from OdysseyVectorGroupPaint.h
+        UPROPERTY( EditAnywhere, Category = PaintGroup )
+        bool Painted;
+
+        UPROPERTY( EditAnywhere, Category = PaintGroup )
+        bool Monochrome;
+
+        UPROPERTY( EditAnywhere, Category = PaintGroup )
+        FColor MonochromeColor;
+
+        UPROPERTY( EditAnywhere, Category = PaintGroup )
+        bool Realtime; // relatime updates
+
+        UPROPERTY( EditAnywhere, Category = PaintGroup , meta = (ClampMin = "0.0", UIMin = "0.0"))
+        double GapTolerance;
+
+        UPROPERTY( EditAnywhere, Category = PaintGroup )
+        bool Wireframe;
+
+        UPROPERTY( EditAnywhere, Category = PaintGroup )
+        FColor WireframeColor;
 };

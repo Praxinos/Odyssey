@@ -5,6 +5,7 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+#include "OdysseyVectorBrush.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegment.h"
 
@@ -57,7 +58,7 @@ struct FPathParam
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, Category="Transform")
+    UPROPERTY(EditAnywhere, Category="Default")
     eJointType JointType;
 
     //UPROPERTY(EditAnywhere,Category="General")
@@ -334,6 +335,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void AlterRadius( double iDeltaRadius );
         static ::ULIS::FVec2D GetAverageHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
         void PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray );
+        void SetBrush( const FOdysseyVectorBrush& iBrush );
+        FOdysseyVectorBrush GetBrush();
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
@@ -353,7 +356,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         std::list<FOdysseyVectorVertex*> mSelectedVertexList;
         uint32 mPaintingCode;
         BLPath mBLPath;
-        BLImage *mBrush;
+        FOdysseyVectorBrush mBrush;
 
     public:
         FPathParam mPathParam;
