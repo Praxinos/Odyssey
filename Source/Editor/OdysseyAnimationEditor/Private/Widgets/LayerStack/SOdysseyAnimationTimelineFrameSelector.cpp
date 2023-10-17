@@ -200,6 +200,7 @@ SOdysseyAnimationTimelineFrameSelector::Construct(
 	mOnSelectionStarted = InArgs._OnSelectionStarted;
 	mOnSelectionEnded = InArgs._OnSelectionEnded;
 	mOnSelectionChanged = InArgs._OnSelectionChanged;
+	mOnSelectionDragged = InArgs._OnSelectionDragged;
 
 	ChildSlot
 	[
@@ -235,7 +236,7 @@ int32 SOdysseyAnimationTimelineFrameSelector::OnPaint(const FPaintArgs& Args, co
 	const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
 	FLinearColor lineColor = FLinearColor::Green;
-	lineColor.A = 0.3f;
+	lineColor.A = 0.2f;
 
 	int firstFrame = INDEX_NONE;
 	int lastFrame = INDEX_NONE;
@@ -302,6 +303,39 @@ SOdysseyAnimationTimelineFrameSelector::OnFrameSelectionEnded(int iFrame)
 {
 	mSelectionData.mIsSelecting = false;
 	mOnSelectionEnded.ExecuteIfBound(iFrame);
+}
+
+FReply 
+SOdysseyAnimationTimelineFrameSelector::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{	
+	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		FInt32Range selectedFrames = mSelectedFrames.Get();
+		if (selectedFrames.IsEmpty())
+			return SCompoundWidget::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+
+		int timelineOffset = mExtension->Timeline()->GetOffset();
+		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
+		float frameWidth = mExtension->Timeline()->GetFrameWidth();
+		float frame = (int)(posX / frameWidth + timelineOffset);
+		
+		if (frame < selectedFrames.GetLowerBoundValue() || frame > selectedFrames.GetUpperBoundValue())
+			return SCompoundWidget::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+		
+		return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
+	}
+
+	return SCompoundWidget::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+}
+
+
+FReply
+SOdysseyAnimationTimelineFrameSelector::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+{
+	if (mOnSelectionDragged.IsBound())
+		return mOnSelectionDragged.Execute();
+
+	return FReply::Unhandled();
 }
 
 //////////////////////////////////////////////////////////////////////////

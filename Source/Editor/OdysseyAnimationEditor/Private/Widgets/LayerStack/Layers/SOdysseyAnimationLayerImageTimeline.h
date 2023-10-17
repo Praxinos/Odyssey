@@ -27,7 +27,12 @@ protected:
     );
 
 public:
+    virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
     virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
+    virtual void OnDragEnter(const FGeometry& iGeometry, const FDragDropEvent& iEvent) override;
+    virtual void OnDragLeave(const FDragDropEvent& iEvent) override;
+    virtual FReply OnDragOver(const FGeometry& iGeometry, const FDragDropEvent& iEvent) override;
+    virtual FReply OnDrop(const FGeometry& iGeometry, const FDragDropEvent& iEvent) override;
 
 protected:
     virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() = 0;
@@ -38,6 +43,7 @@ private:
     FInt32Range GetSelectedFrames() const;
     void OnFramesSelectionChanged(FInt32Range iSelectedFrames);
     void OnFramesSelectionEnded(int iFrame);
+    FReply OnFramesSelectionDragged();
 
 private:
     //Context Menu
@@ -54,4 +60,15 @@ protected:
     UOdysseyAnimationLayer* mLayer;
 	
 	TSharedRef<FUICommandList> mCommandList;
+
+    enum eDragState
+    {
+        kDrag_None, //The drop will do nothin
+        kDrag_Move, //The drop will move the selected cells
+        kDrag_Copy, //The drop will copy the selected cells
+    };
+
+    bool mIsDraggingOver;
+    eDragState mDragState;
+    int mDragPosition;
 };

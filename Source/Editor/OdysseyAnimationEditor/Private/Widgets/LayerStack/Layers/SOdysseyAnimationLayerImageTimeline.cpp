@@ -11,6 +11,9 @@ SOdysseyAnimationLayerImageTimeline::~SOdysseyAnimationLayerImageTimeline()
 
 SOdysseyAnimationLayerImageTimeline::SOdysseyAnimationLayerImageTimeline()
     : mCommandList(MakeShared<FUICommandList>())
+    , mIsDraggingOver(false)
+    , mDragState(kDrag_None)
+    , mDragPosition(0)
 {
     MapActions(mCommandList);
 }
@@ -33,45 +36,12 @@ SOdysseyAnimationLayerImageTimeline::Construct(
         .SelectedFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectedFrames)
         .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
         .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
+        .OnSelectionDragged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged)
         [
             SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
             .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
             .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
         ]
-
-        /*
-        SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SOverlay)
-            + SOverlay::Slot()
-            [
-                SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
-                .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
-                .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
-            ]
-            + SOverlay::Slot()
-            [
-                SNew(SBorder)
-                .OnMouseButtonDown_Lambda(
-                    [](const FGeometry&, const FPointerEvent&) -> FReply
-                    {
-                        return FReply::Unhandled();
-                    }
-                )
-            ]
-        ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
-            .SelectableFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectableFrames)
-            .SelectedFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectedFrames)
-            .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
-            .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
-        ]
-        */
     ];
 }
 
@@ -97,6 +67,186 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
         mExtension->Timeline()->SetSelectedFrames(FInt32Range::Empty());
     }
 	return FReply::Unhandled();
+}
+
+int32
+SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	// Draw a current frame
+	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	++LayerId;
+
+	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
+
+	const float height = AllottedGeometry.GetLocalSize().Y;  
+	const float width = AllottedGeometry.GetLocalSize().X;
+	float offset = mExtension->Timeline()->GetOffset();
+	const float frameSize = mExtension->Timeline()->GetFrameWidth();
+
+	if(mIsDraggingOver && mDragState != kDrag_None)
+	{
+        //Dragging Zone
+        FLinearColor lineColor(0.2f, 0.2f, 1.f);
+		float dragPos = (mDragPosition - offset) * frameSize;
+
+        //Dragging Bar
+		FSlateDrawElement::MakeBox(
+			OutDrawElements,
+			LayerId,
+			AllottedGeometry.ToPaintGeometry(FVector2D(dragPos, 0.f), FVector2D(3.f, height)),
+			GenericBrush,
+			ESlateDrawEffect::None,
+			lineColor
+		);
+
+        if (mDragState == kDrag_Copy)
+        {
+            int plusSize = 5.f;
+
+            //Plus
+            FSlateDrawElement::MakeBox(
+                OutDrawElements,
+                LayerId,
+                AllottedGeometry.ToPaintGeometry(FVector2D(dragPos + 5.f,  5.f + plusSize), FVector2D( 3 * plusSize, plusSize)),
+                GenericBrush,
+                ESlateDrawEffect::None,
+                lineColor
+            );
+
+            //Plus
+            FSlateDrawElement::MakeBox(
+                OutDrawElements,
+                LayerId,
+                AllottedGeometry.ToPaintGeometry(FVector2D(dragPos + 5.f + plusSize,  5.f), FVector2D(plusSize, 3 * plusSize)),
+                GenericBrush,
+                ESlateDrawEffect::None,
+                lineColor
+            );
+        }
+	}
+
+	return LayerId;
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::OnDragEnter(const FGeometry& iGeometry, const FDragDropEvent& iEvent)
+{
+    TSharedPtr<FOdysseyAnimationCellsDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyAnimationCellsDragDropOperation>();
+    if (!operation)
+        return;
+
+    if (!operation->GetData().CanPaste(mLayer))
+        return;
+        
+    mIsDraggingOver = true;
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::OnDragLeave(const FDragDropEvent& iEvent)
+{
+    TSharedPtr<FOdysseyAnimationCellsDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyAnimationCellsDragDropOperation>();
+    if (!operation)
+        return;
+
+    if (!operation->GetData().CanPaste(mLayer))
+        return;
+
+    mIsDraggingOver = false;
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, const FDragDropEvent& iEvent)
+{
+    TSharedPtr<FOdysseyAnimationCellsDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyAnimationCellsDragDropOperation>();
+    if (!operation)
+        return FReply::Unhandled();
+
+    if (!operation->GetData().CanPaste(mLayer))
+        return FReply::Unhandled();
+
+    int timelineOffset = mExtension->Timeline()->GetOffset();
+    float posX = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X;
+    float frameWidth = mExtension->Timeline()->GetFrameWidth();
+    float frame = (int)(posX / frameWidth + timelineOffset + 0.5f);
+
+    mDragPosition = frame;
+
+    /*
+    if (FSlateApplication::Get().GetModifierKeys().IsControlDown())
+        mDragState = kDrag_Copy;
+    else
+        mDragState = kDrag_Move;
+    */
+   mDragState = kDrag_Copy; //For now we can only copy frames, we will be able to move them when layers will have holes
+
+    //Check if the copy or move is actually allowed
+    UOdysseyAnimationLayer* layer = operation->GetLayer();
+    if (layer == mLayer)
+    {
+        FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
+        if (mDragState == kDrag_Copy && frame > selectedFrames.GetLowerBoundValue() && frame <= selectedFrames.GetUpperBoundValue())
+        {
+            //Trying to copy cells inside the current layer selection
+            //This is not allowed
+            mDragState = kDrag_None;
+            return FReply::Handled();
+        }
+        else if (mDragState == kDrag_Move && frame >= selectedFrames.GetLowerBoundValue() && frame <= selectedFrames.GetUpperBoundValue() + 1)
+        {
+            //Trying to move cells inside the current layer selection
+            //This is not allowed
+            mDragState = kDrag_None;
+            return FReply::Handled();
+        }
+    }
+
+    return FReply::Handled();
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnDrop(const FGeometry& iGeometry, const FDragDropEvent& iEvent)
+{
+    TSharedPtr<FOdysseyAnimationCellsDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyAnimationCellsDragDropOperation>();
+    if (!operation)
+        return FReply::Unhandled();
+
+    if (mDragState == kDrag_None)
+        return FReply::Unhandled();
+
+    if (!operation->GetData().CanPaste(mLayer))
+        return FReply::Unhandled();
+
+    if (mDragState == kDrag_Copy)
+    {
+    #ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Copy Cells"));
+    #endif
+        operation->GetData().Paste(mLayer, mDragPosition);
+    }
+
+    /* if (mDragState == kDrag_Move)
+    {
+    #ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Move Cells"));
+    #endif
+
+        //Remove frames from original layer
+        UOdysseyAnimationLayer* layer = operation->GetData().GetLayer();
+        FInt32Range selectedFrames = operation->GetData().GetSelectedFrames();
+        FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
+        mutator.RemoveFrameRange(selectedFrames);
+        if (iFrame > selectedFrames.GetUpperBoundValue())
+        {
+            int numDeletedFrames = selectedFrames.GetUpperBoundValue() - selectedFrames.GetLowerBoundValue() + 1;
+            mutator.SetOffset(layer->GetCellsContainer()->GetOffset() + numDeletedFrames);
+        }
+        mutator.Commit();
+
+        operation->GetData().Paste(mLayer, mDragPosition);
+    }
+    */
+    mIsDraggingOver = false;
+    return FReply::Handled();
 }
 
 void
@@ -194,6 +344,13 @@ SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded(int iFrame)
     int frame = FMath::Clamp(iFrame, frameRange.GetLowerBoundValue(), frameRange.GetUpperBoundValue());
 
     FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged()
+{
+    TSharedRef<FOdysseyAnimationCellsDragDropOperation> operation = FOdysseyAnimationCellsDragDropOperation::Create(mLayer, mExtension->Timeline()->GetSelectedFrames());
+    return FReply::Handled().BeginDragDrop(operation);
 }
 
 void

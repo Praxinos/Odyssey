@@ -13,6 +13,7 @@ public:
 	DECLARE_DELEGATE_OneParam(FOnSelectionChanged, FInt32Range)
 	DECLARE_DELEGATE_OneParam(FOnSelectionStarted, int /* iFrame */)
 	DECLARE_DELEGATE_OneParam(FOnSelectionEnded, int /* iFrame */)
+	DECLARE_DELEGATE_RetVal(FReply, FOnSelectionDragged)
 
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineFrameSelector)
@@ -24,6 +25,7 @@ public:
 		SLATE_EVENT(FOnSelectionStarted, OnSelectionStarted)
 		SLATE_EVENT(FOnSelectionEnded, OnSelectionEnded)
 		SLATE_EVENT(FOnSelectionChanged, OnSelectionChanged)
+		SLATE_EVENT(FOnSelectionDragged, OnSelectionDragged)
 	SLATE_END_ARGS()
 
 	SOdysseyAnimationTimelineFrameSelector();
@@ -42,6 +44,10 @@ private:
 	void OnFrameSelectionStarted(int iFrame);
 	void OnFrameSelectionEnded(int iFrame);
 
+	FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+	//FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+
 private:
 	TAttribute<FInt32Range> mSelectedFrames;
 	TAttribute<FInt32Range> mSelectableFrames;
@@ -58,4 +64,5 @@ private:
 	FOnSelectionChanged mOnSelectionChanged;
 	FOnSelectionStarted mOnSelectionStarted;
 	FOnSelectionEnded mOnSelectionEnded;
+	FOnSelectionDragged mOnSelectionDragged;
 };

@@ -19,11 +19,17 @@ public:
 public:
     bool CanPaste(UOdysseyAnimationLayer* iLayer) const;
     void Paste(UOdysseyAnimationLayer* iLayer, int iFrame) const;
+    void Move(UOdysseyAnimationLayer* iLayer, int iFrame) const;
+    int GetCellCount() const;
+    UOdysseyAnimationLayer* GetLayer() const;
+    const FInt32Range& GetSelectedFrames() const;
 
 private:
-    void Copy(TSharedPtr<FOdysseyAnimationCellsContainer> iCellContainer, const FInt32Range& iSelectedFrames);
+    void Copy();
+    void DeleteSelectedFrames() const; 
 
 private:
+    UOdysseyAnimationLayer* mLayer;
     struct FCellCopy
     {
         TSharedPtr<FOdysseyAnimationCell> mCell;
@@ -31,4 +37,5 @@ private:
     };
 
     TArray<FCellCopy> mCellCopies;
+    FInt32Range mSelectedFrames;
 };
