@@ -7,6 +7,8 @@
 #include "OdysseyPainterEditorTool.h"
 #include "OdysseyPainterEditorRasterSelection.generated.h"
 
+class FOdysseyHUDPolygon;
+
 //This is already a tool to prepare for the moment we'll separate transform and selection. When we'll have a "mask" feature in Odyssey
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelection : public UOdysseyPainterEditorTool
@@ -21,7 +23,31 @@ public:
     //Constructor
     UOdysseyPainterEditorRasterSelection();
 
-private:
+    //For now, we init the selection by sharing the HUD and the editor from the transform. When the selection and the transform will be two separate tools, we won't have to do this anymore
+    void Init( FOdysseyHUDElement* iHUD, FOdysseyPainterEditor* iEditor );
+    
+    virtual bool IsActivable() const override;
+
+    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
+    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual bool OnKeyUp(const FKey& iKey);
+
+    virtual void Load() override;
+    virtual void Unload() override;
 
 
+protected:
+    ::ULIS::FRectI GetSelectionAreaBoundingRect();
+    bool IsSelectionValid(::ULIS::FRectI iSelectionArea);
+    void ClearSelection();
+    void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
+
+protected:
+    bool mSelectionAreaSet;
+    FOdysseyHUDPolygon* mSelectionArea;
+    FOdysseyPaintEngine mPaintEngine;
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mSelectionBlock;
 };

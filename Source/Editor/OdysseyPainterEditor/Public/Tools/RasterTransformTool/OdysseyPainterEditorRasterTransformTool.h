@@ -9,6 +9,7 @@
 
 class FOdysseyHUDPolygon;
 class FOdysseyHUDHandle;
+class UOdysseyPainterEditorRasterSelection;
 
 UENUM()
 enum class EOdysseySelectionShape : uint8
@@ -81,7 +82,7 @@ public:
     EOdysseySelectionShape SelectionShape;
 
 private: 
-
+    UOdysseyPainterEditorRasterSelection* mSelection;
     FOdysseyPaintEngine mPaintEngine;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mReferenceBlock;

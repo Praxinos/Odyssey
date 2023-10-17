@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
+#include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterRectangleSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDPolygon.h"
 #include "GeomTools.h"
@@ -13,13 +14,26 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterTransformTool::~UOdysseyPainterEditorRasterTransformTool()
 {
+    if (mReferenceBlock)
+    {
+        mReferenceBlock.Reset();
+        mReferenceBlock = nullptr;
+    }
+    if (mTransformedBlock)
+    {
+        mTransformedBlock.Reset();
+        mTransformedBlock = nullptr;
+    }
+    mHandles.Empty();
+    mHUD->EmptyHUDElements();
 }
 
 UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTool() :
     SelectionShape(EOdysseySelectionShape::Rectangle),
+    mSelection(NewObject<UOdysseyPainterEditorRasterRectangleSelection>()),
     mPaintEngine(),
-    mReferenceBlock(nullptr),
     mTransformedBlock(nullptr),
+    mReferenceBlock(nullptr),
     mTransformArea(nullptr),
     mTransformAreaSet(false),
     mRasterMutator(true),
@@ -27,6 +41,7 @@ UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTo
     mTransformCaptureMode(EOdysseyTransformCapture::NoCapture)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.TransformTool32");
+    mSelection->AddToRoot();
 }
 
 bool
@@ -37,6 +52,9 @@ UOdysseyPainterEditorRasterTransformTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if( mSelection->OnMouseDown( iPointInTexture, iKey ) )
+        return true;
+/*
     if (!mTransformAreaSet) //Creating a zone for the transform
     {
         if( SelectionShape == EOdysseySelectionShape::Rectangle )
@@ -75,18 +93,19 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
             return true;
         }
 
-    }
+    }*/
     
     if( mHUD->OnKeyDown(iPointInTexture, iKey) ) //Handling HUD events if needed
     {
         return true;
     }
+    /*
     else if( FGeomTools2D::IsPointInPolygon( FVector2D( iPointInTexture.x, iPointInTexture.y ), mTransformArea->GetPoints() ) ) //Handling clicking inside the transform zone (for dragging it)
     {
         mTransformCaptureMode = EOdysseyTransformCapture::Inside;
         mMouseLastReferencePoint = FVector2D( iPointInTexture.x, iPointInTexture.y );
         return true;
-    }
+    }*/
 
 
     return false;
@@ -94,13 +113,19 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
 
 void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
+    //If is in polygon, change mouse cursor to hand
+    //If is in other area, change mouse cursor accordingly
+    mSelection->OnMouseHover( iPointInTexture );
     mHUD->MouseMove( iPointInTexture );
 }
 
 void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
+    mSelection->OnMouseDrag(iPointInTexture);
+
     mHUD->CapturedMouseMove(iPointInTexture);
 
+    /*
     if( !mTransformAreaSet )
     {
         if (SelectionShape == EOdysseySelectionShape::FreeHand)
@@ -138,12 +163,17 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
     }
 
     CreateTransformBlockFromReferenceBlock();
-    BlendTransformAreaToPaintBlock();
+    BlendTransformAreaToPaintBlock();*/
 }
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if( mSelection->OnMouseUp( iPointInTexture, iKey ))
+        return true;
+
+
     bool isHandled = mHUD->OnKeyUp( iPointInTexture, iKey );
+    /*
     mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
     if (!mTransformAreaSet)
     {
@@ -311,7 +341,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
         mTransformAreaSet = true;
         ConstrainToRectangle(FVector2D(iPointInTexture.x, iPointInTexture.y));
         return true;
-    }
+    }*/
 
     return isHandled;
 }
@@ -334,11 +364,14 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
 
 void UOdysseyPainterEditorRasterTransformTool::Load()
 {
+    mSelection->Init(mHUD, mEditor);
+    mSelection->Load();
     UOdysseyPainterEditorTool::Load();
 }
 
 void UOdysseyPainterEditorRasterTransformTool::Unload()
 {
+    mSelection->Unload();
     AbortTransform();
     UOdysseyPainterEditorTool::Unload();
 }
