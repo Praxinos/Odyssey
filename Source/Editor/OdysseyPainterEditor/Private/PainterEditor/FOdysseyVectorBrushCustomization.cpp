@@ -1,74 +1,45 @@
-#include "BLImageCustomization.h"
+#include "FOdysseyVectorBrushCustomization.h"
 #include "OdysseyVectorBrush.h"
 #include "ContentBrowserModule.h" // for FContentBrowserModule
-#include "PropertyEditor/Public/IPropertyTypeCustomization.h"
-#include "DetailWidgetRow.h"
 #include "IContentBrowserSingleton.h" // for FAssetPickerConfig
 #include "PropertyCustomizationHelpers.h" // for SObjectPropertyEntryBox
 
 #include "SlateBasics.h"
 
-#define LOCTEXT_NAMESPACE "BLImageCustomization"
-
-class FBLImageDetails : public IPropertyTypeCustomization
-{
-public:
-    /** Makes a new instance of this detail layout class for a specific detail view requesting it */
-    static TSharedRef<IPropertyTypeCustomization> MakeInstance()
-    {
-        return MakeShareable(new FBLImageDetails());
-    }
-
-    virtual void CustomizeHeader( TSharedRef<IPropertyHandle> StructPropertyHandle
-	                            , class FDetailWidgetRow& HeaderRow
-	                            , IPropertyTypeCustomizationUtils& StructCustomizationUtils ) override;
-
-    virtual void CustomizeChildren( TSharedRef<IPropertyHandle> StructPropertyHandle
-                                  , class IDetailChildrenBuilder& StructBuilder
-		                          , IPropertyTypeCustomizationUtils& StructCustomizationUtils ) override;
-
-    private:
-        void OnObjectChanged( const FAssetData& AssetData
-                            , TSharedRef<IPropertyHandle> StructPropertyHandle );
-        void ObjectPath( TSharedRef<IPropertyHandle> StructPropertyHandle );
-        FReply OnClicked( TSharedRef<IPropertyHandle> StructPropertyHandle );
-        bool FilterAsset( const struct FAssetData& InAssetData );
-
-    private:
-        TSharedPtr<SButton> mBrushButton;
-        FSlateBrush* mBrushIcon;
-        TSharedPtr<FAssetThumbnailPool> mAssetThumbnailPool;
-};
+#define LOCTEXT_NAMESPACE "OdysseyVectorBrushCustomization"
 
 void
-FBLImageDetails::CustomizeHeader( TSharedRef<IPropertyHandle> StructPropertyHandle
+FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> StructPropertyHandle
 	                            , class FDetailWidgetRow& HeaderRow
 	                            , IPropertyTypeCustomizationUtils& StructCustomizationUtils )
 {
-    TSharedPtr<IPropertyHandle> textureProperty = StructPropertyHandle->GetChildHandle("texture");
-
     mAssetThumbnailPool = MakeShareable( new FAssetThumbnailPool( 1024 ) );
 
-    mBrushIcon = new FSlateBrush();
-    mBrushIcon->SetResourceObject(nullptr);
-    mBrushIcon->ImageSize.X = 64;
-    mBrushIcon->ImageSize.Y = 16;
+    mBrushIcon = MakeShareable( new FSlateBrush() );
+    mBrushIcon.Get()->SetResourceObject(nullptr);
+    mBrushIcon.Get()->ImageSize.X = 64;
+    mBrushIcon.Get()->ImageSize.Y = 16;
     //mBrushIcon->DrawAs = ImageType;
+
+    TAttribute<const FSlateBrush*> BrushAttribute = TAttribute<const FSlateBrush*>::Create(TAttribute<const FSlateBrush*>::FGetter::CreateRaw( this, &FOdysseyVectorBrushCustomization::UpdateButton, StructPropertyHandle ));
 
     mBrushButton = SNew(SButton)
 			      .Visibility( EVisibility::Visible )
-			      .Text( LOCTEXT("CreateDefault", "Create Default") )
-			      .ToolTipText( LOCTEXT("CreateDefaultToolTip", "Reconstructs section ordering based on start time") )
-			      .OnClicked(this, &FBLImageDetails::OnClicked, StructPropertyHandle )
+			      .Text( LOCTEXT("VectorBrushButton", "Vector Brush Button") )
+			      .ToolTipText( LOCTEXT("VectorBrushButtonToolTip", "Vector Brush Button") )
+			      .OnClicked(this, &FOdysseyVectorBrushCustomization::OnClicked, StructPropertyHandle )
 			      .HAlign(HAlign_Center)
 			      .VAlign(VAlign_Center)
                   [
                       SNew(SImage)
-                      .Image( mBrushIcon )
+                      .Image( BrushAttribute )
                   ];
 
-    ObjectPath( StructPropertyHandle );
+    UpdateButton( StructPropertyHandle );
 
+    // We don't use the SObjectPropertyEntryBox widget because I had troubles with setting the filter.
+    // MoreOver, this widget was taking to much room, so I chose to use a SButton instead and display
+    // an asset picker on mouse click.
 	HeaderRow.NameContent()[StructPropertyHandle->CreatePropertyNameWidget()]
 	.ValueContent()[
 		SNew(SHorizontalBox)
@@ -79,10 +50,10 @@ FBLImageDetails::CustomizeHeader( TSharedRef<IPropertyHandle> StructPropertyHand
 /*
             SNew(SObjectPropertyEntryBox)
                 .AllowedClass(          UTexture2D::StaticClass() )
-                .ObjectPath(            this, &FBLImageDetails::ObjectPath, StructPropertyHandle )
+                .ObjectPath(            this, &FOdysseyVectorBrushCustomization::ObjectPath, StructPropertyHandle )
                 .ThumbnailPool(         mAssetThumbnailPool )
-                .OnObjectChanged(       this, &FBLImageDetails::OnObjectChanged, StructPropertyHandle )
-                .OnShouldFilterAsset(   this, &FBLImageDetails::FilterAsset )
+                .OnObjectChanged(       this, &FOdysseyVectorBrushCustomization::OnObjectChanged, StructPropertyHandle )
+                .OnShouldFilterAsset(   this, &FOdysseyVectorBrushCustomization::FilterAsset )
                 .AllowClear(            true )
                 .DisplayUseSelected(    true )
                 .DisplayBrowse(         true )
@@ -94,12 +65,10 @@ FBLImageDetails::CustomizeHeader( TSharedRef<IPropertyHandle> StructPropertyHand
 */
 		]
 	];
-
-    textureProperty->SetOnPropertyValueChanged( FSimpleDelegate::CreateSP( this, &FBLImageDetails::ObjectPath, StructPropertyHandle ) );
 }
 
 FReply
-FBLImageDetails::OnClicked( TSharedRef<IPropertyHandle> StructPropertyHandle )
+FOdysseyVectorBrushCustomization::OnClicked( TSharedRef<IPropertyHandle> StructPropertyHandle )
 {
     FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
     FString brushPath = FPaths::ProjectContentDir() + FString("/Brushes/Vector");
@@ -108,9 +77,9 @@ FBLImageDetails::OnClicked( TSharedRef<IPropertyHandle> StructPropertyHandle )
 
     Config.InitialAssetViewType = EAssetViewType::List;
     Config.ThumbnailScale = 1.0f; // make thumbnails as small as possible
-    Config.OnAssetSelected = FOnAssetSelected::CreateRaw( this, &FBLImageDetails::OnObjectChanged, StructPropertyHandle );
+    Config.OnAssetSelected = FOnAssetSelected::CreateRaw( this, &FOdysseyVectorBrushCustomization::OnAssetSelected, StructPropertyHandle );
     // All the filter I tried didn't work, so I ended up filtering via the OnShouldFilterAsset delegate
-    Config.OnShouldFilterAsset = FOnShouldFilterAsset::CreateRaw( this, &FBLImageDetails::FilterAsset );
+    Config.OnShouldFilterAsset = FOnShouldFilterAsset::CreateRaw( this, &FOdysseyVectorBrushCustomization::FilterAsset );
     Config.bAllowNullSelection = true;
     Config.bAllowDragging = false;
 
@@ -133,7 +102,7 @@ FBLImageDetails::OnClicked( TSharedRef<IPropertyHandle> StructPropertyHandle )
 }
 
 bool
-FBLImageDetails::FilterAsset( const struct FAssetData& InAssetData )
+FOdysseyVectorBrushCustomization::FilterAsset( const struct FAssetData& InAssetData )
 {
     static FString vectorBrushesDir = FString("/Brushes/Vector");
     // If the asset lies in the Vector Brush directory, show it (return false).
@@ -150,7 +119,7 @@ FBLImageDetails::FilterAsset( const struct FAssetData& InAssetData )
 
 //FString
 void
-FBLImageDetails::ObjectPath( TSharedRef<IPropertyHandle> StructPropertyHandle ) 
+FOdysseyVectorBrushCustomization::OnPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle ) 
 {
     FProperty *property = StructPropertyHandle.Get().GetProperty();
     TArray<UObject*> OuterObjects;
@@ -162,17 +131,32 @@ FBLImageDetails::ObjectPath( TSharedRef<IPropertyHandle> StructPropertyHandle )
         UObject* OuterObject = OuterObjects[0];
         const FOdysseyVectorBrush* vectorBrush = property->ContainerPtrToValuePtr<FOdysseyVectorBrush>( OuterObject, 0 ); 
 
-        mBrushIcon->SetResourceObject( vectorBrush->texture );
+        mBrushIcon.Get()->SetResourceObject( vectorBrush->texture );
+    }
+}
 
-        //return ( vectorBrush->texture ) ? vectorBrush->texture->GetPathName() : FString();
+const FSlateBrush*
+FOdysseyVectorBrushCustomization::UpdateButton( TSharedRef<IPropertyHandle> StructPropertyHandle )
+{
+    FProperty *property = StructPropertyHandle.Get().GetProperty();
+    TArray<UObject*> OuterObjects;
+
+    StructPropertyHandle.Get().GetOuterObjects( OuterObjects );
+
+    if( OuterObjects.Num() == 1 )
+    {
+        UObject* OuterObject = OuterObjects[0];
+        const FOdysseyVectorBrush* vectorBrush = property->ContainerPtrToValuePtr<FOdysseyVectorBrush>( OuterObject, 0 ); 
+
+        mBrushIcon.Get()->SetResourceObject( vectorBrush->texture );
     }
 
-    //return FString();
+    return mBrushIcon.Get();
 }
 
 void
-FBLImageDetails::OnObjectChanged( const FAssetData& AssetData
-                                , TSharedRef<IPropertyHandle> StructPropertyHandle )
+FOdysseyVectorBrushCustomization::OnAssetSelected( const FAssetData& AssetData
+                                                 , TSharedRef<IPropertyHandle> StructPropertyHandle )
 {
     UTexture2D* texture = AssetData.IsValid() ? CastChecked<UTexture2D>( AssetData.GetAsset() ) : nullptr;
     FProperty *property = StructPropertyHandle.Get().GetProperty();
@@ -191,7 +175,7 @@ FBLImageDetails::OnObjectChanged( const FAssetData& AssetData
         texture->UpdateResource();
     }
 
-    mBrushIcon->SetResourceObject( texture );
+    mBrushIcon.Get()->SetResourceObject( texture );
 
     for ( int i = 0; i < OuterObjects.Num(); i++ )
     {
@@ -202,25 +186,28 @@ FBLImageDetails::OnObjectChanged( const FAssetData& AssetData
         FOdysseyVectorBrush* vectorBrush = property->ContainerPtrToValuePtr<FOdysseyVectorBrush>( OuterObject, 0 ); 
 
         vectorBrush->texture = texture;
+        
 
         OuterObject->PostEditChangeProperty( propertyChangedEvent );
     }
 }
 
 void
-FBLImageDetails::CustomizeChildren( TSharedRef<IPropertyHandle> StructPropertyHandle
+FOdysseyVectorBrushCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> StructPropertyHandle
                                   , class IDetailChildrenBuilder& StructBuilder
 		                          , IPropertyTypeCustomizationUtils& StructCustomizationUtils )
 {
-    StructPropertyHandle->SetOnPropertyValueChanged( FSimpleDelegate::CreateRaw( this, &FBLImageDetails::ObjectPath, StructPropertyHandle ) );
+//    TSharedPtr<IPropertyHandle> textureProperty = StructPropertyHandle->GetChildHandle("texture");
 
+//    textureProperty->SetOnPropertyValueChanged( FSimpleDelegate::CreateRaw( this, &FOdysseyVectorBrushCustomization::OnPropertyValueChanged ) );
 }
 
+//static
 void
-FBLImageCustomization::Register()
+FOdysseyVectorBrushCustomization::Register()
 {
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    PropertyModule.RegisterCustomPropertyTypeLayout(FOdysseyVectorBrush::StaticStruct()->GetFName(), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FBLImageDetails::MakeInstance));
+    PropertyModule.RegisterCustomPropertyTypeLayout(FOdysseyVectorBrush::StaticStruct()->GetFName(), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FOdysseyVectorBrushCustomization::MakeInstance));
 
     PropertyModule.NotifyCustomizationModuleChanged();
 }

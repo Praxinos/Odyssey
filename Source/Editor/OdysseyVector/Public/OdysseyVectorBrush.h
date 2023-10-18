@@ -9,16 +9,20 @@
 #include "OdysseyVectorBrush.generated.h"
 
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, Category="Default")
     UTexture2D* texture;
 
     FOdysseyVectorBrush()
     {
         texture = nullptr;
+    }
+
+    FOdysseyVectorBrush( UTexture2D* iTexture )
+    {
+        texture = iTexture;
     }
 };

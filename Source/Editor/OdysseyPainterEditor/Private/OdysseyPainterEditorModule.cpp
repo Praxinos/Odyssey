@@ -3,7 +3,7 @@
 
 #include "OdysseyPainterEditorModule.h"
 
-#include "BLImageCustomization.h"
+#include "FOdysseyVectorBrushCustomization.h"
 
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
@@ -38,7 +38,7 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterLevelEditorLayoutExtensions();
 
     // test
-    FBLImageCustomization::Register();
+    FOdysseyVectorBrushCustomization::Register();
 }
 
 void

@@ -25,6 +25,7 @@ UOdysseyPainterEditorVectorPathView::ImportParam()
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
 
             JointType = selectedPath->GetJointType();
+
             Brush = selectedPath->GetBrush();
 
             break; // only one
