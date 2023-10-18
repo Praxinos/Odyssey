@@ -5,7 +5,6 @@
 import argparse
 from datetime import datetime
 from enum import Enum
-import itertools
 import json
 from pathlib import Path
 import platform
@@ -14,16 +13,67 @@ import shutil
 import subprocess
 import sys
 
+#---
+
+gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
+if gOperatingSystem != 'windows' and gOperatingSystem != 'darwin':
+    raise ValueError( f'{gOperatingSystem} not supported' )
+
+#---
+
+if sys.prefix == sys.base_prefix:
+    print( 'Not in a venv, setting up venv.' )
+    print()
+
+    root_path = Path( __file__ ).parent.resolve()
+    venv_path = root_path / '.venv'
+
+    if gOperatingSystem == 'windows':
+        venv_activation = [ str(venv_path / 'Scripts' / 'activate.bat') ]
+    elif gOperatingSystem == 'darwin':
+        venv_activation = [ 'source', str(venv_path / 'bin' / 'activate') ]
+    else:
+        raise ValueError( f'{gOperatingSystem} not supported' )
+
+    #---
+
+    if venv_path.exists():
+        print( f'Upgrading venv...' )
+        completed_process = subprocess.run( venv_activation + [ '&&', 'pip', 'install', '-q', '-U', '-r', 'requirements.txt' ], capture_output=True, text=True )
+        print( completed_process.stdout )
+    else:
+        print( f'Creating venv...' )
+        completed_process = subprocess.run( [ 'python', '-m', 'venv', '.venv' ], capture_output=True, text=True )
+        print( completed_process.stdout )
+        print( f'Updating venv...' )
+        completed_process = subprocess.run( venv_activation + [ '&&', 'pip', 'install', '-q', '-r', 'requirements.txt' ], capture_output=True, text=True )
+        print( completed_process.stdout )
+
+    print( f'Now, activate the virtual environement with:' )
+    if gOperatingSystem == 'windows':
+        print( f'    .\\{venv_path.name}\\Scripts\\activate' )
+    elif gOperatingSystem == 'darwin':
+        print( f'    source {venv_path.name}/bin/activate' )
+    else:
+        raise ValueError( f'{gOperatingSystem} not supported' )
+
+    print()
+    print( f'Then, once in the venv, re-execute:' )
+    print( f'    build-package.py ...' )
+
+    sys.exit()
+
+#---
+#---
+#---
+
+# All venv dependencies must be include here, as the venv is managed above
+
 from pygit2 import Repository
 from colorama import init, Fore, Back, Style
 init( autoreset=True )
 
 #---
-
-gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
-if gOperatingSystem != 'windows' and gOperatingSystem != 'darwin':
-    print( Fore.RED + f'This platform is not supported: {gOperatingSystem}' )
-    sys.exit( 5 )
 
 class eTarget(Enum):
     kDev = 'dev'

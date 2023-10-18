@@ -79,8 +79,7 @@ Read the [:blue_book:User Documentation](https://praxinos.coop/epos-user-doc) to
 # Making a Package
 
 - open a shell/cmd at the root of the plugin
-- activate the virtual environment `.\.venv\Scripts\activate`
-- execute `build-package.py ...`
+- execute `build-package.py ...` *(and follow the instructions (activate the venv) if needed)*
 
 ## Examples
 
