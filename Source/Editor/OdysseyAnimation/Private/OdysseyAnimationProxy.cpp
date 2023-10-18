@@ -40,10 +40,19 @@ FOdysseyAnimationProxy::GetBlockDataForComposition(const TArray<FGuid>& iComposi
 TSharedPtr<::ULIS::FBlock>
 FOdysseyAnimationProxy::GetBlock(int iFrameIndex)
 {   
-    if (!mFramesToBlockData.Contains(iFrameIndex))
-        return nullptr;
+    TSharedPtr<FBlockData> blockData = nullptr;
+    if (mFramesToBlockData.Contains(iFrameIndex))
+    {
+        blockData = mFramesToBlockData[iFrameIndex];
+    }
+    else
+    {
+        TArray<FGuid> composition = mAnimation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, iFrameIndex);
+        blockData = GetBlockDataForComposition(composition);
+        if (!blockData)
+            return nullptr;
+    }
 
-    TSharedPtr<FBlockData> blockData = mFramesToBlockData[iFrameIndex];
     TSharedPtr<::ULIS::FBlock> block = blockData->GetBlock(); //To keep the block in memory
     if (!blockData->Render()) //Renders only if needed, so this is safe
         return nullptr;

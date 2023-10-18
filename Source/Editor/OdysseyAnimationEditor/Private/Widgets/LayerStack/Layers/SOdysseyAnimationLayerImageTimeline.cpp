@@ -355,14 +355,13 @@ SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged()
 
 void
 SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
-{
-    const FText commonSectionTitle = LOCTEXT("OdysseyAnimationTimelineCommonSection", "Common");
+{   
     iMenuBuilder.PushCommandList(mCommandList);
-    iMenuBuilder.BeginSection("Selection", LOCTEXT("LayerStackCommonSection", "Selection"));
+    iMenuBuilder.BeginSection("Selection", LOCTEXT("LayerImageTimeline-ContextMenu-SelectionSection", "Selection"));
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
     iMenuBuilder.EndSection();
 
-    iMenuBuilder.BeginSection("Common", LOCTEXT("LayerStackCommonSection", "Common"));
+    iMenuBuilder.BeginSection("Common", LOCTEXT("LayerImageTimeline-ContextMenu-CommonSection", "Common"));
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Duplicate);
         iMenuBuilder.AddSeparator("");
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Cut);
@@ -370,9 +369,170 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Paste);
         iMenuBuilder.AddSeparator("");
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
-
     iMenuBuilder.EndSection();
+
+    iMenuBuilder.BeginSection("Layer", LOCTEXT("LayerImageTimeline-ContextMenu-LayerSection", "Layer"));
+        iMenuBuilder.AddSubMenu(
+            LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour", "Pre Behaviour"),
+            LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-Tooltip", "Set Layer's Pre Behaviour"),
+            FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildPreBehaviourSubMenu)
+        );
+        iMenuBuilder.AddSubMenu(
+            LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour", "Post Behaviour"),
+            LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-Tooltip", "Set Layer's Post Behaviour"),
+            FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu)
+        );
+    iMenuBuilder.EndSection();
+
     iMenuBuilder.PopCommandList();
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder)
+{
+    iMenuBuilder.AddMenuEntry(
+        LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-None", "None"),
+        TAttribute<FText>(),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::None),
+            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour),
+            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::None)
+        ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+    iMenuBuilder.AddMenuEntry(
+        LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-Hold", "Hold"),
+        TAttribute<FText>(),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Hold),
+            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour),
+            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Hold)
+        ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+    iMenuBuilder.AddMenuEntry(
+        LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-Loop", "Loop"),
+        TAttribute<FText>(),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Loop),
+            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour),
+            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Loop)
+        ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+    iMenuBuilder.AddMenuEntry(
+        LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-PingPong", "PingPong"),
+        TAttribute<FText>(),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::PingPong),
+            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour),
+            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::PingPong)
+        ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder)
+{
+    iMenuBuilder.AddMenuEntry(
+        LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-None", "None"),
+        TAttribute<FText>(),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::None),
+            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour),
+            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::None)
+        ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+    iMenuBuilder.AddMenuEntry(
+        LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-Hold", "Hold"),
+        TAttribute<FText>(),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Hold),
+            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour),
+            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Hold)
+        ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+    iMenuBuilder.AddMenuEntry(
+        LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-Loop", "Loop"),
+        TAttribute<FText>(),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Loop),
+            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour),
+            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Loop)
+        ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+    iMenuBuilder.AddMenuEntry(
+        LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-PingPong", "PingPong"),
+        TAttribute<FText>(),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::PingPong),
+            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour),
+            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::PingPong)
+        ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour)
+{
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Set Post Behaviour"));
+#endif
+    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "PostBehaviour", iBehaviour);
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const
+{
+    return mLayer->PostBehaviour == iBehaviour;
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour() const
+{
+    return !mLayer->IsLocked;
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::SetPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour)
+{
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Set Pre Behaviour"));
+#endif
+    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "PreBehaviour", iBehaviour);
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::IsPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const
+{
+    return mLayer->PreBehaviour == iBehaviour;
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour() const
+{
+    return !mLayer->IsLocked;
 }
 
 void

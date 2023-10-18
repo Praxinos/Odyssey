@@ -14,6 +14,15 @@
 class FOdysseyAnimationCellsContainer;
 class FOdysseyAnimationLightTable;
 
+UENUM(BlueprintType)
+enum class EOdysseyAnimationLayerImagePostBehaviour
+{
+    None,
+    Hold,
+    Loop,
+    PingPong
+};
+
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     : public UOdysseyLayer
@@ -26,11 +35,17 @@ public:
     UOdysseyAnimation* GetAnimation() const;
     virtual FInt32Range GetFrameRange() const;
     virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const { return nullptr; }
+
+    int GetPreBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const;
+    int GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const;
     
 protected:
     //Property changes
     virtual void ChildrenChanged() override;
     virtual void IsActivatedChanged() override;
+    virtual void PreBehaviourChanged();
+    virtual void PostBehaviourChanged();
+    virtual void PropertyChanged(const FName& iPropertyName) override;
 
 public:
 	//FOdysseyImageRenderingAbility overrides
@@ -38,4 +53,11 @@ public:
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
+
+public:
+    UPROPERTY()
+    EOdysseyAnimationLayerImagePostBehaviour PreBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
+
+    UPROPERTY()
+    EOdysseyAnimationLayerImagePostBehaviour PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 };

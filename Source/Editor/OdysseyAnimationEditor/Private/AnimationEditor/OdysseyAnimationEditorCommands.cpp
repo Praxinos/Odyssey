@@ -41,6 +41,15 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
 
     UI_CMD( StepForward, TimelineShortcuts, "Step Forward", "Change the current frame to be the next frame in the animation timeline",                                                            EUserInterfaceActionType::Button, FInputChord(EKeys::O));
     UI_CMD( StepBackward, TimelineShortcuts, "Step Backward", "Change the current frame to be the previous frame in the animation timeline",                                                      EUserInterfaceActionType::Button, FInputChord(EKeys::U));
+
+    UI_CMD( SetPreBehaviourNone, TimelineShortcuts, "Set Layer's Pre Behaviour to None", "Set Layer's Pre Behaviour to None", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_CMD( SetPreBehaviourHold, TimelineShortcuts, "Set Layer's Pre Behaviour to Hold", "Set Layer's Pre Behaviour to Hold", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_CMD( SetPreBehaviourLoop, TimelineShortcuts, "Set Layer's Pre Behaviour to Loop", "Set Layer's Pre Behaviour to Loop", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_CMD( SetPreBehaviourPingPong, TimelineShortcuts, "Set Layer's Pre Behaviour to PingPong", "Set Layer's Pre Behaviour to PingPong", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_CMD( SetPostBehaviourNone, TimelineShortcuts, "Set Layer's Post Behaviour to None", "Set Layer's Post Behaviour to None", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_CMD( SetPostBehaviourHold, TimelineShortcuts, "Set Layer's Post Behaviour to Hold", "Set Layer's Post Behaviour to Hold", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_CMD( SetPostBehaviourLoop, TimelineShortcuts, "Set Layer's Post Behaviour to Loop", "Set Layer's Post Behaviour to Loop", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_CMD( SetPostBehaviourPingPong, TimelineShortcuts, "Set Layer's Post Behaviour to PingPong", "Set Layer's Post Behaviour to PingPong", EUserInterfaceActionType::RadioButton, FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE

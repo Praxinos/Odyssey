@@ -207,8 +207,19 @@ UOdysseyAnimationLayerImageVector::GetImageRenderingComposition(IOdysseyImageRen
         idComposition.Append(mLightTable->GetImageRenderingComposition(iRenderType, iFrameIndex));
     }
 
-    int celFrameIndex = mCellsContainer->GetCellFrameAtFrame(iFrameIndex);
-    TSharedPtr<FOdysseyAnimationCell> cell = mCellsContainer->GetCellAtFrame(iFrameIndex);
+    int frame = iFrameIndex;
+    FInt32Range frameRange = GetFrameRange();
+    if (iFrameIndex < frameRange.GetLowerBoundValue())
+    {
+        frame = GetPreBehaviourFrame(PreBehaviour, iFrameIndex);
+    }
+    else if (iFrameIndex > frameRange.GetUpperBoundValue())
+    {
+        frame = GetPostBehaviourFrame(PostBehaviour, iFrameIndex);
+    }
+
+    int celFrameIndex = mCellsContainer->GetCellFrameAtFrame(frame);
+    TSharedPtr<FOdysseyAnimationCell> cell = mCellsContainer->GetCellAtFrame(frame);
     if (cell)
     {
         idComposition.Append(cell->GetImageRenderingComposition(iRenderType, celFrameIndex));

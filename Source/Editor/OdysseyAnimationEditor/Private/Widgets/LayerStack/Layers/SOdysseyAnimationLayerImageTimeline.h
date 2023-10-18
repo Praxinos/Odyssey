@@ -55,6 +55,17 @@ private:
     void BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
     void MapActions(TSharedPtr<FUICommandList> iCommandList);
 
+    void BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
+    void BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
+
+    void SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
+    bool IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
+    bool CanSetPostBehaviour() const;
+
+    void SetPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
+    bool IsPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
+    bool CanSetPreBehaviour() const;
+
 protected:
     FOdysseyAnimationEditorExtension* mExtension;
     UOdysseyAnimationLayer* mLayer;

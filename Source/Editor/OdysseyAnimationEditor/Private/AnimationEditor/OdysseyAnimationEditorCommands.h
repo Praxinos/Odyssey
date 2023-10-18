@@ -69,4 +69,13 @@ public:
 
     /** Action for deleting the current layer */
     TSharedPtr<FUICommandInfo> ChangeLayerOpacity100;
+    
+    TSharedPtr<FUICommandInfo> SetPreBehaviourNone;
+    TSharedPtr<FUICommandInfo> SetPreBehaviourHold;
+    TSharedPtr<FUICommandInfo> SetPreBehaviourLoop;
+    TSharedPtr<FUICommandInfo> SetPreBehaviourPingPong;
+    TSharedPtr<FUICommandInfo> SetPostBehaviourNone;
+    TSharedPtr<FUICommandInfo> SetPostBehaviourHold;
+    TSharedPtr<FUICommandInfo> SetPostBehaviourLoop;
+    TSharedPtr<FUICommandInfo> SetPostBehaviourPingPong;
 };

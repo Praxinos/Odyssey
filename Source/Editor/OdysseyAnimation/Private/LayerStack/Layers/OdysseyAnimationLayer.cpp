@@ -64,6 +64,29 @@ UOdysseyAnimationLayer::IsActivatedChanged()
     parentLayer->ImageRenderingCompositionChanged();
 }
 
+void
+UOdysseyAnimationLayer::PreBehaviourChanged()
+{
+    ImageRenderingCompositionChanged();
+}
+
+void
+UOdysseyAnimationLayer::PostBehaviourChanged()
+{
+    ImageRenderingCompositionChanged();
+}
+
+void
+UOdysseyAnimationLayer::PropertyChanged(const FName& iPropertyName)
+{
+    Super::PropertyChanged(iPropertyName);
+
+    if (iPropertyName == "PreBehaviour")
+        PreBehaviourChanged();
+    if (iPropertyName == "PostBehaviour")
+        PostBehaviourChanged();
+}
+
 TSharedPtr<IOdysseyImageRenderer>
 UOdysseyAnimationLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
@@ -99,6 +122,92 @@ UOdysseyAnimationLayer::GetImageRenderingRects() const
         return {};
 
     return layerStack->GetImageRenderingRects();
+}
+
+int
+UOdysseyAnimationLayer::GetPreBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const
+{
+    FInt32Range frameRange = GetFrameRange();
+
+    //PreBehaviour
+    int frame = iFrame;
+    switch(iBehaviour)
+    {
+        default:
+        case EOdysseyAnimationLayerImagePostBehaviour::None:
+        break;
+
+        case EOdysseyAnimationLayerImagePostBehaviour::Hold:
+        {
+            frame = frameRange.GetLowerBoundValue();
+        }
+        break;
+        case EOdysseyAnimationLayerImagePostBehaviour::Loop:
+        {
+            int offsetFromStart = frameRange.GetLowerBoundValue() - iFrame;
+            int layerLength = frameRange.GetUpperBoundValue() - frameRange.GetLowerBoundValue() + 1;
+            frame = frameRange.GetUpperBoundValue() - ((offsetFromStart - 1) % layerLength);
+        }
+        break;
+        case EOdysseyAnimationLayerImagePostBehaviour::PingPong:
+        {
+            int offsetFromStart = frameRange.GetLowerBoundValue() - iFrame;
+            int layerLength = frameRange.GetUpperBoundValue() - frameRange.GetLowerBoundValue() + 1;
+
+            int offset = ((offsetFromStart - 1) % (layerLength - 1)) + 1;
+            int forwardFrame = frameRange.GetLowerBoundValue() + offset;
+            int backwardFrame = frameRange.GetUpperBoundValue() - offset;
+
+            int direction = layerLength > 0 ? ((offsetFromStart - 1) / (layerLength - 1)) % 2 : 0;
+            frame = direction == 0 ? forwardFrame : backwardFrame;
+        }
+        break;
+    }
+
+    return frame;
+}
+
+int
+UOdysseyAnimationLayer::GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const
+{
+    //PreBehaviour
+    FInt32Range frameRange = GetFrameRange();
+
+    int frame = iFrame;
+    switch(iBehaviour)
+    {
+        default:
+        case EOdysseyAnimationLayerImagePostBehaviour::None:
+        break;
+
+        case EOdysseyAnimationLayerImagePostBehaviour::Hold:
+        {
+            frame = frameRange.GetUpperBoundValue();
+        }
+        break;
+        case EOdysseyAnimationLayerImagePostBehaviour::Loop:
+        {
+            int offsetFromEnd = iFrame - frameRange.GetUpperBoundValue();
+            int layerLength = frameRange.GetUpperBoundValue() - frameRange.GetLowerBoundValue() + 1;
+            frame = frameRange.GetLowerBoundValue() + (offsetFromEnd - 1) % layerLength;
+        }
+        break;
+        case EOdysseyAnimationLayerImagePostBehaviour::PingPong:
+        {
+            int offsetFromEnd = iFrame - frameRange.GetUpperBoundValue();
+            int layerLength = frameRange.GetUpperBoundValue() - frameRange.GetLowerBoundValue() + 1;
+
+            int offset = ((offsetFromEnd - 1) % (layerLength - 1)) + 1;
+            int forwardFrame = frameRange.GetLowerBoundValue() + offset;
+            int backwardFrame = frameRange.GetUpperBoundValue() - offset;
+
+            int direction = layerLength > 0 ? ((offsetFromEnd - 1) / (layerLength - 1)) % 2 : 0;
+            frame = direction == 0 ? backwardFrame : forwardFrame;
+        }
+        break;
+    }
+
+    return frame;
 }
 
 #undef LOCTEXT_NAMESPACE

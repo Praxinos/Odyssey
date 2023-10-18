@@ -13,10 +13,7 @@ FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const U
     , mAnimationRenderer(nullptr)
     , mBlock(nullptr)
 {
-    if ( GetRenderType() != IOdysseyImageRenderer::eRenderType::Render )
-    {
-        mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(iAnimation, iFrameIndex, iRenderType, iDefaultRects);
-    }
+    mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(iAnimation, iFrameIndex, iRenderType, iDefaultRects);
 }
 
 void
@@ -27,7 +24,11 @@ FOdysseyAnimationProxyImageRenderer::Init()
         mAnimationRenderer->Init();
 
     if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Render )
+    {
         mBlock = mProxy->GetBlock(mFrameIndex);
+        if (!mBlock)
+            mAnimationRenderer->Init();
+    }
 
 }
 
@@ -38,11 +39,12 @@ FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, :
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
         return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 
-    if ( !mBlock )
-        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory
+    /* if ( !mBlock )
+        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory */
 
     if ( !mBlock )
-        return iWaitList;
+        return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+        //return iWaitList;
 
     return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
@@ -54,11 +56,11 @@ FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, co
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render)
         return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 
-    if ( !mBlock )
-        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory
+    /* if ( !mBlock )
+        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory */
 
     if ( !mBlock )
-        return iWaitList;
+        return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 
     return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
 }
