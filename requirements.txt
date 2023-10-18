@@ -1,0 +1,4 @@
+cffi==1.16.0
+colorama==0.4.6
+pycparser==2.21
+pygit2==1.13.1
