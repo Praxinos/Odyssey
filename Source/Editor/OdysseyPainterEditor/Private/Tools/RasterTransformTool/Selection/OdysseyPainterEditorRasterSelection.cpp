@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterSelection.h"
+#include "GeomTools.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterSelection"
 
@@ -22,7 +23,7 @@ UOdysseyPainterEditorRasterSelection::~UOdysseyPainterEditorRasterSelection()
 }
 
 UOdysseyPainterEditorRasterSelection::UOdysseyPainterEditorRasterSelection():
-    mSelectionAreaSet(false),
+    mIsSelectionAreaSet(false),
     mSelectionArea(nullptr),
     mPaintEngine(),
     mSelectionBlock(nullptr)
@@ -79,6 +80,24 @@ void UOdysseyPainterEditorRasterSelection::Unload()
     ClearSelection();
 }
 
+bool UOdysseyPainterEditorRasterSelection::IsSelectionAreaSet()
+{
+    return mIsSelectionAreaSet;
+}
+
+bool UOdysseyPainterEditorRasterSelection::IsInSelectionArea(FVector2D iPoint)
+{
+    if( !mSelectionArea || mSelectionArea->GetPoints().Num() == 0 )
+        return false;
+
+    return FGeomTools2D::IsPointInPolygon(iPoint, mSelectionArea->GetPoints()); 
+}
+
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelection::GetSelectionBlock()
+{
+    return mSelectionBlock;
+}
+
 ::ULIS::FRectI UOdysseyPainterEditorRasterSelection::GetSelectionAreaBoundingRect()
 {
     if (mSelectionArea)
@@ -110,7 +129,7 @@ bool UOdysseyPainterEditorRasterSelection::IsSelectionValid(::ULIS::FRectI iSele
 void UOdysseyPainterEditorRasterSelection::ClearSelection()
 {
     mHUD->EmptyHUDElements();
-    mSelectionAreaSet = false;
+    mIsSelectionAreaSet = false;
     if( mSelectionBlock )
     {
         mSelectionBlock.Reset();

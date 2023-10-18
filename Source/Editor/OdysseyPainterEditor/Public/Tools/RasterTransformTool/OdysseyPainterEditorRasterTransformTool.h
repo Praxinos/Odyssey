@@ -59,23 +59,22 @@ public:
     virtual void Unload() override;
 
 private:
+    void CreateTransformAreaFromSelection();
+    EOdysseyTransformCapture DetectCaptureMode( FVector2D iPoint );
     void ConstrainToRectangle( FVector2D iPosition );
     void ConstrainToParallelogram(FVector2D iPosition);
 
-    void CreateTransformBlockFromReferenceBlock(); //Get a temporary block for the transformation, so we don't lose quality when transforming our reference block
+    void CreateTransformBlockFromSelectionBlock(); //Get a temporary block for the transformation, so we don't lose quality when transforming our reference block
     ::ULIS::FRectI GetTransformAreaBoundingRect();
 
     TArray<::ULIS::FRectI> GetTransformAreaAsScanlines(); //Returns rectangles with height of 1 that cover the entire transform area. Useful for freehand selection
     
     void BlendTransformAreaToPaintBlock();
 
-    void ClearBlock( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock );
-
-    bool IsSelectionValid(::ULIS::FRectI iSelectionArea); //Checks if the selection has a relevant position in the canvas. ULIS needs it to determine if their operations make sense.
-
     void CommitTransform();
     void AbortTransform();
     void ClearTransform(); //Resets the tool and its HUD
+    void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
 public:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
@@ -85,7 +84,6 @@ private:
     UOdysseyPainterEditorRasterSelection* mSelection;
     FOdysseyPaintEngine mPaintEngine;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mReferenceBlock;
 
     FOdysseyHUDPolygon* mTransformArea;
     bool mTransformAreaSet;

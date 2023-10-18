@@ -37,15 +37,20 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
+    bool IsSelectionAreaSet();
+    bool IsInSelectionArea( FVector2D iPoint );
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetSelectionBlock();
+    ::ULIS::FRectI GetSelectionAreaBoundingRect();
+
+    void ClearSelection();
 
 protected:
-    ::ULIS::FRectI GetSelectionAreaBoundingRect();
     bool IsSelectionValid(::ULIS::FRectI iSelectionArea);
-    void ClearSelection();
     void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
 protected:
-    bool mSelectionAreaSet;
+    bool mIsSelectionAreaSet;
     FOdysseyHUDPolygon* mSelectionArea;
     FOdysseyPaintEngine mPaintEngine;
 

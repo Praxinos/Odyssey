@@ -18,7 +18,7 @@ UOdysseyPainterEditorRasterRectangleSelection::UOdysseyPainterEditorRasterRectan
 
 bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (!mSelectionAreaSet) //Creating a zone for the selection
+    if (!mIsSelectionAreaSet) //Creating a zone for the selection
     {
         TArray<FVector2D> areaPoints;
         for (int i = 0; i < 4; i++)
@@ -41,13 +41,13 @@ void UOdysseyPainterEditorRasterRectangleSelection::OnMouseHover(const FOdysseyP
 
 void UOdysseyPainterEditorRasterRectangleSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if (!mSelectionAreaSet)
+    if (!mIsSelectionAreaSet)
         ConstrainSelectionToRectangle(FVector2D(iPointInTexture.x, iPointInTexture.y));
 }
 
 bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (!mSelectionAreaSet)
+    if (!mIsSelectionAreaSet)
     {
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
         if (mediaRasters.Num() <= 0)
@@ -87,7 +87,7 @@ bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseUp(const FOdysseyPoin
 
         ctx.Finish();
 
-        mSelectionAreaSet = true;
+        mIsSelectionAreaSet = true;
         return true;
     }
 
