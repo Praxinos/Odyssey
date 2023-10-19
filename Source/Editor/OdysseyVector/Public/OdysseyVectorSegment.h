@@ -11,6 +11,17 @@
 class FOdysseyVectorObject;
 class FOdysseyVectorPath;
 
+typedef struct _FPolygon {
+    ::ULIS::FVec2D quadVertex[4];
+    double quadU[4];
+    double quadV[4];
+    ::ULIS::FVec2D lineVertex[2];
+    ::ULIS::FVec2D lineVertexInParent[2];
+    double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;
+    double fromT;
+    double toT;
+} FPolygon;
+
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 {
     private:
@@ -124,6 +135,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         void AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex );
 
        /**
+         * @brief Get the number of polygons in cache.
+         * @return the number of polygons in cache.
+         */
+        uint32 GetPolygonCount();
+
+       /**
+         * @brief Get the polygons in cache.
+         * @return a reference to the array of polygons.
+         */
+        std::vector<FPolygon>& GetPolygonCache();
+
+       /**
          * @brief Get the segment's bounding box.
          * @return a reference to the segment's bounding box.
          */
@@ -155,8 +178,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         virtual bool HasBaseClass( uint32 iBaseClassID );
         virtual bool Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData ) = 0;
         virtual bool Pick( double iX, double iY, double iRadius ) = 0;
+        ::ULIS::FVec2D GetPolygonCacheStartPointInParent();
+        ::ULIS::FVec2D GetPolygonCacheEndPointInParent();
 
     protected:
+        void DrawPolygonCache();
+
+    protected:
+        std::vector<FPolygon> mPolygonCache;
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
@@ -164,4 +193,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         bool mIsPaintingReady;
         uint32 mID;
         uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
+        double mBrushStartT;
+        double mBrushEndT;
 };

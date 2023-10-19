@@ -680,18 +680,6 @@ IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex
     }
 }
 
-uint32
-FOdysseyVectorSegmentCubic::GetPolygonCount()
-{
-    return mPolygonCache.size();
-}
-
-std::vector<FPolygon>&
- FOdysseyVectorSegmentCubic::GetPolygonCache()
-{
-    return mPolygonCache;
-}
-
 void
 FOdysseyVectorSegmentCubic::DrawStructure( FOdysseyVectorObject* iParentObject, bool iWorld )
 {
@@ -740,39 +728,6 @@ FOdysseyVectorSegmentCubic::MakeBLPath()
 
         mBLPath.close();
     }
-}
-
-void
-FOdysseyVectorSegmentCubic::DrawPolygonCache()
-{
-    BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
-    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
-
-    blctx->setStrokeWidth( 1.0f );
-
-    for ( int i = 0; i < mPolygonCache.size(); i++ )
-    {
-        // the stroke thing is very slow and slows the all thing, we have to find something better
-        //iBLContext.strokePolygon( mPolygonCache[i].vertex, 4 );
-        BLPoint pt[4] = { { mPolygonCache[i].quadVertex[0].x, mPolygonCache[i].quadVertex[0].y }
-                        , { mPolygonCache[i].quadVertex[1].x, mPolygonCache[i].quadVertex[1].y }
-                        , { mPolygonCache[i].quadVertex[2].x, mPolygonCache[i].quadVertex[2].y }
-                        , { mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y } };
-
-        blctx->fillPolygon( pt, 4 );
-    }
-
-    // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
-    // line stroking is done in world coordinates because we need a 1 pixel width
-    blctx->save();
-    blctx->resetMatrix();
-    blctx->setStrokeWidth( 1.0f );
-    for ( int i = 1; i < mPolygonCache.size(); i++ )
-    {
-        blctx->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].quadVertex[0].x, mPolygonCache[i].quadVertex[0].y )
-                         , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
-    }
-    blctx->restore();
 }
 
 void
@@ -1339,34 +1294,6 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurves()
             RoundOffsetFragment( fragment1, prevFragment1, nextFragment1, prevCombinedVector1, nextCombinedVector1 );
         }
     }
-}
-
-::ULIS::FVec2D
-FOdysseyVectorSegmentCubic::GetPolygonCacheStartPointInParent()
-{
-    if( mPolygonCache.size() )
-    {
-        uint32 index = 0;
-
-        return ::ULIS::FVec2D( mPolygonCache[index].lineVertexInParent[0].x
-                             , mPolygonCache[index].lineVertexInParent[0].y );
-    }
-
-    return ::ULIS::FVec2D( 0.0f, 0.0f );
-}
-
-::ULIS::FVec2D
-FOdysseyVectorSegmentCubic::GetPolygonCacheEndPointInParent()
-{
-    if( mPolygonCache.size() )
-    {
-        uint32 index = mPolygonCache.size() - 1;
-
-        return ::ULIS::FVec2D( mPolygonCache[index].lineVertexInParent[1].x
-                             , mPolygonCache[index].lineVertexInParent[1].y );
-    }
-
-    return ::ULIS::FVec2D( 0.0f, 0.0f );
 }
 
 void

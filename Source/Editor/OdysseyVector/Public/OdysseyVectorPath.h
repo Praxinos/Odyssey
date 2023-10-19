@@ -53,6 +53,18 @@ constexpr enum ePointSelectionFlags operator ^( const enum ePointSelectionFlags 
     return (enum ePointSelectionFlags)(uint32(a) ^ uint32(b));
 }
 
+struct FVertexChain
+{
+    FOdysseyVectorVertex* vertex;
+    uint32 segmentCount;
+
+    FVertexChain( FOdysseyVectorVertex* iVertex, uint32 iSegmentCount )
+    {
+        vertex = iVertex;
+        segmentCount = iSegmentCount;
+    }
+};
+
 USTRUCT()
 struct FPathParam
 {
@@ -347,9 +359,24 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags );
         void UpdateBBox();
         void Fill();
-
+        uint32 ExploreVertexChain( FOdysseyVectorVertex* iVertex );
+        void FindVertexChains();
+        void DrawVertexChain( const FVertexChain& iVertexChain, uint64 iDrawingFlags );
+        void DrawTexturedSegment( FOdysseyVectorSegment* iSegment
+                                , int8*  iScreenPixels
+                                , uint32 iScreenWidth
+                                , uint32 iScreenHeight
+                                , uint32 iScreenBitsPerPixel
+                                , int8*  iTexturePixels
+                                , uint32 iTextureWidth
+                                , uint32 iTextureHeight
+                                , uint32 iTextureBitsPerPixel
+                                , double iStartU
+                                , double iEndU
+                                , uint64 iDrawingFlags );
 
     protected :
+        std::vector<FVertexChain> mVertexChainArray;
         std::list<FOdysseyVectorVertex*> mVertexList;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSegment*> mInvalidatedSegmentList;

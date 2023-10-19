@@ -21,6 +21,7 @@ FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> S
     mBrushIcon.Get()->ImageSize.Y = 16;
     //mBrushIcon->DrawAs = ImageType;
 
+     // the hell with this syntax....
     TAttribute<const FSlateBrush*> BrushAttribute = TAttribute<const FSlateBrush*>::Create(TAttribute<const FSlateBrush*>::FGetter::CreateRaw( this, &FOdysseyVectorBrushCustomization::UpdateButton, StructPropertyHandle ));
 
     mBrushButton = SNew(SButton)
@@ -206,10 +207,24 @@ FOdysseyVectorBrushCustomization::CustomizeChildren( TSharedRef<IPropertyHandle>
 void
 FOdysseyVectorBrushCustomization::Register()
 {
-    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    PropertyModule.RegisterCustomPropertyTypeLayout(FOdysseyVectorBrush::StaticStruct()->GetFName(), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FOdysseyVectorBrushCustomization::MakeInstance));
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+    PropertyModule.RegisterCustomPropertyTypeLayout( FOdysseyVectorBrush::StaticStruct()->GetFName(), FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FOdysseyVectorBrushCustomization::MakeInstance ) );
 
     PropertyModule.NotifyCustomizationModuleChanged();
+}
+
+//static
+void
+FOdysseyVectorBrushCustomization::Unregister()
+{
+	if( FModuleManager::Get().IsModuleLoaded( "PropertyEditor" ) )
+	{
+		// unregister properties when the module is shutdown
+		FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		PropertyModule.UnregisterCustomPropertyTypeLayout(FOdysseyVectorBrush::StaticStruct()->GetFName());
+
+		PropertyModule.NotifyCustomizationModuleChanged();
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -298,6 +298,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                         , double iDeltaRadius
                         , bool iAlterAllAlong );
         FOdysseyVectorHandleSegment* GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment );
+        void SetChained( bool iChained );
+        bool IsChained();
 
     protected:
         /**
@@ -319,6 +321,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorVertex* mNearestVertex;
 
     private :
+        static const uint32 CHAINED        = ( 1 << 1 );
         static const uint32 VISITED        = ( 1 << 2 );
         static const uint32 SELECTED       = ( 1 << 3 );
         static const uint32 HANDLE_ALIGNED = ( 1 << 4 );

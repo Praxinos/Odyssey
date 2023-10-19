@@ -8,11 +8,86 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1 )
     : FOdysseyVectorLink( iVertex0, iVertex1 )
-    , mPath ( iPath )
+    , mPath( iPath )
     , mIsInvalidated( false )
     , mIsPaintingReady( false )
-    , mPaintingCode ( 0 )
+    , mPaintingCode( 0 )
+    , mBrushStartT( 0.0f )
+    , mBrushEndT( 0.0f )
 {
+}
+
+uint32
+FOdysseyVectorSegment::GetPolygonCount()
+{
+    return mPolygonCache.size();
+}
+
+std::vector<FPolygon>&
+ FOdysseyVectorSegment::GetPolygonCache()
+{
+    return mPolygonCache;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorSegment::GetPolygonCacheStartPointInParent()
+{
+    if( mPolygonCache.size() )
+    {
+        uint32 index = 0;
+
+        return ::ULIS::FVec2D( mPolygonCache[index].lineVertexInParent[0].x
+                             , mPolygonCache[index].lineVertexInParent[0].y );
+    }
+
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
+::ULIS::FVec2D
+FOdysseyVectorSegment::GetPolygonCacheEndPointInParent()
+{
+    if( mPolygonCache.size() )
+    {
+        uint32 index = mPolygonCache.size() - 1;
+
+        return ::ULIS::FVec2D( mPolygonCache[index].lineVertexInParent[1].x
+                             , mPolygonCache[index].lineVertexInParent[1].y );
+    }
+
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
+void
+FOdysseyVectorSegment::DrawPolygonCache()
+{
+    BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
+    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+
+    blctx->setStrokeWidth( 1.0f );
+
+    for ( int i = 0; i < mPolygonCache.size(); i++ )
+    {
+        // the stroke thing is very slow and slows the all thing, we have to find something better
+        //iBLContext.strokePolygon( mPolygonCache[i].vertex, 4 );
+        BLPoint pt[4] = { { mPolygonCache[i].quadVertex[0].x, mPolygonCache[i].quadVertex[0].y }
+                        , { mPolygonCache[i].quadVertex[1].x, mPolygonCache[i].quadVertex[1].y }
+                        , { mPolygonCache[i].quadVertex[2].x, mPolygonCache[i].quadVertex[2].y }
+                        , { mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y } };
+
+        blctx->fillPolygon( pt, 4 );
+    }
+
+    // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
+    // line stroking is done in world coordinates because we need a 1 pixel width
+    blctx->save();
+    blctx->resetMatrix();
+    blctx->setStrokeWidth( 1.0f );
+    for ( int i = 1; i < mPolygonCache.size(); i++ )
+    {
+        blctx->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].quadVertex[0].x, mPolygonCache[i].quadVertex[0].y )
+                         , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
+    }
+    blctx->restore();
 }
 
 FOdysseyVectorHandleSegment*

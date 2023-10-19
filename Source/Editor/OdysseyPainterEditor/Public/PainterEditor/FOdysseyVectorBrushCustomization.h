@@ -12,6 +12,7 @@ class FOdysseyVectorBrushCustomization : public IPropertyTypeCustomization
 {
 public:
     static void Register();
+    static void Unregister();
 
     /** Makes a new instance of this detail layout class for a specific detail view requesting it */
     static TSharedRef<IPropertyTypeCustomization> MakeInstance()

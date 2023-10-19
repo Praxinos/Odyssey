@@ -25,6 +25,7 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
 
     mPathParam.Filled = false;
 
+    mVertexChainArray.reserve( 10 );
 /*
     mBrush = new BLImage();
     if( mBrush )
@@ -443,6 +444,8 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
     iSegment->GetVertex(1)->AddSegment( iSegment );
 
     InvalidateSegment( iSegment );
+
+    FindVertexChains();
 }
 
 void
@@ -479,6 +482,8 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
     Invalidate();
+
+    FindVertexChains();
 }
 
 std::list<FOdysseyVectorSegment*>&
@@ -1394,56 +1399,6 @@ FOdysseyVectorPath::Cut( const ::ULIS::FVec2D& iLinePoint0
     }
 }
 
-void
-FOdysseyVectorPath::Fill()
-{
-    FOdysseyVectorVertex *firstVertex = static_cast<FOdysseyVectorVertex*>( GetFirstVertex() );
-
-    if ( firstVertex )
-    {
-        BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-        FColor fillColor = mBackgroundBucket.GetColor();
-        BLRgba32 blFillColor;
-        BLPath path;
-
-        blFillColor.setR( fillColor.R );
-        blFillColor.setG( fillColor.G );
-        blFillColor.setB( fillColor.B );
-        blFillColor.setA( fillColor.A );
-
-        if( mSegmentList.size() == mVertexList.size() )
-        {
-            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(GetFirstSegment());
-            FOdysseyVectorVertex* vertex = firstVertex;
-
-            path.moveTo( firstVertex->GetX(), firstVertex->GetY() );
-
-            do
-            {
-                FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( vertex );
-                FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( segment );
-                ::ULIS::FVec2D& point1 = nextVertex->GetCoords();
-                ::ULIS::FVec2D& handle0 = segment->GetHandle( vertex     )->GetCoords();
-                ::ULIS::FVec2D& handle1 = segment->GetHandle( nextVertex )->GetCoords();
-
-                path.cubicTo( handle0.x
-                            , handle0.y
-                            , handle1.x
-                            , handle1.y
-                            , point1.x
-                            , point1.y );
-
-                vertex = nextVertex;
-                segment = static_cast<FOdysseyVectorSegmentCubic*>(nextSegment);
-            }
-            while( segment && ( vertex != firstVertex ) );
-        }
-
-        blctx->setFillStyle( blFillColor );
-        blctx->fillPath( path );
-    }
-}
-
 // only used internally by FOdysseyVectorPath::DeletePoint(). Declare in CPP file
 static FOdysseyVectorVertex*
 GetStitchingVertex( FOdysseyVectorVertex* iVertex
@@ -1644,31 +1599,113 @@ FOdysseyVectorPath::AlterRadius( double iDeltaRadius )
 }
 
 void
-FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
+FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
+                                       , int8*  iScreenPixels
+                                       , uint32 iScreenWidth
+                                       , uint32 iScreenHeight
+                                       , uint32 iScreenBitsPerPixel
+                                       , int8*  iTexturePixels
+                                       , uint32 iTextureWidth
+                                       , uint32 iTextureHeight
+                                       , uint32 iTextureBitsPerPixel
+                                       , double iStartU
+                                       , double iEndU
+                                       , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
+    std::vector<FPolygon>& polygonCache = iSegment->GetPolygonCache();
+    double difU = iEndU - iStartU;
 
-    // testing brushes
-    BLImage* image = vectorEngine->GetBLImage();
-    BLImageData imageData;
-    //BLImageData brushData;
-
-    image->getData( &imageData );
-    //mBrush->getData( &brushData );
-    //
-
-    if ( mPathParam.Filled )
+    for( int i = 0; i < polygonCache.size(); i++ )
     {
-        // TODO: precompute the filling (build the BLPath )
-        Fill();
-    }
+        FPolygon* poly = &polygonCache[i];
+        BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( poly->quadVertex[0].x, poly->quadVertex[0].y )
+                                , mWorldMatrix.mapPoint( poly->quadVertex[1].x, poly->quadVertex[1].y ) 
+                                , mWorldMatrix.mapPoint( poly->quadVertex[2].x, poly->quadVertex[2].y ) 
+                                , mWorldMatrix.mapPoint( poly->quadVertex[3].x, poly->quadVertex[3].y ) };
+        ::ULIS::FVec2I integerPoint[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                                         , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                                         , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
+                                         , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
+        double quadU[4] = { iStartU + ( poly->quadU[0] * difU )
+                          , iStartU + ( poly->quadU[1] * difU )
+                          , iStartU + ( poly->quadU[2] * difU )
+                          , iStartU + ( poly->quadU[3] * difU ) };
 
+        // should be a static function
+        vectorEngine->DrawQuad( integerPoint
+                              , quadU
+                              , poly->quadV
+                              , mObjectParam.Opacity
+                              , iScreenPixels
+                              , iScreenBitsPerPixel
+                              , iTexturePixels
+                              , iTextureWidth
+                              , iTextureHeight
+                              , iTextureBitsPerPixel );
+    }
+}
+
+void
+FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
+{
+    for( FVertexChain& vertexChain : mVertexChainArray )
+    {
+        DrawVertexChain( vertexChain, iDrawingFlags );
+    }
+}
+
+void
+FOdysseyVectorPath::DrawVertexChain( const FVertexChain& iVertexChain, uint64 iDrawingFlags )
+{
+    FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
     BLContext* blctx = vectorEngine->GetBLContext();
+
     FColor color = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? FColor( 0, 0, 0, 255 )
                                                                                  : mForegroundBucket.GetColor();
     BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A );
+    FOdysseyVectorVertex* currentVertex = iVertexChain.vertex;
+    FOdysseyVectorSegment* currentSegment = currentVertex->GetFirstSegment();
+    uint32 segmentCount = 0;
 
-    if( mSegmentList.size() )
+    if( mBrush.texture )
+    {
+        const FColor* brushData = static_cast<const FColor*>(mBrush.texture->PlatformData->Mips[0].BulkData.LockReadOnly());
+        double startU = 0.0f, stepU = 1.0f / iVertexChain.segmentCount;
+        BLImage* image = vectorEngine->GetBLImage();
+        BLImageData imageData;
+
+        image->getData( &imageData );
+
+        while( segmentCount < iVertexChain.segmentCount )
+        {
+            FOdysseyVectorVertex* nextVertex = currentSegment->GetOtherVertex( currentVertex );
+            FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( currentSegment );
+
+            DrawTexturedSegment( currentSegment
+                                , (int8*)imageData.pixelData
+                                , imageData.size.w
+                                , imageData.size.h
+                                , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                , (int8*) brushData
+                                , mBrush.texture->GetSurfaceWidth()
+                                , mBrush.texture->GetSurfaceHeight()
+                                , 32
+                                , startU
+                                , startU + stepU
+                                , iDrawingFlags );
+
+            startU += stepU;
+
+            currentVertex = nextVertex;
+            currentSegment = nextSegment;
+
+            segmentCount++;
+        }
+
+        mBrush.texture->PlatformData->Mips[0].BulkData.Unlock();
+    }
+    else
     {
         // We fill with stroke color because our curve is made of filled shapes.
         //blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
@@ -1676,58 +1713,18 @@ FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
         blctx->setFillStyle( strokeColor );
         blctx->setStrokeStyle( strokeColor );
 
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        while( segmentCount < iVertexChain.segmentCount )
         {
-            FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            //FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+            FOdysseyVectorVertex* nextVertex = currentSegment->GetOtherVertex( currentVertex );
+            FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( currentSegment );
 
-            if( mBrush.texture == nullptr )
-            {
-                segment->Draw();
-            }
-            else
-            {
-                const FColor* brushData = static_cast<const FColor*>( mBrush.texture->PlatformData->Mips[0].BulkData.LockReadOnly() );
-                std::vector<FPolygon>& polygonCache = segment->GetPolygonCache();
+            currentSegment->Draw();
 
-                for( int i = 0; i < polygonCache.size(); i++ )
-                {
-                    FPolygon* poly = &polygonCache[i];
-                    BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( poly->quadVertex[0].x, poly->quadVertex[0].y )
-                                            , mWorldMatrix.mapPoint( poly->quadVertex[1].x, poly->quadVertex[1].y ) 
-                                            , mWorldMatrix.mapPoint( poly->quadVertex[2].x, poly->quadVertex[2].y ) 
-                                            , mWorldMatrix.mapPoint( poly->quadVertex[3].x, poly->quadVertex[3].y ) };
-                    ::ULIS::FVec2I intPoint[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
-                                                 , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
-                                                 , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
-                                                 , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
+            currentVertex = nextVertex;
+            currentSegment = nextSegment;
 
-                    vectorEngine->DrawQuad( intPoint
-                                          , poly->quadU
-                                          , poly->quadV
-                                          , mObjectParam.Opacity
-                                          , (int8*)imageData.pixelData
-                                          , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                          , (int8*) brushData
-                                          , mBrush.texture->GetSurfaceWidth()
-                                          , mBrush.texture->GetSurfaceHeight()
-                                          , /*( brushData.format == BL_FORMAT_PRGB32 ) ? 32 : 0*/32 );
-                }
-
-                mBrush.texture->PlatformData->Mips[0].BulkData.Unlock();
-            }
+            segmentCount++;
         }
-
-        if( mBrush.texture == nullptr )
-        {
-            for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
-            {
-                FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
-
-                DrawJoint( cubicVertex, iDrawingFlags );
-            }
-        }
-
     }
 }
 
@@ -2126,6 +2123,68 @@ FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSe
         if( segment->Pick( maskRect, (uint8*)maskData.pixelData ) )
         {
             oPickedSegmentArray.push_back( segment );
+        }
+    }
+}
+
+
+
+uint32
+FOdysseyVectorPath::ExploreVertexChain( FOdysseyVectorVertex* iVertex )
+{
+    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
+    uint32 segmentCount = 0;
+
+    iVertex->SetChained( true );
+
+    for( FOdysseyVectorSegment* segment : segmentList )
+    {
+        FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( iVertex );
+
+        if( otherVertex->IsChained() == false )
+        {
+            segmentCount += ( ExploreVertexChain( otherVertex ) + 1 );
+        }
+    }
+
+    return segmentCount;
+}
+
+void
+FOdysseyVectorPath::FindVertexChains()
+{
+    mVertexChainArray.clear();
+
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        vertex->SetChained( false );
+    }
+
+    // first step. Brush vertices at segment end points
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        if( vertex->IsChained() == false )
+        {
+            if( vertex->GetSegmentCount() == 1 )
+            {
+                uint32 segmentCount = ExploreVertexChain( vertex );
+
+                mVertexChainArray.emplace_back( vertex, segmentCount );
+            }
+        }
+    }
+
+    // second step. Brush remaining vertices (belonging to loops for example)
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        if( vertex->IsChained() == false )
+        {
+            if( vertex->GetSegmentCount() == 2 )
+            {
+                uint32 segmentCount = ExploreVertexChain( vertex );
+
+                mVertexChainArray.emplace_back( vertex, segmentCount );
+            }
         }
     }
 }

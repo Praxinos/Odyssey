@@ -497,6 +497,25 @@ FOdysseyVectorVertex::IsSelected()
 }
 
 void
+FOdysseyVectorVertex::SetChained( bool iChained )
+{
+    if( iChained == true )
+    {
+        mFlags |= CHAINED;
+    }
+    else
+    {
+        mFlags &= (~CHAINED);
+    }
+}
+
+bool
+FOdysseyVectorVertex::IsChained()
+{
+    return ( mFlags & CHAINED ) ? true : false;
+}
+
+void
 FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
 {
     ::ULIS::FVec2D handleVector = iHandle->GetCoords() - GetCoords();

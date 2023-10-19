@@ -37,7 +37,6 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterCommands();
     RegisterLevelEditorLayoutExtensions();
 
-    // test
     FOdysseyVectorBrushCustomization::Register();
 }
 
@@ -48,6 +47,8 @@ FOdysseyPainterEditorModule::ShutdownModule()
     UnregisterSettings();
     UnregisterCommands();
     UnregisterLevelEditorLayoutExtensions();
+
+    FOdysseyVectorBrushCustomization::Unregister();
 }
 
 void
