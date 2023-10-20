@@ -3,6 +3,8 @@
 
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterRectangleSelection.h"
+#include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterEllipseSelection.h"
+#include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterFreehandSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDPolygon.h"
 #include "OdysseyBrushTransform.h"
@@ -28,11 +30,10 @@ UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTo
     mSelection(NewObject<UOdysseyPainterEditorRasterRectangleSelection>()),
     mPaintEngine(),
     mTransformedBlock(nullptr),
-    mTransformArea(nullptr),
-    mTransformAreaSet(false),
     mRasterMutator(true),
-    mAreaConstrain(EOdysseyTransformConstrain::Rectangle),
-    mTransformCaptureMode(EOdysseyTransformCapture::NoCapture)
+    mTransformAreaConstrain(EOdysseyTransformConstrain::Rectangle),
+    mTransformCaptureMode(EOdysseyTransformCapture::NoCapture),
+    mTransformArea(nullptr)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.TransformTool32");
     mSelection->AddToRoot();
@@ -46,6 +47,12 @@ UOdysseyPainterEditorRasterTransformTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if (mHUD->OnKeyDown(iPointInTexture, iKey)) //Handling HUD events if needed
+        return true;
+
+    if (mSelection->OnMouseDown(iPointInTexture, iKey))
+        return true;
+
     if( mTransformArea )
     {
         mTransformCaptureMode = DetectCaptureMode( FVector2D( iPointInTexture.x, iPointInTexture.y ));
@@ -53,11 +60,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
         if( mTransformCaptureMode != EOdysseyTransformCapture::NoCapture )
             return true;
     }
-
-    if( mSelection->OnMouseDown( iPointInTexture, iKey ) )
-        return true;
-
-    if( mSelection->IsInSelectionArea( FVector2D( iPointInTexture.x, iPointInTexture.y )))
+    else if( mSelection->IsInSelectionArea( FVector2D( iPointInTexture.x, iPointInTexture.y )))
     {
         mTransformCaptureMode = EOdysseyTransformCapture::Inside;
         mMouseLastReferencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
@@ -65,59 +68,6 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
         CreateTransformBlockFromSelectionBlock();
         return true;
     }
-/*
-    if (!mTransformAreaSet) //Creating a zone for the transform
-    {
-        if( SelectionShape == EOdysseySelectionShape::Rectangle )
-        {
-            TArray<FVector2D> areaPoints;
-            for (int i = 0; i < 4; i++)
-            {
-                areaPoints.Add(FVector2D(iPointInTexture.x, iPointInTexture.y));
-            }
-
-            mTransformArea = new FOdysseyHUDPolygon(FName("TransformArea"), areaPoints);
-            mHUD->AddElement(mTransformArea);
-
-            FOdysseyHUDHandle* handleTopLeft = new FOdysseyHUDHandle(FName("handleTopLeft"), mTransformArea, &(mTransformArea->GetPoints()[0]));
-            FOdysseyHUDHandle* handleTopRight = new FOdysseyHUDHandle(FName("handleTopRight"), mTransformArea, &(mTransformArea->GetPoints()[1]));
-            FOdysseyHUDHandle* handleBottomLeft = new FOdysseyHUDHandle(FName("handleBottomLeft"), mTransformArea, &(mTransformArea->GetPoints()[2]));
-            FOdysseyHUDHandle* handleBottomRight = new FOdysseyHUDHandle(FName("handleBottomRight"), mTransformArea, &(mTransformArea->GetPoints()[3]));
-
-            mTransformArea->AddElement(handleTopLeft);
-            mTransformArea->AddElement(handleTopRight);
-            mTransformArea->AddElement(handleBottomLeft);
-            mTransformArea->AddElement(handleBottomRight);
-
-            mHandles.Add(handleTopLeft);
-            mHandles.Add(handleTopRight);
-            mHandles.Add(handleBottomLeft);
-            mHandles.Add(handleBottomRight);
-        }
-        else if( SelectionShape == EOdysseySelectionShape::FreeHand )
-        {
-            TArray<FVector2D> areaPoints;
-            areaPoints.Add(FVector2D(iPointInTexture.x, iPointInTexture.y));
-            mTransformArea = new FOdysseyHUDPolygon(FName("TransformArea"), areaPoints);
-            mHUD->AddElement(mTransformArea);
-            mAreaConstrain = EOdysseyTransformConstrain::NoConstrain;
-            return true;
-        }
-
-    }*/
-    
-    if( mHUD->OnKeyDown(iPointInTexture, iKey) ) //Handling HUD events if needed
-    {
-        return true;
-    }
-    /*
-    else if( FGeomTools2D::IsPointInPolygon( FVector2D( iPointInTexture.x, iPointInTexture.y ), mTransformArea->GetPoints() ) ) //Handling clicking inside the transform zone (for dragging it)
-    {
-        mTransformCaptureMode = EOdysseyTransformCapture::Inside;
-        mMouseLastReferencePoint = FVector2D( iPointInTexture.x, iPointInTexture.y );
-        return true;
-    }*/
-
 
     return false;
 }
@@ -126,15 +76,15 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint&
 {
     //If is in polygon, change mouse cursor to hand
     //If is in other area, change mouse cursor accordingly
+    mHUD->MouseMove(iPointInTexture);
     mSelection->OnMouseHover( iPointInTexture );
-    mHUD->MouseMove( iPointInTexture );
 }
 
 void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    mSelection->OnMouseDrag(iPointInTexture);
-
     mHUD->CapturedMouseMove(iPointInTexture);
+
+    mSelection->OnMouseDrag(iPointInTexture);
 
     if (mTransformCaptureMode == EOdysseyTransformCapture::Inside)
     {
@@ -148,30 +98,7 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
         return;
     }
 
-    /*
-    if( !mTransformAreaSet )
-    {
-        if (SelectionShape == EOdysseySelectionShape::FreeHand)
-        {
-            mTransformArea->GetPoints().Add(FVector2D(iPointInTexture.x, iPointInTexture.y));
-        }
-    }
-    else
-    {
-        if( mTransformCaptureMode == EOdysseyTransformCapture::Inside )
-        {
-            TArray<FVector2D>& points = mTransformArea->GetPoints();
-            for (int i = 0; i < points.Num(); i++)
-            {
-                points[i] = points[i] - (mMouseLastReferencePoint - FVector2D(iPointInTexture.x, iPointInTexture.y));
-            }
-            mMouseLastReferencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
-            BlendTransformAreaToPaintBlock();
-            return;
-        }
-    }
-
-    switch (mAreaConstrain)
+    switch (mTransformAreaConstrain)
     {
     case EOdysseyTransformConstrain::Rectangle:
         ConstrainToRectangle(FVector2D(iPointInTexture.x, iPointInTexture.y));
@@ -185,188 +112,21 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
         break;
     }
 
-    CreateTransformBlockFromReferenceBlock();
-    BlendTransformAreaToPaintBlock();*/
+    CreateTransformBlockFromSelectionBlock();
+    BlendTransformAreaToPaintBlock();
 }
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
+
+    if( mHUD->OnKeyUp(iPointInTexture, iKey) )
+        return true;
+
     if( mSelection->OnMouseUp( iPointInTexture, iKey ))
         return true;
 
-
-    bool isHandled = mHUD->OnKeyUp( iPointInTexture, iKey );
-    /*
-    mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
-    if (!mTransformAreaSet)
-    {
-        TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
-        if (mediaRasters.Num() <= 0)
-            return isHandled;
-
-        if (mediaRasters[0]->IsLocked())
-            return isHandled;
-
-        TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-        mPaintEngine.RasterBlock(rasterBlock);
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
-
-        if( mAreaConstrain == EOdysseyTransformConstrain::Rectangle )
-        {
-            ::ULIS::eFormat format = rasterBlock->GetFormat();
-            ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
-
-            if (!IsSelectionValid(boundingBox))
-            {
-                AbortTransform();
-                return true;
-            }
-
-            int decalX = FMath::Min( boundingBox.x, 0 );
-            int decalY = FMath::Min( boundingBox.y, 0 );
-
-            mReferenceBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
-            ClearBlock( mReferenceBlock );
-
-            mRasterMutator.SetRasterBlock(rasterBlock);
-            mRasterMutator.EditTilesFromRects(
-                { boundingBox },
-                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                    [&, referenceBlock = mReferenceBlock](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-                    {
-                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-                        ::ULIS::FEvent copyEvent, clearEvent, blendEvent;
-
-                        ctx.Copy(
-                            *iBlock,
-                            *referenceBlock,
-                            boundingBox,
-                            ::ULIS::FVec2I(-decalX, -decalY),
-                            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                            0,
-                            nullptr,
-                            &copyEvent
-                        );
-
-                        ctx.Clear(
-                            *iBlock,
-                            boundingBox & iBlock->Rect(),
-                            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                            1,
-                            &copyEvent,
-                            &clearEvent);
-
-                        ctx.Blend(
-                            *referenceBlock,
-                            *paintBlock,
-                            referenceBlock->Rect(),
-                            ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
-                            ::ULIS::Blend_Normal,
-                            ::ULIS::Alpha_Normal,
-                            1.f,
-                            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                            1,
-                            &clearEvent,
-                            &blendEvent
-                        );
-
-                        return { blendEvent };
-                    }
-                )
-            );
-
-            paintBlock->Dirty();
-            mPaintEngine.Update(FOdysseyBlendParameters());
-        }
-        else if ( mAreaConstrain == EOdysseyTransformConstrain::NoConstrain )
-        {
-            ::ULIS::eFormat format = rasterBlock->GetFormat();
-            ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
-
-            if ( !IsSelectionValid(boundingBox) )
-            {
-                AbortTransform();
-                return true;
-            }
-
-            TArray<::ULIS::FRectI> rectangles = GetTransformAreaAsScanlines();
-
-            mReferenceBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
-            ClearBlock(mReferenceBlock);
-
-            mRasterMutator.SetRasterBlock(rasterBlock);
-            mRasterMutator.EditTilesFromRects(
-                { boundingBox },
-                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                    [&, referenceBlock = mReferenceBlock](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-                    {
-                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-                        ::ULIS::FEvent blendEvent;
-
-                        for( int i = 0; i < rectangles.Num(); i++ )
-                        {
-                            int decalX = FMath::Min(rectangles[i].x, 0);
-                            int decalY = FMath::Min(rectangles[i].y, 0);
-
-                            ctx.Copy(
-                                *iBlock,
-                                *referenceBlock,
-                                rectangles[i],
-                                ::ULIS::FVec2I(-decalX - boundingBox.x + rectangles[i].x, -decalY - boundingBox.y + rectangles[i].y),
-                                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                                0,
-                                nullptr,
-                                nullptr
-                            );
-                        }
-
-                        ctx.Flush();
-
-                        for (int i = 0; i < rectangles.Num(); i++)
-                        {
-                            if( (rectangles[i] & iBlock->Rect()).w > 0 ) //TODO: ULIS wtf... Why do I need to do this test to prevent a crash when I already use the intersection in the clear ?...
-                            {
-                                ctx.Clear(
-                                    *iBlock,
-                                    rectangles[i] & iBlock->Rect(),
-                                    ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                                    0,
-                                    nullptr,
-                                    nullptr);
-                            }
-                        }
-
-                        ctx.Flush();
-
-                        ctx.Blend(
-                            *referenceBlock,
-                            *paintBlock,
-                            referenceBlock->Rect(),
-                            ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
-                            ::ULIS::Blend_Normal,
-                            ::ULIS::Alpha_Normal,
-                            1.f,
-                            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                            0,
-                            nullptr,
-                            &blendEvent
-                        );
-
-                        return { blendEvent };
-                    }
-                )
-            );
-
-            paintBlock->Dirty();
-            mPaintEngine.Update(FOdysseyBlendParameters());
-        }
-        CreateTransformBlockFromReferenceBlock();
-        mTransformAreaSet = true;
-        ConstrainToRectangle(FVector2D(iPointInTexture.x, iPointInTexture.y));
-        return true;
-    }*/
-
-    return isHandled;
+    return false;
 }
 
 bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
@@ -378,7 +138,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
     }
     else if( iKey == EKeys::Escape )
     {
-        AbortTransform();
+        ClearTransform();
         return true;
     }
 
@@ -395,8 +155,41 @@ void UOdysseyPainterEditorRasterTransformTool::Load()
 void UOdysseyPainterEditorRasterTransformTool::Unload()
 {
     mSelection->Unload();
-    AbortTransform();
+    ClearTransform();
     UOdysseyPainterEditorTool::Unload();
+}
+
+void UOdysseyPainterEditorRasterTransformTool::PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(iPropertyChangedEvent);
+
+    if (iPropertyChangedEvent.GetPropertyName() == "SelectionShape")
+    {
+        ClearTransform();
+        mSelection->RemoveFromRoot();
+
+        switch( SelectionShape )
+        {
+            case EOdysseySelectionShape::Rectangle:
+                mSelection = NewObject<UOdysseyPainterEditorRasterRectangleSelection>();
+                mSelection->AddToRoot();
+                mSelection->Init(mHUD, mEditor);
+                break;
+            case EOdysseySelectionShape::FreeHand:
+                mSelection = NewObject<UOdysseyPainterEditorRasterFreehandSelection>();
+                mSelection->AddToRoot();
+                mSelection->Init(mHUD, mEditor);
+                break;
+            case EOdysseySelectionShape::Ellipse:
+                mSelection = NewObject<UOdysseyPainterEditorRasterEllipseSelection>();
+                mSelection->AddToRoot();
+                mSelection->Init(mHUD, mEditor);
+                break;
+            default:
+                break;
+        }
+
+    }
 }
 
 void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection()
@@ -458,19 +251,22 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
             {
                 ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
                 ::ULIS::FEvent blendEvent;
-                
-                if( (boundingBox & iBlock->Rect()).w > 0 && (boundingBox & iBlock->Rect()).h > 0 ) //Berk. ULIS forced me to do that. it crashes otherwise.
-                {
-                    ctx.Clear(
-                        *iBlock,
-                        boundingBox & iBlock->Rect(),
-                        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                        0,
-                        nullptr,
-                        nullptr);
 
-                    ctx.Flush();
-                }
+                ctx.Blend(
+                    *referenceBlock,
+                    *iBlock,
+                    referenceBlock->Rect(),
+                    ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
+                    ::ULIS::Blend_Normal,
+                    ::ULIS::Alpha_Erase,
+                    1.f,
+                    ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                    0,
+                    nullptr,
+                    nullptr
+                );
+
+                ctx.Flush();
 
                 ctx.Blend(
                     *referenceBlock,
@@ -491,8 +287,8 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
         )
     );
 
-     paintBlock->Dirty();
-     mPaintEngine.Update(FOdysseyBlendParameters());
+    paintBlock->Dirty();
+    mPaintEngine.Update(FOdysseyBlendParameters());
 }
 
 
@@ -508,39 +304,6 @@ EOdysseyTransformCapture UOdysseyPainterEditorRasterTransformTool::DetectCapture
 
 void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iPosition)
 {
-    if( mTransformAreaSet && mTransformArea->GetPoints().Num() != 4 )
-    {
-        ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
-        mEditor->HUDSystem()->ClearHUDSurface();
-        mHandles.Empty();
-        mHUD->EmptyHUDElements();
-
-        TArray<FVector2D> areaPoints;
-        mTransformArea = new FOdysseyHUDPolygon(FName("TransformArea"), areaPoints);
-        mHUD->AddElement(mTransformArea);
-        mTransformArea->GetPoints().Add( FVector2D( boundingBox.x, boundingBox.y ));
-        mTransformArea->GetPoints().Add( FVector2D( boundingBox.x + boundingBox.w, boundingBox.y ));
-        mTransformArea->GetPoints().Add( FVector2D( boundingBox.x + boundingBox.w, boundingBox.y + boundingBox.h ));
-        mTransformArea->GetPoints().Add( FVector2D( boundingBox.x , boundingBox.y + boundingBox.h));
-
-        FOdysseyHUDHandle* handleTopLeft = new FOdysseyHUDHandle(FName("handleTopLeft"), mTransformArea, &(mTransformArea->GetPoints()[0]));
-        FOdysseyHUDHandle* handleTopRight = new FOdysseyHUDHandle(FName("handleTopRight"), mTransformArea, &(mTransformArea->GetPoints()[1]));
-        FOdysseyHUDHandle* handleBottomRight = new FOdysseyHUDHandle(FName("handleBottomRight"), mTransformArea, &(mTransformArea->GetPoints()[2]));
-        FOdysseyHUDHandle* handleBottomLeft = new FOdysseyHUDHandle(FName("handleBottomLeft"), mTransformArea, &(mTransformArea->GetPoints()[3]));
-
-        mTransformArea->AddElement(handleTopLeft);
-        mTransformArea->AddElement(handleTopRight);
-        mTransformArea->AddElement(handleBottomRight);
-        mTransformArea->AddElement(handleBottomLeft);
-
-        mHandles.Add(handleTopLeft);
-        mHandles.Add(handleTopRight);
-        mHandles.Add(handleBottomRight);
-        mHandles.Add(handleBottomLeft);
-        mAreaConstrain = EOdysseyTransformConstrain::Rectangle;
-        return;
-    }
-
     int next;
     int opposite;
     int previous;
@@ -623,67 +386,6 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromSelection
     return ::ULIS::FRectI::FromXYWH( 0,0,0,0 );
 }
 
-TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterTransformTool::GetTransformAreaAsScanlines()
-{
-    TArray<::ULIS::FRectI> rectangles;
-    ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
-    int maxX = boundingBox.x + boundingBox.w;
-    int maxY = boundingBox.y + boundingBox.h;
-    int minX = boundingBox.x;
-    int minY = boundingBox.y;
-
-    TArray<FVector2D>& points = mTransformArea->GetPoints();
-
-    for (int y = minY; y <= maxY; y++)
-    {
-        std::vector< int > nodesX;
-        int j = int(points.Num() - 1);
-
-        for (int i = 0; i < points.Num(); i++)
-        {
-            if ((points[i].Y < y && points[j].Y >= y) || (points[j].Y < y && points[i].Y >= y))
-            {
-                nodesX.push_back(int(points[i].X + double(y - points[i].Y) / double(points[j].Y - points[i].Y) * (points[j].X - points[i].X)));
-            }
-            j = i;
-        }
-
-        int i = 0;
-        int size = int(nodesX.size() - 1);
-        while (i < size)
-        {
-            if (nodesX[i] > nodesX[i + 1])
-            {
-                int temp = nodesX[i];
-                nodesX[i] = nodesX[i + 1];
-                nodesX[i + 1] = temp;
-                if (i > 0)
-                    i--;
-            }
-            else
-            {
-                i++;
-            }
-        }
-
-        for (i = 0; i < nodesX.size(); i += 2)
-        {
-            if (nodesX[i] > maxX) break;
-            if (nodesX[i + 1] > minX)
-            {
-                if (nodesX[i] < minX)
-                    nodesX[i] = minX;
-                if (nodesX[i + 1] > maxX)
-                    nodesX[i + 1] = maxX;
-
-                rectangles.Add( ::ULIS::FRectI::FromXYWH(nodesX[i], y, nodesX[i + 1] - nodesX[i], 1) );
-            }
-        }
-    }
-
-    return rectangles;
-}
-
 void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
 {
     if( mTransformArea )
@@ -741,7 +443,7 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
     ClearTransform();
 }
 
-void UOdysseyPainterEditorRasterTransformTool::AbortTransform()
+void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
 {
     if (mRasterMutator.GetRasterBlock() != nullptr)
     {
@@ -749,11 +451,6 @@ void UOdysseyPainterEditorRasterTransformTool::AbortTransform()
         mRasterMutator.Abort();
         mRasterMutator.SetRasterBlock(nullptr);
     }
-    ClearTransform();
-}
-
-void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
-{
     if (mTransformedBlock)
     {
         mTransformedBlock.Reset();
@@ -761,9 +458,8 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
     }
     mHandles.Empty();
     mHUD->EmptyHUDElements();
-    mTransformAreaSet = false;
     mTransformArea = nullptr;
-    mAreaConstrain = EOdysseyTransformConstrain::Rectangle;
+    mTransformAreaConstrain = EOdysseyTransformConstrain::Rectangle;
     mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
     mEditor->HUDSystem()->ClearHUDSurface();
     mSelection->ClearSelection();

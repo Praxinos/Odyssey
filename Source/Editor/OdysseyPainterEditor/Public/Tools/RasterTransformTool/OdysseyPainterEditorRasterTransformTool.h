@@ -58,13 +58,15 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
+
 private:
     void CreateTransformAreaFromSelection();
     EOdysseyTransformCapture DetectCaptureMode( FVector2D iPoint );
     void ConstrainToRectangle( FVector2D iPosition );
     void ConstrainToParallelogram(FVector2D iPosition);
 
-    void CreateTransformBlockFromSelectionBlock(); //Get a temporary block for the transformation, so we don't lose quality when transforming our reference block
+    void CreateTransformBlockFromSelectionBlock();
     ::ULIS::FRectI GetTransformAreaBoundingRect();
 
     TArray<::ULIS::FRectI> GetTransformAreaAsScanlines(); //Returns rectangles with height of 1 that cover the entire transform area. Useful for freehand selection
@@ -72,8 +74,7 @@ private:
     void BlendTransformAreaToPaintBlock();
 
     void CommitTransform();
-    void AbortTransform();
-    void ClearTransform(); //Resets the tool and its HUD
+    void ClearTransform();
     void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
 public:
@@ -82,18 +83,15 @@ public:
 
 private: 
     UOdysseyPainterEditorRasterSelection* mSelection;
+
     FOdysseyPaintEngine mPaintEngine;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
-
-    FOdysseyHUDPolygon* mTransformArea;
-    bool mTransformAreaSet;
-    TArray<FOdysseyHUDHandle*> mHandles;
-
     FOdysseyRasterBlockMutator mRasterMutator;
 
-    EOdysseyTransformConstrain mAreaConstrain;
+    EOdysseyTransformConstrain mTransformAreaConstrain;
     EOdysseyTransformCapture mTransformCaptureMode;
+    FOdysseyHUDPolygon* mTransformArea;
+    TArray<FOdysseyHUDHandle*> mHandles;
 
     FVector2D mMouseLastReferencePoint;
-
 };

@@ -21,7 +21,14 @@ public:
     UOdysseyPainterEditorRasterFreehandSelection();
 
 
-private:
+public:
+    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
+    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual bool OnKeyUp(const FKey& iKey);
 
+private:
+    TArray<::ULIS::FRectI> GetSelectionAreaAsScanlines();
 
 };

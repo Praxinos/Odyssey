@@ -72,7 +72,6 @@ bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseUp(const FOdysseyPoin
         ClearBlock(mSelectionBlock);
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-        ::ULIS::FEvent copyEvent;
 
         ctx.Copy(
             *rasterBlock->GetBlock(),
@@ -82,7 +81,7 @@ bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseUp(const FOdysseyPoin
             ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
             0,
             nullptr,
-            &copyEvent
+            nullptr
         );
 
         ctx.Finish();
