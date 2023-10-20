@@ -2,7 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
+#include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
+#include "Widgets/LayerStack/Cells/CellImageVector/SOdysseyAnimationCellImageVector.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageVectorTimeline"
 
@@ -35,7 +38,12 @@ SOdysseyAnimationLayerImageVectorTimeline::OnCreateCell()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell)
 {
-    return SNew(SOdysseyAnimationLayerImageVectorCell);
+    if (iCell->GetType() == FOdysseyAnimationCellImageVector::StaticType())
+        return SNew(SOdysseyAnimationCellImageVector);
+    else if (iCell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
+        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell));
+
+    return SNullWidget::NullWidget;
 }
 
 #undef LOCTEXT_NAMESPACE

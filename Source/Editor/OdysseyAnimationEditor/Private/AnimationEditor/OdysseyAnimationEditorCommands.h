@@ -78,4 +78,9 @@ public:
     TSharedPtr<FUICommandInfo> SetPostBehaviourHold;
     TSharedPtr<FUICommandInfo> SetPostBehaviourLoop;
     TSharedPtr<FUICommandInfo> SetPostBehaviourPingPong;
+
+    TSharedPtr<FUICommandInfo> StaggerCell;
+    TSharedPtr<FUICommandInfo> SetStaggerCellBehaviourHold;
+    TSharedPtr<FUICommandInfo> SetStaggerCellBehaviourLoop;
+    TSharedPtr<FUICommandInfo> SetStaggerCellBehaviourPingPong;
 };

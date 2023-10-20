@@ -109,7 +109,21 @@ public:
      */
     bool IsCellHeadAtFrame(int iFrame) const;
 
+    /**
+     * @brief Get the given Cell Index
+     * 
+     * @return int 
+     */
+    int GetCellIndex(TSharedPtr<const FOdysseyAnimationCell> iCell) const;
 
+    /**
+     * @brief Get the first frame the given Cell can be found
+     * 
+     * @return int 
+     */
+    int GetCellFrame(TSharedPtr<const FOdysseyAnimationCell> iCell) const;
+
+public:
     /**
      * @brief PostDuplicate
      *

@@ -22,8 +22,8 @@ void
 FOdysseyLayerStackEditorCommands::RegisterCommands()
 {
 // LayerStack Shortcuts Category
-    UI_CMD( MergeSelectedLayers, LayerStackShortcuts, "Merge Selected Layers", "Merge Selected Layers", EUserInterfaceActionType::Button, FInputChord() );
-    UI_CMD( FlattenSelectedLayers, LayerStackShortcuts, "Flatten Selected Layers", "Flatten Selected Layers", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( MergeSelectedLayers, LayerStackShortcuts, "Merge Selected Layers", "Merge Selected Layers", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( FlattenSelectedLayers, LayerStackShortcuts, "Flatten Selected Layers", "Flatten Selected Layers", EUserInterfaceActionType::Button, FInputChord() );
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.h"
+#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageTimeline"
 
@@ -10,12 +11,10 @@ SOdysseyAnimationLayerImageTimeline::~SOdysseyAnimationLayerImageTimeline()
 }
 
 SOdysseyAnimationLayerImageTimeline::SOdysseyAnimationLayerImageTimeline()
-    : mCommandList(MakeShared<FUICommandList>())
-    , mIsDraggingOver(false)
+    : mIsDraggingOver(false)
     , mDragState(kDrag_None)
     , mDragPosition(0)
 {
-    MapActions(mCommandList);
 }
 
 void
@@ -54,8 +53,10 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
         if (frame == INDEX_NONE)
             return FReply::Unhandled();
 
-		FMenuBuilder menuBuilder(true, mCommandList);
-		BuildContextMenu(menuBuilder, frame);
+        TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
+        MapActions(commandList, frame);
+		FMenuBuilder menuBuilder(true, commandList);
+		BuildContextMenu(menuBuilder);
 
 		TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
 		FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
@@ -315,6 +316,60 @@ SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames()
     mutator.Commit();
 }
 
+void
+SOdysseyAnimationLayerImageTimeline::StaggerCell( int iFrame )
+{
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return;
+
+    int cellFrame = cellsContainer->GetCellFrameAtFrame(iFrame);
+    if (cellFrame == INDEX_NONE || cellFrame == 0)
+        return;
+
+    int cellIndex = cellsContainer->GetCellIndexAtFrame(iFrame);
+    if (cellIndex == INDEX_NONE)
+        return;
+
+    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
+    if (!cell || cell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
+        return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Stagger Cell"));
+#endif
+    
+    int cellStaggerLength = cell->GetLength() - cellFrame;
+    TSharedPtr<FOdysseyAnimationCellImageStagger> cellStagger = FOdysseyAnimationCellImageStagger::Create(mLayer, cellStaggerLength);
+    
+    FOdysseyAnimationCellsMutator mutator(mLayer, cellsContainer);
+    mutator.SetLength( cellIndex, cellFrame );
+    mutator.Add({cellStagger}, cellIndex + 1);
+    mutator.Commit();
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::CanStaggerCell( int iFrame ) const
+{
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return false;
+
+    int cellFrame = cellsContainer->GetCellFrameAtFrame(iFrame);
+    if (cellFrame == INDEX_NONE || cellFrame == 0)
+        return false;
+
+    int cellIndex = cellsContainer->GetCellIndexAtFrame(iFrame);
+    if (cellIndex == INDEX_NONE)
+        return false;
+
+    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
+    if (!cell || cell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
+        return false;
+
+    return true;
+}
+
 FInt32Range
 SOdysseyAnimationLayerImageTimeline::GetSelectableFrames() const
 {
@@ -354,9 +409,8 @@ SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged()
 }
 
 void
-SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame)
+SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 {   
-    iMenuBuilder.PushCommandList(mCommandList);
     iMenuBuilder.BeginSection("Selection", LOCTEXT("LayerImageTimeline-ContextMenu-SelectionSection", "Selection"));
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
     iMenuBuilder.EndSection();
@@ -371,6 +425,10 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
     iMenuBuilder.EndSection();
 
+    iMenuBuilder.BeginSection("Cells", LOCTEXT("LayerImageTimeline-ContextMenu-CellsSection", "Cells"));
+        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().StaggerCell);
+    iMenuBuilder.EndSection();
+
     iMenuBuilder.BeginSection("Layer", LOCTEXT("LayerImageTimeline-ContextMenu-LayerSection", "Layer"));
         iMenuBuilder.AddSubMenu(
             LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour", "Pre Behaviour"),
@@ -383,8 +441,6 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
             FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu)
         );
     iMenuBuilder.EndSection();
-
-    iMenuBuilder.PopCommandList();
 }
 
 void
@@ -536,7 +592,7 @@ SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour() const
 }
 
 void
-SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iCommandList)
+SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame)
 {
 	iCommandList->MapAction(
         FGenericCommands::Get().SelectAll,
@@ -561,6 +617,12 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
     iCommandList->MapAction(
         FGenericCommands::Get().Paste,
         FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::PasteFrames)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyAnimationEditorCommands::Get().StaggerCell,
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::StaggerCell, iFrame),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanStaggerCell, iFrame)
     );
 }
 

@@ -35,6 +35,7 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "KismetWidgets",
                 "PropertyEditor",
                 "Projects",
+                "OdysseyCore",
                 "OdysseyStyle",
                 "OdysseyBrush",
                 "OdysseyWidgets",

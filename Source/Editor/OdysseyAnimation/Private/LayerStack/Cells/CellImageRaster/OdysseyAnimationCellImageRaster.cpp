@@ -29,6 +29,12 @@ FOdysseyAnimationCellImageRaster::Create(UOdysseyAnimationLayerImageRaster* iLay
     return cell;
 }
 
+UOdysseyAnimationLayerImageRaster*
+FOdysseyAnimationCellImageRaster::GetLayer() const
+{
+    return Cast<UOdysseyAnimationLayerImageRaster>(FOdysseyAnimationCell::GetLayer());
+}
+
 TSharedPtr<FOdysseyRasterBlock>
 FOdysseyAnimationCellImageRaster::GetRasterBlock() const
 {
@@ -51,9 +57,8 @@ FOdysseyAnimationCellImageRaster::~FOdysseyAnimationCellImageRaster()
 }
 
 FOdysseyAnimationCellImageRaster::FOdysseyAnimationCellImageRaster(UOdysseyAnimationLayerImageRaster* iLayer, int iLength)
-    : FOdysseyAnimationCell(iLength)
-    , mLayer(iLayer)
-    , mRasterBlock(MakeShared<FOdysseyRasterBlock>(mLayer))
+    : FOdysseyAnimationCell(iLength, iLayer)
+    , mRasterBlock(MakeShared<FOdysseyRasterBlock>(iLayer))
     , mMediaRaster(nullptr)
 {
     mRasterBlock->OnBlockChanged().AddRaw(this, &FOdysseyAnimationCellImageRaster::OnBlockChanged);
@@ -102,9 +107,9 @@ FOdysseyAnimationCellImageRaster::PostDuplicate()
 
     //The cell could be duplicated in a different animation with different parameters
     //Ensure the block uses those parameters
-    ::ULIS::eFormat format = mLayer->GetAnimation()->Format();
-    int width = mLayer->GetAnimation()->Width();
-    int height = mLayer->GetAnimation()->Height();
+    ::ULIS::eFormat format = GetLayer()->GetAnimation()->Format();
+    int width = GetLayer()->GetAnimation()->Width();
+    int height = GetLayer()->GetAnimation()->Height();
     mRasterBlock->PostDuplicate(width, height, format);
 }
 
@@ -131,7 +136,7 @@ FOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
 TArray<::ULIS::FEvent>
 FOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    if (!mLayer->IsAlphaLocked)
+    if (!GetLayer()->IsAlphaLocked)
         return iWaitList;
 
     //Apply AlphaLock
@@ -240,7 +245,7 @@ FOdysseyAnimationCellImageRaster::CreateCellFromFrame(uint32 iFrameIndex) const
     ctx.Finish();
 
     //Create a new raster cell from the given block
-    return FOdysseyAnimationCellImageRaster::Create(mLayer, 1, block);
+    return FOdysseyAnimationCellImageRaster::Create(GetLayer(), 1, block);
 }
 
 #undef LOCTEXT_NAMESPACE

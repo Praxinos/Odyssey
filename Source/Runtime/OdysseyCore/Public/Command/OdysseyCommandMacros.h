@@ -3,12 +3,9 @@
 
 #pragma once
 
-#define UI_CMD( CommandId, Category, FriendlyName, InDescription, CommandType, InDefaultChord )                           \
-    CommandId = FUICommandInfoDecl(                                                                                       \
-                this->AsShared(),                                                                                         \
-                FName( TEXT( #CommandId ) ),                                                                              \
-                LOCTEXT( #CommandId "Label", FriendlyName ),                                                              \
-                LOCTEXT( #CommandId "ToolTip", InDescription ),                                                           \
-                Category)                                                                                                 \
-            .UserInterfaceType( CommandType )                                                                             \
-            .DefaultChord( InDefaultChord );
+/** Internal function used by the UI_COMMAND macros to build the command. Do not call this directly as only the macros are gathered for localization; instead use FUICommandInfo::MakeCommandInfo for dynamic content */
+ODYSSEYCORE_API void OdysseyMakeUIBundleCommand_InternalUseOnly(FBindingContext* This, TSharedPtr< FUICommandInfo >& OutCommand, const FName InBundle, const TCHAR* InSubNamespace, const TCHAR* InCommandName, const TCHAR* InCommandNameUnderscoreTooltip, const ANSICHAR* DotCommandName, const TCHAR* FriendlyName, const TCHAR* InDescription, const EUserInterfaceActionType CommandType, const FInputChord& InDefaultChord, const FInputChord& InAlternateDefaultChord = FInputChord());
+
+#define UI_BUNDLE_COMMAND( CommandId, Bundle, FriendlyName, InDescription, CommandType, InDefaultChord, ... ) \
+	OdysseyMakeUIBundleCommand_InternalUseOnly( this, CommandId, Bundle, TEXT(LOCTEXT_NAMESPACE), TEXT(#CommandId), TEXT(#CommandId) TEXT("_ToolTip"), "." #CommandId, TEXT(FriendlyName), TEXT(InDescription), CommandType, InDefaultChord, ## __VA_ARGS__ );
+

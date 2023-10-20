@@ -22,12 +22,14 @@ public:
     void Action_Paste();
     void Action_SelectAll();
     void Action_Delete();
+    void Action_StaggerCell();
 
     bool CanAction_Copy();
     bool CanAction_Cut();
     bool CanAction_Paste();
     bool CanAction_SelectAll();
     bool CanAction_Delete();
+    bool CanAction_StaggerCell();
 
 private:
     //Shortcuts

@@ -15,8 +15,11 @@
 #endif
 
 #define IMAGE_BRUSH( RelativePath, ... )    FSlateImageBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
+#define IMAGE_BRUSH_SVG( RelativePath, ... ) FSlateVectorImageBrush( RootToContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
 #define BOX_BRUSH( RelativePath, ... )      FSlateBoxBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
+#define BOX_BRUSH_SVG( RelativePath, ... )  FSlateVectorBoxBrush( RootToContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
 #define BORDER_BRUSH( RelativePath, ... )   FSlateBorderBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
+#define BORDER_BRUSH_SVG( RelativePath, ... )  FSlateVectorBorderBrush( RootToContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
 #define DEFAULT_FONT( ... )                 FCoreStyle::GetDefaultFontStyle( __VA_ARGS__ )
 #define ICON_FONT( ... )                    FSlateFontInfo( RootToContentDir( "Fonts/FontAwesome", TEXT(".ttf") ), __VA_ARGS__ )
 
@@ -700,6 +703,21 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
     Set("Animation.CellTimingHandle", new IMAGE_BRUSH("OdysseyAnimation/CellTimingHandle_16", mIcon16x16));
     Set("Animation.CellLengthHandle", new IMAGE_BRUSH("OdysseyAnimation/CellLengthHandle_16", mIcon16x16));
+    Set("Animation.CellImageStaggerArrowTop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowTop", FVector2D(10, 7), FLinearColor::White, ESlateBrushTileType::Horizontal));
+    Set("Animation.CellImageStaggerArrowBottom", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowBottom", FVector2D(10, 7), FLinearColor::White, ESlateBrushTileType::Horizontal));
+    Set("Animation.CellImageStagger.Behaviour.Hold", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourHold", mIcon16x16));
+    Set("Animation.CellImageStagger.Behaviour.Loop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourLoop", mIcon16x16));
+    Set("Animation.CellImageStagger.Behaviour.PingPong", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourPingPong", mIcon16x16));
+    
+    //Animation Command Icons
+    //Icons are used automatically
+    //Just use the prefix "OdysseyAnimationEditorCommands.[CommandName]"
+    {
+        Set("OdysseyAnimationEditorCommands.SetStaggerCellBehaviourHold", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourHold", mIcon16x16));
+        Set("OdysseyAnimationEditorCommands.SetStaggerCellBehaviourLoop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourLoop", mIcon16x16));
+        Set("OdysseyAnimationEditorCommands.SetStaggerCellBehaviourPingPong", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourPingPong", mIcon16x16));
+    }
+    
 
     //Texture
     Set("Texture.AlphaLockedToggle", FCheckBoxStyle()

@@ -40,6 +40,7 @@ public:
     //SWidget overrides
 	virtual bool SupportsKeyboardFocus() const override;
     virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
+    FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent);
 
 private:
     void RequestRefresh();
@@ -107,7 +108,7 @@ private:
 
     TSharedPtr<SBorder> mCellsBorder;
     TSharedPtr<SHorizontalBox> mCellsBox;
-    TSharedPtr<SHorizontalBox> mHandlesBox;
+    //TSharedPtr<SHorizontalBox> mHandlesBox;
 
     const FSlateBrush* mTimingHandleBrush;
     const FSlateBrush* mLengthHandleBrush;
@@ -127,8 +128,7 @@ private:
     struct FCellData
     {
         TSharedPtr<FOdysseyAnimationCell> mCell;
-        TSharedPtr<SWidget> mCellSectionWidget;
-        TSharedPtr<SWidget> mHandlesSectionWidget;
+        TSharedPtr<SWidget> mCellWidget;
         int mCellIndex;
         bool mIsVisible;
         bool mIsTimingHandleVisible;
@@ -140,6 +140,7 @@ private:
 
     struct
     {
+        bool mIsDragDetected;
         double mMousePosition;
     } mLayerOffsetData;
 

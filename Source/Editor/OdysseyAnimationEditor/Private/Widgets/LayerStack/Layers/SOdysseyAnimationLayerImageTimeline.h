@@ -47,16 +47,19 @@ private:
 
 private:
     //Context Menu
+    void BuildContextMenu(FMenuBuilder& iMenuBuilder);
+    void MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame);
+    void BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
+    void BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
+
     void SelectAllFrames();
     void DeleteSelectedFrames();
     void CopyFrames();
     void CutFrames();
     void PasteFrames();
-    void BuildContextMenu(FMenuBuilder& iMenuBuilder, int iFrame);
-    void MapActions(TSharedPtr<FUICommandList> iCommandList);
+    void StaggerCell(int iFrame);
 
-    void BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
-    void BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
+    bool CanStaggerCell(int iFrame) const;
 
     void SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
     bool IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
@@ -69,8 +72,6 @@ private:
 protected:
     FOdysseyAnimationEditorExtension* mExtension;
     UOdysseyAnimationLayer* mLayer;
-	
-	TSharedRef<FUICommandList> mCommandList;
 
     enum eDragState
     {

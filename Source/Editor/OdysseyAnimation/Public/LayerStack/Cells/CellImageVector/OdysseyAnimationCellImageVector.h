@@ -52,7 +52,7 @@ public:
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     FCriticalSection* GetImageRenderingMutex() const;
     bool IsImageRenderingGameThreadOnly() const;
-    UOdysseyAnimationLayerImageVector* GetLayer() const;
+    virtual UOdysseyAnimationLayerImageVector* GetLayer() const override;
 
 private:
     void OnVectorBlockInvalidated(bool iIsInteractive);
@@ -63,7 +63,6 @@ private:
     friend class FOdysseyAnimationCellImageVectorImport;
 
 private:
-    UOdysseyAnimationLayerImageVector* mLayer;
     FOdysseyVectorEngine* mEngine;
     FGuid mVectorBlockId;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine

@@ -18,19 +18,17 @@ FOdysseyAnimationCell::~FOdysseyAnimationCell()
 {
 }
 
-FOdysseyAnimationCell::FOdysseyAnimationCell(int iLength)
+FOdysseyAnimationCell::FOdysseyAnimationCell(int iLength, UOdysseyAnimationLayer* iLayer)
     : mLength(iLength)
+    , mLayer(iLayer)
 {
 }
 
-/*
-void
-FOdysseyAnimationCell::SetLength(int iLength)
+UOdysseyAnimationLayer*
+FOdysseyAnimationCell::GetLayer() const
 {
-    mLength = iLength;
-    OnLengthChanged().Broadcast(AsShared());
+    return mLayer;
 }
-*/
 
 int
 FOdysseyAnimationCell::GetLength() const

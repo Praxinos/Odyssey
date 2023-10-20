@@ -42,8 +42,7 @@ FOdysseyAnimationCellImageVector::~FOdysseyAnimationCellImageVector()
 }
 
 FOdysseyAnimationCellImageVector::FOdysseyAnimationCellImageVector(UOdysseyAnimationLayerImageVector* iLayer, int iLength)
-    : FOdysseyAnimationCell(iLength)
-    , mLayer(iLayer)
+    : FOdysseyAnimationCell(iLength, iLayer)
     , mEngine(nullptr)
     , mVectorBlockId(FGuid::NewGuid())
     , mWidth(0)
@@ -64,13 +63,13 @@ FOdysseyAnimationCellImageVector::Clone(UOdysseyAnimationLayer* iLayer, int iLen
 UOdysseyAnimationLayerImageVector*
 FOdysseyAnimationCellImageVector::GetLayer() const
 {
-    return mLayer;
+    return Cast<UOdysseyAnimationLayerImageVector>(FOdysseyAnimationCell::GetLayer());
 }
 
 void
 FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 {
-    UOdysseyAnimation* animation = mLayer->GetAnimation();
+    UOdysseyAnimation* animation = GetLayer()->GetAnimation();
 
     mWidth = iWidth;
     mHeight = iHeight;
@@ -84,7 +83,7 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mEngine, iWidth, iHeight, animation->Format());
-    mVectorBlock->SetRenderFlags(mLayer->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
+    mVectorBlock->SetRenderFlags(GetLayer()->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     mVectorBlock->OnInvalidated().AddRaw(this, &FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);
 }
 
@@ -168,12 +167,12 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 void
 FOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImageVector* iLayer)
 {
-    if (iLayer != mLayer)
+    if (iLayer != GetLayer())
         return;
 
     mEngine->Invalidate();
 
-    mVectorBlock->SetRenderFlags(mLayer->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
+    mVectorBlock->SetRenderFlags(GetLayer()->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     ImageRenderingChanged();
 }
 
@@ -226,7 +225,7 @@ FOdysseyAnimationCellImageVector::CreateCellFromFrame(uint32 iFrameIndex) const
 {
     //Copy Current Cell block at given frameindex
     //Create a new Vector cell from the given block
-    TSharedRef<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(mLayer, 1, mWidth, mHeight);
+    TSharedRef<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(GetLayer(), 1, mWidth, mHeight);
     FOdysseyVectorScene* newScene = static_cast<FOdysseyVectorScene*>(mEngine->GetScene()->Copy());
     cell->GetEngine()->SetScene(newScene);
     newScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );

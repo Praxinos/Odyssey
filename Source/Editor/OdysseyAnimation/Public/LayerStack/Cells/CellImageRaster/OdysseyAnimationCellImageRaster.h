@@ -27,6 +27,7 @@ public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
     virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const override;
+    virtual UOdysseyAnimationLayerImageRaster* GetLayer() const override;
 
 public:
     virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const override;

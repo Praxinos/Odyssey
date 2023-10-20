@@ -137,6 +137,25 @@ FOdysseyAnimationCellsContainer::IsCellHeadAtFrame(int iFrame) const
     return GetCellFrameAtFrame(iFrame) == 0;
 }
 
+int
+FOdysseyAnimationCellsContainer::GetCellIndex(TSharedPtr<const FOdysseyAnimationCell> iCell) const
+{
+    return mCells.Find(ConstCastSharedPtr<FOdysseyAnimationCell>(iCell));
+}
+
+int
+FOdysseyAnimationCellsContainer::GetCellFrame(TSharedPtr<const FOdysseyAnimationCell> iCell) const
+{
+    uint32 startFrame = mOffset;
+    for (int i = 0; i < mCells.Num(); i++ )
+    {
+        if (mCells[i] == iCell)
+            return startFrame;
+        startFrame += mCells[i]->GetLength();
+    }
+    return INDEX_NONE;
+}
+
 void
 FOdysseyAnimationCellsContainer::PostDuplicate()
 {

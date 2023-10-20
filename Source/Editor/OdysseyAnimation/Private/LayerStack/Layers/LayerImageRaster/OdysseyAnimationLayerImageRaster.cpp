@@ -8,6 +8,7 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImageRenderer.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "OdysseyRasterBlockMutator.h"
@@ -50,6 +51,7 @@ UOdysseyAnimationLayerImageRaster::UOdysseyAnimationLayerImageRaster()
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
 
     mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageRaster::StaticType());
+    mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageStagger::StaticType());
 }
 
 void
@@ -328,6 +330,11 @@ UOdysseyAnimationLayerImageRaster::CreateCell( const FName& iCellType, bool iFor
 
         UOdysseyAnimation* animation = GetAnimation();
         return FOdysseyAnimationCellImageRaster::Create(this, 1, animation->Width(), animation->Height(), animation->Format());
+    }
+    else if (iCellType == FOdysseyAnimationCellImageStagger::StaticType())
+    {
+        if (iForSerialization)
+            return FOdysseyAnimationCellImageStagger::Create(this, 1);
     }
     return nullptr;
 }

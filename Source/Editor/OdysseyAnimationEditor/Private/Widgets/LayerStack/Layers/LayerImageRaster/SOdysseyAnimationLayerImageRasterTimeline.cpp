@@ -2,6 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
+#include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
+#include "Widgets/LayerStack/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterTimeline"
 
@@ -34,7 +37,14 @@ SOdysseyAnimationLayerImageRasterTimeline::OnCreateCell()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell)
 {
-    return SNew(SOdysseyAnimationLayerImageRasterCell);
+    if (!iCell)
+        return SNew(SOdysseyAnimationCellImageRaster); //DefaultCell, this can be called when creating cells, because the celle does not really exist yet
+    if (iCell->GetType() == FOdysseyAnimationCellImageRaster::StaticType())
+        return SNew(SOdysseyAnimationCellImageRaster);
+    else if (iCell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
+        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell));
+
+    return SNullWidget::NullWidget;
 }
 
 FReply

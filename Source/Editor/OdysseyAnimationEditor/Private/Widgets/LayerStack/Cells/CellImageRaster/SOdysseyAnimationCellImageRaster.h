@@ -5,11 +5,11 @@
 
 #include "CoreMinimal.h"
 
-class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorCell
+class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCellImageRaster
     : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorCell)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationCellImageRaster)
         {}
     SLATE_END_ARGS()
 

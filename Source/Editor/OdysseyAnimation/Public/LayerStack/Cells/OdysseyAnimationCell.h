@@ -16,11 +16,12 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCell
 
 public:
     virtual ~FOdysseyAnimationCell();
-    FOdysseyAnimationCell(int iLength);
+    FOdysseyAnimationCell(int iLength, UOdysseyAnimationLayer* iLayer);
 
 public:
     //void SetLength(int iLength);
     int GetLength() const;
+    virtual UOdysseyAnimationLayer* GetLayer() const;
     virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const = 0;
     virtual const FName& GetType() const = 0;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
@@ -37,5 +38,6 @@ private:
     friend class FOdysseySetCellLengthMutation;
 
 protected:
+    UOdysseyAnimationLayer* mLayer;
     uint32 mLength;
 };

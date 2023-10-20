@@ -60,19 +60,14 @@ SOdysseyAnimationCells::Construct(
             + SHorizontalBox::Slot()
             .AutoWidth()
             [
+                //Timeline Section for Layer Offset
                 SNew(SOdysseyAnimationTimelineSection, mExtension)
                 .WidthInFrames(this, &SOdysseyAnimationCells::GetOffset)
                 .HeightInScreenUnits(this, &SOdysseyAnimationCells::GetCellHeight)
+                .Content()
                 [
                     //Add Cells Handle
-                    SNew(SOverlay)
-                    + SOverlay::Slot()
-                    .Padding(0.f, 0.f, 0.f, 0.f)
-                    .HAlign(HAlign_Right)
-                    .VAlign(VAlign_Bottom)
-                    [
-                        CreateAddCellsHandleLeftWidget()
-                    ]
+                    CreateAddCellsHandleLeftWidget()
                 ]
             ]
             + SHorizontalBox::Slot()
@@ -84,7 +79,9 @@ SOdysseyAnimationCells::Construct(
                 .OnMouseMove(this, &SOdysseyAnimationCells::OnCellsMouseMove)
                 .OnMouseButtonUp(this, &SOdysseyAnimationCells::OnCellsMouseButtonUp)
                 [
-                    SNew(SOverlay)
+                    SAssignNew(mCellsBox, SHorizontalBox)
+
+                    /* SNew(SOverlay)
                     + SOverlay::Slot()
                     [
                         SAssignNew(mCellsBox, SHorizontalBox)
@@ -92,21 +89,16 @@ SOdysseyAnimationCells::Construct(
                     + SOverlay::Slot()
                     [
                         SAssignNew(mHandlesBox, SHorizontalBox)
-                    ]
+                    ] */
                 ]
             ]
             + SHorizontalBox::Slot()
             .AutoWidth()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Top)
             [
                 //Add Cells Handle
-                SNew(SOverlay)
-                + SOverlay::Slot()
-                .Padding(0.f, 0.f, 0.f, 0.f)
-                .HAlign(HAlign_Left)
-                .VAlign(VAlign_Top)
-                [
-                    CreateAddCellsHandleRightWidget()
-                ]
+                CreateAddCellsHandleRightWidget()
             ]
         ]
     ];
@@ -206,18 +198,18 @@ SOdysseyAnimationCells::RemoveCellData(int iIndex)
 void
 SOdysseyAnimationCells::InsertCellSection(int iIndex, TSharedPtr<FCellData> iCellData)
 {
-    iCellData->mCellSectionWidget = SNew(SOdysseyAnimationTimelineSection, mExtension)
-        .WidthInFrames(this, &SOdysseyAnimationCells::GetCellLength, iCellData)
-        .HeightInScreenUnits(this, &SOdysseyAnimationCells::GetCellHeight)
-        [
-            CreateCellWidget(iCellData)
-        ];
-
-    iCellData->mHandlesSectionWidget = SNew(SOdysseyAnimationTimelineSection, mExtension)
+    iCellData->mCellWidget = SNew(SOdysseyAnimationTimelineSection, mExtension)
         .WidthInFrames(this, &SOdysseyAnimationCells::GetCellLength, iCellData)
         .HeightInScreenUnits(this, &SOdysseyAnimationCells::GetCellHeight)
         [
             SNew(SOverlay)
+            + SOverlay::Slot() //Cell Widget
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Top)
+            [
+                CreateCellWidget(iCellData)
+            ]
+            
             + SOverlay::Slot() //Timing Handle Top Left
             //.Padding(-mLengthHandleBrush->ImageSize.X / 2, 0.f, -mLengthHandleBrush->ImageSize.X / 2, 0.f)
             .Padding(0.f, 0.f, -mLengthHandleBrush->ImageSize.X, 0.f)
@@ -239,14 +231,7 @@ SOdysseyAnimationCells::InsertCellSection(int iIndex, TSharedPtr<FCellData> iCel
     mCellsBox->InsertSlot(iIndex)
     .AutoWidth()
     [
-        iCellData->mCellSectionWidget.ToSharedRef()
-    ];
-
-    //Handle widgets
-    mHandlesBox->InsertSlot(iIndex)
-    .AutoWidth()
-    [
-        iCellData->mHandlesSectionWidget.ToSharedRef()
+        iCellData->mCellWidget.ToSharedRef()
     ];
 }
 
@@ -259,15 +244,15 @@ SOdysseyAnimationCells::AddCellSection(TSharedPtr<FCellData> iCellData)
 void
 SOdysseyAnimationCells::RemoveCellSection(TSharedPtr<FCellData> iCellData)
 {
-    mCellsBox->RemoveSlot(iCellData->mCellSectionWidget.ToSharedRef());
-    mHandlesBox->RemoveSlot(iCellData->mHandlesSectionWidget.ToSharedRef());
+    mCellsBox->RemoveSlot(iCellData->mCellWidget.ToSharedRef());
+    //mHandlesBox->RemoveSlot(iCellData->mHandlesSectionWidget.ToSharedRef());
 }
 
 void
 SOdysseyAnimationCells::RefreshWidgets()
 {
     mCellsBox->ClearChildren();
-    mHandlesBox->ClearChildren();
+    //mHandlesBox->ClearChildren();
 
     for ( int i = 0; i < mCellsData.Num(); i++ )
     {
@@ -336,18 +321,24 @@ SOdysseyAnimationCells::CreateAddCellsHandleRightWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationCells::CreateAddCellsHandleLeftWidget()
 {
-    return SNew(SBox)
+    return SNew(SBox) //Box for alignment
         .Visibility(this, &SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility)
-        .WidthOverride(mAddCellsHandleLeftBrush->ImageSize.X)
-        .HeightOverride(mAddCellsHandleLeftBrush->ImageSize.Y)
+        .HAlign(HAlign_Right)
+        .VAlign(VAlign_Bottom)
         [
-            SNew(SOdysseyAnimationCellHandle)
-            .OnDragStarted(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStarted, false)
-            .OnDragged(this, &SOdysseyAnimationCells::OnAddCellsHandleDragged)
-            .OnDragStopped(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStopped)
+            //Box for size
+            SNew(SBox)
+            .WidthOverride(mAddCellsHandleLeftBrush->ImageSize.X)
+            .HeightOverride(mAddCellsHandleLeftBrush->ImageSize.Y)
             [
-                SNew(SImage)
-                .Image(mAddCellsHandleLeftBrush)
+                SNew(SOdysseyAnimationCellHandle)
+                .OnDragStarted(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStarted, false)
+                .OnDragged(this, &SOdysseyAnimationCells::OnAddCellsHandleDragged)
+                .OnDragStopped(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStopped)
+                [
+                    SNew(SImage)
+                    .Image(mAddCellsHandleLeftBrush)
+                ]
             ]
         ];
 }
@@ -405,20 +396,31 @@ SOdysseyAnimationCells::OnCellsMouseButtonDown(const FGeometry& iGeometry, const
     if (iEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
         mOffsettingLayer = true;
-
+        mLayerOffsetData.mIsDragDetected = false;
         mLayerOffsetData.mMousePosition = iEvent.GetScreenSpacePosition().X;
         mOffset = mCellsContainer->GetOffset();
 
-        return FReply::Handled().CaptureMouse(mCellsBorder.ToSharedRef()).PreventThrottling();
+        return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
     }
 
     return FReply::Unhandled();
 }
 
 FReply
+SOdysseyAnimationCells::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+{
+  	if (mOffsettingLayer)
+  	{
+        mLayerOffsetData.mIsDragDetected = true;
+        return FReply::Handled().CaptureMouse(mCellsBorder.ToSharedRef()).PreventThrottling();
+  	}
+  	return FReply::Unhandled();
+}
+
+FReply
 SOdysseyAnimationCells::OnCellsMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-    if ( mOffsettingLayer )
+    if ( mOffsettingLayer && mLayerOffsetData.mIsDragDetected)
     {
         const int minOffset = 0;
         float mouseOffset = iEvent.GetScreenSpacePosition().X - mLayerOffsetData.mMousePosition;
@@ -436,8 +438,10 @@ SOdysseyAnimationCells::OnCellsMouseMove(const FGeometry& iGeometry, const FPoin
 FReply
 SOdysseyAnimationCells::OnCellsMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-    if ( mOffsettingLayer )
+    if ( mOffsettingLayer && mLayerOffsetData.mIsDragDetected)
     {
+        mLayerOffsetData.mIsDragDetected = false;
+
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Change Layer Offset"));
 #endif

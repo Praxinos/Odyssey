@@ -59,6 +59,12 @@ FOdysseyAnimationTimelineShortcuts::MapActionsToCommandList()
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineShortcuts::Action_Delete),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineShortcuts::CanAction_Delete)
     );
+
+    mCommandList->MapAction(
+        FOdysseyAnimationEditorCommands::Get().StaggerCell,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineShortcuts::Action_StaggerCell),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineShortcuts::CanAction_StaggerCell)
+    );
 }
 
 void
@@ -155,6 +161,32 @@ FOdysseyAnimationTimelineShortcuts::Action_Delete()
     mutator.Commit();
 }
 
+
+
+void
+FOdysseyAnimationTimelineShortcuts::Action_StaggerCell()
+{
+    /* UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
+    if (!layer)
+        return;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+    if (!cellsContainer)
+        return;
+
+    FInt32Range selectedFrames = mTimelineContext->GetSelectedFrames();
+    if (selectedFrames.IsEmpty())
+        return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Remove Frames"));
+#endif
+
+    FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
+    mutator.RemoveFrameRange(selectedFrames);
+    mutator.Commit(); */
+}
+
 bool
 FOdysseyAnimationTimelineShortcuts::CanAction_Copy()
 {
@@ -234,6 +266,25 @@ FOdysseyAnimationTimelineShortcuts::CanAction_Delete()
     if (selectedFrames.IsEmpty())
         return false;
 
+    return true;
+}
+
+bool
+FOdysseyAnimationTimelineShortcuts::CanAction_StaggerCell()
+{
+    /* UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
+    if (!layer)
+        return false;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+    if (!cellsContainer)
+        return false;
+
+    FInt32Range selectedFrames = mTimelineContext->GetSelectedFrames();
+    if (selectedFrames.IsEmpty())
+        return false;
+
+    return true; */
     return true;
 }
 
