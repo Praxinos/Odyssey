@@ -20,7 +20,13 @@ public:
 
 private:
     const FSlateBrush* GetBehaviourBrush() const;
-    FText GetReachText() const;
+
+    int GetReach() const;
+    void OnReachValueChanged(int iReach);
+    void OnReachValueCommited(int iReach, ETextCommit::Type iType);
+    void OnReachBeginSliderMovement();
+    void OnReachEndSliderMovement(int iReach);
+
     TSharedRef<SWidget> GetBehaviourMenuContent();
 
     void MapActions(TSharedPtr<FUICommandList> iCommandList);
@@ -31,4 +37,10 @@ private:
 
 private:
     TSharedPtr<FOdysseyAnimationCellImageStagger> mCell;
+
+    bool mIsEditingReach;
+    struct FReachData
+    {
+        int mReach;
+    } mReachData;
 };

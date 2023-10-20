@@ -107,7 +107,7 @@ FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
         case eBehaviour::Loop:
         {
             int layerStartFrame = frameRange.GetLowerBoundValue();
-            int startFrame = mReach <= 0 ? layerStartFrame : FMath::Min(layerStartFrame, int(cellStartFrame - mReach));
+            int startFrame = mReach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - mReach));
             int offset = iFrameIndex % (cellStartFrame - startFrame);
             frame = startFrame + offset;
         }
@@ -116,7 +116,7 @@ FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
         case eBehaviour::PingPong:
         {
             int layerStartFrame = frameRange.GetLowerBoundValue();
-            int startFrame = mReach <= 0 ? layerStartFrame : FMath::Min(layerStartFrame, int(cellStartFrame - mReach));
+            int startFrame = mReach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - mReach));
 
             //If there is only one frame before the stagger cell,
             //we return that one frame because PingPong needs at least 2 frames to work properly

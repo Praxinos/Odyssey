@@ -3,6 +3,7 @@
 
 #include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerMutator.h"
+#include "Widgets/Input/SSpinBox.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationCellImageStagger"
 
@@ -18,27 +19,35 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, TSharedPtr
     .HAlign(HAlign_Left)
     .Padding(FMargin(3, 0, 0, 0))
     [
-        SNew(SComboButton)
-        //.IsFocusable(true)
-        .HasDownArrow(false)
-        .OnGetMenuContent(this, &SOdysseyAnimationCellImageStagger::GetBehaviourMenuContent)
-        .ContentPadding(FMargin(0, 2, 0, 2))
-        .ButtonContent()
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
         [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .AutoWidth()
+            SNew(SComboButton)
+            //.IsFocusable(true)
+            .HasDownArrow(false)
+            .OnGetMenuContent(this, &SOdysseyAnimationCellImageStagger::GetBehaviourMenuContent)
+            .ContentPadding(FMargin(0, 2, 0, 2))
+            .ButtonContent()
             [
                 SNew(SImage)
                 .Image(this, &SOdysseyAnimationCellImageStagger::GetBehaviourBrush)
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .Padding(FMargin(5, 0, 0, 0))
-            [
-                SNew(STextBlock)
-                .Text(this, &SOdysseyAnimationCellImageStagger::GetReachText)
-            ]
+            ]   
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .Padding(FMargin(5, 0, 0, 0))
+        [
+            SNew( SSpinBox<int> )
+            .Value(this, &SOdysseyAnimationCellImageStagger::GetReach )
+            .OnValueChanged( this, &SOdysseyAnimationCellImageStagger::OnReachValueChanged )
+            .OnValueCommitted( this, &SOdysseyAnimationCellImageStagger::OnReachValueCommited )
+            .OnBeginSliderMovement( this, &SOdysseyAnimationCellImageStagger::OnReachBeginSliderMovement )
+            .OnEndSliderMovement( this, &SOdysseyAnimationCellImageStagger::OnReachEndSliderMovement )
+            .LinearDeltaSensitivity( 15 )
+            .Delta(1)
+            /* SNew(STextBlock)
+            .Text(this, &SOdysseyAnimationCellImageStagger::GetReachText) */
         ]
     ];
 }
@@ -94,10 +103,43 @@ SOdysseyAnimationCellImageStagger::GetBehaviourBrush() const
     return nullptr;
 }
 
-FText
-SOdysseyAnimationCellImageStagger::GetReachText() const
+int
+SOdysseyAnimationCellImageStagger::GetReach() const
 {
-    return FText::AsNumber(mCell->GetReach());
+    if (mIsEditingReach)
+        return mReachData.mReach;
+    return mCell->GetReach();
+}
+
+void
+SOdysseyAnimationCellImageStagger::OnReachValueChanged(int iReach)
+{
+    mReachData.mReach = FMath::Max(0, iReach);
+    //return mCell->GetReach()
+}
+
+void
+SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit::Type iType)
+{    
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("OdysseyAnimationCellImageStagger::SetReach", "Set Stagger Cell Reach"));
+#endif
+    FOdysseyAnimationCellImageStaggerMutator mutator(mCell->GetLayer(), mCell);
+    mutator.SetReach(FMath::Max(0, iReach));
+}
+
+void
+SOdysseyAnimationCellImageStagger::OnReachBeginSliderMovement()
+{
+    mReachData.mReach = mCell->GetReach();
+    mIsEditingReach = true;
+}
+
+void
+SOdysseyAnimationCellImageStagger::OnReachEndSliderMovement(int iReach)
+{
+    mReachData.mReach = mCell->GetReach();
+    mIsEditingReach = false;
 }
 
 TSharedRef<SWidget>
@@ -149,7 +191,7 @@ void
 SOdysseyAnimationCellImageStagger::SetBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour)
 {
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("OdysseyAnimationCellImageStagger", "Set Behaviour"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("OdysseyAnimationCellImageStagger::SetBehaviour", "Set Stagger Cell Behaviour"));
 #endif
     FOdysseyAnimationCellImageStaggerMutator mutator(mCell->GetLayer(), mCell);
     mutator.SetBehaviour(iBehaviour);
