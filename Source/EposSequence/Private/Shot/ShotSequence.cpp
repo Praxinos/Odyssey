@@ -20,6 +20,7 @@
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
+#include "Tracks/MovieSceneSkeletalAnimationTrack.h"
 
 #include "Board/BoardHelpers.h"
 #include "EposSequenceModule.h"
@@ -265,7 +266,8 @@ UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClas
         InTrackClass == UMovieSceneAudioTrack::StaticClass() ||
         InTrackClass == UMovieSceneFadeTrack::StaticClass() ||
         InTrackClass == UMovieSceneMediaTrack::StaticClass() ||
-        InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() )
+        InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() ||
+        InTrackClass == UMovieSceneSkeletalAnimationTrack::StaticClass() )
     {
         return ETrackSupport::Supported;
     }

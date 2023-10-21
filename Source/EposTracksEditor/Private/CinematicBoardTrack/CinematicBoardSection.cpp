@@ -87,10 +87,18 @@ FCinematicBoardSection::FCinematicSectionCacheForThumbnail::operator!=( const FC
 
 FCinematicBoardSection::FViewCachedState::FViewCachedState( const UMovieSceneCinematicBoardSection& iSection, TSharedPtr<ISequencer> iSequencer )
 {
-    check( iSequencer );
+    // See comment in the FCinematicBoardSection constructor why iSequencer may be nullptr
+    //check( iSequencer );
 
-    //if( iSequencer->GetTopTimeSliderWidget()->GetTickSpaceGeometry().GetLocalSize().IsNearlyZero() ) // In the first tick(s), geometry is empty, but it's not the better way to manage this
-    //    return;
+    mPaddedViewRange = iSequencer ? iSequencer->GetViewRange() : TRange<double>( 0.f, 0.f );
+
+    mTimeSliderGeometry = iSequencer ? iSequencer->GetTopTimeSliderWidget()->GetTickSpaceGeometry() : FGeometry();
+    //TODO: or maybe: (?)
+    // - create and store a FTimeToPixel here and so update it in each tick
+    // - set the FTimeToPixel of FCinematicBoardSection with this cached one in the ticks if changed
+    // - use it in ConstructConverterForViewRange
+
+    //---
 
     //FTimeToPixel TimeToPixelConverter = ...; // Get as parameter
 
@@ -108,17 +116,32 @@ FCinematicBoardSection::FViewCachedState::FViewCachedState( const UMovieSceneCin
     //PaddedViewRange = TRange<double>::Intersection( SectionRange / MovieScene->GetTickResolution(), VisibleRange );
     //SelectionSerial = Sequencer->GetSelection().GetSerialNumber();
     //SelectionPreviewHash = Sequencer->GetSelectionPreview().GetSelectionHash();
-
-    mPaddedViewRange = iSequencer->GetViewRange();
 }
 
 bool
 FCinematicBoardSection::FViewCachedState::operator!=( const FViewCachedState& iRHS ) const
 {
-    const double RangeSize = mPaddedViewRange.Size<double>();
-    const double OtherRangeSize = iRHS.mPaddedViewRange.Size<double>();
+    bool is_different = false;
 
-    return !FMath::IsNearlyEqual( RangeSize, OtherRangeSize, RangeSize * 0.001 );
+    if( mTimeSliderGeometry != iRHS.mTimeSliderGeometry )
+    {
+        is_different |= true;
+    }
+
+    if( mPaddedViewRange != iRHS.mPaddedViewRange )
+    {
+        is_different |= true;
+
+        const double RangeSize = mPaddedViewRange.Size<double>();
+        const double OtherRangeSize = iRHS.mPaddedViewRange.Size<double>();
+
+        if( !FMath::IsNearlyEqual( RangeSize, OtherRangeSize, RangeSize * 0.001 ) )
+        {
+            is_different |= true;
+        }
+    }
+
+    return is_different;
 
     //ECacheFlags Flags = ECacheFlags::None;
 
@@ -158,7 +181,12 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
     : TSubSectionMixin( iSequencer, iSection, iSequencer, iThumbnailPool, iSection )
     , mCinematicBoardTrackEditor( iCinematicBoardTrackEditor )
     , mThumbnailCacheData( &iSection )
-    , mViewCacheState( iSection, iSequencer )
+    // nullptr is given here to the cache because
+    // when this section interface is created, the sequencer exists BUT NOT its corresponding widget
+    // (see Sequencer.cpp#510 (creation of the model so this FCinematicBoardSection creation) and only then see Sequencer.cpp#530 (creation of the sequencer widget))
+    // so the widget in GetTopTimeSliderWidget() of the sequencer is not valid
+    // the cache is naturally updated in the ticks
+    , mViewCacheState( iSection, nullptr )
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 
@@ -433,12 +461,19 @@ FCinematicBoardSection::ConstructConverterForViewRange( FGeometry* oGeometry ) c
     check( GetSequencer() );
 
     FGeometry geometry( GetSequencer()->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
+
+    FVector2f local_size = geometry.GetLocalSize();
+    local_size = local_size.X > 0 ? local_size : FVector2f( 100.f, 20.f );
+
     if( oGeometry )
+    {
+        check( local_size.X > 0 );
         *oGeometry = geometry;
+    }
 
     TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> editor_model = GetSequencer()->GetViewModel();
     TSharedPtr<UE::Sequencer::FTrackAreaViewModel> track_model = editor_model->GetTrackArea();
-    return track_model->GetTimeToPixel( geometry.GetLocalSize().X );
+    return track_model->GetTimeToPixel( local_size.X );
 }
 
 FTimeToPixel

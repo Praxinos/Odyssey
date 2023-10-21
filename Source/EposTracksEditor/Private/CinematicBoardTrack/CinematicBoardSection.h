@@ -146,7 +146,7 @@ private:
 
         (It's mutable because it is used inside OnPaintSection() which is const)
     */
-    mutable const FSequencerSectionPainter* mRootPainter;
+    mutable const FSequencerSectionPainter* mRootPainter = nullptr;
 
 private:
 
@@ -192,6 +192,8 @@ private:
         //uint32 mSelectionSerial = 0;
         /** The value of FSequencerSelectionPreview::GetSelectionHash when this cache was created */
         //uint32 mSelectionPreviewHash = 0;
+
+        FGeometry mTimeSliderGeometry;
     };
 
     /** Cached section data */

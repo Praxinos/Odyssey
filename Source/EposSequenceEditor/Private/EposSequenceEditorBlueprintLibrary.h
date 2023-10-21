@@ -550,7 +550,7 @@ public:
     /** Sets the lock for the viewport to the camera cuts. */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static void SetLockCameraCutToViewport(bool bLock);
-    
+
     /** Check whether the lock for the viewport on the board track to the inner camera cuts is enabled. */
     UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
     static bool IsBoardInnerCameraCutLockedToViewport();
