@@ -55,6 +55,8 @@ public:
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual bool OnKeyUp(const FKey& iKey);
 
+    virtual void Tick(float iDeltaTime) override;
+
     virtual void Load() override;
     virtual void Unload() override;
 

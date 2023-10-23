@@ -94,7 +94,7 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
             points[i] = points[i] - (mMouseLastReferencePoint - FVector2D(iPointInTexture.x, iPointInTexture.y));
         }
         mMouseLastReferencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
-        BlendTransformAreaToPaintBlock();
+        //BlendTransformAreaToPaintBlock();
         return;
     }
 
@@ -113,7 +113,7 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
     }
 
     CreateTransformBlockFromSelectionBlock();
-    BlendTransformAreaToPaintBlock();
+    //BlendTransformAreaToPaintBlock();
 }
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
@@ -143,6 +143,12 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
     }
 
     return false;
+}
+
+void UOdysseyPainterEditorRasterTransformTool::Tick(float iDeltaTime)
+{
+    //Only blend on the tick to synchronize with the FPS of the Editor
+    BlendTransformAreaToPaintBlock();
 }
 
 void UOdysseyPainterEditorRasterTransformTool::Load()
@@ -258,7 +264,7 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
                     referenceBlock->Rect(),
                     ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
                     ::ULIS::Blend_Normal,
-                    ::ULIS::Alpha_Erase,
+                    ::ULIS::Alpha_Sub,
                     1.f,
                     ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                     0,
