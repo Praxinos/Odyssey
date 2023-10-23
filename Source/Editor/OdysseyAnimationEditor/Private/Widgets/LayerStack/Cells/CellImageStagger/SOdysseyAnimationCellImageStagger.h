@@ -5,7 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "Widgets/Input/SSpinBox.h"
 
+class FOdysseyAnimationEditorExtension;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCellImageStagger
     : public SCompoundWidget
 {
@@ -15,13 +17,16 @@ public:
     SLATE_END_ARGS()
 
 public:
-    void Construct(const FArguments& iArgs, TSharedPtr<FOdysseyAnimationCellImageStagger> iCell);
+    void Construct(const FArguments& iArgs, TSharedPtr<FOdysseyAnimationCellImageStagger> iCell, FOdysseyAnimationEditorExtension* iExtension);
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const;
 
 private:
     const FSlateBrush* GetBehaviourBrush() const;
 
     int GetReach() const;
+    
+    int GetClampedReach() const;
+    int GetStaggerLength() const;
     void OnReachValueChanged(int iReach);
     void OnReachValueCommited(int iReach, ETextCommit::Type iType);
     void OnReachBeginSliderMovement();
@@ -36,6 +41,7 @@ private:
     bool CanSetBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour) const;
 
 private:
+    FOdysseyAnimationEditorExtension* mExtension;
     TSharedPtr<FOdysseyAnimationCellImageStagger> mCell;
 
     bool mIsEditingReach;
@@ -43,4 +49,5 @@ private:
     {
         int mReach;
     } mReachData;
+    TSharedPtr<SSpinBox<int>> mReachSpinBox;
 };

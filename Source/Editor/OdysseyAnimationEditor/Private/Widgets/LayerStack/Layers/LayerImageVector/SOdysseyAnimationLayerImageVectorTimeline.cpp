@@ -41,7 +41,7 @@ SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(TSharedPtr<FOdys
     if (iCell->GetType() == FOdysseyAnimationCellImageVector::StaticType())
         return SNew(SOdysseyAnimationCellImageVector);
     else if (iCell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
-        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell));
+        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell), mExtension);
 
     return SNullWidget::NullWidget;
 }

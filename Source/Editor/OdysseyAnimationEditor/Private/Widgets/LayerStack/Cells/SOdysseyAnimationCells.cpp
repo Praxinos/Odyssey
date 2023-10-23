@@ -698,14 +698,14 @@ EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleRightVisibility() const
 {
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleRightBrush->ImageSize.X;
-    return isZoomedEnough ? EVisibility::Visible : EVisibility::Collapsed;
+    return isZoomedEnough ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility() const
 {
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleLeftBrush->ImageSize.X;
-    return (isZoomedEnough && GetOffset() > 0) ? EVisibility::Visible : EVisibility::Collapsed;
+    return (isZoomedEnough && GetOffset() > 0) ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 void

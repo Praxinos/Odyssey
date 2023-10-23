@@ -703,8 +703,13 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
     Set("Animation.CellTimingHandle", new IMAGE_BRUSH("OdysseyAnimation/CellTimingHandle_16", mIcon16x16));
     Set("Animation.CellLengthHandle", new IMAGE_BRUSH("OdysseyAnimation/CellLengthHandle_16", mIcon16x16));
-    Set("Animation.CellImageStaggerArrowTop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowTop", FVector2D(10, 7), FLinearColor::White, ESlateBrushTileType::Horizontal));
-    Set("Animation.CellImageStaggerArrowBottom", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowBottom", FVector2D(10, 7), FLinearColor::White, ESlateBrushTileType::Horizontal));
+    Set("Animation.CellImageStagger.PreviewReachColor", FLinearColor(0.2f, 0.3f, 1.0f, 0.5f));
+    Set("Animation.CellImageStagger.ArrowPreviewReach", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowPreviewReach", mIcon32x32, FLinearColor::White, ESlateBrushTileType::Horizontal));
+    Set("Animation.CellImageStagger.ArrowsColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
+    Set("Animation.CellImageStagger.ArrowTop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowTop", FVector2D(10, 7), FLinearColor::White, ESlateBrushTileType::Horizontal));
+    Set("Animation.CellImageStagger.ArrowBottom", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowBottom", FVector2D(10, 7), FLinearColor::White, ESlateBrushTileType::Horizontal));
+    Set("Animation.CellImageStagger.StaggerLengthColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
+    Set("Animation.CellImageStagger.BeheviourColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
     Set("Animation.CellImageStagger.Behaviour.Hold", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourHold", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.Loop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourLoop", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.PingPong", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourPingPong", mIcon16x16));

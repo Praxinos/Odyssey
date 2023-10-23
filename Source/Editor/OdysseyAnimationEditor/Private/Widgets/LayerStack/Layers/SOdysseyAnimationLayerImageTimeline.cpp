@@ -79,7 +79,7 @@ SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeom
 
 	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
 
-	const float height = AllottedGeometry.GetLocalSize().Y;  
+	const float height = AllottedGeometry.GetLocalSize().Y;
 	const float width = AllottedGeometry.GetLocalSize().X;
 	float offset = mExtension->Timeline()->GetOffset();
 	const float frameSize = mExtension->Timeline()->GetFrameWidth();

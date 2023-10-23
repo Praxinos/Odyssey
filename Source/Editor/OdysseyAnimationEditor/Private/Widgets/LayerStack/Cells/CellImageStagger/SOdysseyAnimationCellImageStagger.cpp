@@ -8,11 +8,13 @@
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationCellImageStagger"
 
 void
-SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, TSharedPtr<FOdysseyAnimationCellImageStagger> iCell)
+SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, TSharedPtr<FOdysseyAnimationCellImageStagger> iCell, FOdysseyAnimationEditorExtension* iExtension)
 {
+    mExtension = iExtension;
     mCell = iCell;
 
-    SetClipping( EWidgetClipping::ClipToBoundsAlways );
+        
+    FSlateColor behaviourColor( FOdysseyStyle::GetColor( "Animation.CellImageStagger.BehaviourColor" ) );
 
     ChildSlot
     .VAlign(VAlign_Center)
@@ -20,6 +22,7 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, TSharedPtr
     .Padding(FMargin(3, 0, 0, 0))
     [
         SNew(SHorizontalBox)
+        .Clipping(EWidgetClipping::ClipToBoundsAlways)
         + SHorizontalBox::Slot()
         .AutoWidth()
         [
@@ -32,13 +35,14 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, TSharedPtr
             [
                 SNew(SImage)
                 .Image(this, &SOdysseyAnimationCellImageStagger::GetBehaviourBrush)
-            ]   
+                .ColorAndOpacity(behaviourColor)
+            ]
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
         .Padding(FMargin(5, 0, 0, 0))
         [
-            SNew( SSpinBox<int> )
+            SAssignNew( mReachSpinBox, SSpinBox<int> )
             .Value(this, &SOdysseyAnimationCellImageStagger::GetReach )
             .OnValueChanged( this, &SOdysseyAnimationCellImageStagger::OnReachValueChanged )
             .OnValueCommitted( this, &SOdysseyAnimationCellImageStagger::OnReachValueCommited )
@@ -59,26 +63,74 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
     
 	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
-	const FSlateBrush* ArrowBrushTop = FOdysseyStyle::GetBrush("Animation.CellImageStaggerArrowTop");
-    const FSlateBrush* ArrowBrushBottom = FOdysseyStyle::GetBrush("Animation.CellImageStaggerArrowBottom");
+	const FSlateBrush* ArrowBrushTop = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowTop");
+    const FSlateBrush* ArrowBrushBottom = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowBottom");
+    const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
 	const float height = AllottedGeometry.GetLocalSize().Y;  
 	const float width = AllottedGeometry.GetLocalSize().X;
+	float offset = mExtension->Timeline()->GetOffset();
+	const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
-    //Plus
+    int reach = GetClampedReach();
+    int staggerLength = GetStaggerLength();
+
+    bool displayReach = false;
+    displayReach |= mReachSpinBox && mReachSpinBox->HasKeyboardFocus();
+    displayReach |= mReachSpinBox && mReachSpinBox->IsHovered();
+
+    if (staggerLength != INDEX_NONE && staggerLength > 0)
+    {
+        FLinearColor staggerLengthColor = FOdysseyStyle::GetColor( "Animation.CellImageStagger.StaggerLengthColor" );
+        for (int x = staggerLength * frameSize; x < width; x += staggerLength * frameSize)
+        {
+            //Repeatiton Limits
+            FSlateDrawElement::MakeBox(
+                OutDrawElements,
+                LayerId,
+                AllottedGeometry.ToPaintGeometry(FVector2D(x, 7.f), FVector2D(1, height - 7.f)),
+                GenericBrush,
+                ESlateDrawEffect::None,
+                staggerLengthColor
+            );
+        }
+    }
+
+    FLinearColor arrowsColor = FOdysseyStyle::GetColor( "Animation.CellImageStagger.ArrowsColor" );
+
+    //Top Arrows
     FSlateDrawElement::MakeBox(
         OutDrawElements,
         LayerId,
         AllottedGeometry.ToPaintGeometry(FVector2D(3, 0), FVector2D(width - 3.f, 7.f)),
-        ArrowBrushTop
+        ArrowBrushTop,
+        ESlateDrawEffect::None,
+        arrowsColor
     );
 
-    //Plus
+    //Bottom Arrows
     FSlateDrawElement::MakeBox(
         OutDrawElements,
         LayerId,
         AllottedGeometry.ToPaintGeometry(FVector2D(3, height - 7.f), FVector2D(width - 3.f, 7.f)),
-        ArrowBrushBottom
+        ArrowBrushBottom,
+        ESlateDrawEffect::None,
+        arrowsColor
     );
+
+    //Plus
+    if (displayReach)
+    {
+        FLinearColor reachColor = FOdysseyStyle::GetColor( "Animation.CellImageStagger.PreviewReachColor" );
+        const FSlateBrush* reachBrush = FOdysseyStyle::GetBrush( "Animation.CellImageStagger.ArrowPreviewReach" );
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry(FVector2D(reach * frameSize * -1, (height - 32.f) / 2.f ), FVector2D(reach * frameSize, 32.f)),
+            reachBrush,
+            ESlateDrawEffect::None,
+            reachColor
+        );
+    }
 
 	return LayerId;
 }
@@ -140,6 +192,10 @@ SOdysseyAnimationCellImageStagger::OnReachEndSliderMovement(int iReach)
 {
     mReachData.mReach = mCell->GetReach();
     mIsEditingReach = false;
+
+    //Clear the keyboard focus here because the spinbox keeps it after dragging the value
+    //which leads to the reach preview to be displayed after edition
+    FSlateApplication::Get().SetKeyboardFocus(AsShared(), EFocusCause::SetDirectly);
 }
 
 TSharedRef<SWidget>
@@ -195,7 +251,6 @@ SOdysseyAnimationCellImageStagger::SetBehaviour(FOdysseyAnimationCellImageStagge
 #endif
     FOdysseyAnimationCellImageStaggerMutator mutator(mCell->GetLayer(), mCell);
     mutator.SetBehaviour(iBehaviour);
-    //TODO: Undo + Mutator
 }
 
 bool
@@ -203,6 +258,37 @@ SOdysseyAnimationCellImageStagger::CanSetBehaviour(FOdysseyAnimationCellImageSta
 {
     //TODO: check if layer is locked
     return true;
+}
+
+int
+SOdysseyAnimationCellImageStagger::GetClampedReach() const
+{
+    int cellStartFrame = mCell->GetLayer()->GetCellsContainer()->GetCellFrame(mCell);
+    int layerStartFrame = mCell->GetLayer()->GetCellsContainer()->GetOffset();
+    int maxReach = cellStartFrame - layerStartFrame;
+    int reach = GetReach() <= 0 ? maxReach : FMath::Min(GetReach(), maxReach);
+
+    return reach;
+}
+
+int
+SOdysseyAnimationCellImageStagger::GetStaggerLength() const
+{
+    switch(mCell->GetBehaviour())
+    {
+        case FOdysseyAnimationCellImageStagger::eBehaviour::Hold:
+            return INDEX_NONE;
+        break;
+
+        case FOdysseyAnimationCellImageStagger::eBehaviour::Loop:
+            return GetClampedReach();
+        break;
+
+        case FOdysseyAnimationCellImageStagger::eBehaviour::PingPong:
+            return GetClampedReach() - 1;
+        break;
+    }
+    return INDEX_NONE;
 }
 
 #undef LOCTEXT_NAMESPACE
