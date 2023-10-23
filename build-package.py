@@ -398,6 +398,12 @@ def Clean( iArgs, iOutputPath ):
     print( Fore.GREEN + f'Removing: {intermediate}' )
     shutil.rmtree( intermediate, ignore_errors=True )
 
+    thridparty_libharu = iOutputPath / 'Source' / 'ThirdParty' / 'libharu'
+    for path in thridparty_libharu.glob( 'libharu-*' ):
+        if path.is_dir():
+            print( Fore.GREEN + f'Removing: {path}' )
+            shutil.rmtree( path, ignore_errors=True )
+
 #---
 
 # Zipping
