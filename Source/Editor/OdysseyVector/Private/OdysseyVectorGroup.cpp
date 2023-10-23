@@ -29,7 +29,7 @@ FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorGroup::DrawShape( uint64 iFlags )
+FOdysseyVectorGroup::DrawShape( BLContext* iBLContext, uint64 iFlags )
 {
 
 }

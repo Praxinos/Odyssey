@@ -32,6 +32,7 @@
 #include "Undo/OdysseyVectorUndoApplyTransformations.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
@@ -42,7 +43,7 @@
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
-#include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
+#include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
@@ -70,6 +71,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEdite
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
 	, mRasterDrawingTool(nullptr)
+	, mRasterPaintBucketTool(nullptr)
     , mVectorPathDrawingTool(nullptr)
     , mVectorPathEditTool(nullptr)
 	, mVectorPrimitiveDrawingTool(nullptr)
@@ -80,7 +82,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEdite
 	, mVectorPathPushTool(nullptr)
 	, mVectorPathSmoothTool(nullptr)
 	, mVectorPathStitchTool(nullptr)
-	, mPaintBucketTool(nullptr)
+	, mVectorPaintBucketTool(nullptr)
 	, mColorPickerTool(nullptr)
 	, mVectorGridTool(nullptr)
 	, mVectorTransformTool(nullptr)
@@ -128,6 +130,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
     GetGUI()->BindShortcuts(iToolkit);
 
     mRasterDrawingTool->BindShortcuts(iToolkit);
+	mRasterPaintBucketTool->BindShortcuts(iToolkit);
     mVectorPathDrawingTool->BindShortcuts(iToolkit);
     mVectorPathEditTool->BindShortcuts(iToolkit);
 	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
@@ -138,7 +141,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mVectorPathPushTool->BindShortcuts(iToolkit);
 	mVectorPathSmoothTool->BindShortcuts(iToolkit);
 	mVectorPathStitchTool->BindShortcuts(iToolkit);
-	mPaintBucketTool->BindShortcuts(iToolkit);
+	mVectorPaintBucketTool->BindShortcuts(iToolkit);
 	mColorPickerTool->BindShortcuts(iToolkit);
 	mVectorGridTool->BindShortcuts(iToolkit);
 	mVectorTransformTool->BindShortcuts(iToolkit);
@@ -161,6 +164,7 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
     GetGUI()->ExtendMenu(iOwner, iMenuName);
 
     mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
+	mRasterPaintBucketTool->ExtendMenu(iOwner, iMenuName);
     mVectorPathDrawingTool->ExtendMenu(iOwner,iMenuName);
     mVectorPathEditTool->ExtendMenu(iOwner,iMenuName);
 	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
@@ -171,7 +175,7 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathSmoothTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPathStitchTool->ExtendMenu(iOwner, iMenuName);
-	mPaintBucketTool->ExtendMenu(iOwner, iMenuName);
+	mVectorPaintBucketTool->ExtendMenu(iOwner, iMenuName);
 	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
 	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
 	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
@@ -204,6 +208,7 @@ void
 FOdysseyPainterEditor::InitTools()
 {
     mRasterDrawingTool = NewObject<UOdysseyPainterEditorRasterDrawingTool>();
+	mRasterPaintBucketTool = NewObject<UOdysseyPainterEditorRasterPaintBucketTool>();
     mVectorPathDrawingTool = NewObject<UOdysseyPainterEditorVectorPathDrawingTool>();
     mVectorPathEditTool = NewObject<UOdysseyPainterEditorVectorPathEditTool>();
 	mVectorPrimitiveDrawingTool = NewObject<UOdysseyPainterEditorVectorPrimitiveDrawingTool>();
@@ -214,12 +219,13 @@ FOdysseyPainterEditor::InitTools()
     mVectorPathPushTool = NewObject<UOdysseyPainterEditorVectorPathPushTool>();
     mVectorPathSmoothTool = NewObject<UOdysseyPainterEditorVectorPathSmoothTool>();
     mVectorPathStitchTool = NewObject<UOdysseyPainterEditorVectorPathStitchTool>();
-	mPaintBucketTool = NewObject<UOdysseyPainterEditorPaintBucketTool>();
+	mVectorPaintBucketTool = NewObject<UOdysseyPainterEditorVectorPaintBucketTool>();
 	mColorPickerTool = NewObject<UOdysseyPainterEditorColorPickerTool>();
 	mVectorGridTool = NewObject<UOdysseyPainterEditorVectorGridTool>();
 	mVectorTransformTool = NewObject<UOdysseyPainterEditorVectorTransformTool>();
 
 	mRasterDrawingTool->SetEditor(this);
+	mRasterPaintBucketTool->SetEditor(this);
     mVectorPathDrawingTool->SetEditor(this);
     mVectorPathEditTool->SetEditor(this);
     mVectorPrimitiveDrawingTool->SetEditor(this);
@@ -230,13 +236,14 @@ FOdysseyPainterEditor::InitTools()
     mVectorPathPushTool->SetEditor(this);
     mVectorPathSmoothTool->SetEditor(this);
     mVectorPathStitchTool->SetEditor(this);
-	mPaintBucketTool->SetEditor(this);
+	mVectorPaintBucketTool->SetEditor(this);
 	mColorPickerTool->SetEditor(this);
 	mVectorGridTool->SetEditor(this);
 	mVectorTransformTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
 
 	mTools.Add(mRasterDrawingTool);
+	mTools.Add(mRasterPaintBucketTool);
     mTools.Add(mVectorPathDrawingTool);
     mTools.Add(mVectorPathEditTool);
     mTools.Add(mVectorPrimitiveDrawingTool);
@@ -247,7 +254,7 @@ FOdysseyPainterEditor::InitTools()
     mTools.Add(mVectorPathPushTool);
     mTools.Add(mVectorPathSmoothTool);
     mTools.Add(mVectorPathStitchTool);
-	mTools.Add(mPaintBucketTool);
+	mTools.Add(mVectorPaintBucketTool);
 	mTools.Add(mColorPickerTool);
 	mTools.Add(mVectorGridTool);
 	mTools.Add(mVectorTransformTool);
@@ -278,6 +285,12 @@ UOdysseyPainterEditorRasterDrawingTool*
 FOdysseyPainterEditor::GetRasterDrawingTool() const
 {
     return mRasterDrawingTool;
+}
+
+UOdysseyPainterEditorRasterPaintBucketTool*
+FOdysseyPainterEditor::GetRasterPaintBucketTool() const
+{
+    return mRasterPaintBucketTool;
 }
 
 UOdysseyPainterEditorVectorPrimitiveDrawingTool*
@@ -352,10 +365,10 @@ FOdysseyPainterEditor::GetVectorPathStitchTool() const
     return mVectorPathStitchTool;
 }
 
-UOdysseyPainterEditorPaintBucketTool*
-FOdysseyPainterEditor::GetPaintBucketTool() const
+UOdysseyPainterEditorVectorPaintBucketTool*
+FOdysseyPainterEditor::GetVectorPaintBucketTool() const
 {
-    return mPaintBucketTool;
+    return mVectorPaintBucketTool;
 }
 
 UOdysseyPainterEditorColorPickerTool*
@@ -1406,6 +1419,7 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	FOdysseyEditor::AddReferencedObjects(Collector);
 	Collector.AddReferencedObject(mRasterDrawingTool);
+	Collector.AddReferencedObject(mRasterPaintBucketTool);
 	Collector.AddReferencedObject(mVectorPrimitiveDrawingTool);
 	Collector.AddReferencedObject(mVectorPathDrawingTool);
 	Collector.AddReferencedObject(mVectorPathEditTool);
@@ -1416,7 +1430,7 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
     Collector.AddReferencedObject(mVectorPathPushTool);
     Collector.AddReferencedObject(mVectorPathSmoothTool);
     Collector.AddReferencedObject(mVectorPathStitchTool);
-	Collector.AddReferencedObject(mPaintBucketTool);
+	Collector.AddReferencedObject(mVectorPaintBucketTool);
 	Collector.AddReferencedObject(mColorPickerTool);
 	Collector.AddReferencedObject(mVectorGridTool);
 	Collector.AddReferencedObject(mVectorTransformTool);

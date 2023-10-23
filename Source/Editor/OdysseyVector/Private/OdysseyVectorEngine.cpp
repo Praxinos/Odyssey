@@ -3,48 +3,21 @@
 
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
-    mBLContext->end();
-
-    delete mBLImage;
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight )
+FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene
+                                          , uint32 iPreferredWidth
+                                          , uint32 iPreferredHeight )
     : FOdysseyVectorObject( "Engine" )
     , mSelectionSpace( nullptr )
-    , mInvalidTileMap( 64, iWidth, iHeight )
-    , mWidth( iWidth )
-    , mHeight( iHeight )
+    , mInvalidTileMap( 64, iPreferredWidth, iPreferredHeight )
+    , mPreferredWidth( iPreferredWidth )
+    , mPreferredHeight( iPreferredHeight )
 {
-    BLContextCreateInfo createInfo {};
-
     // Configure the number of threads to use.
     mProcessorCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
 
-    createInfo.threadCount = mProcessorCount;
-
-    // create an empty default image. An image is always needed for matrix operations
-    mDefaultBLImage.createFromData( mWidth
-                                  , mHeight
-                                  , BL_FORMAT_PRGB32
-                                  , nullptr
-                                  , 0
-                                  , nullptr
-                                  , nullptr );
-
-    mBLContext = new BLContext();
-    mBLMask  = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
-
-    UseImage( &mDefaultBLImage );
-
-    /*mScene = NewObject<FOdysseyVectorScene>();
-    mScene->Init("Vector Scene");*/
-
     SetScene( iScene );
-
-    mBLContext->begin( *mBLImage, createInfo );
-    //UseColorImage();
-
-    mHorizontalLineBuffer.resize( iHeight );
 }
 
 bool
@@ -77,33 +50,27 @@ FOdysseyVectorEngine::GetInvalidTileMap()
 }
 
 BLImage*
-FOdysseyVectorEngine::GetBLImage()
-{
-    return mBLImage;
-}
-
-BLContext*
-FOdysseyVectorEngine::GetBLContext()
-{
-    return mBLContext;
-}
-
-BLImage*
 FOdysseyVectorEngine::GetBLMask()
 {
     return mBLMask;
 }
 
-uint32
-FOdysseyVectorEngine::GetWidth()
+void
+FOdysseyVectorEngine::SetBLMask( BLImage* iBLMask )
 {
-    return mWidth;
+    mBLMask = iBLMask;
 }
 
 uint32
-FOdysseyVectorEngine::GetHeight()
+FOdysseyVectorEngine::GetPreferredWidth()
 {
-    return mHeight;
+    return mPreferredWidth;
+}
+
+uint32
+FOdysseyVectorEngine::GetPreferredHeight()
+{
+    return mPreferredHeight;
 }
 
 void
@@ -127,31 +94,29 @@ FOdysseyVectorEngine::GetScene()
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( BLImage* iBLImage/*FOdysseyVectorScene* iScene */ )
+FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext/*FOdysseyVectorScene* iScene */ )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
     std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
 
-    UseImage( iBLImage );
+    //UseImage( iBLImage );
 
-    mBLContext->save();
-    mBLContext->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
     //mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
     //mBLContext->setFillAlpha( 0.0f );
-    mBLContext->clearAll();
+    iBLContext->clearAll();
 
-    for( std::list<FOdysseyVectorHUD*>::iterator hit = GetHUDList().begin(); hit != GetHUDList().end(); ++hit )
+    for( FOdysseyVectorHUD *hud : GetHUDList() )
     {
-        FOdysseyVectorHUD *hud = (*hit);
-
-        hud->Draw( mScene, 0 );
+        hud->Draw( iBLContext, mScene, 0 );
     }
 
-    mBLContext->restore();
+    iBLContext->restore();
 
-    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+    iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
-    UseImage( &mDefaultBLImage );
+    //UseImage( &mDefaultBLImage );
 }
 
 void
@@ -172,149 +137,28 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 }
 
 void
-FOdysseyVectorEngine::Render( BLImage* iBLImage, uint64 iDrawingFlags )
+FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
-    UseImage( iBLImage );
+    BLImage* image = iBLContext->targetImage();
+    BLImageData imageData;
+
+    image->getData( &imageData );
+
+    // for drawing polygones (textured)
+    if( mHorizontalLineBuffer.size() != imageData.size.h )
+    {
+        mHorizontalLineBuffer.resize( imageData.size.h );
+    }
 
     if( mInvalidationFlags )
     {
-        mScene->Draw( iDrawingFlags );
-        mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+        mScene->Draw( iBLContext, iDrawingFlags );
+
+        iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
 
     mInvalidationFlags = 0;
-
-    UseImage( &mDefaultBLImage );
-}
-
-void
-FOdysseyVectorEngine::ClearMask()
-{
-    BLImage* currentImage = GetBLImage();
-
-    UseMaskImage();
-
-    mBLContext->save();
-    mBLContext->resetMatrix();
-
-    mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLContext->setFillAlpha( 0.0f );
-    mBLContext->clearAll();
-    mBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
-
-    mBLContext->restore();
-
-    UseImage( currentImage );
-}
-
-::ULIS::FRectD
-FOdysseyVectorEngine::GenerateCircleMask( double iX, double iY, double iRadius )
-{
-    BLImage* currentImage = GetBLImage();
-
-    UseMaskImage();
-
-    mBLContext->save();
-    mBLContext->resetMatrix();
-
-    mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLContext->setFillAlpha( 1.0f );
-    mBLContext->fillCircle( iX, iY, iRadius );
-    mBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
-
-    mBLContext->restore();
-
-    UseImage( currentImage );
-
-    return ::ULIS::FRectD::FromMinMax( iX - iRadius, iY - iRadius
-                                     , iX + iRadius, iY + iRadius );
-}
-
-::ULIS::FRectD
-FOdysseyVectorEngine::GenerateRectangleMask( const ::ULIS::FRectD& iRect )
-{
-    BLImage* currentImage = GetBLImage();
-
-    UseMaskImage();
-
-    mBLContext->save();
-    mBLContext->resetMatrix();
-
-    mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLContext->setFillAlpha( 0.0f );
-    mBLContext->clearAll();
-    mBLContext->setFillAlpha( 1.0f );
-    mBLContext->fillRect( iRect.x, iRect.y, iRect.w, iRect.h );
-    mBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
-
-    mBLContext->restore();
-
-    UseImage( currentImage );
-
-    return iRect;
-}
-
-::ULIS::FRectD
-FOdysseyVectorEngine::GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray )
-{
-    BLImage* currentImage = GetBLImage();
-    ::ULIS::FRectD rect = { 0, 0, 0, 0 };
-    BLPath path;
-
-    UseMaskImage();
-
-    mBLContext->save();
-    mBLContext->resetMatrix();
-    mBLContext->setCompOp(BL_COMP_OP_SRC_COPY);
-    /*blctx.setFillStyle( BLRgba32(0x00000000) );*/
-    mBLContext->setFillAlpha(0.0f);
-    mBLContext->clearAll();
-
-    if( iPointArray.size() )
-    {
-        double x1 = iPointArray[0].x, y1 = iPointArray[0].y
-             , x2 = iPointArray[0].x, y2 = iPointArray[0].y;
-
-        path.moveTo( iPointArray[0].x, iPointArray[0].y );
-
-        for( uint32 i = 1; i < iPointArray.size(); i++ )
-        {
-            path.lineTo( iPointArray[i].x, iPointArray[i].y );
-
-            if( iPointArray[i].x < x1 )
-            {
-                x1 = iPointArray[i].x;
-            }
-
-            if( iPointArray[i].y < y1 )
-            {
-                y1 = iPointArray[i].y;
-            }
-
-            if( iPointArray[i].x > x2 )
-            {
-                x2 = iPointArray[i].x;
-            }
-
-            if( iPointArray[i].y > y2 )
-            {
-                y2 = iPointArray[i].y;
-            }
-        }
-
-        rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
-
-        mBLContext->setFillAlpha(1.0f);
-        mBLContext->fillPath( path );
-    }
-
-    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
-    mBLContext->restore();
-
-    UseImage( currentImage );
-
-    return rect;
 }
 
 void
@@ -756,22 +600,6 @@ FOdysseyVectorEngine::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
 }
 
 void
-FOdysseyVectorEngine::UseMaskImage()
-{
-    mBLContext->end();
-    mBLContext->begin( *mBLMask );
-}
-
-void
-FOdysseyVectorEngine::UseImage( BLImage* iImage )
-{
-    mBLContext->end();
-    mBLContext->begin(*iImage);
-
-    mBLImage = iImage;
-}
-
-void
 FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
                           , const ::ULIS::FRectD& iRoi
                           , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
@@ -851,7 +679,9 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
                                 , int32 iX1
                                 , int32 iY1
                                 , double iU1
-                                , double iV1 )
+                                , double iV1
+                                , uint32 iImageWidth
+                                , uint32 iImageHeight )
 {
     int32 dx  = ( iX1 - iX0 ),
           ddx = abs ( dx ),
@@ -872,9 +702,9 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     {
         for( int i = 0; i <= ddx; i++ )
         {
-            if( ( y >= 0 ) && ( y < (int32) mHeight ) )
+            if( ( y >= 0 ) && ( y < (int32) iImageHeight ) )
             {
-                uint32 offset = ( y * mWidth ) + x;
+                uint32 offset = ( y * iImageWidth ) + x;
 
                 if( mHorizontalLineBuffer[y].inited == 0 )
                 {
@@ -920,9 +750,9 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     {
         for( int i = 0x00; i <= ddy; i++ )
         {
-            if( ( y >= 0x00 ) && ( y < (int32) mHeight ) )
+            if( ( y >= 0x00 ) && ( y < (int32) iImageHeight ) )
             {
-                uint32 offset = ( y * mWidth ) + x;
+                uint32 offset = ( y * iImageWidth ) + x;
 
                 if( mHorizontalLineBuffer[y].inited == 0 )
                 {
@@ -967,7 +797,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
 }
 
 // Macro for faster execution. Indeed, an inline function is not guaranteed to be inlined.
-#define GETPIXEL(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,U,V,R,G,B,A)             \
+#define GETPIXEL(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,ALPHAONLY,U,V,R,G,B,A)   \
     switch ( BITSPERPIXEL )                                                \
     {                                                                      \
         case 32 :                                                          \
@@ -977,9 +807,13 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
             int32 TEXV = V * ( HEIGHT - 1 );                               \
             uint32 TEXOFFSET = ( TEXV * WIDTH ) + TEXU;                    \
                                                                            \
-            B = PIXELS32[TEXOFFSET][0];                                    \
-            G = PIXELS32[TEXOFFSET][1];                                    \
-            R = PIXELS32[TEXOFFSET][2];                                    \
+            if( ALPHAONLY == false )                                       \
+            {                                                              \
+                B = PIXELS32[TEXOFFSET][0];                                \
+                G = PIXELS32[TEXOFFSET][1];                                \
+                R = PIXELS32[TEXOFFSET][2];                                \
+            }                                                              \
+                                                                           \
             A = PIXELS32[TEXOFFSET][3];                                    \
         }                                                                  \
         break;                                                             \
@@ -992,39 +826,54 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
 void
 FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
                                           , double iOpacity
-                                          , int8*  iPixelData
-                                          , int32  iBitsPerPixel
+                                          , int8*  iImagePixelData
+                                          , uint32 iImageWidth
+                                          , uint32 iImageHeight
+                                          , int32  iImageBitsPerPixel
+                                          , const  FColor& iColor
                                           // Temp
                                           , int8*  iBrushPixelData
                                           , uint32 iBrushWidth
                                           , uint32 iBrushHeight
-                                          , int32  iBrushBitsPerPixel )
+                                          , int32  iBrushBitsPerPixel
+                                          , bool   iBrushAlphaOnly )
 {
     FHorizontalLine *hline = &mHorizontalLineBuffer[iLineNumber];
     int32 x0 = hline->x0,
           x1 = hline->x1;
     double u0 = hline->u0;
     double v0 = hline->v0;
-    int32 dx = x1 - x0, ddx = abs ( dx );
+    int32 dx = x1 - x0;
     int32 x = x0;
-    double du  = hline->u1 - hline->u0, pu = ( ddx ) ? ( du / ddx ) : 0.0f;
-    double dv  = hline->v1 - hline->v0, pv = ( ddx ) ? ( dv / ddx ) : 0.0f;
-    long  px = ( dx > 0 ) ? 1 : -1;
+    double du  = hline->u1 - hline->u0, pu = ( dx ) ? ( du / dx ) : 0.0f;
+    double dv  = hline->v1 - hline->v0, pv = ( dx ) ? ( dv / dx ) : 0.0f;
     double u = u0;
     double v = v0;
     double opacityFactor = iOpacity / 255.0f;
+    uint32 offset = ( iLineNumber * iImageWidth );
+    int32 screenx = dx;
+    unsigned char BR = iColor.R, BG = iColor.G, BB = iColor.B, BA = iColor.A;
 
-    uint32 offset = ( iLineNumber * mWidth );
+    // Clipping. Note: x1 MUST be > 0, which is checked before the call to this function
+    if( x0 < 0 )
+    {
+        int32 clippingW = -x0;
+
+        x = 0;
+        u  += ( clippingW * pu );
+        v  += ( clippingW * pv );
+
+        screenx  = dx - clippingW;
+    }
 
     // Commented out: we don't drow from edge-to-edge, we stop 1 pixel before to prevent overlapping,
     // which would lead to double stroke and would produce artefact when alpha is semi-transparent.
     //for( int i = 0; i <= ddx; i++ )
-    for( int i = 0; i < ddx; i++ )
+    for( int i = 0; ( i < screenx ) && ( x < (int)iImageWidth /* clipping */ ); i++ )
     {
-        if( ( x >= 0 ) && ( x < (int32) mWidth ) )
+        if( ( x >= 0 ) && ( x < (int32) iImageWidth ) )
         {
             uint32 aoffset = offset + x;
-            unsigned char BA = 255, BR = 0, BG = 0, BB = 0;
 
             if( iBrushPixelData && iBrushWidth && iBrushHeight )
             {
@@ -1032,6 +881,7 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
                         , iBrushWidth
                         , iBrushHeight
                         , iBrushBitsPerPixel
+                        , iBrushAlphaOnly
                         , u
                         , v
                         , BR
@@ -1040,21 +890,22 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
                         , BA );
             }
 
-            switch ( iBitsPerPixel )
+            switch ( iImageBitsPerPixel )
             {
                 case 32 :
                 {
-                    unsigned char (*srcimg)[4] = ( unsigned char (*)[4]) iPixelData;
+                    unsigned char (*srcimg)[4] = ( unsigned char (*)[4]) iImagePixelData;
 
                     if( BA )
                     {
-                        double alpha = (double) BA * opacityFactor;
-                        double invAlpha = 1.0f - alpha;
+                        double blending = (double) BA * opacityFactor;
+                        double invBlending = 1.0f - blending;
+                        uint32 maxAlpha = ( uint32) srcimg[aoffset][3] + ( BA * iOpacity );
 
-                        srcimg[aoffset][0] = /*BB*/( invAlpha * srcimg[aoffset][0] ) + ( BB * alpha );
-                        srcimg[aoffset][1] = /*BG*/( invAlpha * srcimg[aoffset][1] ) + ( BG * alpha );
-                        srcimg[aoffset][2] = /*BR*/( invAlpha * srcimg[aoffset][2] ) + ( BR * alpha );
-                        srcimg[aoffset][3] = /*BA*/( invAlpha * srcimg[aoffset][3] ) + ( BA * alpha );
+                        srcimg[aoffset][0] = /*BB*/( invBlending * srcimg[aoffset][0] ) + ( BB * blending );
+                        srcimg[aoffset][1] = /*BG*/( invBlending * srcimg[aoffset][1] ) + ( BG * blending );
+                        srcimg[aoffset][2] = /*BR*/( invBlending * srcimg[aoffset][2] ) + ( BR * blending );
+                        srcimg[aoffset][3] = ( maxAlpha > 255 ) ? 255 : maxAlpha;
                     }
                 }
                 break;
@@ -1064,7 +915,7 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
             }
         }
 
-        x += px;
+        x ++;
         u += pu;
         v += pv;
     }
@@ -1108,13 +959,17 @@ FOdysseyVectorEngine::DrawQuad( ::ULIS::FVec2I iPoint[4]
                               , double iU[4]
                               , double iV[4]
                               , double iOpacity
-                              , int8*  iPixelData
-                              , int32  iBitsPerPixel
+                              , int8*  iImagePixelData
+                              , uint32 iImageWidth
+                              , uint32 iImageHeight
+                              , int32  iImageBitsPerPixel
+                              , const FColor& iColor
                               // temp
                               , int8*  iBrushPixelData
                               , uint32 iBrushWidth
                               , uint32 iBrushHeight
-                              , int32  iBrushBitsPerPixel )
+                              , int32  iBrushBitsPerPixel
+                              , bool   iBrushAlphaOnly )
 {
     int32 ymin = iPoint[0].y,
           ymax = ymin;
@@ -1130,19 +985,19 @@ FOdysseyVectorEngine::DrawQuad( ::ULIS::FVec2I iPoint[4]
         if( iPoint[i].x < iPoint[n].x )
         {
             TraceLine ( iPoint[i].x, iPoint[i].y, iU[i], iV[i]
-                      , iPoint[n].x, iPoint[n].y, iU[n], iV[n] );
+                      , iPoint[n].x, iPoint[n].y, iU[n], iV[n], iImageWidth, iImageHeight );
         }
         else
         {
             TraceLine ( iPoint[n].x, iPoint[n].y, iU[n], iV[n]
-                      , iPoint[i].x, iPoint[i].y, iU[i], iV[i] );
+                      , iPoint[i].x, iPoint[i].y, iU[i], iV[i], iImageWidth, iImageHeight );
         }
     }
 
-    if ( ymin <  0               ) ymin = 0;
-    if ( ymin >= (int32) mHeight ) ymin = (int32) mHeight - 1;
-    if ( ymax <  0               ) ymax = 0;
-    if ( ymax >= (int32) mHeight ) ymax = (int32) mHeight - 1;
+    if ( ymin <  0                    ) ymin = 0;
+    if ( ymin >= (int32) iImageHeight ) ymin = (int32) iImageHeight - 1;
+    if ( ymax <  0                    ) ymax = 0;
+    if ( ymax >= (int32) iImageHeight ) ymax = (int32) iImageHeight - 1;
 
     if ( ymin <= ymax )
     {
@@ -1276,14 +1131,21 @@ FOdysseyVectorEngine::DrawQuad( ::ULIS::FVec2I iPoint[4]
         {
             if( mHorizontalLineBuffer[i].inited == 2 )
             {
-                TraceHorizontalLine( i
-                                   , iOpacity
-                                   , iPixelData
-                                   , iBitsPerPixel
-                                   , iBrushPixelData
-                                   , iBrushWidth
-                                   , iBrushHeight
-                                   , iBrushBitsPerPixel );
+                if( mHorizontalLineBuffer[i].x1 >= 0 )
+                {
+                    TraceHorizontalLine( i
+                                       , iOpacity
+                                       , iImagePixelData
+                                       , iImageWidth
+                                       , iImageHeight
+                                       , iImageBitsPerPixel
+                                       , iColor
+                                       , iBrushPixelData
+                                       , iBrushWidth
+                                       , iBrushHeight
+                                       , iBrushBitsPerPixel
+                                       , iBrushAlphaOnly );
+                }
             }
 
             mHorizontalLineBuffer[i].inited = 0;

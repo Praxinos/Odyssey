@@ -254,7 +254,6 @@ FOdysseyVectorCycle::PropagateBucket()
 bool
 FOdysseyVectorCycle::HitTest( double iX, double iY )
 {
-    BLContext* blctx = mOwner->GetScene()->GetEngine()->GetBLContext();
     BLPoint pt = { iX, iY };
 
     uint32 ret = mCombinedPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
@@ -269,20 +268,18 @@ FOdysseyVectorCycle::GetOwner()
 }
 
 void
-FOdysseyVectorCycle::StrokePath( bool iWorld )
+FOdysseyVectorCycle::StrokePath( BLContext* iBLContext, bool iWorld )
 {
-    BLContext* blctx = mOwner->GetScene()->GetEngine()->GetBLContext();
-
     if( iWorld == true )
     {
         BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
         BLPath contourPath = mContourPath;
 
-        blctx->save();
+        iBLContext->save();
 
         if( iWorld )
         {
-            blctx->resetMatrix();
+            iBLContext->resetMatrix();
         }
 
         if( iWorld )
@@ -290,7 +287,7 @@ FOdysseyVectorCycle::StrokePath( bool iWorld )
             contourPath.transform( worldMatrix );
         }
 
-        blctx->strokePath( contourPath );
+        iBLContext->strokePath( contourPath );
 
         for( int i = 0; i < mInnerSectionArray.size(); i++ )
         {
@@ -304,13 +301,13 @@ FOdysseyVectorCycle::StrokePath( bool iWorld )
             sectionPath.moveTo ( pt[0] );
             sectionPath.cubicTo( pt[1], pt[2], pt[3] );
 
-            blctx->strokePath( sectionPath );
+            iBLContext->strokePath( sectionPath );
         }
 
-        blctx->restore();
+        iBLContext->restore();
     }
 
-    blctx->flush( BL_CONTEXT_FLUSH_SYNC );
+    iBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
 }
 
 // for debugging purposes
@@ -344,9 +341,8 @@ FOdysseyVectorCycle::GetBBox()
 }
 
 void
-FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeColor )
+FOdysseyVectorCycle::Draw( BLContext* iBLContext, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor )
 {
-    BLContext* blctx = mOwner->GetScene()->GetEngine()->GetBLContext();
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
 
@@ -357,8 +353,8 @@ FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeCo
                                    , iMonochromeColor.B
                                    , iMonochromeColor.A );
 
-        blctx->setStrokeStyle( BLColor );
-        blctx->setFillStyle( BLColor );
+        iBLContext->setStrokeStyle( BLColor );
+        iBLContext->setFillStyle( BLColor );
     }
     else
     {
@@ -406,8 +402,8 @@ FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeCo
                     linear.addStop( 0.0, BLColor0 );
                     linear.addStop( 1.0, BLColor1 );
 
-                    blctx->setStrokeStyle( linear );
-                    blctx->setFillStyle( linear );
+                    iBLContext->setStrokeStyle( linear );
+                    iBLContext->setFillStyle( linear );
                 }
                 break;
 
@@ -440,8 +436,8 @@ FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeCo
                     radial.addStop( 0.0, BLColor0 );
                     radial.addStop( 1.0, BLColor1 );
 
-                    blctx->setStrokeStyle( radial );
-                    blctx->setFillStyle( radial );
+                    iBLContext->setStrokeStyle( radial );
+                    iBLContext->setFillStyle( radial );
                 }
                 break;
 
@@ -450,8 +446,8 @@ FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeCo
                     FColor color = bucket->GetColor();
                     BLRgba32 BLColor = BLRgba32( color.R, color.G, color.B, color.A );
 
-                    blctx->setStrokeStyle( BLColor );
-                    blctx->setFillStyle( BLColor );
+                    iBLContext->setStrokeStyle( BLColor );
+                    iBLContext->setFillStyle( BLColor );
                 }
                 break;
             }
@@ -461,17 +457,17 @@ FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeCo
             FColor& color = mOwner->GetBackgroundBucket().GetSolidColor();
             BLRgba32 BLColor = BLRgba32( color.R, color.G, color.B, color.A );
 
-           blctx->setStrokeStyle( BLColor );
-           blctx->setFillStyle( BLColor );
+           iBLContext->setStrokeStyle( BLColor );
+           iBLContext->setFillStyle( BLColor );
         }
     }
 
-    blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
-    blctx->fillPath( mCombinedPath );
+    iBLContext->setFillRule( BL_FILL_RULE_EVEN_ODD );
+    iBLContext->fillPath( mCombinedPath );
 
-    blctx->save();
-    blctx->resetMatrix();
-    blctx->setStrokeWidth( 1.0f );
+    iBLContext->save();
+    iBLContext->resetMatrix();
+    iBLContext->setStrokeWidth( 1.0f );
 
     // stroke borders or else there will be a small 1 pixel gap. We draw it only once: the cycle responsible for drawing the 
     // section is the cycle that was first attached to the section. That way we don't draw it twice. The paint group could be
@@ -493,9 +489,9 @@ FOdysseyVectorCycle::Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeCo
             path.moveTo( pt[0] );
             path.cubicTo( pt[1], pt[2], pt[3] );
 
-            blctx->strokePath( path );
+            iBLContext->strokePath( path );
         }
     }
 
-    blctx->restore();
+    iBLContext->restore();
 }

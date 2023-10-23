@@ -14,15 +14,35 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 {
     GENERATED_BODY()
 
-    UTexture2D* texture;
+    UPROPERTY( EditAnywhere, Category = "Default" )
+    bool ColorFromBrush;
+
+    UPROPERTY( EditAnywhere, Category = "Default" )
+    bool ExtendOverPath;
+
+    UPROPERTY( EditAnywhere, Category = "Default" )
+    bool Revert;
 
     FOdysseyVectorBrush()
     {
         texture = nullptr;
+        ColorFromBrush = false;
+        ExtendOverPath = true;
+        Revert = false;
     }
 
     FOdysseyVectorBrush( UTexture2D* iTexture )
     {
         texture = iTexture;
+        ColorFromBrush = false;
+        ExtendOverPath = true;
+        Revert = false;
     }
+
+    void SetTexture( UTexture2D* iTexture );
+    UTexture2D* GetTexture() const;
+
+    private:
+        UTexture2D* texture;
+
 };

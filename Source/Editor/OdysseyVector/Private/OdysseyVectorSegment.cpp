@@ -12,8 +12,7 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
     , mIsInvalidated( false )
     , mIsPaintingReady( false )
     , mPaintingCode( 0 )
-    , mBrushStartT( 0.0f )
-    , mBrushEndT( 0.0f )
+    , mLength( 0.0f )
 {
 }
 
@@ -58,12 +57,11 @@ FOdysseyVectorSegment::GetPolygonCacheEndPointInParent()
 }
 
 void
-FOdysseyVectorSegment::DrawPolygonCache()
+FOdysseyVectorSegment::DrawPolygonCache( BLContext* iBLContext )
 {
-    BLContext* blctx = mPath->GetScene()->GetEngine()->GetBLContext();
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
 
-    blctx->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeWidth( 1.0f );
 
     for ( int i = 0; i < mPolygonCache.size(); i++ )
     {
@@ -74,20 +72,20 @@ FOdysseyVectorSegment::DrawPolygonCache()
                         , { mPolygonCache[i].quadVertex[2].x, mPolygonCache[i].quadVertex[2].y }
                         , { mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y } };
 
-        blctx->fillPolygon( pt, 4 );
+        iBLContext->fillPolygon( pt, 4 );
     }
 
     // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
     // line stroking is done in world coordinates because we need a 1 pixel width
-    blctx->save();
-    blctx->resetMatrix();
-    blctx->setStrokeWidth( 1.0f );
+    iBLContext->save();
+    iBLContext->resetMatrix();
+    iBLContext->setStrokeWidth( 1.0f );
     for ( int i = 1; i < mPolygonCache.size(); i++ )
     {
-        blctx->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].quadVertex[0].x, mPolygonCache[i].quadVertex[0].y )
-                         , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
+        iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].quadVertex[0].x, mPolygonCache[i].quadVertex[0].y )
+                              , worldMatrix.mapPoint( mPolygonCache[i].quadVertex[3].x, mPolygonCache[i].quadVertex[3].y ) );
     }
-    blctx->restore();
+    iBLContext->restore();
 }
 
 FOdysseyVectorHandleSegment*
@@ -328,7 +326,7 @@ FOdysseyVectorSegment::GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVert
 }
 
 void
-FOdysseyVectorSegment::Draw()
+FOdysseyVectorSegment::Draw( BLContext* iBLContext )
 {
 
 }
@@ -340,6 +338,13 @@ FOdysseyVectorSegment::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
 
     return vector;
 }
+
+double
+FOdysseyVectorSegment::GetLength()
+{
+    return ::ULIS::FVec2D( mPoint[1]->GetCoords() - mPoint[0]->GetCoords() ).Distance();
+}
+
 /*
 void
 FOdysseyVectorSegment::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )

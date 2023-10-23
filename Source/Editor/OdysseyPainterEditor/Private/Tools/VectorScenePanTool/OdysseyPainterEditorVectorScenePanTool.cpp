@@ -190,8 +190,8 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
 {
     BLPoint worldMouseCoordsBefore = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 imageWidth = vectorEngine->GetWidth();
-    uint32 imageHeight = vectorEngine->GetHeight();
+    uint32 imageWidth = vectorEngine->GetPreferredWidth();
+    uint32 imageHeight = vectorEngine->GetPreferredHeight();
     double factor;
 
     factor = (double) iPointInTexture.deltaPosition.X / imageWidth;

@@ -3,9 +3,9 @@
 #include <blend2d.h>
 #include <ULIS>
 #include "HUD/OdysseyVectorHUD.h"
-#include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
+#include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolHUD : public FOdysseyVectorHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : public FOdysseyVectorHUD
 {
     public:
         static const uint32 HANDLE_RADIUS      = 3;
@@ -19,12 +19,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolHUD : public 
         static const uint32 PICK_RADIAL_HANDLE = 3;
         static const uint32 PICK_RADIAL_AREA   = 4;
 
-        virtual ~FOdysseyPainterEditorPaintBucketToolHUD();
-        FOdysseyPainterEditorPaintBucketToolHUD(  UOdysseyPainterEditorPaintBucketTool* iPaintBucketTool );
+        virtual ~FOdysseyPainterEditorVectorPaintBucketToolHUD();
+        FOdysseyPainterEditorVectorPaintBucketToolHUD(  UOdysseyPainterEditorVectorPaintBucketTool* iVectorPaintBucketTool );
 
-        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
         virtual void Load( FOdysseyVectorScene* iScene ) override;
+        virtual void Unload( FOdysseyVectorScene* iScene ) override;
 
         void SetCycle( FOdysseyVectorCycle* iCycle );
 
@@ -43,11 +44,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolHUD : public 
         void SetPickedCycles( std::vector<FOdysseyVectorCycle*>& pickedCycleArray );
 
     private:
-        void RecursiveDrawObject( FOdysseyVectorObject* iObject
-                                 , BLContext* iBLContext
-                                 , BLRgba32 fgColor
-                                 , BLRgba32 bgColor
-                                 , BLRgba32 hcColor );
+        void RecursiveDrawObject( BLContext* iBLContext
+                                , FOdysseyVectorObject* iObject
+                                , BLRgba32 fgColor
+                                , BLRgba32 bgColor
+                                , BLRgba32 hcColor );
 
         FOdysseyVectorBucket* RecursivePickBucket( FOdysseyVectorObject* iObject
                                                  , double iWorldX
@@ -58,8 +59,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolHUD : public 
                                        , double iWorldY
                                        , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
 
-        void DrawBucket( FOdysseyVectorBucket* iBucket
-                       , BLContext* iBLContext
+        void DrawBucket( BLContext* iBLContext
+                       , FOdysseyVectorBucket* iBucket
                        , BLRgba32 fgColor
                        , BLRgba32 bgColor
                        , BLRgba32 hcColor );
@@ -70,5 +71,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolHUD : public 
 
     private:
         std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
-        UOdysseyPainterEditorPaintBucketTool* mPaintBucketTool;
+        UOdysseyPainterEditorVectorPaintBucketTool* mPaintBucketTool;
 };

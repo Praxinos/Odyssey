@@ -377,8 +377,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorSc
                                                               , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = vectorEngine->GetWidth();
-    uint32 height = vectorEngine->GetHeight();
+    uint32 width = vectorEngine->GetPreferredWidth();
+    uint32 height = vectorEngine->GetPreferredHeight();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     ::ULIS::FRectI imageRegion;
 
@@ -433,6 +433,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorSce
     {
         mUndoPathExtend->RecordSegment( newSegment, newSegment->GetVertex(1) );
     }
+
+    iScene->Update( 0 ); // update invalidated path after segment insertion
 
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );

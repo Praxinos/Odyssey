@@ -48,7 +48,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @brief draw the cycle (in parent coordinates system).
          * @param iFlags drawing flags.
          */
-        void Draw( uint64 iFlags, bool iMonochrome, FColor iMonochromeColor );
+        void Draw( BLContext* iBLContext, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor );
 
         /**
          * @brief collision test with coordinates passed as parameters.
@@ -116,7 +116,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @brief Stroke the path using BLend2D API. The context (path width, color) can be set before calling this method.
          * @param iWorld true if it should be drawn in world coordinates, false otherwise
          */
-        void StrokePath( bool iWorld );
+        void StrokePath( BLContext* iBLContext, bool iWorld );
 
         ::ULIS::FRectD GetBBox();
 

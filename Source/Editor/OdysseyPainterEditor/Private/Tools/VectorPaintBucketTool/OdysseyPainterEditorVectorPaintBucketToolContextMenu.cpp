@@ -1,14 +1,14 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketToolContextMenu.h"
+#include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketToolContextMenu.h"
 #include "OdysseyPainterEditorVectorBucketView.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorPaintBucketToolContextMenu"
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorPaintBucketToolContextMenu"
 
 //static
 TSharedPtr<SWidget>
-FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
+FOdysseyPainterEditorVectorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
     FMenuBuilder menu( true, nullptr );
 
@@ -33,17 +33,17 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEd
             LOCTEXT("CopyBucketParam", "Copy Bucket Param")
             , LOCTEXT("CopyBucketParam", "Copy Bucket Param")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorPaintBucketToolContextMenu::CopyBucketParam, iBucket )));
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorVectorPaintBucketToolContextMenu::CopyBucketParam, iBucket )));
         menu.AddMenuEntry(
             LOCTEXT("PasteBucketParam", "Paste Bucket Param")
             , LOCTEXT("PasteBucketParam", "Paste Bucket Param")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorPaintBucketToolContextMenu::PasteBucketParam, iBucket )));
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorVectorPaintBucketToolContextMenu::PasteBucketParam, iBucket )));
         menu.AddMenuEntry(
             LOCTEXT("BucketProperties", "Bucket properties")
             , LOCTEXT("BucketProperties", "Bucket Properties")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties, iEditor, iBucket )));
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditorVectorPaintBucketToolContextMenu::BucketProperties, iEditor, iBucket )));
     }
     menu.EndSection();
 
@@ -52,7 +52,7 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::CreateWidget( FOdysseyPainterEd
 
 //static
 void
-FOdysseyPainterEditorPaintBucketToolContextMenu::BucketProperties( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
+FOdysseyPainterEditorVectorPaintBucketToolContextMenu::BucketProperties( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     TSharedPtr<IDetailsView> detailsView;
@@ -109,7 +109,7 @@ GetCopiedBucket()
 
 // static
 void
-FOdysseyPainterEditorPaintBucketToolContextMenu::CopyBucketParam( FOdysseyVectorBucket* iSourceBucket )
+FOdysseyPainterEditorVectorPaintBucketToolContextMenu::CopyBucketParam( FOdysseyVectorBucket* iSourceBucket )
 {
     FOdysseyVectorBucket& destinationBucket = GetCopiedBucket();
 
@@ -118,7 +118,7 @@ FOdysseyPainterEditorPaintBucketToolContextMenu::CopyBucketParam( FOdysseyVector
 
 // static
 void
-FOdysseyPainterEditorPaintBucketToolContextMenu::PasteBucketParam( FOdysseyVectorBucket* iDestinationBucket )
+FOdysseyPainterEditorVectorPaintBucketToolContextMenu::PasteBucketParam( FOdysseyVectorBucket* iDestinationBucket )
 {
     FOdysseyVectorBucket& sourceBucket = GetCopiedBucket();
     ::ULIS::FVec2D destinationBucketCoords = iDestinationBucket->GetCoords();

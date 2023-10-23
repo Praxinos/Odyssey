@@ -51,7 +51,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLine : public FOdysseyVectorPrimitive
         double GetHeight();
 
     private:
-        virtual void DrawShape( uint64 iFlags ) override;
+        virtual void DrawShape( BLContext* iBLContext, uint64 iFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 

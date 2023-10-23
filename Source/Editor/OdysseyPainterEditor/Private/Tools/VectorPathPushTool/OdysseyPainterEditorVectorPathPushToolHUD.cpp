@@ -24,37 +24,41 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Load(FOdysseyVectorScene* iScene)
 }
 
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorPathPushToolHUD::Unload( FOdysseyVectorScene* iScene )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
+}
+
+void
+FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
+                                                , FOdysseyVectorScene* iScene
+                                                , uint64 iFlags )
+{
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
-    blctx->save();
-    blctx->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
     if( mPathPushTool->RestrictToSelection )
     {
         std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
-        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        for( FOdysseyVectorObject* selectedObject : selectedObjectList )
         {
-            FOdysseyVectorObject* selectedObject = (*it);
-
-            FOdysseyVectorHUD::DrawObjectRecursive( selectedObject, blctx );
+            FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, selectedObject );
         }
     }
     else
     {
-        FOdysseyVectorHUD::DrawObjectRecursive( iScene, blctx );
+        FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, iScene );
     }
 
-    blctx->setStrokeStyle( hcColor );
-    blctx->setStrokeWidth( 1.0f );
-    blctx->strokeCircle( mX, mY, mPathPushTool->Radius );
+    iBLContext->setStrokeStyle( hcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->strokeCircle( mX, mY, mPathPushTool->Radius );
 
-    blctx->restore();
+    iBLContext->restore();
 }
 
 void

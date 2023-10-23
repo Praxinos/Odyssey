@@ -23,7 +23,22 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY_MK2:
+                {
+                    FString assetName;
+
+                    Ar << assetName;
+
+                    UEditorAssetLibrary::LoadAsset( assetName );
+
+                    UOdysseyPaletteEntry* paletteEntry = Cast<UOdysseyPaletteEntry>(StaticFindObject(NULL, ANY_PACKAGE, *assetName));
+
+                    iBucket.SetPaletteEntry( paletteEntry );
+                }
+                break;
+
+                // LEGACY (non-functionnal)
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY_MK1:
                 {
                     FName nameEntry;
                     Ar << nameEntry;

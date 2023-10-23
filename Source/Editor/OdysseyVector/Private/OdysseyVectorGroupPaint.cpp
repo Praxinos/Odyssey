@@ -577,30 +577,20 @@ FOdysseyVectorGroupPaint::PropagateBuckets()
 void
 FOdysseyVectorGroupPaint::Colorize()
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     std::list<FOdysseyVectorCycle*>::iterator it;
 
-    blctx->save();
-    blctx->setMatrix( mWorldMatrix );
-
     // reset color for all cycles first
-    for( it = mCycleList.begin(); it != mCycleList.end(); ++it )
+    for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        FOdysseyVectorCycle *cycle = (*it);
-
         cycle->SetBucket( nullptr );
     }
 
-    for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
+    for( FOdysseyVectorBucket *bucket : mBucketList )
     {
-        FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
-
         ApplyBucket( bucket );
     }
 
     PropagateBuckets();
-
-    blctx->restore();
 }
 
 void
@@ -608,10 +598,8 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 {
     std::list<FOdysseyVectorCycle*>::iterator it;
 
-    for( it = mCycleList.begin(); it != mCycleList.end(); ++it )
+    for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        FOdysseyVectorCycle *cycle = (*it);
-
         if( cycle->HitTest( iBucket->GetCoords().x, iBucket->GetCoords().y ) )
         {
             cycle->SetBucket( iBucket );
@@ -625,48 +613,45 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 }
 
 void
-FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawChildren( BLContext* iBLContext, uint64 iFlags )
 {
-    std::list<FOdysseyVectorObject*>::iterator it; 
-
-    for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    for( FOdysseyVectorObject *child : mChildrenList )
     {
-        FOdysseyVectorObject *child = (*it);
-
         if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
             FOdysseyVectorPath *childPath = static_cast<FOdysseyVectorPath*>(child);
 
             if( mGroupPaintParam.Wireframe == false )
             {
-                childPath->Draw( iFlags );
+                childPath->Draw( iBLContext, iFlags );
             }
             else
             {
-                childPath->DrawStructure( mGroupPaintParam.WireframeColor, 1.0f, true );
+                childPath->DrawStructure( iBLContext, mGroupPaintParam.WireframeColor, 1.0f, true );
             }
         }
         else
         {
-            child->Draw( iFlags );
+            child->Draw( iBLContext, iFlags );
         }
     }
 }
 
 void
-FOdysseyVectorGroupPaint::Draw( uint64 iFlags )
+FOdysseyVectorGroupPaint::Draw( BLContext* iBLContext, uint64 iFlags )
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+    iBLContext->save();
+    iBLContext->transform( mLocalMatrix );
 
-    blctx->save();
-    blctx->transform( mLocalMatrix );
+    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
 
-    blctx->setCompOp( BL_COMP_OP_SRC_OVER );
+    DrawShape( iBLContext, iFlags );
+    // get sure cycles are drawn before paths
+    iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
-    DrawShape( iFlags );
-    DrawChildren( iFlags );
+    DrawChildren( iBLContext, iFlags );
 
-    blctx->restore();
+    iBLContext->restore();
 }
 
 void
@@ -819,28 +804,25 @@ FOdysseyVectorGroupPaint::RemoveAllBuckets()
 }
 
 void
-FOdysseyVectorGroupPaint::DrawShape( uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext, uint64 iFlags )
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     std::list<FOdysseyVectorCycle*>::iterator it;
 
-    for( it = mCycleList.begin(); it != mCycleList.end(); ++it )
+    for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        FOdysseyVectorCycle *cycle = (*it);
-
-        cycle->Draw( iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
+        cycle->Draw( iBLContext, iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
     }
 
     if( mGroupPaintParam.Wireframe )
     {
-        blctx->save();
-        blctx->resetMatrix();
-        blctx->setStrokeWidth( 1.0f );
-        blctx->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
+        iBLContext->save();
+        iBLContext->resetMatrix();
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
 
         for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
         {
-            mGapSegmentBuffer[i].DrawStructure( this, true );
+            mGapSegmentBuffer[i].DrawStructure( iBLContext, this, true );
         }
 
 /* Works too
@@ -862,7 +844,7 @@ FOdysseyVectorGroupPaint::DrawShape( uint64 iFlags )
         }
 */
 
-        blctx->restore();
+        iBLContext->restore();
     }
 }
 
@@ -1937,7 +1919,6 @@ FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPicke
 FOdysseyVectorCycle*
 FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLPoint localCoord = mInverseWorldMatrix.mapPoint( iWorldX, iWorldY );
     std::list<FOdysseyVectorCycle*>::iterator it;
 

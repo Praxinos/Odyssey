@@ -64,9 +64,9 @@ FOdysseyVectorLine::CopyShape()
 }
 
 void
-FOdysseyVectorLine::DrawShape( uint64 iFlags )
+FOdysseyVectorLine::DrawShape( BLContext* iBLContext, uint64 iFlags )
 {
-    FOdysseyVectorPath::DrawShape( iFlags );
+    FOdysseyVectorPath::DrawShape( iBLContext, iFlags );
 }
 
 void

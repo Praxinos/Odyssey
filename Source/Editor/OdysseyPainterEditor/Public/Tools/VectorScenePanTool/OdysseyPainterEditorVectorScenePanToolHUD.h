@@ -15,14 +15,18 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorScenePanToolHUD : publ
         virtual ~FOdysseyPainterEditorVectorScenePanToolHUD();
         FOdysseyPainterEditorVectorScenePanToolHUD( UOdysseyPainterEditorVectorScenePanTool* iScenePanTool );
 
-        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
         virtual void Load( FOdysseyVectorScene* iScene ) override;
+        virtual void Unload( FOdysseyVectorScene* iScene ) override;
 
         void SetFactor( double iFactor );
     private:
-        void DrawFrame( FOdysseyVectorScene* iScene
+        void DrawFrame( BLContext* iBLContext
+                      , FOdysseyVectorScene* iScene
                       , ::ULIS::FRectD& iFrame
                       , ::ULIS::FVec2D& iFrameLength );
-        void DrawText( FOdysseyVectorScene* iScene, ::ULIS::FRectD& iFrame );
+        void DrawText( BLContext* iBLContext
+                     , FOdysseyVectorScene* iScene
+                     , ::ULIS::FRectD& iFrame );
 };

@@ -332,15 +332,16 @@ FOdysseyVectorScene::GetSelectedObjectList()
 }
 
 void
-FOdysseyVectorScene::DrawShape( uint64 iDrawingFlags )
+FOdysseyVectorScene::DrawShape( BLContext* iBLContext, uint64 iDrawingFlags )
 {
-    BLContext* blctx = GetEngine()->GetBLContext();
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
     FColor fillColor = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? mGroupPaintParam.MonochromeColor
                                                                                      : mBackgroundBucket.GetColor();
 
-    blctx->setCompOp( BL_COMP_OP_SRC_COPY );
+    iBLContext->save();
+
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
 
 //UE_LOG(LogTemp, Warning, TEXT("Some warning message:%d %d %d %d"), roi.x, roi.y, roi.w, roi.h );
 
@@ -349,20 +350,20 @@ FOdysseyVectorScene::DrawShape( uint64 iDrawingFlags )
     blFillColor.setB( fillColor.B );
     blFillColor.setA( fillColor.A );
 
-    blctx->setFillStyle( blFillColor );
+    iBLContext->setFillStyle( blFillColor );
 
-    blctx->save();
-    blctx->resetMatrix();
+    //iBLContext->resetMatrix();
     //blctx->clearAll();
-    blctx->fillAll();
-    blctx->restore();
+    iBLContext->fillAll();
 
-    FOdysseyVectorGroupPaint::DrawShape( iDrawingFlags );
+
+    FOdysseyVectorGroupPaint::DrawShape( iBLContext, iDrawingFlags );
 
     // view the updated zone ( testing purpose only )
-    /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
-    blctx.setStrokeWidth(1.0f);
-    blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
+    /*iBLContext.setStrokeStyle(BLRgba32(0xFFFF0000));
+    iBLContext.setStrokeWidth(1.0f);
+    iBLContext.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
+    iBLContext->restore();
 }
 
 FOdysseyVectorObject*

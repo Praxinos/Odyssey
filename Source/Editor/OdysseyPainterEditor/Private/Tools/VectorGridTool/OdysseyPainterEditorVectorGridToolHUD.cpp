@@ -202,17 +202,18 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect, b
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( FOdysseyVectorScene* iScene, uint64 iFlags  )
+FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( BLContext* iBLContext
+                                                              , FOdysseyVectorScene* iScene
+                                                              , uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
-    blctx->save();
-    blctx->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
-    blctx->setStrokeStyle( BLRgba32( hc.R, hc.G, hc.B, hc.A ) );
-    blctx->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeStyle( BLRgba32( hc.R, hc.G, hc.B, hc.A ) );
+    iBLContext->setStrokeWidth( 1.0f );
 
     if( mWorldSelDrag != mWorldSelStart )
     {
@@ -223,14 +224,14 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( FOdysseyVectorSc
             double xmax = ::ULIS::FMath::Max( mWorldSelDrag.x, mWorldSelStart.x );
             double ymax = ::ULIS::FMath::Max( mWorldSelDrag.y, mWorldSelStart.y );
 
-            blctx->strokeLine( xmin, ymin, xmax, ymin );
-            blctx->strokeLine( xmax, ymin, xmax, ymax );
-            blctx->strokeLine( xmax, ymax, xmin, ymax );
-            blctx->strokeLine( xmin, ymax, xmin, ymin );
+            iBLContext->strokeLine( xmin, ymin, xmax, ymin );
+            iBLContext->strokeLine( xmax, ymin, xmax, ymax );
+            iBLContext->strokeLine( xmax, ymax, xmin, ymax );
+            iBLContext->strokeLine( xmin, ymax, xmin, ymin );
         }
     }
 
-    blctx->restore();
+    iBLContext->restore();
 }
 
 void
@@ -240,9 +241,10 @@ FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext
+                                            , FOdysseyVectorScene* iScene
+                                            , uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -250,14 +252,14 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
-    blctx->save();
-    blctx->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
     if( mSelectionBox.rect.Area() )
     {
         BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
 
-        DrawSelectionRectangle( iScene, iFlags );
+        DrawSelectionRectangle( iBLContext, iScene, iFlags );
 
         for( int i = 0; i < mCellArray.size(); i++ )
         {
@@ -266,27 +268,27 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( FOdysseyVectorScene* iScene, uint6
                               worldMatrix.mapPoint( mCellArray[i].mNode[2]->GetX(), mCellArray[i].mNode[2]->GetY() ),
                               worldMatrix.mapPoint( mCellArray[i].mNode[3]->GetX(), mCellArray[i].mNode[3]->GetY() ) };
 
-            blctx->setStrokeWidth( 2.0f );
-            blctx->setStrokeStyle( bgColor );
-            blctx->strokePolygon( pt, 4 );
-            blctx->setStrokeStyle( fgColor );
-            blctx->setStrokeWidth( 1.0f );
-            blctx->strokePolygon( pt, 4 );
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( bgColor );
+            iBLContext->strokePolygon( pt, 4 );
+            iBLContext->setStrokeStyle( fgColor );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->strokePolygon( pt, 4 );
         }
 
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
             BLPoint pt = worldMatrix.mapPoint( mNodeArray[i].GetX(), mNodeArray[i].GetY() );
 
-            blctx->setFillStyle( mNodeArray[i].IsSelected() ? hcColor : fgColor );
-            blctx->fillCircle( pt.x, pt.y, FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS );
-            blctx->setStrokeWidth( 1.0f );
-            blctx->setStrokeStyle( bgColor );
-            blctx->strokeCircle( pt.x, pt.y, FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS );
+            iBLContext->setFillStyle( mNodeArray[i].IsSelected() ? hcColor : fgColor );
+            iBLContext->fillCircle( pt.x, pt.y, FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( bgColor );
+            iBLContext->strokeCircle( pt.x, pt.y, FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS );
         }
     }
 
-    blctx->restore();
+    iBLContext->restore();
 }
 
 void
@@ -334,14 +336,12 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject,
 void
 FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorScene* iScene )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
+    std::list<FOdysseyVectorObject*>& focusedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
 
     mPointCount = 0;
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject *obj : focusedObjectList )
     {
-        FOdysseyVectorObject *obj = (*it);
-
         mPointCount += MapObjectRecurse( obj );
     }
 }
@@ -357,28 +357,30 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPath( FOdysseyVectorPath* iPath
 
     conversionMatrix.transform( iPath->GetWorldMatrix() );
 
-    for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+    for( FOdysseyVectorVertex* vertex : vertexList )
     {
-        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
-        BLPoint pt = conversionMatrix.mapPoint( cubicVertex->GetX(), cubicVertex->GetY() );
+        BLPoint pt = conversionMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
         double spaceX = pt.x - mSelectionBox.rect.x;
         double spaceY = pt.y - mSelectionBox.rect.y;
 
-        pointCount += MapPoint( iPath, cubicVertex, spaceX, spaceY );
+        pointCount += MapPoint( iPath, vertex, spaceX, spaceY );
     }
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+    for( FOdysseyVectorSegment* segment : segmentList )
     {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        FOdysseyVectorPoint* point[2] = { cubicSegment->GetHandle(0), cubicSegment->GetHandle(1) };
-
-        for( int i = 0; i < 2; i++ )
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-            BLPoint pt = conversionMatrix.mapPoint( point[i]->GetX(), point[i]->GetY() );
-            double spaceX = pt.x - mSelectionBox.rect.x; // Hi again, Elon :) !
-            double spaceY = pt.y - mSelectionBox.rect.y;
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            FOdysseyVectorPoint* point[2] = { cubicSegment->GetHandle(0), cubicSegment->GetHandle(1) };
 
-            pointCount += MapPoint( iPath, point[i], spaceX, spaceY );
+            for( int i = 0; i < 2; i++ )
+            {
+                BLPoint pt = conversionMatrix.mapPoint( point[i]->GetX(), point[i]->GetY() );
+                double spaceX = pt.x - mSelectionBox.rect.x; // Hi again, Elon :) !
+                double spaceY = pt.y - mSelectionBox.rect.y;
+
+                pointCount += MapPoint( iPath, point[i], spaceX, spaceY );
+            }
         }
     }
 
@@ -390,16 +392,14 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPaintGroupBuckets( FOdysseyVectorGrou
                                                             , BLMatrix2D& iInverseGridMatrix )
 {
     std::list<FOdysseyVectorBucket*>& bucketList = iPaintGroup->GetBucketList();
-    std::list<FOdysseyVectorBucket*>::iterator bit;
     BLMatrix2D conversionMatrix = iInverseGridMatrix;
     uint32 pointCount = 0;
 
     conversionMatrix.transform( iPaintGroup->GetWorldMatrix() );
 
     // map buckets
-    for( bit = bucketList.begin(); bit != bucketList.end(); ++bit )
+    for( FOdysseyVectorBucket* bucket : bucketList )
     {
-        FOdysseyVectorBucket* bucket = *bit;
         BLPoint pt = conversionMatrix.mapPoint( bucket->GetX(), bucket->GetY() );
         double spaceX = pt.x - mSelectionBox.rect.x;
         double spaceY = pt.y - mSelectionBox.rect.y;
@@ -415,17 +415,14 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPaintGroup( FOdysseyVectorGroupPaint*
                                                      , BLMatrix2D& iInverseGridMatrix )
 {
     std::list<FOdysseyVectorObject*>& childrenList = iPaintGroup->GetChildrenList();
-    std::list<FOdysseyVectorObject*>::iterator oit;
     BLMatrix2D conversionMatrix = iInverseGridMatrix;
     uint32 pointCount = 0;
 
     conversionMatrix.transform( iPaintGroup->GetWorldMatrix() );
 
     // map paths
-    for( oit = childrenList.begin(); oit != childrenList.end(); ++oit )
+    for( FOdysseyVectorObject* child : childrenList )
     {
-        FOdysseyVectorObject* child = *oit;
-
         if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
@@ -461,10 +458,8 @@ FOdysseyPainterEditorVectorGridToolHUD::MapObjectRecurse( FOdysseyVectorObject* 
     }
 
     // Recurse
-    for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
+    for( FOdysseyVectorObject *child : childrenList )
     {
-        FOdysseyVectorObject *child = (*it);
-
         pointCount += MapObjectRecurse( child );
     }
 
@@ -475,7 +470,6 @@ uint32
 FOdysseyPainterEditorVectorGridToolHUD::MapObjectNoRecurse( FOdysseyVectorObject* iObject )
 {
     BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
-    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
     uint32 pointCount = 0;
 
     if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )

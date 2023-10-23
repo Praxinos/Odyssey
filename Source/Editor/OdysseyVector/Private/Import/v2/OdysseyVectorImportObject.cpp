@@ -173,6 +173,16 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
             ReadObjectTransform( iObject, Ar.Tell() + iChunkLen, Ar );
         break;
 
+        case FOdysseyFile::VectorV2::CHUNK_OBJECT_OPACITY:
+        {
+            double opacity;
+
+            Ar << opacity;
+
+            iObject.SetOpacity( opacity );
+        }
+        break;
+
         case FOdysseyFile::VectorV2::CHUNK_OBJECT_FOREGROUNDBUCKET:
         {
             FOdysseyVectorBucket& foregroundBucket = iObject.GetForegroundBucket();

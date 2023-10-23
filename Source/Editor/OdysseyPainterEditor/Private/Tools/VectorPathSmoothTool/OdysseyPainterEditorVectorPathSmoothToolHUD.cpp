@@ -27,39 +27,43 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Load( FOdysseyVectorScene* iScene 
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload( FOdysseyVectorScene* iScene )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
+}
+
+void
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
+                                                  , FOdysseyVectorScene* iScene
+                                                  , uint64 iFlags )
+{
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
-    blctx->save();
-    blctx->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
     if( mPathSmoothTool->RestrictToSelection )
     {
         std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
-        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+        for( FOdysseyVectorObject* selectedObject : selectedObjectList )
         {
-            FOdysseyVectorObject* selectedObject = (*it);
-
-            FOdysseyVectorHUD::DrawObjectRecursive( selectedObject, blctx );
+            FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, selectedObject );
         }
     }
     else
     {
-        FOdysseyVectorHUD::DrawObjectRecursive( iScene, blctx );
+        FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, iScene );
     }
 
-    blctx->setStrokeStyle( hcColor );
-    blctx->setStrokeWidth( 1.0f );
-    blctx->strokeCircle( mX, mY, mPathSmoothTool->PickingRadius );
+    iBLContext->setStrokeStyle( hcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->strokeCircle( mX, mY, mPathSmoothTool->PickingRadius );
 
-    blctx->restore();
+    iBLContext->restore();
 }
 
 void

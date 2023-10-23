@@ -125,6 +125,7 @@ private:
         FGuid mId;
         ::ULIS::eFormat mFormat;
         TSharedPtr<BLImage> mBLImage;
+        TSharedPtr<BLContext> mBLContext;
         FUniqueBuffer mBuffer;
         //eBlockState mState;
         bool mNeedsCache;
@@ -133,6 +134,7 @@ private:
     struct FHUDBlockData
     {
         TSharedPtr<BLImage> mBLImage;
+        TSharedPtr<BLContext> mBLContext;
     };
 
     //eBlockState mState;

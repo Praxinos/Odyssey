@@ -44,8 +44,8 @@ FOdysseyVectorPathTracer::Init( FOdysseyVectorScene* iScene )
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     BLImageData imageData;
 
-    mWidth = vectorEngine->GetWidth();
-    mHeight = vectorEngine->GetHeight();
+    mWidth = vectorEngine->GetPreferredWidth();
+    mHeight = vectorEngine->GetPreferredHeight();
 
     if( mBLImage )
     {

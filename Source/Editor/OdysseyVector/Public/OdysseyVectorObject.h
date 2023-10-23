@@ -139,10 +139,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual FOdysseyVectorObject* Copy();
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
 
-        virtual void Draw( uint64 iFlags );
-        virtual void DrawShape ( uint64 iFlags ){};
+        virtual void Draw( BLContext* iBLContext, uint64 iFlags );
+        virtual void DrawShape ( BLContext* iBLContext, uint64 iFlags ){};
 
-        virtual void DrawStructure ( uint64 iFlags ){};
+        virtual void DrawStructure ( BLContext* iBLContext, uint64 iFlags ){};
 
         virtual uint32 GetType();
 
@@ -154,7 +154,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         virtual void TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
         /*virtual void UpdateBoundingBox() = 0;*/
-        virtual void DrawChildren( uint64 iFlags );
+        virtual void DrawChildren( BLContext* iBLContext, uint64 iFlags );
         void UpdateMatrix( );
         void Translate( double iX, double iY );
         void Rotate( double iAngle );

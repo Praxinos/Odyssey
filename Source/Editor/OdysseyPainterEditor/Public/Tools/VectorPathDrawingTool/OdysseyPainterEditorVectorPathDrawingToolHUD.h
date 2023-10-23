@@ -18,9 +18,12 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : p
         FOdysseyPainterEditorVectorPathDrawingToolHUD(){};
         FOdysseyPainterEditorVectorPathDrawingToolHUD( UOdysseyPainterEditorVectorPathDrawingTool* iPathDrawingTool );
 
-        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Draw( BLContext* iBLContext
+                         , FOdysseyVectorScene* iScene
+                         , uint64 iFlags ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
         virtual void Load( FOdysseyVectorScene* iScene ) override;
+        virtual void Unload( FOdysseyVectorScene* iScene ) override;
 
         bool SetCursorPosition( double iX, double iY );
         std::vector<FOdysseyVectorPoint*>& GetStitchedPointArray();

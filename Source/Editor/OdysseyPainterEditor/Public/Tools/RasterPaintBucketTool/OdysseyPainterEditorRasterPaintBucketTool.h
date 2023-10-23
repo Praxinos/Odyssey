@@ -10,14 +10,14 @@
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndo.h"
 
-#include "OdysseyPainterEditorPaintBucketTool.generated.h"
+#include "OdysseyPainterEditorRasterPaintBucketTool.generated.h"
 
 class FOdysseyPaintEngine;
-class FOdysseyPainterEditorPaintBucketToolHUD;
-class FOdysseyPainterEditorPaintBucketToolContextMenu;
+class FOdysseyPainterEditorRasterPaintBucketToolHUD;
+class FOdysseyPainterEditorRasterPaintBucketToolContextMenu;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorPaintBucketTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterPaintBucketTool : public UOdysseyPainterEditorTool
 {
     GENERATED_BODY()
 
@@ -32,10 +32,10 @@ public:
     static bool DoubleClicked();
 
     // Destructor
-    virtual ~UOdysseyPainterEditorPaintBucketTool();
+    virtual ~UOdysseyPainterEditorRasterPaintBucketTool();
 
     //Constructor
-    UOdysseyPainterEditorPaintBucketTool();
+    UOdysseyPainterEditorRasterPaintBucketTool();
     
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
@@ -112,25 +112,25 @@ protected:
                             , const FOdysseyPoint& iPointInTexture );
 
 public:
-    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
     uint8 Tolerance;
 
-    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
     bool RestrictToSelection;
 
-    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
     bool Propagate;
 
-    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
     eBucketColorMode ColorMode;
 
-    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
     FColor Color1;
 
-    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
     FColor Color2;
 
-    UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
     double PickingRadius;
 
 protected:
@@ -144,8 +144,8 @@ protected:
     double mDownMouseY;
     ::ULIS::FVec2D mPointPosition;
     double mPointRotation;
-    FOdysseyPainterEditorPaintBucketToolHUD* mBucketHUD;
-    FOdysseyPainterEditorPaintBucketToolContextMenu* mContextMenu;
+    FOdysseyPainterEditorRasterPaintBucketToolHUD* mBucketHUD;
+    FOdysseyPainterEditorRasterPaintBucketToolContextMenu* mContextMenu;
     uint32 mPickedArea;
     ::ULIS::FVec2D mOldPointInTexture;
     bool mShowControls;

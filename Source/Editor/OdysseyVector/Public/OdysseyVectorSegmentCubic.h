@@ -86,9 +86,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @brief Draw the cubic segment
          * @param iRoi the region-of-interest
          */
-        virtual void Draw() override;
+        virtual void Draw( BLContext* iBLContext ) override;
 
-        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, bool iWorld ) override;
+        virtual void DrawStructure( BLContext* iBLContext, FOdysseyVectorObject* iParentObject, bool iWorld ) override;
 
        /**
          * @brief Get the segment's bounding box.
@@ -214,7 +214,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
         ::ULIS::FVec2D* GetBezier();
         virtual bool HasBaseClass( uint32 iBaseClassID ) override;
-        double GetApproximateLength( uint32 iDivisions );
 
     private:
         void BuildVariableAdaptive( double  iFromT

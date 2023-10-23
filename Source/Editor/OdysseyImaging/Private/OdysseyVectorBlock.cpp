@@ -75,7 +75,7 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
 {   
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
     //Render in a BLImage
-    mEngine->Render(mBlockData->mBLImage.Get(), mRenderFlags);
+    mEngine->Render(mBlockData->mBLContext.Get(), mRenderFlags);
 
     {
         TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
@@ -99,7 +99,7 @@ void
 FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
 {   
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
-    mEngine->RenderHUD(mHUDBlockData->mBLImage.Get());
+    mEngine->RenderHUD( mHUDBlockData->mBLContext.Get() );
 
     {
         TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertHUDBlock);
@@ -145,6 +145,9 @@ FOdysseyVectorBlock::CleanupBlock(uint8* iData, void* iInfo)
 {
     FBlockData* blockData = static_cast<FBlockData*>(iInfo);
 
+    // End BLContext operations on the BLImage
+    blockData->mBLContext.Get()->end();
+
     if ( blockData->mNeedsCache )
     {
         FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
@@ -173,6 +176,9 @@ FOdysseyVectorBlock::CleanupHUDBlock(uint8* iData, void* iInfo)
 {
     FHUDBlockData* blockData = static_cast<FHUDBlockData*>(iInfo);
 
+    // End BLContext operations on the BLImage
+    blockData->mBLContext.Get()->end();
+
     //Data is owned by the block
     ::ULIS::OnCleanup_FreeMemory(iData, iInfo); 
     
@@ -194,6 +200,12 @@ FOdysseyVectorBlock::GetHUDBlock()
 
     mHUDBlockData = new FHUDBlockData();
     mHUDBlockData->mBLImage = MakeShared<BLImage>(mWidth, mHeight, BL_FORMAT_PRGB32);
+    mHUDBlockData->mBLContext = MakeShared<BLContext>();
+    // Starts BLContext operations on the BLImage
+    BLContextCreateInfo createInfo{};
+    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    mHUDBlockData->mBLContext.Get()->begin(*mHUDBlockData->mBLImage.Get(), createInfo);
+
     block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, mFormat);
     block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyVectorBlock::CleanupHUDBlock, mHUDBlockData));
     RenderHUD(*block);
@@ -221,6 +233,11 @@ FOdysseyVectorBlock::GetBlock()
 
     //Blend2D block : Used internally to render the Vector Scene into a pixel block
     mBlockData->mBLImage = MakeShared<BLImage>(mWidth, mHeight, BL_FORMAT_PRGB32);
+    mBlockData->mBLContext = MakeShared<BLContext>();
+    // Starts BLContext operations on the BLImage
+    BLContextCreateInfo createInfo{};
+    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    mBlockData->mBLContext.Get()->begin(*mBlockData->mBLImage.Get(), createInfo);
 
     //FUniqueBuffer buffer;
     FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);

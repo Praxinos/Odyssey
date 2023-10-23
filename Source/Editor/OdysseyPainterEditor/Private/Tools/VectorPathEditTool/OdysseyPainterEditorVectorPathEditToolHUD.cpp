@@ -21,9 +21,15 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Load( FOdysseyVectorScene* iScene )
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorPathEditToolHUD::Unload( FOdysseyVectorScene* iScene )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
+}
+
+void
+FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
+                                                , FOdysseyVectorScene* iScene
+                                                , uint64 iFlags )
+{
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -37,20 +43,19 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, u
     uint64 segmentHandleFlag = ( pickingMode == ePathPickingMode::SegmentHandle ) ? VIEW_SEGMENT_HANDLE
                                                                                   | VIEW_VERTEX_ALIGNMENT : 0;
 
-    blctx->save();
+    iBLContext->save();
 
-    blctx->setStrokeStyle( hcColor );
-    blctx->strokeCircle( mX, mY, mPathEditTool->PickingRadius );
+    iBLContext->setStrokeStyle( hcColor );
+    iBLContext->strokeCircle( mX, mY, mPathEditTool->PickingRadius );
 
-    for( std::list<FOdysseyVectorObject*>::iterator oit = selectedObjectList.begin(); oit != selectedObjectList.end(); ++oit )
+    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
-        FOdysseyVectorObject* selectedObject = *oit;
-
         if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            FOdysseyVectorHUD::DrawPath( path
+            FOdysseyVectorHUD::DrawPath( iBLContext
+                                       , path
                                        , fgColor
                                        , bgColor
                                        , hcColor
@@ -62,7 +67,8 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, u
         {
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
-            FOdysseyVectorHUD::DrawPaintGroup( paintGroup
+            FOdysseyVectorHUD::DrawPaintGroup( iBLContext
+                                             , paintGroup
                                              , fgColor
                                              , bgColor
                                              , hcColor
@@ -71,7 +77,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( FOdysseyVectorScene* iScene, u
         }
     }
 
-    blctx->restore();
+    iBLContext->restore();
 }
 
 bool

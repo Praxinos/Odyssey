@@ -45,6 +45,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 {
     TArray<UOdysseyPainterEditorTool*> tools = {
         mEditor->GetRasterDrawingTool(),
+        mEditor->GetRasterPaintBucketTool(),
         mEditor->GetVectorPathDrawingTool(),
         mEditor->GetVectorPathEditTool(),
         mEditor->GetVectorPathCutTool(),
@@ -56,7 +57,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorPathSmoothTool(),
         mEditor->GetVectorPathStitchTool(),
         mEditor->GetVectorEraserTool(),
-        mEditor->GetPaintBucketTool(),
+        mEditor->GetVectorPaintBucketTool(),
         mEditor->GetColorPickerTool(),
         mEditor->GetVectorGridTool()
     };

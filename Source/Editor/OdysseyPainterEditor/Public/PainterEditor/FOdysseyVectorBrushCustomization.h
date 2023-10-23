@@ -8,6 +8,8 @@
 #include "DetailWidgetRow.h"
 #include "IDetailChildrenBuilder.h"
 
+struct FOdysseyVectorBrush;
+
 class FOdysseyVectorBrushCustomization : public IPropertyTypeCustomization
 {
 public:
@@ -32,12 +34,14 @@ public:
         void OnAssetSelected( const FAssetData& AssetData
                             , TSharedRef<IPropertyHandle> StructPropertyHandle );
         void OnPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle );
+        void OnChildPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle );
         FReply OnClicked( TSharedRef<IPropertyHandle> StructPropertyHandle );
         bool FilterAsset( const struct FAssetData& InAssetData );
-        const FSlateBrush* UpdateButton( TSharedRef<IPropertyHandle> StructPropertyHandle );
+        const FSlateBrush* UpdateButtonImage( TSharedRef<IPropertyHandle> StructPropertyHandle );
+        FText UpdateButtonToolTip( TSharedRef<IPropertyHandle> StructPropertyHandle );
+        FOdysseyVectorBrush* GetVectorBrush( TSharedRef<IPropertyHandle> StructPropertyHandle );
 
     private:
         TSharedPtr<SButton> mBrushButton;
         TSharedPtr<FSlateBrush> mBrushIcon;
-        TSharedPtr<FAssetThumbnailPool> mAssetThumbnailPool;
 };

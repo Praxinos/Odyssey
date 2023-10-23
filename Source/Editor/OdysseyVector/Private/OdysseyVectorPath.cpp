@@ -123,7 +123,7 @@ FOdysseyVectorPath::IsFilled()
     return mPathParam.Filled;
 }
 
-FOdysseyVectorBrush
+FOdysseyVectorBrush&
 FOdysseyVectorPath::GetBrush()
 {
     return mBrush;
@@ -188,14 +188,12 @@ FOdysseyVectorPath::UpdateBBox()
     double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
     bool hasBBox = false;
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( FVertexChain& vertexChain : mVertexChainArray )
     {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-        ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
-        double rx1 = segmentBBox.x
-             , ry1 = segmentBBox.y
-             , rx2 = segmentBBox.x + segmentBBox.w
-             , ry2 = segmentBBox.y + segmentBBox.h;
+        double rx1 = vertexChain.bbox.x
+             , ry1 = vertexChain.bbox.y
+             , rx2 = vertexChain.bbox.x + vertexChain.bbox.w
+             , ry2 = vertexChain.bbox.y + vertexChain.bbox.h;
 
         hasBBox = true;
 
@@ -203,21 +201,6 @@ FOdysseyVectorPath::UpdateBBox()
         if ( ry1 < ymin ) ymin = ry1;
         if ( rx2 > xmax ) xmax = rx2;
         if ( ry2 > ymax ) ymax = ry2;
-    }
-
-    // This is in case there are oprhaned vertices, which should not happen. Once we
-    // are sure orphaned vertices are impossible, the loop below can be removed.
-    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
-    {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
-        ::ULIS::FVec2D& vertexCoords = vertex->GetCoords();
-
-        hasBBox = true;
-
-        if ( vertexCoords.x < xmin ) xmin = vertexCoords.x;
-        if ( vertexCoords.y < ymin ) ymin = vertexCoords.y;
-        if ( vertexCoords.x > xmax ) xmax = vertexCoords.x;
-        if ( vertexCoords.y > ymax ) ymax = vertexCoords.y;
     }
 
     mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -236,7 +219,7 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 {
     mBLPath.clear();
 
-    // update segments
+    // update invalidated segments only
     for ( std::list<FOdysseyVectorSegment*>::iterator it = mInvalidatedSegmentList.begin(); it != mInvalidatedSegmentList.end(); ++it )
     {
         FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
@@ -246,6 +229,13 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
     mInvalidatedSegmentList.clear();
 
+    // Updates vertex chains' length and bounding box
+    for( FVertexChain& vertexChain : mVertexChainArray )
+    {
+        UpdateVertexChain( &vertexChain );
+    }
+
+    // TODO::Optimize this can be merged with the for loop above
     UpdateBBox();
 
     // cache BL Path (for drawing structure for example)
@@ -552,7 +542,8 @@ static bool intersectLine( ::ULIS::FVec2D& iOrigin0
 }
 
 static void
-_drawMiterJoint( FOdysseyVectorPath* iPath
+_drawMiterJoint( BLContext* iBLContext
+               , FOdysseyVectorPath* iPath
                , ::ULIS::FVec2D& iOrigin
                , ::ULIS::FVec2D& iVector0
                , ::ULIS::FVec2D& iVector1
@@ -568,7 +559,6 @@ _drawMiterJoint( FOdysseyVectorPath* iPath
     ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
     // have to clamp due to imprecision of the dot product
     double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
-    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
 
     BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
     BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
@@ -616,15 +606,15 @@ _drawMiterJoint( FOdysseyVectorPath* iPath
 
                 // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
                 // line stroking is done in world coordinates because we need a 1 pixel width
-                blctx->save();
-                blctx->resetMatrix();
-                blctx->setStrokeWidth( 1.0f );
-                blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
-                blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[3].x, vertex[3].y ) );
-                blctx->restore();
+                iBLContext->save();
+                iBLContext->resetMatrix();
+                iBLContext->setStrokeWidth( 1.0f );
+                iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
+                iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[3].x, vertex[3].y ) );
+                iBLContext->restore();
 
-                //blctx->strokePolygon( vertex, 4 );
-                blctx->fillPolygon( vertex, 4 );
+                //iBLContext->strokePolygon( vertex, 4 );
+                iBLContext->fillPolygon( vertex, 4 );
             }
             else
             {
@@ -646,22 +636,23 @@ _drawMiterJoint( FOdysseyVectorPath* iPath
 
                 // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
                 // line stroking is done in world coordinates because we need a 1 pixel width
-                blctx->save();
-                blctx->resetMatrix();
-                blctx->setStrokeWidth( 1.0f );
-                blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
-                blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[4].x, vertex[4].y ) );
-                blctx->restore();
+                iBLContext->save();
+                iBLContext->resetMatrix();
+                iBLContext->setStrokeWidth( 1.0f );
+                iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
+                iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[4].x, vertex[4].y ) );
+                iBLContext->restore();
 
-                //blctx->strokePolygon( vertex, 5 );
-                blctx->fillPolygon( vertex, 5 );
+                //iBLContext->strokePolygon( vertex, 5 );
+                iBLContext->fillPolygon( vertex, 5 );
             }
         }
     }
 }
 
 static void
-_drawRadialJoint( FOdysseyVectorPath* iPath
+_drawRadialJoint( BLContext* iBLContext
+                , FOdysseyVectorPath* iPath
                 , ::ULIS::FVec2D& iOrigin
                 , ::ULIS::FVec2D& iVector0
                 , ::ULIS::FVec2D& iVector1
@@ -679,7 +670,6 @@ _drawRadialJoint( FOdysseyVectorPath* iPath
     double angle = acos( std::clamp<double>( perpendicularVec0.DotProduct( perpendicularVec1 ), -1.0f, 1.0f ) );
     static const int steps = 24;
     double a = angle / steps;
-    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
     BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
     BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
     static BLPoint vertex[steps][3];
@@ -712,28 +702,29 @@ _drawRadialJoint( FOdysseyVectorPath* iPath
         vertex[i][2].x = vertex[i][0].x + ( interpolatedVector.x * iRadius );
         vertex[i][2].y = vertex[i][0].y + ( interpolatedVector.y * iRadius );
 
-        //blctx->strokePolygon( vertex , 3 );
-        blctx->fillPolygon( vertex[i], 3 );
+        //iBLContext->strokePolygon( vertex , 3 );
+        iBLContext->fillPolygon( vertex[i], 3 );
 
         perpendicularVec0 = interpolatedVector;
     }
 
     // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
     // line stroking is done in world coordinates because we need a 1 pixel width
-    blctx->save();
-    blctx->resetMatrix();
-    blctx->setStrokeWidth( 1.0f );
+    iBLContext->save();
+    iBLContext->resetMatrix();
+    iBLContext->setStrokeWidth( 1.0f );
     for ( uint32 i = 0; i < steps; i++ )
     {
-        blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[i][1].x, vertex[i][1].y ) );
-        blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[i][2].x, vertex[i][2].y ) );
+        iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[i][1].x, vertex[i][1].y ) );
+        iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[i][2].x, vertex[i][2].y ) );
 
     }
-    blctx->restore();
+    iBLContext->restore();
 }
 
 static void
-_drawLinearJoint( FOdysseyVectorPath* iPath
+_drawLinearJoint( BLContext* iBLContext
+                , FOdysseyVectorPath* iPath
                 , ::ULIS::FVec2D& iOrigin
                 , ::ULIS::FVec2D& iVector0
                 , ::ULIS::FVec2D& iVector1
@@ -748,7 +739,6 @@ _drawLinearJoint( FOdysseyVectorPath* iPath
     ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
     // have to clamp due to imprecision of the dot product
     double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
-    BLContext* blctx = iPath->GetScene()->GetEngine()->GetBLContext();
     BLPoint vertex[3];
     BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
     BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
@@ -774,15 +764,15 @@ _drawLinearJoint( FOdysseyVectorPath* iPath
 
     // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
     // line stroking is done in world coordinates because we need a 1 pixel width
-    blctx->save();
-    blctx->resetMatrix();
-    blctx->setStrokeWidth( 1.0f );
-    blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
-    blctx->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[2].x, vertex[2].y ) );
-    blctx->restore();
+    iBLContext->save();
+    iBLContext->resetMatrix();
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
+    iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[2].x, vertex[2].y ) );
+    iBLContext->restore();
 
-    //blctx->strokePolygon( vertex, 3 );
-    blctx->fillPolygon( vertex, 3 );
+    //iBLContext->strokePolygon( vertex, 3 );
+    iBLContext->fillPolygon( vertex, 3 );
 }
 
 void
@@ -797,12 +787,12 @@ FOdysseyVectorPath::InvalidateAllSegments()
 }
 
 void
-FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags )
+FOdysseyVectorPath::DrawJoint( BLContext* iBLContext
+                             , FOdysseyVectorVertex* iVertex,uint64 iFlags)
 {
     FOdysseyVectorSegment* segment0 = iVertex->GetFirstSegment();
     FOdysseyVectorSegment* segment1 = iVertex->GetLastSegment();
     double vertexRadius = iVertex->GetRadius();
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
 
     if ( ( segment0 && segment1 ) && ( segment0 != segment1 ) )
     {
@@ -821,18 +811,18 @@ FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags )
             perpendicularVector0 = ::ULIS::FVec2D( segment0Vector.y, -segment0Vector.x );
             perpendicularVector1 = ::ULIS::FVec2D( segment1Vector.y, -segment1Vector.x );
 
-            blctx->save();
-            blctx->resetMatrix();
-            blctx->setStrokeWidth( 1.0f );
-            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector0.x * vertexRadius
-                                                                 , origin.y + perpendicularVector0.y * vertexRadius ) );
-            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector0.x * vertexRadius
-                                                                 , origin.y - perpendicularVector0.y * vertexRadius ) );
-            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector1.x * vertexRadius
-                                                                 , origin.y + perpendicularVector1.y * vertexRadius ) );
-            blctx->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector1.x * vertexRadius
-                                                                 , origin.y - perpendicularVector1.y * vertexRadius ) );
-            blctx->restore();
+            iBLContext->save();
+            iBLContext->resetMatrix();
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector0.x * vertexRadius
+                                                                      , origin.y + perpendicularVector0.y * vertexRadius ) );
+            iBLContext->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector0.x * vertexRadius
+                                                                      , origin.y - perpendicularVector0.y * vertexRadius ) );
+            iBLContext->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector1.x * vertexRadius
+                                                                      , origin.y + perpendicularVector1.y * vertexRadius ) );
+            iBLContext->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector1.x * vertexRadius
+                                                                      , origin.y - perpendicularVector1.y * vertexRadius ) );
+            iBLContext->restore();
 
             // if the dot product equals to 1.0f, then the point is perfectly smooth, hence there is no need for joints.
             if ( segment0Vector.DotProduct(segment1Vector) < 1.0f )
@@ -840,15 +830,15 @@ FOdysseyVectorPath::DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags )
                 switch ( mPathParam.JointType )
                 {
                     case eJointType::Linear :
-                        _drawLinearJoint ( this, origin, segment0Vector, segment1Vector, vertexRadius );
+                        _drawLinearJoint ( iBLContext, this, origin, segment0Vector, segment1Vector, vertexRadius );
                     break;
 
                     case eJointType::Miter :
-                        _drawMiterJoint  ( this, origin, segment0Vector, segment1Vector, vertexRadius,  4.0f );
+                        _drawMiterJoint  ( iBLContext, this, origin, segment0Vector, segment1Vector, vertexRadius,  4.0f );
                     break;
 
                     case eJointType::Radial :
-                        _drawRadialJoint ( this, origin, segment0Vector, segment1Vector, vertexRadius );
+                        _drawRadialJoint ( iBLContext, this, origin, segment0Vector, segment1Vector, vertexRadius );
                     break;
 
                     default:
@@ -1049,150 +1039,153 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
                               , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                               , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLImage* blimg = GetScene()->GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
-    BLImageData imageData;
-    std::vector<FOdysseyVectorSegment*> newSegmentArray;
-    std::vector<FOdysseyVectorSegment*> oldSegmentArray;
-    std::vector<FOdysseyVectorVertex*> newVertexArray;
-    std::vector<FOdysseyVectorVertex*> oldVertexArray;
-    std::list<FOdysseyVectorVertex*> vertexList = mVertexList; // work on a copy, for removal
 
-    blimg->getData( &imageData );
-
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    if( blimg )
     {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
-        ::ULIS::FVec2D& firstCoords = cubicSegment->GetVertex(0)->GetCoords();
-        BLPoint firstAt = mWorldMatrix.mapPoint( firstCoords.x, firstCoords.y );
-        std::vector<double> subVertexT;
-        int32 previousPixelValue;
-        std::vector<FOdysseyVectorSegment*> subSegmentArray;
-        bool hasHit = false;
+        BLImageData imageData;
+        std::vector<FOdysseyVectorSegment*> newSegmentArray;
+        std::vector<FOdysseyVectorSegment*> oldSegmentArray;
+        std::vector<FOdysseyVectorVertex*> newVertexArray;
+        std::vector<FOdysseyVectorVertex*> oldVertexArray;
+        std::list<FOdysseyVectorVertex*> vertexList = mVertexList; // work on a copy, for removal
 
-        for( uint32 i = 0; i < polygonCache.size(); i++ )
+        blimg->getData( &imageData );
+
+        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
-            BLPoint p0 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y );
-            BLPoint p1 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y );
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+            std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
+            ::ULIS::FVec2D& firstCoords = cubicSegment->GetVertex(0)->GetCoords();
+            BLPoint firstAt = mWorldMatrix.mapPoint( firstCoords.x, firstCoords.y );
+            std::vector<double> subVertexT;
+            int32 previousPixelValue;
+            std::vector<FOdysseyVectorSegment*> subSegmentArray;
+            bool hasHit = false;
 
-            TraceLine( p0.x, p0.y, polygonCache[i].fromT
-                     , p1.x, p1.y, polygonCache[i].toT
-                     , [cubicSegment
-                     , &imageData
-                     , &previousPixelValue
-                     , &subVertexT
-                     , &subSegmentArray
-                     , &newVertexArray
-                     , &hasHit]( int32 iX, int32 iY, double iT) -> bool
-                       {
-                           /*if( ( iX >= 0 && iX < imageData.size.w )
-                            && ( iY >= 0 && iY < imageData.size.h ) )
-                           {*/
-                               uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
-                               uint32 offset = ( iY * imageData.size.w ) + iX;
-                               int32 pixelValue = ( ( iX >= 0 && iX < imageData.size.w )
-                                                 && ( iY >= 0 && iY < imageData.size.h ) ) ? pixel[offset] : 0;
+            for( uint32 i = 0; i < polygonCache.size(); i++ )
+            {
+                BLPoint p0 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y );
+                BLPoint p1 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y );
 
-                               if( pixelValue == 255 ) hasHit = true;
+                TraceLine( p0.x, p0.y, polygonCache[i].fromT
+                         , p1.x, p1.y, polygonCache[i].toT
+                         , [cubicSegment
+                         , &imageData
+                         , &previousPixelValue
+                         , &subVertexT
+                         , &subSegmentArray
+                         , &newVertexArray
+                         , &hasHit]( int32 iX, int32 iY, double iT) -> bool
+                           {
+                               /*if( ( iX >= 0 && iX < imageData.size.w )
+                                && ( iY >= 0 && iY < imageData.size.h ) )
+                               {*/
+                                   uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                                   uint32 offset = ( iY * imageData.size.w ) + iX;
+                                   int32 pixelValue = ( ( iX >= 0 && iX < imageData.size.w )
+                                                     && ( iY >= 0 && iY < imageData.size.h ) ) ? pixel[offset] : 0;
 
-                               if( iT == 0.0f )
-                               {
-                                   if( pixelValue == 0 )
+                                   if( pixelValue == 255 ) hasHit = true;
+
+                                   if( iT == 0.0f )
                                    {
-                                       subVertexT.push_back( iT );
-                                   }
-
-                                   previousPixelValue = pixelValue;
-                               }
-
-                               if( ( iT > 0.0f ) && ( iT < 1.0f ) )
-                               {
-                                   if( (int32) abs( pixelValue - previousPixelValue ) == 255 )
-                                   {
-                                       subVertexT.push_back( iT );
+                                       if( pixelValue == 0 )
+                                       {
+                                           subVertexT.push_back( iT );
+                                       }
 
                                        previousPixelValue = pixelValue;
                                    }
-                               }
 
-                               if( iT == 1.0f )
-                               {
-                                   if( pixelValue == 0 )
+                                   if( ( iT > 0.0f ) && ( iT < 1.0f ) )
                                    {
-                                       subVertexT.push_back( iT );
+                                       if( (int32) abs( pixelValue - previousPixelValue ) == 255 )
+                                       {
+                                           subVertexT.push_back( iT );
+
+                                           previousPixelValue = pixelValue;
+                                       }
                                    }
-                               }
 
-                               if( subVertexT.size() == 2 )
-                               {
-                                   uint32 tCount = subVertexT.size();
-                                   double t0 = subVertexT[0];
-                                   double t1 = subVertexT[1];
+                                   if( iT == 1.0f )
+                                   {
+                                       if( pixelValue == 0 )
+                                       {
+                                           subVertexT.push_back( iT );
+                                       }
+                                   }
 
-                                    if( fabs( subVertexT[0] - subVertexT[1]) < 1.0f )
-                                    {
-                                        subSegmentArray.push_back( cubicSegment->Sample( t0, t1, newVertexArray ) );
-                                    }
+                                   if( subVertexT.size() == 2 )
+                                   {
+                                       uint32 tCount = subVertexT.size();
+                                       double t0 = subVertexT[0];
+                                       double t1 = subVertexT[1];
 
-                                   subVertexT.clear();
-                               }
-                           /*}*/
+                                        if( fabs( subVertexT[0] - subVertexT[1]) < 1.0f )
+                                        {
+                                            subSegmentArray.push_back( cubicSegment->Sample( t0, t1, newVertexArray ) );
+                                        }
 
-                           // keep tracing the line
-                           return false;
-                       });
-        }
+                                       subVertexT.clear();
+                                   }
+                               /*}*/
 
-        if( hasHit )
-        {
-            // won't insert anything if no subsegment were created
-            if( subSegmentArray.size() )
-            {
-                newSegmentArray.insert( newSegmentArray.end(), subSegmentArray.begin(), subSegmentArray.end() );
+                               // keep tracing the line
+                               return false;
+                           });
             }
 
-            // in case of a hit, old segment is deleted no matter what.
-            oldSegmentArray.push_back( cubicSegment );
+            if( hasHit )
+            {
+                // won't insert anything if no subsegment were created
+                if( subSegmentArray.size() )
+                {
+                    newSegmentArray.insert( newSegmentArray.end(), subSegmentArray.begin(), subSegmentArray.end() );
+                }
+
+                // in case of a hit, old segment is deleted no matter what.
+                oldSegmentArray.push_back( cubicSegment );
+            }
         }
-    }
 
-    for( int i = 0; i < oldSegmentArray.size(); i++ )
-    {
-        this->RemoveSegment( oldSegmentArray[i] );
-    }
-
-    for( int i = 0; i < newVertexArray.size(); i++ )
-    {
-        this->AddVertex( newVertexArray[i] );
-    }
-
-    for( int i = 0; i < newSegmentArray.size(); i++ )
-    {
-        this->AddSegment( newSegmentArray[i] );
-
-        newSegmentArray[i]->Invalidate();
-    }
-
-    // remove orphaned vertices
-    for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
-    {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
-
-        if( vertex->GetSegmentCount() == 0 )
+        for( int i = 0; i < oldSegmentArray.size(); i++ )
         {
-            oldVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(vertex) );
-
-            this->RemoveVertex( vertex );
+            this->RemoveSegment( oldSegmentArray[i] );
         }
+
+        for( int i = 0; i < newVertexArray.size(); i++ )
+        {
+            this->AddVertex( newVertexArray[i] );
+        }
+
+        for( int i = 0; i < newSegmentArray.size(); i++ )
+        {
+            this->AddSegment( newSegmentArray[i] );
+
+            newSegmentArray[i]->Invalidate();
+        }
+
+        // remove orphaned vertices
+        for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+        {
+            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
+
+            if( vertex->GetSegmentCount() == 0 )
+            {
+                oldVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(vertex) );
+
+                this->RemoveVertex( vertex );
+            }
+        }
+
+        Invalidate();
+
+        oAddedVertexArray.insert( oAddedVertexArray.end(), newVertexArray.begin(), newVertexArray.end() );
+        oAddedSegmentArray.insert( oAddedSegmentArray.end(), newSegmentArray.begin(), newSegmentArray.end() );
+        oRemovedVertexArray.insert( oRemovedVertexArray.end(), oldVertexArray.begin(), oldVertexArray.end() );
+        oRemovedSegmentArray.insert( oRemovedSegmentArray.end(), oldSegmentArray.begin(), oldSegmentArray.end() );
     }
-
-    Invalidate();
-
-    oAddedVertexArray.insert( oAddedVertexArray.end(), newVertexArray.begin(), newVertexArray.end() );
-    oAddedSegmentArray.insert( oAddedSegmentArray.end(), newSegmentArray.begin(), newSegmentArray.end() );
-    oRemovedVertexArray.insert( oRemovedVertexArray.end(), oldVertexArray.begin(), oldVertexArray.end() );
-    oRemovedSegmentArray.insert( oRemovedSegmentArray.end(), oldSegmentArray.begin(), oldSegmentArray.end() );
 
     return ( mSegmentList.size() == 0 ) ? true : false;
 }
@@ -1200,8 +1193,6 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
 bool
 FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-
     if( iSelectionFlags & PICK_MATH_BASED )
     {
         BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
@@ -1225,36 +1216,39 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
         BLImage* blimg = GetScene()->GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
         BLImageData imageData;
 
-        blimg->getData( &imageData );
-
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        if( blimg )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
+            blimg->getData( &imageData );
 
-            for( uint32 i = 0; i < polygonCache.size(); i++ )
+            for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
             {
-                BLPoint p0 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y );
-                BLPoint p1 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y );
-                bool pointHitMask = TraceLine( p0.x, p0.y, 0.0f
-                                             , p1.x, p1.y, 0.0f
-                                             , [&imageData]( int32 iX, int32 iY, double iT)
-                                               {
-                                                    if( ( iX >= 0 && iX < imageData.size.w )
-                                                     && ( iY >= 0 && iY < imageData.size.h ) )
-                                                    {
-                                                        uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
-                                                        uint32 offset = ( iY * imageData.size.w ) + iX;
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+                std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
 
-                                                        return ( pixel[offset] ) ? true : false;
-                                                    }
-
-                                                    return false;
-                                               });
-
-                if( pointHitMask )
+                for( uint32 i = 0; i < polygonCache.size(); i++ )
                 {
-                    return true;
+                    BLPoint p0 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y );
+                    BLPoint p1 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y );
+                    bool pointHitMask = TraceLine( p0.x, p0.y, 0.0f
+                                                 , p1.x, p1.y, 0.0f
+                                                 , [&imageData]( int32 iX, int32 iY, double iT)
+                                                   {
+                                                        if( ( iX >= 0 && iX < imageData.size.w )
+                                                         && ( iY >= 0 && iY < imageData.size.h ) )
+                                                        {
+                                                            uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                                                            uint32 offset = ( iY * imageData.size.w ) + iX;
+
+                                                            return ( pixel[offset] ) ? true : false;
+                                                        }
+
+                                                        return false;
+                                                   });
+
+                    if( pointHitMask )
+                    {
+                        return true;
+                    }
                 }
             }
         }
@@ -1638,124 +1632,152 @@ FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                               , poly->quadV
                               , mObjectParam.Opacity
                               , iScreenPixels
+                              , iScreenWidth
+                              , iScreenHeight
                               , iScreenBitsPerPixel
+                              , GetForegroundColor()
                               , iTexturePixels
                               , iTextureWidth
                               , iTextureHeight
-                              , iTextureBitsPerPixel );
+                              , iTextureBitsPerPixel
+                              , mBrush.ColorFromBrush ? false : true );
     }
 }
 
 void
-FOdysseyVectorPath::DrawShape( uint64 iDrawingFlags )
+FOdysseyVectorPath::DrawShape( BLContext* iBLContext, uint64 iDrawingFlags )
 {
     for( FVertexChain& vertexChain : mVertexChainArray )
     {
-        DrawVertexChain( vertexChain, iDrawingFlags );
+        DrawVertexChain( iBLContext, vertexChain, iDrawingFlags );
     }
 }
 
 void
-FOdysseyVectorPath::DrawVertexChain( const FVertexChain& iVertexChain, uint64 iDrawingFlags )
+FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
+                                   , const FVertexChain& iVertexChain
+                                   , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
-    BLContext* blctx = vectorEngine->GetBLContext();
-
     FColor color = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? FColor( 0, 0, 0, 255 )
                                                                                  : mForegroundBucket.GetColor();
-    BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A );
+    BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A * mObjectParam.Opacity );
     FOdysseyVectorVertex* currentVertex = iVertexChain.vertex;
-    FOdysseyVectorSegment* currentSegment = currentVertex->GetFirstSegment();
-    uint32 segmentCount = 0;
+    UTexture2D* texture = mBrush.GetTexture();
 
-    if( mBrush.texture )
+    if( texture )
     {
-        const FColor* brushData = static_cast<const FColor*>(mBrush.texture->PlatformData->Mips[0].BulkData.LockReadOnly());
-        double startU = 0.0f, stepU = 1.0f / iVertexChain.segmentCount;
-        BLImage* image = vectorEngine->GetBLImage();
+        const FColor* brushData = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
+        double startU = mBrush.Revert ? 1.0f : 0.0f;
+        BLImage* image = iBLContext->targetImage();
         BLImageData imageData;
 
-        image->getData( &imageData );
+        image->makeMutable( &imageData );
 
-        while( segmentCount < iVertexChain.segmentCount )
+        for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
         {
-            FOdysseyVectorVertex* nextVertex = currentSegment->GetOtherVertex( currentVertex );
-            FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( currentSegment );
+            FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( currentVertex );
+            double segmentLength = segment->GetLength();
+            double endU = 0.0f;
 
-            DrawTexturedSegment( currentSegment
+            if( mBrush.ExtendOverPath )
+            {
+                if( mBrush.Revert )
+                {
+                    endU = iVertexChain.length ? startU - ( segmentLength / iVertexChain.length ) : 0.0f;
+                }
+                else
+                {
+                    endU = iVertexChain.length ? startU + ( segmentLength / iVertexChain.length ) : 0.0f;
+                }
+            }
+            else
+            {
+                if( mBrush.Revert )
+                {
+                    startU = 0.0f;
+                    endU   = 1.0f;
+                }
+                else
+                {
+                    startU = 1.0f;
+                    endU   = 0.0f;
+                }
+            }
+ 
+            DrawTexturedSegment( segment
                                 , (int8*)imageData.pixelData
                                 , imageData.size.w
                                 , imageData.size.h
                                 , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
                                 , (int8*) brushData
-                                , mBrush.texture->GetSurfaceWidth()
-                                , mBrush.texture->GetSurfaceHeight()
+                                , texture->GetSurfaceWidth()
+                                , texture->GetSurfaceHeight()
                                 , 32
-                                , startU
-                                , startU + stepU
+                                , currentVertex == segment->GetVertex(0) ? startU : endU
+                                , currentVertex == segment->GetVertex(0) ? endU : startU
                                 , iDrawingFlags );
 
-            startU += stepU;
+            // only when mBrush.ExtendOverPath == true 
+            startU = endU;
 
             currentVertex = nextVertex;
-            currentSegment = nextSegment;
-
-            segmentCount++;
         }
 
-        mBrush.texture->PlatformData->Mips[0].BulkData.Unlock();
+        texture->PlatformData->Mips[0].BulkData.Unlock();
     }
     else
     {
         // We fill with stroke color because our curve is made of filled shapes.
-        //blctx->setFillRule( BL_FILL_RULE_NON_ZERO );
-        blctx->setFillRule( BL_FILL_RULE_EVEN_ODD );
-        blctx->setFillStyle( strokeColor );
-        blctx->setStrokeStyle( strokeColor );
+        //iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
+        iBLContext->setFillRule( BL_FILL_RULE_EVEN_ODD );
+        iBLContext->setFillStyle( strokeColor );
+        iBLContext->setStrokeStyle( strokeColor );
 
-        while( segmentCount < iVertexChain.segmentCount )
+        for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
         {
-            FOdysseyVectorVertex* nextVertex = currentSegment->GetOtherVertex( currentVertex );
-            FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( currentSegment );
+            FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( currentVertex );
 
-            currentSegment->Draw();
+            segment->Draw( iBLContext );
 
-            currentVertex = nextVertex;
-            currentSegment = nextSegment;
-
-            segmentCount++;
+            if( nextVertex->GetSegmentCount() == 2 )
+            {
+                DrawJoint( iBLContext, nextVertex, iDrawingFlags );
+            }
         }
     }
 }
 
 void
-FOdysseyVectorPath::DrawStructure( const FColor& iStrokeColor, double iStrokeWidth, bool iWorld )
+FOdysseyVectorPath::DrawStructure( BLContext* iBLContext
+                                 , const FColor& iStrokeColor
+                                 , double iStrokeWidth
+                                 , bool iWorld )
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLRgba32 strokeColor = BLRgba32( iStrokeColor.R
                                    , iStrokeColor.G
                                    , iStrokeColor.B
                                    , iStrokeColor.A );
 
-    blctx->save();
+    iBLContext->save();
 
     if( iWorld )
     {
-        blctx->resetMatrix();
+        iBLContext->resetMatrix();
     }
 
-    blctx->setStrokeWidth( iStrokeWidth );
-    blctx->setStrokeStyle( strokeColor );
+    iBLContext->setStrokeWidth( iStrokeWidth );
+    iBLContext->setStrokeStyle( strokeColor );
 
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {
         FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
         FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
 
-        segment->DrawStructure( this, iWorld );
+        segment->DrawStructure( iBLContext, this, iWorld );
     }
 
-    blctx->restore();
+    iBLContext->restore();
 }
 
 std::list<FOdysseyVectorSegment*>&
@@ -2127,27 +2149,57 @@ FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSe
     }
 }
 
-
-
-uint32
-FOdysseyVectorPath::ExploreVertexChain( FOdysseyVectorVertex* iVertex )
+// Updates length and bounding box
+void
+FOdysseyVectorPath::UpdateVertexChain( FVertexChain* iVertexChain )
 {
-    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
-    uint32 segmentCount = 0;
+    double xmin = DBL_MAX,ymin = DBL_MAX,xmax = -DBL_MAX,ymax = -DBL_MAX;
+    bool hasBBox = false;
 
-    iVertex->SetChained( true );
+    iVertexChain->length = 0.0f;
 
-    for( FOdysseyVectorSegment* segment : segmentList )
+    for( FOdysseyVectorSegment* segment : iVertexChain->segmentArray )
     {
-        FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( iVertex );
+        ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
+        double rx1 = segmentBBox.x
+             , ry1 = segmentBBox.y
+             , rx2 = segmentBBox.x + segmentBBox.w
+             , ry2 = segmentBBox.y + segmentBBox.h;
 
-        if( otherVertex->IsChained() == false )
-        {
-            segmentCount += ( ExploreVertexChain( otherVertex ) + 1 );
-        }
+        hasBBox = true;
+
+        if ( rx1 < xmin ) xmin = rx1;
+        if ( ry1 < ymin ) ymin = ry1;
+        if ( rx2 > xmax ) xmax = rx2;
+        if ( ry2 > ymax ) ymax = ry2;
+
+        iVertexChain->length += segment->GetLength();
     }
 
-    return segmentCount;
+    iVertexChain->bbox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+}
+
+void
+FOdysseyVectorPath::ExploreVertexChain( FVertexChain* iVertexChain )
+{
+    FOdysseyVectorVertex* currentVertex = iVertexChain->vertex;
+    FOdysseyVectorSegment* currentSegment = currentVertex->GetFirstSegment();
+
+    while( ( currentSegment ) && ( currentVertex->IsChained() == false ) )
+    {
+        FOdysseyVectorVertex* nextVertex = currentSegment->GetOtherVertex( currentVertex );
+        FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( currentSegment );
+
+        currentVertex->SetChained( true );
+
+        iVertexChain->segmentArray.emplace_back( currentSegment );
+
+        currentVertex = nextVertex;
+        currentSegment = nextSegment;
+    }
+
+    // set the last vertex as chained as well, no matter what
+    currentVertex->SetChained( true );
 }
 
 void
@@ -2167,9 +2219,9 @@ FOdysseyVectorPath::FindVertexChains()
         {
             if( vertex->GetSegmentCount() == 1 )
             {
-                uint32 segmentCount = ExploreVertexChain( vertex );
+                mVertexChainArray.emplace_back( vertex, mSegmentList.size() );
 
-                mVertexChainArray.emplace_back( vertex, segmentCount );
+                ExploreVertexChain( &mVertexChainArray.back() );
             }
         }
     }
@@ -2181,9 +2233,9 @@ FOdysseyVectorPath::FindVertexChains()
         {
             if( vertex->GetSegmentCount() == 2 )
             {
-                uint32 segmentCount = ExploreVertexChain( vertex );
+                mVertexChainArray.emplace_back( vertex, mSegmentList.size() );
 
-                mVertexChainArray.emplace_back( vertex, segmentCount );
+                ExploreVertexChain( &mVertexChainArray.back() );
             }
         }
     }

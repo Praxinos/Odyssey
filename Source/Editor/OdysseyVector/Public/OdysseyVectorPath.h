@@ -56,12 +56,14 @@ constexpr enum ePointSelectionFlags operator ^( const enum ePointSelectionFlags 
 struct FVertexChain
 {
     FOdysseyVectorVertex* vertex;
-    uint32 segmentCount;
+    std::vector<FOdysseyVectorSegment*> segmentArray;
+    double length;
+    ::ULIS::FRectD bbox;
 
-    FVertexChain( FOdysseyVectorVertex* iVertex, uint32 iSegmentCount )
+    FVertexChain( FOdysseyVectorVertex* iVertex, uint32 iReserveSegmentCount )
     {
         vertex = iVertex;
-        segmentCount = iSegmentCount;
+        segmentArray.reserve( iReserveSegmentCount );
     }
 };
 
@@ -145,7 +147,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param iWorld draw in world coordinates system.
          */
         using FOdysseyVectorObject::DrawStructure;
-        virtual void DrawStructure( const FColor& iStrokeColor, double iStrokeWidth, bool iWorld );
+        virtual void DrawStructure(  BLContext* iBLContext, const FColor& iStrokeColor, double iStrokeWidth, bool iWorld );
 
        /**
          * @brief Erase path according to the mask image.
@@ -348,20 +350,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         static ::ULIS::FVec2D GetAverageHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
         void PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray );
         void SetBrush( const FOdysseyVectorBrush& iBrush );
-        FOdysseyVectorBrush GetBrush();
+        FOdysseyVectorBrush& GetBrush();
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
-        virtual void DrawShape( uint64 iFlags ) override;
+        virtual void DrawShape( BLContext* iBLContext, uint64 iFlags ) override;
         virtual bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
 
-        void DrawJoint( FOdysseyVectorVertex* iVertex, uint64 iFlags );
+        void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
         void UpdateBBox();
         void Fill();
-        uint32 ExploreVertexChain( FOdysseyVectorVertex* iVertex );
+        void ExploreVertexChain( FVertexChain* iVertexChain );
+        void UpdateVertexChain( FVertexChain* iVertexChain );
         void FindVertexChains();
-        void DrawVertexChain( const FVertexChain& iVertexChain, uint64 iDrawingFlags );
+        void DrawVertexChain( BLContext* iBLContext, const FVertexChain& iVertexChain, uint64 iDrawingFlags );
         void DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                 , int8*  iScreenPixels
                                 , uint32 iScreenWidth

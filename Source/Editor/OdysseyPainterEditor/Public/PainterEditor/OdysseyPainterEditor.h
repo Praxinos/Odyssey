@@ -6,6 +6,7 @@
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
@@ -16,7 +17,7 @@
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
-#include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
+#include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
@@ -73,6 +74,7 @@ public:
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
     
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
+    virtual UOdysseyPainterEditorRasterPaintBucketTool*              GetRasterPaintBucketTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathEditTool*                 GetVectorPathEditTool() const;
@@ -85,7 +87,7 @@ public:
     virtual UOdysseyPainterEditorVectorPathPushTool*                 GetVectorPathPushTool() const;
     virtual UOdysseyPainterEditorVectorPathSmoothTool*               GetVectorPathSmoothTool() const;
     virtual UOdysseyPainterEditorVectorPathStitchTool*               GetVectorPathStitchTool() const;
-    virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const;
+    virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
 
     // generic reusable vector methods. 
@@ -163,6 +165,7 @@ protected:
     FSimpleMulticastDelegate        mOnSourceChanged;
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
+    UOdysseyPainterEditorRasterPaintBucketTool* mRasterPaintBucketTool;
     UOdysseyPainterEditorVectorPrimitiveDrawingTool* mVectorPrimitiveDrawingTool;
     UOdysseyPainterEditorVectorPathDrawingTool* mVectorPathDrawingTool;
     UOdysseyPainterEditorVectorPathEditTool* mVectorPathEditTool;
@@ -173,7 +176,7 @@ protected:
     UOdysseyPainterEditorVectorPathPushTool* mVectorPathPushTool;
     UOdysseyPainterEditorVectorPathSmoothTool* mVectorPathSmoothTool;
     UOdysseyPainterEditorVectorPathStitchTool* mVectorPathStitchTool;
-    UOdysseyPainterEditorPaintBucketTool* mPaintBucketTool;
+    UOdysseyPainterEditorVectorPaintBucketTool* mVectorPaintBucketTool;
     UOdysseyPainterEditorColorPickerTool* mColorPickerTool;
     UOdysseyPainterEditorVectorGridTool* mVectorGridTool;
     UOdysseyPainterEditorVectorTransformTool* mVectorTransformTool;

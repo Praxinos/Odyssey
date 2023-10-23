@@ -16,10 +16,25 @@ FOdysseyVectorExportV2::WriteBucketColorMode( FOdysseyVectorBucket& iBucket, FAr
     } );
 }
 
+
 void
-FOdysseyVectorExportV2::WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar)
+FOdysseyVectorExportV2::WriteBucketPaletteEntryMark2( FOdysseyVectorBucket& iBucket, FArchive& Ar)
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY_MK2
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
+    {
+        FString assetName = FSoftObjectPath( iBucket.GetPaletteEntry() ).ToString();
+
+        Ar << assetName;
+    } );
+}
+
+// unused. Kept as history
+void
+FOdysseyVectorExportV2::WriteBucketPaletteEntryMark1( FOdysseyVectorBucket& iBucket, FArchive& Ar)
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY_MK1
                             , Ar
                             , [&iBucket](FArchive &Ar) -> void
     {
@@ -181,7 +196,7 @@ FOdysseyVectorExportV2::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar
 
         if( iBucket.GetColorMode() == eBucketColorMode::Palette )
         {
-            WriteBucketPaletteEntry( iBucket, Ar );
+            WriteBucketPaletteEntryMark2( iBucket, Ar );
         }
 
         WriteBucketGradient( iBucket, Ar );

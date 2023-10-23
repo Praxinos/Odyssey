@@ -10,6 +10,8 @@
 
 #include "OdysseyPainterEditorVectorEraserTool.generated.h"
 
+class FOdysseyPainterEditorVectorEraserToolHUD;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UOdysseyPainterEditorTool
 {
@@ -62,6 +64,6 @@ public:
     double Radius;
 
 private:
-    FOdysseyVectorHUDEraser mEraserHUD;
+    FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;
 
 };

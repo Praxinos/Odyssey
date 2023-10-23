@@ -4,12 +4,11 @@
 
 FOdysseyPainterEditorVectorSelectionToolHUD::~FOdysseyPainterEditorVectorSelectionToolHUD()
 {
-    delete mSelectionMask;
+
 }
 
 FOdysseyPainterEditorVectorSelectionToolHUD::FOdysseyPainterEditorVectorSelectionToolHUD( UOdysseyPainterEditorVectorSelectionTool* iSelectionTool )
-    : mSelectionMask ( nullptr )
-    , mShowSelectionBox( true )
+    : mShowSelectionBox( true )
     , mShowSelectionIfEmpty ( false )
 {
     mSelectionTool = iSelectionTool;
@@ -19,21 +18,30 @@ void
 FOdysseyPainterEditorVectorSelectionToolHUD::Load( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = vectorEngine->GetWidth();
-    uint32 height = vectorEngine->GetHeight();
+    uint32 width = vectorEngine->GetPreferredWidth();
+    uint32 height = vectorEngine->GetPreferredHeight();
 
-    if( mSelectionMask )
-    {
-        delete mSelectionMask;
-    }
+    mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
 
-    mSelectionMask = new BLImage( width, height, BL_FORMAT_A8 );
+    mBLSelectionContext.begin( mBLSelectionMask );
+}
+
+void
+FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorScene* iScene )
+{
+    mBLSelectionContext.end();
 }
 
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     UpdateSelectionBox( iScene, false );
+}
+
+BLImage*
+FOdysseyPainterEditorVectorSelectionToolHUD::GetMask()
+{
+    return &mBLSelectionMask;
 }
 
 FSelectionBox&
@@ -50,7 +58,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::ShowSelectionBox( bool iShowSelecti
 
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::GetSelectedVertices( FOdysseyVectorScene* iScene
-                                                           , std::vector<FOdysseyVectorPoint*>& oPointArray )
+                                                                , std::vector<FOdysseyVectorPoint*>& oPointArray )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
     std::list<FOdysseyVectorObject*>::iterator it;
@@ -85,16 +93,14 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GetSelectedVertices( FOdysseyVector
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( FOdysseyVectorScene* iScene
-                                                          , uint64 iFlags )
+FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLContext
+                                                               , FOdysseyVectorScene* iScene
+                                                               , uint64 iFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
-    BLImage* currentImage = vectorEngine->GetBLImage();
     BLPoint topLeft = { 0, 0 };
 
-    blctx->save();
-    blctx->resetMatrix();
+    mBLSelectionContext.save();
 
     if( iScene->GetEngine()->GetSelectionSpace() )
     {
@@ -103,44 +109,41 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( FOdysseyVectorS
         BLRgba32 strokeColor = { 0x80, 0x80, 0x80, 0xFF };
         BLMatrix2D& worldMatrix = selectionSpace->GetWorldMatrix();
 
-        iScene->GetEngine()->UseImage( mSelectionMask );
+        //iScene->GetEngine()->UseImage( mSelectionMask );
 
-        blctx->setCompOp( BL_COMP_OP_SRC_COPY );
+        mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
 
-        blctx->clearAll();
-        blctx->setFillStyle( BLRgba32( 0x80FFFFFF ) );
-        blctx->fillRect( 0, 0, mSelectionMask->width(), mSelectionMask->height() );
+        mBLSelectionContext.clearAll();
+        mBLSelectionContext.setFillStyle( BLRgba32( 0x80FFFFFF ) );
+        mBLSelectionContext.fillRect( 0, 0, mBLSelectionMask.width(), mBLSelectionMask.height() );
 
-        blctx->setMatrix( worldMatrix );
-        blctx->setFillStyle( BLRgba32( 0x00000000/*0x800000FF*/ ) );
-        blctx->fillRect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
+        mBLSelectionContext.setMatrix( worldMatrix );
+        mBLSelectionContext.setFillStyle( BLRgba32( 0x00000000/*0x800000FF*/ ) );
+        mBLSelectionContext.fillRect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
 
-        iScene->GetEngine()->UseImage( currentImage );
-
-        blctx->blitImage( topLeft, *mSelectionMask );
+        //iScene->GetEngine()->UseImage( currentImage );
+        // blit with current renderer
+        iBLContext->blitImage( topLeft, mBLSelectionMask );
     }
 
-    blctx->restore();
+    mBLSelectionContext.restore();
 }
 
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
-                                                                    , bool iForceWorld )
+                                                                         , bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
-    std::list<FOdysseyVectorObject*>::iterator it;
+    std::list<FOdysseyVectorObject*>& focusedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
     bool inited = false;
 
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
     mSelectionBox.worldMatrix.reset();
 
-    for( it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
     {
-        FOdysseyVectorObject* selectedObject = *it;
-
-        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
-            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
+            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(focusedObject);
             ::ULIS::FRectD selectedPathBBox;
 
             if( selectedPath->GetBBoxFromSelectedVertices( selectedPathBBox, true ) )
@@ -152,9 +155,9 @@ FOdysseyPainterEditorVectorSelectionToolHUD::UpdateSelectionBoxVertexMode( FOdys
             }
         }
 
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
-            FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+            FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
             ::ULIS::FRectD selectedPaintGroupBBox;
 
             if( selectedPaintGroup->GetBBoxFromSelectedVertices( selectedPaintGroupBBox, true ) )
@@ -223,7 +226,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::UpdateSelectionBoxObjectMode( FOdys
 
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::UpdateSelectionBox( FOdysseyVectorScene* iScene
-                                                          , bool iForceWorld )
+                                                               , bool iForceWorld )
 {
     switch( mSelectionTool->GetEditor()->GetVectorEditionMode() )
     {
@@ -241,10 +244,10 @@ FOdysseyPainterEditorVectorSelectionToolHUD::UpdateSelectionBox( FOdysseyVectorS
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionBox( FOdysseyVectorScene* iScene
-                                                        , uint64 iFlags )
+FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionBox( BLContext* iBLContext
+                                                             , FOdysseyVectorScene* iScene
+                                                             , uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     BLRgba32 white = BLRgba32( 255, 255, 255, 255 );
@@ -252,8 +255,8 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionBox( FOdysseyVectorSce
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
-    blctx->save();
-    blctx->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
     if( mSelectionBox.rect.Area() )
     {
@@ -270,28 +273,30 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionBox( FOdysseyVectorSce
         path.lineTo( point[3] );
         path.close();
 
-        blctx->setStrokeStyle( bgColor );
-        blctx->setStrokeWidth( 2.0f );
-        blctx->strokePath( path );
+        iBLContext->setStrokeStyle( bgColor );
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->strokePath( path );
 
         // draw box as white if nothing is selected, colored if something is selected
-        blctx->setStrokeStyle( ( iScene->GetSelectedObjectList().size() == 0 ) ? white : fgColor );
-        blctx->setStrokeWidth( 1.0f );
-        blctx->strokePath( path );
+        iBLContext->setStrokeStyle( ( iScene->GetSelectedObjectList().size() == 0 ) ? white : fgColor );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->strokePath( path );
     }
 
-    blctx->restore();
+    iBLContext->restore();
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawObjectSelection( FOdysseyVectorScene* iScene
-                                                           , uint64 iFlags )
+FOdysseyPainterEditorVectorSelectionToolHUD::DrawObjectSelection( BLContext* iBLContext
+                                                                , FOdysseyVectorScene* iScene
+                                                                , uint64 iFlags )
 {
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawVertexSelection( FOdysseyVectorScene* iScene
-                                                           , uint64 iFlags )
+FOdysseyPainterEditorVectorSelectionToolHUD::DrawVertexSelection( BLContext* iBLContext
+                                                                , FOdysseyVectorScene* iScene
+                                                                , uint64 iFlags )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
     std::list<FOdysseyVectorObject*>::iterator it;
@@ -310,23 +315,23 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawVertexSelection( FOdysseyVector
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            FOdysseyVectorHUD::DrawPath( path, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
+            FOdysseyVectorHUD::DrawPath( iBLContext, path, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
         }
 
         if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
-            FOdysseyVectorHUD::DrawPaintGroup( paintGroup, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
+            FOdysseyVectorHUD::DrawPaintGroup( iBLContext, paintGroup, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
         }
     }
 }
 
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( BLContext* iBLContext
-                                                       , BLRgba32 fgColor
-                                                       , BLRgba32 bgColor
-                                                       , BLRgba32 hcColor )
+                                                            , BLRgba32 fgColor
+                                                            , BLRgba32 bgColor
+                                                            , BLRgba32 hcColor )
 {
     std::vector<::ULIS::FVec2D>& pointArray = mSelectionTool->GetPointArray();
     BLPath path;
@@ -385,9 +390,10 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( BLContext* iBLCont
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
+                                                 , FOdysseyVectorScene* iScene
+                                                 , uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -401,29 +407,132 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( FOdysseyVectorScene* iScene, 
         switch( mSelectionTool->GetEditor()->GetVectorEditionMode() )
         {
             case eVectorEditionMode::Object :
-                DrawObjectSelection( iScene, iFlags );
+                DrawObjectSelection( iBLContext, iScene, iFlags );
             break;
 
             case eVectorEditionMode::Vertex :
-                DrawVertexSelection( iScene, iFlags );
+                DrawVertexSelection( iBLContext, iScene, iFlags );
             break;
 
             default:
             break;
         }
 
-        DrawSelectionSpace( iScene, iFlags );
+        DrawSelectionSpace( iBLContext, iScene, iFlags );
 
         if( mShowSelectionBox )
         {
-            DrawSelectionBox( iScene, iFlags );
+            DrawSelectionBox( iBLContext, iScene, iFlags );
         }
     }
 
-    blctx->save();
-    blctx->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
-    DrawPickingArea( blctx, fgColor, bgColor, hcColor );
+    DrawPickingArea( iBLContext, fgColor, bgColor, hcColor );
 
-    blctx->restore();
+    iBLContext->restore();
+}
+
+void
+FOdysseyPainterEditorVectorSelectionToolHUD::ClearMask()
+{
+    mBLSelectionContext.save();
+
+    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.setFillAlpha( 0.0f );
+    mBLSelectionContext.clearAll();
+    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
+
+    mBLSelectionContext.restore();
+}
+
+::ULIS::FRectD
+FOdysseyPainterEditorVectorSelectionToolHUD::GenerateCircleMask( double iX, double iY, double iRadius )
+{
+    mBLSelectionContext.save();
+
+    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.setFillAlpha( 1.0f );
+    mBLSelectionContext.fillCircle( iX, iY, iRadius );
+    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
+
+    mBLSelectionContext.restore();
+
+    return ::ULIS::FRectD::FromMinMax( iX - iRadius, iY - iRadius
+                                     , iX + iRadius, iY + iRadius );
+}
+
+::ULIS::FRectD
+FOdysseyPainterEditorVectorSelectionToolHUD::GenerateRectangleMask( const ::ULIS::FRectD& iRect )
+{
+    mBLSelectionContext.save();
+
+    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.setFillAlpha( 0.0f );
+    mBLSelectionContext.clearAll();
+    mBLSelectionContext.setFillAlpha( 1.0f );
+    mBLSelectionContext.fillRect( iRect.x, iRect.y, iRect.w, iRect.h );
+    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
+
+    mBLSelectionContext.restore();
+
+    return iRect;
+}
+
+::ULIS::FRectD
+FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray )
+{
+    ::ULIS::FRectD rect = { 0, 0, 0, 0 };
+    BLPath path;
+
+    mBLSelectionContext.save();
+
+    mBLSelectionContext.setCompOp(BL_COMP_OP_SRC_COPY);
+    /*blctx.setFillStyle( BLRgba32(0x00000000) );*/
+    mBLSelectionContext.setFillAlpha(0.0f);
+    mBLSelectionContext.clearAll();
+
+    if( iPointArray.size() )
+    {
+        double x1 = iPointArray[0].x, y1 = iPointArray[0].y
+             , x2 = iPointArray[0].x, y2 = iPointArray[0].y;
+
+        path.moveTo( iPointArray[0].x, iPointArray[0].y );
+
+        for( uint32 i = 1; i < iPointArray.size(); i++ )
+        {
+            path.lineTo( iPointArray[i].x, iPointArray[i].y );
+
+            if( iPointArray[i].x < x1 )
+            {
+                x1 = iPointArray[i].x;
+            }
+
+            if( iPointArray[i].y < y1 )
+            {
+                y1 = iPointArray[i].y;
+            }
+
+            if( iPointArray[i].x > x2 )
+            {
+                x2 = iPointArray[i].x;
+            }
+
+            if( iPointArray[i].y > y2 )
+            {
+                y2 = iPointArray[i].y;
+            }
+        }
+
+        rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
+
+        mBLSelectionContext.setFillAlpha(1.0f);
+        mBLSelectionContext.fillPath( path );
+    }
+
+    mBLSelectionContext.flush(BL_CONTEXT_FLUSH_SYNC);
+    mBLSelectionContext.restore();
+
+    return rect;
 }

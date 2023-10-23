@@ -45,6 +45,30 @@ UOdysseyPainterEditorVectorSelectionTool::GetFocusedObjectList( FOdysseyVectorSc
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
+
+bool
+UOdysseyPainterEditorVectorSelectionTool::IsActivable() const
+{
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+}
+
+void
+UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorEngine* iEngine
+                                                    , FOdysseyVectorScene* iScene )
+{
+    mPickHUD->Load( iScene );
+
+    iEngine->ClearHUD();
+    iEngine->AddHUD( mPickHUD );
+
+    iEngine->ResetHUD();
+
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+}
+
 void
 UOdysseyPainterEditorVectorSelectionTool::Load()
 {
@@ -65,6 +89,15 @@ UOdysseyPainterEditorVectorSelectionTool::Load()
 }
 
 void
+UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorEngine* iEngine
+                                                      , FOdysseyVectorScene* iScene )
+{
+    iEngine->RemoveHUD( mPickHUD );
+
+    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+}
+
+void
 UOdysseyPainterEditorVectorSelectionTool::Unload()
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
@@ -81,38 +114,6 @@ UOdysseyPainterEditorVectorSelectionTool::Unload()
             UnloadVector( vectorEngine, vectorScene );
         }
     }
-}
-
-bool
-UOdysseyPainterEditorVectorSelectionTool::IsActivable() const
-{
-    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-}
-
-void
-UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene )
-{
-    iEngine->RemoveHUD( mPickHUD );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-}
-
-void
-UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene )
-{
-    mPickHUD->Load( iScene );
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mPickHUD );
-
-    iEngine->ResetHUD();
-
-    // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
 TSharedRef<SWidget>
@@ -139,27 +140,6 @@ UOdysseyPainterEditorVectorSelectionTool::OnKeyUpVector( FOdysseyVectorEngine* i
 {
     // Note: this also calls iScene->Update(0)
     UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
-
-    return false;
-}
-
-bool
-UOdysseyPainterEditorVectorSelectionTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            return OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
-        }
-    }
 
     return false;
 }
@@ -198,8 +178,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorEngin
     return true;
 }
 
-void
-UOdysseyPainterEditorVectorSelectionTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+bool
+UOdysseyPainterEditorVectorSelectionTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
@@ -212,9 +192,11 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDrag( const FOdysseyPoint& iPoi
             FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
-            OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+            return OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
         }
     }
+
+    return false;
 }
 
 void
@@ -256,6 +238,25 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorEngin
     //return redrawRegion; // unused;
 }
 
+void
+UOdysseyPainterEditorVectorSelectionTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+        }
+    }
+}
+
 static void
 SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iSelectedObject )
 {
@@ -280,7 +281,7 @@ UOdysseyPainterEditorVectorSelectionTool::GenerateMask( FOdysseyVectorEngine* iE
 {
     ::ULIS::FRectD roi = ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0 );
 
-    iEngine->ClearMask();
+    mPickHUD->ClearMask();
 
     if( mPointArray.size() > 1 )
     {
@@ -294,7 +295,7 @@ UOdysseyPainterEditorVectorSelectionTool::GenerateMask( FOdysseyVectorEngine* iE
                 double ymax = ::ULIS::FMath::Max( mPointArray[0].y, mPointArray[1].y );
                 ::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
 
-                return iEngine->GenerateRectangleMask( rect );
+                return mPickHUD->GenerateRectangleMask( rect );
             }
             break;
 
@@ -302,12 +303,12 @@ UOdysseyPainterEditorVectorSelectionTool::GenerateMask( FOdysseyVectorEngine* iE
             {
                 ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( mPointArray[1] - mPointArray[0] );
 
-                return iEngine->GenerateCircleMask( mPointArray[0].x, mPointArray[0].y, diagonal.Distance() );
+                return mPickHUD->GenerateCircleMask( mPointArray[0].x, mPointArray[0].y, diagonal.Distance() );
             }
             break;
 
             case EOdysseyVectorSelectionShape::Freehand:
-                return iEngine->GenerateFreehandMask( mPointArray );
+                return mPickHUD->GenerateFreehandMask( mPointArray );
             break;
 
             default:
@@ -316,61 +317,6 @@ UOdysseyPainterEditorVectorSelectionTool::GenerateMask( FOdysseyVectorEngine* iE
     }
 
     return roi;
-}
-
-bool
-UOdysseyPainterEditorVectorSelectionTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{   
-    bool ret = false;
-
-/*if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
-{*/
-    if( iKey == EKeys::RightMouseButton )
-    {
-        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
-        {
-            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorSelectionToolObjectContextMenu::CreateWidget( GetEditor() );
-            
-            TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
-            FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
-                                               FWidgetPath(),
-                                               contextMenu.ToSharedRef(),
-                                               FSlateApplication::Get().GetCursorPos(),
-                                               FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
-        }
-
-        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
-        {
-            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorSelectionToolVertexContextMenu::CreateWidget( GetEditor() );
-
-            TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
-            FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
-                                               FWidgetPath(),
-                                               contextMenu.ToSharedRef(),
-                                               FSlateApplication::Get().GetCursorPos(),
-                                               FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
-        }
-    }
-/*}*/
-    else
-    {
-        bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-        if( hasVector )
-        {
-            TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-            if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-            {
-                FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-                FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-                return OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-            }
-        }
-    }
-
-    return ret;
 }
 
 void
@@ -542,6 +488,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorEngine*
     {
         roi = GenerateMask( iEngine );
 
+        // TODO: pass the mask image as arg to Pick function
+        iEngine->SetBLMask( mPickHUD->GetMask() );
         if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
         {
             OnMouseUpVectorObjectMode( iEngine, iScene, iPointInTexture, iKey );
@@ -551,6 +499,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorEngine*
         {
             OnMouseUpVectorVertexMode( iEngine, iScene, iPointInTexture, iKey );
         }
+        iEngine->SetBLMask( nullptr );
     }
 
     mPointArray.clear();
@@ -562,6 +511,62 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorEngine*
                    | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 
     return true;
+}
+
+
+bool
+UOdysseyPainterEditorVectorSelectionTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{   
+    bool ret = false;
+
+/*if(FSlateApplication::Get().GetModifierKeys().IsControlDown())
+{*/
+    if( iKey == EKeys::RightMouseButton )
+    {
+        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
+        {
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorSelectionToolObjectContextMenu::CreateWidget( GetEditor() );
+            
+            TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+            FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
+                                               FWidgetPath(),
+                                               contextMenu.ToSharedRef(),
+                                               FSlateApplication::Get().GetCursorPos(),
+                                               FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
+        }
+
+        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
+        {
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorSelectionToolVertexContextMenu::CreateWidget( GetEditor() );
+
+            TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+            FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
+                                               FWidgetPath(),
+                                               contextMenu.ToSharedRef(),
+                                               FSlateApplication::Get().GetCursorPos(),
+                                               FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
+        }
+    }
+/*}*/
+    else
+    {
+        bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+        if( hasVector )
+        {
+            TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+            if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+            {
+                FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+                FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+                return OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+            }
+        }
+    }
+
+    return ret;
 }
 
 std::vector<::ULIS::FVec2D>&

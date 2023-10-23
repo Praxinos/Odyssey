@@ -108,11 +108,11 @@ FOdysseyVectorEllipse::CopyShape()
 }
 
 void
-FOdysseyVectorEllipse::DrawShape( uint64 iFlags )
+FOdysseyVectorEllipse::DrawShape( BLContext* iBLContext, uint64 iFlags )
 {
     if ( mRadiusX && mRadiusY )
     {
-        FOdysseyVectorPath::DrawShape ( iFlags );
+        FOdysseyVectorPath::DrawShape ( iBLContext, iFlags );
     }
 }
 

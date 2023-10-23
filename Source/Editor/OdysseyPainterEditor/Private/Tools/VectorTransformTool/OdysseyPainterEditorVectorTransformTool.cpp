@@ -172,8 +172,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorEngi
     if( mDragging == false )
     {
         FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-        uint32 width = vectorEngine->GetWidth();
-        uint32 height = vectorEngine->GetHeight();
+        uint32 width = vectorEngine->GetPreferredWidth();
+        uint32 height = vectorEngine->GetPreferredHeight();
 
         imageRegion.x = 0;
         imageRegion.y = 0;

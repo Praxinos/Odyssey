@@ -23,6 +23,11 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Load( FOdysseyVectorScene* iScene 
 {
 }
 
+void
+FOdysseyPainterEditorVectorPathStitchToolHUD::Unload( FOdysseyVectorScene* iScene )
+{
+}
+
 std::vector<FOdysseyVectorPoint*>&
 FOdysseyPainterEditorVectorPathStitchToolHUD::GetPickedPointArray()
 {
@@ -41,9 +46,10 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX, doubl
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
+                                                  , FOdysseyVectorScene* iScene
+                                                  , uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     std::list<FOdysseyVectorObject*>::iterator it;
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
@@ -53,14 +59,14 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( FOdysseyVectorScene* iScene,
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
-    blctx->save();
-    blctx->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
-    blctx->setCompOp( BL_COMP_OP_SRC_COPY );
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
 
-    blctx->setStrokeStyle( hcColor );
-    blctx->setStrokeWidth( 1.0f );
-    blctx->strokeCircle( mX, mY, mPathStitchTool->PickingRadius );
+    iBLContext->setStrokeStyle( hcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->strokeCircle( mX, mY, mPathStitchTool->PickingRadius );
 
     if( mPickedPointArray.size() > 1 )
     {
@@ -69,13 +75,13 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( FOdysseyVectorScene* iScene,
 
         if( ( vertex0->GetSegmentCount() == 1 ) && ( vertex1->GetSegmentCount() == 1 ) )
         {
-            DrawPath( vertex0->GetPath(), fgColor, bgColor, hcColor, true, VIEW_SEGMENT );
-            DrawPath( vertex1->GetPath(), fgColor, bgColor, hcColor, true, VIEW_SEGMENT );
+            DrawPath( iBLContext, vertex0->GetPath(), fgColor, bgColor, hcColor, true, VIEW_SEGMENT );
+            DrawPath( iBLContext, vertex1->GetPath(), fgColor, bgColor, hcColor, true, VIEW_SEGMENT );
 
-            DrawVertex( vertex0, blctx, fgColor, bgColor, hcColor, true, 0 );
-            DrawVertex( vertex1, blctx, fgColor, bgColor, hcColor, true, 0 );
+            DrawVertex( iBLContext, vertex0, fgColor, bgColor, hcColor, true, 0 );
+            DrawVertex( iBLContext, vertex1, fgColor, bgColor, hcColor, true, 0 );
         }
     }
 
-    blctx->restore();
+    iBLContext->restore();
 }

@@ -33,7 +33,9 @@ class ODYSSEYVECTOR_API FPointQuadTree
                      , std::vector<FPointQuadTreeEntry>& iPointQuadTreeEntryArray );
 
         void Build( uint32 iMaxPointsPerQuad, std::vector<FPointQuadTreeEntry>& iParentPointQuadTreeEntryArray );
-        void Draw( FOdysseyVectorScene* iScene, uint64 iFlags );
+        void Draw( BLContext* iBLContext
+                 , FOdysseyVectorScene* iScene
+                 , uint64 iFlags );
         void PickPoints( double iWorldX
                        , double iWorldY
                        , double iSelectionRadius
@@ -47,50 +49,52 @@ class ODYSSEYVECTOR_API FPointQuadTree
 class ODYSSEYVECTOR_API FOdysseyVectorHUD
 {
     public:
-        static void DrawObjectRecursive( FOdysseyVectorObject* iObj, BLContext* iBLCtx );
         static FColor& GetForegroundColor();
         static FColor& GetBackgroundColor();
         static FColor& GetHighlightColor();
-
-        static void DrawLine( double iWorldx0
+        static void DrawObjectRecursive( BLContext* iBLContext
+                                       , FOdysseyVectorObject* iObj );
+        static void DrawLine( BLContext* iBLContext
+                            , double iWorldx0
                             , double iWorldY0
                             , double iWorldx1
                             , double iWorldY1
-                            , BLContext* iBLContext
                             , const BLRgba32& fgColor
                             , const BLRgba32& bgColor );
 
-        static void DrawCircle( double iWorldx
+        static void DrawCircle( BLContext* iBLContext
+                              , double iWorldx
                               , double iWorldY
                               , double iRadius
-                              , BLContext* iBLContext
                               , const BLRgba32& fgColor
                               , const BLRgba32& bgColor );
 
-        static void DrawVertex( FOdysseyVectorVertex* iVertex
-                              , BLContext* iBLContext
+        static void DrawVertex( BLContext* iBLContext
+                              , FOdysseyVectorVertex* iVertex
                               , const BLRgba32& fgColor
                               , const BLRgba32& bgColor
                               , const BLRgba32& hcColor
                               , bool iWorld
                               , uint64 iHUDFlags );
 
-        static void DrawCubicSegment( FOdysseyVectorSegmentCubic* iCubicSegment
-                                    , BLContext* iBLContext
+        static void DrawCubicSegment( BLContext* iBLContext
+                                    , FOdysseyVectorSegmentCubic* iCubicSegment
                                     , const BLRgba32& fgColor
                                     , const BLRgba32& bgColor
                                     , const BLRgba32& hcColor
                                     , bool iWorld
                                     , uint64 iHUDFlags );
 
-        static void DrawPath( FOdysseyVectorPath* iPath
+        static void DrawPath( BLContext* iBLContext
+                            , FOdysseyVectorPath* iPath
                             , const BLRgba32& fgColor
                             , const BLRgba32& bgColor
                             , const BLRgba32& hcColor
                             , bool iWorld
                             , uint64 iHUDFlags );
 
-        static void DrawPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
+        static void DrawPaintGroup( BLContext* iBLContext
+                                  , FOdysseyVectorGroupPaint* iPaintGroup
                                   , const BLRgba32& fgColor
                                   , const BLRgba32& bgColor
                                   , const BLRgba32& hcColor
@@ -116,9 +120,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 VIEW_SEGMENT          = 1 << 6;
         static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
-        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iHUDFlags ) = 0;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iHUDFlags ) = 0;
         virtual void Reset( FOdysseyVectorScene* iScene ) = 0;
         virtual void Load( FOdysseyVectorScene* iScene ) = 0;
+        virtual void Unload( FOdysseyVectorScene* iScene ) = 0;
 
         void PickPoints( double iWorldX
                        , double iWorldY

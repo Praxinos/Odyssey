@@ -10,7 +10,7 @@
 class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorPaintBucketToolContextMenu
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolContextMenu
 {
     public:
         // FOdysseyEditorTab interface

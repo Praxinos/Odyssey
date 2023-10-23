@@ -59,9 +59,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @brief Draw the segment
          * @param iRoi the region-of-interest
          */
-        virtual void Draw();
+        virtual void Draw( BLContext* iBLContext );
 
-        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, bool iWorld ){};
+        virtual void DrawStructure( BLContext* iBLContext, FOdysseyVectorObject* iParentObject, bool iWorld ){};
 
         uint32 GetIntersectionVertexCount();
 
@@ -180,9 +180,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         virtual bool Pick( double iX, double iY, double iRadius ) = 0;
         ::ULIS::FVec2D GetPolygonCacheStartPointInParent();
         ::ULIS::FVec2D GetPolygonCacheEndPointInParent();
+        virtual double GetLength();
 
     protected:
-        void DrawPolygonCache();
+        void DrawPolygonCache( BLContext* iBLContext );
 
     protected:
         std::vector<FPolygon> mPolygonCache;
@@ -193,6 +194,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         bool mIsPaintingReady;
         uint32 mID;
         uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
-        double mBrushStartT;
-        double mBrushEndT;
+        double mLength;
 };
