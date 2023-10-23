@@ -7,6 +7,9 @@
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoVertexRadius.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
+#include "OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorViewportTab.h"
+#include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathEditTool"
 

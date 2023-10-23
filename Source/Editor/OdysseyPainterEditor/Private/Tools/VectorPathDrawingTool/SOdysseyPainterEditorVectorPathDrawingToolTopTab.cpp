@@ -3,6 +3,7 @@
 
 #include "Tools/VectorPathDrawingTool/SOdysseyPainterEditorVectorPathDrawingToolTopTab.h"
 #include "ISinglePropertyView.h"
+#include "Widgets/Layout/SWrapBox.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorPathDrawingToolTopTab"
 
