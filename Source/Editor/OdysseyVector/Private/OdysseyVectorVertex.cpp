@@ -737,6 +737,18 @@ FOdysseyVectorVertex::GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment )
     return nullptr;
 }
 
+FOdysseyVectorJoint&
+FOdysseyVectorVertex::GetJoint()
+{
+    return mJoint;
+}
+
+double
+FOdysseyVectorVertex::GetJointLength()
+{
+    return mJoint.GetLength();
+}
+
 void
 FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags )
 {

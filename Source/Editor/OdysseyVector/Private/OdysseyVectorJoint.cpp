@@ -5,6 +5,7 @@ FOdysseyVectorJoint::~FOdysseyVectorJoint()
 }
 
 FOdysseyVectorJoint::FOdysseyVectorJoint()
+    : mLength( 0.0f )
 {
 }
 
@@ -108,17 +109,17 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iOrigin
                 mPolygonCache[0].point[1].x = edge0Point.x;
                 mPolygonCache[0].point[1].y = edge0Point.y;
                 mPolygonCache[0].U[1] = 0.0f;
-                mPolygonCache[0].V[1] = 1.0f * side;
+                mPolygonCache[0].V[1] = side == 1.0f ? 1.0f : 0.0f;
 
                 mPolygonCache[0].point[2].x = intersectionPoint.x;
                 mPolygonCache[0].point[2].y = intersectionPoint.y;
                 mPolygonCache[0].U[2] = 0.5f;
-                mPolygonCache[0].V[2] = 1.0f * side;
+                mPolygonCache[0].V[2] = side == 1.0f ? 1.0f : 0.0f;
 
                 mPolygonCache[0].point[3].x = edge1Point.x;
                 mPolygonCache[0].point[3].y = edge1Point.y;
                 mPolygonCache[0].U[3] = 1.0f;
-                mPolygonCache[0].V[3] = 1.0f * side;
+                mPolygonCache[0].V[3] = side == 1.0f ? 1.0f : 0.0f;
                 // default pointCount for joint's polygons is 5. Set it to 4.
                 mPolygonCache[0].pointCount = 4;
             }
@@ -126,23 +127,36 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iOrigin
             {
                 mPolygonCache[0].point[0].x = iOrigin.x;
                 mPolygonCache[0].point[0].y = iOrigin.y;
+                mPolygonCache[0].U[0] = 0.0f;
+                mPolygonCache[0].V[0] = 0.5f;
 
                 mPolygonCache[0].point[1].x = edge0Point.x;
                 mPolygonCache[0].point[1].y = edge0Point.y;
+                mPolygonCache[0].U[1] = 0.0f;
+                mPolygonCache[0].V[1] = side == 1.0f ? 1.0f : 0.0f;
 
                 mPolygonCache[0].point[2].x = edge0Point.x - ( parallelVec0.x * iMiterLimit * iRadius );
                 mPolygonCache[0].point[2].y = edge0Point.y - ( parallelVec0.y * iMiterLimit * iRadius );
+                mPolygonCache[0].U[2] = 0.33f;
+                mPolygonCache[0].V[2] = side == 1.0f ? 1.0f : 0.0f;
 
                 mPolygonCache[0].point[3].x = edge1Point.x - ( parallelVec1.x * iMiterLimit * iRadius );
                 mPolygonCache[0].point[3].y = edge1Point.y - ( parallelVec1.y * iMiterLimit * iRadius );
+                mPolygonCache[0].U[3] = 0.66f;
+                mPolygonCache[0].V[3] = side == 1.0f ? 1.0f : 0.0f;
 
                 mPolygonCache[0].point[4].x = edge1Point.x;
                 mPolygonCache[0].point[4].y = edge1Point.y;
+                mPolygonCache[0].U[4] = 1.0f;
+                mPolygonCache[0].V[4] = side == 1.0f ? 1.0f : 0.0f;
+
                 // default pointCount might have been altered, reset it
                 mPolygonCache[0].pointCount = 5;
             }
         }
     }
+
+    mLength = shortestTest.Distance();
 }
 
 void
@@ -160,7 +174,9 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iOrigin
     ::ULIS::FVec2D shortestTest = edge1Point - edge0Point;
     // have to clamp due to imprecision of the dot product
     double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec1 ), -1.0f, 1.0f );
-
+    double angle = acos( std::clamp<double>( perpendicularVec0.DotProduct( perpendicularVec1 ), -1.0f, 1.0f ) );
+    static const int steps = 24;
+    double a = angle / steps;
     double side = 1.0f;
 
     // Find on which side should the joint be drawn by comparing the directions of our vectors
@@ -176,9 +192,6 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iOrigin
         side = -1.0f;
     }
 
-    static const int steps = 24;
-    double angle = acos( std::clamp<double>( perpendicularVec0.DotProduct( perpendicularVec1 ), -1.0f, 1.0f ) );
-    double a = angle / steps;
     double cosa = cos(a);
     double sina = sin(a);
 
@@ -187,8 +200,8 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iOrigin
     for ( uint32 i = 0; i < steps; i++ )
     {
         // https://stackoverflow.com/questions/11773889/how-to-calculate-a-vector-from-an-angle-with-another-vector-in-2d
-        ::ULIS::FVec2D interpolatedVector = { (  perpendicularVec0.x * cosa ) + ( perpendicularVec0.y * sina ),
-                                              ( -perpendicularVec0.x * sina ) + ( perpendicularVec0.y * cosa ) };
+        ::ULIS::FVec2D interpolatedVector = { (  perpendicularVec0.x * cosa ) - ( perpendicularVec0.y * sina ) * side,
+                                       side * (  perpendicularVec0.x * sina ) + ( perpendicularVec0.y * cosa ) };
 
         // start drawing triangles at origin
         mPolygonCache[i].point[0].x = ( iOrigin.x );
@@ -204,6 +217,8 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iOrigin
 
         perpendicularVec0 = interpolatedVector;
     }
+
+    mLength = angle * iRadius;
 }
 
 void
@@ -239,12 +254,27 @@ FOdysseyVectorJoint::MakeLinear( ::ULIS::FVec2D& iOrigin
 
     mPolygonCache[0].point[0].x = ( iOrigin.x );
     mPolygonCache[0].point[0].y = ( iOrigin.y );
+    mPolygonCache[0].U[0] = 0.0f;
+    mPolygonCache[0].V[0] = 0.5f;
 
     mPolygonCache[0].point[1].x = mPolygonCache[0].point[0].x + ( perpendicularVec0.x * iRadius );
     mPolygonCache[0].point[1].y = mPolygonCache[0].point[0].y + ( perpendicularVec0.y * iRadius );
+    mPolygonCache[0].U[1] = 0.0f;
+    mPolygonCache[0].V[1] = side == 1.0f ? 1.0f : 0.0f;
 
     mPolygonCache[0].point[2].x = mPolygonCache[0].point[0].x + ( perpendicularVec1.x * iRadius );
     mPolygonCache[0].point[2].y = mPolygonCache[0].point[0].y + ( perpendicularVec1.y * iRadius );
+    mPolygonCache[0].U[2] = 1.0f;
+    mPolygonCache[0].V[2] = side == 1.0f ? 1.0f : 0.0f;
+
     // default pointCount for joint's polygons is 5. Set it to 3.
     mPolygonCache[0].pointCount = 3;
+
+    mLength = shortestTest.Distance();
+}
+
+std::vector<FOdysseyVectorPolygon5>&
+FOdysseyVectorJoint::GetPolygonCache()
+{
+    return mPolygonCache;
 }

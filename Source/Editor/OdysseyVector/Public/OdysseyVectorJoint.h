@@ -21,27 +21,25 @@ class ODYSSEYVECTOR_API FOdysseyVectorJoint
         void
         Draw( BLContext* iBLContext, uint64 iDrawingFlags );
 
-        void
-        MakeNone();
+        void MakeNone();
 
-        void
-        MakeMiter( ::ULIS::FVec2D& iOrigin
-                  , ::ULIS::FVec2D& iVector0
-                  , ::ULIS::FVec2D& iVector1
-                  , double iRadius
-                  , double iMiterLimit );
+        void MakeMiter( ::ULIS::FVec2D& iOrigin
+                      , ::ULIS::FVec2D& iVector0
+                      , ::ULIS::FVec2D& iVector1
+                      , double iRadius
+                      , double iMiterLimit );
 
-        void
-        MakeLinear( ::ULIS::FVec2D& iOrigin
-                  , ::ULIS::FVec2D& iVector0
-                  , ::ULIS::FVec2D& iVector1
-                  , double iRadius );
+        void MakeLinear( ::ULIS::FVec2D& iOrigin
+                       , ::ULIS::FVec2D& iVector0
+                       , ::ULIS::FVec2D& iVector1
+                       , double iRadius );
 
-        void
-        MakeRadial( ::ULIS::FVec2D& iOrigin
-                  , ::ULIS::FVec2D& iVector0
-                  , ::ULIS::FVec2D& iVector1
-                  , double iRadius );
+        void MakeRadial( ::ULIS::FVec2D& iOrigin
+                       , ::ULIS::FVec2D& iVector0
+                       , ::ULIS::FVec2D& iVector1
+                       , double iRadius );
+
+        std::vector<FOdysseyVectorPolygon5>& GetPolygonCache();
 
     protected:
         std::vector<FOdysseyVectorPolygon5> mPolygonCache;

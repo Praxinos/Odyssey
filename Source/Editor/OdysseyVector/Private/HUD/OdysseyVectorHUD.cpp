@@ -344,6 +344,46 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
     BLPoint handle = HUDMatrix.mapVector( ctrl.x, ctrl.y );
     static BLRgba32 greenColor = BLRgba32( 0, 255, 0, 255 );
 
+    if ( iHUDFlags & VIEW_VERTEX_HANDLE )
+    {
+        static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+        static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+
+        // Line to handle
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->setStrokeStyle( bgColor );
+        iBLContext->strokeLine( point.x, point.y, point.x + handle.x, point.y + handle.y );
+
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->setStrokeStyle( whiteColor );
+        iBLContext->strokeLine( point.x, point.y, point.x + handle.x, point.y + handle.y );
+
+        // handle
+        FOdysseyVectorHUD::DrawCircle( iBLContext
+                                     , point.x + handle.x
+                                     , point.y + handle.y
+                                     , HANDLERADIUS
+                                     , whiteColor
+                                     , blackColor );
+
+        // Line to handle
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->setStrokeStyle( bgColor );
+        iBLContext->strokeLine( point.x, point.y, point.x - handle.x, point.y - handle.y );
+
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->setStrokeStyle( whiteColor );
+        iBLContext->strokeLine( point.x, point.y, point.x - handle.x, point.y - handle.y );
+
+        // handle
+        FOdysseyVectorHUD::DrawCircle( iBLContext
+                                     , point.x - handle.x
+                                     , point.y - handle.y
+                                     , HANDLERADIUS
+                                     , whiteColor
+                                     , blackColor );
+    }
+
     FOdysseyVectorHUD::DrawCircle( iBLContext
                                  , point.x
                                  , point.y
@@ -359,26 +399,6 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
             iBLContext->setStrokeStyle( greenColor );
             iBLContext->strokeCircle( point.x, point.y, VERTEXRADIUS + 2 );
         }
-    }
-
-    if ( iHUDFlags & VIEW_VERTEX_HANDLE )
-    {
-        static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
-        static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
-
-        FOdysseyVectorHUD::DrawCircle( iBLContext
-                                     , point.x + handle.x
-                                     , point.y + handle.y
-                                     , HANDLERADIUS
-                                     , whiteColor
-                                     , blackColor );
-
-        FOdysseyVectorHUD::DrawCircle( iBLContext
-                                     , point.x - handle.x
-                                     , point.y - handle.y
-                                     , HANDLERADIUS
-                                     , whiteColor
-                                     , blackColor );
     }
 }
 

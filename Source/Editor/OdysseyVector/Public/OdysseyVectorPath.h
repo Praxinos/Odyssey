@@ -381,6 +381,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                                 , double iStartU
                                 , double iEndU
                                 , uint64 iDrawingFlags );
+        void DrawTexturedJoint( FOdysseyVectorJoint* iJoint
+                              , int8*  iScreenPixels
+                              , uint32 iScreenWidth
+                              , uint32 iScreenHeight
+                              , uint32 iScreenBitsPerPixel
+                              , int8*  iTexturePixels
+                              , uint32 iTextureWidth
+                              , uint32 iTextureHeight
+                              , uint32 iTextureBitsPerPixel
+                              , double iStartU
+                              , double iEndU
+                              , uint64 iDrawingFlags );
 
     protected :
         std::vector<FVertexChain> mVertexChainArray;

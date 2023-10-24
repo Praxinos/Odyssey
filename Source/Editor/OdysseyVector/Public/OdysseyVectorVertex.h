@@ -303,6 +303,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         bool IsChained();
         void MakeJoint( FOdysseyVectorSegment* iPreviousSegment );
         void DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags );
+        FOdysseyVectorJoint& GetJoint();
+        double GetJointLength();
 
     protected:
         /**

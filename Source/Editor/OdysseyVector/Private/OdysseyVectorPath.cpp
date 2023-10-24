@@ -1280,6 +1280,58 @@ FOdysseyVectorPath::AlterRadius( double iDeltaRadius )
 }
 
 void
+FOdysseyVectorPath::DrawTexturedJoint( FOdysseyVectorJoint* iJoint
+                                     , int8*  iScreenPixels
+                                     , uint32 iScreenWidth
+                                     , uint32 iScreenHeight
+                                     , uint32 iScreenBitsPerPixel
+                                     , int8*  iTexturePixels
+                                     , uint32 iTextureWidth
+                                     , uint32 iTextureHeight
+                                     , uint32 iTextureBitsPerPixel
+                                     , double iStartU
+                                     , double iEndU
+                                     , uint64 iDrawingFlags )
+{
+    // TODO: transform this to an argument to avoid repetitive calls. I guess.
+    FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
+    std::vector<FOdysseyVectorPolygon5>& polygonCache = iJoint->GetPolygonCache();
+    double difU = iEndU - iStartU;
+
+    for( int i = 0; i < polygonCache.size(); i++ )
+    {
+        FOdysseyVectorPolygon5* polygon = &polygonCache[i];
+        BLPoint worldPoint[5];
+        ::ULIS::FVec2I int32Point[5];
+        double polyU[5];
+
+        for( uint32 j = 0; j < polygon->pointCount; j++ )
+        {
+           worldPoint[j] = mWorldMatrix.mapPoint( polygon->point[j].x, polygon->point[j].y );
+           int32Point[j].x = (int32) worldPoint[j].x;
+           int32Point[j].y = (int32) worldPoint[j].y;
+           polyU[j] = iStartU + ( polygon->U[j] * difU );
+        }
+
+            vectorEngine->DrawPolygon( int32Point
+                                     , polyU
+                                     , polygon->V
+                                     , polygon->pointCount
+                                     , mObjectParam.Opacity
+                                     , iScreenPixels
+                                     , iScreenWidth
+                                     , iScreenHeight
+                                     , iScreenBitsPerPixel
+                                     , GetForegroundColor()
+                                     , iTexturePixels
+                                     , iTextureWidth
+                                     , iTextureHeight
+                                     , iTextureBitsPerPixel
+                                     , mBrush.ColorFromBrush ? false : true );
+    }
+}
+
+void
 FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                        , int8*  iScreenPixels
                                        , uint32 iScreenWidth
@@ -1412,24 +1464,54 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                 }
             }
 
-            // don't draw if segment is outside the screen
-            if( ( ( bbox.x          ) < screen.w )
-             && ( ( bbox.x + bbox.w ) > 0        )
-             && ( ( bbox.y          ) < screen.h )
-             && ( ( bbox.y + bbox.h ) > 0        ) )
+            if( segmentLength )
             {
-                DrawTexturedSegment( segment
-                                    , (int8*)imageData.pixelData
-                                    , imageData.size.w
-                                    , imageData.size.h
-                                    , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                    , (int8*) brushData
-                                    , texture->GetSurfaceWidth()
-                                    , texture->GetSurfaceHeight()
-                                    , 32
-                                    , currentVertex == segment->GetVertex(0) ? startU : endU
-                                    , currentVertex == segment->GetVertex(0) ? endU : startU
-                                    , iDrawingFlags );
+                double segmentStartU = ( currentVertex == segment->GetVertex(0) ) ? startU : endU;
+                double segmentEndU   = ( currentVertex == segment->GetVertex(0) ) ? endU : startU;
+
+                if( currentVertex->IsHandleAligned() == false )
+                {
+                    FOdysseyVectorJoint& joint = currentVertex->GetJoint();
+                    double jointLength = joint.GetLength();
+                    double segmentJointRatio = jointLength / ( segmentLength + jointLength );
+                    double jointStartU = segmentStartU;
+                    double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
+
+                    segmentStartU = jointEndU;
+
+                    DrawTexturedJoint( &joint
+                                     , (int8*)imageData.pixelData
+                                     , imageData.size.w
+                                     , imageData.size.h
+                                     , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                     , (int8*) brushData
+                                     , texture->GetSurfaceWidth()
+                                     , texture->GetSurfaceHeight()
+                                     , 32
+                                     , jointStartU
+                                     , jointEndU
+                                     , iDrawingFlags );
+                }
+
+                // don't draw if segment is outside the screen
+                if( ( ( bbox.x          ) < screen.w )
+                 && ( ( bbox.x + bbox.w ) > 0        )
+                 && ( ( bbox.y          ) < screen.h )
+                 && ( ( bbox.y + bbox.h ) > 0        ) )
+                {
+                    DrawTexturedSegment( segment
+                                        , (int8*)imageData.pixelData
+                                        , imageData.size.w
+                                        , imageData.size.h
+                                        , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                        , (int8*) brushData
+                                        , texture->GetSurfaceWidth()
+                                        , texture->GetSurfaceHeight()
+                                        , 32
+                                        , segmentStartU
+                                        , segmentEndU
+                                        , iDrawingFlags );
+                }
             }
 
             // only when mBrush.ExtendOverPath == true 
@@ -1905,7 +1987,7 @@ FOdysseyVectorPath::UpdateVertexChain( FVertexChain* iVertexChain )
         // update joint
         nextVertex->MakeJoint( segment );
 
-        iVertexChain->length += segment->GetLength() /*+ nextVertex->GetJointLength()*/;
+        iVertexChain->length += segment->GetLength() + currentVertex->GetJointLength();
 
         currentVertex = nextVertex;
     }
