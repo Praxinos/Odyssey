@@ -1767,7 +1767,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     //-
 
     bool is_keys_area_visible = board_section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() );
-    label_text   = is_keys_area_visible ? LOCTEXT( "hide-plane-keys-area-tooltip", "Collapse" )         : LOCTEXT( "show-plane-keys-area-tooltip", "Expand" );
+    label_text   = is_keys_area_visible ? LOCTEXT( "hide-plane-keys-area-label", "Collapse" )           : LOCTEXT( "show-plane-keys-area-label", "Expand" );
     tooltip_text = is_keys_area_visible ? LOCTEXT( "hide-plane-keys-area-tooltip", "Hide keys area" )   : LOCTEXT( "show-plane-keys-area-tooltip", "Show keys area" );
 
     ioMenuBuilder.AddMenuEntry(
