@@ -292,7 +292,7 @@ FOdysseyVectorGroupPaint::IsRealtime()
 }
 
 // CubicSegment-CubicSegment intersection test. The test is performed using straight sub-segments
-// that are precomputed by the PaintGroup object when updated and stored in the path's PolygonCache,
+// that are precomputed by the PaintGroup object when updated and stored in the path's FractionCache,
 // as it would be too complicated to do maths using the parametric bezier and I'm not that smart.
 // Actual intersections vertices are created in this method. We create 2 vertices per intersection.
 // This is required because a segment can intersect itself, in that case we need to be able to create
@@ -307,27 +307,27 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
 {
     FOdysseyVectorVertex* segment0Vertex0 = iSegment0->GetVertex(0);
     FOdysseyVectorVertex* segment0Vertex1 = iSegment0->GetVertex(1);
-    std::vector<FPolygon>& segment0PolygonCache = iSegment0->GetPolygonCache();
-    ::ULIS::FVec2D segment0Point0 = iSegment0->GetPolygonCacheStartPointInParent();
-    ::ULIS::FVec2D segment0Point1 = iSegment0->GetPolygonCacheEndPointInParent();
+    std::vector<FOdysseyVectorFraction>& segment0FractionCache = iSegment0->GetFractionCache();
+    ::ULIS::FVec2D segment0Point0 = iSegment0->GetFractionCacheStartPointInParent();
+    ::ULIS::FVec2D segment0Point1 = iSegment0->GetFractionCacheEndPointInParent();
 
     FOdysseyVectorVertex* segment1Vertex0 = iSegment1->GetVertex(0);
     FOdysseyVectorVertex* segment1Vertex1 = iSegment1->GetVertex(1);
-    std::vector<FPolygon>& segment1PolygonCache = iSegment1->GetPolygonCache();
-    ::ULIS::FVec2D segment1Point0 = iSegment1->GetPolygonCacheStartPointInParent();
-    ::ULIS::FVec2D segment1Point1 = iSegment1->GetPolygonCacheEndPointInParent();
+    std::vector<FOdysseyVectorFraction>& segment1FractionCache = iSegment1->GetFractionCache();
+    ::ULIS::FVec2D segment1Point0 = iSegment1->GetFractionCacheStartPointInParent();
+    ::ULIS::FVec2D segment1Point1 = iSegment1->GetFractionCacheEndPointInParent();
 
     uint32 intersectionCount = 0;
 
-    for ( int i = 0; i < segment0PolygonCache.size(); i++ )
+    for ( int i = 0; i < segment0FractionCache.size(); i++ )
     {
-        FPolygon* segment0Poly = &segment0PolygonCache[i];
+        FOdysseyVectorFraction* segment0Poly = &segment0FractionCache[i];
         int p = i - 1;
         int n = i + 1;
 
-        for( int j = 0; j < segment1PolygonCache.size(); j++ )
+        for( int j = 0; j < segment1FractionCache.size(); j++ )
         {
-            FPolygon* segment1Poly = &segment1PolygonCache[j];
+            FOdysseyVectorFraction* segment1Poly = &segment1FractionCache[j];
             double segment0PolySubT, segment1PolySubT;
 
             // to speed things up a bit (actually I've found out that it speeds things up x2 or x3)
@@ -400,7 +400,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                                 }
                             }
 
-                            if( ( j == ( segment1PolygonCache.size() - 1 ) ) && ( segment1Vertex1->GetSegmentCount() == 1 ) )
+                            if( ( j == ( segment1FractionCache.size() - 1 ) ) && ( segment1Vertex1->GetSegmentCount() == 1 ) )
                             {
                                 double distance;
                                 double t = DistanceToSegmentConstrained( segment1Point1
@@ -432,7 +432,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                                 }
                             }
 
-                            if( ( i == ( segment0PolygonCache.size() - 1 ) ) && ( segment0Vertex1->GetSegmentCount() == 1 ) )
+                            if( ( i == ( segment0FractionCache.size() - 1 ) ) && ( segment0Vertex1->GetSegmentCount() == 1 ) )
                             {
                                 double distance;
                                 double t = DistanceToSegmentConstrained( segment0Point1
@@ -688,13 +688,13 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
                             if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
                             {
                                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
-                                std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
+                                std::vector<FOdysseyVectorFraction>& polygonCache = cubicSegment->GetFractionCache();
 
                                 // convert polygon cache coordinates to paintgroup's coordinates
                                 // for faster intersection test
                                 for( int i = 0; i < polygonCache.size(); i++ )
                                 {
-                                    FPolygon* polygon = &polygonCache[i];
+                                    FOdysseyVectorFraction* polygon = &polygonCache[i];
 
                                     BLPoint lineVertex0 = conversionMatrix.mapPoint( polygon->lineVertex[0].x
                                                                                    , polygon->lineVertex[0].y );

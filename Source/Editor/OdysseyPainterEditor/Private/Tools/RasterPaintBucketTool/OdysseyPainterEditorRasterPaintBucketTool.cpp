@@ -27,7 +27,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::~UOdysseyPainterEditorRasterPaintBuc
 
 UOdysseyPainterEditorRasterPaintBucketTool::UOdysseyPainterEditorRasterPaintBucketTool()
     : Tolerance( 0 )
-    , ColorMode ( eBucketColorMode::SolidColor )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 }

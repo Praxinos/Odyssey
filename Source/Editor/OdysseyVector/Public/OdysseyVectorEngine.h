@@ -264,20 +264,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                  , uint32 iBrushHeight
                                  , int32  iBrushBitsPerPixel
                                  , bool   iBrushAlphaOnly );
-        void DrawQuad( ::ULIS::FVec2I iPoint[4]
-                     , double iU[4]
-                     , double iV[4]
-                     , double iOpacity
-                     , int8*  iImagePixelData
-                     , uint32 iImageWidth
-                     , uint32 iImageHeight
-                     , int32  iImageBitsPerPixel
-                     , const FColor& iColor
-                     , int8*  iBrushPixelData
-                     , uint32 iBrushWidth
-                     , uint32 iBrushHeight
-                     , int32  iBrushBitsPerPixel
-                     , bool   iBrushAlphaOnly );
+        void DrawPolygon( ::ULIS::FVec2I* iPoint
+                        , double* iU
+                        , double* iV
+                        , uint32 pointCount
+                        , double iOpacity
+                        , int8*  iImagePixelData
+                        , uint32 iImageWidth
+                        , uint32 iImageHeight
+                        , int32  iImageBitsPerPixel
+                        , const FColor& iColor
+                        // temp
+                        , int8*  iBrushPixelData
+                        , uint32 iBrushWidth
+                        , uint32 iBrushHeight
+                        , int32  iBrushBitsPerPixel
+                        , bool   iBrushAlphaOnly );
 
         void DrawQuadThread( uint32 iProcessorID
                            , uint32 iProcessorCount

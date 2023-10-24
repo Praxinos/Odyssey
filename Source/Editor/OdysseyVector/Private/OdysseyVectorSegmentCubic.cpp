@@ -253,14 +253,14 @@ FOdysseyVectorSegmentCubic::GetTangentAt( double t, bool iNormalize )
 void
 FOdysseyVectorSegmentCubic::IncreasePolygonCache( uint32 iSize )
 {
-     mPolygonCache.resize( mPolygonCache.size() + iSize );
+     mFractionCache.resize( mFractionCache.size() + iSize );
 }
 
 void
 FOdysseyVectorSegmentCubic::ResetPolygonCache( )
 {
-    mPolygonCache.clear();
-    mPolygonCache.reserve( 200 );
+    mFractionCache.clear();
+    mFractionCache.reserve( 200 );
 }
 
 // mask-based version of the picking process
@@ -285,7 +285,7 @@ FOdysseyVectorSegmentCubic::Pick( double iLocalX
                                 , double iLocalY
                                 , double iRadius )
 {
-    for ( int i = 0; i < mPolygonCache.size(); i++ )
+    for ( int i = 0; i < mFractionCache.size(); i++ )
     {
         double refQuantity = 0;
         bool collide = true;
@@ -293,10 +293,10 @@ FOdysseyVectorSegmentCubic::Pick( double iLocalX
         for ( int j = 0; j < 4; j++ )
         {
             int n = ( j + 1 ) % 4;
-            ::ULIS::FVec2D vivn = { mPolygonCache[i].quadVertex[n].x - mPolygonCache[i].quadVertex[j].x
-                                  , mPolygonCache[i].quadVertex[n].y - mPolygonCache[i].quadVertex[j].y };
-            ::ULIS::FVec2D vivt = { iLocalX - mPolygonCache[i].quadVertex[j].x
-                                  , iLocalY - mPolygonCache[i].quadVertex[j].y };
+            ::ULIS::FVec2D vivn = { mFractionCache[i].polygon.point[n].x - mFractionCache[i].polygon.point[j].x
+                                  , mFractionCache[i].polygon.point[n].y - mFractionCache[i].polygon.point[j].y };
+            ::ULIS::FVec2D vivt = { iLocalX - mFractionCache[i].polygon.point[j].x
+                                  , iLocalY - mFractionCache[i].polygon.point[j].y };
             // https://stackoverflow.com/questions/15490795/determine-if-a-2d-point-is-within-a-quadrilateral
             // Compute the quantity
             double quantity = (vivt.x) * (vivn.y) - (vivn.x) * (vivt.y);
@@ -354,10 +354,10 @@ FOdysseyVectorSegmentCubic::ProximityTest( double iLocalX, double iLocalY, doubl
     double dx;
     double dy;
 
-    for( uint32 i = 0; i < mPolygonCache.size(); i++ )
+    for( uint32 i = 0; i < mFractionCache.size(); i++ )
     {
-        ::ULIS::FVec2D p0 = { mPolygonCache[i].lineVertex[0].x, mPolygonCache[i].lineVertex[0].y };
-        ::ULIS::FVec2D p1 = { mPolygonCache[i].lineVertex[1].x, mPolygonCache[i].lineVertex[1].y };
+        ::ULIS::FVec2D p0 = { mFractionCache[i].lineVertex[0].x, mFractionCache[i].lineVertex[0].y };
+        ::ULIS::FVec2D p1 = { mFractionCache[i].lineVertex[1].x, mFractionCache[i].lineVertex[1].y };
         double t = FOdysseyVector::DistanceToSegment( pt, p0, p1, dist );
 
         if( ( t >= 0.0f ) && ( t <= 1.0f ) )
@@ -547,19 +547,19 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
     ::ULIS::FVec2D ctrlPoint1Vector = GetVectorAtEnd( true );
     double difRadius = mPoint[1]->GetRadius() - mPoint[0]->GetRadius();
 
-    for( int i = 0; i < mPolygonCache.size(); i++ )
+    for( int i = 0; i < mFractionCache.size(); i++ )
     {
-        FPolygon* poly = &mPolygonCache[i];
+        FOdysseyVectorFraction* fraction = &mFractionCache[i];
         double polySubT, interPolySubT;
 
-        if ( FOdysseyVector::IntersectSegment( poly->lineVertex[0]
-                                             , poly->lineVertex[1]
+        if ( FOdysseyVector::IntersectSegment( fraction->lineVertex[0]
+                                             , fraction->lineVertex[1]
                                              , linePoint0
                                              , linePoint1
                                              , &polySubT
                                              , &interPolySubT ) )
         {
-            double segmentT = poly->fromT + ( polySubT * ( poly->toT - poly->fromT ) );
+            double segmentT = fraction->fromT + ( polySubT * ( fraction->toT - fraction->fromT ) );
             ::ULIS::FVec2D pointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
                                                                                         , ctrlPoint0
                                                                                         , ctrlPoint1
@@ -701,37 +701,6 @@ FOdysseyVectorSegmentCubic::DrawStructure( BLContext* iBLContext
 }
 
 void
-FOdysseyVectorSegmentCubic::MakeBLPath()
-{
-    mBLPath.clear();
-
-    if( mPolygonCache.size() )
-    {
-        int i;
-
-        mBLPath.moveTo( mPolygonCache[0].quadVertex[0].x
-                      , mPolygonCache[0].quadVertex[0].y );
-
-        for ( i = 0; i < mPolygonCache.size(); i++ )
-        {
-            mBLPath.lineTo( mPolygonCache[i].quadVertex[1].x
-                          , mPolygonCache[i].quadVertex[1].y );
-        }
-
-        for ( --i ; i >= 0; i-- )
-        {
-            mBLPath.lineTo( mPolygonCache[i].quadVertex[2].x
-                          , mPolygonCache[i].quadVertex[2].y );
-        }
-
-        mBLPath.lineTo( mPolygonCache[0].quadVertex[3].x
-                      , mPolygonCache[0].quadVertex[3].y );
-
-        mBLPath.close();
-    }
-}
-
-void
 FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext )
 {
     std::vector<FOdysseyVectorBezierFragment>& offsetCurve0FragmentArray = mOffsetCurve[0].GetBezierFragmentArray();
@@ -741,7 +710,7 @@ FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext )
     blctx->fillPath( mBLPath );
 */
 
-    DrawPolygonCache( iBLContext );
+    DrawFractionCache( iBLContext );
 /*
     for( int i = 0; i < offsetCurve0FragmentArray.size(); i++ )
     {
@@ -805,24 +774,36 @@ FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext )
 }
 
 void
-FOdysseyVectorSegmentCubic::ThickenPolygon( FPolygon* iPolygon )
+FOdysseyVectorSegmentCubic::ThickenFraction( FOdysseyVectorFraction* iFraction )
 {
-    iPolygon->quadVertex[0] = mOffsetCurve[0].GetPointAt( iPolygon->fromT );
-    iPolygon->quadVertex[1] = mOffsetCurve[0].GetPointAt( iPolygon->toT   );
-    iPolygon->quadVertex[2] = mOffsetCurve[1].GetPointAt( iPolygon->toT   );
-    iPolygon->quadVertex[3] = mOffsetCurve[1].GetPointAt( iPolygon->fromT );
+    ::ULIS::FVec2D point[4] = { mOffsetCurve[0].GetPointAt( iFraction->fromT )
+                              , mOffsetCurve[0].GetPointAt( iFraction->toT   )
+                              , mOffsetCurve[1].GetPointAt( iFraction->toT   )
+                              , mOffsetCurve[1].GetPointAt( iFraction->fromT ) };
 
-    iPolygon->quadU[0] = iPolygon->fromT;
-    iPolygon->quadV[0] = 0.0f;
+    iFraction->polygon.point[0].x = point[0].x;
+    iFraction->polygon.point[0].y = point[0].y;
 
-    iPolygon->quadU[1] = iPolygon->toT;
-    iPolygon->quadV[1] = 0.0f;
+    iFraction->polygon.point[1].x = point[1].x;
+    iFraction->polygon.point[1].y = point[1].y;
 
-    iPolygon->quadU[2] = iPolygon->toT;
-    iPolygon->quadV[2] = 1.0f;
+    iFraction->polygon.point[2].x = point[2].x;
+    iFraction->polygon.point[2].y = point[2].y;
 
-    iPolygon->quadU[3] = iPolygon->fromT;
-    iPolygon->quadV[3] = 1.0f;
+    iFraction->polygon.point[3].x = point[3].x;
+    iFraction->polygon.point[3].y = point[3].y;
+
+    iFraction->polygon.U[0] = iFraction->fromT;
+    iFraction->polygon.V[0] = 0.0f;
+
+    iFraction->polygon.U[1] = iFraction->toT;
+    iFraction->polygon.V[1] = 0.0f;
+
+    iFraction->polygon.U[2] = iFraction->toT;
+    iFraction->polygon.V[2] = 1.0f;
+
+    iFraction->polygon.U[3] = iFraction->fromT;
+    iFraction->polygon.V[3] = 1.0f;
 }
 
 // De Casteljau algorithm. Stopping condition : dot product between p0p3-p0p1 is bigger than some limit value. Same for p3p0-p3p2.
@@ -917,19 +898,19 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
     }
     else
     {
-        uint32 polyCount = mPolygonCache.size();
-        FPolygon* polygon;
+        uint32 polyCount = mFractionCache.size();
+        FOdysseyVectorFraction* fraction;
 
-        mPolygonCache.emplace_back();
+        mFractionCache.emplace_back();
 
-        polygon = &mPolygonCache[polyCount];
+        fraction = &mFractionCache[polyCount];
 
-        polygon->lineVertex[0] = iBezier[0];
-        polygon->lineVertex[1] = iBezier[3];
-        polygon->fromT = iFromT;
-        polygon->toT = iToT;
+        fraction->lineVertex[0] = iBezier[0];
+        fraction->lineVertex[1] = iBezier[3];
+        fraction->fromT = iFromT;
+        fraction->toT = iToT;
 
-        ThickenPolygon( polygon );
+        ThickenFraction( fraction );
     }
 }
 
@@ -1399,6 +1380,4 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                           , 0 );
 
     mLength = FOdysseyVector::GetBezierApproximateLength( mBezier, 8 );
-
-    //MakeBLPath();
 }

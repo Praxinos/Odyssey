@@ -736,3 +736,66 @@ FOdysseyVectorVertex::GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment )
 
     return nullptr;
 }
+
+void
+FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags )
+{
+    mJoint.Draw( iBLContext, iDrawingFlags );
+}
+
+void
+FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iPreviousSegment )
+{
+    if( iPreviousSegment )
+    {
+        FOdysseyVectorSegment* nextSegment = GetOtherSegment( iPreviousSegment );
+
+        if( iPreviousSegment && nextSegment )
+        {
+            ::ULIS::FVec2D segment0Vector = GetVectorOnSegment( iPreviousSegment, false );
+            ::ULIS::FVec2D segment1Vector = GetVectorOnSegment( nextSegment     , false );
+
+            if( segment0Vector.DistanceSquared() )
+            {
+                segment0Vector.Normalize();
+            }
+
+            if( segment1Vector.DistanceSquared() )
+            {
+                segment1Vector.Normalize();
+            }
+
+            switch( mPath->mPathParam.JointType )
+            {
+                case eJointType::Linear :
+                    mJoint.MakeLinear( mCoords
+                                     , segment0Vector
+                                     , segment1Vector
+                                     , mRadius );
+                break;
+
+                case eJointType::Miter :
+                    mJoint.MakeMiter( mCoords
+                                    , segment0Vector
+                                    , segment1Vector
+                                    , mRadius
+                                    , mPath->mPathParam.MiterLimit );
+                break;
+
+                case eJointType::Radial :
+                    mJoint.MakeRadial( mCoords
+                                     , segment0Vector
+                                     , segment1Vector
+                                     , mRadius );
+                break;
+
+                default:
+                break;
+            }
+
+            return;
+        }
+    }
+
+    mJoint.MakeNone();
+}

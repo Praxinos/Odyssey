@@ -115,24 +115,6 @@ public:
     UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
     uint8 Tolerance;
 
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
-    bool RestrictToSelection;
-
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
-    bool Propagate;
-
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
-    eBucketColorMode ColorMode;
-
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
-    FColor Color1;
-
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
-    FColor Color2;
-
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
-    double PickingRadius;
-
 protected:
     //std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
     FOdysseyPaintEngine mPaintEngine;

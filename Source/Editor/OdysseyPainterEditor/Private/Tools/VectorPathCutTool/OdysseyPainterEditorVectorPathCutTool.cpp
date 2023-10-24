@@ -204,7 +204,7 @@ UOdysseyPainterEditorVectorPathCutTool::CutPath( FOdysseyVectorPath* iPath
     ::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
     ::ULIS::FRectD isxRect;
 
-    if( FOdysseyVector::IntersectRegions<double>( rect, iPath->GetBBox(false), isxRect ) )
+    if( FOdysseyVector::IntersectRegions<double>( rect, iPath->GetBBox(false), &isxRect ) )
     {
         iPath->Cut( ::ULIS::FVec2D( localP0.x, localP0.y )
                   , ::ULIS::FVec2D( localP1.x, localP1.y )
@@ -235,7 +235,7 @@ UOdysseyPainterEditorVectorPathCutTool::CutPaintGroup( FOdysseyVectorGroupPaint*
     ::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
     ::ULIS::FRectD isxRect;
 
-    if( FOdysseyVector::IntersectRegions<double>( rect, iPaintGroup->GetBBox(false), isxRect ) )
+    if( FOdysseyVector::IntersectRegions<double>( rect, iPaintGroup->GetBBox(false), &isxRect ) )
     {
         std::list<FOdysseyVectorObject*>& childrenList = iPaintGroup->GetChildrenList();
         std::list<FOdysseyVectorObject*>::iterator it;

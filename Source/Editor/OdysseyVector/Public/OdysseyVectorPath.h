@@ -72,8 +72,11 @@ struct FPathParam
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, Category="Default")
+    UPROPERTY( EditAnywhere, Category="Default" )
     eJointType JointType;
+
+    UPROPERTY( EditAnywhere, Category="Default" )
+    double MiterLimit;
 
     //UPROPERTY(EditAnywhere,Category="General")
     bool Filled; // unused for now
@@ -351,6 +354,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray );
         void SetBrush( const FOdysseyVectorBrush& iBrush );
         FOdysseyVectorBrush& GetBrush();
+        void SetMiterLimit( double iMiterLimit );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;

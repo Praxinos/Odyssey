@@ -955,28 +955,29 @@ FOdysseyVectorEngine::DrawQuadThread( uint32 iProcessorID
 */
 
 void
-FOdysseyVectorEngine::DrawQuad( ::ULIS::FVec2I iPoint[4]
-                              , double iU[4]
-                              , double iV[4]
-                              , double iOpacity
-                              , int8*  iImagePixelData
-                              , uint32 iImageWidth
-                              , uint32 iImageHeight
-                              , int32  iImageBitsPerPixel
-                              , const FColor& iColor
-                              // temp
-                              , int8*  iBrushPixelData
-                              , uint32 iBrushWidth
-                              , uint32 iBrushHeight
-                              , int32  iBrushBitsPerPixel
-                              , bool   iBrushAlphaOnly )
+FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
+                                 , double* iU
+                                 , double* iV
+                                 , uint32 pointCount
+                                 , double iOpacity
+                                 , int8*  iImagePixelData
+                                 , uint32 iImageWidth
+                                 , uint32 iImageHeight
+                                 , int32  iImageBitsPerPixel
+                                 , const FColor& iColor
+                                 // temp
+                                 , int8*  iBrushPixelData
+                                 , uint32 iBrushWidth
+                                 , uint32 iBrushHeight
+                                 , int32  iBrushBitsPerPixel
+                                 , bool   iBrushAlphaOnly )
 {
     int32 ymin = iPoint[0].y,
           ymax = ymin;
 
-    for( int i = 0; i < 4; i++ )
+    for( uint32 i = 0; i < pointCount; i++ )
     {
-        uint32 n = ( i + 1 ) % 4;
+        uint32 n = ( i + 1 ) % pointCount;
 
         if ( iPoint[i].y < ymin ) ymin = iPoint[i].y;
         if ( iPoint[i].y > ymax ) ymax = iPoint[i].y;

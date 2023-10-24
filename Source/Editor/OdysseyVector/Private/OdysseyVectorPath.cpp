@@ -24,6 +24,7 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
     SetJointType( eJointType::Miter );
 
     mPathParam.Filled = false;
+    SetMiterLimit( 4.0f );
 
     mVertexChainArray.reserve( 10 );
 /*
@@ -151,6 +152,16 @@ void
 FOdysseyVectorPath::SetJointType( eJointType iJointType )
 {
     mPathParam.JointType = iJointType;
+
+    Invalidate();
+}
+
+void
+FOdysseyVectorPath::SetMiterLimit( double iMiterLimit )
+{
+    mPathParam.MiterLimit = iMiterLimit;
+
+    Invalidate();
 }
 
 void
@@ -220,10 +231,8 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
     mBLPath.clear();
 
     // update invalidated segments only
-    for ( std::list<FOdysseyVectorSegment*>::iterator it = mInvalidatedSegmentList.begin(); it != mInvalidatedSegmentList.end(); ++it )
+    for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
     {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-
         segment->Update();
     }
 
@@ -520,261 +529,6 @@ FOdysseyVectorPath::GetFirstVertex()
     return mVertexList.front();
 }
 
-// https://gamedev.net/forums/topic/647810-intersection-point-of-two-vectors/5094071/
-static bool intersectLine( ::ULIS::FVec2D& iOrigin0
-                         , ::ULIS::FVec2D& iDirection0
-                         , ::ULIS::FVec2D& iOrigin1
-                         , ::ULIS::FVec2D& iDirection1
-                         , ::ULIS::FVec2D& iOut ) {
-    ::ULIS::FVec2D c = iOrigin0 - iOrigin1;
-    double cross = ( iDirection0.y * iDirection1.x ) - ( iDirection0.x * iDirection1.y );
-
-    if ( cross )
-    {
-        double t = ( ( c.x * iDirection1.y ) - ( c.y * iDirection1.x ) ) / cross;
-
-        iOut = iOrigin0 + ( iDirection0 * t );
-
-        return true;
-    }
-
-    return false;
-}
-
-static void
-_drawMiterJoint( BLContext* iBLContext
-               , FOdysseyVectorPath* iPath
-               , ::ULIS::FVec2D& iOrigin
-               , ::ULIS::FVec2D& iVector0
-               , ::ULIS::FVec2D& iVector1
-               , double iRadius
-               , double iMiterLimit )
-{
-    ::ULIS::FVec2D parallelVec0 = iVector0;
-    ::ULIS::FVec2D parallelVec1 = iVector1;
-    ::ULIS::FVec2D perpendicularVec0 = {   parallelVec0.y, - parallelVec0.x };
-    ::ULIS::FVec2D perpendicularVec1 = { - parallelVec1.y,   parallelVec1.x };
-    ::ULIS::FVec2D edge0Point = iOrigin + ( perpendicularVec0 * iRadius );
-    ::ULIS::FVec2D edge1Point = iOrigin + ( perpendicularVec1 * iRadius );
-    ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
-    // have to clamp due to imprecision of the dot product
-    double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
-
-    BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
-    BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
-    ::ULIS::FVec2D intersectionPoint;
-
-    // Find on which side should the joint be drawn by comparing the directions of our vectors
-    if ( dot < 0 )
-    {
-        ::ULIS::FVec2D tmp = perpendicularVec0;
-        perpendicularVec0 = -tmp;
-
-                       tmp = perpendicularVec1;
-        perpendicularVec1 = -tmp;
-
-        edge0Point = iOrigin + ( perpendicularVec0 * iRadius );
-        edge1Point = iOrigin + ( perpendicularVec1 * iRadius );
-    }
-
-    if( iRadius )
-    {
-        if ( intersectLine( edge0Point
-                          , parallelVec0
-                          , edge1Point
-                          , parallelVec1
-                          , intersectionPoint ) == true )
-        {
-            ::ULIS::FVec2D originToIntersection = intersectionPoint - iOrigin;
-
-            double miterRatio = originToIntersection.Distance() / iRadius;
-
-            if ( miterRatio < iMiterLimit )
-            {
-                BLPoint vertex[4];
-                vertex[0].x = iOrigin.x;
-                vertex[0].y = iOrigin.y;
-
-                vertex[1].x = edge0Point.x;
-                vertex[1].y = edge0Point.y;
-
-                vertex[2].x = intersectionPoint.x;
-                vertex[2].y = intersectionPoint.y;
-
-                vertex[3].x = edge1Point.x;
-                vertex[3].y = edge1Point.y;
-
-                // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
-                // line stroking is done in world coordinates because we need a 1 pixel width
-                iBLContext->save();
-                iBLContext->resetMatrix();
-                iBLContext->setStrokeWidth( 1.0f );
-                iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
-                iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[3].x, vertex[3].y ) );
-                iBLContext->restore();
-
-                //iBLContext->strokePolygon( vertex, 4 );
-                iBLContext->fillPolygon( vertex, 4 );
-            }
-            else
-            {
-                BLPoint vertex[5];
-                vertex[0].x = iOrigin.x;
-                vertex[0].y = iOrigin.y;
-
-                vertex[1].x = edge0Point.x;
-                vertex[1].y = edge0Point.y;
-
-                vertex[2].x = edge0Point.x - ( parallelVec0.x * iMiterLimit * iRadius );
-                vertex[2].y = edge0Point.y - ( parallelVec0.y * iMiterLimit * iRadius );
-
-                vertex[3].x = edge1Point.x - ( parallelVec1.x * iMiterLimit * iRadius );
-                vertex[3].y = edge1Point.y - ( parallelVec1.y * iMiterLimit * iRadius );
-
-                vertex[4].x = edge1Point.x;
-                vertex[4].y = edge1Point.y;
-
-                // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
-                // line stroking is done in world coordinates because we need a 1 pixel width
-                iBLContext->save();
-                iBLContext->resetMatrix();
-                iBLContext->setStrokeWidth( 1.0f );
-                iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
-                iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[4].x, vertex[4].y ) );
-                iBLContext->restore();
-
-                //iBLContext->strokePolygon( vertex, 5 );
-                iBLContext->fillPolygon( vertex, 5 );
-            }
-        }
-    }
-}
-
-static void
-_drawRadialJoint( BLContext* iBLContext
-                , FOdysseyVectorPath* iPath
-                , ::ULIS::FVec2D& iOrigin
-                , ::ULIS::FVec2D& iVector0
-                , ::ULIS::FVec2D& iVector1
-                , double iRadius )
-{
-    ::ULIS::FVec2D parallelVec0 = iVector0;
-    ::ULIS::FVec2D parallelVec1 = iVector1;
-    ::ULIS::FVec2D perpendicularVec0 = {   parallelVec0.y, - parallelVec0.x };
-    ::ULIS::FVec2D perpendicularVec1 = { - parallelVec1.y,   parallelVec1.x };
-    ::ULIS::FVec2D edge0Point = iOrigin + ( perpendicularVec0 * iRadius );
-    ::ULIS::FVec2D edge1Point = iOrigin + ( perpendicularVec1 * iRadius );
-    ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
-    // have to clamp due to imprecision of the dot product
-    double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
-    double angle = acos( std::clamp<double>( perpendicularVec0.DotProduct( perpendicularVec1 ), -1.0f, 1.0f ) );
-    static const int steps = 24;
-    double a = angle / steps;
-    BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
-    BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
-    static BLPoint vertex[steps][3];
-
-    // Find on which side should the joint be drawn by comparing the directions of our vectors
-    if ( dot < 0 )
-    {
-        ::ULIS::FVec2D tmp = perpendicularVec0;
-        perpendicularVec0 = -tmp;
-
-        a = -a;
-    }
-
-    double cosa = cos(a);
-    double sina = sin(a);
-
-    for ( uint32 i = 0; i < steps; i++ )
-    {
-        // https://stackoverflow.com/questions/11773889/how-to-calculate-a-vector-from-an-angle-with-another-vector-in-2d
-        ::ULIS::FVec2D interpolatedVector = { (  perpendicularVec0.x * cosa ) + ( perpendicularVec0.y * sina ),
-                                              ( -perpendicularVec0.x * sina ) + ( perpendicularVec0.y * cosa ) };
-
-        // start drawing triangles at origin
-        vertex[i][0].x = ( iOrigin.x );
-        vertex[i][0].y = ( iOrigin.y );
-
-        vertex[i][1].x = vertex[i][0].x + ( perpendicularVec0.x * iRadius );
-        vertex[i][1].y = vertex[i][0].y + ( perpendicularVec0.y * iRadius );
-
-        vertex[i][2].x = vertex[i][0].x + ( interpolatedVector.x * iRadius );
-        vertex[i][2].y = vertex[i][0].y + ( interpolatedVector.y * iRadius );
-
-        //iBLContext->strokePolygon( vertex , 3 );
-        iBLContext->fillPolygon( vertex[i], 3 );
-
-        perpendicularVec0 = interpolatedVector;
-    }
-
-    // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
-    // line stroking is done in world coordinates because we need a 1 pixel width
-    iBLContext->save();
-    iBLContext->resetMatrix();
-    iBLContext->setStrokeWidth( 1.0f );
-    for ( uint32 i = 0; i < steps; i++ )
-    {
-        iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[i][1].x, vertex[i][1].y ) );
-        iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[i][2].x, vertex[i][2].y ) );
-
-    }
-    iBLContext->restore();
-}
-
-static void
-_drawLinearJoint( BLContext* iBLContext
-                , FOdysseyVectorPath* iPath
-                , ::ULIS::FVec2D& iOrigin
-                , ::ULIS::FVec2D& iVector0
-                , ::ULIS::FVec2D& iVector1
-                , double iRadius )
-{
-    ::ULIS::FVec2D parallelVec0 = iVector0;
-    ::ULIS::FVec2D parallelVec1 = iVector1;
-    ::ULIS::FVec2D perpendicularVec0 = {   parallelVec0.y, - parallelVec0.x };
-    ::ULIS::FVec2D perpendicularVec1 = { - parallelVec1.y,   parallelVec1.x };
-    ::ULIS::FVec2D edge0Point = iOrigin + ( perpendicularVec0 * iRadius );
-    ::ULIS::FVec2D edge1Point = iOrigin + ( perpendicularVec1 * iRadius );
-    ::ULIS::FVec2D shortestTest = edge0Point - edge1Point;
-    // have to clamp due to imprecision of the dot product
-    double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec0 ), -1.0f, 1.0f );
-    BLPoint vertex[3];
-    BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
-    BLPoint worldOrigin = worldMatrix.mapPoint( iOrigin.x, iOrigin.y );
-
-    if ( dot < 0 )
-    {
-        ::ULIS::FVec2D tmp = perpendicularVec0;
-
-        perpendicularVec0 = -tmp;
-
-                tmp = perpendicularVec1;
-        perpendicularVec1 = -tmp;
-    }
-
-    vertex[0].x = ( iOrigin.x );
-    vertex[0].y = ( iOrigin.y );
-
-    vertex[1].x = vertex[0].x + ( perpendicularVec0.x * iRadius );
-    vertex[1].y = vertex[0].y + ( perpendicularVec0.y * iRadius );
-
-    vertex[2].x = vertex[0].x + ( perpendicularVec1.x * iRadius );
-    vertex[2].y = vertex[0].y + ( perpendicularVec1.y * iRadius );
-
-    // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
-    // line stroking is done in world coordinates because we need a 1 pixel width
-    iBLContext->save();
-    iBLContext->resetMatrix();
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[1].x, vertex[1].y ) );
-    iBLContext->strokeLine( worldOrigin, worldMatrix.mapPoint( vertex[2].x, vertex[2].y ) );
-    iBLContext->restore();
-
-    //iBLContext->strokePolygon( vertex, 3 );
-    iBLContext->fillPolygon( vertex, 3 );
-}
-
 void
 FOdysseyVectorPath::InvalidateAllSegments()
 {
@@ -783,73 +537,6 @@ FOdysseyVectorPath::InvalidateAllSegments()
         FOdysseyVectorSegment *segment = (*it);
 
         segment->Invalidate();
-    }
-}
-
-void
-FOdysseyVectorPath::DrawJoint( BLContext* iBLContext
-                             , FOdysseyVectorVertex* iVertex,uint64 iFlags)
-{
-    FOdysseyVectorSegment* segment0 = iVertex->GetFirstSegment();
-    FOdysseyVectorSegment* segment1 = iVertex->GetLastSegment();
-    double vertexRadius = iVertex->GetRadius();
-
-    if ( ( segment0 && segment1 ) && ( segment0 != segment1 ) )
-    {
-        ::ULIS::FVec2D segment0Vector = iVertex->GetVectorOnSegment(segment0, false);
-        ::ULIS::FVec2D segment1Vector = iVertex->GetVectorOnSegment(segment1, false);
-        ::ULIS::FVec2D& origin = iVertex->GetCoords();
-        BLPoint worldOrigin = mWorldMatrix.mapPoint( origin.x, origin.y );
-
-        if ( segment0Vector.DistanceSquared() && segment1Vector.DistanceSquared() )
-        {
-            ::ULIS::FVec2D perpendicularVector0, perpendicularVector1;
-
-            segment0Vector.Normalize();
-            segment1Vector.Normalize();
-
-            perpendicularVector0 = ::ULIS::FVec2D( segment0Vector.y, -segment0Vector.x );
-            perpendicularVector1 = ::ULIS::FVec2D( segment1Vector.y, -segment1Vector.x );
-
-            iBLContext->save();
-            iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 1.0f );
-            iBLContext->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector0.x * vertexRadius
-                                                                      , origin.y + perpendicularVector0.y * vertexRadius ) );
-            iBLContext->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector0.x * vertexRadius
-                                                                      , origin.y - perpendicularVector0.y * vertexRadius ) );
-            iBLContext->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x + perpendicularVector1.x * vertexRadius
-                                                                      , origin.y + perpendicularVector1.y * vertexRadius ) );
-            iBLContext->strokeLine( worldOrigin, mWorldMatrix.mapPoint( origin.x - perpendicularVector1.x * vertexRadius
-                                                                      , origin.y - perpendicularVector1.y * vertexRadius ) );
-            iBLContext->restore();
-
-            // if the dot product equals to 1.0f, then the point is perfectly smooth, hence there is no need for joints.
-            if ( segment0Vector.DotProduct(segment1Vector) < 1.0f )
-            {
-                switch ( mPathParam.JointType )
-                {
-                    case eJointType::Linear :
-                        _drawLinearJoint ( iBLContext, this, origin, segment0Vector, segment1Vector, vertexRadius );
-                    break;
-
-                    case eJointType::Miter :
-                        _drawMiterJoint  ( iBLContext, this, origin, segment0Vector, segment1Vector, vertexRadius,  4.0f );
-                    break;
-
-                    case eJointType::Radial :
-                        _drawRadialJoint ( iBLContext, this, origin, segment0Vector, segment1Vector, vertexRadius );
-                    break;
-
-                    default:
-                    break;
-                }
-            }
-            else
-            {
-
-            }
-        }
     }
 }
 
@@ -1055,7 +742,7 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
         for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
+            std::vector<FOdysseyVectorFraction>& fractionCache = cubicSegment->GetFractionCache();
             ::ULIS::FVec2D& firstCoords = cubicSegment->GetVertex(0)->GetCoords();
             BLPoint firstAt = mWorldMatrix.mapPoint( firstCoords.x, firstCoords.y );
             std::vector<double> subVertexT;
@@ -1063,13 +750,13 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
             std::vector<FOdysseyVectorSegment*> subSegmentArray;
             bool hasHit = false;
 
-            for( uint32 i = 0; i < polygonCache.size(); i++ )
+            for( uint32 i = 0; i < fractionCache.size(); i++ )
             {
-                BLPoint p0 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y );
-                BLPoint p1 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y );
+                BLPoint p0 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[0].x, fractionCache[i].lineVertex[0].y );
+                BLPoint p1 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[1].x, fractionCache[i].lineVertex[1].y );
 
-                TraceLine( p0.x, p0.y, polygonCache[i].fromT
-                         , p1.x, p1.y, polygonCache[i].toT
+                TraceLine( p0.x, p0.y, fractionCache[i].fromT
+                         , p1.x, p1.y, fractionCache[i].toT
                          , [cubicSegment
                          , &imageData
                          , &previousPixelValue
@@ -1223,12 +910,12 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
             for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
             {
                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-                std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
+                std::vector<FOdysseyVectorFraction>& fractionCache = cubicSegment->GetFractionCache();
 
-                for( uint32 i = 0; i < polygonCache.size(); i++ )
+                for( uint32 i = 0; i < fractionCache.size(); i++ )
                 {
-                    BLPoint p0 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[0].x, polygonCache[i].lineVertex[0].y );
-                    BLPoint p1 = mWorldMatrix.mapPoint( polygonCache[i].lineVertex[1].x, polygonCache[i].lineVertex[1].y );
+                    BLPoint p0 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[0].x, fractionCache[i].lineVertex[0].y );
+                    BLPoint p1 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[1].x, fractionCache[i].lineVertex[1].y );
                     bool pointHitMask = TraceLine( p0.x, p0.y, 0.0f
                                                  , p1.x, p1.y, 0.0f
                                                  , [&imageData]( int32 iX, int32 iY, double iT)
@@ -1607,40 +1294,53 @@ FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                        , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
-    std::vector<FPolygon>& polygonCache = iSegment->GetPolygonCache();
+    std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
     double difU = iEndU - iStartU;
 
-    for( int i = 0; i < polygonCache.size(); i++ )
+    for( int i = 0; i < fractionCache.size(); i++ )
     {
-        FPolygon* poly = &polygonCache[i];
-        BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( poly->quadVertex[0].x, poly->quadVertex[0].y )
-                                , mWorldMatrix.mapPoint( poly->quadVertex[1].x, poly->quadVertex[1].y ) 
-                                , mWorldMatrix.mapPoint( poly->quadVertex[2].x, poly->quadVertex[2].y ) 
-                                , mWorldMatrix.mapPoint( poly->quadVertex[3].x, poly->quadVertex[3].y ) };
-        ::ULIS::FVec2I integerPoint[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
-                                         , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
-                                         , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
-                                         , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
-        double quadU[4] = { iStartU + ( poly->quadU[0] * difU )
-                          , iStartU + ( poly->quadU[1] * difU )
-                          , iStartU + ( poly->quadU[2] * difU )
-                          , iStartU + ( poly->quadU[3] * difU ) };
+        FOdysseyVectorFraction* fraction = &fractionCache[i];
+        BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( fraction->polygon.point[0].x, fraction->polygon.point[0].y )
+                                , mWorldMatrix.mapPoint( fraction->polygon.point[1].x, fraction->polygon.point[1].y ) 
+                                , mWorldMatrix.mapPoint( fraction->polygon.point[2].x, fraction->polygon.point[2].y ) 
+                                , mWorldMatrix.mapPoint( fraction->polygon.point[3].x, fraction->polygon.point[3].y ) };
+        ::ULIS::FVec2I intPt[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                                  , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                                  , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
+                                  , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
+        int32 xmin = ::ULIS::FMath::Min4( intPt[0].x, intPt[1].x, intPt[2].x, intPt[3].x );
+        int32 xmax = ::ULIS::FMath::Max4( intPt[0].x, intPt[1].x, intPt[2].x, intPt[3].x );
+        int32 ymin = ::ULIS::FMath::Min4( intPt[0].y, intPt[1].y, intPt[2].y, intPt[3].y );
+        int32 ymax = ::ULIS::FMath::Max4( intPt[0].y, intPt[1].y, intPt[2].y, intPt[3].y );
 
-        // should be a static function
-        vectorEngine->DrawQuad( integerPoint
-                              , quadU
-                              , poly->quadV
-                              , mObjectParam.Opacity
-                              , iScreenPixels
-                              , iScreenWidth
-                              , iScreenHeight
-                              , iScreenBitsPerPixel
-                              , GetForegroundColor()
-                              , iTexturePixels
-                              , iTextureWidth
-                              , iTextureHeight
-                              , iTextureBitsPerPixel
-                              , mBrush.ColorFromBrush ? false : true );
+        // don't draw if quad is outside the screen
+        if( ( ( xmin ) < (int32)iScreenWidth  )
+         && ( ( xmax ) > 0                    )
+         && ( ( ymin ) < (int32)iScreenHeight )
+         && ( ( ymax ) > 0                    ) )
+        {
+            double quadU[4] = { iStartU + ( fraction->polygon.U[0] * difU )
+                              , iStartU + ( fraction->polygon.U[1] * difU )
+                              , iStartU + ( fraction->polygon.U[2] * difU )
+                              , iStartU + ( fraction->polygon.U[3] * difU ) };
+
+            // should be a static function
+            vectorEngine->DrawPolygon( intPt
+                                     , quadU
+                                     , fraction->polygon.V
+                                     , 4
+                                     , mObjectParam.Opacity
+                                     , iScreenPixels
+                                     , iScreenWidth
+                                     , iScreenHeight
+                                     , iScreenBitsPerPixel
+                                     , GetForegroundColor()
+                                     , iTexturePixels
+                                     , iTextureWidth
+                                     , iTextureHeight
+                                     , iTextureBitsPerPixel
+                                     , mBrush.ColorFromBrush ? false : true );
+        }
     }
 }
 
@@ -1664,19 +1364,26 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
     BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A * mObjectParam.Opacity );
     FOdysseyVectorVertex* currentVertex = iVertexChain.vertex;
     UTexture2D* texture = mBrush.GetTexture();
+    BLImage* image = iBLContext->targetImage();
+    BLImageData imageData;
+    ::ULIS::FRectD screen;
+
+    image->makeMutable( &imageData );
+
+    screen.x = 0;
+    screen.y = 0;
+    screen.w = imageData.size.w;
+    screen.h = imageData.size.h;
 
     if( texture )
     {
         const FColor* brushData = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
         double startU = mBrush.Revert ? 1.0f : 0.0f;
-        BLImage* image = iBLContext->targetImage();
-        BLImageData imageData;
-
-        image->makeMutable( &imageData );
 
         for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
         {
-            FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( currentVertex );
+            ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
+            FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex(currentVertex);
             double segmentLength = segment->GetLength();
             double endU = 0.0f;
 
@@ -1704,19 +1411,26 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                     endU   = 0.0f;
                 }
             }
- 
-            DrawTexturedSegment( segment
-                                , (int8*)imageData.pixelData
-                                , imageData.size.w
-                                , imageData.size.h
-                                , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                , (int8*) brushData
-                                , texture->GetSurfaceWidth()
-                                , texture->GetSurfaceHeight()
-                                , 32
-                                , currentVertex == segment->GetVertex(0) ? startU : endU
-                                , currentVertex == segment->GetVertex(0) ? endU : startU
-                                , iDrawingFlags );
+
+            // don't draw if segment is outside the screen
+            if( ( ( bbox.x          ) < screen.w )
+             && ( ( bbox.x + bbox.w ) > 0        )
+             && ( ( bbox.y          ) < screen.h )
+             && ( ( bbox.y + bbox.h ) > 0        ) )
+            {
+                DrawTexturedSegment( segment
+                                    , (int8*)imageData.pixelData
+                                    , imageData.size.w
+                                    , imageData.size.h
+                                    , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                    , (int8*) brushData
+                                    , texture->GetSurfaceWidth()
+                                    , texture->GetSurfaceHeight()
+                                    , 32
+                                    , currentVertex == segment->GetVertex(0) ? startU : endU
+                                    , currentVertex == segment->GetVertex(0) ? endU : startU
+                                    , iDrawingFlags );
+            }
 
             // only when mBrush.ExtendOverPath == true 
             startU = endU;
@@ -1734,16 +1448,27 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
         iBLContext->setFillStyle( strokeColor );
         iBLContext->setStrokeStyle( strokeColor );
 
+        currentVertex->DrawJoint( iBLContext, iDrawingFlags );
+
         for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
         {
             FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( currentVertex );
+            ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
 
-            segment->Draw( iBLContext );
+            // don't draw if segment is outside the screen
+            if( ( ( bbox.x          ) < screen.w )
+             && ( ( bbox.x + bbox.w ) > 0        )
+             && ( ( bbox.y          ) < screen.h )
+             && ( ( bbox.y + bbox.h ) > 0        ) )
+            {
+                segment->Draw( iBLContext );
+            }
 
-            if( nextVertex->GetSegmentCount() == 2 )
+            nextVertex->DrawJoint( iBLContext, iDrawingFlags );
+            /*if( nextVertex->GetSegmentCount() == 2 )
             {
                 DrawJoint( iBLContext, nextVertex, iDrawingFlags );
-            }
+            }*/
         }
     }
 }
@@ -2153,13 +1878,17 @@ FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSe
 void
 FOdysseyVectorPath::UpdateVertexChain( FVertexChain* iVertexChain )
 {
+    FOdysseyVectorVertex* currentVertex = iVertexChain->vertex;
     double xmin = DBL_MAX,ymin = DBL_MAX,xmax = -DBL_MAX,ymax = -DBL_MAX;
     bool hasBBox = false;
 
     iVertexChain->length = 0.0f;
 
+    currentVertex->MakeJoint( nullptr );
+
     for( FOdysseyVectorSegment* segment : iVertexChain->segmentArray )
     {
+        FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex(currentVertex);
         ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
         double rx1 = segmentBBox.x
              , ry1 = segmentBBox.y
@@ -2173,7 +1902,12 @@ FOdysseyVectorPath::UpdateVertexChain( FVertexChain* iVertexChain )
         if ( rx2 > xmax ) xmax = rx2;
         if ( ry2 > ymax ) ymax = ry2;
 
-        iVertexChain->length += segment->GetLength();
+        // update joint
+        nextVertex->MakeJoint( segment );
+
+        iVertexChain->length += segment->GetLength() /*+ nextVertex->GetJointLength()*/;
+
+        currentVertex = nextVertex;
     }
 
     iVertexChain->bbox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );

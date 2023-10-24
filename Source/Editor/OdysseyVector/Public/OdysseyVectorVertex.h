@@ -4,6 +4,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
+#include "OdysseyVectorJoint.h"
 #include "OdysseyVectorPoint.h"
 
 class FOdysseyVectorSegment;
@@ -300,6 +301,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorHandleSegment* GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment );
         void SetChained( bool iChained );
         bool IsChained();
+        void MakeJoint( FOdysseyVectorSegment* iPreviousSegment );
+        void DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags );
 
     protected:
         /**
@@ -310,6 +313,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         virtual void SetCoords( double iX, double iY, double iRadius ) override;
 
     protected:
+        FOdysseyVectorJoint mJoint;
+        //eJointType mJointType;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;

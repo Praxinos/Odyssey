@@ -113,9 +113,6 @@ protected:
 
 public:
     UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
-    uint8 Tolerance;
-
-    UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
     bool RestrictToSelection;
 
     UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )

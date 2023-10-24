@@ -224,7 +224,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , const ::ULIS::FVec2D& iNormalizedTangentFrom
                                   , const ::ULIS::FVec2D& iNormalizedTangentTo
                                   , int32   iMaxRecurseDepth );
-        void MakeBLPath();
         void PrepareOffsetBeziers( double iSegmentStartRadius
                                  , double iSegmentEndRadius
                                  , FOdysseyVectorBezierFragment& iFragment
@@ -250,7 +249,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         ::ULIS::FVec2D GetOffsetVectorAtVertex( FOdysseyVectorVertex* iVertex
                                               , double iSide // 1.0f or -1.0f
                                               , ::ULIS::FVec2D& iVertexOffsetPoint );
-        void ThickenPolygon( FPolygon* iPolygon );
+        void ThickenFraction( FOdysseyVectorFraction* iFraction );
 
     protected:
         FOdysseyVectorOffsetCurveCubic mOffsetCurve[2];

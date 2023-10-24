@@ -4,6 +4,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
+#include "OdysseyVectorPolygon.h"
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorLink.h"
@@ -11,16 +12,14 @@
 class FOdysseyVectorObject;
 class FOdysseyVectorPath;
 
-typedef struct _FPolygon {
-    ::ULIS::FVec2D quadVertex[4];
-    double quadU[4];
-    double quadV[4];
+typedef struct _FOdysseyVectorFraction {
+    FOdysseyVectorPolygon4 polygon;
     ::ULIS::FVec2D lineVertex[2];
     ::ULIS::FVec2D lineVertexInParent[2];
     double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;
     double fromT;
     double toT;
-} FPolygon;
+} FOdysseyVectorFraction;
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 {
@@ -138,13 +137,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @brief Get the number of polygons in cache.
          * @return the number of polygons in cache.
          */
-        uint32 GetPolygonCount();
+        uint32 GetFractionCount();
 
        /**
          * @brief Get the polygons in cache.
          * @return a reference to the array of polygons.
          */
-        std::vector<FPolygon>& GetPolygonCache();
+        std::vector<FOdysseyVectorFraction>& GetFractionCache();
 
        /**
          * @brief Get the segment's bounding box.
@@ -178,15 +177,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         virtual bool HasBaseClass( uint32 iBaseClassID );
         virtual bool Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData ) = 0;
         virtual bool Pick( double iX, double iY, double iRadius ) = 0;
-        ::ULIS::FVec2D GetPolygonCacheStartPointInParent();
-        ::ULIS::FVec2D GetPolygonCacheEndPointInParent();
+        ::ULIS::FVec2D GetFractionCacheStartPointInParent();
+        ::ULIS::FVec2D GetFractionCacheEndPointInParent();
         virtual double GetLength();
 
     protected:
-        void DrawPolygonCache( BLContext* iBLContext );
+        void DrawFractionCache( BLContext* iBLContext );
 
     protected:
-        std::vector<FPolygon> mPolygonCache;
+        std::vector<FOdysseyVectorFraction> mFractionCache;
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;

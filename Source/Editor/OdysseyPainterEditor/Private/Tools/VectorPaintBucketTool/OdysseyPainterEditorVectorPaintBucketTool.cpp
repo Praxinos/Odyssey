@@ -22,8 +22,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::~UOdysseyPainterEditorVectorPaintBuc
 }
 
 UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBucketTool()
-    : Tolerance( 0 )
-    , RestrictToSelection( false )
+    : RestrictToSelection( false )
     , Propagate( true )
     , ColorMode ( eBucketColorMode::SolidColor )
     , Color1( 255, 255, 255, 255 )
@@ -32,7 +31,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
     , mShowControls( false )
     , mPickedBucket( nullptr )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectorPaintBucket64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 
     mBucketHUD = new FOdysseyPainterEditorVectorPaintBucketToolHUD( this );
 }
