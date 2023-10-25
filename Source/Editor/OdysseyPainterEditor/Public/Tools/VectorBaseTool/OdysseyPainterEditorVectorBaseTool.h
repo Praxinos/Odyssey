@@ -7,25 +7,25 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
 
-#include "OdysseyPainterEditorDefaultTool.generated.h"
+#include "OdysseyPainterEditorVectorBaseTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorDefaultTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdysseyPainterEditorTool
 {
 public:
     GENERATED_BODY()
 
 public:
     // Destructor
-    virtual ~UOdysseyPainterEditorDefaultTool();
+    virtual ~UOdysseyPainterEditorVectorBaseTool();
 
     //Constructor
-    UOdysseyPainterEditorDefaultTool();
+    UOdysseyPainterEditorVectorBaseTool();
  
 protected:
     void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
     void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-
+    void PopupDefaultContextMenu();
 
 public:
     virtual bool OnKeyDown( const FKey& iKey ) override;

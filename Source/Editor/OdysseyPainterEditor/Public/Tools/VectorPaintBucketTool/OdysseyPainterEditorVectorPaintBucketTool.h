@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyPaintEngine.h"
 
 #include "OdysseyVector.h"
@@ -17,7 +17,7 @@ class FOdysseyPainterEditorVectorPaintBucketToolHUD;
 class FOdysseyPainterEditorVectorPaintBucketToolContextMenu;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : public UOdysseyPainterEditorVectorBaseTool
 {
     GENERATED_BODY()
 

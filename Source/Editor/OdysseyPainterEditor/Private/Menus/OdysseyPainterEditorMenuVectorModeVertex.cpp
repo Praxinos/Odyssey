@@ -1,16 +1,16 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolVertexContextMenu.h"
+#include "Menus/OdysseyPainterEditorMenuVectorModeVertex.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorSelectionToolVertexContextMenu"
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditorMenuVectorModeVertex"
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------- FOdysseyPainterEditorVectorSelectionToolVertexContextMenu interface
 
 TSharedPtr<SWidget>
-FOdysseyPainterEditorVectorSelectionToolVertexContextMenu::CreateWidget( FOdysseyPainterEditor* iEditor )
+FOdysseyPainterEditorMenuVectorModeVertex::CreateWidget( FOdysseyPainterEditor* iEditor )
 {
     FMenuBuilder menu( true, nullptr );
     bool hasVector = iEditor->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();

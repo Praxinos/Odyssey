@@ -1,23 +1,23 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorDefaultTool"
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorBaseTool"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyPainterEditorDefaultTool::~UOdysseyPainterEditorDefaultTool()
+UOdysseyPainterEditorVectorBaseTool::~UOdysseyPainterEditorVectorBaseTool()
 {
 }
 
-UOdysseyPainterEditorDefaultTool::UOdysseyPainterEditorDefaultTool()
+UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
 {
 }
 
 //static
 bool
-UOdysseyPainterEditorDefaultTool::DoubleClicked()
+UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
 {
     uint64 clickTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     static uint64 previousClickTime = 0;
@@ -29,7 +29,7 @@ UOdysseyPainterEditorDefaultTool::DoubleClicked()
 }
 
 bool
-UOdysseyPainterEditorDefaultTool::OnKeyDown( const FKey& iKey )
+UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
@@ -51,7 +51,7 @@ UOdysseyPainterEditorDefaultTool::OnKeyDown( const FKey& iKey )
 }
 
 bool
-UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
+UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
                                                  , FOdysseyVectorScene* iScene
                                                  , const FKey& iKey )
 {
@@ -94,7 +94,7 @@ UOdysseyPainterEditorDefaultTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
 }
 
 bool
-UOdysseyPainterEditorDefaultTool::OnKeyUp( const FKey& iKey )
+UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 {
     bool ret = false;
     
@@ -108,7 +108,7 @@ UOdysseyPainterEditorDefaultTool::OnKeyUp( const FKey& iKey )
         {
             FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            ret = UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+            ret = UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
         }
     }
 
@@ -116,11 +116,13 @@ UOdysseyPainterEditorDefaultTool::OnKeyUp( const FKey& iKey )
 }
 
 bool
-UOdysseyPainterEditorDefaultTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                                               , FOdysseyVectorScene* iScene
-                                               , const FKey& iKey )
+UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
+                                                  , FOdysseyVectorScene* iScene
+                                                  , const FKey& iKey )
 {
     return false;
 }
+
+void PopupContextMenu();
 
 #undef LOCTEXT_NAMESPACE

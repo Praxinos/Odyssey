@@ -5,7 +5,7 @@
 
 class FOdysseyPainterEditor;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolObjectContextMenu
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorMenuVectorModeObject
 {
     public:
         // FOdysseyEditorTab interface

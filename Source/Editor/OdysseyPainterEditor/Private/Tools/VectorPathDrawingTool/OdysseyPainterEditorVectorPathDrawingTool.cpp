@@ -247,7 +247,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorScene
         Stitch = !Stitch; // flip the value
     }
 
-    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, iScene, iKey );
+    UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( vectorEngine, iScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return false;
@@ -281,7 +281,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorScene* 
 
     Stitch = StitchAtKeyDown;
 
-    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, iScene, iKey );
+    UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( vectorEngine, iScene, iKey );
 
     return false;
 }

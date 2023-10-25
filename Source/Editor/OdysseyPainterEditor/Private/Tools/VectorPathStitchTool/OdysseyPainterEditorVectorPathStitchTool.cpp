@@ -160,7 +160,12 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
                 // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
                 vertexB = mergedVertexArray[vertexB->GetID()];
 
-                iScene->Unselect( mergedPath );
+                if( mergedPath->IsSelected() )
+                {
+                    iScene->Unselect( mergedPath );
+
+                    iScene->Select( vertexA->GetPath() );
+                }
 
                 removedPathArray.push_back( mergedPath );
             }

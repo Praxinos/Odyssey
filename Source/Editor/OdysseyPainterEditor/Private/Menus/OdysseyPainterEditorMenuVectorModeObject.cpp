@@ -1,15 +1,15 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolObjectContextMenu.h"
+#include "Menus/OdysseyPainterEditorMenuVectorModeObject.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorSelectionToolObjectContextMenu"
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditorMenuVectorModeObject"
 
 // static
 TSharedPtr<SWidget>
-FOdysseyPainterEditorVectorSelectionToolObjectContextMenu::CreateWidget( FOdysseyPainterEditor* iEditor )
+FOdysseyPainterEditorMenuVectorModeObject::CreateWidget( FOdysseyPainterEditor* iEditor )
 {
     FMenuBuilder menu( true, nullptr );
     bool hasVector = iEditor->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();

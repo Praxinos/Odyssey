@@ -4,8 +4,8 @@
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
 #include "Tools/VectorSelectionTool/SOdysseyPainterEditorVectorSelectionToolTopTab.h"
-#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolObjectContextMenu.h"
-#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolVertexContextMenu.h"
+#include "Menus/OdysseyPainterEditorMenuVectorModeObject.h"
+#include "Menus/OdysseyPainterEditorMenuVectorModeVertex.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
@@ -128,7 +128,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnKeyDownVector( FOdysseyVectorEngine*
                                                          , const FKey& iKey )
 {
     // Note: this also calls iScene->Update(0)
-    UOdysseyPainterEditorDefaultTool::OnKeyDownVector( iEngine, iScene, iKey );
+    UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iEngine, iScene, iKey );
 
     return false;
 }
@@ -139,7 +139,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnKeyUpVector( FOdysseyVectorEngine* i
                                                        , const FKey& iKey )
 {
     // Note: this also calls iScene->Update(0)
-    UOdysseyPainterEditorDefaultTool::OnKeyUpVector( iEngine, iScene, iKey );
+    UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iEngine, iScene, iKey );
 
     return false;
 }
@@ -260,7 +260,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDrag( const FOdysseyPoint& iPoi
 static void
 SetSelectionSpace( FOdysseyVectorEngine* iVectorEngine, FOdysseyVectorObject* iSelectedObject )
 {
-    if( UOdysseyPainterEditorDefaultTool::DoubleClicked() == true )
+    if( UOdysseyPainterEditorVectorBaseTool::DoubleClicked() == true )
     {
         FOdysseyVectorGroup* selectedGroup = nullptr;
 
@@ -525,7 +525,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUp( const FOdysseyPoint& iPoint
     {
         if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
         {
-            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorSelectionToolObjectContextMenu::CreateWidget( GetEditor() );
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorMenuVectorModeObject::CreateWidget( GetEditor() );
             
             TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
             FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
@@ -537,7 +537,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUp( const FOdysseyPoint& iPoint
 
         if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
         {
-            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorVectorSelectionToolVertexContextMenu::CreateWidget( GetEditor() );
+            TSharedPtr<SWidget> contextMenu = FOdysseyPainterEditorMenuVectorModeVertex::CreateWidget( GetEditor() );
 
             TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
             FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),

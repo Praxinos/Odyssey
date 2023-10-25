@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoSelect.h"
 #include "OdysseyPainterEditorVectorSelectionTool.generated.h"
@@ -20,7 +20,7 @@ enum class EOdysseyVectorSelectionShape : uint8
 class FOdysseyPainterEditorVectorSelectionToolHUD;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public UOdysseyPainterEditorDefaultTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public UOdysseyPainterEditorVectorBaseTool
 {
 public:
     GENERATED_BODY()

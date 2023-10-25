@@ -103,7 +103,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
         Uniform = !Uniform; // flip the value
     }
 
-    return UOdysseyPainterEditorDefaultTool::OnKeyDown( iKey );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDown( iKey );
 }
 
 bool
@@ -111,7 +111,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUp( const FKey& iKey )
 {
     Uniform = UniformAtKeyDown;
 
-    return  UOdysseyPainterEditorDefaultTool::OnKeyUp( iKey );
+    return  UOdysseyPainterEditorVectorBaseTool::OnKeyUp( iKey );
 }
 
 bool
