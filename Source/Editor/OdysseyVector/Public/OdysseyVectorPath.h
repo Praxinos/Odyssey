@@ -358,7 +358,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
-        virtual void DrawShape( BLContext* iBLContext, uint64 iFlags ) override;
+        virtual void DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ) override;
         virtual bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
 
@@ -368,7 +368,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void ExploreVertexChain( FVertexChain* iVertexChain );
         void UpdateVertexChain( FVertexChain* iVertexChain );
         void FindVertexChains();
-        void DrawVertexChain( BLContext* iBLContext, const FVertexChain& iVertexChain, uint64 iDrawingFlags );
+        void DrawVertexChain( BLContext* iBLContext, double iCombinedOpacity, const FVertexChain& iVertexChain, uint64 iDrawingFlags );
         void DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                 , int8*  iScreenPixels
                                 , uint32 iScreenWidth
@@ -380,6 +380,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                                 , uint32 iTextureBitsPerPixel
                                 , double iStartU
                                 , double iEndU
+                                , double iCombinedOpacity
                                 , uint64 iDrawingFlags );
         void DrawTexturedJoint( FOdysseyVectorJoint* iJoint
                               , int8*  iScreenPixels
@@ -392,6 +393,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , uint32 iTextureBitsPerPixel
                               , double iStartU
                               , double iEndU
+                              , double iCombinedOpacity
                               , uint64 iDrawingFlags );
 
     protected :

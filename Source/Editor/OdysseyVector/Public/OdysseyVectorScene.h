@@ -49,7 +49,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
         void ClearSelection();
         FOdysseyVectorObject* GetLastSelected();
         std::list<FOdysseyVectorObject*>& GetSelectedObjectList();
-        virtual void DrawShape( BLContext* iBLContext, uint64 iFlags ) override;
+        virtual void DrawShape( BLContext* iBLContext, double iHierarchyOpacity, uint64 iFlags ) override;
         bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
         ::ULIS::FVec2D GetWorldPositionFromSelection();
         void InvalidateObject( FOdysseyVectorObject* iObject );

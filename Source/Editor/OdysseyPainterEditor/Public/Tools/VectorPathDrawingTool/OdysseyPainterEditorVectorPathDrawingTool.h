@@ -15,10 +15,17 @@ class FOdysseyPainterEditorVectorPathDrawingToolHUD;
 class FOdysseyVectorUndoPathExtend;
 
 UENUM()
+enum class ePathDrawingToolColorSource : uint8
+{
+    ColorWheel = eBucketColorMode::SolidColor,
+    Palette  = eBucketColorMode::Palette
+};
+
+UENUM()
 enum class eTracingType : uint8
 {
     Organic  = 0,
-    Mechanic = 1,
+    Mechanic = 1
 };
 
 UENUM()
@@ -86,6 +93,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         void RecordUndoPathAdd( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath  );
         void RecordUndoPathExtend( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath );
     public:
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool )
+        ePathDrawingToolColorSource ColorSource;
+
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         FOdysseyVectorBrush Brush;
 

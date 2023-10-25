@@ -474,46 +474,49 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorEng
 void
 UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBucket )
 {
-    if( ( ColorMode == eBucketColorMode::LinearGradient )
-     || ( ColorMode == eBucketColorMode::RadialGradient ) )
+    switch( ColorMode )
     {
-        iBucket->SetColorMode( ColorMode );
-        iBucket->SetGradientColor0( Color1.R, Color1.G, Color1.B, Color1.A );
-        iBucket->SetGradientColor1( Color2.R, Color2.G, Color2.B, Color2.A );
-    }
-    else
-    {
-        ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
+        case eBucketColorMode::LinearGradient:
+        case eBucketColorMode::RadialGradient:
+            iBucket->SetGradientColor0( Color1.R, Color1.G, Color1.B, Color1.A );
+            iBucket->SetGradientColor1( Color2.R, Color2.G, Color2.B, Color2.A );
+        break;
 
-        TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
-        if ( colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette())
+        case eBucketColorMode::SolidColor:
         {
-            UOdysseyPaletteEntry* entry = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+            ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
+            ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+            uint8 R = rgba8.R8();
+            uint8 G = rgba8.G8();
+            uint8 B = rgba8.B8();
+            uint8 A = rgba8.A8();
 
-            if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+            iBucket->SetSolidColor( R, G, B, A );
+        }
+        break;
+
+        case eBucketColorMode::Palette:
+        {
+            TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
+            UOdysseyPalette* palette = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette();
+
+            if ( palette )
             {
-                FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
-                color = ::ULIS::FColor::RGBAF(colorEntry.R, colorEntry.G, colorEntry.B, colorEntry.A);
+                UOdysseyPaletteEntry* paletteEntry = palette->CurrentEntry.Get();
 
-                iBucket->SetPaletteEntry( entry );
+                if ( paletteEntry && paletteEntry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+                {
+                    iBucket->SetPaletteEntry( paletteEntry );
+                }
             }
-
-            iBucket->SetColorMode( eBucketColorMode::Palette );
         }
-        else
-        {
-            iBucket->SetColorMode( eBucketColorMode::SolidColor );
-        }
+        break;
 
-        ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-        uint8 R = rgba8.R8();
-        uint8 G = rgba8.G8();
-        uint8 B = rgba8.B8();
-        uint8 A = rgba8.A8();
-
-        iBucket->SetSolidColor( R, G, B, A );
+        default:
+        break;
     }
 
+    iBucket->SetColorMode( ColorMode );
     iBucket->SetPropagated( Propagate );
 }
 

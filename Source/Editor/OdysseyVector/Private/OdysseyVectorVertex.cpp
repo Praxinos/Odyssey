@@ -802,6 +802,7 @@ FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iPreviousSegment )
                 break;
 
                 default:
+                    mJoint.MakeNone();
                 break;
             }
 

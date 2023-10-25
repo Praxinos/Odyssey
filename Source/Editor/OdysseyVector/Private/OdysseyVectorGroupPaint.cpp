@@ -613,7 +613,7 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 }
 
 void
-FOdysseyVectorGroupPaint::DrawChildren( BLContext* iBLContext, uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
 {
     for( FOdysseyVectorObject *child : mChildrenList )
     {
@@ -623,7 +623,7 @@ FOdysseyVectorGroupPaint::DrawChildren( BLContext* iBLContext, uint64 iFlags )
 
             if( mGroupPaintParam.Wireframe == false )
             {
-                childPath->Draw( iBLContext, iFlags );
+                childPath->Draw( iBLContext, iCombinedOpacity, iFlags );
             }
             else
             {
@@ -632,24 +632,26 @@ FOdysseyVectorGroupPaint::DrawChildren( BLContext* iBLContext, uint64 iFlags )
         }
         else
         {
-            child->Draw( iBLContext, iFlags );
+            child->Draw( iBLContext, iCombinedOpacity, iFlags );
         }
     }
 }
 
 void
-FOdysseyVectorGroupPaint::Draw( BLContext* iBLContext, uint64 iFlags )
+FOdysseyVectorGroupPaint::Draw( BLContext* iBLContext, double iAncestorsOpacity, uint64 iFlags )
 {
+    double combinedOpacity = iAncestorsOpacity * mObjectParam.Opacity;
+
     iBLContext->save();
     iBLContext->transform( mLocalMatrix );
 
     iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
 
-    DrawShape( iBLContext, iFlags );
+    DrawShape( iBLContext, combinedOpacity, iFlags );
     // get sure cycles are drawn before paths
     iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
-    DrawChildren( iBLContext, iFlags );
+    DrawChildren( iBLContext, combinedOpacity, iFlags );
 
     iBLContext->restore();
 }
@@ -804,13 +806,13 @@ FOdysseyVectorGroupPaint::RemoveAllBuckets()
 }
 
 void
-FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext, uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
 {
     std::list<FOdysseyVectorCycle*>::iterator it;
 
     for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        cycle->Draw( iBLContext, iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
+        cycle->Draw( iBLContext, iCombinedOpacity, iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
     }
 
     if( mGroupPaintParam.Wireframe )

@@ -178,6 +178,8 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iOrigin
     static const int steps = 24;
     double a = angle / steps;
     double side = 1.0f;
+    double stepU = 1.0f / steps;
+    double U = 0.0f;
 
     // Find on which side should the joint be drawn by comparing the directions of our vectors
     if ( dot < 0 )
@@ -206,14 +208,23 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iOrigin
         // start drawing triangles at origin
         mPolygonCache[i].point[0].x = ( iOrigin.x );
         mPolygonCache[i].point[0].y = ( iOrigin.y );
+        mPolygonCache[i].U[0] = 0.0f;
+        mPolygonCache[i].V[0] = 0.5f;
 
         mPolygonCache[i].point[1].x = mPolygonCache[i].point[0].x + ( perpendicularVec0.x * iRadius );
         mPolygonCache[i].point[1].y = mPolygonCache[i].point[0].y + ( perpendicularVec0.y * iRadius );
+        mPolygonCache[i].U[1] = U;
+        mPolygonCache[i].V[1] = side == 1.0f ? 1.0f : 0.0f;
 
         mPolygonCache[i].point[2].x = mPolygonCache[i].point[0].x + ( interpolatedVector.x * iRadius );
         mPolygonCache[i].point[2].y = mPolygonCache[i].point[0].y + ( interpolatedVector.y * iRadius );
+        mPolygonCache[i].U[2] = U + stepU;
+        mPolygonCache[i].V[2] = side == 1.0f ? 1.0f : 0.0f;
+
         // default pointCount for joint's polygons is 5. Set it to 3.
         mPolygonCache[i].pointCount = 3;
+
+        U += stepU;
 
         perpendicularVec0 = interpolatedVector;
     }

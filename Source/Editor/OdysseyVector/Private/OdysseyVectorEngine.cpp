@@ -153,7 +153,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
     if( mInvalidationFlags )
     {
-        mScene->Draw( iBLContext, iDrawingFlags );
+        mScene->Draw( iBLContext, 1.0f, iDrawingFlags );
 
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
@@ -882,8 +882,8 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
                         , iBrushHeight
                         , iBrushBitsPerPixel
                         , iBrushAlphaOnly
-                        , u
-                        , v
+                        , fmod(u,1.0f) // function call might slow things (maybe not that much, as fmod is declared inline)
+                        , fmod(v,1.0f) // function call might slow things (maybe not that much, as fmod is declared inline)
                         , BR
                         , BG
                         , BB

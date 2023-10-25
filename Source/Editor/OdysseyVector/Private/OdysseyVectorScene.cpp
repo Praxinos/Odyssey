@@ -332,7 +332,7 @@ FOdysseyVectorScene::GetSelectedObjectList()
 }
 
 void
-FOdysseyVectorScene::DrawShape( BLContext* iBLContext, uint64 iDrawingFlags )
+FOdysseyVectorScene::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iDrawingFlags )
 {
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
@@ -348,7 +348,7 @@ FOdysseyVectorScene::DrawShape( BLContext* iBLContext, uint64 iDrawingFlags )
     blFillColor.setR( fillColor.R );
     blFillColor.setG( fillColor.G );
     blFillColor.setB( fillColor.B );
-    blFillColor.setA( fillColor.A );
+    blFillColor.setA( fillColor.A * iCombinedOpacity );
 
     iBLContext->setFillStyle( blFillColor );
 
@@ -357,7 +357,7 @@ FOdysseyVectorScene::DrawShape( BLContext* iBLContext, uint64 iDrawingFlags )
     iBLContext->fillAll();
 
 
-    FOdysseyVectorGroupPaint::DrawShape( iBLContext, iDrawingFlags );
+    FOdysseyVectorGroupPaint::DrawShape( iBLContext, iCombinedOpacity, iDrawingFlags );
 
     // view the updated zone ( testing purpose only )
     /*iBLContext.setStrokeStyle(BLRgba32(0xFFFF0000));
@@ -381,10 +381,8 @@ FOdysseyVectorScene::GetType()
 void
 FOdysseyVectorScene::RemoveSelectedObjects()
 {
-    for(std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it)
+    for( FOdysseyVectorObject* selectedObject : mSelectedObjectList )
     {
-        FOdysseyVectorObject* selectedObject = (*it);
-
         // prevent nested removal
         if( selectedObject->HasSelectedAncestor() == false )
         {

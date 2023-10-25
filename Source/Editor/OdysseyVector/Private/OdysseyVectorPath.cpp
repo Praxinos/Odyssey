@@ -1291,11 +1291,13 @@ FOdysseyVectorPath::DrawTexturedJoint( FOdysseyVectorJoint* iJoint
                                      , uint32 iTextureBitsPerPixel
                                      , double iStartU
                                      , double iEndU
+                                     , double iCombinedOpacity
                                      , uint64 iDrawingFlags )
 {
     // TODO: transform this to an argument to avoid repetitive calls. I guess.
     FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
     std::vector<FOdysseyVectorPolygon5>& polygonCache = iJoint->GetPolygonCache();
+    FColor foregroundColor = GetForegroundColor();
     double difU = iEndU - iStartU;
 
     for( int i = 0; i < polygonCache.size(); i++ )
@@ -1313,16 +1315,17 @@ FOdysseyVectorPath::DrawTexturedJoint( FOdysseyVectorJoint* iJoint
            polyU[j] = iStartU + ( polygon->U[j] * difU );
         }
 
+        // TODO : check for in-screen visibility
             vectorEngine->DrawPolygon( int32Point
                                      , polyU
                                      , polygon->V
                                      , polygon->pointCount
-                                     , mObjectParam.Opacity
+                                     , iCombinedOpacity
                                      , iScreenPixels
                                      , iScreenWidth
                                      , iScreenHeight
                                      , iScreenBitsPerPixel
-                                     , GetForegroundColor()
+                                     , foregroundColor
                                      , iTexturePixels
                                      , iTextureWidth
                                      , iTextureHeight
@@ -1343,10 +1346,12 @@ FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                        , uint32 iTextureBitsPerPixel
                                        , double iStartU
                                        , double iEndU
+                                       , double iCombinedOpacity
                                        , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
     std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
+    FColor foregroundColor = GetForegroundColor();
     double difU = iEndU - iStartU;
 
     for( int i = 0; i < fractionCache.size(); i++ )
@@ -1381,12 +1386,12 @@ FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                      , quadU
                                      , fraction->polygon.V
                                      , 4
-                                     , mObjectParam.Opacity
+                                     , iCombinedOpacity
                                      , iScreenPixels
                                      , iScreenWidth
                                      , iScreenHeight
                                      , iScreenBitsPerPixel
-                                     , GetForegroundColor()
+                                     , foregroundColor
                                      , iTexturePixels
                                      , iTextureWidth
                                      , iTextureHeight
@@ -1397,23 +1402,24 @@ FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
 }
 
 void
-FOdysseyVectorPath::DrawShape( BLContext* iBLContext, uint64 iDrawingFlags )
+FOdysseyVectorPath::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iDrawingFlags )
 {
     for( FVertexChain& vertexChain : mVertexChainArray )
     {
-        DrawVertexChain( iBLContext, vertexChain, iDrawingFlags );
+        DrawVertexChain( iBLContext, iCombinedOpacity, vertexChain, iDrawingFlags );
     }
 }
 
 void
 FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
+                                   , double iCombinedOpacity
                                    , const FVertexChain& iVertexChain
                                    , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
     FColor color = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? FColor( 0, 0, 0, 255 )
                                                                                  : mForegroundBucket.GetColor();
-    BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A * mObjectParam.Opacity );
+    BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A * iCombinedOpacity );
     FOdysseyVectorVertex* currentVertex = iVertexChain.vertex;
     UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();
@@ -1436,18 +1442,21 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
         {
             ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
             FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex(currentVertex);
+            FOdysseyVectorJoint& joint = currentVertex->GetJoint();
             double segmentLength = segment->GetLength();
+            double jointLength = joint.GetLength();
+            double segmentAndJointLength = segmentLength + jointLength;
             double endU = 0.0f;
 
             if( mBrush.ExtendOverPath )
             {
                 if( mBrush.Revert )
                 {
-                    endU = iVertexChain.length ? startU - ( segmentLength / iVertexChain.length ) : 0.0f;
+                    endU = iVertexChain.length ? startU - ( segmentAndJointLength / iVertexChain.length ) : 0.0f;
                 }
                 else
                 {
-                    endU = iVertexChain.length ? startU + ( segmentLength / iVertexChain.length ) : 0.0f;
+                    endU = iVertexChain.length ? startU + ( segmentAndJointLength / iVertexChain.length ) : 0.0f;
                 }
             }
             else
@@ -1469,16 +1478,18 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                 double segmentStartU = ( currentVertex == segment->GetVertex(0) ) ? startU : endU;
                 double segmentEndU   = ( currentVertex == segment->GetVertex(0) ) ? endU : startU;
 
-                if( currentVertex->IsHandleAligned() == false )
+                // Textured joints are drawn only in texture mode (obviously) and if the texture
+                // goes all over the path.
+                if( ( currentVertex->IsHandleAligned() == false )
+                && ( mBrush.ExtendOverPath == true ) )
                 {
-                    FOdysseyVectorJoint& joint = currentVertex->GetJoint();
-                    double jointLength = joint.GetLength();
-                    double segmentJointRatio = jointLength / ( segmentLength + jointLength );
+                    double segmentJointRatio = jointLength / ( segmentAndJointLength );
                     double jointStartU = segmentStartU;
                     double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
 
                     segmentStartU = jointEndU;
 
+                    // TODO : check for in-screen visibility
                     DrawTexturedJoint( &joint
                                      , (int8*)imageData.pixelData
                                      , imageData.size.w
@@ -1490,6 +1501,7 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                                      , 32
                                      , jointStartU
                                      , jointEndU
+                                     , iCombinedOpacity
                                      , iDrawingFlags );
                 }
 
@@ -1510,6 +1522,7 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                                         , 32
                                         , segmentStartU
                                         , segmentEndU
+                                        , iCombinedOpacity
                                         , iDrawingFlags );
                 }
             }
@@ -1530,8 +1543,6 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
         iBLContext->setFillStyle( strokeColor );
         iBLContext->setStrokeStyle( strokeColor );
 
-        currentVertex->DrawJoint( iBLContext, iDrawingFlags );
-
         for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
         {
             FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( currentVertex );
@@ -1546,11 +1557,13 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                 segment->Draw( iBLContext );
             }
 
-            nextVertex->DrawJoint( iBLContext, iDrawingFlags );
-            /*if( nextVertex->GetSegmentCount() == 2 )
+        // TODO : check for in-screen visibility
+            if( currentVertex->GetSegmentCount() == 2 )
             {
-                DrawJoint( iBLContext, nextVertex, iDrawingFlags );
-            }*/
+                currentVertex->DrawJoint( iBLContext, iDrawingFlags );
+            }
+
+            currentVertex = nextVertex;
         }
     }
 }

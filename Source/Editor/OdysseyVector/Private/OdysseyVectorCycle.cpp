@@ -341,7 +341,7 @@ FOdysseyVectorCycle::GetBBox()
 }
 
 void
-FOdysseyVectorCycle::Draw( BLContext* iBLContext, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor )
+FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor )
 {
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
@@ -392,12 +392,12 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, uint64 iFlags, bool iMonochrom
                     BLColor0.setR( gradientColor0.R );
                     BLColor0.setG( gradientColor0.G );
                     BLColor0.setB( gradientColor0.B );
-                    BLColor0.setA( gradientColor0.A );
+                    BLColor0.setA( gradientColor0.A * iOpacity );
 
                     BLColor1.setR( gradientColor1.R );
                     BLColor1.setG( gradientColor1.G );
                     BLColor1.setB( gradientColor1.B );
-                    BLColor1.setA( gradientColor1.A );
+                    BLColor1.setA( gradientColor1.A * iOpacity );
 
                     linear.addStop( 0.0, BLColor0 );
                     linear.addStop( 1.0, BLColor1 );
@@ -426,12 +426,12 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, uint64 iFlags, bool iMonochrom
                     BLColor0.setR( gradientColor0.R );
                     BLColor0.setG( gradientColor0.G );
                     BLColor0.setB( gradientColor0.B );
-                    BLColor0.setA( gradientColor0.A );
+                    BLColor0.setA( gradientColor0.A * iOpacity );
 
                     BLColor1.setR( gradientColor1.R );
                     BLColor1.setG( gradientColor1.G );
                     BLColor1.setB( gradientColor1.B );
-                    BLColor1.setA( gradientColor1.A );
+                    BLColor1.setA( gradientColor1.A * iOpacity );
 
                     radial.addStop( 0.0, BLColor0 );
                     radial.addStop( 1.0, BLColor1 );
@@ -444,7 +444,10 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, uint64 iFlags, bool iMonochrom
                 default:
                 {
                     FColor color = bucket->GetColor();
-                    BLRgba32 BLColor = BLRgba32( color.R, color.G, color.B, color.A );
+                    BLRgba32 BLColor = BLRgba32( color.R
+                                               , color.G
+                                               , color.B
+                                               , color.A * iOpacity );
 
                     iBLContext->setStrokeStyle( BLColor );
                     iBLContext->setFillStyle( BLColor );
@@ -455,7 +458,10 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, uint64 iFlags, bool iMonochrom
         else
         {
             FColor& color = mOwner->GetBackgroundBucket().GetSolidColor();
-            BLRgba32 BLColor = BLRgba32( color.R, color.G, color.B, color.A );
+            BLRgba32 BLColor = BLRgba32( color.R
+                                       , color.G
+                                       , color.B
+                                       , color.A * iOpacity );
 
            iBLContext->setStrokeStyle( BLColor );
            iBLContext->setFillStyle( BLColor );

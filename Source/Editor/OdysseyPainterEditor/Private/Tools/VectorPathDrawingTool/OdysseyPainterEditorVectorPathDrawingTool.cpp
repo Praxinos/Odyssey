@@ -18,7 +18,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 }
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
-    : TracingType( eTracingType::Organic )
+    : ColorSource( ePathDrawingToolColorSource::ColorWheel )
+    , TracingType( eTracingType::Organic )
     , TracingFidelity( eTracingFidelity::Average )
     , Radius( 5.0f )
     , Opacity( 1.0f )
@@ -166,26 +167,41 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnSizeChanged()
 void
 UOdysseyPainterEditorVectorPathDrawingTool::SetPathColor( FOdysseyVectorPath* iPath )
 {
-    ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
-    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-    FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), /*rgba8.A8()*/ Opacity * 255.0f );
-    TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
-    UOdysseyPalette* palette = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette();
-
-    if( palette )
+    switch( ColorSource )
     {
-        UOdysseyPaletteEntry * paletteEntry = palette->CurrentEntry.Get();
-
-        if( paletteEntry && paletteEntry->IsA( UOdysseyPaletteEntryColor::StaticClass() ) )
+        case ePathDrawingToolColorSource::ColorWheel:
         {
-            FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(paletteEntry)->GetUsedColor();
-            ueColor = colorEntry;
+            ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
+            ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+            FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
-            iPath->GetForegroundBucket().SetPaletteEntry( paletteEntry );
+            iPath->GetForegroundBucket().SetSolidColor( ueColor );
         }
+        break;
+
+        case ePathDrawingToolColorSource::Palette:
+        {
+            TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
+            UOdysseyPalette* palette = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette();
+
+            if( palette )
+            {
+                UOdysseyPaletteEntry * paletteEntry = palette->CurrentEntry.Get();
+
+                if( paletteEntry && paletteEntry->IsA( UOdysseyPaletteEntryColor::StaticClass() ) )
+                {
+                    iPath->GetForegroundBucket().SetPaletteEntry( paletteEntry );
+                }
+            }
+        }
+        break;
+
+        default:
+        break;
     }
 
-    iPath->SetForegroundColor( ueColor );
+    iPath->SetOpacity( Opacity );
+    iPath->GetForegroundBucket().SetColorMode( (eBucketColorMode)ColorSource );
 }
 
 void

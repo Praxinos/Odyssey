@@ -552,25 +552,27 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysse
 }
 
 void
-FOdysseyVectorObject::DrawChildren( BLContext* iBLContext, uint64 iFlags )
+FOdysseyVectorObject::DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
 {
     for( FOdysseyVectorObject *child : mChildrenList )
     {
-        child->Draw( iBLContext, iFlags );
+        child->Draw( iBLContext, iCombinedOpacity, iFlags );
     }
 }
 
 void
-FOdysseyVectorObject::Draw( BLContext* iBLContext, uint64 iFlags )
+FOdysseyVectorObject::Draw( BLContext* iBLContext, double iAncestorsOpacity, uint64 iFlags )
 {
+    double combinedOpacity = iAncestorsOpacity *= mObjectParam.Opacity;
+
     iBLContext->save();
     iBLContext->transform( mLocalMatrix );
 
     iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
 
-    DrawShape( iBLContext, iFlags );
+    DrawShape( iBLContext, combinedOpacity, iFlags );
 
-    DrawChildren( iBLContext, iFlags );
+    DrawChildren( iBLContext, combinedOpacity, iFlags );
 
     iBLContext->restore();
 }

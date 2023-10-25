@@ -48,7 +48,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @brief draw the cycle (in parent coordinates system).
          * @param iFlags drawing flags.
          */
-        void Draw( BLContext* iBLContext, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor );
+        void Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor );
 
         /**
          * @brief collision test with coordinates passed as parameters.
