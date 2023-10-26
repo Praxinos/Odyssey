@@ -60,25 +60,21 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorScene*
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    // Left mouse button clicked
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorScenePanTool","Pan Scene"));
+    if( GUndo )
     {
-        BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
+        // save selected object translation/rotation/scaling before transform
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
 
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorScenePanTool","Pan Scene"));
-        if( GUndo )
-        {
-            // save selected object translation/rotation/scaling before transform
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
-
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-        GEditor->EndTransaction();
-
-        mDownLocalMouseX = localCoords.x;
-        mDownLocalMouseY = localCoords.y;
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
+    GEditor->EndTransaction();
+
+    mDownLocalMouseX = localCoords.x;
+    mDownLocalMouseY = localCoords.y;
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
@@ -150,7 +146,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorScene*
 
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    if( iPointInTexture.keysDown.Find(EKeys::RightMouseButton) != INDEX_NONE)
+    if( iPointInTexture.keysDown.Find( EKeys::RightMouseButton ) != INDEX_NONE)
     {
         Scale( iEngine, iScene, iPointInTexture );
     }

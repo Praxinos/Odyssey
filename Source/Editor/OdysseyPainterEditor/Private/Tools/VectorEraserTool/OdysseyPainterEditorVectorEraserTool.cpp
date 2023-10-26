@@ -67,7 +67,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorScene* i
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
     {
         mEraserHUD->BlendMask( true );
         mEraserHUD->ClearMask();
@@ -130,6 +131,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorScene* iSc
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
         std::vector<FOdysseyVectorObject*> addedObjectArray;

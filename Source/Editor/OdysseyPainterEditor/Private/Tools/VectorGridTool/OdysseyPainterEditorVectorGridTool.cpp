@@ -71,7 +71,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorScene* iSc
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
     {
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("VectorGridTool","Vector Grid Tool"));
@@ -166,6 +167,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorScene* iScen
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
         if( mMultipleSelectionMode == true )

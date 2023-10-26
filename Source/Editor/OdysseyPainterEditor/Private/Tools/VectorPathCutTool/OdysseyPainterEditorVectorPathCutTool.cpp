@@ -62,7 +62,8 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorScene* 
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
     {
         mPathCutHUD->SetP0( iPointInTexture.x, iPointInTexture.y );
         mPathCutHUD->SetP1( iPointInTexture.x, iPointInTexture.y );
@@ -166,6 +167,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorScene* iS
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
         std::list<FOdysseyVectorObject*>& focusedObjectList = GetFocusedObjectList( iScene );

@@ -117,8 +117,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorScen
     //FOdysseyVectorPoint::ArrayToVertexArray( pickedPointArray, vertexArray );
     //FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, segmentArray );
 
-    // Left mouse button clicked
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
     {
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("VectorPathSmoothTool","Vector Path Smooth Tool"));
@@ -212,7 +212,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorScene*
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    // Left mouse button clicked
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
         std::vector<FOdysseyVectorVertex*> vertexArray;

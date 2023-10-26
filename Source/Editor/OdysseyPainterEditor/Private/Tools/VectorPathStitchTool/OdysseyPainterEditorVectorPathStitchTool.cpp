@@ -62,8 +62,8 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorScen
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
-    // Left mouse button clicked
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
     {
         FOdysseyVectorEngine* iEngine = iScene->GetEngine();
         ::ULIS::FRectD roi = { iPointInTexture.x - PickingRadius, iPointInTexture.y - PickingRadius, PickingRadius * 2, PickingRadius * 2 };
