@@ -12,6 +12,7 @@ UOdysseyPainterEditorVectorBaseTool::~UOdysseyPainterEditorVectorBaseTool()
 }
 
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
+    : RestrictToSelection( false )
 {
 }
 
@@ -28,14 +29,28 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
     return doubleClicked;
 }
 
-bool
-UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
+std::list<FOdysseyVectorObject*>&
+UOdysseyPainterEditorVectorBaseTool::GetFocusedObjectList( FOdysseyVectorScene* iScene )
+{
+    if( RestrictToSelection )
+    {
+        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+
+        return selectedObjectList;
+    }
+
+    // return scene as list
+    return iScene->GetEngine()->GetChildrenList();
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::Unload()
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
     if( hasVector )
     {
-        //Should be done in OnKeyDownVector directly
+        //Should be done in UnloadVector directly
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
         if( mediaVectors.Num() > 0 )
@@ -43,18 +58,37 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
             FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
-            OnKeyDownVector( vectorEngine, vectorScene, iKey );
+            UnloadVector( vectorScene );
         }
     }
-
-    return false;
 }
 
-bool
-UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                                 , FOdysseyVectorScene* iScene
-                                                 , const FKey& iKey )
+void
+UOdysseyPainterEditorVectorBaseTool::Load()
 {
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() > 0 )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            LoadVector( vectorScene );
+        }
+    }
+}
+
+uint64
+UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+                                                    , const FKey& iKey )
+{
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
     {
         if( iKey == EKeys::C )
@@ -90,39 +124,367 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorEngine* iEng
         }
     }
 
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+}
+
+bool
+UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    bool ret = false;
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            uint64 signalFlags;
+
+            signalFlags = OnKeyDownVector( vectorScene, iKey );
+
+            vectorEngine->Signal( signalFlags );
+        }
+    }
+
     return false;
+}
+
+uint64
+UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+                                                  , const FKey& iKey )
+{
+    return 0;
 }
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 {
-    bool ret = false;
-    
-    
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            uint64 signalFlags;
+
+            signalFlags = OnKeyUpVector(vectorScene,iKey);
+
+            vectorEngine->Signal( signalFlags );
+        }
+    }
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
+                                                , const FKey& iKey )
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            uint64 signalFlags;
+
+            signalFlags = OnMouseDownVector( vectorScene, iPointInTexture, iKey );
+
+            vectorEngine->Signal( signalFlags );
+        }
+    }
+
+    return false;
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            uint64 signalFlags;
+
+            signalFlags = OnMouseHoverVector( vectorScene, iPointInTexture );
+
+            vectorEngine->Signal( signalFlags );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            uint64 signalFlags;
+
+            signalFlags = OnMouseDragVector( vectorScene, iPointInTexture );
+
+            vectorEngine->Signal( signalFlags );
+        }
+    }
+}
+
+bool
+UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
+                                              , const FKey& iKey )
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    bool ret = false;
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            uint64 signalFlags;
+
+            signalFlags = OnMouseUpVector( vectorScene, iPointInTexture, iKey );
+
+            vectorEngine->Signal( signalFlags );
+        }
+    }
+
+    if( iKey == EKeys::RightMouseButton )
+    {
+        PopupContextMenu();
+    }
+
+    return false;
+}
+
+uint64
+UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( FOdysseyVectorScene* iScene
+                                                          , const FName& iPropertyName )
+{
+    // RestricttoSelection was changed, return redraw flag
+
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    // redraw
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
     if (hasVector)
     {
         //Should be done in OnKeyUpVector directly
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-        if (mediaVectors.Num() > 0)
+        if( mediaVectors.Num() > 0 )
         {
             FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            ret = UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
+            uint64 signalFlags;
+
+            signalFlags = PropertyChangedVector( vectorScene, PropertyChangedEvent.GetPropertyName() );
+
+            vectorEngine->Signal( signalFlags );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::Commit()
+{
+
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::PopupContextMenu()
+{
+    TSharedPtr<SWidget> contextMenu = CreateContextMenu();
+
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+    FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
+                                       FWidgetPath(),
+                                       contextMenu.ToSharedRef(),
+                                       FSlateApplication::Get().GetCursorPos(),
+                                       FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
+}
+
+TSharedPtr<SWidget>
+UOdysseyPainterEditorVectorBaseTool::CreateContextMenu()
+{
+    FMenuBuilder menu( true, nullptr );
+
+    ExtendContextMenu( menu );
+
+    return menu.MakeWidget();
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ExtendContextMenu( FMenuBuilder& menu )
+{
+    switch( GetEditor()->GetVectorEditionMode() )
+    {
+        case eVectorEditionMode::Object :
+            ExtendContextMenuObject( menu );
+        break;
+
+        case eVectorEditionMode::Vertex :
+            ExtendContextMenuVertex( menu );
+        break;
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu )
+{
+    //FMenuBuilder menu( true, nullptr );
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            menu.BeginSection("Context");
+            {
+                menu.AddMenuEntry(
+                      LOCTEXT("ResetView", "Reset View")
+                    , LOCTEXT("ResetView", "Reset View")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ResetView, vectorEngine, vectorScene)));
+                menu.AddMenuEntry(
+                      LOCTEXT("GroupPaint", "Make Paint Group")
+                    , LOCTEXT("GroupPaint", "Make Paint Group")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::GroupPaint, vectorEngine, vectorScene)));
+                /*menu.AddMenuEntry(
+                      LOCTEXT("Trim", "Trim")
+                    , LOCTEXT("Trim", "Trim")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Trim, vectorScene)));*/
+                menu.AddMenuEntry(
+                      LOCTEXT("Group", "Group")
+                    , LOCTEXT("Group", "Group")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Group, vectorEngine, vectorScene)));
+                menu.AddMenuEntry(
+                      LOCTEXT("Ungroup", "Ungroup")
+                    , LOCTEXT("Ungroup", "Ungroup")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Ungroup, vectorEngine, vectorScene)));
+                menu.AddMenuEntry(
+                      LOCTEXT("BringForward", "Bring forward")
+                    , LOCTEXT("BringForward", "Bring forward")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::BringForward, vectorEngine, vectorScene)));
+                menu.AddMenuEntry(
+                      LOCTEXT("SendBackward", "Send backward")
+                    , LOCTEXT("SendBackward", "Send backward")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::SendBackward, vectorEngine, vectorScene)));
+                menu.AddMenuEntry(
+                      LOCTEXT("DeleteSelection","Delete Selection")
+                    , LOCTEXT("DeleteSelection","Delete Selection")
+                    , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjectSelection, vectorEngine, vectorScene)));
+                menu.AddMenuEntry(
+                      LOCTEXT("FlipHorizontal","Flip Horizontal")
+                    , LOCTEXT("FlipHorizontal","Flip Horizontal")
+                    , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::FlipHorizontal, vectorEngine, vectorScene)));
+                menu.AddMenuEntry(
+                      LOCTEXT("FlipVertical","Flip Vertical")
+                    , LOCTEXT("FlipVertical","Flip Vertical")
+                    , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::FlipVertical, vectorEngine, vectorScene)));
+                menu.AddMenuEntry(
+                    LOCTEXT("ClearColoring", "Clear Coloring")
+                    , LOCTEXT("ClearColoring", "Clear Coloring")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ClearColoring, vectorEngine, vectorScene )));
+                menu.AddMenuEntry(
+                    LOCTEXT("ApplyTransformations", "Apply Transformations")
+                    , LOCTEXT("ApplyTransformations", "Apply Transformations")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ApplyTransformations, vectorScene )));
+            }
+            menu.EndSection();
         }
     }
 
-    return ret;
+    //return menu.MakeWidget();
 }
 
-bool
-UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                                                  , FOdysseyVectorScene* iScene
-                                                  , const FKey& iKey )
+void
+UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu )
 {
-    return false;
-}
+    //FMenuBuilder menu( true, nullptr );
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
-void PopupContextMenu();
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            menu.BeginSection("Context");
+            {
+            menu.AddMenuEntry(
+                  LOCTEXT("DeleteSelection", "Delete Selection")
+                , LOCTEXT("DeleteSelection", "Delete Selection")
+                , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeletePointSelection, vectorEngine, vectorScene)));
+            menu.AddMenuEntry(
+                  LOCTEXT("AlignPointSelection", "Align Point Selection")
+                , LOCTEXT("AlignPointSelection", "Align Point Selection")
+                , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::AlignPointSelection, vectorScene)));
+            menu.AddMenuEntry(
+                  LOCTEXT("UnalignPointSelection", "Unalign Point Selection")
+                , LOCTEXT("UnalignPointSelection", "Unalign Point Selection")
+                , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnalignPointSelection, vectorScene)));
+            }
+            menu.EndSection();
+        }
+    }
+
+    //return menu.MakeWidget();
+}
 
 #undef LOCTEXT_NAMESPACE

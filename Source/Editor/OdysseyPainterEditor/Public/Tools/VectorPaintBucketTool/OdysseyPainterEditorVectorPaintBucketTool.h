@@ -21,129 +21,100 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
 {
     GENERATED_BODY()
 
-public:
-    //Inactivates the tool
-    virtual bool IsActivable() const override;
+    public:
+        //Inactivates the tool
+        virtual bool IsActivable() const override;
 
-    virtual void Load();
-    virtual void Unload();
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorPaintBucketTool();
 
+        static FOdysseyVectorBucket& GetCopiedBucket();
+        static void CopyBucketParam( FOdysseyVectorBucket* iSourceBucket );
+        static void PasteBucketParam( FOdysseyVectorBucket* iDestinationBucket );
+        static void BucketProperties( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
 
-    static bool DoubleClicked();
+        //Constructor
+        UOdysseyPainterEditorVectorPaintBucketTool();
 
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorPaintBucketTool();
+        bool GetShowControls();
 
-    //Constructor
-    UOdysseyPainterEditorVectorPaintBucketTool();
-    
-    void Initialize(FOdysseyPaintEngine* iPaintEngine);
+    protected:
+        //OdysseyPainterVectorBaseEditorTool overrides
+        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+                                      , const FKey& iKey ) override;
+        virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey ) override;
+        virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+                                         , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ) override;
+        //virtual uint64 PropertyChangedVector( FOdysseyVectorScene* iScene
+        //                                  , const FName& iPropertyName ) override;
 
-    //OdysseyPainterEditorTool overrides
-    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    protected:
+        virtual void ExtendContextMenu( FMenuBuilder& menu );
 
-    virtual bool OnKeyDown( const FKey& iKey ) override;
-    virtual bool OnKeyUp( const FKey& iKey ) override;
-    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
-    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
-    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+    private:
+        void SetBucketColor( FOdysseyVectorBucket* iBucket );
+        void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
+                                       , FOdysseyVectorBucket* iBucket );
+        void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey );
+        void OnMouseUpVectorRemoveBucket( FOdysseyVectorScene* iScene
+                                        , FOdysseyVectorBucket* iBucket );
+        void OnMouseUpVectorMovePoint( FOdysseyVectorScene* iScene
+                                     , FOdysseyVectorPoint* iPoint
+                                     , ::ULIS::FVec2D iPointOriginalPosition );
+        void OnMouseUpVectorPropagateBucket( FOdysseyVectorScene* iScene
+                                            , FOdysseyVectorBucket* iBucket
+                                            , bool iPropagate );
+        void OnMouseUpVectorColorBucket( FOdysseyVectorScene* iScene
+                                        , FOdysseyVectorBucket* iBucket );
+        void OnMouseDownVectorRotateBucket( FOdysseyVectorScene* iScene
+                                          , FOdysseyVectorBucket* iBucket );
+        double GetRotationAngle( FOdysseyVectorBucket* iBucket
+                                , const FOdysseyPoint& iPointInTexture );
 
-    // Raster Mouse Down
-    bool OnMouseDownRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
-    // Vector Mouse Down
-    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                           , FOdysseyVectorScene* iScene
-                           , const FOdysseyPoint& iPointInTexture );
-    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
-    bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FKey& iKey );
-    bool OnKeyUpVector(FOdysseyVectorEngine* iEngine
-                      ,FOdysseyVectorScene* iScene
-                      ,const FKey& iKey);
-    void PropertyChangedVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
-                              , const FName& iPropertyName );
+    public:
+/*
+        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        bool RestrictToSelection;
+*/
+        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        bool Propagate;
 
-    virtual void Commit() override;
+        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        eBucketColorMode ColorMode;
 
-    std::vector<FOdysseyVectorCycle*>& GetPickedCycleArray();
+        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        FColor Color1;
 
-    std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
+        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        FColor Color2;
 
-    bool GetShowControls();
+        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        double PickingRadius;
 
-private:
-    void SetBucketColor( FOdysseyVectorBucket* iBucket );
-    void PopUpMenu( FOdysseyVectorBucket* iBucket );
-
-protected:
-    void OnMouseUpVectorClearBucket( FOdysseyVectorScene* iScene
-                                    , FOdysseyVectorBucket* iBucket );
-    void OnMouseUpVectorCreateBucket( FOdysseyVectorScene* iScene
-                                    , const FOdysseyPoint& iPointInTexture
-                                    , const FKey& iKey );
-    void OnMouseUpVectorRemoveBucket( FOdysseyVectorScene* iScene
-                                    , FOdysseyVectorBucket* iBucket );
-    void OnMouseUpVectorMovePoint( FOdysseyVectorScene* iScene
-                                 , FOdysseyVectorPoint* iPoint
-                                 , ::ULIS::FVec2D iPointOriginalPosition );
-    void OnMouseUpVectorPropagateBucket( FOdysseyVectorScene* iScene
-                                        , FOdysseyVectorBucket* iBucket
-                                        , bool iPropagate );
-    void OnMouseUpVectorColorBucket( FOdysseyVectorScene* iScene
-                                    , FOdysseyVectorBucket* iBucket );
-    void OnMouseDownVectorRotateBucket( FOdysseyVectorScene* iScene
-                                      , FOdysseyVectorBucket* iBucket );
-    double GetRotationAngle( FOdysseyVectorBucket* iBucket
-                            , const FOdysseyPoint& iPointInTexture );
-
-public:
-    UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
-    bool RestrictToSelection;
-
-    UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
-    bool Propagate;
-
-    UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
-    eBucketColorMode ColorMode;
-
-    UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
-    FColor Color1;
-
-    UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
-    FColor Color2;
-
-    UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
-    double PickingRadius;
-
-protected:
-    //std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
-    FOdysseyPaintEngine mPaintEngine;
-    FOdysseyVectorBucket* mPickedBucket;
-    //FOdysseyVectorObject* mPickedObject;
-    double mOldLocalMouseX;
-    double mOldLocalMouseY;
-    double mDownMouseX;
-    double mDownMouseY;
-    ::ULIS::FVec2D mPointPosition;
-    double mPointRotation;
-    FOdysseyPainterEditorVectorPaintBucketToolHUD* mBucketHUD;
-    FOdysseyPainterEditorVectorPaintBucketToolContextMenu* mContextMenu;
-    uint32 mPickedArea;
-    ::ULIS::FVec2D mOldPointInTexture;
-    bool mShowControls;
+    protected:
+        FOdysseyVectorBucket* mPickedBucket;
+        //FOdysseyVectorObject* mPickedObject;
+        double mOldLocalMouseX;
+        double mOldLocalMouseY;
+        double mDownMouseX;
+        double mDownMouseY;
+        ::ULIS::FVec2D mPointPosition;
+        double mPointRotation;
+        FOdysseyPainterEditorVectorPaintBucketToolHUD* mBucketHUD;
+        FOdysseyPainterEditorVectorPaintBucketToolContextMenu* mContextMenu;
+        uint32 mPickedArea;
+        ::ULIS::FVec2D mOldPointInTexture;
+        bool mShowControls;
 };

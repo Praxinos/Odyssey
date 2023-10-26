@@ -29,72 +29,37 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
-void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::Load()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            LoadVector( vectorEngine, vectorScene );
-        }
-    }
-}
-
-void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::Unload()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            UnloadVector( vectorEngine, vectorScene );
-        }
-    }
-}
-
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::IsActivable() const
 {
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
-void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     //iEngine->RemoveHUD( &mDummyHUD );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorScene* iScene )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     //iEngine->ClearHUD();
     //iEngine->AddHUD( &mDummyHUD );
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
+uint64
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+                                                                , const FKey& iKey )
 {
     UniformAtKeyDown = Uniform;
 
@@ -103,123 +68,84 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDown( const FKey& iKey )
         Uniform = !Uniform; // flip the value
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDown( iKey );
+    return 0;
 }
 
-bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUp( const FKey& iKey )
+uint64
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+                                                              , const FKey& iKey )
 {
     Uniform = UniformAtKeyDown;
 
-    return  UOdysseyPainterEditorVectorBaseTool::OnKeyUp( iKey );
+    return 0;
 }
 
-bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            return OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
-        }
-    }
-
-    return false;
-}
-
-
-bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                                                                  , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorScene* iScene
                                                                   , const FOdysseyPoint& iPointInTexture
                                                                   , const FKey& iKey )
 {
-    BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-    ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
-    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-    FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-    FOdysseyVectorPrimitive* primitive;
-    UOdysseyPaletteEntry* entry = nullptr;
-    BLPoint widthVector = iScene->GetInverseWorldMatrix().mapVector( 0.7071f * StrokeWidth, 0.7071f * StrokeWidth );
-    ::ULIS::FVec2D width = ::ULIS::FVec2D( widthVector.x, widthVector.y );
-
-    TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
-    if (colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette())
+    // Left mouse button clicked
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        entry = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+        BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+        ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
+        ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+        FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+        FOdysseyVectorPrimitive* primitive;
+        UOdysseyPaletteEntry* entry = nullptr;
+        BLPoint widthVector = iScene->GetInverseWorldMatrix().mapVector( 0.7071f * StrokeWidth, 0.7071f * StrokeWidth );
+        ::ULIS::FVec2D width = ::ULIS::FVec2D( widthVector.x, widthVector.y );
+
+        TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
+        if (colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette())
+        {
+            entry = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
+            if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
+            {
+                FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
+                ueColor = colorEntry;
+            }
+        }
+
+        mMouseDown.x = iPointInTexture.x;
+        mMouseDown.y = iPointInTexture.y;
+
+        switch( PrimitiveType )
+        {
+            case EOdysseyVectorPrimitiveType::Rectangle:
+                primitive = new FOdysseyVectorRectangle( FString("Rectangle"), 0.0f, 0.0f, width.Distance() );
+            break;
+
+            case EOdysseyVectorPrimitiveType::Line:
+                primitive = new FOdysseyVectorLine( FString("Line"), 0.0f, 0.0f, width.Distance() );
+            break;
+
+            default:
+                primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, width.Distance() );
+            break;
+        }
+
         if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-        {
-            FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
-            ueColor = colorEntry;
-        }
+            primitive->GetForegroundBucket().SetPaletteEntry(entry);
+
+        iScene->AppendChild( primitive );
+
+        primitive->SetForegroundColor( ueColor );
+        primitive->Translate( localCoords.x, localCoords.y );
+        primitive->UpdateMatrix();
+
+        iScene->ClearSelection();
+        iScene->Select( primitive );
+
+        //mSelectionChanged.Broadcast(iScene);
+
+        iScene->Update( 0 ); // update invalidated objects
     }
 
-    mMouseDown.x = iPointInTexture.x;
-    mMouseDown.y = iPointInTexture.y;
-
-    switch( PrimitiveType )
-    {
-        case EOdysseyVectorPrimitiveType::Rectangle:
-            primitive = new FOdysseyVectorRectangle( FString("Rectangle"), 0.0f, 0.0f, width.Distance() );
-        break;
-
-        case EOdysseyVectorPrimitiveType::Line:
-            primitive = new FOdysseyVectorLine( FString("Line"), 0.0f, 0.0f, width.Distance() );
-        break;
-
-        default:
-            primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, width.Distance() );
-        break;
-    }
-
-    if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-        primitive->GetForegroundBucket().SetPaletteEntry(entry);
-
-    iScene->AppendChild( primitive );
-
-    primitive->SetForegroundColor( ueColor );
-    primitive->Translate( localCoords.x, localCoords.y );
-    primitive->UpdateMatrix();
-
-    iScene->ClearSelection();
-    iScene->Select( primitive );
-
-    //mSelectionChanged.Broadcast(iScene);
-
-    iScene->Update( 0 ); // update invalidated objects
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
-
-    return true;
-}
-
-void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
-        }
-    }
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 double
@@ -243,155 +169,133 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetLineRotationAngle( FOdysseyV
     return 0.0f;
 }
 
-void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                                                  , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorScene* iScene
                                                                   , const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetLastSelected() );
-
-    if( primitive )
+    // Left mouse button clicked
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        BLPoint bldif = primitive->GetInverseWorldMatrix().mapVector( iPointInTexture.x - mMouseDown.x
-                                                                    , iPointInTexture.y - mMouseDown.y );
-        ::ULIS::FVec2D size = ::ULIS::FVec2D( bldif.x, bldif.y );
+        FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetLastSelected() );
 
-        switch( PrimitiveType )
+        if( primitive )
         {
-            case EOdysseyVectorPrimitiveType::Ellipse:
+            BLPoint bldif = primitive->GetInverseWorldMatrix().mapVector( iPointInTexture.x - mMouseDown.x
+                                                                        , iPointInTexture.y - mMouseDown.y );
+            ::ULIS::FVec2D size = ::ULIS::FVec2D( bldif.x, bldif.y );
+
+            switch( PrimitiveType )
             {
-                FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>(primitive);
-
-                if( Uniform )
+                case EOdysseyVectorPrimitiveType::Ellipse:
                 {
-                    size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
-                    size.y = size.x;
-                }
+                    FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>(primitive);
 
-                ellipse->SetRadius( size.x, size.y );
+                    if( Uniform )
+                    {
+                        size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
+                        size.y = size.x;
+                    }
+
+                    ellipse->SetRadius( size.x, size.y );
+                }
+                break;
+
+                case EOdysseyVectorPrimitiveType::Rectangle:
+                {
+                    FOdysseyVectorRectangle* rectangle = static_cast<FOdysseyVectorRectangle*>(primitive);
+
+                    if( Uniform )
+                    {
+                        size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
+                        size.y = size.x;
+                    }
+
+                    rectangle->SetSize( size.x, size.y );
+                }
+                break;
+
+                case EOdysseyVectorPrimitiveType::Line:
+                {
+                    FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(primitive);
+
+                    if( Uniform )
+                    {
+                        BLMatrix2D& inverseMatrix = line->GetInverseWorldMatrix();
+                        BLPoint pt = inverseMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                        double distance = ::ULIS::FVec2D( pt.x, pt.y ).Distance();
+                        int rotation = GetLineRotationAngle( line, iPointInTexture ) / M_PI * 180.0f;
+
+                         // to force the tip of the line in the middle of the 45 degrees steps
+                        rotation += 22;
+                        // 45 deg by 45 deg
+                        double angle = ( ( rotation / 45 ) * 45 ) * M_PI / 180.0f;
+
+                        line->SetSize( cos( angle ) * distance, sin( angle ) * distance );
+                    }
+                    else
+                    {
+                        line->SetSize( size.x, size.y );
+                    }
+                }
+                break;
+
+                default:
+                break;
             }
-            break;
-
-            case EOdysseyVectorPrimitiveType::Rectangle:
-            {
-                FOdysseyVectorRectangle* rectangle = static_cast<FOdysseyVectorRectangle*>(primitive);
-
-                if( Uniform )
-                {
-                    size.x = ::ULIS::FVec2D( bldif.x, bldif.y ).Distance() * 0.7071f;
-                    size.y = size.x;
-                }
-
-                rectangle->SetSize( size.x, size.y );
-            }
-            break;
-
-            case EOdysseyVectorPrimitiveType::Line:
-            {
-                FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(primitive);
-
-                if( Uniform )
-                {
-                    BLMatrix2D& inverseMatrix = line->GetInverseWorldMatrix();
-                    BLPoint pt = inverseMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-                    double distance = ::ULIS::FVec2D( pt.x, pt.y ).Distance();
-                    int rotation = GetLineRotationAngle( line, iPointInTexture ) / M_PI * 180.0f;
-
-                     // to force the tip of the line in the middle of the 45 degrees steps
-                    rotation += 22;
-                    // 45 deg by 45 deg
-                    double angle = ( ( rotation / 45 ) * 45 ) * M_PI / 180.0f;
-
-                    line->SetSize( cos( angle ) * distance, sin( angle ) * distance );
-                }
-                else
-                {
-                    line->SetSize( size.x, size.y );
-                }
-            }
-            break;
-
-            default:
-            break;
         }
+
+        iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
     }
 
-    iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            return OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-        }
-    }
-
-    return false;
-}
-
-bool
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                                                , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVectorScene* iScene
                                                                 , const FOdysseyPoint& iPointInTexture
                                                                 , const FKey& iKey )
 {
-    FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetLastSelected() );
-
-    if( primitive )
+    // Left mouse button clicked
+    if( iKey == EKeys::LeftMouseButton )
     {
-        FOdysseyVectorPath* path = primitive->Convert();
+        FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetLastSelected() );
 
-        // Undo must be called before association with parent object
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorPrimitiveDrawingTool","Vector Primitive Drawing Tool"));
-        if( GUndo )
+        if( primitive )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path );
+            FOdysseyVectorPath* path = primitive->Convert();
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            // Undo must be called before association with parent object
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("VectorPrimitiveDrawingTool","Vector Primitive Drawing Tool"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path );
+
+                GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            }
+            GEditor->EndTransaction();
+
+            iScene->ClearSelection();
+            iScene->RemoveChild( primitive );
+
+            delete primitive;
+
+            iScene->AppendChild( path );
+            //path->InvalidateAllSegments();
+            path->UpdateMatrix();
+            iScene->Select( path );
         }
-        GEditor->EndTransaction();
 
-        iScene->ClearSelection();
-        iScene->RemoveChild( primitive );
-
-        delete primitive;
-
-        iScene->AppendChild( path );
-        //path->InvalidateAllSegments();
-        path->UpdateMatrix();
-        iScene->Select( path );
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidate objects
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidate objects
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
-
-    return false;
-}
-
-void
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::Commit()
-{
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+         | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
 }
 
 #undef LOCTEXT_NAMESPACE

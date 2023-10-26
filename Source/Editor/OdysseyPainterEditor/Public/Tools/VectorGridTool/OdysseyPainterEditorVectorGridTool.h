@@ -16,59 +16,53 @@ class FOdysseyPainterEditorVectorGridToolHUD;
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdysseyPainterEditorVectorSelectionTool
 {
-public:
-    GENERATED_BODY()
+    public:
+        GENERATED_BODY()
 
-public:
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorGridTool();
+    public:
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorGridTool();
 
-    virtual bool IsActivable() const override;
-    virtual void Load() override;
-    virtual void Unload() override;
-    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
-    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture,const FKey& iKey ) override;
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+        virtual bool IsActivable() const override;
 
-    //Constructor
-    UOdysseyPainterEditorVectorGridTool();
-    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
-    void PropertyChangedVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
-                              , const FName& iPropertyName );
+        UOdysseyPainterEditorVectorGridTool();
 
-    //OdysseyPainterEditorTool overrides
-    virtual void Commit() override;
+    protected:
+        //OdysseyPainterVectorBaseEditorTool overrides
+        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
+        //virtual bool OnKeyDownVector( FOdysseyVectorScene* iScene
+        //                            , const FKey& iKey ) override;
+        //virtual bool OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey ) override;
+        virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+                                         , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ) override;
+        virtual uint64 PropertyChangedVector( FOdysseyVectorScene* iScene
+                                            , const FName& iPropertyName ) override;
 
-private:
-    std::vector<FOdysseyVectorPoint*> mPointArray;
-    FOdysseyPainterEditorVectorGridToolHUD* mGridHUD;
-    std::vector<FGridNode *> mGridNodeArray;
-    bool mMultipleSelectionMode;
+    private:
+        std::vector<FOdysseyVectorPoint*> mPointArray;
+        FOdysseyPainterEditorVectorGridToolHUD* mGridHUD;
+        std::vector<FGridNode *> mGridNodeArray;
+        bool mMultipleSelectionMode;
 
-public:
-    UPROPERTY( EditAnywhere, Category = GridTool, meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
-    uint32 DivisionsX;
+    public:
+        UPROPERTY( EditAnywhere, Category = GridTool, meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
+        uint32 DivisionsX;
 
-    UPROPERTY( EditAnywhere, Category = GridTool, meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
-    uint32 DivisionsY;
+        UPROPERTY( EditAnywhere, Category = GridTool, meta = (ClampMin = "1", ClampMax = "32", UIMin = "1", UIMax = "32") )
+        uint32 DivisionsY;
 
-    UPROPERTY( EditAnywhere, Category = GridTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
-    double PickingRadius;
+        UPROPERTY( EditAnywhere, Category = GridTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+        double PickingRadius;
 
-    UPROPERTY( EditAnywhere, Category = GridTool )
-    bool World;
+        UPROPERTY( EditAnywhere, Category = GridTool )
+        bool World;
 };

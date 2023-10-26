@@ -22,71 +22,55 @@ class FOdysseyPainterEditorVectorSelectionToolHUD;
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public UOdysseyPainterEditorVectorBaseTool
 {
-public:
-    GENERATED_BODY()
+    public:
+        GENERATED_BODY()
 
-public:
-    static bool DoubleClicked();
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorSelectionTool();
+    public:
+        static bool DoubleClicked();
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorSelectionTool();
 
-    //Constructor
-    UOdysseyPainterEditorVectorSelectionTool();
+        //Constructor
+        UOdysseyPainterEditorVectorSelectionTool();
 
-    virtual bool IsActivable() const override;
-    virtual void Load() override;
-    virtual void Unload() override;
+        virtual bool IsActivable() const override;
+        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
-    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
-    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
- 
-    virtual void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    virtual void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    virtual bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                                  , FOdysseyVectorScene* iScene
-                                  , const FOdysseyPoint& iPointInTexture
-                                  , const FKey& iKey );
-    virtual void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                  , FOdysseyVectorScene* iScene
-                                  , const FOdysseyPoint& iPointInTexture );
-    virtual bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                , FOdysseyVectorScene* iScene
-                                , const FOdysseyPoint& iPointInTexture
-                                , const FKey& iKey );
-    virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                , FOdysseyVectorScene* iScene
-                                , const FKey& iKey );
-    virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
-                              , const FKey& iKey );
+        std::vector<::ULIS::FVec2D>& GetPointArray();
 
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+        EOdysseyVectorSelectionShape GetSelectionShape();
 
-    //OdysseyPainterEditorTool overrides
-    virtual void Commit() override;
+    protected:
+        //OdysseyPainterVectorBaseEditorTool overrides
+        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
+        //virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+        //                            , const FKey& iKey ) override;
+        //virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey ) override;
+        //virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+        //                                , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ) override;
+        //virtual uint64 PropertyChangedVector( FOdysseyVectorScene* iScene
+        //                                  , const FName& iPropertyName ) override;
 
-    void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-
-    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
-
-    std::vector<::ULIS::FVec2D>& GetPointArray();
-
-    EOdysseyVectorSelectionShape GetSelectionShape();
-
-    std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
+        void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+        void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
 protected:
-    void OnMouseUpVectorObjectMode( FOdysseyVectorEngine* iEngine
-                                  , FOdysseyVectorScene* iScene
+    void OnMouseUpVectorObjectMode( FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey );
-    void OnMouseUpVectorVertexMode( FOdysseyVectorEngine* iEngine
-                                  , FOdysseyVectorScene* iScene
+    void OnMouseUpVectorVertexMode( FOdysseyVectorScene* iScene
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey );
-    ::ULIS::FRectD GenerateMask( FOdysseyVectorEngine* iEngine );
+    ::ULIS::FRectD GenerateMask();
 
     void SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup );
     void SelectVertexFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup );

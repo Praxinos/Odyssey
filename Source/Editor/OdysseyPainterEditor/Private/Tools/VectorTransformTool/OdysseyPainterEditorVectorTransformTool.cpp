@@ -35,63 +35,26 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
-void
-UOdysseyPainterEditorVectorTransformTool::Load()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            LoadVector( vectorEngine, vectorScene );
-        }
-    }
-}
-
-void
-UOdysseyPainterEditorVectorTransformTool::Unload()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            UnloadVector( vectorEngine, vectorScene );
-        }
-    }
-}
-
 bool
 UOdysseyPainterEditorVectorTransformTool::IsActivable() const
 {
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
-void
-UOdysseyPainterEditorVectorTransformTool::UnloadVector( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorTransformTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+
     iEngine->RemoveHUD( mTransformHUD );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-void
-UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorScene* iScene )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
@@ -112,7 +75,7 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorEngine* iEng
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 TSharedRef<SWidget>
@@ -121,8 +84,9 @@ UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
     return SNew(SOdysseyPainterEditorVectorTransformToolTopTab, this);
 }
 
-bool
-UOdysseyPainterEditorVectorTransformTool::OnKeyDown( const FKey& iKey )
+uint64
+UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+                                                         , const FKey& iKey )
 {
     UniformAtKeyDown = Uniform;
 
@@ -131,49 +95,30 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyDown( const FKey& iKey )
         Uniform = !Uniform; // flip the value
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDown( iKey );
+    return UOdysseyPainterEditorVectorSelectionTool::OnKeyDownVector( iScene, iKey );
 }
 
-bool
-UOdysseyPainterEditorVectorTransformTool::OnKeyUp( const FKey& iKey )
+uint64
+UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+                                                       , const FKey& iKey )
 {
     Uniform = UniformAtKeyDown;
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUp( iKey );
+    return UOdysseyPainterEditorVectorSelectionTool::OnKeyUpVector( iScene, iKey );
 }
 
-void
-UOdysseyPainterEditorVectorTransformTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
-        }
-    }
-}
-
-void
-UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                                                            , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     ::ULIS::FRectI imageRegion;
 
     if( mDragging == false )
     {
-        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-        uint32 width = vectorEngine->GetPreferredWidth();
-        uint32 height = vectorEngine->GetPreferredHeight();
+        uint32 width = iEngine->GetPreferredWidth();
+        uint32 height = iEngine->GetPreferredHeight();
 
         imageRegion.x = 0;
         imageRegion.y = 0;
@@ -190,68 +135,53 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorEngi
     if( redrawRegion.Area() )
     {
         iEngine->GetInvalidTileMap().Invalidate(redrawRegion);
-        iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-    }
-}
 
-bool
-UOdysseyPainterEditorVectorTransformTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            return OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-        }
+        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
 
-    return false;
+    return 0;
 }
 
-bool
-UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                                                           , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorScene* iScene
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
-    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-    uint32 hudFlags = mTransformHUD->GetFlags();
-
-    mDragging = false;
-    mScreenMouseAtDown = FSlateApplication::Get().GetCursorPos();
-
-    mPickedPivot = hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ZAXIS ? &mTransformHUD->GetGizmo() : nullptr;
-
-    if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
+    // Left mouse button clicked
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        mSelectedPoints.clear();
-        mTransformHUD->GetSelectedVertices( iScene, mSelectedPoints );
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+        uint32 hudFlags = mTransformHUD->GetFlags();
 
-        // remember for undos. we don't register the undo in the mouse down event yet because
-        // it could conflict with the undo created by th emouse up event in the case of a no-drag
-        mUndo = new FOdysseyVectorUndoPointPosition( iScene, mSelectedPoints );
-    }
+        mDragging = false;
+        mScreenMouseAtDown = FSlateApplication::Get().GetCursorPos();
 
-    if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
-    {
-        // remember for undos. we don't register the undo in the mouse down event yet because
-        // it could conflict with the undo created by th emouse up event in the case of a no-drag
-        mUndo = new FOdysseyVectorUndoObjectTransform( iScene, GetFocusedObjectList( iScene ) );
-    }
+        mPickedPivot = hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ZAXIS ? &mTransformHUD->GetGizmo() : nullptr;
 
-    if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
-    {
-        mTransformHUD->ShowSelectionBox( false );
+        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
+        {
+            mSelectedPoints.clear();
+            mTransformHUD->GetSelectedVertices( iScene, mSelectedPoints );
+
+            // remember for undos. we don't register the undo in the mouse down event yet because
+            // it could conflict with the undo created by th emouse up event in the case of a no-drag
+            mUndo = new FOdysseyVectorUndoPointPosition( iScene, mSelectedPoints );
+        }
+
+        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
+        {
+            // remember for undos. we don't register the undo in the mouse down event yet because
+            // it could conflict with the undo created by th emouse up event in the case of a no-drag
+            mUndo = new FOdysseyVectorUndoObjectTransform( iScene, GetFocusedObjectList( iScene ) );
+        }
+
+        if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
+        {
+            mTransformHUD->ShowSelectionBox( false );
+        }
     }
  
-    return true;
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 static void
@@ -714,197 +644,138 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
     iEngine->ResetHUD();
 }
 
-void
-UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                                           , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorScene* iScene
                                                            , const FOdysseyPoint& iPointInTexture )
 {
-    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-    uint32 hudFlags = mTransformHUD->GetFlags();
-    FVector2D currCursorPos = FSlateApplication::Get().GetCursorPos();
-    FVector2D deltaPos = currCursorPos - mScreenMouseAtDown;
-
-    // What do we consider dragging ? We have to move at least a few pixels, otherwise we wouldn't
-    // be able to differentiate an actual dragging from a simple down-up click, especially
-    // when using the stylus, which is too sensitive to allow a Down and a UP at the very same
-    // position, unlike the mouse. And we use the simple down-up click as a selection tool.
-    // See OnMouseUpVector() for details.
-    if( ( mDragging == true ) // don't bother checking if we are already dragging
-     || ( ::ULIS::FVec2D( deltaPos.X, deltaPos.Y ).Distance() > 3.0f ) )
+    // Left mouse button clicked
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        mDragging = true;
+        FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+        uint32 hudFlags = mTransformHUD->GetFlags();
+        FVector2D currCursorPos = FSlateApplication::Get().GetCursorPos();
+        FVector2D deltaPos = currCursorPos - mScreenMouseAtDown;
 
-        if( selectionBox.rect.Area() )
+        // What do we consider dragging ? We have to move at least a few pixels, otherwise we wouldn't
+        // be able to differentiate an actual dragging from a simple down-up click, especially
+        // when using the stylus, which is too sensitive to allow a Down and a UP at the very same
+        // position, unlike the mouse. And we use the simple down-up click as a selection tool.
+        // See OnMouseUpVector() for details.
+        if( ( mDragging == true ) // don't bother checking if we are already dragging
+         || ( ::ULIS::FVec2D( deltaPos.X, deltaPos.Y ).Distance() > 3.0f ) )
         {
-            if ( mPickedPivot )
-            {
-                BLMatrix2D& inverseWorldMatrix = selectionBox.inverseWorldMatrix;
-                BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+            mDragging = true;
 
-                mTransformHUD->SetGizmo( localCoords.x, localCoords.y );
-            }
-            else
+            if( selectionBox.rect.Area() )
             {
-                if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_XAXIS     )
-                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS     )
-                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
+                if ( mPickedPivot )
                 {
-                    TranslateObjectSelection( iEngine, iScene, iPointInTexture );
+                    BLMatrix2D& inverseWorldMatrix = selectionBox.inverseWorldMatrix;
+                    BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+
+                    mTransformHUD->SetGizmo( localCoords.x, localCoords.y );
                 }
                 else
-                if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
                 {
-                    RotateObjectSelection( iEngine, iScene, iPointInTexture );
-                }
-                else
-                if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT     )
-                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPRIGHT    )
-                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMRIGHT )
-                 || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMLEFT  ) )
-                {
-                    ScaleObjectSelection( iEngine, iScene, iPointInTexture );
+                    if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_XAXIS     )
+                     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS     )
+                     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
+                    {
+                        TranslateObjectSelection( iEngine, iScene, iPointInTexture );
+                    }
+                    else
+                    if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
+                    {
+                        RotateObjectSelection( iEngine, iScene, iPointInTexture );
+                    }
+                    else
+                    if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT     )
+                     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPRIGHT    )
+                     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMRIGHT )
+                     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMLEFT  ) )
+                    {
+                        ScaleObjectSelection( iEngine, iScene, iPointInTexture );
+                    }
                 }
             }
-        }
 
-        iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                       | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
-    }
-}
-
-void
-UOdysseyPainterEditorVectorTransformTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+            return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                 | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
         }
     }
+
+    return 0;
 }
 
-bool
-UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                                         , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorScene* iScene
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey)
 {
-    mTransformHUD->ShowSelectionBox( true );
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    if( mDragging == false )
+    // Left mouse button clicked
+    if( iKey == EKeys::LeftMouseButton )
     {
-        // use the pick tool if the Down and Up events were at the same position (no dragging )
-        GetEditor()->GetVectorSelectionTool()->OnMouseDown( iPointInTexture, iKey );
-        GetEditor()->GetVectorSelectionTool()->OnMouseUp( iPointInTexture, iKey );
+        mTransformHUD->ShowSelectionBox( true );
 
-        mTransformHUD->CenterGizmo();
+        if( mDragging == false )
+        {
+            // use the pick tool if the Down and Up events were at the same position (no dragging )
+            GetEditor()->GetVectorSelectionTool()->OnMouseDown( iPointInTexture, iKey );
+            GetEditor()->GetVectorSelectionTool()->OnMouseUp( iPointInTexture, iKey );
 
-        // cancel the undo object that we created in the down event.
-        if( mUndo )
-        {
-            delete mUndo;
-        }
-    }
-    else
-    {
-        if( mUndo )
-        {
-            // needed for valid GUndo pointer
-            GEditor->BeginTransaction(LOCTEXT("VectorTransformTool","Vector Transform Tool"));
-            if( GUndo )
+            mTransformHUD->CenterGizmo();
+
+            // cancel the undo object that we created in the down event.
+            if( mUndo )
             {
-                GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
+                delete mUndo;
             }
-            GEditor->EndTransaction();
         }
-
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-        // quick fix to place the gizmo at the right place
-        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-        ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo(); 
-        BLPoint worldGizmo = selectionBox.worldMatrix.mapPoint( gizmo.x, gizmo.y );
-        // endof quickfix
-
-        iEngine->ResetHUD();
-
-        // quick fix to place the gizmo at the right place
-        BLPoint localGizmo = selectionBox.inverseWorldMatrix.mapPoint( worldGizmo );
-        mTransformHUD->SetGizmo( localGizmo.x, localGizmo.y );
-        // endof quickfix
-
-        iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-    }
-
-    mUndo = nullptr;
-    mDragging = false;
-    mPickedPivot = nullptr;
-
-    return true;
-}
-
-bool
-UOdysseyPainterEditorVectorTransformTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        else
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            if( mUndo )
+            {
+                // needed for valid GUndo pointer
+                GEditor->BeginTransaction(LOCTEXT("VectorTransformTool","Vector Transform Tool"));
+                if( GUndo )
+                {
+                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
+                }
+                GEditor->EndTransaction();
+            }
 
-            return OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+            iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+            // quick fix to place the gizmo at the right place
+            FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+            ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo(); 
+            BLPoint worldGizmo = selectionBox.worldMatrix.mapPoint( gizmo.x, gizmo.y );
+            // endof quickfix
+
+            iEngine->ResetHUD();
+
+            // quick fix to place the gizmo at the right place
+            BLPoint localGizmo = selectionBox.inverseWorldMatrix.mapPoint( worldGizmo );
+            mTransformHUD->SetGizmo( localGizmo.x, localGizmo.y );
+            // endof quickfix
         }
+
+        mUndo = nullptr;
+        mDragging = false;
+        mPickedPivot = nullptr;
     }
 
-    return false;
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-void
-UOdysseyPainterEditorVectorTransformTool::Commit()
-{
-
-}
-
-void
-UOdysseyPainterEditorVectorTransformTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
-{
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-    
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName() );
-        }
-    }
-}
-
-void
-UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorEngine* iEngine
-                                                               , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorScene* iScene
                                                                , const FName& iPropertyName )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     //mTransformHUD->MakeTransform( iScene, DivisionsX, DivisionsY );
 
     if( iPropertyName == "World" )
@@ -913,7 +784,8 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorE
         mTransformHUD->CenterGizmo();
     }
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName )
+         | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -33,63 +33,49 @@ typedef struct _FPushedPoint
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public UOdysseyPainterEditorVectorBaseTool
 {
-public:
-    GENERATED_BODY()
+    public:
+        GENERATED_BODY()
 
-public:
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorPathPushTool();
+    public:
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorPathPushTool();
 
-    //Constructor
-    UOdysseyPainterEditorVectorPathPushTool();
+        //Constructor
+        UOdysseyPainterEditorVectorPathPushTool();
 
-    virtual bool IsActivable() const override;
-    virtual void Load() override;
-    virtual void Unload() override;
+        virtual bool IsActivable() const override;
 
-    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
-    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
-    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    protected:
+        //OdysseyPainterVectorBaseEditorTool overrides
+        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
+        //virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+        //                              , const FKey& iKey ) override;
+        //virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey ) override;
+        virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+                                         , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ) override;
+        //virtual void PropertyChangedVector( FOdysseyVectorScene* iScene
+        //                                  , const FName& iPropertyName ) override;
 
-    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                           , FOdysseyVectorScene* iScene
-                           , const FOdysseyPoint& iPointInTexture );
-    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
+    private:
+        FPushedPoint* GetPushedPoint( FOdysseyVectorPoint* iPoint );
+        std::vector<FPushedPoint> mPushedPointArray;
+        std::vector<FOdysseyVectorSegment*> mSegmentArray;
+        //FOdysseyVectorHUDPicking mPickingHUD;
+        FOdysseyPainterEditorVectorPathPushToolHUD *mPathPushHUD;
 
-    //OdysseyPainterEditorTool overrides
-    virtual void Commit() override;
+    public:
+        UPROPERTY( EditAnywhere, Category = PathPushTool, meta = (ClampMin = "0.0", UIMin = "0.0"))
+        double Radius;
 
-protected:
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-    void PropertyChanged( const FName& iPropertyName );
-
-private:
-    FPushedPoint* GetPushedPoint( FOdysseyVectorPoint* iPoint );
-    std::vector<FPushedPoint> mPushedPointArray;
-    std::vector<FOdysseyVectorSegment*> mSegmentArray;
-    //FOdysseyVectorHUDPicking mPickingHUD;
-    FOdysseyPainterEditorVectorPathPushToolHUD *mPathPushHUD;
-
-public:
-    UPROPERTY( EditAnywhere, Category = PathPushTool, meta = (ClampMin = "0.0", UIMin = "0.0"))
-    double Radius;
-
-    UPROPERTY( EditAnywhere, Category = PathPushTool )
-    bool PreserveSmoothness;
-
-    UPROPERTY( EditAnywhere, Category = PathPushTool )
-    bool RestrictToSelection;
+        UPROPERTY( EditAnywhere, Category = PathPushTool )
+        bool PreserveSmoothness;
 };

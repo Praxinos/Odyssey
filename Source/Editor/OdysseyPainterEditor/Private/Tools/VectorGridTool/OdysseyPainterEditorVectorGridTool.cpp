@@ -36,55 +36,21 @@ UOdysseyPainterEditorVectorGridTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
-void
-UOdysseyPainterEditorVectorGridTool::Load()
+uint64
+UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            LoadVector( vectorEngine, vectorScene );
-        }
-    }
-}
-
-void
-UOdysseyPainterEditorVectorGridTool::Unload()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            UnloadVector( vectorEngine, vectorScene );
-        }
-    }
-}
-
-void
-UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
-{
     iEngine->RemoveHUD( mGridHUD );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-void
-UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorScene* iScene )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+
     iEngine->ClearHUD();
     iEngine->AddHUD( mGridHUD );
 
@@ -95,206 +61,136 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorEngine* iEngine, 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorGridTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            return OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-        }
-    }
-
-    return false;
-}
-
-bool
-UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorScene* iScene
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
 {
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorGridTool","Vector Grid Tool"));
-    if( GUndo )
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
-
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-
-    // multiple selection mode
-    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
-    {
-        mMultipleSelectionMode = true;
-
-        mGridHUD->StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
-    }
-    else
-    {
-        bool picked;
-
-        mGridHUD->GetSelection( mGridNodeArray );
-
-        picked = mGridHUD->PickNodes( iPointInTexture.x
-                                    , iPointInTexture.y
-                                    , PickingRadius
-                                    , FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
-
-        if( picked == true )
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorGridTool","Vector Grid Tool"));
+        if( GUndo )
         {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+
+        // multiple selection mode
+        if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+        {
+            mMultipleSelectionMode = true;
+
+            mGridHUD->StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+        }
+        else
+        {
+            bool picked;
+
             mGridHUD->GetSelection( mGridNodeArray );
+
+            picked = mGridHUD->PickNodes( iPointInTexture.x
+                                        , iPointInTexture.y
+                                        , PickingRadius
+                                        , FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
+
+            if( picked == true )
+            {
+                mGridHUD->GetSelection( mGridNodeArray );
+            }
         }
     }
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
-
-    return true;
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-void
-UOdysseyPainterEditorVectorGridTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+uint64
+UOdysseyPainterEditorVectorGridTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+                                                       , const FOdysseyPoint& iPointInTexture )
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    // TODO: highlight grid handles ?
 
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
-        }
-    }
+    return 0;
 }
 
-void
-UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorScene* iScene
                                                       , const FOdysseyPoint& iPointInTexture )
 {
-    if( mMultipleSelectionMode == true )
-    {
-        mGridHUD->DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
-    }
-    else
-    {
-        FSelectionBox& selectionBox = mGridHUD->GetSelectionBox();
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-        if( selectionBox.rect.Area() )
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    {
+        if( mMultipleSelectionMode == true )
         {
-            BLPoint spaceDif = selectionBox.inverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
-                                                                        , iPointInTexture.deltaPosition.Y );
+            mGridHUD->DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
+        }
+        else
+        {
+            FSelectionBox& selectionBox = mGridHUD->GetSelectionBox();
 
-            for( int i = 0; i < mGridNodeArray.size(); i++ )
+            if( selectionBox.rect.Area() )
             {
-                mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
+                BLPoint spaceDif = selectionBox.inverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
+                                                                            , iPointInTexture.deltaPosition.Y );
+
+                for( int i = 0; i < mGridNodeArray.size(); i++ )
+                {
+                    mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
+                }
+
+                mGridHUD->Deform();
+
+                // update invalidated objects
+                iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
             }
-
-            mGridHUD->Deform();
-
-            // update invalidated objects
-            iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
         }
     }
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-bool
-UOdysseyPainterEditorVectorGridTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
-        {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            return OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-        }
-    }
-
-    return false;
-}
-
-bool
-UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                                    , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorScene* iScene
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
-    if( mMultipleSelectionMode == true )
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+
+    if( iKey == EKeys::LeftMouseButton )
     {
-        mGridHUD->EndSelectionRectangle( FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
-    }
-
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-
-    mMultipleSelectionMode = false;
-
-    return true;
-}
-
-void
-UOdysseyPainterEditorVectorGridTool::Commit()
-{
-
-}
-
-void
-UOdysseyPainterEditorVectorGridTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
-{
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
+        if( mMultipleSelectionMode == true )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-            PropertyChangedVector( vectorEngine, vectorScene, PropertyChangedEvent.GetPropertyName());
+            mGridHUD->EndSelectionRectangle( FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
         }
+
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+        mMultipleSelectionMode = false;
     }
+
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-void
-UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorScene* iScene
                                                           , const FName& iPropertyName )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+
     iEngine->ResetHUD();
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName )
+         | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 #undef LOCTEXT_NAMESPACE

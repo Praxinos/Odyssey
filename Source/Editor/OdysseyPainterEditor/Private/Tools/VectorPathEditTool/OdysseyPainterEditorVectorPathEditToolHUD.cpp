@@ -30,7 +30,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorScene* iScene
                                                 , uint64 iFlags )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& focusedObjectList = mPathEditTool->GetFocusedObjectList( iScene );
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -48,11 +48,11 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
     iBLContext->setStrokeStyle( hcColor );
     iBLContext->strokeCircle( mX, mY, mPathEditTool->PickingRadius );
 
-    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
     {
-        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(focusedObject);
 
             FOdysseyVectorHUD::DrawPath( iBLContext
                                        , path
@@ -63,9 +63,9 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                                        , VIEW_VERTEX | VIEW_SEGMENT | vertexHandleFlag | segmentHandleFlag );
         }
 
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
 
             FOdysseyVectorHUD::DrawPaintGroup( iBLContext
                                              , paintGroup

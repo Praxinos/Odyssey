@@ -9,34 +9,71 @@
 
 #include "OdysseyPainterEditorVectorBaseTool.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdysseyPainterEditorTool
 {
-public:
-    GENERATED_BODY()
+    public:
+        GENERATED_BODY()
 
-public:
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorBaseTool();
+    public:
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorBaseTool();
 
-    //Constructor
-    UOdysseyPainterEditorVectorBaseTool();
- 
-protected:
-    void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void PopupDefaultContextMenu();
+        //Constructor
+        UOdysseyPainterEditorVectorBaseTool();
 
-public:
-    virtual bool OnKeyDown( const FKey& iKey ) override;
-    virtual bool OnKeyUp( const FKey& iKey ) override;
-    
-    static bool DoubleClicked();
-    virtual bool OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                , FOdysseyVectorScene* iScene
-                                , const FKey& iKey );
-    virtual bool OnKeyUpVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
-                              , const FKey& iKey );
+        static bool DoubleClicked();
 
+        virtual void Load();
+        virtual void Unload();
+        virtual bool OnKeyDown( const FKey& iKey ) override;
+        virtual bool OnKeyUp( const FKey& iKey ) override;
+        virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+        virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture );
+        virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture );
+        virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+        virtual std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
+        virtual void Commit();
+        virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+
+    protected:
+        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ){ return 0; };
+        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ){ return 0; };
+        virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+                                        , const FKey& iKey );
+        virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene
+                                      , const FKey& iKey );
+        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey ){ return false; };
+        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ){ return 0; };
+        virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ){ return 0; };
+        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ){ return false; };
+        virtual uint64 PropertyChangedVector( FOdysseyVectorScene* iScene
+                                            , const FName& iPropertyName );
+
+        void PopupContextMenu();
+        TSharedPtr<SWidget> CreateContextMenu();
+
+    private:
+        void OnKeyDownCommon( FOdysseyVectorScene* iScene, const FKey& iKey );
+        void OnKeyUpCommon( FOdysseyVectorScene* iScene, const FKey& iKey );
+        void PropertyChangedCommon(  FOdysseyVectorScene* iScene, const FName& iPropertyName );
+
+    protected:
+        void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+        void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+        virtual void ExtendContextMenu( FMenuBuilder& menu );
+
+    private:
+        void ExtendContextMenuObject( FMenuBuilder& menu );
+        void ExtendContextMenuVertex( FMenuBuilder& menu );
+
+    public:
+        UPROPERTY( EditAnywhere, Category = BaseTool )
+        bool RestrictToSelection;
 };

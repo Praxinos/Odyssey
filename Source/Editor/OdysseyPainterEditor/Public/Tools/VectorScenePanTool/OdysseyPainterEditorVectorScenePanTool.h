@@ -25,32 +25,26 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorScenePanTool : public 
         UOdysseyPainterEditorVectorScenePanTool();
 
         virtual bool IsActivable() const override;
-        virtual void Load() override;
-        virtual void Unload() override;
 
-        virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-        virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
-        virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-
-        void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-        void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-        bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
-                              , const FOdysseyPoint& iPointInTexture
-                              , const FKey& iKey );
-        void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                               , FOdysseyVectorScene* iScene
-                               , const FOdysseyPoint& iPointInTexture );
-        void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                              , FOdysseyVectorScene* iScene
-                              , const FOdysseyPoint& iPointInTexture );
-        bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                            , FOdysseyVectorScene* iScene
-                            , const FOdysseyPoint& iPointInTexture
-                            , const FKey& iKey );
-
-        //OdysseyPainterEditorTool overrides
-        virtual void Commit() override;
+    protected:
+        //OdysseyPainterVectorBaseEditorTool overrides
+        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
+        //virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+        //                              , const FKey& iKey ) override;
+        //virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey ) override;
+        //virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+        //                                 , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ) override;
+        //virtual void PropertyChangedVector( FOdysseyVectorScene* iScene
+        //                                  , const FName& iPropertyName ) override;
 
     protected:
         void Pan( FOdysseyVectorEngine* iEngine
