@@ -6,13 +6,16 @@ FOdysseyPainterEditorVectorPathEditToolHUD::~FOdysseyPainterEditorVectorPathEdit
 }
 
 FOdysseyPainterEditorVectorPathEditToolHUD::FOdysseyPainterEditorVectorPathEditToolHUD( UOdysseyPainterEditorVectorPathEditTool* iPathEditTool )
-    : mPathEditTool( iPathEditTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPathEditTool )
+    , mPathEditTool( iPathEditTool )
 {
 }
 
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void

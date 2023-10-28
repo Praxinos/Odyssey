@@ -48,6 +48,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathCutTool : public U
         //                                  , const FName& iPropertyName ) override;
 
         protected:
+            void CutObjectRecursive( FOdysseyVectorObject* iObject
+                                   , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                                   , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                   , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
             void CutPath( FOdysseyVectorPath* iPath
                         , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                         , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray

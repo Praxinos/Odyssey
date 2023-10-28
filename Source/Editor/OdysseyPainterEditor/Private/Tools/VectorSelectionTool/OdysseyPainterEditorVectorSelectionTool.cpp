@@ -3,7 +3,6 @@
 
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
-#include "Tools/VectorSelectionTool/SOdysseyPainterEditorVectorSelectionToolTopTab.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
@@ -62,12 +61,6 @@ UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorScene* iSc
     iEngine->RemoveHUD( mPickHUD );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-}
-
-TSharedRef<SWidget>
-UOdysseyPainterEditorVectorSelectionTool::CreateTopTabWidget()
-{
-    return SNew(SOdysseyPainterEditorVectorSelectionToolTopTab, this);
 }
 
 uint64

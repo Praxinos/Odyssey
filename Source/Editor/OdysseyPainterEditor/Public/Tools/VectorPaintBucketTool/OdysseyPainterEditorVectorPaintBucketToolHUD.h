@@ -2,10 +2,10 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "HUD/OdysseyVectorHUD.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : public FOdysseyVectorHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:
         static const uint32 HANDLE_RADIUS      = 3;

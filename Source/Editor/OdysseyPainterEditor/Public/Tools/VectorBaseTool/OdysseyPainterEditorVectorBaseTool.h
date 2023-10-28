@@ -15,6 +15,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
     public:
         GENERATED_BODY()
 
+    protected:
+        // reserved flags returned by callbaks, the eight higher bits
+        //static const uint64 NOMENU = ( FOdysseyVectorEngine::SIGNAL_USER0_RESERVED );
+
     public:
         // Destructor
         virtual ~UOdysseyPainterEditorVectorBaseTool();
@@ -23,6 +27,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         UOdysseyPainterEditorVectorBaseTool();
 
         static bool DoubleClicked();
+
+        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
         virtual void Load();
         virtual void Unload();
@@ -33,8 +39,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture );
         virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
         virtual std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
+        virtual std::list<FOdysseyVectorObject*>& GetSelectedObjectList( FOdysseyVectorScene* iScene );
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+        virtual void ExtendContextMenu( FMenuBuilder& menu );
 
     protected:
         virtual uint64 LoadVector( FOdysseyVectorScene* iScene ){ return 0; };
@@ -67,13 +75,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
     protected:
         void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
         void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-        virtual void ExtendContextMenu( FMenuBuilder& menu );
 
     private:
         void ExtendContextMenuObject( FMenuBuilder& menu );
         void ExtendContextMenuVertex( FMenuBuilder& menu );
 
+    protected:
+        bool mHasContextMenu;
+
     public:
-        UPROPERTY( EditAnywhere, Category = BaseTool )
-        bool RestrictToSelection;
+        UPROPERTY( EditAnywhere, Category = Behavior )
+        bool RestrictToSelectedObjects;
 };

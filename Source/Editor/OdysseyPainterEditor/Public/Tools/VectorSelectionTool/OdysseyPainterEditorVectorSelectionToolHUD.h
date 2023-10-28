@@ -2,28 +2,19 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "HUD/OdysseyVectorHUD.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 
-typedef struct _FSelectionBox
-{
-    ::ULIS::FRectD rect;
-    BLMatrix2D worldMatrix;
-    BLMatrix2D inverseWorldMatrix;
-} FSelectionBox;
-
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : public FOdysseyVectorHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:
         virtual ~FOdysseyPainterEditorVectorSelectionToolHUD();
         FOdysseyPainterEditorVectorSelectionToolHUD(  UOdysseyPainterEditorVectorSelectionTool* iSelectionTool );
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags ) override;
-        virtual void Reset( FOdysseyVectorScene* iScene ) override;
         virtual void Load( FOdysseyVectorScene* iScene ) override;
         virtual void Unload( FOdysseyVectorScene* iScene ) override;
         void ShowSelectionBox( bool iShowSelectionBox );
-        FSelectionBox& GetSelectionBox();
         void Init( uint32 iWidth, uint32 iHeight );
         void GetSelectedVertices( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorPoint*>& oPointArray );
 
@@ -61,15 +52,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
         void DrawVertexSelection( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags );
         void DrawObjectSelection( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags );
         void DrawSelectionSpace( BLContext* iBLContext, FOdysseyVectorScene* iScene,uint64 iFlags);
-        void DrawSelectionBox( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags );
-
-        void UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene, bool iForceWorld );
-        void UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene, bool iForceWorld );
-        void UpdateSelectionBox( FOdysseyVectorScene* iScene, bool iForceWorld );
-
-
-        bool PathGetBBoxFromSelectedVertices( FOdysseyVectorPath* iPath, ::ULIS::FRectD& oBBox );
-        bool GroupPaintGetBBoxFromSelectedVertices( FOdysseyVectorGroupPaint* iPaintGroup, ::ULIS::FRectD& oBBox );
 
     protected:
         UOdysseyPainterEditorVectorSelectionTool* mSelectionTool;
@@ -77,7 +59,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
         //bool mSelecting;
         BLContext mBLSelectionContext;
         BLImage mBLSelectionMask;
-        FSelectionBox mSelectionBox;
+
         bool mShowSelectionBox;
         bool mShowSelectionIfEmpty;
 };

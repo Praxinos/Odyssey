@@ -90,32 +90,48 @@ public:
     virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
 
+    void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
+    eVectorEditionMode GetVectorEditionMode();
+
     // generic reusable vector methods. 
-    static void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void DeleteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void DeletePointSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void SelectAll( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void BringForward( FOdysseyVectorScene* iScene );
+    static void SendBackward( FOdysseyVectorScene* iScene );
+    static void Ungroup( FOdysseyVectorScene* iScene );
+    static void ApplyTransformations( FOdysseyVectorScene* iScene
+                                    , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+    static void GroupPaint( FOdysseyVectorScene* iScene );
+    static void Group( FOdysseyVectorScene* iScene );
+    static void SelectAll( FOdysseyVectorScene* iScene );
+    static void ResetView( FOdysseyVectorScene* iScene );
+    static void UnalignPointSelection( FOdysseyVectorScene* iScene
+                                     , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+    static void AlignPointSelection( FOdysseyVectorScene* iScene
+                                   , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+    static void DeletePointSelectionRecursive( FOdysseyVectorObject* iVectorObject
+                                             , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                                             , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                                             , std::vector<FOdysseyVectorPath*>& oRemovedPathArray
+                                             , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
+    static void DeletePointSelection( FOdysseyVectorScene* iScene
+                                    , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+    static void DeleteObjectSelection( FOdysseyVectorScene* iScene );
+    static void FlipHorizontal( FOdysseyVectorScene* iScene
+                              , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+    static void ClearColoring( FOdysseyVectorScene* iScene
+                             , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+    static void FlipVertical( FOdysseyVectorScene* iScene
+                            , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
     static void DeleteBucket( FOdysseyVectorBucket* iBucket );
     static void PropagateBucket( FOdysseyVectorBucket* iBucket );
     static void UnpropagateBucket( FOdysseyVectorBucket* iBucket );
-    static void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void CopyObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void PasteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void UnalignPointSelection( FOdysseyVectorScene* iScene );
-    static void AlignPointSelection( FOdysseyVectorScene* iScene );
-    static void GetVertexSelection( FOdysseyVectorScene* iScene
-                                  , std::vector<FOdysseyVectorPoint*>& iSelectedVertexArray );
-    static void ClearColoring( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void ApplyTransformations( FOdysseyVectorScene* iScene );
-    void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
-    eVectorEditionMode GetVectorEditionMode();
+    static void CopyObjectSelection( FOdysseyVectorScene* iScene );
+    static void PasteObjectSelection( FOdysseyVectorScene* iScene );
+    static void StitchVertices( FOdysseyVectorScene* iScene
+                              , FOdysseyVectorVertex* iVertexA
+                              , FOdysseyVectorVertex* iVertexB );
+
+    // Populates the Edit Menu everytime it is displayed
+    void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );
 
 public:
     // Setters

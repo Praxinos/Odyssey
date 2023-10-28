@@ -6,7 +6,8 @@ FOdysseyPainterEditorVectorPathPushToolHUD::~FOdysseyPainterEditorVectorPathPush
 }
 
 FOdysseyPainterEditorVectorPathPushToolHUD::FOdysseyPainterEditorVectorPathPushToolHUD( UOdysseyPainterEditorVectorPathPushTool* iPathPushTool )
-    : mPathPushTool( iPathPushTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPathPushTool )
+    , mPathPushTool( iPathPushTool )
     , mX( 0.0f )
     , mY( 0.0f )
 {
@@ -16,6 +17,8 @@ FOdysseyPainterEditorVectorPathPushToolHUD::FOdysseyPainterEditorVectorPathPushT
 void
 FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
@@ -31,13 +34,17 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Unload( FOdysseyVectorScene* iScene 
 void
 FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorScene* iScene
-                                                , uint64 iFlags )
+                                                , uint64 iDrawingFlags )
 {
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
+    // Draw scene in object or vertex mode
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     iBLContext->save();
+/*
     iBLContext->resetMatrix();
 
     if( mPathPushTool->RestrictToSelection )
@@ -53,7 +60,7 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
     {
         FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, iScene );
     }
-
+*/
     iBLContext->setStrokeStyle( hcColor );
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->strokeCircle( mX, mY, mPathPushTool->Radius );

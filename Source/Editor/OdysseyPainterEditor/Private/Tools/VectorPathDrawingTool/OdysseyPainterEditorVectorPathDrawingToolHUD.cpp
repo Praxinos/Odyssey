@@ -6,7 +6,8 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::~FOdysseyPainterEditorVectorPathD
 }
 
 FOdysseyPainterEditorVectorPathDrawingToolHUD::FOdysseyPainterEditorVectorPathDrawingToolHUD( UOdysseyPainterEditorVectorPathDrawingTool* iPathDrawingTool )
-    : mPathDrawingTool( iPathDrawingTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPathDrawingTool )
+    , mPathDrawingTool( iPathDrawingTool )
 {
 }
 
@@ -14,6 +15,9 @@ void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     MakePointQuadTree( iScene, false );
+
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
@@ -35,7 +39,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::GetStitchedPointArray()
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
                                                    , FOdysseyVectorScene* iScene
-                                                   , uint64 iFlags )
+                                                   , uint64 iDrawingFlags )
 {
     FOdysseyVectorPathTracer& pathTracer = mPathDrawingTool->GetPathTracer();
     std::vector<FTracerRecord>& recordArray = pathTracer.GetRecordArray();
@@ -50,6 +54,9 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+
+    // Draw scene in object or vertex mode
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
 
     if( mPathDrawingTool->Stitch )
     {

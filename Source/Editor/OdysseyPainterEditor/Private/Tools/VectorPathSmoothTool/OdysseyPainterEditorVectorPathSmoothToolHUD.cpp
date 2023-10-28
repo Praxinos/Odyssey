@@ -6,7 +6,8 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::~FOdysseyPainterEditorVectorPathSm
 }
 
 FOdysseyPainterEditorVectorPathSmoothToolHUD::FOdysseyPainterEditorVectorPathSmoothToolHUD( UOdysseyPainterEditorVectorPathSmoothTool* iPathSmoothTool )
-    : mPathSmoothTool( iPathSmoothTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPathSmoothTool )
+    , mPathSmoothTool( iPathSmoothTool )
     , mX( 0.0f )
     , mY( 0.0f )
 {
@@ -18,7 +19,10 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene
     mPickedPointArray.clear();
     mPickedPointArray.reserve( 50 );
 
-    MakePointQuadTree( iScene, mPathSmoothTool->RestrictToSelection );
+    MakePointQuadTree( iScene, mPathSmoothTool->RestrictToSelectedObjects );
+
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
@@ -34,15 +38,19 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload( FOdysseyVectorScene* iScen
 void
 FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
                                                   , FOdysseyVectorScene* iScene
-                                                  , uint64 iFlags )
+                                                  , uint64 iDrawingFlags )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
+    // Draw scene in object or vertex mode
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     iBLContext->save();
+/*
     iBLContext->resetMatrix();
 
     if( mPathSmoothTool->RestrictToSelection )
@@ -58,7 +66,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
     {
         FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, iScene );
     }
-
+*/
     iBLContext->setStrokeStyle( hcColor );
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->strokeCircle( mX, mY, mPathSmoothTool->PickingRadius );

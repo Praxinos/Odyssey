@@ -211,6 +211,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
         }
 
         scene->GetEngine()->ResetHUD();
+
         scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
     }
@@ -234,7 +235,7 @@ SOdysseyPainterEditorVectorSceneTreeView::DeleteObjectSelection()
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::DeleteObjectSelection( scene->GetEngine(), scene );
+        FOdysseyPainterEditor::DeleteObjectSelection( scene );
     }
 }
 
@@ -245,7 +246,7 @@ SOdysseyPainterEditorVectorSceneTreeView::CopyObjectSelection()
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::CopyObjectSelection( scene->GetEngine(), scene );
+        FOdysseyPainterEditor::CopyObjectSelection( scene );
     }
 }
 
@@ -256,7 +257,7 @@ SOdysseyPainterEditorVectorSceneTreeView::PasteObjectSelection()
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::PasteObjectSelection( scene->GetEngine(), scene );
+        FOdysseyPainterEditor::PasteObjectSelection( scene );
     }
 }
 

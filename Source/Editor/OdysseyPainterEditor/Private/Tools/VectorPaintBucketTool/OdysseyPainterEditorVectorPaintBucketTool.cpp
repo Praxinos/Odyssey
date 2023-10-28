@@ -21,8 +21,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::~UOdysseyPainterEditorVectorPaintBuc
 }
 
 UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBucketTool()
-    : /*RestrictToSelection( false )
-    ,*/ Propagate( true )
+    : Propagate( true )
     , ColorMode ( eBucketColorMode::SolidColor )
     , Color1( 255, 255, 255, 255 )
     , Color2( 255, 255, 255, 255 )
@@ -121,13 +120,15 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorSce
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
+    // valid for boith right and left clicks
+    mPickedBucket = mBucketHUD->PickBucket( iScene, iPointInTexture.x, iPointInTexture.y );
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
         mDownMouseX = mOldPointInTexture.x = iPointInTexture.x;
         mDownMouseY = mOldPointInTexture.y = iPointInTexture.y;
 
-        mPickedBucket = mBucketHUD->PickBucket( iScene, iPointInTexture.x, iPointInTexture.y );
         mPickedArea = FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_NONE;
 
         if( mPickedBucket )
@@ -590,9 +591,13 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties, GetEditor(), mPickedBucket )));
         }
         iMenu.EndSection();
-    }
 
-    ExtendContextMenu( iMenu );
+        mPickedBucket = nullptr;
+    }
+    else
+    {
+        UOdysseyPainterEditorVectorBaseTool::ExtendContextMenu( iMenu );
+    }
 }
 
 //static

@@ -8,6 +8,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::~FOdysseyPainterEditorVectorEraserTool
 }
 
 FOdysseyPainterEditorVectorEraserToolHUD::FOdysseyPainterEditorVectorEraserToolHUD( UOdysseyPainterEditorVectorEraserTool* iEraserTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iEraserTool )
 {
     mEraserTool = iEraserTool;
 }
@@ -34,16 +35,22 @@ void
 FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     ClearMask();
+
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
 FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
                                               , FOdysseyVectorScene* iScene
-                                              , uint64 iFlags )
+                                              , uint64 iDrawingFlags )
 {
     ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
     BLPath path;
     BLPoint topLeft = { 0, 0 };
+
+    // Draw scene in object or vertex mode
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
 
     mBLEraserContext.flush( BL_CONTEXT_FLUSH_SYNC );
 

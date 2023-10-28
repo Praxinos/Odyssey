@@ -2,10 +2,10 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "HUD/OdysseyVectorHUD.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : public FOdysseyVectorHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     private:
         double mX;
@@ -14,8 +14,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : p
         UOdysseyPainterEditorVectorPathDrawingTool* mPathDrawingTool;
 
     public:
-        virtual ~FOdysseyPainterEditorVectorPathDrawingToolHUD(  );
-        FOdysseyPainterEditorVectorPathDrawingToolHUD(){};
+        virtual ~FOdysseyPainterEditorVectorPathDrawingToolHUD();
+
         FOdysseyPainterEditorVectorPathDrawingToolHUD( UOdysseyPainterEditorVectorPathDrawingTool* iPathDrawingTool );
 
         virtual void Draw( BLContext* iBLContext

@@ -456,15 +456,15 @@ FOdysseyVectorPath::Invalidate()
 void
 FOdysseyVectorPath::Invalidate( uint32 iInvalidationFlags )
 {
-    if( iInvalidationFlags & INVALIDATE_MATRIX )
-    {
+    //if( iInvalidationFlags & INVALIDATE_MATRIX )
+    //{
         // Mark all segment as NOT painting ready to force recalculation of cached subsegments
         // use by the parent paint group
         for( FOdysseyVectorSegment* segment : mSegmentList )
         {
             segment->SetPaintingReady( false );
         }
-    }
+    //}
 
     FOdysseyVectorObject::Invalidate( iInvalidationFlags );
 }

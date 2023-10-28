@@ -238,12 +238,15 @@ void
 FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     MakeGrid( iScene );
+
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
 FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext
                                             , FOdysseyVectorScene* iScene
-                                            , uint64 iFlags )
+                                            , uint64 iDrawingFlags )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -255,11 +258,15 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext
     iBLContext->save();
     iBLContext->resetMatrix();
 
+    // Draw scene in object or vertex mode
+    // Note: we don't draw from the base class because we don't need the selection HUD
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+
     if( mSelectionBox.rect.Area() )
     {
         BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
 
-        DrawSelectionRectangle( iBLContext, iScene, iFlags );
+        DrawSelectionRectangle( iBLContext, iScene, iDrawingFlags );
 
         for( int i = 0; i < mCellArray.size(); i++ )
         {

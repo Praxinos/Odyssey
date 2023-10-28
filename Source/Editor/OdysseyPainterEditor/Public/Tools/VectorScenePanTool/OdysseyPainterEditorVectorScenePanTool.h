@@ -55,6 +55,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorScenePanTool : public 
                   , const FOdysseyPoint& iPointInTexture );
 
     private:
+        bool mDragged;
         double mDownLocalMouseX;
         double mDownLocalMouseY;
         FOdysseyPainterEditorVectorScenePanToolHUD* mScenePanHUD;

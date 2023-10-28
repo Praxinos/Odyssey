@@ -2,10 +2,10 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "HUD/OdysseyVectorHUD.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathCutToolHUD : public FOdysseyVectorHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathCutToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:
         virtual ~FOdysseyPainterEditorVectorPathCutToolHUD();

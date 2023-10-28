@@ -34,7 +34,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public
         UOdysseyPainterEditorVectorSelectionTool();
 
         virtual bool IsActivable() const override;
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
         std::vector<::ULIS::FVec2D>& GetPointArray();
 

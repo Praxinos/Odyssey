@@ -6,7 +6,8 @@ FOdysseyPainterEditorVectorPathCutToolHUD::~FOdysseyPainterEditorVectorPathCutTo
 }
 
 FOdysseyPainterEditorVectorPathCutToolHUD::FOdysseyPainterEditorVectorPathCutToolHUD( UOdysseyPainterEditorVectorPathCutTool* iPathCutTool )
-    : mPathCutTool( iPathCutTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPathCutTool )
+    , mPathCutTool( iPathCutTool )
 {
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
@@ -17,6 +18,9 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
+
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
@@ -58,7 +62,7 @@ FOdysseyPainterEditorVectorPathCutToolHUD::GetP1()
 void
 FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
                                                , FOdysseyVectorScene* iScene
-                                               , uint64 iFlags )
+                                               , uint64 iDrawingFlags )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
@@ -68,42 +72,15 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
+    // Draw scene in object or vertex mode
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+
     iBLContext->save();
-    iBLContext->resetMatrix();
 
     iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
     iBLContext->setStrokeStyle( hcColor );
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->strokeLine( mPoint[0].x, mPoint[0].y, mPoint[1].x, mPoint[1].y );
-
-    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
-    {
-        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
-
-            FOdysseyVectorHUD::DrawPath( iBLContext
-                                       , path
-                                       , fgColor
-                                       , bgColor
-                                       , hcColor
-                                       , true
-                                       , VIEW_VERTEX | VIEW_SEGMENT );
-        }
-
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-
-            FOdysseyVectorHUD::DrawPaintGroup( iBLContext
-                                             , paintGroup
-                                             , fgColor
-                                             , bgColor
-                                             , hcColor
-                                             , true
-                                             , VIEW_VERTEX | VIEW_SEGMENT );
-        }
-    }
 
     iBLContext->restore();
 }

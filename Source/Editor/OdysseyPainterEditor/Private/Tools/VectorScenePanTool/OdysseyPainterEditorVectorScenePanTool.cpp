@@ -19,6 +19,8 @@ UOdysseyPainterEditorVectorScenePanTool::UOdysseyPainterEditorVectorScenePanTool
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ScenePanTool64");
 
+    mHasContextMenu = false;
+
     mScenePanHUD = new FOdysseyPainterEditorVectorScenePanToolHUD( this );
 }
 
@@ -61,6 +63,8 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorScene*
                                                           , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
+
+    mDragged = false;
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("VectorScenePanTool","Pan Scene"));
@@ -142,9 +146,9 @@ uint64
 UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
-    // Left mouse button clicked
-
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+
+    mDragged = true;
 
     if( iPointInTexture.keysDown.Find( EKeys::RightMouseButton ) != INDEX_NONE)
     {

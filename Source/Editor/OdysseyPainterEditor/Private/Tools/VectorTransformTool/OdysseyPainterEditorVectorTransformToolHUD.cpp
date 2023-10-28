@@ -339,10 +339,11 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                                                  , FOdysseyVectorScene* iScene
-                                                 , uint64 iFlags )
+                                                 , uint64 iDrawingFlags )
 {
-    // draws nothing in object mode, vertices in vertex mode
-    FOdysseyPainterEditorVectorSelectionToolHUD::Draw( iBLContext, iScene, iFlags );
+    // Draw scene in object or vertex mode
+    // Note: we don't draw from the base class because we don't need the selection HUD
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -354,10 +355,10 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
         if( mShowSelectionBox )
         {
             //DrawSelectionBox( iScene, iFlags ); // commented out: now called from super::draw()
-            DrawScalers( iBLContext, iScene, iFlags );
+            DrawScalers( iBLContext, iScene, iDrawingFlags );
         }
 
-        DrawGizmo( iBLContext, iScene, iFlags );
+        DrawGizmo( iBLContext, iScene, iDrawingFlags );
     }
 
     iBLContext->restore();

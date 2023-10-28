@@ -8,7 +8,8 @@ FOdysseyPainterEditorVectorSelectionToolHUD::~FOdysseyPainterEditorVectorSelecti
 }
 
 FOdysseyPainterEditorVectorSelectionToolHUD::FOdysseyPainterEditorVectorSelectionToolHUD( UOdysseyPainterEditorVectorSelectionTool* iSelectionTool )
-    : mShowSelectionBox( true )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iSelectionTool )
+    , mShowSelectionBox( true )
     , mShowSelectionIfEmpty ( false )
 {
     mSelectionTool = iSelectionTool;
@@ -32,22 +33,10 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorScene* iScene
     mBLSelectionContext.end();
 }
 
-void
-FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorScene* iScene )
-{
-    UpdateSelectionBox( iScene, false );
-}
-
 BLImage*
 FOdysseyPainterEditorVectorSelectionToolHUD::GetMask()
 {
     return &mBLSelectionMask;
-}
-
-FSelectionBox&
-FOdysseyPainterEditorVectorSelectionToolHUD::GetSelectionBox()
-{
-    return mSelectionBox;
 }
 
 void
@@ -127,163 +116,6 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLC
     }
 
     mBLSelectionContext.restore();
-}
-
-void
-FOdysseyPainterEditorVectorSelectionToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
-                                                                         , bool iForceWorld )
-{
-    std::list<FOdysseyVectorObject*>& focusedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
-    bool inited = false;
-
-    mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
-    mSelectionBox.worldMatrix.reset();
-
-    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-    {
-        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(focusedObject);
-            ::ULIS::FRectD selectedPathBBox;
-
-            if( selectedPath->GetBBoxFromSelectedVertices( selectedPathBBox, true ) )
-            {
-                mSelectionBox.rect = inited ? mSelectionBox.rect | selectedPathBBox
-                                            : selectedPathBBox;
-
-                inited = true;
-            }
-        }
-
-        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
-            ::ULIS::FRectD selectedPaintGroupBBox;
-
-            if( selectedPaintGroup->GetBBoxFromSelectedVertices( selectedPaintGroupBBox, true ) )
-            {
-                mSelectionBox.rect = inited ? mSelectionBox.rect | selectedPaintGroupBBox
-                                            : selectedPaintGroupBBox;
-
-                inited = true;
-            }
-        }
-    }
-
-    BLMatrix2D::invert( mSelectionBox.inverseWorldMatrix, mSelectionBox.worldMatrix );
-
-    /*if( inited )
-    {
-        ::ULIS::FVec2D origin = ::ULIS::FVec2D( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
-                                              , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
-
-        mSelectionBox.worldMatrix.translate( origin.x, origin.y );
-    }*/
-}
-
-void
-FOdysseyPainterEditorVectorSelectionToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
-                                                                         , bool iForceWorld )
-{
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
-
-    mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
-
-    if( selectedObjectList.size() )
-    {
-        if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
-        {
-            FOdysseyVectorObject* selectedObject = selectedObjectList.front();
-
-            mSelectionBox.rect = selectedObject->GetBBox( false );
-
-            mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
-            mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
-        }
-        else
-        {
-            BLPoint p0, p1, p2, p3;
-            ::ULIS::FRectD rect = FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
-            ::ULIS::FVec2D origin = ::ULIS::FVec2D( rect.x + (rect.w * 0.5f)
-                                                  , rect.y + (rect.h * 0.5f) );
-            mSelectionBox.worldMatrix.reset();
-            mSelectionBox.worldMatrix.translate( origin.x, origin.y );
-
-            BLMatrix2D::invert( mSelectionBox.inverseWorldMatrix, mSelectionBox.worldMatrix );
-
-            p0 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y          );
-            p1 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y          );
-            p2 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y + rect.h );
-            p3 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y + rect.h );
-
-            mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
-                                                           , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
-                                                           , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
-                                                           , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
-        }
-    }
-}
-
-void
-FOdysseyPainterEditorVectorSelectionToolHUD::UpdateSelectionBox( FOdysseyVectorScene* iScene
-                                                               , bool iForceWorld )
-{
-    switch( mSelectionTool->GetEditor()->GetVectorEditionMode() )
-    {
-        case eVectorEditionMode::Object :
-            UpdateSelectionBoxObjectMode( iScene, iForceWorld );
-        break;
-
-        case eVectorEditionMode::Vertex:
-            UpdateSelectionBoxVertexMode( iScene, iForceWorld );
-        break;
-
-        default :
-        break;
-    }
-}
-
-void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionBox( BLContext* iBLContext
-                                                             , FOdysseyVectorScene* iScene
-                                                             , uint64 iFlags )
-{
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    BLRgba32 white = BLRgba32( 255, 255, 255, 255 );
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-
-    // matrix might get altered for displaying the selection rectangle of a single object. Save it.
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    if( mSelectionBox.rect.Area() )
-    {
-        BLMatrix2D& worldMatrix = mSelectionBox.worldMatrix;
-        BLPoint point[4] = { worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        )
-                           , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        )
-                           , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h )
-                           , worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h ) };
-        BLPath path;
-
-        path.moveTo( point[0] );
-        path.lineTo( point[1] );
-        path.lineTo( point[2] );
-        path.lineTo( point[3] );
-        path.close();
-
-        iBLContext->setStrokeStyle( bgColor );
-        iBLContext->setStrokeWidth( 2.0f );
-        iBLContext->strokePath( path );
-
-        // draw box as white if nothing is selected, colored if something is selected
-        iBLContext->setStrokeStyle( ( iScene->GetSelectedObjectList().size() == 0 ) ? white : fgColor );
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->strokePath( path );
-    }
-
-    iBLContext->restore();
 }
 
 void
@@ -392,7 +224,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( BLContext* iBLCont
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
                                                  , FOdysseyVectorScene* iScene
-                                                 , uint64 iFlags )
+                                                 , uint64 iDrawingFlags )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -402,27 +234,16 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint32 selectedObjectCount = iScene->GetSelectedObjectList().size();
 
+    // Draw scene in object or vertex mode
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+
     if( ( mShowSelectionIfEmpty == true ) || ( selectedObjectCount > 0 ) )
     {
-        switch( mSelectionTool->GetEditor()->GetVectorEditionMode() )
-        {
-            case eVectorEditionMode::Object :
-                DrawObjectSelection( iBLContext, iScene, iFlags );
-            break;
-
-            case eVectorEditionMode::Vertex :
-                DrawVertexSelection( iBLContext, iScene, iFlags );
-            break;
-
-            default:
-            break;
-        }
-
-        DrawSelectionSpace( iBLContext, iScene, iFlags );
+        DrawSelectionSpace( iBLContext, iScene, iDrawingFlags );
 
         if( mShowSelectionBox )
         {
-            DrawSelectionBox( iBLContext, iScene, iFlags );
+            //DrawSelectionBox( iBLContext, iScene, iDrawingFlags );
         }
     }
 

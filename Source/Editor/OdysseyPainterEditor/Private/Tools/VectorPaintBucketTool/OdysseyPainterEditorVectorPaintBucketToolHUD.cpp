@@ -5,8 +5,9 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::~FOdysseyPainterEditorVectorPaint
 {
 }
 
-FOdysseyPainterEditorVectorPaintBucketToolHUD::FOdysseyPainterEditorVectorPaintBucketToolHUD( UOdysseyPainterEditorVectorPaintBucketTool* iVectorPaintBucketTool )
-    : mPaintBucketTool( iVectorPaintBucketTool )
+FOdysseyPainterEditorVectorPaintBucketToolHUD::FOdysseyPainterEditorVectorPaintBucketToolHUD( UOdysseyPainterEditorVectorPaintBucketTool* iPaintBucketTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPaintBucketTool )
+    , mPaintBucketTool( iPaintBucketTool )
 {
 }
 
@@ -14,6 +15,9 @@ void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     mPickedCycleArray.clear();
+
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
@@ -476,8 +480,8 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::SetPickedCycles( std::vector<FOdy
 
 void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
-                                             , FOdysseyVectorScene* iScene
-                                             , uint64 iFlags )
+                                                   , FOdysseyVectorScene* iScene
+                                                   , uint64 iDrawingFlags )
 {
     std::list<FOdysseyVectorObject*>& focusedObjectList = mPaintBucketTool->GetFocusedObjectList( iScene );
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
@@ -486,6 +490,9 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+
+    // Draw scene in object or vertex mode
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
 
     iBLContext->save();
     iBLContext->resetMatrix();

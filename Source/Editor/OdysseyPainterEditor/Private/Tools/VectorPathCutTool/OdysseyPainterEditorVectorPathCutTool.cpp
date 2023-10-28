@@ -125,40 +125,24 @@ UOdysseyPainterEditorVectorPathCutTool::CutPath( FOdysseyVectorPath* iPath
 }
 
 void
-UOdysseyPainterEditorVectorPathCutTool::CutPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
-                                                     , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                                                     , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
-                                                     , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
+UOdysseyPainterEditorVectorPathCutTool::CutObjectRecursive( FOdysseyVectorObject* iObject
+                                                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                                                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
-
-    BLMatrix2D& inverseWorldMatrix = iPaintGroup->GetInverseWorldMatrix();
-    ::ULIS::FVec2D& p0 = mPathCutHUD->GetP0();
-    ::ULIS::FVec2D& p1 = mPathCutHUD->GetP1();
-    BLPoint localP0 = inverseWorldMatrix.mapPoint( p0.x, p0.y );
-    BLPoint localP1 = inverseWorldMatrix.mapPoint( p1.x, p1.y );
-    double xmin = ::ULIS::FMath::Min( localP0.x, localP1.x );
-    double ymin = ::ULIS::FMath::Min( localP0.y, localP1.y );
-    double xmax = ::ULIS::FMath::Max( localP0.x, localP1.x );
-    double ymax = ::ULIS::FMath::Max( localP0.y, localP1.y );
-    ::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
-    ::ULIS::FRectD isxRect;
-
-    if( FOdysseyVector::IntersectRegions<double>( rect, iPaintGroup->GetBBox(false), &isxRect ) )
+    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
     {
-        std::list<FOdysseyVectorObject*>& childrenList = iPaintGroup->GetChildrenList();
-        std::list<FOdysseyVectorObject*>::iterator it;
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
 
-        for( it = childrenList.begin(); it != childrenList.end(); ++it )
-        {
-            FOdysseyVectorObject* child = *it;
+        CutPath( path, oAddedVertexArray, oAddedSegmentArray, oRemovedSegmentArray );
+    }
 
-            if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
-            {
-                FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
-
-                CutPath( path, oAddedVertexArray, oAddedSegmentArray, oRemovedSegmentArray );
-            }
-        }
+    for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+    {
+        CutObjectRecursive( childObject
+                          , oAddedVertexArray
+                          , oAddedSegmentArray
+                          , oRemovedSegmentArray );
     }
 }
 
@@ -183,19 +167,10 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorScene* iS
 
         for( FOdysseyVectorObject* focusedObject : focusedObjectList )
         {
-            if( focusedObject->GetClass() == FOdysseyVectorPath::StaticClass() )
-            {
-                FOdysseyVectorPath *path = static_cast<FOdysseyVectorPath*>(focusedObject);
-
-                CutPath( path, addedVertexArray, addedSegmentArray, removedSegmentArray );
-            }
-
-            if( focusedObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
-            {
-                FOdysseyVectorGroupPaint *paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
-
-                CutPaintGroup( paintGroup, addedVertexArray, addedSegmentArray, removedSegmentArray );
-            }
+            CutObjectRecursive( focusedObject
+                              , addedVertexArray
+                              , addedSegmentArray
+                              , removedSegmentArray );
         }
 
         // needed for valid GUndo pointer
@@ -220,7 +195,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorScene* iS
 
         iEngine->ResetHUD();
 
-        iScene->Update( 0 ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

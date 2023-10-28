@@ -47,13 +47,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         virtual bool HasBaseClass( uint32 iBaseClassID );
 
         // signal flags
-        static const uint64 SIGNAL_SCENE_REDRAW       = ( 1 << 0 );
-        static const uint64 SIGNAL_SCENE_HIERARCHY    = ( 1 << 1 );
-        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1 << 2 );
-        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1 << 3 );
-        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1 << 4 );
-        static const uint64 SIGNAL_INTERACTIVE        = ( 1 << 5 );
-        static const uint64 SIGNAL_ALL                = 0xFFFFFFFFFFFFFFFF & (~SIGNAL_INTERACTIVE);
+        static const uint64 SIGNAL_SCENE_REDRAW       = ( 1ULL << 0 );
+        static const uint64 SIGNAL_SCENE_HIERARCHY    = ( 1ULL << 1 );
+        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1ULL << 2 );
+        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1ULL << 3 );
+        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1ULL << 4 );
+        static const uint64 SIGNAL_INTERACTIVE        = ( 1ULL << 5 );
+        static const uint64 SIGNAL_ALL                = 0x0FFFFFFFFFFFFFFF & (~SIGNAL_INTERACTIVE);
+
+        static const uint64 SIGNAL_USER0_RESERVED = ( 1ULL << 56 );
+        static const uint64 SIGNAL_USER1_RESERVED = ( 1ULL << 57 );
+        static const uint64 SIGNAL_USER2_RESERVED = ( 1ULL << 58 );
+        static const uint64 SIGNAL_USER3_RESERVED = ( 1ULL << 59 );
+        static const uint64 SIGNAL_USER4_RESERVED = ( 1ULL << 60 );
+        static const uint64 SIGNAL_USER5_RESERVED = ( 1ULL << 61 );
+        static const uint64 SIGNAL_USER6_RESERVED = ( 1ULL << 62 );
+        static const uint64 SIGNAL_USER7_RESERVED = ( 1ULL << 63 );
 
         static FSignalDelegate& OnSignalDelegate();
 
@@ -228,6 +237,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          */
         void SelectAllInSelectionSpace();
 
+        static void GetVertexSelection( std::list<FOdysseyVectorObject*>& iVectorObjectList
+                                      , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
+
         void Render( BLContext* iBLContext, uint64 iDrawingFlags );
 
         void EraseSections( FOdysseyVectorScene* iScene
@@ -321,6 +333,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                           , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                           , bool iSelectedOnly );
 
+        static void GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
+                                               , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
 
 
     private:

@@ -119,6 +119,35 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext/*FOdysseyVectorScene* iSc
     //UseImage( &mDefaultBLImage );
 }
 
+// static
+void
+FOdysseyVectorEngine::GetVertexSelection( std::list<FOdysseyVectorObject*>& iVectorObjectList
+                                        , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray )
+{
+    for( FOdysseyVectorObject* vectorObject : iVectorObjectList )
+    {
+        GetVertexSelectionRecursive( vectorObject, iSelectedPointArray );
+    }
+}
+
+// static
+void
+FOdysseyVectorEngine::GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
+                                                 , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray )
+{
+    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+
+        path->GetSelectedPoints( iSelectedPointArray, ePointSelectionFlags::Vertex );
+    }
+
+    for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+    {
+        GetVertexSelectionRecursive( childObject, iSelectedPointArray );
+    }
+}
+
 void
 FOdysseyVectorEngine::SelectAllInSelectionSpace()
 {

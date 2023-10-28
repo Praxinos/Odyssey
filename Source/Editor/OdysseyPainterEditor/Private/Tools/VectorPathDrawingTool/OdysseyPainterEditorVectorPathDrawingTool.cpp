@@ -3,7 +3,6 @@
 
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
-#include "Tools/VectorPathDrawingTool/SOdysseyPainterEditorVectorPathDrawingToolTopTab.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathExtend.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
@@ -107,12 +106,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorScene* iSc
     }
 
     return nullptr;
-}
-
-TSharedRef<SWidget>
-UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
-{
-    return SNew(SOdysseyPainterEditorVectorPathDrawingToolTopTab, this);
 }
 
 void

@@ -42,6 +42,17 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
 
     TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
     toolkit->Initialize(iTexture, editor);
+	TSharedPtr<FExtender> menuExtender = MakeShareable(new FExtender());
+
+	menuExtender->AddMenuExtension(
+		"Configuration",
+		EExtensionHook::After,
+		NULL,
+		FMenuExtensionDelegate::CreateRaw( editor.Get(), &FOdysseyPainterEditor::AddEditMenuEntry )
+	);
+
+	toolkit->AddMenuExtender( menuExtender );
+	toolkit->RegenerateMenusAndToolbars();
 
 	TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(iTexture);
 	editor->SetSource(source);

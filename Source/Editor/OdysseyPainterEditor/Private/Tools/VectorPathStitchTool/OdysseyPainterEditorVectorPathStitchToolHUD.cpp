@@ -6,7 +6,8 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::~FOdysseyPainterEditorVectorPathSt
 }
 
 FOdysseyPainterEditorVectorPathStitchToolHUD::FOdysseyPainterEditorVectorPathStitchToolHUD( UOdysseyPainterEditorVectorPathStitchTool* iPathStitchTool )
-    : mPathStitchTool( iPathStitchTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPathStitchTool )
+    , mPathStitchTool( iPathStitchTool )
 {
 }
 
@@ -15,7 +16,10 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene
 {
     mPickedPointArray.clear();
 
-    MakePointQuadTree( iScene, mPathStitchTool->RestrictToSelection );
+    MakePointQuadTree( iScene, mPathStitchTool->RestrictToSelectedObjects );
+
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
@@ -48,16 +52,17 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX, doubl
 void
 FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
                                                   , FOdysseyVectorScene* iScene
-                                                  , uint64 iFlags )
+                                                  , uint64 iDrawingFlags )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-    std::list<FOdysseyVectorObject*>::iterator it;
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+
+    // Draw scene in object or vertex mode
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
 
     iBLContext->save();
     iBLContext->resetMatrix();

@@ -28,8 +28,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
 
         virtual bool IsActivable() const override;
 
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
-
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;

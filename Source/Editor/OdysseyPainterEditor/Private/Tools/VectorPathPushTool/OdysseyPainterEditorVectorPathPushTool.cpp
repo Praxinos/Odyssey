@@ -94,7 +94,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorScene*
         mPushedPointArray.clear();
 
         iEngine->PickSegments( iScene
-                             , RestrictToSelection
+                             , RestrictToSelectedObjects
                              , iPointInTexture.x
                              , iPointInTexture.y
                              , Radius

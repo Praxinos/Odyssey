@@ -3,7 +3,6 @@
 
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
-#include "Tools/VectorTransformTool/SOdysseyPainterEditorVectorTransformToolTopTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditor.h"
 
@@ -76,12 +75,6 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorScene* iScen
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-}
-
-TSharedRef<SWidget>
-UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
-{
-    return SNew(SOdysseyPainterEditorVectorTransformToolTopTab, this);
 }
 
 uint64
@@ -701,7 +694,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorScene
             }
 
             return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                 | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
+                 /*| FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED*/;
         }
     }
 
@@ -768,7 +761,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorScene* 
         mPickedPivot = nullptr;
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
 }
 
 uint64

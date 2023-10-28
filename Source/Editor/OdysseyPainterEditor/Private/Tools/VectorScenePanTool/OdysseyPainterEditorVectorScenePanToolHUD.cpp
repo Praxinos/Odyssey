@@ -6,7 +6,8 @@ FOdysseyPainterEditorVectorScenePanToolHUD::~FOdysseyPainterEditorVectorScenePan
 }
 
 FOdysseyPainterEditorVectorScenePanToolHUD::FOdysseyPainterEditorVectorScenePanToolHUD( UOdysseyPainterEditorVectorScenePanTool* iScenePanTool )
-    : mScenePanTool( iScenePanTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iScenePanTool )
+    , mScenePanTool( iScenePanTool )
 {
     BLFontFace face;
    // TODO: do something depending on to the O.S
@@ -18,6 +19,8 @@ FOdysseyPainterEditorVectorScenePanToolHUD::FOdysseyPainterEditorVectorScenePanT
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
+    // Updates the selection box
+    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
@@ -93,7 +96,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( BLContext* iBLContext
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorScene* iScene
-                                                , uint64 iFlags )
+                                                , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
@@ -111,6 +114,10 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
 
     frameLength.x = frame.w * 0.125f;
     frameLength.y = frame.h * 0.125f;
+
+    // Draw scene in object or vertex mode
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+
 
     iBLContext->save();
     iBLContext->resetMatrix();
