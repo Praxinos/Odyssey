@@ -219,46 +219,6 @@ FOdysseyVectorHUD::PickPoints( double iWorldX
     }
 }
 
-//static
-void
-FOdysseyVectorHUD::DrawObjectRecursive( BLContext* iBLContext
-                                      , FOdysseyVectorObject* iObj )
-{
-    if( iObj->GetClass() == FOdysseyVectorPath::StaticClass() )
-    {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObj);
-        std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
-
-        iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
-        iBLContext->setFillStyle( BLRgba32( 0x80FFFFFF ) );
-
-        // Points and Point size handles
-        for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
-        {
-            FOdysseyVectorVertex *vertex = static_cast<FOdysseyVectorVertex*>(*it);
-            BLMatrix2D& worldMatrix = path->GetWorldMatrix();
-            BLPoint worldPoint = worldMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
-
-            iBLContext->setFillStyle( BLRgba32( 0xFF000000 ) );
-            iBLContext->fillCircle( worldPoint.x, worldPoint.y, 2.0f );
-            iBLContext->setFillStyle( BLRgba32( 0xFFFFFFFF ) );
-            iBLContext->fillCircle( worldPoint.x, worldPoint.y, 1.0f );
-
-            /*iBLCtx->fillRect( worldPoint.x + POINTRECT.x
-                            , worldPoint.y + POINTRECT.y
-                            , POINTRECT.w
-                            , POINTRECT.h );*/
-        }
-    }
-
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObj->GetChildrenList().begin(); it != iObj->GetChildrenList().end(); ++it )
-    {
-        FOdysseyVectorObject* child = (*it);
-
-        DrawObjectRecursive( iBLContext, child );
-    }
-}
-
 // static
 FColor&
 FOdysseyVectorHUD::GetForegroundColor()
@@ -284,6 +244,159 @@ FOdysseyVectorHUD::GetHighlightColor()
     static FColor hc = FColor( 0xFF, 0x00, 0x00, 0xFF ); // red
 
     return hc;
+}
+
+
+FSelectionBox&
+FOdysseyVectorHUD::GetSelectionBox()
+{
+    return mSelectionBox;
+}
+
+void
+FOdysseyVectorHUD::UpdateSelectionBoxVertexModeRecursive( FOdysseyVectorObject* iObject
+                                                        , bool iForceWorld )
+{
+    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    {
+        FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(iObject);
+        ::ULIS::FRectD selectedPathBBox;
+
+        if( selectedPath->GetBBoxFromSelectedVertices( selectedPathBBox, true ) )
+        {
+            mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedPathBBox
+                                                      : selectedPathBBox;
+
+            mSelectionBox.inited = true;
+        }
+    }
+
+    for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+    {
+        UpdateSelectionBoxVertexModeRecursive( childObject, iForceWorld );
+    }
+}
+
+void
+FOdysseyVectorHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
+                                               , std::list<FOdysseyVectorObject*>& iSelectedObjectList
+                                               , bool iForceWorld )
+{
+    mSelectionBox.inited = false;
+    //mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
+    mSelectionBox.worldMatrix.reset();
+
+    for( FOdysseyVectorObject* selectedObject : iSelectedObjectList )
+    {
+        UpdateSelectionBoxVertexModeRecursive( selectedObject, iForceWorld );
+    }
+
+    BLMatrix2D::invert( mSelectionBox.inverseWorldMatrix, mSelectionBox.worldMatrix );
+}
+
+void
+FOdysseyVectorHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
+                                               , std::list<FOdysseyVectorObject*>& iSelectedObjectList
+                                               , bool iForceWorld )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iSelectedObjectList;
+
+    mSelectionBox.inited = false;
+    mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
+
+    if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
+    {
+        FOdysseyVectorObject* selectedObject = selectedObjectList.front();
+
+        mSelectionBox.inited = true;
+        mSelectionBox.rect = selectedObject->GetBBox( false );
+
+        mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
+        mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
+    }
+    else
+    {
+        BLPoint p0, p1, p2, p3;
+        ::ULIS::FRectD rect = FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
+        ::ULIS::FVec2D origin = ::ULIS::FVec2D( rect.x + (rect.w * 0.5f)
+                                              , rect.y + (rect.h * 0.5f) );
+        mSelectionBox.worldMatrix.reset();
+        mSelectionBox.worldMatrix.translate( origin.x, origin.y );
+
+        BLMatrix2D::invert( mSelectionBox.inverseWorldMatrix, mSelectionBox.worldMatrix );
+
+        p0 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y          );
+        p1 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y          );
+        p2 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y + rect.h );
+        p3 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y + rect.h );
+
+        mSelectionBox.inited = true;
+        mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                       , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                       , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                       , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+    }
+}
+
+void
+FOdysseyVectorHUD::UpdateSelectionBox( FOdysseyVectorScene* iScene
+                                     , std::list<FOdysseyVectorObject*>& iSelectedObjectList
+                                     , bool iForceWorld
+                                     , uint64 iHUDFlags )
+{
+    if( iHUDFlags & VIEW_MODE_OBJECT )
+    {
+        //case eVectorEditionMode::Object :
+        UpdateSelectionBoxObjectMode( iScene, iSelectedObjectList, iForceWorld );
+    }
+
+    if( iHUDFlags & VIEW_MODE_VERTEX )
+    {
+        //case eVectorEditionMode::Vertex:
+        UpdateSelectionBoxVertexMode( iScene, iSelectedObjectList, iForceWorld );
+    }
+}
+
+void
+FOdysseyVectorHUD::DrawSelectionBox( BLContext* iBLContext
+                                   , FOdysseyVectorScene* iScene
+                                   , BLRgba32& iForegroundColor
+                                   , BLRgba32& iBackgroundColor
+                                   , BLRgba32& iHighlightColor
+                                   , uint64 iHUDFlags )
+{
+    BLRgba32 white = BLRgba32( 255, 255, 255, 255 );
+
+    // matrix might get altered for displaying the selection rectangle of a single object. Save it.
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    if( mSelectionBox.inited )
+    {
+        BLMatrix2D& worldMatrix = mSelectionBox.worldMatrix;
+        BLPoint point[4] = { worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        )
+                           , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        )
+                           , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h )
+                           , worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h ) };
+        BLPath path;
+
+        path.moveTo( point[0] );
+        path.lineTo( point[1] );
+        path.lineTo( point[2] );
+        path.lineTo( point[3] );
+        path.close();
+
+        iBLContext->setStrokeStyle( iBackgroundColor );
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->strokePath( path );
+
+        // draw box as white if nothing is selected, colored if something is selected
+        iBLContext->setStrokeStyle( ( iScene->GetSelectedObjectList().size() == 0 ) ? white : iForegroundColor );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->strokePath( path );
+    }
+
+    iBLContext->restore();
 }
 
 // static
@@ -344,7 +457,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
     BLPoint handle = HUDMatrix.mapVector( ctrl.x, ctrl.y );
     static BLRgba32 greenColor = BLRgba32( 0, 255, 0, 255 );
 
-    if ( iHUDFlags & VIEW_VERTEX_HANDLE )
+    if ( iHUDFlags & VIEW_PATH_VERTEX_HANDLE )
     {
         static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
         static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
@@ -391,7 +504,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
                                  , iVertex->IsSelected() ? hcColor : fgColor
                                  , bgColor );
 
-    if ( iHUDFlags & VIEW_VERTEX_ALIGNMENT )
+    if ( iHUDFlags & VIEW_PATH_VERTEX_ALIGNMENT )
     {
         if( iVertex->IsHandleAligned() )
         {
@@ -437,7 +550,7 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
     iBLContext->setStrokeStyle( fgColor );
     iBLContext->strokePath( segment );
 
-    if ( iHUDFlags & VIEW_SEGMENT_HANDLE )
+    if ( iHUDFlags & VIEW_PATH_SEGMENT_HANDLE )
     {
         static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
         static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
@@ -483,7 +596,7 @@ FOdysseyVectorHUD::DrawPath( BLContext* iBLContext
         iBLContext->resetMatrix();
     }
 
-    if( iHUDFlags & VIEW_SEGMENT )
+    if( iHUDFlags & VIEW_PATH_SEGMENT )
     {
         for( FOdysseyVectorSegment* segment : segmentList )
         {
@@ -496,24 +609,24 @@ FOdysseyVectorHUD::DrawPath( BLContext* iBLContext
         }
     }
 
-    if( iHUDFlags & VIEW_VERTEX )
+    if( iHUDFlags & VIEW_PATH_VERTEX )
     {
         // Points and Point size handles
         for( FOdysseyVectorVertex* vertex : vertexList )
         {
             uint32 valence = vertex->GetSegmentCount();
 
-            if( ( valence == 0 ) && ( iHUDFlags & VIEW_VERTEX_VALENCE0 ) )
+            if( ( valence == 0 ) && ( iHUDFlags & VIEW_PATH_VERTEX_VALENCE0 ) )
             {
                 DrawVertex( iBLContext, vertex, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
             }
             else
-            if( ( valence == 1 ) && ( iHUDFlags & VIEW_VERTEX_VALENCE1 ) )
+            if( ( valence == 1 ) && ( iHUDFlags & VIEW_PATH_VERTEX_VALENCE1 ) )
             {
                 DrawVertex( iBLContext, vertex, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
             }
             else
-            if( ( valence == 2 ) && ( iHUDFlags & VIEW_VERTEX_VALENCE2 ) )
+            if( ( valence == 2 ) && ( iHUDFlags & VIEW_PATH_VERTEX_VALENCE2 ) )
             {
                 DrawVertex( iBLContext, vertex, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
             }
@@ -524,8 +637,193 @@ FOdysseyVectorHUD::DrawPath( BLContext* iBLContext
 }
 
 // static
+::ULIS::FVec2D
+FOdysseyVectorHUD::GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld )
+{
+    ::ULIS::FVec2D& bucketCoords = iBucket->GetCoords();
+
+    if( iWorld )
+    {
+        FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
+        BLPoint worldPosition = worldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
+
+        return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
+    }
+
+    return bucketCoords;
+}
+
+// static
+::ULIS::FVec2D
+FOdysseyVectorHUD::GetBucketRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld )
+{
+    ::ULIS::FVec2D radialHandleCoords = iBucket->GetCoords() + iBucket->GetRadialOffset();
+
+    radialHandleCoords.x += iBucket->GetRadialRadius();
+
+    if( iWorld )
+    {
+        FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
+        BLPoint worldPosition = worldMatrix.mapPoint( radialHandleCoords.x, radialHandleCoords.y );
+
+        return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
+    }
+
+    return radialHandleCoords;
+}
+
+// static
+::ULIS::FVec2D
+FOdysseyVectorHUD::GetBucketRadialPosition( FOdysseyVectorBucket* iBucket, bool iWorld )
+{
+    ::ULIS::FVec2D radialCoords = iBucket->GetCoords() + iBucket->GetRadialOffset();
+
+    if( iWorld )
+    {
+        FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
+        BLPoint worldPosition = worldMatrix.mapPoint( radialCoords.x, radialCoords.y );
+
+        return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
+    }
+
+    return radialCoords;
+}
+
+// static
+::ULIS::FVec2D
+FOdysseyVectorHUD::GetBucketHandleVector( FOdysseyVectorBucket* iBucket, bool iWorld )
+{
+    double a = iBucket->GetRotation();
+    ::ULIS::FVec2D handleVector = ::ULIS::FVec2D( cos( a ), sin( a ) );
+
+    if( iWorld )
+    {
+        FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+        BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
+        BLPoint worldVector = worldMatrix.mapVector( handleVector.x, handleVector.y );
+        ::ULIS::FVec2D normalizedVector = ::ULIS::FVec2D( worldVector.x, worldVector.y );
+
+        normalizedVector.Normalize();
+
+        return normalizedVector;
+    }
+
+    return handleVector;
+}
+
+// static
 void
-FOdysseyVectorHUD::DrawPaintGroup( BLContext* iBLContext
+FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
+                             , FOdysseyVectorBucket* iBucket
+                             , const BLRgba32& fgColor
+                             , const BLRgba32& bgColor
+                             , const BLRgba32& hcColor
+                             , uint64 iHUDFlags )
+{
+    ::ULIS::FVec2D bucketWorldCoords = GetBucketPosition( iBucket, true );
+    FColor bucketColor = iBucket->GetColor();
+    BLRgba32 fillColor = BLRgba32( bucketColor.R, bucketColor.G, bucketColor.B, bucketColor.A );
+    BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF )
+                                                 : BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+
+    if( iHUDFlags & VIEW_GROUPPAINT_BUCKET_HANDLE )
+    {
+        if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
+        {
+            ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetBucketHandleVector( iBucket, true ) * HANDLE_DISTANCE );
+            BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+            BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+
+            // Bucket-to-handle line
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
+                                  , handleWorldCoords.x, handleWorldCoords.y );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
+                                  , handleWorldCoords.x, handleWorldCoords.y );
+
+            // Handle
+            iBLContext->setFillStyle( whiteColor );
+            iBLContext->fillCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeCircle( handleWorldCoords.x, handleWorldCoords.y, HANDLE_RADIUS );
+        }
+
+        if( iBucket->GetColorMode() == eBucketColorMode::RadialGradient )
+        {
+            ::ULIS::FVec2D radialWorldCoords = GetBucketRadialPosition( iBucket, true );
+            ::ULIS::FVec2D radialHandleWorldCoords = GetBucketRadialHandlePosition( iBucket, true );
+            double radialRadius = ( radialHandleWorldCoords - radialWorldCoords ).Distance();
+
+            BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+            BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+
+            // Bucket-to-radial line
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
+                                  , radialWorldCoords.x, radialWorldCoords.y );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeLine( bucketWorldCoords.x, bucketWorldCoords.y
+                                  , radialWorldCoords.x, radialWorldCoords.y );
+
+            // Radial Circle
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeCircle( radialWorldCoords.x, radialWorldCoords.y, RADIAL_AREA_RADIUS );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeCircle( radialWorldCoords.x, radialWorldCoords.y, RADIAL_AREA_RADIUS );
+
+            // Radial-to-RadialHandle line
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeLine( radialWorldCoords.x, radialWorldCoords.y
+                                  , radialHandleWorldCoords.x, radialHandleWorldCoords.y );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeLine( radialWorldCoords.x, radialWorldCoords.y
+                                  , radialHandleWorldCoords.x, radialHandleWorldCoords.y );
+
+            // RadialHandle Circle
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeCircle( radialWorldCoords.x, radialWorldCoords.y, radialRadius );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( whiteColor );
+            iBLContext->strokeCircle( radialWorldCoords.x, radialWorldCoords.y, radialRadius );
+
+            // RadialHandle
+            iBLContext->setFillStyle( whiteColor );
+            iBLContext->fillCircle( radialHandleWorldCoords.x, radialHandleWorldCoords.y, HANDLE_RADIUS );
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( blackColor );
+            iBLContext->strokeCircle( radialHandleWorldCoords.x, radialHandleWorldCoords.y, HANDLE_RADIUS );
+        }
+    }
+
+    // Bucket
+    iBLContext->setFillStyle( fillColor );
+    iBLContext->fillCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
+
+    iBLContext->setStrokeWidth( 2.0f );
+    iBLContext->setStrokeStyle( BLRgba32( 0x00, 0x00, 0x00, 0xFF ) );
+    iBLContext->strokeCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeStyle( propColor ); // green if propagated, white otherwise
+    iBLContext->strokeCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
+}
+
+// static
+void
+FOdysseyVectorHUD::DrawGroupPaint( BLContext* iBLContext
                                  , FOdysseyVectorGroupPaint* iPaintGroup
                                  , const BLRgba32& fgColor
                                  , const BLRgba32& bgColor
@@ -533,15 +831,126 @@ FOdysseyVectorHUD::DrawPaintGroup( BLContext* iBLContext
                                  , bool iWorld
                                  , uint64 iHUDFlags )
 {
-    std::list<FOdysseyVectorObject*>& childrenObjectList = iPaintGroup->GetChildrenList();
+    iBLContext->save();
 
-    for( FOdysseyVectorObject* child : childrenObjectList )
+    if( iWorld )
     {
-        if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
+        iBLContext->resetMatrix();
+    }
 
-            DrawPath( iBLContext, path, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
+    if( iHUDFlags & VIEW_GROUPPAINT_BUCKET )
+    {
+        std::list<FOdysseyVectorBucket*>& bucketList = iPaintGroup->GetBucketList();
+
+        for( FOdysseyVectorBucket *bucket : bucketList )
+        {
+            DrawBucket( iBLContext, bucket, fgColor, bgColor, hcColor, iHUDFlags );
         }
     }
+
+    iBLContext->restore();
 }
+
+// static
+void
+FOdysseyVectorHUD::DrawObjectRecursive( BLContext* iBLContext
+                                      , FOdysseyVectorObject* iObject
+                                      , BLRgba32& iForegroundColor
+                                      , BLRgba32& iBackgroundColor
+                                      , BLRgba32& iHighlightColor
+                                      , uint64 iHUDFlags )
+{
+    if( iHUDFlags & VIEW_PATH_ALL )
+    {
+        if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+
+            FOdysseyVectorHUD::DrawPath( iBLContext
+                                       , path
+                                       , iForegroundColor
+                                       , iBackgroundColor
+                                       , iHighlightColor
+                                       , true
+                                       , iHUDFlags );
+        }
+    }
+
+    if( iHUDFlags & VIEW_GROUPPAINT_ALL )
+    {
+        if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
+
+            FOdysseyVectorHUD::DrawGroupPaint( iBLContext
+                                             , paintGroup
+                                             , iForegroundColor
+                                             , iBackgroundColor
+                                             , iHighlightColor
+                                             , true
+                                             , iHUDFlags );
+        }
+    }
+
+    for( FOdysseyVectorObject* child : iObject->GetChildrenList() )
+    {
+        DrawObjectRecursive( iBLContext
+                           , child
+                           , iForegroundColor
+                           , iBackgroundColor
+                           , iHighlightColor
+                           , iHUDFlags );
+    }
+}
+
+// static
+void
+FOdysseyVectorHUD::DrawObjects( BLContext* iBLContext
+                              , std::list<FOdysseyVectorObject*>* iFocusedObjectList
+                              , BLRgba32& iForegroundColor
+                              , BLRgba32& iBackgroundColor
+                              , BLRgba32& iHighlightColor
+                              , uint64 iHUDFlags )
+{
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    if( iFocusedObjectList )
+    {
+        for( FOdysseyVectorObject* focusedObject : *iFocusedObjectList )
+        {
+            DrawObjectRecursive( iBLContext
+                               , focusedObject
+                               , iForegroundColor
+                               , iBackgroundColor
+                               , iHighlightColor
+                               , iHUDFlags );
+        }
+    }
+
+    iBLContext->restore();
+}
+
+/*
+void
+FOdysseyVectorHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iHUDFlags )
+{
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    std::list<FOdysseyVectorObject*>* focusedObjectList = GetFocusedObjectList( iScene );
+
+    if( focusedObjectList )
+    {
+        DrawObjects( iBLContext, focusedObjectList, fgColor, bgColor, hcColor, iHUDFlags );
+    }
+
+    if( iHUDFlags & VIEW_SELECTIONBOX )
+    {
+        DrawSelectionBox( iBLContext, focusedObjectList, fgColor, bgColor, hcColor, iHUDFlags );
+    }
+}
+*/

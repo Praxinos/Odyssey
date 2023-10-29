@@ -327,7 +327,12 @@ FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
-    UpdateSelectionBox( iScene, mTransformTool->World );
+    uint64 hudFlags = GetViewingMode();
+
+    UpdateSelectionBox( iScene
+                      , mTransformTool->GetSelectedObjectList( iScene )
+                      , mTransformTool->World
+                      , hudFlags );
 
     //FOdysseyPainterEditorVectorSelectionToolHUD::Reset( iScene ); // Updates the selection box
 /*
@@ -338,12 +343,28 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
-                                                 , FOdysseyVectorScene* iScene
-                                                 , uint64 iDrawingFlags )
+                                                 , FOdysseyVectorScene* iScene )
 {
-    // Draw scene in object or vertex mode
-    // Note: we don't draw from the base class because we don't need the selection HUD
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+    uint64 hudFlags = GetViewingMode();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    uint32 selectedObjectCount = iScene->GetSelectedObjectList().size();
+
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        // static call
+        FOdysseyVectorHUD::DrawObjects( iBLContext
+                                      , &mTransformTool->GetFocusedObjectList( iScene )
+                                      , fgColor
+                                      , bgColor
+                                      , hcColor
+                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -354,11 +375,13 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
 
         if( mShowSelectionBox )
         {
+            DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+
             //DrawSelectionBox( iScene, iFlags ); // commented out: now called from super::draw()
-            DrawScalers( iBLContext, iScene, iDrawingFlags );
+            DrawScalers( iBLContext, iScene, hudFlags );
         }
 
-        DrawGizmo( iBLContext, iScene, iDrawingFlags );
+        DrawGizmo( iBLContext, iScene, hudFlags );
     }
 
     iBLContext->restore();

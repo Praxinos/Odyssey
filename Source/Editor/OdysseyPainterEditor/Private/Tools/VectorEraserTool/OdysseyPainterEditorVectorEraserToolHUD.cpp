@@ -34,29 +34,52 @@ FOdysseyPainterEditorVectorEraserToolHUD::Unload( FOdysseyVectorScene* iScene )
 void
 FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = GetViewingMode();
+
     ClearMask();
 
-    // Updates the selection box
-    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
+    UpdateSelectionBox( iScene
+                      , mEraserTool->GetSelectedObjectList( iScene )
+                      , false
+                      , hudFlags );
 }
 
 void
 FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
-                                              , FOdysseyVectorScene* iScene
-                                              , uint64 iDrawingFlags )
+                                              , FOdysseyVectorScene* iScene )
 {
-    ::ULIS::FRectD bbox = { 0, 0, 0, 0 };
-    BLPath path;
-    BLPoint topLeft = { 0, 0 };
+    uint64 hudFlags = GetViewingMode();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
-    // Draw scene in object or vertex mode
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        // static call
+        FOdysseyVectorHUD::DrawObjects( iBLContext
+                                      , &mEraserTool->GetFocusedObjectList( iScene )
+                                      , fgColor
+                                      , bgColor
+                                      , hcColor
+                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
 
+    // draw selection box only if we restrict erasure to the selection 
+    if( mEraserTool->RestrictToSelectedObjects )
+    {
+        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+    }
+
+    // Prepare bliting the erasing mask
     mBLEraserContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     if( mBlending == true )
     {
-        iBLContext->blitImage( topLeft, mBLEraserMask );
+        iBLContext->blitImage( BLPoint( 0, 0 ), mBLEraserMask );
     }
 
     iBLContext->save();

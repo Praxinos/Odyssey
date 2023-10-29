@@ -11,9 +11,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
         virtual ~FOdysseyPainterEditorVectorSelectionToolHUD();
         FOdysseyPainterEditorVectorSelectionToolHUD(  UOdysseyPainterEditorVectorSelectionTool* iSelectionTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
         virtual void Load( FOdysseyVectorScene* iScene ) override;
         virtual void Unload( FOdysseyVectorScene* iScene ) override;
+        virtual void Reset( FOdysseyVectorScene* iScene ) override;
         void ShowSelectionBox( bool iShowSelectionBox );
         void Init( uint32 iWidth, uint32 iHeight );
         void GetSelectedVertices( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorPoint*>& oPointArray );

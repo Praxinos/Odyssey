@@ -8,21 +8,10 @@
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:
-        static const uint32 HANDLE_RADIUS      = 3;
-        static const uint32 HANDLE_DISTANCE    = 40;
-        static const uint32 PELLET_RADIUS      = 5;
-        static const uint32 RADIAL_AREA_RADIUS = 40;
-
-        static const uint32 PICK_NONE          = 0;
-        static const uint32 PICK_HANDLE        = 1;
-        static const uint32 PICK_BUCKET        = 2;
-        static const uint32 PICK_RADIAL_HANDLE = 3;
-        static const uint32 PICK_RADIAL_AREA   = 4;
-
         virtual ~FOdysseyPainterEditorVectorPaintBucketToolHUD();
         FOdysseyPainterEditorVectorPaintBucketToolHUD(  UOdysseyPainterEditorVectorPaintBucketTool* iVectorPaintBucketTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
         virtual void Load( FOdysseyVectorScene* iScene ) override;
         virtual void Unload( FOdysseyVectorScene* iScene ) override;
@@ -44,12 +33,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
         void SetPickedCycles( std::vector<FOdysseyVectorCycle*>& pickedCycleArray );
 
     private:
-        void RecursiveDrawObject( BLContext* iBLContext
-                                , FOdysseyVectorObject* iObject
-                                , BLRgba32 fgColor
-                                , BLRgba32 bgColor
-                                , BLRgba32 hcColor );
-
         FOdysseyVectorBucket* RecursivePickBucket( FOdysseyVectorObject* iObject
                                                  , double iWorldX
                                                  , double iWorldY );
@@ -58,16 +41,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
                                        , double iWorldX
                                        , double iWorldY
                                        , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
-
-        void DrawBucket( BLContext* iBLContext
-                       , FOdysseyVectorBucket* iBucket
-                       , BLRgba32 fgColor
-                       , BLRgba32 bgColor
-                       , BLRgba32 hcColor );
-        ::ULIS::FVec2D GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
-        ::ULIS::FVec2D GetHandleVector( FOdysseyVectorBucket* iBucket, bool iWorld );
-        ::ULIS::FVec2D GetRadialPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
-        ::ULIS::FVec2D GetRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld );
 
     private:
         std::vector<FOdysseyVectorCycle*> mPickedCycleArray;

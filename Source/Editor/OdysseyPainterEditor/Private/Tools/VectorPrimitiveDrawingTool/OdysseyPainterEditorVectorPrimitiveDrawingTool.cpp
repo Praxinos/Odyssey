@@ -5,6 +5,8 @@
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "OdysseyPaletteEntryColor.h"
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
+#include "PainterEditor/OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L

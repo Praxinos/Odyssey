@@ -14,10 +14,15 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::FOdysseyPainterEditorVectorPathDr
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = GetViewingMode();
+
     MakePointQuadTree( iScene, false );
 
-    // Updates the selection box
-    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
+    // Updates the selection box (it is not used in this tool but whatever)
+    UpdateSelectionBox( iScene
+                      , mPathDrawingTool->GetSelectedObjectList( iScene )
+                      , false
+                      , hudFlags );
 }
 
 void
@@ -38,9 +43,16 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::GetStitchedPointArray()
 
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
-                                                   , FOdysseyVectorScene* iScene
-                                                   , uint64 iDrawingFlags )
+                                                   , FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = GetViewingMode();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    // PathTracer data
     FOdysseyVectorPathTracer& pathTracer = mPathDrawingTool->GetPathTracer();
     std::vector<FTracerRecord>& recordArray = pathTracer.GetRecordArray();
     std::vector<FTracerPoint>& pointArray = pathTracer.GetPointArray();
@@ -48,15 +60,20 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
     FOdysseyVectorPath* path = pathTracer.GetPath();
     FTracerBezier& bestBezier = pathTracer.GetBestBezier();
     FTracerBezier& rawBezier = pathTracer.GetRawBezier();
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
-    // Draw scene in object or vertex mode
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        // static call
+        FOdysseyVectorHUD::DrawObjects( iBLContext
+                                      , &mPathDrawingTool->GetFocusedObjectList( iScene )
+                                      , fgColor
+                                      , bgColor
+                                      , hcColor
+                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
+
+    //DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
 
     if( mPathDrawingTool->Stitch )
     {
@@ -78,7 +95,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
                             , bgColor
                             , hcColor
                             , true // World
-                            , VIEW_SEGMENT );
+                            , VIEW_PATH_SEGMENT );
                 }
             }
         }

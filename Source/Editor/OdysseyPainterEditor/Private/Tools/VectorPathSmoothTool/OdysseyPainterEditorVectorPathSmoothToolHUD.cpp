@@ -16,13 +16,17 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::FOdysseyPainterEditorVectorPathSmo
 void
 FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = GetViewingMode();
+
     mPickedPointArray.clear();
     mPickedPointArray.reserve( 50 );
 
     MakePointQuadTree( iScene, mPathSmoothTool->RestrictToSelectedObjects );
 
-    // Updates the selection box
-    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
+    UpdateSelectionBox( iScene
+                      , mPathSmoothTool->GetSelectedObjectList( iScene )
+                      , false
+                      , hudFlags );
 }
 
 void
@@ -37,36 +41,37 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload( FOdysseyVectorScene* iScen
 
 void
 FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
-                                                  , FOdysseyVectorScene* iScene
-                                                  , uint64 iDrawingFlags )
+                                                  , FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
-    // Draw scene in object or vertex mode
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        // static call
+        FOdysseyVectorHUD::DrawObjects( iBLContext
+                                      , &mPathSmoothTool->GetFocusedObjectList( iScene )
+                                      , fgColor
+                                      , bgColor
+                                      , hcColor
+                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
+
+    // draw selection box only if we restrict erasure to the selection 
+    if( mPathSmoothTool->RestrictToSelectedObjects )
+    {
+        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+    }
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     iBLContext->save();
-/*
-    iBLContext->resetMatrix();
 
-    if( mPathSmoothTool->RestrictToSelection )
-    {
-        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-
-        for( FOdysseyVectorObject* selectedObject : selectedObjectList )
-        {
-            FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, selectedObject );
-        }
-    }
-    else
-    {
-        FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, iScene );
-    }
-*/
     iBLContext->setStrokeStyle( hcColor );
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->strokeCircle( mX, mY, mPathSmoothTool->PickingRadius );

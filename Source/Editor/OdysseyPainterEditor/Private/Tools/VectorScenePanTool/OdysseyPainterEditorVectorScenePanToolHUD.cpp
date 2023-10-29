@@ -19,8 +19,12 @@ FOdysseyPainterEditorVectorScenePanToolHUD::FOdysseyPainterEditorVectorScenePanT
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
-    // Updates the selection box
-    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
+    uint64 hudFlags = GetViewingMode();
+    // it's unused but we could use it at some point so, we init it anyways
+    UpdateSelectionBox( iScene
+                      , mScenePanTool->GetSelectedObjectList( iScene )
+                      , false
+                      , hudFlags );
 }
 
 void
@@ -95,14 +99,16 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( BLContext* iBLContext
 
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorScene* iScene
-                                                , uint64 iDrawingFlags )
+                                                , FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     BLImage* image = iBLContext->targetImage();
     ::ULIS::FVec2D frameLength;
     ::ULIS::FRectD frame;
@@ -115,9 +121,17 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     frameLength.x = frame.w * 0.125f;
     frameLength.y = frame.h * 0.125f;
 
-    // Draw scene in object or vertex mode
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
-
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        // static call
+        FOdysseyVectorHUD::DrawObjects( iBLContext
+                                      , &mScenePanTool->GetFocusedObjectList( iScene )
+                                      , fgColor
+                                      , bgColor
+                                      , hcColor
+                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
 
     iBLContext->save();
     iBLContext->resetMatrix();

@@ -203,16 +203,12 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect, b
 
 void
 FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( BLContext* iBLContext
-                                                              , FOdysseyVectorScene* iScene
-                                                              , uint64 iFlags )
+                                                              , BLRgba32& iHighlightColor )
 {
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    iBLContext->setStrokeStyle( BLRgba32( hc.R, hc.G, hc.B, hc.A ) );
+    iBLContext->setStrokeStyle( iHighlightColor );
     iBLContext->setStrokeWidth( 1.0f );
 
     if( mWorldSelDrag != mWorldSelStart )
@@ -238,16 +234,12 @@ void
 FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     MakeGrid( iScene );
-
-    // Updates the selection box
-    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext
-                                            , FOdysseyVectorScene* iScene
-                                            , uint64 iDrawingFlags )
+FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -255,18 +247,26 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        // static call
+        FOdysseyVectorHUD::DrawObjects( iBLContext
+                                      , &mGridTool->GetFocusedObjectList( iScene )
+                                      , fgColor
+                                      , bgColor
+                                      , hcColor
+                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
+
     iBLContext->save();
     iBLContext->resetMatrix();
-
-    // Draw scene in object or vertex mode
-    // Note: we don't draw from the base class because we don't need the selection HUD
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
 
     if( mSelectionBox.rect.Area() )
     {
         BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
 
-        DrawSelectionRectangle( iBLContext, iScene, iDrawingFlags );
+        DrawSelectionRectangle( iBLContext, hcColor );
 
         for( int i = 0; i < mCellArray.size(); i++ )
         {
@@ -318,7 +318,10 @@ FOdysseyPainterEditorVectorGridToolHUD::Export( std::vector<FOdysseyVectorPoint*
 }
 
 uint32
-FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject, FOdysseyVectorPoint* iPoint, double iSpaceX, double iSpaceY )
+FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject
+                                                , FOdysseyVectorPoint* iPoint
+                                                , double iSpaceX
+                                                , double iSpaceY )
 {
     double paramX = iSpaceX / mSelectionBox.rect.w;
     double paramY = iSpaceY / mSelectionBox.rect.h;
@@ -558,7 +561,13 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeCells()
 void
 FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene )
 {
-    UpdateSelectionBox( iScene, mGridTool->World );
+    uint64 hudFlags = GetViewingMode();
+
+    // Updates the selection box
+    UpdateSelectionBox( iScene
+                      , mGridTool->GetSelectedObjectList( iScene )
+                      , mGridTool->World
+                      , hudFlags );
 
     if( mSelectionBox.rect.Area() )
     {

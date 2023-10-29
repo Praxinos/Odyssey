@@ -26,7 +26,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         virtual ~FOdysseyPainterEditorVectorTransformToolHUD();
         FOdysseyPainterEditorVectorTransformToolHUD(  UOdysseyPainterEditorVectorTransformTool* iTransformTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
 
         uint32 SetCursorPosition( double iWorldX, double iWorldY );

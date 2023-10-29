@@ -33,6 +33,17 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorScene* iScene
     mBLSelectionContext.end();
 }
 
+void
+FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorScene* iScene )
+{
+    uint64 hudFlags = GetViewingMode();
+
+    UpdateSelectionBox( iScene
+                      , mSelectionTool->GetSelectedObjectList( iScene )
+                      , false
+                      , hudFlags );
+}
+
 BLImage*
 FOdysseyPainterEditorVectorSelectionToolHUD::GetMask()
 {
@@ -119,47 +130,6 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLC
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawObjectSelection( BLContext* iBLContext
-                                                                , FOdysseyVectorScene* iScene
-                                                                , uint64 iFlags )
-{
-}
-
-void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawVertexSelection( BLContext* iBLContext
-                                                                , FOdysseyVectorScene* iScene
-                                                                , uint64 iFlags )
-{
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
-    std::list<FOdysseyVectorObject*>::iterator it;
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-
-    for( it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-    {
-        FOdysseyVectorObject* selectedObject = (*it);
-
-        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
-
-            FOdysseyVectorHUD::DrawPath( iBLContext, path, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
-        }
-
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-
-            FOdysseyVectorHUD::DrawPaintGroup( iBLContext, paintGroup, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
-        }
-    }
-}
-
-void
 FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( BLContext* iBLContext
                                                             , BLRgba32 fgColor
                                                             , BLRgba32 bgColor
@@ -223,9 +193,9 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( BLContext* iBLCont
 
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
-                                                 , FOdysseyVectorScene* iScene
-                                                 , uint64 iDrawingFlags )
+                                                 , FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -234,12 +204,26 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint32 selectedObjectCount = iScene->GetSelectedObjectList().size();
 
-    // Draw scene in object or vertex mode
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        // static call
+        FOdysseyVectorHUD::DrawObjects( iBLContext
+                                      , &mSelectionTool->GetFocusedObjectList( iScene )
+                                      , fgColor
+                                      , bgColor
+                                      , hcColor
+                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
+
+    if( hudFlags & VIEW_MODE_OBJECT )
+    {
+        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+    }
 
     if( ( mShowSelectionIfEmpty == true ) || ( selectedObjectCount > 0 ) )
     {
-        DrawSelectionSpace( iBLContext, iScene, iDrawingFlags );
+        DrawSelectionSpace( iBLContext, iScene, hudFlags );
 
         if( mShowSelectionBox )
         {

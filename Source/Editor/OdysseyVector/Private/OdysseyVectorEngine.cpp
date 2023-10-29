@@ -109,7 +109,7 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext/*FOdysseyVectorScene* iSc
 
     for( FOdysseyVectorHUD *hud : GetHUDList() )
     {
-        hud->Draw( iBLContext, mScene, 0 );
+        hud->Draw( iBLContext, mScene );
     }
 
     iBLContext->restore();

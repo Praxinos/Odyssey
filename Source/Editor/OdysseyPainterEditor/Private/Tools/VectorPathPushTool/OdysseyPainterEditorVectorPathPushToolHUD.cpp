@@ -17,8 +17,13 @@ FOdysseyPainterEditorVectorPathPushToolHUD::FOdysseyPainterEditorVectorPathPushT
 void
 FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
+    uint64 hudFlags = GetViewingMode();
+
     // Updates the selection box
-    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
+    UpdateSelectionBox( iScene
+                      , mPathPushTool->GetSelectedObjectList( iScene )
+                      , false
+                      , hudFlags );
 }
 
 void
@@ -32,35 +37,37 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Unload( FOdysseyVectorScene* iScene 
 }
 
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorScene* iScene
-                                                , uint64 iDrawingFlags )
+FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = GetViewingMode();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
-    // Draw scene in object or vertex mode
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        // static call
+        FOdysseyVectorHUD::DrawObjects( iBLContext
+                                      , &mPathPushTool->GetFocusedObjectList( iScene )
+                                      , fgColor
+                                      , bgColor
+                                      , hcColor
+                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
+
+    // draw selection box only if we restrict pushing to the selection 
+    if( mPathPushTool->RestrictToSelectedObjects )
+    {
+        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+    }
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     iBLContext->save();
-/*
-    iBLContext->resetMatrix();
 
-    if( mPathPushTool->RestrictToSelection )
-    {
-        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-
-        for( FOdysseyVectorObject* selectedObject : selectedObjectList )
-        {
-            FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, selectedObject );
-        }
-    }
-    else
-    {
-        FOdysseyVectorHUD::DrawObjectRecursive( iBLContext, iScene );
-    }
-*/
     iBLContext->setStrokeStyle( hcColor );
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->strokeCircle( mX, mY, mPathPushTool->Radius );

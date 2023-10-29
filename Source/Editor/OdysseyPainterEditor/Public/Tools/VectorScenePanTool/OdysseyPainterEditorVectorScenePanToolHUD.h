@@ -15,7 +15,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorScenePanToolHUD : publ
         virtual ~FOdysseyPainterEditorVectorScenePanToolHUD();
         FOdysseyPainterEditorVectorScenePanToolHUD( UOdysseyPainterEditorVectorScenePanTool* iScenePanTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
         virtual void Load( FOdysseyVectorScene* iScene ) override;
         virtual void Unload( FOdysseyVectorScene* iScene ) override;

@@ -16,11 +16,15 @@ FOdysseyPainterEditorVectorPathCutToolHUD::FOdysseyPainterEditorVectorPathCutToo
 void
 FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = GetViewingMode();
+
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
 
-    // Updates the selection box
-    FOdysseyPainterEditorVectorBaseToolHUD::Reset( iScene );
+    UpdateSelectionBox( iScene
+                      , mPathCutTool->GetSelectedObjectList( iScene )
+                      , false
+                      , hudFlags );
 }
 
 void
@@ -61,10 +65,9 @@ FOdysseyPainterEditorVectorPathCutToolHUD::GetP1()
 
 void
 FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
-                                               , FOdysseyVectorScene* iScene
-                                               , uint64 iDrawingFlags )
+                                               , FOdysseyVectorScene* iScene )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -72,8 +75,23 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
 
-    // Draw scene in object or vertex mode
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene, iDrawingFlags );
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        // static call
+        FOdysseyVectorHUD::DrawObjects( iBLContext
+                                      , &mPathCutTool->GetFocusedObjectList( iScene )
+                                      , fgColor
+                                      , bgColor
+                                      , hcColor
+                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
+
+    // draw selection box only if we restrict erasure to the selection 
+    if( mPathCutTool->RestrictToSelectedObjects )
+    {
+        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+    }
 
     iBLContext->save();
 
