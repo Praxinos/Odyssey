@@ -20,10 +20,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene
 
     MakePointQuadTree( iScene, mPathStitchTool->RestrictToSelectedObjects );
 
-    UpdateSelectionBox( iScene
-                      , mPathStitchTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 void
@@ -70,7 +67,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mPathStitchTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor

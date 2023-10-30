@@ -16,11 +16,13 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     uint64 hudFlags = GetViewingMode();
 
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        if( mPathEditTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
+    }
+
     // Updates the selection box
-    UpdateSelectionBox( iScene
-                      , mPathEditTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 void
@@ -50,12 +52,14 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                                                                                   | VIEW_PATH_VERTEX_ALIGNMENT : 0;
 
 
-    // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_VERTEX )
+    // draw object details in any mode (if statement is useles per-se but here for clarity)
+    if( ( hudFlags & VIEW_MODE_VERTEX ) || ( hudFlags & VIEW_MODE_OBJECT ) )
     {
+        if( mPathEditTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
+
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mPathEditTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor

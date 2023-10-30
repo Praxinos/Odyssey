@@ -21,10 +21,12 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
 
-    UpdateSelectionBox( iScene
-                      , mPathCutTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        if( mPathCutTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
+    }
+
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 void
@@ -74,20 +76,35 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    //static BLRgba32 whiteColor = BLRgba32( 255, 255, 255, 255 );
 
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mPathCutTool->GetFocusedObjectList( iScene )
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+        if( mPathCutTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
+
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
     }
 
-    // draw selection box only if we restrict erasure to the selection 
+    // draw only white vertices in object mode, to view were the cutting is going to be
+    if( hudFlags & VIEW_MODE_OBJECT )
+    {
+        if( mPathCutTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
+
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , fgColor // in object mode, we don't show the selected vertices with a different color
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
+
+    // draw selection box only if we restrict cutting to the selection 
     if( mPathCutTool->RestrictToSelectedObjects )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );

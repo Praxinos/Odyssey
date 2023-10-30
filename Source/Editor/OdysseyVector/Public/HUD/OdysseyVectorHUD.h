@@ -120,19 +120,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                   , bool iWorld
                                   , uint64 iHUDFlags );
 
-        static void DrawObjectRecursive( BLContext* iBLContext
-                                       , FOdysseyVectorObject* iObject
-                                       , BLRgba32& iForegroundColor
-                                       , BLRgba32& iBackgroundColor
-                                       , BLRgba32& iHighlightColor
-                                       , uint64 iDrawingFlags );
+        void DrawObjectRecursive( BLContext* iBLContext
+                                , FOdysseyVectorScene* iScene
+                                , FOdysseyVectorObject* iObject
+                                , const BLRgba32& iForegroundColor
+                                , const BLRgba32& iBackgroundColor
+                                , const BLRgba32& iHighlightColor
+                                , uint64 iDrawingFlags );
 
-        static void DrawObjects( BLContext* iBLContext
-                               , std::list<FOdysseyVectorObject*>* iFocusedObjectList
-                               , BLRgba32& iForegroundColor
-                               , BLRgba32& iBackgroundColor
-                               , BLRgba32& iHighlightColor
-                               , uint64 iHUDFlags );
+        void DrawObjects( BLContext* iBLContext
+                        , FOdysseyVectorScene* iScene
+                        , const BLRgba32& iForegroundColor
+                        , const BLRgba32& iBackgroundColor
+                        , const BLRgba32& iHighlightColor
+                        , uint64 iHUDFlags );
 
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
@@ -155,6 +156,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         // HUD Drawing Flags
         static const uint64 VIEW_MODE_OBJECT             = 1 <<  0;
         static const uint64 VIEW_MODE_VERTEX             = 1 <<  1;
+        static const uint64 VIEW_MODE_ALL                = VIEW_MODE_OBJECT
+                                                         | VIEW_MODE_VERTEX;
         static const uint64 VIEW_PATH_VERTEX_VALENCE0    = 1 <<  2;
         static const uint64 VIEW_PATH_VERTEX_VALENCE1    = 1 <<  3;
         static const uint64 VIEW_PATH_VERTEX_VALENCE2    = 1 <<  4;
@@ -174,10 +177,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 VIEW_GROUPPAINT_ALL           = VIEW_GROUPPAINT_BUCKET
                                                           | VIEW_GROUPPAINT_BUCKET_HANDLE;
         static const uint64 VIEW_SELECTIONBOX             = 1 << 11;
+        static const uint64 VIEW_RESTRICTTOSELECTION      = 1 << 12;
+        static const uint64 VIEW_FORCEWORLD               = 1 << 13;
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) = 0;
         virtual void Reset( FOdysseyVectorScene* iScene ) = 0;
+
 
         void PickPoints( double iWorldX
                        , double iWorldY
@@ -189,20 +195,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         FSelectionBox& GetSelectionBox();
 
     protected:
-        void UpdateSelectionBoxVertexModeRecursive( FOdysseyVectorObject* iObject
-                                                  , bool iForceWorld );
+        void UpdateSelectionBoxVertexModeRecursive( FOdysseyVectorScene* iScene
+                                                  , FOdysseyVectorObject* iObject
+                                                  , uint64 iHUDFlags );
 
         void UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
-                                         , std::list<FOdysseyVectorObject*>& iSelectedObjectList
-                                         , bool iForceWorld );
+                                         , uint64 iHUDFlags );
+
+        void UpdateSelectionBoxObjectModeRecursive( FOdysseyVectorScene* iScene
+                                                  , FOdysseyVectorObject* iObject
+                                                  , uint64 iHUDFlags );
 
         void UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
-                                         , std::list<FOdysseyVectorObject*>& iSelectedObjectList
-                                         , bool iForceWorld );
+                                         , uint64 iHUDFlags );
 
         void UpdateSelectionBox( FOdysseyVectorScene* iScene
-                               , std::list<FOdysseyVectorObject*>& iSelectedObjectList
-                               , bool iForceWorld
                                , uint64 iHUDFlags );
 
         void DrawSelectionBox( BLContext* iBLContext
@@ -211,6 +218,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                              , BLRgba32& iBackgroundColor
                              , BLRgba32& iHighlightColor
                              , uint64 iHUDFlags );
+
+        virtual bool IsTargetObject( FOdysseyVectorScene* iScene
+                                   , FOdysseyVectorObject* iObject
+                                   , uint64 iHUDFlags ) = 0;
 
     protected:
         FPointQuadTree* mPointQuadTree;

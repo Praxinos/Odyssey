@@ -130,18 +130,14 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorScene* iScen
 
     if( iKey == EKeys::Delete )
     {
-        switch( GetEditor()->GetVectorEditionMode() )
+        if( GetEditor()->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
         {
-            case eVectorEditionMode::Object :
-                GetEditor()->DeleteObjectSelection( iScene );
-            break;
+            GetEditor()->DeleteObjectSelection( iScene );
+        }
 
-            case eVectorEditionMode::Vertex :
-                GetEditor()->DeletePointSelection( iScene, &GetFocusedObjectList( iScene ) );
-            break;
-
-            default:
-            break;
+        if( GetEditor()->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+        {
+            GetEditor()->DeletePointSelection( iScene, &GetFocusedObjectList( iScene ) );
         }
     }
 
@@ -311,7 +307,7 @@ uint64
 UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( FOdysseyVectorScene* iScene
                                                           , const FName& iPropertyName )
 {
-    // RestricttoSelection was changed, return redraw flag
+    // RestrictToSelection was changed, return redraw flag
     if( iPropertyName == "RestrictToSelectedObjects" )
     {
         iScene->GetEngine()->ResetHUD();
@@ -392,15 +388,14 @@ UOdysseyPainterEditorVectorBaseTool::CreateContextMenu()
 void
 UOdysseyPainterEditorVectorBaseTool::ExtendContextMenu( FMenuBuilder& menu )
 {
-    switch( GetEditor()->GetVectorEditionMode() )
+    if( GetEditor()->GetVectorEditionFlags() &  FOdysseyVectorHUD::VIEW_MODE_OBJECT )
     {
-        case eVectorEditionMode::Object :
-            ExtendContextMenuObject( menu );
-        break;
+        ExtendContextMenuObject( menu );
+    }
 
-        case eVectorEditionMode::Vertex :
-            ExtendContextMenuVertex( menu );
-        break;
+    if( GetEditor()->GetVectorEditionFlags() &  FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+    {
+        ExtendContextMenuVertex( menu );
     }
 }
 

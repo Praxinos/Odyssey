@@ -38,10 +38,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
 
     ClearMask();
 
-    UpdateSelectionBox( iScene
-                      , mEraserTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 void
@@ -61,7 +58,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mEraserTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor

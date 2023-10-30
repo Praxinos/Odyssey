@@ -18,10 +18,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScen
 
     mPickedCycleArray.clear();
 
-    UpdateSelectionBox( iScene
-                      , mPaintBucketTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 void
@@ -209,7 +206,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mPaintBucketTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor
@@ -225,7 +222,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mPaintBucketTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor

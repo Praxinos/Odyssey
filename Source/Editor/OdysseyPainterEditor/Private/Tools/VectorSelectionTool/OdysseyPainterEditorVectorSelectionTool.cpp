@@ -354,12 +354,12 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorScene* 
 
         // TODO: pass the mask image as arg to Pick function
         iEngine->SetBLMask( mPickHUD->GetMask() );
-        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
+        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
         {
             OnMouseUpVectorObjectMode( iScene, iPointInTexture, iKey );
         }
 
-        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
+        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
         {
             OnMouseUpVectorVertexMode( iScene, iPointInTexture, iKey );
         }

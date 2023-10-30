@@ -20,10 +20,7 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorScene* iScene)
     uint64 hudFlags = GetViewingMode();
 
     // Updates the selection box
-    UpdateSelectionBox( iScene
-                      , mPathPushTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 void
@@ -52,7 +49,7 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext, FOdysse
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mPathPushTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor

@@ -252,7 +252,7 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext, FOdysseyVec
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mGridTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor
@@ -564,10 +564,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene )
     uint64 hudFlags = GetViewingMode();
 
     // Updates the selection box
-    UpdateSelectionBox( iScene
-                      , mGridTool->GetSelectedObjectList( iScene )
-                      , mGridTool->World
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 
     if( mSelectionBox.rect.Area() )
     {

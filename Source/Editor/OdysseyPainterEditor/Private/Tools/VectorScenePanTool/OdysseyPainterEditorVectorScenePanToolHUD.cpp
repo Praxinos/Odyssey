@@ -21,10 +21,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
     uint64 hudFlags = GetViewingMode();
     // it's unused but we could use it at some point so, we init it anyways
-    UpdateSelectionBox( iScene
-                      , mScenePanTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 void
@@ -126,7 +123,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mScenePanTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor

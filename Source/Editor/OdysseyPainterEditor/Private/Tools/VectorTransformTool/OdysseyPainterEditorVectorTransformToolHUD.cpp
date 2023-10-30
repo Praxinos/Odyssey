@@ -329,10 +329,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
     uint64 hudFlags = GetViewingMode();
 
-    UpdateSelectionBox( iScene
-                      , mTransformTool->GetSelectedObjectList( iScene )
-                      , mTransformTool->World
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 
     //FOdysseyPainterEditorVectorSelectionToolHUD::Reset( iScene ); // Updates the selection box
 /*
@@ -359,7 +356,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mTransformTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor

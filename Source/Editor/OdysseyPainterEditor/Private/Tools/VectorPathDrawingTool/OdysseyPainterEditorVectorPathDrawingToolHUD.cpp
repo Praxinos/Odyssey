@@ -19,10 +19,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScen
     MakePointQuadTree( iScene, false );
 
     // Updates the selection box (it is not used in this tool but whatever)
-    UpdateSelectionBox( iScene
-                      , mPathDrawingTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 void
@@ -66,7 +63,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mPathDrawingTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor

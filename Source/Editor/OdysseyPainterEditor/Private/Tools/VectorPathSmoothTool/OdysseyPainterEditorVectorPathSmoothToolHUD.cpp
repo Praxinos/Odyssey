@@ -23,10 +23,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene
 
     MakePointQuadTree( iScene, mPathSmoothTool->RestrictToSelectedObjects );
 
-    UpdateSelectionBox( iScene
-                      , mPathSmoothTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 void
@@ -56,7 +53,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
     {
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mPathSmoothTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor

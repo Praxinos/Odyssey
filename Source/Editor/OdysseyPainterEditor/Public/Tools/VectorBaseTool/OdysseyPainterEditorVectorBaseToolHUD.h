@@ -16,7 +16,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
 
     protected:
         uint64 GetViewingMode();
-
+        virtual bool IsTargetObject( FOdysseyVectorScene* iScene
+                                   , FOdysseyVectorObject* iObject
+                                   , uint64 iHUDFlags ) override;
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;
         //bool mSelecting;

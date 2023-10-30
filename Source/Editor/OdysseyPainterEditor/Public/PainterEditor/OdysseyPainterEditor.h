@@ -33,12 +33,6 @@ class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
 
-enum class eVectorEditionMode : uint8
-{
-    Object = 0,
-    Vertex = 1
-};
-
 /**
  * Base class for a Painting Editor
  */
@@ -90,8 +84,8 @@ public:
     virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
 
-    void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
-    eVectorEditionMode GetVectorEditionMode();
+    void SetVectorEditionFlags( uint64 iVectorEditionFlags );
+    uint64 GetVectorEditionFlags();
 
     // generic reusable vector methods. 
     static void BringForward( FOdysseyVectorScene* iScene );
@@ -172,7 +166,7 @@ protected:
     TArray<UOdysseyPainterEditorTool*>       mTools;
     TSharedPtr<FOdysseyPainterEditorGUI>     mGUI;
 
-    eVectorEditionMode                       mVectorEditionMode;
+    uint64                          mVectorEditionFlags;
 
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;

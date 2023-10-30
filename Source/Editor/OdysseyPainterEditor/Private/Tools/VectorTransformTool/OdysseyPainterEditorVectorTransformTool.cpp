@@ -151,7 +151,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorScene
 
         mPickedPivot = hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ZAXIS ? &mTransformHUD->GetGizmo() : nullptr;
 
-        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
+        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
         {
             mSelectedPoints.clear();
             mTransformHUD->GetSelectedVertices( iScene, mSelectedPoints );
@@ -161,7 +161,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorScene
             mUndo = new FOdysseyVectorUndoPointPosition( iScene, mSelectedPoints );
         }
 
-        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
+        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
         {
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
@@ -258,7 +258,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         translateMatrix.translate( 0, translateBy.y );
     }
 
-    if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
+    if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
     {
         for( int i = 0; i < mSelectedPoints.size(); i++ )
         {
@@ -278,7 +278,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         pivot.y += translateBy.y;
     }
 
-    if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
+    if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
     {
         BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
                                     , pivot.y - selectionBox.rect.y );
@@ -396,7 +396,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
 
     BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );
 
-    if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
+    if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
     {
         for( int i = 0; i < mSelectedPoints.size(); i++ )
         {
@@ -407,7 +407,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
         }
     }
 
-    if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
+    if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
     {
         for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
         {
@@ -563,7 +563,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
             scalingMatrix.scale( x2mx1 / selectionBox.rect.w, y2my1 / selectionBox.rect.h );
         }
 
-        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Vertex )
+        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
         {
             double selectionBoxArea = selectionBox.rect.Area();
              // side note: the sqrt() is there because surface rises at the square of dimension factor. We have to correct that.
@@ -580,7 +580,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
             }
         }
 
-        if( mEditor->GetVectorEditionMode() == eVectorEditionMode::Object )
+        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
         {
             for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
             {

@@ -254,74 +254,91 @@ FOdysseyVectorHUD::GetSelectionBox()
 }
 
 void
-FOdysseyVectorHUD::UpdateSelectionBoxVertexModeRecursive( FOdysseyVectorObject* iObject
-                                                        , bool iForceWorld )
+FOdysseyVectorHUD::UpdateSelectionBoxVertexModeRecursive( FOdysseyVectorScene* iScene
+                                                        , FOdysseyVectorObject* iObject
+                                                        , uint64 iHUDFlags )
 {
-    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    if( IsTargetObject( iScene, iObject, iHUDFlags ) )
     {
-        FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(iObject);
-        ::ULIS::FRectD selectedPathBBox;
-
-        if( selectedPath->GetBBoxFromSelectedVertices( selectedPathBBox, true ) )
+        if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
-            mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedPathBBox
-                                                      : selectedPathBBox;
+            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(iObject);
+            ::ULIS::FRectD selectedPathBBox;
 
-            mSelectionBox.inited = true;
+            if( selectedPath->GetBBoxFromSelectedVertices( selectedPathBBox, true ) )
+            {
+                mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedPathBBox
+                                                          : selectedPathBBox;
+
+                mSelectionBox.inited = true;
+            }
         }
     }
 
     for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
     {
-        UpdateSelectionBoxVertexModeRecursive( childObject, iForceWorld );
+        UpdateSelectionBoxVertexModeRecursive( iScene, childObject, iHUDFlags );
     }
 }
 
 void
-FOdysseyVectorHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
-                                               , std::list<FOdysseyVectorObject*>& iSelectedObjectList
-                                               , bool iForceWorld )
+FOdysseyVectorHUD::UpdateSelectionBoxObjectModeRecursive( FOdysseyVectorScene* iScene
+                                                        , FOdysseyVectorObject* iObject
+                                                        , uint64 iHUDFlags )
 {
-    mSelectionBox.inited = false;
-    //mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
-    mSelectionBox.worldMatrix.reset();
-
-    for( FOdysseyVectorObject* selectedObject : iSelectedObjectList )
+    if( IsTargetObject( iScene, iObject, iHUDFlags ) )
     {
-        UpdateSelectionBoxVertexModeRecursive( selectedObject, iForceWorld );
+        ::ULIS::FRectD selectedObjectBBox = iObject->GetBBox( true );
+
+        mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedObjectBBox
+                                                  : selectedObjectBBox;
+
+        mSelectionBox.inited = true;
     }
 
-    BLMatrix2D::invert( mSelectionBox.inverseWorldMatrix, mSelectionBox.worldMatrix );
+    for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+    {
+        UpdateSelectionBoxObjectModeRecursive( iScene, childObject, iHUDFlags );
+    }
 }
 
 void
-FOdysseyVectorHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
-                                               , std::list<FOdysseyVectorObject*>& iSelectedObjectList
-                                               , bool iForceWorld )
+FOdysseyVectorHUD::UpdateSelectionBox( FOdysseyVectorScene* iScene
+                                     , uint64 iHUDFlags )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iSelectedObjectList;
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
     mSelectionBox.inited = false;
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
+    mSelectionBox.worldMatrix.reset();
 
-    if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
+    if( iHUDFlags & VIEW_MODE_OBJECT )
     {
-        FOdysseyVectorObject* selectedObject = selectedObjectList.front();
-
-        mSelectionBox.inited = true;
-        mSelectionBox.rect = selectedObject->GetBBox( false );
-
-        mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
-        mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
+        //case eVectorEditionMode::Object :
+        UpdateSelectionBoxObjectModeRecursive( iScene, iScene, iHUDFlags );
     }
-    else
+
+    if( iHUDFlags & VIEW_MODE_VERTEX )
     {
+        //case eVectorEditionMode::Vertex:
+        UpdateSelectionBoxVertexModeRecursive( iScene, iScene, iHUDFlags );
+    }
+
+    if( mSelectionBox.inited )
+    {
+        ::ULIS::FRectD rect = mSelectionBox.rect;
         BLPoint p0, p1, p2, p3;
-        ::ULIS::FRectD rect = FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList );
-        ::ULIS::FVec2D origin = ::ULIS::FVec2D( rect.x + (rect.w * 0.5f)
-                                              , rect.y + (rect.h * 0.5f) );
-        mSelectionBox.worldMatrix.reset();
-        mSelectionBox.worldMatrix.translate( origin.x, origin.y );
+
+        if( ( selectedObjectList.size() == 1 ) && ( ( iHUDFlags & VIEW_FORCEWORLD ) == 0 ) )
+        {
+            FOdysseyVectorObject* selectedObject = selectedObjectList.front();
+
+            mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
+        }
+        else
+        {
+            mSelectionBox.worldMatrix.reset();
+        }
 
         BLMatrix2D::invert( mSelectionBox.inverseWorldMatrix, mSelectionBox.worldMatrix );
 
@@ -330,30 +347,10 @@ FOdysseyVectorHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
         p2 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y + rect.h );
         p3 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y + rect.h );
 
-        mSelectionBox.inited = true;
         mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                        , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                                        , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
                                                        , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
-    }
-}
-
-void
-FOdysseyVectorHUD::UpdateSelectionBox( FOdysseyVectorScene* iScene
-                                     , std::list<FOdysseyVectorObject*>& iSelectedObjectList
-                                     , bool iForceWorld
-                                     , uint64 iHUDFlags )
-{
-    if( iHUDFlags & VIEW_MODE_OBJECT )
-    {
-        //case eVectorEditionMode::Object :
-        UpdateSelectionBoxObjectMode( iScene, iSelectedObjectList, iForceWorld );
-    }
-
-    if( iHUDFlags & VIEW_MODE_VERTEX )
-    {
-        //case eVectorEditionMode::Vertex:
-        UpdateSelectionBoxVertexMode( iScene, iSelectedObjectList, iForceWorld );
     }
 }
 
@@ -851,50 +848,54 @@ FOdysseyVectorHUD::DrawGroupPaint( BLContext* iBLContext
     iBLContext->restore();
 }
 
-// static
 void
 FOdysseyVectorHUD::DrawObjectRecursive( BLContext* iBLContext
+                                      , FOdysseyVectorScene* iScene
                                       , FOdysseyVectorObject* iObject
-                                      , BLRgba32& iForegroundColor
-                                      , BLRgba32& iBackgroundColor
-                                      , BLRgba32& iHighlightColor
+                                      , const BLRgba32& iForegroundColor
+                                      , const BLRgba32& iBackgroundColor
+                                      , const BLRgba32& iHighlightColor
                                       , uint64 iHUDFlags )
 {
-    if( iHUDFlags & VIEW_PATH_ALL )
+    if( IsTargetObject( iScene, iObject, iHUDFlags )  )
     {
-        if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        if( iHUDFlags & VIEW_PATH_ALL )
         {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+            if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+            {
+                FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
 
-            FOdysseyVectorHUD::DrawPath( iBLContext
-                                       , path
-                                       , iForegroundColor
-                                       , iBackgroundColor
-                                       , iHighlightColor
-                                       , true
-                                       , iHUDFlags );
+                FOdysseyVectorHUD::DrawPath( iBLContext
+                                           , path
+                                           , iForegroundColor
+                                           , iBackgroundColor
+                                           , iHighlightColor
+                                           , true
+                                           , iHUDFlags );
+            }
         }
-    }
 
-    if( iHUDFlags & VIEW_GROUPPAINT_ALL )
-    {
-        if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        if( iHUDFlags & VIEW_GROUPPAINT_ALL )
         {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
+            if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
 
-            FOdysseyVectorHUD::DrawGroupPaint( iBLContext
-                                             , paintGroup
-                                             , iForegroundColor
-                                             , iBackgroundColor
-                                             , iHighlightColor
-                                             , true
-                                             , iHUDFlags );
+                FOdysseyVectorHUD::DrawGroupPaint( iBLContext
+                                                 , paintGroup
+                                                 , iForegroundColor
+                                                 , iBackgroundColor
+                                                 , iHighlightColor
+                                                 , true
+                                                 , iHUDFlags );
+            }
         }
     }
 
     for( FOdysseyVectorObject* child : iObject->GetChildrenList() )
     {
         DrawObjectRecursive( iBLContext
+                           , iScene
                            , child
                            , iForegroundColor
                            , iBackgroundColor
@@ -903,30 +904,24 @@ FOdysseyVectorHUD::DrawObjectRecursive( BLContext* iBLContext
     }
 }
 
-// static
 void
 FOdysseyVectorHUD::DrawObjects( BLContext* iBLContext
-                              , std::list<FOdysseyVectorObject*>* iFocusedObjectList
-                              , BLRgba32& iForegroundColor
-                              , BLRgba32& iBackgroundColor
-                              , BLRgba32& iHighlightColor
+                              , FOdysseyVectorScene* iScene
+                              , const BLRgba32& iForegroundColor
+                              , const BLRgba32& iBackgroundColor
+                              , const BLRgba32& iHighlightColor
                               , uint64 iHUDFlags )
 {
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    if( iFocusedObjectList )
-    {
-        for( FOdysseyVectorObject* focusedObject : *iFocusedObjectList )
-        {
-            DrawObjectRecursive( iBLContext
-                               , focusedObject
-                               , iForegroundColor
-                               , iBackgroundColor
-                               , iHighlightColor
-                               , iHUDFlags );
-        }
-    }
+    DrawObjectRecursive( iBLContext
+                       , iScene
+                       , iScene
+                       , iForegroundColor
+                       , iBackgroundColor
+                       , iHighlightColor
+                       , iHUDFlags );
 
     iBLContext->restore();
 }

@@ -38,10 +38,12 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorScene* iScene 
 {
     uint64 hudFlags = GetViewingMode();
 
-    UpdateSelectionBox( iScene
-                      , mSelectionTool->GetSelectedObjectList( iScene )
-                      , false
-                      , hudFlags );
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        if( mSelectionTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
+    }
+
+    UpdateSelectionBox( iScene, hudFlags );
 }
 
 BLImage*
@@ -207,16 +209,18 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
+        if( mSelectionTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
+
         // static call
         FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , &mSelectionTool->GetFocusedObjectList( iScene )
+                                      , iScene
                                       , fgColor
                                       , bgColor
                                       , hcColor
                                       , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
     }
 
-    if( hudFlags & VIEW_MODE_OBJECT )
+    //if( hudFlags & VIEW_MODE_OBJECT )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

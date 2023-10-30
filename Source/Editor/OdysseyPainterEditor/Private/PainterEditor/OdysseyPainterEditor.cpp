@@ -66,7 +66,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEdite
     , mSource(nullptr)
     , mMeshSelector(MakeShared<FOdysseyMeshSelector>())
     , mSelectedTool(nullptr)
-    , mVectorEditionMode(eVectorEditionMode::Object)
+    , mVectorEditionFlags(FOdysseyVectorHUD::VIEW_MODE_OBJECT)
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
@@ -553,15 +553,15 @@ FOdysseyPainterEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 }
 
 void
-FOdysseyPainterEditor::SetVectorEditionMode(eVectorEditionMode iVectorEditionMode)
+FOdysseyPainterEditor::SetVectorEditionFlags( uint64 iVectorEditionFlags )
 {
-    mVectorEditionMode = iVectorEditionMode;
+    mVectorEditionFlags = iVectorEditionFlags;
 }
 
-eVectorEditionMode
-FOdysseyPainterEditor::GetVectorEditionMode()
+uint64
+FOdysseyPainterEditor::GetVectorEditionFlags()
 {
-    return mVectorEditionMode;
+    return mVectorEditionFlags;
 }
 
 //--------------------------------------------------------------------------------------
