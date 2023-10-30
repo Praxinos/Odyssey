@@ -51,6 +51,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
         UPROPERTY( EditAnywhere, Category = EraserTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
         double Radius;
 
+        UPROPERTY( EditAnywhere, Category = Behavior )
+        bool RestrictToSelection;
+
     private:
         FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;
 

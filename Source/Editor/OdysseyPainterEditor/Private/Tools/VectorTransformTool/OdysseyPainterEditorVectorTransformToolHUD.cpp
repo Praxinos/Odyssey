@@ -338,6 +338,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 */
 }
 
+//( object->HasSelectedAncestor() == false ) <---- put that in IsObjectAltered
+
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                                                  , FOdysseyVectorScene* iScene )

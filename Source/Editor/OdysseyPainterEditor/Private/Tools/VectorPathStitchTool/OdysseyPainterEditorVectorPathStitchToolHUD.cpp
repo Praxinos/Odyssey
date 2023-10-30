@@ -18,7 +18,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene
 
     mPickedPointArray.clear();
 
-    MakePointQuadTree( iScene, mPathStitchTool->RestrictToSelectedObjects );
+    MakePointQuadTree( iScene, /*mPathStitchTool->RestrictToSelectedObjects*/false );
 
     UpdateSelectionBox( iScene, hudFlags );
 }
@@ -75,11 +75,12 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
+/*
     if( mPathStitchTool->RestrictToSelectedObjects )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
-
+*/
     iBLContext->save();
     iBLContext->resetMatrix();
 

@@ -14,11 +14,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         virtual void Load( FOdysseyVectorScene* iScene ) = 0;
         virtual void Unload( FOdysseyVectorScene* iScene )  = 0;
 
+        void GetAlteredObjectList( FOdysseyVectorScene* iScene
+                                 , std::list<FOdysseyVectorObject*>& oObjectList );
     protected:
         uint64 GetViewingMode();
-        virtual bool IsTargetObject( FOdysseyVectorScene* iScene
-                                   , FOdysseyVectorObject* iObject
-                                   , uint64 iHUDFlags ) override;
+
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;
         //bool mSelecting;

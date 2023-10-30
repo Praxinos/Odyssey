@@ -38,8 +38,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture );
         virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture );
         virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
-        virtual std::list<FOdysseyVectorObject*>& GetFocusedObjectList( FOdysseyVectorScene* iScene );
-        virtual std::list<FOdysseyVectorObject*>& GetSelectedObjectList( FOdysseyVectorScene* iScene );
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
         virtual void ExtendContextMenu( FMenuBuilder& menu );
@@ -84,6 +82,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         bool mHasContextMenu;
 
     public:
-        UPROPERTY( EditAnywhere, Category = Behavior )
-        bool RestrictToSelectedObjects;
+        //UPROPERTY( EditAnywhere, Category = Behavior )
+        //bool RestrictToSelectedObjects;
 };

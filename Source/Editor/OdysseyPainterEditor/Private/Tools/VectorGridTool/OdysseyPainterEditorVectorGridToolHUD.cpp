@@ -236,6 +236,32 @@ FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
     MakeGrid( iScene );
 }
 
+// tells in which case an object has its HUD displayed by the eraser tool
+bool
+FOdysseyPainterEditorVectorGridToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                                         , FOdysseyVectorObject* iObject
+                                                         , uint64 iHUDFlags )
+{
+    return false;
+}
+
+// tells in which case an object is altered by the grid tool
+bool
+FOdysseyPainterEditorVectorGridToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
+                                                       , FOdysseyVectorObject* iObject
+                                                       , uint64 iHUDFlags )
+{
+    if( iScene->GetSelectedObjectList().size() )
+    {
+        return true;
+    }
+    {
+        return iObject->IsSelected();
+    }
+
+    return false;
+}
+
 void
 FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene )
 {
@@ -346,14 +372,31 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject
 void
 FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorScene* iScene )
 {
-    std::list<FOdysseyVectorObject*>& focusedObjectList = mSelectionTool->GetFocusedObjectList( iScene );
-
     mPointCount = 0;
 
-    for( FOdysseyVectorObject *obj : focusedObjectList )
-    {
-        mPointCount += MapObjectRecurse( obj );
-    }
+    Traverse( iScene
+            , iScene
+            , mSelectionTool->GetEditor()->GetVectorEditionFlags()
+            , [ this ]( FOdysseyVectorObject* object ) -> bool
+              {
+                  BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
+
+                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                  {
+                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+
+                      mPointCount += MapPaintGroupBuckets( paintGroup, inverseSpaceMatrix );
+                  }
+
+                  if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
+                  {
+                      FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                      mPointCount += MapPath( path, inverseSpaceMatrix );
+                  }
+
+                  return false;
+              } );
 }
 
 uint32
@@ -442,36 +485,6 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPaintGroup( FOdysseyVectorGroupPaint*
     }
  
     pointCount += MapPaintGroupBuckets( iPaintGroup, iInverseGridMatrix );
-
-    return pointCount;
-}
-
-uint32
-FOdysseyPainterEditorVectorGridToolHUD::MapObjectRecurse( FOdysseyVectorObject* iObject )
-{
-    BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
-    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
-    uint32 pointCount = 0;
-
-    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-    {
-        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
-
-        pointCount += MapPaintGroupBuckets( paintGroup, inverseSpaceMatrix );
-    }
-
-    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
-    {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
-
-        pointCount += MapPath( path, inverseSpaceMatrix );
-    }
-
-    // Recurse
-    for( FOdysseyVectorObject *child : childrenList )
-    {
-        pointCount += MapObjectRecurse( child );
-    }
 
     return pointCount;
 }

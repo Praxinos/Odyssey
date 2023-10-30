@@ -57,11 +57,12 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext, FOdysse
     }
 
     // draw selection box only if we restrict pushing to the selection 
+/*
     if( mPathPushTool->RestrictToSelectedObjects )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
-
+*/
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     iBLContext->save();
 

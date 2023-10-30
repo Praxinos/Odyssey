@@ -14,6 +14,7 @@ UOdysseyPainterEditorVectorPathCutTool::~UOdysseyPainterEditorVectorPathCutTool(
 }
 
 UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
+    : RestrictToSelection( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCutTool64");
 
@@ -154,7 +155,6 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorScene* iS
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        std::list<FOdysseyVectorObject*>& focusedObjectList = GetFocusedObjectList( iScene );
         std::vector<FOdysseyVectorVertex*> addedVertexArray;
         std::vector<FOdysseyVectorSegment*> addedSegmentArray;
         std::vector<FOdysseyVectorSegment*> removedSegmentArray;
@@ -165,13 +165,27 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorScene* iS
         addedSegmentArray.reserve(50);
         addedVertexArray.reserve(50);
 
-        for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-        {
-            CutObjectRecursive( focusedObject
-                              , addedVertexArray
-                              , addedSegmentArray
-                              , removedSegmentArray );
-        }
+        // traverse recursively on objects determined by the HUD
+        mPathCutHUD->Traverse( iScene
+                             , iScene
+                             , GetEditor()->GetVectorEditionFlags()
+                             , [ this
+                               , &addedVertexArray
+                               , &addedSegmentArray
+                               , &removedSegmentArray ](FOdysseyVectorObject* object) -> bool
+                               {
+                                   if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                                   {
+                                       FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                                       CutPath( path
+                                              , addedVertexArray
+                                              , addedSegmentArray
+                                              , removedSegmentArray );
+                                   }
+
+                                   return false; // keep traversing
+                               } );
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("VectorPathCutTool","Vector Path Cut Tool"));

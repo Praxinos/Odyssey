@@ -21,6 +21,7 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
     , mPickingMode  ( ePathPickingMode::Vertex )
     , PickingRadius(10.0f)
     , WidenAllAlong( true )
+    ,RestrictToSelection( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 
@@ -155,7 +156,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorS
                                                                , const FOdysseyPoint& iPointInTexture
                                                                , const FKey& iKey )
 {
-    std::list<FOdysseyVectorObject*>& focusedObjectList = GetFocusedObjectList( iScene );
     std::vector<FOdysseyVectorPath*> removedPathArray;
     std::vector<FOdysseyVectorVertex*> removedVertexArray;
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
@@ -169,42 +169,38 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorS
     addedSegmentArray.reserve( 10 );
 
     mPickedPointArray.clear();
+    mPickedPointArray.reserve( 10 );
 
-    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-    {
-        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(focusedObject);
+    mPathEditHUD->Traverse( iScene
+                          , iScene
+                          , GetEditor()->GetVectorEditionFlags()
+                          , [ this
+                            , &iPointInTexture
+                            , &removedPathArray
+                            , &removedVertexArray
+                            , &removedSegmentArray
+                            , &addedSegmentArray ]( FOdysseyVectorObject* object ) -> bool
+                            {
+                                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                                {
+                                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-            mPickedPointArray.reserve( 10 );
+                                    path->PickPoint( iPointInTexture.x
+                                                   , iPointInTexture.y
+                                                   , PickingRadius
+                                                   , mPickedPointArray
+                                                   , FOdysseyVectorPath::PICK_POINT );
 
-            path->PickPoint( iPointInTexture.x
-                           , iPointInTexture.y
-                           , PickingRadius
-                           , mPickedPointArray
-                           , FOdysseyVectorPath::PICK_POINT );
+                                    FOdysseyVectorPath::DeletePoint( path
+                                                                   , mPickedPointArray
+                                                                   , removedVertexArray
+                                                                   , removedSegmentArray
+                                                                   , removedPathArray
+                                                                   , addedSegmentArray );
+                                }
 
-            FOdysseyVectorPath::DeletePoint( path
-                                           , mPickedPointArray
-                                           , removedVertexArray
-                                           , removedSegmentArray
-                                           , removedPathArray
-                                           , addedSegmentArray );
-        }
-
-        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
-
-            GroupPaintDeletePoint( paintGroup
-                                 , removedVertexArray
-                                 , removedSegmentArray
-                                 , removedPathArray
-                                 , addedSegmentArray
-                                 , PickingRadius
-                                 , iPointInTexture );
-        }
-    }
+                                return false; // keep traversing
+                            } );
 
     if( mPickedPointArray.size() )
     {
@@ -278,51 +274,24 @@ PathPickPoint( FOdysseyVectorPath* iPath
     iPath->Invalidate();
 }
 
-static void
-GroupPaintPickPoint( FOdysseyVectorGroupPaint* iPaintGroup
-                   , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
-                   , double iSelectionRadius
-                   , uint64 iSelectionFlags
-                   , const FOdysseyPoint& iPointInTexture )
-{
-    std::list<FOdysseyVectorObject*>& childrenList = iPaintGroup->GetChildrenList();
-    std::list<FOdysseyVectorObject*>::iterator it;
-
-    for( it = childrenList.begin(); it != childrenList.end(); ++it )
-    {
-        FOdysseyVectorObject* childObject = *it;
-
-        if( childObject->GetClass() == FOdysseyVectorPath::StaticClass() )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(childObject);
-
-            PathPickPoint( path, iPickedPointArray, iSelectionRadius, iSelectionFlags, iPointInTexture );
-        }
-    }
-}
-
 void
 UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorScene* iScene
                                                               , std::vector<FOdysseyVectorPath*>& oPathArray )
 {
-    std::list<FOdysseyVectorObject*>& focusedObjectList = GetFocusedObjectList( iScene );
-
-    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-    {
-        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(focusedObject);
+    mPathEditHUD->Traverse( iScene
+                          , iScene
+                          , GetEditor()->GetVectorEditionFlags()
+                          , [ &oPathArray ]( FOdysseyVectorObject* object ) -> bool
+                            {
+                                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                                {
+                                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
  
-            oPathArray.push_back( path );
-        }
+                                    oPathArray.push_back( path );
+                                }
 
-        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
- 
-            paintGroup->GetChildrenPaths( oPathArray );
-        }
-    }
+                                return false; // keep traversing
+                            } );
 }
 
 void
@@ -330,28 +299,30 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorSce
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
-    std::list<FOdysseyVectorObject*>& focusedObjectList = GetFocusedObjectList( iScene );
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     mSelectedPathArray.clear();
     mPickedPointArray.clear();
 
-    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-    {
-        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(focusedObject);
+    mPathEditHUD->Traverse( iScene
+                          , iScene
+                          , GetEditor()->GetVectorEditionFlags()
+                          , [ this
+                            , &iPointInTexture ]( FOdysseyVectorObject* object ) -> bool
+                            {
+                                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                                {
+                                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+ 
+                                    PathPickPoint( path
+                                                 , mPickedPointArray
+                                                 , PickingRadius
+                                                 , mPickingFlags
+                                                 , iPointInTexture );
+                                }
 
-            PathPickPoint( path, mPickedPointArray, PickingRadius, mPickingFlags, iPointInTexture );
-        }
-
-        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
-
-            GroupPaintPickPoint( paintGroup, mPickedPointArray, PickingRadius, mPickingFlags, iPointInTexture );
-        }
-    }
+                                return false; // keep traversing
+                            } );
 
     if( mPickedPointArray.size() )
     {

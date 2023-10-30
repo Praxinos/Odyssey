@@ -253,12 +253,33 @@ FOdysseyVectorHUD::GetSelectionBox()
     return mSelectionBox;
 }
 
+// Parse on altered objects
+void
+FOdysseyVectorHUD::Traverse( FOdysseyVectorScene* iScene
+                           , FOdysseyVectorObject* iObject
+                           , uint64 iHUDFlags
+                           , std::function<bool(FOdysseyVectorObject*)> iCallback )
+{
+    if( IsObjectAltered( iScene, iObject, iHUDFlags ) )
+    {
+        if ( iCallback( iObject ) )
+        {
+            return; // stops parsing if returned value is true
+        }
+    }
+
+    for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+    {
+        Traverse( iScene, childObject, iHUDFlags, iCallback );
+    }
+}
+
 void
 FOdysseyVectorHUD::UpdateSelectionBoxVertexModeRecursive( FOdysseyVectorScene* iScene
                                                         , FOdysseyVectorObject* iObject
                                                         , uint64 iHUDFlags )
 {
-    if( IsTargetObject( iScene, iObject, iHUDFlags ) )
+    if( iObject->IsSelected() )
     {
         if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
@@ -286,7 +307,7 @@ FOdysseyVectorHUD::UpdateSelectionBoxObjectModeRecursive( FOdysseyVectorScene* i
                                                         , FOdysseyVectorObject* iObject
                                                         , uint64 iHUDFlags )
 {
-    if( IsTargetObject( iScene, iObject, iHUDFlags ) )
+    if( iObject->IsSelected() )
     {
         ::ULIS::FRectD selectedObjectBBox = iObject->GetBBox( true );
 
@@ -328,8 +349,8 @@ FOdysseyVectorHUD::UpdateSelectionBox( FOdysseyVectorScene* iScene
     {
         ::ULIS::FRectD rect = mSelectionBox.rect;
         BLPoint p0, p1, p2, p3;
-
-        if( ( selectedObjectList.size() == 1 ) && ( ( iHUDFlags & VIEW_FORCEWORLD ) == 0 ) )
+UE_LOG(LogTemp, Warning, TEXT("UpdateSelectionBox to refactor with FORCE argument") );
+        if( ( selectedObjectList.size() == 1 ) /*&& ( ( iHUDFlags & VIEW_FORCEWORLD ) == 0 )*/ )
         {
             FOdysseyVectorObject* selectedObject = selectedObjectList.front();
 
@@ -857,7 +878,7 @@ FOdysseyVectorHUD::DrawObjectRecursive( BLContext* iBLContext
                                       , const BLRgba32& iHighlightColor
                                       , uint64 iHUDFlags )
 {
-    if( IsTargetObject( iScene, iObject, iHUDFlags )  )
+    if( IsObjectDisplayed( iScene, iObject, iHUDFlags )  )
     {
         if( iHUDFlags & VIEW_PATH_ALL )
         {

@@ -19,6 +19,7 @@ UOdysseyPainterEditorVectorSelectionTool::~UOdysseyPainterEditorVectorSelectionT
 
 UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool()
     : SelectionShape( EOdysseyVectorSelectionShape::Freehand )
+    , RestrictToSelectedObjects( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
@@ -269,25 +270,6 @@ UOdysseyPainterEditorVectorSelectionTool::SelectVertexFromPath( FOdysseyVectorPa
 }
 
 void
-UOdysseyPainterEditorVectorSelectionTool::SelectVertexFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
-{
-    std::list<FOdysseyVectorObject*>& childrenObjectList = iPaintGroup->GetChildrenList();
-    std::list<FOdysseyVectorObject*>::iterator it;
-
-    for( it = childrenObjectList.begin(); it != childrenObjectList.end(); ++it )
-    {
-        FOdysseyVectorObject* child = (*it);
-
-        if( child->HasBaseClass(FOdysseyVectorPath::StaticClass()) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
-
-            SelectVertexFromPath( path );
-        }
-    }
-}
-
-void
 UOdysseyPainterEditorVectorSelectionTool::SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
 {
     std::vector<FOdysseyVectorBucket*> pickedBucketArray;
@@ -315,26 +297,29 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
                                                                    , const FOdysseyPoint& iPointInTexture
                                                                    , const FKey& iKey )
 {
-    std::list<FOdysseyVectorObject*>& focusedObjectList = GetFocusedObjectList( iScene );
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-    {
-        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(focusedObject);
+    mPickHUD->Traverse( iScene
+                      , iScene
+                      , GetEditor()->GetVectorEditionFlags()
+                      , [ this ]( FOdysseyVectorObject* object ) -> bool
+                        {
+                            if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                            {
+                                FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-            SelectVertexFromPath( path );
-        }
+                                SelectVertexFromPath( path );
+                            }
 
-        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
+                            if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                            {
+                                FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
-            SelectVertexFromPaintGroup( paintGroup );
-            SelectBucketFromPaintGroup( paintGroup );
-        }
-    }
+                                SelectBucketFromPaintGroup( paintGroup );
+                            }
+
+                            return false; // keep traversing
+                        } );
 
     iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 }

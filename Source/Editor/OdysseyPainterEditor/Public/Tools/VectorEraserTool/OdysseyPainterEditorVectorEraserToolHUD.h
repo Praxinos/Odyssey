@@ -17,6 +17,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorEraserToolHUD : public
         virtual void Unload( FOdysseyVectorScene* iScene ) override;
         void Init( uint32 iWidth, uint32 iHeight );
 
+        virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                      , FOdysseyVectorObject* iObject
+                                      , uint64 iHUDFlags ) override;
+
+        virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorObject* iObject
+                                    , uint64 iHUDFlags ) override;
+
         void SetPosition( double iX, double iY );
         void BlendMask( bool iBlending );
 

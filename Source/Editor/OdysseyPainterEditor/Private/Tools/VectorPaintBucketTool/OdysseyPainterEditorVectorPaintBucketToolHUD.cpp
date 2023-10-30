@@ -86,79 +86,34 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
     return PICK_NONE;
 }
 
-//static
-void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::RecursivePickCycles( FOdysseyVectorObject* iObject
-                                                                  , double iWorldX
-                                                                  , double iWorldY
-                                                                  , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray )
-{
-    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
-
-    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-    {
-        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
-        FOdysseyVectorCycle* pickedCycle = paintGroup->PickCycle( iWorldX, iWorldY );
-
-        if( pickedCycle )
-        {
-            oPickedCycleArray.push_back( pickedCycle );
-        }
-    }
-
-    for( FOdysseyVectorObject* child : childrenList )
-    {
-        RecursivePickCycles( child, iWorldX, iWorldY, oPickedCycleArray );
-    }
-}
-
 void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorScene* iScene
                                                          , double iWorldX
                                                          , double iWorldY
                                                          , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray )
 {
-    std::list<FOdysseyVectorObject*>& focusedObjectList = mPaintBucketTool->GetFocusedObjectList( iScene );
-
     oPickedCycleArray.clear();
 
-    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-    {
-        RecursivePickCycles( focusedObject, iWorldX, iWorldY, oPickedCycleArray );
-    }
-}
+    Traverse( iScene
+            , iScene
+            , mPaintBucketTool->GetEditor()->GetVectorEditionFlags()
+            , [ &iWorldX
+              , &iWorldY
+              , &oPickedCycleArray ]( FOdysseyVectorObject* object ) -> bool
+              {
+                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                  {
+                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+                      FOdysseyVectorCycle* pickedCycle = paintGroup->PickCycle( iWorldX, iWorldY );
 
-FOdysseyVectorBucket*
-FOdysseyPainterEditorVectorPaintBucketToolHUD::RecursivePickBucket( FOdysseyVectorObject* iObject
-                                                                  , double iWorldX
-                                                                  , double iWorldY )
-{
-    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
-    FOdysseyVectorBucket *pickedBucket = nullptr;
+                      if( pickedCycle )
+                      {
+                          oPickedCycleArray.push_back( pickedCycle );
+                      }
+                  }
 
-    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-    {
-        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
-        std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
-
-        for( FOdysseyVectorBucket *bucket : bucketList )
-        {
-            if( PickBucketArea( bucket, iWorldX, iWorldY ) )
-            {
-                return bucket;
-            }
-        }
-    }
-
-    for( FOdysseyVectorObject *child : childrenList )
-    {
-        pickedBucket = RecursivePickBucket( child, iWorldX, iWorldY );
-
-        if( pickedBucket )
-            break;
-    }
-
-    return pickedBucket;
+                  return false; // keep traversing
+              } );
 }
 
 FOdysseyVectorBucket*
@@ -166,20 +121,36 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorScene* 
                                                          , double iWorldX
                                                          , double iWorldY )
 {
-    std::list<FOdysseyVectorObject*>& focusedObjectList = mPaintBucketTool->GetFocusedObjectList( iScene );
     FOdysseyVectorBucket* pickedBucket = nullptr;
 
-    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
-    {
-        pickedBucket = RecursivePickBucket( focusedObject, iWorldX, iWorldY );
+    Traverse( iScene
+            , iScene
+            , mPaintBucketTool->GetEditor()->GetVectorEditionFlags()
+            , [ this
+              , &iWorldX
+              , &iWorldY
+              , &pickedBucket ]( FOdysseyVectorObject* object ) -> bool
+              {
+                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                  {
+                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+                      std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
 
-        if( pickedBucket )
-        {
-            return pickedBucket;
-        }
-    }
+                      for( FOdysseyVectorBucket *bucket : bucketList )
+                      {
+                          if( PickBucketArea( bucket, iWorldX, iWorldY ) )
+                          {
+                              pickedBucket = bucket;
 
-    return nullptr;
+                              return true; // stop traversing
+                          }
+                      }
+                  }
+
+                  return false; // keep traversing
+              } );
+
+    return pickedBucket;
 }
 
 // must be set at eache mouse hover event for memory safety issues.
@@ -232,11 +203,12 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
+/*
     if( mPaintBucketTool->RestrictToSelectedObjects )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
-
+*/
     iBLContext->save();
     iBLContext->resetMatrix();
 

@@ -21,11 +21,6 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
 
-    if( hudFlags & VIEW_MODE_VERTEX )
-    {
-        if( mPathCutTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
-    }
-
     UpdateSelectionBox( iScene, hudFlags );
 }
 
@@ -81,8 +76,6 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        if( mPathCutTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
-
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
@@ -94,8 +87,6 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     // draw only white vertices in object mode, to view were the cutting is going to be
     if( hudFlags & VIEW_MODE_OBJECT )
     {
-        if( mPathCutTool->RestrictToSelectedObjects ) hudFlags |= VIEW_RESTRICTTOSELECTION;
-
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
@@ -105,11 +96,12 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict cutting to the selection 
+/*
     if( mPathCutTool->RestrictToSelectedObjects )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
-
+*/
     iBLContext->save();
 
     iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );

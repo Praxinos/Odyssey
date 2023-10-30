@@ -135,6 +135,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                         , const BLRgba32& iHighlightColor
                         , uint64 iHUDFlags );
 
+        virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                      , FOdysseyVectorObject* iObject
+                                      , uint64 iHUDFlags ){ return false; };
+
+        virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorObject* iObject
+                                    , uint64 iHUDFlags ){ return false; };
+
+        void Traverse( FOdysseyVectorScene* iScene
+                     , FOdysseyVectorObject* iObject
+                     , uint64 iHUDFlags
+                     , std::function<bool(FOdysseyVectorObject*)> iCallback );
+
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
 
@@ -177,8 +190,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 VIEW_GROUPPAINT_ALL           = VIEW_GROUPPAINT_BUCKET
                                                           | VIEW_GROUPPAINT_BUCKET_HANDLE;
         static const uint64 VIEW_SELECTIONBOX             = 1 << 11;
-        static const uint64 VIEW_RESTRICTTOSELECTION      = 1 << 12;
-        static const uint64 VIEW_FORCEWORLD               = 1 << 13;
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) = 0;
@@ -218,10 +229,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                              , BLRgba32& iBackgroundColor
                              , BLRgba32& iHighlightColor
                              , uint64 iHUDFlags );
-
-        virtual bool IsTargetObject( FOdysseyVectorScene* iScene
-                                   , FOdysseyVectorObject* iObject
-                                   , uint64 iHUDFlags ) = 0;
 
     protected:
         FPointQuadTree* mPointQuadTree;

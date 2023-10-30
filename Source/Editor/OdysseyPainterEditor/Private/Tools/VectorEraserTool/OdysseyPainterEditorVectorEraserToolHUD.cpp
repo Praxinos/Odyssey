@@ -41,6 +41,50 @@ FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
     UpdateSelectionBox( iScene, hudFlags );
 }
 
+// tells in which case an object has its HUD displayed by the eraser tool
+bool
+FOdysseyPainterEditorVectorEraserToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                                           , FOdysseyVectorObject* iObject
+                                                           , uint64 iHUDFlags )
+{
+    // displays vertices etc... in vertex mode
+    if( iHUDFlags & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+    {
+        if( ( mEraserTool->RestrictToSelection == true ) && iObject->IsSelected() )
+        {
+            return true;
+        }
+
+        if( mEraserTool->RestrictToSelection == false )
+        {
+            return true;
+        }
+    }
+
+    // displays nothing in object mode
+
+    return false;
+}
+
+// tells in which case an object is altered by the eraser tool
+bool
+FOdysseyPainterEditorVectorEraserToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
+                                                         , FOdysseyVectorObject* iObject
+                                                         , uint64 iHUDFlags )
+{
+    if( ( mEraserTool->RestrictToSelection == true ) && iObject->IsSelected() )
+    {
+        return true;
+    }
+
+    if( mEraserTool->RestrictToSelection == false )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void
 FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
                                               , FOdysseyVectorScene* iScene )
@@ -66,7 +110,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
-    if( mEraserTool->RestrictToSelectedObjects )
+    if( mEraserTool->RestrictToSelection && iScene->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

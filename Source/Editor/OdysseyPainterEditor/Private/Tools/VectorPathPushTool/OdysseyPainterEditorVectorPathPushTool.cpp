@@ -93,6 +93,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorScene*
         mSegmentArray.clear();
         mPushedPointArray.clear();
 
+/*
         iEngine->PickSegments( iScene
                              , RestrictToSelectedObjects
                              , iPointInTexture.x
@@ -100,6 +101,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorScene*
                              , Radius
                              , mSegmentArray
                              , &pickedSegmentDistanceArray );
+*/
 
         // First step: find farthest distance to mouse pointer
         for( int i = 0; i < mSegmentArray.size(); i++ )

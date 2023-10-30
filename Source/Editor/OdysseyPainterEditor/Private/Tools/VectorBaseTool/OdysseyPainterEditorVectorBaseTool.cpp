@@ -14,8 +14,7 @@ UOdysseyPainterEditorVectorBaseTool::~UOdysseyPainterEditorVectorBaseTool()
 }
 
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
-    : RestrictToSelectedObjects( false )
-    , mHasContextMenu( true )
+    : mHasContextMenu( true )
 {
 }
 
@@ -32,31 +31,6 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
     return doubleClicked;
 }
 
-std::list<FOdysseyVectorObject*>&
-UOdysseyPainterEditorVectorBaseTool::GetSelectedObjectList( FOdysseyVectorScene* iScene )
-{
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-
-    if( selectedObjectList.size() )
-    {
-        return selectedObjectList;
-    }
-
-    // return scene as list
-    return iScene->GetEngine()->GetChildrenList();
-}
-
-std::list<FOdysseyVectorObject*>&
-UOdysseyPainterEditorVectorBaseTool::GetFocusedObjectList( FOdysseyVectorScene* iScene )
-{
-    if( RestrictToSelectedObjects )
-    {
-        return GetSelectedObjectList( iScene );
-    }
-
-    // return scene as list
-    return iScene->GetEngine()->GetChildrenList();
-}
 
 void
 UOdysseyPainterEditorVectorBaseTool::Unload()
@@ -137,7 +111,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorScene* iScen
 
         if( GetEditor()->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
         {
-            GetEditor()->DeletePointSelection( iScene, &GetFocusedObjectList( iScene ) );
+UE_LOG(LogTemp, Warning, TEXT("UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector to refactor") );
+            GetEditor()->DeletePointSelection( iScene, nullptr );
         }
     }
 
@@ -412,8 +387,10 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
             FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            std::list<FOdysseyVectorObject*>* focusedObjectList = &GetFocusedObjectList( vectorScene );
 
+            std::list<FOdysseyVectorObject*>* focusedObjectList = nullptr;
+
+UE_LOG(LogTemp, Warning, TEXT("UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject to refactor") );
         // Commented-out: sections are not needed here as they would conflict with the section
         // just created by the Edit Menu when this tool's menu appears in the Edit Menu
         // See FOdysseyPainterEditor::AddEditMenuEntry() for details
@@ -500,7 +477,8 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
             FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-            std::list<FOdysseyVectorObject*>* focusedObjectList = &GetFocusedObjectList( vectorScene );
+            std::list<FOdysseyVectorObject*>* focusedObjectList = /*&GetFocusedObjectList( vectorScene )*/nullptr;
+UE_LOG(LogTemp, Warning, TEXT("UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex to refactor") );
 
         // Commented-out: sections are not needed here as they would conflict with the section
         // just created by the Edit Menu when this tool's menu appears in the Edit Menu

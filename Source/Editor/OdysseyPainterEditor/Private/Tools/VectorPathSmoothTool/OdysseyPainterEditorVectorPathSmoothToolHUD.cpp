@@ -21,7 +21,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene
     mPickedPointArray.clear();
     mPickedPointArray.reserve( 50 );
 
-    MakePointQuadTree( iScene, mPathSmoothTool->RestrictToSelectedObjects );
+    MakePointQuadTree( iScene, /*mPathSmoothTool->RestrictToSelection*/false );
 
     UpdateSelectionBox( iScene, hudFlags );
 }
@@ -61,10 +61,12 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
+/*
     if( mPathSmoothTool->RestrictToSelectedObjects )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
+*/
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
     iBLContext->save();

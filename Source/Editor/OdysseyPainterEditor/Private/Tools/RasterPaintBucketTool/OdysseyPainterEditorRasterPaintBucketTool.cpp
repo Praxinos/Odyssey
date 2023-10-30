@@ -149,14 +149,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iP
 {
 }
 
-bool
-UOdysseyPainterEditorRasterPaintBucketTool::OnKeyDownVector( FOdysseyVectorEngine* iEngine
-                                                           , FOdysseyVectorScene* iScene
-                                                           , const FKey& iKey )
-{
-    return false;
-}
-
 static void floodFill ( int32 x
                       , int32 y
                       , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iSrcImage
