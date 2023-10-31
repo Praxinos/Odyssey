@@ -265,7 +265,7 @@ FOdysseyVectorHUD::UpdateSelectionBoxVertexModeRecursive( FOdysseyVectorScene* i
                                                         , FOdysseyVectorObject* iObject
                                                         , uint64 iHUDFlags )
 {
-    if( iObject->IsSelected() )
+    if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
     {
         if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
@@ -312,6 +312,7 @@ FOdysseyVectorHUD::UpdateSelectionBoxObjectModeRecursive( FOdysseyVectorScene* i
 
 void
 FOdysseyVectorHUD::UpdateSelectionBox( FOdysseyVectorScene* iScene
+                                     , bool iForceWorld
                                      , uint64 iHUDFlags )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
@@ -336,8 +337,8 @@ FOdysseyVectorHUD::UpdateSelectionBox( FOdysseyVectorScene* iScene
     {
         ::ULIS::FRectD rect = mSelectionBox.rect;
         BLPoint p0, p1, p2, p3;
-UE_LOG(LogTemp, Warning, TEXT("UpdateSelectionBox to refactor with FORCE argument") );
-        if( ( selectedObjectList.size() == 1 ) /*&& ( ( iHUDFlags & VIEW_FORCEWORLD ) == 0 )*/ )
+
+        if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
         {
             FOdysseyVectorObject* selectedObject = selectedObjectList.front();
 
@@ -506,7 +507,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
                                  , point.x
                                  , point.y
                                  , VERTEXRADIUS
-                                 , iVertex->IsSelected() ? hcColor : fgColor
+                                 , iVertex->IsSelected() && ( iHUDFlags & VIEW_MODE_VERTEX ) ? hcColor : fgColor
                                  , bgColor );
 
     if ( iHUDFlags & VIEW_PATH_VERTEX_ALIGNMENT )
@@ -957,3 +958,28 @@ FOdysseyVectorHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uin
     }
 }
 */
+
+// static
+bool
+FOdysseyVectorHUD::IsPaintedPath( FOdysseyVectorObject* iObject, bool iHasParentSelected )
+{
+    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+        FOdysseyVectorObject* parent = path->GetParent();
+
+        if( parent->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(parent);
+
+            if( iHasParentSelected )
+            {
+                return paintGroup->IsSelected() ? true : false;
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}

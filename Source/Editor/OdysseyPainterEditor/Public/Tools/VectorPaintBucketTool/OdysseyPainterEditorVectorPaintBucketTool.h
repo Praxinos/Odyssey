@@ -99,9 +99,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         UPROPERTY( EditAnywhere, Category = PaintBucketTool )
         double PickingRadius;
 
-        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
-        bool RestrictToSelectedPaintGroups;
-
     protected:
         FOdysseyVectorBucket* mPickedBucket;
         //FOdysseyVectorObject* mPickedObject;

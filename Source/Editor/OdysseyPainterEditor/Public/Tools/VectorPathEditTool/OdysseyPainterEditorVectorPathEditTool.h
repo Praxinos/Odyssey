@@ -99,7 +99,4 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
 
         UPROPERTY( EditAnywhere, Category = PathEditTool )
         bool WidenAllAlong;
-
-        UPROPERTY( EditAnywhere, Category = PathEditTool )
-        bool RestrictToSelectedObjects;
 };

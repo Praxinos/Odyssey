@@ -15,7 +15,7 @@ void
 FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     // Updates the selection box
-    UpdateSelectionBox( iScene, mPathEditTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mPathEditTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 void
@@ -34,14 +34,16 @@ FOdysseyPainterEditorVectorPathEditToolHUD::IsObjectDisplayed( FOdysseyVectorSce
                                                              , FOdysseyVectorObject* iObject
                                                              , uint64 iHUDFlags )
 {
-    if( mPathEditTool->RestrictToSelectedObjects == false )
+    if( iScene->GetSelectedObjectList().size() == 0 )
     {
         return true;
     }
-
-    if( ( mPathEditTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    else
     {
-        return true;
+        if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
+        {
+            return true;
+        }
     }
 
     return false;
@@ -53,14 +55,16 @@ FOdysseyPainterEditorVectorPathEditToolHUD::IsObjectAltered( FOdysseyVectorScene
                                                            , FOdysseyVectorObject* iObject
                                                            , uint64 iHUDFlags )
 {
-    if( mPathEditTool->RestrictToSelectedObjects == false )
+    if( iScene->GetSelectedObjectList().size() == 0 )
     {
         return true;
     }
-
-    if( ( mPathEditTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    else
     {
-        return true;
+        if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
+        {
+            return true;
+        }
     }
 
     return false;
@@ -99,12 +103,10 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
-/*
-    if( mPathEditTool->RestrictToSelection )
-    {
-        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
-    }
-*/
+    if( iScene->GetSelectedObjectList().size() )
+//    {
+//        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+//    }
 
     iBLContext->save();
 

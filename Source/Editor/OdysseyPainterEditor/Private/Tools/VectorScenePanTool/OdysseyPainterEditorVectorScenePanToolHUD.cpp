@@ -20,7 +20,7 @@ void
 FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
     // it's unused but we could use it at some point so, we init it anyways
-    UpdateSelectionBox( iScene, mScenePanTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mScenePanTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 void

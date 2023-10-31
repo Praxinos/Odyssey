@@ -36,7 +36,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     ClearMask();
 
-    UpdateSelectionBox( iScene, mEraserTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mEraserTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 // tells in which case an object is displayed by the tool
@@ -47,14 +47,16 @@ FOdysseyPainterEditorVectorEraserToolHUD::IsObjectDisplayed( FOdysseyVectorScene
 {
     if ( iHUDFlags & VIEW_MODE_VERTEX )
     {
-        if( mEraserTool->RestrictToSelection == false )
+        if( iScene->GetSelectedObjectList().size() == 0 )
         {
             return true;
         }
-
-        if( ( mEraserTool->RestrictToSelection == true ) && iObject->IsSelected() )
+        else
         {
-            return true;
+            if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+            {
+                return true;
+            }
         }
     }
 
@@ -67,14 +69,16 @@ FOdysseyPainterEditorVectorEraserToolHUD::IsObjectAltered( FOdysseyVectorScene* 
                                                          , FOdysseyVectorObject* iObject
                                                          , uint64 iHUDFlags )
 {
-    if( mEraserTool->RestrictToSelection == false )
+    if( iScene->GetSelectedObjectList().size() == 0 )
     {
         return true;
     }
-
-    if( ( mEraserTool->RestrictToSelection == true ) && iObject->IsSelected() )
+    else
     {
-        return true;
+        if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+        {
+            return true;
+        }
     }
 
     return false;
@@ -105,7 +109,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
-    if( mEraserTool->RestrictToSelection && iScene->GetSelectedObjectList().size() )
+    if( iScene->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

@@ -320,7 +320,11 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorScene* i
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
+        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
         iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
+
+        vectorEngine->ResetHUD();
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

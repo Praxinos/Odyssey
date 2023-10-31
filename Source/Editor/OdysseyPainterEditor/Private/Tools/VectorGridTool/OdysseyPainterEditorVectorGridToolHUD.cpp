@@ -250,8 +250,11 @@ FOdysseyPainterEditorVectorGridToolHUD::IsObjectDisplayed( FOdysseyVectorScene* 
             return true;
         }
         {
-            // otherwise it applies to selected objects only
-            return iObject->IsSelected();
+            if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+            {
+                // otherwise it applies to selected objects only
+                return true;
+            }
         }
     }
 
@@ -270,8 +273,11 @@ FOdysseyPainterEditorVectorGridToolHUD::IsObjectAltered( FOdysseyVectorScene* iS
         return true;
     }
     {
-        // otherwise it applies to selected objects only
-        return iObject->IsSelected();
+        if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+        {
+            // otherwise it applies to selected objects only
+            return true;
+        }
     }
 
     return false;
@@ -590,7 +596,7 @@ void
 FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene, uint64 iHUDFlags )
 {
     // Updates the selection box
-    UpdateSelectionBox( iScene, iHUDFlags );
+    UpdateSelectionBox( iScene, mGridTool->World, iHUDFlags );
 
     if( mSelectionBox.rect.Area() )
     {

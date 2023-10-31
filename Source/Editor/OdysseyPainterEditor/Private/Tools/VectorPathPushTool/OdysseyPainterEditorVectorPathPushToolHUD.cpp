@@ -19,7 +19,7 @@ void
 FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
     // Updates the selection box
-    UpdateSelectionBox( iScene, mPathPushTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mPathPushTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 void
@@ -42,10 +42,12 @@ FOdysseyPainterEditorVectorPathPushToolHUD::IsObjectDisplayed( FOdysseyVectorSce
     {
         return true;
     }
-
-    if( ( mPathPushTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    else
     {
-        return true;
+        if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+        {
+            return true;
+        }
     }
 
     return false;
@@ -61,10 +63,12 @@ FOdysseyPainterEditorVectorPathPushToolHUD::IsObjectAltered( FOdysseyVectorScene
     {
         return true;
     }
-
-    if( ( mPathPushTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    else
     {
-        return true;
+        if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+        {
+            return true;
+        }
     }
 
     return false;

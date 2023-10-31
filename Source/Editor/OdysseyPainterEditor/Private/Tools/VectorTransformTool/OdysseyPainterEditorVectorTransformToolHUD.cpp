@@ -327,7 +327,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
-    UpdateSelectionBox( iScene, mTransformTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, mTransformTool->World, mTransformTool->GetEditor()->GetVectorEditionFlags() );
 
     //FOdysseyPainterEditorVectorSelectionToolHUD::Reset( iScene ); // Updates the selection box
 /*
@@ -337,6 +337,61 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 }
 
 //( object->HasSelectedAncestor() == false ) <---- put that in IsObjectAltered
+
+// tells in which case an object is displayed by the tool
+bool
+FOdysseyPainterEditorVectorTransformToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                                              , FOdysseyVectorObject* iObject
+                                                              , uint64 iHUDFlags )
+{
+    if( iHUDFlags & VIEW_MODE_VERTEX )
+    {
+        if( iScene->GetSelectedObjectList().size() == 0 )
+        {
+            return true;
+        }
+        else
+        {
+            if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// tells in which case an object is altered by the tool
+bool
+FOdysseyPainterEditorVectorTransformToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
+                                                            , FOdysseyVectorObject* iObject
+                                                            , uint64 iHUDFlags )
+{
+    if( iScene->GetSelectedObjectList().size() == 0 )
+    {
+        // We only move the top-most object, otherwise we'll move objects multiple times
+        // as a matrix operation is resursive per-se
+        if( iObject->GetClass() == FOdysseyVectorScene::StaticClass() )
+        {
+            return true;
+        }
+    }
+    else
+    {
+        // We only move the top-most object, otherwise we'll move objects multiple times
+        // as a matrix operation is resursive per-se
+        if( iObject->HasSelectedAncestor() == false )
+        {
+            if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
 
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext

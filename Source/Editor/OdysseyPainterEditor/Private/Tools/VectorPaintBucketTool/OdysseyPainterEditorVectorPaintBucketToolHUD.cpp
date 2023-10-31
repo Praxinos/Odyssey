@@ -16,7 +16,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScen
 {
     mPickedCycleArray.clear();
 
-    UpdateSelectionBox( iScene, mPaintBucketTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mPaintBucketTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 void
@@ -166,50 +166,30 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::IsObjectDisplayed( FOdysseyVector
 {
     if( iHUDFlags & VIEW_MODE_VERTEX )
     {
-        if( mPaintBucketTool->RestrictToSelectedPaintGroups == false )
+        if( iScene->GetSelectedObjectList().size() == false )
         {
             return true;
         }
         else
         {
-            if ( iObject->IsSelected() )
+            if ( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
             {
-                if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                // display paintgroup children path details too
-                if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                {
-                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
-                    FOdysseyVectorObject* parent = path->GetParent();
-
-                    if( parent->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                    {
-                        return parent->IsSelected();
-                    }
-                }
+                return true;
             }
         }
     }
 
     if( iHUDFlags & VIEW_MODE_OBJECT )
     {
-        if( mPaintBucketTool->RestrictToSelectedPaintGroups == false )
+        if( iScene->GetSelectedObjectList().size() == false )
         {
             return true;
         }
         else
         {
-            if ( iObject->IsSelected() )
+            if ( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
             {
-                if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                {
-                    return true;
-                }
+                return true;
             }
         }
     }
@@ -223,7 +203,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::IsObjectAltered( FOdysseyVectorSc
                                                               , FOdysseyVectorObject* iObject
                                                               , uint64 iHUDFlags )
 {
-    if( mPaintBucketTool->RestrictToSelectedPaintGroups == false )
+    if( iScene->GetSelectedObjectList().size() == false )
     {
         return true;
     }
@@ -284,7 +264,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
-    if( mPaintBucketTool->RestrictToSelectedPaintGroups && iScene->GetSelectedObjectList().size() )
+    if( iScene->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

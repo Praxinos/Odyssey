@@ -58,6 +58,8 @@ class ODYSSEYVECTOR_API FPointQuadTree
 class ODYSSEYVECTOR_API FOdysseyVectorHUD
 {
     public:
+        static bool IsPaintedPath( FOdysseyVectorObject* iObject, bool iHasParentSelected );
+
         static FColor& GetForegroundColor();
         static FColor& GetBackgroundColor();
         static FColor& GetHighlightColor();
@@ -221,6 +223,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                          , uint64 iHUDFlags );
 
         void UpdateSelectionBox( FOdysseyVectorScene* iScene
+                               , bool iForceWorld
                                , uint64 iHUDFlags );
 
         void DrawSelectionBox( BLContext* iBLContext

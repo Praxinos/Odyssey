@@ -19,7 +19,7 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
 
-    UpdateSelectionBox( iScene, mPathCutTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mPathCutTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 void
@@ -64,14 +64,16 @@ FOdysseyPainterEditorVectorPathCutToolHUD::IsObjectDisplayed( FOdysseyVectorScen
                                                             , FOdysseyVectorObject* iObject
                                                             , uint64 iHUDFlags )
 {
-    if( mPathCutTool->RestrictToSelectedObjects == false )
+    if( iScene->GetSelectedObjectList().size() == 0 )
     {
         return true;
     }
-
-    if( ( mPathCutTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    else
     {
-        return true;
+        if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
+        {
+            return true;
+        }
     }
 
     return false;
@@ -83,14 +85,16 @@ FOdysseyPainterEditorVectorPathCutToolHUD::IsObjectAltered( FOdysseyVectorScene*
                                                           , FOdysseyVectorObject* iObject
                                                           , uint64 iHUDFlags )
 {
-    if( mPathCutTool->RestrictToSelectedObjects == false )
+    if( iScene->GetSelectedObjectList().size() == 0 )
     {
         return true;
     }
-
-    if( ( mPathCutTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    else
     {
-        return true;
+        if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
+        {
+            return true;
+        }
     }
 
     return false;
@@ -132,12 +136,11 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict cutting to the selection 
-/*
-    if( mPathCutTool->RestrictToSelectedObjects )
+    if( iScene->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
-*/
+
     iBLContext->save();
 
     iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );

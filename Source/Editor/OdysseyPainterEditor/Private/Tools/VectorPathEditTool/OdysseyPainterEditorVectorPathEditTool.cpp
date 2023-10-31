@@ -21,7 +21,6 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
     , mPickingMode  ( ePathPickingMode::Vertex )
     , PickingRadius(10.0f)
     , WidenAllAlong( true )
-    , RestrictToSelectedObjects( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 
@@ -613,6 +612,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorScene* i
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
+        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
         if( mPickedPointArray.size() == 0 )
         {
             // use the pick tool if the Down and Up events were at the same position (no dragging )
@@ -621,6 +622,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorScene* i
         }
 
         iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+        vectorEngine->ResetHUD();
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

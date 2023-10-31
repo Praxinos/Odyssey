@@ -41,14 +41,16 @@ FOdysseyPainterEditorVectorSelectionToolHUD::IsObjectDisplayed( FOdysseyVectorSc
 {
     if( iHUDFlags & VIEW_MODE_VERTEX )
     {
-        if( mSelectionTool->RestrictToSelectedObjects == false )
+        if( iScene->GetSelectedObjectList().size() == 0 )
         {
             return true;
         }
-
-        if( ( mSelectionTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+        else
         {
-            return true;
+            if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
+            {
+                return true;
+            }
         }
     }
 
@@ -63,14 +65,16 @@ FOdysseyPainterEditorVectorSelectionToolHUD::IsObjectAltered( FOdysseyVectorScen
 {
     if( iHUDFlags & VIEW_MODE_VERTEX )
     {
-        if( mSelectionTool->RestrictToSelectedObjects == false )
+        if( iScene->GetSelectedObjectList().size() == 0 )
         {
             return true;
         }
-
-        if( ( mSelectionTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+        else
         {
-            return true;
+            if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
+            {
+                return true;
+            }
         }
     }
 
@@ -80,7 +84,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::IsObjectAltered( FOdysseyVectorScen
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    UpdateSelectionBox( iScene, mSelectionTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mSelectionTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 BLImage*

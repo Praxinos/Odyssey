@@ -20,7 +20,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene
 
     MakePointQuadTree( iScene, hudFlags );
 
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, false, hudFlags );
 }
 
 void

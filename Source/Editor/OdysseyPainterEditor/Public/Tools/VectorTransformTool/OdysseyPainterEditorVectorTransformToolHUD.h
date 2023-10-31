@@ -29,6 +29,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
 
+        virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                      , FOdysseyVectorObject* iObject
+                                      , uint64 iHUDFlags );
+
+        virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorObject* iObject
+                                    , uint64 iHUDFlags );
+
         uint32 SetCursorPosition( double iWorldX, double iWorldY );
         void SetGizmo( double iLocalX, double iLocalY );
         ::ULIS::FVec2D& GetGizmo();

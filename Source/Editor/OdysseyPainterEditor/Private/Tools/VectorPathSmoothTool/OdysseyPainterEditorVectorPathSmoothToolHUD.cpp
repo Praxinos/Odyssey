@@ -23,7 +23,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene
 
     MakePointQuadTree( iScene, hudFlags );
 
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, false, hudFlags );
 }
 
 void
@@ -46,10 +46,12 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::IsObjectDisplayed( FOdysseyVectorS
     {
         return true;
     }
-
-    if( ( mPathSmoothTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    else
     {
-        return true;
+        if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
+        {
+            return true;
+        }
     }
 
     return false;
@@ -65,10 +67,12 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::IsObjectAltered( FOdysseyVectorSce
     {
         return true;
     }
-
-    if( ( mPathSmoothTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    else
     {
-        return true;
+        if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+        {
+            return true;
+        }
     }
 
     return false;

@@ -31,7 +31,6 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
     return doubleClicked;
 }
 
-
 void
 UOdysseyPainterEditorVectorBaseTool::Unload()
 {

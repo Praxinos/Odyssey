@@ -19,7 +19,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScen
     MakePointQuadTree( iScene, hudFlags );
 
     // Updates the selection box (it is not used in this tool but whatever)
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, false, hudFlags );
 }
 
 void
@@ -38,13 +38,28 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::GetStitchedPointArray()
     return mStitchedPointArray;
 }
 
-// tells in which case an object is displayed by the tool
+// tells in which case the object's HUD is displayed by the tool
 bool
 FOdysseyPainterEditorVectorPathDrawingToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
                                                                 , FOdysseyVectorObject* iObject
                                                                 , uint64 iHUDFlags )
 {
-    return true;
+    if ( iHUDFlags & VIEW_MODE_VERTEX )
+    {
+        if( iScene->GetSelectedObjectList().size() == 0 )
+        {
+            return true;
+        }
+        else
+        {
+            if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 // tells in which case an object is altered by the tool
@@ -53,6 +68,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::IsObjectAltered( FOdysseyVectorSc
                                                               , FOdysseyVectorObject* iObject
                                                               , uint64 iHUDFlags )
 {
+    // none
     return false;
 }
 

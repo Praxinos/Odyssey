@@ -83,7 +83,4 @@ protected:
 public:
     UPROPERTY( EditAnywhere, Category = SelectionTool )
     EOdysseyVectorSelectionShape SelectionShape;
-
-    UPROPERTY( EditAnywhere, Category = BehaviorInVertexMode )
-    bool RestrictToSelectedObjects;
 };
