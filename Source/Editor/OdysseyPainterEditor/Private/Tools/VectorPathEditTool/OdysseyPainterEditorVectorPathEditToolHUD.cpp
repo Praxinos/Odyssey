@@ -30,6 +30,44 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Unload( FOdysseyVectorScene* iScene 
 {
 }
 
+// tells in which case an object is displayed by the tool
+bool
+FOdysseyPainterEditorVectorPathEditToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                                             , FOdysseyVectorObject* iObject
+                                                             , uint64 iHUDFlags )
+{
+    if( mPathEditTool->RestrictToSelectedObjects == false )
+    {
+        return true;
+    }
+
+    if( ( mPathEditTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+// tells in which case an object is altered by the tool
+bool
+FOdysseyPainterEditorVectorPathEditToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
+                                                           , FOdysseyVectorObject* iObject
+                                                           , uint64 iHUDFlags )
+{
+    if( mPathEditTool->RestrictToSelectedObjects == false )
+    {
+        return true;
+    }
+
+    if( ( mPathEditTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorScene* iScene )

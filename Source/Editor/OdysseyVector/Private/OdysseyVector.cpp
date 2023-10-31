@@ -234,7 +234,7 @@ FOdysseyVector::BezierExtract( ::ULIS::FVec2D& iP0
 bool
 FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
                           , const ::ULIS::FRectD& iMaskRect
-                          , uint8* iPixelData )
+                          , const uint8* iPixelData )
 {
     double xmin = ::ULIS::FMath::Min4( iWorldBezier[0].x, iWorldBezier[1].x
                                      , iWorldBezier[2].x, iWorldBezier[3].x );

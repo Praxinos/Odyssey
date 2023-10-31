@@ -84,24 +84,23 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
                                 , const FOdysseyPoint& iPointInTexture );
 
     public:
-/*
-        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
-        bool RestrictToSelection;
-*/
-        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
         bool Propagate;
 
-        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
         eBucketColorMode ColorMode;
 
-        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
         FColor Color1;
 
-        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
         FColor Color2;
 
-        UPROPERTY( EditAnywhere, Category = VectorPaintBucketTool )
+        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
         double PickingRadius;
+
+        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+        bool RestrictToSelectedPaintGroups;
 
     protected:
         FOdysseyVectorBucket* mPickedBucket;

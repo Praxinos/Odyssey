@@ -14,7 +14,7 @@ UOdysseyPainterEditorVectorPathCutTool::~UOdysseyPainterEditorVectorPathCutTool(
 }
 
 UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
-    : RestrictToSelection( false )
+    : RestrictToSelectedObjects( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCutTool64");
 

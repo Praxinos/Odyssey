@@ -41,7 +41,7 @@ namespace FOdysseyVector
 
     bool ODYSSEYVECTOR_API PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
                                      , const ::ULIS::FRectD& iMaskRect
-                                     , uint8* iPixelData );
+                                     , const uint8* iPixelData );
 
     double ODYSSEYVECTOR_API GetBezierApproximateLength( ::ULIS::FVec2D iBezier[4], uint32 iDivisions );
 

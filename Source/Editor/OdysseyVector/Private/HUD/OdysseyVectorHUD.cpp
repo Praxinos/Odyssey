@@ -307,7 +307,8 @@ FOdysseyVectorHUD::UpdateSelectionBoxObjectModeRecursive( FOdysseyVectorScene* i
                                                         , FOdysseyVectorObject* iObject
                                                         , uint64 iHUDFlags )
 {
-    if( iObject->IsSelected() )
+    if( ( iScene->GetSelectedObjectList().size() == 0 )
+    || iObject->IsSelected() )
     {
         ::ULIS::FRectD selectedObjectBBox = iObject->GetBBox( true );
 

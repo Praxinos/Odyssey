@@ -60,6 +60,44 @@ FOdysseyPainterEditorVectorPathCutToolHUD::GetP1()
     return mPoint[1];
 }
 
+// tells in which case an object is displayed by the tool
+bool
+FOdysseyPainterEditorVectorPathCutToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                                            , FOdysseyVectorObject* iObject
+                                                            , uint64 iHUDFlags )
+{
+    if( mPathCutTool->RestrictToSelectedObjects == false )
+    {
+        return true;
+    }
+
+    if( ( mPathCutTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+// tells in which case an object is altered by the tool
+bool
+FOdysseyPainterEditorVectorPathCutToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
+                                                          , FOdysseyVectorObject* iObject
+                                                          , uint64 iHUDFlags )
+{
+    if( mPathCutTool->RestrictToSelectedObjects == false )
+    {
+        return true;
+    }
+
+    if( ( mPathCutTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void
 FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
                                                , FOdysseyVectorScene* iScene )

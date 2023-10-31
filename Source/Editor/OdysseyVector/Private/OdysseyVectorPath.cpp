@@ -1948,6 +1948,57 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
     }
 }
 
+// Math based version
+void
+FOdysseyVectorPath::PickSegments( double iWorldX
+                                , double iWorldY
+                                , double iWorldRadius
+                                , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
+                                , std::vector<double>* oDistanceArray )
+{
+    BLPoint localVector = mInverseWorldMatrix.mapVector( 0.7071f, 0.7071f );
+    ::ULIS::FVec2D factor = { localVector.x * iWorldRadius, localVector.y * iWorldRadius };
+    double localRadius = factor.Distance();
+    BLPoint localPoint = mInverseWorldMatrix.mapPoint( iWorldX, iWorldY );
+    ::ULIS::FRectD pathBBox = mBBox;
+
+    // get sure we hit the box be enlarging it with the picking circle radius value.
+    // otherwise we might not be able to pick points located at the box's boundaries.
+    pathBBox.x -=   localRadius;
+    pathBBox.y -=   localRadius;
+    pathBBox.w += ( localRadius * 2 );
+    pathBBox.h += ( localRadius * 2 );
+
+    if( pathBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
+    {
+        for( FOdysseyVectorSegment* segment : mSegmentList )
+        {
+            ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
+
+            segmentBBox.x -=   localRadius;
+            segmentBBox.y -=   localRadius;
+            segmentBBox.w += ( localRadius * 2 );
+            segmentBBox.h += ( localRadius * 2 );
+
+            if( segmentBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
+            {
+                double smallestDistance;
+
+                if( segment->ProximityTest( localPoint.x, localPoint.y, localRadius, smallestDistance ) )
+                {
+                    oPickedSegmentArray.push_back( segment );
+
+                    if( oDistanceArray )
+                    {
+                        oDistanceArray->push_back( smallestDistance );
+                    }
+                } 
+            }
+        }
+    }
+}
+
+// Mask based version
 void
 FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray )
 {

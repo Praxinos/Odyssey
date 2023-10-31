@@ -18,6 +18,7 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
     : Radius( 20.0f )
     , PreserveSmoothness( false )
+    , RestrictToSelectedObjects( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPushTool64");
 
@@ -93,15 +94,26 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorScene*
         mSegmentArray.clear();
         mPushedPointArray.clear();
 
-/*
-        iEngine->PickSegments( iScene
-                             , RestrictToSelectedObjects
-                             , iPointInTexture.x
-                             , iPointInTexture.y
-                             , Radius
-                             , mSegmentArray
-                             , &pickedSegmentDistanceArray );
-*/
+        mPathPushHUD->Traverse( iScene
+                              , iScene
+                              , GetEditor()->GetVectorEditionFlags()
+                              , [ this
+                                , &iPointInTexture
+                                , &pickedSegmentDistanceArray ]( FOdysseyVectorObject* object ) -> bool
+                                {
+                                    if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                                    {
+                                        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                                        path->PickSegments( iPointInTexture.x
+                                                          , iPointInTexture.y
+                                                          , Radius
+                                                          , mSegmentArray
+                                                          , &pickedSegmentDistanceArray );
+                                    }
+
+                                    return false; // keep traversing
+                                } );
 
         // First step: find farthest distance to mouse pointer
         for( int i = 0; i < mSegmentArray.size(); i++ )

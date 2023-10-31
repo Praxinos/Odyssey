@@ -38,6 +38,24 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::GetStitchedPointArray()
     return mStitchedPointArray;
 }
 
+// tells in which case an object is displayed by the tool
+bool
+FOdysseyPainterEditorVectorPathDrawingToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                                                , FOdysseyVectorObject* iObject
+                                                                , uint64 iHUDFlags )
+{
+    return true;
+}
+
+// tells in which case an object is altered by the tool
+bool
+FOdysseyPainterEditorVectorPathDrawingToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
+                                                              , FOdysseyVectorObject* iObject
+                                                              , uint64 iHUDFlags )
+{
+    return false;
+}
+
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
                                                    , FOdysseyVectorScene* iScene )

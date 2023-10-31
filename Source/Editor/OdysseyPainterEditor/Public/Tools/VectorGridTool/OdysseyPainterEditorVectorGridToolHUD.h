@@ -44,11 +44,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
-
         virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
                                       , FOdysseyVectorObject* iObject
                                       , uint64 iHUDFlags ) override;
-
         virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
                                     , FOdysseyVectorObject* iObject
                                     , uint64 iHUDFlags ) override;

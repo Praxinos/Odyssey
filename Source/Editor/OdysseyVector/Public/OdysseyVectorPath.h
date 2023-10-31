@@ -351,7 +351,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
         void AlterRadius( double iDeltaRadius );
         static ::ULIS::FVec2D GetAverageHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize );
+        // Mask based
         void PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray );
+        // Math based
+        void PickSegments( double iWorldX
+                         , double iWorldY
+                         , double iWorldRadius
+                         , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
+                         , std::vector<double>* oDistanceArray );
+
         void SetBrush( const FOdysseyVectorBrush& iBrush );
         FOdysseyVectorBrush& GetBrush();
         void SetMiterLimit( double iMiterLimit );

@@ -236,26 +236,41 @@ FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
     MakeGrid( iScene );
 }
 
-// tells in which case an object has its HUD displayed by the eraser tool
+// tells in which case an object is displayed by the tool
 bool
 FOdysseyPainterEditorVectorGridToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
                                                          , FOdysseyVectorObject* iObject
                                                          , uint64 iHUDFlags )
 {
+    if ( iHUDFlags & VIEW_MODE_VERTEX )
+    {
+        // if nothing is selected the grid applies to all objects
+        if( iScene->GetSelectedObjectList().size() == 0 )
+        {
+            return true;
+        }
+        {
+            // otherwise it applies to selected objects only
+            return iObject->IsSelected();
+        }
+    }
+
     return false;
 }
 
-// tells in which case an object is altered by the grid tool
+// tells in which case an object is altered by the tool
 bool
 FOdysseyPainterEditorVectorGridToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
                                                        , FOdysseyVectorObject* iObject
                                                        , uint64 iHUDFlags )
 {
-    if( iScene->GetSelectedObjectList().size() )
+    // if nothing is selected the grid applies to all objects
+    if( iScene->GetSelectedObjectList().size() == 0 )
     {
         return true;
     }
     {
+        // otherwise it applies to selected objects only
         return iObject->IsSelected();
     }
 

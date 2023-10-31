@@ -47,11 +47,24 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
         //virtual void PropertyChangedVector( FOdysseyVectorScene* iScene
         //                                 , const FName& iPropertyName ) override;
 
+        void ErasePaths( FOdysseyVectorScene* iScene
+                       , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                       , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                       , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                       , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray );
+        void EraseSections( FOdysseyVectorScene* iScene
+                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                          , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray );
+
     public:
         UPROPERTY( EditAnywhere, Category = EraserTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
         double Radius;
 
-        UPROPERTY( EditAnywhere, Category = Behavior )
+        UPROPERTY( EditAnywhere, Category = EraserTool )
         bool RestrictToSelection;
 
     private:

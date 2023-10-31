@@ -1942,8 +1942,8 @@ FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
 }
 
 void
-FOdysseyVectorGroupPaint::GetSectionsForSegment( FOdysseyVectorSegment* iSegment
-                                               , std::vector<FOdysseyVectorSection*>& oSectionArray )
+FOdysseyVectorGroupPaint::GetSectionsFromSegment( FOdysseyVectorSegment* iSegment
+                                                , std::vector<FOdysseyVectorSection*>& oSectionArray )
 {
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
@@ -2007,7 +2007,7 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
     FOdysseyVectorPath* path = iSegment->GetPath();
     std::vector<FVertexPair> vertexPairArray;
 
-    GetSectionsForSegment( iSegment, sectionArray );
+    GetSectionsFromSegment( iSegment, sectionArray );
 
     // first step : find to which extent the segment is erased. We check on both sides of the segment
     // until we reach a section that is marked as erased or til the end. this is the role of
@@ -2146,10 +2146,10 @@ FOdysseyVectorGroupPaint::ExtendErasedSection( FOdysseyVectorVertex* iVertex
 
 void
 FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iErasedSectionArray
-                                       , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                                        , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                                       , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray )
+                                       , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                       , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
     std::vector<FOdysseyVectorSection*> extendedErasedSectionArray;
                                         // Arbitrary value
@@ -2249,6 +2249,63 @@ FOdysseyVectorGroupPaint::GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oP
     }
 }
 
+void
+FOdysseyVectorGroupPaint::GetSectionsFromPath( FOdysseyVectorPath* iPath
+                                             , std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
+{
+    for( int i = 0; i < mSectionBuffer.size(); i++ )
+    {
+        if( mSectionBuffer[i].GetSegment()->GetPath() == iPath )
+        {
+            oPickedSectionArray.push_back( &mSectionBuffer[i] );
+        }
+    }
+}
+
+bool
+FOdysseyVectorGroupPaint::PickSection( FOdysseyVectorSection* iSection
+                                     , const ::ULIS::FRectD& iMaskRect
+                                     , const uint8* iMaskPixelData )
+{
+    ::ULIS::FVec2D* bezier = iSection->GetBezier();
+    BLPoint pt[4] = { mWorldMatrix.mapPoint( bezier[0].x, bezier[0].y )
+                    , mWorldMatrix.mapPoint( bezier[1].x, bezier[1].y )
+                    , mWorldMatrix.mapPoint( bezier[2].x, bezier[2].y )
+                    , mWorldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
+    ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
+                                    , ::ULIS::FVec2D( pt[1].x, pt[1].y )
+                                    , ::ULIS::FVec2D( pt[2].x, pt[2].y )
+                                    , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
+
+    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iMaskPixelData );
+}
+
+bool
+FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& iSectionArray
+                                     ,  std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
+{
+    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    BLImageData maskData;
+    ::ULIS::FRectD maskRect;
+    bool picked = false;
+
+    maskImage->getData( &maskData );
+
+    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
+
+    for( int i = 0; i < iSectionArray.size(); i++ )
+    {
+        if( PickSection( iSectionArray[i], maskRect, (uint8*) maskData.pixelData ) )
+        {
+            oPickedSectionArray.push_back( iSectionArray[i] );
+
+            picked = true;
+        }
+    }
+
+    return picked;
+}
+
 bool
 FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
 {
@@ -2263,17 +2320,7 @@ FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPi
 
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
-        ::ULIS::FVec2D* bezier = mSectionBuffer[i].GetBezier();
-        BLPoint pt[4] = { mWorldMatrix.mapPoint( bezier[0].x, bezier[0].y )
-                        , mWorldMatrix.mapPoint( bezier[1].x, bezier[1].y )
-                        , mWorldMatrix.mapPoint( bezier[2].x, bezier[2].y )
-                        , mWorldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
-        ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
-                                        , ::ULIS::FVec2D( pt[1].x, pt[1].y )
-                                        , ::ULIS::FVec2D( pt[2].x, pt[2].y )
-                                        , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
-
-        if( FOdysseyVector::PickBezier( worldBezier, maskRect, (uint8*)maskData.pixelData ) )
+        if( PickSection( &mSectionBuffer[i], maskRect, (uint8*) maskData.pixelData ) )
         {
             oPickedSectionArray.push_back( &mSectionBuffer[i] );
 

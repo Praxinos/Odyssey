@@ -41,43 +41,40 @@ FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
     UpdateSelectionBox( iScene, hudFlags );
 }
 
-// tells in which case an object has its HUD displayed by the eraser tool
+// tells in which case an object is displayed by the tool
 bool
 FOdysseyPainterEditorVectorEraserToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
                                                            , FOdysseyVectorObject* iObject
                                                            , uint64 iHUDFlags )
 {
-    // displays vertices etc... in vertex mode
-    if( iHUDFlags & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+    if ( iHUDFlags & VIEW_MODE_VERTEX )
     {
-        if( ( mEraserTool->RestrictToSelection == true ) && iObject->IsSelected() )
+        if( mEraserTool->RestrictToSelection == false )
         {
             return true;
         }
 
-        if( mEraserTool->RestrictToSelection == false )
+        if( ( mEraserTool->RestrictToSelection == true ) && iObject->IsSelected() )
         {
             return true;
         }
     }
 
-    // displays nothing in object mode
-
     return false;
 }
 
-// tells in which case an object is altered by the eraser tool
+// tells in which case an object is altered by the tool
 bool
 FOdysseyPainterEditorVectorEraserToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
                                                          , FOdysseyVectorObject* iObject
                                                          , uint64 iHUDFlags )
 {
-    if( ( mEraserTool->RestrictToSelection == true ) && iObject->IsSelected() )
+    if( mEraserTool->RestrictToSelection == false )
     {
         return true;
     }
 
-    if( mEraserTool->RestrictToSelection == false )
+    if( ( mEraserTool->RestrictToSelection == true ) && iObject->IsSelected() )
     {
         return true;
     }

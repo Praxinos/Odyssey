@@ -78,4 +78,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public 
 
         UPROPERTY( EditAnywhere, Category = PathPushTool )
         bool PreserveSmoothness;
+
+        UPROPERTY( EditAnywhere, Category = PathPushTool )
+        bool RestrictToSelectedObjects;
 };

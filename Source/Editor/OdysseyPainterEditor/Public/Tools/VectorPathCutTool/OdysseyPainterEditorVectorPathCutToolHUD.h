@@ -16,6 +16,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathCutToolHUD : publi
         virtual void Load( FOdysseyVectorScene* iScene ) override;
         virtual void Unload( FOdysseyVectorScene* iScene ) override;
 
+        virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorObject* iObject
+                                    , uint64 iHUDFlags ) override;
+        virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorObject* iObject
+                                    , uint64 iHUDFlags ) override;
+
         void SetP0( double iX, double iY );
         void SetP1( double iX, double iY );
 

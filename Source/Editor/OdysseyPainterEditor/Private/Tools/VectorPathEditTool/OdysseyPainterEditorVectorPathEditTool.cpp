@@ -21,7 +21,7 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
     , mPickingMode  ( ePathPickingMode::Vertex )
     , PickingRadius(10.0f)
     , WidenAllAlong( true )
-    ,RestrictToSelection( false )
+    , RestrictToSelectedObjects( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 

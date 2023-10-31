@@ -65,6 +65,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathCutTool : public U
         //FOdysseyVectorHUDPathCubic mCubicPathHUD;
 
     public:
-        UPROPERTY( EditAnywhere, Category = Behavior )
-        bool RestrictToSelection;
+        UPROPERTY( EditAnywhere, Category = PathCutTool )
+        bool RestrictToSelectedObjects;
 };

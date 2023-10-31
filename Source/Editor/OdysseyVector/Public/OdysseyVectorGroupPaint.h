@@ -154,13 +154,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         virtual void ApplyTransformations() override;
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
 
-        void EraseSections( std::vector<FOdysseyVectorSection*>& iErasedSectionArray
-                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
-        bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
-
         void GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oPathArray );
         void PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray );
         void SetRealtime( bool iRealtime );
@@ -168,6 +161,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool IsRealtime();
         void SetWireframeColor( const FColor& iWireframeColor );
         void SetMonochromeColor( const FColor& iMonochromeColor );
+        void GetSectionsFromPath( FOdysseyVectorPath* iPath
+                                , std::vector<FOdysseyVectorSection*>& oSectionArray );
+        bool PickSection( FOdysseyVectorSection* iSection
+                        , const ::ULIS::FRectD& iMaskRect
+                        , const uint8* iMaskPixelData );
+        bool PickSections( std::vector<FOdysseyVectorSection*>& iSectionArray
+                        ,  std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
+        bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
+        void EraseSections( std::vector<FOdysseyVectorSection*>& iErasedSectionArray
+                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
+        void GetSectionsFromSegment( FOdysseyVectorSegment* iSegment
+                                   , std::vector<FOdysseyVectorSection*>& oSectionArray );
 
     protected:
         /**
@@ -201,6 +209,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iDepth current recursion depth.
          * @return iCubicSegment the segment.
          */
+         // TODO: rename "Path" to something else, it is confusing with FOdysseyVectorPath
         uint32 FindPath( FOdysseyVectorSection* iReturnSection
                        , FOdysseyVectorVertex* iVertex
                        , FOdysseyVectorSection* iSection
