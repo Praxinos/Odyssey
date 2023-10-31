@@ -55,7 +55,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         bool PickNodes( ::ULIS::FRectD& iWorldRect, bool iClearSelection );
         void ClearSelection();
         void GetSelection( std::vector<FGridNode*>& oNodeArray );
-        void MakeGrid( FOdysseyVectorScene* iScene );
+        void MakeGrid( FOdysseyVectorScene* iScene, uint64 iHUDFlags );
         void Deform();
         void StartSelectionRectangle( double iWorldX, double iWorldY );
         void DragSelectionRectangle( double iWorldX, double iWorldY );

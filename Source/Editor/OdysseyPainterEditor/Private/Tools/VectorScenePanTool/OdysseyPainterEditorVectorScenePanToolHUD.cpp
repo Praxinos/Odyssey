@@ -19,9 +19,8 @@ FOdysseyPainterEditorVectorScenePanToolHUD::FOdysseyPainterEditorVectorScenePanT
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
-    uint64 hudFlags = GetViewingMode();
     // it's unused but we could use it at some point so, we init it anyways
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, mScenePanTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 void
@@ -99,7 +98,6 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -109,6 +107,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     BLImage* image = iBLContext->targetImage();
     ::ULIS::FVec2D frameLength;
     ::ULIS::FRectD frame;
+    uint64 hudFlags = mScenePanTool->GetEditor()->GetVectorEditionFlags();
 
     frame.x = image->width()  * 0.05f;
     frame.y = image->height() * 0.05f;

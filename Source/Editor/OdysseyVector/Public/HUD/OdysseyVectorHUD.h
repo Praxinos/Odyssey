@@ -137,7 +137,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
 
         virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
                                       , FOdysseyVectorObject* iObject
-                                      , uint64 iHUDFlags ){ return false; };
+                                      , uint64 iHUDFlags ){ return true; };
 
         virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
                                     , FOdysseyVectorObject* iObject
@@ -201,7 +201,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                        , double iSelectionRadius
                        , std::vector<FOdysseyVectorPoint*>& oPickedPointArray );
 
-        void MakePointQuadTree( FOdysseyVectorScene *iScene, bool iRestrictToSelection );
+        void MakePointQuadTree( FOdysseyVectorScene *iScene,uint64 iHUDFlags );
 
         FSelectionBox& GetSelectionBox();
 

@@ -16,12 +16,10 @@ FOdysseyPainterEditorVectorPathCutToolHUD::FOdysseyPainterEditorVectorPathCutToo
 void
 FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
-
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
 
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, mPathCutTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 void
@@ -102,7 +100,6 @@ void
 FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
                                                , FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -110,6 +107,7 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     //static BLRgba32 whiteColor = BLRgba32( 255, 255, 255, 255 );
+    uint64 hudFlags = mPathCutTool->GetEditor()->GetVectorEditionFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )

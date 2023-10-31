@@ -16,8 +16,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
 
         void GetAlteredObjectList( FOdysseyVectorScene* iScene
                                  , std::list<FOdysseyVectorObject*>& oObjectList );
-    protected:
-        uint64 GetViewingMode();
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;

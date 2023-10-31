@@ -65,10 +65,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
 
         UPROPERTY( EditAnywhere, Category = PathSmoothTool, meta = (ClampMin = "0.0", UIMin = "0.0"))
         double PickingRadius;
-/*
-        UPROPERTY( EditAnywhere, Category = PathSmoothTool )
-        bool RestrictToSelection;
-*/
+
         UPROPERTY( EditAnywhere, Category = PathSmoothTool )
         bool PreserveHandleLength;
+
+        UPROPERTY( EditAnywhere, Category = PathSmoothTool )
+        bool RestrictToSelectedObjects;
 };

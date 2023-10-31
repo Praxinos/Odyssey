@@ -14,10 +14,8 @@ FOdysseyPainterEditorVectorPathEditToolHUD::FOdysseyPainterEditorVectorPathEditT
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
-
     // Updates the selection box
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, mPathEditTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 void
@@ -72,7 +70,6 @@ void
 FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -83,7 +80,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
     uint64 vertexHandleFlag  = ( pickingMode == ePathPickingMode::VertexHandle  ) ? VIEW_PATH_VERTEX_HANDLE  : 0;
     uint64 segmentHandleFlag = ( pickingMode == ePathPickingMode::SegmentHandle ) ? VIEW_PATH_SEGMENT_HANDLE
                                                                                   | VIEW_PATH_VERTEX_ALIGNMENT : 0;
-
+    uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorEditionFlags();
 
     // draw object details in any mode (if statement is useles per-se but here for clarity)
     if( ( hudFlags & VIEW_MODE_VERTEX ) || ( hudFlags & VIEW_MODE_OBJECT ) )

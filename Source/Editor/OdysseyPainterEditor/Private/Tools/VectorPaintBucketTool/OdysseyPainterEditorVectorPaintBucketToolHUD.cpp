@@ -14,11 +14,9 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::FOdysseyPainterEditorVectorPaintB
 void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
-
     mPickedCycleArray.clear();
 
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, mPaintBucketTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 void
@@ -247,7 +245,6 @@ void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
                                                    , FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -255,6 +252,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 viewBucketHandleFlag = mPaintBucketTool->GetShowControls() ? VIEW_GROUPPAINT_BUCKET_HANDLE : 0;
+    uint64 hudFlags = mPaintBucketTool->GetEditor()->GetVectorEditionFlags();
 
     if( hudFlags & VIEW_MODE_VERTEX )
     {

@@ -152,25 +152,16 @@ MapPoints( FOdysseyVectorObject* iObject
          , const ::ULIS::FRectD& iRect
          , std::vector<FPointQuadTreeEntry>& oPointQuadTreeEntryArray )
 {
-    std::list<FOdysseyVectorObject*>& childrenList = iObject->GetChildrenList();
-
-    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( iObject );
 
         MapPath( path, iRect, oPointQuadTreeEntryArray );
     }
-
-    for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
-    {
-        FOdysseyVectorObject* child = (*it);
-
-        MapPoints( child, iRect, oPointQuadTreeEntryArray );
-    }
 }
 
 void
-FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene, bool iRestrictToSelection )
+FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene, uint64 iHUDFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
@@ -182,22 +173,17 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene, bool iRestric
 
     pointQuadTreeEntryArray.reserve( 200 );
 
-    if( iRestrictToSelection )
-    {
-        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-        std::list<FOdysseyVectorObject*>::iterator it;
+    Traverse( iScene
+            , iScene
+            , iHUDFlags
+            , [ &iScene
+              , &screenRect
+              , &pointQuadTreeEntryArray ]( FOdysseyVectorObject* object ) -> bool
+              {
+                  MapPoints( object, screenRect, pointQuadTreeEntryArray );
 
-        for( it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-        {
-            FOdysseyVectorObject* selectedObject = (*it);
-
-            MapPoints( selectedObject, screenRect, pointQuadTreeEntryArray );
-        }
-    }
-    else
-    {
-        MapPoints( iScene, screenRect, pointQuadTreeEntryArray );
-    }
+                  return false; // keep traversing
+              } );
 
     if( mPointQuadTree )
     {

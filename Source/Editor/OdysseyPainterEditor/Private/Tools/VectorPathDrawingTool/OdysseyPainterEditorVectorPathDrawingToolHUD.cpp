@@ -14,9 +14,9 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::FOdysseyPainterEditorVectorPathDr
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
+    uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorEditionFlags();
 
-    MakePointQuadTree( iScene, false );
+    MakePointQuadTree( iScene, hudFlags );
 
     // Updates the selection box (it is not used in this tool but whatever)
     UpdateSelectionBox( iScene, hudFlags );
@@ -60,7 +60,6 @@ void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
                                                    , FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -75,6 +74,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
     FOdysseyVectorPath* path = pathTracer.GetPath();
     FTracerBezier& bestBezier = pathTracer.GetBestBezier();
     FTracerBezier& rawBezier = pathTracer.GetRawBezier();
+    uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorEditionFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )

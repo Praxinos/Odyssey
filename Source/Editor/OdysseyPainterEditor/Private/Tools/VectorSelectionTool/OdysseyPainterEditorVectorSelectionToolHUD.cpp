@@ -33,12 +33,54 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorScene* iScene
     mBLSelectionContext.end();
 }
 
+// tells in which case an object is displayed by the tool
+bool
+FOdysseyPainterEditorVectorSelectionToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                                              , FOdysseyVectorObject* iObject
+                                                              , uint64 iHUDFlags )
+{
+    if( iHUDFlags & VIEW_MODE_VERTEX )
+    {
+        if( mSelectionTool->RestrictToSelectedObjects == false )
+        {
+            return true;
+        }
+
+        if( ( mSelectionTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// tells in which case an object is altered by the tool
+bool
+FOdysseyPainterEditorVectorSelectionToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
+                                                            , FOdysseyVectorObject* iObject
+                                                            , uint64 iHUDFlags )
+{
+    if( iHUDFlags & VIEW_MODE_VERTEX )
+    {
+        if( mSelectionTool->RestrictToSelectedObjects == false )
+        {
+            return true;
+        }
+
+        if( ( mSelectionTool->RestrictToSelectedObjects == true ) && iObject->IsSelected() )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
-
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, mSelectionTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 BLImage*
@@ -190,7 +232,6 @@ void
 FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
                                                  , FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -198,6 +239,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint32 selectedObjectCount = iScene->GetSelectedObjectList().size();
+    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorEditionFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )

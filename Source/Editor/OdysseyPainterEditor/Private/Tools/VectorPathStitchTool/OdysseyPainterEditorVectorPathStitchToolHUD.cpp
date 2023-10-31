@@ -14,11 +14,11 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::FOdysseyPainterEditorVectorPathSti
 void
 FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
+    uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorEditionFlags();
 
     mPickedPointArray.clear();
 
-    MakePointQuadTree( iScene, /*mPathStitchTool->RestrictToSelectedObjects*/false );
+    MakePointQuadTree( iScene, hudFlags );
 
     UpdateSelectionBox( iScene, hudFlags );
 }
@@ -50,17 +50,35 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX, doubl
     PickPoints( iWorldX, iWorldY, mPathStitchTool->PickingRadius, mPickedPointArray );
 }
 
+// tells in which case an object is displayed by the tool
+bool
+FOdysseyPainterEditorVectorPathStitchToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
+                                                               , FOdysseyVectorObject* iObject
+                                                               , uint64 iHUDFlags )
+{
+    return true;
+}
+
+// tells in which case an object is altered by the tool
+bool
+FOdysseyPainterEditorVectorPathStitchToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
+                                                             , FOdysseyVectorObject* iObject
+                                                             , uint64 iHUDFlags )
+{
+    return true;
+}
+
 void
 FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
                                                   , FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorEditionFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
@@ -97,11 +115,16 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
 
         if( ( vertex0->GetSegmentCount() == 1 ) && ( vertex1->GetSegmentCount() == 1 ) )
         {
-            DrawPath( iBLContext, vertex0->GetPath(), fgColor, bgColor, hcColor, true, VIEW_PATH_SEGMENT );
-            DrawPath( iBLContext, vertex1->GetPath(), fgColor, bgColor, hcColor, true, VIEW_PATH_SEGMENT );
+            if( vertex0->GetFirstSegment() != vertex1->GetFirstSegment() )
+            {
+                BLRgba32 violet = BLRgba32( 255, 0, 255, 255 );
 
-            DrawVertex( iBLContext, vertex0, fgColor, bgColor, hcColor, true, 0 );
-            DrawVertex( iBLContext, vertex1, fgColor, bgColor, hcColor, true, 0 );
+                DrawPath( iBLContext, vertex0->GetPath(), violet, bgColor, hcColor, true, VIEW_PATH_SEGMENT );
+                DrawPath( iBLContext, vertex1->GetPath(), violet, bgColor, hcColor, true, VIEW_PATH_SEGMENT );
+
+                DrawVertex( iBLContext, vertex0, violet, bgColor, hcColor, true, 0 );
+                DrawVertex( iBLContext, vertex1, violet, bgColor, hcColor, true, 0 );
+            }
         }
     }
 

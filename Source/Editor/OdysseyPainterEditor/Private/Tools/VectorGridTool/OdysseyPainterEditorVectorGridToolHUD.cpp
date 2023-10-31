@@ -233,7 +233,7 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( BLContext* iBLCo
 void
 FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    MakeGrid( iScene );
+    MakeGrid( iScene, mGridTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 // tells in which case an object is displayed by the tool
@@ -280,13 +280,13 @@ FOdysseyPainterEditorVectorGridToolHUD::IsObjectAltered( FOdysseyVectorScene* iS
 void
 FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    uint64 hudFlags = mGridTool->GetEditor()->GetVectorEditionFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
@@ -587,12 +587,10 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeCells()
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene, uint64 iHUDFlags )
 {
-    uint64 hudFlags = GetViewingMode();
-
     // Updates the selection box
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, iHUDFlags );
 
     if( mSelectionBox.rect.Area() )
     {

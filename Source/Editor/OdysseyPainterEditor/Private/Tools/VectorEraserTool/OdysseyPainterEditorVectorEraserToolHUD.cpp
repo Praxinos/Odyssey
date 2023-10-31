@@ -34,11 +34,9 @@ FOdysseyPainterEditorVectorEraserToolHUD::Unload( FOdysseyVectorScene* iScene )
 void
 FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
-
     ClearMask();
 
-    UpdateSelectionBox( iScene, hudFlags );
+    UpdateSelectionBox( iScene, mEraserTool->GetEditor()->GetVectorEditionFlags() );
 }
 
 // tells in which case an object is displayed by the tool
@@ -86,13 +84,13 @@ void
 FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
                                               , FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = GetViewingMode();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    uint64 hudFlags = mEraserTool->GetEditor()->GetVectorEditionFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )

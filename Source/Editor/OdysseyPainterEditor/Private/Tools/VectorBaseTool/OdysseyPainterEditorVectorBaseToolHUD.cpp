@@ -11,14 +11,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
     mBaseTool = iBaseTool;
 }
 
-uint64
-FOdysseyPainterEditorVectorBaseToolHUD::GetViewingMode()
-{
-    FOdysseyPainterEditor* painterEditor = mBaseTool->GetEditor();
-
-    return painterEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_ALL;
-}
-
 void
 FOdysseyPainterEditorVectorBaseToolHUD::GetAlteredObjectList( FOdysseyVectorScene* iScene
                                                             , std::list<FOdysseyVectorObject*>& oObjectList )
