@@ -1203,13 +1203,16 @@ FOdysseyVectorEngine::Traverse( FOdysseyVectorScene* iScene
         iTraversalFlags |= TRAVERSE_PARENT_ACCEPTED;
     }
 
-    for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+    if( ( objectTraversalFlags & TRAVERSE_OBJECT_IGNORE_CHILDREN ) == 0 )
     {
-        uint64 childTraversalFlags = Traverse( iScene, childObject, iTraversalFlags, iCallback );
-
-        if( childTraversalFlags & TRAVERSE_STOP )
+        for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
         {
-            return TRAVERSE_STOP;
+            uint64 childTraversalFlags = Traverse( iScene, childObject, iTraversalFlags, iCallback );
+
+            if( childTraversalFlags & TRAVERSE_STOP )
+            {
+                return TRAVERSE_STOP;
+            }
         }
     }
 

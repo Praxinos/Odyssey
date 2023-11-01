@@ -716,7 +716,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorScene* iScene )
 // static
 void
 FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorScene* iScene
-                                           , std::list<FOdysseyVectorObject*>* iFocusedObjectList )
+                                           , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
@@ -725,13 +725,13 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorScene* iScene
     GEditor->BeginTransaction(LOCTEXT("ApplyTransformations", "Apply Transformations"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoApplyTransformations( iScene, *iFocusedObjectList );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoApplyTransformations( iScene, iFocusedObjectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
-    for( FOdysseyVectorObject* focusedObject : *iFocusedObjectList )
+    for( FOdysseyVectorObject* focusedObject : iFocusedObjectList )
     {
         focusedObject->ApplyTransformations();
     }
@@ -871,13 +871,13 @@ FOdysseyPainterEditor::ResetView( FOdysseyVectorScene* iScene )
 // static
 void
 FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorScene* iScene
-                                            , std::list<FOdysseyVectorObject*>* iFocusedObjectList )
+                                            , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorPoint*> selectedPointArray;
 
     // static call
-    FOdysseyVectorEngine::GetVertexSelection ( *iFocusedObjectList, selectedPointArray );
+    FOdysseyVectorEngine::GetVertexSelection ( iFocusedObjectList, selectedPointArray );
 
     for( int i = 0; i < selectedPointArray.size(); i++ )
     {
@@ -895,13 +895,13 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorScene* iScene
 // static
 void
 FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorScene* iScene
-                                          , std::list<FOdysseyVectorObject*>* iFocusedObjectList )
+                                          , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorPoint*> selectedPointArray;
 
     // static call
-    FOdysseyVectorEngine::GetVertexSelection( *iFocusedObjectList, selectedPointArray );
+    FOdysseyVectorEngine::GetVertexSelection( iFocusedObjectList, selectedPointArray );
 
     for( int i = 0; i < selectedPointArray.size(); i++ )
     {
@@ -920,41 +920,8 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorScene* iScene
 
 // static
 void
-FOdysseyPainterEditor::DeletePointSelectionRecursive( FOdysseyVectorObject* iVectorObject
-                                                    , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                                                    , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                                                    , std::vector<FOdysseyVectorPath*>& oRemovedPathArray
-                                                    , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray )
-{
-    if( iVectorObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-    {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iVectorObject);
-        std::vector<FOdysseyVectorPoint*> selectedPointArray;
-
-        path->GetSelectedPoints( selectedPointArray, ePointSelectionFlags::Vertex );
-
-        FOdysseyVectorPath::DeletePoint( path
-                                       , selectedPointArray
-                                       , oRemovedVertexArray
-                                       , oRemovedSegmentArray
-                                       , oRemovedPathArray
-                                       , oAddedSegmentArray );
-    }
-
-    for( FOdysseyVectorObject* childObject : iVectorObject->GetChildrenList() )
-    {
-        DeletePointSelectionRecursive( childObject
-                                     , oRemovedVertexArray
-                                     , oRemovedSegmentArray
-                                     , oRemovedPathArray
-                                     , oAddedSegmentArray );
-    }
-}
-
-// static
-void
 FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorScene* iScene
-                                           , std::list<FOdysseyVectorObject*>* iFocusedObjectList )
+                                           , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorPath*> removedPathArray;
@@ -963,20 +930,28 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorScene* iScene
     std::vector<FOdysseyVectorPath*> addedPathArray;
     std::vector<FOdysseyVectorVertex*> addedVertexArray; // not filled, here just for the undo record
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
-    std::vector<FOdysseyVectorPoint*> selectedPointArray;
 
     removedPathArray.reserve( 10 );
     removedVertexArray.reserve( 10 );
     removedSegmentArray.reserve( 10 );
     addedSegmentArray.reserve( 10 );
 
-    for( FOdysseyVectorObject* focusedObject : *iFocusedObjectList )
+    for( FOdysseyVectorObject* focusedObject : iFocusedObjectList )
     {
-        DeletePointSelectionRecursive( focusedObject
-                                     , removedVertexArray
-                                     , removedSegmentArray
-                                     , removedPathArray
-                                     , addedSegmentArray );
+        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(focusedObject);
+            std::vector<FOdysseyVectorPoint*> selectedPointArray;
+
+            path->GetSelectedPoints( selectedPointArray, ePointSelectionFlags::Vertex );
+
+            FOdysseyVectorPath::DeletePoint( path
+                                           , selectedPointArray
+                                           , removedVertexArray
+                                           , removedSegmentArray
+                                           , removedPathArray
+                                           , addedSegmentArray );
+        }
     }
 
     for( int i = 0; i < removedPathArray.size(); i++ )
@@ -1039,7 +1014,7 @@ FOdysseyPainterEditor::DeleteObjectSelection( FOdysseyVectorScene* iScene )
 // static
 void
 FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorScene* iScene
-                                     , std::list<FOdysseyVectorObject*>* iFocusedObjectList )
+                                     , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
  
@@ -1047,13 +1022,13 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorScene* iScene
     GEditor->BeginTransaction(LOCTEXT("FlipHorizontal", "Flip Horizontal"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene->GetSelectedObjectList() );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iFocusedObjectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
-    iScene->FlipSelectionHorizontal( true /*ignored for now*/ );
+    iScene->FlipObjectsHorizontal( iFocusedObjectList );
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
@@ -1066,7 +1041,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorScene* iScene
 // static
 void
 FOdysseyPainterEditor::ClearColoring( FOdysseyVectorScene* iScene
-                                    , std::list<FOdysseyVectorObject*>* iFocusedObjectList )
+                                    , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorBucket*> bucketArray;
@@ -1074,7 +1049,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyVectorScene* iScene
     bucketArray.reserve( 100 );
 
     // first step: retrieve all buckets for undoing.
-    for( FOdysseyVectorObject* focusedObject : *iFocusedObjectList )
+    for( FOdysseyVectorObject* focusedObject : iFocusedObjectList )
     {
         if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
@@ -1089,7 +1064,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyVectorScene* iScene
     }
 
     // second step: the actual removal.
-    for( FOdysseyVectorObject* focusedObject : *iFocusedObjectList )
+    for( FOdysseyVectorObject* focusedObject : iFocusedObjectList )
     {
         if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
@@ -1121,7 +1096,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyVectorScene* iScene
 // static
 void
 FOdysseyPainterEditor::FlipVertical( FOdysseyVectorScene* iScene
-                                   , std::list<FOdysseyVectorObject*>* iFocusedObjectList )
+                                   , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
@@ -1135,7 +1110,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyVectorScene* iScene
     }
     GEditor->EndTransaction();
 
-    iScene->FlipSelectionVertical( true /*ignored for now*/ );
+    iScene->FlipObjectsVertical( iFocusedObjectList );
 
     iScene->Update( 0 );
 

@@ -136,8 +136,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorScen
 }
 
 void
-UOdysseyPainterEditorVectorTransformTool::GetAlteredObjectList( FOdysseyVectorScene* iScene
-                                                              , std::list<FOdysseyVectorObject*>& oObjectList )
+UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVectorScene* iScene
+                                                                  , std::list<FOdysseyVectorObject*>& oObjectList )
 {
     FOdysseyVectorEngine::Traverse
     ( iScene
@@ -183,19 +183,19 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorScene
             mTransformHUD->GetSelectedVertices( iScene, mSelectedPoints );
 
             // remember for undos. we don't register the undo in the mouse down event yet because
-            // it could conflict with the undo created by th emouse up event in the case of a no-drag
+            // it could conflict with the undo created by the mouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoPointPosition( iScene, mSelectedPoints );
         }
 
         if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
         {
-            std::list<FOdysseyVectorObject*> objectList;
+            std::list<FOdysseyVectorObject*> transformedObjectList;
 
-            GetAlteredObjectList( iScene, objectList );
+            GetTransformedObjectList( iScene, transformedObjectList );
 
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
-            mUndo = new FOdysseyVectorUndoObjectTransform( iScene, objectList );
+            mUndo = new FOdysseyVectorUndoObjectTransform( iScene, transformedObjectList );
         }
 
         if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )

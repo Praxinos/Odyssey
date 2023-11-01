@@ -32,7 +32,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
     private:
         FOdysseyVectorObject* CopyShape();
         FOdysseyVectorEngine* mEngine;
-        void FlipSelection( bool iWorld, double iXFactor, double iYFactor );
+
+
+        void FlipObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                        , double iXFactor
+                        , double iYFactor );
 
     protected:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
@@ -40,8 +44,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
     public:
         virtual ~FOdysseyVectorScene();
         FOdysseyVectorScene( const FString& iName );
-        void FlipSelectionHorizontal( bool iWorld );
-        void FlipSelectionVertical( bool iWorld );
+        void FlipObjectsHorizontal( const std::list<FOdysseyVectorObject*>& iObjectList );
+        void FlipObjectsVertical( const std::list<FOdysseyVectorObject*>& iObjectList );
+        ::ULIS::FVec2D GetPositionFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList );
 
         void Init( const FString& iName );
         void Select( FOdysseyVectorObject* iVecObj );

@@ -308,9 +308,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         void SetBLMask( BLImage* iBLMask );
 
-        static const uint64 TRAVERSE_STOP             = ( 1 << 0 );
-        static const uint64 TRAVERSE_OBJECT_ACCEPTED  = ( 1 << 1 );
-        static const uint64 TRAVERSE_PARENT_ACCEPTED  = ( 1 << 2 );
+        static const uint64 TRAVERSE_STOP                   = ( 1 << 0 );
+        static const uint64 TRAVERSE_OBJECT_ACCEPTED        = ( 1 << 1 );
+        static const uint64 TRAVERSE_PARENT_ACCEPTED        = ( 1 << 2 );
+        static const uint64 TRAVERSE_OBJECT_IGNORE_CHILDREN = ( 1 << 3 );
 
         static uint64 Traverse( FOdysseyVectorScene* iScene
                               , FOdysseyVectorObject* iObject

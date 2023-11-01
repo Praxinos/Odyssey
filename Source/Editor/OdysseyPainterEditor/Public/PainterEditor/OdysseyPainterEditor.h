@@ -92,29 +92,29 @@ public:
     static void SendBackward( FOdysseyVectorScene* iScene );
     static void Ungroup( FOdysseyVectorScene* iScene );
     static void ApplyTransformations( FOdysseyVectorScene* iScene
-                                    , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+                                    , std::list<FOdysseyVectorObject*>& iFocusedObjectList );
     static void GroupPaint( FOdysseyVectorScene* iScene );
     static void Group( FOdysseyVectorScene* iScene );
     static void SelectAll( FOdysseyVectorScene* iScene );
     static void ResetView( FOdysseyVectorScene* iScene );
     static void UnalignPointSelection( FOdysseyVectorScene* iScene
-                                     , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+                                     , std::list<FOdysseyVectorObject*>& iFocusedObjectList );
     static void AlignPointSelection( FOdysseyVectorScene* iScene
-                                   , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+                                   , std::list<FOdysseyVectorObject*>& iFocusedObjectList );
     static void DeletePointSelectionRecursive( FOdysseyVectorObject* iVectorObject
                                              , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                                              , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                                              , std::vector<FOdysseyVectorPath*>& oRemovedPathArray
                                              , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
     static void DeletePointSelection( FOdysseyVectorScene* iScene
-                                    , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+                                    , std::list<FOdysseyVectorObject*>& iFocusedObjectList );
     static void DeleteObjectSelection( FOdysseyVectorScene* iScene );
     static void FlipHorizontal( FOdysseyVectorScene* iScene
-                              , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+                              , std::list<FOdysseyVectorObject*>& iFocusedObjectList );
     static void ClearColoring( FOdysseyVectorScene* iScene
-                             , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+                             , std::list<FOdysseyVectorObject*>& iFocusedObjectList );
     static void FlipVertical( FOdysseyVectorScene* iScene
-                            , std::list<FOdysseyVectorObject*>* iFocusedObjectList );
+                            , std::list<FOdysseyVectorObject*>& iFocusedObjectList );
     static void DeleteBucket( FOdysseyVectorBucket* iBucket );
     static void PropagateBucket( FOdysseyVectorBucket* iBucket );
     static void UnpropagateBucket( FOdysseyVectorBucket* iBucket );

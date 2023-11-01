@@ -22,14 +22,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         virtual void Load( FOdysseyVectorScene* iScene ) = 0;
         virtual void Unload( FOdysseyVectorScene* iScene )  = 0;
 
-        void GetAlteredObjectList( FOdysseyVectorScene* iScene
-                                 , std::list<FOdysseyVectorObject*>& oObjectList );
-
-        virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                      , FOdysseyVectorObject* iObject
-                                      , uint64 iHUDFlags
-                                      , uint64 iTraversalFlags ) override;
-
         void DrawObjects( BLContext* iBLContext
                         , FOdysseyVectorScene* iScene
                         , const BLRgba32& iForegroundColor

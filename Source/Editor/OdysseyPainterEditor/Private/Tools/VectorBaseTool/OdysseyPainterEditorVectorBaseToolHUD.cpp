@@ -10,45 +10,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
 {
     mBaseTool = iBaseTool;
 }
-/*
-void
-FOdysseyPainterEditorVectorBaseToolHUD::GetAlteredObjectList( FOdysseyVectorScene* iScene
-                                                            , std::list<FOdysseyVectorObject*>& oObjectList )
-{
-    FOdysseyVectorEngine::Traverse
-    ( iScene
-    , iScene
-    , mBaseTool->GetEditor()->GetVectorEditionFlags()
-    , [ &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
-        {
-            oObjectList.push_back( object);
-
-            return false; // keep traversing
-        } );
-}
-*/
-
-// tells in which case an object is displayed by the tool
-bool
-FOdysseyPainterEditorVectorBaseToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                         , FOdysseyVectorObject* iObject
-                                                         , uint64 iHUDFlags
-                                                         , uint64 iTraversalFlags )
-{
-    if( iScene->GetSelectedObjectList().size() == 0 )
-    {
-        return true;
-    }
-    else
-    {
-        if( iObject->IsSelected() || ( iTraversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 void
 FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext

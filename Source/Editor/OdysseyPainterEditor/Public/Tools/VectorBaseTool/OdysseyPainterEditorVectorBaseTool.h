@@ -28,6 +28,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         static bool DoubleClicked();
 
+        void GetDisplayedAncestorList( FOdysseyVectorScene* iScene
+                                     , std::list<FOdysseyVectorObject*>& oObjectList );
+
+        void GetDisplayedObjectList( FOdysseyVectorScene* iScene
+                                   , std::list<FOdysseyVectorObject*>& oObjectList );
+
         bool DisplayObjectHUD( FOdysseyVectorScene* iScene
                              , FOdysseyVectorObject* iObject
                              , uint64 iHUDFlags
@@ -82,6 +88,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
     private:
         void ExtendContextMenuObject( FMenuBuilder& menu );
         void ExtendContextMenuVertex( FMenuBuilder& menu );
+
+        // this method are needed because we retrieve the object list as a local variable which
+        // must exist when a menu action is run
+        void ApplyTransformations( FOdysseyVectorScene* iScene );
+        void ClearColoring( FOdysseyVectorScene* iScene );
+        void FlipVertical( FOdysseyVectorScene* iScene );
+        void FlipHorizontal( FOdysseyVectorScene* iScene  );
+        void DeletePointSelection( FOdysseyVectorScene* iScene  );
+        void AlignPointSelection( FOdysseyVectorScene* iScene  );
+        void UnalignPointSelection( FOdysseyVectorScene* iScene  );
 
     protected:
         bool mHasContextMenu;
