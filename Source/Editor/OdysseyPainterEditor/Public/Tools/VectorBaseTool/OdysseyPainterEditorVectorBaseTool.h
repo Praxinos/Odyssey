@@ -28,6 +28,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         static bool DoubleClicked();
 
+        bool DisplayObjectHUD( FOdysseyVectorScene* iScene
+                             , FOdysseyVectorObject* iObject
+                             , uint64 iHUDFlags
+                             , uint64 iTraversalFlags );
+
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
         virtual void Load();

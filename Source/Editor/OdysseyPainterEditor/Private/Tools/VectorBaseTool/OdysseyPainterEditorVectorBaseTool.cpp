@@ -31,6 +31,30 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
     return doubleClicked;
 }
 
+bool
+UOdysseyPainterEditorVectorBaseTool::DisplayObjectHUD( FOdysseyVectorScene* iScene
+                                                     , FOdysseyVectorObject* iObject
+                                                     , uint64 iHUDFlags
+                                                     , uint64 iTraversalFlags )
+{
+    if( iObject->IsSelected() )
+    {
+        return true;
+    }
+
+    if( iScene->GetSelectedObjectList().size() == 0 )
+    {
+        return true;
+    }
+
+    if( iTraversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void
 UOdysseyPainterEditorVectorBaseTool::Unload()
 {

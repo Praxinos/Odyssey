@@ -50,24 +50,6 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX, doubl
     PickPoints( iWorldX, iWorldY, mPathStitchTool->PickingRadius, mPickedPointArray );
 }
 
-// tells in which case an object is displayed by the tool
-bool
-FOdysseyPainterEditorVectorPathStitchToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                               , FOdysseyVectorObject* iObject
-                                                               , uint64 iHUDFlags )
-{
-    return true;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorPathStitchToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
-                                                             , FOdysseyVectorObject* iObject
-                                                             , uint64 iHUDFlags )
-{
-    return true;
-}
-
 void
 FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
                                                   , FOdysseyVectorScene* iScene )
@@ -83,13 +65,12 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
     }
 
     // draw selection box only if we restrict erasure to the selection 

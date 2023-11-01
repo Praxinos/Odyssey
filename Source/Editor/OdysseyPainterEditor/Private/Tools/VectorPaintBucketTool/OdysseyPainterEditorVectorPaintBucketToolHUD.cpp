@@ -92,26 +92,33 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorScene* 
 {
     oPickedCycleArray.clear();
 
-    Traverse( iScene
-            , iScene
-            , mPaintBucketTool->GetEditor()->GetVectorEditionFlags()
-            , [ &iWorldX
-              , &iWorldY
-              , &oPickedCycleArray ]( FOdysseyVectorObject* object ) -> bool
-              {
-                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                  {
-                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
-                      FOdysseyVectorCycle* pickedCycle = paintGroup->PickCycle( iWorldX, iWorldY );
+    FOdysseyVectorEngine::Traverse
+    ( iScene
+    , iScene
+    , mPaintBucketTool->GetEditor()->GetVectorEditionFlags()
+    , [ iScene
+      , &iWorldX
+      , &iWorldY
+      , &oPickedCycleArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+        {
+            if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+            {
+                if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                {
+                    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+                    FOdysseyVectorCycle* pickedCycle = paintGroup->PickCycle( iWorldX, iWorldY );
 
-                      if( pickedCycle )
-                      {
-                          oPickedCycleArray.push_back( pickedCycle );
-                      }
-                  }
+                    if( pickedCycle )
+                    {
+                        oPickedCycleArray.push_back( pickedCycle );
+                    }
+                }
 
-                  return false; // keep traversing
-              } );
+                return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+            }
+
+            return 0;
+        } );
 }
 
 FOdysseyVectorBucket*
@@ -121,32 +128,39 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorScene* 
 {
     FOdysseyVectorBucket* pickedBucket = nullptr;
 
-    Traverse( iScene
-            , iScene
-            , mPaintBucketTool->GetEditor()->GetVectorEditionFlags()
-            , [ this
-              , &iWorldX
-              , &iWorldY
-              , &pickedBucket ]( FOdysseyVectorObject* object ) -> bool
+    FOdysseyVectorEngine::Traverse
+    ( iScene
+    , iScene
+    , mPaintBucketTool->GetEditor()->GetVectorEditionFlags()
+    , [ this
+      , iScene
+      , &iWorldX
+      , &iWorldY
+      , &pickedBucket ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
               {
-                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                  FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+                  std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
+
+                  for( FOdysseyVectorBucket *bucket : bucketList )
                   {
-                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
-                      std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
-
-                      for( FOdysseyVectorBucket *bucket : bucketList )
+                      if( PickBucketArea( bucket, iWorldX, iWorldY ) )
                       {
-                          if( PickBucketArea( bucket, iWorldX, iWorldY ) )
-                          {
-                              pickedBucket = bucket;
+                          pickedBucket = bucket;
 
-                              return true; // stop traversing
-                          }
+                          return true; // stop traversing
                       }
                   }
+              }
 
-                  return false; // keep traversing
-              } );
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
 
     return pickedBucket;
 }
@@ -156,69 +170,6 @@ void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::SetPickedCycles( std::vector<FOdysseyVectorCycle*>& pickedCycleArray )
 {
     mPickedCycleArray = pickedCycleArray;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorPaintBucketToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                                , FOdysseyVectorObject* iObject
-                                                                , uint64 iHUDFlags )
-{
-    if( iHUDFlags & VIEW_MODE_VERTEX )
-    {
-        if( iScene->GetSelectedObjectList().size() == false )
-        {
-            return true;
-        }
-        else
-        {
-            if ( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
-            {
-                return true;
-            }
-        }
-    }
-
-    if( iHUDFlags & VIEW_MODE_OBJECT )
-    {
-        if( iScene->GetSelectedObjectList().size() == false )
-        {
-            return true;
-        }
-        else
-        {
-            if ( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorPaintBucketToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
-                                                              , FOdysseyVectorObject* iObject
-                                                              , uint64 iHUDFlags )
-{
-    if( iScene->GetSelectedObjectList().size() == false )
-    {
-        return true;
-    }
-    else
-    {
-        if ( iObject->IsSelected() )
-        {
-            if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
 }
 
 void
@@ -236,31 +187,29 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
 
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags
-                                      | VIEW_PATH_VERTEX
-                                      | VIEW_PATH_SEGMENT
-                                      | VIEW_GROUPPAINT_BUCKET
-                                      | viewBucketHandleFlag );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags
+                   | VIEW_PATH_VERTEX
+                   | VIEW_PATH_SEGMENT
+                   | VIEW_GROUPPAINT_BUCKET
+                   | viewBucketHandleFlag );
     }
 
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_OBJECT )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags
-                                      | VIEW_GROUPPAINT_BUCKET
-                                      | viewBucketHandleFlag );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags
+                   | VIEW_GROUPPAINT_BUCKET
+                   | viewBucketHandleFlag );
     }
 
     // draw selection box only if we restrict erasure to the selection 

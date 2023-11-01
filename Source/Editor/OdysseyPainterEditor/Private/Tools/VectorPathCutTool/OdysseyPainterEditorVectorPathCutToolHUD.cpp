@@ -58,48 +58,6 @@ FOdysseyPainterEditorVectorPathCutToolHUD::GetP1()
     return mPoint[1];
 }
 
-// tells in which case an object is displayed by the tool
-bool
-FOdysseyPainterEditorVectorPathCutToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                            , FOdysseyVectorObject* iObject
-                                                            , uint64 iHUDFlags )
-{
-    if( iScene->GetSelectedObjectList().size() == 0 )
-    {
-        return true;
-    }
-    else
-    {
-        if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorPathCutToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
-                                                          , FOdysseyVectorObject* iObject
-                                                          , uint64 iHUDFlags )
-{
-    if( iScene->GetSelectedObjectList().size() == 0 )
-    {
-        return true;
-    }
-    else
-    {
-        if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void
 FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
                                                , FOdysseyVectorScene* iScene )
@@ -110,7 +68,7 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    //static BLRgba32 whiteColor = BLRgba32( 255, 255, 255, 255 );
+    static BLRgba32 whiteColor = BLRgba32( 255, 255, 255, 255 );
     uint64 hudFlags = mPathCutTool->GetEditor()->GetVectorEditionFlags();
 
     // Draw object details only in vertex mode
@@ -136,10 +94,10 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict cutting to the selection 
-    if( iScene->GetSelectedObjectList().size() )
-    {
-        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
-    }
+//    if( iScene->GetSelectedObjectList().size() )
+//    {
+//        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+//    }
 
     iBLContext->save();
 

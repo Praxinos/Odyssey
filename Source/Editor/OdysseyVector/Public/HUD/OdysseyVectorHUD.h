@@ -13,14 +13,6 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorScene;
 class FOdysseyVectorEngine;
 
-typedef struct _FSelectionBox
-{
-    bool inited;
-    ::ULIS::FRectD rect;
-    BLMatrix2D worldMatrix;
-    BLMatrix2D inverseWorldMatrix;
-} FSelectionBox;
-
 typedef struct _FPointQuadTreeEntry
 {
     FOdysseyVectorPoint* point;
@@ -122,33 +114,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                   , bool iWorld
                                   , uint64 iHUDFlags );
 
-        void DrawObjectRecursive( BLContext* iBLContext
-                                , FOdysseyVectorScene* iScene
-                                , FOdysseyVectorObject* iObject
-                                , const BLRgba32& iForegroundColor
-                                , const BLRgba32& iBackgroundColor
-                                , const BLRgba32& iHighlightColor
-                                , uint64 iDrawingFlags );
-
-        void DrawObjects( BLContext* iBLContext
-                        , FOdysseyVectorScene* iScene
-                        , const BLRgba32& iForegroundColor
-                        , const BLRgba32& iBackgroundColor
-                        , const BLRgba32& iHighlightColor
-                        , uint64 iHUDFlags );
-
         virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
                                       , FOdysseyVectorObject* iObject
-                                      , uint64 iHUDFlags ){ return true; };
-
-        virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
-                                    , FOdysseyVectorObject* iObject
-                                    , uint64 iHUDFlags ){ return false; };
-
-        void Traverse( FOdysseyVectorScene* iScene
-                     , FOdysseyVectorObject* iObject
-                     , uint64 iHUDFlags
-                     , std::function<bool(FOdysseyVectorObject*)> iCallback );
+                                      , uint64 iHUDFlags
+                                      , uint64 iTraversalFlags ){ return true; };
 
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
@@ -205,35 +174,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
 
         void MakePointQuadTree( FOdysseyVectorScene *iScene,uint64 iHUDFlags );
 
-        FSelectionBox& GetSelectionBox();
-
-    protected:
-        void UpdateSelectionBoxVertexModeRecursive( FOdysseyVectorScene* iScene
-                                                  , FOdysseyVectorObject* iObject
-                                                  , uint64 iHUDFlags );
-
-        void UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
-                                         , uint64 iHUDFlags );
-
-        void UpdateSelectionBoxObjectModeRecursive( FOdysseyVectorScene* iScene
-                                                  , FOdysseyVectorObject* iObject
-                                                  , uint64 iHUDFlags );
-
-        void UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
-                                         , uint64 iHUDFlags );
-
-        void UpdateSelectionBox( FOdysseyVectorScene* iScene
-                               , bool iForceWorld
-                               , uint64 iHUDFlags );
-
-        void DrawSelectionBox( BLContext* iBLContext
-                             , FOdysseyVectorScene* iScene
-                             , BLRgba32& iForegroundColor
-                             , BLRgba32& iBackgroundColor
-                             , BLRgba32& iHighlightColor
-                             , uint64 iHUDFlags );
-
     protected:
         FPointQuadTree* mPointQuadTree;
-        FSelectionBox mSelectionBox;
 };

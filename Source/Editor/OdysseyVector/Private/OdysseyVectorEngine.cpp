@@ -1183,3 +1183,35 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
 
     }
 }
+
+// Execute callback on object tree
+uint64
+FOdysseyVectorEngine::Traverse( FOdysseyVectorScene* iScene
+                              , FOdysseyVectorObject* iObject
+                              , uint64 iTraversalFlags
+                              , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback )
+{
+    uint64 objectTraversalFlags = iCallback( iObject, iTraversalFlags );
+
+    if( objectTraversalFlags & TRAVERSE_STOP )
+    {
+        return TRAVERSE_STOP;
+    }
+
+    if( objectTraversalFlags & TRAVERSE_OBJECT_ACCEPTED )
+    {
+        iTraversalFlags |= TRAVERSE_PARENT_ACCEPTED;
+    }
+
+    for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+    {
+        uint64 childTraversalFlags = Traverse( iScene, childObject, iTraversalFlags, iCallback );
+
+        if( childTraversalFlags & TRAVERSE_STOP )
+        {
+            return TRAVERSE_STOP;
+        }
+    }
+
+    return 0;
+}

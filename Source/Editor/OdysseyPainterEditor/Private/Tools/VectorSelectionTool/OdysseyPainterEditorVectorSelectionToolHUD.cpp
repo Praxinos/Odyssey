@@ -33,54 +33,6 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorScene* iScene
     mBLSelectionContext.end();
 }
 
-// tells in which case an object is displayed by the tool
-bool
-FOdysseyPainterEditorVectorSelectionToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                              , FOdysseyVectorObject* iObject
-                                                              , uint64 iHUDFlags )
-{
-    if( iHUDFlags & VIEW_MODE_VERTEX )
-    {
-        if( iScene->GetSelectedObjectList().size() == 0 )
-        {
-            return true;
-        }
-        else
-        {
-            if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorSelectionToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
-                                                            , FOdysseyVectorObject* iObject
-                                                            , uint64 iHUDFlags )
-{
-    if( iHUDFlags & VIEW_MODE_VERTEX )
-    {
-        if( iScene->GetSelectedObjectList().size() == 0 )
-        {
-            return true;
-        }
-        else
-        {
-            if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
@@ -103,34 +55,45 @@ void
 FOdysseyPainterEditorVectorSelectionToolHUD::GetSelectedVertices( FOdysseyVectorScene* iScene
                                                                 , std::vector<FOdysseyVectorPoint*>& oPointArray )
 {
+    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorEditionFlags();
+
     // avoir to many reallocation by reserving a decent amount of memory
     oPointArray.reserve( 200 );
 
-    Traverse( iScene
-            , iScene
-            , mSelectionTool->GetEditor()->GetVectorEditionFlags()
-            , [ &oPointArray]( FOdysseyVectorObject* object ) -> bool
+    FOdysseyVectorEngine::Traverse
+    ( iScene
+    , iScene
+    , 0
+    , [ this
+      , iScene
+      , &hudFlags
+      , &oPointArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( mSelectionTool->DisplayObjectHUD(iScene, object, hudFlags, traversalFlags ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
-                  if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                  {
-                      FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(object);
+                  FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(object);
 
-                      selectedPath->GetSelectedPoints( oPointArray
-                                                     , ePointSelectionFlags::Vertex
-                                                     | ePointSelectionFlags::Strict
-                                                     | ePointSelectionFlags::SegmentHandle );
-                  }
+                  selectedPath->GetSelectedPoints( oPointArray
+                                                 , ePointSelectionFlags::Vertex
+                                                 | ePointSelectionFlags::Strict
+                                                 | ePointSelectionFlags::SegmentHandle );
+              }
 
-                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                  {
-                      FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+              {
+                  FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
-                      selectedPaintGroup->GetSelectedPoints( oPointArray
-                                                           , ePointSelectionFlags::Bucket );
-                  }
+                  selectedPaintGroup->GetSelectedPoints( oPointArray
+                                                       , ePointSelectionFlags::Bucket );
+              }
 
-                  return false; // keep traversing
-              } );
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;  
+      } );
 }
 
 void
@@ -248,13 +211,12 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
     }
 
     if( hudFlags & VIEW_MODE_OBJECT )

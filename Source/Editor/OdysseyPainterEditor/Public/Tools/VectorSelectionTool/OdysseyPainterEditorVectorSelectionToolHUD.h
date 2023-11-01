@@ -19,14 +19,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
         void Init( uint32 iWidth, uint32 iHeight );
         void GetSelectedVertices( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorPoint*>& oPointArray );
 
-        virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                      , FOdysseyVectorObject* iObject
-                                      , uint64 iHUDFlags )override;
-
-        virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
-                                    , FOdysseyVectorObject* iObject
-                                    , uint64 iHUDFlags )override;
-
         void ClearMask();
         BLImage* GetMask();
 

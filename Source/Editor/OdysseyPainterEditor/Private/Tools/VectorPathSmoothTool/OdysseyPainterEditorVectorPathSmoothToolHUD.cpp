@@ -40,7 +40,8 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload( FOdysseyVectorScene* iScen
 bool
 FOdysseyPainterEditorVectorPathSmoothToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
                                                                , FOdysseyVectorObject* iObject
-                                                               , uint64 iHUDFlags )
+                                                               , uint64 iHUDFlags
+                                                               , uint64 iTraversalFlags )
 {
     if( mPathSmoothTool->RestrictToSelectedObjects == false )
     {
@@ -61,7 +62,8 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::IsObjectDisplayed( FOdysseyVectorS
 bool
 FOdysseyPainterEditorVectorPathSmoothToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
                                                              , FOdysseyVectorObject* iObject
-                                                             , uint64 iHUDFlags )
+                                                             , uint64 iHUDFlags
+                                                             , uint64 iTraversalFlags )
 {
     if( mPathSmoothTool->RestrictToSelectedObjects == false )
     {
@@ -93,13 +95,12 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
     }
 
     // draw selection box only if we restrict erasure to the selection 

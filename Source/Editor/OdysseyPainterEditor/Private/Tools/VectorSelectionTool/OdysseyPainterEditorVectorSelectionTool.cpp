@@ -298,27 +298,35 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    mPickHUD->Traverse( iScene
-                      , iScene
-                      , GetEditor()->GetVectorEditionFlags()
-                      , [ this ]( FOdysseyVectorObject* object ) -> bool
-                        {
-                            if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                            {
-                                FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+    // run lambda on object tree
+    FOdysseyVectorEngine::Traverse
+    ( iScene
+    , iScene
+    , 0
+    , [ this
+      , &iScene ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+    {
+        if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+        {
+            if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+            {
+                FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                                SelectVertexFromPath( path );
-                            }
+                SelectVertexFromPath( path );
+            }
 
-                            if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                            {
-                                FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+            if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
-                                SelectBucketFromPaintGroup( paintGroup );
-                            }
+                SelectBucketFromPaintGroup( paintGroup );
+            }
 
-                            return false; // keep traversing
-                        } );
+            return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED; // keep traversing
+        }
+
+        return 0;
+    } );
 
     iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 }

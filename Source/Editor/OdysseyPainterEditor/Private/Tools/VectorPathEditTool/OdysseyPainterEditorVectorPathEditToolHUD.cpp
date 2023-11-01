@@ -28,48 +28,6 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Unload( FOdysseyVectorScene* iScene 
 {
 }
 
-// tells in which case an object is displayed by the tool
-bool
-FOdysseyPainterEditorVectorPathEditToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                             , FOdysseyVectorObject* iObject
-                                                             , uint64 iHUDFlags )
-{
-    if( iScene->GetSelectedObjectList().size() == 0 )
-    {
-        return true;
-    }
-    else
-    {
-        if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorPathEditToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
-                                                           , FOdysseyVectorObject* iObject
-                                                           , uint64 iHUDFlags )
-{
-    if( iScene->GetSelectedObjectList().size() == 0 )
-    {
-        return true;
-    }
-    else
-    {
-        if( iObject->IsSelected()  || IsPaintedPath( iObject, true ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorScene* iScene )
@@ -89,17 +47,16 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
     // draw object details in any mode (if statement is useles per-se but here for clarity)
     if( ( hudFlags & VIEW_MODE_VERTEX ) || ( hudFlags & VIEW_MODE_OBJECT ) )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags
-                                      | VIEW_PATH_VERTEX
-                                      | VIEW_PATH_SEGMENT
-                                      | vertexHandleFlag
-                                      | segmentHandleFlag );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags
+                   | VIEW_PATH_VERTEX
+                   | VIEW_PATH_SEGMENT
+                   | vertexHandleFlag
+                   | segmentHandleFlag );
     }
 
     // draw selection box only if we restrict erasure to the selection 

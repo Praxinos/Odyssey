@@ -36,28 +36,8 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Unload( FOdysseyVectorScene* iScene 
 bool
 FOdysseyPainterEditorVectorPathPushToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
                                                              , FOdysseyVectorObject* iObject
-                                                             , uint64 iHUDFlags )
-{
-    if( mPathPushTool->RestrictToSelectedObjects == false )
-    {
-        return true;
-    }
-    else
-    {
-        if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorPathPushToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
-                                                           , FOdysseyVectorObject* iObject
-                                                           , uint64 iHUDFlags )
+                                                             , uint64 iHUDFlags
+                                                             , uint64 iTraversalFlags )
 {
     if( mPathPushTool->RestrictToSelectedObjects == false )
     {
@@ -88,13 +68,12 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext, FOdysse
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
     }
 
     // draw selection box only if we restrict pushing to the selection 

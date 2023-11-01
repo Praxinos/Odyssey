@@ -20,11 +20,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathSmoothToolHUD : pu
 
         virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
                                       , FOdysseyVectorObject* iObject
-                                      , uint64 iHUDFlags );
+                                      , uint64 iHUDFlags
+                                      , uint64 iTraversalFlags );
 
         virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
                                     , FOdysseyVectorObject* iObject
-                                    , uint64 iHUDFlags );
+                                    , uint64 iHUDFlags
+                                    , uint64 iTraversalFlags );
 
         void SetCursorPosition( double iX, double iY );
         std::vector<FOdysseyVectorPoint*>& GetPickedPointArray();

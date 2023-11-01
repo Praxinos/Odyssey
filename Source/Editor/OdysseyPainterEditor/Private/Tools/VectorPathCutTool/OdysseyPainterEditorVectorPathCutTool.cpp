@@ -165,26 +165,33 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorScene* iS
         addedVertexArray.reserve(50);
 
         // traverse recursively on objects determined by the HUD
-        mPathCutHUD->Traverse( iScene
-                             , iScene
-                             , GetEditor()->GetVectorEditionFlags()
-                             , [ this
-                               , &addedVertexArray
-                               , &addedSegmentArray
-                               , &removedSegmentArray ](FOdysseyVectorObject* object) -> bool
-                               {
-                                   if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                                   {
-                                       FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+        FOdysseyVectorEngine::Traverse
+        ( iScene
+        , iScene
+        , 0
+        , [ this
+          , iScene
+          , &addedVertexArray
+          , &addedSegmentArray
+          , &removedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+          {
+              if( object->IsSelected() || (iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED )  )
+              {
+                  if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                  {
+                      FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                                       CutPath( path
-                                              , addedVertexArray
-                                              , addedSegmentArray
-                                              , removedSegmentArray );
-                                   }
+                      CutPath( path
+                              , addedVertexArray
+                              , addedSegmentArray
+                              , removedSegmentArray );
+                  }
 
-                                   return false; // keep traversing
-                               } );
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              }
+
+              return 0;
+          } );
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("VectorPathCutTool","Vector Path Cut Tool"));

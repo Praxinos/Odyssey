@@ -308,6 +308,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         void SetBLMask( BLImage* iBLMask );
 
+        static const uint64 TRAVERSE_STOP             = ( 1 << 0 );
+        static const uint64 TRAVERSE_OBJECT_ACCEPTED  = ( 1 << 1 );
+        static const uint64 TRAVERSE_PARENT_ACCEPTED  = ( 1 << 2 );
+
+        static uint64 Traverse( FOdysseyVectorScene* iScene
+                              , FOdysseyVectorObject* iObject
+                              , uint64 iTraversalFlags
+                              , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
+
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj

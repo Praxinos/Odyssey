@@ -23,11 +23,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathPushToolHUD : publ
 
         virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
                                       , FOdysseyVectorObject* iObject
-                                      , uint64 iHUDFlags ) override;
-
-        virtual bool IsObjectAltered( FOdysseyVectorScene* iScene
-                                    , FOdysseyVectorObject* iObject
-                                    , uint64 iHUDFlags ) override;
+                                      , uint64 iHUDFlags
+                                      , uint64 iTraversalFlags ) override;
 
         void SetCursorPosition( double iX, double iY );
 };

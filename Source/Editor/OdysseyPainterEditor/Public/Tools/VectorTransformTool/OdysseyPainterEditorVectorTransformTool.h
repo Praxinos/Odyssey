@@ -59,6 +59,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         void ScaleObjectSelection( FOdysseyVectorEngine* iEngine
                                  , FOdysseyVectorScene* iScene
                                  , const FOdysseyPoint& iPointInTexture );
+        void GetAlteredObjectList( FOdysseyVectorScene* iScene
+                                 , std::list<FOdysseyVectorObject*>& oObjectList );
 
     private:
         FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;

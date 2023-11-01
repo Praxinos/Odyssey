@@ -342,7 +342,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 bool
 FOdysseyPainterEditorVectorTransformToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
                                                               , FOdysseyVectorObject* iObject
-                                                              , uint64 iHUDFlags )
+                                                              , uint64 iHUDFlags
+                                                              , uint64 iTraversalFlags )
 {
     if( iHUDFlags & VIEW_MODE_VERTEX )
     {
@@ -366,7 +367,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::IsObjectDisplayed( FOdysseyVectorSc
 bool
 FOdysseyPainterEditorVectorTransformToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
                                                             , FOdysseyVectorObject* iObject
-                                                            , uint64 iHUDFlags )
+                                                            , uint64 iHUDFlags
+                                                            , uint64 iTraversalFlags )
 {
     if( iScene->GetSelectedObjectList().size() == 0 )
     {
@@ -409,13 +411,12 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
     }
 
     iBLContext->save();

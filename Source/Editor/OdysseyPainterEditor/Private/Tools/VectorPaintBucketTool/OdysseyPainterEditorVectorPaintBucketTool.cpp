@@ -388,32 +388,39 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     // No cycles picked, we create an orphan bucket
     else
     {
-        mBucketHUD->Traverse( iScene
-                            , iScene
-                            , GetEditor()->GetVectorEditionFlags()
-                            , [ this
-                              , &iPointInTexture
-                              , &addedBucketArray
-                              , &paramBucketArray ]( FOdysseyVectorObject* object ) -> bool
-                              {
-                                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                                  {
-                                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
-                                      BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
-                                      BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-                                      FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( paintGroup
-                                                                                             , localCoords.x
-                                                                                             , localCoords.y
-                                                                                             , Propagate );
+        FOdysseyVectorEngine::Traverse
+        ( iScene
+        , iScene
+        , 0
+        , [ this
+          , iScene
+          , &iPointInTexture
+          , &addedBucketArray
+          , &paramBucketArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+          {
+              if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+              {
+                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                  {
+                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+                      BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
+                      BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                      FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( paintGroup
+                                                                             , localCoords.x
+                                                                             , localCoords.y
+                                                                             , Propagate );
 
-                                      paintGroup->AddBucket( bucket );
+                      paintGroup->AddBucket( bucket );
 
-                                      addedBucketArray.push_back( bucket );
-                                      paramBucketArray.push_back( bucket );
-                                  }
+                      addedBucketArray.push_back( bucket );
+                      paramBucketArray.push_back( bucket );
+                  }
 
-                                  return false; // keep traversing
-                              } );
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              }
+
+              return 0;
+          } );
     }
 
     // needed for valid GUndo pointer

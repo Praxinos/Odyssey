@@ -39,51 +39,6 @@ FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
     UpdateSelectionBox( iScene, false, mEraserTool->GetEditor()->GetVectorEditionFlags() );
 }
 
-// tells in which case an object is displayed by the tool
-bool
-FOdysseyPainterEditorVectorEraserToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                           , FOdysseyVectorObject* iObject
-                                                           , uint64 iHUDFlags )
-{
-    if ( iHUDFlags & VIEW_MODE_VERTEX )
-    {
-        if( iScene->GetSelectedObjectList().size() == 0 )
-        {
-            return true;
-        }
-        else
-        {
-            if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorEraserToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
-                                                         , FOdysseyVectorObject* iObject
-                                                         , uint64 iHUDFlags )
-{
-    if( iScene->GetSelectedObjectList().size() == 0 )
-    {
-        return true;
-    }
-    else
-    {
-        if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void
 FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
                                               , FOdysseyVectorScene* iScene )
@@ -99,13 +54,12 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
     }
 
     // draw selection box only if we restrict erasure to the selection 

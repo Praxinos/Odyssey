@@ -236,53 +236,6 @@ FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
     MakeGrid( iScene, mGridTool->GetEditor()->GetVectorEditionFlags() );
 }
 
-// tells in which case an object is displayed by the tool
-bool
-FOdysseyPainterEditorVectorGridToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                         , FOdysseyVectorObject* iObject
-                                                         , uint64 iHUDFlags )
-{
-    if ( iHUDFlags & VIEW_MODE_VERTEX )
-    {
-        // if nothing is selected the grid applies to all objects
-        if( iScene->GetSelectedObjectList().size() == 0 )
-        {
-            return true;
-        }
-        {
-            if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
-            {
-                // otherwise it applies to selected objects only
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorGridToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
-                                                       , FOdysseyVectorObject* iObject
-                                                       , uint64 iHUDFlags )
-{
-    // if nothing is selected the grid applies to all objects
-    if( iScene->GetSelectedObjectList().size() == 0 )
-    {
-        return true;
-    }
-    {
-        if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
-        {
-            // otherwise it applies to selected objects only
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void
 FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene )
 {
@@ -297,13 +250,12 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext, FOdysseyVec
     // Draw object details only in vertex mode
     if( hudFlags & VIEW_MODE_VERTEX )
     {
-        // static call
-        FOdysseyVectorHUD::DrawObjects( iBLContext
-                                      , iScene
-                                      , fgColor
-                                      , bgColor
-                                      , hcColor
-                                      , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
     }
 
     iBLContext->save();
@@ -395,29 +347,36 @@ FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorScene* iScene )
 {
     mPointCount = 0;
 
-    Traverse( iScene
-            , iScene
-            , mSelectionTool->GetEditor()->GetVectorEditionFlags()
-            , [ this ]( FOdysseyVectorObject* object ) -> bool
+    FOdysseyVectorEngine::Traverse
+    ( iScene
+    , iScene
+    , 0
+    , [ this
+      , &iScene ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
+      {
+          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          {
+              BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
+
+              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
               {
-                  BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
+                  FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
-                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                  {
-                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+                  mPointCount += MapPaintGroupBuckets( paintGroup, inverseSpaceMatrix );
+              }
 
-                      mPointCount += MapPaintGroupBuckets( paintGroup, inverseSpaceMatrix );
-                  }
+              if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                  if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
-                  {
-                      FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+                  mPointCount += MapPath( path, inverseSpaceMatrix );
+              }
 
-                      mPointCount += MapPath( path, inverseSpaceMatrix );
-                  }
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
 
-                  return false;
-              } );
+          return 0;
+      } );
 }
 
 uint32

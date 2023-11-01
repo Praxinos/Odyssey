@@ -170,36 +170,43 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorS
     mPickedPointArray.clear();
     mPickedPointArray.reserve( 10 );
 
-    mPathEditHUD->Traverse( iScene
-                          , iScene
-                          , GetEditor()->GetVectorEditionFlags()
-                          , [ this
-                            , &iPointInTexture
-                            , &removedPathArray
-                            , &removedVertexArray
-                            , &removedSegmentArray
-                            , &addedSegmentArray ]( FOdysseyVectorObject* object ) -> bool
-                            {
-                                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                                {
-                                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+    FOdysseyVectorEngine::Traverse
+    ( iScene
+    , iScene
+    , 0
+    , [ this
+      , iScene
+      , &iPointInTexture
+      , &removedPathArray
+      , &removedVertexArray
+      , &removedSegmentArray
+      , &addedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                                    path->PickPoint( iPointInTexture.x
-                                                   , iPointInTexture.y
-                                                   , PickingRadius
-                                                   , mPickedPointArray
-                                                   , FOdysseyVectorPath::PICK_POINT );
+                  path->PickPoint( iPointInTexture.x
+                                  , iPointInTexture.y
+                                  , PickingRadius
+                                  , mPickedPointArray
+                                  , FOdysseyVectorPath::PICK_POINT );
 
-                                    FOdysseyVectorPath::DeletePoint( path
-                                                                   , mPickedPointArray
-                                                                   , removedVertexArray
-                                                                   , removedSegmentArray
-                                                                   , removedPathArray
-                                                                   , addedSegmentArray );
-                                }
+                  FOdysseyVectorPath::DeletePoint( path
+                                                  , mPickedPointArray
+                                                  , removedVertexArray
+                                                  , removedSegmentArray
+                                                  , removedPathArray
+                                                  , addedSegmentArray );
+              }
 
-                                return false; // keep traversing
-                            } );
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
 
     if( mPickedPointArray.size() )
     {
@@ -277,20 +284,27 @@ void
 UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorScene* iScene
                                                               , std::vector<FOdysseyVectorPath*>& oPathArray )
 {
-    mPathEditHUD->Traverse( iScene
-                          , iScene
-                          , GetEditor()->GetVectorEditionFlags()
-                          , [ &oPathArray ]( FOdysseyVectorObject* object ) -> bool
-                            {
-                                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                                {
-                                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+    FOdysseyVectorEngine::Traverse
+    ( iScene
+    , iScene
+    , 0
+    , [ iScene
+      , &oPathArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
  
-                                    oPathArray.push_back( path );
-                                }
+                  oPathArray.push_back( path );
+              }
 
-                                return false; // keep traversing
-                            } );
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
 }
 
 void
@@ -303,25 +317,32 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorSce
     mSelectedPathArray.clear();
     mPickedPointArray.clear();
 
-    mPathEditHUD->Traverse( iScene
-                          , iScene
-                          , GetEditor()->GetVectorEditionFlags()
-                          , [ this
-                            , &iPointInTexture ]( FOdysseyVectorObject* object ) -> bool
-                            {
-                                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                                {
-                                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+    FOdysseyVectorEngine::Traverse
+    ( iScene
+    , iScene
+    , 0
+    , [ this
+      , iScene
+      , &iPointInTexture ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
  
-                                    PathPickPoint( path
-                                                 , mPickedPointArray
-                                                 , PickingRadius
-                                                 , mPickingFlags
-                                                 , iPointInTexture );
-                                }
+                  PathPickPoint( path
+                               , mPickedPointArray
+                               , PickingRadius
+                               , mPickingFlags
+                               , iPointInTexture );
+              }
 
-                                return false; // keep traversing
-                            } );
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
 
     if( mPickedPointArray.size() )
     {
