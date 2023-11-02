@@ -507,6 +507,36 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
     return newCubicSegment;
 }
 
+::ULIS::FRectD
+FOdysseyVectorPathTracer::GetRedrawRect()
+{
+    if( mPointArray.size() )
+    {
+        double xmin = mPointArray[0].coords.x
+             , ymin = mPointArray[0].coords.y
+             , xmax = xmin
+             , ymax = ymin;
+        double maxRadius = mPointArray[0].radius;
+
+        for( int i = 1; i < mPointArray.size(); i++ )
+        {
+            if( mPointArray[i].coords.x < xmin ) xmin = mPointArray[i].coords.x;
+            if( mPointArray[i].coords.x > xmax ) xmax = mPointArray[i].coords.x;
+            if( mPointArray[i].coords.y < ymin ) ymin = mPointArray[i].coords.y;
+            if( mPointArray[i].coords.y > ymax ) ymax = mPointArray[i].coords.y;
+
+            if( mPointArray[i].radius > maxRadius ) maxRadius = mPointArray[i].radius;
+        }
+
+        return ::ULIS::FRectD::FromMinMax( xmin - maxRadius
+                                         , ymin - maxRadius
+                                         , xmax + maxRadius
+                                         , ymax + maxRadius );
+    }
+
+    return ::ULIS::FRectD( 0, 0, 0, 0 );
+}
+
 FOdysseyVectorSegment*
 FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                                , double iWorldX

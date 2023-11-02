@@ -72,9 +72,11 @@ FOdysseyVectorBlock::GetRenderFlags() const
 
 void
 FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
-{   
+{
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
-    //Render in a BLImage
+    ::ULIS::FRectI invalidatedRect = mEngine->GetInvalidatedRect();
+
+    //Render in a BLImage (also resets the internal invalidation rectangle)
     mEngine->Render(mBlockData->mBLContext.Get(), mRenderFlags);
 
     {
@@ -86,18 +88,18 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
 
         //Unpremultiply the render block
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-        ctx.Unpremultiply(renderBlock);
+        ctx.Unpremultiply(renderBlock, invalidatedRect );
         ctx.Finish();
 
         //Convert the right ULIS block in the expected ULIS Format
-        ctx.ConvertFormat(renderBlock, ioBlock);
+        ctx.ConvertFormat(renderBlock, ioBlock, invalidatedRect, ::ULIS::FVec2I( invalidatedRect.x, invalidatedRect.y ) );
         ctx.Finish();
     }
 }
 
 void
 FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
-{   
+{
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
     mEngine->RenderHUD( mHUDBlockData->mBLContext.Get() );
 

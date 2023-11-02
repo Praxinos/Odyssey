@@ -318,6 +318,10 @@ FOdysseyVectorScene::DrawShape( BLContext* iBLContext, double iCombinedOpacity, 
     //blctx->clearAll();
     iBLContext->fillAll();
 
+    // TODO: possible optimization: only erase the invalidated part.
+    // however, fillRect can do the trick only if the matrix is set to identity.
+    //::ULIS::FRectI& rect = GetEngine()->GetInvalidatedRect();
+    //iBLContext->fillRect( rect.x, rect.y, rect.w, rect.h );
 
     FOdysseyVectorGroupPaint::DrawShape( iBLContext, iCombinedOpacity, iDrawingFlags );
 

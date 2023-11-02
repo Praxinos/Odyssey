@@ -318,6 +318,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                               , uint64 iTraversalFlags
                               , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
 
+       void SetInvalidatedRect( const ::ULIS::FRectD& iRect );
+       void SetInvalidatedRect( const ::ULIS::FRectI& iRect );
+       ::ULIS::FRectI& GetInvalidatedRect();
+
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
@@ -358,4 +362,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         uint32 mPreferredHeight;
         std::vector<FHorizontalLine> mHorizontalLineBuffer;
         uint32 mProcessorCount;
+        ::ULIS::FRectI mInvalidatedRect;
 };

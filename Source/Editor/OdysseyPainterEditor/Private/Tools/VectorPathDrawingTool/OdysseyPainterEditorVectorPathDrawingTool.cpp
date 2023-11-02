@@ -304,6 +304,19 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorSce
             mUndoPathExtend->RecordSegment( newSegment, newSegment->GetVertex(1) );
         }
 
+        // dont redraw everything if no new segment was created
+        if( newSegment == nullptr )
+        {
+            vectorEngine->SetInvalidatedRect( mPathTracer.GetRedrawRect() );
+        }
+        else
+        {
+            uint32 imgW = vectorEngine->GetPreferredWidth(),
+                   imgH = vectorEngine->GetPreferredHeight();
+
+            vectorEngine->SetInvalidatedRect( ::ULIS::FRectI( 0, 0, imgW, imgH ) );
+        }
+
         iScene->Update( 0 ); // update invalidated path after segment insertion
     }
 

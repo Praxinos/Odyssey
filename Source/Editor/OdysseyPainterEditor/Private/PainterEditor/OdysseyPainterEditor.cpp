@@ -1107,7 +1107,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyVectorScene* iScene )
 
     iScene->FlipObjectsVertical( objectList );
 
-    iScene->Update( 0 );
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

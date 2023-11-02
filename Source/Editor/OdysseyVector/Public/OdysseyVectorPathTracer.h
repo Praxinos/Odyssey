@@ -142,4 +142,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         void TraceEdge( FTracerEdge* iEdge, double iAlpha );
         void SetDotLimit( double iDotLimit );
         void SetTracingWidth( double iTracingWidth );
+        ::ULIS::FRectD GetRedrawRect();
 };

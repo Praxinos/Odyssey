@@ -13,6 +13,7 @@ FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene
     , mInvalidTileMap( 64, iPreferredWidth, iPreferredHeight )
     , mPreferredWidth( iPreferredWidth )
     , mPreferredHeight( iPreferredHeight )
+    , mInvalidatedRect( 0, 0, iPreferredWidth, iPreferredHeight )
 {
     // Configure the number of threads to use.
     mProcessorCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
@@ -93,6 +94,36 @@ FOdysseyVectorScene*
 FOdysseyVectorEngine::GetScene()
 {
     return mScene;
+}
+
+void
+FOdysseyVectorEngine::SetInvalidatedRect( const ::ULIS::FRectD& iRect )
+{
+    ::ULIS::FRectI rect = ::ULIS::FRectI( iRect.x, iRect.y, iRect.w, iRect.h );
+
+    SetInvalidatedRect( rect );
+}
+
+void
+FOdysseyVectorEngine::SetInvalidatedRect( const ::ULIS::FRectI& iRect )
+{
+    if( mInvalidationFlags == 0 )
+    {
+        mInvalidatedRect.x = iRect.x;
+        mInvalidatedRect.y = iRect.y;
+        mInvalidatedRect.w = iRect.w;
+        mInvalidatedRect.h = iRect.h;
+    }
+    else // if we haven' been redrawn yet, combine the rectangles
+    {
+        mInvalidatedRect = mInvalidatedRect | iRect;
+    }
+}
+
+::ULIS::FRectI&
+FOdysseyVectorEngine::GetInvalidatedRect()
+{
+    return mInvalidatedRect;
 }
 
 void
@@ -190,6 +221,8 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
     }
 
     mInvalidationFlags = 0;
+
+    mInvalidatedRect = ::ULIS::FRectI( 0, 0, imageData.size.w, imageData.size.h );
 }
 
 void
