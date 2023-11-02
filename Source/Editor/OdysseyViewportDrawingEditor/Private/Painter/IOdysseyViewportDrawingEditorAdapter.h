@@ -51,7 +51,7 @@ public:
     FVector2D ViewportCoordinatesToTextureCoordinates( FVector2D iPositionInViewport, FEditorViewportClient* iViewportClient);
 
 public:
-    bool IsReadyToDraw() const;
+    bool IsReadyToDraw();
 
 public:
     /** Viewport Client methods */

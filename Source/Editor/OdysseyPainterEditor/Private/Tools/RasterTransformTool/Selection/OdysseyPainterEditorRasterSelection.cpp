@@ -48,6 +48,7 @@ bool UOdysseyPainterEditorRasterSelection::OnMouseDown(const FOdysseyPoint& iPoi
 
 void UOdysseyPainterEditorRasterSelection::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
+
 }
 
 void UOdysseyPainterEditorRasterSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
@@ -100,7 +101,7 @@ TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelec
 
 ::ULIS::FRectI UOdysseyPainterEditorRasterSelection::GetSelectionAreaBoundingRect()
 {
-    if (mSelectionArea)
+    if (mSelectionArea && mSelectionArea->GetPoints().Num() != 0)
     {
         int minX = mSelectionArea->GetPoints()[0].X;
         int maxX = mSelectionArea->GetPoints()[0].X;

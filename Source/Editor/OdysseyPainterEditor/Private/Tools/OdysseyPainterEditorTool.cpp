@@ -15,6 +15,7 @@ UOdysseyPainterEditorTool::~UOdysseyPainterEditorTool()
 
 UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
+    , mMouseCursor( EMouseCursor::Crosshairs )
     , mIsActivated(false)
 {
     mHUD = new FOdysseyHUDElement( FName("RootHUD") );
@@ -168,6 +169,11 @@ UOdysseyPainterEditorTool::CreateTopTabWidget()
 FOdysseyHUDElement* UOdysseyPainterEditorTool::GetHUD()
 {
     return mHUD;
+}
+
+EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor()
+{
+    return mMouseCursor;
 }
 
 void

@@ -141,7 +141,7 @@ void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
 
 FVector2D IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FVector2D iPositionInViewport, FEditorViewportClient* iViewportClient)
 {
-    if (!mTexture)
+    if ( !mTexture )
         return FVector2D( 0, 0 );
 
     const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapterPtr = mExtension->ComponentToAdapterMap().Find(mExtension->Component());
@@ -180,8 +180,17 @@ FVector2D IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoor
     return iPositionInViewport;
 }
 
-bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw() const
+bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw() 
 {
+    if( !mTexture )
+        return false;
+
+    if (!mExtension->Actor() || !mExtension->Component() || !mExtension->Material() || mExtension->Actor()->IsPendingKill() || mExtension->Component()->IsPendingKill() || mExtension->Material()->IsPendingKill() )
+    {
+        SetTexture(nullptr);
+        return false;
+    }
+
     return !(mState == eState::kIdle);
 }
 

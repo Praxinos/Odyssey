@@ -69,6 +69,7 @@ public:
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
     virtual TSharedRef<SWidget> CreateTopTabWidget();
     virtual FOdysseyHUDElement* GetHUD();
+    virtual EMouseCursor::Type GetMouseCursor();
 
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);
@@ -86,6 +87,7 @@ public:
 protected:
     FOdysseyPainterEditor*              mEditor;
     FOdysseyHUDElement*                 mHUD;
+    EMouseCursor::Type                  mMouseCursor; //If the cursor should be changed while using this tool
 
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")

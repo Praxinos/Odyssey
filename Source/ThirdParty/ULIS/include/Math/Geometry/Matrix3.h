@@ -456,13 +456,13 @@ TMatrix3< T >::MakeHomography( const TVector2< T > iSrc[], const TVector2< T > i
         , iSrc[1].x, iSrc[1].y, 1, 0, 0, 0, static_cast< double >( -iSrc[1].x ) * iDst[1].x, static_cast< double >( - iSrc[1].y ) * iDst[1].x
         , iSrc[2].x, iSrc[2].y, 1, 0, 0, 0, static_cast< double >( -iSrc[2].x ) * iDst[2].x, static_cast< double >( - iSrc[2].y ) * iDst[2].x
         , iSrc[3].x, iSrc[3].y, 1, 0, 0, 0, static_cast< double >( -iSrc[3].x ) * iDst[3].x, static_cast< double >( - iSrc[3].y ) * iDst[3].x
-        , 0, 0, 0, iSrc[2].x, iSrc[2].y, 1, static_cast< double >( -iSrc[2].x ) * iDst[2].y, static_cast< double >( - iSrc[2].y ) * iDst[2].y
         , 0, 0, 0, iSrc[0].x, iSrc[0].y, 1, static_cast< double >( -iSrc[0].x ) * iDst[0].y, static_cast< double >( - iSrc[0].y ) * iDst[0].y
         , 0, 0, 0, iSrc[1].x, iSrc[1].y, 1, static_cast< double >( -iSrc[1].x ) * iDst[1].y, static_cast< double >( - iSrc[1].y ) * iDst[1].y
+        , 0, 0, 0, iSrc[2].x, iSrc[2].y, 1, static_cast< double >( -iSrc[2].x ) * iDst[2].y, static_cast< double >( - iSrc[2].y ) * iDst[2].y
         , 0, 0, 0, iSrc[3].x, iSrc[3].y, 1, static_cast< double >( -iSrc[3].x ) * iDst[3].y, static_cast< double >( - iSrc[3].y ) * iDst[3].y }
     );
 
-    Vec8 vec( { iDst[0].x, iDst[1].x, iDst[2].x, iDst[3].x, iDst[2].y, iDst[0].y, iDst[1].y, iDst[3].y } );
+    Vec8 vec( { iDst[0].x, iDst[1].x, iDst[2].x, iDst[3].x, iDst[0].y, iDst[1].y, iDst[2].y, iDst[3].y } );
     Mat8 inverse = mat.Inverse();
     Vec8 res = inverse * vec;
     return  TMatrix3< T >(

@@ -32,7 +32,7 @@ bool UOdysseyPainterEditorRasterFreehandSelection::OnMouseDown(const FOdysseyPoi
 
 void UOdysseyPainterEditorRasterFreehandSelection::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-
+    mMouseCursor = EMouseCursor::Default;
 }
 
 void UOdysseyPainterEditorRasterFreehandSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)

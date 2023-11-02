@@ -972,8 +972,8 @@ FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, 
         mCurrentMouseCursor = EMouseCursor::GrabHand;
     else if( mCurrentToolState == eState::kPick )
         mCurrentMouseCursor = EMouseCursor::EyeDropper;
-    else
-        mCurrentMouseCursor = EMouseCursor::Crosshairs;
+    else if( mOdysseyPainterEditor->GetSelectedTool() )
+        mCurrentMouseCursor = mOdysseyPainterEditor->GetSelectedTool()->GetMouseCursor();
 
     return mCurrentMouseCursor;
 }

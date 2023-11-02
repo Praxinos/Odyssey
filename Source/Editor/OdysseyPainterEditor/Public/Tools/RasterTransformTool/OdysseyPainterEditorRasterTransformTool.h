@@ -31,7 +31,8 @@ enum class EOdysseyTransformCapture
 {
     NoCapture,
     Inside,
-    Sides
+    Sides,
+    Rotation
 };
 
 UCLASS()
@@ -61,8 +62,11 @@ public:
     virtual void Unload() override;
 
     virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
+    virtual EMouseCursor::Type GetMouseCursor() override;
 
 private:
+    double GetRotationAngleFromLastReference(FVector2D iPointInTexture);
+
     void CreateTransformAreaFromSelection();
     EOdysseyTransformCapture DetectCaptureMode( FVector2D iPoint );
     void ConstrainToRectangle( FVector2D iPosition );
@@ -94,6 +98,11 @@ private:
     EOdysseyTransformCapture mTransformCaptureMode;
     FOdysseyHUDPolygon* mTransformArea;
     TArray<FOdysseyHUDHandle*> mHandles;
+    FVector2D mPivot;
 
+    double mLastReferenceRotation;
     FVector2D mMouseLastReferencePoint;
+    ::ULIS::FRectI mInitialSelectionBoundingBox;
+
+    double mRotation;
 };

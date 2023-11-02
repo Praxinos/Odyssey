@@ -33,7 +33,7 @@ bool UOdysseyPainterEditorRasterEllipseSelection::OnMouseDown(const FOdysseyPoin
 
 void UOdysseyPainterEditorRasterEllipseSelection::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-
+    mMouseCursor = EMouseCursor::Default;
 }
 
 void UOdysseyPainterEditorRasterEllipseSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
