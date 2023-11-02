@@ -15,7 +15,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 }
 
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
-    : mUndoSegmentReshape( nullptr )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathSmoothToolHUD( this ) )
+    , mUndoSegmentReshape( nullptr )
     , SmoothingMode( ePathSmoothingMode::Round )
     , PickingRadius( 20.0f )
     , PreserveHandleLength( false )
@@ -23,7 +24,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmooth
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathSmoothTool64");
 
-    mPathSmoothHUD = new FOdysseyPainterEditorVectorPathSmoothToolHUD( this );
+    mPathSmoothHUD = static_cast<FOdysseyPainterEditorVectorPathSmoothToolHUD*>( mBaseHUD );
 }
 
 bool
@@ -35,23 +36,12 @@ UOdysseyPainterEditorVectorPathSmoothTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mPathSmoothHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
 UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mPathSmoothHUD );
-
-    iEngine->ResetHUD();
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 

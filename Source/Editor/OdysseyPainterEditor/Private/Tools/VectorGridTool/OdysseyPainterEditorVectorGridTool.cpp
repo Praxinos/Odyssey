@@ -16,7 +16,8 @@ UOdysseyPainterEditorVectorGridTool::~UOdysseyPainterEditorVectorGridTool()
 }
 
 UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
-    : mMultipleSelectionMode( false )
+    : UOdysseyPainterEditorVectorSelectionTool( new FOdysseyPainterEditorVectorGridToolHUD( this ) )
+    , mMultipleSelectionMode( false )
     , DivisionsX( 4 )
     , DivisionsY( 4 )
     , PickingRadius( 10.0f )
@@ -24,7 +25,7 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
 
-    mGridHUD = new FOdysseyPainterEditorVectorGridToolHUD( this );
+    mGridHUD = static_cast<FOdysseyPainterEditorVectorGridToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -39,10 +40,6 @@ UOdysseyPainterEditorVectorGridTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mGridHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
@@ -50,11 +47,6 @@ uint64
 UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mGridHUD );
-
-    iEngine->ResetHUD(); // reset the Grid HUD
 
     mGridHUD->Export( mPointArray );
 

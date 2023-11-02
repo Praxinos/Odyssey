@@ -82,6 +82,8 @@ FOdysseyVectorEngine::SetScene( FOdysseyVectorScene* iScene )
     mChildrenList.clear();
     AppendChild( iScene );
 
+//    SetSelectionSpace( iScene );
+
     mScene->SetEngine( this );
 
     ResetHUD();
@@ -118,7 +120,7 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext/*FOdysseyVectorScene* iSc
 
     //UseImage( &mDefaultBLImage );
 }
-
+/*
 // static
 void
 FOdysseyVectorEngine::GetVertexSelection( std::list<FOdysseyVectorObject*>& iVectorObjectList
@@ -147,7 +149,7 @@ FOdysseyVectorEngine::GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
         GetVertexSelectionRecursive( childObject, iSelectedPointArray );
     }
 }
-
+*/
 void
 FOdysseyVectorEngine::SelectAllInSelectionSpace()
 {

@@ -19,8 +19,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         virtual ~FOdysseyPainterEditorVectorBaseToolHUD();
         FOdysseyPainterEditorVectorBaseToolHUD(  UOdysseyPainterEditorVectorBaseTool* iBaseTool );
 
-        virtual void Load( FOdysseyVectorScene* iScene ) = 0;
-        virtual void Unload( FOdysseyVectorScene* iScene )  = 0;
+        virtual void Load( FOdysseyVectorScene* iScene );
+        virtual void Unload( FOdysseyVectorScene* iScene );
+        virtual void Reset( FOdysseyVectorScene* iScene ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
 
         void DrawObjects( BLContext* iBLContext
                         , FOdysseyVectorScene* iScene
@@ -32,12 +34,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         FSelectionBox& GetSelectionBox();
 
     protected:
-        void UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
-                                         , uint64 iHUDFlags );
+        void UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene );
 
         void UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
-                                         , bool iForceWorld
-                                         , uint64 iHUDFlags );
+                                         , bool iForceWorld );
 
         void UpdateSelectionBox( FOdysseyVectorScene* iScene
                                , bool iForceWorld

@@ -12,16 +12,16 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathStitchTool::~UOdysseyPainterEditorVectorPathStitchTool()
 {
-    delete mPathStitchHUD;
 }
 
 UOdysseyPainterEditorVectorPathStitchTool::UOdysseyPainterEditorVectorPathStitchTool()
-    : PickingRadius(20.0f)
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathStitchToolHUD( this ) )
+    , PickingRadius(20.0f)
 //    , RestrictToSelection( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathKnotTool64");
 
-    mPathStitchHUD = new FOdysseyPainterEditorVectorPathStitchToolHUD( this );
+    mPathStitchHUD = static_cast<FOdysseyPainterEditorVectorPathStitchToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -38,11 +38,6 @@ UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorScene* iSce
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mPathStitchHUD );
-
-    iEngine->ResetHUD();
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
@@ -53,8 +48,6 @@ uint64
 UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mPathStitchHUD );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
@@ -79,7 +72,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorScen
         std::vector<FOdysseyVectorVertex*> removedVertexArray;
         std::vector<FOdysseyVectorSegment*> mergedSegmentArray;
         std::vector<FOdysseyVectorVertex*> mergedVertexArray;
-        std::vector<FOdysseyVectorPoint*>& pickedPointArray = mPathStitchHUD->GetPickedPointArray();
+        FOdysseyVectorVertex** stitchableVertex = mPathStitchHUD->GetStitchableVertices();
 
         //pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
 
@@ -92,65 +85,59 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorScen
                            , pickedPointArray
                            , FOdysseyVectorPath::PICK_POINT );
     */
-        if( pickedPointArray.size() > 1 )
+        if( stitchableVertex[0] && stitchableVertex[1] )
         {
-            FOdysseyVectorVertex* vertexA = static_cast<FOdysseyVectorVertex*>( pickedPointArray[0] );
-            FOdysseyVectorVertex* vertexB = static_cast<FOdysseyVectorVertex*>( pickedPointArray[1] );
+            FOdysseyVectorVertex* vertexA = static_cast<FOdysseyVectorVertex*>( stitchableVertex[0] );
+            FOdysseyVectorVertex* vertexB = static_cast<FOdysseyVectorVertex*>( stitchableVertex[1] );
             FOdysseyVectorPath* mergedPath = nullptr;
 
-            if( ( vertexA->GetSegmentCount() == 1 ) && ( vertexB->GetSegmentCount() == 1 ) )
+            // TODO: remove vertexB->GetPath() from selected objects.
+            if( vertexA->GetPath() != vertexB->GetPath() )
             {
-                if( vertexA->GetFirstSegment() != vertexB->GetFirstSegment() )
+                mergedPath = vertexB->GetPath();
+
+                vertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
+                vertexA->GetPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
+
+
+                // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
+                vertexB = mergedVertexArray[vertexB->GetID()];
+
+                if( mergedPath->IsSelected() )
                 {
-                    // TODO: remove vertexB->GetPath() from selected objects.
-                    if( vertexA->GetPath() != vertexB->GetPath() )
-                    {
-                        mergedPath = vertexB->GetPath();
+                    iScene->Unselect( mergedPath );
 
-                        vertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
-                        vertexA->GetPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
-
-
-                        // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
-                        vertexB = mergedVertexArray[vertexB->GetID()];
-
-                        if( mergedPath->IsSelected() )
-                        {
-                            iScene->Unselect( mergedPath );
-
-                            iScene->Select( vertexA->GetPath() );
-                        }
-
-                        removedPathArray.push_back( mergedPath );
-                    }
-
-                    knotVertex = iEngine->Stitch( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
-
-                    if( knotVertex )
-                    {
-                        addedVertexArray.push_back( knotVertex );
-                        removedVertexArray.push_back( vertexA );
-                        removedVertexArray.push_back( vertexB );
-
-                        // needed for valid GUndo pointer
-                        GEditor->BeginTransaction(LOCTEXT("VectorPathStitchTool","Vector Path Stitch Tool"));
-                        if( GUndo )
-                        {
-                            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathStitch( iScene
-                                                                                      , removedPathArray
-                                                                                      , removedVertexArray
-                                                                                      , removedSegmentArray
-                                                                                      , addedPathArray
-                                                                                      , addedVertexArray
-                                                                                      , addedSegmentArray
-                                                                                      , mergedVertexArray
-                                                                                      , mergedSegmentArray );
-
-                            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                        }
-                        GEditor->EndTransaction();
-                    }
+                    iScene->Select( vertexA->GetPath() );
                 }
+
+                removedPathArray.push_back( mergedPath );
+            }
+
+            knotVertex = iEngine->Stitch( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
+
+            if( knotVertex )
+            {
+                addedVertexArray.push_back( knotVertex );
+                removedVertexArray.push_back( vertexA );
+                removedVertexArray.push_back( vertexB );
+
+                // needed for valid GUndo pointer
+                GEditor->BeginTransaction(LOCTEXT("VectorPathStitchTool","Vector Path Stitch Tool"));
+                if( GUndo )
+                {
+                    FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathStitch( iScene
+                                                                                , removedPathArray
+                                                                                , removedVertexArray
+                                                                                , removedSegmentArray
+                                                                                , addedPathArray
+                                                                                , addedVertexArray
+                                                                                , addedSegmentArray
+                                                                                , mergedVertexArray
+                                                                                , mergedSegmentArray );
+
+                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                }
+                GEditor->EndTransaction();
             }
         }
 

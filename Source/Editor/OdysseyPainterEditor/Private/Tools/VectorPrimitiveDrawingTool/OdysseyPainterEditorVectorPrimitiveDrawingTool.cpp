@@ -21,7 +21,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 }
 
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
-    : PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorBaseToolHUD( this ) )
+    , PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
     , StrokeWidth( 4.0f )
     , Uniform( false )
 {
@@ -40,19 +41,12 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    //iEngine->RemoveHUD( &mDummyHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    //iEngine->ClearHUD();
-    //iEngine->AddHUD( &mDummyHUD );
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 

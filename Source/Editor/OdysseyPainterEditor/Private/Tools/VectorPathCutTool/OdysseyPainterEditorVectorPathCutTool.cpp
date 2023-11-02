@@ -10,14 +10,14 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathCutTool::~UOdysseyPainterEditorVectorPathCutTool()
 {
-   delete mPathCutHUD;
 }
 
 UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathCutToolHUD( this ) )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCutTool64");
 
-    mPathCutHUD = new FOdysseyPainterEditorVectorPathCutToolHUD( this );
+    mPathCutHUD = static_cast<FOdysseyPainterEditorVectorPathCutToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -34,21 +34,12 @@ UOdysseyPainterEditorVectorPathCutTool::UnloadVector( FOdysseyVectorScene* iScen
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    iEngine->RemoveHUD( mPathCutHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
 UOdysseyPainterEditorVectorPathCutTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mPathCutHUD );
-
-    iEngine->ResetHUD();
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 

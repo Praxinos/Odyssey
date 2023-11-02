@@ -69,7 +69,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GetSelectedVertices( FOdysseyVector
       , &hudFlags
       , &oPointArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( mSelectionTool->DisplayObjectHUD(iScene, object, hudFlags, traversalFlags ) )
+          if( mSelectionTool->DisplayObjectHUD(iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {

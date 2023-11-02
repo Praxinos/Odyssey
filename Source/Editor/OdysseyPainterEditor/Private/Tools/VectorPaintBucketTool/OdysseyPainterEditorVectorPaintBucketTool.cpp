@@ -17,11 +17,11 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPaintBucketTool::~UOdysseyPainterEditorVectorPaintBucketTool()
 {
-    delete mBucketHUD;
 }
 
 UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBucketTool()
-    : Propagate( true )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPaintBucketToolHUD( this ) )
+    , Propagate( true )
     , ColorMode ( eBucketColorMode::SolidColor )
     , Color1( 255, 255, 255, 255 )
     , Color2( 255, 255, 255, 255 )
@@ -31,7 +31,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 
-    mBucketHUD = new FOdysseyPainterEditorVectorPaintBucketToolHUD( this );
+    mBucketHUD = static_cast<FOdysseyPainterEditorVectorPaintBucketToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -46,17 +46,12 @@ UOdysseyPainterEditorVectorPaintBucketTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPaintBucketTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mBucketHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
 UOdysseyPainterEditorVectorPaintBucketTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
@@ -65,11 +60,6 @@ UOdysseyPainterEditorVectorPaintBucketTool::LoadVector( FOdysseyVectorScene* iSc
 
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mBucketHUD );
-
-    mBucketHUD->Reset( iScene );
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );

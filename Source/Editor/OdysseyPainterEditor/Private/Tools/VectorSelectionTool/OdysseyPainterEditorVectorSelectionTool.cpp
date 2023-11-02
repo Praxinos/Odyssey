@@ -3,6 +3,7 @@
 
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
@@ -18,11 +19,21 @@ UOdysseyPainterEditorVectorSelectionTool::~UOdysseyPainterEditorVectorSelectionT
 }
 
 UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool()
-    : SelectionShape( EOdysseyVectorSelectionShape::Freehand )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorSelectionToolHUD( this ) )
+    , SelectionShape( EOdysseyVectorSelectionShape::Freehand )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
-    mPickHUD = new FOdysseyPainterEditorVectorSelectionToolHUD( this );
+    mPickHUD = static_cast<FOdysseyPainterEditorVectorSelectionToolHUD*>( mBaseHUD );
+}
+
+UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool( FOdysseyPainterEditorVectorBaseToolHUD* iHUD )
+    : UOdysseyPainterEditorVectorBaseTool( iHUD )
+    , SelectionShape( EOdysseyVectorSelectionShape::Freehand )
+{
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
+
+    mPickHUD = static_cast<FOdysseyPainterEditorVectorSelectionToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -38,15 +49,6 @@ UOdysseyPainterEditorVectorSelectionTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    mPickHUD->Load( iScene );
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mPickHUD );
-
-    iEngine->ResetHUD();
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
@@ -56,10 +58,6 @@ UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorScene* iScen
 uint64
 UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mPickHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 

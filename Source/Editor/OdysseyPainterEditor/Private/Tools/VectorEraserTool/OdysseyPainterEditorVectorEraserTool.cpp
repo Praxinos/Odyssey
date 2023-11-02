@@ -10,15 +10,13 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorEraserTool::~UOdysseyPainterEditorVectorEraserTool()
 {
-    delete mEraserHUD;
 }
 
 UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
-    : Radius( 20.0f )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorEraserToolHUD( this ) )
+    , Radius( 20.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
-
-    mEraserHUD = new FOdysseyPainterEditorVectorEraserToolHUD( this );
 }
 
 //--------------------------------------------------------------------------------------
@@ -33,27 +31,12 @@ UOdysseyPainterEditorVectorEraserTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mEraserHUD );
-
-    mEraserHUD->Unload( iScene );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
 UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    mEraserHUD->Load( iScene );
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mEraserHUD );
-
-    iEngine->ResetHUD();
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 

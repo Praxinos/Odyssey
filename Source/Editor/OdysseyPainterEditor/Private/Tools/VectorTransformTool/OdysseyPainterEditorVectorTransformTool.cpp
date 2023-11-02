@@ -19,7 +19,8 @@ UOdysseyPainterEditorVectorTransformTool::~UOdysseyPainterEditorVectorTransformT
 }
 
 UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTool()
-    : mPickedPivot( nullptr )
+    : UOdysseyPainterEditorVectorSelectionTool( new FOdysseyPainterEditorVectorTransformToolHUD( this ) )
+    , mPickedPivot( nullptr )
     , mDragging( false )
     , PickingRadius( 10.0f )
     , mUndo ( nullptr )
@@ -28,7 +29,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.TransformTool32");
 
-    mTransformHUD = new FOdysseyPainterEditorVectorTransformToolHUD( this );
+    mTransformHUD = static_cast<FOdysseyPainterEditorVectorTransformToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -43,17 +44,12 @@ UOdysseyPainterEditorVectorTransformTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorTransformTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mTransformHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
 UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
@@ -63,12 +59,6 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorScene* iScen
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
-    mTransformHUD->Load( iScene );
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mTransformHUD );
-
-    mTransformHUD->Reset( iScene );
     mTransformHUD->CenterGizmo();
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so

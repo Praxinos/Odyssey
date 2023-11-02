@@ -8,6 +8,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::~FOdysseyPainterEditorVectorPaint
 FOdysseyPainterEditorVectorPaintBucketToolHUD::FOdysseyPainterEditorVectorPaintBucketToolHUD( UOdysseyPainterEditorVectorPaintBucketTool* iPaintBucketTool )
     : FOdysseyPainterEditorVectorBaseToolHUD( iPaintBucketTool )
     , mPaintBucketTool( iPaintBucketTool )
+    , mAnyPaintGroupSelected( false )
 {
 }
 
@@ -17,11 +18,26 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScen
     mPickedCycleArray.clear();
 
     UpdateSelectionBox( iScene, false, mPaintBucketTool->GetEditor()->GetVectorEditionFlags() );
+
+    mAnyPaintGroupSelected = false;
+
+    // check if any paint group is selected. this allows us to determinate when we can draw 
+    // the hud for the whole scene
+    for( FOdysseyVectorObject* object : iScene->GetSelectedObjectList() )
+    {
+        if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            mAnyPaintGroupSelected = true;
+
+            break;
+        }
+    }
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::Load(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorPaintBucketToolHUD::Load( FOdysseyVectorScene* iScene )
 {
+    Reset( iScene );
 }
 
 void
@@ -90,18 +106,22 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorScene* 
                                                          , double iWorldY
                                                          , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
     oPickedCycleArray.clear();
 
     FOdysseyVectorEngine::Traverse
     ( iScene
     , iScene
-    , mPaintBucketTool->GetEditor()->GetVectorEditionFlags()
-    , [ iScene
+    , 0
+    , [ this
+      , iScene
+      , vectorEngine
       , &iWorldX
       , &iWorldY
       , &oPickedCycleArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
         {
-            if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+            if( ( mAnyPaintGroupSelected == false ) || ( object->IsSelected() ) )
             {
                 if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                 {
@@ -138,7 +158,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorScene* 
       , &iWorldY
       , &pickedBucket ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          if( ( mAnyPaintGroupSelected == false ) || ( object->IsSelected() ) )
           {
               if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
               {

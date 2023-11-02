@@ -7,6 +7,7 @@
 #include "OdysseyStyleSet.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyVector.h"
+#include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorSceneTreeView"
 
@@ -228,36 +229,38 @@ SOdysseyPainterEditorVectorSceneTreeView::SelectAll()
 */
 }
 
+//FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+
 void
-SOdysseyPainterEditorVectorSceneTreeView::DeleteObjectSelection()
+SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects()
 {
     if( mRootItem )
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::DeleteObjectSelection( scene );
+        FOdysseyPainterEditor::DeleteObjects( scene );
     }
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::CopyObjectSelection()
+SOdysseyPainterEditorVectorSceneTreeView::CopyObjects()
 {
     if( mRootItem )
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::CopyObjectSelection( scene );
+        FOdysseyPainterEditor::CopyObjects( scene  );
     }
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::PasteObjectSelection()
+SOdysseyPainterEditorVectorSceneTreeView::PasteObjects()
 {
     if( mRootItem )
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::PasteObjectSelection( scene );
+        FOdysseyPainterEditor::PasteObjects( scene );
     }
 }
 
@@ -266,22 +269,22 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
 {
     mCommandList->MapAction(
         FGenericCommands::Get().SelectAll,
-        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::SelectAll)
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::SelectAll )
     );
 
     mCommandList->MapAction(
         FGenericCommands::Get().Delete,
-        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::DeleteObjectSelection)
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects )
     );
 
     mCommandList->MapAction(
         FGenericCommands::Get().Copy,
-        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::CopyObjectSelection)
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::CopyObjects )
     );
 
     mCommandList->MapAction(
         FGenericCommands::Get().Paste,
-        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::PasteObjectSelection)
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::PasteObjects )
     );
 /*
     mCommandList->MapAction(

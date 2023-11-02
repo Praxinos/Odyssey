@@ -58,13 +58,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
         bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
         ::ULIS::FVec2D GetWorldPositionFromSelection();
         void InvalidateObject( FOdysseyVectorObject* iObject );
-        void RemoveSelectedObjects();
+        void RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList );
 
-        FOdysseyVectorGroup* GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& oObjectArray
-                                                 , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray );
-        FOdysseyVectorGroupPaint* MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVectorObject*>& oCubicPathArray
-                                                                   , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
-                                                                   , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray );
+        FOdysseyVectorGroup* GroupObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                         , std::vector<FOdysseyVectorObject*>& oObjectArray
+                                         , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray );
+
+        FOdysseyVectorGroupPaint* MakePaintGroupFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                                           , std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                                           , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
+                                                           , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray );
         uint32 GetType();
 
         void SetEngine( FOdysseyVectorEngine* iEngine );

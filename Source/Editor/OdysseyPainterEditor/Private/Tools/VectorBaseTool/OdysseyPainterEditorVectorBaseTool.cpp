@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "Widgets/Layout/SWrapBox.h"
 
@@ -11,10 +12,21 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorBaseTool::~UOdysseyPainterEditorVectorBaseTool()
 {
+    if( mBaseHUD )
+    {
+        delete mBaseHUD;
+    }
 }
 
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
     : mHasContextMenu( true )
+    , mBaseHUD( nullptr )
+{
+}
+
+UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( FOdysseyPainterEditorVectorBaseToolHUD* iBaseHUD )
+    : mHasContextMenu(true)
+    , mBaseHUD( iBaseHUD )
 {
 }
 
@@ -31,62 +43,72 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
     return doubleClicked;
 }
 
+// static
 void
 UOdysseyPainterEditorVectorBaseTool::GetDisplayedAncestorList( FOdysseyVectorScene* iScene
+                                                             , bool iAcceptScene
                                                              , std::list<FOdysseyVectorObject*>& oObjectList )
 {
-    uint64 hudFlags = GetEditor()->GetVectorEditionFlags();
-
-    FOdysseyVectorEngine::Traverse
-    ( iScene
-    , iScene
-    , 0
-    , [ this
-      , iScene
-      , &hudFlags
-      , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
-        {
-            if( DisplayObjectHUD( iScene, object, hudFlags, traversalFlags ) )
+    if( ( iScene->GetSelectedObjectList().size() == 0 ) && ( iAcceptScene == false ) )
+    {
+        return;
+    }
+    else
+    {
+        FOdysseyVectorEngine::Traverse
+        ( iScene
+        , iScene
+        , 0
+        , [ iScene
+          , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
             {
-                oObjectList.push_back( object );
+                if( DisplayObjectHUD( iScene, object, traversalFlags ) )
+                {
+                    oObjectList.push_back( object );
 
-                return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
-            }
+                    return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+                }
 
-            return 0;
-        } );
+                return 0;
+            } );
+    }
 }
 
+// static
 void
 UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( FOdysseyVectorScene* iScene
+                                                           , bool iAcceptScene
                                                            , std::list<FOdysseyVectorObject*>& oObjectList )
 {
-    uint64 hudFlags = GetEditor()->GetVectorEditionFlags();
-
-    FOdysseyVectorEngine::Traverse
-    ( iScene
-    , iScene
-    , 0
-    , [ this
-      , iScene
-      , &hudFlags
-      , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
-        {
-            if( DisplayObjectHUD( iScene, object, hudFlags, traversalFlags ) )
+    if( ( iScene->GetSelectedObjectList().size() == 0 ) && ( iAcceptScene == false ) )
+    {
+        return;
+    }
+    else
+    {
+        FOdysseyVectorEngine::Traverse
+        ( iScene
+        , iScene
+        , 0
+        , [ iScene
+          , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
             {
-                oObjectList.push_back( object );
+                if( DisplayObjectHUD( iScene, object, traversalFlags ) )
+                {
+                    oObjectList.push_back( object );
 
-                return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-            }
+                    return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                }
 
-            return 0;
-        } );
+                return 0;
+            } );
+    }
 }
 
+// static
 bool
 UOdysseyPainterEditorVectorBaseTool::DisplayObjectHUD( FOdysseyVectorScene* iScene
                                                      , FOdysseyVectorObject* iObject
-                                                     , uint64 iHUDFlags
                                                      , uint64 iTraversalFlags )
 {
     if( iObject->IsSelected() )
@@ -126,6 +148,12 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
             signalFlags = UnloadVector( vectorScene );
 
             vectorEngine->Signal( signalFlags );
+
+            if( mBaseHUD )
+            {
+                mBaseHUD->Unload( vectorScene );
+                vectorEngine->RemoveHUD( mBaseHUD );
+            }
         }
     }
 }
@@ -146,6 +174,16 @@ UOdysseyPainterEditorVectorBaseTool::Load()
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
+            vectorEngine->ClearHUD();
+
+            if( mBaseHUD )
+            {
+                mBaseHUD->Load( vectorScene );
+
+                vectorEngine->AddHUD( mBaseHUD );
+                vectorEngine->ResetHUD();
+            }
+
             signalFlags = LoadVector( vectorScene );
 
             vectorEngine->Signal( signalFlags );
@@ -163,12 +201,12 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorScene* iScen
     {
         if( iKey == EKeys::C )
         {
-            FOdysseyPainterEditor::CopyObjectSelection( iScene );
+            FOdysseyPainterEditor::CopyObjects( iScene );
         }
 
         if( iKey == EKeys::V )
         {
-            FOdysseyPainterEditor::PasteObjectSelection( iScene );
+            FOdysseyPainterEditor::PasteObjects( iScene );
         }
 
         if( iKey == EKeys::A )
@@ -181,17 +219,12 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorScene* iScen
     {
         if( GetEditor()->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
         {
-            GetEditor()->DeleteObjectSelection( iScene );
+            GetEditor()->DeleteObjects( iScene );
         }
 
         if( GetEditor()->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
         {
-            // object that have their HUD displayed
-            std::list<FOdysseyVectorObject*> displayedObjectList;
-
-            GetDisplayedObjectList( iScene, displayedObjectList );
-
-            GetEditor()->DeletePointSelection( iScene, displayedObjectList );
+            GetEditor()->DeletePointSelection( iScene );
         }
     }
 
@@ -476,12 +509,12 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
                       LOCTEXT("ResetView", "Reset View")
                     , LOCTEXT("ResetView", "Reset View")
                     , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ResetView, vectorScene)));
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ResetView, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("GroupPaint", "Make Paint Group")
                     , LOCTEXT("GroupPaint", "Make Paint Group")
                     , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::GroupPaint, vectorScene)));
+                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::MakePaintGroup, vectorScene )));
                 /*menu.AddMenuEntry(
                       LOCTEXT("Trim", "Trim")
                     , LOCTEXT("Trim", "Trim")
@@ -491,12 +524,12 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
                       LOCTEXT("Group", "Group")
                     , LOCTEXT("Group", "Group")
                     , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Group, vectorScene )));
+                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Group, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("Ungroup", "Ungroup")
                     , LOCTEXT("Ungroup", "Ungroup")
                     , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Ungroup, vectorScene )));
+                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("BringForward", "Bring forward")
                     , LOCTEXT("BringForward", "Bring forward")
@@ -511,103 +544,33 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
                       LOCTEXT("DeleteSelection","Delete Selection")
                     , LOCTEXT("DeleteSelection","Delete Selection")
                     , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjectSelection, vectorScene )));
+                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("FlipHorizontal","Flip Horizontal")
                     , LOCTEXT("FlipHorizontal","Flip Horizontal")
                     , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-                    , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::FlipHorizontal, vectorScene )));
+                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::FlipHorizontal, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("FlipVertical","Flip Vertical")
                     , LOCTEXT("FlipVertical","Flip Vertical")
                     , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-                    , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::FlipVertical, vectorScene )));
+                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::FlipVertical, vectorScene )));
                 menu.AddMenuEntry(
                     LOCTEXT("ClearColoring", "Clear Coloring")
                     , LOCTEXT("ClearColoring", "Clear Coloring")
                     , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-                    , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::ClearColoring, vectorScene )));
+                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ClearColoring, vectorScene )));
                 menu.AddMenuEntry(
                     LOCTEXT("ApplyTransformations", "Apply Transformations")
                     , LOCTEXT("ApplyTransformations", "Apply Transformations")
                     , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-                    , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::ApplyTransformations, vectorScene )));
+                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ApplyTransformations, vectorScene )));
         //    }
         //    menu.EndSection();
         }
     }
 
     //return menu.MakeWidget();
-}
-
-void
-UOdysseyPainterEditorVectorBaseTool::ApplyTransformations( FOdysseyVectorScene* iScene )
-{
-    std::list<FOdysseyVectorObject*> ancestorList;
-
-    GetDisplayedAncestorList( iScene, ancestorList );
-
-    GetEditor()->ApplyTransformations( iScene, ancestorList );
-}
-
-void
-UOdysseyPainterEditorVectorBaseTool::ClearColoring( FOdysseyVectorScene* iScene )
-{
-    std::list<FOdysseyVectorObject*> ancestorList;
-
-    GetDisplayedAncestorList( iScene, ancestorList );
-
-    GetEditor()->ClearColoring( iScene, ancestorList );
-}
-
-void
-UOdysseyPainterEditorVectorBaseTool::FlipVertical( FOdysseyVectorScene* iScene )
-{
-    std::list<FOdysseyVectorObject*> ancestorList;
-
-    GetDisplayedAncestorList( iScene, ancestorList );
-
-    GetEditor()->FlipVertical( iScene, ancestorList );
-}
-
-void
-UOdysseyPainterEditorVectorBaseTool::FlipHorizontal( FOdysseyVectorScene* iScene  )
-{
-    std::list<FOdysseyVectorObject*> ancestorList;
-
-    GetDisplayedAncestorList( iScene, ancestorList );
-
-    GetEditor()->FlipHorizontal( iScene, ancestorList );
-}
-
-void
-UOdysseyPainterEditorVectorBaseTool::DeletePointSelection( FOdysseyVectorScene* iScene  )
-{
-    std::list<FOdysseyVectorObject*> ancestorList;
-
-    GetDisplayedAncestorList( iScene, ancestorList );
-
-    GetEditor()->DeletePointSelection( iScene, ancestorList );
-}
-
-void
-UOdysseyPainterEditorVectorBaseTool::AlignPointSelection( FOdysseyVectorScene* iScene  )
-{
-    std::list<FOdysseyVectorObject*> ancestorList;
-
-    GetDisplayedAncestorList( iScene, ancestorList );
-
-    GetEditor()->AlignPointSelection( iScene, ancestorList );
-}
-
-void
-UOdysseyPainterEditorVectorBaseTool::UnalignPointSelection( FOdysseyVectorScene* iScene  )
-{
-    std::list<FOdysseyVectorObject*> ancestorList;
-
-    GetDisplayedAncestorList( iScene, ancestorList );
-
-    GetEditor()->UnalignPointSelection( iScene, ancestorList );
 }
 
 void
@@ -633,17 +596,17 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu
                   LOCTEXT("DeleteSelection", "Delete Selection")
                 , LOCTEXT("DeleteSelection", "Delete Selection")
                 , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-                , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::DeletePointSelection, vectorScene )));
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::DeletePointSelection, vectorScene )));
             menu.AddMenuEntry(
                   LOCTEXT("AlignPointSelection", "Align Point Selection")
                 , LOCTEXT("AlignPointSelection", "Align Point Selection")
                 , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-                , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::AlignPointSelection, vectorScene )));
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AlignPointSelection, vectorScene )));
             menu.AddMenuEntry(
                   LOCTEXT("UnalignPointSelection", "Unalign Point Selection")
                 , LOCTEXT("UnalignPointSelection", "Unalign Point Selection")
                 , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-                , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::UnalignPointSelection, vectorScene )));
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::UnalignPointSelection, vectorScene )));
         //    }
         //    menu.EndSection();
         }

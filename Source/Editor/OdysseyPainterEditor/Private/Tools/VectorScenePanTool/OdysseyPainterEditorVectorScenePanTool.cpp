@@ -16,12 +16,13 @@ UOdysseyPainterEditorVectorScenePanTool::~UOdysseyPainterEditorVectorScenePanToo
 }
 
 UOdysseyPainterEditorVectorScenePanTool::UOdysseyPainterEditorVectorScenePanTool()
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorScenePanToolHUD( this ) )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ScenePanTool64");
 
     mHasContextMenu = false;
 
-    mScenePanHUD = new FOdysseyPainterEditorVectorScenePanToolHUD( this );
+    mScenePanHUD = static_cast<FOdysseyPainterEditorVectorScenePanToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -36,21 +37,12 @@ UOdysseyPainterEditorVectorScenePanTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mScenePanHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
 UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mScenePanHUD );
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 

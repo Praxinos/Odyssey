@@ -13,11 +13,11 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDrawingTool()
 {
-    delete mPathDrawingHUD;
 }
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
-    : ColorSource( ePathDrawingToolColorSource::ColorWheel )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathDrawingToolHUD( this ) )
+    , ColorSource( ePathDrawingToolColorSource::ColorWheel )
     , TracingType( eTracingType::Organic )
     , TracingFidelity( eTracingFidelity::Average )
     , Radius( 5.0f )
@@ -33,7 +33,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
 
-    mPathDrawingHUD = new FOdysseyPainterEditorVectorPathDrawingToolHUD( this );
+    mPathDrawingHUD = static_cast<FOdysseyPainterEditorVectorPathDrawingToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -48,13 +48,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
-    vectorEngine->ClearHUD();
-    vectorEngine->AddHUD( mPathDrawingHUD );
-
-    vectorEngine->ResetHUD(); // creates the quadtree;
-
     // init pathTracer's raster image
     mPathTracer.Init( iScene );
 
@@ -66,10 +59,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorScene* iSc
 uint64
 UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
-    vectorEngine->RemoveHUD( mPathDrawingHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
@@ -248,8 +237,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorSce
 
         mPathTracer.AttachPath( path );
 
-        iScene->ClearSelection();
-        iScene->Select( path );
+        //iScene->ClearSelection();
+        //iScene->Select( path );
+
         // update invalidated objects
         iScene->Update( 0 );
 
@@ -295,7 +285,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorSce
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector);
 
     // Left mouse button clicked
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    // For some reason, iPointInTexture.keysDown.Find does not find the left button click for the first few events
+    // when using the stylus so we use mPathTracer.GetPath instead
+    //if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    if( mPathTracer.GetPath() )
     {
         double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
         FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();

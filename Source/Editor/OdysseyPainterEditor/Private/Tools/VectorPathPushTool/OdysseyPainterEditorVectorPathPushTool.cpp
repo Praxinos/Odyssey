@@ -16,13 +16,14 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 }
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
-    : Radius( 20.0f )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathPushToolHUD( this ) )
+    , Radius( 20.0f )
     , PreserveSmoothness( false )
     , RestrictToSelectedObjects( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPushTool64");
 
-    mPathPushHUD = new FOdysseyPainterEditorVectorPathPushToolHUD( this );
+    mPathPushHUD = static_cast<FOdysseyPainterEditorVectorPathPushToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -37,13 +38,6 @@ UOdysseyPainterEditorVectorPathPushTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mPathPushHUD );
-
-    mPathPushHUD->Reset( iScene );
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
@@ -53,10 +47,6 @@ UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorScene* iScene
 uint64
 UOdysseyPainterEditorVectorPathPushTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mPathPushHUD );
-
      return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 

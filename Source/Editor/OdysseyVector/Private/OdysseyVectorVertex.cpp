@@ -539,6 +539,8 @@ FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
             }
         }
     }
+
+    SetHandleAligned( true );
 }
 
 void

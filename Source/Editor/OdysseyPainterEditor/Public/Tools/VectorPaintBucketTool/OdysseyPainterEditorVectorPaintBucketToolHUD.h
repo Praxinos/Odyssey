@@ -45,4 +45,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
     private:
         std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
         UOdysseyPainterEditorVectorPaintBucketTool* mPaintBucketTool;
+        bool mAnyPaintGroupSelected;
 };

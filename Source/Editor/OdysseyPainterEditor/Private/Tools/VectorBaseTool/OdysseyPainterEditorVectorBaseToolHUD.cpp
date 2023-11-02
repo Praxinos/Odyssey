@@ -11,71 +11,21 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
     mBaseTool = iBaseTool;
 }
 
-void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
-                                                   , FOdysseyVectorScene* iScene
-                                                   , const BLRgba32& iForegroundColor
-                                                   , const BLRgba32& iBackgroundColor
-                                                   , const BLRgba32& iHighlightColor
-                                                   , uint64 iHUDFlags )
+void 
+FOdysseyPainterEditorVectorBaseToolHUD::Load( FOdysseyVectorScene* iScene )
 {
-    iBLContext->save();
-    iBLContext->resetMatrix();
+}
 
-    // Run lambda
-    FOdysseyVectorEngine::Traverse
-    ( iScene
-    , iScene
-    , 0
-    , [ this
-      , &iBLContext
-      , &iScene
-      , &iHUDFlags
-      , &iForegroundColor
-      , &iBackgroundColor
-      , &iHighlightColor ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
-      {
-          if( mBaseTool->DisplayObjectHUD( iScene, object, iHUDFlags, traversalFlags ) )
-          {
-              if( iHUDFlags & VIEW_PATH_ALL )
-              {
-                  if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-                  {
-                      FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+void
+FOdysseyPainterEditorVectorBaseToolHUD::Unload( FOdysseyVectorScene* iScene )
+{
 
-                      FOdysseyVectorHUD::DrawPath( iBLContext
-                                                 , path
-                                                 , iForegroundColor
-                                                 , iBackgroundColor
-                                                 , iHighlightColor
-                                                 , true
-                                                 , iHUDFlags );
-                  }
-              }
+}
 
-              if( iHUDFlags & VIEW_GROUPPAINT_ALL )
-              {
-                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                  {
-                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+void
+FOdysseyPainterEditorVectorBaseToolHUD::Reset( FOdysseyVectorScene* iScene )
+{
 
-                      FOdysseyVectorHUD::DrawGroupPaint( iBLContext
-                                                       , paintGroup
-                                                       , iForegroundColor
-                                                       , iBackgroundColor
-                                                       , iHighlightColor
-                                                       , true
-                                                       , iHUDFlags );
-                  }
-              }
-
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-          }
-
-          return 0;
-      } );
-
-    iBLContext->restore();
 }
 
 FSelectionBox&
@@ -85,8 +35,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::GetSelectionBox()
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene
-                                                                    , uint64 iHUDFlags )
+FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene )
 {
     mSelectionBox.inited = false;
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
@@ -99,10 +48,9 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
     , iScene
     , 0
     , [ this
-      , iScene
-      , &iHUDFlags ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
+      , iScene ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
       {
-          if( mBaseTool->DisplayObjectHUD( iScene, object, iHUDFlags, iTraversalFlags ) )
+          if( mBaseTool->DisplayObjectHUD( iScene, object, iTraversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -143,8 +91,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
 
 void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
-                                                                    , bool iForceWorld
-                                                                    , uint64 iHUDFlags )
+                                                                    , bool iForceWorld )
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
 
@@ -171,10 +118,9 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
         , 0
         , [ this
           , iScene
-          , &iHUDFlags
           , &selectedObjectList ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
           {
-              if( mBaseTool->DisplayObjectHUD( iScene, object, iHUDFlags, iTraversalFlags ) )
+              if( mBaseTool->DisplayObjectHUD( iScene, object, iTraversalFlags ) )
               {
                   ::ULIS::FRectD selectedObjectBBox = object->GetBBox( true );
 
@@ -215,13 +161,13 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( FOdysseyVectorScene*
     if( iHUDFlags & VIEW_MODE_OBJECT )
     {
         //case eVectorEditionMode::Object :
-        UpdateSelectionBoxObjectMode( iScene, iForceWorld, iHUDFlags );
+        UpdateSelectionBoxObjectMode( iScene, iForceWorld );
     }
 
     if( iHUDFlags & VIEW_MODE_VERTEX )
     {
         //case eVectorEditionMode::Vertex:
-        UpdateSelectionBoxVertexMode( iScene, iHUDFlags );
+        UpdateSelectionBoxVertexMode( iScene );
     }
 }
 
@@ -265,4 +211,95 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( BLContext* iBLContext
     }
 
     iBLContext->restore();
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
+                                                   , FOdysseyVectorScene* iScene
+                                                   , const BLRgba32& iForegroundColor
+                                                   , const BLRgba32& iBackgroundColor
+                                                   , const BLRgba32& iHighlightColor
+                                                   , uint64 iHUDFlags )
+{
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    // Run lambda
+    FOdysseyVectorEngine::Traverse
+    ( iScene
+    , iScene
+    , 0
+    , [ this
+      , &iBLContext
+      , &iScene
+      , &iHUDFlags
+      , &iForegroundColor
+      , &iBackgroundColor
+      , &iHighlightColor ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( mBaseTool->DisplayObjectHUD( iScene, object, traversalFlags ) )
+          {
+              if( iHUDFlags & VIEW_PATH_ALL )
+              {
+                  if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                  {
+                      FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                      FOdysseyVectorHUD::DrawPath( iBLContext
+                                                 , path
+                                                 , iForegroundColor
+                                                 , iBackgroundColor
+                                                 , iHighlightColor
+                                                 , true
+                                                 , iHUDFlags );
+                  }
+              }
+
+              if( iHUDFlags & VIEW_GROUPPAINT_ALL )
+              {
+                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                  {
+                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+
+                      FOdysseyVectorHUD::DrawGroupPaint( iBLContext
+                                                       , paintGroup
+                                                       , iForegroundColor
+                                                       , iBackgroundColor
+                                                       , iHighlightColor
+                                                       , true
+                                                       , iHUDFlags );
+                  }
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+
+    iBLContext->restore();
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::Draw( BLContext* iBLContext
+                                            , FOdysseyVectorScene* iScene )
+{
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    uint64 hudFlags = mBaseTool->GetEditor()->GetVectorEditionFlags();
+
+    // Draw object details only in vertex mode
+    if( hudFlags & VIEW_MODE_VERTEX )
+    {
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+    }
 }

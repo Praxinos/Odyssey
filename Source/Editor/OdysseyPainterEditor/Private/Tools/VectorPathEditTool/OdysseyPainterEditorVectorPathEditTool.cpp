@@ -17,14 +17,15 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 }
 
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
-    : mPickingFlags ( FOdysseyVectorPath::PICK_POINT )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathEditToolHUD( this ) )
+    , mPickingFlags ( FOdysseyVectorPath::PICK_POINT )
     , mPickingMode  ( ePathPickingMode::Vertex )
     , PickingRadius(10.0f)
     , WidenAllAlong( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
 
-    mPathEditHUD = new FOdysseyPainterEditorVectorPathEditToolHUD( this );
+    mPathEditHUD = static_cast<FOdysseyPainterEditorVectorPathEditToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -39,18 +40,12 @@ UOdysseyPainterEditorVectorPathEditTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->RemoveHUD( mPathEditHUD );
-
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
 UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
@@ -59,11 +54,6 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorScene* iScene
 
     // we need the focus on the viewport for keyboard 
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
-
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mPathEditHUD );
-
-    iEngine->ResetHUD();
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );

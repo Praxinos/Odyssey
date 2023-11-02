@@ -9,6 +9,8 @@
 
 #include "OdysseyPainterEditorVectorBaseTool.generated.h"
 
+class FOdysseyPainterEditorVectorBaseToolHUD;
+
 UCLASS(Abstract)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdysseyPainterEditorTool
 {
@@ -25,19 +27,21 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         //Constructor
         UOdysseyPainterEditorVectorBaseTool();
+        UOdysseyPainterEditorVectorBaseTool( FOdysseyPainterEditorVectorBaseToolHUD* iBaseHUD );
 
         static bool DoubleClicked();
 
-        void GetDisplayedAncestorList( FOdysseyVectorScene* iScene
-                                     , std::list<FOdysseyVectorObject*>& oObjectList );
+        static void GetDisplayedAncestorList( FOdysseyVectorScene* iScene
+                                            , bool iAcceptScene
+                                            , std::list<FOdysseyVectorObject*>& oObjectList );
 
-        void GetDisplayedObjectList( FOdysseyVectorScene* iScene
-                                   , std::list<FOdysseyVectorObject*>& oObjectList );
+        static void GetDisplayedObjectList( FOdysseyVectorScene* iScene
+                                          , bool iAcceptScene
+                                          , std::list<FOdysseyVectorObject*>& oObjectList );
 
-        bool DisplayObjectHUD( FOdysseyVectorScene* iScene
-                             , FOdysseyVectorObject* iObject
-                             , uint64 iHUDFlags
-                             , uint64 iTraversalFlags );
+        static bool DisplayObjectHUD( FOdysseyVectorScene* iScene
+                                    , FOdysseyVectorObject* iObject
+                                    , uint64 iTraversalFlags );
 
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
@@ -98,8 +102,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void DeletePointSelection( FOdysseyVectorScene* iScene  );
         void AlignPointSelection( FOdysseyVectorScene* iScene  );
         void UnalignPointSelection( FOdysseyVectorScene* iScene  );
+        void Group( FOdysseyVectorScene* iScene );
+        void Ungroup( FOdysseyVectorScene* iScene );
+        void MakePaintGroup( FOdysseyVectorScene* iScene );
 
     protected:
+        FOdysseyPainterEditorVectorBaseToolHUD* mBaseHUD;
         bool mHasContextMenu;
 
     public:

@@ -77,14 +77,15 @@ FOdysseyVectorScene::CopyShape()
 }
 
 FOdysseyVectorGroupPaint*
-FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVectorObject*>& oCubicPathArray
-                                                      , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
-                                                      , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray )
+FOdysseyVectorScene::MakePaintGroupFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                              , std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                              , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
+                                              , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray )
 {
     // this array will help us to transfer buckets as well
     std::vector<FOdysseyVectorGroupPaint*> parentPaintGroupArray;
 
-    if( mSelectedObjectList.size() )
+    if( iObjectList.size() )
     {
         FOdysseyVectorGroupPaint* paintGroup = new FOdysseyVectorGroupPaint( "Paint Group" );
 
@@ -92,7 +93,7 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
 
         paintGroup->UpdateMatrix();
 
-        for( FOdysseyVectorObject* selectedObject : mSelectedObjectList )
+        for( FOdysseyVectorObject* selectedObject : iObjectList )
         {
             if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
             {
@@ -251,29 +252,13 @@ FOdysseyVectorScene::FlipObjects( const std::list<FOdysseyVectorObject*>& iObjec
 }
 
 FOdysseyVectorGroup*
-FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& oObjectArray
-                                         , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )
+FOdysseyVectorScene::GroupObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                 , std::vector<FOdysseyVectorObject*>& oObjectArray
+                                 , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )
 {
     BLPoint averageTranslation = { 0.0f, 0.0f };
-/*
-    if ( mSelectedObjectList.size() )
-    {
-        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
-        {
-            FOdysseyVectorObject *obj = (*it);
-            BLPoint origin = obj->GetWorldMatrix().mapPoint( 0.0f, 0.0f );
 
-            averageTranslation.x += origin.x;
-            averageTranslation.y += origin.y;
-        }
-
-        averageTranslation.x /= mSelectedObjectList.size();
-        averageTranslation.y /= mSelectedObjectList.size();
-
-        averageTranslation = this->GetInverseWorldMatrix().mapPoint ( averageTranslation.x, averageTranslation.y );
-    }
-*/
-    if ( mSelectedObjectList.size() )
+    if ( iObjectList.size() )
     {
         FOdysseyVectorGroup* group = new FOdysseyVectorGroup( FString("Group") );
 
@@ -282,13 +267,11 @@ FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& o
         //group->Translate( averageTranslation.x, averageTranslation.y );
         group->UpdateMatrix();
 
-        oObjectArray.reserve( mSelectedObjectList.size() );
-        oObjectOldParentArray.reserve( mSelectedObjectList.size() );
+        oObjectArray.reserve( iObjectList.size() );
+        oObjectOldParentArray.reserve( iObjectList.size() );
 
-        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+        for( FOdysseyVectorObject *obj : iObjectList )
         {
-            FOdysseyVectorObject *obj = (*it);
-
             oObjectArray.push_back( obj );
             oObjectOldParentArray.push_back( obj->GetParent() );
 
@@ -358,9 +341,9 @@ FOdysseyVectorScene::GetType()
 }
 
 void
-FOdysseyVectorScene::RemoveSelectedObjects()
+FOdysseyVectorScene::RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList )
 {
-    for( FOdysseyVectorObject* selectedObject : mSelectedObjectList )
+    for( FOdysseyVectorObject* selectedObject : iObjectList )
     {
         // prevent nested removal
         if( selectedObject->HasSelectedAncestor() == false )

@@ -17,12 +17,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathStitchToolHUD : pu
         virtual void Unload( FOdysseyVectorScene* iScene ) override;
 
         void SetPosition( double iWorldX, double iWorldY );
-        std::vector<FOdysseyVectorPoint*>& GetPickedPointArray();
+        FOdysseyVectorVertex** GetStitchableVertices();
 
     protected:
         ::ULIS::FVec2D mPoint[2];
         UOdysseyPainterEditorVectorPathStitchTool* mPathStitchTool;
         std::vector<FOdysseyVectorPoint*> mPickedPointArray;
-       double mX;
-       double mY;
+        FOdysseyVectorVertex* mStitchableVertex[2];
+        double mX;
+        double mY;
 };

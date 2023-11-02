@@ -27,32 +27,32 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
           LOCTEXT("GroupPaint", "Make Paint Group")
         , LOCTEXT("GroupPaint", "Make Paint Group")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::GroupPaint, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::MakePaintGroup, vectorScene )));
     menu.AddMenuEntry(
           LOCTEXT("Group", "Group")
         , LOCTEXT("Group", "Group")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Group, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Group, vectorScene )));
     menu.AddMenuEntry(
           LOCTEXT("Ungroup", "Ungroup")
         , LOCTEXT("Ungroup", "Ungroup")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Ungroup, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, vectorScene )));
     menu.AddMenuEntry(
           LOCTEXT("Copy", "Copy")
         , LOCTEXT("Copy", "Copy")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::CopyObjectSelection, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::CopyObjects, vectorScene)));
     menu.AddMenuEntry(
           LOCTEXT("Paste", "Paste")
         , LOCTEXT("Paste", "Paste")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteObjectSelection, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteObjects, vectorScene)));
     menu.AddMenuEntry(
           LOCTEXT("DeleteSelection","Delete Selection")
         , LOCTEXT("DeleteSelection","Delete Selection")
         , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjectSelection, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, vectorScene)));
     }
     menu.EndSection();
 

@@ -17,6 +17,7 @@ enum class EOdysseyVectorSelectionShape : uint8
     Rectangle
 };
 
+class FOdysseyPainterEditorVectorBaseToolHUD;
 class FOdysseyPainterEditorVectorSelectionToolHUD;
 
 UCLASS()
@@ -32,6 +33,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public
 
         //Constructor
         UOdysseyPainterEditorVectorSelectionTool();
+
+        //Constructor
+        UOdysseyPainterEditorVectorSelectionTool( FOdysseyPainterEditorVectorBaseToolHUD* iHUD );
 
         virtual bool IsActivable() const override;
 
