@@ -44,6 +44,12 @@ UOdysseyAnimationLayer::GetLightTable() const
     return nullptr;
 }
 
+bool
+UOdysseyAnimationLayer::GetIsLightTableActivated() const
+{
+    return false;
+}
+
 void
 UOdysseyAnimationLayer::ChildrenChanged()
 {

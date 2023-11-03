@@ -22,8 +22,6 @@ public:
     struct FFrameData
     {
         float mOpacity;
-        FOdysseyAnimationLightTable::eFrameDisplayMode mDisplayMode;
-        ::ULIS::FColor mColor;
         TSharedPtr<IOdysseyImageRenderer> mRenderer;
     };
     TArray<FFrameData> mFramesData;

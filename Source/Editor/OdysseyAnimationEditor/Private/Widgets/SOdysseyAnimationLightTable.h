@@ -42,6 +42,7 @@ private:
 
 	ECheckBoxState GetKeyIsActivated( int iKeyIndex ) const;
 	float GetKeyOpacity( int iKeyIndex ) const;
+	TSharedRef<SWidget> GenerateKeyWidget(int iKeyIndex);
 
 private:
 	FOdysseyAnimationEditorExtension* mExtension;

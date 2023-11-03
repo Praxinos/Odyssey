@@ -3,6 +3,7 @@
 
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTable.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageTimeline"
 
@@ -30,16 +31,27 @@ SOdysseyAnimationLayerImageTimeline::Construct(
     
     ChildSlot
     [
-        SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
-        .SelectableFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectableFrames)
-        .SelectedFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectedFrames)
-        .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
-        .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
-        .OnSelectionDragged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged)
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
         [
-            SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
-            .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
-            .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
+            SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
+            .SelectableFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectableFrames)
+            .SelectedFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectedFrames)
+            .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
+            .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
+            .OnSelectionDragged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged)
+            [
+                SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
+                .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
+                .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
+            ]
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SOdysseyAnimationTimelineLightTable, mLayer, mExtension)
+            .Visibility(this, &SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility)
         ]
     ];
 }
@@ -624,6 +636,12 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
         FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::StaggerCell, iFrame),
         FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanStaggerCell, iFrame)
     );
+}
+
+EVisibility
+SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility() const
+{
+    return mLayer->GetIsLightTableActivated() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

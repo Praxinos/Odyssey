@@ -713,6 +713,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.CellImageStagger.Behaviour.Hold", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourHold", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.Loop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourLoop", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.PingPong", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourPingPong", mIcon16x16));
+    Set("Animation.LightTableKey.Color", FLinearColor(1.f, 1.f, 1.f, 1.f));
     
     //Animation Command Icons
     //Icons are used automatically

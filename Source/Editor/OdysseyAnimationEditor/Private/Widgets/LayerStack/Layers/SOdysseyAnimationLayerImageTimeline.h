@@ -45,6 +45,8 @@ private:
     void OnFramesSelectionEnded(int iFrame);
     FReply OnFramesSelectionDragged();
 
+    EVisibility GetLightTableVisibility() const;
+
 private:
     //Context Menu
     void BuildContextMenu(FMenuBuilder& iMenuBuilder);

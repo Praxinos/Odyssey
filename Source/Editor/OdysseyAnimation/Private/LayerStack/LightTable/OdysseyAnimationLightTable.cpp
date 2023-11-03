@@ -14,25 +14,24 @@ FOdysseyAnimationLightTable::FOdysseyAnimationLightTable(UOdysseyAnimationLayer*
     , mDisplayMode(EOdysseyLightTableDisplayMode::Default)
 {
     //assume 10 frames on the left + 10 frames on the left + 1 current frame
-    for (int i = -10; i <= 10; i++)
+    for (int i = -1; i >= -GetRange(); i--)
     {
-        if (i == 0)
-            continue;
-
         FKeyData keyData;
         keyData.mIsActivated = false;
-        keyData.mOffset = i;
         keyData.mOpacity = 0.5f;
-
-        //TEMPORARY:
-        if (i == 1 || i == -1)
-        {
-            keyData.mIsActivated = true;
-        }
-        //TEMPORARY:
-
-        mKeysData.Add(keyData);
+        mKeysData.Add(i, keyData);
     }
+
+    for (int i = 1; i <= GetRange(); i++)
+    {
+        FKeyData keyData;
+        keyData.mIsActivated = false;
+        keyData.mOpacity = 0.5f;
+        mKeysData.Add(i, keyData);
+    }
+    
+    mKeysData[1].mIsActivated = true;
+    mKeysData[-1].mIsActivated = true;
 }
 
 UOdysseyAnimationLayer*
@@ -62,7 +61,7 @@ FOdysseyAnimationLightTable::GetDisplayMode() const
 bool
 FOdysseyAnimationLightTable::GetKeyIsActivated(int iIndex) const
 {
-    if (iIndex >= mKeysData.Num())
+    if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
         return false;
 
     return mKeysData[iIndex].mIsActivated;
@@ -71,8 +70,8 @@ FOdysseyAnimationLightTable::GetKeyIsActivated(int iIndex) const
 int
 FOdysseyAnimationLightTable::GetKeyOffset(int iIndex) const
 {
-    if (iIndex >= mKeysData.Num())
-        return false;
+    if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
+        return 0;
 
     return mKeysData[iIndex].mOffset;
 }
@@ -80,18 +79,15 @@ FOdysseyAnimationLightTable::GetKeyOffset(int iIndex) const
 float
 FOdysseyAnimationLightTable::GetKeyOpacity(int iIndex) const
 {
-    if (iIndex >= mKeysData.Num())
-        return false;
+    if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
+        return 0;
 
     return mKeysData[iIndex].mOpacity;
 }
 
 FOdysseyAnimationLightTable::eFrameDisplayMode
-FOdysseyAnimationLightTable::GetKeyDisplayMode(int iIndex) const
+FOdysseyAnimationLightTable::GetKeyDisplayMode() const
 {
-    if (iIndex >= mKeysData.Num())
-        return eFrameDisplayMode::kDefault;
-
     switch ( mDisplayMode )
     {
         case EOdysseyLightTableDisplayMode::Default: return eFrameDisplayMode::kDefault;
@@ -111,10 +107,16 @@ FOdysseyAnimationLightTable::GetKeyColor(int iIndex) const
     return ::ULIS::FColor();
 }
 
-const TArray<FOdysseyAnimationLightTable::FKeyData>&
+const TMap<int, FOdysseyAnimationLightTable::FKeyData>&
 FOdysseyAnimationLightTable::GetKeysData() const
 {
     return mKeysData;
+}
+
+int
+FOdysseyAnimationLightTable::GetRange() const
+{
+    return 10;
 }
 
 TSharedPtr<IOdysseyImageRenderer>
@@ -131,7 +133,18 @@ FOdysseyAnimationLightTable::GetImageRenderingComposition(IOdysseyImageRenderer:
     if(!mSourceLayer)
         return idComposition;
 
-    for (int i = 0; i < mKeysData.Num(); i++)
+    for (int i = -1; i >= -GetRange(); i--)
+    {
+        if (!mKeysData[i].mIsActivated)
+            continue;
+
+        //Find the cell or frame 
+        int offset = mKeysData[i].mOffset;
+        int celFrameIndex = INDEX_NONE;
+        idComposition.Append(mSourceLayer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, iFrameIndex + offset));
+    }
+
+    for (int i = 1; i <= GetRange(); i++)
     {
         if (!mKeysData[i].mIsActivated)
             continue;
