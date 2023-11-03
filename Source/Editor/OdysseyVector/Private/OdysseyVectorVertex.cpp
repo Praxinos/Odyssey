@@ -581,6 +581,12 @@ FOdysseyVectorVertex::IsVisited()
     return ( mFlags & VISITED ) ? true : false;
 }
 
+uint32
+FOdysseyVectorVertex::GetFlags()
+{
+    return mFlags;
+}
+
 void
 FOdysseyVectorVertex::AddSection( FOdysseyVectorSection* iSection )
 {

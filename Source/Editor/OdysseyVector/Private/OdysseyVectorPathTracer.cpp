@@ -81,6 +81,15 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
 {
     FOdysseyVectorSegment* newSegment = nullptr;
 
+    // forbid path with a signle vertex that has a segment that loops on itself
+    if ( ( mCubicPath->GetVertexList().size() == 1 )
+      && ( mCubicPath->GetVertexList().front() == iEndVertex ) )
+    {
+        Reset();
+
+        return nullptr;
+    }
+
     if( mEdgeArray.size() )
     {
         MakeBezier( true );

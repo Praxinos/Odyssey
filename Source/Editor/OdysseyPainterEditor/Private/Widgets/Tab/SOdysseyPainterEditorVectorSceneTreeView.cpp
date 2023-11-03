@@ -176,9 +176,10 @@ SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged( TSharedPtr<FVector
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo )
+SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem
+                                                            , ESelectInfo::Type SelectInfo )
 {
-    if( mRootItem )
+    if( mRootItem && ( SelectInfo == ESelectInfo::Type::OnMouseClick ) )
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 

@@ -1417,9 +1417,10 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                                    , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
-    FColor color = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? FColor( 0, 0, 0, 255 )
-                                                                                 : mForegroundBucket.GetColor();
-    BLRgba32 strokeColor = BLRgba32( color.R, color.G, color.B, color.A * iCombinedOpacity );
+    FColor color = mForegroundBucket.GetColor();
+    BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 ) 
+                                                                                         : BLRgba32( color.R, color.G, color.B, color.A * iCombinedOpacity );
+
     FOdysseyVectorVertex* currentVertex = iVertexChain.vertex;
     UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();

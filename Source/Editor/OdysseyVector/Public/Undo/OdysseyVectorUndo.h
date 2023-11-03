@@ -37,7 +37,8 @@ class ODYSSEYVECTOR_API FSnapshotPoint
 class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
 {
     public:
-        static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
+        static const uint32 SNAPSHOT_FLAGS = ( 1 << 0 );
+        static const uint32 SNAPSHOT_ALL   = 0xFFFFFFFF;
 
         ~FSnapshotVertex();
         FSnapshotVertex( FOdysseyVectorVertex* iVertex
@@ -48,6 +49,7 @@ class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
 
     private:
         uint32 mVertexSnapshotFlags;
+        uint32 mVertexFlags;
 };
 
 class ODYSSEYVECTOR_API FSnapshotSegmentCubic
@@ -60,6 +62,8 @@ class ODYSSEYVECTOR_API FSnapshotSegmentCubic
         FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic* iCubicSegment, uint32 iCubicSegmentSnapshotFlags );
 
         void Restore();
+
+        FOdysseyVectorSegmentCubic* GetCubicSegment();
 
     private:
         uint32 mCubicSegmentSnapshotFlags;

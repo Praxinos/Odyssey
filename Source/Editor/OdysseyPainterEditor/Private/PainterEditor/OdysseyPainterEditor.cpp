@@ -30,6 +30,8 @@
 #include "Undo/OdysseyVectorUndoPathStitch.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoApplyTransformations.h"
+#include "Undo/OdysseyVectorUndoVertexAlign.h"
+#include "Undo/OdysseyVectorUndoVertexUnalign.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
@@ -892,10 +894,13 @@ void
 FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::vector<FOdysseyVectorVertex*> unalignedVertexArray; // for undoing
     std::list<FOdysseyVectorObject*> objectList;
 
+    unalignedVertexArray.reserve( 50 );
+
     // concerns all selected objects of a branch excluding the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, false, objectList );
+    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, true, objectList );
 
     for( FOdysseyVectorObject* object : objectList )
     {
@@ -905,10 +910,25 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorScene* iScene )
 
             for( FOdysseyVectorVertex* vertex : path->GetSelectedVertexList() )
             {
-                vertex->SetHandleAligned( false );
+                if( vertex->IsHandleAligned() == true )
+                {
+                    vertex->SetHandleAligned( false );
+
+                    unalignedVertexArray.push_back( vertex );
+                }
             }
         }
     }
+
+    GEditor->BeginTransaction(LOCTEXT("UnalignPointSelection","Unalign Point Selection"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexUnalign( iScene, unalignedVertexArray );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
 
@@ -923,11 +943,16 @@ void
 FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::vector<FOdysseyVectorVertex*> alignedVertexArray; // for undoing
     std::list<FOdysseyVectorObject*> objectList;
 
-    // concerns all selected objects of a branch excluding the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, false, objectList );
+    alignedVertexArray.reserve( 50 );
 
+    // concerns all selected objects of a branch excluding the scene
+    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, true, objectList );
+
+    // first step prepare the array. First step is needed because we are going to snapshot 
+    // segment handles coordinates before they'll get aligned.
     for( FOdysseyVectorObject* object : objectList )
     {
         if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
@@ -936,14 +961,31 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorScene* iScene )
 
             for( FOdysseyVectorVertex* vertex : path->GetSelectedVertexList() )
             {
-                FOdysseyVectorSegment* segment = vertex->GetFirstSegment();
-
-                if( segment )
+                if( vertex->IsHandleAligned() == false )
                 {
-                    vertex->AlignHandles( segment->GetHandle( vertex ) );
+                    alignedVertexArray.push_back( vertex );
                 }
             }
         }
+    }
+
+    GEditor->BeginTransaction(LOCTEXT("AlignPointSelection","Align Point Selection"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlign( iScene, alignedVertexArray );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction(); 
+
+
+    // the actual alignment ( alignment is based on the first segment met)
+    for( FOdysseyVectorVertex* vertex : alignedVertexArray )
+    {
+        FOdysseyVectorSegment* segment = vertex->GetFirstSegment();
+        // we don't check the validity of the pointer to the segment because a vertex is suppose
+        // to always belong to at least 1 segment.
+        vertex->AlignHandles( segment->GetHandle( vertex ) );
     }
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects

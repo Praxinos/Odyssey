@@ -109,6 +109,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
     protected:
         FOdysseyPainterEditorVectorBaseToolHUD* mBaseHUD;
         bool mHasContextMenu;
+        bool mDoubleMouseDown_WorkAround;
 
     public:
         //UPROPERTY( EditAnywhere, Category = Behavior )

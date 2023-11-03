@@ -191,50 +191,72 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
     std::vector<FOdysseyVectorObject*> pickedObjectArray;
     ::ULIS::FRectD roi;
 
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorObjectSelectionTool","Vector Object Pick Tool"));
-    if( GUndo )
+    if( UOdysseyPainterEditorVectorBaseTool::DoubleClicked() == true )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
+        FOdysseyVectorGroup* pickedGroup = nullptr;
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-
-    // deselect all if control key is not pressed
-    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-    {
-        iScene->ClearSelection();
-    }
-
-    // dragging occured
-    if ( mPointArray.size() > 1 )
-    {
-        iEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
-
-        // when dragging occured, we select all objects lying in the selection area.
-        for ( int i = 0; i < pickedObjectArray.size(); i++ )
-        {
-            iScene->Select( pickedObjectArray[i] );
-        }
-    }
-
-    // no dragging occured
-    if ( mPointArray.size() == 1 )
-    {
-        roi.x = mPointArray[0].x;
-        roi.y = mPointArray[0].y;
+        roi.x = iPointInTexture.x;
+        roi.y = iPointInTexture.y;
 
         iEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
 
-        // if no dragging occured, we only select the object that is the most forward
         if( pickedObjectArray.size() )
         {
-            iScene->Select( pickedObjectArray.back() );
+            FOdysseyVectorObject* pickedObject = pickedObjectArray.front();
+
+            if( pickedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+            {
+                pickedGroup = static_cast<FOdysseyVectorGroup*>(pickedObject);
+            }
+        }
+
+        iEngine->SetSelectionSpace( pickedGroup );
+    }
+    else
+    {
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorObjectSelectionTool","Vector Object Pick Tool"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
+
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+
+        // deselect all if control key is not pressed
+        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+        {
+            iScene->ClearSelection();
+        }
+
+        // dragging occured
+        if ( mPointArray.size() > 1 )
+        {
+            iEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
+
+            // when dragging occured, we select all objects lying in the selection area.
+            for ( int i = 0; i < pickedObjectArray.size(); i++ )
+            {
+                iScene->Select( pickedObjectArray[i] );
+            }
+        }
+
+        // no dragging occured
+        if ( mPointArray.size() == 1 )
+        {
+            roi.x = mPointArray[0].x;
+            roi.y = mPointArray[0].y;
+
+            iEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
+
+            // if no dragging occured, we only select the object that is the most forward
+            if( pickedObjectArray.size() )
+            {
+                iScene->Select( pickedObjectArray.back() );
+            }
         }
     }
-
-    SetSelectionSpace( iEngine, iScene->GetLastSelected() );
 
     iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 }

@@ -305,6 +305,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags );
         FOdysseyVectorJoint& GetJoint();
         double GetJointLength();
+        uint32 GetFlags();
 
     protected:
         /**
@@ -327,7 +328,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorSegment* mNearestSegment;
         FOdysseyVectorVertex* mNearestVertex;
 
-    private :
+    public :
         static const uint32 CHAINED        = ( 1 << 1 );
         static const uint32 VISITED        = ( 1 << 2 );
         static const uint32 SELECTED       = ( 1 << 3 );

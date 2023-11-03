@@ -77,7 +77,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GetSelectedVertices( FOdysseyVector
 
                   selectedPath->GetSelectedPoints( oPointArray
                                                  , ePointSelectionFlags::Vertex
-                                                 | ePointSelectionFlags::Strict
+                                                 //| ePointSelectionFlags::Strict
                                                  | ePointSelectionFlags::SegmentHandle );
               }
 
@@ -224,15 +224,8 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
 
-    if( ( mShowSelectionIfEmpty == true ) || ( selectedObjectCount > 0 ) )
-    {
-        DrawSelectionSpace( iBLContext, iScene, hudFlags );
+    DrawSelectionSpace( iBLContext, iScene, hudFlags );
 
-        if( mShowSelectionBox )
-        {
-            //DrawSelectionBox( iBLContext, iScene, iDrawingFlags );
-        }
-    }
 
     iBLContext->save();
     iBLContext->resetMatrix();

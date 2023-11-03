@@ -21,6 +21,12 @@ UOdysseyPainterEditorVectorBaseTool::~UOdysseyPainterEditorVectorBaseTool()
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
     : mHasContextMenu( true )
     , mBaseHUD( nullptr )
+    // to prevent a double mouse down bug detected in
+    // FOdysseyPainterEditorViewportClient::InputKey
+    // FOdysseyPainterEditorViewportClient::OnStylusStateChanged
+    // they sometimes are both called and both trigger 
+    // FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint
+    , mDoubleMouseDown_WorkAround( false )
 {
 }
 
@@ -293,6 +299,10 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
+  if( mDoubleMouseDown_WorkAround == false ) // workaround
+  {                                          // workaround
+    mDoubleMouseDown_WorkAround = true;      // workaround
+
     if( hasVector )
     {
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
@@ -308,6 +318,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
             vectorEngine->Signal( signalFlags );
         }
     }
+  }  // workaround
 
     return false;
 }
@@ -362,6 +373,8 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
     bool ret = false;
+
+    mDoubleMouseDown_WorkAround = false; // workaround
 
     if( hasVector )
     {
