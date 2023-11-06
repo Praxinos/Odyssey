@@ -6,6 +6,7 @@
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageVectorRow"
@@ -94,26 +95,43 @@ SOdysseyAnimationLayerImageVectorRow::GenerateHeaderWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
 {
-	return SNew(SHorizontalBox)
-        +SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
+	return SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
         [
-            SNew(STextBlock)
-            .Text(LOCTEXT("OdysseyLayerImageVectorBlendingMode", "Blending Mode"))
+            SNew(SHorizontalBox)
+            +SHorizontalBox::Slot()
+            .VAlign(VAlign_Center)
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("OdysseyLayerImageRasterBlendingMode", "Blending Mode"))
+            ]
+            +SHorizontalBox::Slot()
+            .VAlign(VAlign_Center)
+            [
+                SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+                .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageVector->BlendMode;})
+                .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged)
+            ]
         ]
-        +SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
+        + SVerticalBox::Slot()
+        .AutoHeight()
         [
-            SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-            .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageVector->BlendMode;})
-            .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged)
+            SNew(SBox)
+            .HeightOverride(FOptionalSize(SOdysseyAnimationTimelineLightTableKey::mDesiredHeight))
+            .Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("OdysseyLayerImageRasterBlendingMode", "LightTable"))
+            ]
         ];
 }
 
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateTimelineWidget()
 {
-    return SNew(SOdysseyAnimationLayerImageVectorTimeline, GetExtension(), mAnimationLayerImageVector);
+    return SNew(SOdysseyAnimationLayerImageVectorTimeline, GetExtension(), mAnimationLayerImageVector)
+        .IsCollapsed(this, &SOdysseyAnimationLayerImageVectorRow::IsCollapsed);
 }
 
 void
@@ -174,6 +192,12 @@ SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, E
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer BlendMode"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "BlendMode", iValue);
+}
+
+EVisibility
+SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility() const
+{
+    return mAnimationLayerImageVector->bIsLightTableActivated ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -15,11 +15,14 @@ SOdysseyAnimationLayerImageTimeline::SOdysseyAnimationLayerImageTimeline()
     : mIsDraggingOver(false)
     , mDragState(kDrag_None)
     , mDragPosition(0)
+    , mIsSelectingFrames(false)
+	, mInteractiveFrameSelection(FInt32Range::Empty())
 {
 }
 
 void
 SOdysseyAnimationLayerImageTimeline::Construct(
+    const FArguments& iArgs, 
     FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayer* iLayer
 )
@@ -28,23 +31,43 @@ SOdysseyAnimationLayerImageTimeline::Construct(
 
     mExtension = iExtension;
     mLayer = iLayer;
+    mIsCollapsed = iArgs._IsCollapsed;
+
+    TAttribute<FMargin> cellsPadding = TAttribute<FMargin>::CreateLambda(
+        [this]()
+        {
+            return IsCollapsed() ? FMargin(0.f, 5.f, 0.f, 5.f) : FMargin(0);
+        }
+    );
     
     ChildSlot
     [
         SNew(SVerticalBox)
         + SVerticalBox::Slot()
-        .AutoHeight()
         [
-            SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
-            .SelectableFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectableFrames)
+            SNew(SOdysseyAnimationTimelineFrameSelection, mExtension)
             .SelectedFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectedFrames)
-            .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
-            .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
             .OnSelectionDragged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged)
             [
-                SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
-                .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
-                .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot()
+                .Padding(cellsPadding)
+                [
+                    SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
+                    .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
+                    .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
+                    .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
+                    .Visibility(this, &SOdysseyAnimationLayerImageTimeline::GetFrameSelectorVisibility)
+                    .SelectableFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectableFrames)
+                    .OnSelectionStarted(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionStarted)
+                    .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
+                    .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
+                ]
             ]
         ]
         + SVerticalBox::Slot()
@@ -391,6 +414,9 @@ SOdysseyAnimationLayerImageTimeline::GetSelectableFrames() const
 FInt32Range
 SOdysseyAnimationLayerImageTimeline::GetSelectedFrames() const
 {
+    if (mIsSelectingFrames)
+        return mInteractiveFrameSelection;
+
     bool isCurrentLayer = mLayer->GetLayerStack()->CurrentLayer == mLayer;
 	return isCurrentLayer ? mExtension->Timeline()->GetSelectedFrames() : FInt32Range::Empty();
 }
@@ -398,12 +424,22 @@ SOdysseyAnimationLayerImageTimeline::GetSelectedFrames() const
 void
 SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged(FInt32Range iSelectedFrames)
 {
-    mExtension->Timeline()->SetSelectedFrames(iSelectedFrames);
+	mInteractiveFrameSelection = iSelectedFrames;
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::OnFramesSelectionStarted(int iFrame)
+{
+    mIsSelectingFrames = true;
+	mInteractiveFrameSelection = FInt32Range::Empty();
 }
 
 void
 SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded(int iFrame)
 {
+    mIsSelectingFrames = false;
+    mExtension->Timeline()->SetSelectedFrames(mInteractiveFrameSelection);
+
     if (mExtension->Timeline()->GetSelectedFrames().IsEmpty())
         return; //Only change currentframe if the selection has been set
 
@@ -641,7 +677,25 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
 EVisibility
 SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility() const
 {
-    return mLayer->GetIsLightTableActivated() ? EVisibility::Visible : EVisibility::Collapsed;
+    return mLayer->GetIsLightTableActivated() && !mIsCollapsed.Get() ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::IsCollapsed() const
+{
+    return mIsCollapsed.Get();
+}
+
+EVisibility
+SOdysseyAnimationLayerImageTimeline::GetFrameSelectorVisibility() const
+{
+    return mIsCollapsed.Get() ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const
+{
+    return !mIsCollapsed.Get();
 }
 
 #undef LOCTEXT_NAMESPACE

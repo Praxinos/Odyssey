@@ -15,7 +15,6 @@ public:
         {}
         SLATE_DEFAULT_SLOT( FArguments, Content )
         SLATE_ATTRIBUTE(float, WidthInFrames)
-        SLATE_ATTRIBUTE(float, HeightInScreenUnits)
     SLATE_END_ARGS()
 
 public:
@@ -27,7 +26,6 @@ public:
 
 private:
     virtual FOptionalSize GetSectionWidth() const;
-    virtual FOptionalSize GetSectionHeight() const;
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;

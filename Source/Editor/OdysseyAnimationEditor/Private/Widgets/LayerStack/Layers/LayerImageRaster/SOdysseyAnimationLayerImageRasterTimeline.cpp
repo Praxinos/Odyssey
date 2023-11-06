@@ -24,7 +24,9 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
 )
 {
     ensure(iAnimationLayerImageRaster);
-    SOdysseyAnimationLayerImageTimeline::Construct(iExtension, iAnimationLayerImageRaster);
+    SOdysseyAnimationLayerImageTimeline::FArguments args;
+    args.IsCollapsed(InArgs._IsCollapsed);
+    SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageRaster);
 }
 
 TSharedRef<FOdysseyAnimationCell>
@@ -42,7 +44,8 @@ SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(TSharedPtr<FOdys
     if (iCell->GetType() == FOdysseyAnimationCellImageRaster::StaticType())
         return SNew(SOdysseyAnimationCellImageRaster);
     else if (iCell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
-        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell), mExtension);
+        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell), mExtension)
+            .ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowStaggerCellContent);
 
     return SNullWidget::NullWidget;
 }
@@ -60,6 +63,12 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(mLayer));
 
     return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+}
+
+bool
+SOdysseyAnimationLayerImageRasterTimeline::GetShowStaggerCellContent() const
+{
+    return !IsCollapsed();
 }
 
 #undef LOCTEXT_NAMESPACE

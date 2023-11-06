@@ -50,6 +50,7 @@ SOdysseyAnimationCells::Construct(
 
     mOnCreateCellWidget = InArgs._OnCreateCellWidget;
     mOnCreateCell = InArgs._OnCreateCell;
+    mShowHandles = InArgs._ShowHandles;
     
     ChildSlot
     [
@@ -63,7 +64,6 @@ SOdysseyAnimationCells::Construct(
                 //Timeline Section for Layer Offset
                 SNew(SOdysseyAnimationTimelineSection, mExtension)
                 .WidthInFrames(this, &SOdysseyAnimationCells::GetOffset)
-                .HeightInScreenUnits(this, &SOdysseyAnimationCells::GetCellHeight)
                 .Content()
                 [
                     //Add Cells Handle
@@ -143,12 +143,6 @@ SOdysseyAnimationCells::GetOffset() const
 }
 
 float
-SOdysseyAnimationCells::GetCellHeight() const
-{
-    return mExtension->Timeline()->GetBaseFrameSize();
-}
-
-float
 SOdysseyAnimationCells::GetCellLength(TSharedPtr<SOdysseyAnimationCells::FCellData> iCellData) const
 {
     if ( !iCellData->mCell || iCellData->mEditingLength )
@@ -200,12 +194,11 @@ SOdysseyAnimationCells::InsertCellSection(int iIndex, TSharedPtr<FCellData> iCel
 {
     iCellData->mCellWidget = SNew(SOdysseyAnimationTimelineSection, mExtension)
         .WidthInFrames(this, &SOdysseyAnimationCells::GetCellLength, iCellData)
-        .HeightInScreenUnits(this, &SOdysseyAnimationCells::GetCellHeight)
         [
             SNew(SOverlay)
             + SOverlay::Slot() //Cell Widget
             .HAlign(HAlign_Left)
-            .VAlign(VAlign_Top)
+            .VAlign(VAlign_Fill)
             [
                 CreateCellWidget(iCellData)
             ]
@@ -354,7 +347,6 @@ SOdysseyAnimationCells::CreateCellWidget(TSharedPtr<FCellData> iCellData)
 
     return SNew(SOdysseyAnimationTimelineSection, mExtension)
     .WidthInFrames(this, &SOdysseyAnimationCells::GetCellLength, iCellData)
-    .HeightInScreenUnits(this, &SOdysseyAnimationCells::GetCellHeight)
     [
         SNew(SBorder)
 		.BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
@@ -460,14 +452,14 @@ EVisibility
 SOdysseyAnimationCells::GetTimingHandleVisibility(TSharedPtr<FCellData> iCellData) const
 {
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mTimingHandleBrush->ImageSize.X;
-	return (isZoomedEnough && iCellData->mIsTimingHandleVisible) ? EVisibility::Visible : EVisibility::Collapsed;
+	return (mShowHandles.Get() && isZoomedEnough && iCellData->mIsTimingHandleVisible) ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
 SOdysseyAnimationCells::GetLengthHandleVisibility(TSharedPtr<FCellData> iCellData) const
 {
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mLengthHandleBrush->ImageSize.X;
-    return (isZoomedEnough && iCellData->mIsLengthHandleVisible) ? EVisibility::Visible : EVisibility::Collapsed;
+    return (mShowHandles.Get() && isZoomedEnough && iCellData->mIsLengthHandleVisible) ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
@@ -698,14 +690,14 @@ EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleRightVisibility() const
 {
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleRightBrush->ImageSize.X;
-    return isZoomedEnough ? EVisibility::Visible : EVisibility::Hidden;
+    return (mShowHandles.Get() && isZoomedEnough) ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility() const
 {
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleLeftBrush->ImageSize.X;
-    return (isZoomedEnough && GetOffset() > 0) ? EVisibility::Visible : EVisibility::Hidden;
+    return (mShowHandles.Get() && isZoomedEnough && GetOffset() > 0) ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 void

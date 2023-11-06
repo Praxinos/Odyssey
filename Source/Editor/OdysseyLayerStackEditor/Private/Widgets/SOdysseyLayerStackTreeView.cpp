@@ -68,7 +68,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
                 .ColorAndOpacity(FSlateColor::UseForeground())
                 .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
             ]
-        + SHeaderRow::Column("IsOptionsDisplayed")
+        + SHeaderRow::Column("IsCollapsed")
             .ToolTipText(LOCTEXT("OdysseyLayerIsOptionsDisplayedButtonToolTip", "Show/Hide inline Layer options"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)

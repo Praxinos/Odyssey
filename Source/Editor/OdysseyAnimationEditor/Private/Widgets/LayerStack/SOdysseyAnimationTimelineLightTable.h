@@ -24,9 +24,10 @@ private:
 	void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
 	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 	void Update();
-	float GetLightTableCellHeight() const;
-	float GetLightTableKeyWidthInFrames(int iCellOffset) const;
+	float GetLightTableKeyRemainingLength(int iCellOffset) const;
 	EVisibility GetLightTableKeyVisibility(int iCellOffset) const;
+	bool GetLightTableKeyIsActivated(int iCellOffset) const;
+	float GetCurrentCellLength() const;
 
 private:
 	UOdysseyAnimationLayer* mLayer;

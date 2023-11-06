@@ -25,7 +25,9 @@ SOdysseyAnimationLayerImageVectorTimeline::Construct(
 )
 {
     ensure(iAnimationLayerImageVector);
-    SOdysseyAnimationLayerImageTimeline::Construct(iExtension, iAnimationLayerImageVector);
+    SOdysseyAnimationLayerImageTimeline::FArguments args;
+    args.IsCollapsed(InArgs._IsCollapsed);
+    SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageVector);
 }
 
 TSharedRef<FOdysseyAnimationCell>
@@ -38,12 +40,34 @@ SOdysseyAnimationLayerImageVectorTimeline::OnCreateCell()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell)
 {
-    if (iCell->GetType() == FOdysseyAnimationCellImageVector::StaticType())
+    if (!iCell || iCell->GetType() == FOdysseyAnimationCellImageVector::StaticType())
         return SNew(SOdysseyAnimationCellImageVector);
     else if (iCell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
-        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell), mExtension);
+        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell), mExtension)
+            .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowStaggerCellContent);
 
     return SNullWidget::NullWidget;
+}
+
+FReply
+SOdysseyAnimationLayerImageVectorTimeline::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+    UOdysseyLayerStack* layerStack = mLayer->GetLayerStack();
+    if (!layerStack)
+        return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+
+    if (layerStack->CurrentLayer.Get() == mLayer)
+        return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(mLayer));
+
+    return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
+}
+
+bool
+SOdysseyAnimationLayerImageVectorTimeline::GetShowStaggerCellContent() const
+{
+    return !IsCollapsed();
 }
 
 #undef LOCTEXT_NAMESPACE

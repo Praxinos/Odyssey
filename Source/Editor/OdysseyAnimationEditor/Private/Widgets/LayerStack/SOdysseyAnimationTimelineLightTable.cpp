@@ -3,6 +3,7 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTable.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationTimelineLightTable"
 
@@ -34,12 +35,11 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 						return 0;
 
 					TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-					int firstCellIndex = FMath::Max(mCurrentCellIndex - 10, 0);
+					int firstCellIndex = FMath::Max(mCurrentCellIndex - mLayer->GetLightTable()->GetRange(), 0);
 					int width = cellsContainer->GetCellFrame(cellsContainer->GetCells()[firstCellIndex]);
 					return width;
 				}
 			)
-			.HeightInScreenUnits(this, &SOdysseyAnimationTimelineLightTable::GetLightTableCellHeight)
 			.Content()
 			[
 				SNullWidget::NullWidget
@@ -47,17 +47,33 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 		];
 
 	//Previous cells
-	for (int i = 0; i < 10; i++)
+	for (int i = -mLayer->GetLightTable()->GetRange(); i <= -1; i++)
 	{
 		horizontalBox->AddSlot()
 		.AutoWidth()
 		[
 			SNew(SOdysseyAnimationTimelineSection, mExtension)
-			.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, i - 10)
-			.WidthInFrames(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyWidthInFrames, i - 10)
-			.HeightInScreenUnits(this, &SOdysseyAnimationTimelineLightTable::GetLightTableCellHeight)
+			.WidthInFrames(1)
+			.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, i)
 			[
-				SNew(SOdysseyAnimationTimelineLightTableKey, mLayer, i - 10)
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.HAlign(HAlign_Center)
+				[
+					SNew(SOdysseyAnimationTimelineLightTableKey, mLayer, i)
+					.IsActivated(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated, i)
+				]
+			]
+		];
+
+		horizontalBox->AddSlot()
+		.AutoWidth()
+		[
+			SNew(SOdysseyAnimationTimelineSection, mExtension)
+			.WidthInFrames(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyRemainingLength, i)
+			.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, i)
+			[
+				SNullWidget::NullWidget
 			]
 		];
 	}
@@ -68,35 +84,55 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 	[
 		SNew(SOdysseyAnimationTimelineSection, mExtension)
 		.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, 0)
-		.WidthInFrames(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyWidthInFrames, 0)
-		.HeightInScreenUnits(this, &SOdysseyAnimationTimelineLightTable::GetLightTableCellHeight)
+		.WidthInFrames(this, &SOdysseyAnimationTimelineLightTable::GetCurrentCellLength)
 		[
 			SNullWidget::NullWidget
 		]
 	];
 
 	//Next cells
-	for (int i = 1; i <= 10; i++)
+	for (int i = 1; i <= mLayer->GetLightTable()->GetRange(); i++)
 	{
+		
 		horizontalBox->AddSlot()
 		.AutoWidth()
 		[
 			SNew(SOdysseyAnimationTimelineSection, mExtension)
+			.WidthInFrames(1)
 			.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, i)
-			.WidthInFrames(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyWidthInFrames, i)
-			.HeightInScreenUnits(this, &SOdysseyAnimationTimelineLightTable::GetLightTableCellHeight)
 			[
-				SNew(SOdysseyAnimationTimelineLightTableKey, mLayer, i)
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.HAlign(HAlign_Center)
+				[
+					SNew(SOdysseyAnimationTimelineLightTableKey, mLayer, i)
+					.IsActivated(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated, i)
+				]
+			]
+		];
+
+		horizontalBox->AddSlot()
+		.AutoWidth()
+		[
+			SNew(SOdysseyAnimationTimelineSection, mExtension)
+			.WidthInFrames(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyRemainingLength, i)
+			.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, i)
+			[
+				SNullWidget::NullWidget
 			]
 		];
 	}
 
 	ChildSlot
 	[
-		SNew(SOdysseyAnimationTimelineScrollBox, mExtension)
-        + SOdysseyAnimationTimelineScrollBox::Slot()
-        [
-			horizontalBox
+		SNew(SBox)
+        .HeightOverride(FOptionalSize(SOdysseyAnimationTimelineLightTableKey::mDesiredHeight))
+		[
+			SNew(SOdysseyAnimationTimelineScrollBox, mExtension)
+			+ SOdysseyAnimationTimelineScrollBox::Slot()
+			[
+				horizontalBox
+			]
 		]
 	];
 
@@ -145,13 +181,7 @@ SOdysseyAnimationTimelineLightTable::Update()
 }
 
 float
-SOdysseyAnimationTimelineLightTable::GetLightTableCellHeight() const
-{
-	return 50; //TODO:
-}
-
-float
-SOdysseyAnimationTimelineLightTable::GetLightTableKeyWidthInFrames(int iCellOffset) const
+SOdysseyAnimationTimelineLightTable::GetLightTableKeyRemainingLength(int iCellOffset) const
 {
 	if (mCurrentCellIndex == INDEX_NONE)
 		return 0;
@@ -159,6 +189,22 @@ SOdysseyAnimationTimelineLightTable::GetLightTableKeyWidthInFrames(int iCellOffs
 	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
 
 	int cellIndex = mCurrentCellIndex + iCellOffset;
+	if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
+		return 0;
+
+	int width = cellsContainer->GetCells()[cellIndex]->GetLength() - 1;
+	return width;
+}
+
+float
+SOdysseyAnimationTimelineLightTable::GetCurrentCellLength() const
+{
+	if (mCurrentCellIndex == INDEX_NONE)
+		return 0;
+
+	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+
+	int cellIndex = mCurrentCellIndex;
 	if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
 		return 0;
 
@@ -179,6 +225,12 @@ SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility(int iCellOffset)
 		return EVisibility::Collapsed;
 
 	return EVisibility::Visible;
+}
+
+bool
+SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated(int iCellOffset) const
+{
+	return mLayer->GetLightTable()->GetKeyIsActivated(iCellOffset);
 }
 
 #undef LOCTEXT_NAMESPACE

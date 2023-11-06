@@ -10,6 +10,7 @@
 SOdysseyAnimationTimelineLightTableKey::SOdysseyAnimationTimelineLightTableKey()
 	: mLayer(nullptr)
 	, mKeyIndex(INDEX_NONE)
+	, mIsActivated(false)
 	, mOpacityMutator(nullptr)
 	, mDraggingPosition(0.f)
 	, mOldOpacity(0.f)
@@ -28,22 +29,45 @@ SOdysseyAnimationTimelineLightTableKey::OnPaint(const FPaintArgs& Args, const FG
 	const float width = AllottedGeometry.GetLocalSize().X;
 
 	//Dragging Zone
-	FLinearColor color = FOdysseyStyle::GetColor( "Animation.LightTableKey.Color" );
+	const FSlateBrush* backBrush = FOdysseyStyle::GetBrush( "Animation.LightTableKey.Back" );
+	const FSlateBrush* frontBrush = FOdysseyStyle::GetBrush( "Animation.LightTableKey.Front" );
+	FSlateColor primary( FStyleColors::Primary );
+    FSlateColor background( FStyleColors::Background );
+	FLinearColor backColor = FOdysseyStyle::GetColor( "Animation.LightTableKey.BackColor" );
+	FLinearColor frontColor = FOdysseyStyle::GetColor( "Animation.LightTableKey.FrontColor" );
 	float opacity = mLayer->GetLightTable()->GetKeyOpacity(mKeyIndex);
 
 
 	//Dragging Bar
-	FSlateDrawElement::MakeBox(
+	/* FSlateDrawElement::MakeBox(
 		OutDrawElements,
 		LayerId,
 		AllottedGeometry.ToPaintGeometry(FVector2D(0.f, height * (1.0f - opacity)), FVector2D(width, height * opacity)),
 		GenericBrush,
-		ESlateDrawEffect::None,
+		mIsActivated.Get() ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect,
 		color
+	); */
+
+	FSlateDrawElement::MakeBox(
+		OutDrawElements,
+		LayerId,
+		AllottedGeometry.ToPaintGeometry(FVector2D(0.f, 0.f), FVector2D(width, height)),
+		backBrush,
+		mIsActivated.Get() ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect,
+		background.GetSpecifiedColor()
+	);
+
+	FSlateDrawElement::MakeBox(
+		OutDrawElements,
+		LayerId,
+		AllottedGeometry.ToPaintGeometry(FVector2D(0.f, height * (1.0f - opacity)), FVector2D(width, height * opacity)),
+		frontBrush,
+		mIsActivated.Get() ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect,
+		primary.GetSpecifiedColor()
 	);
 
 	// Draw a current frame
-	return SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	return LayerId;
 }
 
 void
@@ -51,12 +75,7 @@ SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs, UOdy
 {
 	mLayer = iLayer;
 	mKeyIndex = iKeyIndex;
-
-	ChildSlot
-	[
-		SNew(SBorder)
-		.Padding(FMargin(0))
-	];
+	mIsActivated = InArgs._IsActivated;
 }
 
 FReply
@@ -88,7 +107,7 @@ SOdysseyAnimationTimelineLightTableKey::OnMouseMove(const FGeometry& iGeometry, 
 	{	
 		float position = iMouseEvent.GetScreenSpacePosition().Y;
 		float delta = (position - mDraggingPosition) * -1;
-		float sensitivity = 500.f;
+		float sensitivity = 200.f;
 		
 		FOdysseyAnimationLightTableMutator mutator(mLayer->GetLightTable());
 		mutator.SetKeyOpacity(mKeyIndex, mOldOpacity + delta / sensitivity);
@@ -128,5 +147,10 @@ SOdysseyAnimationTimelineLightTableKey::OnMouseButtonUp(const FGeometry& iGeomet
 	return FReply::Unhandled();
 }
 
+FVector2D
+SOdysseyAnimationTimelineLightTableKey::ComputeDesiredSize(float iLayoutScaleMultiplier) const
+{
+	return FVector2D(mDesiredWidth, mDesiredHeight);
+}
 
 #undef LOCTEXT_NAMESPACE

@@ -36,6 +36,7 @@ private:
     ECheckBoxState GetIsAlphaLockedIsChecked() const;
     void OnLightTableCheckStateChanged(ECheckBoxState iState);
     ECheckBoxState GetLightTableIsChecked() const;
+    EVisibility GetLightTableVisibility() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);

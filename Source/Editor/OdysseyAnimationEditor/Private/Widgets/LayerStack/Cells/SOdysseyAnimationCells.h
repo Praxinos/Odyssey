@@ -17,9 +17,11 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCells
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCells)
+        : _ShowHandles(false)
         {}
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
         SLATE_EVENT(FOnCreateCell, OnCreateCell)
+        SLATE_ATTRIBUTE(bool, ShowHandles)
     SLATE_END_ARGS()
 
 public:
@@ -105,6 +107,7 @@ private:
 
     FOnCreateCellWidget mOnCreateCellWidget;
     FOnCreateCell mOnCreateCell;
+    TAttribute<bool> mShowHandles;
 
     TSharedPtr<SBorder> mCellsBorder;
     TSharedPtr<SHorizontalBox> mCellsBox;
