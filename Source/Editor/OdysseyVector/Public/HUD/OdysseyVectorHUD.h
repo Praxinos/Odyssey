@@ -76,7 +76,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                               , const BLRgba32& bgColor
                               , const BLRgba32& hcColor
                               , bool iWorld
-                              , uint64 iDrawingFlags );
+                              , uint64 iHUDFlags );
 
         static void DrawCubicSegment( BLContext* iBLContext
                                     , FOdysseyVectorSegmentCubic* iCubicSegment
@@ -84,7 +84,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                     , const BLRgba32& bgColor
                                     , const BLRgba32& hcColor
                                     , bool iWorld
-                                    , uint64 iDrawingFlags );
+                                   , uint64 iHUDFlags );
 
         static void DrawPath( BLContext* iBLContext
                             , FOdysseyVectorPath* iPath
@@ -92,7 +92,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                             , const BLRgba32& bgColor
                             , const BLRgba32& hcColor
                             , bool iWorld
-                            , uint64 iDrawingFlags );
+                            , uint64 iHUDFlags );
 
         static ::ULIS::FVec2D GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld );
@@ -114,11 +114,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                   , bool iWorld
                                   , uint64 iHUDFlags );
 
-        virtual bool IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                      , FOdysseyVectorObject* iObject
-                                      , uint64 iHUDFlags
-                                      , uint64 iTraversalFlags ){ return true; };
-
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
 
@@ -138,29 +133,29 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint32 PICK_RADIAL_AREA   = 4;
 
         // HUD Drawing Flags
-        static const uint64 VIEW_MODE_OBJECT             = 1 <<  0;
-        static const uint64 VIEW_MODE_VERTEX             = 1 <<  1;
-        static const uint64 VIEW_MODE_ALL                = VIEW_MODE_OBJECT
-                                                         | VIEW_MODE_VERTEX;
-        static const uint64 VIEW_PATH_VERTEX_VALENCE0    = 1 <<  2;
-        static const uint64 VIEW_PATH_VERTEX_VALENCE1    = 1 <<  3;
-        static const uint64 VIEW_PATH_VERTEX_VALENCE2    = 1 <<  4;
-        static const uint64 VIEW_PATH_VERTEX             = VIEW_PATH_VERTEX_VALENCE0
-                                                         | VIEW_PATH_VERTEX_VALENCE1
-                                                         | VIEW_PATH_VERTEX_VALENCE2;
-        static const uint64 VIEW_PATH_VERTEX_HANDLE       = 1 <<  5;
-        static const uint64 VIEW_PATH_VERTEX_ALIGNMENT    = 1 <<  6;
-        static const uint64 VIEW_PATH_SEGMENT             = 1 <<  7;
-        static const uint64 VIEW_PATH_SEGMENT_HANDLE      = 1 <<  8;
-        static const uint64 VIEW_PATH_ALL                 = VIEW_PATH_VERTEX
-                                                          | VIEW_PATH_VERTEX_HANDLE
-                                                          | VIEW_PATH_SEGMENT
-                                                          | VIEW_PATH_SEGMENT_HANDLE;
-        static const uint64 VIEW_GROUPPAINT_BUCKET        = 1 <<  9;
-        static const uint64 VIEW_GROUPPAINT_BUCKET_HANDLE = 1 << 10;
-        static const uint64 VIEW_GROUPPAINT_ALL           = VIEW_GROUPPAINT_BUCKET
-                                                          | VIEW_GROUPPAINT_BUCKET_HANDLE;
-        static const uint64 VIEW_SELECTIONBOX             = 1 << 11;
+        static const uint64 HUD_MODE_OBJECT              = ( 1ULL <<  0 );
+        static const uint64 HUD_MODE_VERTEX              = ( 1ULL <<  1 );
+        static const uint64 HUD_MODE_ALL                 = HUD_MODE_OBJECT
+                                                         | HUD_MODE_VERTEX;
+        static const uint64 HUD_PATH_VERTEX_VALENCE0     = ( 1ULL <<  2 );
+        static const uint64 HUD_PATH_VERTEX_VALENCE1     = ( 1ULL <<  3 );
+        static const uint64 HUD_PATH_VERTEX_VALENCE2     = ( 1ULL <<  4 );
+        static const uint64 HUD_PATH_VERTEX              = HUD_PATH_VERTEX_VALENCE0
+                                                         | HUD_PATH_VERTEX_VALENCE1
+                                                         | HUD_PATH_VERTEX_VALENCE2;
+        static const uint64 HUD_PATH_VERTEX_HANDLE       = ( 1ULL <<  5 );
+        static const uint64 HUD_PATH_VERTEX_ALIGNMENT    = ( 1ULL <<  6 );
+        static const uint64 HUD_PATH_SEGMENT             = ( 1ULL <<  7 );
+        static const uint64 HUD_PATH_SEGMENT_HANDLE      = ( 1ULL <<  8 );
+        static const uint64 HUD_PATH_ALL                 = HUD_PATH_VERTEX
+                                                         | HUD_PATH_VERTEX_HANDLE
+                                                         | HUD_PATH_SEGMENT
+                                                         | HUD_PATH_SEGMENT_HANDLE;
+        static const uint64 HUD_GROUPPAINT_BUCKET        = ( 1ULL <<  9 );
+        static const uint64 HUD_GROUPPAINT_BUCKET_HANDLE = ( 1ULL << 10 );
+        static const uint64 HUD_GROUPPAINT_ALL           = HUD_GROUPPAINT_BUCKET
+                                                         | HUD_GROUPPAINT_BUCKET_HANDLE;
+        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 11 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) = 0;

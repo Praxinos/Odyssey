@@ -233,11 +233,12 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( BLContext* iBLCo
 void
 FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    MakeGrid( iScene, mGridTool->GetEditor()->GetVectorEditionFlags() );
+    MakeGrid( iScene, mGridTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext
+                                            , FOdysseyVectorScene* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -245,17 +246,17 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext, FOdysseyVec
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint64 hudFlags = mGridTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mGridTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
     iBLContext->save();
@@ -345,16 +346,19 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject
 void
 FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorScene* iScene )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
     mPointCount = 0;
 
-    FOdysseyVectorEngine::Traverse
+    vectorEngine->Traverse
     ( iScene
     , iScene
     , 0
     , [ this
-      , &iScene ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
+      , iScene
+      , vectorEngine ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
-          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          if( vectorEngine->HasFocus( iScene, object, travesalFlags ) )
           {
               BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
 

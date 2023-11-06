@@ -36,7 +36,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     ClearMask();
 
-    UpdateSelectionBox( iScene, false, mEraserTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mEraserTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
@@ -49,17 +49,17 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint64 hudFlags = mEraserTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mEraserTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
     // draw selection box only if we restrict erasure to the selection 

@@ -15,7 +15,7 @@ void
 FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     // Updates the selection box
-    UpdateSelectionBox( iScene, false, mPathEditTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mPathEditTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
@@ -39,13 +39,13 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     ePathPickingMode pickingMode = mPathEditTool->GetPickingMode();
-    uint64 vertexHandleFlag  = ( pickingMode == ePathPickingMode::VertexHandle  ) ? VIEW_PATH_VERTEX_HANDLE  : 0;
-    uint64 segmentHandleFlag = ( pickingMode == ePathPickingMode::SegmentHandle ) ? VIEW_PATH_SEGMENT_HANDLE
-                                                                                  | VIEW_PATH_VERTEX_ALIGNMENT : 0;
-    uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorEditionFlags();
+    uint64 vertexHandleFlag  = ( pickingMode == ePathPickingMode::VertexHandle  ) ? HUD_PATH_VERTEX_HANDLE  : 0;
+    uint64 segmentHandleFlag = ( pickingMode == ePathPickingMode::SegmentHandle ) ? HUD_PATH_SEGMENT_HANDLE
+                                                                                  | HUD_PATH_VERTEX_ALIGNMENT : 0;
+    uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
 
     // draw object details in any mode (if statement is useles per-se but here for clarity)
-    if( ( hudFlags & VIEW_MODE_VERTEX ) || ( hudFlags & VIEW_MODE_OBJECT ) )
+    if( ( hudFlags & HUD_MODE_VERTEX ) || ( hudFlags & HUD_MODE_OBJECT ) )
     {
         DrawObjects( iBLContext
                    , iScene
@@ -53,8 +53,8 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                    , bgColor
                    , hcColor
                    , hudFlags
-                   | VIEW_PATH_VERTEX
-                   | VIEW_PATH_SEGMENT
+                   | HUD_PATH_VERTEX
+                   | HUD_PATH_SEGMENT
                    | vertexHandleFlag
                    | segmentHandleFlag );
     }

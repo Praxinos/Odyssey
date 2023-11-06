@@ -129,17 +129,20 @@ void
 UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVectorScene* iScene
                                                                   , std::list<FOdysseyVectorObject*>& oObjectList )
 {
-    FOdysseyVectorEngine::Traverse
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    vectorEngine->Traverse
     ( iScene
     , iScene
     , 0
     , [ iScene
+      , vectorEngine
       , &oObjectList ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
           // transform is recursive per se, do not recurse if the parent was transformed already
           if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
           {
-              if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) )
+              if( vectorEngine->HasFocus( iScene, object, travesalFlags ) )
               {
                   oObjectList.push_back( object );
 
@@ -167,7 +170,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorScene
 
         mPickedPivot = hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ZAXIS ? &mTransformHUD->GetGizmo() : nullptr;
 
-        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
             mSelectedPoints.clear();
             mTransformHUD->GetSelectedVertices( iScene, mSelectedPoints );
@@ -177,7 +180,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorScene
             mUndo = new FOdysseyVectorUndoPointPosition( iScene, mSelectedPoints );
         }
 
-        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
             std::list<FOdysseyVectorObject*> transformedObjectList;
 
@@ -277,7 +280,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         translateMatrix.translate( 0, translateBy.y );
     }
 
-    if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+    if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         for( int i = 0; i < mSelectedPoints.size(); i++ )
         {
@@ -297,17 +300,18 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         pivot.y += translateBy.y;
     }
 
-    if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
+    if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
                                     , pivot.y - selectionBox.rect.y );
 
         // run lambda recursively on altered objects
-        FOdysseyVectorEngine::Traverse
+        iEngine->Traverse
         ( iScene
         , iScene
         , 0
         , [ iScene
+          , iEngine
           , &spaceMatrix
           , &inverseSpaceMatrix
           , &translateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
@@ -315,7 +319,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
               // transform is recursive per se, do not recurse if the parent was transformed already
               if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
               {
-                  if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) )
+                  if( iEngine->HasFocus( iScene, object, travesalFlags ) )
                   {
                       double translationX;
                       double translationY;
@@ -428,7 +432,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
 
     BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );
 
-    if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+    if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         for( int i = 0; i < mSelectedPoints.size(); i++ )
         {
@@ -439,14 +443,15 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
         }
     }
 
-    if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
+    if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         // run lambda recursively on altered objects
-        FOdysseyVectorEngine::Traverse
+        iEngine->Traverse
         ( iScene
         , iScene
         , 0
         ,[ iScene
+          , iEngine
           , &spaceMatrix
           , &inverseSpaceMatrix
           , &rotateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
@@ -454,7 +459,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
               // transform is recursive per se, do not recurse if the parent was transformed already
               if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
               {
-                  if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) )
+                  if( iEngine->HasFocus( iScene, object, travesalFlags ) )
                   {
                       double translationX;
                       double translationY;
@@ -608,7 +613,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
             scalingMatrix.scale( x2mx1 / selectionBox.rect.w, y2my1 / selectionBox.rect.h );
         }
 
-        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
             double selectionBoxArea = selectionBox.rect.Area();
              // side note: the sqrt() is there because surface rises at the square of dimension factor. We have to correct that.
@@ -625,14 +630,15 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
             }
         }
 
-        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
             // run lambda recursively on altered objects
-            FOdysseyVectorEngine::Traverse
+            iEngine->Traverse
             ( iScene
             , iScene
             , 0
             ,[ iScene
+             , iEngine
              , &spaceMatrix
              , &inverseSpaceMatrix
              , &scalingMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
@@ -640,7 +646,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                   // transform is recursive per se, do not recurse if the parent was transformed already
                   if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
                   {
-                      if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) )
+                      if( iEngine->HasFocus( iScene, object, travesalFlags ) )
                       {
                           double translationX;
                           double translationY;

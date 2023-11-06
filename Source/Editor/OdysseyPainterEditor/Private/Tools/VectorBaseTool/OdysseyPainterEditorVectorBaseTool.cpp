@@ -55,20 +55,23 @@ UOdysseyPainterEditorVectorBaseTool::GetDisplayedAncestorList( FOdysseyVectorSce
                                                              , bool iAcceptScene
                                                              , std::list<FOdysseyVectorObject*>& oObjectList )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
     if( ( iScene->GetSelectedObjectList().size() == 0 ) && ( iAcceptScene == false ) )
     {
         return;
     }
     else
     {
-        FOdysseyVectorEngine::Traverse
+        vectorEngine->Traverse
         ( iScene
         , iScene
         , 0
         , [ iScene
+          , vectorEngine
           , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
             {
-                if( DisplayObjectHUD( iScene, object, traversalFlags ) )
+                if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
                 {
                     oObjectList.push_back( object );
 
@@ -86,20 +89,23 @@ UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( FOdysseyVectorScene
                                                            , bool iAcceptScene
                                                            , std::list<FOdysseyVectorObject*>& oObjectList )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
     if( ( iScene->GetSelectedObjectList().size() == 0 ) && ( iAcceptScene == false ) )
     {
         return;
     }
     else
     {
-        FOdysseyVectorEngine::Traverse
+        vectorEngine->Traverse
         ( iScene
         , iScene
         , 0
         , [ iScene
+          , vectorEngine
           , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
             {
-                if( DisplayObjectHUD( iScene, object, traversalFlags ) )
+                if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
                 {
                     oObjectList.push_back( object );
 
@@ -109,30 +115,6 @@ UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( FOdysseyVectorScene
                 return 0;
             } );
     }
-}
-
-// static
-bool
-UOdysseyPainterEditorVectorBaseTool::DisplayObjectHUD( FOdysseyVectorScene* iScene
-                                                     , FOdysseyVectorObject* iObject
-                                                     , uint64 iTraversalFlags )
-{
-    if( iObject->IsSelected() )
-    {
-        return true;
-    }
-
-    if( iScene->GetSelectedObjectList().size() == 0 )
-    {
-        return true;
-    }
-
-    if( iTraversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED )
-    {
-        return true;
-    }
-
-    return false;
 }
 
 void
@@ -221,14 +203,23 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorScene* iScen
         }
     }
 
+    if( iKey == EKeys::W )
+    {
+/*
+        uint64 drawingflags = iEngine->GetDrawingFlags();
+
+        iEngine->SetDrawingFlags( drawingflags | FOdysseyVectorEngine::DRAWING_WIREFRAME );
+*/
+    }
+
     if( iKey == EKeys::Delete )
     {
-        if( GetEditor()->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
             GetEditor()->DeleteObjects( iScene );
         }
 
-        if( GetEditor()->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
             GetEditor()->DeletePointSelection( iScene );
         }
@@ -266,6 +257,13 @@ uint64
 UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorScene* iScene
                                                   , const FKey& iKey )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+/*
+    uint64 drawingflags = iEngine->GetDrawingFlags();
+
+    iEngine->SetDrawingFlags( drawingflags & (~FOdysseyVectorEngine::DRAWING_WIREFRAME) );
+*/
+
     return 0;
 }
 
@@ -488,12 +486,12 @@ UOdysseyPainterEditorVectorBaseTool::CreateContextMenu()
 void
 UOdysseyPainterEditorVectorBaseTool::ExtendContextMenu( FMenuBuilder& menu )
 {
-    if( GetEditor()->GetVectorEditionFlags() &  FOdysseyVectorHUD::VIEW_MODE_OBJECT )
+    if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         ExtendContextMenuObject( menu );
     }
 
-    if( GetEditor()->GetVectorEditionFlags() &  FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+    if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         ExtendContextMenuVertex( menu );
     }

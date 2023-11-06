@@ -23,5 +23,6 @@ public:
     TSharedPtr<const FOdysseyAnimationCellImageVector> mCell;
     TSharedPtr<::ULIS::FBlock> mBlock;
     TSharedPtr<::ULIS::FBlock> mHUDBlock;
+    uint64 mDrawingFlags;
     bool mRenderHUD;
 };

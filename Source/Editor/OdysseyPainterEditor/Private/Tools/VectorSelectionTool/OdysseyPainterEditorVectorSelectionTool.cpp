@@ -319,14 +319,15 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     // run lambda on object tree
-    FOdysseyVectorEngine::Traverse
+    iEngine->Traverse
     ( iScene
     , iScene
     , 0
     , [ this
-      , &iScene ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      , iEngine
+      , iScene ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
     {
-        if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+        if( iEngine->HasFocus( iScene, object, traversalFlags ) )
         {
             if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
             {
@@ -366,12 +367,12 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorScene* 
 
         // TODO: pass the mask image as arg to Pick function
         iEngine->SetBLMask( mPickHUD->GetMask() );
-        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
             OnMouseUpVectorObjectMode( iScene, iPointInTexture, iKey );
         }
 
-        if( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
             OnMouseUpVectorVertexMode( iScene, iPointInTexture, iKey );
         }

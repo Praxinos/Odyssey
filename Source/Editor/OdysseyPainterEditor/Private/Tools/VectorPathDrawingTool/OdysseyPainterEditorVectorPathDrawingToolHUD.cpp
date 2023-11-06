@@ -14,7 +14,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::FOdysseyPainterEditorVectorPathDr
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorHUDFlags();
 
     MakePointQuadTree( iScene, hudFlags );
 
@@ -56,17 +56,17 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
     FOdysseyVectorPath* path = pathTracer.GetPath();
     FTracerBezier& bestBezier = pathTracer.GetBestBezier();
     FTracerBezier& rawBezier = pathTracer.GetRawBezier();
-    uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
     //DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
@@ -91,7 +91,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
                             , bgColor
                             , hcColor
                             , true // World
-                            , VIEW_PATH_SEGMENT );
+                            , HUD_PATH_SEGMENT );
                 }
             }
         }

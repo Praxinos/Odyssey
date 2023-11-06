@@ -20,9 +20,9 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
     SNew(SCheckBox)
    .Type(ESlateCheckBoxType::ToggleButton)
    .Style(FAppStyle::Get(),TEXT("ToggleButtonCheckBox"))
-   .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, FOdysseyVectorHUD::VIEW_MODE_OBJECT ))
-   .IsChecked( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_OBJECT ? ECheckBoxState::Checked
-                                                                                      : ECheckBoxState::Unchecked )
+   .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, FOdysseyVectorHUD::HUD_MODE_OBJECT ))
+   .IsChecked( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT ? ECheckBoxState::Checked
+                                                                                 : ECheckBoxState::Unchecked )
     [
         SNew(SImage)
        .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeObject32"))
@@ -32,9 +32,9 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
     SNew(SCheckBox)
    .Type(ESlateCheckBoxType::ToggleButton)
    .Style(FAppStyle::Get(),TEXT("ToggleButtonCheckBox"))
-   .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, FOdysseyVectorHUD::VIEW_MODE_VERTEX ))
-   .IsChecked( mEditor->GetVectorEditionFlags() & FOdysseyVectorHUD::VIEW_MODE_VERTEX ? ECheckBoxState::Checked
-                                                                                      : ECheckBoxState::Unchecked )
+   .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, FOdysseyVectorHUD::HUD_MODE_VERTEX ))
+   .IsChecked( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX ? ECheckBoxState::Checked
+                                                                                 : ECheckBoxState::Unchecked )
     [
         SNew(SImage)
        .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeVertex32"))
@@ -69,15 +69,15 @@ SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags( ECheckBoxState iN
 {
     TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mEditor->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
-    mEditor->SetVectorEditionFlags( ( mEditor->GetVectorEditionFlags() & (~FOdysseyVectorHUD::VIEW_MODE_ALL) ) | iViewMode );
+    mEditor->SetVectorHUDFlags( ( mEditor->GetVectorHUDFlags() & (~FOdysseyVectorHUD::HUD_MODE_ALL) ) | iViewMode );
 
-    if( iViewMode & FOdysseyVectorHUD::VIEW_MODE_OBJECT )
+    if( iViewMode & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         mObjectModeCheckbox.Get()->SetIsChecked( ECheckBoxState::Checked );
         mVertexModeCheckbox.Get()->SetIsChecked( ECheckBoxState::Unchecked );
     }
 
-    if( iViewMode & FOdysseyVectorHUD::VIEW_MODE_VERTEX )
+    if( iViewMode & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         mObjectModeCheckbox.Get()->SetIsChecked(ECheckBoxState::Unchecked);
         mVertexModeCheckbox.Get()->SetIsChecked( ECheckBoxState::Checked );

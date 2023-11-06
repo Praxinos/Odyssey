@@ -17,7 +17,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScen
 {
     mPickedCycleArray.clear();
 
-    UpdateSelectionBox( iScene, false, mPaintBucketTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mPaintBucketTool->GetEditor()->GetVectorHUDFlags() );
 
     mAnyPaintGroupSelected = false;
 
@@ -110,7 +110,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorScene* 
 
     oPickedCycleArray.clear();
 
-    FOdysseyVectorEngine::Traverse
+    vectorEngine->Traverse
     ( iScene
     , iScene
     , 0
@@ -146,14 +146,16 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorScene* 
                                                          , double iWorldX
                                                          , double iWorldY )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorBucket* pickedBucket = nullptr;
 
-    FOdysseyVectorEngine::Traverse
+    vectorEngine->Traverse
     ( iScene
     , iScene
-    , mPaintBucketTool->GetEditor()->GetVectorEditionFlags()
+    , mPaintBucketTool->GetEditor()->GetVectorHUDFlags()
     , [ this
       , iScene
+      , vectorEngine
       , &iWorldX
       , &iWorldY
       , &pickedBucket ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
@@ -202,10 +204,10 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint64 viewBucketHandleFlag = mPaintBucketTool->GetShowControls() ? VIEW_GROUPPAINT_BUCKET_HANDLE : 0;
-    uint64 hudFlags = mPaintBucketTool->GetEditor()->GetVectorEditionFlags();
+    uint64 viewBucketHandleFlag = mPaintBucketTool->GetShowControls() ? HUD_GROUPPAINT_BUCKET_HANDLE : 0;
+    uint64 hudFlags = mPaintBucketTool->GetEditor()->GetVectorHUDFlags();
 
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
@@ -213,14 +215,14 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
                    , bgColor
                    , hcColor
                    , hudFlags
-                   | VIEW_PATH_VERTEX
-                   | VIEW_PATH_SEGMENT
-                   | VIEW_GROUPPAINT_BUCKET
+                   | HUD_PATH_VERTEX
+                   | HUD_PATH_SEGMENT
+                   | HUD_GROUPPAINT_BUCKET
                    | viewBucketHandleFlag );
     }
 
     // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_OBJECT )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         DrawObjects( iBLContext
                    , iScene
@@ -228,7 +230,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
                    , bgColor
                    , hcColor
                    , hudFlags
-                   | VIEW_GROUPPAINT_BUCKET
+                   | HUD_GROUPPAINT_BUCKET
                    | viewBucketHandleFlag );
     }
 

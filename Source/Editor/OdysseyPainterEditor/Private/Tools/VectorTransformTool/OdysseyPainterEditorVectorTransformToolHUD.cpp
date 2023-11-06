@@ -327,72 +327,13 @@ FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
-    UpdateSelectionBox( iScene, mTransformTool->World, mTransformTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, mTransformTool->World, mTransformTool->GetEditor()->GetVectorHUDFlags() );
 
     //FOdysseyPainterEditorVectorSelectionToolHUD::Reset( iScene ); // Updates the selection box
 /*
     SetGizmo( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
             , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
 */
-}
-
-//( object->HasSelectedAncestor() == false ) <---- put that in IsObjectAltered
-
-// tells in which case an object is displayed by the tool
-bool
-FOdysseyPainterEditorVectorTransformToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                              , FOdysseyVectorObject* iObject
-                                                              , uint64 iHUDFlags
-                                                              , uint64 iTraversalFlags )
-{
-    if( iHUDFlags & VIEW_MODE_VERTEX )
-    {
-        if( iScene->GetSelectedObjectList().size() == 0 )
-        {
-            return true;
-        }
-        else
-        {
-            if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-// tells in which case an object is altered by the tool
-bool
-FOdysseyPainterEditorVectorTransformToolHUD::IsObjectAltered( FOdysseyVectorScene* iScene
-                                                            , FOdysseyVectorObject* iObject
-                                                            , uint64 iHUDFlags
-                                                            , uint64 iTraversalFlags )
-{
-    if( iScene->GetSelectedObjectList().size() == 0 )
-    {
-        // We only move the top-most object, otherwise we'll move objects multiple times
-        // as a matrix operation is resursive per-se
-        if( iObject->GetClass() == FOdysseyVectorScene::StaticClass() )
-        {
-            return true;
-        }
-    }
-    else
-    {
-        // We only move the top-most object, otherwise we'll move objects multiple times
-        // as a matrix operation is resursive per-se
-        if( iObject->HasSelectedAncestor() == false )
-        {
-            if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
 }
 
 void
@@ -406,17 +347,17 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint32 selectedObjectCount = iScene->GetSelectedObjectList().size();
-    uint64 hudFlags = mTransformTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
     iBLContext->save();

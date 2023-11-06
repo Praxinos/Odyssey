@@ -298,7 +298,7 @@ FOdysseyVectorScene::DrawShape( BLContext* iBLContext, double iCombinedOpacity, 
 {
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
-    FColor fillColor = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? mGroupPaintParam.MonochromeColor
+    FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? mGroupPaintParam.MonochromeColor
                                                                                      : mBackgroundBucket.GetColor();
 
     iBLContext->save();

@@ -346,7 +346,7 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
 
-    if( iMonochrome || ( iFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) )
+    if( iMonochrome || ( iFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) )
     {
         BLRgba32 BLColor = BLRgba32( iMonochromeColor.R
                                    , iMonochromeColor.G

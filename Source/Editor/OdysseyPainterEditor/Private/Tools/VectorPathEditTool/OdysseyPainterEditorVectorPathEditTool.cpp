@@ -145,6 +145,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorS
                                                                , const FOdysseyPoint& iPointInTexture
                                                                , const FKey& iKey )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorPath*> removedPathArray;
     std::vector<FOdysseyVectorVertex*> removedVertexArray;
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
@@ -160,19 +161,20 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorS
     mPickedPointArray.clear();
     mPickedPointArray.reserve( 10 );
 
-    FOdysseyVectorEngine::Traverse
+    vectorEngine->Traverse
     ( iScene
     , iScene
     , 0
     , [ this
       , iScene
+      , vectorEngine
       , &iPointInTexture
       , &removedPathArray
       , &removedVertexArray
       , &removedSegmentArray
       , &addedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -274,14 +276,17 @@ void
 UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorScene* iScene
                                                               , std::vector<FOdysseyVectorPath*>& oPathArray )
 {
-    FOdysseyVectorEngine::Traverse
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    vectorEngine->Traverse
     ( iScene
     , iScene
     , 0
     , [ iScene
+      , vectorEngine
       , &oPathArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -302,20 +307,21 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorSce
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
     mSelectedPathArray.clear();
     mPickedPointArray.clear();
 
-    FOdysseyVectorEngine::Traverse
+    vectorEngine->Traverse
     ( iScene
     , iScene
     , 0
     , [ this
       , iScene
+      , vectorEngine
       , &iPointInTexture ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {

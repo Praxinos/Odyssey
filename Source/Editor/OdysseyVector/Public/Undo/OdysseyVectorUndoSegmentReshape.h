@@ -36,8 +36,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSegmentReshape : public FOdysseyVector
     public:
         ~FOdysseyVectorUndoSegmentReshape();
         FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene );
+        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene
+                                        , const std::vector<FOdysseyVectorVertex*>& iVertexArray );
+        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene
+                                        , const std::vector<FOdysseyVectorSegment*>& iSegmentArray );
 
-        void RecordSegment( std::vector<FOdysseyVectorSegment*>& iSegmentArray );
+        void RecordSegment( const std::vector<FOdysseyVectorSegment*>& iSegmentArray );
         void RecordSegment( FOdysseyVectorSegment* iSegment );
         bool HasSegment( FOdysseyVectorSegment* iSegment );
 
@@ -53,5 +57,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSegmentReshape : public FOdysseyVector
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSegmentShape> mSegmentShapeArray;
+        std::vector<FSnapshotVertex> mVertexSnapshotArray;
+        std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;
 };

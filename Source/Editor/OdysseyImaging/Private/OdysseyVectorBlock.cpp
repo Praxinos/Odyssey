@@ -32,7 +32,6 @@ FOdysseyVectorBlock::Init(const FGuid& iId, FOdysseyVectorEngine* iEngine, int i
     mWidth = iWidth;
     mHeight = iHeight;
     mFormat = iFormat;
-    mRenderFlags = 0;
     mNeedsRender = false;
 }
 
@@ -53,7 +52,7 @@ FOdysseyVectorBlock::GetFormat() const
 {
     return mFormat;
 }
-
+/*
 void
 FOdysseyVectorBlock::SetRenderFlags(uint64 iRenderFlags)
 {
@@ -69,15 +68,15 @@ FOdysseyVectorBlock::GetRenderFlags() const
 {
     return mRenderFlags;
 }
-
+*/
 void
-FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
+FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
     ::ULIS::FRectI invalidatedRect = mEngine->GetInvalidatedRect();
 
     //Render in a BLImage (also resets the internal invalidation rectangle)
-    mEngine->Render(mBlockData->mBLContext.Get(), mRenderFlags);
+    mEngine->Render(mBlockData->mBLContext.Get(), iDrawingFlags);
 
     {
         TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
@@ -122,15 +121,15 @@ FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
 }
 
 TSharedPtr<::ULIS::FBlock>
-FOdysseyVectorBlock::Render()
+FOdysseyVectorBlock::Render( uint64 iDrawingFlags )
 {
-    TSharedPtr<::ULIS::FBlock> block = GetBlock();
+    TSharedPtr<::ULIS::FBlock> block = GetBlock( iDrawingFlags );
     if ( !block )
         return nullptr;
 
     if (mNeedsRender)
     {
-        Render(*block);
+        Render(*block, iDrawingFlags );
 
         TSharedPtr<::ULIS::FBlock> hudBlock = mHUDBlock.Pin();
         if ( hudBlock )
@@ -217,7 +216,7 @@ FOdysseyVectorBlock::GetHUDBlock()
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyVectorBlock::GetBlock()
+FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
 {
 	FScopeLock Lock(&mMutex);
 
@@ -253,7 +252,7 @@ FOdysseyVectorBlock::GetBlock()
     {
         block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, mFormat);
         mBlockData->mBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
-        Render(*block);
+        Render(*block, iDrawingFlags);
         mBlockData->mNeedsCache = true;
         mNeedsRender = false;
     }

@@ -46,6 +46,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         virtual uint32 GetClass() { return mStaticClass; };
         virtual bool HasBaseClass( uint32 iBaseClassID );
 
+        // drawing flags
+        static const uint64 DRAWING_WIREFRAME         = ( 1ULL <<  2 );
+        static const uint64 DRAWING_IGNORECOLOR       = ( 1ULL <<  3 );
+
         // signal flags
         static const uint64 SIGNAL_SCENE_REDRAW       = ( 1ULL << 0 );
         static const uint64 SIGNAL_SCENE_HIERARCHY    = ( 1ULL << 1 );
@@ -308,20 +312,29 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         void SetBLMask( BLImage* iBLMask );
 
+
+
         static const uint64 TRAVERSE_STOP                   = ( 1 << 0 );
         static const uint64 TRAVERSE_OBJECT_ACCEPTED        = ( 1 << 1 );
         static const uint64 TRAVERSE_PARENT_ACCEPTED        = ( 1 << 2 );
         static const uint64 TRAVERSE_OBJECT_IGNORE_CHILDREN = ( 1 << 3 );
 
-        static uint64 Traverse( FOdysseyVectorScene* iScene
-                              , FOdysseyVectorObject* iObject
-                              , uint64 iTraversalFlags
-                              , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
+        bool HasFocus( FOdysseyVectorScene* iScene
+                     , FOdysseyVectorObject* iObject
+                     , uint64 iTraversalFlags );
+
+        uint64 Traverse( FOdysseyVectorScene* iScene
+                       , FOdysseyVectorObject* iObject
+                       , uint64 iTraversalFlags
+                       , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
 
        void SetInvalidatedRect( const ::ULIS::FRectD& iRect );
        void SetInvalidatedRect( const ::ULIS::FRectI& iRect );
        ::ULIS::FRectI& GetInvalidatedRect();
-
+/*
+       uint64 GetDrawingFlags();
+       void SetDrawingFlags( uint64 iDrawingFlags );
+*/
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
@@ -363,4 +376,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         std::vector<FHorizontalLine> mHorizontalLineBuffer;
         uint32 mProcessorCount;
         ::ULIS::FRectI mInvalidatedRect;
+        //uint64 mDrawingFlags; // temporary, until we find a way to pass the drawing flags as arg
 };

@@ -20,7 +20,7 @@ void
 FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
     // it's unused but we could use it at some point so, we init it anyways
-    UpdateSelectionBox( iScene, false, mScenePanTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mScenePanTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
@@ -107,7 +107,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     BLImage* image = iBLContext->targetImage();
     ::ULIS::FVec2D frameLength;
     ::ULIS::FRectD frame;
-    uint64 hudFlags = mScenePanTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mScenePanTool->GetEditor()->GetVectorHUDFlags();
 
     frame.x = image->width()  * 0.05f;
     frame.y = image->height() * 0.05f;
@@ -118,14 +118,14 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     frameLength.y = frame.h * 0.125f;
 
     // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
     iBLContext->save();

@@ -117,18 +117,21 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorScene* iScen
                                                     , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                                                     , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray )
 {
-    FOdysseyVectorEngine::Traverse
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    vectorEngine->Traverse
     ( iScene
     , iScene
     , 0
     , [ iScene
+      , vectorEngine
       , &oAddedVertexArray
       , &oAddedSegmentArray
       , &oRemovedVertexArray
       , &oRemovedSegmentArray
       , &oRemovedObjectArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
               {
@@ -189,18 +192,21 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorScene* iScene
                                                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                                                  , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray )
 {
-    FOdysseyVectorEngine::Traverse
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    vectorEngine->Traverse
     ( iScene
     , iScene
-    , GetEditor()->GetVectorEditionFlags()
+    , GetEditor()->GetVectorHUDFlags()
     , [ iScene
+      , vectorEngine
       , &oAddedVertexArray
       , &oAddedSegmentArray
       , &oRemovedVertexArray
       , &oRemovedSegmentArray
       , &oRemovedObjectArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
               {

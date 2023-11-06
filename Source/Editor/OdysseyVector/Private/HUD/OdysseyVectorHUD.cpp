@@ -173,17 +173,17 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene, uint64 iHUDFl
 
     pointQuadTreeEntryArray.reserve( 200 );
 
-    FOdysseyVectorEngine::Traverse( iScene
-                                  , iScene
-                                  , iHUDFlags
-                                  , [ &iScene
-                                    , &screenRect
-                                    , &pointQuadTreeEntryArray ]( FOdysseyVectorObject* object, uint64 traverseFlags ) -> uint64
-                                    {
-                                        MapPoints( object, screenRect, pointQuadTreeEntryArray );
+    vectorEngine->Traverse( iScene
+                          , iScene
+                          , iHUDFlags
+                          , [ &iScene
+                          , &screenRect
+                          , &pointQuadTreeEntryArray ]( FOdysseyVectorObject* object, uint64 traverseFlags ) -> uint64
+                            {
+                                MapPoints( object, screenRect, pointQuadTreeEntryArray );
 
-                                        return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-                                    } );
+                                return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                            } );
 
     if( mPointQuadTree )
     {
@@ -290,7 +290,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
     BLPoint handle = HUDMatrix.mapVector( ctrl.x, ctrl.y );
     static BLRgba32 greenColor = BLRgba32( 0, 255, 0, 255 );
 
-    if ( iHUDFlags & VIEW_PATH_VERTEX_HANDLE )
+    if ( iHUDFlags & HUD_PATH_VERTEX_HANDLE )
     {
         static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
         static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
@@ -334,10 +334,10 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
                                  , point.x
                                  , point.y
                                  , VERTEXRADIUS
-                                 , iVertex->IsSelected() && ( iHUDFlags & VIEW_MODE_VERTEX ) ? hcColor : fgColor
+                                 , iVertex->IsSelected() && ( iHUDFlags & HUD_MODE_VERTEX ) ? hcColor : fgColor
                                  , bgColor );
 
-    if ( iHUDFlags & VIEW_PATH_VERTEX_ALIGNMENT )
+    if ( iHUDFlags & HUD_PATH_VERTEX_ALIGNMENT )
     {
         if( iVertex->IsHandleAligned() )
         {
@@ -383,7 +383,7 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
     iBLContext->setStrokeStyle( fgColor );
     iBLContext->strokePath( segment );
 
-    if ( iHUDFlags & VIEW_PATH_SEGMENT_HANDLE )
+    if ( iHUDFlags & HUD_PATH_SEGMENT_HANDLE )
     {
         static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
         static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
@@ -429,7 +429,7 @@ FOdysseyVectorHUD::DrawPath( BLContext* iBLContext
         iBLContext->resetMatrix();
     }
 
-    if( iHUDFlags & VIEW_PATH_SEGMENT )
+    if( iHUDFlags & HUD_PATH_SEGMENT )
     {
         for( FOdysseyVectorSegment* segment : segmentList )
         {
@@ -442,24 +442,24 @@ FOdysseyVectorHUD::DrawPath( BLContext* iBLContext
         }
     }
 
-    if( iHUDFlags & VIEW_PATH_VERTEX )
+    if( iHUDFlags & HUD_PATH_VERTEX )
     {
         // Points and Point size handles
         for( FOdysseyVectorVertex* vertex : vertexList )
         {
             uint32 valence = vertex->GetSegmentCount();
 
-            if( ( valence == 0 ) && ( iHUDFlags & VIEW_PATH_VERTEX_VALENCE0 ) )
+            if( ( valence == 0 ) && ( iHUDFlags & HUD_PATH_VERTEX_VALENCE0 ) )
             {
                 DrawVertex( iBLContext, vertex, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
             }
             else
-            if( ( valence == 1 ) && ( iHUDFlags & VIEW_PATH_VERTEX_VALENCE1 ) )
+            if( ( valence == 1 ) && ( iHUDFlags & HUD_PATH_VERTEX_VALENCE1 ) )
             {
                 DrawVertex( iBLContext, vertex, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
             }
             else
-            if( ( valence == 2 ) && ( iHUDFlags & VIEW_PATH_VERTEX_VALENCE2 ) )
+            if( ( valence == 2 ) && ( iHUDFlags & HUD_PATH_VERTEX_VALENCE2 ) )
             {
                 DrawVertex( iBLContext, vertex, fgColor, bgColor, hcColor, iWorld, iHUDFlags );
             }
@@ -562,7 +562,7 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
     BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF )
                                                  : BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
-    if( iHUDFlags & VIEW_GROUPPAINT_BUCKET_HANDLE )
+    if( iHUDFlags & HUD_GROUPPAINT_BUCKET_HANDLE )
     {
         if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
         {
@@ -671,7 +671,7 @@ FOdysseyVectorHUD::DrawGroupPaint( BLContext* iBLContext
         iBLContext->resetMatrix();
     }
 
-    if( iHUDFlags & VIEW_GROUPPAINT_BUCKET )
+    if( iHUDFlags & HUD_GROUPPAINT_BUCKET )
     {
         std::list<FOdysseyVectorBucket*>& bucketList = iPaintGroup->GetBucketList();
 
@@ -683,30 +683,6 @@ FOdysseyVectorHUD::DrawGroupPaint( BLContext* iBLContext
 
     iBLContext->restore();
 }
-
-/*
-void
-FOdysseyVectorHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iHUDFlags )
-{
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    std::list<FOdysseyVectorObject*>* focusedObjectList = GetFocusedObjectList( iScene );
-
-    if( focusedObjectList )
-    {
-        DrawObjects( iBLContext, focusedObjectList, fgColor, bgColor, hcColor, iHUDFlags );
-    }
-
-    if( iHUDFlags & VIEW_SELECTIONBOX )
-    {
-        DrawSelectionBox( iBLContext, focusedObjectList, fgColor, bgColor, hcColor, iHUDFlags );
-    }
-}
-*/
 
 // static
 bool

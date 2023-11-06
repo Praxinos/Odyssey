@@ -22,7 +22,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         virtual void Load( FOdysseyVectorScene* iScene );
         virtual void Unload( FOdysseyVectorScene* iScene );
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
+        virtual void Draw( BLContext* iBLContext
+                         , FOdysseyVectorScene* iScene ) override;
 
         void DrawObjects( BLContext* iBLContext
                         , FOdysseyVectorScene* iScene

@@ -337,6 +337,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
                                                                        , const FOdysseyPoint& iPointInTexture
                                                                        , const FKey& iKey )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorBucket*> addedBucketArray;
     std::vector<FOdysseyVectorBucket*> paramBucketArray;
     std::vector<FOdysseyVectorCycle*> pickedCycleArray;
@@ -378,17 +379,18 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     // No cycles picked, we create an orphan bucket
     else
     {
-        FOdysseyVectorEngine::Traverse
+        vectorEngine->Traverse
         ( iScene
         , iScene
         , 0
         , [ this
           , iScene
+          , vectorEngine
           , &iPointInTexture
           , &addedBucketArray
           , &paramBucketArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
           {
-              if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+              if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
               {
                   if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                   {

@@ -127,7 +127,7 @@ FOdysseyVectorEngine::GetInvalidatedRect()
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext/*FOdysseyVectorScene* iScene */ )
+FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
     std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
@@ -197,7 +197,19 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
         mScene->Select( child );
     }
 }
+/*
+uint64
+FOdysseyVectorEngine::GetDrawingFlags()
+{
+    return mDrawingFlags;
+}
 
+void
+FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
+{
+    mDrawingFlags = iDrawingFlags;
+}
+*/
 void
 FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 {
@@ -886,6 +898,20 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
         break;                                                             \
     }                                                                      \
 
+/*
+struct _EngineTexture
+{
+    int8*  pixelData;
+    uint32 width;
+    uint32 height;
+    int32  bitsPerPixel;
+};
+
+struct _EngineTexture
+{
+
+};
+*/
 
 void
 FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
@@ -1073,12 +1099,16 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
                           , &ymin
                           , &ymax
                           , &iOpacity
-                          , &iPixelData
-                          , &iBitsPerPixel
+                          , &iImagePixelData
+                          , &iImageWidth
+                          , &iImageHeight
+                          , &iImageBitsPerPixel
+                          , &iColor
                           , &iBrushPixelData
                           , &iBrushWidth
                           , &iBrushHeight
-                          , &iBrushBitsPerPixel]( uint32 iProcessorID, uint32 iProcessorCount ) -> bool
+                          , &iBrushBitsPerPixel
+                          , &iBrushAlphaOnly ]( uint32 iProcessorID, uint32 iProcessorCount ) -> bool
                           {
                               for( int i = ymin + iProcessorID; i <= ymax ; i += iProcessorCount )
                               {
@@ -1086,12 +1116,16 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
                                   {
                                       TraceHorizontalLine( i
                                                          , iOpacity
-                                                         , iPixelData
-                                                         , iBitsPerPixel
+                                                         , iImagePixelData
+                                                         , iImageWidth
+                                                         , iImageHeight
+                                                         , iImageBitsPerPixel
+                                                         , iColor
                                                          , iBrushPixelData
                                                          , iBrushWidth
                                                          , iBrushHeight
-                                                         , iBrushBitsPerPixel );
+                                                         , iBrushBitsPerPixel
+                                                         , iBrushAlphaOnly );
                                   }
 
                                   mHorizontalLineBuffer[i].inited = 0;
@@ -1105,7 +1139,6 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
                               return false;
                           } );
 */
-
 /*
         std::vector<std::future<void>> threads;
 
@@ -1192,6 +1225,7 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
 */
 
     // Single CPU version. The one that actually works.
+
         for ( int i = ymin; i <= ymax; i++ )
         {
             if( mHorizontalLineBuffer[i].inited == 2 )
@@ -1215,8 +1249,30 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
 
             mHorizontalLineBuffer[i].inited = 0;
         }
-
     }
+}
+
+bool
+FOdysseyVectorEngine::HasFocus( FOdysseyVectorScene* iScene
+                              , FOdysseyVectorObject* iObject
+                              , uint64 iTraversalFlags )
+{
+    if( iObject->IsSelected() )
+    {
+        return true;
+    }
+
+    if( iScene->GetSelectedObjectList().size() == 0 )
+    {
+        return true;
+    }
+
+    if( iTraversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED )
+    {
+        return true;
+    }
+
+    return false;
 }
 
 // Execute callback on object tree

@@ -228,7 +228,7 @@ FOdysseyVectorVertex::GetAverageStraightVectorOnSegment( bool iNormalize )
 
 //static
 void
-FOdysseyVectorVertex::ArrayToSegmentArray( std::vector<FOdysseyVectorVertex*>& iVertexArray
+FOdysseyVectorVertex::ArrayToSegmentArray( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                          , std::vector<FOdysseyVectorSegment*>& oSegmentArray )
 {
 
@@ -513,6 +513,15 @@ bool
 FOdysseyVectorVertex::IsChained()
 {
     return ( mFlags & CHAINED ) ? true : false;
+}
+
+void
+FOdysseyVectorVertex::AlignHandles()
+{
+    if( mSegmentList.size() )
+    {
+        AlignHandles( mSegmentList.front()->GetHandle( this ) );
+    }
 }
 
 void

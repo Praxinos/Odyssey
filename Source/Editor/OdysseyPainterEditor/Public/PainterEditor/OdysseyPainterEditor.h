@@ -84,8 +84,11 @@ public:
     virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
 
-    void SetVectorEditionFlags( uint64 iVectorEditionFlags );
-    uint64 GetVectorEditionFlags();
+    void SetVectorHUDFlags( uint64 iVectorHUDFlags );
+    uint64 GetVectorHUDFlags();
+
+    void SetVectorDrawingFlags(uint64 iVectorDrawingFlags);
+    uint64 GetVectorDrawingFlags();
 
     // generic reusable vector methods. 
     static void BringForward( FOdysseyVectorScene* iScene );
@@ -159,7 +162,8 @@ protected:
     TArray<UOdysseyPainterEditorTool*>       mTools;
     TSharedPtr<FOdysseyPainterEditorGUI>     mGUI;
 
-    uint64                          mVectorEditionFlags;
+    uint64                          mVectorHUDFlags;
+    uint64                          mVectorDrawingFlags;
 
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;

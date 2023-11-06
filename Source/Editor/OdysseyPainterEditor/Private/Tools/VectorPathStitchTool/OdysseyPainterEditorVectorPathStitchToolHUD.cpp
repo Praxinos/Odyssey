@@ -14,7 +14,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::FOdysseyPainterEditorVectorPathSti
 void
 FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorHUDFlags();
 
     mPickedPointArray.reserve(10);
     mPickedPointArray.clear();
@@ -91,26 +91,26 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorHUDFlags();
 
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
-    if( hudFlags & VIEW_MODE_OBJECT )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX_VALENCE1 | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX_VALENCE1 | HUD_PATH_SEGMENT );
     }
 
     // draw selection box only if we restrict erasure to the selection 
@@ -133,8 +133,8 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
     {
         BLRgba32 orange = BLRgba32( 255, 127, 0, 255 );
 
-        DrawPath( iBLContext, mStitchableVertex[0]->GetPath(), orange, bgColor, hcColor, true, VIEW_PATH_SEGMENT );
-        DrawPath( iBLContext, mStitchableVertex[1]->GetPath(), orange, bgColor, hcColor, true, VIEW_PATH_SEGMENT );
+        DrawPath( iBLContext, mStitchableVertex[0]->GetPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
+        DrawPath( iBLContext, mStitchableVertex[1]->GetPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
 
         DrawVertex( iBLContext, mStitchableVertex[0], orange, bgColor, hcColor, true, 0 );
         DrawVertex( iBLContext, mStitchableVertex[1], orange, bgColor, hcColor, true, 0 );

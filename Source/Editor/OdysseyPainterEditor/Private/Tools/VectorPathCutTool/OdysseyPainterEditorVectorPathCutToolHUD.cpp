@@ -19,7 +19,7 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
 
-    UpdateSelectionBox( iScene, false, mPathCutTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mPathCutTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
@@ -69,28 +69,28 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     static BLRgba32 whiteColor = BLRgba32( 255, 255, 255, 255 );
-    uint64 hudFlags = mPathCutTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mPathCutTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
     // draw only white vertices in object mode, to view were the cutting is going to be
-    if( hudFlags & VIEW_MODE_OBJECT )
+    if( hudFlags & HUD_MODE_OBJECT )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , fgColor // in object mode, we don't show the selected vertices with a different color
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
     // draw selection box only if we restrict cutting to the selection 

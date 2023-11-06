@@ -14,18 +14,15 @@ class FOdysseyPainterEditorVectorPathPushToolHUD;
 typedef struct _FPushedPoint
 {
      FOdysseyVectorPoint* point;
-     double ratio;
-     bool isSmooth;
+     double distance;
      FOdysseyVectorSegment* smoothingGuideSegment;
 
      _FPushedPoint( FOdysseyVectorPoint* iPoint
-                  , double iRatio
-                  , bool iIsSmooth
+                  , double iDistance
                   , FOdysseyVectorSegment* iSmoothingGuideSegment )
      {
          point = iPoint;
-         ratio = iRatio;
-         isSmooth = iIsSmooth;
+         distance = iDistance;
          smoothingGuideSegment = iSmoothingGuideSegment;
      }
 } FPushedPoint;
@@ -71,6 +68,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public 
         std::vector<FOdysseyVectorSegment*> mSegmentArray;
         //FOdysseyVectorHUDPicking mPickingHUD;
         FOdysseyPainterEditorVectorPathPushToolHUD *mPathPushHUD;
+        double mMaxDistance;
 
     public:
         UPROPERTY( EditAnywhere, Category = PathPushTool, meta = (ClampMin = "0.0", UIMin = "0.0"))

@@ -68,7 +68,8 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FText& iName, UObject* iEdite
     , mSource(nullptr)
     , mMeshSelector(MakeShared<FOdysseyMeshSelector>())
     , mSelectedTool(nullptr)
-    , mVectorEditionFlags(FOdysseyVectorHUD::VIEW_MODE_OBJECT)
+    , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
+    , mVectorDrawingFlags(0)
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
@@ -555,15 +556,27 @@ FOdysseyPainterEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 }
 
 void
-FOdysseyPainterEditor::SetVectorEditionFlags( uint64 iVectorEditionFlags )
+FOdysseyPainterEditor::SetVectorHUDFlags( uint64 iVectorHUDFlags )
 {
-    mVectorEditionFlags = iVectorEditionFlags;
+    mVectorHUDFlags = iVectorHUDFlags;
 }
 
 uint64
-FOdysseyPainterEditor::GetVectorEditionFlags()
+FOdysseyPainterEditor::GetVectorHUDFlags()
 {
-    return mVectorEditionFlags;
+    return mVectorHUDFlags;
+}
+
+void
+FOdysseyPainterEditor::SetVectorDrawingFlags( uint64 iVectorDrawingFlags )
+{
+    mVectorDrawingFlags = iVectorDrawingFlags;
+}
+
+uint64
+FOdysseyPainterEditor::GetVectorDrawingFlags()
+{
+    return mVectorDrawingFlags;
 }
 
 //--------------------------------------------------------------------------------------

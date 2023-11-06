@@ -19,7 +19,7 @@ void
 FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
     // Updates the selection box
-    UpdateSelectionBox( iScene, false, mPathPushTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mPathPushTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
@@ -32,30 +32,9 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Unload( FOdysseyVectorScene* iScene 
 {
 }
 
-// tells in which case an object is displayed by the tool
-bool
-FOdysseyPainterEditorVectorPathPushToolHUD::IsObjectDisplayed( FOdysseyVectorScene* iScene
-                                                             , FOdysseyVectorObject* iObject
-                                                             , uint64 iHUDFlags
-                                                             , uint64 iTraversalFlags )
-{
-    if( mPathPushTool->RestrictToSelectedObjects == false )
-    {
-        return true;
-    }
-    else
-    {
-        if( iObject->IsSelected() || IsPaintedPath( iObject, true ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
+                                                , FOdysseyVectorScene* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -63,17 +42,17 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext, FOdysse
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint64 hudFlags = mPathPushTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mPathPushTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
     // draw selection box only if we restrict pushing to the selection 

@@ -36,7 +36,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorScene* iScene
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
-    UpdateSelectionBox( iScene, false, mSelectionTool->GetEditor()->GetVectorEditionFlags() );
+    UpdateSelectionBox( iScene, false, mSelectionTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 BLImage*
@@ -55,21 +55,23 @@ void
 FOdysseyPainterEditorVectorSelectionToolHUD::GetSelectedVertices( FOdysseyVectorScene* iScene
                                                                 , std::vector<FOdysseyVectorPoint*>& oPointArray )
 {
-    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorEditionFlags();
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
 
     // avoir to many reallocation by reserving a decent amount of memory
     oPointArray.reserve( 200 );
 
-    FOdysseyVectorEngine::Traverse
+    vectorEngine->Traverse
     ( iScene
     , iScene
     , 0
     , [ this
       , iScene
+      , vectorEngine
       , &hudFlags
       , &oPointArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( mSelectionTool->DisplayObjectHUD(iScene, object, traversalFlags ) )
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -206,20 +208,20 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint32 selectedObjectCount = iScene->GetSelectedObjectList().size();
-    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorEditionFlags();
+    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
-    if( hudFlags & VIEW_MODE_VERTEX )
+    if( hudFlags & HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | VIEW_PATH_VERTEX | VIEW_PATH_SEGMENT );
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
-    if( hudFlags & VIEW_MODE_OBJECT )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

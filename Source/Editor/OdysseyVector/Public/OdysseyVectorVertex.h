@@ -53,7 +53,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorVertex ( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius );
         ~FOdysseyVectorVertex();
 
-        static void ArrayToSegmentArray( std::vector<FOdysseyVectorVertex*>& iVertexArray
+        static void ArrayToSegmentArray( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                        , std::vector<FOdysseyVectorSegment*>& oSegmentArray );
 
         /**
@@ -293,6 +293,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         ::ULIS::FVec2D GetWorldCoords();
         void AlignHandles( FOdysseyVectorHandleSegment* iHandle );
+        void AlignHandles();
 
         void AlterRadius( FOdysseyVectorVertex* iInitiatorVertex
                         , FOdysseyVectorSegment* iFromSegment

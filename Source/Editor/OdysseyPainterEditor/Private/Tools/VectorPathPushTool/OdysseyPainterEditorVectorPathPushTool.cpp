@@ -74,36 +74,37 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorScene*
     {
         FOdysseyVectorEngine* iEngine = iScene->GetEngine();
         std::vector<double> pickedSegmentDistanceArray;
-        std::vector<FOdysseyVectorPoint*> pointArray; // for undo/redo
+        std::vector<FOdysseyVectorVertex*> vertexArray; // for undo/redo
 
         // this callback crashes if I dont reserve memory. I have no idea why. To troubleshoot later.
-        pointArray.reserve( 100 );
+        vertexArray.reserve( 100 );
         mSegmentArray.reserve( 100 );
         pickedSegmentDistanceArray.reserve( 100 ); // unused for now
 
         mSegmentArray.clear();
         mPushedPointArray.clear();
 
-        FOdysseyVectorEngine::Traverse
+        iEngine->Traverse
         ( iScene
         , iScene
         , 0
         , [ this
           , iScene
+          , iEngine
           , &iPointInTexture
           , &pickedSegmentDistanceArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
           {
-              if( object->IsSelected() || ( iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) )
+              if( iEngine->HasFocus( iScene, object, traversalFlags ) || ( RestrictToSelectedObjects == false ) )
               {
                   if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                   {
                       FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
                       path->PickSegments( iPointInTexture.x
-                                          , iPointInTexture.y
-                                          , Radius
-                                          , mSegmentArray
-                                          , &pickedSegmentDistanceArray );
+                                        , iPointInTexture.y
+                                        , Radius
+                                        , mSegmentArray
+                                        , &pickedSegmentDistanceArray );
                   }
 
                   return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
@@ -111,6 +112,8 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorScene*
 
               return 0;
           } );
+
+        mMaxDistance = 0.0f;
 
         // First step: find farthest distance to mouse pointer
         for( int i = 0; i < mSegmentArray.size(); i++ )
@@ -142,79 +145,52 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorScene*
                                                           , iPointInTexture.y - worldCtrlPoint0.y ).Distance();
                 double ctrlPointDistance1 = ::ULIS::FVec2D( iPointInTexture.x - worldCtrlPoint1.x
                                                           , iPointInTexture.y - worldCtrlPoint1.y ).Distance();
-                double maxDistance = 0.0f;
 
-                if( pointDistance0 > maxDistance )
+                if( pointDistance0 > mMaxDistance )
                 {
-                    maxDistance = pointDistance0;
+                    mMaxDistance = pointDistance0;
                 }
 
-                if( pointDistance1 > maxDistance )
+                if( pointDistance1 > mMaxDistance )
                 {
-                    maxDistance = pointDistance1;
+                    mMaxDistance = pointDistance1;
                 }
 
-                if( ctrlPointDistance0 > maxDistance )
+                if( ctrlPointDistance0 > mMaxDistance )
                 {
-                    maxDistance = ctrlPointDistance0;
+                    mMaxDistance = ctrlPointDistance0;
                 }
 
-                if( ctrlPointDistance1 > maxDistance )
+                if( ctrlPointDistance1 > mMaxDistance )
                 {
-                    maxDistance = ctrlPointDistance1;
+                    mMaxDistance = ctrlPointDistance1;
                 }
 
-                mPushedPointArray.emplace_back( handle0, ctrlPointDistance0 / maxDistance, false, nullptr );
-                mPushedPointArray.emplace_back( handle1, ctrlPointDistance1 / maxDistance, false, nullptr );
-
-                pointArray.push_back( handle0 );
-                pointArray.push_back( handle1 );
+                mPushedPointArray.emplace_back( handle0, ctrlPointDistance0, nullptr );
+                mPushedPointArray.emplace_back( handle1, ctrlPointDistance1, nullptr );
 
                 if( GetPushedPoint( vertex0 ) == nullptr )
                 {
-                    double ratio = pointDistance0 / maxDistance;
-
-                    mPushedPointArray.emplace_back( vertex0, ratio, vertex0->IsSmooth(), segment );
-                    pointArray.push_back( vertex0 );
+                    mPushedPointArray.emplace_back( vertex0, pointDistance0, segment );
+                    vertexArray.push_back( vertex0 );
                 }
 
                 if( GetPushedPoint( vertex1 ) == nullptr )
                 {
-                    double ratio = pointDistance1 / maxDistance;
-
-                    mPushedPointArray.emplace_back( vertex1, ratio, vertex1->IsSmooth(), segment );
-                    pointArray.push_back( vertex1 );
+                    mPushedPointArray.emplace_back( vertex1, pointDistance1, segment );
+                    vertexArray.push_back( vertex1 );
                 }
-
             }
         }
 
-        // second step : we also have to remember the position of neighbour handles, i.e handles taht are 
-        // not per-se part of the picking but that will be influenced by the smoothing options.
-        for( int i = 0; i < mSegmentArray.size(); i++ )
-        {
-            FOdysseyVectorSegment* segment = mSegmentArray[i];
-            FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-            FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
-            FOdysseyVectorHandleSegment* neighbourHandle0 = vertex0->GetOtherSegmentHandle( segment );
-            FOdysseyVectorHandleSegment* neighbourHandle1 = vertex1->GetOtherSegmentHandle( segment );
-
-            if( neighbourHandle0 && ( GetPushedPoint( neighbourHandle0 ) == nullptr ) )
-            {
-                pointArray.push_back( neighbourHandle0 );
-            }
-
-            if( neighbourHandle1 && ( GetPushedPoint( neighbourHandle1 ) == nullptr ) )
-            {
-                pointArray.push_back( neighbourHandle1 );
-            }
-        }
+        // static call
+        //FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, savedSegmentArray );
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("VectorPathPushTool","Vector Path Push Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPointPosition( iScene, pointArray );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoSegmentReshape( iScene, vertexArray );
 
             GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
@@ -252,7 +228,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorScene*
 
         for( int i = 0; i < mPushedPointArray.size(); i++ )
         {
-            double ratio = 1.0f - mPushedPointArray[i].ratio;
+            double ratio = 1.0f - ( mPushedPointArray[i].distance / mMaxDistance );
             FOdysseyVectorPoint* point = mPushedPointArray[i].point;
             FOdysseyVectorPath* path;
 
@@ -276,27 +252,21 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorScene*
             point->SetY( point->GetY() + ( delta.y * ratio ) );
         }
 
-        if( PreserveSmoothness )
+        for( int i = 0; i < mPushedPointArray.size(); i++ )
         {
-            for( int i = 0; i < mPushedPointArray.size(); i++ )
+            FPushedPoint* pushedPoint = &mPushedPointArray[i];
+            FOdysseyVectorPoint* point = pushedPoint->point;
+
+            if( point->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
             {
-                FPushedPoint* pushedPoint = &mPushedPointArray[i];
-                FOdysseyVectorPoint* point = pushedPoint->point;
+                FOdysseyVectorHandleSegment* handle = static_cast<FOdysseyVectorHandleSegment*>(point);
+                FOdysseyVectorSegment* segment = handle->GetOwner();
+                FOdysseyVectorVertex* handleVertex = segment->GetVertex( handle->GetHandleID() );
 
-                if( pushedPoint->isSmooth )
+                if( handleVertex->IsHandleAligned() )
                 {
-                    if( point->GetClass() == FOdysseyVectorVertex::StaticClass() )
-                    {
-                        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
-                        ::ULIS::FVec2D smoothingGuideSegmentVector = pushedPoint->smoothingGuideSegment->GetHandleVector(vertex, true);
-                        FOdysseyVectorSegment* otherSegment = vertex->GetOtherSegment( pushedPoint->smoothingGuideSegment );
-                        FOdysseyVectorHandleSegment* otherSegmentHandle = otherSegment->GetHandle(vertex);
-                        ::ULIS::FVec2D otherSegmentHandleVector = otherSegment->GetHandleVector( vertex, false );
-                        double length = otherSegmentHandleVector.Distance();
-
-                        otherSegmentHandle->Set( vertex->GetX() - ( smoothingGuideSegmentVector.x * length )
-                                               , vertex->GetY() - ( smoothingGuideSegmentVector.y * length ) );
-                    }
+                    //FOdysseyVectorPath::SmoothSegments( vertex, true );
+                    handleVertex->AlignHandles( handle );
                 }
             }
         }

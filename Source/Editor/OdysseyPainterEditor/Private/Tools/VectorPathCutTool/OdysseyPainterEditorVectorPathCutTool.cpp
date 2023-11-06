@@ -142,6 +142,8 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorScene* iS
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -156,17 +158,18 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorScene* iS
         addedVertexArray.reserve(50);
 
         // traverse recursively on objects determined by the HUD
-        FOdysseyVectorEngine::Traverse
+        vectorEngine->Traverse
         ( iScene
         , iScene
         , 0
         , [ this
           , iScene
+          , vectorEngine
           , &addedVertexArray
           , &addedSegmentArray
           , &removedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
           {
-              if( object->IsSelected() || (iScene->GetSelectedObjectList().size() == 0 ) || ( traversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED )  )
+              if( vectorEngine->HasFocus( iScene, object, traversalFlags )  )
               {
                   if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                   {

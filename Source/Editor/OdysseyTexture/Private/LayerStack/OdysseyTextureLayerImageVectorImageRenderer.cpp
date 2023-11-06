@@ -12,22 +12,32 @@ FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorIma
     , mBlock(nullptr)
     , mHUDBlock(nullptr)
     , mRenderHUD(false)
+    , mDrawingFlags(0)
 {
     UOdysseyLayerStack* layerStack = iLayer->GetLayerStack();
     if (!layerStack)
         return;
 
     mRenderHUD = layerStack->CurrentLayer.Get() == iLayer;
+
+    // this is per-layer
+    mDrawingFlags = iLayer->IsColored   ? mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_IGNORECOLOR)
+                                        : mDrawingFlags |   FOdysseyVectorEngine::DRAWING_IGNORECOLOR;
+    // TEMP: this should be global, stored in PainterEditor. Hence this should be
+    // changed when PainterEditor will be available and we can retrieve the shared flags.
+    // Update: commented-out for now
+    //mDrawingFlags = iLayer->IsWireframe ? mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_WIREFRAME)
+    //                                    : mDrawingFlags |   FOdysseyVectorEngine::DRAWING_WIREFRAME;
 }
 
 void
 FOdysseyTextureLayerImageVectorImageRenderer::Init()
 {
-    mBlock = mVectorBlock->GetBlock();
+    mBlock = mVectorBlock->GetBlock(mDrawingFlags);
     if (mRenderHUD)
         mHUDBlock = mVectorBlock->GetHUDBlock();
     
-    mVectorBlock->Render();
+    mVectorBlock->Render(mDrawingFlags);
 }
 
 bool
