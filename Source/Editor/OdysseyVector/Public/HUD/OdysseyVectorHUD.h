@@ -117,6 +117,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
 
+        static const uint32 VERTEXRADIUS_SMALL = 2.0f;
+        static const uint32 HANDLERADIUS_SMALL = 2.0f;
+
         static const uint32 VERTEXRADIUS = 3;
         static const uint32 HANDLERADIUS = 3;
 
@@ -156,6 +159,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 HUD_GROUPPAINT_ALL           = HUD_GROUPPAINT_BUCKET
                                                          | HUD_GROUPPAINT_BUCKET_HANDLE;
         static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 11 );
+        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 12 );
+        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 13 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) = 0;

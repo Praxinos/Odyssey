@@ -223,7 +223,10 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
-        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+        if( iScene->GetSelectedObjectList().size() )
+        {
+            DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+        }
     }
 
     DrawSelectionSpace( iBLContext, iScene, hudFlags );

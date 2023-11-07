@@ -34,13 +34,13 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
         }
 
         // this is per-layer
-        mDrawingFlags = layer->IsColored   ? mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_IGNORECOLOR)
-                                           : mDrawingFlags |   FOdysseyVectorEngine::DRAWING_IGNORECOLOR;
+        mDrawingFlags  = layer->IsColored   ? mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_IGNORECOLOR)
+                                            : mDrawingFlags | ( FOdysseyVectorEngine::DRAWING_IGNORECOLOR);
         // TEMP: this should be global, stored in PainterEditor. Hence this should be
         // changed when PainterEditor will be available and we can retrieve the shared flags.
         // Update: commented-out for now
-        //mDrawingFlags = layer->IsWireframe ? mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_WIREFRAME)
-        //                                   : mDrawingFlags |   FOdysseyVectorEngine::DRAWING_WIREFRAME;
+        mDrawingFlags |= layer->IsWireframe ? mDrawingFlags | ( FOdysseyVectorEngine::DRAWING_WIREFRAME)
+                                            : mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_WIREFRAME);
 
     }
 }

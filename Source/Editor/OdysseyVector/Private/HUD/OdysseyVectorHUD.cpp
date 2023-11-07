@@ -289,6 +289,8 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
     BLPoint point = HUDMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );
     BLPoint handle = HUDMatrix.mapVector( ctrl.x, ctrl.y );
     static BLRgba32 greenColor = BLRgba32( 0, 255, 0, 255 );
+    double vertexRadius = ( iHUDFlags & HUD_SIZE_SMALL ) ? VERTEXRADIUS_SMALL : VERTEXRADIUS;
+    double handleRadius = ( iHUDFlags & HUD_SIZE_SMALL ) ? HANDLERADIUS_SMALL : HANDLERADIUS;
 
     if ( iHUDFlags & HUD_PATH_VERTEX_HANDLE )
     {
@@ -308,7 +310,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
         FOdysseyVectorHUD::DrawCircle( iBLContext
                                      , point.x + handle.x
                                      , point.y + handle.y
-                                     , HANDLERADIUS
+                                     , handleRadius
                                      , whiteColor
                                      , blackColor );
 
@@ -325,7 +327,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
         FOdysseyVectorHUD::DrawCircle( iBLContext
                                      , point.x - handle.x
                                      , point.y - handle.y
-                                     , HANDLERADIUS
+                                     , handleRadius
                                      , whiteColor
                                      , blackColor );
     }
@@ -333,7 +335,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
     FOdysseyVectorHUD::DrawCircle( iBLContext
                                  , point.x
                                  , point.y
-                                 , VERTEXRADIUS
+                                 , vertexRadius
                                  , iVertex->IsSelected() && ( iHUDFlags & HUD_MODE_VERTEX ) ? hcColor : fgColor
                                  , bgColor );
 
@@ -343,7 +345,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
         {
             iBLContext->setStrokeWidth( 1.0f );
             iBLContext->setStrokeStyle( greenColor );
-            iBLContext->strokeCircle( point.x, point.y, VERTEXRADIUS + 2 );
+            iBLContext->strokeCircle( point.x, point.y, vertexRadius + 2 );
         }
     }
 }

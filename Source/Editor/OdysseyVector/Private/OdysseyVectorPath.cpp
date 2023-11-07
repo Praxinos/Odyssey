@@ -450,7 +450,7 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 void
 FOdysseyVectorPath::Invalidate()
 {
-    FOdysseyVectorObject::Invalidate();
+    Invalidate( INVALIDATE_ALL );
 }
 
 void
@@ -1434,77 +1434,126 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
     screen.w = imageData.size.w;
     screen.h = imageData.size.h;
 
-    if( texture )
+    if( iDrawingFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME )
     {
-        const FColor* brushData = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
-        double startU = mBrush.Revert ? 1.0f : 0.0f;
-
-        for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
+        DrawStructure( iBLContext, BLRgba32( 255, 255, 255, 255 ), 2.0f, true );
+    }
+    else
+    {
+        if( texture )
         {
-            ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
-            FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex(currentVertex);
-            FOdysseyVectorJoint& joint = currentVertex->GetJoint();
-            double segmentLength = segment->GetLength();
-            double jointLength = joint.GetLength();
-            double segmentAndJointLength = segmentLength + jointLength;
-            double endU = 0.0f;
+            const FColor* brushData = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
+            double startU = mBrush.Revert ? 1.0f : 0.0f;
 
-            if( mBrush.ExtendOverPath )
+            for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
             {
-                if( mBrush.Revert )
+                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
+                FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex(currentVertex);
+                FOdysseyVectorJoint& joint = currentVertex->GetJoint();
+                double segmentLength = segment->GetLength();
+                double jointLength = joint.GetLength();
+                double segmentAndJointLength = segmentLength + jointLength;
+                double endU = 0.0f;
+
+                if( mBrush.ExtendOverPath )
                 {
-                    endU = iVertexChain.length ? startU - ( segmentAndJointLength / iVertexChain.length ) : 0.0f;
+                    if( mBrush.Revert )
+                    {
+                        endU = iVertexChain.length ? startU - ( segmentAndJointLength / iVertexChain.length ) : 0.0f;
+                    }
+                    else
+                    {
+                        endU = iVertexChain.length ? startU + ( segmentAndJointLength / iVertexChain.length ) : 0.0f;
+                    }
                 }
                 else
                 {
-                    endU = iVertexChain.length ? startU + ( segmentAndJointLength / iVertexChain.length ) : 0.0f;
+                    if( mBrush.Revert )
+                    {
+                        startU = 0.0f;
+                        endU   = 1.0f;
+                    }
+                    else
+                    {
+                        startU = 1.0f;
+                        endU   = 0.0f;
+                    }
                 }
+
+                if( segmentLength )
+                {
+                    double segmentStartU = ( currentVertex == segment->GetVertex(0) ) ? startU : endU;
+                    double segmentEndU   = ( currentVertex == segment->GetVertex(0) ) ? endU : startU;
+
+                    // Textured joints are drawn only in texture mode (obviously) and if the texture
+                    // goes all over the path.
+                    if( ( currentVertex->IsHandleAligned() == false )
+                    && ( mBrush.ExtendOverPath == true ) )
+                    {
+                        double segmentJointRatio = jointLength / ( segmentAndJointLength );
+                        double jointStartU = segmentStartU;
+                        double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
+
+                        segmentStartU = jointEndU;
+
+                        // TODO : check for in-screen visibility
+                        DrawTexturedJoint( &joint
+                                         , (int8*)imageData.pixelData
+                                         , imageData.size.w
+                                         , imageData.size.h
+                                         , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                         , (int8*) brushData
+                                         , texture->GetSurfaceWidth()
+                                         , texture->GetSurfaceHeight()
+                                         , 32
+                                         , jointStartU
+                                         , jointEndU
+                                         , iCombinedOpacity
+                                         , iDrawingFlags );
+                    }
+
+                    // don't draw if segment is outside the screen
+                    if( ( ( bbox.x          ) < screen.w )
+                     && ( ( bbox.x + bbox.w ) > 0        )
+                     && ( ( bbox.y          ) < screen.h )
+                     && ( ( bbox.y + bbox.h ) > 0        ) )
+                    {
+                        DrawTexturedSegment( segment
+                                            , (int8*)imageData.pixelData
+                                            , imageData.size.w
+                                            , imageData.size.h
+                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                            , (int8*) brushData
+                                            , texture->GetSurfaceWidth()
+                                            , texture->GetSurfaceHeight()
+                                            , 32
+                                            , segmentStartU
+                                            , segmentEndU
+                                            , iCombinedOpacity
+                                            , iDrawingFlags );
+                    }
+                }
+
+                // only when mBrush.ExtendOverPath == true 
+                startU = endU;
+
+                currentVertex = nextVertex;
             }
-            else
+
+            texture->PlatformData->Mips[0].BulkData.Unlock();
+        }
+        else
+        {
+            // We fill with stroke color because our curve is made of filled shapes.
+            //iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
+            iBLContext->setFillRule( BL_FILL_RULE_EVEN_ODD );
+            iBLContext->setFillStyle( strokeColor );
+            iBLContext->setStrokeStyle( strokeColor );
+
+            for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
             {
-                if( mBrush.Revert )
-                {
-                    startU = 0.0f;
-                    endU   = 1.0f;
-                }
-                else
-                {
-                    startU = 1.0f;
-                    endU   = 0.0f;
-                }
-            }
-
-            if( segmentLength )
-            {
-                double segmentStartU = ( currentVertex == segment->GetVertex(0) ) ? startU : endU;
-                double segmentEndU   = ( currentVertex == segment->GetVertex(0) ) ? endU : startU;
-
-                // Textured joints are drawn only in texture mode (obviously) and if the texture
-                // goes all over the path.
-                if( ( currentVertex->IsHandleAligned() == false )
-                && ( mBrush.ExtendOverPath == true ) )
-                {
-                    double segmentJointRatio = jointLength / ( segmentAndJointLength );
-                    double jointStartU = segmentStartU;
-                    double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
-
-                    segmentStartU = jointEndU;
-
-                    // TODO : check for in-screen visibility
-                    DrawTexturedJoint( &joint
-                                     , (int8*)imageData.pixelData
-                                     , imageData.size.w
-                                     , imageData.size.h
-                                     , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                     , (int8*) brushData
-                                     , texture->GetSurfaceWidth()
-                                     , texture->GetSurfaceHeight()
-                                     , 32
-                                     , jointStartU
-                                     , jointEndU
-                                     , iCombinedOpacity
-                                     , iDrawingFlags );
-                }
+                FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( currentVertex );
+                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
 
                 // don't draw if segment is outside the screen
                 if( ( ( bbox.x          ) < screen.w )
@@ -1512,74 +1561,27 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                  && ( ( bbox.y          ) < screen.h )
                  && ( ( bbox.y + bbox.h ) > 0        ) )
                 {
-                    DrawTexturedSegment( segment
-                                        , (int8*)imageData.pixelData
-                                        , imageData.size.w
-                                        , imageData.size.h
-                                        , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                        , (int8*) brushData
-                                        , texture->GetSurfaceWidth()
-                                        , texture->GetSurfaceHeight()
-                                        , 32
-                                        , segmentStartU
-                                        , segmentEndU
-                                        , iCombinedOpacity
-                                        , iDrawingFlags );
+                    segment->Draw( iBLContext );
                 }
+
+            // TODO : check for in-screen visibility
+                if( currentVertex->GetSegmentCount() == 2 )
+                {
+                    currentVertex->DrawJoint( iBLContext, iDrawingFlags );
+                }
+
+                currentVertex = nextVertex;
             }
-
-            // only when mBrush.ExtendOverPath == true 
-            startU = endU;
-
-            currentVertex = nextVertex;
-        }
-
-        texture->PlatformData->Mips[0].BulkData.Unlock();
-    }
-    else
-    {
-        // We fill with stroke color because our curve is made of filled shapes.
-        //iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
-        iBLContext->setFillRule( BL_FILL_RULE_EVEN_ODD );
-        iBLContext->setFillStyle( strokeColor );
-        iBLContext->setStrokeStyle( strokeColor );
-
-        for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
-        {
-            FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( currentVertex );
-            ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
-
-            // don't draw if segment is outside the screen
-            if( ( ( bbox.x          ) < screen.w )
-             && ( ( bbox.x + bbox.w ) > 0        )
-             && ( ( bbox.y          ) < screen.h )
-             && ( ( bbox.y + bbox.h ) > 0        ) )
-            {
-                segment->Draw( iBLContext );
-            }
-
-        // TODO : check for in-screen visibility
-            if( currentVertex->GetSegmentCount() == 2 )
-            {
-                currentVertex->DrawJoint( iBLContext, iDrawingFlags );
-            }
-
-            currentVertex = nextVertex;
         }
     }
 }
 
 void
 FOdysseyVectorPath::DrawStructure( BLContext* iBLContext
-                                 , const FColor& iStrokeColor
+                                 , const BLRgba32& iStrokeColor
                                  , double iStrokeWidth
                                  , bool iWorld )
 {
-    BLRgba32 strokeColor = BLRgba32( iStrokeColor.R
-                                   , iStrokeColor.G
-                                   , iStrokeColor.B
-                                   , iStrokeColor.A );
-
     iBLContext->save();
 
     if( iWorld )
@@ -1588,7 +1590,7 @@ FOdysseyVectorPath::DrawStructure( BLContext* iBLContext
     }
 
     iBLContext->setStrokeWidth( iStrokeWidth );
-    iBLContext->setStrokeStyle( strokeColor );
+    iBLContext->setStrokeStyle( iStrokeColor );
 
     for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
     {

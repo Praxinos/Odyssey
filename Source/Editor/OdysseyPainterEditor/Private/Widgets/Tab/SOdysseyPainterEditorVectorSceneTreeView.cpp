@@ -183,17 +183,17 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        scene->ClearSelection();
-
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( scene );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
         GEditor->EndTransaction();
+
+        scene->ClearSelection();
 
         // iTtem is null when selection is empty
         if( iItem )

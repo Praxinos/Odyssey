@@ -139,7 +139,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void Draw( BLContext* iBLContext, double iAncestorsOpacity, uint64 iFlags );
         virtual void DrawShape ( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ){};
 
-        virtual void DrawStructure ( BLContext* iBLContext, uint64 iFlags ){};
+        virtual void DrawStructure ( BLContext* iBLContext, const BLRgba32& iStrokeColor, double iStrokeWidth, bool iWorld ){};
 
         virtual uint32 GetType();
 

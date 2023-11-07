@@ -72,6 +72,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
  
         void OpacityChanged();
         void BlendModeChanged();
+        void IsWireframeChanged();
         void IsColoredChanged();
         void Serialize(FArchive& Ar);
         virtual void PropertyChanged(const FName& iPropertyName) override;
@@ -94,6 +95,9 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         friend class FOdysseyTextureLayerImageVectorImport;
 
     public:
+        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
+        bool IsWireframe = false;
+
         UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
         bool IsColored = true;
 

@@ -245,7 +245,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
       , &iBackgroundColor
       , &iHighlightColor ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) || ( iHUDFlags & HUD_DRAW_ALL ) )
           {
               if( iHUDFlags & HUD_PATH_ALL )
               {

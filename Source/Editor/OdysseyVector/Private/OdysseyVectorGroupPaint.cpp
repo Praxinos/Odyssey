@@ -613,50 +613,6 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 }
 
 void
-FOdysseyVectorGroupPaint::DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
-{
-    for( FOdysseyVectorObject *child : mChildrenList )
-    {
-        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
-        {
-            FOdysseyVectorPath *childPath = static_cast<FOdysseyVectorPath*>(child);
-
-            if( mGroupPaintParam.Wireframe == false )
-            {
-                childPath->Draw( iBLContext, iCombinedOpacity, iFlags );
-            }
-            else
-            {
-                childPath->DrawStructure( iBLContext, mGroupPaintParam.WireframeColor, 1.0f, true );
-            }
-        }
-        else
-        {
-            child->Draw( iBLContext, iCombinedOpacity, iFlags );
-        }
-    }
-}
-
-void
-FOdysseyVectorGroupPaint::Draw( BLContext* iBLContext, double iAncestorsOpacity, uint64 iFlags )
-{
-    double combinedOpacity = iAncestorsOpacity * mObjectParam.Opacity;
-
-    iBLContext->save();
-    iBLContext->transform( mLocalMatrix );
-
-    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
-
-    DrawShape( iBLContext, combinedOpacity, iFlags );
-    // get sure cycles are drawn before paths
-    iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
-
-    DrawChildren( iBLContext, combinedOpacity, iFlags );
-
-    iBLContext->restore();
-}
-
-void
 FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
 {
     FOdysseyVectorGroup::TransferChild( iFosterChild, iInsertAfter );
@@ -665,7 +621,6 @@ FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild, FOd
 void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
-    std::list<FOdysseyVectorPath*>::iterator it;
    BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
 
     if( mGroupPaintParam.Painted )
@@ -815,7 +770,7 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext, double iCombinedOpac
         cycle->Draw( iBLContext, iCombinedOpacity, iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
     }
 
-    if( mGroupPaintParam.Wireframe )
+    if( iFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME/* mGroupPaintParam.Wireframe*/ )
     {
         iBLContext->save();
         iBLContext->resetMatrix();

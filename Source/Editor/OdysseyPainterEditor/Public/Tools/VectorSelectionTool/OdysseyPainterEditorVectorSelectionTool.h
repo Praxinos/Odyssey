@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoSelect.h"
 #include "OdysseyPainterEditorVectorSelectionTool.generated.h"
 
 UENUM()
@@ -75,9 +74,11 @@ protected:
                                   , const FKey& iKey );
     ::ULIS::FRectD GenerateMask();
 
-    void SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup );
-    void SelectVertexFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup );
-    void SelectVertexFromPath( FOdysseyVectorPath* iPath );
+    void PickVertexFromPath( FOdysseyVectorPath* iPath
+                           , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray );
+
+    void PickBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
+                                 , std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
 
 protected:
     FOdysseyPainterEditorVectorSelectionToolHUD* mPickHUD;

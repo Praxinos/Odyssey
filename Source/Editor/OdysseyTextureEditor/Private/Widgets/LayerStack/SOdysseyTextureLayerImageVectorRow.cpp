@@ -31,6 +31,7 @@ TSharedRef<SWidget>
 SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
 {
     const FCheckBoxStyle* coloredToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.ColoredToggle");
+    const FCheckBoxStyle* wireframeToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.WireframeToggle");
 
 	TSharedRef<SWidget> defaultWidget = SOdysseyLayerRow::GenerateHeaderWidget();
     return SNew(SHorizontalBox)
@@ -40,6 +41,17 @@ SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
         [
             //LayerName
             SOdysseyLayerRow::GenerateHeaderWidget()
+        ]
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
+        .VAlign(VAlign_Center)
+        .AutoWidth()
+        [
+            //WireframeLock
+            SNew(SCheckBox)
+            .Style(wireframeToggleStyle)
+            .OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged)
+            .IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsWireframeIsChecked)
         ]
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
@@ -76,6 +88,13 @@ SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
 
 
 void
+SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
+{
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Wireframe Display"));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "IsWireframe", iState == ECheckBoxState::Checked);
+}
+
+void
 SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Coloring"));
@@ -107,6 +126,12 @@ void
 SOdysseyTextureLayerImageVectorRow::OnOpacityEndSliderMovement(int iValue)
 {
     GEditor->EndTransaction();
+}
+
+ECheckBoxState
+SOdysseyTextureLayerImageVectorRow::GetIsWireframeIsChecked() const
+{
+	return mTextureLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState

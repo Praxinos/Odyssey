@@ -1252,6 +1252,49 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
     }
 }
 
+void
+FOdysseyVectorEngine::GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& oObjectList )
+{
+    Traverse
+    ( mScene
+    , mScene
+    , 0
+    , [ this
+      , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( HasFocus( mScene, object, traversalFlags ) )
+          {
+              oObjectList.push_back( object );
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+          }
+
+          return 0;
+      } );
+}
+
+void
+FOdysseyVectorEngine::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList )
+{
+    Traverse
+    ( mScene
+    , mScene
+    , 0
+    , [ this
+      , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( HasFocus( mScene, object, traversalFlags ) )
+          {
+              oObjectList.push_back( object );
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+}
+
+
 bool
 FOdysseyVectorEngine::HasFocus( FOdysseyVectorScene* iScene
                               , FOdysseyVectorObject* iObject

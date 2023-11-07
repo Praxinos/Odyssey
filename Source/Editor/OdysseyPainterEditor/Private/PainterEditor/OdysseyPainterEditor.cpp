@@ -32,6 +32,8 @@
 #include "Undo/OdysseyVectorUndoApplyTransformations.h"
 #include "Undo/OdysseyVectorUndoVertexAlign.h"
 #include "Undo/OdysseyVectorUndoVertexUnalign.h"
+#include "Undo/OdysseyVectorUndoSelectObject.h"
+#include "Undo/OdysseyVectorUndoSelectVertex.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
@@ -688,7 +690,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorScene* iScene )
     std::list<FOdysseyVectorObject*> objectList;
 
     // concerns only top-most objects of a branch, including the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedAncestorList( iScene, true, objectList );
+    vectorEngine->GetFocusedAncestorList( objectList );
 
     // Backup before, for undoing
     // needed for undos
@@ -727,7 +729,7 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyVectorScene* iScene )
     FOdysseyVectorGroupPaint* paintGroup;
 
     // concerns all selected objects of a branch but the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, false, objectList );
+    vectorEngine->GetFocusedObjectList( objectList );
 
     paintGroup = iScene->MakePaintGroupFromObjects( objectList
                                                   , cubicPathArray
@@ -821,7 +823,7 @@ FOdysseyPainterEditor::Group( FOdysseyVectorScene* iScene )
     FOdysseyVectorGroup* group;
 
     // concerns all selected objects of a branch but the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, false, objectList );
+    vectorEngine->GetFocusedObjectList( objectList );
 
     group = iScene->GroupObjects( objectList, objectArray, objectOldParentArray );
 
@@ -862,7 +864,7 @@ FOdysseyPainterEditor::SelectAll( FOdysseyVectorScene* iScene )
     GEditor->BeginTransaction(LOCTEXT("SelectAll", "Select All"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
@@ -913,7 +915,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorScene* iScene )
     unalignedVertexArray.reserve( 50 );
 
     // concerns all selected objects of a branch excluding the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, true, objectList );
+    vectorEngine->GetFocusedObjectList( objectList );
 
     for( FOdysseyVectorObject* object : objectList )
     {
@@ -962,7 +964,7 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorScene* iScene )
     alignedVertexArray.reserve( 50 );
 
     // concerns all selected objects of a branch excluding the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, true, objectList );
+    vectorEngine->GetFocusedObjectList( objectList );
 
     // first step prepare the array. First step is needed because we are going to snapshot 
     // segment handles coordinates before they'll get aligned.
@@ -1023,7 +1025,7 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorScene* iScene )
     std::list<FOdysseyVectorObject*> objectList;
 
     // concerns all selected objects of a branch including implicit selection
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, true, objectList );
+    vectorEngine->GetFocusedObjectList( objectList );
 
     removedPathArray.reserve( 10 );
     removedVertexArray.reserve( 10 );
@@ -1087,7 +1089,7 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyVectorScene* iScene )
     std::list<FOdysseyVectorObject*> objectList;
 
     // concerns the top-most selected objects of a branch but the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedAncestorList( iScene, false, objectList );
+    vectorEngine->GetFocusedAncestorList( objectList );
 
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("DeleteObjects", "Delete Objects"));
@@ -1118,7 +1120,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorScene* iScene )
     std::list<FOdysseyVectorObject*> objectList;
 
     // concerns only the top-most selected objects of a branch, including the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedAncestorList( iScene, true, objectList );
+    vectorEngine->GetFocusedAncestorList( objectList );
  
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("FlipHorizontal", "Flip Horizontal"));
@@ -1148,7 +1150,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyVectorScene* iScene )
     std::list<FOdysseyVectorObject*> objectList;
 
     // concerns only the top-most selected objects of a branch, including the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedAncestorList( iScene, true, objectList );
+    vectorEngine->GetFocusedAncestorList( objectList );
 
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("FlipVertical", "Flip Vertical"));
@@ -1179,7 +1181,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyVectorScene* iScene )
     std::list<FOdysseyVectorObject*> objectList;
 
     // concerns all objects of a branch, including the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, true, objectList );
+    vectorEngine->GetFocusedObjectList( objectList );
 
     bucketArray.reserve( 100 );
 
@@ -1305,10 +1307,11 @@ GetCopiedObjectList()
 void
 FOdysseyPainterEditor::CopyObjects( FOdysseyVectorScene* iScene )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*> objectList;
 
     // concerns all objects of a branch but the scene
-    UOdysseyPainterEditorVectorBaseTool::GetDisplayedObjectList( iScene, false, objectList );
+    vectorEngine->GetFocusedObjectList( objectList );
 
     if( objectList.size() )
     {

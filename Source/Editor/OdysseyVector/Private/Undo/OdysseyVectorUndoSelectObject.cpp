@@ -1,18 +1,18 @@
-#include "Undo/OdysseyVectorUndoSelect.h"
+#include "Undo/OdysseyVectorUndoSelectObject.h"
 
-FOdysseyVectorUndoSelect::~FOdysseyVectorUndoSelect()
+FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
 {
     mSelectedObjectList.clear();
 }
 
-FOdysseyVectorUndoSelect::FOdysseyVectorUndoSelect( FOdysseyVectorScene* iScene )
+FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorScene* iScene )
     : FOdysseyVectorUndo( iScene )
 {
     mSelectedObjectList = mScene->GetSelectedObjectList();
 }
 
 void
-FOdysseyVectorUndoSelect::Apply( UObject* iIgnored )
+FOdysseyVectorUndoSelectObject::Apply( UObject* iIgnored )
 {
     // save former selection
     std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
@@ -41,7 +41,7 @@ FOdysseyVectorUndoSelect::Apply( UObject* iIgnored )
 }
 
 void
-FOdysseyVectorUndoSelect::Revert( UObject* iIgnored )
+FOdysseyVectorUndoSelectObject::Revert( UObject* iIgnored )
 {
     // save former selection
     std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
@@ -71,7 +71,7 @@ FOdysseyVectorUndoSelect::Revert( UObject* iIgnored )
 
 /** Describes this change (for debugging) */
 FString
-FOdysseyVectorUndoSelect::ToString() const
+FOdysseyVectorUndoSelectObject::ToString() const
 {
-    return FString("FOdysseyVectorUndoSelect");
+    return FString("FOdysseyVectorUndoSelectObject");
 }

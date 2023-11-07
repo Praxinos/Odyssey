@@ -571,6 +571,8 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext, double iAncestorsOpacity, uin
     iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
 
     DrawShape( iBLContext, combinedOpacity, iFlags );
+    // get sure the parent has finished drawing before drawing its children
+    iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
     DrawChildren( iBLContext, combinedOpacity, iFlags );
 

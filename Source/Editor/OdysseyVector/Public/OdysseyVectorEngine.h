@@ -331,6 +331,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
        void SetInvalidatedRect( const ::ULIS::FRectD& iRect );
        void SetInvalidatedRect( const ::ULIS::FRectI& iRect );
        ::ULIS::FRectI& GetInvalidatedRect();
+
+        void GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList );
+        void GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& oObjectList );
 /*
        uint64 GetDrawingFlags();
        void SetDrawingFlags( uint64 iDrawingFlags );

@@ -8,6 +8,9 @@
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
 
+#include "Undo/OdysseyVectorUndoSelectObject.h"
+#include "Undo/OdysseyVectorUndoSelectVertex.h"
+
 #include <chrono>
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorSelectionTool"
@@ -218,7 +221,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         GEditor->BeginTransaction(LOCTEXT("VectorObjectSelectionTool","Vector Object Pick Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( iScene );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
 
             GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
@@ -262,12 +265,9 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
 }
 
 void
-UOdysseyPainterEditorVectorSelectionTool::SelectVertexFromPath( FOdysseyVectorPath* iPath )
+UOdysseyPainterEditorVectorSelectionTool::PickVertexFromPath( FOdysseyVectorPath* iPath
+                                                            , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray )
 {
-    std::vector<FOdysseyVectorVertex*> pickedVertexArray;
-
-    pickedVertexArray.reserve( 50 );
-
     // deselect all if control key is not pressed
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
     {
@@ -275,40 +275,20 @@ UOdysseyPainterEditorVectorSelectionTool::SelectVertexFromPath( FOdysseyVectorPa
     }
 
     // Pick from mask image
-    iPath->PickVertex(  pickedVertexArray );
-
-    for( int i = 0; i < pickedVertexArray.size(); i++ )
-    {
-        FOdysseyVectorVertex* vertex = pickedVertexArray[i];
-
-        if( vertex->IsSelected() == false )
-        {
-            iPath->SelectVertex( vertex );
-        }
-    }
+    iPath->PickVertex(  oPickedVertexArray );
 }
 
 void
-UOdysseyPainterEditorVectorSelectionTool::SelectBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup )
+UOdysseyPainterEditorVectorSelectionTool::PickBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
+                                                                  , std::vector<FOdysseyVectorBucket*>& oPickedBucketArray )
 {
-    std::vector<FOdysseyVectorBucket*> pickedBucketArray;
-
-    pickedBucketArray.reserve( 50 );
-
     // deselect all if control key is not pressed
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
     {
         iPaintGroup->UnselectAllBuckets();
     }
 
-    iPaintGroup->PickBucket( pickedBucketArray );
-
-    for( int i = 0; i < pickedBucketArray.size(); i++ )
-    {
-        FOdysseyVectorBucket* bucket = pickedBucketArray[i];
-
-        iPaintGroup->SelectBucket( bucket );
-    }
+    iPaintGroup->PickBucket( oPickedBucketArray );
 }
 
 void
@@ -316,6 +296,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
                                                                    , const FOdysseyPoint& iPointInTexture
                                                                    , const FKey& iKey )
 {
+    std::vector<FOdysseyVectorVertex*> pickedVertexArray;
+    std::vector<FOdysseyVectorBucket*> pickedBucketArray;
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     // run lambda on object tree
@@ -325,7 +307,9 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     , 0
     , [ this
       , iEngine
-      , iScene ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      , iScene
+      , &pickedVertexArray
+      , &pickedBucketArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
     {
         if( iEngine->HasFocus( iScene, object, traversalFlags ) )
         {
@@ -333,14 +317,15 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
             {
                 FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                SelectVertexFromPath( path );
+
+                PickVertexFromPath( path, pickedVertexArray );
             }
 
             if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
             {
                 FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
-                SelectBucketFromPaintGroup( paintGroup );
+                PickBucketFromPaintGroup( paintGroup, pickedBucketArray );
             }
 
             return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED; // keep traversing
@@ -348,6 +333,45 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
 
         return 0;
     } );
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("VectorObjectSelectionTool","Vector Vertex Pick Tool"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene
+                                                                     , pickedVertexArray
+                                                                     , pickedBucketArray );
+
+        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+    // the actual selection
+
+    for( int i = 0; i < pickedVertexArray.size(); i++ )
+    {
+        FOdysseyVectorVertex* vertex = pickedVertexArray[i];
+
+        if( vertex->IsSelected() == false )
+        {
+            vertex->GetPath()->SelectVertex( vertex );
+        }
+    }
+
+    for( int i = 0; i < pickedBucketArray.size(); i++ )
+    {
+        FOdysseyVectorBucket* bucket = pickedBucketArray[i];
+        FOdysseyVectorObject* ownerObject = bucket->GetOwner();
+
+        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+            //note:  bucket selection is checked in SelectBucket()
+            paintGroup->SelectBucket( bucket );
+        }
+    }
+
 
     iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 }

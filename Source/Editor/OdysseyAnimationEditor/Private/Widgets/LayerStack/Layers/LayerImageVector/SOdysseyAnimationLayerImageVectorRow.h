@@ -34,8 +34,10 @@ private:
     virtual TSharedRef<SWidget> GenerateTimelineWidget() override;
     void OnLightTableCheckStateChanged(ECheckBoxState iState);
     void OnIsColoredCheckStateChanged( ECheckBoxState iState );
+    void OnIsWireframeCheckStateChanged( ECheckBoxState iState );
     ECheckBoxState GetLightTableIsChecked() const;
     ECheckBoxState GetIsColoredIsChecked() const;
+    ECheckBoxState GetIsWireframeIsChecked() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);

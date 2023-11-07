@@ -201,12 +201,24 @@ void
 UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
 {
     Super::PropertyChanged(iPropertyName);
+    if(iPropertyName == "IsWireframe")
+        IsWireframeChanged();
     if(iPropertyName == "IsColored")
         IsColoredChanged();
     if (iPropertyName == "BlendMode")
         BlendModeChanged();
     if (iPropertyName == "Opacity")
         OpacityChanged();
+}
+
+void
+UOdysseyTextureLayerImageVector::IsWireframeChanged()
+{
+    mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+
+    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+
+    ImageRenderingChanged();
 }
 
 void

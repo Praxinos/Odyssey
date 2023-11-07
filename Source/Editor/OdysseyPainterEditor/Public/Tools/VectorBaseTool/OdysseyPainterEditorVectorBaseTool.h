@@ -31,14 +31,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         static bool DoubleClicked();
 
-        static void GetDisplayedAncestorList( FOdysseyVectorScene* iScene
-                                            , bool iAcceptScene
-                                            , std::list<FOdysseyVectorObject*>& oObjectList );
-
-        static void GetDisplayedObjectList( FOdysseyVectorScene* iScene
-                                          , bool iAcceptScene
-                                          , std::list<FOdysseyVectorObject*>& oObjectList );
-
         static bool DisplayObjectHUD( FOdysseyVectorScene* iScene
                                     , FOdysseyVectorObject* iObject
                                     , uint64 iTraversalFlags );

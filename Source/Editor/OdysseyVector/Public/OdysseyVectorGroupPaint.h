@@ -79,9 +79,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         virtual void DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ) override;
 
-        virtual void Draw( BLContext* iBLContext, double iAncestorsOpacity, uint64 iFlags ) override;
-        virtual void DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ) override;
-
         /**
          * @brief Pick the shape.
          * @param iRoi picking region.

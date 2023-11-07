@@ -7,11 +7,11 @@
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorUndoSelect : public FOdysseyVectorUndo
+class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectObject : public FOdysseyVectorUndo
 {
     public:
-        ~FOdysseyVectorUndoSelect();
-        FOdysseyVectorUndoSelect( FOdysseyVectorScene* iScene );
+        ~FOdysseyVectorUndoSelectObject();
+        FOdysseyVectorUndoSelectObject( FOdysseyVectorScene* iScene );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
