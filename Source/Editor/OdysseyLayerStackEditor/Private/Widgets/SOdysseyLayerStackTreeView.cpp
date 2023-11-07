@@ -521,4 +521,15 @@ SOdysseyLayerStackTreeView::CreateDragDropOperation() const
     return operation;
 }
 
+int32
+SOdysseyLayerStackTreeView::GetMaxIndentLevel() const
+{
+    int32 NestingLevel = 0;
+    for (const FItemInfo& info : DenseItemInfos)
+    {
+        NestingLevel = FMath::Max( NestingLevel, info.GetNestingLevel());
+    }
+    return NestingLevel;
+}
+
 #undef LOCTEXT_NAMESPACE

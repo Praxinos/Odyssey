@@ -32,6 +32,8 @@ public:
 	//Commands
 	void Rename();
 
+    TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
+
 protected:
     //SMultiColumnTableRow overrides
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
@@ -56,6 +58,8 @@ protected:
     bool IsCollapsed() const;
     
     EVisibility OptionsWidgetVisibility() const;
+
+    
 
 
 
@@ -99,4 +103,5 @@ private:
     UOdysseyLayer* mLayer = nullptr;
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
     bool mIsCollapsed = false;
+    TWeakPtr<SOdysseyLayerStackTreeView> mTreeView;
 };

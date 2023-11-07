@@ -17,6 +17,7 @@ void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdy
 {
     ensure(iLayer);
     mLayer = iLayer;
+	mTreeView = iOwnerTableView;
 
     SMultiColumnTableRow<UOdysseyLayer*>::FArguments args;
     args.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
@@ -131,6 +132,12 @@ EVisibility
 SOdysseyLayerRow::OptionsWidgetVisibility() const
 {
 	return mIsCollapsed ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+TSharedPtr<SOdysseyLayerStackTreeView>
+SOdysseyLayerRow::GetTreeView() const
+{
+	return mTreeView.Pin();
 }
 
 TSharedRef<SWidget>
