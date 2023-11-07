@@ -5,9 +5,25 @@
 
 #include "CoreMinimal.h"
 #include "Input/OdysseyPoint.h"
+#include <ULIS>
 #include "OdysseyShape.generated.h"
 
 class FOdysseyHUDElement;
+
+enum EOdysseyDrawingPrecision
+{
+    kRaw, 
+    kAA, //AntiAliased
+    kSP //SubPixel
+};
+
+struct FOdysseyShapeDrawOptions
+{
+    //float size;
+    ::ULIS::FColor mColor = ::ULIS::FColor::RGBA8( 0, 0, 0, 255);
+    bool mFilled = false;
+    EOdysseyDrawingPrecision mPrecision = EOdysseyDrawingPrecision::kRaw;
+};
 
 UENUM()
 enum class EOdysseyShape : uint8
@@ -54,6 +70,8 @@ public:
     void SetHUD( FOdysseyHUDElement* iHUD );
     virtual float GetStep() const;
     virtual bool AbortShape();
+
+    virtual void Draw( ::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions ); //Draw this shape onto a block
 
 public:
     // Getters

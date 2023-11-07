@@ -48,6 +48,7 @@ public:
 private:
     void CommitLine();
     virtual bool AbortShape() override;
+    virtual void Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions) override; //Draw this shape onto a block
 
 protected:
     // protected Data Members

@@ -1,0 +1,222 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
+#include "OdysseyPainterEditor.h"
+
+#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterPrimitiveDrawingTool"
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------- Construction / Destruction
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::~UOdysseyPainterEditorRasterPrimitiveDrawingTool()
+{
+}
+
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrimitiveDrawingTool() :
+    mPaintEngine(),
+    SelectedShape(EOdysseyPrimitiveShape::kLine)
+{
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.LineTool32" );
+
+    AvailableShapes.Add(EOdysseyPrimitiveShape::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::LineShape"));
+    AvailableShapes.Add(EOdysseyPrimitiveShape::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::RectangleShape"));
+    AvailableShapes.Add(EOdysseyPrimitiveShape::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::PolygonShape"));
+    AvailableShapes.Add(EOdysseyPrimitiveShape::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::EllipseShape"));
+    AvailableShapes.Add(EOdysseyPrimitiveShape::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::BezierShape"));
+
+    SelectedShapeInstance = AvailableShapes[SelectedShape];
+}
+
+template<class T>
+T*
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::CreateShape(FName iName)
+{
+    T* shape = CreateDefaultSubobject<T>(iName, true);
+
+    shape->OnPathEndDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd);
+    shape->OnPathAbortDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathAbort);
+    shape->OnPathResetDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathReset);
+
+    shape->SetHUD(mHUD);
+
+    return shape;
+}
+
+bool
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::IsActivable() const
+{
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+}
+
+bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    if (!hasRaster)
+        return false;
+
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return false;
+
+    if (mediaRasters[0]->IsLocked())
+        return false;
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    mPaintEngine.RasterBlock(rasterBlock);
+
+    return SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+{
+    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    if (!hasRaster)
+        return;
+
+    //ensure we can retrieve a media
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return;
+
+    if (mediaRasters[0]->IsLocked())
+        return;
+
+    SelectedShapeInstance->OnMouseHover( iPointInTexture );
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+{
+    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    if (!hasRaster)
+        return;
+
+    //ensure we can retrieve a media
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return;
+
+    if (mediaRasters[0]->IsLocked())
+        return;
+
+    SelectedShapeInstance->OnMouseDrag(iPointInTexture);
+}
+
+bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    if (!hasRaster)
+        return false;
+
+    //ensure we can retrieve a media
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return false;
+
+    if (mediaRasters[0]->IsLocked())
+        return false;
+
+    return SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
+}
+
+bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnKeyUp(const FKey& iKey)
+{
+    if( iKey == EKeys::Escape )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
+{
+    UOdysseyPainterEditorTool::Load();
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
+{
+    UOdysseyPainterEditorTool::Unload();
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Flush()
+{
+
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Commit()
+{
+    mPaintEngine.Commit(BlendParameters);
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Tick(float iDeltaTime)
+{
+    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    if (!hasRaster)
+        return;
+
+    //ensure we can retrieve a media
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return;
+
+    if (mediaRasters[0]->IsLocked())
+        return;
+
+    //Tick the shape
+    SelectedShapeInstance->Tick(iDeltaTime);
+
+    //Update the paintEngine
+    mPaintEngine.Update(BlendParameters);
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::SelectedShapeChanged()
+{
+    SelectedShapeInstance->AbortShape();
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
+    mOnShapeChanged.Broadcast();
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdysseyPoint& iPoint)
+{
+    GEditor->BeginTransaction(TEXT("DrawShape"), LOCTEXT("OnDrawPrimitiveShape", "Draw Primitive Shape"), nullptr);
+
+    FOdysseyShapeDrawOptions options;
+    SelectedShapeInstance->Draw(mPaintEngine.PaintBlock().Get(), options);
+    mPaintEngine.PaintBlock()->Dirty();
+    mPaintEngine.Update(BlendParameters);
+
+    Flush();
+    Commit();
+    GEditor->EndTransaction();
+    mHUD->EmptyHUDElements();
+    mEditor->HUDSystem()->ClearHUDSurface();
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathAbort()
+{
+    mPaintEngine.Abort();
+
+    mHUD->EmptyHUDElements();
+    mEditor->HUDSystem()->ClearHUDSurface();
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathReset()
+{
+    mPaintEngine.Abort();
+
+    mHUD->EmptyHUDElements();
+    mEditor->HUDSystem()->ClearHUDSurface();
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FName& iPropertyName)
+{
+    if (iPropertyName == "SelectedShape")
+        SelectedShapeChanged();
+}
+
+FSimpleMulticastDelegate& UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeChanged()
+{
+    return mOnShapeChanged;
+}
+
+#undef LOCTEXT_NAMESPACE

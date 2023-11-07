@@ -135,3 +135,21 @@ bool UOdysseyLineShape::AbortShape()
     }
     return false;
 }
+
+void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+{
+    if( !iBlock )
+        return;
+
+    
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+    
+    if( iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw )
+        ctx.DrawLine(*(iBlock), ::ULIS::FVec2I( mLine->mStartPoint.X, mLine->mStartPoint.Y ), ::ULIS::FVec2I( mLine->mFinishPoint.X, mLine->mFinishPoint.Y ), iOptions.mColor);
+    else if( iOptions.mPrecision == EOdysseyDrawingPrecision::kAA )
+        ctx.DrawLineAA(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
+    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
+        ctx.DrawLineSP(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
+
+    ctx.Finish();
+}
