@@ -37,6 +37,7 @@ private:
     void OnLightTableCheckStateChanged(ECheckBoxState iState);
     ECheckBoxState GetLightTableIsChecked() const;
     EVisibility GetLightTableVisibility() const;
+    EVisibility GetCollapsedOpacityVisibility() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);

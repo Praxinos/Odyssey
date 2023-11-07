@@ -53,6 +53,27 @@ SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
         .VAlign(VAlign_Center)
         .AutoWidth()
         [
+            SNew(SNumericEntryBox<int>)
+            .Visibility(this, &SOdysseyAnimationLayerImageRasterRow::GetCollapsedOpacityVisibility)
+            .Value_Lambda([this]() { return (int)(mAnimationLayerImageRaster->Opacity * 100.f + 0.5f);})
+            .AllowSpin(true)
+            .ShiftMouseMovePixelPerDelta(10)
+            .Delta(1)
+            .MinValue(0)
+            .MinSliderValue(0)
+            .MaxValue(100)
+            .MaxSliderValue(100)
+            .OnValueChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityValueChanged)
+            .OnValueCommitted(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted)
+            .OnBeginSliderMovement(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityBeginSliderMovement)
+            .OnEndSliderMovement(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityEndSliderMovement)
+            //.MinDesiredValueWidth  
+        ]
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
+        .VAlign(VAlign_Center)
+        .AutoWidth()
+        [
             //AlphaLock
             SNew(SCheckBox)
             .Style(lightTableToggleStyle)
@@ -69,26 +90,6 @@ SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
             .Style(alphaLockedToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
             .IsChecked(this, &SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked)
-        ]
-        +SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
-        .VAlign(VAlign_Center)
-        .AutoWidth()
-        [
-            SNew(SNumericEntryBox<int>)
-            .Value_Lambda([this]() { return (int)(mAnimationLayerImageRaster->Opacity * 100.f + 0.5f);})
-            .AllowSpin(true)
-            .ShiftMouseMovePixelPerDelta(10)
-            .Delta(1)
-            .MinValue(0)
-            .MinSliderValue(0)
-            .MaxValue(100)
-            .MaxSliderValue(100)
-            .OnValueChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityValueChanged)
-            .OnValueCommitted(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted)
-            .OnBeginSliderMovement(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityBeginSliderMovement)
-            .OnEndSliderMovement(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityEndSliderMovement)
-            //.MinDesiredValueWidth  
         ];
 }
 
@@ -97,16 +98,30 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
 {
 	return SNew(SVerticalBox)
         + SVerticalBox::Slot()
+        .Padding(FMargin(0, 2.f, 0, 0))
         .AutoHeight()
         [
             SNew(SHorizontalBox)
             +SHorizontalBox::Slot()
-            .VAlign(VAlign_Center)
+            .Padding(FMargin(0, 0, 1.f, 0))
             [
-                SNew(STextBlock)
-                .Text(LOCTEXT("OdysseyLayerImageRasterBlendingMode", "Blending Mode"))
+                SNew(SNumericEntryBox<int>)
+                .Value_Lambda([this]() { return (int)(mAnimationLayerImageRaster->Opacity * 100.f + 0.5f);})
+                .AllowSpin(true)
+                .ShiftMouseMovePixelPerDelta(10)
+                .Delta(1)
+                .MinValue(0)
+                .MinSliderValue(0)
+                .MaxValue(100)
+                .MaxSliderValue(100)
+                .OnValueChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityValueChanged)
+                .OnValueCommitted(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted)
+                .OnBeginSliderMovement(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityBeginSliderMovement)
+                .OnEndSliderMovement(this, &SOdysseyAnimationLayerImageRasterRow::OnOpacityEndSliderMovement)
+                //.MinDesiredValueWidth  
             ]
             +SHorizontalBox::Slot()
+            .Padding(FMargin(1.f, 0, 0, 0))
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
@@ -198,6 +213,12 @@ EVisibility
 SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility() const
 {
     return mAnimationLayerImageRaster->bIsLightTableActivated ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility
+SOdysseyAnimationLayerImageRasterRow::GetCollapsedOpacityVisibility() const
+{
+    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE
