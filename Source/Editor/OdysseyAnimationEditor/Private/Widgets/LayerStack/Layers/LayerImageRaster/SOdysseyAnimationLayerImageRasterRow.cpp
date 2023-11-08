@@ -74,7 +74,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
         .VAlign(VAlign_Center)
         .AutoWidth()
         [
-            //AlphaLock
+            //LightTable
             SNew(SCheckBox)
             .Style(lightTableToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnLightTableCheckStateChanged)

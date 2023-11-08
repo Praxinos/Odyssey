@@ -31,6 +31,7 @@ public:
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
     virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
+    EVisibility GetCollapsedOpacityVisibility() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
