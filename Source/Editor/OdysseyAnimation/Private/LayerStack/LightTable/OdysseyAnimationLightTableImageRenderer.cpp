@@ -8,26 +8,52 @@
 FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iLightTable->GetSourceLayer()->GetCellsContainer();
+    int currentCellIndex = cellsContainer->GetCellIndexAtFrame(iFrame);
+    if (currentCellIndex == INDEX_NONE)
+        return;
+
+    const TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = cellsContainer->GetCells();
+    if (currentCellIndex == INDEX_NONE)
+        return;
+
     const TMap<int, FOdysseyAnimationLightTable::FKeyData>& keysData = iLightTable->GetKeysData();
     for (int i = -1; i >= -iLightTable->GetRange(); i--)
     {
+        int cellIndex = currentCellIndex + i;
+        if (cellIndex < 0 || cellIndex >= cells.Num())
+            continue;
+
+        TSharedPtr<FOdysseyAnimationCell> cell = cells[cellIndex];
+
         if (!keysData[i].mIsActivated)
             continue;
 
+        int cellFirstFrame = cellsContainer->GetCellFrame(cell);
+
         FFrameData data;
         data.mOpacity = keysData[i].mOpacity;
-        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, iFrame + i);
+        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame);
         mFramesData.Add(data);
     }
 
     for (int i = 1; i <= iLightTable->GetRange(); i++)
     {
+        int cellIndex = currentCellIndex + i;
+        if (cellIndex < 0 || cellIndex >= cells.Num())
+            continue;
+
+        TSharedPtr<FOdysseyAnimationCell> cell = cells[cellIndex];
+
         if (!keysData[i].mIsActivated)
             continue;
 
+        int cellFirstFrame = cellsContainer->GetCellFrame(cell);
+
         FFrameData data;
         data.mOpacity = keysData[i].mOpacity;
-        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, iFrame + i);
+        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame);
         mFramesData.Add(data);
     }
 }
