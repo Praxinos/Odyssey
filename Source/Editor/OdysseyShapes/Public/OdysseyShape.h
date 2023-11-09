@@ -6,15 +6,17 @@
 #include "CoreMinimal.h"
 #include "Input/OdysseyPoint.h"
 #include <ULIS>
+#include "ULISLoaderModule.h"
 #include "OdysseyShape.generated.h"
 
 class FOdysseyHUDElement;
 
-enum EOdysseyDrawingPrecision
+UENUM()
+enum class EOdysseyDrawingPrecision : uint8
 {
-    kRaw, 
-    kAA, //AntiAliased
-    kSP //SubPixel
+    kRaw  UMETA(DisplayName = "Raw"),
+    kAA   UMETA(DisplayName = "AntiAliased"),
+    kSP   UMETA(DisplayName = "SubPixel")
 };
 
 struct FOdysseyShapeDrawOptions
@@ -84,7 +86,10 @@ public:
 
 public:
     UPROPERTY(EditInstanceOnly, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
-    float   Step = 20.f;
+    float   Step = 1.0;
+
+    UPROPERTY(EditAnywhere, Category = "Shape")
+    bool Uniform = false;
 
 protected:
     // protected Data Members

@@ -162,9 +162,24 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
     return false;
 }
 
+bool UOdysseyPainterEditorRasterTransformTool::OnKeyDown(const FKey& iKey)
+{
+    if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
+    {
+        Uniform = !Uniform;
+        return true;
+    }
+    return false;
+}
+
 bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
 {
-    if( iKey == EKeys::Enter || iKey == EKeys::SpaceBar )
+    if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
+    {
+        Uniform = !Uniform;
+        return true;
+    }
+    else if( iKey == EKeys::Enter || iKey == EKeys::SpaceBar )
     {
         CommitTransform();
         return true;
@@ -186,7 +201,7 @@ void UOdysseyPainterEditorRasterTransformTool::Tick(float iDeltaTime)
 
 void UOdysseyPainterEditorRasterTransformTool::Load()
 {
-    mSelection->Init(mHUD, mEditor);
+    mSelection->Init(mHUD, mEditor, Uniform);
     mSelection->Load();
     UOdysseyPainterEditorTool::Load();
 }
@@ -212,17 +227,17 @@ void UOdysseyPainterEditorRasterTransformTool::PostEditChangeProperty(FPropertyC
             case EOdysseySelectionShape::Rectangle:
                 mSelection = NewObject<UOdysseyPainterEditorRasterRectangleSelection>();
                 mSelection->AddToRoot();
-                mSelection->Init(mHUD, mEditor);
+                mSelection->Init(mHUD, mEditor, Uniform);
                 break;
             case EOdysseySelectionShape::FreeHand:
                 mSelection = NewObject<UOdysseyPainterEditorRasterFreehandSelection>();
                 mSelection->AddToRoot();
-                mSelection->Init(mHUD, mEditor);
+                mSelection->Init(mHUD, mEditor, Uniform);
                 break;
             case EOdysseySelectionShape::Ellipse:
                 mSelection = NewObject<UOdysseyPainterEditorRasterEllipseSelection>();
                 mSelection->AddToRoot();
-                mSelection->Init(mHUD, mEditor);
+                mSelection->Init(mHUD, mEditor, Uniform);
                 break;
             default:
                 break;

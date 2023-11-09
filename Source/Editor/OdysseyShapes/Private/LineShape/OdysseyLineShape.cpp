@@ -18,7 +18,6 @@ UOdysseyLineShape::UOdysseyLineShape(const FObjectInitializer& iObjectInitialize
     , mRawStroke()
     , mHasStrokeBegun( false )
 {
-    Step = 1.0f;
 }
 
 //--------------------------------------------------------------------------------------
@@ -38,8 +37,8 @@ UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey&
         FOdysseyHUDHandle* handleStart = new FOdysseyHUDHandle(FName("handleStart"), mLine, &(mLine->mStartPoint));
         FOdysseyHUDHandle* handleFinish = new FOdysseyHUDHandle(FName("handleFinish"), mLine, &(mLine->mFinishPoint));
 
-        mLine->AddElement(handleStart);
         mLine->AddElement(handleFinish);
+        mLine->AddElement(handleStart);
 
         mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
@@ -73,7 +72,18 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if( mHasStrokeBegun )
     {
-        mHUD->CapturedMouseMove(iPointInTexture);
+        FOdysseyPoint point = iPointInTexture;
+        if( Uniform )
+        {
+            int shiftX = FMath::Abs( iPointInTexture.x - mLine->mStartPoint.X);
+            int shiftY = FMath::Abs( iPointInTexture.y - mLine->mStartPoint.Y);
+
+            if( shiftX > shiftY )
+                point.y = mLine->mStartPoint.Y;
+            else
+                point.x = mLine->mStartPoint.X;
+        }
+        mHUD->CapturedMouseMove(point);
 
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
@@ -94,6 +104,25 @@ bool
 UOdysseyLineShape::OnKeyUp(const FKey& iKey)
 {
     return UOdysseyShape::OnKeyUp(iKey);
+}
+
+
+void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+{
+    if (!iBlock)
+        return;
+
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+
+    if (iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw)
+        ctx.DrawLine(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
+    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kAA)
+        ctx.DrawLineAA(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
+    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
+        ctx.DrawLineSP(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
+
+    ctx.Finish();
 }
 
 void UOdysseyLineShape::CommitLine()
@@ -134,22 +163,4 @@ bool UOdysseyLineShape::AbortShape()
         return UOdysseyShape::AbortShape();
     }
     return false;
-}
-
-void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
-{
-    if( !iBlock )
-        return;
-
-    
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-    
-    if( iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw )
-        ctx.DrawLine(*(iBlock), ::ULIS::FVec2I( mLine->mStartPoint.X, mLine->mStartPoint.Y ), ::ULIS::FVec2I( mLine->mFinishPoint.X, mLine->mFinishPoint.Y ), iOptions.mColor);
-    else if( iOptions.mPrecision == EOdysseyDrawingPrecision::kAA )
-        ctx.DrawLineAA(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
-    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
-        ctx.DrawLineSP(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
-
-    ctx.Finish();
 }

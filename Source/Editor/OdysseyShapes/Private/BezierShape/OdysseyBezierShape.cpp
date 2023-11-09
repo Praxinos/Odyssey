@@ -19,7 +19,6 @@ UOdysseyBezierShape::UOdysseyBezierShape(const FObjectInitializer& iObjectInitia
     , mHasStrokeBegun( false )
     , mHasControlBegun( false )
 {
-    Step = 1.0f;
 }
 
 //--------------------------------------------------------------------------------------
@@ -123,6 +122,23 @@ bool
 UOdysseyBezierShape::OnKeyUp(const FKey& iKey)
 {
     return UOdysseyShape::OnKeyUp(iKey);
+}
+
+void UOdysseyBezierShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+{
+    if (!iBlock)
+        return;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+
+    if (iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw)
+        ctx.DrawQuadraticBezier(*(iBlock), ::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mControlPoint.X, mBezier->mControlPoint.Y), ::ULIS::FVec2I(mBezier->mEndPoint.X, mBezier->mEndPoint.Y), 1.f, iOptions.mColor);
+    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kAA)
+        ctx.DrawQuadraticBezierAA(*(iBlock), ::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mControlPoint.X, mBezier->mControlPoint.Y), ::ULIS::FVec2I(mBezier->mEndPoint.X, mBezier->mEndPoint.Y), 1.f, iOptions.mColor);
+    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
+        ctx.DrawQuadraticBezierSP(*(iBlock), ::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mControlPoint.X, mBezier->mControlPoint.Y), ::ULIS::FVec2I(mBezier->mEndPoint.X, mBezier->mEndPoint.Y), 1.f, iOptions.mColor);
+
+    ctx.Finish();
 }
 
 void UOdysseyBezierShape::CommitBezier()

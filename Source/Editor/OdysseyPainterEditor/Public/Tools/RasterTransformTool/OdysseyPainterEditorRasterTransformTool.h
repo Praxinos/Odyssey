@@ -54,7 +54,8 @@ public:
     virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual bool OnKeyUp(const FKey& iKey);
+    virtual bool OnKeyDown(const FKey& iKey) override;
+    virtual bool OnKeyUp(const FKey& iKey) override;
 
     virtual void Tick(float iDeltaTime) override;
 
@@ -86,6 +87,9 @@ private:
 public:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     EOdysseySelectionShape SelectionShape;
+
+    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    bool Uniform = false;
 
 private: 
     UOdysseyPainterEditorRasterSelection* mSelection;

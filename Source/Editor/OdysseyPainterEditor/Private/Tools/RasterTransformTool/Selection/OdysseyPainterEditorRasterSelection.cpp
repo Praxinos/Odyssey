@@ -30,10 +30,11 @@ UOdysseyPainterEditorRasterSelection::UOdysseyPainterEditorRasterSelection():
 {
 }
 
-void UOdysseyPainterEditorRasterSelection::Init(FOdysseyHUDElement* iHUD, FOdysseyPainterEditor* iEditor)
+void UOdysseyPainterEditorRasterSelection::Init(FOdysseyHUDElement* iHUD, FOdysseyPainterEditor* iEditor, bool iUniform)
 {
     mHUD = iHUD;
     mEditor = iEditor;
+    Uniform = iUniform;
 }
 
 bool UOdysseyPainterEditorRasterSelection::IsActivable() const
@@ -61,9 +62,24 @@ bool UOdysseyPainterEditorRasterSelection::OnMouseUp(const FOdysseyPoint& iPoint
     return false;
 }
 
+bool UOdysseyPainterEditorRasterSelection::OnKeyDown(const FKey& iKey)
+{
+    if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
+    {
+        Uniform = !Uniform;
+        return true;
+    }
+    return false;
+}
+
 bool UOdysseyPainterEditorRasterSelection::OnKeyUp(const FKey& iKey)
 {
-    if (iKey == EKeys::Enter || iKey == EKeys::SpaceBar || iKey == EKeys::Escape)
+    if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
+    {
+        Uniform = !Uniform;
+        return true;
+    }
+    else if (iKey == EKeys::Enter || iKey == EKeys::SpaceBar || iKey == EKeys::Escape)
     {
         ClearSelection();
         return true;

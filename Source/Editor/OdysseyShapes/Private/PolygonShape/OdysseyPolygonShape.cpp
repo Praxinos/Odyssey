@@ -18,7 +18,6 @@ UOdysseyPolygonShape::UOdysseyPolygonShape(const FObjectInitializer& iObjectInit
     , mRawStroke()
     , mHasStrokeBegun( false )
 {
-    Step = 1.0f;
 }
 
 //--------------------------------------------------------------------------------------
@@ -43,8 +42,8 @@ UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FK
         mPolygon->mPoints.Add(FVector2D(iPointInTexture.x, iPointInTexture.y));
         FOdysseyHUDHandle* handle2 = new FOdysseyHUDHandle(FName("handle" + mPolygon->mPoints.Num()), mPolygon, &(mPolygon->mPoints.Last()));
 
-        mPolygon->AddElement(handle1);
         mPolygon->AddElement(handle2);
+        mPolygon->AddElement(handle1);
 
         mHandles.Add(handle1);
         mHandles.Add(handle2);
@@ -94,7 +93,7 @@ UOdysseyPolygonShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     if (mHasStrokeBegun)
     {
-        mHUD->CapturedMouseMove(iPointInTexture);
+        OnMouseDrag( iPointInTexture );
     }
     else
     {
@@ -108,7 +107,20 @@ UOdysseyPolygonShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if( mHasStrokeBegun )
     {
-        mHUD->CapturedMouseMove(iPointInTexture);
+        FOdysseyPoint point = iPointInTexture;
+        if (Uniform)
+        {
+            int num = mPolygon->GetPoints().Num() - 2; 
+            int shiftX = FMath::Abs(iPointInTexture.x - mPolygon->GetPoints()[num].X);
+            int shiftY = FMath::Abs(iPointInTexture.y - mPolygon->GetPoints()[num].Y);
+
+            if (shiftX > shiftY)
+                point.y = mPolygon->GetPoints()[num].Y;
+            else
+                point.x = mPolygon->GetPoints()[num].X;
+        }
+
+        mHUD->CapturedMouseMove(point);
 
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
@@ -134,6 +146,47 @@ bool
 UOdysseyPolygonShape::OnKeyUp(const FKey& iKey)
 {
     return UOdysseyShape::OnKeyUp(iKey);
+}
+
+void UOdysseyPolygonShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+{
+    if (!iBlock)
+        return;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+
+    if (iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw)
+    {
+        std::vector< ::ULIS::FVec2I > points;
+        for (int i = 0; i < mPolygon->GetPoints().Num(); i++)
+        {
+            points.push_back(::ULIS::FVec2I(mPolygon->GetPoints()[i].X, mPolygon->GetPoints()[i].Y));
+        }
+        
+        ctx.DrawPolygon(*(iBlock), points, iOptions.mColor, iOptions.mFilled );
+    }
+    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kAA)
+    {
+        std::vector< ::ULIS::FVec2I > points;
+        for (int i = 0; i < mPolygon->GetPoints().Num(); i++)
+        {
+            points.push_back(::ULIS::FVec2I(mPolygon->GetPoints()[i].X, mPolygon->GetPoints()[i].Y));
+        }
+
+        ctx.DrawPolygonAA(*(iBlock), points, iOptions.mColor, iOptions.mFilled);
+    }
+    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
+    {
+        std::vector< ::ULIS::FVec2F > points;
+        for (int i = 0; i < mPolygon->GetPoints().Num(); i++)
+        {
+            points.push_back(::ULIS::FVec2F(mPolygon->GetPoints()[i].X, mPolygon->GetPoints()[i].Y));
+        }
+
+        ctx.DrawPolygonSP(*(iBlock), points, iOptions.mColor, iOptions.mFilled);
+    }
+
+    ctx.Finish();
 }
 
 void UOdysseyPolygonShape::CommitPolygon()

@@ -18,7 +18,6 @@ UOdysseyRectangleShape::UOdysseyRectangleShape(const FObjectInitializer& iObject
     , mRawStroke()
     , mHasStrokeBegun( false )
 {
-    Step = 1.0f;
 }
 
 //--------------------------------------------------------------------------------------
@@ -38,8 +37,8 @@ UOdysseyRectangleShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const 
         FOdysseyHUDHandle* handleTopLeft = new FOdysseyHUDHandle(FName("handleTopLeft"), mRectangle, &(mRectangle->mTopLeftPoint));
         FOdysseyHUDHandle* handleBottomRight = new FOdysseyHUDHandle(FName("handleBottomRight"), mRectangle, &(mRectangle->mBottomRightPoint));
 
-        mRectangle->AddElement(handleTopLeft);
         mRectangle->AddElement(handleBottomRight);
+        mRectangle->AddElement(handleTopLeft);
 
         mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
@@ -73,8 +72,29 @@ UOdysseyRectangleShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if( mHasStrokeBegun )
     {
-        mHUD->CapturedMouseMove(iPointInTexture);
+        FOdysseyPoint point = iPointInTexture;
+        if (Uniform)
+        {
+            int shiftX = iPointInTexture.x - mRectangle->mTopLeftPoint.X;
+            int shiftY = iPointInTexture.y - mRectangle->mTopLeftPoint.Y;
 
+            int signX = shiftX < 0 ? -1 : 1;
+            int signY = shiftY < 0 ? -1 : 1;
+
+            int mult = signX == signY ? 1 : -1;
+
+            if( FMath::Abs(shiftX) > FMath::Abs(shiftY) )
+            {
+                point.x = mRectangle->mTopLeftPoint.X + shiftX;
+                point.y = mRectangle->mTopLeftPoint.Y + shiftX * mult;
+            }
+            else
+            {
+                point.x = mRectangle->mTopLeftPoint.X + shiftY * mult;
+                point.y = mRectangle->mTopLeftPoint.Y + shiftY;
+            }
+        }
+        mHUD->CapturedMouseMove(point);
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
 }
@@ -94,6 +114,18 @@ bool
 UOdysseyRectangleShape::OnKeyUp(const FKey& iKey)
 {
     return UOdysseyShape::OnKeyUp(iKey);
+}
+
+void UOdysseyRectangleShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+{
+    if (!iBlock)
+        return;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+
+    ctx.DrawRectangle(*(iBlock), ::ULIS::FVec2I(mRectangle->mTopLeftPoint.X, mRectangle->mTopLeftPoint.Y), ::ULIS::FVec2I(mRectangle->mBottomRightPoint.X, mRectangle->mBottomRightPoint.Y), iOptions.mColor, iOptions.mFilled);
+
+    ctx.Finish();
 }
 
 void UOdysseyRectangleShape::CommitRectangle()

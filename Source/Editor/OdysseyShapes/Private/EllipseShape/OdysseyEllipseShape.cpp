@@ -18,7 +18,6 @@ UOdysseyEllipseShape::UOdysseyEllipseShape(const FObjectInitializer& iObjectInit
     , mRawStroke()
     , mHasStrokeBegun( false )
 {
-    Step = 1.0f;
 }
 
 //--------------------------------------------------------------------------------------
@@ -67,8 +66,19 @@ UOdysseyEllipseShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if( mHasStrokeBegun )
     {
-        mHUD->CapturedMouseMove(iPointInTexture);
-        mEllipse->mBorderPoint = FVector2D( iPointInTexture.x, iPointInTexture.y );
+        FOdysseyPoint point = iPointInTexture;
+        if (Uniform)
+        {
+            int shiftX = FMath::Abs(iPointInTexture.x - mEllipse->mCenterPoint.X);
+            int shiftY = FMath::Abs(iPointInTexture.y - mEllipse->mCenterPoint.Y);
+
+            int maxShift = FMath::Max( shiftX, shiftY );
+
+            point.x = mEllipse->mCenterPoint.X + maxShift;
+            point.y = mEllipse->mCenterPoint.Y + maxShift;
+        }
+        mHUD->CapturedMouseMove(point);
+        mEllipse->mBorderPoint = FVector2D(point.x, point.y);
 
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
@@ -89,6 +99,23 @@ bool
 UOdysseyEllipseShape::OnKeyUp(const FKey& iKey)
 {
     return UOdysseyShape::OnKeyUp(iKey);
+}
+
+void UOdysseyEllipseShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+{
+    if (!iBlock)
+        return;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+    
+    if (iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw)
+        ctx.DrawEllipse(*(iBlock), ::ULIS::FVec2I(mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), mEllipse->GetAAxis(), mEllipse->GetBAxis(), iOptions.mColor, iOptions.mFilled);
+    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kAA)
+        ctx.DrawEllipseAA(*(iBlock), ::ULIS::FVec2I(mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), mEllipse->GetAAxis(), mEllipse->GetBAxis(), iOptions.mColor, iOptions.mFilled);
+    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
+        ctx.DrawEllipseSP(*(iBlock), ::ULIS::FVec2I(mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), mEllipse->GetAAxis(), mEllipse->GetBAxis(), iOptions.mColor, iOptions.mFilled);
+
+    ctx.Finish();
 }
 
 void UOdysseyEllipseShape::CommitEllipse()
@@ -128,3 +155,4 @@ bool UOdysseyEllipseShape::AbortShape()
     }
     return false;
 }
+

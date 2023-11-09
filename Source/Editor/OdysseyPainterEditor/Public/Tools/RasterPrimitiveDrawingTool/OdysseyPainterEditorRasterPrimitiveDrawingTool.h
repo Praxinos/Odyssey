@@ -42,6 +42,7 @@ public:
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
 
+    virtual bool OnKeyDown(const FKey& iKey) override;
     virtual bool OnKeyUp(const FKey& iKey) override;
 
     virtual void Load() override;
@@ -74,6 +75,12 @@ protected:
 public:
     UPROPERTY(EditAnywhere, Category = "Shape")
     EOdysseyPrimitiveShape SelectedShape;
+
+    UPROPERTY(EditAnywhere, Category = "Shape")
+    EOdysseyDrawingPrecision Precision = EOdysseyDrawingPrecision::kRaw;
+
+    UPROPERTY(EditAnywhere, Category = "Shape")
+    bool Filled = false;
 
     UPROPERTY(VisibleInstanceOnly, Category = "Shape", Instanced, meta = (ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;

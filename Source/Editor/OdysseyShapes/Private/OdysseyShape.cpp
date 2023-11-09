@@ -36,12 +36,24 @@ UOdysseyShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 bool
 UOdysseyShape::OnKeyDown(const FKey& iKey)
 {
+	if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
+	{
+		Uniform = !Uniform;
+		return true;
+	}
+
 	return false;
 }
 
 bool
 UOdysseyShape::OnKeyUp(const FKey& iKey)
 {
+    if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
+    {
+        Uniform = !Uniform;
+		return true;
+    }
+
 	return false;
 }
 

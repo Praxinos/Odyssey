@@ -16,7 +16,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrim
     mPaintEngine(),
     SelectedShape(EOdysseyPrimitiveShape::kLine)
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.LineTool32" );
+    Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Circle64");
 
     AvailableShapes.Add(EOdysseyPrimitiveShape::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::LineShape"));
     AvailableShapes.Add(EOdysseyPrimitiveShape::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::RectangleShape"));
@@ -118,14 +118,14 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPo
     return SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
 }
 
+bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnKeyDown(const FKey& iKey)
+{
+    return SelectedShapeInstance->OnKeyDown(iKey);
+}
+
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnKeyUp(const FKey& iKey)
 {
-    if( iKey == EKeys::Escape )
-    {
-        return true;
-    }
-
-    return false;
+    return SelectedShapeInstance->OnKeyUp(iKey);
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
@@ -181,6 +181,11 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
     GEditor->BeginTransaction(TEXT("DrawShape"), LOCTEXT("OnDrawPrimitiveShape", "Draw Primitive Shape"), nullptr);
 
     FOdysseyShapeDrawOptions options;
+
+    options.mColor = GetEditor()->PaintColor().GetValue();
+    options.mFilled = Filled;
+    options.mPrecision = Precision;
+
     SelectedShapeInstance->Draw(mPaintEngine.PaintBlock().Get(), options);
     mPaintEngine.PaintBlock()->Dirty();
     mPaintEngine.Update(BlendParameters);
