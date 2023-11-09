@@ -68,7 +68,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
                 .ColorAndOpacity(FSlateColor::UseForeground())
                 .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
             ]
-        + SHeaderRow::Column("IsOptionsDisplayed")
+        + SHeaderRow::Column("IsCollapsed")
             .ToolTipText(LOCTEXT("OdysseyLayerIsOptionsDisplayedButtonToolTip", "Show/Hide inline Layer options"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
@@ -519,6 +519,17 @@ SOdysseyLayerStackTreeView::CreateDragDropOperation() const
     TSharedRef<FOdysseyLayerStackDragDropOperation> operation =  MakeShared<FOdysseyLayerStackDragDropOperation>(mLayerStack, GetSelectedItems());
 	operation->Construct();
     return operation;
+}
+
+int32
+SOdysseyLayerStackTreeView::GetMaxIndentLevel() const
+{
+    int32 NestingLevel = 0;
+    for (const FItemInfo& info : DenseItemInfos)
+    {
+        NestingLevel = FMath::Max( NestingLevel, info.GetNestingLevel());
+    }
+    return NestingLevel;
 }
 
 #undef LOCTEXT_NAMESPACE

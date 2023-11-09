@@ -5,56 +5,11 @@
 
 #define LOCTEXT_NAMESPACE "SOdysseyAnimationTimelineFrameSelector"
 
-namespace Internal {
-
-class SFrameSelector
-	: public SCompoundWidget
-{
-	DECLARE_DELEGATE_OneParam(FOnSelectionChanged, FInt32Range)
-	DECLARE_DELEGATE_OneParam(FOnSelectionStarted, int /* iFrame */)
-	DECLARE_DELEGATE_OneParam(FOnSelectionEnded, int /* iFrame */)
-
-public:
-	SLATE_BEGIN_ARGS(SFrameSelector)
-	{}
-		SLATE_ATTRIBUTE(FInt32Range, SelectableFrames)
-		SLATE_EVENT(FOnSelectionStarted, OnSelectionStarted)
-		SLATE_EVENT(FOnSelectionEnded, OnSelectionEnded)
-		SLATE_EVENT(FOnSelectionChanged, OnSelectionChanged)
-	SLATE_END_ARGS()
-
-	void Construct(
-		const FArguments& InArgs,
-		FOdysseyAnimationEditorExtension* iExtension);
-
-	// SWidget interface
-	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
-	// End of SWidget interfacepublic:
-	
-private:
-	FOdysseyAnimationEditorExtension* mExtension;
-	bool mIsSelecting = false;
-	TAttribute<FInt32Range> mSelectableFrames;
-    struct
-    {
-		bool mIsDragDetected;
-		int mCursorFrame;
-        FInt32Range mSelectedFrames;
-    } mSelectionData;
-
-	FOnSelectionChanged mOnSelectionChanged;
-	FOnSelectionStarted mOnSelectionStarted;
-	FOnSelectionEnded mOnSelectionEnded;
-};
-
 //////////////////////////////////////////////////////////////////////////
-// SFrameSelector
+// SOdysseyAnimationTimelineFrameSelector
 
 void
-SFrameSelector::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)
+SOdysseyAnimationTimelineFrameSelector::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)
 {
 	mExtension = iExtension;
 	mSelectableFrames = InArgs._SelectableFrames;
@@ -65,12 +20,12 @@ SFrameSelector::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExten
 	ChildSlot
 	[
 		SNew(SBox)
-		.HeightOverride(20.f)
+		.HeightOverride(15.f)
 	];
 }
 
 FReply 
-SFrameSelector::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+SOdysseyAnimationTimelineFrameSelector::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {	
 	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
@@ -93,7 +48,7 @@ SFrameSelector::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEve
 
 
 FReply
-SFrameSelector::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyAnimationTimelineFrameSelector::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
   	if (mIsSelecting)
   	{
@@ -122,7 +77,7 @@ SFrameSelector::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& 
 }
 
 FReply
-SFrameSelector::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+SOdysseyAnimationTimelineFrameSelector::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	if(mIsSelecting)
 	{
@@ -153,7 +108,7 @@ SFrameSelector::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& Mo
 }
 
 FReply
-SFrameSelector::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+SOdysseyAnimationTimelineFrameSelector::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
 	if (mIsSelecting)
 	{
@@ -178,51 +133,30 @@ SFrameSelector::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent&
 	return FReply::Unhandled();
 }
 
-} //namespace Internal
-
 //////////////////////////////////////////////////////////////////////////
-// SOdysseyAnimationTimelineFrameSelector
+// SOdysseyAnimationTimelineFrameSelection
 
-SOdysseyAnimationTimelineFrameSelector::SOdysseyAnimationTimelineFrameSelector()
-	: mCommandList(MakeShared<FUICommandList>())
+SOdysseyAnimationTimelineFrameSelection::SOdysseyAnimationTimelineFrameSelection()
 {
 }
 
 void
-SOdysseyAnimationTimelineFrameSelector::Construct(
+SOdysseyAnimationTimelineFrameSelection::Construct(
 	const FArguments& InArgs,
 	FOdysseyAnimationEditorExtension* iExtension
 )
 {
 	mExtension = iExtension;
 	mSelectedFrames = InArgs._SelectedFrames;
-	mSelectableFrames = InArgs._SelectableFrames;
-	mOnSelectionStarted = InArgs._OnSelectionStarted;
-	mOnSelectionEnded = InArgs._OnSelectionEnded;
-	mOnSelectionChanged = InArgs._OnSelectionChanged;
 	mOnSelectionDragged = InArgs._OnSelectionDragged;
 
 	ChildSlot
 	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-        .AutoHeight()
-		[
-			InArgs._Content.Widget
-		]
-		+ SVerticalBox::Slot()
-        .AutoHeight()
-		[
-			SNew(Internal::SFrameSelector, mExtension)
-			.SelectableFrames(mSelectableFrames)
-			.OnSelectionChanged(this, &SOdysseyAnimationTimelineFrameSelector::OnFrameSelectionChanged)
-			.OnSelectionStarted(this, &SOdysseyAnimationTimelineFrameSelector::OnFrameSelectionStarted)
-			.OnSelectionEnded(this, &SOdysseyAnimationTimelineFrameSelector::OnFrameSelectionEnded)
-		]
+		InArgs._Content.Widget
 	];
 }
 
-int32 SOdysseyAnimationTimelineFrameSelector::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+int32 SOdysseyAnimationTimelineFrameSelection::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
 	// Draw a current frame
 	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
@@ -264,14 +198,14 @@ int32 SOdysseyAnimationTimelineFrameSelector::OnPaint(const FPaintArgs& Args, co
 
 
 bool
-SOdysseyAnimationTimelineFrameSelector::GetSelectedFrames(int& oStartFrame, int& oEndFrame) const
+SOdysseyAnimationTimelineFrameSelection::GetSelectedFrames(int& oStartFrame, int& oEndFrame) const
 {
-	if (mSelectionData.mIsSelecting)
+	/* if (mSelectionData.mIsSelecting)
 	{
 		oStartFrame = mSelectionData.mSelectedFrames.GetLowerBoundValue();
 		oEndFrame = mSelectionData.mSelectedFrames.GetUpperBoundValue();
 		return true;
-	}
+	} */
 
 	FInt32Range selectedFrames = mSelectedFrames.Get();
 	if (selectedFrames.IsEmpty())
@@ -283,15 +217,15 @@ SOdysseyAnimationTimelineFrameSelector::GetSelectedFrames(int& oStartFrame, int&
 }
 
 
-void
-SOdysseyAnimationTimelineFrameSelector::OnFrameSelectionChanged(FInt32Range iSelectedFrames)
+/* void
+SOdysseyAnimationTimelineFrameSelection::OnFrameSelectionChanged(FInt32Range iSelectedFrames)
 {
 	mSelectionData.mSelectedFrames = iSelectedFrames;
 	mOnSelectionChanged.ExecuteIfBound(iSelectedFrames);
 }
 
 void
-SOdysseyAnimationTimelineFrameSelector::OnFrameSelectionStarted(int iFrame)
+SOdysseyAnimationTimelineFrameSelection::OnFrameSelectionStarted(int iFrame)
 {
 	mSelectionData.mIsSelecting = true;
 	mSelectionData.mSelectedFrames = FInt32Range::Empty();
@@ -299,14 +233,14 @@ SOdysseyAnimationTimelineFrameSelector::OnFrameSelectionStarted(int iFrame)
 }
 
 void
-SOdysseyAnimationTimelineFrameSelector::OnFrameSelectionEnded(int iFrame)
+SOdysseyAnimationTimelineFrameSelection::OnFrameSelectionEnded(int iFrame)
 {
 	mSelectionData.mIsSelecting = false;
 	mOnSelectionEnded.ExecuteIfBound(iFrame);
-}
+} */
 
 FReply 
-SOdysseyAnimationTimelineFrameSelector::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+SOdysseyAnimationTimelineFrameSelection::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {	
 	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
@@ -330,7 +264,7 @@ SOdysseyAnimationTimelineFrameSelector::OnPreviewMouseButtonDown(const FGeometry
 
 
 FReply
-SOdysseyAnimationTimelineFrameSelector::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyAnimationTimelineFrameSelection::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
 	if (mOnSelectionDragged.IsBound())
 		return mOnSelectionDragged.Execute();

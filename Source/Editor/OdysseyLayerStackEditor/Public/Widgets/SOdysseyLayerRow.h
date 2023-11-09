@@ -32,6 +32,8 @@ public:
 	//Commands
 	void Rename();
 
+    TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
+
 protected:
     //SMultiColumnTableRow overrides
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
@@ -41,7 +43,7 @@ protected:
 	virtual TSharedRef<SWidget> GenerateHeaderWidget();
     virtual TSharedRef<SWidget> GenerateOptionsWidget();
     TSharedRef<SWidget> GenerateExpandableHeaderWidget();
-	TSharedRef<SWidget> GenerateIsOptionsDisplayedWidget();
+	TSharedRef<SWidget> GenerateIsCollapsedWidget();
     TSharedRef<SWidget> GenerateIsActivatedWidget();
     TSharedRef<SWidget> GenerateIsLockedWidget();
     
@@ -53,6 +55,11 @@ protected:
 	void OnLayerNameCommited(const FText& iText, ETextCommit::Type iType);
     FText GetLayerName() const;
     FSlateFontInfo GetLayerNameFont() const;
+    bool IsCollapsed() const;
+    
+    EVisibility OptionsWidgetVisibility() const;
+
+    
 
 
 
@@ -88,12 +95,13 @@ protected:
 
 
 private:
-    void OnIsOptionsDisplayedCheckBoxStateChanged(ECheckBoxState iState);
-    ECheckBoxState GetIsOptionsDisplayedCheckBoxState() const;
+    void OnIsCollapsedCheckBoxStateChanged(ECheckBoxState iState);
+    ECheckBoxState GetIsCollapsedCheckBoxState() const;
     EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
 
 private:
     UOdysseyLayer* mLayer = nullptr;
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
-    bool mIsOptionsDisplayed = true;
+    bool mIsCollapsed = false;
+    TWeakPtr<SOdysseyLayerStackTreeView> mTreeView;
 };

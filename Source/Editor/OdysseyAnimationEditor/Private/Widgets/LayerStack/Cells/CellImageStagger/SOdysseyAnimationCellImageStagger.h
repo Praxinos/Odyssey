@@ -13,7 +13,9 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCellImageStagger
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCellImageStagger)
+        : _ShowContent(true)
         {}
+        SLATE_ATTRIBUTE(bool, ShowContent)
     SLATE_END_ARGS()
 
 public:
@@ -22,6 +24,7 @@ public:
 
 private:
     const FSlateBrush* GetBehaviourBrush() const;
+    EVisibility GetContentVisibility() const;
 
     int GetReach() const;
     
@@ -43,6 +46,7 @@ private:
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     TSharedPtr<FOdysseyAnimationCellImageStagger> mCell;
+    TAttribute<bool> mShowContent;
 
     bool mIsEditingReach;
     struct FReachData

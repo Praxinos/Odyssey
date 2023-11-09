@@ -45,10 +45,12 @@ SOdysseyAnimationLayerFolderRow::GenerateHeaderWidget()
 			SOdysseyLayerRow::GenerateHeaderWidget()
 		]
         +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
         .VAlign(VAlign_Center)
         .AutoWidth()
         [
             SNew(SNumericEntryBox<int>)
+            .Visibility(this, &SOdysseyAnimationLayerFolderRow::GetCollapsedOpacityVisibility)
             .Value_Lambda([this]() { return (int)(mAnimationLayerFolder->Opacity * 100.f + 0.5f);})
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
@@ -70,20 +72,32 @@ SOdysseyAnimationLayerFolderRow::GenerateOptionsWidget()
 {
 	return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
+        .Padding(FMargin(0, 0, 1.f, 0))
+        [
+            SNew(SNumericEntryBox<int>)
+            .Value_Lambda([this]() { return (int)(mAnimationLayerFolder->Opacity * 100.f + 0.5f);})
+            .AllowSpin(true)
+            .ShiftMouseMovePixelPerDelta(10)
+            .Delta(1)
+            .MinValue(0)
+            .MinSliderValue(0)
+            .MaxValue(100)
+            .MaxSliderValue(100)
+            .OnValueChanged(this, &SOdysseyAnimationLayerFolderRow::OnOpacityValueChanged)
+            .OnValueCommitted(this, &SOdysseyAnimationLayerFolderRow::OnOpacityValueCommitted)
+            .OnBeginSliderMovement(this, &SOdysseyAnimationLayerFolderRow::OnOpacityBeginSliderMovement)
+            .OnEndSliderMovement(this, &SOdysseyAnimationLayerFolderRow::OnOpacityEndSliderMovement)
+            //.MinDesiredValueWidth  
+        ]
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(1.f, 0, 0, 0))
         .VAlign(VAlign_Center)
         [
-            SNew(STextBlock)
-            .Text(LOCTEXT("OdysseyLayerFolderBlendingMode", "Blending Mode"))
-        ]
-		+ SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
-        .VAlign(VAlign_Center)
-		[
-			SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-			.CurrentValue_Lambda([this]() { return (int32)mAnimationLayerFolder->BlendMode; })
-		    .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerFolderRow::OnBlendModeComboBoxChanged)
-		];
+            SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+            .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerFolder->BlendMode;})
+            .ContentPadding(FMargin(0))
+            .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerFolderRow::OnBlendModeComboBoxChanged)
+        ];
 }
 
 void
@@ -118,6 +132,12 @@ void
 SOdysseyAnimationLayerFolderRow::OnOpacityEndSliderMovement(int iValue)
 {
     GEditor->EndTransaction();
+}
+
+EVisibility
+SOdysseyAnimationLayerFolderRow::GetCollapsedOpacityVisibility() const
+{
+    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

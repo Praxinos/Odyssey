@@ -8,17 +8,26 @@
 FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
-    const TArray<FOdysseyAnimationLightTable::FKeyData>& keysData = iLightTable->GetKeysData();
-    for (int i = 0; i < keysData.Num(); i++)
+    const TMap<int, FOdysseyAnimationLightTable::FKeyData>& keysData = iLightTable->GetKeysData();
+    for (int i = -1; i >= -iLightTable->GetRange(); i--)
     {
-        if (!iLightTable->GetKeyIsActivated(i))
+        if (!keysData[i].mIsActivated)
             continue;
 
         FFrameData data;
-        data.mOpacity = iLightTable->GetKeyOpacity(i);
-        data.mDisplayMode = iLightTable->GetKeyDisplayMode(i);
-        data.mColor = iLightTable->GetKeyColor(i);
-        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, iFrame + iLightTable->GetKeyOffset(i));
+        data.mOpacity = keysData[i].mOpacity;
+        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, iFrame + i);
+        mFramesData.Add(data);
+    }
+
+    for (int i = 1; i <= iLightTable->GetRange(); i++)
+    {
+        if (!keysData[i].mIsActivated)
+            continue;
+
+        FFrameData data;
+        data.mOpacity = keysData[i].mOpacity;
+        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, iFrame + i);
         mFramesData.Add(data);
     }
 }

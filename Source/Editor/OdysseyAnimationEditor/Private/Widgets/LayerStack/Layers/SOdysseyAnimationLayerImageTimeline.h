@@ -20,8 +20,15 @@ public:
     virtual ~SOdysseyAnimationLayerImageTimeline();
     SOdysseyAnimationLayerImageTimeline();
 
+    SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageTimeline)
+        : _IsCollapsed(false)
+        {}
+        SLATE_ATTRIBUTE(bool, IsCollapsed)
+    SLATE_END_ARGS()
+
 protected:
     void Construct(
+        const FArguments& iArgs, 
         FOdysseyAnimationEditorExtension* iExtension,
         UOdysseyAnimationLayer* iLayer
     );
@@ -38,12 +45,22 @@ protected:
     virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() = 0;
     virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) = 0;
 
-private:
+protected:
     FInt32Range GetSelectableFrames() const;
     FInt32Range GetSelectedFrames() const;
     void OnFramesSelectionChanged(FInt32Range iSelectedFrames);
+    void OnFramesSelectionStarted(int iFrame);
     void OnFramesSelectionEnded(int iFrame);
     FReply OnFramesSelectionDragged();
+
+    EVisibility GetLightTableVisibility() const;
+
+    FOptionalSize GetCellsHeight() const;
+    FOptionalSize GetLightTableHeight() const;
+    bool IsCollapsed() const;
+    EVisibility GetFrameSelectorVisibility() const;
+
+    bool GetShowCellsHandles() const;
 
 private:
     //Context Menu
@@ -83,4 +100,8 @@ protected:
     bool mIsDraggingOver;
     eDragState mDragState;
     int mDragPosition;
+    TAttribute<bool> mIsCollapsed;
+
+    bool mIsSelectingFrames;
+	FInt32Range mInteractiveFrameSelection;
 };

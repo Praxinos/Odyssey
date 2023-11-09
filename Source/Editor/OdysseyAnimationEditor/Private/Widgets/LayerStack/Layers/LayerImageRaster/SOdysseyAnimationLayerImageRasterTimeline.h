@@ -16,6 +16,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterTimeline
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterTimeline)
         {}
+        SLATE_ATTRIBUTE(bool, IsCollapsed)
     SLATE_END_ARGS()
 
 public:
@@ -32,4 +33,7 @@ private:
     virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() override;
     virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) override;
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+
+private:
+    bool GetShowStaggerCellContent() const;
 };

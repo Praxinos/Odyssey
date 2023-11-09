@@ -97,6 +97,7 @@ SOdysseyLayerExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& All
 		const TBitArray<>& NeedsWireByLevel = OwnerRow->GetWiresNeededByDepth();
 		const int32 NumLevels = NeedsWireByLevel.Num();
 		const float PreviousIndent = Indent * (NumLevels - 2);
+		const float CurrentIndent = Indent * (NumLevels - 1);
 
 		for (int32 Level = 1; Level < NumLevels; ++Level)
 		{
@@ -161,7 +162,8 @@ SOdysseyLayerExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& All
 			//Additional width to occupy space of a hidden arrow
 			float posX = PreviousIndent + arrowSize.X  * 0.5f + wireThickness  * 0.5f;
 			float posY = arrowPos.Y + arrowSize.Y * 0.5f - wireThickness  * 0.5f;
-			FVector2D boxSize(AllottedGeometry.Size.X - posX - arrowSize.X - distanceFromArrow, wireThickness);
+			//FVector2D boxSize(AllottedGeometry.Size.X - posX - arrowSize.X - distanceFromArrow, wireThickness);
+			FVector2D boxSize(posX + Indent - arrowSize.X - distanceFromArrow, wireThickness);
 			FVector2D boxPos(posX, posY);
 
 			FSlateDrawElement::MakeBox(
@@ -200,8 +202,10 @@ FReply SOdysseyLayerExpanderArrow::OnArrowClicked()
 FMargin SOdysseyLayerExpanderArrow::GetExpanderPadding() const
 {
 	const int32 NestingDepth = FMath::Max(0, mLayerRow.Pin()->GetIndentLevel() - BaseIndentLevel.Get());
+	const int32 MaxNestingDepth = FMath::Max(0, mLayerRow.Pin()->GetTreeView()->GetMaxIndentLevel() - BaseIndentLevel.Get());
+	
 	const float Indent = IndentAmount.Get(10.f);
-	return FMargin( NestingDepth * Indent, 0,0,0 ) + mArrowPadding;
+	return FMargin( NestingDepth * Indent, 0, (MaxNestingDepth - NestingDepth) * Indent, 0 ) + mArrowPadding;
 }
 
 /** @return the name of an image that should be shown as the expander arrow */

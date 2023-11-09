@@ -152,6 +152,9 @@ public:
      */
     void ResetDropZone();
 
+    
+    int32 GetMaxIndentLevel() const;
+
 protected:
     UOdysseyLayerStack* mLayerStack;
 

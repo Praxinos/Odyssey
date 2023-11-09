@@ -53,6 +53,7 @@ public:
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
+    virtual bool GetIsLightTableActivated() const;
 
 public:
     UPROPERTY()

@@ -89,41 +89,54 @@ SOdysseyAnimationLightTable::Rebuild()
 	if (!lightTable)
 		return;
 
-	const TArray<FOdysseyAnimationLightTable::FKeyData>& keysData = lightTable->GetKeysData();
+	const TMap<int, FOdysseyAnimationLightTable::FKeyData>& keysData = lightTable->GetKeysData();
 
-	for (int i = 0; i < keysData.Num(); i++)
+	for (int i = -lightTable->GetRange(); i <= -1 ; i++)
     {
-		FText offsetText = FText::AsNumber(keysData[i].mOffset);
-
 		mSlidersBox->AddSlot()
 		[
-			SNew(SVerticalBox)
-			+SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				SNew(STextBlock)
-				.Text(offsetText)
-				.Justification(ETextJustify::Center)
-			]
-			+SVerticalBox::Slot()
-			.AutoHeight()
-			.HAlign(HAlign_Center)
-			[
-				SNew(SCheckBox)
-				.OnCheckStateChanged(this, &SOdysseyAnimationLightTable::OnKeyIsActivatedCheckStateChanged, i)
-				.IsChecked(this, &SOdysseyAnimationLightTable::GetKeyIsActivated, i )
-			]
-			+SVerticalBox::Slot()
-			[
-				SNew(SSlider)
-				.Orientation(Orient_Vertical)
-				.MinValue(0.f)
-				.MaxValue(1.f)
-				.OnValueChanged(this, &SOdysseyAnimationLightTable::OnKeyOpacitySliderValueChanged, i)
-				.Value(this, &SOdysseyAnimationLightTable::GetKeyOpacity, i)
-			]
+			GenerateKeyWidget(i)
 		];
 	}
+
+	for (int i = 1; i <= lightTable->GetRange(); i++)
+    {
+		mSlidersBox->AddSlot()
+		[
+			GenerateKeyWidget(i)
+		];
+	}
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLightTable::GenerateKeyWidget(int iKeyIndex)
+{
+	FText offsetText = FText::AsNumber(iKeyIndex);
+	return SNew(SVerticalBox)
+	+SVerticalBox::Slot()
+	.AutoHeight()
+	[
+		SNew(STextBlock)
+		.Text(offsetText)
+		.Justification(ETextJustify::Center)
+	]
+	+SVerticalBox::Slot()
+	.AutoHeight()
+	.HAlign(HAlign_Center)
+	[
+		SNew(SCheckBox)
+		.OnCheckStateChanged(this, &SOdysseyAnimationLightTable::OnKeyIsActivatedCheckStateChanged, iKeyIndex)
+		.IsChecked(this, &SOdysseyAnimationLightTable::GetKeyIsActivated, iKeyIndex )
+	]
+	+SVerticalBox::Slot()
+	[
+		SNew(SSlider)
+		.Orientation(Orient_Vertical)
+		.MinValue(0.f)
+		.MaxValue(1.f)
+		.OnValueChanged(this, &SOdysseyAnimationLightTable::OnKeyOpacitySliderValueChanged, iKeyIndex)
+		.Value(this, &SOdysseyAnimationLightTable::GetKeyOpacity, iKeyIndex)
+	];
 }
 
 void

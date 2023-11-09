@@ -68,6 +68,7 @@ public:
 
 public:
     virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const override;
+    virtual bool GetIsLightTableActivated() const override;
     virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override;
 
 public:

@@ -70,6 +70,12 @@ UOdysseyAnimationLayerImageVector::GetLightTable() const
     return mLightTable;
 }
 
+bool
+UOdysseyAnimationLayerImageVector::GetIsLightTableActivated() const
+{
+    return bIsLightTableActivated;
+}
+
 TSharedPtr<FOdysseyAnimationCellsContainer>
 UOdysseyAnimationLayerImageVector::GetCellsContainer() const
 {

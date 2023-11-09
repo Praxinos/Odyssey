@@ -17,6 +17,7 @@ void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdy
 {
     ensure(iLayer);
     mLayer = iLayer;
+	mTreeView = iOwnerTableView;
 
     SMultiColumnTableRow<UOdysseyLayer*>::FArguments args;
     args.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
@@ -45,9 +46,9 @@ SOdysseyLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
     {
         return GenerateIsLockedWidget();
     }
-	else if (InColumnName == "IsOptionsDisplayed")
+	else if (InColumnName == "IsCollapsed")
     {
-        return GenerateIsOptionsDisplayedWidget();
+        return GenerateIsCollapsedWidget();
     }
     else if (InColumnName == "Header")
     {
@@ -111,13 +112,8 @@ SOdysseyLayerRow::GenerateExpandableHeaderWidget()
             + SVerticalBox::Slot()
             .AutoHeight()
             [
-                SNew(SWidgetSwitcher)
-				.WidgetIndex_Lambda([this]() { return mIsOptionsDisplayed ? 1 : 0; })
-                +SWidgetSwitcher::Slot()
-                [
-                    SNullWidget::NullWidget
-                ]
-                +SWidgetSwitcher::Slot()
+				SNew(SBox)
+				.Visibility(this, &SOdysseyLayerRow::OptionsWidgetVisibility)
                 [
                     GenerateOptionsWidget()
                 ]
@@ -129,25 +125,29 @@ TSharedRef<SWidget>
 SOdysseyLayerRow::GenerateOptionsWidget()
 {
     TSharedRef<SWidget> optionsWidget = SNullWidget::NullWidget;
-	/*
-    if(mLayer->OptionsWidget) //use this widget class
-    {
-		if (!mLayer->OptionsWidgetInstance)
-        	mLayer->OptionsWidgetInstance = NewObject<UUserWidget>(mLayer, mLayer->OptionsWidget, NAME_None, RF_Public);
-        optionsWidget = mLayer->OptionsWidgetInstance->TakeWidget();
-    }
-	*/
     return optionsWidget;
 }
 
-TSharedRef<SWidget>
-SOdysseyLayerRow::GenerateIsOptionsDisplayedWidget()
+EVisibility
+SOdysseyLayerRow::OptionsWidgetVisibility() const
 {
-	const FCheckBoxStyle* isOptionsDisplayedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsOptionsDisplayedToggle");
+	return mIsCollapsed ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+TSharedPtr<SOdysseyLayerStackTreeView>
+SOdysseyLayerRow::GetTreeView() const
+{
+	return mTreeView.Pin();
+}
+
+TSharedRef<SWidget>
+SOdysseyLayerRow::GenerateIsCollapsedWidget()
+{
+	const FCheckBoxStyle* isCollapsedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsCollapsedToggle");
 	return SNew(SCheckBox)
-		.Style(isOptionsDisplayedToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsOptionsDisplayedCheckBoxStateChanged)
-		.IsChecked(this, &SOdysseyLayerRow::GetIsOptionsDisplayedCheckBoxState);
+		.Style(isCollapsedToggleStyle)
+		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsCollapsedCheckBoxStateChanged)
+		.IsChecked(this, &SOdysseyLayerRow::GetIsCollapsedCheckBoxState);
 }
 
 TSharedRef<SWidget>
@@ -229,6 +229,12 @@ SOdysseyLayerRow::GetLayerNameFont() const
 		return FStyleDefaults::GetFontInfo();
 	
 	return FAppStyle::Get().GetFontStyle("NormalFontBold");
+}
+
+bool
+SOdysseyLayerRow::IsCollapsed() const
+{
+	return mIsCollapsed;
 }
 
 void
@@ -449,15 +455,15 @@ SOdysseyLayerRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEv
 }
 
 void
-SOdysseyLayerRow::OnIsOptionsDisplayedCheckBoxStateChanged(ECheckBoxState iState)
+SOdysseyLayerRow::OnIsCollapsedCheckBoxStateChanged(ECheckBoxState iState)
 {
-	mIsOptionsDisplayed = (iState == ECheckBoxState::Checked);
+	mIsCollapsed = (iState != ECheckBoxState::Checked);
 }
 
 ECheckBoxState
-SOdysseyLayerRow::GetIsOptionsDisplayedCheckBoxState() const
+SOdysseyLayerRow::GetIsCollapsedCheckBoxState() const
 {
-	return mIsOptionsDisplayed ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mIsCollapsed ? ECheckBoxState::Unchecked : ECheckBoxState::Checked;
 }
 
 #undef LOCTEXT_NAMESPACE

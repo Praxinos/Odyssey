@@ -50,7 +50,7 @@ public:
     bool GetKeyIsActivated(int iIndex) const;
     int GetKeyOffset(int iIndex) const;
     float GetKeyOpacity(int iIndex) const;
-    eFrameDisplayMode GetKeyDisplayMode(int iIndex) const;
+    eFrameDisplayMode GetKeyDisplayMode() const;
     ::ULIS::FColor GetKeyColor(int iIndex) const;
 
     struct FKeyData
@@ -60,7 +60,8 @@ public:
         float mOpacity;
     };
 
-    const TArray<FKeyData>& GetKeysData() const;
+    const TMap<int, FKeyData>& GetKeysData() const;
+    int GetRange() const;
 
 public:
 	//FOdysseyImageRenderingAbility overrides
@@ -76,5 +77,5 @@ private:
     EOdysseyLightTableDisplayPosition mDisplayPosition;
     TEnumAsByte<EOdysseyLightTableDisplayMode> mDisplayMode;
 
-    TArray<FKeyData> mKeysData;
+    TMap<int, FKeyData> mKeysData;
 };

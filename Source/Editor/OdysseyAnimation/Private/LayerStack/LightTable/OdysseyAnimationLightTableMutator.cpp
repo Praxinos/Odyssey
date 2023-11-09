@@ -152,7 +152,7 @@ FOdysseyAnimationLightTableMutator::SetKeyOpacity(int iIndex, float iOpacity)
 {
     TSharedRef<FSetKeyOpacityData> data = MakeShared<FSetKeyOpacityData>();
     data->mIndex = iIndex;
-    data->mNewOpacity = iOpacity;
+    data->mNewOpacity = FMath::Clamp(iOpacity, 0.f, 1.f);
     data->mOldOpacity = mLightTable->mKeysData[iIndex].mOpacity;
 
     TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeyOpacityData>>(

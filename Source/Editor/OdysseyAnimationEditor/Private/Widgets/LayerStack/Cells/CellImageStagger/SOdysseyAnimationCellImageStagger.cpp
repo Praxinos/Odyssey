@@ -12,7 +12,7 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, TSharedPtr
 {
     mExtension = iExtension;
     mCell = iCell;
-
+    mShowContent = iArgs._ShowContent;
         
     FSlateColor behaviourColor( FOdysseyStyle::GetColor( "Animation.CellImageStagger.BehaviourColor" ) );
 
@@ -22,6 +22,7 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, TSharedPtr
     .Padding(FMargin(3, 0, 0, 0))
     [
         SNew(SHorizontalBox)
+        .Visibility(this, &SOdysseyAnimationCellImageStagger::GetContentVisibility)
         .Clipping(EWidgetClipping::ClipToBoundsAlways)
         + SHorizontalBox::Slot()
         .AutoWidth()
@@ -289,6 +290,12 @@ SOdysseyAnimationCellImageStagger::GetStaggerLength() const
         break;
     }
     return INDEX_NONE;
+}
+
+EVisibility
+SOdysseyAnimationCellImageStagger::GetContentVisibility() const
+{
+    return mShowContent.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

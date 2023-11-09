@@ -136,6 +136,12 @@ UOdysseyAnimationLayerImageRaster::GetLightTable() const
     return mLightTable;
 }
 
+bool
+UOdysseyAnimationLayerImageRaster::GetIsLightTableActivated() const
+{
+    return bIsLightTableActivated;
+}
+
 /*
 int
 UOdysseyAnimationLayerImageRaster::GetOffset() const

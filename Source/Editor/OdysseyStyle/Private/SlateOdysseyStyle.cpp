@@ -480,7 +480,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyLayerStack.Colored16", new IMAGE_BRUSH( "OdysseyLayerStack/colored_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Uncolored16", new IMAGE_BRUSH( "OdysseyLayerStack/uncolored_16", mIcon16x16 ) );
 
-    Set("LayerStack.IsOptionsDisplayedToggle", FCheckBoxStyle()
+    Set("LayerStack.IsCollapsedToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
@@ -713,6 +713,15 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.CellImageStagger.Behaviour.Hold", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourHold", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.Loop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourLoop", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.PingPong", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourPingPong", mIcon16x16));
+
+    FSlateColor primary( FStyleColors::Primary );
+    FSlateColor background( FStyleColors::Background );
+    FSlateColor input( FStyleColors::Input );
+    FSlateColor inputOutline( FStyleColors::InputOutline );
+    Set("Animation.LightTableKey.Back", new FSlateRoundedBoxBrush( primary, FVector4( 8.0f, 8.0f, 8.0f, 8.0f ) ));
+    Set("Animation.LightTableKey.Front", new FSlateRoundedBoxBrush( background, FVector4( 8.0f, 8.0f, 8.0f, 8.0f ) ));
+    Set("Animation.LightTableKey.BackColor", primary);
+    Set("Animation.LightTableKey.FrontColor", background);
     
     //Animation Command Icons
     //Icons are used automatically
