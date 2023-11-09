@@ -275,6 +275,7 @@ UOdysseyPainterEditorRasterDrawingTool::Flush()
 void
 UOdysseyPainterEditorRasterDrawingTool::Commit()
 {
+    FScopedTransaction transaction(LOCTEXT("OnPaintStroke", "Paint Stroke"));
     mPaintEngine.Commit(BlendParameters);
 }
 
@@ -323,8 +324,6 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathBegin( const FOdysseyPoint& i
         UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyBrushAssetBase::StrokeBegin() from StrokeEngine"));
         return;
     }
-
-    GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("OnPaintStroke", "Paint Stroke"), nullptr);
 
     TArray<FOdysseyPoint> points = { iPoint };
     if (mAdaptShapePointsDelegate.IsBound())
@@ -380,8 +379,6 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPo
 
     Flush();
     Commit();
-
-    GEditor->EndTransaction();
 
     mHUD->EmptyHUDElements();
     mEditor->HUDSystem()->ClearHUDSurface();
