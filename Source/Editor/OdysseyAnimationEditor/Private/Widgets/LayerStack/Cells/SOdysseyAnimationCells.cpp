@@ -295,15 +295,15 @@ SOdysseyAnimationCells::CreateLengthHandleWidget(TSharedPtr<FCellData> iCellData
 TSharedRef<SWidget>
 SOdysseyAnimationCells::CreateAddCellsHandleRightWidget()
 {
-    return SNew(SBox)
-        .Visibility(this, &SOdysseyAnimationCells::GetAddCellsHandleRightVisibility)
-        .WidthOverride(mAddCellsHandleRightBrush->ImageSize.X)
-        .HeightOverride(mAddCellsHandleRightBrush->ImageSize.Y)
+    return SNew(SOdysseyAnimationCellHandle)
+        .OnDragStarted(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStarted, true)
+        .OnDragged(this, &SOdysseyAnimationCells::OnAddCellsHandleDragged)
+        .OnDragStopped(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStopped)
         [
-            SNew(SOdysseyAnimationCellHandle)
-            .OnDragStarted(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStarted, true)
-            .OnDragged(this, &SOdysseyAnimationCells::OnAddCellsHandleDragged)
-            .OnDragStopped(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStopped)
+            SNew(SBox)
+            .Visibility(this, &SOdysseyAnimationCells::GetAddCellsHandleRightVisibility)
+            .WidthOverride(mAddCellsHandleRightBrush->ImageSize.X)
+            .HeightOverride(mAddCellsHandleRightBrush->ImageSize.Y)
             [
                 SNew(SImage)
                 .Image(mAddCellsHandleRightBrush)
@@ -315,19 +315,19 @@ TSharedRef<SWidget>
 SOdysseyAnimationCells::CreateAddCellsHandleLeftWidget()
 {
     return SNew(SBox) //Box for alignment
-        .Visibility(this, &SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility)
         .HAlign(HAlign_Right)
         .VAlign(VAlign_Bottom)
         [
-            //Box for size
-            SNew(SBox)
-            .WidthOverride(mAddCellsHandleLeftBrush->ImageSize.X)
-            .HeightOverride(mAddCellsHandleLeftBrush->ImageSize.Y)
+            SNew(SOdysseyAnimationCellHandle)
+            .OnDragStarted(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStarted, false)
+            .OnDragged(this, &SOdysseyAnimationCells::OnAddCellsHandleDragged)
+            .OnDragStopped(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStopped)
             [
-                SNew(SOdysseyAnimationCellHandle)
-                .OnDragStarted(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStarted, false)
-                .OnDragged(this, &SOdysseyAnimationCells::OnAddCellsHandleDragged)
-                .OnDragStopped(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStopped)
+                //Box for size
+                SNew(SBox)
+                .Visibility(this, &SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility)
+                .WidthOverride(mAddCellsHandleLeftBrush->ImageSize.X)
+                .HeightOverride(mAddCellsHandleLeftBrush->ImageSize.Y)
                 [
                     SNew(SImage)
                     .Image(mAddCellsHandleLeftBrush)
