@@ -19,6 +19,52 @@ enum class ePathPickingMode : uint8
     SegmentHandle = 2
 };
 
+// struct that stores the ratio of handleLength / segmentLength at mouseDown
+// This allows us to adjust the handle length when moving vertices.
+typedef struct _FSegmentAdjustment
+{
+    double handleRatio[2];
+    FOdysseyVectorSegment* segment;
+
+    _FSegmentAdjustment( FOdysseyVectorSegment* iSegment )
+    {
+        double segmentLength = iSegment->GetLength();
+
+        segment = iSegment;
+        handleRatio[0] = handleRatio[1] = 0.0f;
+
+        if( segmentLength )
+        {
+            if( iSegment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+            {
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
+                ::ULIS::FVec2D handleVector0 = cubicSegment->GetHandleVector( (uint32)0, false );
+                ::ULIS::FVec2D handleVector1 = cubicSegment->GetHandleVector( (uint32)1, false );
+
+                handleRatio[0] = handleVector0.Distance() / segmentLength;
+                handleRatio[1] = handleVector1.Distance() / segmentLength;
+            }
+        }
+    }
+
+    void Adjust()
+    {
+        if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            FOdysseyVectorVertex* vertex0 = cubicSegment->GetVertex(0);
+            FOdysseyVectorVertex* vertex1 = cubicSegment->GetVertex(1);
+            ::ULIS::FVec2D handleVector0 = cubicSegment->GetHandleVector( vertex0, true );
+            ::ULIS::FVec2D handleVector1 = cubicSegment->GetHandleVector( vertex1, true );
+            double currentSegmentLength = cubicSegment->GetLength();
+
+            cubicSegment->GetHandle(0)->Set( vertex0->GetCoords() + ( handleVector0 * currentSegmentLength * handleRatio[0] ) );
+            cubicSegment->GetHandle(1)->Set( vertex1->GetCoords() + ( handleVector1 * currentSegmentLength * handleRatio[1] ) );
+        }
+    }
+}
+FSegmentAdjustment;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public UOdysseyPainterEditorVectorBaseTool
 {
@@ -67,6 +113,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         void OnMouseDownPickPoint( FOdysseyVectorScene* iScene
                                  , const FOdysseyPoint& iPointInTexture
                                  , const FKey& iKey );
+/*
         void GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
                                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
@@ -74,20 +121,32 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
                                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                   , double iSelectionRadius
                                   , const FOdysseyPoint& iPointInTexture );
+*/
+        ::ULIS::FRectD DragSegmentHandle( FOdysseyVectorHandleSegment *iHandle
+                                        , double iWorldX
+                                        , double iWorldY
+                                        , double iDeltaX
+                                        , double iDeltaY
+                                        , bool iRealign );
 
-        ::ULIS::FRectD DragPoint( FOdysseyVectorPoint *iPoint
-                                , double iWorldX
-                                , double iWorldY
-                                , double iDeltaX
-                                , double iDeltaY
-                                , bool iWidenAllAlong );
+        ::ULIS::FRectD DragVertex( FOdysseyVectorVertex *iVertex
+                                 , double iWorldX
+                                 , double iWorldY
+                                 , double iDeltaX
+                                 , double iDeltaY
+                                 , bool iWidenAllAlong );
 
         void GetPathsFromSelection( FOdysseyVectorScene* iScene
                                   , std::vector<FOdysseyVectorPath*>& oPathArray );
 
+        static void BuildSegmentAdjustments( const std::vector<FOdysseyVectorSegment*>& iSegmentArray
+                                           , std::vector<FSegmentAdjustment>& oSegmentAdjustmentArray );
+
     private:
         FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
-        std::vector<FOdysseyVectorPoint*> mPickedPointArray;
+        std::vector<FOdysseyVectorVertex*> mPickedVertexArray;
+        std::vector<FOdysseyVectorHandleSegment*> mPickedHandleArray;
+        std::vector<FSegmentAdjustment> mSegmentAdjustmentArray;
         std::vector<FOdysseyVectorPath*> mSelectedPathArray;
         uint64 mPickingFlags;
         ePathPickingMode mPickingMode;

@@ -211,14 +211,19 @@ static void floodFill ( int32 x
                                          ( curColor.G8() >= ::ULIS::FMath::Max( oldG - iTolerance, 0x00 ) ) &&
                                          ( curColor.G8() <= ::ULIS::FMath::Min( oldG + iTolerance, 0xFF ) ) &&
                                          ( curColor.B8() >= ::ULIS::FMath::Max( oldB - iTolerance, 0x00 ) ) &&
-                                         ( curColor.B8() <= ::ULIS::FMath::Min( oldB + iTolerance, 0xFF ) ) &&
+                                         ( curColor.B8() <= ::ULIS::FMath::Min( oldB + iTolerance, 0xFF ) )/* &&
                                          ( curColor.A8() >= ::ULIS::FMath::Max( oldA - iTolerance, 0x00 ) ) &&
-                                         ( curColor.A8() <= ::ULIS::FMath::Min( oldA + iTolerance, 0xFF ) ) ) {
+                                         ( curColor.A8() <= ::ULIS::FMath::Min( oldA + iTolerance, 0xFF ) )*/ ) {
+                                        ::ULIS::ISample dstColor = iColor;
+
+                                        if( curColor.A8() )
+                                            dstColor.SetA8( curColor.A8() );
+
                                         stack[nbItems][0] = nx;
                                         stack[nbItems][1] = ny;
 
                                         // this is super slow
-                                        iDstImage->SetPixel( nx, ny, iColor );
+                                        iDstImage->SetPixel( nx, ny, dstColor );
 
                                         nbItems++;
 

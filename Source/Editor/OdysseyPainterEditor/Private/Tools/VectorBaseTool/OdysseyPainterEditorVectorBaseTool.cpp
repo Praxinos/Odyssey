@@ -50,6 +50,57 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
 }
 
 void
+UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorScene* iScene
+                                                        , std::vector<FOdysseyVectorVertex*>& oSelectedVertexArray )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    oSelectedVertexArray.clear();
+
+    vectorEngine->Traverse
+    ( iScene
+    , iScene
+    , 0
+    , [ this
+      , iScene
+      , vectorEngine
+      , &oSelectedVertexArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+ 
+                  path->GetSelectedVertices( oSelectedVertexArray );
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::GetSegmentHandlesFromVertices( const std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                                                  , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray )
+{
+    for( FOdysseyVectorVertex* vertex : iVertexArray )
+    {
+        for( FOdysseyVectorSegment* segment : vertex->GetSegmentList() )
+        {
+            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FOdysseyVectorHandleSegment* handle = segment->GetHandle( vertex );
+
+                oSegmentHandleArray.push_back( handle );
+            }
+        }
+    }
+}
+
+void
 UOdysseyPainterEditorVectorBaseTool::Unload()
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();

@@ -126,8 +126,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void UnselectAllBuckets();
         std::list<FOdysseyVectorBucket*>& GetSelectedBucketList();
 
-        void GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
-                              , ePointSelectionFlags iPointSelectionFlags  );
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
         void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
         virtual void AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter ) override;

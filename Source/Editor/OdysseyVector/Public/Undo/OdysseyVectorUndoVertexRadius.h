@@ -17,7 +17,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexRadius : public FOdysseyVectorUn
         FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
                                       , std::vector<FOdysseyVectorPath*>& iPathArray );
         FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
-                                      , std::vector<FOdysseyVectorPoint*>& iPointArray );
+                                      , std::vector<FOdysseyVectorVertex*>& iVertexArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

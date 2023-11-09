@@ -421,72 +421,6 @@ FOdysseyVectorEngine::EraseSections( FOdysseyVectorScene* iScene
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
 
-static void
-RecursivePickPoints( FOdysseyVectorObject* iObject
-                   , double iWorldX
-                   , double iWorldY
-                   , double iRadius
-                   , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
-                   , uint64 iPickingFlags )
-{
-    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
-    {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
-        BLMatrix2D& inverseWorldMatrix = iObject->GetInverseWorldMatrix();
-        BLPoint localRadius = inverseWorldMatrix.mapVector( 0.7071f * iRadius, 0.7071f * iRadius );
-        BLPoint localPoint = inverseWorldMatrix.mapPoint( iWorldX, iWorldY );
-        ::ULIS::FRectD pathBBox = path->GetBBox( false );
-
-        // get sure we hit the box be enlarging it with the picking circle radius value.
-        // otherwise we might not be able to pick points located at the box's boundaries.
-        pathBBox.x -=   localRadius.x;
-        pathBBox.y -=   localRadius.y;
-        pathBBox.w += ( localRadius.x * 2 );
-        pathBBox.h += ( localRadius.y * 2 );
-
-        if( pathBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
-        {
-            path->PickPoint( iWorldX, iWorldY, iRadius, oPickedPointArray, iPickingFlags );
-        }
-    }
-
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
-    {
-        FOdysseyVectorObject* child = (*it);
-
-        RecursivePickPoints( child, iWorldX, iWorldY, iRadius, oPickedPointArray, iPickingFlags );
-    }
-}
-
-void
-FOdysseyVectorEngine::PickPoints( FOdysseyVectorScene* iScene
-                                , bool iRestrictToSelection
-                                , double iX
-                                , double iY
-                                , double iRadius
-                                , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
-                                , uint64 iPickingFlags )
-{
-    if( iRestrictToSelection )
-    {
-        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-
-        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-        {
-            FOdysseyVectorObject* selectedObject = (*it);
-
-            if( selectedObject->HasSelectedAncestor() == false )
-            {
-                RecursivePickPoints( selectedObject, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
-            }
-        }
-    }
-    else
-    {
-        RecursivePickPoints( iScene, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
-    }
-}
-
 FOdysseyVectorVertex*
 FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
                             , FOdysseyVectorVertex* iVertexB
@@ -773,6 +707,8 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     double u = iU0;
     double v = iV0;
     int cumul = 0;
+    // we plot only 1 pixel per horizontal line. This is need only when ddx > ddy
+    bool pixelOnLine = false;
 
     if( ddx > ddy )
     {
@@ -782,31 +718,36 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
             {
                 uint32 offset = ( y * iImageWidth ) + x;
 
-                if( mHorizontalLineBuffer[y].inited == 0 )
+                if( pixelOnLine == false )
                 {
-                    mHorizontalLineBuffer[y].inited = 1;
-
-                    mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
-                    mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
-                    mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
-                }
-                else
-                {
-                    if( x < mHorizontalLineBuffer[y].x0 )
+                    if( mHorizontalLineBuffer[y].inited == 0 )
                     {
-                        mHorizontalLineBuffer[y].x0 = x;
-                        mHorizontalLineBuffer[y].u0 = u;
-                        mHorizontalLineBuffer[y].v0 = v;
+                        mHorizontalLineBuffer[y].inited = 1;
+
+                        mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
+                        mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
+                        mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
+                    }
+                    else
+                    {
+                        if( x < mHorizontalLineBuffer[y].x0 )
+                        {
+                            mHorizontalLineBuffer[y].x0 = x;
+                            mHorizontalLineBuffer[y].u0 = u;
+                            mHorizontalLineBuffer[y].v0 = v;
+                        }
+
+                        if( x > mHorizontalLineBuffer[y].x1 )
+                        {
+                            mHorizontalLineBuffer[y].x1 = x;
+                            mHorizontalLineBuffer[y].u1 = u;
+                            mHorizontalLineBuffer[y].v1 = v;
+                        }
+
+                        mHorizontalLineBuffer[y].inited = 2;
                     }
 
-                    if( x > mHorizontalLineBuffer[y].x1 )
-                    {
-                        mHorizontalLineBuffer[y].x1 = x;
-                        mHorizontalLineBuffer[y].u1 = u;
-                        mHorizontalLineBuffer[y].v1 = v;
-                    }
-
-                    mHorizontalLineBuffer[y].inited = 2;
+                    pixelOnLine = true;
                 }
             }
 
@@ -819,6 +760,8 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
             {
                 cumul -= ddx;
                 y     += py;
+
+                pixelOnLine = false;
             }
         }
     }
@@ -830,32 +773,37 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
             {
                 uint32 offset = ( y * iImageWidth ) + x;
 
-                if( mHorizontalLineBuffer[y].inited == 0 )
-                {
-                     mHorizontalLineBuffer[y].inited = 1;
-
-                     mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
-                     mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
-                     mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
-                }
-                else
-                {
-                    if( x < mHorizontalLineBuffer[y].x0 )
+                /*if( pixelOnLine == false )
+                {*/
+                    if( mHorizontalLineBuffer[y].inited == 0 )
                     {
-                        mHorizontalLineBuffer[y].x0 = x;
-                        mHorizontalLineBuffer[y].u0 = u;
-                        mHorizontalLineBuffer[y].v0 = v;
-                    }
+                         mHorizontalLineBuffer[y].inited = 1;
 
-                    if( x > mHorizontalLineBuffer[y].x1 )
+                         mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
+                         mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
+                         mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
+                    }
+                    else
                     {
-                        mHorizontalLineBuffer[y].x1 = x;
-                        mHorizontalLineBuffer[y].u1 = u;
-                        mHorizontalLineBuffer[y].v1 = v;
-                    }
+                        if( x < mHorizontalLineBuffer[y].x0 )
+                        {
+                            mHorizontalLineBuffer[y].x0 = x;
+                            mHorizontalLineBuffer[y].u0 = u;
+                            mHorizontalLineBuffer[y].v0 = v;
+                        }
 
-                    mHorizontalLineBuffer[y].inited = 2;
-                }
+                        if( x > mHorizontalLineBuffer[y].x1 )
+                        {
+                            mHorizontalLineBuffer[y].x1 = x;
+                            mHorizontalLineBuffer[y].u1 = u;
+                            mHorizontalLineBuffer[y].v1 = v;
+                        }
+
+                        mHorizontalLineBuffer[y].inited = 2;
+                    }
+/*
+                    pixelOnLine = true;
+                }*/
             }
 
             cumul += ddx;
@@ -867,6 +815,8 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
             {
                 cumul -= ddy;
                 x     += px;
+
+                //pixelOnLine = false;
             }
         }
     }

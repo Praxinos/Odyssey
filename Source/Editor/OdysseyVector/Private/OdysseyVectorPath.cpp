@@ -355,42 +355,13 @@ GetSelectedCubicSegmentHandles( FOdysseyVectorSegmentCubic* iCubicSegment
 }
 
 void
-FOdysseyVectorPath::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
-                                     , ePointSelectionFlags iPointSelectionFlags )
+FOdysseyVectorPath::GetSelectedVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray )
 {
-    // vertex selection part
-    if( iPointSelectionFlags & ePointSelectionFlags::Vertex )
+    oVertexArray.reserve( oVertexArray.size() + mSelectedVertexList.size() );
+
+    for( FOdysseyVectorVertex* vertex : mSelectedVertexList )
     {
-        std::list<FOdysseyVectorVertex*>::iterator vit;
-
-        oPointArray.reserve( oPointArray.size() + mSelectedVertexList.size() );
-
-        for( vit = mSelectedVertexList.begin(); vit != mSelectedVertexList.end(); ++vit )
-        {
-            FOdysseyVectorVertex* vertex = *vit;
-
-            oPointArray.push_back( vertex );
-        }
-    }
-
-    // segment handle selection part
-    if( iPointSelectionFlags & ePointSelectionFlags::SegmentHandle )
-    {
-        std::list<FOdysseyVectorSegment*>::iterator sit;
-
-        oPointArray.reserve( oPointArray.size() + ( mSegmentList.size() * 2 ) );
-
-        for( sit = mSegmentList.begin(); sit != mSegmentList.end(); ++sit )
-        {
-            FOdysseyVectorSegment* segment = *sit;
-
-            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-            {
-                FOdysseyVectorSegmentCubic* cubicSegment= static_cast<FOdysseyVectorSegmentCubic*>(segment);
- 
-                GetSelectedCubicSegmentHandles( cubicSegment, oPointArray, iPointSelectionFlags );
-            }
-        }
+        oVertexArray.push_back( vertex );
     }
 }
 
@@ -948,18 +919,21 @@ bool
 FOdysseyVectorPath::PickPoint( double iWorldX
                              , double iWorldY
                              , double iSelectionRadius
-                             , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
+                             , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                             , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray
                              , uint64 iSelectionFlags )
 {
+    bool anythingPicked = false;
+
     for(std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it)
     {
         FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
         ::ULIS::FVec2D perpendicularVector = FOdysseyVectorPath::GetPerpendicularVector( vertex, true );
         BLPoint worldPerpendicularVector = mWorldMatrix.mapVector( perpendicularVector.x * vertex->GetRadius()
-                                                                    , perpendicularVector.y * vertex->GetRadius() );
+                                                                 , perpendicularVector.y * vertex->GetRadius() );
 
         // Pick vertex
-        if ( iSelectionFlags & PICK_POINT )
+        if ( iSelectionFlags & PICK_VERTEX )
         {
             ::ULIS::FVec2D& localCoords = vertex->GetCoords();
             // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
@@ -968,12 +942,14 @@ FOdysseyVectorPath::PickPoint( double iWorldX
 
             if( dif.Distance() <= iSelectionRadius )
             {
-                oPickedPointArray.push_back( vertex );
+                oPickedVertexArray.push_back( vertex );
+
+                anythingPicked = true;
             }
         }
 
         // Pick vertex handle
-        if( iSelectionFlags & PICK_HANDLE_POINT )
+        if( iSelectionFlags & PICK_HANDLE_VERTEX )
         {
             ::ULIS::FVec2D& localCoords = vertex->GetCoords();
             // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
@@ -986,16 +962,20 @@ FOdysseyVectorPath::PickPoint( double iWorldX
 
             if( dif0.Distance() <= iSelectionRadius )
             {
-                oPickedPointArray.push_back( vertex );
+                oPickedVertexArray.push_back( vertex );
 
-                return true;
+                anythingPicked = true;
+
+                continue; // prevent duplicate selection
             }
 
             if( dif1.Distance() <= iSelectionRadius )
             {
-                oPickedPointArray.push_back( vertex );
+                oPickedVertexArray.push_back( vertex );
 
-                return true;
+                anythingPicked = true;
+
+                continue; // prevent duplicate selection
             }
         }
     }
@@ -1003,11 +983,9 @@ FOdysseyVectorPath::PickPoint( double iWorldX
     // Pick segment handles
     if( iSelectionFlags & PICK_HANDLE_SEGMENT )
     {
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        for( FOdysseyVectorSegment* segment : mSegmentList )
         {
             // TODO: hit-test with segment's bounding box.
-
-            FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
             FOdysseyVectorHandleSegment* handle0 = segment->GetHandle(0);
             FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
             ::ULIS::FVec2D& handle0LocalCoords = handle0->GetCoords();
@@ -1020,21 +998,21 @@ FOdysseyVectorPath::PickPoint( double iWorldX
 
             if( dif0.Distance() <= iSelectionRadius )
             {
-                oPickedPointArray.push_back( handle0 );
+                oPickedHandleArray.push_back( handle0 );
 
-                return true;
+                anythingPicked = true;
             }
 
             if( dif1.Distance() <= iSelectionRadius )
             {
-                oPickedPointArray.push_back( handle1 );
+                oPickedHandleArray.push_back( handle1 );
 
-                return true;
+                anythingPicked = true;
             }
         }
     }
 
-    return false;
+    return anythingPicked;
 }
 
 void
@@ -1084,7 +1062,7 @@ FOdysseyVectorPath::Cut( const ::ULIS::FVec2D& iLinePoint0
 static FOdysseyVectorVertex*
 GetStitchingVertex( FOdysseyVectorVertex* iVertex
                   , FOdysseyVectorSegment* iSegment
-                  , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
+                  , std::vector<FOdysseyVectorVertex*>& iPickedVertexArray
                   , ::ULIS::FVec2D& oHandle )
 {
     FOdysseyVectorVertex *currentVertex = iVertex;
@@ -1093,14 +1071,9 @@ GetStitchingVertex( FOdysseyVectorVertex* iVertex
     do
     {
         // return the nextVertex if it is not marked for deletion. Then it will be stitched with its counterpart, if any.
-        if( std::find( iPickedPointArray.begin(), iPickedPointArray.end(), currentVertex ) == iPickedPointArray.end() )
+        if( std::find( iPickedVertexArray.begin(), iPickedVertexArray.end(), currentVertex ) == iPickedVertexArray.end() )
         {
-            if( currentSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-            {
-                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>( currentSegment );
-
-                oHandle = cubicSegment->GetHandle( currentVertex )->GetCoords();
-            }
+            oHandle = currentSegment->GetHandle( currentVertex )->GetCoords();
 
             return currentVertex;
         }
@@ -1140,26 +1113,26 @@ typedef struct FStitchingPair
 
 //static
 void
-FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
-                               , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
-                               , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                               , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                               , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
-                               , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
+FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
+                                , std::vector<FOdysseyVectorVertex*>& iPickedVertexArray
+                                , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                                , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
 {
-    std::vector<FOdysseyVectorPoint*> extendedPointArray;
+    std::vector<FOdysseyVectorVertex*> extendedVertexArray;
     std::vector<FStitchingPair> stitchingPairArray;
 
     stitchingPairArray.reserve( 10 );
-    extendedPointArray.reserve( 10 );
+    extendedVertexArray.reserve( 10 );
 
-    extendedPointArray = iPickedPointArray;
+    extendedVertexArray = iPickedVertexArray;
 
     // first step
     // Build stitching pairs by finding a vertex that is not doomed for deletion on both sides.
-    for( int i = 0; i < iPickedPointArray.size(); i++ )
+    for( int i = 0; i < iPickedVertexArray.size(); i++ )
     {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>( iPickedPointArray[i] );
+        FOdysseyVectorVertex* vertex = iPickedVertexArray[i];
         std::list<FOdysseyVectorSegment*>& segmentList = vertex->GetSegmentList();
         uint32 segmentCount = segmentList.size();
 
@@ -1170,11 +1143,11 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
             FOdysseyVectorSegment* segment1 = ( segmentCount > 1  ) ? segmentList.back() : nullptr;
             FOdysseyVectorVertex* stitchingVertex[2] = { segment0 ? GetStitchingVertex( segment0->GetOtherVertex(vertex)
                                                                                       , segment0
-                                                                                      , iPickedPointArray
+                                                                                      , iPickedVertexArray
                                                                                       , handle[0] ) : nullptr
                                                        , segment1 ? GetStitchingVertex( segment1->GetOtherVertex(vertex)
                                                                                       , segment1
-                                                                                      , iPickedPointArray
+                                                                                      , iPickedVertexArray
                                                                                       , handle[1] ) : nullptr };
 
             if( stitchingVertex[0] == stitchingVertex[1] ) // e.g loops
@@ -1182,7 +1155,7 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
                 if( stitchingVertex[0] )
                 {
                     // for vertices that were not picked but that cannot be stitched, delete them as well.
-                    extendedPointArray.push_back( stitchingVertex[0] );
+                    extendedVertexArray.push_back( stitchingVertex[0] );
                 }
             }
             else // stitchingVertex[0] != stitchingVertex[1]
@@ -1202,13 +1175,13 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
                     if( stitchingVertex[0] && ( stitchingVertex[0]->GetSegmentCount() == 1 ) )
                     {
                         // for vertices that were not picked but that cannot be stitched, delete them as well.
-                        extendedPointArray.push_back( stitchingVertex[0] );
+                        extendedVertexArray.push_back( stitchingVertex[0] );
                     }
 
                     if( stitchingVertex[1] && ( stitchingVertex[1]->GetSegmentCount() == 1 ) )
                     {
                         // for vertices that were not picked but that cannot be stitched, delete them as well.
-                        extendedPointArray.push_back( stitchingVertex[1] );
+                        extendedVertexArray.push_back( stitchingVertex[1] );
                     }
                 }
             }
@@ -1217,16 +1190,14 @@ FOdysseyVectorPath::DeletePoint( FOdysseyVectorPath* iPath
 
     // second step
     // the actual deletion
-    for( int i = 0; i < extendedPointArray.size(); i++ )
+    for( int i = 0; i < extendedVertexArray.size(); i++ )
     {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>( extendedPointArray[i] );
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>( extendedVertexArray[i] );
         // Note: work on a copy of the list, because deletion will alter the segment list
         std::list<FOdysseyVectorSegment*> segmentList = vertex->GetSegmentList();
 
-        for( std::list<FOdysseyVectorSegment*>::iterator sit = segmentList.begin(); sit != segmentList.end(); ++sit )
+        for( FOdysseyVectorSegment* segment : segmentList )
         {
-            FOdysseyVectorSegment* segment = *sit;
-
             iPath->RemoveSegment( segment );
             // for undoing
             iRemovedSegmentArray.push_back( segment );
@@ -1485,6 +1456,10 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                     double segmentStartU = ( currentVertex == segment->GetVertex(0) ) ? startU : endU;
                     double segmentEndU   = ( currentVertex == segment->GetVertex(0) ) ? endU : startU;
 
+                    // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
+                    if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
+                    if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
+
                     // Textured joints are drawn only in texture mode (obviously) and if the texture
                     // goes all over the path.
                     if( ( currentVertex->IsHandleAligned() == false )
@@ -1495,6 +1470,10 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                         double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
 
                         segmentStartU = jointEndU;
+
+                        // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
+                        if ( jointStartU < 0.0f ) jointStartU = 0.0f;
+                        if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
 
                         // TODO : check for in-screen visibility
                         DrawTexturedJoint( &joint
@@ -1622,6 +1601,8 @@ FOdysseyVectorPath::CopyShape()
                                                                   , originalVertex->GetX()
                                                                   , originalVertex->GetY()
                                                                   , originalVertex->GetRadius() );
+
+        newVertex->SetHandleAligned( originalVertex->IsHandleAligned() );
 
         lookupTable.insert( std::make_pair( originalVertex, newVertex ) );
 

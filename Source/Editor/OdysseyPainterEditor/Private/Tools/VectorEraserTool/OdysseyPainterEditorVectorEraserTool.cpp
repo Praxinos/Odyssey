@@ -151,7 +151,12 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorScene* iScen
                       // remove whole paths for paths without intersections
                       if( pathSectionArray.size() == 0 )
                       {
-                          oRemovedObjectArray.push_back( path );
+                          ::ULIS::FRectD unusedRect;
+
+                          if( path->PickShape( unusedRect, FOdysseyVectorEngine::PICK_MASK_BASED ) )
+                          {
+                              oRemovedObjectArray.push_back( path );
+                          }
                       }
                       else
                       {

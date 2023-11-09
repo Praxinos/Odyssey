@@ -52,53 +52,6 @@ FOdysseyPainterEditorVectorSelectionToolHUD::ShowSelectionBox( bool iShowSelecti
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::GetSelectedVertices( FOdysseyVectorScene* iScene
-                                                                , std::vector<FOdysseyVectorPoint*>& oPointArray )
-{
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
-
-    // avoir to many reallocation by reserving a decent amount of memory
-    oPointArray.reserve( 200 );
-
-    vectorEngine->Traverse
-    ( iScene
-    , iScene
-    , 0
-    , [ this
-      , iScene
-      , vectorEngine
-      , &hudFlags
-      , &oPointArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
-      {
-          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
-          {
-              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-              {
-                  FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(object);
-
-                  selectedPath->GetSelectedPoints( oPointArray
-                                                 , ePointSelectionFlags::Vertex
-                                                 //| ePointSelectionFlags::Strict
-                                                 | ePointSelectionFlags::SegmentHandle );
-              }
-
-              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-              {
-                  FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
-
-                  selectedPaintGroup->GetSelectedPoints( oPointArray
-                                                       , ePointSelectionFlags::Bucket );
-              }
-
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-          }
-
-          return 0;  
-      } );
-}
-
-void
 FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLContext
                                                                , FOdysseyVectorScene* iScene
                                                                , uint64 iFlags )

@@ -81,6 +81,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
         void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
 
+        void GetSelectedVertices( FOdysseyVectorScene* iScene
+                                , std::vector<FOdysseyVectorVertex*>& oSelectedVertexArray );
+        // static
+        void GetSegmentHandlesFromVertices( const std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                          , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray );
+
     private:
         void ExtendContextMenuObject( FMenuBuilder& menu );
         void ExtendContextMenuVertex( FMenuBuilder& menu );

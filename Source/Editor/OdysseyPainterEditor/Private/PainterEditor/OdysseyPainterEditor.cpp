@@ -1037,16 +1037,16 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorScene* iScene )
         if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(focusedObject);
-            std::vector<FOdysseyVectorPoint*> selectedPointArray;
+            std::vector<FOdysseyVectorVertex*> selectedVertexArray;
 
-            path->GetSelectedPoints( selectedPointArray, ePointSelectionFlags::Vertex );
+            path->GetSelectedVertices( selectedVertexArray );
 
-            FOdysseyVectorPath::DeletePoint( path
-                                           , selectedPointArray
-                                           , removedVertexArray
-                                           , removedSegmentArray
-                                           , removedPathArray
-                                           , addedSegmentArray );
+            FOdysseyVectorPath::DeleteVertex( path
+                                            , selectedVertexArray
+                                            , removedVertexArray
+                                            , removedSegmentArray
+                                            , removedPathArray
+                                            , addedSegmentArray );
         }
     }
 

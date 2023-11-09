@@ -330,31 +330,35 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorScene
                                                            , const FKey& iKey )
 {
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
-    if( iKey == EKeys::LeftMouseButton )
+    if( iKey == EKeys::LeftMouseButton)
     {
-        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-        FOdysseyVectorSegment* newSegment;
-        FOdysseyVectorVertex* endingVertex = PickVertex( iScene
-                                                       , iPointInTexture.x
-                                                       , iPointInTexture.y
-                                                       , StitchingRadius );
-
-        // stitching to another path at MouseUp is CURRENTLY not supported
-        if( endingVertex && ( endingVertex->GetPath() != mPathTracer.GetPath() ) )
+        // check path validity in case we get a UP without a DOWN first
+        if( mPathTracer.GetPath() )
         {
-            endingVertex = nullptr;
+            FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+            FOdysseyVectorSegment* newSegment;
+            FOdysseyVectorVertex* endingVertex = PickVertex( iScene
+                                                           , iPointInTexture.x
+                                                           , iPointInTexture.y
+                                                           , StitchingRadius );
+
+            // stitching to another path at MouseUp is CURRENTLY not supported
+            if( endingVertex && ( endingVertex->GetPath() != mPathTracer.GetPath() ) )
+            {
+                endingVertex = nullptr;
+            }
+
+            newSegment = mPathTracer.Flush( endingVertex );
+
+            if( newSegment && mStitchedVertex )
+            {
+                mUndoPathExtend->RecordSegment( newSegment, endingVertex ? nullptr : newSegment->GetVertex(1) );
+            }
+
+            iScene->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATEPAINTGROUPS : 0 ); // update invalidated objects
+
+            vectorEngine->ResetHUD(); // re-creates the quadtree;
         }
-
-        newSegment = mPathTracer.Flush( endingVertex );
-
-        if( newSegment && mStitchedVertex )
-        {
-            mUndoPathExtend->RecordSegment( newSegment, endingVertex ? nullptr : newSegment->GetVertex(1) );
-        }
-
-        iScene->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATEPAINTGROUPS : 0 ); // update invalidated objects
-
-        vectorEngine->ResetHUD(); // re-creates the quadtree;
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

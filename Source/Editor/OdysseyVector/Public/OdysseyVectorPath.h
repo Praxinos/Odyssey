@@ -99,12 +99,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                                   , ::ULIS::FVec2D iPerpendicularVector
                                   , bool iPreserveHandleLength );
         //static
-        static void DeletePoint( FOdysseyVectorPath* iPath
-                               , std::vector<FOdysseyVectorPoint*>& iPickedPointArray
-                               , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                               , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                               , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
-                               , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
+        static void DeleteVertex( FOdysseyVectorPath* iPath
+                                , std::vector<FOdysseyVectorVertex*>& iPickedVertexArray
+                                , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                                , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 
        /**
          * @brief Destructor
@@ -272,7 +272,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         bool PickPoint( double iWorldX
                       , double iWorldY
                       , double iSelectionRadius
-                      , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
+                      , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                      , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray
                       , uint64 iSelectionFlags );
 
        /**
@@ -339,8 +340,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          */
         void UnselectAllVertices();
 
-        void GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
-                              , ePointSelectionFlags iPointSelectionFlags );
+        void GetSelectedVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
 
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
         std::list<FOdysseyVectorSegment*>& GetInvalidatedSegmentList();
@@ -364,12 +364,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         FOdysseyVectorBrush& GetBrush();
         void SetMiterLimit( double iMiterLimit );
 
-    protected:
+
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
         virtual void DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ) override;
         virtual bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
 
+    protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
         void UpdateBBox();
         void Fill();
@@ -418,9 +419,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         FPathParam mPathParam;
 
     public:
-        static const uint64 PICK_HANDLE_POINT   = 1;
+        static const uint64 PICK_HANDLE_VERTEX  = 1;
         static const uint64 PICK_HANDLE_SEGMENT = 1 << 1;
-        static const uint64 PICK_POINT          = 1 << 2;
+        static const uint64 PICK_VERTEX         = 1 << 2;
 
         void SetPaintingCode( uint32 iPaintingCode );
         uint32 GetPaintingCode();

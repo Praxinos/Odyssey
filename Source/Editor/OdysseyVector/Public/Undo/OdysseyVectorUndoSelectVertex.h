@@ -12,8 +12,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectVertex : public FOdysseyVectorUn
     public:
         ~FOdysseyVectorUndoSelectVertex();
          FOdysseyVectorUndoSelectVertex( FOdysseyVectorScene* iScene
-                                       , std::vector<FOdysseyVectorVertex*>& iPickedVertexArray
-                                       , std::vector<FOdysseyVectorBucket*>& iPickedBucketArray );
+                                       , const std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -25,6 +24,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectVertex : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
-        std::vector<FOdysseyVectorVertex*> mPickedVertexArray;
-        std::vector<FOdysseyVectorBucket*> mPickedBucketArray;
+        std::vector<FSnapshotPath> mPathSnapshotArray;
+        std::vector<FSnapshotGroupPaint> mPaintgroupSnapshotArray;
 };

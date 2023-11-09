@@ -236,11 +236,18 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
             }
         }
     }
+
+    if( iPathSnapshotFlags & SNAPSHOT_SELECTED_VERTICES )
+    {
+        mSelectedVertexList = iPath->GetSelectedVertexList();
+    }
 }
 
 void
 FSnapshotPath::Restore()
 {
+    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(mObject);
+
     FSnapshotObject::Restore();
 
     if( mPathSnapshotFlags & SNAPSHOT_VERTICES )
@@ -257,6 +264,20 @@ FSnapshotPath::Restore()
         {
             mCubicSegmentSnapshotArray[i].Restore();
         }
+    }
+
+    if( mPathSnapshotFlags & SNAPSHOT_SELECTED_VERTICES )
+    {
+        std::list<FOdysseyVectorVertex*> currentVertexList = path->GetSelectedVertexList();
+
+        path->UnselectAllVertices();
+
+        for( FOdysseyVectorVertex* vertex : mSelectedVertexList )
+        {
+            path->SelectVertex( vertex );
+        }
+
+        mSelectedVertexList = currentVertexList;
     }
 }
 
@@ -323,11 +344,18 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
             mBucketSnapshotArray.emplace_back( bucket, FSnapshotBucket::SNAPSHOT_ALL );
         }
     }
+
+    if( iPaintGroupSnapshotFlags & SNAPSHOT_SELECTED_BUCKETS )
+    {
+        mSelectedBucketList = iPaintGroup->GetSelectedBucketList();
+    }
 }
 
 void
 FSnapshotGroupPaint::Restore()
 {
+    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mObject);
+
     FSnapshotObject::Restore();
 
     if( mPaintGroupSnapshotFlags & SNAPSHOT_BUCKETS )
@@ -336,5 +364,19 @@ FSnapshotGroupPaint::Restore()
         {
             mBucketSnapshotArray[i].Restore();
         }
+    }
+
+    if( mPaintGroupSnapshotFlags & SNAPSHOT_SELECTED_BUCKETS )
+    {
+        std::list<FOdysseyVectorBucket*> currentBucketList = paintGroup->GetSelectedBucketList();
+
+        paintGroup->UnselectAllBuckets();
+
+        for( FOdysseyVectorBucket* bucket : mSelectedBucketList )
+        {
+            paintGroup->SelectBucket( bucket );
+        }
+
+        mSelectedBucketList = currentBucketList;
     }
 }

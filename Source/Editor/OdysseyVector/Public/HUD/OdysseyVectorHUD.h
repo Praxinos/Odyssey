@@ -117,17 +117,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         virtual ~FOdysseyVectorHUD();
         FOdysseyVectorHUD();
 
-        static const uint32 VERTEXRADIUS_SMALL = 2.0f;
-        static const uint32 HANDLERADIUS_SMALL = 2.0f;
+        static constexpr  double VERTEXRADIUS_SMALL = 2.0f;
+        static constexpr  double HANDLERADIUS_SMALL = 1.5;
 
-        static const uint32 VERTEXRADIUS = 3;
-        static const uint32 HANDLERADIUS = 3;
+        static constexpr  double VERTEXRADIUS = 3.0f;
+        static constexpr  double HANDLERADIUS = 2.5f;
 
         // Bucket constants
-        static const uint32 HANDLE_RADIUS      = 3;
-        static const uint32 HANDLE_DISTANCE    = 40;
-        static const uint32 PELLET_RADIUS      = 5;
-        static const uint32 RADIAL_AREA_RADIUS = 40;
+        static constexpr  double HANDLE_RADIUS      = 3;
+        static constexpr  double HANDLE_DISTANCE    = 40;
+        static constexpr  double PELLET_RADIUS      = 5;
+        static constexpr  double RADIAL_AREA_RADIUS = 40;
 
         static const uint32 PICK_NONE          = 0;
         static const uint32 PICK_HANDLE        = 1;

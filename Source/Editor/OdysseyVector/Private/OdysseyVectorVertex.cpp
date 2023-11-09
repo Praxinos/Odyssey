@@ -527,25 +527,21 @@ FOdysseyVectorVertex::AlignHandles()
 void
 FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
 {
-    ::ULIS::FVec2D handleVector = iHandle->GetCoords() - GetCoords();
+    ::ULIS::FVec2D handleVector = iHandle->GetCoords() - mCoords;
+    FOdysseyVectorSegment* segment = iHandle->GetOwner();
+    FOdysseyVectorSegment* otherSegment = GetOtherSegment( segment );
 
-    if( handleVector.Distance() )
+    if( otherSegment )
     {
-        FOdysseyVectorSegment* segment = iHandle->GetOwner();
-        FOdysseyVectorSegment* otherSegment = GetOtherSegment( segment );
+        FOdysseyVectorHandleSegment* otherHandle = otherSegment->GetHandle( this );
+        ::ULIS::FVec2D otherHandleVector = otherHandle->GetCoords() - mCoords;
 
-        handleVector.Normalize();
-
-        if( otherSegment )
+        // if vectors are already aligned, their cross product equals 0
+        if( FOdysseyVector::Cross2D( otherHandleVector, handleVector ) )
         {
-            if( otherSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-            {
-                FOdysseyVectorSegmentCubic* otherCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(otherSegment);
-                FOdysseyVectorHandleSegment* otherHandle = otherCubicSegment->GetHandle( this );
-                ::ULIS::FVec2D otherHandleVector = otherHandle->GetCoords() - GetCoords();
+            handleVector.Normalize();
 
-                otherHandle->Set( GetCoords() - ( otherHandleVector.Distance() * handleVector ) );
-            }
+            otherHandle->Set( GetCoords() - ( otherHandleVector.Distance() * handleVector ) );
         }
     }
 

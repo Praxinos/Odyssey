@@ -265,37 +265,11 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
 }
 
 void
-UOdysseyPainterEditorVectorSelectionTool::PickVertexFromPath( FOdysseyVectorPath* iPath
-                                                            , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray )
-{
-    // deselect all if control key is not pressed
-    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-    {
-        iPath->UnselectAllVertices();
-    }
-
-    // Pick from mask image
-    iPath->PickVertex(  oPickedVertexArray );
-}
-
-void
-UOdysseyPainterEditorVectorSelectionTool::PickBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
-                                                                  , std::vector<FOdysseyVectorBucket*>& oPickedBucketArray )
-{
-    // deselect all if control key is not pressed
-    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-    {
-        iPaintGroup->UnselectAllBuckets();
-    }
-
-    iPaintGroup->PickBucket( oPickedBucketArray );
-}
-
-void
 UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVectorScene* iScene
                                                                    , const FOdysseyPoint& iPointInTexture
                                                                    , const FKey& iKey )
 {
+    std::list<FOdysseyVectorObject*> objectList;
     std::vector<FOdysseyVectorVertex*> pickedVertexArray;
     std::vector<FOdysseyVectorBucket*> pickedBucketArray;
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
@@ -308,24 +282,28 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     , [ this
       , iEngine
       , iScene
+      , &objectList
       , &pickedVertexArray
       , &pickedBucketArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
     {
         if( iEngine->HasFocus( iScene, object, traversalFlags ) )
         {
+            // all focused object are concerned, as their selection
+            // might be cleared in case no vertex is selected.
+            objectList.push_back( object );
+
             if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
             {
                 FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-
-                PickVertexFromPath( path, pickedVertexArray );
+                path->PickVertex( pickedVertexArray );
             }
 
             if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
             {
                 FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
-                PickBucketFromPaintGroup( paintGroup, pickedBucketArray );
+                paintGroup->PickBucket( pickedBucketArray );
             }
 
             return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED; // keep traversing
@@ -338,9 +316,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     GEditor->BeginTransaction(LOCTEXT("VectorObjectSelectionTool","Vector Vertex Pick Tool"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene
-                                                                     , pickedVertexArray
-                                                                     , pickedBucketArray );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList );
 
         GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
@@ -348,10 +324,33 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
 
     // the actual selection
 
-    for( int i = 0; i < pickedVertexArray.size(); i++ )
+    // deselect all if control key is not pressed
+    for( FOdysseyVectorObject* object : objectList )
     {
-        FOdysseyVectorVertex* vertex = pickedVertexArray[i];
+        if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
+            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+            {
+                path->UnselectAllVertices();
+            }
+        }
+
+        if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+
+            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+            {
+                paintGroup->UnselectAllBuckets();
+            }
+        }
+    }
+
+    // select
+    for( FOdysseyVectorVertex* vertex : pickedVertexArray )
+    {
         if( vertex->IsSelected() == false )
         {
             vertex->GetPath()->SelectVertex( vertex );

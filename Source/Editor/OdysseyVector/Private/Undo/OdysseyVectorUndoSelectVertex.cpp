@@ -5,12 +5,27 @@ FOdysseyVectorUndoSelectVertex::~FOdysseyVectorUndoSelectVertex()
 }
 
 FOdysseyVectorUndoSelectVertex::FOdysseyVectorUndoSelectVertex( FOdysseyVectorScene* iScene
-                                                             , std::vector<FOdysseyVectorVertex*>& iPickedVertexArray
-                                                             , std::vector<FOdysseyVectorBucket*>& iPickedBucketArray )
+                                                              , const std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
-    , mPickedVertexArray( iPickedVertexArray )
-    , mPickedBucketArray( iPickedBucketArray )
 {
+    mPathSnapshotArray.reserve( iObjectList.size() );
+
+    for( FOdysseyVectorObject* object : iObjectList )
+    {
+        if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+            mPathSnapshotArray.emplace_back( path, 0, FSnapshotPath::SNAPSHOT_SELECTED_VERTICES );
+        }
+
+        if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+
+            mPaintgroupSnapshotArray.emplace_back( paintGroup, 0, FSnapshotGroupPaint::SNAPSHOT_SELECTED_BUCKETS );
+        }
+    }
 }
 
 void
@@ -18,26 +33,19 @@ FOdysseyVectorUndoSelectVertex::Apply( UObject* iIgnored )
 {
     // save former selection
     FOdysseyVectorUndo::Apply( iIgnored );
-
-    for( FOdysseyVectorVertex* vertex : mPickedVertexArray )
+    
+    for( FSnapshotPath& pathSnapshot : mPathSnapshotArray )
     {
-        vertex->GetPath()->SelectVertex( vertex );
+        pathSnapshot.Restore();
     }
 
-    for( FOdysseyVectorBucket* bucket : mPickedBucketArray )
+    for( FSnapshotGroupPaint& paintgroupSnapshot : mPaintgroupSnapshotArray )
     {
-        FOdysseyVectorObject* ownerObject = bucket->GetOwner();
-
-        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        { 
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
-
-            paintGroup->SelectBucket( bucket );
-        }
+        paintgroupSnapshot.Restore();
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mScene->Update( 0 );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -52,25 +60,18 @@ FOdysseyVectorUndoSelectVertex::Revert( UObject* iIgnored )
     // save former selection
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( FOdysseyVectorVertex* vertex : mPickedVertexArray )
+    for( FSnapshotPath& pathSnapshot : mPathSnapshotArray )
     {
-        vertex->GetPath()->UnselectVertex( vertex );
+        pathSnapshot.Restore();
     }
 
-    for( FOdysseyVectorBucket* bucket : mPickedBucketArray )
+    for( FSnapshotGroupPaint& paintgroupSnapshot : mPaintgroupSnapshotArray )
     {
-        FOdysseyVectorObject* ownerObject = bucket->GetOwner();
-
-        if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        { 
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
-
-            paintGroup->UnselectBucket( bucket );
-        }
+        paintgroupSnapshot.Restore();
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mScene->Update( 0 );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

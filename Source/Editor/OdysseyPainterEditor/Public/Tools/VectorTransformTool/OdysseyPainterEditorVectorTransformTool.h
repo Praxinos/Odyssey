@@ -64,7 +64,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
 
     private:
         FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
-        std::vector<FOdysseyVectorPoint*> mSelectedPoints;
+        std::vector<FOdysseyVectorVertex*> mTransformedVertexArray;
+        std::vector<FOdysseyVectorHandleSegment*> mTransformedHandleArray;
         FOdysseyVectorUndo* mUndo;
 
         ::ULIS::FVec2D* mPickedPivot;

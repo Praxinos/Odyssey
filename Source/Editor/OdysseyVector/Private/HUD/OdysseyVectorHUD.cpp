@@ -338,7 +338,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
                                  , vertexRadius
                                  , iVertex->IsSelected() && ( iHUDFlags & HUD_MODE_VERTEX ) ? hcColor : fgColor
                                  , bgColor );
-
+/*
     if ( iHUDFlags & HUD_PATH_VERTEX_ALIGNMENT )
     {
         if( iVertex->IsHandleAligned() )
@@ -348,6 +348,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
             iBLContext->strokeCircle( point.x, point.y, vertexRadius + 2 );
         }
     }
+*/
 }
 
 // static
@@ -362,14 +363,14 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
 {
     FOdysseyVectorPath* path = iCubicSegment->GetPath();
     BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
-    FOdysseyVectorVertex* vertex0 = iCubicSegment->GetVertex(0);
-    FOdysseyVectorVertex* vertex1 = iCubicSegment->GetVertex(1);
-    FOdysseyVectorHandleSegment* handle0 = iCubicSegment->GetHandle(0);
-    FOdysseyVectorHandleSegment* handle1 = iCubicSegment->GetHandle(1);
-    BLPoint point[2] = { HUDMatrix.mapPoint( vertex0->GetX(), vertex0->GetY() )
-                       , HUDMatrix.mapPoint( vertex1->GetX(), vertex1->GetY() ) };
-    BLPoint handlePoint[2] = { HUDMatrix.mapPoint( handle0->GetX(), handle0->GetY() )
-                             , HUDMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) };
+    FOdysseyVectorVertex* vertex[2] = { iCubicSegment->GetVertex(0)
+                                      , iCubicSegment->GetVertex(1) };
+    FOdysseyVectorHandleSegment* handle[2] = { iCubicSegment->GetHandle(0)
+                                             , iCubicSegment->GetHandle(1) };
+    BLPoint point[2] = { HUDMatrix.mapPoint( vertex[0]->GetX(), vertex[0]->GetY() )
+                       , HUDMatrix.mapPoint( vertex[1]->GetX(), vertex[1]->GetY() ) };
+    BLPoint handlePoint[2] = { HUDMatrix.mapPoint( handle[0]->GetX(), handle[0]->GetY() )
+                             , HUDMatrix.mapPoint( handle[1]->GetX(), handle[1]->GetY() ) };
     BLPath segment;
 
     segment.moveTo( point[0] );
@@ -389,6 +390,7 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
     {
         static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
         static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+        static BLRgba32 greenColor = BLRgba32( 0x00, 0x00, 0xFF, 0xFF );
 
         for( int i = 0; i < 2; i++ )
         {
@@ -397,7 +399,7 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
                                        , point[i].y
                                        , handlePoint[i].x
                                        , handlePoint[i].y
-                                       , whiteColor
+                                       , vertex[i]->IsHandleAligned() ? fgColor : whiteColor
                                        , blackColor );
 
             // control handle 0

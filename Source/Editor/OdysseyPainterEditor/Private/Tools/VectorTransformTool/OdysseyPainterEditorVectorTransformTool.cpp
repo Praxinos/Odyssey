@@ -172,12 +172,19 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorScene
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
-            mSelectedPoints.clear();
-            mTransformHUD->GetSelectedVertices( iScene, mSelectedPoints );
+            mTransformedVertexArray.clear();
+            mTransformedHandleArray.clear();
+
+            GetSelectedVertices( iScene, mTransformedVertexArray );
+            // static call
+            UOdysseyPainterEditorVectorBaseTool::GetSegmentHandlesFromVertices( mTransformedVertexArray
+                                                                              , mTransformedHandleArray );
 
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by the mouse up event in the case of a no-drag
-            mUndo = new FOdysseyVectorUndoPointPosition( iScene, mSelectedPoints );
+            mUndo = new FOdysseyVectorUndoPointPosition( iScene
+                                                       , mTransformedVertexArray
+                                                       , mTransformedHandleArray );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -282,9 +289,17 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
-        for( int i = 0; i < mSelectedPoints.size(); i++ )
+        for( int i = 0; i < mTransformedVertexArray.size(); i++ )
         {
-            TransformPoint( mSelectedPoints[i]
+            TransformPoint( mTransformedVertexArray[i]
+                          , spaceMatrix
+                          , inverseSpaceMatrix
+                          , translateMatrix );
+        }
+
+        for( int i = 0; i < mTransformedHandleArray.size(); i++ )
+        {
+            TransformPoint( mTransformedHandleArray[i]
                           , spaceMatrix
                           , inverseSpaceMatrix
                           , translateMatrix );
@@ -434,9 +449,17 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
-        for( int i = 0; i < mSelectedPoints.size(); i++ )
+        for( int i = 0; i < mTransformedVertexArray.size(); i++ )
         {
-            TransformPoint( mSelectedPoints[i]
+            TransformPoint( mTransformedVertexArray[i]
+                          , spaceMatrix
+                          , inverseSpaceMatrix
+                          , rotateMatrix );
+        }
+
+        for( int i = 0; i < mTransformedHandleArray.size(); i++ )
+        {
+            TransformPoint( mTransformedHandleArray[i]
                           , spaceMatrix
                           , inverseSpaceMatrix
                           , rotateMatrix );
@@ -619,14 +642,22 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
              // side note: the sqrt() is there because surface rises at the square of dimension factor. We have to correct that.
             double radiusRatio = selectionBoxArea ? sqrt ( ( x2mx1 * y2my1 ) / selectionBoxArea ) : 1.0f;
 
-            for( int i = 0; i < mSelectedPoints.size(); i++ )
+            for( int i = 0; i < mTransformedVertexArray.size(); i++ )
             {
-                TransformPoint( mSelectedPoints[i]
+                TransformPoint( mTransformedVertexArray[i]
                               , spaceMatrix
                               , inverseSpaceMatrix
                               , scalingMatrix );
 
-                mSelectedPoints[i]->SetRadius( mSelectedPoints[i]->GetRadius() * radiusRatio );
+                mTransformedVertexArray[i]->SetRadius( mTransformedVertexArray[i]->GetRadius() * radiusRatio );
+            }
+
+            for( int i = 0; i < mTransformedHandleArray.size(); i++ )
+            {
+                TransformPoint( mTransformedHandleArray[i]
+                              , spaceMatrix
+                              , inverseSpaceMatrix
+                              , scalingMatrix );
             }
         }
 

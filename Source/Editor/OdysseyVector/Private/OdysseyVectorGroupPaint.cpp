@@ -1764,33 +1764,6 @@ FOdysseyVectorGroupPaint::CopyShape()
     return groupPaintCopy;
 }
 
-void
-FOdysseyVectorGroupPaint::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
-                                           , ePointSelectionFlags iPointSelectionFlags )
-{
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
-    {
-        FOdysseyVectorObject *child = (*it);
-
-        if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
-
-            path->GetSelectedPoints( oPointArray, iPointSelectionFlags );
-        }
-    }
-
-    if( iPointSelectionFlags & ePointSelectionFlags::Bucket )
-    {
-        for( std::list<FOdysseyVectorBucket*>::iterator it = mSelectedBucketList.begin(); it != mSelectedBucketList.end(); ++it )
-        {
-            FOdysseyVectorBucket *bucket = (*it);
-
-            oPointArray.push_back( bucket );
-        }
-    }
-}
-
 bool
 FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld )
 {

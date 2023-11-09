@@ -102,7 +102,7 @@ class ODYSSEYVECTOR_API FSnapshotObject
 
         virtual void Restore();
 
-    private:
+    protected:
         uint32 mObjectSnapshotFlags;
         FOdysseyVectorObject* mObject;
         std::vector<FSnapshotObject*> mChildrenSnapshotArray;
@@ -116,9 +116,10 @@ class ODYSSEYVECTOR_API FSnapshotObject
 class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
 {
     public:
-        static const uint32 SNAPSHOT_VERTICES = ( 1 << 0 );
-        static const uint32 SNAPSHOT_SEGMENTS = ( 1 << 1 );
-        static const uint32 SNAPSHOT_ALL     = 0xFFFFFFFF;
+        static const uint32 SNAPSHOT_VERTICES          = ( 1 << 0 );
+        static const uint32 SNAPSHOT_SEGMENTS          = ( 1 << 1 );
+        static const uint32 SNAPSHOT_SELECTED_VERTICES = ( 1 << 2 );
+        static const uint32 SNAPSHOT_ALL               = 0xFFFFFFFF;
 
         ~FSnapshotPath();
         FSnapshotPath( FOdysseyVectorPath* iPath
@@ -131,13 +132,15 @@ class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
         uint32 mPathSnapshotFlags;
         std::vector<FSnapshotVertex> mVertexSnapshotArray;
         std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;
+        std::list<FOdysseyVectorVertex*> mSelectedVertexList;
 };
 
 class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotObject
 {
     public:
-        static const uint32 SNAPSHOT_BUCKETS = ( 1 << 0 );
-        static const uint32 SNAPSHOT_ALL     = 0xFFFFFFFF;
+        static const uint32 SNAPSHOT_BUCKETS          = ( 1 << 0 );
+        static const uint32 SNAPSHOT_SELECTED_BUCKETS = ( 1 << 1 );
+        static const uint32 SNAPSHOT_ALL              = 0xFFFFFFFF;
 
         ~FSnapshotGroupPaint();
         FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
@@ -149,6 +152,7 @@ class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotObject
     private:
         uint32 mPaintGroupSnapshotFlags;
         std::vector<FSnapshotBucket> mBucketSnapshotArray;
+        std::list<FOdysseyVectorBucket*> mSelectedBucketList;
 };
 
 

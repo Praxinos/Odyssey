@@ -99,9 +99,9 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-    if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
+    if( ( selectedObjectList.size() <= 1 ) && ( iForceWorld == false ) )
     {
-        FOdysseyVectorObject* selectedObject = selectedObjectList.front();
+        FOdysseyVectorObject* selectedObject = selectedObjectList.size() ? selectedObjectList.front() : iScene;
 
         mSelectionBox.inited = true;
         mSelectionBox.rect = selectedObject->GetBBox( false );

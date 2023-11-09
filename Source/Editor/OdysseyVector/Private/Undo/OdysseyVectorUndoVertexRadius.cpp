@@ -25,21 +25,14 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorSc
 }
 
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
-                                                              , std::vector<FOdysseyVectorPoint*>& iPointArray )
+                                                              , std::vector<FOdysseyVectorVertex*>& iVertexArray )
     : FOdysseyVectorUndo( iScene )
 {
-    mVertexSnapshotArray.reserve( iPointArray.size() );
+    mVertexSnapshotArray.reserve( iVertexArray.size() );
 
-    for( int i = 0; i < iPointArray.size(); i++ )
+    for( FOdysseyVectorVertex* vertex : iVertexArray )
     {
-        if( iPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
-        {
-            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>( iPointArray[i] );
-
-            mVertexSnapshotArray.emplace_back( vertex
-                                             , FSnapshotPoint::SNAPSHOT_RADIUS
-                                             , FSnapshotVertex::SNAPSHOT_ALL );
-        }
+        mVertexSnapshotArray.emplace_back( vertex, FSnapshotPoint::SNAPSHOT_RADIUS, 0 );
     }
 }
 

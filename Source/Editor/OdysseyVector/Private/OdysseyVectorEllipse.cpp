@@ -39,6 +39,11 @@ FOdysseyVectorEllipse::FOdysseyVectorEllipse( const FString& iName
     AddSegment ( mCubicSegment[2] );
     AddSegment ( mCubicSegment[3] );
 
+    mCubicVertex[0]->SetHandleAligned( true );
+    mCubicVertex[1]->SetHandleAligned( true );
+    mCubicVertex[2]->SetHandleAligned( true );
+    mCubicVertex[3]->SetHandleAligned( true );
+
     UpdateShape( 0 );
 }
 
