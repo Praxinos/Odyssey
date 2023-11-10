@@ -7,6 +7,8 @@
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathExtend.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
+#include "Palette/OdysseyPalette.h"
+#include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathDrawingTool"
 
@@ -176,7 +178,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::SetPathColor( FOdysseyVectorPath* iP
 
     if( palette )
     {
-        UOdysseyPaletteEntry * paletteEntry = palette->CurrentEntry.Get();
+        UOdysseyPaletteEntry* paletteEntry = palette->CurrentEntry.Get();
 
         if( paletteEntry && paletteEntry->IsA( UOdysseyPaletteEntryColor::StaticClass() ) )
         {

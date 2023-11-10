@@ -3,6 +3,8 @@
 
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutToolHUD.h"
+#include "PainterEditor/OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathCutTool"
 
