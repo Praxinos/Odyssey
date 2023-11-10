@@ -21,10 +21,10 @@ bool UOdysseyPainterEditorRasterEllipseSelection::OnMouseDown(const FOdysseyPoin
     if (!mIsSelectionAreaSet) //Creating a zone for the selection
     {
         TArray<FVector2D> areaPoints;
-        areaPoints.Add(FVector2D(iPointInTexture.x, iPointInTexture.y));
+        areaPoints.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
         mSelectionArea = new FOdysseyHUDPolygon(FName("SelectionArea"), areaPoints);
         mHUD->AddElement(mSelectionArea);
-        mDownReference = FVector2D( iPointInTexture.x, iPointInTexture.y );
+        mDownReference = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y) );
         return true;
     }
 
@@ -41,7 +41,7 @@ void UOdysseyPainterEditorRasterEllipseSelection::OnMouseDrag(const FOdysseyPoin
     if (!mIsSelectionAreaSet)
     {
         mSelectionArea->GetPoints().Empty();
-        FVector2D referencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
+        FVector2D referencePoint = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y));
         FVector2D center = (mDownReference + referencePoint) / 2;
         int a = FMath::Abs( mDownReference.X - referencePoint.X ) / 2;
         int b = FMath::Abs( mDownReference.Y - referencePoint.Y ) / 2;

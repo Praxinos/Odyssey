@@ -23,7 +23,7 @@ bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseDown(const FOdysseyPo
         TArray<FVector2D> areaPoints;
         for (int i = 0; i < 4; i++)
         {
-            areaPoints.Add(FVector2D(iPointInTexture.x, iPointInTexture.y));
+            areaPoints.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
         }
 
         mSelectionArea = new FOdysseyHUDPolygon(FName("SelectionArea"), areaPoints);
@@ -42,7 +42,7 @@ void UOdysseyPainterEditorRasterRectangleSelection::OnMouseHover(const FOdysseyP
 void UOdysseyPainterEditorRasterRectangleSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if (!mIsSelectionAreaSet)
-        ConstrainSelectionToRectangle(FVector2D(iPointInTexture.x, iPointInTexture.y));
+        ConstrainSelectionToRectangle(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
 }
 
 bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)

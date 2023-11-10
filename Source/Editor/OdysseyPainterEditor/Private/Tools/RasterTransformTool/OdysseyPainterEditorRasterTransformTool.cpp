@@ -47,7 +47,11 @@ UOdysseyPainterEditorRasterTransformTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (mHUD->OnKeyDown(iPointInTexture, iKey)) //Handling HUD events if needed
+    FOdysseyPoint point = iPointInTexture;
+    point.x = FMath::RoundToInt( point.x );
+    point.y = FMath::RoundToInt( point.y );
+
+    if (mHUD->OnKeyDown(point, iKey)) //Handling HUD events if needed
         return true;
 
     if (mSelection->OnMouseDown(iPointInTexture, iKey))
@@ -56,14 +60,14 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
     if( mTransformArea )
     {
         mTransformCaptureMode = DetectCaptureMode( FVector2D( iPointInTexture.x, iPointInTexture.y ));
-        mMouseLastReferencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
+        mMouseLastReferencePoint = FVector2D(point.x, point.y);
         if( mTransformCaptureMode != EOdysseyTransformCapture::NoCapture )
             return true;
     }
     else if( mSelection->IsInSelectionArea( FVector2D( iPointInTexture.x, iPointInTexture.y )))
     {
         mTransformCaptureMode = EOdysseyTransformCapture::Inside;
-        mMouseLastReferencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
+        mMouseLastReferencePoint = FVector2D(point.x, point.y);
         CreateTransformAreaFromSelection();
         CreateTransformBlockFromSelectionBlock();
         return true;
@@ -99,7 +103,11 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint&
 
 void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    mHUD->CapturedMouseMove(iPointInTexture);
+    FOdysseyPoint point = iPointInTexture;
+    point.x = FMath::RoundToInt(point.x);
+    point.y = FMath::RoundToInt(point.y);
+
+    mHUD->CapturedMouseMove(point);
 
     mSelection->OnMouseDrag(iPointInTexture);
 
@@ -107,16 +115,16 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
     {
         for (int i = 0; i < mHandles.Num(); i++)
         {
-            mHandles[i]->SetPosition( mHandles[i]->GetPosition() - (mMouseLastReferencePoint - FVector2D(iPointInTexture.x, iPointInTexture.y)));
+            mHandles[i]->SetPosition( mHandles[i]->GetPosition() - (mMouseLastReferencePoint - FVector2D(point.x, point.y)));
         }
-        mMouseLastReferencePoint = FVector2D(iPointInTexture.x, iPointInTexture.y);
+        mMouseLastReferencePoint = FVector2D(point.x, point.y);
         //BlendTransformAreaToPaintBlock();
         return;
     }
     else if (mTransformCaptureMode == EOdysseyTransformCapture::Rotation)
     {
         ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
-        double rotationDelta = GetRotationAngleFromLastReference(FVector2D(iPointInTexture.x, iPointInTexture.y)) - mLastReferenceRotation;
+        double rotationDelta = GetRotationAngleFromLastReference(FVector2D(point.x, point.y)) - mLastReferenceRotation;
         mRotation+= rotationDelta;
         mLastReferenceRotation += rotationDelta;
         TArray<FVector2D>& points = mTransformArea->GetPoints();
@@ -134,10 +142,10 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
     switch (mTransformAreaConstrain)
     {
     case EOdysseyTransformConstrain::Rectangle:
-        ConstrainToRectangle(FVector2D(iPointInTexture.x, iPointInTexture.y));
+        ConstrainToRectangle(FVector2D(point.x, point.y));
         break;
     case EOdysseyTransformConstrain::Parallelogram:
-        ConstrainToParallelogram(FVector2D(iPointInTexture.x, iPointInTexture.y));
+        ConstrainToParallelogram(FVector2D(point.x, point.y));
         break;
     case EOdysseyTransformConstrain::NoConstrain:
         break;
@@ -151,9 +159,13 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    FOdysseyPoint point = iPointInTexture;
+    point.x = FMath::RoundToInt(point.x);
+    point.y = FMath::RoundToInt(point.y);
+
     mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
 
-    if( mHUD->OnKeyUp(iPointInTexture, iKey) )
+    if( mHUD->OnKeyUp(point, iKey) )
         return true;
 
     if( mSelection->OnMouseUp( iPointInTexture, iKey ))
@@ -257,10 +269,14 @@ EMouseCursor::Type UOdysseyPainterEditorRasterTransformTool::GetMouseCursor()
 double
 UOdysseyPainterEditorRasterTransformTool::GetRotationAngleFromLastReference( FVector2D iPointInTexture )
 {
+    FVector2D point = iPointInTexture;
+    point.X = FMath::RoundToInt(point.X);
+    point.Y = FMath::RoundToInt(point.Y);
+
     if( !mTransformArea )
         return 0;
 
-    FVector2D refPoint = mPivot - iPointInTexture;
+    FVector2D refPoint = mPivot - point;
 
     return FMath::Atan2(refPoint.X, refPoint.Y);
 }
