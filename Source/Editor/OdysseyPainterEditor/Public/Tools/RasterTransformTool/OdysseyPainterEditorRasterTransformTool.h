@@ -19,12 +19,11 @@ enum class EOdysseySelectionShape : uint8
     Ellipse
 };
 
-enum class EOdysseyTransformConstrain
+UENUM()
+enum class EOdysseyTransformConstrain : uint8
 {
-    NoConstrain,
     Rectangle,
-    RectangleForcedRatio,
-    Parallelogram
+    NoConstrain,
 };
 
 enum class EOdysseyTransformCapture
@@ -66,7 +65,7 @@ public:
     virtual EMouseCursor::Type GetMouseCursor() override;
 
 private:
-    double GetRotationAngleFromLastReference(FVector2D iPointInTexture);
+    int GetRotationAngleFromLastReference(FVector2D iPointInTexture);
 
     void CreateTransformAreaFromSelection();
     EOdysseyTransformCapture DetectCaptureMode( FVector2D iPoint );
@@ -88,6 +87,10 @@ public:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     EOdysseySelectionShape SelectionShape;
 
+
+    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    EOdysseyTransformConstrain Constrain = EOdysseyTransformConstrain::Rectangle;
+
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     bool Uniform = false;
 
@@ -98,13 +101,12 @@ private:
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
     FOdysseyRasterBlockMutator mRasterMutator;
 
-    EOdysseyTransformConstrain mTransformAreaConstrain;
     EOdysseyTransformCapture mTransformCaptureMode;
     FOdysseyHUDPolygon* mTransformArea;
     TArray<FOdysseyHUDHandle*> mHandles;
     FVector2D mPivot;
 
-    double mLastReferenceRotation;
+    int mLastReferenceRotation;
     FVector2D mMouseLastReferencePoint;
     ::ULIS::FRectI mInitialSelectionBoundingBox;
 
