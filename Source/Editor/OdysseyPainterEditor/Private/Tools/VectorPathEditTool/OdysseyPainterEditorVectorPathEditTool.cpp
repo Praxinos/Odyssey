@@ -8,6 +8,7 @@
 #include "Undo/OdysseyVectorUndoVertexRadius.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "Undo/OdysseyVectorUndoPathEdit.h"
+#include "Undo/OdysseyVectorUndoVertexAlignment.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathEditTool"
 
@@ -248,6 +249,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorSce
     mSelectedPathArray.clear();
     mPickedVertexArray.clear();
     mPickedHandleArray.clear();
+    mSegmentAdjustmentArray.clear();
 
     vectorEngine->Traverse
     ( iScene
@@ -282,6 +284,17 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorSce
     if( ( mPickingMode == ePathPickingMode::SegmentHandle ) &&  ( mPickedVertexArray.size() == 1 ) )
     {
         FOdysseyVectorVertex* vertex = mPickedVertexArray[0];
+
+        //-------------- undo ---------------//
+        GEditor->BeginTransaction(LOCTEXT("AlignPointSelection","Align Point Selection"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, mPickedVertexArray );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction(); 
+        //---------- end of undo ------------//
 
         vertex->SetHandleAligned( vertex->IsHandleAligned() ? false : true );
 
@@ -352,6 +365,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorSce
                     GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
+                //---------- end of undo
             }
             break;
 
@@ -376,6 +390,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorSce
                     GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
+                //---------- end of undo
             }
             break;
 

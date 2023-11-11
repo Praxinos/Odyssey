@@ -10,13 +10,13 @@
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexAlign : public FOdysseyVectorUndo
+class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexAlignment : public FOdysseyVectorUndo
 {
     public:
-        ~FOdysseyVectorUndoVertexAlign();
-        FOdysseyVectorUndoVertexAlign( FOdysseyVectorScene* iScene
-                                     , const std::vector<FOdysseyVectorVertex*>& iVertexArray );
-
+        ~FOdysseyVectorUndoVertexAlignment();
+        FOdysseyVectorUndoVertexAlignment( FOdysseyVectorScene* iScene
+                                         , const std::vector<FOdysseyVectorVertex*>& iVertexArray );
+        FOdysseyVectorUndoVertexAlignment( FOdysseyVectorScene* iScene, FOdysseyVectorVertex* iVertex );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 
@@ -26,10 +26,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexAlign : public FOdysseyVectorUnd
         /** Describes this change (for debugging) */
         virtual FString ToString() const override;
 
-    protected:
-        bool IsSegmentRecorded( FOdysseyVectorSegment* iSegment );
-
     private:
-        std::vector<FOdysseyVectorVertex*> mAlignedVertexArray;
+        std::vector<FSnapshotVertex> mVertexSnapshotArray;
         std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;
 };

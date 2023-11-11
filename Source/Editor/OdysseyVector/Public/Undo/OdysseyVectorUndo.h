@@ -27,7 +27,7 @@ class ODYSSEYVECTOR_API FSnapshotPoint
 
         virtual void Restore();
 
-    private:
+    protected:
         uint32 mPointSnapshotFlags;
         FOdysseyVectorPoint* mPoint;
         ULIS::FVec2D mCoords;
@@ -37,8 +37,8 @@ class ODYSSEYVECTOR_API FSnapshotPoint
 class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
 {
     public:
-        static const uint32 SNAPSHOT_FLAGS = ( 1 << 0 );
-        static const uint32 SNAPSHOT_ALL   = 0xFFFFFFFF;
+        static const uint32 SNAPSHOT_ALIGNMENT = ( 1 << 0 );
+        static const uint32 SNAPSHOT_ALL       = 0xFFFFFFFF;
 
         ~FSnapshotVertex();
         FSnapshotVertex( FOdysseyVectorVertex* iVertex
@@ -47,9 +47,9 @@ class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
 
         virtual void Restore() override;
 
-    private:
+    protected:
         uint32 mVertexSnapshotFlags;
-        uint32 mVertexFlags;
+        bool mAlignment;
 };
 
 class ODYSSEYVECTOR_API FSnapshotSegmentCubic

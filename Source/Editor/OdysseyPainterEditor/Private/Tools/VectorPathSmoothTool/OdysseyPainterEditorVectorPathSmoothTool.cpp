@@ -159,33 +159,29 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorScen
             if( pickedPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
             {
                 FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(pickedPointArray[i]);
+                FOdysseyVectorSegment* segment[2] = { vertex->GetFirstSegment()
+                                                    , vertex->GetLastSegment() };
 
-                if( vertex->GetSegmentCount() == 2 )
+                // record segment for undos first
+                if( segment[0] && mUndoSegmentReshape->HasSegment( segment[0] ) == false )
                 {
-                    FOdysseyVectorSegment* segment[2] = { vertex->GetFirstSegment()
-                                                        , vertex->GetLastSegment() };
+                    mUndoSegmentReshape->RecordSegment( segment[0] );
+                }
 
-                    // record segment for undos first
-                    if( mUndoSegmentReshape->HasSegment( segment[0] ) == false )
-                    {
-                        mUndoSegmentReshape->RecordSegment( segment[0] );
-                    }
+                if( segment[1] && mUndoSegmentReshape->HasSegment( segment[1] ) == false )
+                {
+                    mUndoSegmentReshape->RecordSegment( segment[1] );
+                }
 
-                    if( mUndoSegmentReshape->HasSegment( segment[1] ) == false )
-                    {
-                        mUndoSegmentReshape->RecordSegment( segment[1] );
-                    }
+                // then sharp or smooth
+                if( SmoothingMode == ePathSmoothingMode::Sharp )
+                {
+                    FOdysseyVectorPath::SharpSegments( vertex, PreserveHandleLength );
+                }
 
-                    // then sharp or smooth
-                    if( SmoothingMode == ePathSmoothingMode::Sharp )
-                    {
-                        FOdysseyVectorPath::SharpSegments( vertex, PreserveHandleLength );
-                    }
-
-                    if( SmoothingMode == ePathSmoothingMode::Round )
-                    {
-                        FOdysseyVectorPath::SmoothSegments( vertex, PreserveHandleLength );
-                    }
+                if( SmoothingMode == ePathSmoothingMode::Round )
+                {
+                    FOdysseyVectorPath::SmoothSegments( vertex, PreserveHandleLength );
                 }
             }
         }

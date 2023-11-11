@@ -54,5 +54,4 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;
         FSelectionBox mSelectionBox;
-        //bool mSelecting;
 };

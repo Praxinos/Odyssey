@@ -44,9 +44,9 @@ FOdysseyVectorLine::UpdateShape( uint32 iUpdateFlags )
     mCubicVertex[0]->Set( 0.0f  , 0.0f    );
     mCubicVertex[1]->Set( mWidth, mHeight );
 
-    // a Line is a cubic segment with its handles aligned
-    mCubicSegment->GetHandle(0)->Set( mWidth  * 0.25f, mHeight  * 0.25f );
-    mCubicSegment->GetHandle(1)->Set( mWidth  * 0.75f, mHeight  * 0.75f );
+    // a Line is a cubic segment with its handles at vertex coordinates
+    mCubicSegment->GetHandle(0)->Set( mCubicVertex[0]->GetCoords() );
+    mCubicSegment->GetHandle(1)->Set( mCubicVertex[1]->GetCoords() );
 
     //mCubicSegment->Update( nullptr );
     FOdysseyVectorPath::UpdateShape( iUpdateFlags );

@@ -1827,15 +1827,16 @@ FOdysseyVectorPath::GetAverageHandleVector( FOdysseyVectorVertex* iVertex, bool 
 void
 FOdysseyVectorPath::SharpSegments( FOdysseyVectorVertex* iVertex, bool iPreserveHandleLength )
 {
-    std::list<FOdysseyVectorSegment*>& segmentList = iVertex->GetSegmentList();
-
-    for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+    for( FOdysseyVectorSegment*segment : iVertex->GetSegmentList() )
     {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
+        if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-        cubicSegment->GetHandle( iVertex )->Set( iVertex->GetX(), iVertex->GetY() );
+            cubicSegment->GetHandle( iVertex )->Set( iVertex->GetX(), iVertex->GetY() );
 
-        cubicSegment->Invalidate();
+            cubicSegment->Invalidate();
+        }
     }
 }
 

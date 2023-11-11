@@ -142,13 +142,12 @@ FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex
                                 , uint32 iVertexSnapshotFlags )
     : FSnapshotPoint( iVertex, iPointSnapshotFlags)
     , mVertexSnapshotFlags( iVertexSnapshotFlags )
-    , mVertexFlags( 0 )
 {
-    if( iVertexSnapshotFlags & SNAPSHOT_FLAGS )
+    if( iVertexSnapshotFlags & SNAPSHOT_ALIGNMENT )
     {
         // note: we only save the flags that are "manually" set by the user,
         // i am unsure about the consistency of other flags
-        mVertexFlags = iVertex->GetFlags() & FOdysseyVectorVertex::HANDLE_ALIGNED;
+        mAlignment = iVertex->IsHandleAligned();
     }
 }
 
@@ -156,6 +155,17 @@ void
 FSnapshotVertex::Restore()
 {
     FSnapshotPoint::Restore();
+
+    if( mVertexSnapshotFlags & SNAPSHOT_ALIGNMENT )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(mPoint);
+        bool alignment = vertex->IsHandleAligned();
+
+        vertex->SetHandleAligned( mAlignment );
+
+        // swap for redo
+        mAlignment = alignment;
+    }
 }
 
 FSnapshotSegmentCubic::~FSnapshotSegmentCubic()

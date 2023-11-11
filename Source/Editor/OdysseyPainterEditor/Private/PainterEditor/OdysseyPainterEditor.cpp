@@ -30,8 +30,7 @@
 #include "Undo/OdysseyVectorUndoPathStitch.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoApplyTransformations.h"
-#include "Undo/OdysseyVectorUndoVertexAlign.h"
-#include "Undo/OdysseyVectorUndoVertexUnalign.h"
+#include "Undo/OdysseyVectorUndoVertexAlignment.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
 
@@ -910,40 +909,56 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorVertex*> unalignedVertexArray; // for undoing
-    std::list<FOdysseyVectorObject*> objectList;
 
     unalignedVertexArray.reserve( 50 );
 
-    // concerns all selected objects of a branch excluding the scene
-    vectorEngine->GetFocusedObjectList( objectList );
-
-    for( FOdysseyVectorObject* object : objectList )
-    {
-        if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    // first step prepare the array. First step is needed because we are going to snapshot 
+    // segment handles coordinates before they'll get aligned.
+    vectorEngine->Traverse(
+        iScene
+      , iScene
+      , 0
+      , [ iScene
+        , vectorEngine
+        , &unalignedVertexArray ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
         {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
-
-            for( FOdysseyVectorVertex* vertex : path->GetSelectedVertexList() )
+            if( vectorEngine->HasFocus( iScene, object, iTraversalFlags ) )
             {
-                if( vertex->IsHandleAligned() == true )
+                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                 {
-                    vertex->SetHandleAligned( false );
+                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                    unalignedVertexArray.push_back( vertex );
+                    for( FOdysseyVectorVertex* vertex : path->GetSelectedVertexList() )
+                    {
+                        if( vertex->IsHandleAligned() == true )
+                        {
+                            unalignedVertexArray.push_back( vertex );
+                        }
+                    }
                 }
-            }
-        }
-    }
 
+                return FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED;
+            }
+
+            return 0;
+        } );
+
+    //------------- undo ----------------//
     GEditor->BeginTransaction(LOCTEXT("UnalignPointSelection","Unalign Point Selection"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexUnalign( iScene, unalignedVertexArray );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, unalignedVertexArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
+    //---------- end of undo ------------//
 
+    // the actual unalignment
+    for( FOdysseyVectorVertex* vertex : unalignedVertexArray )
+    {
+        vertex->SetHandleAligned( false );
+    }
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
 
@@ -959,40 +974,50 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorScene* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorVertex*> alignedVertexArray; // for undoing
-    std::list<FOdysseyVectorObject*> objectList;
 
     alignedVertexArray.reserve( 50 );
 
-    // concerns all selected objects of a branch excluding the scene
-    vectorEngine->GetFocusedObjectList( objectList );
-
     // first step prepare the array. First step is needed because we are going to snapshot 
     // segment handles coordinates before they'll get aligned.
-    for( FOdysseyVectorObject* object : objectList )
-    {
-        if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    vectorEngine->Traverse(
+        iScene
+      , iScene
+      , 0
+      , [ iScene
+        , vectorEngine
+        , &alignedVertexArray ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
         {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
-
-            for( FOdysseyVectorVertex* vertex : path->GetSelectedVertexList() )
+            if( vectorEngine->HasFocus( iScene, object, iTraversalFlags ) )
             {
-                if( vertex->IsHandleAligned() == false )
+                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                 {
-                    alignedVertexArray.push_back( vertex );
-                }
-            }
-        }
-    }
+                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
+                    for( FOdysseyVectorVertex* vertex : path->GetSelectedVertexList() )
+                    {
+                        if( vertex->IsHandleAligned() == false )
+                        {
+                            alignedVertexArray.push_back( vertex );
+                        }
+                    }
+                }
+
+                return FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED;
+            }
+
+            return 0;
+        } );
+
+    //------------- undo ----------------//
     GEditor->BeginTransaction(LOCTEXT("AlignPointSelection","Align Point Selection"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlign( iScene, alignedVertexArray );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, alignedVertexArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction(); 
-
+    //---------- end of undo ------------//
 
     // the actual alignment ( alignment is based on the first segment met)
     for( FOdysseyVectorVertex* vertex : alignedVertexArray )

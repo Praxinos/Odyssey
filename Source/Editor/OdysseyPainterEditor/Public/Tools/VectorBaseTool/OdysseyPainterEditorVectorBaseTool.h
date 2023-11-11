@@ -49,6 +49,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
         virtual void ExtendContextMenu( FMenuBuilder& menu );
 
+        bool IsDragging();
+
     protected:
         virtual uint64 LoadVector( FOdysseyVectorScene* iScene ){ return 0; };
         virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ){ return 0; };
@@ -71,6 +73,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
+
 
     private:
         void OnKeyDownCommon( FOdysseyVectorScene* iScene, const FKey& iKey );
@@ -108,6 +111,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         FOdysseyPainterEditorVectorBaseToolHUD* mBaseHUD;
         bool mHasContextMenu;
         bool mDoubleMouseDown_WorkAround;
+        bool mDragging;
 
     public:
         //UPROPERTY( EditAnywhere, Category = Behavior )

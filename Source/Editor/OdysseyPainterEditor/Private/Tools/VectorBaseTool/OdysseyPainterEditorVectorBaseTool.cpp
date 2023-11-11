@@ -82,6 +82,12 @@ UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorScene* i
       } );
 }
 
+bool
+UOdysseyPainterEditorVectorBaseTool::IsDragging()
+{
+    return mDragging;
+}
+
 void
 UOdysseyPainterEditorVectorBaseTool::GetSegmentHandlesFromVertices( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                                                   , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray )
@@ -280,6 +286,8 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
+    mDragging = false;
+
   if( mDoubleMouseDown_WorkAround == false ) // workaround
   {                                          // workaround
     mDoubleMouseDown_WorkAround = true;      // workaround
@@ -331,6 +339,8 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInT
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
+    mDragging = true;
+
     if( hasVector )
     {
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
@@ -356,6 +366,8 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
     bool ret = false;
 
     mDoubleMouseDown_WorkAround = false; // workaround
+
+    mDragging = false;
 
     if( hasVector )
     {

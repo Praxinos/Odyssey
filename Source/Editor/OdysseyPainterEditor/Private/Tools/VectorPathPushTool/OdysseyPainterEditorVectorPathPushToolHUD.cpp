@@ -56,7 +56,7 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict pushing to the selection 
-    if( mPathPushTool->RestrictToSelectedObjects && iScene->GetSelectedObjectList().size() )
+    if( mPathPushTool->RestrictToSelectedObjects && iScene->GetSelectedObjectList().size() && ( mPathPushTool->IsDragging() == false ) )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
