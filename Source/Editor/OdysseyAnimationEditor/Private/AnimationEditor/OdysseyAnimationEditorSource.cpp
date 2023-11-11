@@ -8,6 +8,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyMediaRaster.h"
 #include "ULISLoaderModule.h"
+#include "Undo/OdysseyVectorUndoEngineClear.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorSource"
 
@@ -187,6 +188,26 @@ FOdysseyAnimationEditorSource::Clear()
 					)
 				);
 				mutator.Commit();
+			}
+		}
+        else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
+        {
+            TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
+            for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
+            {
+                FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
+				// needed for undos
+				GEditor->BeginTransaction(LOCTEXT("ClearVectorScene", "Clear Vector Scene"));
+				if (GUndo)
+				{
+					FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
+
+					GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
+				}
+				GEditor->EndTransaction();
+
+				vectorEngine->SetScene(new FOdysseyVectorScene("Scene"));
+				vectorEngine->Signal(FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW);
 			}
 		}
 	}
