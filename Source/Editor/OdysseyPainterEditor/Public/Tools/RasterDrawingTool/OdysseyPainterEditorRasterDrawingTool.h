@@ -206,6 +206,7 @@ protected:
     UPROPERTY()
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
+public:
     UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;
 

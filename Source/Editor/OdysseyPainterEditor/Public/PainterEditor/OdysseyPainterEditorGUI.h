@@ -55,6 +55,7 @@ protected:
     void SwitchTabletAPI();
 
     void ClearCurrentLayer();
+    void ToggleEraserButton();
 
 private:
     FOdysseyPainterEditor*                          mEditor;

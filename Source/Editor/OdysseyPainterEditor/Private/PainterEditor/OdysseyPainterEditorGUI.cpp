@@ -127,8 +127,9 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.Discord, Discord )
     MAP_ACTION(painterEditorCommands.SwitchTabletAPI, SwitchTabletAPI )
 
+    //Need to rethink the commands and shortcuts to put them in the right place and not in GUI
     MAP_ACTION(painterEditorCommands.ClearCurrentLayer, ClearCurrentLayer)
-
+    MAP_ACTION(painterEditorCommands.ToggleEraserButton, ToggleEraserButton)
 
     #undef MAP_ACTION
 }
@@ -407,6 +408,17 @@ void FOdysseyPainterEditorGUI::ClearCurrentLayer()
 {
     if( mEditor && mEditor->GetSource() )
         mEditor->GetSource()->Clear();
+}
+
+void FOdysseyPainterEditorGUI::ToggleEraserButton()
+{
+    if( mEditor )
+    {
+        if( mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()) )
+        {
+            Cast< UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool())->BlendParameters.bEraserMode = !Cast< UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool())->BlendParameters.bEraserMode;
+        }
+    }
 }
 
 #undef LOCTEXT_NAMESPACE
