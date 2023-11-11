@@ -127,6 +127,9 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.Discord, Discord )
     MAP_ACTION(painterEditorCommands.SwitchTabletAPI, SwitchTabletAPI )
 
+    MAP_ACTION(painterEditorCommands.ClearCurrentLayer, ClearCurrentLayer)
+
+
     #undef MAP_ACTION
 }
 
@@ -398,6 +401,12 @@ void
 FOdysseyPainterEditorGUI::SwitchTabletAPI()
 {
     SOdysseyTabletAPISwitcher::Open();
+}
+
+void FOdysseyPainterEditorGUI::ClearCurrentLayer()
+{
+    if( mEditor && mEditor->GetSource() )
+        mEditor->GetSource()->Clear();
 }
 
 #undef LOCTEXT_NAMESPACE

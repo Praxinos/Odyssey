@@ -54,6 +54,8 @@ protected:
     void Discord();
     void SwitchTabletAPI();
 
+    void ClearCurrentLayer();
+
 private:
     FOdysseyPainterEditor*                          mEditor;
 	TSharedPtr<FTabManager::FLayout>                mLayout;
