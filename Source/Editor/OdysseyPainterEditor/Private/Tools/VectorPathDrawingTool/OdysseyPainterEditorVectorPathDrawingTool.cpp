@@ -400,4 +400,66 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
          | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
+TSharedPtr<SWidget>
+UOdysseyPainterEditorVectorPathDrawingTool::CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
+                                                                , const TSharedPtr<ISinglePropertyView> iView )
+{
+    if (!iPropertyHandle)
+        return nullptr;
+
+    TSharedRef<SWidget> nameWidget = iPropertyHandle->CreatePropertyNameWidget();
+    TSharedRef<SWidget> valueWidget = iPropertyHandle->CreatePropertyValueWidget(false);
+
+    iView->SetVisibility(EVisibility::Collapsed);
+
+    return SNew(SHorizontalBox)
+    + SHorizontalBox::Slot()
+    .AutoWidth()
+    [
+        //PATCH:
+        iView.ToSharedRef()
+    ]
+    + SHorizontalBox::Slot()
+    .AutoWidth()
+    .Padding(0.f, 0.f, 3.f, 0.f)
+    [
+        nameWidget
+    ]
+    + SHorizontalBox::Slot()
+    [
+        valueWidget
+    ];
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
+{
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
+    const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
+
+    return SNew(SWrapBox)
+           .InnerSlotPadding(FVector2D(10.f, 3.f))
+           .UseAllottedSize(true)
+           .HAlign(HAlign_Fill)
+           + SWrapBox::Slot()
+           .HAlign(HAlign_Fill)
+           [
+               UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
+           ]
+           + SWrapBox::Slot()
+           .HAlign(HAlign_Fill)
+           [
+               CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
+           ]
+           + SWrapBox::Slot()
+           .HAlign(HAlign_Fill)
+           [
+               CreatePropertyWidget(opacityHandle, opacityPropertyView).ToSharedRef()
+           ];
+}
+
 #undef LOCTEXT_NAMESPACE

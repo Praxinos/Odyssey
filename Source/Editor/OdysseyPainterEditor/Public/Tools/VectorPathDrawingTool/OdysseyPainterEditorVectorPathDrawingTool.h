@@ -55,6 +55,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         FOdysseyVectorPathTracer& GetPathTracer();
 
+        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
+        TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
+                                                , const TSharedPtr<ISinglePropertyView> iView );
+
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
