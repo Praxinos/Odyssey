@@ -104,6 +104,19 @@ FOdysseyVectorExportV2::WriteObjectParentID( FOdysseyVectorObject& iObject, FArc
 }
 
 void
+FOdysseyVectorExportV2::WriteObjectName( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_NAME
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
+    {
+        FString& name = iObject.GetName();
+
+        Ar << name;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_FOREGROUNDBUCKET
@@ -178,6 +191,7 @@ void
 FOdysseyVectorExportV2::WriteObjectChunks( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     WriteObjectParentID( iObject, Ar );
+    WriteObjectName( iObject, Ar );
     WriteObjectTransform( iObject, Ar );
     WriteObjectOpacity( iObject, Ar );
     WriteObjectForegroundBucket( iObject, Ar );

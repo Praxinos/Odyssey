@@ -73,6 +73,15 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
 
     if( mPathDrawingTool->Stitch )
     {
+        // matrix might get altered for displaying the selection rectangle of a single object. Save it.
+        iBLContext->save();
+
+        iBLContext->setStrokeStyle( hcColor );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->strokeCircle( mX, mY, mPathDrawingTool->StitchingRadius );
+
+        iBLContext->restore();
+
         if( mStitchedPointArray.size() )
         {
             FOdysseyVectorPoint* point = mStitchedPointArray[0];

@@ -283,11 +283,8 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
 {
     FOdysseyVectorPath* path = iVertex->GetPath();
     BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
-    ::ULIS::FVec2D perpendicular = FOdysseyVectorPath::GetPerpendicularVector( iVertex, true );
-    ::ULIS::FVec2D ctrl = perpendicular * iVertex->GetRadius();
     // TODO: compute that once and pass it as parameter for all vertices
     BLPoint point = HUDMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );
-    BLPoint handle = HUDMatrix.mapVector( ctrl.x, ctrl.y );
     static BLRgba32 greenColor = BLRgba32( 0, 255, 0, 255 );
     double vertexRadius = ( iHUDFlags & HUD_SIZE_SMALL ) ? VERTEXRADIUS_SMALL : VERTEXRADIUS;
     double handleRadius = ( iHUDFlags & HUD_SIZE_SMALL ) ? HANDLERADIUS_SMALL : HANDLERADIUS;
@@ -296,20 +293,27 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
     {
         static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
         static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+        ::ULIS::FVec2D localHandleCoords[2];
+        BLPoint worldHandleCoords[2];
+
+        iVertex->GetHandlePosition( localHandleCoords );
+
+        worldHandleCoords[0] = HUDMatrix.mapPoint( localHandleCoords[0].x, localHandleCoords[0].y );
+        worldHandleCoords[1] = HUDMatrix.mapPoint( localHandleCoords[1].x, localHandleCoords[1].y );
 
         // Line to handle
         iBLContext->setStrokeWidth( 2.0f );
         iBLContext->setStrokeStyle( bgColor );
-        iBLContext->strokeLine( point.x, point.y, point.x + handle.x, point.y + handle.y );
+        iBLContext->strokeLine( point.x, point.y, worldHandleCoords[0].x, worldHandleCoords[0].y );
 
         iBLContext->setStrokeWidth( 1.0f );
         iBLContext->setStrokeStyle( whiteColor );
-        iBLContext->strokeLine( point.x, point.y, point.x + handle.x, point.y + handle.y );
+        iBLContext->strokeLine( point.x, point.y, worldHandleCoords[0].x, worldHandleCoords[0].y );
 
         // handle
         FOdysseyVectorHUD::DrawCircle( iBLContext
-                                     , point.x + handle.x
-                                     , point.y + handle.y
+                                     , worldHandleCoords[0].x
+                                     , worldHandleCoords[0].y
                                      , handleRadius
                                      , whiteColor
                                      , blackColor );
@@ -317,16 +321,16 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
         // Line to handle
         iBLContext->setStrokeWidth( 2.0f );
         iBLContext->setStrokeStyle( bgColor );
-        iBLContext->strokeLine( point.x, point.y, point.x - handle.x, point.y - handle.y );
+        iBLContext->strokeLine( point.x, point.y, worldHandleCoords[1].x, worldHandleCoords[1].y );
 
         iBLContext->setStrokeWidth( 1.0f );
         iBLContext->setStrokeStyle( whiteColor );
-        iBLContext->strokeLine( point.x, point.y, point.x - handle.x, point.y - handle.y );
+        iBLContext->strokeLine( point.x, point.y, worldHandleCoords[1].x, worldHandleCoords[1].y );
 
         // handle
         FOdysseyVectorHUD::DrawCircle( iBLContext
-                                     , point.x - handle.x
-                                     , point.y - handle.y
+                                     , worldHandleCoords[1].x
+                                     , worldHandleCoords[1].y
                                      , handleRadius
                                      , whiteColor
                                      , blackColor );
@@ -390,7 +394,7 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
     {
         static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
         static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
-        static BLRgba32 greenColor = BLRgba32( 0x00, 0x00, 0xFF, 0xFF );
+        static BLRgba32 greenColor = BLRgba32( 0x00, 0xFF, 0x00, 0xFF );
 
         for( int i = 0; i < 2; i++ )
         {
@@ -399,7 +403,7 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
                                        , point[i].y
                                        , handlePoint[i].x
                                        , handlePoint[i].y
-                                       , vertex[i]->IsHandleAligned() ? fgColor : whiteColor
+                                       , vertex[i]->IsHandleAligned() ? greenColor : whiteColor
                                        , blackColor );
 
             // control handle 0

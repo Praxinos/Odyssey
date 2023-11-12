@@ -169,6 +169,16 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
         }
         break;
 
+        case FOdysseyFile::VectorV2::CHUNK_OBJECT_NAME:
+        {
+            FString name;
+
+            Ar << name;
+
+            iObject.SetName( name );
+        }
+        break;
+
         case FOdysseyFile::VectorV2::CHUNK_OBJECT_TRANSFORM:
             ReadObjectTransform( iObject, Ar.Tell() + iChunkLen, Ar );
         break;

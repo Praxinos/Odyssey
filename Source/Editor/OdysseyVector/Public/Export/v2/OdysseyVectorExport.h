@@ -25,6 +25,7 @@ namespace FOdysseyVectorExportV2
     void WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectID( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectName( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectTransform( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectTransformTranslation( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectTransformRotation( FOdysseyVectorObject& iObject, FArchive &Ar );

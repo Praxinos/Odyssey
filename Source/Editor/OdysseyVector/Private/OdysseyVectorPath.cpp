@@ -925,9 +925,8 @@ FOdysseyVectorPath::PickPoint( double iWorldX
 {
     bool anythingPicked = false;
 
-    for(std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it)
+    for( FOdysseyVectorVertex* vertex : mVertexList )
     {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
         ::ULIS::FVec2D perpendicularVector = FOdysseyVectorPath::GetPerpendicularVector( vertex, true );
         BLPoint worldPerpendicularVector = mWorldMatrix.mapVector( perpendicularVector.x * vertex->GetRadius()
                                                                  , perpendicularVector.y * vertex->GetRadius() );
@@ -951,31 +950,24 @@ FOdysseyVectorPath::PickPoint( double iWorldX
         // Pick vertex handle
         if( iSelectionFlags & PICK_HANDLE_VERTEX )
         {
-            ::ULIS::FVec2D& localCoords = vertex->GetCoords();
-            // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
-            BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
-            // There are 2 point handles, compute both
-            ::ULIS::FVec2D dif0 = ::ULIS::FVec2D( worldCoords.x + worldPerpendicularVector.x - iWorldX
-                                                , worldCoords.y + worldPerpendicularVector.y - iWorldY );
-            ::ULIS::FVec2D dif1 = ::ULIS::FVec2D( worldCoords.x - worldPerpendicularVector.x - iWorldX
-                                                , worldCoords.y - worldPerpendicularVector.y - iWorldY );
+            ::ULIS::FVec2D localCoords[2];
 
-            if( dif0.Distance() <= iSelectionRadius )
+            vertex->GetHandlePosition( localCoords );
+
+            for( int i = 0; i < 2; i++ )
             {
-                oPickedVertexArray.push_back( vertex );
+                BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords[i].x, localCoords[i].y );
+                ::ULIS::FVec2D dif = ::ULIS::FVec2D( worldCoords.x - iWorldX
+                                                   , worldCoords.y - iWorldY );
 
-                anythingPicked = true;
+                if( dif.Distance() <= iSelectionRadius )
+                {
+                    oPickedVertexArray.push_back( vertex );
 
-                continue; // prevent duplicate selection
-            }
+                    anythingPicked = true;
 
-            if( dif1.Distance() <= iSelectionRadius )
-            {
-                oPickedVertexArray.push_back( vertex );
-
-                anythingPicked = true;
-
-                continue; // prevent duplicate selection
+                    break;
+                }
             }
         }
     }
@@ -1544,10 +1536,10 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                 }
 
             // TODO : check for in-screen visibility
-                if( currentVertex->GetSegmentCount() == 2 )
-                {
+                /*if( currentVertex->GetSegmentCount() == 2 )
+                {*/
                     currentVertex->DrawJoint( iBLContext, iDrawingFlags );
-                }
+                /*}*/
 
                 currentVertex = nextVertex;
             }

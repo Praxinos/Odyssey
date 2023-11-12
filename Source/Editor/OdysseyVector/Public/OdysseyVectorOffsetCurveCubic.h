@@ -7,6 +7,7 @@
 typedef struct _FOdysseyVectorBezierFragment
 {
     ::ULIS::FVec2D bezier[4];
+    ::ULIS::FVec2D straightVector;
     double straightLength;
     double fromT;
     double toT;
@@ -19,7 +20,6 @@ typedef struct _FOdysseyVectorBezierFragment
     {
         memcpy( bezier, iBezier, sizeof( bezier ) );
 
-        straightLength = 0.0f;
         fromT = iFromT;
         toT = iToT;
     }

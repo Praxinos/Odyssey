@@ -307,6 +307,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorJoint& GetJoint();
         double GetJointLength();
         uint32 GetFlags();
+        void GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] );
 
     protected:
         /**

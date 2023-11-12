@@ -516,6 +516,32 @@ FOdysseyVectorVertex::IsChained()
 }
 
 void
+FOdysseyVectorVertex::GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] )
+{
+    FOdysseyVectorSegment* segment = GetFirstSegment();
+
+    iHandlePosition[0] = iHandlePosition[1] = mCoords;
+
+    if( segment && segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+    {
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+        FOdysseyVectorOffsetCurveCubic* offsetCurve[2] = { cubicSegment->GetOffsetCurve( 0 )
+                                                         , cubicSegment->GetOffsetCurve( 1 ) };
+        std::vector<FOdysseyVectorBezierFragment>& offsetCurve0BezierFragmentArray = offsetCurve[0]->GetBezierFragmentArray();
+        std::vector<FOdysseyVectorBezierFragment>& offsetCurve1BezierFragmentArray = offsetCurve[1]->GetBezierFragmentArray();
+
+        if( offsetCurve0BezierFragmentArray.size() && offsetCurve1BezierFragmentArray.size() )
+        {
+            iHandlePosition[0] = ( segment->GetVertex(0) == this ) ? offsetCurve0BezierFragmentArray.front().bezier[0]
+                                                                   : offsetCurve0BezierFragmentArray.back().bezier[3];
+            iHandlePosition[1] = ( segment->GetVertex(0) == this ) ? offsetCurve1BezierFragmentArray.front().bezier[0]
+                                                                   : offsetCurve1BezierFragmentArray.back().bezier[3];
+        }
+    }
+}
+
+// TODO: rename as AlignSegments
+void
 FOdysseyVectorVertex::AlignHandles()
 {
     if( mSegmentList.size() )
@@ -524,6 +550,7 @@ FOdysseyVectorVertex::AlignHandles()
     }
 }
 
+// TODO: rename as AlignSegments
 void
 FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
 {
@@ -548,6 +575,7 @@ FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
     SetHandleAligned( true );
 }
 
+// TODO: rename as SetSegmentAligned
 void
 FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
 {
@@ -561,6 +589,7 @@ FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
     }
 }
 
+// TODO: rename as IsSegmentAligned
 bool
 FOdysseyVectorVertex::IsHandleAligned()
 {
@@ -765,7 +794,29 @@ FOdysseyVectorVertex::GetJointLength()
 void
 FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags )
 {
-    mJoint.Draw( iBLContext, iDrawingFlags );
+    if( mSegmentList.size() == 2 )
+    {
+        if( IsHandleAligned() == true )
+        {
+            BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+            ::ULIS::FVec2D localHandlePosition[2];
+            BLPoint worldHandlePosition[2];
+
+            GetHandlePosition( localHandlePosition );
+
+            worldHandlePosition[0] = worldMatrix.mapPoint( localHandlePosition[0].x, localHandlePosition[0].y );
+            worldHandlePosition[1] = worldMatrix.mapPoint( localHandlePosition[1].x, localHandlePosition[1].y );
+
+            iBLContext->save();
+            iBLContext->resetMatrix();
+            iBLContext->strokeLine( worldHandlePosition[0], worldHandlePosition[1] );
+            iBLContext->restore();
+        }
+        else
+        {
+            mJoint.Draw( iBLContext, iDrawingFlags );
+        }
+    }
 }
 
 void

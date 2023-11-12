@@ -75,6 +75,7 @@ namespace FOdysseyFile
 
                     static const uint32 CHUNK_OBJECT = 0x51334470; // container
                         static const uint32 CHUNK_OBJECT_PARENTID = 0xaeddfa4d; // uint32(ParentID)
+                        static const uint32 CHUNK_OBJECT_NAME =  0x5dbafbd0; // FString(Name)
                         static const uint32 CHUNK_OBJECT_TRANSFORM = 0x3bf02661; // container
                             static const uint32 CHUNK_OBJECT_TRANSFORM_TRANSLATION = 0x621d21c; // double(X)-double(Y)
                             static const uint32 CHUNK_OBJECT_TRANSFORM_ROTATION = 0xbf4d725c; // double(A)

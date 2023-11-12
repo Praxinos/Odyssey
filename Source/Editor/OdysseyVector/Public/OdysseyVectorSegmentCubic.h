@@ -215,6 +215,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         ::ULIS::FVec2D* GetBezier();
         virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
+        FOdysseyVectorOffsetCurveCubic* GetOffsetCurve( uint32 iID );
+
     private:
         // static
         static void GetOffsetPoints( ::ULIS::FVec2D& iPoint0
@@ -251,9 +253,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                        , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray );
         void ThickenFraction( FOdysseyVectorFraction* iFraction );
         void SmoothOffsetCurves( const std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray );
-        void SmoothOffsetCurvesFragments( FOdysseyVectorBezierFragment* iBackwardFragment
-                                        , FOdysseyVectorBezierFragment* iForwardFragment
-                                        , const ::ULIS::FVec2D& iTangent );
+        static void SmoothOffsetCurvesFragments( FOdysseyVectorVertex* iVertex
+                                               , FOdysseyVectorSegmentCubic* iPrevSegment
+                                               , FOdysseyVectorSegmentCubic* iCurrSegment
+                                               , FOdysseyVectorBezierFragment* iPrevFragment[2]
+                                               , FOdysseyVectorBezierFragment* iCurrFragment[2] );
 
     protected:
         FOdysseyVectorOffsetCurveCubic mOffsetCurve[2];
