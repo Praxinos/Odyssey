@@ -309,7 +309,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
     }
   }  // workaround
 
-    return false;
+    return true;
 }
 
 void
