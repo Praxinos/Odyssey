@@ -759,6 +759,19 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/colored_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/colored_16", mIcon16x16))
 	);
+
+    Set("Texture.WireframeToggle", FCheckBoxStyle()
+        //.Padding(FMargin(0,0,0,0))
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_off_16", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_off_16", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_off_16", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_on_16", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_on_16", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_on_16", mIcon16x16))
+	);
 #endif
 }
 

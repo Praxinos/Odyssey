@@ -104,6 +104,19 @@ FOdysseyVectorExportV2::WriteObjectParentID( FOdysseyVectorObject& iObject, FArc
 }
 
 void
+FOdysseyVectorExportV2::WriteObjectName( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_NAME
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
+    {
+        FString& name = iObject.GetName();
+
+        Ar << name;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_FOREGROUNDBUCKET
@@ -162,10 +175,25 @@ FOdysseyVectorExportV2::WriteObjectBackgroundColor( FOdysseyVectorObject& iObjec
 }
 
 void
+FOdysseyVectorExportV2::WriteObjectOpacity( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_OPACITY
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
+    {
+        double opacity = iObject.GetOpacity();
+
+        Ar << opacity;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteObjectChunks( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     WriteObjectParentID( iObject, Ar );
+    WriteObjectName( iObject, Ar );
     WriteObjectTransform( iObject, Ar );
+    WriteObjectOpacity( iObject, Ar );
     WriteObjectForegroundBucket( iObject, Ar );
     WriteObjectBackgroundBucket( iObject, Ar );
 }

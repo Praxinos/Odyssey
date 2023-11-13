@@ -21,8 +21,18 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
     {
         FOdysseyVectorObject* focusedObject = (*it);
 
-        ObjectParam = focusedObject->mObjectParam;
+        // Category "Identity"
+        Name = focusedObject->GetName();
 
+        // Category "Transform"
+        TranslationX = focusedObject->GetTranslationX();
+        TranslationY = focusedObject->GetTranslationY();
+        Rotation     = focusedObject->GetRotation();
+        ScalingX     = focusedObject->GetScalingX();
+        ScalingY     = focusedObject->GetScalingY();
+
+        // Category "Appearance"
+        Opacity         = focusedObject->GetOpacity();
         ForegroundColor = focusedObject->GetForegroundBucket().GetSolidColor();
         BackgroundColor = focusedObject->GetBackgroundBucket().GetSolidColor();
 
@@ -53,30 +63,36 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         // We have to change properties one by one especially in case of multiple selection.
         // We just cannot copy the whole block of properties.
 
+        // Category "Identity"
         if( iPropertyName == "Name" )
         {
-            selectedObject->mObjectParam.Name = ObjectParam.Name;
+            selectedObject->SetName( Name );
 
             signalFlags |= FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY;
         }
 
+        // Category "Transform"
         if( iPropertyName == "TranslationX" )
-            selectedObject->mObjectParam.TranslationX = ObjectParam.TranslationX;
+            selectedObject->Translate( TranslationX, selectedObject->GetTranslationY() );
 
         if( iPropertyName == "TranslationY" )
-            selectedObject->mObjectParam.TranslationY = ObjectParam.TranslationY;
-
-        //if( iPropertyName == "TranslationZ" )
-        //    selectedObject->mObjectParam.TranslationZ = ObjectParam.TranslationZ;
+            selectedObject->Translate( selectedObject->GetTranslationY(), TranslationY );
 
         if( iPropertyName == "Rotation" )
-            selectedObject->mObjectParam.Rotation = ObjectParam.Rotation;
+            selectedObject->Rotate( Rotation );
 
         if( iPropertyName == "ScalingX" )
-            selectedObject->mObjectParam.ScalingX = ObjectParam.ScalingX;
+            selectedObject->Scale( ScalingX, selectedObject->GetScalingY() );
 
         if( iPropertyName == "ScalingY" )
-            selectedObject->mObjectParam.ScalingY = ObjectParam.ScalingY;
+            selectedObject->Scale( selectedObject->GetScalingY(), ScalingY );
+
+        if( iCategory == "Transform" )
+            selectedObject->UpdateMatrix();
+
+        // Category "Appearance"
+        if( iPropertyName == "Opacity" )
+            selectedObject->SetOpacity( Opacity );
 
         if( iPropertyName == "ForegroundColor" )
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
@@ -84,8 +100,6 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == "BackgroundColor" )
             selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
 
-        if( iCategory == "Transform" )
-            selectedObject->UpdateMatrix();
     }
 
     return signalFlags;

@@ -127,7 +127,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         std::vector<FTracerEdge>& GetEdgeArray();
         FOdysseyVectorSegment* Flush( FOdysseyVectorVertex* iEndVertex );
         FOdysseyVectorSegment* CommitSegment( FOdysseyVectorVertex* iEndVertex );
-        FOdysseyVectorVertex* CommitVertex();
+        FOdysseyVectorVertex* CommitVertex( bool iIsHandleAligned );
         void Reset();
         void ClearPointsTo( uint32 iPointID );
         void ClearTo( uint32 iRecordID, uint32 iEdgeID );
@@ -142,4 +142,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         void TraceEdge( FTracerEdge* iEdge, double iAlpha );
         void SetDotLimit( double iDotLimit );
         void SetTracingWidth( double iTracingWidth );
+        ::ULIS::FRectD GetRedrawRect();
 };

@@ -14,6 +14,25 @@
 
 //#include "OdysseyVectorScene.generated.h"
 
+typedef struct _FHorizontalLine
+{
+    int32 x0;
+    int32 y0;
+    double u0;
+    double v0;
+    int32 x1;
+    int32 y1;
+    double u1;
+    double v1;
+    int inited;
+
+    _FHorizontalLine()
+    {
+        inited = 0;
+    }
+}
+FHorizontalLine;
+
 class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 {
     public:
@@ -27,14 +46,27 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         virtual uint32 GetClass() { return mStaticClass; };
         virtual bool HasBaseClass( uint32 iBaseClassID );
 
+        // drawing flags
+        static const uint64 DRAWING_WIREFRAME         = ( 1ULL <<  2 );
+        static const uint64 DRAWING_IGNORECOLOR       = ( 1ULL <<  3 );
+
         // signal flags
-        static const uint64 SIGNAL_SCENE_REDRAW       = ( 1 << 0 );
-        static const uint64 SIGNAL_SCENE_HIERARCHY    = ( 1 << 1 );
-        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1 << 2 );
-        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1 << 3 );
-        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1 << 4 );
-        static const uint64 SIGNAL_INTERACTIVE        = ( 1 << 5 );
-        static const uint64 SIGNAL_ALL                = 0xFFFFFFFFFFFFFFFF & (~SIGNAL_INTERACTIVE);
+        static const uint64 SIGNAL_SCENE_REDRAW       = ( 1ULL << 0 );
+        static const uint64 SIGNAL_SCENE_HIERARCHY    = ( 1ULL << 1 );
+        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1ULL << 2 );
+        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1ULL << 3 );
+        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1ULL << 4 );
+        static const uint64 SIGNAL_INTERACTIVE        = ( 1ULL << 5 );
+        static const uint64 SIGNAL_ALL                = 0x0FFFFFFFFFFFFFFF & (~SIGNAL_INTERACTIVE);
+
+        static const uint64 SIGNAL_USER0_RESERVED = ( 1ULL << 56 );
+        static const uint64 SIGNAL_USER1_RESERVED = ( 1ULL << 57 );
+        static const uint64 SIGNAL_USER2_RESERVED = ( 1ULL << 58 );
+        static const uint64 SIGNAL_USER3_RESERVED = ( 1ULL << 59 );
+        static const uint64 SIGNAL_USER4_RESERVED = ( 1ULL << 60 );
+        static const uint64 SIGNAL_USER5_RESERVED = ( 1ULL << 61 );
+        static const uint64 SIGNAL_USER6_RESERVED = ( 1ULL << 62 );
+        static const uint64 SIGNAL_USER7_RESERVED = ( 1ULL << 63 );
 
         static FSignalDelegate& OnSignalDelegate();
 
@@ -43,17 +75,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         void RemoveHUD( FOdysseyVectorHUD* iHUDObject );
         void ClearHUD();
         void ResetHUD();
-
-        /**
-         * @brief Clear the mask image
-         */
-        void ClearMask();
-
-        /**
-         * @brief Get the rendering context (Blend2D)
-         * @return a pointer to the rendering context
-         */
-        BLContext* GetBLContext();
 
         /**
          * @brief Get the mask image
@@ -69,7 +90,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         /**
          * @brief Constructor
          */
-        FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight );
+        FOdysseyVectorEngine( FOdysseyVectorScene* iScene
+                            , uint32 iPreferredWidth
+                            , uint32 iPreferredHeight );
 
         /**
          * @brief Erase objects based on the mask image. Currently works with cubic paths only.
@@ -86,12 +109,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                   , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                   , ::ULIS::FRectD &iRoi
                   , bool iSelectedOnly );
-
-        /**
-         * @brief Fill the mask image with a shape defined by a array of points.
-         * @param iPointArray a reference to the array of points.
-         */
-        ::ULIS::FRectD GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray );
 
         /**
          * @brief Pick an object
@@ -176,17 +193,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                     , bool iSmooth );
 
         /**
-         * @brief Use the color image as the default rendering buffer.
-         */
-        void UseColorImage(); // TODO : rename UseDefaultImage
-
-        /**
-         * @brief Use the mask image as the default rendering buffer.
-         */
-        void UseMaskImage();
-
-
-        /**
          * @brief Set the selection space, i.e the group we pick objects from. 
          *   Default is null, meaning the scene is the selection space.
          * @param iSelectionSpace a pointer to the selection space. Use NULL to define the scene as the selection space.
@@ -208,15 +214,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         FULISInvalidTileMap& GetInvalidTileMap();
 
         /**
-         * @brief set an image as the main rendering buffer
-         * @param iImage a pointer to the image that will be used as the rendering buffer.
-         */
-        void UseImage( BLImage* iImage );
-
-        /**
          * @brief render the current HUD.
          */
-        void RenderHUD( BLImage* iBLImage );
+        void RenderHUD( BLContext* iBLContext );
 
         /**
          * @brief Send a signal to methods registered to this delegate.
@@ -241,23 +241,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          */
         void SelectAllInSelectionSpace();
 
-        /**
-         * @brief Fill the mask image with an alpha Circle.
-         * @param iX the circle's center on X axis.
-         * @param iY the circle's center on Y axis.
-         * @param iRadius the circle's radius.
-         * @return the bounding box including the circle.
-         */
-        ::ULIS::FRectD GenerateCircleMask( double iX, double iY, double iRadius );
+        static void GetVertexSelection( std::list<FOdysseyVectorObject*>& iVectorObjectList
+                                      , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
 
-        /**
-         * @brief Fill the mask image with an alpha Rectangle.
-         * @param iRect the rectangle
-         * @return the bounding box including the rectangle.
-         */
-        ::ULIS::FRectD GenerateRectangleMask( const ::ULIS::FRectD& iRect );
-
-        void Render( BLImage* iBLImage, uint64 iDrawingFlags );
+        void Render( BLContext* iBLContext, uint64 iDrawingFlags );
 
         void EraseSections( FOdysseyVectorScene* iScene
                           , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
@@ -267,10 +254,90 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                           , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                           , bool iSelectedOnly );
 
-        uint32 GetWidth();
-        uint32 GetHeight();
-        BLImage* GetBLImage();
+        uint32 GetPreferredWidth();
+        uint32 GetPreferredHeight();
 
+        void TraceLine ( int32 iX0
+                       , int32 iY0
+                       , double iU0
+                       , double iV0
+                       , int32 iX1
+                       , int32 iY1
+                       , double iU1
+                       , double iV1
+                       , uint32 iImageWidth
+                       , uint32 iImageHeight );
+
+        void TraceHorizontalLine ( int32 iLineNumber
+                                 , double iOpacity
+                                 , int8*  iPixelData
+                                 , uint32 iImageWidth
+                                 , uint32 iImageHeight
+                                 , int32  iBitsPerPixel
+                                 , const FColor& iColor
+                                 , int8*  iBrushPixelData
+                                 , uint32 iBrushWidth
+                                 , uint32 iBrushHeight
+                                 , int32  iBrushBitsPerPixel
+                                 , bool   iBrushAlphaOnly );
+        void DrawPolygon( ::ULIS::FVec2I* iPoint
+                        , double* iU
+                        , double* iV
+                        , uint32 pointCount
+                        , double iOpacity
+                        , int8*  iImagePixelData
+                        , uint32 iImageWidth
+                        , uint32 iImageHeight
+                        , int32  iImageBitsPerPixel
+                        , const FColor& iColor
+                        // temp
+                        , int8*  iBrushPixelData
+                        , uint32 iBrushWidth
+                        , uint32 iBrushHeight
+                        , int32  iBrushBitsPerPixel
+                        , bool   iBrushAlphaOnly );
+
+        void DrawQuadThread( uint32 iProcessorID
+                           , uint32 iProcessorCount
+                           , int32  iFirstLine
+                           , int32  iLastLine
+                           , double iOpacity
+                           , int8*  iPixelData
+                           , int32  iBitsPerPixel
+                           // Temp
+                           , int8*  iBrushPixelData
+                           , uint32 iBrushWidth
+                           , uint32 iBrushHeight
+                           , int32  iBrushBitsPerPixel );
+
+        void SetBLMask( BLImage* iBLMask );
+
+
+
+        static const uint64 TRAVERSE_STOP                   = ( 1 << 0 );
+        static const uint64 TRAVERSE_OBJECT_ACCEPTED        = ( 1 << 1 );
+        static const uint64 TRAVERSE_PARENT_ACCEPTED        = ( 1 << 2 );
+        static const uint64 TRAVERSE_OBJECT_IGNORE_CHILDREN = ( 1 << 3 );
+
+        bool HasFocus( FOdysseyVectorScene* iScene
+                     , FOdysseyVectorObject* iObject
+                     , uint64 iTraversalFlags );
+
+        uint64 Traverse( FOdysseyVectorScene* iScene
+                       , FOdysseyVectorObject* iObject
+                       , uint64 iTraversalFlags
+                       , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
+
+       void SetInvalidatedRect( const ::ULIS::FRectD& iRect );
+       void SetInvalidatedRect( const ::ULIS::FRectI& iRect );
+       ::ULIS::FRectI& GetInvalidatedRect();
+
+        void GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList );
+        void GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& oObjectList );
+/*
+       uint64 GetDrawingFlags();
+       void SetDrawingFlags( uint64 iDrawingFlags );
+*/
     protected:
         static void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
                                  , FOdysseyVectorObject* iObj
@@ -296,17 +363,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                           , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                           , bool iSelectedOnly );
 
+        static void GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
+                                               , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
 
 
     private:
-        BLContext* mBLContext;
-        BLImage mDefaultBLImage; // needed outside of rendering operation (matrix ops e.g)
-        BLImage* mBLImage;
+        BLContextCreateInfo mCreateInfo;
         BLImage* mBLMask;
         std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
         FOdysseyVectorScene* mScene;
         FULISInvalidTileMap mInvalidTileMap;
-        uint32 mWidth;
-        uint32 mHeight;
+        uint32 mPreferredWidth;
+        uint32 mPreferredHeight;
+        std::vector<FHorizontalLine> mHorizontalLineBuffer;
+        uint32 mProcessorCount;
+        ::ULIS::FRectI mInvalidatedRect;
+        //uint64 mDrawingFlags; // temporary, until we find a way to pass the drawing flags as arg
 };

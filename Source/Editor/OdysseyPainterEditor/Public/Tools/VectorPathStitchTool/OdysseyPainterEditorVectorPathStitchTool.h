@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoPathStitch.h"
 
@@ -13,58 +13,48 @@
 class FOdysseyPainterEditorVectorPathStitchToolHUD;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathStitchTool : public UOdysseyPainterEditorDefaultTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathStitchTool : public UOdysseyPainterEditorVectorBaseTool
 {
-public:
-    GENERATED_BODY()
+    public:
+        GENERATED_BODY()
 
-public:
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorPathStitchTool();
+    public:
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorPathStitchTool();
 
-    //Constructor
-    UOdysseyPainterEditorVectorPathStitchTool();
+        //Constructor
+        UOdysseyPainterEditorVectorPathStitchTool();
 
-    virtual bool IsActivable() const override;
-    virtual void Load() override;
-    virtual void Unload() override;
+        virtual bool IsActivable() const override;
 
-    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
-    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
-    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    protected:
+        //OdysseyPainterVectorBaseEditorTool overrides
+        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
+        //virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+        //                            , const FKey& iKey ) override;
+        //virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey ) override;
+        virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+                                         , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ) override;
+        virtual uint64 PropertyChangedVector( FOdysseyVectorScene* iScene
+                                            , const FName& iPropertyName ) override;
 
-    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                           , FOdysseyVectorScene* iScene
-                           , const FOdysseyPoint& iPointInTexture );
-    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
+    private:
+            FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;
 
-    //OdysseyPainterEditorTool overrides
-    virtual void Commit() override;
-
-protected:
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-    void PropertyChanged( const FName& iPropertyName );
-
-private:
-        FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;
-
-public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathStitch Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
-    double PickingRadius;
-
-    UPROPERTY(EditAnywhere, Category="Odyssey PathStitch Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
-    bool RestrictToSelection;
+    public:
+        UPROPERTY( EditAnywhere, Category = PathStitchTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+        double PickingRadius;
+/*
+        UPROPERTY( EditAnywhere, Category = PathStitchTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+        bool RestrictToSelection;
+*/
 };

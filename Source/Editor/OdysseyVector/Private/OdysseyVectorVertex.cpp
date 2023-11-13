@@ -107,7 +107,7 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
 
             if( section != iLastSection )
             {
-                if( ( FOdysseyVector::Cross2D( -lastSectionVector, sectionVector ) * iOrientation >= 0.0f ) )
+                if( ( FOdysseyVector::Cross2D( -lastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
                 {
                     rightSideSection.push_back( section );
                 }
@@ -228,7 +228,7 @@ FOdysseyVectorVertex::GetAverageStraightVectorOnSegment( bool iNormalize )
 
 //static
 void
-FOdysseyVectorVertex::ArrayToSegmentArray( std::vector<FOdysseyVectorVertex*>& iVertexArray
+FOdysseyVectorVertex::ArrayToSegmentArray( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                          , std::vector<FOdysseyVectorSegment*>& oSegmentArray )
 {
 
@@ -301,7 +301,7 @@ FOdysseyVectorVertex::IsSmooth()
         ::ULIS::FVec2D lastSegmentVector = GetVectorOnSegment( GetLastSegment(), true );
         double dot = firstSegmentVector.DotProduct( lastSegmentVector );
 
-        if( fabs(dot) > 0.99f )
+        if( dot < -0.9999f )
         {
             return true;
         }
@@ -497,31 +497,85 @@ FOdysseyVectorVertex::IsSelected()
 }
 
 void
-FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
+FOdysseyVectorVertex::SetChained( bool iChained )
 {
-    ::ULIS::FVec2D handleVector = iHandle->GetCoords() - GetCoords();
-
-    if( handleVector.Distance() )
+    if( iChained == true )
     {
-        FOdysseyVectorSegment* segment = iHandle->GetOwner();
-        FOdysseyVectorSegment* otherSegment = GetOtherSegment( segment );
+        mFlags |= CHAINED;
+    }
+    else
+    {
+        mFlags &= (~CHAINED);
+    }
+}
 
-        handleVector.Normalize();
+bool
+FOdysseyVectorVertex::IsChained()
+{
+    return ( mFlags & CHAINED ) ? true : false;
+}
 
-        if( otherSegment )
+void
+FOdysseyVectorVertex::GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] )
+{
+    FOdysseyVectorSegment* segment = GetFirstSegment();
+
+    iHandlePosition[0] = iHandlePosition[1] = mCoords;
+
+    if( segment && segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+    {
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+        FOdysseyVectorOffsetCurveCubic* offsetCurve[2] = { cubicSegment->GetOffsetCurve( 0 )
+                                                         , cubicSegment->GetOffsetCurve( 1 ) };
+        std::vector<FOdysseyVectorBezierFragment>& offsetCurve0BezierFragmentArray = offsetCurve[0]->GetBezierFragmentArray();
+        std::vector<FOdysseyVectorBezierFragment>& offsetCurve1BezierFragmentArray = offsetCurve[1]->GetBezierFragmentArray();
+
+        if( offsetCurve0BezierFragmentArray.size() && offsetCurve1BezierFragmentArray.size() )
         {
-            if( otherSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-            {
-                FOdysseyVectorSegmentCubic* otherCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(otherSegment);
-                FOdysseyVectorHandleSegment* otherHandle = otherCubicSegment->GetHandle( this );
-                ::ULIS::FVec2D otherHandleVector = otherHandle->GetCoords() - GetCoords();
-
-                otherHandle->Set( GetCoords() - ( otherHandleVector.Distance() * handleVector ) );
-            }
+            iHandlePosition[0] = ( segment->GetVertex(0) == this ) ? offsetCurve0BezierFragmentArray.front().bezier[0]
+                                                                   : offsetCurve0BezierFragmentArray.back().bezier[3];
+            iHandlePosition[1] = ( segment->GetVertex(0) == this ) ? offsetCurve1BezierFragmentArray.front().bezier[0]
+                                                                   : offsetCurve1BezierFragmentArray.back().bezier[3];
         }
     }
 }
 
+// TODO: rename as AlignSegments
+void
+FOdysseyVectorVertex::AlignHandles()
+{
+    if( mSegmentList.size() )
+    {
+        AlignHandles( mSegmentList.front()->GetHandle( this ) );
+    }
+}
+
+// TODO: rename as AlignSegments
+void
+FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
+{
+    ::ULIS::FVec2D handleVector = iHandle->GetCoords() - mCoords;
+    FOdysseyVectorSegment* segment = iHandle->GetOwner();
+    FOdysseyVectorSegment* otherSegment = GetOtherSegment( segment );
+
+    if( otherSegment )
+    {
+        FOdysseyVectorHandleSegment* otherHandle = otherSegment->GetHandle( this );
+        ::ULIS::FVec2D otherHandleVector = otherHandle->GetCoords() - mCoords;
+
+        // if vectors are already aligned, their cross product equals 0
+        if( FOdysseyVector::Cross2D( otherHandleVector, handleVector ) )
+        {
+            handleVector.Normalize();
+
+            otherHandle->Set( GetCoords() - ( otherHandleVector.Distance() * handleVector ) );
+        }
+    }
+
+    SetHandleAligned( true );
+}
+
+// TODO: rename as SetSegmentAligned
 void
 FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
 {
@@ -535,6 +589,7 @@ FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
     }
 }
 
+// TODO: rename as IsSegmentAligned
 bool
 FOdysseyVectorVertex::IsHandleAligned()
 {
@@ -558,6 +613,12 @@ bool
 FOdysseyVectorVertex::IsVisited()
 {
     return ( mFlags & VISITED ) ? true : false;
+}
+
+uint32
+FOdysseyVectorVertex::GetFlags()
+{
+    return mFlags;
 }
 
 void
@@ -716,4 +777,102 @@ FOdysseyVectorVertex::GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment )
     }
 
     return nullptr;
+}
+
+FOdysseyVectorJoint&
+FOdysseyVectorVertex::GetJoint()
+{
+    return mJoint;
+}
+
+double
+FOdysseyVectorVertex::GetJointLength()
+{
+    return mJoint.GetLength();
+}
+
+void
+FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags )
+{
+    if( mSegmentList.size() == 2 )
+    {
+        if( IsHandleAligned() == true )
+        {
+            BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+            ::ULIS::FVec2D localHandlePosition[2];
+            BLPoint worldHandlePosition[2];
+
+            GetHandlePosition( localHandlePosition );
+
+            worldHandlePosition[0] = worldMatrix.mapPoint( localHandlePosition[0].x, localHandlePosition[0].y );
+            worldHandlePosition[1] = worldMatrix.mapPoint( localHandlePosition[1].x, localHandlePosition[1].y );
+
+            iBLContext->save();
+            iBLContext->resetMatrix();
+            iBLContext->strokeLine( worldHandlePosition[0], worldHandlePosition[1] );
+            iBLContext->restore();
+        }
+        else
+        {
+            mJoint.Draw( iBLContext, iDrawingFlags );
+        }
+    }
+}
+
+void
+FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iPreviousSegment )
+{
+    if( iPreviousSegment )
+    {
+        FOdysseyVectorSegment* nextSegment = GetOtherSegment( iPreviousSegment );
+
+        if( iPreviousSegment && nextSegment )
+        {
+            ::ULIS::FVec2D segment0Vector = GetVectorOnSegment( iPreviousSegment, false );
+            ::ULIS::FVec2D segment1Vector = GetVectorOnSegment( nextSegment     , false );
+
+            if( segment0Vector.DistanceSquared() )
+            {
+                segment0Vector.Normalize();
+            }
+
+            if( segment1Vector.DistanceSquared() )
+            {
+                segment1Vector.Normalize();
+            }
+
+            switch( mPath->mPathParam.JointType )
+            {
+                case eJointType::Linear :
+                    mJoint.MakeLinear( mCoords
+                                     , segment0Vector
+                                     , segment1Vector
+                                     , mRadius );
+                break;
+
+                case eJointType::Miter :
+                    mJoint.MakeMiter( mCoords
+                                    , segment0Vector
+                                    , segment1Vector
+                                    , mRadius
+                                    , mPath->mPathParam.MiterLimit );
+                break;
+
+                case eJointType::Radial :
+                    mJoint.MakeRadial( mCoords
+                                     , segment0Vector
+                                     , segment1Vector
+                                     , mRadius );
+                break;
+
+                default:
+                    mJoint.MakeNone();
+                break;
+            }
+
+            return;
+        }
+    }
+
+    mJoint.MakeNone();
 }

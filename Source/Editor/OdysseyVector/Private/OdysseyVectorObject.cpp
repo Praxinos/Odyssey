@@ -31,6 +31,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     mInverseWorldMatrix.reset();
 
     SetName( iName );
+    SetOpacity( 1.0f );
 
     SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
 
@@ -51,6 +52,18 @@ FOdysseyVectorBucket&
 FOdysseyVectorObject::GetForegroundBucket()
 {
     return mForegroundBucket;
+}
+
+double
+FOdysseyVectorObject::GetOpacity()
+{
+    return mObjectParam.Opacity;
+}
+
+void
+FOdysseyVectorObject::SetOpacity( double iOpacity )
+{
+    mObjectParam.Opacity = iOpacity;
 }
 
 void
@@ -347,6 +360,7 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
     iDestinationObject.mBBox = mBBox;
 
     iDestinationObject.SetName( mObjectParam.Name );
+    iDestinationObject.SetOpacity( mObjectParam.Opacity );
 }
 
 double
@@ -374,23 +388,17 @@ FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
 
     if( scene )
     {
-        BLContext* blctx = scene->GetEngine()->GetBLContext();
-
-        blctx->save();
-
-        blctx->resetMatrix();
-        blctx->translate( mObjectParam.TranslationX, mObjectParam.TranslationY );
-        blctx->rotate( mObjectParam.Rotation * M_PI / 180.0f );
-        blctx->scale( mObjectParam.ScalingX, mObjectParam.ScalingY );
-        mLocalMatrix = blctx->userMatrix();
+        mLocalMatrix.reset();
+        mLocalMatrix.translate( mObjectParam.TranslationX, mObjectParam.TranslationY );
+        mLocalMatrix.rotate( mObjectParam.Rotation * M_PI / 180.0f );
+        mLocalMatrix.scale( mObjectParam.ScalingX, mObjectParam.ScalingY );
 
         BLMatrix2D::invert( mInverseLocalMatrix, mLocalMatrix );
 
         if( mParent)
         {
-            blctx->setMatrix( mParent->mWorldMatrix );
-            blctx->transform( mLocalMatrix );
-            mWorldMatrix = blctx->userMatrix();
+            mWorldMatrix = mParent->mWorldMatrix;
+            mWorldMatrix.transform( mLocalMatrix );
 
             BLMatrix2D::invert( mInverseWorldMatrix, mWorldMatrix );
         }
@@ -407,8 +415,6 @@ FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
 
             child->UpdateMatrix( false );
         }
-
-        blctx->restore();
 
         mInvalidationFlags &= (~INVALIDATE_MATRIX);
     }
@@ -546,31 +552,31 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysse
 }
 
 void
-FOdysseyVectorObject::DrawChildren( uint64 iFlags )
+FOdysseyVectorObject::DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    for( FOdysseyVectorObject *child : mChildrenList )
     {
-        FOdysseyVectorObject *child = (*it);
-
-        child->Draw( iFlags );
+        child->Draw( iBLContext, iCombinedOpacity, iFlags );
     }
 }
 
 void
-FOdysseyVectorObject::Draw( uint64 iFlags )
+FOdysseyVectorObject::Draw( BLContext* iBLContext, double iAncestorsOpacity, uint64 iFlags )
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
+    double combinedOpacity = iAncestorsOpacity *= mObjectParam.Opacity;
 
-    blctx->save();
-    blctx->transform( mLocalMatrix );
+    iBLContext->save();
+    iBLContext->transform( mLocalMatrix );
 
-    blctx->setCompOp( BL_COMP_OP_SRC_OVER );
+    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
 
-    DrawShape( iFlags );
+    DrawShape( iBLContext, combinedOpacity, iFlags );
+    // get sure the parent has finished drawing before drawing its children
+    iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
-    DrawChildren( iFlags );
+    DrawChildren( iBLContext, combinedOpacity, iFlags );
 
-    blctx->restore();
+    iBLContext->restore();
 }
 
 bool

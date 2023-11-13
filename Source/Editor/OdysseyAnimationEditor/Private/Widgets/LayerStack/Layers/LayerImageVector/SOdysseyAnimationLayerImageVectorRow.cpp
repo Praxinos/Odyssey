@@ -39,6 +39,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateHeaderWidget()
 {
     const FCheckBoxStyle* lightTableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LightTableToggle");
     const FCheckBoxStyle* coloredToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.ColoredToggle");
+    const FCheckBoxStyle* wireframeToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.WireframeToggle");
 
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
@@ -79,6 +80,17 @@ SOdysseyAnimationLayerImageVectorRow::GenerateHeaderWidget()
             .Style(lightTableToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnLightTableCheckStateChanged)
             .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableIsChecked)
+        ]
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
+        .VAlign(VAlign_Center)
+        .AutoWidth()
+        [
+            //WireframeLock
+            SNew(SCheckBox)
+            .Style(wireframeToggleStyle)
+            .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged)
+            .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked)
         ]
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
@@ -151,6 +163,13 @@ SOdysseyAnimationLayerImageVectorRow::GenerateTimelineWidget()
 }
 
 void
+SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
+{
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Wireframe status"));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "IsWireframe", iState == ECheckBoxState::Checked);
+}
+
+void
 SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Coloring"));
@@ -188,6 +207,12 @@ void
 SOdysseyAnimationLayerImageVectorRow::OnOpacityEndSliderMovement(int iValue)
 {
     GEditor->EndTransaction();
+}
+
+ECheckBoxState
+SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked() const
+{
+	return mAnimationLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState

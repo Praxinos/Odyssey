@@ -8,17 +8,9 @@
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorIntersection.h"
+#include "OdysseyVectorOffsetCurveCubic.h"
 
 class FOdysseyVectorPathCubic;
-
-typedef struct _FPolygon {
-    ::ULIS::FVec2D quadVertex[4];
-    ::ULIS::FVec2D lineVertex[2];
-    ::ULIS::FVec2D lineVertexInParent[2];
-    double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;
-    double fromT;
-    double toT;
-} FPolygon;
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegment
 {
@@ -94,9 +86,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @brief Draw the cubic segment
          * @param iRoi the region-of-interest
          */
-        virtual void Draw() override;
+        virtual void Draw( BLContext* iBLContext ) override;
 
-        virtual void DrawStructure( FOdysseyVectorObject* iParentObject, bool iWorld ) override;
+        virtual void DrawStructure( BLContext* iBLContext, FOdysseyVectorObject* iParentObject, bool iWorld ) override;
 
        /**
          * @brief Get the segment's bounding box.
@@ -179,18 +171,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         virtual FOdysseyVectorHandleSegment* GetHandle( FOdysseyVectorVertex* iAssociatedVertex ) override;
 
        /**
-         * @brief Get the number of polygons in cache.
-         * @return the number of polygons in cache.
-         */
-        uint32 GetPolygonCount();
-
-       /**
-         * @brief Get the polygons in cache.
-         * @return a reference to the array of polygons.
-         */
-        std::vector<FPolygon>& GetPolygonCache();
-
-       /**
          * @brief Get coordinates on the segment at parameter t.
          * @param t between 0.0 and 1.0.
          * @return coordinates at t.
@@ -232,15 +212,23 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                           , std::vector<FOdysseyVectorVertex*>& oNewVertexArray );
 
         virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
-
-        ::ULIS::FVec2D GetPolygonCacheStartPointInParent();
-        ::ULIS::FVec2D GetPolygonCacheEndPointInParent();
         ::ULIS::FVec2D* GetBezier();
         virtual bool HasBaseClass( uint32 iBaseClassID ) override;
-        double GetApproximateLength( uint32 iDivisions );
 
+        FOdysseyVectorOffsetCurveCubic* GetOffsetCurve( uint32 iID );
 
     private:
+        // static
+        static void GetOffsetPoints( ::ULIS::FVec2D& iPoint0
+                                   , ::ULIS::FVec2D& iPoint1
+                                   , ::ULIS::FVec2D& iPoint2
+                                   , ::ULIS::FVec2D& iPoint3
+                                   , double iRadius0
+                                   , double iRadius3
+                                   , double iSampleT
+                                   , ::ULIS::FVec2D* oPointOut0
+                                   , ::ULIS::FVec2D* oPointOut1 );
+
         void BuildVariableAdaptive( double  iFromT
                                   , double  iToT
                                   , double  iRadiusFrom
@@ -249,14 +237,34 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , const ::ULIS::FVec2D& iNormalizedTangentFrom
                                   , const ::ULIS::FVec2D& iNormalizedTangentTo
                                   , int32   iMaxRecurseDepth );
-        void MakeBLPath();
-        void DrawPolygonCache();
+        void PrepareOffsetBeziers( double iSegmentStartRadius
+                                 , double iSegmentEndRadius
+                                 , const FOdysseyVectorBezierFragment& iFragment
+                                 , FOdysseyVectorBezierFragment& oFragment0
+                                 , FOdysseyVectorBezierFragment& oFragment1 );
+        void BuildOffsetCurves();
+        void BuildOffsetCurvesRecursive( ::ULIS::FVec2D iBezier[4]
+                                       , double iDotLimit
+                                       , double iFromT
+                                       , double iToT
+                                       , uint32 iMinRecurse
+                                       , uint32 iMaxRecurse
+                                       , uint32 iCurrentRecurse
+                                       , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray );
+        void ThickenFraction( FOdysseyVectorFraction* iFraction );
+        void SmoothOffsetCurves( const std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray );
+        static void SmoothOffsetCurvesFragments( FOdysseyVectorVertex* iVertex
+                                               , FOdysseyVectorSegmentCubic* iPrevSegment
+                                               , FOdysseyVectorSegmentCubic* iCurrSegment
+                                               , FOdysseyVectorBezierFragment* iPrevFragment[2]
+                                               , FOdysseyVectorBezierFragment* iCurrFragment[2] );
 
     protected:
+        FOdysseyVectorOffsetCurveCubic mOffsetCurve[2];
         ::ULIS::FVec2D mBezier[4];
         bool mNeedWidth;
-        //::ULIS::FVec2D mWidthBezier[2][4];
+        ::ULIS::FVec2D mOffsetBezier[2][4];
         FOdysseyVectorHandleSegment mCtrlPoint[2];
-        std::vector<FPolygon> mPolygonCache;
+
         BLPath mBLPath;
 };

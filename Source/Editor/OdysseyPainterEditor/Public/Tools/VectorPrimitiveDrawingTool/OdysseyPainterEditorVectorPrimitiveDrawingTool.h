@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/DefaultTool/OdysseyPainterEditorDefaultTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyPainterEditorVectorPrimitiveDrawingTool.generated.h"
@@ -18,62 +18,51 @@ enum class EOdysseyVectorPrimitiveType : uint8
 };
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool : public UOdysseyPainterEditorDefaultTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool : public UOdysseyPainterEditorVectorBaseTool
 {
-public:
-    GENERATED_BODY()
+    public:
+        GENERATED_BODY()
 
-    DECLARE_MULTICAST_DELEGATE_OneParam(FSelectionChanged,FOdysseyVectorScene*)
-    FSelectionChanged mSelectionChanged;
+    public:
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorPrimitiveDrawingTool();
 
-public:
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorPrimitiveDrawingTool();
+        //Constructor
+        UOdysseyPainterEditorVectorPrimitiveDrawingTool();
 
-    //Constructor
-    UOdysseyPainterEditorVectorPrimitiveDrawingTool();
+        virtual bool IsActivable() const override;
 
-    virtual bool IsActivable() const override;
-    virtual void Load() override;
-    virtual void Unload() override;
-
-    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
-    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual bool OnKeyDown( const FKey& iKey ) override;
-    virtual bool OnKeyUp( const FKey& iKey ) override;
-
-    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                           , FOdysseyVectorScene* iScene
-                           , const FOdysseyPoint& iPointInTexture );
-    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
-
-    //OdysseyPainterEditorTool overrides
-    virtual void Commit() override;
+    protected:
+        //OdysseyPainterVectorBaseEditorTool overrides
+        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+                                      , const FKey& iKey ) override;
+        virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey ) override;
+        //virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+        //                                 , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ) override;
+        //virtual uint64 PropertyChangedVector( FOdysseyVectorScene* iScene
+        //                                    , const FName& iPropertyName ) override;
 
     private:
         double GetLineRotationAngle( FOdysseyVectorLine* iLine, const FOdysseyPoint& iPointInTexture );
 
     public:
-        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
+        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
         EOdysseyVectorPrimitiveType PrimitiveType;
 
-        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool", meta = (ClampMin = "0.0", UIMin = "0.0"))
+        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool , meta = (ClampMin = "0.0", UIMin = "0.0"))
         double StrokeWidth;
 
-        UPROPERTY(EditAnywhere, Category="Primitive Drawing Tool")
+        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
         bool Uniform;
         bool UniformAtKeyDown;
 

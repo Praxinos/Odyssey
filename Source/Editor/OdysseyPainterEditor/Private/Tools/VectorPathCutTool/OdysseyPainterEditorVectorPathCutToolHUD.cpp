@@ -6,7 +6,8 @@ FOdysseyPainterEditorVectorPathCutToolHUD::~FOdysseyPainterEditorVectorPathCutTo
 }
 
 FOdysseyPainterEditorVectorPathCutToolHUD::FOdysseyPainterEditorVectorPathCutToolHUD( UOdysseyPainterEditorVectorPathCutTool* iPathCutTool )
-    : mPathCutTool( iPathCutTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPathCutTool )
+    , mPathCutTool( iPathCutTool )
 {
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
@@ -17,10 +18,17 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
+
+    UpdateSelectionBox( iScene, false, mPathCutTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
 FOdysseyPainterEditorVectorPathCutToolHUD::Load( FOdysseyVectorScene* iScene )
+{
+}
+
+void
+FOdysseyPainterEditorVectorPathCutToolHUD::Unload( FOdysseyVectorScene* iScene )
 {
 }
 
@@ -51,44 +59,52 @@ FOdysseyPainterEditorVectorPathCutToolHUD::GetP1()
 }
 
 void
-FOdysseyPainterEditorVectorPathCutToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
+                                               , FOdysseyVectorScene* iScene )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-    std::list<FOdysseyVectorObject*>::iterator it;
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    static BLRgba32 whiteColor = BLRgba32( 255, 255, 255, 255 );
+    uint64 hudFlags = mPathCutTool->GetEditor()->GetVectorHUDFlags();
 
-    blctx->save();
-    blctx->resetMatrix();
-
-    blctx->setCompOp( BL_COMP_OP_SRC_COPY );
-    blctx->setStrokeStyle( hcColor );
-    blctx->setStrokeWidth( 1.0f );
-    blctx->strokeLine( mPoint[0].x, mPoint[0].y, mPoint[1].x, mPoint[1].y );
-
-    for( it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
+    // Draw object details only in vertex mode
+    if( hudFlags & HUD_MODE_VERTEX )
     {
-        FOdysseyVectorObject* selectedObject = (*it);
-
-        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(selectedObject);
-
-            FOdysseyVectorHUD::DrawPath( path, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
-        }
-
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
-
-            FOdysseyVectorHUD::DrawPaintGroup( paintGroup, fgColor, bgColor, hcColor, true, VIEW_VERTEX | VIEW_SEGMENT );
-        }
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
-    blctx->restore();
+    // draw only white vertices in object mode, to view were the cutting is going to be
+    if( hudFlags & HUD_MODE_OBJECT )
+    {
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , fgColor // in object mode, we don't show the selected vertices with a different color
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
+    }
+
+    // draw selection box only if we restrict cutting to the selection 
+//    if( iScene->GetSelectedObjectList().size() )
+//    {
+//        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+//    }
+
+    iBLContext->save();
+
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+    iBLContext->setStrokeStyle( hcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->strokeLine( mPoint[0].x, mPoint[0].y, mPoint[1].x, mPoint[1].y );
+
+    iBLContext->restore();
 }

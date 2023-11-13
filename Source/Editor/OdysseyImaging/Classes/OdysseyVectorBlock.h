@@ -61,7 +61,7 @@ public:
      * 
      * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
      */
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock( uint64 iDrawingFlags );
 
     /**
      * @brief Get the Block object
@@ -75,7 +75,7 @@ public:
      * 
      * @return TSharedPtr<::ULIS::FBlock> 
      */
-    TSharedPtr<::ULIS::FBlock> Render();
+    TSharedPtr<::ULIS::FBlock> Render( uint64 iDrawingFlags );
 
     /**
      * @brief Sets the render flags passed to the vector engine
@@ -97,7 +97,7 @@ private:
 
     static void CleanupBlock(uint8* iData, void* iInfo);
     static void CleanupHUDBlock(uint8* iData, void* iInfo);
-    void Render(::ULIS::FBlock& ioBlock);
+    void Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags);
     void RenderHUD(::ULIS::FBlock& ioBlock);
     void OnVectorEngineSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
     void Invalidate(bool iIsInteractive);
@@ -112,7 +112,7 @@ private:
     int mWidth;
     int mHeight;
     ::ULIS::eFormat mFormat;
-    uint64 mRenderFlags; //See DRAWING_IGNORECOLOR for example
+    //uint64 mRenderFlags; //See DRAWING_IGNORECOLOR for example
 
     // 
     // OPTIMIZATIONS
@@ -125,6 +125,7 @@ private:
         FGuid mId;
         ::ULIS::eFormat mFormat;
         TSharedPtr<BLImage> mBLImage;
+        TSharedPtr<BLContext> mBLContext;
         FUniqueBuffer mBuffer;
         //eBlockState mState;
         bool mNeedsCache;
@@ -133,6 +134,7 @@ private:
     struct FHUDBlockData
     {
         TSharedPtr<BLImage> mBLImage;
+        TSharedPtr<BLContext> mBLContext;
     };
 
     //eBlockState mState;

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyVector.h"
 
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
@@ -19,103 +19,143 @@ enum class ePathPickingMode : uint8
     SegmentHandle = 2
 };
 
-UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public UOdysseyPainterEditorTool
+// struct that stores the ratio of handleLength / segmentLength at mouseDown
+// This allows us to adjust the handle length when moving vertices.
+typedef struct _FSegmentAdjustment
 {
-public:
-    GENERATED_BODY()
+    double handleRatio[2];
+    FOdysseyVectorSegment* segment;
 
-public:
-    // Destructor
-    virtual ~UOdysseyPainterEditorVectorPathEditTool();
+    _FSegmentAdjustment( FOdysseyVectorSegment* iSegment )
+    {
+        double segmentLength = iSegment->GetLength();
 
-    //Constructor
-    UOdysseyPainterEditorVectorPathEditTool();
+        segment = iSegment;
+        handleRatio[0] = handleRatio[1] = 0.0f;
 
-    virtual bool IsActivable() const override;
-    virtual void Load() override;
-    virtual void Unload() override;
+        if( segmentLength )
+        {
+            if( iSegment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+            {
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
+                ::ULIS::FVec2D handleVector0 = cubicSegment->GetHandleVector( (uint32)0, false );
+                ::ULIS::FVec2D handleVector1 = cubicSegment->GetHandleVector( (uint32)1, false );
 
-    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
-    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
-    virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual bool OnKeyUp( const FKey& iKey ) override;
-    virtual bool OnKeyDown( const FKey& iKey ) override;
+                handleRatio[0] = handleVector0.Distance() / segmentLength;
+                handleRatio[1] = handleVector1.Distance() / segmentLength;
+            }
+        }
+    }
 
-    void UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    void LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    bool OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                          , const FOdysseyPoint& iPointInTexture
-                          , const FKey& iKey );
-    void OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                           , FOdysseyVectorScene* iScene
-                           , const FOdysseyPoint& iPointInTexture );
-    void OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                          , FOdysseyVectorScene* iScene
-                           , const FOdysseyPoint& iPointInTexture );
-    bool OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                        , FOdysseyVectorScene* iScene
-                        , const FOdysseyPoint& iPointInTexture
-                        , const FKey& iKey );
+    void Adjust()
+    {
+        if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            FOdysseyVectorVertex* vertex0 = cubicSegment->GetVertex(0);
+            FOdysseyVectorVertex* vertex1 = cubicSegment->GetVertex(1);
+            ::ULIS::FVec2D handleVector0 = cubicSegment->GetHandleVector( vertex0, true );
+            ::ULIS::FVec2D handleVector1 = cubicSegment->GetHandleVector( vertex1, true );
+            double currentSegmentLength = cubicSegment->GetLength();
 
-    //OdysseyPainterEditorTool overrides
-    virtual void Commit() override;
+            cubicSegment->GetHandle(0)->Set( vertex0->GetCoords() + ( handleVector0 * currentSegmentLength * handleRatio[0] ) );
+            cubicSegment->GetHandle(1)->Set( vertex1->GetCoords() + ( handleVector1 * currentSegmentLength * handleRatio[1] ) );
+        }
+    }
+}
+FSegmentAdjustment;
 
-    uint64 GetPickingFlags();
-    ePathPickingMode GetPickingMode();
+UCLASS()
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public UOdysseyPainterEditorVectorBaseTool
+{
+    public:
+        GENERATED_BODY()
 
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-    void PropertyChanged( const FName& iPropertyName );
+    public:
+        // Destructor
+        virtual ~UOdysseyPainterEditorVectorPathEditTool();
 
-private:
-    FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorEngine* iVectorEngine
-                                      , FOdysseyVectorScene* iScene
-                                      , double iWorldX
-                                      , double iWorldY );
-    void OnMouseDownDeletePoint( FOdysseyVectorEngine* iEngine
-                               , FOdysseyVectorScene* iScene
-                               , const FOdysseyPoint& iPointInTexture
-                               , const FKey& iKey );
-    void OnMouseDownPickPoint( FOdysseyVectorEngine* iEngine
-                             , FOdysseyVectorScene* iScene
-                             , const FOdysseyPoint& iPointInTexture
-                             , const FKey& iKey );
-    void GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
-                              , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                              , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                              , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
-                              , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                              , double iSelectionRadius
-                              , const FOdysseyPoint& iPointInTexture );
-    void DetectPickingMode();
+        //Constructor
+        UOdysseyPainterEditorVectorPathEditTool();
 
-    ::ULIS::FRectD DragPoint( FOdysseyVectorPoint *iPoint
-                            , double iWorldX
-                            , double iWorldY
-                            , double iDeltaX
-                            , double iDeltaY
-                            , bool iWidenAllAlong );
-    void AlterVertexRadius( FOdysseyVectorVertex* vertex
-                          , FOdysseyVectorSegment* iFromSegment
-                          , double iDeltaRadius );
-    void GetPathsFromSelection( FOdysseyVectorScene* iScene
-                             , std::vector<FOdysseyVectorPath*>& oPathArray );
+        virtual bool IsActivable() const override;
 
-private:
-    FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
+        uint64 GetPickingFlags();
+        ePathPickingMode GetPickingMode();
 
-    std::vector<FOdysseyVectorPoint*> mPickedPointArray;
-    std::vector<FOdysseyVectorPath*> mSelectedPathArray;
-    uint64 mPickingFlags;
-    ePathPickingMode mPickingMode;
-    ::ULIS::FVec2D mOldPointInTexture;
+    protected:
+        //OdysseyPainterVectorBaseEditorTool overrides
+        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
+        virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+                                      , const FKey& iKey ) override;
+        virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey ) override;
+        virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+                                         , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+                                        , const FOdysseyPoint& iPointInTexture ) override;
+        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ) override;
+        //virtual void PropertyChangedVector( FOdysseyVectorScene* iScene
+        //                                  , const FName& iPropertyName ) override;
 
-public:
-    UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool", meta = (ClampMin = "0.0", UIMin = "0.0") )
-    double PickingRadius;
+    private:
+        FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorScene* iScene
+                                          , double iWorldX
+                                          , double iWorldY );
+        void OnMouseDownDeletePoint( FOdysseyVectorScene* iScene
+                                   , const FOdysseyPoint& iPointInTexture
+                                   , const FKey& iKey );
+        void OnMouseDownPickPoint( FOdysseyVectorScene* iScene
+                                 , const FOdysseyPoint& iPointInTexture
+                                 , const FKey& iKey );
+/*
+        void GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
+                                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
+                                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                  , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
+                                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
+                                  , double iSelectionRadius
+                                  , const FOdysseyPoint& iPointInTexture );
+*/
+        ::ULIS::FRectD DragSegmentHandle( FOdysseyVectorHandleSegment *iHandle
+                                        , double iWorldX
+                                        , double iWorldY
+                                        , double iDeltaX
+                                        , double iDeltaY
+                                        , bool iRealign );
 
-    UPROPERTY(EditAnywhere, Category="Odyssey PathEdit Tool" )
-    bool WidenAllAlong;
+        ::ULIS::FRectD DragVertex( FOdysseyVectorVertex *iVertex
+                                 , double iWorldX
+                                 , double iWorldY
+                                 , double iDeltaX
+                                 , double iDeltaY
+                                 , bool iWidenAllAlong );
+
+        void GetPathsFromSelection( FOdysseyVectorScene* iScene
+                                  , std::vector<FOdysseyVectorPath*>& oPathArray );
+
+        static void BuildSegmentAdjustments( const std::vector<FOdysseyVectorSegment*>& iSegmentArray
+                                           , std::vector<FSegmentAdjustment>& oSegmentAdjustmentArray );
+
+    private:
+        FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
+        std::vector<FOdysseyVectorVertex*> mPickedVertexArray;
+        std::vector<FOdysseyVectorHandleSegment*> mPickedHandleArray;
+        std::vector<FSegmentAdjustment> mSegmentAdjustmentArray;
+        std::vector<FOdysseyVectorPath*> mSelectedPathArray;
+        uint64 mPickingFlags;
+        ePathPickingMode mPickingMode;
+        ::ULIS::FVec2D mOldPointInTexture;
+
+    public:
+        UPROPERTY( EditAnywhere, Category = PathEditTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+        double PickingRadius;
+
+        UPROPERTY( EditAnywhere, Category = PathEditTool )
+        bool WidenAllAlong;
 };

@@ -18,12 +18,14 @@ namespace FOdysseyVectorExportV2
     void WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteDefineObjectID( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectChunks( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectOpacity( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectBackgroundColor( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectBackgroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectID( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectName( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectTransform( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectTransformTranslation( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectTransformRotation( FOdysseyVectorObject& iObject, FArchive &Ar );
@@ -40,10 +42,18 @@ namespace FOdysseyVectorExportV2
     void WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar );
-    void WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar);
+    void WriteBucketPaletteEntryMark1( FOdysseyVectorBucket& iBucket, FArchive& Ar);
+    void WriteBucketPaletteEntryMark2( FOdysseyVectorBucket& iBucket, FArchive& Ar);
     void WriteBucketColorMode( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketGradientRadialOffset( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketGradientRadialRadius( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+
+    ////////////////////////////////////
+    void WriteBrush( const FOdysseyVectorBrush& iBrush, FArchive &Ar );
+    void WriteBrushTexture( const FOdysseyVectorBrush& iBrush, FArchive &Ar );
+    void WriteBrushExtendOverPath( const FOdysseyVectorBrush& iBrush, FArchive &Ar );
+    void WriteBrushColorFromBrush( const FOdysseyVectorBrush& iBrush, FArchive &Ar );
+    void WriteBrushRevert( const FOdysseyVectorBrush& iBrush, FArchive &Ar );
 
     ////////////////////////////////////
     void ODYSSEYVECTOR_API WritePath( FOdysseyVectorPath& iPath, FArchive &Ar );
@@ -54,6 +64,7 @@ namespace FOdysseyVectorExportV2
     void WritePathGeometryVertexHandleAlignment( FOdysseyVectorVertex& iVertex, FArchive &Ar );
     void WritePathGeometry( FOdysseyVectorPath& iPath, FArchive &Ar );
     void WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar );
+    void WritePathBrush( FOdysseyVectorPath& iPath, FArchive &Ar );
 
     ////////////////////////////////////
     void ODYSSEYVECTOR_API WriteGroup( FOdysseyVectorGroup& iGroup, FArchive &Ar );

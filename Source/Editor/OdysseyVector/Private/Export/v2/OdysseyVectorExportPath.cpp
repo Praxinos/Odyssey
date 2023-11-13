@@ -158,6 +158,18 @@ FOdysseyVectorExportV2::WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar 
 
 //static
 void
+FOdysseyVectorExportV2::WritePathBrush( FOdysseyVectorPath& iPath, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_BRUSH
+                            , Ar
+                            , [&iPath](FArchive &Ar) -> void
+    {
+        FOdysseyVectorExportV2::WriteBrush( iPath.GetBrush(), Ar );
+    } );
+}
+
+//static
+void
 FOdysseyVectorExportV2::WritePath( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH
@@ -170,5 +182,6 @@ FOdysseyVectorExportV2::WritePath( FOdysseyVectorPath& iPath, FArchive &Ar )
         // own chunks
         WritePathJoint( iPath, Ar );
         WritePathGeometry( iPath, Ar );
+        WritePathBrush( iPath, Ar );
     } );
 }

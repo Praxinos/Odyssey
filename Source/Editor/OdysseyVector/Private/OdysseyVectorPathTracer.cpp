@@ -14,7 +14,7 @@ FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
     : mDotLimit ( 0.0 ) // 90 deg
     //, mDotLimit ( 0.7071f ) // cos 45deg
     , mPointID( 0 )
-    , mSampleDistance( 6.0f )
+    , mSampleDistance( 3.0f )
     , mTracingWidth( 6.0f )
     , mPreviousVertex ( nullptr )
     , mCubicPath(nullptr)
@@ -44,8 +44,8 @@ FOdysseyVectorPathTracer::Init( FOdysseyVectorScene* iScene )
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     BLImageData imageData;
 
-    mWidth = vectorEngine->GetWidth();
-    mHeight = vectorEngine->GetHeight();
+    mWidth = vectorEngine->GetPreferredWidth();
+    mHeight = vectorEngine->GetPreferredHeight();
 
     if( mBLImage )
     {
@@ -81,10 +81,19 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
 {
     FOdysseyVectorSegment* newSegment = nullptr;
 
+    // forbid path with a signle vertex that has a segment that loops on itself
+    if ( ( mCubicPath->GetVertexList().size() == 1 )
+      && ( mCubicPath->GetVertexList().front() == iEndVertex ) )
+    {
+        Reset();
+
+        return nullptr;
+    }
+
     if( mEdgeArray.size() )
     {
         MakeBezier( true );
-        newSegment = CommitSegment( iEndVertex ? iEndVertex : CommitVertex() );
+        newSegment = CommitSegment( iEndVertex ? iEndVertex : CommitVertex( false ) );
     }
 
     Reset();
@@ -448,7 +457,7 @@ FOdysseyVectorPathTracer::ClearTo( uint32 iRecordID, uint32 iEdgeID )
 }
 
 FOdysseyVectorVertex*
-FOdysseyVectorPathTracer::CommitVertex()
+FOdysseyVectorPathTracer::CommitVertex( bool iIsHandleAligned )
 {
     BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
     BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[3].x
@@ -460,6 +469,8 @@ FOdysseyVectorPathTracer::CommitVertex()
                                                               , localPoint.x
                                                               , localPoint.y
                                                               , localRadius );
+
+    newVertex->SetHandleAligned( iIsHandleAligned );
 
     mCubicPath->AddVertex( newVertex );
 
@@ -503,6 +514,36 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
 
 
     return newCubicSegment;
+}
+
+::ULIS::FRectD
+FOdysseyVectorPathTracer::GetRedrawRect()
+{
+    if( mPointArray.size() )
+    {
+        double xmin = mPointArray[0].coords.x
+             , ymin = mPointArray[0].coords.y
+             , xmax = xmin
+             , ymax = ymin;
+        double maxRadius = mPointArray[0].radius;
+
+        for( int i = 1; i < mPointArray.size(); i++ )
+        {
+            if( mPointArray[i].coords.x < xmin ) xmin = mPointArray[i].coords.x;
+            if( mPointArray[i].coords.x > xmax ) xmax = mPointArray[i].coords.x;
+            if( mPointArray[i].coords.y < ymin ) ymin = mPointArray[i].coords.y;
+            if( mPointArray[i].coords.y > ymax ) ymax = mPointArray[i].coords.y;
+
+            if( mPointArray[i].radius > maxRadius ) maxRadius = mPointArray[i].radius;
+        }
+
+        return ::ULIS::FRectD::FromMinMax( xmin - maxRadius
+                                         , ymin - maxRadius
+                                         , xmax + maxRadius
+                                         , ymax + maxRadius );
+    }
+
+    return ::ULIS::FRectD( 0, 0, 0, 0 );
 }
 
 FOdysseyVectorSegment*
@@ -579,7 +620,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
 
                 MakeBezier( true );
 
-                newVertex = CommitVertex();
+                newVertex = CommitVertex( lastRecord->smooth );
                 newSegment = CommitSegment( newVertex );
 
                 mRecordArray.push_back( newRecord );
@@ -594,7 +635,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                 {
                     FOdysseyVectorVertex* newVertex;
 
-                    newVertex = CommitVertex();
+                    newVertex = CommitVertex( lastRecord->smooth );
                     newSegment = CommitSegment( newVertex );
                 }
             }

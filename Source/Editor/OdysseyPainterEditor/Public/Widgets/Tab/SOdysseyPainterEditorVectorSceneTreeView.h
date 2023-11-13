@@ -9,6 +9,8 @@
 #include "Widgets/Views/STreeView.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
 
+class FOdysseyPainterEditor;
+
 /**
  * Implements the Scene Tree View Widget
  */
@@ -52,9 +54,10 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
 
         void MapActionsToCommandList();
 
-        void CopyObjectSelection();
-        void PasteObjectSelection();
-        void DeleteObjectSelection();
+        // actions
+        void CopyObjects();
+        void PasteObjects();
+        void DeleteObjects();
         void SelectAll();
         FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent );
 

@@ -83,7 +83,6 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mEngine, iWidth, iHeight, animation->Format());
-    mVectorBlock->SetRenderFlags(GetLayer()->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     mVectorBlock->OnInvalidated().AddRaw(this, &FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);
 }
 
@@ -172,7 +171,8 @@ FOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImage
 
     mEngine->Invalidate();
 
-    mVectorBlock->SetRenderFlags(GetLayer()->IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
+    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+
     ImageRenderingChanged();
 }
 

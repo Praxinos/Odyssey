@@ -3,6 +3,8 @@
 
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchToolHUD.h"
+#include "PainterEditor/OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
@@ -13,52 +15,20 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorPathStitchTool::~UOdysseyPainterEditorVectorPathStitchTool()
 {
-    delete mPathStitchHUD;
 }
 
 UOdysseyPainterEditorVectorPathStitchTool::UOdysseyPainterEditorVectorPathStitchTool()
-    : PickingRadius(20.0f)
-    , RestrictToSelection( false )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathStitchToolHUD( this ) )
+    , PickingRadius(20.0f)
+//    , RestrictToSelection( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathKnotTool64");
 
-    mPathStitchHUD = new FOdysseyPainterEditorVectorPathStitchToolHUD( this );
+    mPathStitchHUD = static_cast<FOdysseyPainterEditorVectorPathStitchToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
-
-void
-UOdysseyPainterEditorVectorPathStitchTool::Load()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPathStitchTool::LoadVector( vectorEngine, vectorScene );
-}
-
-void
-UOdysseyPainterEditorVectorPathStitchTool::Unload()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( vectorEngine, vectorScene );
-}
 
 bool
 UOdysseyPainterEditorVectorPathStitchTool::IsActivable() const
@@ -66,93 +36,82 @@ UOdysseyPainterEditorVectorPathStitchTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
-void
-UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( mPathStitchHUD );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-}
-
-void
-UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
-{
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mPathStitchHUD );
-
-    iEngine->ResetHUD();
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+uint64
+UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return false;
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return false;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    return UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
-                                                          , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey )
+uint64
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
-    ::ULIS::FRectD roi = { iPointInTexture.x - PickingRadius, iPointInTexture.y - PickingRadius, PickingRadius * 2, PickingRadius * 2 };
-    FOdysseyVectorVertex* knotVertex;
-    // for undos
-    std::vector<FOdysseyVectorPath*> addedPathArray; // stays empty
-    std::vector<FOdysseyVectorVertex*> addedVertexArray;
-    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
-    std::vector<FOdysseyVectorPath*> removedPathArray; // receives the merged path if any
-    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-    std::vector<FOdysseyVectorVertex*> removedVertexArray;
-    std::vector<FOdysseyVectorSegment*> mergedSegmentArray;
-    std::vector<FOdysseyVectorVertex*> mergedVertexArray;
-    std::vector<FOdysseyVectorPoint*>& pickedPointArray = mPathStitchHUD->GetPickedPointArray();
-
-    //pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
-
-/*
-    iEngine->PickPoints( iScene
-                       , false
-                       , iPointInTexture.x
-                       , iPointInTexture.y
-                       , PickingRadius
-                       , pickedPointArray
-                       , FOdysseyVectorPath::PICK_POINT );
-*/
-    if( pickedPointArray.size() > 1 )
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
     {
-        FOdysseyVectorVertex* vertexA = static_cast<FOdysseyVectorVertex*>( pickedPointArray[0] );
-        FOdysseyVectorVertex* vertexB = static_cast<FOdysseyVectorVertex*>( pickedPointArray[1] );
-        FOdysseyVectorPath* mergedPath = nullptr;
+        FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+        ::ULIS::FRectD roi = { iPointInTexture.x - PickingRadius, iPointInTexture.y - PickingRadius, PickingRadius * 2, PickingRadius * 2 };
+        FOdysseyVectorVertex* knotVertex;
+        // for undos
+        std::vector<FOdysseyVectorPath*> addedPathArray; // stays empty
+        std::vector<FOdysseyVectorVertex*> addedVertexArray;
+        std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+        std::vector<FOdysseyVectorPath*> removedPathArray; // receives the merged path if any
+        std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+        std::vector<FOdysseyVectorVertex*> removedVertexArray;
+        std::vector<FOdysseyVectorSegment*> mergedSegmentArray;
+        std::vector<FOdysseyVectorVertex*> mergedVertexArray;
+        FOdysseyVectorVertex** stitchableVertex = mPathStitchHUD->GetStitchableVertices();
 
-        if( ( vertexA->GetSegmentCount() == 1 ) && ( vertexB->GetSegmentCount() == 1 ) )
+        //pickedPointArray.reserve(500); // crashes if I don't reserve. I don't know why.
+
+    /*
+        iEngine->PickPoints( iScene
+                           , false
+                           , iPointInTexture.x
+                           , iPointInTexture.y
+                           , PickingRadius
+                           , pickedPointArray
+                           , FOdysseyVectorPath::PICK_POINT );
+    */
+        if( stitchableVertex[0] && stitchableVertex[1] )
         {
+            FOdysseyVectorVertex* vertexA = static_cast<FOdysseyVectorVertex*>( stitchableVertex[0] );
+            FOdysseyVectorVertex* vertexB = static_cast<FOdysseyVectorVertex*>( stitchableVertex[1] );
+            FOdysseyVectorPath* mergedPath = nullptr;
+
+            // TODO: remove vertexB->GetPath() from selected objects.
             if( vertexA->GetPath() != vertexB->GetPath() )
             {
-                // TODO: remove vertexB->GetPath() from selected objects.
                 mergedPath = vertexB->GetPath();
 
                 vertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
                 vertexA->GetPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
+
+
                 // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
                 vertexB = mergedVertexArray[vertexB->GetID()];
 
-                iScene->Unselect( mergedPath );
+                if( mergedPath->IsSelected() )
+                {
+                    iScene->Unselect( mergedPath );
+
+                    iScene->Select( vertexA->GetPath() );
+                }
 
                 removedPathArray.push_back( mergedPath );
             }
@@ -170,54 +129,35 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorEngi
                 if( GUndo )
                 {
                     FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathStitch( iScene
-                                                                              , removedPathArray
-                                                                              , removedVertexArray
-                                                                              , removedSegmentArray
-                                                                              , addedPathArray
-                                                                              , addedVertexArray
-                                                                              , addedSegmentArray
-                                                                              , mergedVertexArray
-                                                                              , mergedSegmentArray );
+                                                                                , removedPathArray
+                                                                                , removedVertexArray
+                                                                                , removedSegmentArray
+                                                                                , addedPathArray
+                                                                                , addedVertexArray
+                                                                                , addedSegmentArray
+                                                                                , mergedVertexArray
+                                                                                , mergedSegmentArray );
 
                     GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
             }
         }
+
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+        mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
-
-    return true;
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-void
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
-}
-
-void
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                                                           , FOdysseyVectorScene* iScene
-                                                           , const FOdysseyPoint& iPointInTexture )
+uint64
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+                                                             , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = PickingRadius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)PickingRadius
@@ -237,109 +177,45 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorEng
     if( rect.Area() )
     {*/
     /*}*/
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-void
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+uint64
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
+    // Left mouse button clicked
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    {
+        mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
+    }
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-void
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
-                                                          , const FOdysseyPoint& iPointInTexture )
+uint64
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
-    mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+uint64
+UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVectorScene* iScene
+                                                                , const FName& iPropertyName )
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return false;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    return UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-}
-
-bool
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
-                                                        , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey )
-{
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-
-    return false;
-}
-
-void
-UOdysseyPainterEditorVectorPathStitchTool::Commit()
-{
-}
-
-void
-UOdysseyPainterEditorVectorPathStitchTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
-{
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-    
-    PropertyChanged( PropertyChangedEvent.GetPropertyName() );
-    
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-
-    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-}
-
-void
-UOdysseyPainterEditorVectorPathStitchTool::PropertyChanged( const FName& iPropertyName )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     if( iPropertyName == "RestrictToSelection" )
     {
-        vectorEngine->ResetHUD(); // rebuild the quad tree
+        iEngine->ResetHUD(); // rebuild the quad tree
     }
+
+    return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName )
+         | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -1,5 +1,23 @@
 #include "OdysseyVectorHandleSegment.h"
 
+// static
+void
+FOdysseyVectorHandleSegment::ArrayToVertexArray( const std::vector<FOdysseyVectorHandleSegment*>& iSegmentHandleArray
+                                               , std::vector<FOdysseyVectorVertex*>& oVertexArray )
+{
+    for( FOdysseyVectorHandleSegment* segmentHandle : iSegmentHandleArray )
+    {
+        FOdysseyVectorSegment* segment = segmentHandle->GetOwner();
+
+        if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+
+            oVertexArray.push_back( cubicSegment->GetVertex( segmentHandle->GetHandleID() ) );
+        }
+    }
+}
+
 FOdysseyVectorHandleSegment::~FOdysseyVectorHandleSegment()
 {
 }
@@ -33,3 +51,4 @@ FOdysseyVectorHandleSegment::SetCoords( double iX, double iY, double iRadius )
         mOwnerSegment->Invalidate();
     }
 }
+

@@ -99,9 +99,10 @@ UOdysseyTextureLayerImageVector::OnCreated_Implementation()
     //let's ensure the format has alpha, so add alpha channel of needed
     format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
+    
+
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
-    mVectorBlock->SetRenderFlags(IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
 }
 
@@ -126,7 +127,6 @@ UOdysseyTextureLayerImageVector::PostLoad()
 
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
-    mVectorBlock->SetRenderFlags(IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
 }
 
@@ -201,6 +201,8 @@ void
 UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
 {
     Super::PropertyChanged(iPropertyName);
+    if(iPropertyName == "IsWireframe")
+        IsWireframeChanged();
     if(iPropertyName == "IsColored")
         IsColoredChanged();
     if (iPropertyName == "BlendMode")
@@ -210,10 +212,22 @@ UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
 }
 
 void
+UOdysseyTextureLayerImageVector::IsWireframeChanged()
+{
+    mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+
+    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+
+    ImageRenderingChanged();
+}
+
+void
 UOdysseyTextureLayerImageVector::IsColoredChanged()
 {
     mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
-    mVectorBlock->SetRenderFlags(IsColored ? 0 : FOdysseyVectorObject::DRAWING_IGNORECOLOR);
+
+    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+
     ImageRenderingChanged();
 }
 

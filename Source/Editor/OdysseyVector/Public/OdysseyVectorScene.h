@@ -32,7 +32,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
     private:
         FOdysseyVectorObject* CopyShape();
         FOdysseyVectorEngine* mEngine;
-        void FlipSelection( bool iWorld, double iXFactor, double iYFactor );
+
+
+        void FlipObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                        , double iXFactor
+                        , double iYFactor );
 
     protected:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
@@ -40,8 +44,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
     public:
         virtual ~FOdysseyVectorScene();
         FOdysseyVectorScene( const FString& iName );
-        void FlipSelectionHorizontal( bool iWorld );
-        void FlipSelectionVertical( bool iWorld );
+        void FlipObjectsHorizontal( const std::list<FOdysseyVectorObject*>& iObjectList );
+        void FlipObjectsVertical( const std::list<FOdysseyVectorObject*>& iObjectList );
+        ::ULIS::FVec2D GetPositionFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList );
 
         void Init( const FString& iName );
         void Select( FOdysseyVectorObject* iVecObj );
@@ -49,17 +54,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorScene : public FOdysseyVectorGroupPaint
         void ClearSelection();
         FOdysseyVectorObject* GetLastSelected();
         std::list<FOdysseyVectorObject*>& GetSelectedObjectList();
-        virtual void DrawShape( uint64 iFlags ) override;
+        virtual void DrawShape( BLContext* iBLContext, double iHierarchyOpacity, uint64 iFlags ) override;
         bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) { return false; };
         ::ULIS::FVec2D GetWorldPositionFromSelection();
         void InvalidateObject( FOdysseyVectorObject* iObject );
-        void RemoveSelectedObjects();
+        void RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList );
 
-        FOdysseyVectorGroup* GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& oObjectArray
-                                                 , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray );
-        FOdysseyVectorGroupPaint* MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVectorObject*>& oCubicPathArray
-                                                                   , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
-                                                                   , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray );
+        FOdysseyVectorGroup* GroupObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                         , std::vector<FOdysseyVectorObject*>& oObjectArray
+                                         , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray );
+
+        FOdysseyVectorGroupPaint* MakePaintGroupFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                                           , std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                                           , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
+                                                           , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray );
         uint32 GetType();
 
         void SetEngine( FOdysseyVectorEngine* iEngine );

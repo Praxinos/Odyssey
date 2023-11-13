@@ -1,45 +1,24 @@
 #include "OdysseyVectorEngine.h"
+//#include <future>
 
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
-    mBLContext->end();
-
-    delete mBLImage;
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene, double iWidth, double iHeight )
+FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene
+                                          , uint32 iPreferredWidth
+                                          , uint32 iPreferredHeight )
     : FOdysseyVectorObject( "Engine" )
     , mSelectionSpace( nullptr )
-    , mInvalidTileMap( 64, iWidth, iHeight )
-    , mWidth( iWidth )
-    , mHeight( iHeight )
+    , mInvalidTileMap( 64, iPreferredWidth, iPreferredHeight )
+    , mPreferredWidth( iPreferredWidth )
+    , mPreferredHeight( iPreferredHeight )
+    , mInvalidatedRect( 0, 0, iPreferredWidth, iPreferredHeight )
 {
-    BLContextCreateInfo createInfo {};
-
     // Configure the number of threads to use.
-    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
-
-    // create an empty default image. An image is always needed for matrix operations
-    mDefaultBLImage.createFromData( mWidth
-                                  , mHeight
-                                  , BL_FORMAT_PRGB32
-                                  , nullptr
-                                  , 0
-                                  , nullptr
-                                  , nullptr );
-
-    mBLContext = new BLContext();
-    mBLMask  = new BLImage( iWidth, iHeight, BL_FORMAT_A8 );
-
-    UseImage( &mDefaultBLImage );
-
-    /*mScene = NewObject<FOdysseyVectorScene>();
-    mScene->Init("Vector Scene");*/
+    mProcessorCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
 
     SetScene( iScene );
-
-    mBLContext->begin( *mBLImage, createInfo );
-    //UseColorImage();
 }
 
 bool
@@ -72,33 +51,27 @@ FOdysseyVectorEngine::GetInvalidTileMap()
 }
 
 BLImage*
-FOdysseyVectorEngine::GetBLImage()
-{
-    return mBLImage;
-}
-
-BLContext*
-FOdysseyVectorEngine::GetBLContext()
-{
-    return mBLContext;
-}
-
-BLImage*
 FOdysseyVectorEngine::GetBLMask()
 {
     return mBLMask;
 }
 
-uint32
-FOdysseyVectorEngine::GetWidth()
+void
+FOdysseyVectorEngine::SetBLMask( BLImage* iBLMask )
 {
-    return mWidth;
+    mBLMask = iBLMask;
 }
 
 uint32
-FOdysseyVectorEngine::GetHeight()
+FOdysseyVectorEngine::GetPreferredWidth()
 {
-    return mHeight;
+    return mPreferredWidth;
+}
+
+uint32
+FOdysseyVectorEngine::GetPreferredHeight()
+{
+    return mPreferredHeight;
 }
 
 void
@@ -109,6 +82,8 @@ FOdysseyVectorEngine::SetScene( FOdysseyVectorScene* iScene )
     // todo: replace with RemoveAllChildren();
     mChildrenList.clear();
     AppendChild( iScene );
+
+//    SetSelectionSpace( iScene );
 
     mScene->SetEngine( this );
 
@@ -122,33 +97,90 @@ FOdysseyVectorEngine::GetScene()
 }
 
 void
-FOdysseyVectorEngine::RenderHUD( BLImage* iBLImage/*FOdysseyVectorScene* iScene */ )
+FOdysseyVectorEngine::SetInvalidatedRect( const ::ULIS::FRectD& iRect )
+{
+    ::ULIS::FRectI rect = ::ULIS::FRectI( iRect.x, iRect.y, iRect.w, iRect.h );
+
+    SetInvalidatedRect( rect );
+}
+
+void
+FOdysseyVectorEngine::SetInvalidatedRect( const ::ULIS::FRectI& iRect )
+{
+    if( mInvalidationFlags == 0 )
+    {
+        mInvalidatedRect.x = iRect.x;
+        mInvalidatedRect.y = iRect.y;
+        mInvalidatedRect.w = iRect.w;
+        mInvalidatedRect.h = iRect.h;
+    }
+    else // if we haven' been redrawn yet, combine the rectangles
+    {
+        mInvalidatedRect = mInvalidatedRect | iRect;
+    }
+}
+
+::ULIS::FRectI&
+FOdysseyVectorEngine::GetInvalidatedRect()
+{
+    return mInvalidatedRect;
+}
+
+void
+FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
     std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
 
-    UseImage( iBLImage );
+    //UseImage( iBLImage );
 
-    mBLContext->save();
-    mBLContext->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
     //mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
     //mBLContext->setFillAlpha( 0.0f );
-    mBLContext->clearAll();
+    iBLContext->clearAll();
 
-    for( std::list<FOdysseyVectorHUD*>::iterator hit = GetHUDList().begin(); hit != GetHUDList().end(); ++hit )
+    for( FOdysseyVectorHUD *hud : GetHUDList() )
     {
-        FOdysseyVectorHUD *hud = (*hit);
-
-        hud->Draw( mScene, 0 );
+        hud->Draw( iBLContext, mScene );
     }
 
-    mBLContext->restore();
+    iBLContext->restore();
 
-    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+    iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
-    UseImage( &mDefaultBLImage );
+    //UseImage( &mDefaultBLImage );
+}
+/*
+// static
+void
+FOdysseyVectorEngine::GetVertexSelection( std::list<FOdysseyVectorObject*>& iVectorObjectList
+                                        , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray )
+{
+    for( FOdysseyVectorObject* vectorObject : iVectorObjectList )
+    {
+        GetVertexSelectionRecursive( vectorObject, iSelectedPointArray );
+    }
 }
 
+// static
+void
+FOdysseyVectorEngine::GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
+                                                 , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray )
+{
+    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+
+        path->GetSelectedPoints( iSelectedPointArray, ePointSelectionFlags::Vertex );
+    }
+
+    for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+    {
+        GetVertexSelectionRecursive( childObject, iSelectedPointArray );
+    }
+}
+*/
 void
 FOdysseyVectorEngine::SelectAllInSelectionSpace()
 {
@@ -165,151 +197,44 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
         mScene->Select( child );
     }
 }
+/*
+uint64
+FOdysseyVectorEngine::GetDrawingFlags()
+{
+    return mDrawingFlags;
+}
 
 void
-FOdysseyVectorEngine::Render( BLImage* iBLImage, uint64 iDrawingFlags )
+FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
+{
+    mDrawingFlags = iDrawingFlags;
+}
+*/
+void
+FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
-    UseImage( iBLImage );
+    BLImage* image = iBLContext->targetImage();
+    BLImageData imageData;
+
+    image->getData( &imageData );
+
+    // for drawing polygones (textured)
+    if( mHorizontalLineBuffer.size() != imageData.size.h )
+    {
+        mHorizontalLineBuffer.resize( imageData.size.h );
+    }
 
     if( mInvalidationFlags )
     {
-        mScene->Draw( iDrawingFlags );
-        mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+        mScene->Draw( iBLContext, 1.0f, iDrawingFlags );
+
+        iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
 
     mInvalidationFlags = 0;
 
-    UseImage( &mDefaultBLImage );
-}
-
-void
-FOdysseyVectorEngine::ClearMask()
-{
-    BLImage* currentImage = GetBLImage();
-
-    UseMaskImage();
-
-    mBLContext->save();
-    mBLContext->resetMatrix();
-
-    mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLContext->setFillAlpha( 0.0f );
-    mBLContext->clearAll();
-    mBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
-
-    mBLContext->restore();
-
-    UseImage( currentImage );
-}
-
-::ULIS::FRectD
-FOdysseyVectorEngine::GenerateCircleMask( double iX, double iY, double iRadius )
-{
-    BLImage* currentImage = GetBLImage();
-
-    UseMaskImage();
-
-    mBLContext->save();
-    mBLContext->resetMatrix();
-
-    mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLContext->setFillAlpha( 1.0f );
-    mBLContext->fillCircle( iX, iY, iRadius );
-    mBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
-
-    mBLContext->restore();
-
-    UseImage( currentImage );
-
-    return ::ULIS::FRectD::FromMinMax( iX - iRadius, iY - iRadius
-                                     , iX + iRadius, iY + iRadius );
-}
-
-::ULIS::FRectD
-FOdysseyVectorEngine::GenerateRectangleMask( const ::ULIS::FRectD& iRect )
-{
-    BLImage* currentImage = GetBLImage();
-
-    UseMaskImage();
-
-    mBLContext->save();
-    mBLContext->resetMatrix();
-
-    mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLContext->setFillAlpha( 0.0f );
-    mBLContext->clearAll();
-    mBLContext->setFillAlpha( 1.0f );
-    mBLContext->fillRect( iRect.x, iRect.y, iRect.w, iRect.h );
-    mBLContext->flush( BL_CONTEXT_FLUSH_SYNC );
-
-    mBLContext->restore();
-
-    UseImage( currentImage );
-
-    return iRect;
-}
-
-::ULIS::FRectD
-FOdysseyVectorEngine::GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray )
-{
-    BLImage* currentImage = GetBLImage();
-    ::ULIS::FRectD rect = { 0, 0, 0, 0 };
-    BLPath path;
-
-    UseMaskImage();
-
-    mBLContext->save();
-    mBLContext->resetMatrix();
-    mBLContext->setCompOp(BL_COMP_OP_SRC_COPY);
-    /*blctx.setFillStyle( BLRgba32(0x00000000) );*/
-    mBLContext->setFillAlpha(0.0f);
-    mBLContext->clearAll();
-
-    if( iPointArray.size() )
-    {
-        double x1 = iPointArray[0].x, y1 = iPointArray[0].y
-             , x2 = iPointArray[0].x, y2 = iPointArray[0].y;
-
-        path.moveTo( iPointArray[0].x, iPointArray[0].y );
-
-        for( uint32 i = 1; i < iPointArray.size(); i++ )
-        {
-            path.lineTo( iPointArray[i].x, iPointArray[i].y );
-
-            if( iPointArray[i].x < x1 )
-            {
-                x1 = iPointArray[i].x;
-            }
-
-            if( iPointArray[i].y < y1 )
-            {
-                y1 = iPointArray[i].y;
-            }
-
-            if( iPointArray[i].x > x2 )
-            {
-                x2 = iPointArray[i].x;
-            }
-
-            if( iPointArray[i].y > y2 )
-            {
-                y2 = iPointArray[i].y;
-            }
-        }
-
-        rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
-
-        mBLContext->setFillAlpha(1.0f);
-        mBLContext->fillPath( path );
-    }
-
-    mBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
-    mBLContext->restore();
-
-    UseImage( currentImage );
-
-    return rect;
+    mInvalidatedRect = ::ULIS::FRectI( 0, 0, imageData.size.w, imageData.size.h );
 }
 
 void
@@ -494,72 +419,6 @@ FOdysseyVectorEngine::EraseSections( FOdysseyVectorScene* iScene
     }
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-}
-
-static void
-RecursivePickPoints( FOdysseyVectorObject* iObject
-                   , double iWorldX
-                   , double iWorldY
-                   , double iRadius
-                   , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
-                   , uint64 iPickingFlags )
-{
-    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
-    {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
-        BLMatrix2D& inverseWorldMatrix = iObject->GetInverseWorldMatrix();
-        BLPoint localRadius = inverseWorldMatrix.mapVector( 0.7071f * iRadius, 0.7071f * iRadius );
-        BLPoint localPoint = inverseWorldMatrix.mapPoint( iWorldX, iWorldY );
-        ::ULIS::FRectD pathBBox = path->GetBBox( false );
-
-        // get sure we hit the box be enlarging it with the picking circle radius value.
-        // otherwise we might not be able to pick points located at the box's boundaries.
-        pathBBox.x -=   localRadius.x;
-        pathBBox.y -=   localRadius.y;
-        pathBBox.w += ( localRadius.x * 2 );
-        pathBBox.h += ( localRadius.y * 2 );
-
-        if( pathBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
-        {
-            path->PickPoint( iWorldX, iWorldY, iRadius, oPickedPointArray, iPickingFlags );
-        }
-    }
-
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
-    {
-        FOdysseyVectorObject* child = (*it);
-
-        RecursivePickPoints( child, iWorldX, iWorldY, iRadius, oPickedPointArray, iPickingFlags );
-    }
-}
-
-void
-FOdysseyVectorEngine::PickPoints( FOdysseyVectorScene* iScene
-                                , bool iRestrictToSelection
-                                , double iX
-                                , double iY
-                                , double iRadius
-                                , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
-                                , uint64 iPickingFlags )
-{
-    if( iRestrictToSelection )
-    {
-        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-
-        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-        {
-            FOdysseyVectorObject* selectedObject = (*it);
-
-            if( selectedObject->HasSelectedAncestor() == false )
-            {
-                RecursivePickPoints( selectedObject, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
-            }
-        }
-    }
-    else
-    {
-        RecursivePickPoints( iScene, iX, iY, iRadius, oPickedPointArray, iPickingFlags );
-    }
 }
 
 FOdysseyVectorVertex*
@@ -751,22 +610,6 @@ FOdysseyVectorEngine::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
 }
 
 void
-FOdysseyVectorEngine::UseMaskImage()
-{
-    mBLContext->end();
-    mBLContext->begin( *mBLMask );
-}
-
-void
-FOdysseyVectorEngine::UseImage( BLImage* iImage )
-{
-    mBLContext->end();
-    mBLContext->begin(*iImage);
-
-    mBLImage = iImage;
-}
-
-void
 FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
                           , const ::ULIS::FRectD& iRoi
                           , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
@@ -836,4 +679,626 @@ FOdysseyVectorEngine::Signal( uint64 iSignalFlags )
     }
 
     OnSignalDelegate().Broadcast( mScene, iSignalFlags );
+}
+
+void
+FOdysseyVectorEngine::TraceLine ( int32 iX0
+                                , int32 iY0
+                                , double iU0
+                                , double iV0
+                                , int32 iX1
+                                , int32 iY1
+                                , double iU1
+                                , double iV1
+                                , uint32 iImageWidth
+                                , uint32 iImageHeight )
+{
+    int32 dx  = ( iX1 - iX0 ),
+          ddx = abs ( dx ),
+          dy  = ( iY1 - iY0 ),
+          ddy = abs ( dy ),
+          dd  = ( ddx > ddy ) ? ddx : ddy;
+    double du  = iU1  - iU0, pu = ( dd ) ? ( du / dd ) : 0.0f;
+    double dv  = iV1  - iV0, pv = ( dd ) ? ( dv / dd ) : 0.0f;
+    int px = ( dx > 0 ) ? 1 : -1, 
+        py = ( dy > 0 ) ? 1 : -1;
+    int32 x = iX0,
+          y = iY0;
+    double u = iU0;
+    double v = iV0;
+    int cumul = 0;
+    // we plot only 1 pixel per horizontal line. This is need only when ddx > ddy
+    bool pixelOnLine = false;
+
+    if( ddx > ddy )
+    {
+        for( int i = 0; i <= ddx; i++ )
+        {
+            if( ( y >= 0 ) && ( y < (int32) iImageHeight ) )
+            {
+                uint32 offset = ( y * iImageWidth ) + x;
+
+                if( pixelOnLine == false )
+                {
+                    if( mHorizontalLineBuffer[y].inited == 0 )
+                    {
+                        mHorizontalLineBuffer[y].inited = 1;
+
+                        mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
+                        mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
+                        mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
+                    }
+                    else
+                    {
+                        if( x < mHorizontalLineBuffer[y].x0 )
+                        {
+                            mHorizontalLineBuffer[y].x0 = x;
+                            mHorizontalLineBuffer[y].u0 = u;
+                            mHorizontalLineBuffer[y].v0 = v;
+                        }
+
+                        if( x > mHorizontalLineBuffer[y].x1 )
+                        {
+                            mHorizontalLineBuffer[y].x1 = x;
+                            mHorizontalLineBuffer[y].u1 = u;
+                            mHorizontalLineBuffer[y].v1 = v;
+                        }
+
+                        mHorizontalLineBuffer[y].inited = 2;
+                    }
+
+                    pixelOnLine = true;
+                }
+            }
+
+            cumul += ddy;
+            x     += px;
+            u     += pu;
+            v     += pv;
+
+            if( cumul >= ddx )
+            {
+                cumul -= ddx;
+                y     += py;
+
+                pixelOnLine = false;
+            }
+        }
+    }
+    else
+    {
+        for( int i = 0x00; i <= ddy; i++ )
+        {
+            if( ( y >= 0x00 ) && ( y < (int32) iImageHeight ) )
+            {
+                uint32 offset = ( y * iImageWidth ) + x;
+
+                /*if( pixelOnLine == false )
+                {*/
+                    if( mHorizontalLineBuffer[y].inited == 0 )
+                    {
+                         mHorizontalLineBuffer[y].inited = 1;
+
+                         mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
+                         mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
+                         mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
+                    }
+                    else
+                    {
+                        if( x < mHorizontalLineBuffer[y].x0 )
+                        {
+                            mHorizontalLineBuffer[y].x0 = x;
+                            mHorizontalLineBuffer[y].u0 = u;
+                            mHorizontalLineBuffer[y].v0 = v;
+                        }
+
+                        if( x > mHorizontalLineBuffer[y].x1 )
+                        {
+                            mHorizontalLineBuffer[y].x1 = x;
+                            mHorizontalLineBuffer[y].u1 = u;
+                            mHorizontalLineBuffer[y].v1 = v;
+                        }
+
+                        mHorizontalLineBuffer[y].inited = 2;
+                    }
+/*
+                    pixelOnLine = true;
+                }*/
+            }
+
+            cumul += ddx;
+            y     += py;
+            u     += pu;
+            v     += pv;
+
+            if( cumul >= ddy )
+            {
+                cumul -= ddy;
+                x     += px;
+
+                //pixelOnLine = false;
+            }
+        }
+    }
+}
+
+// Macro for faster execution. Indeed, an inline function is not guaranteed to be inlined.
+#define GETPIXEL(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,ALPHAONLY,U,V,R,G,B,A)   \
+    switch ( BITSPERPIXEL )                                                \
+    {                                                                      \
+        case 32 :                                                          \
+        {                                                                  \
+            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4]) PIXELS; \
+            int32 TEXU = U * ( WIDTH  - 1 );                               \
+            int32 TEXV = V * ( HEIGHT - 1 );                               \
+            uint32 TEXOFFSET = ( TEXV * WIDTH ) + TEXU;                    \
+                                                                           \
+            if( ALPHAONLY == false )                                       \
+            {                                                              \
+                B = PIXELS32[TEXOFFSET][0];                                \
+                G = PIXELS32[TEXOFFSET][1];                                \
+                R = PIXELS32[TEXOFFSET][2];                                \
+            }                                                              \
+                                                                           \
+            A = PIXELS32[TEXOFFSET][3];                                    \
+        }                                                                  \
+        break;                                                             \
+                                                                           \
+        default :                                                          \
+        break;                                                             \
+    }                                                                      \
+
+/*
+struct _EngineTexture
+{
+    int8*  pixelData;
+    uint32 width;
+    uint32 height;
+    int32  bitsPerPixel;
+};
+
+struct _EngineTexture
+{
+
+};
+*/
+
+void
+FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
+                                          , double iOpacity
+                                          , int8*  iImagePixelData
+                                          , uint32 iImageWidth
+                                          , uint32 iImageHeight
+                                          , int32  iImageBitsPerPixel
+                                          , const  FColor& iColor
+                                          // Temp
+                                          , int8*  iBrushPixelData
+                                          , uint32 iBrushWidth
+                                          , uint32 iBrushHeight
+                                          , int32  iBrushBitsPerPixel
+                                          , bool   iBrushAlphaOnly )
+{
+    FHorizontalLine *hline = &mHorizontalLineBuffer[iLineNumber];
+    int32 x0 = hline->x0,
+          x1 = hline->x1;
+    double u0 = hline->u0;
+    double v0 = hline->v0;
+    int32 dx = x1 - x0;
+    int32 x = x0;
+    double du  = hline->u1 - hline->u0, pu = ( dx ) ? ( du / dx ) : 0.0f;
+    double dv  = hline->v1 - hline->v0, pv = ( dx ) ? ( dv / dx ) : 0.0f;
+    double u = u0;
+    double v = v0;
+    double opacityFactor = iOpacity / 255.0f;
+    uint32 offset = ( iLineNumber * iImageWidth );
+    int32 screenx = dx;
+    unsigned char BR = iColor.R, BG = iColor.G, BB = iColor.B, BA = iColor.A;
+
+    // Clipping. Note: x1 MUST be > 0, which is checked before the call to this function
+    if( x0 < 0 )
+    {
+        int32 clippingW = -x0;
+
+        x = 0;
+        u  += ( clippingW * pu );
+        v  += ( clippingW * pv );
+
+        screenx  = dx - clippingW;
+    }
+
+    // Commented out: we don't drow from edge-to-edge, we stop 1 pixel before to prevent overlapping,
+    // which would lead to double stroke and would produce artefact when alpha is semi-transparent.
+    //for( int i = 0; i <= ddx; i++ )
+    for( int i = 0; ( i < screenx ) && ( x < (int)iImageWidth /* clipping */ ); i++ )
+    {
+        if( ( x >= 0 ) && ( x < (int32) iImageWidth ) )
+        {
+            uint32 aoffset = offset + x;
+
+            if( iBrushPixelData && iBrushWidth && iBrushHeight )
+            {
+                GETPIXEL( iBrushPixelData
+                        , iBrushWidth
+                        , iBrushHeight
+                        , iBrushBitsPerPixel
+                        , iBrushAlphaOnly
+                        , fmod(u,1.0f) // function call might slow things (maybe not that much, as fmod is declared inline)
+                        , fmod(v,1.0f) // function call might slow things (maybe not that much, as fmod is declared inline)
+                        , BR
+                        , BG
+                        , BB
+                        , BA );
+            }
+
+            switch ( iImageBitsPerPixel )
+            {
+                case 32 :
+                {
+                    unsigned char (*srcimg)[4] = ( unsigned char (*)[4]) iImagePixelData;
+
+                    if( BA )
+                    {
+                        double blending = (double) BA * opacityFactor;
+                        double invBlending = 1.0f - blending;
+                        uint32 maxAlpha = ( uint32) srcimg[aoffset][3] + ( BA * iOpacity );
+
+                        srcimg[aoffset][0] = /*BB*/( invBlending * srcimg[aoffset][0] ) + ( BB * blending );
+                        srcimg[aoffset][1] = /*BG*/( invBlending * srcimg[aoffset][1] ) + ( BG * blending );
+                        srcimg[aoffset][2] = /*BR*/( invBlending * srcimg[aoffset][2] ) + ( BR * blending );
+                        srcimg[aoffset][3] = ( maxAlpha > 255 ) ? 255 : maxAlpha;
+                    }
+                }
+                break;
+
+                default :
+                break;
+            }
+        }
+
+        x ++;
+        u += pu;
+        v += pv;
+    }
+}
+/*
+void
+FOdysseyVectorEngine::DrawQuadThread( uint32 iProcessorID
+                                    , uint32 iProcessorCount
+                                    , int32  iFirstLine
+                                    , int32  iLastLine
+                                    , double iOpacity
+                                    , int8*  iPixelData
+                                    , int32  iBitsPerPixel
+                                    // Temp
+                                    , int8*  iBrushPixelData
+                                    , uint32 iBrushWidth
+                                    , uint32 iBrushHeight
+                                    , int32  iBrushBitsPerPixel )
+{
+    for( int i = iFirstLine + iProcessorID; i <= iLastLine ; i += iProcessorCount )
+    {
+        if( mHorizontalLineBuffer[i].inited == 2 )
+        {
+            TraceHorizontalLine( i
+                               , iOpacity
+                               , iPixelData
+                               , iBitsPerPixel
+                               , iBrushPixelData
+                               , iBrushWidth
+                               , iBrushHeight
+                               , iBrushBitsPerPixel );
+        }
+
+        mHorizontalLineBuffer[i].inited = 0;
+    }
+}
+*/
+
+void
+FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
+                                 , double* iU
+                                 , double* iV
+                                 , uint32 pointCount
+                                 , double iOpacity
+                                 , int8*  iImagePixelData
+                                 , uint32 iImageWidth
+                                 , uint32 iImageHeight
+                                 , int32  iImageBitsPerPixel
+                                 , const FColor& iColor
+                                 // temp
+                                 , int8*  iBrushPixelData
+                                 , uint32 iBrushWidth
+                                 , uint32 iBrushHeight
+                                 , int32  iBrushBitsPerPixel
+                                 , bool   iBrushAlphaOnly )
+{
+    int32 ymin = iPoint[0].y,
+          ymax = ymin;
+
+    for( uint32 i = 0; i < pointCount; i++ )
+    {
+        uint32 n = ( i + 1 ) % pointCount;
+
+        if ( iPoint[i].y < ymin ) ymin = iPoint[i].y;
+        if ( iPoint[i].y > ymax ) ymax = iPoint[i].y;
+
+        // always draw in the same direction (left to right ) to avoid bad overlapping
+        if( iPoint[i].x < iPoint[n].x )
+        {
+            TraceLine ( iPoint[i].x, iPoint[i].y, iU[i], iV[i]
+                      , iPoint[n].x, iPoint[n].y, iU[n], iV[n], iImageWidth, iImageHeight );
+        }
+        else
+        {
+            TraceLine ( iPoint[n].x, iPoint[n].y, iU[n], iV[n]
+                      , iPoint[i].x, iPoint[i].y, iU[i], iV[i], iImageWidth, iImageHeight );
+        }
+    }
+
+    if ( ymin <  0                    ) ymin = 0;
+    if ( ymin >= (int32) iImageHeight ) ymin = (int32) iImageHeight - 1;
+    if ( ymax <  0                    ) ymax = 0;
+    if ( ymax >= (int32) iImageHeight ) ymax = (int32) iImageHeight - 1;
+
+    if ( ymin <= ymax )
+    {
+/*
+        FOdysseyVectorComputer& mainComputer = FOdysseyVectorComputer::GetMainComputer();
+
+        mainComputer.Run( [ this
+                          , &ymin
+                          , &ymax
+                          , &iOpacity
+                          , &iImagePixelData
+                          , &iImageWidth
+                          , &iImageHeight
+                          , &iImageBitsPerPixel
+                          , &iColor
+                          , &iBrushPixelData
+                          , &iBrushWidth
+                          , &iBrushHeight
+                          , &iBrushBitsPerPixel
+                          , &iBrushAlphaOnly ]( uint32 iProcessorID, uint32 iProcessorCount ) -> bool
+                          {
+                              for( int i = ymin + iProcessorID; i <= ymax ; i += iProcessorCount )
+                              {
+                                  if( mHorizontalLineBuffer[i].inited == 2 )
+                                  {
+                                      TraceHorizontalLine( i
+                                                         , iOpacity
+                                                         , iImagePixelData
+                                                         , iImageWidth
+                                                         , iImageHeight
+                                                         , iImageBitsPerPixel
+                                                         , iColor
+                                                         , iBrushPixelData
+                                                         , iBrushWidth
+                                                         , iBrushHeight
+                                                         , iBrushBitsPerPixel
+                                                         , iBrushAlphaOnly );
+                                  }
+
+                                  mHorizontalLineBuffer[i].inited = 0;
+
+                                  if( i == ymax )
+                                  {
+                                      return true;
+                                  }
+                              }
+
+                              return false;
+                          } );
+*/
+/*
+        std::vector<std::future<void>> threads;
+
+//mProcessorCount = 2;
+
+        threads.resize( mProcessorCount );
+
+        int totalThreads = ( ymax - ymin  + 1 ) < (int) mProcessorCount ? ( ymax - ymin  + 1 ) :  (int)mProcessorCount;
+
+        for( int32 i = 0; i < totalThreads; i++ )
+        //for( uint32 i = 0; i < threads.size(); i++ )
+        {
+            threads[i] = std::async( std::launch::async
+                                    , [ this
+                                      , &ymin
+                                      , &ymax
+                                      , &iOpacity
+                                      , &iPixelData
+                                      , &iBitsPerPixel
+                                      , &iBrushPixelData
+                                      , &iBrushWidth
+                                      , &iBrushHeight
+                                      , &iBrushBitsPerPixel]( uint32 iProcessorID, uint32 iProcessorCount )
+                                      {
+
+                                          FGenericPlatformProcess::SetThreadAffinityMask( (uint64) 1 << iProcessorID );
+
+                                          for( int i = ymin + iProcessorID; i <= ymax ; i += iProcessorCount )
+                                          {
+                                              if( mHorizontalLineBuffer[i].inited == 2 )
+                                              {
+                                                    TraceHorizontalLine( i
+                                                                     , iOpacity
+                                                                     , iPixelData
+                                                                     , iBitsPerPixel
+                                                                     , iBrushPixelData
+                                                                     , iBrushWidth
+                                                                     , iBrushHeight
+                                                                     , iBrushBitsPerPixel );
+                                              }
+
+                                              mHorizontalLineBuffer[i].inited = 0;
+                                          }
+                                      }
+                                  , i
+                                  , mProcessorCount );
+        }
+
+        for( uint32 i = 0; i < (uint32)totalThreads; i++ )
+        {
+            threads[i].wait();
+        }
+*/
+/*
+        int32 lineCount = ( ymax - ymin ) + 1;
+
+        ParallelFor( lineCount
+                  , [ this
+                    , &ymin
+                    , &iOpacity
+                    , iPixelData
+                    , &iBitsPerPixel
+                    , iBrushPixelData
+                    , &iBrushWidth
+                    , &iBrushHeight
+                    , &iBrushBitsPerPixel ]( int32 iIndex )
+                      {
+                          int32 lineID = iIndex + ymin;
+
+                          if( mHorizontalLineBuffer[lineID].inited == 2 )
+                          {
+                              TraceHorizontalLine( lineID
+                                                 , iOpacity
+                                                 , iPixelData
+                                                 , iBitsPerPixel
+                                                 , iBrushPixelData
+                                                 , iBrushWidth
+                                                 , iBrushHeight
+                                                 , iBrushBitsPerPixel );
+                          }
+
+                          mHorizontalLineBuffer[lineID].inited = 0;
+                      } );
+*/
+
+    // Single CPU version. The one that actually works.
+
+        for ( int i = ymin; i <= ymax; i++ )
+        {
+            if( mHorizontalLineBuffer[i].inited == 2 )
+            {
+                if( mHorizontalLineBuffer[i].x1 >= 0 )
+                {
+                    TraceHorizontalLine( i
+                                       , iOpacity
+                                       , iImagePixelData
+                                       , iImageWidth
+                                       , iImageHeight
+                                       , iImageBitsPerPixel
+                                       , iColor
+                                       , iBrushPixelData
+                                       , iBrushWidth
+                                       , iBrushHeight
+                                       , iBrushBitsPerPixel
+                                       , iBrushAlphaOnly );
+                }
+            }
+
+            mHorizontalLineBuffer[i].inited = 0;
+        }
+    }
+}
+
+void
+FOdysseyVectorEngine::GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& oObjectList )
+{
+    Traverse
+    ( mScene
+    , mScene
+    , 0
+    , [ this
+      , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( HasFocus( mScene, object, traversalFlags ) )
+          {
+              oObjectList.push_back( object );
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+          }
+
+          return 0;
+      } );
+}
+
+void
+FOdysseyVectorEngine::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList )
+{
+    Traverse
+    ( mScene
+    , mScene
+    , 0
+    , [ this
+      , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( HasFocus( mScene, object, traversalFlags ) )
+          {
+              oObjectList.push_back( object );
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+}
+
+
+bool
+FOdysseyVectorEngine::HasFocus( FOdysseyVectorScene* iScene
+                              , FOdysseyVectorObject* iObject
+                              , uint64 iTraversalFlags )
+{
+    if( iObject->IsSelected() )
+    {
+        return true;
+    }
+
+    if( iScene->GetSelectedObjectList().size() == 0 )
+    {
+        return true;
+    }
+
+    if( iTraversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+// Execute callback on object tree
+uint64
+FOdysseyVectorEngine::Traverse( FOdysseyVectorScene* iScene
+                              , FOdysseyVectorObject* iObject
+                              , uint64 iTraversalFlags
+                              , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback )
+{
+    uint64 objectTraversalFlags = iCallback( iObject, iTraversalFlags );
+
+    if( objectTraversalFlags & TRAVERSE_STOP )
+    {
+        return TRAVERSE_STOP;
+    }
+
+    if( objectTraversalFlags & TRAVERSE_OBJECT_ACCEPTED )
+    {
+        iTraversalFlags |= TRAVERSE_PARENT_ACCEPTED;
+    }
+
+    if( ( objectTraversalFlags & TRAVERSE_OBJECT_IGNORE_CHILDREN ) == 0 )
+    {
+        for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+        {
+            uint64 childTraversalFlags = Traverse( iScene, childObject, iTraversalFlags, iCallback );
+
+            if( childTraversalFlags & TRAVERSE_STOP )
+            {
+                return TRAVERSE_STOP;
+            }
+        }
+    }
+
+    return 0;
 }

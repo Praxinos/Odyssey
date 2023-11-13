@@ -4,6 +4,10 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
+#include "OdysseyVector.h"
+#include "OdysseyPainterEditorVectorObjectView.h"
+#include "OdysseyPainterEditorVectorPathView.h"
+#include "OdysseyPainterEditorVectorGroupPaintView.h"
 #include <ULIS>
 
 class FOdysseyPainterEditor;
@@ -12,7 +16,7 @@ class FVectorSceneTreeViewItem;
 class FOdysseyVectorScene;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
-    public FOdysseyEditorTab
+    public FOdysseyEditorTab, public FGCObject
 {
     public:
         static const FName& StaticId();
@@ -21,18 +25,28 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
         // Construction / Destruction
         virtual ~FOdysseyPainterEditorVectorSceneTreeViewTab();
         FOdysseyPainterEditorVectorSceneTreeViewTab( FOdysseyPainterEditor* iEditor );
+        void UpdateObjectPropertiesPanel( FOdysseyVectorScene* iScene );
+        void UpdateSceneTreeView( FOdysseyVectorScene* iScene );
 
     protected:
         // FOdysseyEditorTab interface
         virtual const FName& GetId() const override;
         virtual TSharedPtr<SWidget> CreateWidget() override;
+        TSharedPtr<IDetailsView> CreateObjectPropertiesPanel();
 
     public:
         // Event Listeners
         void OnRefresh( FOdysseyVectorScene* iScene );
         void Update( FOdysseyVectorScene* iScene );
+        virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+        virtual FString GetReferencerName() const override;
 
     private:
         FOdysseyPainterEditor* mEditor;
         TSharedPtr<SOdysseyPainterEditorVectorSceneTreeView> mVectorSceneTreeView;
+        TSharedPtr<IDetailsView> mDetailsView;
+
+        UOdysseyPainterEditorVectorObjectView* mObjectView;
+        UOdysseyPainterEditorVectorPathView* mPathView;
+        UOdysseyPainterEditorVectorGroupPaintView* mGroupPaintView;
 };

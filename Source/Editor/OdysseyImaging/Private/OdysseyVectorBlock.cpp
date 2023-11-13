@@ -32,7 +32,6 @@ FOdysseyVectorBlock::Init(const FGuid& iId, FOdysseyVectorEngine* iEngine, int i
     mWidth = iWidth;
     mHeight = iHeight;
     mFormat = iFormat;
-    mRenderFlags = 0;
     mNeedsRender = false;
 }
 
@@ -53,7 +52,7 @@ FOdysseyVectorBlock::GetFormat() const
 {
     return mFormat;
 }
-
+/*
 void
 FOdysseyVectorBlock::SetRenderFlags(uint64 iRenderFlags)
 {
@@ -69,13 +68,15 @@ FOdysseyVectorBlock::GetRenderFlags() const
 {
     return mRenderFlags;
 }
-
+*/
 void
-FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
-{   
+FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
+{
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
-    //Render in a BLImage
-    mEngine->Render(mBlockData->mBLImage.Get(), mRenderFlags);
+    ::ULIS::FRectI invalidatedRect = mEngine->GetInvalidatedRect();
+
+    //Render in a BLImage (also resets the internal invalidation rectangle)
+    mEngine->Render(mBlockData->mBLContext.Get(), iDrawingFlags);
 
     {
         TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
@@ -86,20 +87,20 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock)
 
         //Unpremultiply the render block
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-        ctx.Unpremultiply(renderBlock);
+        ctx.Unpremultiply(renderBlock, invalidatedRect );
         ctx.Finish();
 
         //Convert the right ULIS block in the expected ULIS Format
-        ctx.ConvertFormat(renderBlock, ioBlock);
+        ctx.ConvertFormat(renderBlock, ioBlock, invalidatedRect, ::ULIS::FVec2I( invalidatedRect.x, invalidatedRect.y ) );
         ctx.Finish();
     }
 }
 
 void
 FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
-{   
+{
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
-    mEngine->RenderHUD(mHUDBlockData->mBLImage.Get());
+    mEngine->RenderHUD( mHUDBlockData->mBLContext.Get() );
 
     {
         TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertHUDBlock);
@@ -120,15 +121,15 @@ FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
 }
 
 TSharedPtr<::ULIS::FBlock>
-FOdysseyVectorBlock::Render()
+FOdysseyVectorBlock::Render( uint64 iDrawingFlags )
 {
-    TSharedPtr<::ULIS::FBlock> block = GetBlock();
+    TSharedPtr<::ULIS::FBlock> block = GetBlock( iDrawingFlags );
     if ( !block )
         return nullptr;
 
     if (mNeedsRender)
     {
-        Render(*block);
+        Render(*block, iDrawingFlags );
 
         TSharedPtr<::ULIS::FBlock> hudBlock = mHUDBlock.Pin();
         if ( hudBlock )
@@ -144,6 +145,9 @@ void
 FOdysseyVectorBlock::CleanupBlock(uint8* iData, void* iInfo)
 {
     FBlockData* blockData = static_cast<FBlockData*>(iInfo);
+
+    // End BLContext operations on the BLImage
+    blockData->mBLContext.Get()->end();
 
     if ( blockData->mNeedsCache )
     {
@@ -173,6 +177,9 @@ FOdysseyVectorBlock::CleanupHUDBlock(uint8* iData, void* iInfo)
 {
     FHUDBlockData* blockData = static_cast<FHUDBlockData*>(iInfo);
 
+    // End BLContext operations on the BLImage
+    blockData->mBLContext.Get()->end();
+
     //Data is owned by the block
     ::ULIS::OnCleanup_FreeMemory(iData, iInfo); 
     
@@ -194,6 +201,12 @@ FOdysseyVectorBlock::GetHUDBlock()
 
     mHUDBlockData = new FHUDBlockData();
     mHUDBlockData->mBLImage = MakeShared<BLImage>(mWidth, mHeight, BL_FORMAT_PRGB32);
+    mHUDBlockData->mBLContext = MakeShared<BLContext>();
+    // Starts BLContext operations on the BLImage
+    BLContextCreateInfo createInfo{};
+    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    mHUDBlockData->mBLContext.Get()->begin(*mHUDBlockData->mBLImage.Get(), createInfo);
+
     block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, mFormat);
     block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyVectorBlock::CleanupHUDBlock, mHUDBlockData));
     RenderHUD(*block);
@@ -203,7 +216,7 @@ FOdysseyVectorBlock::GetHUDBlock()
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyVectorBlock::GetBlock()
+FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
 {
 	FScopeLock Lock(&mMutex);
 
@@ -221,6 +234,11 @@ FOdysseyVectorBlock::GetBlock()
 
     //Blend2D block : Used internally to render the Vector Scene into a pixel block
     mBlockData->mBLImage = MakeShared<BLImage>(mWidth, mHeight, BL_FORMAT_PRGB32);
+    mBlockData->mBLContext = MakeShared<BLContext>();
+    // Starts BLContext operations on the BLImage
+    BLContextCreateInfo createInfo{};
+    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    mBlockData->mBLContext.Get()->begin(*mBlockData->mBLImage.Get(), createInfo);
 
     //FUniqueBuffer buffer;
     FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
@@ -234,7 +252,7 @@ FOdysseyVectorBlock::GetBlock()
     {
         block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, mFormat);
         mBlockData->mBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
-        Render(*block);
+        Render(*block, iDrawingFlags);
         mBlockData->mNeedsCache = true;
         mNeedsRender = false;
     }

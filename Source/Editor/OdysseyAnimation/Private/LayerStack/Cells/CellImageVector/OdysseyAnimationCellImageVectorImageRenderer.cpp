@@ -17,6 +17,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
     , mBlock(nullptr)
     , mHUDBlock(nullptr)
     , mRenderHUD(false)
+    , mDrawingFlags(0)
 {
     /* TEMPORARY FOR DISPLAYING TOOLS HUD */
     UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(mCell->GetLayer());
@@ -31,6 +32,16 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
 
             mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
         }
+
+        // this is per-layer
+        mDrawingFlags  = layer->IsColored   ? mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_IGNORECOLOR)
+                                            : mDrawingFlags | ( FOdysseyVectorEngine::DRAWING_IGNORECOLOR);
+        // TEMP: this should be global, stored in PainterEditor. Hence this should be
+        // changed when PainterEditor will be available and we can retrieve the shared flags.
+        // Update: commented-out for now
+        mDrawingFlags |= layer->IsWireframe ? mDrawingFlags | ( FOdysseyVectorEngine::DRAWING_WIREFRAME)
+                                            : mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_WIREFRAME);
+
     }
 }
     
@@ -38,11 +49,11 @@ void
 FOdysseyAnimationCellImageVectorImageRenderer::Init()
 {
     TSharedPtr<FOdysseyVectorBlock> vectorBlock = mCell->GetVectorBlock();
-    
+
 
     if (vectorBlock)
     {
-        mBlock = vectorBlock->GetBlock(); //Store block before rendering to avoid looking twice for the block in cache
+        mBlock = vectorBlock->GetBlock( mDrawingFlags ); //Store block before rendering to avoid looking twice for the block in cache
         /* TEMPORARY FOR DISPLAYING TOOLS HUD */
         if (mRenderHUD)
             mHUDBlock = vectorBlock->GetHUDBlock();
@@ -50,7 +61,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
 
     {   
         FScopeLock renderLock(&mEngineMutex);
-        vectorBlock->Render();
+        vectorBlock->Render( mDrawingFlags );
     }
 }
 

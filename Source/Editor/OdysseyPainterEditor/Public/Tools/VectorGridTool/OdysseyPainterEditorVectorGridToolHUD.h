@@ -2,7 +2,7 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickToolHUD.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 
 typedef struct _FGridPoint
@@ -34,7 +34,7 @@ typedef struct _FGridCell
 }
 FGridCell;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public FOdysseyPainterEditorVectorPickToolHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public FOdysseyPainterEditorVectorSelectionToolHUD
 {
     public:
         static const uint32 HANDLE_RADIUS = 5;
@@ -42,14 +42,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         virtual ~FOdysseyPainterEditorVectorGridToolHUD();
         FOdysseyPainterEditorVectorGridToolHUD(  UOdysseyPainterEditorVectorGridTool* iGridTool );
 
-        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
 
         bool PickNodes( double iWorldX, double iWorldY, double iWorldRadius, bool iClearSelection );
         bool PickNodes( ::ULIS::FRectD& iWorldRect, bool iClearSelection );
         void ClearSelection();
         void GetSelection( std::vector<FGridNode*>& oNodeArray );
-        void MakeGrid( FOdysseyVectorScene* iScene );
+        void MakeGrid( FOdysseyVectorScene* iScene, uint64 iHUDFlags );
         void Deform();
         void StartSelectionRectangle( double iWorldX, double iWorldY );
         void DragSelectionRectangle( double iWorldX, double iWorldY );
@@ -68,7 +68,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         void Map( FOdysseyVectorScene* iScene );
         void DeformCell( FGridCell& iCell );
         void UnselectNodes();
-        void DrawSelectionRectangle( FOdysseyVectorScene* iScene, uint64 iFlags );
+        void DrawSelectionRectangle( BLContext* iBLContext, BLRgba32& iHighlightColor );
 
     private:
         UOdysseyPainterEditorVectorGridTool* mGridTool;

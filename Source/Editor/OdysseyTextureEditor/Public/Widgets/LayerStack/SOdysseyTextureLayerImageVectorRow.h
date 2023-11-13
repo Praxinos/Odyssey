@@ -26,6 +26,8 @@ private:
     virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
     void OnIsColoredCheckStateChanged( ECheckBoxState iState );
     ECheckBoxState GetIsColoredIsChecked() const;
+    void OnIsWireframeCheckStateChanged( ECheckBoxState iState );
+    ECheckBoxState GetIsWireframeIsChecked() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);

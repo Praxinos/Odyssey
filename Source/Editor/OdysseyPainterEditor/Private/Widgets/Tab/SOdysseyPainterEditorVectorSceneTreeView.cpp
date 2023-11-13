@@ -7,6 +7,7 @@
 #include "OdysseyStyleSet.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyVector.h"
+#include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorSceneTreeView"
 
@@ -175,43 +176,46 @@ SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged( TSharedPtr<FVector
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo )
+SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem
+                                                            , ESelectInfo::Type SelectInfo )
 {
-    // can be null if no selection, from what I understand
-    if( iItem )
+    if( mRootItem && ( SelectInfo == ESelectInfo::Type::OnMouseClick ) )
     {
-        TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
+        FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        // no need to create an undo record or do anything if the selection is empty
-        if( selectedItems.Num() )
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
+        if( GUndo )
         {
-            FOdysseyVectorObject* vectorObject = iItem.Get()->GetVectorObject();
-            FOdysseyVectorScene* scene = vectorObject->GetScene();
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene );
 
-            scene->ClearSelection();
-
-            // needed for valid GUndo pointer
-            GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
-            if( GUndo )
-            {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelect( scene );
-
-                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            }
-            GEditor->EndTransaction();
-
-            for( int i = 0; i < selectedItems.Num(); i++ )
-            {
-                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
-
-                scene->Select( selectedObject );
-            }
-
-            scene->GetEngine()->ResetHUD();
-
-            scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                      | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
+        GEditor->EndTransaction();
+
+        scene->ClearSelection();
+
+        // iTtem is null when selection is empty
+        if( iItem )
+        {
+            TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
+
+            // no need to create an undo record or do anything if the selection is empty
+            if( selectedItems.Num() )
+            {
+                for( int i = 0; i < selectedItems.Num(); i++ )
+                {
+                    FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
+
+                    scene->Select( selectedObject );
+                }
+            }
+        }
+
+        scene->GetEngine()->ResetHUD();
+
+        scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
     }
 }
 
@@ -226,36 +230,38 @@ SOdysseyPainterEditorVectorSceneTreeView::SelectAll()
 */
 }
 
+//FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+
 void
-SOdysseyPainterEditorVectorSceneTreeView::DeleteObjectSelection()
+SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects()
 {
     if( mRootItem )
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::DeleteObjectSelection( scene->GetEngine(), scene );
+        FOdysseyPainterEditor::DeleteObjects( scene );
     }
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::CopyObjectSelection()
+SOdysseyPainterEditorVectorSceneTreeView::CopyObjects()
 {
     if( mRootItem )
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::CopyObjectSelection( scene->GetEngine(), scene );
+        FOdysseyPainterEditor::CopyObjects( scene  );
     }
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::PasteObjectSelection()
+SOdysseyPainterEditorVectorSceneTreeView::PasteObjects()
 {
     if( mRootItem )
     {
         FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::PasteObjectSelection( scene->GetEngine(), scene );
+        FOdysseyPainterEditor::PasteObjects( scene );
     }
 }
 
@@ -264,22 +270,22 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
 {
     mCommandList->MapAction(
         FGenericCommands::Get().SelectAll,
-        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::SelectAll)
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::SelectAll )
     );
 
     mCommandList->MapAction(
         FGenericCommands::Get().Delete,
-        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::DeleteObjectSelection)
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects )
     );
 
     mCommandList->MapAction(
         FGenericCommands::Get().Copy,
-        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::CopyObjectSelection)
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::CopyObjects )
     );
 
     mCommandList->MapAction(
         FGenericCommands::Get().Paste,
-        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::PasteObjectSelection)
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::PasteObjects )
     );
 /*
     mCommandList->MapAction(

@@ -102,6 +102,9 @@ private:
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
+    bool IsWireframe = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
     bool IsColored = true;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")

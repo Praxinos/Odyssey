@@ -19,6 +19,9 @@ struct FObjectParam
     UPROPERTY(EditAnywhere, Category="Identity")
     FString Name;
 
+    UPROPERTY(EditAnywhere,Category="Appearance", meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+    double Opacity;
+
     UPROPERTY(EditAnywhere, Category="Transform")
     double TranslationX;
 
@@ -62,9 +65,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 VECTORRECTANGLETYPE  = 4;
         static const uint32 VECTORPATHTYPE       = 5;
         static const uint32 VECTORGROUPPAINTTYPE = 6;
-
-        // drawing mask
-        static const uint32 DRAWING_IGNORECOLOR  = ( 1 << 0 );
 
         // update mask
         //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
@@ -136,10 +136,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual FOdysseyVectorObject* Copy();
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
 
-        virtual void Draw( uint64 iFlags );
-        virtual void DrawShape ( uint64 iFlags ){};
+        virtual void Draw( BLContext* iBLContext, double iAncestorsOpacity, uint64 iFlags );
+        virtual void DrawShape ( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ){};
 
-        virtual void DrawStructure ( uint64 iFlags ){};
+        virtual void DrawStructure ( BLContext* iBLContext, const BLRgba32& iStrokeColor, double iStrokeWidth, bool iWorld ){};
 
         virtual uint32 GetType();
 
@@ -151,7 +151,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         virtual void TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
         /*virtual void UpdateBoundingBox() = 0;*/
-        virtual void DrawChildren( uint64 iFlags );
+        virtual void DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags );
         void UpdateMatrix( );
         void Translate( double iX, double iY );
         void Rotate( double iAngle );
@@ -214,4 +214,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* GetPreviousChild( FOdysseyVectorObject* iChild );
         virtual void ApplyTransformations();
         virtual void ApplyMatrix( BLMatrix2D& iMatrix );
+        void SetOpacity( double iOpacity );
+        double GetOpacity();
 };

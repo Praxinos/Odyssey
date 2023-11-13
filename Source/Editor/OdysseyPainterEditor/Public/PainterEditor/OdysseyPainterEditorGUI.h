@@ -73,7 +73,6 @@ protected:
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>            mColorSlidersTab;
     TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;
     TSharedPtr<FOdysseyPainterEditorToolsTab>                   mToolsTab;
-    TSharedPtr<FOdysseyPainterEditorToolOptionsTab>             mToolOptionsTab;
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab>    mSelectedVectorObjectTab; */
+    TSharedPtr<FOdysseyPainterEditorToolOptionsTab>             mToolOptionsTab; */
 };
 

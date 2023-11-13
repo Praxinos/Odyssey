@@ -4,6 +4,8 @@
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanToolHUD.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorScenePanTool"
 
@@ -14,46 +16,17 @@ UOdysseyPainterEditorVectorScenePanTool::~UOdysseyPainterEditorVectorScenePanToo
 }
 
 UOdysseyPainterEditorVectorScenePanTool::UOdysseyPainterEditorVectorScenePanTool()
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorScenePanToolHUD( this ) )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ScenePanTool64");
 
-    mScenePanHUD = new FOdysseyPainterEditorVectorScenePanToolHUD( this );
+    mHasContextMenu = false;
+
+    mScenePanHUD = static_cast<FOdysseyPainterEditorVectorScenePanToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
-
-void
-UOdysseyPainterEditorVectorScenePanTool::Load()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorScenePanTool::LoadVector( vectorEngine, vectorScene );
-}
-
-void
-UOdysseyPainterEditorVectorScenePanTool::Unload()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorScenePanTool::UnloadVector( vectorEngine, vectorScene );
-}
 
 bool
 UOdysseyPainterEditorVectorScenePanTool::IsActivable() const
@@ -61,49 +34,29 @@ UOdysseyPainterEditorVectorScenePanTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
-void
-UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( mScenePanHUD );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-void
-UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mScenePanHUD );
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return false;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    return UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
-}
-
-bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
+
+    mDragged = false;
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("VectorScenePanTool","Pan Scene"));
@@ -119,27 +72,8 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorEngine
     mDownLocalMouseX = localCoords.x;
     mDownLocalMouseY = localCoords.y;
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
-
-
-    return true;
-}
-
-void
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 void
@@ -162,9 +96,6 @@ UOdysseyPainterEditorVectorScenePanTool::Pan( FOdysseyVectorEngine* iEngine
     iScene->Translate( iScene->GetTranslationX() + ( iPointInTexture.deltaPosition.X * factor )
                      , iScene->GetTranslationY() + ( iPointInTexture.deltaPosition.Y * factor ) );
     iScene->UpdateMatrix();
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
 void
@@ -174,8 +105,8 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
 {
     BLPoint worldMouseCoordsBefore = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 imageWidth = vectorEngine->GetWidth();
-    uint32 imageHeight = vectorEngine->GetHeight();
+    uint32 imageWidth = vectorEngine->GetPreferredWidth();
+    uint32 imageHeight = vectorEngine->GetPreferredHeight();
     double factor;
 
     factor = (double) iPointInTexture.deltaPosition.X / imageWidth;
@@ -201,18 +132,17 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
                      , iScene->GetTranslationY() - ( worldMouseCoordsAfter.y - worldMouseCoordsBefore.y ) );
 
     iScene->UpdateMatrix();
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
 }
 
-void
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    if(iPointInTexture.keysDown.Find(EKeys::RightMouseButton) != INDEX_NONE)
+    mDragged = true;
+
+    if( iPointInTexture.keysDown.Find( EKeys::RightMouseButton ) != INDEX_NONE)
     {
         Scale( iEngine, iScene, iPointInTexture );
     }
@@ -223,39 +153,17 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorEngine
             Pan( iEngine, iScene, iPointInTexture );
         }
     }
+
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return false;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    return UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-}
-
-bool
-UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorScene* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-
-    return true;
-}
-
-void
-UOdysseyPainterEditorVectorScenePanTool::Commit()
-{
-
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 #undef LOCTEXT_NAMESPACE

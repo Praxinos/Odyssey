@@ -6,16 +6,25 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::~FOdysseyPainterEditorVectorPathSt
 }
 
 FOdysseyPainterEditorVectorPathStitchToolHUD::FOdysseyPainterEditorVectorPathStitchToolHUD( UOdysseyPainterEditorVectorPathStitchTool* iPathStitchTool )
-    : mPathStitchTool( iPathStitchTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPathStitchTool )
+    , mPathStitchTool( iPathStitchTool )
 {
 }
 
 void
 FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene )
 {
+    uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorHUDFlags();
+
+    mPickedPointArray.reserve(10);
     mPickedPointArray.clear();
 
-    MakePointQuadTree( iScene, mPathStitchTool->RestrictToSelection );
+    mStitchableVertex[0] = nullptr;
+    mStitchableVertex[1] = nullptr;
+
+    MakePointQuadTree( iScene, hudFlags );
+
+    UpdateSelectionBox( iScene, false, hudFlags );
 }
 
 void
@@ -23,59 +32,113 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Load( FOdysseyVectorScene* iScene 
 {
 }
 
-std::vector<FOdysseyVectorPoint*>&
-FOdysseyPainterEditorVectorPathStitchToolHUD::GetPickedPointArray()
+void
+FOdysseyPainterEditorVectorPathStitchToolHUD::Unload( FOdysseyVectorScene* iScene )
 {
-    return mPickedPointArray;
+}
+
+FOdysseyVectorVertex**
+FOdysseyPainterEditorVectorPathStitchToolHUD::GetStitchableVertices()
+{
+    return mStitchableVertex;
 }
 
 void
 FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX, double iWorldY )
 {
-    mPickedPointArray.clear();
-
     mX = iWorldX;
     mY = iWorldY;
 
+    mStitchableVertex[0] = nullptr;
+    mStitchableVertex[1] = nullptr;
+    mPickedPointArray.clear();
+
     PickPoints( iWorldX, iWorldY, mPathStitchTool->PickingRadius, mPickedPointArray );
+
+    for( int i = 0; i < mPickedPointArray.size(); i++ )
+    {
+        if( mPickedPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
+        {
+            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(mPickedPointArray[i]);
+
+            if( vertex->GetSegmentCount() == 1 )
+            {
+                if( mStitchableVertex[0] == nullptr )
+                {
+                    mStitchableVertex[0] = vertex;
+                }
+                else
+                {
+                    if( vertex->GetFirstSegment() != mStitchableVertex[0]->GetFirstSegment() )
+                    {
+                        mStitchableVertex[1] = vertex;
+
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
+                                                  , FOdysseyVectorScene* iScene )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-    std::list<FOdysseyVectorObject*>::iterator it;
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorHUDFlags();
 
-    blctx->save();
-    blctx->resetMatrix();
-
-    blctx->setCompOp( BL_COMP_OP_SRC_COPY );
-
-    blctx->setStrokeStyle( hcColor );
-    blctx->setStrokeWidth( 1.0f );
-    blctx->strokeCircle( mX, mY, mPathStitchTool->PickingRadius );
-
-    if( mPickedPointArray.size() > 1 )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
-        FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>(mPickedPointArray[0]);
-        FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>(mPickedPointArray[1]);
-
-        if( ( vertex0->GetSegmentCount() == 1 ) && ( vertex1->GetSegmentCount() == 1 ) )
-        {
-            DrawPath( vertex0->GetPath(), fgColor, bgColor, hcColor, true, VIEW_SEGMENT );
-            DrawPath( vertex1->GetPath(), fgColor, bgColor, hcColor, true, VIEW_SEGMENT );
-
-            DrawVertex( vertex0, blctx, fgColor, bgColor, hcColor, true, 0 );
-            DrawVertex( vertex1, blctx, fgColor, bgColor, hcColor, true, 0 );
-        }
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
-    blctx->restore();
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
+    {
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_PATH_VERTEX_VALENCE1 | HUD_PATH_SEGMENT );
+    }
+
+    // draw selection box only if we restrict erasure to the selection 
+/*
+    if( mPathStitchTool->RestrictToSelectedObjects )
+    {
+        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+    }
+*/
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+
+    iBLContext->setStrokeStyle( hcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->strokeCircle( mX, mY, mPathStitchTool->PickingRadius );
+
+    if( mStitchableVertex[0] && mStitchableVertex[1] )
+    {
+        BLRgba32 orange = BLRgba32( 255, 127, 0, 255 );
+
+        DrawPath( iBLContext, mStitchableVertex[0]->GetPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
+        DrawPath( iBLContext, mStitchableVertex[1]->GetPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
+
+        DrawVertex( iBLContext, mStitchableVertex[0], orange, bgColor, hcColor, true, 0 );
+        DrawVertex( iBLContext, mStitchableVertex[1], orange, bgColor, hcColor, true, 0 );
+    }
+
+    iBLContext->restore();
 }

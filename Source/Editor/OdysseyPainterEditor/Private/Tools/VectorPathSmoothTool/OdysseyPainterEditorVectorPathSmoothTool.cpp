@@ -3,7 +3,8 @@
 
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothToolHUD.h"
-
+#include "OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathSmoothTool"
 
@@ -14,47 +15,16 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 }
 
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
-    : mUndoSegmentReshape( nullptr )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathSmoothToolHUD( this ) )
+    , mUndoSegmentReshape( nullptr )
     , SmoothingMode( ePathSmoothingMode::Round )
     , PickingRadius( 20.0f )
-    , RestrictToSelection( false )
     , PreserveHandleLength( false )
+    , RestrictToSelectedObjects( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathSmoothTool64");
 
-    mPathSmoothHUD = new FOdysseyPainterEditorVectorPathSmoothToolHUD( this );
-}
-
-void
-UOdysseyPainterEditorVectorPathSmoothTool::Load()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( vectorEngine, vectorScene );
-}
-
-void
-UOdysseyPainterEditorVectorPathSmoothTool::Unload()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( vectorEngine, vectorScene );
+    mPathSmoothHUD = static_cast<FOdysseyPainterEditorVectorPathSmoothToolHUD*>( mBaseHUD );
 }
 
 bool
@@ -63,30 +33,24 @@ UOdysseyPainterEditorVectorPathSmoothTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
-void
-UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( mPathSmoothHUD );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-void
-UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    iEngine->ClearHUD();
-    iEngine->AddHUD( mPathSmoothHUD );
-
-    iEngine->ResetHUD();
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDown( const FKey& iKey )
+uint64
+UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+                                                          , const FKey& iKey )
 {
     //FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
     //FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
@@ -104,11 +68,13 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDown( const FKey& iKey )
     //UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
-    return false;
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey )
+         | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUp( const FKey& iKey )
+uint64
+UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+                                                        , const FKey& iKey )
 {
     //FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
     //FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
@@ -119,28 +85,12 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUp( const FKey& iKey )
     //UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
-    return false;
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey )
+         | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return false;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    return UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture,iKey  );
-}
-
-bool
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                                                            , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
@@ -157,41 +107,26 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorEngi
     //FOdysseyVectorPoint::ArrayToVertexArray( pickedPointArray, vertexArray );
     //FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, segmentArray );
 
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPathSmoothTool","Vector Path Smooth Tool"));
-    if( GUndo )
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
     {
-        mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("VectorPathSmoothTool","Vector Path Smooth Tool"));
+        if( GUndo )
+        {
+            mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>( mUndoSegmentReshape ) );
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>( mUndoSegmentReshape ) );
+        }
+        GEditor->EndTransaction();
     }
-    GEditor->EndTransaction();
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
-
-    return true;
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-void
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
-}
-
-void
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                                                             , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = PickingRadius * 2.0f;
@@ -202,55 +137,38 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorEng
 
     mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-void
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
-}
-
-void
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                                            , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorScene* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
-    std::vector<FOdysseyVectorPoint*> pickedPointArray;
-
-    mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-
-    pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
-
-    for( int i = 0; i < pickedPointArray.size(); i++ )
+    // Left mouse button clicked
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        if( pickedPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
-        {
-            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(pickedPointArray[i]);
+        std::vector<FOdysseyVectorPoint*> pickedPointArray;
 
-            if( vertex->GetSegmentCount() == 2 )
+        mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
+        pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
+
+        for( int i = 0; i < pickedPointArray.size(); i++ )
+        {
+            if( pickedPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
             {
+                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(pickedPointArray[i]);
                 FOdysseyVectorSegment* segment[2] = { vertex->GetFirstSegment()
                                                     , vertex->GetLastSegment() };
 
                 // record segment for undos first
-                if( mUndoSegmentReshape->HasSegment( segment[0] ) == false )
+                if( segment[0] && mUndoSegmentReshape->HasSegment( segment[0] ) == false )
                 {
                     mUndoSegmentReshape->RecordSegment( segment[0] );
                 }
 
-                if( mUndoSegmentReshape->HasSegment( segment[1] ) == false )
+                if( segment[1] && mUndoSegmentReshape->HasSegment( segment[1] ) == false )
                 {
                     mUndoSegmentReshape->RecordSegment( segment[1] );
                 }
@@ -267,43 +185,31 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorEngi
                 }
             }
         }
+
+        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
     }
 
-    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-bool
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return false;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    return UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-}
-
-bool
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                                          , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorScene* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    std::vector<FOdysseyVectorVertex*> vertexArray;
-    std::vector<FOdysseyVectorSegment*> segmentArray;
-    std::vector<FOdysseyVectorPoint*> pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
+    {
+        std::vector<FOdysseyVectorVertex*> vertexArray;
+        std::vector<FOdysseyVectorSegment*> segmentArray;
+        std::vector<FOdysseyVectorPoint*> pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
+        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        vectorEngine->ResetHUD();
+    }
 
 /*
     FOdysseyVectorPoint::ArrayToVertexArray( pickedPointArray, vertexArray );
@@ -319,40 +225,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorEngine
     }
     GEditor->EndTransaction();
 */
-    return false;
-}
-
-void
-UOdysseyPainterEditorVectorPathSmoothTool::Commit()
-{
-
-}
-
-void
-UOdysseyPainterEditorVectorPathSmoothTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
-{
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-    
-    PropertyChanged( PropertyChangedEvent.GetPropertyName() );
-
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-}
-
-void
-UOdysseyPainterEditorVectorPathSmoothTool::PropertyChanged( const FName& iPropertyName )
-{
-    //mPickingHUD.SetRadius( Radius );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 #undef LOCTEXT_NAMESPACE

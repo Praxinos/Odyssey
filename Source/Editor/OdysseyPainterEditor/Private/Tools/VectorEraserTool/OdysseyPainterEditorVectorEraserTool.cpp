@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
+#include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserToolHUD.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorEraserTool"
 
@@ -9,52 +10,19 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorEraserTool::~UOdysseyPainterEditorVectorEraserTool()
 {
-
 }
 
 UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
-    : Radius( 20.0f )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorEraserToolHUD( this ) )
+    , Radius( 20.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 
-    mEraserHUD.SetRadius( Radius );
+    mEraserHUD = static_cast<FOdysseyPainterEditorVectorEraserToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
-
-void
-UOdysseyPainterEditorVectorEraserTool::Load()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorEraserTool::LoadVector( vectorEngine, vectorScene );
-}
-
-void
-UOdysseyPainterEditorVectorEraserTool::Unload()
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    
-    UOdysseyPainterEditorVectorEraserTool::UnloadVector( vectorEngine, vectorScene );
-}
 
 bool
 UOdysseyPainterEditorVectorEraserTool::IsActivable() const
@@ -62,88 +30,44 @@ UOdysseyPainterEditorVectorEraserTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 
-void
-UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorScene* iScene )
 {
-    iEngine->RemoveHUD( &mEraserHUD );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-void
-UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene )
+uint64
+UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorScene* iScene )
 {
-    iEngine->ClearHUD();
-    iEngine->AddHUD( &mEraserHUD );
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-bool
-UOdysseyPainterEditorVectorEraserTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
-                                                  , const FKey& iKey )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return false;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    return UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( vectorEngine, vectorScene, iPointInTexture, iKey );
-}
-
-bool
-UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorScene* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    BLImage* currentImage = iEngine->GetBLImage();
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    mEraserHUD.SetRadius( Radius );
-    mEraserHUD.BlendMask( true );
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
+    {
+        mEraserHUD->BlendMask( true );
+        mEraserHUD->ClearMask();
+        mEraserHUD->FillCircle( iPointInTexture.x, iPointInTexture.y );
 
-    iEngine->UseMaskImage();
-    iEngine->GetBLContext()->setFillAlpha( 0.0f );
-    iEngine->GetBLContext()->clearAll();
-    iEngine->GetBLContext()->setFillAlpha( 1.0f );
-    iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
-    iEngine->UseImage( currentImage );
+        iScene->Update( 0 );
+    }
 
-    iScene->Update( 0 );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
-
-    return true;
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-void
-UOdysseyPainterEditorVectorEraserTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( vectorEngine, vectorScene, iPointInTexture );
-}
-
-void
-UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorEngine* iEngine
-                                                         , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
                                                          , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = Radius * 2.0f;
@@ -152,7 +76,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorEngine*
                           , (int)diameter
                           , (int)diameter };
 
-    mEraserHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mEraserHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
 /*
     if( rect.x < 0 ) rect.x = 0;
     if( rect.y < 0 ) rect.y = 0;
@@ -164,167 +88,229 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorEngine*
 
     /*}*/
     // refresh vector scene and GUI widgets via delegates.
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-void
-UOdysseyPainterEditorVectorEraserTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
-{
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( vectorEngine, vectorScene, iPointInTexture );
-}
-
-void
-UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorEngine* iEngine
-                                                        , FOdysseyVectorScene* iScene
+uint64
+UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorScene* iScene
                                                         , const FOdysseyPoint& iPointInTexture )
 {
-    BLImage* currentImage = iEngine->GetBLImage();
-    BLPoint pt = { 0, 0 };
+    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    {
+        mEraserHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
+        mEraserHUD->StrokeLine( ::ULIS::FVec2D( iPointInTexture.x - iPointInTexture.deltaPosition.X
+                                              , iPointInTexture.y - iPointInTexture.deltaPosition.Y )
+                              , ::ULIS::FVec2D( iPointInTexture.x 
+                                              , iPointInTexture.y ) );
+    }
 
-    mEraserHUD.SetPosition( iPointInTexture.x, iPointInTexture.y );
-
-    iEngine->UseMaskImage();
-
-    iEngine->GetBLContext()->setStrokeWidth( Radius * 2 );
-    iEngine->GetBLContext()->strokeLine( iPointInTexture.x - iPointInTexture.deltaPosition.X
-                                       , iPointInTexture.y - iPointInTexture.deltaPosition.Y
-                                       , iPointInTexture.x 
-                                       , iPointInTexture.y );
-    iEngine->GetBLContext()->fillCircle( iPointInTexture.x, iPointInTexture.y, Radius );
-
-    iEngine->UseImage( currentImage );
-
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_INTERACTIVE );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-bool
-UOdysseyPainterEditorVectorEraserTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
-                                                , const FKey& iKey )
+void
+UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorScene* iScene
+                                                    , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                                                    , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                                    , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                                                    , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                                                    , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray )
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return false;
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return false;
+    vectorEngine->Traverse
+    ( iScene
+    , iScene
+    , 0
+    , [ iScene
+      , vectorEngine
+      , &oAddedVertexArray
+      , &oAddedSegmentArray
+      , &oRemovedVertexArray
+      , &oRemovedSegmentArray
+      , &oRemovedObjectArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+                  FOdysseyVectorObject* parent = path->GetParent();
 
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    return UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( vectorEngine, vectorScene, iPointInTexture, iKey );
+                  if( parent->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                  {
+                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(parent);
+                      std::vector<FOdysseyVectorSection*> pathSectionArray;
+                      std::vector<FOdysseyVectorSection*> trimmedSectionArray;
+
+                      pathSectionArray.reserve( 10 );
+                      trimmedSectionArray.reserve( 10 );
+
+                      paintGroup->GetSectionsFromPath( path, pathSectionArray );
+                      // remove whole paths for paths without intersections
+                      if( pathSectionArray.size() == 0 )
+                      {
+                          ::ULIS::FRectD unusedRect;
+
+                          if( path->PickShape( unusedRect, FOdysseyVectorEngine::PICK_MASK_BASED ) )
+                          {
+                              oRemovedObjectArray.push_back( path );
+                          }
+                      }
+                      else
+                      {
+                          // remove sections only for paths with intersections
+                          paintGroup->PickSections( pathSectionArray, trimmedSectionArray );
+
+                          if( trimmedSectionArray.size() )
+                          {
+                              paintGroup->EraseSections( trimmedSectionArray
+                                                       , oAddedVertexArray
+                                                       , oAddedSegmentArray
+                                                       , oRemovedVertexArray
+                                                       , oRemovedSegmentArray );
+                          }
+                      }
+                  }
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+
+    for( int i = 0; i < oRemovedObjectArray.size(); i++ )
+    { 
+        oRemovedObjectArray[i]->GetParent()->RemoveChild( oRemovedObjectArray[i] );
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
 
-bool
-UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorEngine* iEngine
-                                                      , FOdysseyVectorScene* iScene
+void
+UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorScene* iScene
+                                                 , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                                                 , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                                 , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                                                 , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                                                 , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    vectorEngine->Traverse
+    ( iScene
+    , iScene
+    , GetEditor()->GetVectorHUDFlags()
+    , [ iScene
+      , vectorEngine
+      , &oAddedVertexArray
+      , &oAddedSegmentArray
+      , &oRemovedVertexArray
+      , &oRemovedSegmentArray
+      , &oRemovedObjectArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+                  ::ULIS::FRectD unusedRect;
+
+                  if( path->Erase( unusedRect
+                                 , oAddedVertexArray
+                                 , oAddedSegmentArray
+                                 , oRemovedVertexArray
+                                 , oRemovedSegmentArray ) )
+                  {
+                      oRemovedObjectArray.push_back( path );
+                  }
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+
+    for( int i = 0; i < oRemovedObjectArray.size(); i++ )
+    {
+        if( oRemovedObjectArray[i]->GetChildrenList().size() == 0 )
+        {
+            oRemovedObjectArray[i]->GetParent()->RemoveChild( oRemovedObjectArray[i] );
+        }
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+}
+
+uint64
+UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorScene* iScene
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
 {
-    std::vector<FOdysseyVectorObject*> addedObjectArray;
-    std::vector<FOdysseyVectorVertex*> addedVertexArray;
-    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
-    std::vector<FOdysseyVectorObject*> removedObjectArray;
-    std::vector<FOdysseyVectorVertex*> removedVertexArray;
-    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-    BLImage* currentImage = iEngine->GetBLImage();
-    ::ULIS::FRectD roi;
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-    mEraserHUD.BlendMask( false );
-
-    iEngine->UseMaskImage();
-
-    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::LeftMouseButton )
     {
-        iEngine->EraseSections( iScene
-                              , addedVertexArray
-                              , addedSegmentArray
-                              , removedObjectArray
-                              , removedVertexArray
-                              , removedSegmentArray
-                              , false );
-    }
-    else
-    {
-        iEngine->Erase( iScene
-                      , addedObjectArray
+        std::vector<FOdysseyVectorObject*> addedObjectArray;
+        std::vector<FOdysseyVectorVertex*> addedVertexArray;
+        std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+        std::vector<FOdysseyVectorObject*> removedObjectArray;
+        std::vector<FOdysseyVectorVertex*> removedVertexArray;
+        std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+        ::ULIS::FRectD roi;
+
+        mEraserHUD->BlendMask( false );
+        // TODO: pass the mask image as arg to Pick function
+        vectorEngine->SetBLMask( mEraserHUD->GetMask() );
+
+        if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+        {
+            EraseSections( iScene
+                         , addedVertexArray
+                         , addedSegmentArray
+                         , removedVertexArray
+                         , removedSegmentArray
+                         , removedObjectArray );
+        }
+        else
+        {
+            ErasePaths( iScene
                       , addedVertexArray
                       , addedSegmentArray
-                      , removedObjectArray
                       , removedVertexArray
                       , removedSegmentArray
-                      , roi
-                      , false );
-    }
+                      , removedObjectArray );
+        }
 
-    iEngine->UseImage( currentImage );
+        vectorEngine->SetBLMask( nullptr );
 
-    iEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                   | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                   | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("EraserTool","Erase"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoErase( iScene
+                                                                  , addedObjectArray
+                                                                  , addedVertexArray
+                                                                  , addedSegmentArray
+                                                                  , removedObjectArray
+                                                                  , removedVertexArray
+                                                                  , removedSegmentArray );
 
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("EraserTool","Erase"));
-    if( GUndo )
-    {
-        FOdysseyVectorUndo *undo = new FOdysseyVectorUndoErase( iScene
-                                                              , addedObjectArray
-                                                              , addedVertexArray
-                                                              , addedSegmentArray
-                                                              , removedObjectArray
-                                                              , removedVertexArray
-                                                              , removedSegmentArray );
+            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+   }
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
+    // this will resize the selection box, knowing that some paths may have been removed after erasal.
+    vectorEngine->ResetHUD();
 
-    return true;
-}
-
-void
-UOdysseyPainterEditorVectorEraserTool::Commit()
-{
-
-}
-
-void
-UOdysseyPainterEditorVectorEraserTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
-{
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
-
-    // redraw
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-    if (!hasVector)
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-    if (mediaVectors.Num() <= 0)
-        return;
-
-    FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-}
-
-void
-UOdysseyPainterEditorVectorEraserTool::PropertyChanged( const FName& iPropertyName )
-{
-    mEraserHUD.SetRadius( Radius );
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+         | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -34,6 +34,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
     void ReadGroup( FOdysseyVectorGroup& iGroup, uint64 iChunkEnd, FArchive &Ar );
     void ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, uint64 iChunkEnd, FArchive &Ar );
     void ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar );
+    void ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd, FArchive &Ar );
 
     FOdysseyVectorObject* CreateObject( uint32 iObjectType );
 

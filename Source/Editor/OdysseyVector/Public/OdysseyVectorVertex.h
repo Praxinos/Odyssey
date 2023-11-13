@@ -4,6 +4,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
+#include "OdysseyVectorJoint.h"
 #include "OdysseyVectorPoint.h"
 
 class FOdysseyVectorSegment;
@@ -52,7 +53,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorVertex ( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius );
         ~FOdysseyVectorVertex();
 
-        static void ArrayToSegmentArray( std::vector<FOdysseyVectorVertex*>& iVertexArray
+        static void ArrayToSegmentArray( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                        , std::vector<FOdysseyVectorSegment*>& oSegmentArray );
 
         /**
@@ -292,12 +293,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         ::ULIS::FVec2D GetWorldCoords();
         void AlignHandles( FOdysseyVectorHandleSegment* iHandle );
+        void AlignHandles();
 
         void AlterRadius( FOdysseyVectorVertex* iInitiatorVertex
                         , FOdysseyVectorSegment* iFromSegment
                         , double iDeltaRadius
                         , bool iAlterAllAlong );
         FOdysseyVectorHandleSegment* GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment );
+        void SetChained( bool iChained );
+        bool IsChained();
+        void MakeJoint( FOdysseyVectorSegment* iPreviousSegment );
+        void DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags );
+        FOdysseyVectorJoint& GetJoint();
+        double GetJointLength();
+        uint32 GetFlags();
+        void GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] );
 
     protected:
         /**
@@ -308,6 +318,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         virtual void SetCoords( double iX, double iY, double iRadius ) override;
 
     protected:
+        FOdysseyVectorJoint mJoint;
+        //eJointType mJointType;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
@@ -318,7 +330,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorSegment* mNearestSegment;
         FOdysseyVectorVertex* mNearestVertex;
 
-    private :
+    public :
+        static const uint32 CHAINED        = ( 1 << 1 );
         static const uint32 VISITED        = ( 1 << 2 );
         static const uint32 SELECTED       = ( 1 << 3 );
         static const uint32 HANDLE_ALIGNED = ( 1 << 4 );

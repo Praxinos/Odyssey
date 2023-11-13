@@ -2,18 +2,19 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "HUD/OdysseyVectorHUD.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathCutToolHUD : public FOdysseyVectorHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathCutToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:
         virtual ~FOdysseyPainterEditorVectorPathCutToolHUD();
         FOdysseyPainterEditorVectorPathCutToolHUD(  UOdysseyPainterEditorVectorPathCutTool* iPathCutTool );
 
-        virtual void Draw( FOdysseyVectorScene* iScene, uint64 iFlags ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
         virtual void Reset( FOdysseyVectorScene* iScene ) override;
         virtual void Load( FOdysseyVectorScene* iScene ) override;
+        virtual void Unload( FOdysseyVectorScene* iScene ) override;
 
         void SetP0( double iX, double iY );
         void SetP1( double iX, double iY );

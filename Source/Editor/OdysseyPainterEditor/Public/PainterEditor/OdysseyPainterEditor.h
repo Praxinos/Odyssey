@@ -8,17 +8,18 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
+#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
-#include "Tools/VectorPickTool/OdysseyPainterEditorVectorPickTool.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
-#include "Tools/PaintBucketTool/OdysseyPainterEditorPaintBucketTool.h"
+#include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
@@ -33,12 +34,6 @@ class FOdysseyPainterEditorSource;
 class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
-
-enum class eVectorEditionMode : uint8
-{
-    Object = 0,
-    Vertex = 1
-};
 
 /**
  * Base class for a Painting Editor
@@ -77,11 +72,12 @@ public:
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorRasterTransformTool*                GetRasterTransformTool() const;
     virtual UOdysseyPainterEditorRasterPrimitiveDrawingTool*         GetRasterPrimitiveDrawingTool() const;
+    virtual UOdysseyPainterEditorRasterPaintBucketTool*              GetRasterPaintBucketTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathEditTool*                 GetVectorPathEditTool() const;
     virtual UOdysseyPainterEditorVectorPathCutTool*                  GetVectorPathCutTool() const;
-    virtual UOdysseyPainterEditorVectorPickTool*                     GetVectorPickTool() const;
+    virtual UOdysseyPainterEditorVectorSelectionTool*                GetVectorSelectionTool() const;
     virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const;
     virtual UOdysseyPainterEditorVectorTransformTool*                GetVectorTransformTool() const;
     virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const;
@@ -89,35 +85,47 @@ public:
     virtual UOdysseyPainterEditorVectorPathPushTool*                 GetVectorPathPushTool() const;
     virtual UOdysseyPainterEditorVectorPathSmoothTool*               GetVectorPathSmoothTool() const;
     virtual UOdysseyPainterEditorVectorPathStitchTool*               GetVectorPathStitchTool() const;
-    virtual UOdysseyPainterEditorPaintBucketTool*                    GetPaintBucketTool() const;
+    virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
 
+    void SetVectorHUDFlags( uint64 iVectorHUDFlags );
+    uint64 GetVectorHUDFlags();
+
+    void SetVectorDrawingFlags(uint64 iVectorDrawingFlags);
+    uint64 GetVectorDrawingFlags();
+
     // generic reusable vector methods. 
-    static void Group( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void ResetView( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void DeleteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void DeletePointSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void GroupPaint( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void Ungroup( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void SendBackward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void BringForward( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void FlipHorizontal( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void FlipVertical( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void SelectAll( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+    static void BringForward( FOdysseyVectorScene* iScene );
+    static void SendBackward( FOdysseyVectorScene* iScene );
+    static void ApplyTransformations( FOdysseyVectorScene* iScene );
+    static void MakePaintGroup( FOdysseyVectorScene* iScene );
+    static void Ungroup( FOdysseyVectorScene* iScene );
+    static void Group( FOdysseyVectorScene* iScene );
+    static void SelectAll( FOdysseyVectorScene* iScene );
+    static void ResetView( FOdysseyVectorScene* iScene );
+    static void UnalignPointSelection( FOdysseyVectorScene* iScene );
+    static void AlignPointSelection( FOdysseyVectorScene* iScene );
+    static void DeletePointSelectionRecursive( FOdysseyVectorObject* iVectorObject
+                                             , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                                             , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                                             , std::vector<FOdysseyVectorPath*>& oRemovedPathArray
+                                             , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
+    static void DeletePointSelection( FOdysseyVectorScene* iScene );
+    static void DeleteObjects( FOdysseyVectorScene* iScene );
+    static void FlipHorizontal( FOdysseyVectorScene* iScene );
+    static void ClearColoring( FOdysseyVectorScene* iScene );
+    static void FlipVertical( FOdysseyVectorScene* iScene );
     static void DeleteBucket( FOdysseyVectorBucket* iBucket );
     static void PropagateBucket( FOdysseyVectorBucket* iBucket );
     static void UnpropagateBucket( FOdysseyVectorBucket* iBucket );
-    static void StitchVertices( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void CopyObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void PasteObjectSelection( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void UnalignPointSelection( FOdysseyVectorScene* iScene );
-    static void AlignPointSelection( FOdysseyVectorScene* iScene );
-    static void GetVertexSelection( FOdysseyVectorScene* iScene
-                                  , std::vector<FOdysseyVectorPoint*>& iSelectedVertexArray );
-    static void ClearColoring( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-    static void ApplyTransformations( FOdysseyVectorScene* iScene );
-    void SetVectorEditionMode(eVectorEditionMode iVectorEditionMode);
-    eVectorEditionMode GetVectorEditionMode();
+    static void CopyObjects( FOdysseyVectorScene* iScene );
+    static void PasteObjects( FOdysseyVectorScene* iScene );
+    static void StitchVertices( FOdysseyVectorScene* iScene
+                              , FOdysseyVectorVertex* iVertexA
+                              , FOdysseyVectorVertex* iVertexB );
+
+    // Populates the Edit Menu everytime it is displayed
+    void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );
 
 public:
     // Setters
@@ -158,7 +166,8 @@ protected:
     TArray<UOdysseyPainterEditorTool*>       mTools;
     TSharedPtr<FOdysseyPainterEditorGUI>     mGUI;
 
-    eVectorEditionMode                       mVectorEditionMode;
+    uint64                          mVectorHUDFlags;
+    uint64                          mVectorDrawingFlags;
 
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
@@ -169,17 +178,18 @@ protected:
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
     UOdysseyPainterEditorRasterTransformTool* mRasterTransformTool;
     UOdysseyPainterEditorRasterPrimitiveDrawingTool* mRasterPrimitiveDrawingTool;
+    UOdysseyPainterEditorRasterPaintBucketTool* mRasterPaintBucketTool;
     UOdysseyPainterEditorVectorPrimitiveDrawingTool* mVectorPrimitiveDrawingTool;
     UOdysseyPainterEditorVectorPathDrawingTool* mVectorPathDrawingTool;
     UOdysseyPainterEditorVectorPathEditTool* mVectorPathEditTool;
     UOdysseyPainterEditorVectorPathCutTool* mVectorPathCutTool;
-    UOdysseyPainterEditorVectorPickTool* mVectorPickTool;
+    UOdysseyPainterEditorVectorSelectionTool* mVectorSelectionTool;
     UOdysseyPainterEditorVectorScenePanTool* mVectorScenePanTool;
     UOdysseyPainterEditorVectorEraserTool* mVectorEraserTool;
     UOdysseyPainterEditorVectorPathPushTool* mVectorPathPushTool;
     UOdysseyPainterEditorVectorPathSmoothTool* mVectorPathSmoothTool;
     UOdysseyPainterEditorVectorPathStitchTool* mVectorPathStitchTool;
-    UOdysseyPainterEditorPaintBucketTool* mPaintBucketTool;
+    UOdysseyPainterEditorVectorPaintBucketTool* mVectorPaintBucketTool;
     UOdysseyPainterEditorColorPickerTool* mColorPickerTool;
     UOdysseyPainterEditorVectorGridTool* mVectorGridTool;
     UOdysseyPainterEditorVectorTransformTool* mVectorTransformTool;

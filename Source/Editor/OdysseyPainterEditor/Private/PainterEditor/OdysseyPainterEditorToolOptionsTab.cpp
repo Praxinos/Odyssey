@@ -51,17 +51,18 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
     SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterDrawingTool()));
     SetWidgetForTool(mEditor->GetRasterTransformTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterTransformTool()));
     SetWidgetForTool(mEditor->GetRasterPrimitiveDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterPrimitiveDrawingTool()));
+    SetWidgetForTool(mEditor->GetRasterPaintBucketTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterPaintBucketTool()));
     SetWidgetForTool(mEditor->GetVectorPathDrawingTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathDrawingTool()));
     SetWidgetForTool(mEditor->GetVectorPathEditTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathEditTool()));
     SetWidgetForTool(mEditor->GetVectorPrimitiveDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPrimitiveDrawingTool()));
     SetWidgetForTool(mEditor->GetVectorPathCutTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathCutTool()));
     SetWidgetForTool(mEditor->GetVectorPathStitchTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathStitchTool()));
     SetWidgetForTool(mEditor->GetVectorPathSmoothTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathSmoothTool()));
-    SetWidgetForTool(mEditor->GetVectorPickTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPickTool()));
+    SetWidgetForTool(mEditor->GetVectorSelectionTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorSelectionTool()));
     SetWidgetForTool(mEditor->GetVectorScenePanTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorScenePanTool()));
     SetWidgetForTool(mEditor->GetVectorEraserTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorEraserTool()));
     SetWidgetForTool(mEditor->GetVectorPathPushTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathPushTool()));
-    SetWidgetForTool(mEditor->GetPaintBucketTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetPaintBucketTool()));
+    SetWidgetForTool(mEditor->GetVectorPaintBucketTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPaintBucketTool()));
     SetWidgetForTool(mEditor->GetVectorGridTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorGridTool()));
     SetWidgetForTool(mEditor->GetVectorTransformTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorTransformTool()));
 

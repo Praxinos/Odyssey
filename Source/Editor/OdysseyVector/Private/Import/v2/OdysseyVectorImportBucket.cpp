@@ -23,7 +23,25 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
-                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY:
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY_MK2:
+                {
+                    FString fullpath;
+
+                    Ar << fullpath;
+
+                    //Loads the asset in memory
+                    //But returns the Palette instead of the PaletteEntry because
+                    // the PaletteEntry is contained inside the Palette Object
+                    //that's why we have to find the object after loading it
+                    UEditorAssetLibrary::LoadAsset( fullpath );
+
+                    UOdysseyPaletteEntry* paletteEntry = Cast<UOdysseyPaletteEntry>(StaticFindObject(NULL, nullptr, *fullpath));
+                    iBucket.SetPaletteEntry( paletteEntry );
+                }
+                break;
+
+                // LEGACY (non-functionnal)
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY_MK1:
                 {
                     FName nameEntry;
                     Ar << nameEntry;

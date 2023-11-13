@@ -25,16 +25,16 @@ FOdysseyVectorUndoUngroup::FOdysseyVectorUndoUngroup( FOdysseyVectorScene* iScen
 void
 FOdysseyVectorUndoUngroup::Apply( UObject* iIgnored )
 {
+    FOdysseyVectorObject* groupParent = mGroup->GetParent();
+
     FOdysseyVectorUndo::Apply( iIgnored );
 
     mScene->ClearSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mUngroupedObjectList.begin(); it != mUngroupedObjectList.end(); ++it )
+    for( FOdysseyVectorObject *child : mUngroupedObjectList )
     {
-        FOdysseyVectorObject *child = (*it);
-
         // transfer the child to the group's parent object
-        mGroup->GetParent()->TransferChild( child, mGroup->GetLastChild() );
+        groupParent->TransferChild( child, groupParent->GetLastChild() );
     }
 
     //mGroup->GetParent()->RemoveChild( mGroup );
@@ -59,10 +59,8 @@ FOdysseyVectorUndoUngroup::Revert( UObject* iIgnored )
     // Note: GetParent() stills holds a valid pointer to the former parent.
     //mGroup->GetParent()->AppendChild( mGroup );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mUngroupedObjectList.begin(); it != mUngroupedObjectList.end(); ++it )
+    for( FOdysseyVectorObject *child : mUngroupedObjectList )
     {
-        FOdysseyVectorObject *child = (*it);
-
         mGroup->TransferChild( child, mGroup->GetLastChild() );
     }
 

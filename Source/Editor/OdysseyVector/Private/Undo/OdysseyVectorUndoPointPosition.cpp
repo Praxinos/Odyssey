@@ -25,6 +25,24 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 }
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
+                                                                , std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                                                , std::vector<FOdysseyVectorHandleSegment*>& iHandleArray )
+    : FOdysseyVectorUndo( iScene )
+{
+    mPointSnapshotArray.reserve( iVertexArray.size() + iHandleArray.size() );
+
+    for( int i = 0; i < iVertexArray.size(); i++ )
+    {
+        mPointSnapshotArray.emplace_back( iVertexArray[i], FSnapshotPoint::SNAPSHOT_ALL );
+    }
+
+    for( int i = 0; i < iHandleArray.size(); i++ )
+    {
+        mPointSnapshotArray.emplace_back( iHandleArray[i], FSnapshotPoint::SNAPSHOT_ALL );
+    }
+}
+
+FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
                                                                 , FOdysseyVectorPoint* iPoint )
     : FOdysseyVectorUndo( iScene )
 {

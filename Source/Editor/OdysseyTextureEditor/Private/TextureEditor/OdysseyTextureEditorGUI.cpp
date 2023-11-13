@@ -7,7 +7,6 @@
 #include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTextureDetailsTab.h"
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
-#include "PainterEditor/OdysseyPainterEditorSelectedVectorObjectTab.h"
 #include "Framework/Docking/LayoutExtender.h"
 #include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
 
@@ -186,7 +185,6 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
     if (!source)
         return;
 
-    TSharedPtr<FOdysseyPainterEditorSelectedVectorObjectTab> vectorObjectTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorSelectedVectorObjectTab>();
     TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
     
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(source->GetLayerStack());
@@ -200,14 +198,14 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint
         {
             if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
             {
-                vectorSceneTreeViewTab.Get()->Update( iScene );
+                vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
             }
 
             if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
              || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
              || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
             {
-                vectorObjectTab.Get()->Update( iScene );
+                vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
             }
         }
     }

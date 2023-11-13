@@ -96,11 +96,11 @@ FOdysseyVectorRectangle::CopyShape()
 }
 
 void
-FOdysseyVectorRectangle::DrawShape( uint64 iFlags )
+FOdysseyVectorRectangle::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
 {
     if ( mWidth && mHeight )
     {
-        FOdysseyVectorPath::DrawShape ( iFlags );
+        FOdysseyVectorPath::DrawShape ( iBLContext, iCombinedOpacity, iFlags );
     }
 }
 

@@ -41,7 +41,9 @@ namespace FOdysseyVector
 
     bool ODYSSEYVECTOR_API PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
                                      , const ::ULIS::FRectD& iMaskRect
-                                     , uint8* iPixelData );
+                                     , const uint8* iPixelData );
+
+    double ODYSSEYVECTOR_API GetBezierApproximateLength( ::ULIS::FVec2D iBezier[4], uint32 iDivisions );
 
     bool ProjectPoint( const ::ULIS::FVec2D& iPt
                      , const ::ULIS::FVec2D& iSegmentP0
@@ -51,7 +53,7 @@ namespace FOdysseyVector
     template< typename T >
     bool IntersectRegions( const ::ULIS::TRectangle<T>& iRegion0
                          , const ::ULIS::TRectangle<T>& iRegion1
-                         ,       ::ULIS::TRectangle<T>& oRegionOut )
+                         ,       ::ULIS::TRectangle<T>* oRegionOut )
     {
         ::ULIS::TRectangle<T> resultRegion;
 
@@ -70,17 +72,24 @@ namespace FOdysseyVector
 
         // Note: the intersect operation from the operator overload & in class FRectI assumes x1 < x2, which is not guaranted.
         // this is why we need to check that first.
-        oRegionOut.x = x1;
-        oRegionOut.y = y1;
-        oRegionOut.w = ( x1 < x2 ) ? x2 - x1 : 0;
-        oRegionOut.h = ( y1 < y2 ) ? y2 - y1 : 0;
+        resultRegion.x = x1;
+        resultRegion.y = y1;
+        resultRegion.w = ( x1 < x2 ) ? x2 - x1 : 0;
+        resultRegion.h = ( y1 < y2 ) ? y2 - y1 : 0;
 
-        return oRegionOut.Area() ? true : false;
+        if( oRegionOut )
+        {
+            *oRegionOut = resultRegion;
+        }
+
+        return resultRegion.Area() ? true : false;
     }
 
     //bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
 }
 
+#include "OdysseyVectorPolygon.h"
+#include "OdysseyVectorBrush.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorScene.h"
 #include "OdysseyVectorPoint.h"
@@ -98,10 +107,6 @@ namespace FOdysseyVector
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCycle.h"
 #include "OdysseyVectorPath.h"
-//#include "OdysseyVectorPathBuilder.h"
 #include "OdysseyVectorPathTracer.h"
 #include "OdysseyVectorEllipse.h"
 #include "OdysseyVectorEngine.h"
-#include "HUD/OdysseyVectorHUD.h"
-#include "HUD/OdysseyVectorHUDPicking.h"
-#include "HUD/OdysseyVectorHUDEraser.h"

@@ -36,8 +36,8 @@ FSnapshotObject::~FSnapshotObject()
 }
 
 FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectSnapshotFlags )
-    : mObject( iObject )
-    , mObjectSnapshotFlags( iObjectSnapshotFlags )
+    : mObjectSnapshotFlags( iObjectSnapshotFlags )
+    , mObject( iObject )
 {
     if( iObjectSnapshotFlags & SNAPSHOT_TRANSFORMATIONS )
     {
@@ -143,12 +143,29 @@ FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex
     : FSnapshotPoint( iVertex, iPointSnapshotFlags)
     , mVertexSnapshotFlags( iVertexSnapshotFlags )
 {
+    if( iVertexSnapshotFlags & SNAPSHOT_ALIGNMENT )
+    {
+        // note: we only save the flags that are "manually" set by the user,
+        // i am unsure about the consistency of other flags
+        mAlignment = iVertex->IsHandleAligned();
+    }
 }
 
 void
 FSnapshotVertex::Restore()
 {
     FSnapshotPoint::Restore();
+
+    if( mVertexSnapshotFlags & SNAPSHOT_ALIGNMENT )
+    {
+        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(mPoint);
+        bool alignment = vertex->IsHandleAligned();
+
+        vertex->SetHandleAligned( mAlignment );
+
+        // swap for redo
+        mAlignment = alignment;
+    }
 }
 
 FSnapshotSegmentCubic::~FSnapshotSegmentCubic()
@@ -160,8 +177,17 @@ FSnapshotSegmentCubic::FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic *iCubic
     : mCubicSegmentSnapshotFlags( iCubicSegmentSnapshotFlags )
     , mCubicSegment( iCubicSegment )
 {
-    mHandleCoords[0] = iCubicSegment->GetHandle(0)->GetCoords();
-    mHandleCoords[1] = iCubicSegment->GetHandle(1)->GetCoords();
+    if( mCubicSegmentSnapshotFlags & SNAPSHOT_HANDLES )
+    {
+        mHandleCoords[0] = iCubicSegment->GetHandle(0)->GetCoords();
+        mHandleCoords[1] = iCubicSegment->GetHandle(1)->GetCoords();
+    }
+}
+
+FOdysseyVectorSegmentCubic*
+FSnapshotSegmentCubic::GetCubicSegment()
+{
+    return mCubicSegment;
 }
 
 void
@@ -220,11 +246,18 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
             }
         }
     }
+
+    if( iPathSnapshotFlags & SNAPSHOT_SELECTED_VERTICES )
+    {
+        mSelectedVertexList = iPath->GetSelectedVertexList();
+    }
 }
 
 void
 FSnapshotPath::Restore()
 {
+    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(mObject);
+
     FSnapshotObject::Restore();
 
     if( mPathSnapshotFlags & SNAPSHOT_VERTICES )
@@ -241,6 +274,20 @@ FSnapshotPath::Restore()
         {
             mCubicSegmentSnapshotArray[i].Restore();
         }
+    }
+
+    if( mPathSnapshotFlags & SNAPSHOT_SELECTED_VERTICES )
+    {
+        std::list<FOdysseyVectorVertex*> currentVertexList = path->GetSelectedVertexList();
+
+        path->UnselectAllVertices();
+
+        for( FOdysseyVectorVertex* vertex : mSelectedVertexList )
+        {
+            path->SelectVertex( vertex );
+        }
+
+        mSelectedVertexList = currentVertexList;
     }
 }
 
@@ -307,11 +354,18 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
             mBucketSnapshotArray.emplace_back( bucket, FSnapshotBucket::SNAPSHOT_ALL );
         }
     }
+
+    if( iPaintGroupSnapshotFlags & SNAPSHOT_SELECTED_BUCKETS )
+    {
+        mSelectedBucketList = iPaintGroup->GetSelectedBucketList();
+    }
 }
 
 void
 FSnapshotGroupPaint::Restore()
 {
+    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mObject);
+
     FSnapshotObject::Restore();
 
     if( mPaintGroupSnapshotFlags & SNAPSHOT_BUCKETS )
@@ -320,5 +374,19 @@ FSnapshotGroupPaint::Restore()
         {
             mBucketSnapshotArray[i].Restore();
         }
+    }
+
+    if( mPaintGroupSnapshotFlags & SNAPSHOT_SELECTED_BUCKETS )
+    {
+        std::list<FOdysseyVectorBucket*> currentBucketList = paintGroup->GetSelectedBucketList();
+
+        paintGroup->UnselectAllBuckets();
+
+        for( FOdysseyVectorBucket* bucket : mSelectedBucketList )
+        {
+            paintGroup->SelectBucket( bucket );
+        }
+
+        mSelectedBucketList = currentBucketList;
     }
 }

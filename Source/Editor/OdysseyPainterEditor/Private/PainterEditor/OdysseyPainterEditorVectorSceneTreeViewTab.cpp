@@ -29,7 +29,9 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::FOdysseyPainterEditorVectorSceneTre
                          FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
 {
-
+    mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
+    mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
+    mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
 }
 
 //--------------------------------------------------------------------------------------
@@ -41,12 +43,80 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::GetId() const
     return StaticId();
 }
 
+void
+FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdysseyVectorScene* iScene )
+{
+    // defaults to scene
+    std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetEngine()->GetChildrenList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
+                                                                                    : sceneAsList;
+    uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );
+
+    if( objectClass )
+    {
+        if( objectClass == FOdysseyVectorPath::StaticClass() )
+        {
+            mPathView->Update( iScene, focusedObjectList );
+            mDetailsView->SetObject( mPathView );
+        }
+
+        if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
+         || ( objectClass == FOdysseyVectorScene::StaticClass() ) )
+        {
+            mGroupPaintView->Update( iScene, focusedObjectList );
+            mDetailsView->SetObject( mGroupPaintView );
+        }
+
+        if( ( objectClass == FOdysseyVectorObject::StaticClass() )
+         || ( objectClass == FOdysseyVectorGroup::StaticClass() ) )
+        {
+            // default
+            mObjectView->Update( iScene, focusedObjectList );
+            mDetailsView->SetObject( mObjectView );
+        }
+    }
+    else
+    {
+        mDetailsView->SetObject( nullptr );
+    }
+}
+
+TSharedPtr<IDetailsView>
+FOdysseyPainterEditorVectorSceneTreeViewTab::CreateObjectPropertiesPanel()
+{
+    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FDetailsViewArgs DetailsViewArgs;
+    TSharedPtr<IDetailsView> detailsView;
+
+    DetailsViewArgs.bUpdatesFromSelection = false;
+    DetailsViewArgs.bLockable = false;
+    DetailsViewArgs.bAllowSearch = false;
+    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+    
+    detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+
+    detailsView->SetObject(nullptr);
+
+    return detailsView;
+}
+
 TSharedPtr<SWidget>
 FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
 {
     mVectorSceneTreeView = SNew( SOdysseyPainterEditorVectorSceneTreeView );
+    mDetailsView = CreateObjectPropertiesPanel();
 
-    return mVectorSceneTreeView;
+    return SNew(SSplitter)
+          .Orientation( EOrientation::Orient_Vertical )
+          +SSplitter::Slot()
+          [
+              mVectorSceneTreeView.ToSharedRef()
+          ]
+          +SSplitter::Slot()
+          [
+              mDetailsView.ToSharedRef()
+          ];
 }
 
 void
@@ -56,14 +126,32 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::OnRefresh( FOdysseyVectorScene* iSc
 }
 
 void
+FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateSceneTreeView( FOdysseyVectorScene* iScene )
+{
+    mVectorSceneTreeView.Get()->Update( iScene );
+}
+
+void
 FOdysseyPainterEditorVectorSceneTreeViewTab::Update( FOdysseyVectorScene* iScene )
 {
-    //mItemsSource.Empty();
-    //mItemsSource.Add( MakeShared<FVectorSceneTreeViewItem>(iScene) );
+    UpdateSceneTreeView( iScene );
+    UpdateObjectPropertiesPanel( iScene );
+}
 
-    //mVectorSceneTreeView.Get()->SetTreeItemsSource( &mItemsSource );
+FString
+FOdysseyPainterEditorVectorSceneTreeViewTab::GetReferencerName() const
+{
+    return "FOdysseyPainterEditorVectorSceneTreeViewTab";
+}
 
-    mVectorSceneTreeView.Get()->Update( iScene );
+void
+FOdysseyPainterEditorVectorSceneTreeViewTab::AddReferencedObjects(FReferenceCollector& Collector)
+{
+    // Prevent these UObjects from being destroyed by garbage collection
+	Collector.AddReferencedObject(mObjectView);
+	Collector.AddReferencedObject(mPathView);
+	Collector.AddReferencedObject(mGroupPaintView);
+	//Collector.AddReferencedObject(mDetailsView);
 }
 
 #undef LOCTEXT_NAMESPACE

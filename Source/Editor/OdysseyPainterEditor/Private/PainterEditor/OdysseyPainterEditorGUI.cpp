@@ -18,7 +18,6 @@
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorToolOptionsTab.h"
-#include "OdysseyPainterEditorSelectedVectorObjectTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 
@@ -61,7 +60,6 @@ void
 FOdysseyPainterEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
 {
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::ClosedTab));
-    //Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorSelectedVectorObjectTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorBrushSelectorTab::StaticId(), ETabState::ClosedTab));
     
@@ -82,7 +80,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorColorWheelTab> colorWheelTab = MakeShared<FOdysseyPainterEditorColorWheelTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorColorSlidersTab> colorSlidersTab = MakeShared<FOdysseyPainterEditorColorSlidersTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorToolsTab> toolsTab = MakeShared<FOdysseyPainterEditorToolsTab>(mEditor);
-    TSharedRef<FOdysseyPainterEditorSelectedVectorObjectTab> selectedVectorObjectTab = MakeShared<FOdysseyPainterEditorSelectedVectorObjectTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorTopTab> topTab = MakeShared<FOdysseyPainterEditorTopTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorToolOptionsTab> toolOptionsTab = MakeShared<FOdysseyPainterEditorToolOptionsTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = MakeShared<FOdysseyPainterEditorVectorSceneTreeViewTab>(mEditor);
@@ -99,7 +96,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
 
     mEditor->AddTab(brushSelectorTab);
     mEditor->AddTab(toolOptionsTab);
-    mEditor->AddTab(selectedVectorObjectTab);
     mEditor->AddTab(toolsTab);
 
     mEditor->AddTab(meshSelectorTab);
@@ -274,7 +270,7 @@ FOdysseyPainterEditorGUI::CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilde
     currentToolStack->SetHideTabWell(false);
     currentToolStack->SetSizeCoefficient(0.33f);
     currentToolStack->AddTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::OpenedTab);
-    currentToolStack->AddTab(FOdysseyPainterEditorSelectedVectorObjectTab::StaticId(),ETabState::OpenedTab);
+    currentToolStack->AddTab(FOdysseyPainterEditorVectorSceneTreeViewTab::StaticId(),ETabState::OpenedTab);
     currentToolStack->SetForegroundTab(FOdysseyPainterEditorToolOptionsTab::StaticId());
 
     TSharedRef<FTabManager::FStack> toolsStack = iBuilder.CreateStack("ToolsStack");

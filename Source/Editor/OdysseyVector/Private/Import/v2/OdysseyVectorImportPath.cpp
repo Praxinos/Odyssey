@@ -103,11 +103,16 @@ void
 FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, FArchive &Ar )
 {
     std::vector<FOdysseyVectorVertex*> vertexArray;
-    static FOdysseyVectorVertex* currentVertex;
+    FOdysseyVectorVertex* currentVertex;
+    FOdysseyVectorBrush* currentBrush;
 
     FOdysseyFile::ReadChunks( iChunkEnd
                             , Ar
-                            , [this,&iPath, &vertexArray](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+                            , [ this
+                              , &iPath
+                              , &vertexArray
+                              , &currentVertex
+                              , &currentBrush ](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
@@ -119,6 +124,14 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
 
                     iPath.SetJointType(static_cast<eJointType>(jointType));
                 }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_PATH_BRUSH:
+                    currentBrush = &iPath.GetBrush();
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_BRUSH:
+                    ReadBrush( *currentBrush, Ar.Tell() + iChunkLen, Ar );
                 break;
 
                 case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY:

@@ -39,6 +39,11 @@ FOdysseyVectorEllipse::FOdysseyVectorEllipse( const FString& iName
     AddSegment ( mCubicSegment[2] );
     AddSegment ( mCubicSegment[3] );
 
+    mCubicVertex[0]->SetHandleAligned( true );
+    mCubicVertex[1]->SetHandleAligned( true );
+    mCubicVertex[2]->SetHandleAligned( true );
+    mCubicVertex[3]->SetHandleAligned( true );
+
     UpdateShape( 0 );
 }
 
@@ -108,11 +113,11 @@ FOdysseyVectorEllipse::CopyShape()
 }
 
 void
-FOdysseyVectorEllipse::DrawShape( uint64 iFlags )
+FOdysseyVectorEllipse::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
 {
     if ( mRadiusX && mRadiusY )
     {
-        FOdysseyVectorPath::DrawShape ( iFlags );
+        FOdysseyVectorPath::DrawShape ( iBLContext, iCombinedOpacity, iFlags );
     }
 }
 

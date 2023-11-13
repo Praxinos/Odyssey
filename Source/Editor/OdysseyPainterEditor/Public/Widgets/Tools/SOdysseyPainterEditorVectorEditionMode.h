@@ -19,7 +19,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorEditionMode : public S
         void  Construct( const  FArguments&  InArgs, FOdysseyPainterEditor* iEditor );
 
     private:
-        void SetVectorEditionMode( ECheckBoxState iNewState, eVectorEditionMode iVectorEditionMode );
+        void SetVectorEditionFlags( ECheckBoxState iNewState, uint64 iViewMode );
 
     private:
         FOdysseyPainterEditor* mEditor;

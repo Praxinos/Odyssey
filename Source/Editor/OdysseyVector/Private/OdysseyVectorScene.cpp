@@ -77,14 +77,15 @@ FOdysseyVectorScene::CopyShape()
 }
 
 FOdysseyVectorGroupPaint*
-FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVectorObject*>& oCubicPathArray
-                                                      , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
-                                                      , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray )
+FOdysseyVectorScene::MakePaintGroupFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                              , std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                              , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
+                                              , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray )
 {
     // this array will help us to transfer buckets as well
     std::vector<FOdysseyVectorGroupPaint*> parentPaintGroupArray;
 
-    if( mSelectedObjectList.size() )
+    if( iObjectList.size() )
     {
         FOdysseyVectorGroupPaint* paintGroup = new FOdysseyVectorGroupPaint( "Paint Group" );
 
@@ -92,7 +93,7 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
 
         paintGroup->UpdateMatrix();
 
-        for( FOdysseyVectorObject* selectedObject : mSelectedObjectList )
+        for( FOdysseyVectorObject* selectedObject : iObjectList )
         {
             if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
             {
@@ -180,15 +181,14 @@ FOdysseyVectorScene::MakePaintGroupFromSelectedObjects( std::vector<FOdysseyVect
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorScene::GetWorldPositionFromSelection()
+FOdysseyVectorScene::GetPositionFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList )
 {
     BLPoint averagePosition = BLPoint( 0.0f, 0.0f );
 
-    if ( mSelectedObjectList.size() )
+    if ( iObjectList.size() )
     {
-        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+        for( FOdysseyVectorObject* obj : iObjectList )
         {
-            FOdysseyVectorObject *obj = (*it);
             ::ULIS::FRectD bbox = obj->GetBBox( true );
             BLPoint middle = BLPoint( bbox.x + bbox.w * 0.5f
                                     , bbox.y + bbox.h * 0.5f );
@@ -197,29 +197,31 @@ FOdysseyVectorScene::GetWorldPositionFromSelection()
             averagePosition.y += middle.y;
         }
 
-        averagePosition.x /= mSelectedObjectList.size();
-        averagePosition.y /= mSelectedObjectList.size();
+        averagePosition.x /= iObjectList.size();
+        averagePosition.y /= iObjectList.size();
     }
 
     return ::ULIS::FVec2D( averagePosition.x, averagePosition.y );
 }
 
 void
-FOdysseyVectorScene::FlipSelectionHorizontal( bool iWorld )
+FOdysseyVectorScene::FlipObjectsHorizontal( const std::list<FOdysseyVectorObject*>& iObjectList )
 {
-    FlipSelection( iWorld, -1.0f, 1.0f );
+    FlipObjects( iObjectList, -1.0f, 1.0f );
 }
 
 void
-FOdysseyVectorScene::FlipSelectionVertical( bool iWorld )
+FOdysseyVectorScene::FlipObjectsVertical( const std::list<FOdysseyVectorObject*>& iObjectList )
 {
-    FlipSelection( iWorld, 1.0f, -1.0f );
+    FlipObjects( iObjectList, 1.0f, -1.0f );
 }
 
 void
-FOdysseyVectorScene::FlipSelection( bool iWorld, double iXFactor, double iYFactor )
+FOdysseyVectorScene::FlipObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                , double iXFactor
+                                , double iYFactor )
 {
-    ::ULIS::FVec2D axisPosition = GetWorldPositionFromSelection();
+    ::ULIS::FVec2D axisPosition = GetPositionFromObjects( iObjectList );
     BLMatrix2D inverseAxisMatrix;
     BLMatrix2D axisMatrix;
     BLMatrix2D flippingMatrix;
@@ -231,70 +233,32 @@ FOdysseyVectorScene::FlipSelection( bool iWorld, double iXFactor, double iYFacto
 
     flippingMatrix.resetToScaling( iXFactor, iYFactor );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject *object : iObjectList )
     {
-        FOdysseyVectorObject *object = (*it);
+        BLMatrix2D& objectWorldMatrix = object->GetWorldMatrix();
+        BLPoint objectWorldCenter = objectWorldMatrix.mapPoint( 0.0f, 0.0f );
+        BLPoint objectLocalCenter = inverseAxisMatrix.mapPoint( objectWorldCenter ); 
+        BLPoint objectLocalFlippedCenter = flippingMatrix.mapPoint( objectLocalCenter );
+        BLPoint objectWorldFlippedCenter = axisMatrix.mapPoint( objectLocalFlippedCenter );
 
-        if( object->HasSelectedAncestor() == false )
-        {
-            BLMatrix2D& objectWorldMatrix = object->GetWorldMatrix();
-            BLPoint objectWorldCenter = objectWorldMatrix.mapPoint( 0.0f, 0.0f );
-            BLPoint objectLocalCenter = inverseAxisMatrix.mapPoint( objectWorldCenter ); 
-            BLPoint objectLocalFlippedCenter = flippingMatrix.mapPoint( objectLocalCenter );
-            BLPoint objectWorldFlippedCenter = axisMatrix.mapPoint( objectLocalFlippedCenter );
+        objectLocalCenter = object->GetParent()->GetInverseWorldMatrix().mapPoint( objectWorldFlippedCenter );
 
-            objectLocalCenter = object->GetParent()->GetInverseWorldMatrix().mapPoint( objectWorldFlippedCenter );
+        object->Translate( objectLocalCenter.x, objectLocalCenter.y );
+        object->Scale( iXFactor * object->GetScalingX(), iYFactor * object->GetScalingY() );
+        object->Rotate( -object->GetRotation() );
 
-            object->Translate( objectLocalCenter.x, objectLocalCenter.y );
-            object->Scale( iXFactor * object->GetScalingX(), iYFactor * object->GetScalingY() );
-            object->Rotate( -object->GetRotation() );
-
-            object->UpdateMatrix();
-        }
+        object->UpdateMatrix();
     }
-            
-/*
-            BLMatrix2D objectAxisMatrix;
-            BLMatrix2D finalLocalMatrix;
-            BLMatrix2D finalWorldMatrix;
-
-            FOdysseyVector::MatrixMultiply( inverseAxisMatrix, objectWorldMatrix, objectAxisMatrix );
-            FOdysseyVector::MatrixMultiply( iFlippingMatrix, objectAxisMatrix, finalLocalMatrix );
-            FOdysseyVector::MatrixMultiply( axisMatrix, finalLocalMatrix, finalWorldMatrix );
-
-            objectWorldMatrix = finalWorldMatrix;
-
-            object->Transfer( object->GetParent()->GetWorldMatrix() );
-            object->UpdateMatrix();
-        }
-    }
-*/
 }
 
 FOdysseyVectorGroup*
-FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& oObjectArray
-                                         , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )
+FOdysseyVectorScene::GroupObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                 , std::vector<FOdysseyVectorObject*>& oObjectArray
+                                 , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )
 {
     BLPoint averageTranslation = { 0.0f, 0.0f };
-/*
-    if ( mSelectedObjectList.size() )
-    {
-        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
-        {
-            FOdysseyVectorObject *obj = (*it);
-            BLPoint origin = obj->GetWorldMatrix().mapPoint( 0.0f, 0.0f );
 
-            averageTranslation.x += origin.x;
-            averageTranslation.y += origin.y;
-        }
-
-        averageTranslation.x /= mSelectedObjectList.size();
-        averageTranslation.y /= mSelectedObjectList.size();
-
-        averageTranslation = this->GetInverseWorldMatrix().mapPoint ( averageTranslation.x, averageTranslation.y );
-    }
-*/
-    if ( mSelectedObjectList.size() )
+    if ( iObjectList.size() )
     {
         FOdysseyVectorGroup* group = new FOdysseyVectorGroup( FString("Group") );
 
@@ -303,13 +267,11 @@ FOdysseyVectorScene::GroupSelectedObjects( std::vector<FOdysseyVectorObject*>& o
         //group->Translate( averageTranslation.x, averageTranslation.y );
         group->UpdateMatrix();
 
-        oObjectArray.reserve( mSelectedObjectList.size() );
-        oObjectOldParentArray.reserve( mSelectedObjectList.size() );
+        oObjectArray.reserve( iObjectList.size() );
+        oObjectOldParentArray.reserve( iObjectList.size() );
 
-        for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+        for( FOdysseyVectorObject *obj : iObjectList )
         {
-            FOdysseyVectorObject *obj = (*it);
-
             oObjectArray.push_back( obj );
             oObjectOldParentArray.push_back( obj->GetParent() );
 
@@ -332,37 +294,42 @@ FOdysseyVectorScene::GetSelectedObjectList()
 }
 
 void
-FOdysseyVectorScene::DrawShape( uint64 iDrawingFlags )
+FOdysseyVectorScene::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iDrawingFlags )
 {
-    BLContext* blctx = GetEngine()->GetBLContext();
     static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
     BLRgba32 blFillColor;
-    FColor fillColor = ( iDrawingFlags & FOdysseyVectorObject::DRAWING_IGNORECOLOR ) ? mGroupPaintParam.MonochromeColor
+    FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? mGroupPaintParam.MonochromeColor
                                                                                      : mBackgroundBucket.GetColor();
 
-    blctx->setCompOp( BL_COMP_OP_SRC_COPY );
+    iBLContext->save();
+
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
 
 //UE_LOG(LogTemp, Warning, TEXT("Some warning message:%d %d %d %d"), roi.x, roi.y, roi.w, roi.h );
 
     blFillColor.setR( fillColor.R );
     blFillColor.setG( fillColor.G );
     blFillColor.setB( fillColor.B );
-    blFillColor.setA( fillColor.A );
+    blFillColor.setA( fillColor.A * iCombinedOpacity );
 
-    blctx->setFillStyle( blFillColor );
+    iBLContext->setFillStyle( blFillColor );
 
-    blctx->save();
-    blctx->resetMatrix();
+    //iBLContext->resetMatrix();
     //blctx->clearAll();
-    blctx->fillAll();
-    blctx->restore();
+    iBLContext->fillAll();
 
-    FOdysseyVectorGroupPaint::DrawShape( iDrawingFlags );
+    // TODO: possible optimization: only erase the invalidated part.
+    // however, fillRect can do the trick only if the matrix is set to identity.
+    //::ULIS::FRectI& rect = GetEngine()->GetInvalidatedRect();
+    //iBLContext->fillRect( rect.x, rect.y, rect.w, rect.h );
+
+    FOdysseyVectorGroupPaint::DrawShape( iBLContext, iCombinedOpacity, iDrawingFlags );
 
     // view the updated zone ( testing purpose only )
-    /*blctx.setStrokeStyle(BLRgba32(0xFFFF0000));
-    blctx.setStrokeWidth(1.0f);
-    blctx.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
+    /*iBLContext.setStrokeStyle(BLRgba32(0xFFFF0000));
+    iBLContext.setStrokeWidth(1.0f);
+    iBLContext.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
+    iBLContext->restore();
 }
 
 FOdysseyVectorObject*
@@ -378,12 +345,10 @@ FOdysseyVectorScene::GetType()
 }
 
 void
-FOdysseyVectorScene::RemoveSelectedObjects()
+FOdysseyVectorScene::RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList )
 {
-    for(std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it)
+    for( FOdysseyVectorObject* selectedObject : iObjectList )
     {
-        FOdysseyVectorObject* selectedObject = (*it);
-
         // prevent nested removal
         if( selectedObject->HasSelectedAncestor() == false )
         {

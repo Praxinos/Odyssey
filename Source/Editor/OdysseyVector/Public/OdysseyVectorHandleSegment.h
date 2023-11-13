@@ -17,6 +17,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
         static uint32 StaticClass() { return mStaticClass; };
         uint32 GetClass() { return mStaticClass; };
 
+        static void ArrayToVertexArray( const std::vector<FOdysseyVectorHandleSegment*>& iSegmentHandleArray
+                                      , std::vector<FOdysseyVectorVertex*>& oVertexArray );
+
         /**
          * @brief Destructor
          */

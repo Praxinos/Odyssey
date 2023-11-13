@@ -6,10 +6,12 @@ FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransfo
 }
 
 FOdysseyPainterEditorVectorTransformToolHUD::FOdysseyPainterEditorVectorTransformToolHUD( UOdysseyPainterEditorVectorTransformTool* iTransformTool )
-    : FOdysseyPainterEditorVectorPickToolHUD( iTransformTool )
+    : FOdysseyPainterEditorVectorSelectionToolHUD( iTransformTool )
     , mFlags( 0 )
 {
     mTransformTool = iTransformTool;
+
+    mShowSelectionIfEmpty = true;
 }
 
 uint32
@@ -87,9 +89,10 @@ GetWorldScalers( FSelectionBox& iSelectionBox, FSelectionBoxScaler iScaler[4] )
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( BLContext* iBLContext
+                                                        , FOdysseyVectorScene* iScene
+                                                        , uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -104,19 +107,20 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( FOdysseyVectorScene* i
     {
         BLRgba32 scalerColor = ( mFlags & scaler[i].flag ) ? hcColor : fgColor;
 
-        blctx->setFillStyle( scalerColor );
-        blctx->fillCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
+        iBLContext->setFillStyle( scalerColor );
+        iBLContext->fillCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
 
-        blctx->setStrokeWidth( 1.0f );
-        blctx->setStrokeStyle( bgColor );
-        blctx->strokeCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->setStrokeStyle( bgColor );
+        iBLContext->strokeCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
     }
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( BLContext* iBLContext
+                                                      , FOdysseyVectorScene* iScene
+                                                      , uint64 iFlags )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -142,36 +146,36 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( FOdysseyVectorScene* iSc
 
     // Central circle
 
-    blctx->setFillStyle( gizmoColor );
-    blctx->fillCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
-    blctx->setStrokeWidth( 1.0f );
-    blctx->setStrokeStyle( bgColor );
-    blctx->strokeCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
+    iBLContext->setFillStyle( gizmoColor );
+    iBLContext->fillCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeStyle( bgColor );
+    iBLContext->strokeCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
 
     // Axises
 
-    blctx->setStrokeWidth( 2.0f );
-    blctx->setStrokeStyle( bgColor );
-    blctx->strokeLine( worldXAxisStart.x
-                     , worldXAxisStart.y
-                     , worldXAxisStart.x + worldXAxisLength.x
-                     , worldXAxisStart.y + worldXAxisLength.y );
-    blctx->strokeLine( worldYAxisStart.x
-                     , worldYAxisStart.y
-                     , worldYAxisStart.x + worldYAxisLength.x
-                     , worldYAxisStart.y + worldYAxisLength.y );
+    iBLContext->setStrokeWidth( 2.0f );
+    iBLContext->setStrokeStyle( bgColor );
+    iBLContext->strokeLine( worldXAxisStart.x
+                          , worldXAxisStart.y
+                          , worldXAxisStart.x + worldXAxisLength.x
+                          , worldXAxisStart.y + worldXAxisLength.y );
+    iBLContext->strokeLine( worldYAxisStart.x
+                          , worldYAxisStart.y
+                          , worldYAxisStart.x + worldYAxisLength.x
+                          , worldYAxisStart.y + worldYAxisLength.y );
 
-    blctx->setStrokeWidth( 1.0f );
-    blctx->setStrokeStyle( xAxisColor );
-    blctx->strokeLine( worldXAxisStart.x
-                     , worldXAxisStart.y
-                     , worldXAxisStart.x + worldXAxisLength.x
-                     , worldXAxisStart.y + worldXAxisLength.y );
-    blctx->setStrokeStyle( yAxisColor );
-    blctx->strokeLine( worldYAxisStart.x
-                     , worldYAxisStart.y
-                     , worldYAxisStart.x + worldYAxisLength.x
-                     , worldYAxisStart.y + worldYAxisLength.y );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeStyle( xAxisColor );
+    iBLContext->strokeLine( worldXAxisStart.x
+                          , worldXAxisStart.y
+                          , worldXAxisStart.x + worldXAxisLength.x
+                          , worldXAxisStart.y + worldXAxisLength.y );
+    iBLContext->setStrokeStyle( yAxisColor );
+    iBLContext->strokeLine( worldYAxisStart.x
+                          , worldYAxisStart.y
+                          , worldYAxisStart.x + worldYAxisLength.x
+                          , worldYAxisStart.y + worldYAxisLength.y );
 }
 
 uint32
@@ -323,7 +327,9 @@ FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 {
-    FOdysseyPainterEditorVectorPickToolHUD::Reset( iScene ); // Updates the selection box
+    UpdateSelectionBox( iScene, mTransformTool->World, mTransformTool->GetEditor()->GetVectorHUDFlags() );
+
+    //FOdysseyPainterEditorVectorSelectionToolHUD::Reset( iScene ); // Updates the selection box
 /*
     SetGizmo( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
             , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
@@ -331,15 +337,31 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::Draw( FOdysseyVectorScene* iScene, uint64 iFlags )
+FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
+                                                 , FOdysseyVectorScene* iScene )
 {
-    BLContext* blctx = iScene->GetEngine()->GetBLContext();
+    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
+    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
+    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
+    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
+    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
+    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    uint32 selectedObjectCount = iScene->GetSelectedObjectList().size();
+    uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
 
-    // draws nothing in object mode, vertices in vertex mode
-    FOdysseyPainterEditorVectorPickToolHUD::Draw( iScene, iFlags );
+    // Draw object details only in vertex mode
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+    {
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
+    }
 
-    blctx->save();
-    blctx->resetMatrix();
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
     if( mSelectionBox.rect.Area() )
     {
@@ -347,12 +369,14 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( FOdysseyVectorScene* iScene, 
 
         if( mShowSelectionBox )
         {
+            DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+
             //DrawSelectionBox( iScene, iFlags ); // commented out: now called from super::draw()
-            DrawScalers( iScene, iFlags );
+            DrawScalers( iBLContext, iScene, hudFlags );
         }
 
-        DrawGizmo( iScene, iFlags );
+        DrawGizmo( iBLContext, iScene, hudFlags );
     }
 
-    blctx->restore();
+    iBLContext->restore();
 }

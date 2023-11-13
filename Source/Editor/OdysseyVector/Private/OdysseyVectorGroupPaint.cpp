@@ -279,8 +279,20 @@ DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
     return t;
 }
 
+void
+FOdysseyVectorGroupPaint::SetRealtime( bool iRealtime )
+{
+    mGroupPaintParam.Realtime = iRealtime;
+}
+
+bool
+FOdysseyVectorGroupPaint::IsRealtime()
+{
+    return mGroupPaintParam.Realtime;
+}
+
 // CubicSegment-CubicSegment intersection test. The test is performed using straight sub-segments
-// that are precomputed by the PaintGroup object when updated and stored in the path's PolygonCache,
+// that are precomputed by the PaintGroup object when updated and stored in the path's FractionCache,
 // as it would be too complicated to do maths using the parametric bezier and I'm not that smart.
 // Actual intersections vertices are created in this method. We create 2 vertices per intersection.
 // This is required because a segment can intersect itself, in that case we need to be able to create
@@ -295,27 +307,27 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
 {
     FOdysseyVectorVertex* segment0Vertex0 = iSegment0->GetVertex(0);
     FOdysseyVectorVertex* segment0Vertex1 = iSegment0->GetVertex(1);
-    std::vector<FPolygon>& segment0PolygonCache = iSegment0->GetPolygonCache();
-    ::ULIS::FVec2D segment0Point0 = iSegment0->GetPolygonCacheStartPointInParent();
-    ::ULIS::FVec2D segment0Point1 = iSegment0->GetPolygonCacheEndPointInParent();
+    std::vector<FOdysseyVectorFraction>& segment0FractionCache = iSegment0->GetFractionCache();
+    ::ULIS::FVec2D segment0Point0 = iSegment0->GetFractionCacheStartPointInParent();
+    ::ULIS::FVec2D segment0Point1 = iSegment0->GetFractionCacheEndPointInParent();
 
     FOdysseyVectorVertex* segment1Vertex0 = iSegment1->GetVertex(0);
     FOdysseyVectorVertex* segment1Vertex1 = iSegment1->GetVertex(1);
-    std::vector<FPolygon>& segment1PolygonCache = iSegment1->GetPolygonCache();
-    ::ULIS::FVec2D segment1Point0 = iSegment1->GetPolygonCacheStartPointInParent();
-    ::ULIS::FVec2D segment1Point1 = iSegment1->GetPolygonCacheEndPointInParent();
+    std::vector<FOdysseyVectorFraction>& segment1FractionCache = iSegment1->GetFractionCache();
+    ::ULIS::FVec2D segment1Point0 = iSegment1->GetFractionCacheStartPointInParent();
+    ::ULIS::FVec2D segment1Point1 = iSegment1->GetFractionCacheEndPointInParent();
 
     uint32 intersectionCount = 0;
 
-    for ( int i = 0; i < segment0PolygonCache.size(); i++ )
+    for ( int i = 0; i < segment0FractionCache.size(); i++ )
     {
-        FPolygon* segment0Poly = &segment0PolygonCache[i];
+        FOdysseyVectorFraction* segment0Poly = &segment0FractionCache[i];
         int p = i - 1;
         int n = i + 1;
 
-        for( int j = 0; j < segment1PolygonCache.size(); j++ )
+        for( int j = 0; j < segment1FractionCache.size(); j++ )
         {
-            FPolygon* segment1Poly = &segment1PolygonCache[j];
+            FOdysseyVectorFraction* segment1Poly = &segment1FractionCache[j];
             double segment0PolySubT, segment1PolySubT;
 
             // to speed things up a bit (actually I've found out that it speeds things up x2 or x3)
@@ -388,7 +400,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                                 }
                             }
 
-                            if( ( j == ( segment1PolygonCache.size() - 1 ) ) && ( segment1Vertex1->GetSegmentCount() == 1 ) )
+                            if( ( j == ( segment1FractionCache.size() - 1 ) ) && ( segment1Vertex1->GetSegmentCount() == 1 ) )
                             {
                                 double distance;
                                 double t = DistanceToSegmentConstrained( segment1Point1
@@ -420,7 +432,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                                 }
                             }
 
-                            if( ( i == ( segment0PolygonCache.size() - 1 ) ) && ( segment0Vertex1->GetSegmentCount() == 1 ) )
+                            if( ( i == ( segment0FractionCache.size() - 1 ) ) && ( segment0Vertex1->GetSegmentCount() == 1 ) )
                             {
                                 double distance;
                                 double t = DistanceToSegmentConstrained( segment0Point1
@@ -565,30 +577,20 @@ FOdysseyVectorGroupPaint::PropagateBuckets()
 void
 FOdysseyVectorGroupPaint::Colorize()
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     std::list<FOdysseyVectorCycle*>::iterator it;
 
-    blctx->save();
-    blctx->setMatrix( mWorldMatrix );
-
     // reset color for all cycles first
-    for( it = mCycleList.begin(); it != mCycleList.end(); ++it )
+    for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        FOdysseyVectorCycle *cycle = (*it);
-
         cycle->SetBucket( nullptr );
     }
 
-    for( std::list<FOdysseyVectorBucket*>::iterator lit = mBucketList.begin(); lit != mBucketList.end(); ++lit )
+    for( FOdysseyVectorBucket *bucket : mBucketList )
     {
-        FOdysseyVectorBucket *bucket = static_cast<FOdysseyVectorBucket*>(*lit);
-
         ApplyBucket( bucket );
     }
 
     PropagateBuckets();
-
-    blctx->restore();
 }
 
 void
@@ -596,10 +598,8 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 {
     std::list<FOdysseyVectorCycle*>::iterator it;
 
-    for( it = mCycleList.begin(); it != mCycleList.end(); ++it )
+    for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        FOdysseyVectorCycle *cycle = (*it);
-
         if( cycle->HitTest( iBucket->GetCoords().x, iBucket->GetCoords().y ) )
         {
             cycle->SetBucket( iBucket );
@@ -613,51 +613,6 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 }
 
 void
-FOdysseyVectorGroupPaint::DrawChildren( uint64 iFlags )
-{
-    std::list<FOdysseyVectorObject*>::iterator it; 
-
-    for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
-    {
-        FOdysseyVectorObject *child = (*it);
-
-        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
-        {
-            FOdysseyVectorPath *childPath = static_cast<FOdysseyVectorPath*>(child);
-
-            if( mGroupPaintParam.Wireframe == false )
-            {
-                childPath->Draw( iFlags );
-            }
-            else
-            {
-                childPath->DrawStructure( mGroupPaintParam.WireframeColor, 1.0f, true );
-            }
-        }
-        else
-        {
-            child->Draw( iFlags );
-        }
-    }
-}
-
-void
-FOdysseyVectorGroupPaint::Draw( uint64 iFlags )
-{
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
-
-    blctx->save();
-    blctx->transform( mLocalMatrix );
-
-    blctx->setCompOp( BL_COMP_OP_SRC_OVER );
-
-    DrawShape( iFlags );
-    DrawChildren( iFlags );
-
-    blctx->restore();
-}
-
-void
 FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
 {
     FOdysseyVectorGroup::TransferChild( iFosterChild, iInsertAfter );
@@ -666,7 +621,6 @@ FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild, FOd
 void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
-    std::list<FOdysseyVectorPath*>::iterator it;
    BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
 
     if( mGroupPaintParam.Painted )
@@ -691,13 +645,13 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
                             if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
                             {
                                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
-                                std::vector<FPolygon>& polygonCache = cubicSegment->GetPolygonCache();
+                                std::vector<FOdysseyVectorFraction>& polygonCache = cubicSegment->GetFractionCache();
 
                                 // convert polygon cache coordinates to paintgroup's coordinates
                                 // for faster intersection test
                                 for( int i = 0; i < polygonCache.size(); i++ )
                                 {
-                                    FPolygon* polygon = &polygonCache[i];
+                                    FOdysseyVectorFraction* polygon = &polygonCache[i];
 
                                     BLPoint lineVertex0 = conversionMatrix.mapPoint( polygon->lineVertex[0].x
                                                                                    , polygon->lineVertex[0].y );
@@ -807,28 +761,25 @@ FOdysseyVectorGroupPaint::RemoveAllBuckets()
 }
 
 void
-FOdysseyVectorGroupPaint::DrawShape( uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     std::list<FOdysseyVectorCycle*>::iterator it;
 
-    for( it = mCycleList.begin(); it != mCycleList.end(); ++it )
+    for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        FOdysseyVectorCycle *cycle = (*it);
-
-        cycle->Draw( iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
+        cycle->Draw( iBLContext, iCombinedOpacity, iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
     }
 
-    if( mGroupPaintParam.Wireframe )
+    if( iFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME/* mGroupPaintParam.Wireframe*/ )
     {
-        blctx->save();
-        blctx->resetMatrix();
-        blctx->setStrokeWidth( 1.0f );
-        blctx->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
+        iBLContext->save();
+        iBLContext->resetMatrix();
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
 
         for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
         {
-            mGapSegmentBuffer[i].DrawStructure( this, true );
+            mGapSegmentBuffer[i].DrawStructure( iBLContext, this, true );
         }
 
 /* Works too
@@ -850,7 +801,7 @@ FOdysseyVectorGroupPaint::DrawShape( uint64 iFlags )
         }
 */
 
-        blctx->restore();
+        iBLContext->restore();
     }
 }
 
@@ -1376,6 +1327,12 @@ FOdysseyVectorGroupPaint::GetMonochromeColor()
 }
 
 void
+FOdysseyVectorGroupPaint::SetMonochromeColor( const FColor& iMonochromeColor )
+{
+    mGroupPaintParam.MonochromeColor = iMonochromeColor;
+}
+
+void
 FOdysseyVectorGroupPaint::SetMonochromeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     mGroupPaintParam.MonochromeColor.R = iR;
@@ -1409,6 +1366,12 @@ FColor&
 FOdysseyVectorGroupPaint::GetWireframeColor()
 {
     return mGroupPaintParam.WireframeColor;
+}
+
+void
+FOdysseyVectorGroupPaint::SetWireframeColor( const FColor& iWireframeColor )
+{
+    mGroupPaintParam.WireframeColor = iWireframeColor;
 }
 
 void
@@ -1801,33 +1764,6 @@ FOdysseyVectorGroupPaint::CopyShape()
     return groupPaintCopy;
 }
 
-void
-FOdysseyVectorGroupPaint::GetSelectedPoints( std::vector<FOdysseyVectorPoint*>& oPointArray
-                                           , ePointSelectionFlags iPointSelectionFlags )
-{
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
-    {
-        FOdysseyVectorObject *child = (*it);
-
-        if( child->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
-
-            path->GetSelectedPoints( oPointArray, iPointSelectionFlags );
-        }
-    }
-
-    if( iPointSelectionFlags & ePointSelectionFlags::Bucket )
-    {
-        for( std::list<FOdysseyVectorBucket*>::iterator it = mSelectedBucketList.begin(); it != mSelectedBucketList.end(); ++it )
-        {
-            FOdysseyVectorBucket *bucket = (*it);
-
-            oPointArray.push_back( bucket );
-        }
-    }
-}
-
 bool
 FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld )
 {
@@ -1913,7 +1849,6 @@ FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPicke
 FOdysseyVectorCycle*
 FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
 {
-    BLContext* blctx = GetScene()->GetEngine()->GetBLContext();
     BLPoint localCoord = mInverseWorldMatrix.mapPoint( iWorldX, iWorldY );
     std::list<FOdysseyVectorCycle*>::iterator it;
 
@@ -1935,8 +1870,8 @@ FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
 }
 
 void
-FOdysseyVectorGroupPaint::GetSectionsForSegment( FOdysseyVectorSegment* iSegment
-                                               , std::vector<FOdysseyVectorSection*>& oSectionArray )
+FOdysseyVectorGroupPaint::GetSectionsFromSegment( FOdysseyVectorSegment* iSegment
+                                                , std::vector<FOdysseyVectorSection*>& oSectionArray )
 {
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
@@ -2000,7 +1935,7 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
     FOdysseyVectorPath* path = iSegment->GetPath();
     std::vector<FVertexPair> vertexPairArray;
 
-    GetSectionsForSegment( iSegment, sectionArray );
+    GetSectionsFromSegment( iSegment, sectionArray );
 
     // first step : find to which extent the segment is erased. We check on both sides of the segment
     // until we reach a section that is marked as erased or til the end. this is the role of
@@ -2139,10 +2074,10 @@ FOdysseyVectorGroupPaint::ExtendErasedSection( FOdysseyVectorVertex* iVertex
 
 void
 FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iErasedSectionArray
-                                       , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                                        , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                                       , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray )
+                                       , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                       , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
     std::vector<FOdysseyVectorSection*> extendedErasedSectionArray;
                                         // Arbitrary value
@@ -2242,6 +2177,63 @@ FOdysseyVectorGroupPaint::GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oP
     }
 }
 
+void
+FOdysseyVectorGroupPaint::GetSectionsFromPath( FOdysseyVectorPath* iPath
+                                             , std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
+{
+    for( int i = 0; i < mSectionBuffer.size(); i++ )
+    {
+        if( mSectionBuffer[i].GetSegment()->GetPath() == iPath )
+        {
+            oPickedSectionArray.push_back( &mSectionBuffer[i] );
+        }
+    }
+}
+
+bool
+FOdysseyVectorGroupPaint::PickSection( FOdysseyVectorSection* iSection
+                                     , const ::ULIS::FRectD& iMaskRect
+                                     , const uint8* iMaskPixelData )
+{
+    ::ULIS::FVec2D* bezier = iSection->GetBezier();
+    BLPoint pt[4] = { mWorldMatrix.mapPoint( bezier[0].x, bezier[0].y )
+                    , mWorldMatrix.mapPoint( bezier[1].x, bezier[1].y )
+                    , mWorldMatrix.mapPoint( bezier[2].x, bezier[2].y )
+                    , mWorldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
+    ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
+                                    , ::ULIS::FVec2D( pt[1].x, pt[1].y )
+                                    , ::ULIS::FVec2D( pt[2].x, pt[2].y )
+                                    , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
+
+    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iMaskPixelData );
+}
+
+bool
+FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& iSectionArray
+                                     ,  std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
+{
+    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    BLImageData maskData;
+    ::ULIS::FRectD maskRect;
+    bool picked = false;
+
+    maskImage->getData( &maskData );
+
+    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
+
+    for( int i = 0; i < iSectionArray.size(); i++ )
+    {
+        if( PickSection( iSectionArray[i], maskRect, (uint8*) maskData.pixelData ) )
+        {
+            oPickedSectionArray.push_back( iSectionArray[i] );
+
+            picked = true;
+        }
+    }
+
+    return picked;
+}
+
 bool
 FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
 {
@@ -2256,17 +2248,7 @@ FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPi
 
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
-        ::ULIS::FVec2D* bezier = mSectionBuffer[i].GetBezier();
-        BLPoint pt[4] = { mWorldMatrix.mapPoint( bezier[0].x, bezier[0].y )
-                        , mWorldMatrix.mapPoint( bezier[1].x, bezier[1].y )
-                        , mWorldMatrix.mapPoint( bezier[2].x, bezier[2].y )
-                        , mWorldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
-        ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
-                                        , ::ULIS::FVec2D( pt[1].x, pt[1].y )
-                                        , ::ULIS::FVec2D( pt[2].x, pt[2].y )
-                                        , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
-
-        if( FOdysseyVector::PickBezier( worldBezier, maskRect, (uint8*)maskData.pixelData ) )
+        if( PickSection( &mSectionBuffer[i], maskRect, (uint8*) maskData.pixelData ) )
         {
             oPickedSectionArray.push_back( &mSectionBuffer[i] );
 
