@@ -131,11 +131,8 @@ MapPath( FOdysseyVectorPath* iPath
        , const ::ULIS::FRectD& iRect
        , std::vector<FPointQuadTreeEntry>& oPointQuadTreeEntryArray )
 {
-    std::list<FOdysseyVectorVertex*>& vertexList = iPath->GetVertexList();
-
-    for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+    for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
     {
-        FOdysseyVectorVertex* vertex = (*it);
         ::ULIS::FVec2D& coords = vertex->GetCoords();
         BLPoint worldCoords = iPath->GetWorldMatrix().mapPoint( coords.x, coords.y );
         ::ULIS::FVec2D screenCoords = ::ULIS::FVec2D( worldCoords.x, worldCoords.y );

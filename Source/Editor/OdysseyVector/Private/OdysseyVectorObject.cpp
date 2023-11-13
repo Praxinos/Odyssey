@@ -7,14 +7,10 @@
 
 FOdysseyVectorObject::~FOdysseyVectorObject()
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    for( FOdysseyVectorObject *obj : mChildrenList )
     {
-        FOdysseyVectorObject *obj = (*it);
-
         delete obj;
     }
-
-    mChildrenList.clear();
 }
 
 FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
@@ -93,14 +89,10 @@ FOdysseyVectorObject::IsExpanded()
 static uint32
 CheckCommonClass( std::list<FOdysseyVectorObject*>& iObjectList, uint32 iCommonClass )
 {
-    std::list<FOdysseyVectorObject*>::iterator it;
-
     if( iObjectList.size() )
     {
-        for( it = iObjectList.begin(); it != iObjectList.end(); ++it )
+        for( FOdysseyVectorObject* object : iObjectList )
         {
-            FOdysseyVectorObject* object = (*it);
-
             if( object->HasBaseClass( iCommonClass ) )
             {
                 uint32 objectClass = object->GetClass();
@@ -326,9 +318,8 @@ FOdysseyVectorObject::Copy()
         CopySettings( *objectCopy ); // we need the matrices to properly import the child
 
         // recurse
-        for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        for( FOdysseyVectorObject *child : mChildrenList )
         {
-            FOdysseyVectorObject *child = (*it);
             FOdysseyVectorObject *childCopy = child->Copy() ;
 
             objectCopy->AppendChild( childCopy );
@@ -409,10 +400,8 @@ FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
         }
 
         // recurse
-        for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        for( FOdysseyVectorObject *child : mChildrenList )
         {
-            FOdysseyVectorObject *child = (*it);
-
             child->UpdateMatrix( false );
         }
 
@@ -436,9 +425,8 @@ FOdysseyVectorObject::GetBoundingBoxFromList( std::list<FOdysseyVectorObject*>& 
     ::ULIS::FRectD bbox;
     int init = 0;
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
+    for( FOdysseyVectorObject *obj : iObjectList )
     {
-        FOdysseyVectorObject *obj = (*it);
         ::ULIS::FRectD objBBox = obj->GetBBox( true );
 
         bbox = ( init == 0 ) ? objBBox : bbox | objBBox;
@@ -880,10 +868,8 @@ FOdysseyVectorObject::TreeToList( FOdysseyVectorObject* iObject, std::list<FOdys
 {
     iOutList.push_back( iObject );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->mChildrenList.begin(); it != iObject->mChildrenList.end(); ++it )
+    for( FOdysseyVectorObject* childObject : iObject->mChildrenList )
     {
-        FOdysseyVectorObject* childObject = (*it);
-
         TreeToList( childObject, iOutList );
     }
 
@@ -898,10 +884,8 @@ FOdysseyVectorObject::TreeToArray( FOdysseyVectorObject* iObject, std::vector<FO
 
     iOutArray.push_back( iObject );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->mChildrenList.begin(); it != iObject->mChildrenList.end(); ++it )
+    for( FOdysseyVectorObject* childObject : iObject->mChildrenList )
     {
-        FOdysseyVectorObject* childObject = (*it);
-
         TreeToArray( childObject, iOutArray );
     }
 

@@ -275,10 +275,8 @@ FOdysseyVectorSegment::GetIntersectionVertexCount()
 void
 FOdysseyVectorSegment::GetIntersectionVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray )
 {
-    for( std::list<FOdysseyVectorVertexIntersection*>::iterator it = mIntersectionVertexList.begin(); it != mIntersectionVertexList.end(); ++it )
+    for( FOdysseyVectorVertexIntersection* intersectionVertex : mIntersectionVertexList )
     {
-        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(*it);
-
         oVertexArray.push_back( intersectionVertex );
     }
 }

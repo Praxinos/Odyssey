@@ -181,7 +181,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @return the number of intersections
          */
         uint32 IntersectSegmentWithList( FOdysseyVectorSegment* iSegment
-                                       , std::list<FOdysseyVectorSegment*>& iSegmenList
+                                       , const std::list<FOdysseyVectorSegment*>& iSegmenList
                                        , std::vector<FOdysseyVectorIntersection*>& oIntersectionList );
 
         /**

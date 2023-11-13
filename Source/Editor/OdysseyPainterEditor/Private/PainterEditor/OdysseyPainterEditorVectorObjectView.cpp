@@ -15,12 +15,8 @@ UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
 void
 UOdysseyPainterEditorVectorObjectView::ImportParam()
 {
-    std::list<FOdysseyVectorObject*>::iterator it;
-
-    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* focusedObject : mFocusedObjectList )
     {
-        FOdysseyVectorObject* focusedObject = (*it);
-
         // Category "Identity"
         Name = focusedObject->GetName();
 
@@ -53,13 +49,10 @@ UOdysseyPainterEditorVectorObjectView::Update( FOdysseyVectorScene* iScene
 uint64
 UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
 {
-    std::list<FOdysseyVectorObject*>::iterator it;
     uint64 signalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
-    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
-        FOdysseyVectorObject* selectedObject = (*it);
-
         // We have to change properties one by one especially in case of multiple selection.
         // We just cannot copy the whole block of properties.
 

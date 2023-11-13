@@ -20,10 +20,8 @@ FOdysseyVectorUndoSelectObject::Apply( UObject* iIgnored )
 
     mScene->ClearSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        FOdysseyVectorObject* object = static_cast<FOdysseyVectorObject*>(*it);
-
         mScene->Select( object );
     }
 
@@ -49,10 +47,8 @@ FOdysseyVectorUndoSelectObject::Revert( UObject* iIgnored )
 
     mScene->ClearSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        FOdysseyVectorObject* object = static_cast<FOdysseyVectorObject*>(*it);
-
         mScene->Select( object );
     }
 

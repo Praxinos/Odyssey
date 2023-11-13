@@ -27,10 +27,8 @@ FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* i
                                                         , std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : iObjectList )
     {
-        FOdysseyVectorObject* object = static_cast<FOdysseyVectorObject*>(*it);
-
         mFormerParentArray.push_back( object->GetParent() );
         mObjectArray.push_back( object );
     }

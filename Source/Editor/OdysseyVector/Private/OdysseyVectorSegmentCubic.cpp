@@ -432,7 +432,7 @@ FOdysseyVectorSegmentCubic::GetVectorAtStart( bool iNormalize )
     return vec;
 }
 
-FOdysseyVectorSegmentCubic*
+FOdysseyVectorSegment*
 FOdysseyVectorSegmentCubic::Sample( double iFromT
                                   , double iToT
                                   , std::vector<FOdysseyVectorVertex*>& oNewVertexArray )

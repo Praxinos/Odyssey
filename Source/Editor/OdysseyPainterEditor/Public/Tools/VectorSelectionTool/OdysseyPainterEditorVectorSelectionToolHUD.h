@@ -2,7 +2,7 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD

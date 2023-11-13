@@ -237,6 +237,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 
             vectorEngine->Signal( signalFlags );
         }
+
+       return true;
     }
 
     return false;
@@ -275,6 +277,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 
             vectorEngine->Signal( signalFlags );
         }
+
+       return true;
     }
 
     return false;
@@ -306,10 +310,12 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 
             vectorEngine->Signal( signalFlags );
         }
+
+       return true;
     }
   }  // workaround
 
-    return true;
+    return false;
 }
 
 void
@@ -391,6 +397,8 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
                 }
             }
         }
+
+       return true;
     }
 
     return false;

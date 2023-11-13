@@ -826,10 +826,8 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorScene* iScene )
             }
             GEditor->EndTransaction();
 
-            for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
+            for( FOdysseyVectorObject* child : childrenList )
             {
-                FOdysseyVectorObject* child = (*it);
-
                 groupParent->TransferChild( child, groupParent->GetLastChild() );
             }
 
@@ -1395,11 +1393,10 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyVectorScene* iScene )
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*> pastedObjectList;
 
+    // TODO: Check why pastedObjectList has to be copied, unclear
     // First copy all objects. This is needed to record their state-before-addition for the UNDO operation.
-    for( std::list<FOdysseyVectorObject*>::iterator it = GetCopiedObjectList().begin(); it != GetCopiedObjectList().end(); ++it )
+    for( FOdysseyVectorObject* copiedObject : GetCopiedObjectList() )
     {
-        FOdysseyVectorObject* copiedObject = (*it);
-
         pastedObjectList.push_back( copiedObject->Copy() );
     }
 
@@ -1416,9 +1413,8 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyVectorScene* iScene )
     }
     GEditor->EndTransaction();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = pastedObjectList.begin(); it != pastedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* pastedObject : pastedObjectList )
     {
-        FOdysseyVectorObject* pastedObject = (*it);
         //BLPoint shifting;
 
         iScene->AppendChild( pastedObject );
@@ -1459,7 +1455,6 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyVectorScene* iScene
     std::vector<FOdysseyVectorSegment*> mergedSegmentArray;
     std::vector<FOdysseyVectorVertex*> mergedVertexArray;
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-    std::list<FOdysseyVectorObject*>::iterator oit;
     FOdysseyVectorPath* mergedPath = nullptr;
 
     if( ( iVertexA->GetSegmentCount() == 1 ) && ( iVertexB->GetSegmentCount() == 1 ) )

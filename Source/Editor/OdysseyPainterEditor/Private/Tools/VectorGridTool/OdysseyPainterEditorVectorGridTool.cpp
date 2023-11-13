@@ -4,6 +4,8 @@
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridToolHUD.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyPainterEditor.h"
+
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorGridTool"
 
 #ifndef M_PI

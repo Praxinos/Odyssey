@@ -8,15 +8,12 @@ FOdysseyVectorUndoPropertyChanged::~FOdysseyVectorUndoPropertyChanged()
 FOdysseyVectorUndoPropertyChanged::FOdysseyVectorUndoPropertyChanged( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
 {
-    std::list<FOdysseyVectorObject*>::iterator it;
-    int i;
+    int i = 0;
 
     mPropertiesRecordArray.resize( iObjectList.size() );
 
-    for( i = 0, it = iObjectList.begin(); it != iObjectList.end(); i++, ++it )
+    for( FOdysseyVectorObject* object : iObjectList )
     {
-        FOdysseyVectorObject* object = (*it);
-
         mPropertiesRecordArray[i].mObject = object;
         mPropertiesRecordArray[i].mObjectParam = object->mObjectParam;
 
@@ -33,6 +30,8 @@ FOdysseyVectorUndoPropertyChanged::FOdysseyVectorUndoPropertyChanged( FOdysseyVe
 
             mPropertiesRecordArray[i].mGroupPaintParam = paintGroup->mGroupPaintParam;
         }
+
+        i++;
     }
 }
 

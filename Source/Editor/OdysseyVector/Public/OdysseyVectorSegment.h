@@ -181,6 +181,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         ::ULIS::FVec2D GetFractionCacheEndPointInParent();
         virtual double GetLength();
 
+        virtual FOdysseyVectorSegment* Sample( double iFromT
+                                             , double iToT
+                                             , std::vector<FOdysseyVectorVertex*>& oNewVertexArray ){ return nullptr; };
+
     protected:
         void DrawFractionCache( BLContext* iBLContext );
 

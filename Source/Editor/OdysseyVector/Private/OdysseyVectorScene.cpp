@@ -39,10 +39,8 @@ FOdysseyVectorScene::GetEngine()
 void
 FOdysseyVectorScene::ClearSelection()
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject *obj : mSelectedObjectList )
     {
-        FOdysseyVectorObject *obj = (*it);
-
         obj->SetIsSelected ( false );
     }
 

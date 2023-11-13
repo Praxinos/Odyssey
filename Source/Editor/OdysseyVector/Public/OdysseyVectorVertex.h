@@ -195,13 +195,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
 
         /**
-         * @brief Tell whether or not the segment passed as parameter is connected to this vertex.
-         * @param iSegment the tested segment.
-         * @return true or false
-         */
-        bool HasSegment( FOdysseyVectorSegment* iSegment );
-
-        /**
          * @brief Mark all connected segments for update.
          */
         void InvalidateSegments();

@@ -207,9 +207,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iToT
          * @return a pointer to the newly created segment.
          */
-        FOdysseyVectorSegmentCubic* Sample( double iFromT
-                                          , double iToT
-                                          , std::vector<FOdysseyVectorVertex*>& oNewVertexArray );
+        virtual FOdysseyVectorSegment* Sample( double iFromT
+                                             , double iToT
+                                             , std::vector<FOdysseyVectorVertex*>& oNewVertexArray ) override;
+
 
         virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
         ::ULIS::FVec2D* GetBezier();

@@ -56,9 +56,8 @@ FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
     if( ( mInvalidationFlags & INVALIDATE_CHILD )
      || ( mInvalidationFlags & INVALIDATE_SHAPE ) )
     {
-        for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        for( FOdysseyVectorObject *child : mChildrenList )
         {
-            FOdysseyVectorObject *child = (*it);
             ::ULIS::FRectD childBBox = child->GetBBox( false );
 
             if( childBBox.Area() )

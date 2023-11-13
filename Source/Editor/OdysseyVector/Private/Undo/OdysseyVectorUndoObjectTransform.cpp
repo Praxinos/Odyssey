@@ -31,10 +31,8 @@ FObjectTransform::MakeArrayFromObjectList( std::list<FOdysseyVectorObject*>& iOb
 {
     oObjectTransformArray.reserve( iObjectList.size() );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : iObjectList )
     {
-        FOdysseyVectorObject* object = (*it);
-
         oObjectTransformArray.push_back( FObjectTransform( object ) );
     }
 }

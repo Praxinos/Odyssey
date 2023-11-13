@@ -78,10 +78,8 @@ FOdysseyVectorPath::GetIntersectionCount()
 {
     uint32 count = 0;
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-
         count += segment->GetIntersectionVertexList().size();
     }
 
@@ -91,10 +89,8 @@ FOdysseyVectorPath::GetIntersectionCount()
 bool
 FOdysseyVectorPath::HasIntersections()
 {
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
-
         if( segment->GetIntersectionVertexList().size() )
         {
             return true;
@@ -248,9 +244,8 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
     UpdateBBox();
 
     // cache BL Path (for drawing structure for example)
-    for ( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for ( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        FOdysseyVectorSegment* segment = static_cast<FOdysseyVectorSegment*>(*it);
         ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords();
         ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords();
 
@@ -503,10 +498,8 @@ FOdysseyVectorPath::GetFirstVertex()
 void
 FOdysseyVectorPath::InvalidateAllSegments()
 {
-    for(std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it)
+    for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        FOdysseyVectorSegment *segment = (*it);
-
         segment->Invalidate();
     }
 }
@@ -523,50 +516,53 @@ FOdysseyVectorPath::GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool 
     {
         uint32 count = 0;
 
-        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+        for( FOdysseyVectorSegment *segment : segmentList )
         {
-            FOdysseyVectorSegmentCubic *segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorVertex* p0 = segment->GetVertex(0);
-            FOdysseyVectorVertex* p1 = segment->GetVertex(1);
-            ::ULIS::FVec2D& point0 = segment->GetVertex(0)->GetCoords();
-            ::ULIS::FVec2D& point1 = segment->GetVertex(1)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint0 = segment->GetHandle(0)->GetCoords();
-            ::ULIS::FVec2D& ctrlPoint1 = segment->GetHandle(1)->GetCoords();
-
-            if( iVertex == p0 )
+            if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
             {
-                // this is less computation-heavy
-                ::ULIS::FVec2D vec = { ctrlPoint0 - point0 };
-                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
-                                                                     , ctrlPoint0.GetCoords()
-                                                                     , ctrlPoint1.GetCoords()
-                                                                     , point1.GetCoords()
-                                                                     , 0.0f ) };*/
+                FOdysseyVectorSegmentCubic *cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+                FOdysseyVectorVertex* vertex0 = cubicSegment->GetVertex(0);
+                FOdysseyVectorVertex* vertex1 = cubicSegment->GetVertex(1);
+                ::ULIS::FVec2D& point0 = vertex0->GetCoords();
+                ::ULIS::FVec2D& point1 = vertex1->GetCoords();
+                ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+                ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
 
-                if ( vec.DistanceSquared() )
+                if( iVertex == vertex0 )
                 {
-                    vec.Normalize();
+                    // this is less computation-heavy
+                    ::ULIS::FVec2D vec = { ctrlPoint0 - point0 };
+                    /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
+                                                                         , ctrlPoint0.GetCoords()
+                                                                         , ctrlPoint1.GetCoords()
+                                                                         , point1.GetCoords()
+                                                                         , 0.0f ) };*/
 
-                    parallel.x += vec.x;
-                    parallel.y += vec.y;
+                    if ( vec.DistanceSquared() )
+                    {
+                        vec.Normalize();
+
+                        parallel.x += vec.x;
+                        parallel.y += vec.y;
+                    }
                 }
-            }
 
-            if( iVertex == p1 )
-            {
-                ::ULIS::FVec2D vec = { point1 - ctrlPoint1 };
-                /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
-                                                                     , ctrlPoint0.GetCoords()
-                                                                     , ctrlPoint1.GetCoords()
-                                                                     , point1.GetCoords()
-                                                                     , 1.0f ) };*/
-
-                if ( vec.DistanceSquared() )
+                if( iVertex == vertex1 )
                 {
-                    vec.Normalize();
+                    ::ULIS::FVec2D vec = { point1 - ctrlPoint1 };
+                    /*::ULIS::FVec2D vec =  { CubicBezierTangentAtParameter<::ULIS::FVec2D>( point0.GetCoords()
+                                                                         , ctrlPoint0.GetCoords()
+                                                                         , ctrlPoint1.GetCoords()
+                                                                         , point1.GetCoords()
+                                                                         , 1.0f ) };*/
 
-                    parallel.x += vec.x;
-                    parallel.y += vec.y;
+                    if ( vec.DistanceSquared() )
+                    {
+                        vec.Normalize();
+
+                        parallel.x += vec.x;
+                        parallel.y += vec.y;
+                    }
                 }
             }
         }
@@ -661,14 +657,12 @@ void
 FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray )
 {
     BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
-    std::list<FOdysseyVectorVertex*>::iterator it;
     BLImageData imageData;
 
     maskImage->getData( &imageData );
 
-    for( it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    for( FOdysseyVectorVertex* vertex : mVertexList )
     {
-        FOdysseyVectorVertex* vertex = (*it);
         ::ULIS::FVec2D& localCoords = vertex->GetCoords();
         // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
         BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
@@ -710,11 +704,10 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
 
         blimg->getData( &imageData );
 
-        for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+        for( FOdysseyVectorSegment* segment : mSegmentList )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            std::vector<FOdysseyVectorFraction>& fractionCache = cubicSegment->GetFractionCache();
-            ::ULIS::FVec2D& firstCoords = cubicSegment->GetVertex(0)->GetCoords();
+            std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
+            ::ULIS::FVec2D& firstCoords = segment->GetVertex(0)->GetCoords();
             BLPoint firstAt = mWorldMatrix.mapPoint( firstCoords.x, firstCoords.y );
             std::vector<double> subVertexT;
             int32 previousPixelValue;
@@ -728,13 +721,13 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
 
                 TraceLine( p0.x, p0.y, fractionCache[i].fromT
                          , p1.x, p1.y, fractionCache[i].toT
-                         , [cubicSegment
-                         , &imageData
-                         , &previousPixelValue
-                         , &subVertexT
-                         , &subSegmentArray
-                         , &newVertexArray
-                         , &hasHit]( int32 iX, int32 iY, double iT) -> bool
+                         , [ segment
+                           , &imageData
+                           , &previousPixelValue
+                           , &subVertexT
+                           , &subSegmentArray
+                           , &newVertexArray
+                           , &hasHit]( int32 iX, int32 iY, double iT) -> bool
                            {
                                /*if( ( iX >= 0 && iX < imageData.size.w )
                                 && ( iY >= 0 && iY < imageData.size.h ) )
@@ -782,7 +775,7 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
 
                                         if( fabs( subVertexT[0] - subVertexT[1]) < 1.0f )
                                         {
-                                            subSegmentArray.push_back( cubicSegment->Sample( t0, t1, newVertexArray ) );
+                                            subSegmentArray.push_back( segment->Sample( t0, t1, newVertexArray ) );
                                         }
 
                                        subVertexT.clear();
@@ -803,7 +796,7 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
                 }
 
                 // in case of a hit, old segment is deleted no matter what.
-                oldSegmentArray.push_back( cubicSegment );
+                oldSegmentArray.push_back( segment );
             }
         }
 
@@ -825,10 +818,8 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
         }
 
         // remove orphaned vertices
-        for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+        for( FOdysseyVectorVertex* vertex : vertexList )
         {
-            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
-
             if( vertex->GetSegmentCount() == 0 )
             {
                 oldVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(vertex) );
@@ -857,11 +848,9 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 
         if( mBBox.HitTest( ::ULIS::FVec2D( pt.x, pt.y ) ) )
         {
-            for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
-            {
-                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
- 
-                if( cubicSegment->Pick( pt.x, pt.y, 0.0f ) )
+            for( FOdysseyVectorSegment* segment : mSegmentList )
+            { 
+                if( segment->Pick( pt.x, pt.y, 0.0f ) )
                 {
                     return true;
                 }
@@ -878,10 +867,9 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
         {
             blimg->getData( &imageData );
 
-            for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+            for( FOdysseyVectorSegment* segment : mSegmentList )
             {
-                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-                std::vector<FOdysseyVectorFraction>& fractionCache = cubicSegment->GetFractionCache();
+                std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
 
                 for( uint32 i = 0; i < fractionCache.size(); i++ )
                 {
@@ -1563,11 +1551,8 @@ FOdysseyVectorPath::DrawStructure( BLContext* iBLContext
     iBLContext->setStrokeWidth( iStrokeWidth );
     iBLContext->setStrokeStyle( iStrokeColor );
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-
         segment->DrawStructure( iBLContext, this, iWorld );
     }
 
@@ -1586,9 +1571,8 @@ FOdysseyVectorPath::CopyShape()
     FOdysseyVectorPath* cubicPathCopy = new FOdysseyVectorPath( FString("Cubic Path") );
     std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> lookupTable;
 
-    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    for( FOdysseyVectorVertex* originalVertex : mVertexList )
     {
-        FOdysseyVectorVertex* originalVertex = static_cast<FOdysseyVectorVertex*>(*it);
         FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( cubicPathCopy
                                                                   , originalVertex->GetX()
                                                                   , originalVertex->GetY()
@@ -1601,22 +1585,24 @@ FOdysseyVectorPath::CopyShape()
         cubicPathCopy->AddVertex( newVertex );
     }
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( FOdysseyVectorSegment* originalSegment : mSegmentList )
     {
-        FOdysseyVectorSegmentCubic* originalSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalSegment->GetPoint(0) );
-        FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalSegment->GetPoint(1) );
-        FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
-                                                                               , lookupTable[vertex0]
-                                                                               , originalSegment->GetHandle(0)->GetX()
-                                                                               , originalSegment->GetHandle(0)->GetY()
-                                                                               , originalSegment->GetHandle(1)->GetX()
-                                                                               , originalSegment->GetHandle(1)->GetY()
-                                                                               , lookupTable[vertex1]
-                                                                               , true );
+        if( originalSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* originalCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(originalSegment);
+            FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(0) );
+            FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(1) );
+            FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
+                                                                                        , lookupTable[vertex0]
+                                                                                        , originalCubicSegment->GetHandle(0)->GetX()
+                                                                                        , originalCubicSegment->GetHandle(0)->GetY()
+                                                                                        , originalCubicSegment->GetHandle(1)->GetX()
+                                                                                        , originalCubicSegment->GetHandle(1)->GetY()
+                                                                                        , lookupTable[vertex1]
+                                                                                        , true );
 
-        cubicPathCopy->AddSegment( newSegment );
-
+            cubicPathCopy->AddSegment( newCubicSegment );
+        }
         //newSegment->BuildVariable();
     }
 
@@ -1647,9 +1633,8 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
 
         FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, mergedPathWorldMatrix, conversionMatrix );
 
-        for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+        for( FOdysseyVectorVertex* vertex : vertexList )
         {
-            FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
             BLPoint pt = conversionMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
             BLPoint rd = conversionMatrix.mapVector( 0.7071 * vertex->GetRadius(), 0.7071 * vertex->GetRadius() );
             ::ULIS::FVec2D radius = ::ULIS::FVec2D( rd.x, rd.y );
@@ -1662,28 +1647,31 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
             AddVertex( newVertex );
         }
 
-        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+        for( FOdysseyVectorSegment* segment : segmentList )
         {
-            FOdysseyVectorSegmentCubic* segment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-            FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-            FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
-            FOdysseyVectorHandleSegment* handle0 = segment->GetHandle(0);
-            FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
-            BLPoint pt[2] = { conversionMatrix.mapPoint( handle0->GetX(), handle0->GetY() )
-                            , conversionMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) };
-            FOdysseyVectorVertex* newCubicVertex0 = static_cast<FOdysseyVectorVertex*>(oAddedVertexArray[vertex0->GetID()]);
-            FOdysseyVectorVertex* newCubicVertex1 = static_cast<FOdysseyVectorVertex*>(oAddedVertexArray[vertex1->GetID()]);
-            FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( this
-                                                                                   , newCubicVertex0
-                                                                                   , pt[0].x
-                                                                                   , pt[0].y
-                                                                                   , pt[1].x
-                                                                                   , pt[1].y
-                                                                                   , newCubicVertex1
-                                                                                   , true );
-            oAddedSegmentArray.push_back( newSegment );
+            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+                FOdysseyVectorVertex* vertex0 = cubicSegment->GetVertex(0);
+                FOdysseyVectorVertex* vertex1 = cubicSegment->GetVertex(1);
+                FOdysseyVectorHandleSegment* handle0 = cubicSegment->GetHandle(0);
+                FOdysseyVectorHandleSegment* handle1 = cubicSegment->GetHandle(1);
+                BLPoint pt[2] = { conversionMatrix.mapPoint( handle0->GetX(), handle0->GetY() )
+                                , conversionMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) };
+                FOdysseyVectorVertex* newVertex0 = oAddedVertexArray[vertex0->GetID()];
+                FOdysseyVectorVertex* newVertex1 = oAddedVertexArray[vertex1->GetID()];
+                FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( this
+                                                                                            , newVertex0
+                                                                                            , pt[0].x
+                                                                                            , pt[0].y
+                                                                                            , pt[1].x
+                                                                                            , pt[1].y
+                                                                                            , newVertex1
+                                                                                            , true );
+                oAddedSegmentArray.push_back( newCubicSegment );
 
-            AddSegment( newSegment ); // this also invalidates the segment
+                AddSegment( newCubicSegment ); // this also invalidates the segment
+            }
         }
     }
 
@@ -1699,30 +1687,32 @@ FOdysseyVectorPath::GetType()
 void
 FOdysseyVectorPath::ApplyMatrix( BLMatrix2D& iMatrix )
 {
-    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    for( FOdysseyVectorVertex* vertex : mVertexList )
     {
-        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
-        ::ULIS::FVec2D& point = cubicVertex->GetCoords();
+        ::ULIS::FVec2D& point = vertex->GetCoords();
         BLPoint localPt = iMatrix.mapPoint( point.x, point.y );
-        BLPoint localVec = iMatrix.mapVector( 0.70710678118f * cubicVertex->GetRadius()
-                                            , 0.70710678118f * cubicVertex->GetRadius() );
+        BLPoint localVec = iMatrix.mapVector( 0.70710678118f * vertex->GetRadius()
+                                            , 0.70710678118f * vertex->GetRadius() );
         ::ULIS::FVec2D vec = { localVec.x, localVec.y };
 
-        cubicVertex->Set( localPt.x, localPt.y, vec.Distance() );
+        vertex->Set( localPt.x, localPt.y, vec.Distance() );
     }
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
-        ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
-        BLPoint localPt0 = iMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y );
-        BLPoint localPt1 = iMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y );
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+            BLPoint localPt0 = iMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y );
+            BLPoint localPt1 = iMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y );
 
-        cubicSegment->GetHandle(0)->Set( localPt0.x, localPt0.y );
-        cubicSegment->GetHandle(1)->Set( localPt1.x, localPt1.y );
+            cubicSegment->GetHandle(0)->Set( localPt0.x, localPt0.y );
+            cubicSegment->GetHandle(1)->Set( localPt1.x, localPt1.y );
+        }
 
-        InvalidateSegment( cubicSegment );
+        InvalidateSegment( segment );
     }
 }
 
@@ -1746,9 +1736,8 @@ FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
     BLMatrix2D& newSpaceInverseWorldMatrix = iNewSpace.GetInverseWorldMatrix();
     BLMatrix2D& newSpaceWorldMatrix = iNewSpace.GetWorldMatrix();
 
-    for( std::list<FOdysseyVectorVertex*>::iterator it = mVertexList.begin(); it != mVertexList.end(); ++it )
+    for( FOdysseyVectorVertex* cubicVertex : mVertexList )
     {
-        FOdysseyVectorVertex* cubicVertex = static_cast<FOdysseyVectorVertex*>(*it);
         ::ULIS::FVec2D& point = cubicVertex->GetCoords();
         BLPoint worldPt = mWorldMatrix.mapPoint( point.x, point.y );
         BLPoint wordlVec = mWorldMatrix.mapVector( 0.70710678118f * cubicVertex->GetRadius()
@@ -1763,24 +1752,27 @@ FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
         cubicVertex->SetRadius( vec.Distance() );
     }
 
-    for( std::list<FOdysseyVectorSegment*>::iterator it = mSegmentList.begin(); it != mSegmentList.end(); ++it )
+    for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-        ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
-        ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
-        BLPoint pt;
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+            ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+            ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+            BLPoint pt;
 
-        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y ) );
+            pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y ) );
 
-        ctrlPoint0.x = pt.x;
-        ctrlPoint0.y = pt.y;
+            ctrlPoint0.x = pt.x;
+            ctrlPoint0.y = pt.y;
 
-        pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y ) );
+            pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y ) );
 
-        ctrlPoint1.x = pt.x;
-        ctrlPoint1.y = pt.y;
+            ctrlPoint1.x = pt.x;
+            ctrlPoint1.y = pt.y;
+        }
 
-        InvalidateSegment( cubicSegment );
+        InvalidateSegment( segment );
     }
 }
 
@@ -1856,71 +1848,74 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
 
     if ( iVertex->GetSegmentCount() > 1 )
     {
-        for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
+        for( FOdysseyVectorSegment* segment : segmentList )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-
-            if ( iVertex == cubicSegment->GetPoint(0) )
+            if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
             {
-                //::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
-                ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( iVertex, true );
-                //double dot = iPerpendicularVector.DotProduct( segmentVector );
-                ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( -iPerpendicularVector.y, iPerpendicularVector.x );
-                double distance;
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-                // if perpendicular vector equals 0 or is orthogonal to the segment vector
-                if ( tangentVector.DotProduct( segmentVector )  < 0.0f )
+                if ( iVertex == cubicSegment->GetPoint(0) )
                 {
-                    tangentVector = -tangentVector;
+                    //::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
+                    ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( iVertex, true );
+                    //double dot = iPerpendicularVector.DotProduct( segmentVector );
+                    ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( -iPerpendicularVector.y, iPerpendicularVector.x );
+                    double distance;
+
+                    // if perpendicular vector equals 0 or is orthogonal to the segment vector
+                    if ( tangentVector.DotProduct( segmentVector )  < 0.0f )
+                    {
+                        tangentVector = -tangentVector;
+                    }
+
+                    if( iPreserveHandleLength )
+                    {
+                        ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(0)->GetCoords();
+                        ::ULIS::FVec2D handleVec = handlePos - iVertex->GetCoords();
+
+                        distance = handleVec.Distance();
+                    }
+                    else
+                    {
+                        distance = cubicSegment->GetStraightDistance() * 0.35f;
+                    }
+
+                    cubicSegment->GetHandle(0)->Set( iVertex->GetX() + ( tangentVector.x * distance ),
+                                                     iVertex->GetY() + ( tangentVector.y * distance ) );
                 }
 
-                if( iPreserveHandleLength )
+                if ( iVertex == cubicSegment->GetPoint(1) )
                 {
-                    ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(0)->GetCoords();
-                    ::ULIS::FVec2D handleVec = handlePos - iVertex->GetCoords();
+                    //::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
+                    ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( iVertex, true );
+                    double dot = iPerpendicularVector.DotProduct( segmentVector );
+                    ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( iPerpendicularVector.y, -iPerpendicularVector.x );
+                    double distance;
 
-                    distance = handleVec.Distance();
-                }
-                else
-                {
-                    distance = cubicSegment->GetStraightDistance() * 0.35f;
+                    // if perpendicular vector equals 0 or is orthogonal to the segment vector
+                    if ( tangentVector.DotProduct( segmentVector ) < 0.0f )
+                    {
+                        tangentVector = -tangentVector;
+                    }
+
+                    if( iPreserveHandleLength )
+                    {
+                        ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(1)->GetCoords();
+                        ::ULIS::FVec2D handleVec = handlePos - iVertex->GetCoords();
+
+                        distance = handleVec.Distance();
+                    }
+                    else
+                    {
+                        distance = cubicSegment->GetStraightDistance() * 0.35f;
+                    }
+
+                    cubicSegment->GetHandle(1)->Set( iVertex->GetX() + ( tangentVector.x * distance ),
+                                                     iVertex->GetY() + ( tangentVector.y * distance ) );
                 }
 
-                cubicSegment->GetHandle(0)->Set( iVertex->GetX() + ( tangentVector.x * distance ),
-                                                 iVertex->GetY() + ( tangentVector.y * distance ) );
+                cubicSegment->Invalidate();
             }
-
-            if ( iVertex == cubicSegment->GetPoint(1) )
-            {
-                //::ULIS::FVec2D segmentVector = iVertex->GetVectorOnSegment( cubicSegment, true );
-                ::ULIS::FVec2D segmentVector = cubicSegment->GetVector( iVertex, true );
-                double dot = iPerpendicularVector.DotProduct( segmentVector );
-                ::ULIS::FVec2D tangentVector = ::ULIS::FVec2D( iPerpendicularVector.y, -iPerpendicularVector.x );
-                double distance;
-
-                // if perpendicular vector equals 0 or is orthogonal to the segment vector
-                if ( tangentVector.DotProduct( segmentVector ) < 0.0f )
-                {
-                    tangentVector = -tangentVector;
-                }
-
-                if( iPreserveHandleLength )
-                {
-                    ::ULIS::FVec2D& handlePos = cubicSegment->GetHandle(1)->GetCoords();
-                    ::ULIS::FVec2D handleVec = handlePos - iVertex->GetCoords();
-
-                    distance = handleVec.Distance();
-                }
-                else
-                {
-                    distance = cubicSegment->GetStraightDistance() * 0.35f;
-                }
-
-                cubicSegment->GetHandle(1)->Set( iVertex->GetX() + ( tangentVector.x * distance ),
-                                                 iVertex->GetY() + ( tangentVector.y * distance ) );
-            }
-
-            cubicSegment->Invalidate();
         }
     }
 }

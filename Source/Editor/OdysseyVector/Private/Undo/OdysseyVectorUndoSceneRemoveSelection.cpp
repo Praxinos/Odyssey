@@ -5,10 +5,8 @@ FOdysseyVectorUndoSceneRemoveSelection::~FOdysseyVectorUndoSceneRemoveSelection(
     // Removal confirmed
     if( mApplied )
     {
-        for( std::list<FOdysseyVectorObject*>::iterator it = mRemovedObjectList.begin(); it != mRemovedObjectList.end(); ++it )
+        for( FOdysseyVectorObject* object : mRemovedObjectList )
         {
-            FOdysseyVectorObject* object = (*it);
-
             delete object;
         }
     }
@@ -30,10 +28,8 @@ FOdysseyVectorUndoSceneRemoveSelection::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mRemovedObjectList.begin(); it != mRemovedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : mRemovedObjectList )
     {
-        FOdysseyVectorObject* object = (*it);
-
         object->GetParent()->RemoveChild( object );
     }
 
@@ -57,10 +53,8 @@ FOdysseyVectorUndoSceneRemoveSelection::Revert( UObject* iIgnored )
 
     mScene->ClearSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mRemovedObjectList.begin(); it != mRemovedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : mRemovedObjectList )
     {
-        FOdysseyVectorObject* object = (*it);
-
         // Note: GetParent is still valid even though the object was removed from the children list.
         // This helps us to add the object to its parent anew without having to store the pointer to the parent object.
         object->GetParent()->AppendChild( object );
