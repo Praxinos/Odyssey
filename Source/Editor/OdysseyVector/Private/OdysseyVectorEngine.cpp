@@ -1168,7 +1168,7 @@ FOdysseyVectorEngine::GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& 
     , [ this
       , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( HasFocus( mScene, object, traversalFlags ) )
+          if( ObjectHasFocus( mScene, object, traversalFlags ) )
           {
               oObjectList.push_back( object );
 
@@ -1189,7 +1189,7 @@ FOdysseyVectorEngine::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oO
     , [ this
       , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( HasFocus( mScene, object, traversalFlags ) )
+          if( ObjectHasFocus( mScene, object, traversalFlags ) )
           {
               oObjectList.push_back( object );
 
@@ -1202,9 +1202,9 @@ FOdysseyVectorEngine::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oO
 
 
 bool
-FOdysseyVectorEngine::HasFocus( FOdysseyVectorGroupPaint* iScene
-                              , FOdysseyVectorObject* iObject
-                              , uint64 iTraversalFlags )
+FOdysseyVectorEngine::ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
+                                    , FOdysseyVectorObject* iObject
+                                    , uint64 iTraversalFlags )
 {
     if( iObject->IsSelected() )
     {

@@ -286,7 +286,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
       , &pickedVertexArray
       , &pickedBucketArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
     {
-        if( iEngine->HasFocus( iScene, object, traversalFlags ) )
+        if( iEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
         {
             // all focused object are concerned, as their selection
             // might be cleared in case no vertex is selected.

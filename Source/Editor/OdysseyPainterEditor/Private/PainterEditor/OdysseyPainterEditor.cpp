@@ -962,7 +962,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorGroupPaint* iScene )
         , vectorEngine
         , &unalignedVertexArray ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
         {
-            if( vectorEngine->HasFocus( iScene, object, iTraversalFlags ) )
+            if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
             {
                 if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                 {
@@ -1027,7 +1027,7 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorGroupPaint* iScene )
         , vectorEngine
         , &alignedVertexArray ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
         {
-            if( vectorEngine->HasFocus( iScene, object, iTraversalFlags ) )
+            if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
             {
                 if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                 {

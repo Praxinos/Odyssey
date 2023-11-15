@@ -319,9 +319,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static const uint64 TRAVERSE_PARENT_ACCEPTED        = ( 1 << 2 );
         static const uint64 TRAVERSE_OBJECT_IGNORE_CHILDREN = ( 1 << 3 );
 
-        bool HasFocus( FOdysseyVectorGroupPaint* iScene
-                     , FOdysseyVectorObject* iObject
-                     , uint64 iTraversalFlags );
+        bool ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
+                           , FOdysseyVectorObject* iObject
+                           , uint64 iTraversalFlags );
 
         uint64 Traverse( FOdysseyVectorGroupPaint* iScene
                        , FOdysseyVectorObject* iObject

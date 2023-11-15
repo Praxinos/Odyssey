@@ -94,17 +94,20 @@ class ODYSSEYVECTOR_API FSnapshotObject
 {
     public:
         static const uint32 SNAPSHOT_TRANSFORMATIONS          = ( 1 << 0 );
-        static const uint32 SNAPSHOT_CHILDREN_TRANSFORMATIONS = ( 1 << 1 );
+        static const uint32 SNAPSHOT_HIERARCHY                = ( 1 << 1 );
+        static const uint32 SNAPSHOT_CHILDREN_TRANSFORMATIONS = ( 1 << 2 );
         static const uint32 SNAPSHOT_ALL                      = 0xFFFFFFFF;
 
         virtual ~FSnapshotObject();
         FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectSnapshotFlags );
 
-        virtual void Restore();
+        virtual bool Restore();
 
     protected:
         uint32 mObjectSnapshotFlags;
         FOdysseyVectorObject* mObject;
+        FOdysseyVectorObject* mParent;
+        FOdysseyVectorObject* mPreviousChild;
         std::vector<FSnapshotObject*> mChildrenSnapshotArray;
         double mTranslationX;
         double mTranslationY;
@@ -126,7 +129,7 @@ class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
                       , uint32 iObjectSnapshotFlags
                       , uint32 iPathSnapshotFlags );
 
-        virtual void Restore() override;
+        virtual bool Restore() override;
 
     private:
         uint32 mPathSnapshotFlags;
@@ -147,7 +150,7 @@ class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotObject
                            , uint32 iObjectSnapshotFlags
                            , uint32 iPaintGroupSnapshotFlags );
 
-        virtual void Restore() override;
+        virtual bool Restore() override;
 
     private:
         uint32 mPaintGroupSnapshotFlags;

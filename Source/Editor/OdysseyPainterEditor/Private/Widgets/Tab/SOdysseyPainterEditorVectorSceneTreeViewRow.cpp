@@ -5,7 +5,7 @@
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoObjectAdd.h"
+#include "Undo/OdysseyVectorUndoTransferObjects.h"
 
 #define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorSceneTreeView"
 
@@ -82,27 +82,17 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
     std::list<FOdysseyVectorObject*>& selectedObjectList = itemScene->GetEngine()->GetSelectedObjectList();
     FOdysseyVectorObject* insertObject = itemObject;
-    std::list<FOdysseyVectorObject*> droppedObjectList;
-
-    // filter dropped object
-    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
-    {
-        if( selectedObject != itemObject )
-        {
-            droppedObjectList.push_back( selectedObject );
-        }
-    }
 
     GEditor->BeginTransaction(LOCTEXT("DropObjects", "Drop Objects"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( itemScene, droppedObjectList ) );
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene, selectedObjectList ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
-    for( FOdysseyVectorObject* selectedObject : droppedObjectList )
+    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
         switch( mDropZone )
         {

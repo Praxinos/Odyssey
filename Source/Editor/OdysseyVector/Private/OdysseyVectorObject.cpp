@@ -785,37 +785,53 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
 {
     FOdysseyVectorObject* lastItem = GetLastChild();
 
-    iChild->mParent = this;
+    if( HasAncestor( iChild ) == false )
+    {
+        iChild->mParent = this;
 
-    if( iInsertAfter == nullptr )
-    {
-        mChildrenList.push_front( iChild );
-    }
-    else
-    if( iInsertAfter == lastItem )
-    {
-        mChildrenList.push_back( iChild );
-    }
-    else
-    {
-        std::list<FOdysseyVectorObject*>::iterator it;
-
-        for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        if( iInsertAfter == nullptr )
         {
-            FOdysseyVectorObject* item = (*it);
+            mChildrenList.push_front( iChild );
+        }
+        else
+        if( iInsertAfter == lastItem )
+        {
+            mChildrenList.push_back( iChild );
+        }
+        else
+        {
+            std::list<FOdysseyVectorObject*>::iterator it;
 
-            if( item == iInsertAfter )
+            for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
             {
-                mChildrenList.insert( ++it, iChild );
+                FOdysseyVectorObject* item = (*it);
 
-                break;
+                if( item == iInsertAfter )
+                {
+                    mChildrenList.insert( ++it, iChild );
+
+                    break;
+                }
             }
         }
+
+        iChild->Invalidate();
+
+        return true; // adding succeeded
     }
 
-    iChild->Invalidate();
+    return false;
+}
 
-    return true; // adding succeeded
+bool
+FOdysseyVectorObject::HasChild( FOdysseyVectorObject* iChild )
+{
+    if( std::find( mChildrenList.begin(), mChildrenList.end(), iChild ) != mChildrenList.end() )
+    {
+        return true;
+    }
+
+    return false;
 }
 
 bool
@@ -823,12 +839,17 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
     //iChild->mParent = nullptr;
 
-    mChildrenList.remove(iChild);
-    mInvalidatedChildrenList.remove(iChild);
+    if( iChild->mParent == this )
+    {
+        mChildrenList.remove( iChild );
+        mInvalidatedChildrenList.remove( iChild );
 
-    Invalidate();
+        Invalidate();
 
-    return true; // removal succeeded
+        return true; // removal succeeded
+    }
+
+    return false;
 }
 
 void

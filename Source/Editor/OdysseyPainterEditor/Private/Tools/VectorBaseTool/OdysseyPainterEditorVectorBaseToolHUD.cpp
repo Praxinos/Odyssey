@@ -53,7 +53,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
       , vectorEngine
       , iScene ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
       {
-          if( vectorEngine->HasFocus( iScene, object, iTraversalFlags ) )
+          if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -125,7 +125,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
           , vectorEngine
           , &selectedObjectList ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
           {
-              if( vectorEngine->HasFocus( iScene, object, iTraversalFlags ) )
+              if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
               {
                   ::ULIS::FRectD selectedObjectBBox = object->GetBBox( true );
 
@@ -245,7 +245,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
       , &iBackgroundColor
       , &iHighlightColor ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) || ( iHUDFlags & HUD_DRAW_ALL ) )
+          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( iHUDFlags & HUD_DRAW_ALL ) )
           {
               if( iHUDFlags & HUD_PATH_ALL )
               {

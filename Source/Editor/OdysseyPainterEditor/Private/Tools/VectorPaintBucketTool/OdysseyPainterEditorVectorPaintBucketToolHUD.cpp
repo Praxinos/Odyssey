@@ -127,7 +127,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorGroupPa
       , &iWorldY 
       , &oPickedCycleArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
         {
-            if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+            if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
             {
                 if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                 {
@@ -166,7 +166,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorGroupPa
       , &iWorldY
       , &pickedBucket ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
               {

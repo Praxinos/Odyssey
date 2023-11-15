@@ -163,7 +163,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         virtual bool AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter );
         virtual bool RemoveChild( FOdysseyVectorObject* iChild );
-
+        bool HasChild( FOdysseyVectorObject* iChild );
         void ImportChild( FOdysseyVectorObject* iChild, BLMatrix2D& iInverseWorldMatrix );
         double GetScalingX();
         double GetScalingY();

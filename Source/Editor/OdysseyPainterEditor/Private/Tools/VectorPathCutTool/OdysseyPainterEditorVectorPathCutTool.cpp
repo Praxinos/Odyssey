@@ -171,7 +171,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorGroupPain
           , &addedSegmentArray
           , &removedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
           {
-              if( vectorEngine->HasFocus( iScene, object, traversalFlags )  )
+              if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags )  )
               {
                   if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                   {
