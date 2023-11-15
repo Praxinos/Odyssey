@@ -237,8 +237,6 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 
             vectorEngine->Signal( signalFlags );
         }
-
-       return true;
     }
 
     return false;
@@ -277,8 +275,6 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 
             vectorEngine->Signal( signalFlags );
         }
-
-       return true;
     }
 
     return false;

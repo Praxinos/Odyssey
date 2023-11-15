@@ -42,6 +42,7 @@ public:
 protected:
     void OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
+    void OnSourceChanged();
 
 private:
 	FOdysseyTextureEditorExtension* mExtension;

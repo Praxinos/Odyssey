@@ -22,14 +22,14 @@ FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> S
     //mBrushIcon->DrawAs = ImageType;
 
      // the hell with this syntax....
-    TAttribute<const FSlateBrush*> BrushImageAttribute = TAttribute<const FSlateBrush*>::Create( TAttribute<const FSlateBrush*>::FGetter::CreateRaw( this, &FOdysseyVectorBrushCustomization::UpdateButtonImage, StructPropertyHandle ) );
-    TAttribute<FText> BrushToolTipAttribute = TAttribute<FText>::Create( TAttribute<FText>::FGetter::CreateRaw( this, &FOdysseyVectorBrushCustomization::UpdateButtonToolTip, StructPropertyHandle ) );
+    //TAttribute<const FSlateBrush*> BrushImageAttribute = TAttribute<const FSlateBrush*>::Create( TAttribute<const FSlateBrush*>::FGetter::CreateRaw( this, &FOdysseyVectorBrushCustomization::UpdateButtonImage, StructPropertyHandle ) );
+    //TAttribute<FText> BrushToolTipAttribute = TAttribute<FText>::Create( TAttribute<FText>::FGetter::CreateRaw( this, &FOdysseyVectorBrushCustomization::UpdateButtonToolTip, StructPropertyHandle ) );
 
     mBrushButton = SNew(SButton)
 			      .Visibility( EVisibility::Visible )
 			      .Text( LOCTEXT("VectorBrushButton", "Vector Brush Button") )
-			      .ToolTipText( BrushToolTipAttribute )
-			      .OnClicked(this, &FOdysseyVectorBrushCustomization::OnClicked, StructPropertyHandle )
+			      .ToolTipText( this, &FOdysseyVectorBrushCustomization::UpdateButtonToolTip, StructPropertyHandle )
+			      .OnClicked( this, &FOdysseyVectorBrushCustomization::OnClicked, StructPropertyHandle )
 			      .HAlign(HAlign_Center)
 			      .VAlign(VAlign_Center)
                   [
@@ -39,7 +39,7 @@ FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> S
                       .BorderImage( &whiteBackgroundBrush )
                       [
                           SNew(SImage)
-                          .Image( BrushImageAttribute )
+                          .Image( this, &FOdysseyVectorBrushCustomization::UpdateButtonImage, StructPropertyHandle )
                       ]
                   ];
 
@@ -127,7 +127,7 @@ FOdysseyVectorBrushCustomization::FilterAsset( const struct FAssetData& InAssetD
 }
 
 FOdysseyVectorBrush*
-FOdysseyVectorBrushCustomization::GetVectorBrush( TSharedRef<IPropertyHandle> StructPropertyHandle ) 
+FOdysseyVectorBrushCustomization::GetVectorBrush( TSharedRef<IPropertyHandle> StructPropertyHandle ) const 
 {
     FProperty *property = StructPropertyHandle.Get().GetProperty();
     TArray<UObject*> OuterObjects;
@@ -158,7 +158,7 @@ FOdysseyVectorBrushCustomization::OnPropertyValueChanged( TSharedRef<IPropertyHa
 }
 
 FText
-FOdysseyVectorBrushCustomization::UpdateButtonToolTip( TSharedRef<IPropertyHandle> StructPropertyHandle )
+FOdysseyVectorBrushCustomization::UpdateButtonToolTip( TSharedRef<IPropertyHandle> StructPropertyHandle ) const
 {
     FOdysseyVectorBrush* vectorBrush = GetVectorBrush( StructPropertyHandle );
 
@@ -176,7 +176,7 @@ FOdysseyVectorBrushCustomization::UpdateButtonToolTip( TSharedRef<IPropertyHandl
 }
 
 const FSlateBrush*
-FOdysseyVectorBrushCustomization::UpdateButtonImage( TSharedRef<IPropertyHandle> StructPropertyHandle )
+FOdysseyVectorBrushCustomization::UpdateButtonImage( TSharedRef<IPropertyHandle> StructPropertyHandle ) const
 {
     FOdysseyVectorBrush* vectorBrush = GetVectorBrush( StructPropertyHandle );
 

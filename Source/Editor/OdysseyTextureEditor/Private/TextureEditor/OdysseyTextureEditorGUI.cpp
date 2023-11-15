@@ -29,6 +29,8 @@ FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditorExtensio
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnCurrentLayerChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnVectorSceneSignal );
+    // bind refresh function to delegates on existing vector scenes when the source changes. Needed to refresh necessary widgets.
+    mExtension->GetEditor()->OnSourceChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnSourceChanged );
 }
 
 void
@@ -41,9 +43,32 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
-        //FOdysseyVectorEngine::ClearHUD();
-
         OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+    }
+}
+
+void
+FOdysseyTextureEditorGUI::OnSourceChanged()
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+ 
+   if (!source)
+        return;
+
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(source->GetLayerStack());
+
+    // layerStack might be NULL when closing the program
+    if( layerStack )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+        if( currentVectorLayer )
+        {
+            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
+            FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
+
+            OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+        }
     }
 }
 

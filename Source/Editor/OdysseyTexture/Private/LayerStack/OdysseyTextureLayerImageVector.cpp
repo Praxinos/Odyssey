@@ -155,7 +155,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
             Init( Width, Height );
         }
-        
+
         if (!FOdysseyTextureLayerImageVectorImport::Read( this, Ar ))
         {
             //Old Style Chunk Loading

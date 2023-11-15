@@ -37,9 +37,9 @@ public:
         void OnChildPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle );
         FReply OnClicked( TSharedRef<IPropertyHandle> StructPropertyHandle );
         bool FilterAsset( const struct FAssetData& InAssetData );
-        const FSlateBrush* UpdateButtonImage( TSharedRef<IPropertyHandle> StructPropertyHandle );
-        FText UpdateButtonToolTip( TSharedRef<IPropertyHandle> StructPropertyHandle );
-        FOdysseyVectorBrush* GetVectorBrush( TSharedRef<IPropertyHandle> StructPropertyHandle );
+        const FSlateBrush* UpdateButtonImage( TSharedRef<IPropertyHandle> StructPropertyHandle ) const;
+        FText UpdateButtonToolTip( TSharedRef<IPropertyHandle> StructPropertyHandle ) const;
+        FOdysseyVectorBrush* GetVectorBrush( TSharedRef<IPropertyHandle> StructPropertyHandle ) const;
 
     private:
         TSharedPtr<SButton> mBrushButton;
