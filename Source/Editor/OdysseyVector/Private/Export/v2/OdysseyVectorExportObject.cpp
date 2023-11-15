@@ -257,14 +257,6 @@ FOdysseyVectorExportV2::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, F
             }
             break;
 
-            case FOdysseyVectorObject::VECTORROOTTYPE:
-            {
-                FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(&iObject);
-
-                FOdysseyVectorExportV2::WriteScene( *scene, Ar );
-            }
-            break;
-
             default:
                 FOdysseyVectorExportV2::WriteObject( iObject, Ar );
             break;

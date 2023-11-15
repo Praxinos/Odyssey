@@ -11,7 +11,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoUngroup : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoUngroup();
-        FOdysseyVectorUndoUngroup( FOdysseyVectorScene* iScene, FOdysseyVectorGroup* iGroup );
+        FOdysseyVectorUndoUngroup( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorGroup* iGroup );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

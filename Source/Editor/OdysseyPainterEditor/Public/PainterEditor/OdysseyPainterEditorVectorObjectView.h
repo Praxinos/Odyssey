@@ -19,7 +19,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         ~UOdysseyPainterEditorVectorObjectView();
         UOdysseyPainterEditorVectorObjectView();
 
-        void Update( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iFocusedObjectList );
+        void Update( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iFocusedObjectList );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     protected:
@@ -27,7 +27,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         virtual uint64 PropertyChanged( const FName& iPropertyName, const FName& iCategory );
 
     protected:
-        FOdysseyVectorScene* mScene;
+        FOdysseyVectorGroupPaint* mScene;
         std::list<FOdysseyVectorObject*> mFocusedObjectList;
 
     public:

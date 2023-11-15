@@ -526,10 +526,10 @@ FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
             handleVector.Normalize();
 
             otherHandle->Set( GetCoords() - ( otherHandleVector.Distance() * handleVector ) );
+
+            //SetHandleAligned( true );
         }
     }
-
-    SetHandleAligned( true );
 }
 
 // TODO: rename as SetSegmentAligned

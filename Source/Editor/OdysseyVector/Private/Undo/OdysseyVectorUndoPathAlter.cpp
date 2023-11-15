@@ -51,7 +51,7 @@ FOdysseyVectorUndoPathAlter::~FOdysseyVectorUndoPathAlter()
     mAddedSegmentArray.clear();
 }
 
-FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                                         , FOdysseyVectorVertex* iRemovedVertex
                                                         , FOdysseyVectorSegment* iRemovedSegment
                                                         , FOdysseyVectorVertex* iAddedVertex
@@ -71,7 +71,7 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* i
         mAddedSegmentArray.push_back( iAddedSegment );
 }
 
-FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                                         , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
                                                         , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                                         , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
@@ -85,7 +85,7 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* i
     mRemovedSegmentArray = iRemovedSegmentArray;
 }
 
-FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                                         , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                                         , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                         , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )

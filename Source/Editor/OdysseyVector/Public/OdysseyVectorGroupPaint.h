@@ -128,8 +128,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
         void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
-        virtual void AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter ) override;
-        virtual void RemoveChild( FOdysseyVectorObject* iChild ) override;
+        virtual bool AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter ) override;
+        virtual bool RemoveChild( FOdysseyVectorObject* iChild ) override;
         FOdysseyVectorCycle* PickCycle( double iWorldX, double iWorldY );
         FOdysseyVectorBucket* PickBucket( double iWorldX, double iWorldY );
         bool IsMonochrome();
@@ -140,7 +140,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         bool IsPainted();
         void SetPainted( bool iPainted );
-        virtual void TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
+        virtual bool TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
 
         uint32 IntersectSegment( FOdysseyVectorSegmentCubic* iSegment0
                                , FOdysseyVectorSegmentCubic* iSegment1

@@ -52,7 +52,7 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
 
     if( mBucket )
     {
-        FOdysseyVectorScene* vectorScene = mBucket->GetOwner()->GetScene();
+        FOdysseyVectorGroupPaint* vectorScene = mBucket->GetOwner()->GetScene();
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("PropertyChanged","Property Changed"));

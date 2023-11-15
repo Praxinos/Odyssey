@@ -4,7 +4,7 @@ FOdysseyVectorUndoSelectVertex::~FOdysseyVectorUndoSelectVertex()
 {
 }
 
-FOdysseyVectorUndoSelectVertex::FOdysseyVectorUndoSelectVertex( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoSelectVertex::FOdysseyVectorUndoSelectVertex( FOdysseyVectorGroupPaint* iScene
                                                               , const std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
 {

@@ -7,7 +7,7 @@
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorScene.h"
+#include "OdysseyVectorGroupPaint.h"
 
 struct ODYSSEYVECTOR_API FObjectTransform
 {
@@ -33,8 +33,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectTransform : public FOdysseyVecto
 {
     public:
         ~FOdysseyVectorUndoObjectTransform();
-        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, FOdysseyVectorObject* iObject );
-        FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
+        FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorObject* iObject );
+        FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

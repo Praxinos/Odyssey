@@ -29,7 +29,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
     
         void Construct(const FArguments& InArgs);
 
-        void Update( FOdysseyVectorScene* iScene );
+        void Update( FOdysseyVectorGroupPaint* iScene );
 
         void RenameSelectedItem();
 

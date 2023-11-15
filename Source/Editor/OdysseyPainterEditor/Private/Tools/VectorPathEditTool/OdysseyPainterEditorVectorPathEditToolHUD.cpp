@@ -13,25 +13,25 @@ FOdysseyPainterEditorVectorPathEditToolHUD::FOdysseyPainterEditorVectorPathEditT
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
     // Updates the selection box
     UpdateSelectionBox( iScene, false, mPathEditTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::Load( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathEditToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathEditToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorScene* iScene )
+                                                , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -61,7 +61,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
-    if( iScene->GetSelectedObjectList().size() )
+    if( iScene->GetEngine()->GetSelectedObjectList().size() )
 //    {
 //        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
 //    }

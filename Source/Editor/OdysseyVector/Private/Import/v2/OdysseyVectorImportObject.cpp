@@ -10,6 +10,7 @@ FOdysseyVectorImportV2::CreateObject( uint32 iObjectType )
 
     switch ( iObjectType )
     {
+        // Legacy, when FOdysseyVectorScene was a thing.
         case FOdysseyVectorObject::VECTORROOTTYPE :
             // don't create anything, the scene is already created by the vector layer
             newObject = mScene;
@@ -24,7 +25,15 @@ FOdysseyVectorImportV2::CreateObject( uint32 iObjectType )
         break;
 
         case FOdysseyVectorObject::VECTORGROUPPAINTTYPE :
-            newObject = new FOdysseyVectorGroupPaint( FString("PaintGroup") );
+            // the root paintgroup
+            if( mObjectArray.size() == 0 )
+            {
+                newObject = mScene;
+            }
+            else
+            {
+                newObject = new FOdysseyVectorGroupPaint( FString("PaintGroup") );
+            }
         break;
 
         default :
@@ -271,6 +280,7 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_SCENE: // legacy
                 case FOdysseyFile::VectorV2::CHUNK_GROUPPAINT :
                 {
                     FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(vectorObject);
@@ -278,16 +288,6 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
                     FOdysseyVectorImportV2::ReadGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
 
                     paintGroup->Invalidate();
-                }
-                break;
-
-                case FOdysseyFile::VectorV2::CHUNK_SCENE:
-                {
-                    FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(vectorObject);
-
-                    FOdysseyVectorImportV2::ReadScene( *scene, Ar.Tell() + iChunkLen, Ar );
-
-                    scene->Invalidate();
                 }
                 break;
 

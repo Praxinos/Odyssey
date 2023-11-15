@@ -44,11 +44,11 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::GetId() const
 }
 
 void
-FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdysseyVectorGroupPaint* iScene )
 {
     // defaults to scene
     std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetEngine()->GetChildrenList();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
     std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
                                                                                     : sceneAsList;
     uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );
@@ -62,7 +62,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdyss
         }
 
         if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
-         || ( objectClass == FOdysseyVectorScene::StaticClass() ) )
+         || ( objectClass == FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             mGroupPaintView->Update( iScene, focusedObjectList );
             mDetailsView->SetObject( mGroupPaintView );
@@ -120,19 +120,19 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
 }
 
 void
-FOdysseyPainterEditorVectorSceneTreeViewTab::OnRefresh( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorSceneTreeViewTab::OnRefresh( FOdysseyVectorGroupPaint* iScene )
 {
     Update( iScene );
 }
 
 void
-FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateSceneTreeView( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateSceneTreeView( FOdysseyVectorGroupPaint* iScene )
 {
     mVectorSceneTreeView.Get()->Update( iScene );
 }
 
 void
-FOdysseyPainterEditorVectorSceneTreeViewTab::Update( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorSceneTreeViewTab::Update( FOdysseyVectorGroupPaint* iScene )
 {
     UpdateSceneTreeView( iScene );
     UpdateObjectPropertiesPanel( iScene );

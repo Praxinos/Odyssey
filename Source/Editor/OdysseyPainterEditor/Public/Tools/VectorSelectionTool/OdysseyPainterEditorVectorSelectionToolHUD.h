@@ -11,13 +11,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
         virtual ~FOdysseyPainterEditorVectorSelectionToolHUD();
         FOdysseyPainterEditorVectorSelectionToolHUD(  UOdysseyPainterEditorVectorSelectionTool* iSelectionTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
-        virtual void Load( FOdysseyVectorScene* iScene ) override;
-        virtual void Unload( FOdysseyVectorScene* iScene ) override;
-        virtual void Reset( FOdysseyVectorScene* iScene ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Load( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Unload( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
         void ShowSelectionBox( bool iShowSelectionBox );
         void Init( uint32 iWidth, uint32 iHeight );
-        void GetSelectedVertices( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorPoint*>& oPointArray );
+        void GetSelectedVertices( FOdysseyVectorGroupPaint* iScene, std::vector<FOdysseyVectorPoint*>& oPointArray );
 
         void ClearMask();
         BLImage* GetMask();
@@ -50,9 +50,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
                             , BLRgba32 fgColor
                             , BLRgba32 bgColor
                             , BLRgba32 hcColor );
-        void DrawVertexSelection( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags );
-        void DrawObjectSelection( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags );
-        void DrawSelectionSpace( BLContext* iBLContext, FOdysseyVectorScene* iScene,uint64 iFlags);
+        void DrawVertexSelection( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags );
+        void DrawObjectSelection( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags );
+        void DrawSelectionSpace( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene,uint64 iFlags);
 
     protected:
         UOdysseyPainterEditorVectorSelectionTool* mSelectionTool;

@@ -1,4 +1,5 @@
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorEngine.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
@@ -28,7 +29,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
 
     SetName( iName );
     SetOpacity( 1.0f );
-
+    SetExpanded(true);
     SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
 
     mForegroundBucket.SetColorMode( eBucketColorMode::SolidColor );
@@ -375,8 +376,9 @@ FOdysseyVectorObject::UpdateMatrix()
 void
 FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
 {
-    FOdysseyVectorScene* scene = GetScene();
+    FOdysseyVectorGroupPaint* scene = GetScene();
 
+    // TODO: I believe this check can be removed
     if( scene )
     {
         mLocalMatrix.reset();
@@ -517,26 +519,38 @@ FOdysseyVectorObject::GetLastChild()
     return mChildrenList.size() ? mChildrenList.back() : nullptr;
 }
 
-void
+bool
 FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
 {
+    FOdysseyVectorObject* formerParent = iFosterChild->GetParent();
+    FOdysseyVectorObject* previousChild = formerParent->GetPreviousChild( iFosterChild );
     double translationX, translationY, rotation, scalingX, scalingY;
     BLMatrix2D localMatrix;
 
     FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, iFosterChild->mWorldMatrix, localMatrix );
     FOdysseyVector::ExtractTransformations( localMatrix, &translationX, &translationY, &rotation, &scalingX, &scalingY );
 
-    iFosterChild->GetParent()->RemoveChild( iFosterChild );
-    
-    AddChild( iFosterChild, iInsertAfter );
+    if( iFosterChild->GetParent()->RemoveChild( iFosterChild ) )
+    {
+        if( AddChild( iFosterChild, iInsertAfter ) )
+        {
+            iFosterChild->SetTransform( translationX
+                                      , translationY
+                                      , rotation / M_PI * 180.0f
+                                      , scalingX
+                                      , scalingY );
 
-    iFosterChild->SetTransform( translationX
-                              , translationY
-                              , rotation / M_PI * 180.0f
-                              , scalingX
-                              , scalingY );
+            iFosterChild->UpdateMatrix();
 
-    iFosterChild->UpdateMatrix();
+            return true; // transfer succeeded
+        }
+        else // add back
+        {
+            formerParent->AddChild( iFosterChild, previousChild );
+        }
+    }
+
+    return false;
 }
 
 void
@@ -609,8 +623,8 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
     mInvalidationFlags |= iInvalidationFlags;
 }
 
-FOdysseyVectorScene*
-FOdysseyVectorObject::GetScene()
+FOdysseyVectorEngine*
+FOdysseyVectorObject::GetEngine()
 {
     FOdysseyVectorObject* parent = mParent;
     FOdysseyVectorObject* root = this;
@@ -622,7 +636,15 @@ FOdysseyVectorObject::GetScene()
         parent = parent->GetParent();
     }
 
-    return ( root->GetClass() == FOdysseyVectorEngine::StaticClass() ) ?  static_cast<FOdysseyVectorEngine*>(root)->GetScene() : nullptr;
+    return ( root->GetClass() == FOdysseyVectorEngine::StaticClass() ) ? static_cast<FOdysseyVectorEngine*>(root) : nullptr;
+}
+
+FOdysseyVectorGroupPaint*
+FOdysseyVectorObject::GetScene()
+{
+    FOdysseyVectorEngine* engine = GetEngine();
+
+    return engine ? engine->GetScene() : nullptr;
 }
 
 void
@@ -744,21 +766,21 @@ FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::
     return nullptr;
 }
 
-void
+bool
 FOdysseyVectorObject::AppendChild( FOdysseyVectorObject* iChild )
 {
     FOdysseyVectorObject* lastItem = mChildrenList.size() ? mChildrenList.back() : nullptr;
 
-    AddChild( iChild, lastItem );
+    return AddChild( iChild, lastItem );
 }
 
-void
+bool
 FOdysseyVectorObject::PrependChild( FOdysseyVectorObject* iChild )
 {
-    AddChild( iChild, nullptr );
+    return AddChild( iChild, nullptr );
 }
 
-void
+bool
 FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
     FOdysseyVectorObject* lastItem = GetLastChild();
@@ -792,9 +814,11 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
     }
 
     iChild->Invalidate();
+
+    return true; // adding succeeded
 }
 
-void
+bool
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
     //iChild->mParent = nullptr;
@@ -803,6 +827,8 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
     mInvalidatedChildrenList.remove(iChild);
 
     Invalidate();
+
+    return true; // removal succeeded
 }
 
 void

@@ -14,7 +14,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::FOdysseyPainterEditorVectorEraserToolH
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::Load( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorEraserToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint32 width = vectorEngine->GetPreferredWidth();
@@ -26,13 +26,13 @@ FOdysseyPainterEditorVectorEraserToolHUD::Load( FOdysseyVectorScene* iScene )
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorEraserToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
     mBLEraserContext.end();
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
     ClearMask();
 
@@ -41,7 +41,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorScene* iScene )
 
 void
 FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
-                                              , FOdysseyVectorScene* iScene )
+                                              , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -63,7 +63,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
-    if( iScene->GetSelectedObjectList().size() )
+    if( iScene->GetEngine()->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

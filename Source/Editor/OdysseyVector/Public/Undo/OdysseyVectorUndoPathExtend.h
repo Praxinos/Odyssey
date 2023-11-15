@@ -13,7 +13,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathExtend : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoPathExtend();
-        FOdysseyVectorUndoPathExtend( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoPathExtend( FOdysseyVectorGroupPaint* iScene
                                     , FOdysseyVectorPath* iPath );
 
         /** Called when redoing */

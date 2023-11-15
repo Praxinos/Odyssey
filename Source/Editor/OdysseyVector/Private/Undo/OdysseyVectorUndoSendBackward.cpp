@@ -12,7 +12,7 @@ FOdysseyVectorUndoSendBackward::~FOdysseyVectorUndoSendBackward()
     }
 }
 
-FOdysseyVectorUndoSendBackward::FOdysseyVectorUndoSendBackward( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoSendBackward::FOdysseyVectorUndoSendBackward( FOdysseyVectorGroupPaint* iScene
                                                               , FOdysseyVectorObject* iObject )
     : FOdysseyVectorUndo( iScene )
     , mObject( iObject )

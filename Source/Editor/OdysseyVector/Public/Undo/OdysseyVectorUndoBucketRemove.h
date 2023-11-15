@@ -7,16 +7,15 @@
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorScene.h"
 #include "OdysseyVectorGroupPaint.h"
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketRemove : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoBucketRemove();
-        FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoBucketRemove( FOdysseyVectorGroupPaint* iScene
                                       , FOdysseyVectorBucket* iBucket );
-        FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoBucketRemove( FOdysseyVectorGroupPaint* iScene
                                       , std::vector<FOdysseyVectorBucket*>& iBucketArray );
 
         /** Called when redoing */

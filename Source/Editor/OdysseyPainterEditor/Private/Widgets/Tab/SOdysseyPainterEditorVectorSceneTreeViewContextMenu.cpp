@@ -12,7 +12,7 @@ TSharedPtr<SWidget>
 SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPainterEditorVectorSceneTreeView* iTreeView )
 {
     TSharedPtr<FVectorSceneTreeViewItem> rootItem = iTreeView->GetRootItem();
-    FOdysseyVectorScene* vectorScene = static_cast<FOdysseyVectorScene*>(rootItem.Get()->GetVectorObject());
+    FOdysseyVectorGroupPaint* vectorScene = static_cast<FOdysseyVectorGroupPaint*>(rootItem.Get()->GetVectorObject());
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
     FMenuBuilder menu( true, nullptr );
 

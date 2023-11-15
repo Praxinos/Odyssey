@@ -9,7 +9,7 @@
 #include "blend2d.h"
 
 class FOdysseyVectorEngine;
-class FOdysseyVectorScene;
+class FOdysseyVectorGroupPaint;
 
 class ODYSSEYIMAGING_API FOdysseyVectorBlock : public TSharedFromThis<FOdysseyVectorBlock>
 {
@@ -99,7 +99,7 @@ private:
     static void CleanupHUDBlock(uint8* iData, void* iInfo);
     void Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags);
     void RenderHUD(::ULIS::FBlock& ioBlock);
-    void OnVectorEngineSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
+    void OnVectorEngineSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void Invalidate(bool iIsInteractive);
     void SetState(eBlockState iState);
 

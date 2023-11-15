@@ -5,7 +5,7 @@ FOdysseyVectorUndoPropertyChanged::~FOdysseyVectorUndoPropertyChanged()
     mPropertiesRecordArray.clear();
 }
 
-FOdysseyVectorUndoPropertyChanged::FOdysseyVectorUndoPropertyChanged( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList )
+FOdysseyVectorUndoPropertyChanged::FOdysseyVectorUndoPropertyChanged( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
 {
     int i = 0;

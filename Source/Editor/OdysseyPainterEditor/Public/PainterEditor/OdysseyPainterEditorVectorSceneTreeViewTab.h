@@ -13,7 +13,7 @@
 class FOdysseyPainterEditor;
 class SOdysseyPainterEditorVectorSceneTreeView;
 class FVectorSceneTreeViewItem;
-class FOdysseyVectorScene;
+class FOdysseyVectorGroupPaint;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
     public FOdysseyEditorTab, public FGCObject
@@ -25,8 +25,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
         // Construction / Destruction
         virtual ~FOdysseyPainterEditorVectorSceneTreeViewTab();
         FOdysseyPainterEditorVectorSceneTreeViewTab( FOdysseyPainterEditor* iEditor );
-        void UpdateObjectPropertiesPanel( FOdysseyVectorScene* iScene );
-        void UpdateSceneTreeView( FOdysseyVectorScene* iScene );
+        void UpdateObjectPropertiesPanel( FOdysseyVectorGroupPaint* iScene );
+        void UpdateSceneTreeView( FOdysseyVectorGroupPaint* iScene );
 
     protected:
         // FOdysseyEditorTab interface
@@ -36,8 +36,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
 
     public:
         // Event Listeners
-        void OnRefresh( FOdysseyVectorScene* iScene );
-        void Update( FOdysseyVectorScene* iScene );
+        void OnRefresh( FOdysseyVectorGroupPaint* iScene );
+        void Update( FOdysseyVectorGroupPaint* iScene );
         virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
         virtual FString GetReferencerName() const override;
 

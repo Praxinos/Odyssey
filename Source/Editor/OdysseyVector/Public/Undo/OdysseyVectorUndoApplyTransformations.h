@@ -8,13 +8,13 @@
 #include "Undo/OdysseyVectorUndo.h"
 
 class FOdysseyVectorObject;
-class FOdysseyVectorScene;
+class FOdysseyVectorGroupPaint;
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoApplyTransformations : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoApplyTransformations();
-        FOdysseyVectorUndoApplyTransformations( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
+        FOdysseyVectorUndoApplyTransformations( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

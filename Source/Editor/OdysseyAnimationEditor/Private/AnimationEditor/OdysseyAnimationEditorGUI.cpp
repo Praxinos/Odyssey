@@ -108,7 +108,7 @@ FOdysseyAnimationEditorGUI::GetLightTableTab()
 }
 
 void
-FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
+FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
     if (!source)
@@ -122,7 +122,7 @@ FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorScene* iScene, ui
 
         if( mediaVectors.Num() )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
             if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
             {

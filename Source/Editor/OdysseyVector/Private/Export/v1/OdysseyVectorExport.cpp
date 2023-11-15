@@ -3,7 +3,7 @@
 #include "OdysseyFile.h"
 
 void
-FOdysseyVectorExportV1::Write( FOdysseyVectorScene* iScene, FArchive &Ar )
+FOdysseyVectorExportV1::Write( FOdysseyVectorGroupPaint* iScene, FArchive &Ar )
 {
     // write the chunk even if iVEngine is nullptr to prevent "expected size mismatch" when unreal reads the data.
     // iVEngine is nullptr when unreal preloads the file.

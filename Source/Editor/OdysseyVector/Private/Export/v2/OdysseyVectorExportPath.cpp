@@ -20,7 +20,7 @@ FOdysseyVectorExportV2::WritePathGeometrySegments( FOdysseyVectorPath& iPath, FA
             {
                 if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
                 {
-                    cubicSegmentCount = cubicSegmentCount++;
+                    cubicSegmentCount++;
                 }
             }
 

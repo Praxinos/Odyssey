@@ -15,14 +15,14 @@ FOdysseyVectorUndoBucketRemove::~FOdysseyVectorUndoBucketRemove()
     }
 }
 
-FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorGroupPaint* iScene
                                                               , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
 {
     mBucketArray.push_back( iBucket );
 }
 
-FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorGroupPaint* iScene
                                                               , std::vector<FOdysseyVectorBucket*>& iBucketArray )
     : FOdysseyVectorUndo( iScene )
     , mBucketArray( iBucketArray )

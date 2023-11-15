@@ -12,7 +12,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::FOdysseyPainterEditorVectorPathDr
 }
 
 void
-FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
     uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorHUDFlags();
 
@@ -23,12 +23,12 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorScene* iScen
 }
 
 void
-FOdysseyPainterEditorVectorPathDrawingToolHUD::Load( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathDrawingToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
-FOdysseyPainterEditorVectorPathDrawingToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathDrawingToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
@@ -40,7 +40,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::GetStitchedPointArray()
 
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
-                                                   , FOdysseyVectorScene* iScene )
+                                                   , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();

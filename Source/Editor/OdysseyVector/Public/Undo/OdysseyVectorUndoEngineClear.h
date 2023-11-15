@@ -6,6 +6,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
+#include "OdysseyVectorGroupPaint.h"
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoEngineClear : public FOdysseyVectorUndo
 {

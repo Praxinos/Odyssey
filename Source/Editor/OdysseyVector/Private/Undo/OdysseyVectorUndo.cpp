@@ -1,5 +1,5 @@
 #include "Undo/OdysseyVectorUndo.h"
-#include "OdysseyVectorScene.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -9,7 +9,7 @@ FOdysseyVectorUndo::~FOdysseyVectorUndo()
 {
 }
 
-FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorScene *iScene )
+FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorGroupPaint *iScene )
     : mApplied( true )
     , mScene( iScene )
 {

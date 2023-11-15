@@ -1,6 +1,6 @@
 #include "Undo/OdysseyVectorUndoApplyTransformations.h"
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorScene.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyVectorUndoApplyTransformations::~FOdysseyVectorUndoApplyTransformations()
 {
@@ -10,7 +10,7 @@ FOdysseyVectorUndoApplyTransformations::~FOdysseyVectorUndoApplyTransformations(
     }
 }
 
-FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( FOdysseyVectorGroupPaint* iScene
                                                                               , std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
 {

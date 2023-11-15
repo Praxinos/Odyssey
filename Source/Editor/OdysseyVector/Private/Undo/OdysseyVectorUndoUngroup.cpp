@@ -15,7 +15,7 @@ FOdysseyVectorUndoUngroup::~FOdysseyVectorUndoUngroup()
     mUngroupedObjectList.clear();
 }
 
-FOdysseyVectorUndoUngroup::FOdysseyVectorUndoUngroup( FOdysseyVectorScene* iScene, FOdysseyVectorGroup* iGroup )
+FOdysseyVectorUndoUngroup::FOdysseyVectorUndoUngroup( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorGroup* iGroup )
     : FOdysseyVectorUndo(iScene)
     , mGroup( iGroup )
 {
@@ -29,7 +29,7 @@ FOdysseyVectorUndoUngroup::Apply( UObject* iIgnored )
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
     for( FOdysseyVectorObject *child : mUngroupedObjectList )
     {
@@ -54,7 +54,7 @@ FOdysseyVectorUndoUngroup::Revert( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
     // Note: GetParent() stills holds a valid pointer to the former parent.
     //mGroup->GetParent()->AppendChild( mGroup );

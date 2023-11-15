@@ -13,7 +13,7 @@ FOdysseyVectorImportV2::FOdysseyVectorImportV2()
 }
 
 void
-FOdysseyVectorImportV2::Read( FOdysseyVectorScene* iScene, FArchive &Ar, uint64 iChunkEnd )
+FOdysseyVectorImportV2::Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, uint64 iChunkEnd )
 {
     if( iScene )
     {

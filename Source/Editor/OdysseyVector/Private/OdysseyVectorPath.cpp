@@ -656,7 +656,7 @@ TraceLine( int32 iX0, int32 iY0, double iT0
 void
 FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray )
 {
-    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    BLImage* maskImage = GetEngine()->GetBLMask();
     BLImageData imageData;
 
     maskImage->getData( &imageData );
@@ -691,7 +691,7 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
                               , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                               , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
-    BLImage* blimg = GetScene()->GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
+    BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
 
     if( blimg )
     {
@@ -860,7 +860,7 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 
     if ( iSelectionFlags & PICK_MASK_BASED )
     {
-        BLImage* blimg = GetScene()->GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
+        BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
         BLImageData imageData;
 
         if( blimg )
@@ -1246,7 +1246,7 @@ FOdysseyVectorPath::DrawTexturedJoint( FOdysseyVectorJoint* iJoint
                                      , uint64 iDrawingFlags )
 {
     // TODO: transform this to an argument to avoid repetitive calls. I guess.
-    FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
+    FOdysseyVectorEngine* vectorEngine = GetEngine();
     std::vector<FOdysseyVectorPolygon5>& polygonCache = iJoint->GetPolygonCache();
     FColor foregroundColor = GetForegroundColor();
     double difU = iEndU - iStartU;
@@ -1300,7 +1300,7 @@ FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                        , double iCombinedOpacity
                                        , uint64 iDrawingFlags )
 {
-    FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
+    FOdysseyVectorEngine* vectorEngine = GetEngine();
     std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
     FColor foregroundColor = GetForegroundColor();
     double difU = iEndU - iStartU;
@@ -1367,7 +1367,7 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                                    , const FVertexChain& iVertexChain
                                    , uint64 iDrawingFlags )
 {
-    FOdysseyVectorEngine* vectorEngine = GetScene()->GetEngine();
+    FOdysseyVectorEngine* vectorEngine = GetEngine();
     FColor color = mForegroundBucket.GetColor();
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 ) 
                                                                                          : BLRgba32( color.R, color.G, color.B, color.A * iCombinedOpacity );
@@ -1974,7 +1974,7 @@ FOdysseyVectorPath::PickSegments( double iWorldX
 void
 FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray )
 {
-    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    BLImage* maskImage = GetEngine()->GetBLMask();
     BLImageData maskData;
     ::ULIS::FRectD maskRect;
     bool picked = false;

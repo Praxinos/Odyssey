@@ -22,7 +22,7 @@ FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
     mRemovedBucketArray.clear();
 }
 
-FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray
@@ -35,7 +35,7 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
     mAddedObjectArray = iAddedObjectArray;
 }
 
-FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray  )
@@ -51,7 +51,7 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
     // destroy the former hierarchy.
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
@@ -101,7 +101,7 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
     // Remove all children from the created group
     for( int i = 0; i < mAddedObjectArray.size(); i++ )

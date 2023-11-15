@@ -8,11 +8,11 @@
 #include <Image/Block.h>
 
 #include "OdysseyVectorSegment.h"
-#include "OdysseyVectorScene.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "ULISInvalidTileMap.h"
 
-//#include "OdysseyVectorScene.generated.h"
+//#include "OdysseyVectorGroupPaint.generated.h"
 
 typedef struct _FHorizontalLine
 {
@@ -36,7 +36,7 @@ FHorizontalLine;
 class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 {
     public:
-        DECLARE_MULTICAST_DELEGATE_TwoParams( FSignalDelegate, FOdysseyVectorScene*, uint64 iDelegateFlags )
+        DECLARE_MULTICAST_DELEGATE_TwoParams( FSignalDelegate, FOdysseyVectorGroupPaint*, uint64 iDelegateFlags )
 
     private:
         static const uint32 mStaticClass = 0xC4C88C77; // value is crc32 FOdysseyVectorEngine
@@ -90,7 +90,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         /**
          * @brief Constructor
          */
-        FOdysseyVectorEngine( FOdysseyVectorScene* iScene
+        FOdysseyVectorEngine( FOdysseyVectorGroupPaint* iScene
                             , uint32 iPreferredWidth
                             , uint32 iPreferredHeight );
 
@@ -100,7 +100,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          * @param iRoi the region of interest.
          * @param iSelectedOnly restrict erasure to selected objects only.
          */
-        void Erase( FOdysseyVectorScene* iScene
+        void Erase( FOdysseyVectorGroupPaint* iScene
                   , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                   , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
@@ -119,7 +119,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          *  FOdysseyVectorObject::PICK_MASK_BASED: in that case the mask buffer must be filled with 0xFF where picking is wanted.
          *  FOdysseyVectorObject::PICK_MATH_BASED: in that case collisions are mathematically computed.
          */
-        void Pick( FOdysseyVectorScene* iScene
+        void Pick( FOdysseyVectorGroupPaint* iScene
                  ,const ::ULIS::FRectD& iRoi
                  , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
                  , uint32 iSelectionFlags );
@@ -133,7 +133,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          * @param oDistance array of returned distance between the segment.
          *  and coordinates iX,iY. Distance is in local coordinates. Can be NULL.
          */
-        void PickSegments( FOdysseyVectorScene* iScene
+        void PickSegments( FOdysseyVectorGroupPaint* iScene
                          , bool iRestrictToSelection
                          , double iX
                          , double iY
@@ -153,7 +153,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          *  FOdysseyVectorPath::PICK_HANDLE_SEGMENT : pick segment handles
          *  FOdysseyVectorPath::PICK_POINT : pick vertices
          */
-        void PickPoints( FOdysseyVectorScene* iScene
+        void PickPoints( FOdysseyVectorGroupPaint* iScene
                        , bool iRestrictToSelection
                        , double iX
                        , double iY
@@ -166,7 +166,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                        , double iWorldY
                                        , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
 
-        void PickCycles( FOdysseyVectorScene* iScene
+        void PickCycles( FOdysseyVectorGroupPaint* iScene
                        , double iWorldX
                        , double iWorldY
                        , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
@@ -228,13 +228,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          * @brief Set the attached scene
          * @param iScene the attached scene
          */
-        void SetScene( FOdysseyVectorScene* iScene );
+        void SetScene( FOdysseyVectorGroupPaint* iScene );
 
         /**
          * @brief Get the attached scene
          * @return a pointer to the attached scene
          */
-        FOdysseyVectorScene* GetScene( );
+        FOdysseyVectorGroupPaint* GetScene( );
 
         /**
          * @brief Select all objects that lies within the selection space
@@ -246,7 +246,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         void Render( BLContext* iBLContext, uint64 iDrawingFlags );
 
-        void EraseSections( FOdysseyVectorScene* iScene
+        void EraseSections( FOdysseyVectorGroupPaint* iScene
                           , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                           , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
@@ -319,11 +319,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static const uint64 TRAVERSE_PARENT_ACCEPTED        = ( 1 << 2 );
         static const uint64 TRAVERSE_OBJECT_IGNORE_CHILDREN = ( 1 << 3 );
 
-        bool HasFocus( FOdysseyVectorScene* iScene
+        bool HasFocus( FOdysseyVectorGroupPaint* iScene
                      , FOdysseyVectorObject* iObject
                      , uint64 iTraversalFlags );
 
-        uint64 Traverse( FOdysseyVectorScene* iScene
+        uint64 Traverse( FOdysseyVectorGroupPaint* iScene
                        , FOdysseyVectorObject* iObject
                        , uint64 iTraversalFlags
                        , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
@@ -334,6 +334,41 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         void GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList );
         void GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& oObjectList );
+
+        FOdysseyVectorObject* GetLastSelectedObject();
+        std::list<FOdysseyVectorObject*>& GetSelectedObjectList();
+        void UnselectObject( FOdysseyVectorObject* iVecObj );
+        void SelectObject( FOdysseyVectorObject* iVecObj );
+        void ClearObjectSelection();
+
+        static void FlipObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                               , double iXFactor
+                               , double iYFactor );
+
+        static void FlipObjectsHorizontal( const std::list<FOdysseyVectorObject*>& iObjectList );
+
+        static void FlipObjectsVertical( const std::list<FOdysseyVectorObject*>& iObjectList );
+
+
+        static FOdysseyVectorGroup* GroupObjects( FOdysseyVectorObject* iParent
+                                                , const std::list<FOdysseyVectorObject*>& iObjectList
+                                                , std::vector<FOdysseyVectorObject*>& oObjectArray
+                                                , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray );
+
+        static FOdysseyVectorGroupPaint* MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
+                                                                  , const std::list<FOdysseyVectorObject*>& iObjectList
+                                                                  , std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                                                  , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
+                                                                  , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray );
+
+        static ::ULIS::FVec2D GetPositionFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList );
+
+        void RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                          , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray);
+
+        virtual bool RemoveChild ( FOdysseyVectorObject* iChild ) override;
+        virtual bool AddChild( FOdysseyVectorObject* iChild
+                             , FOdysseyVectorObject* iInsertAfter ) override;
 /*
        uint64 GetDrawingFlags();
        void SetDrawingFlags( uint64 iDrawingFlags );
@@ -366,13 +401,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static void GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
                                                , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
 
-
-    private:
+    protected:
+        std::list<FOdysseyVectorObject*> mSelectedObjectList;
         BLContextCreateInfo mCreateInfo;
         BLImage* mBLMask;
         std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
-        FOdysseyVectorScene* mScene;
+        FOdysseyVectorGroupPaint* mScene;
         FULISInvalidTileMap mInvalidTileMap;
         uint32 mPreferredWidth;
         uint32 mPreferredHeight;

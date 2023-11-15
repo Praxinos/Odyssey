@@ -11,26 +11,27 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
         virtual ~FOdysseyPainterEditorVectorPaintBucketToolHUD();
         FOdysseyPainterEditorVectorPaintBucketToolHUD(  UOdysseyPainterEditorVectorPaintBucketTool* iVectorPaintBucketTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
-        virtual void Reset( FOdysseyVectorScene* iScene ) override;
-        virtual void Load( FOdysseyVectorScene* iScene ) override;
-        virtual void Unload( FOdysseyVectorScene* iScene ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Load( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Unload( FOdysseyVectorGroupPaint* iScene ) override;
 
         void SetCycle( FOdysseyVectorCycle* iCycle );
 
-        FOdysseyVectorBucket* PickBucket( FOdysseyVectorScene* iScene
+        FOdysseyVectorBucket* PickBucket( FOdysseyVectorGroupPaint* iScene
                                         , double iWorldX
                                         , double iWorldY );
 
-        void PickCycles( FOdysseyVectorScene* iScene
+        void PickCycles( FOdysseyVectorGroupPaint* iScene
                        , double iWorldX
                        , double iWorldY
                        , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
 
+        void SetCursorPosition( double iWorldX, double iWorldY );
+
         uint32 PickBucketArea( FOdysseyVectorBucket* iBucket
                              , double iWorldX
                              , double iWorldY );
-        void SetPickedCycles( std::vector<FOdysseyVectorCycle*>& pickedCycleArray );
 
     private:
         FOdysseyVectorBucket* RecursivePickBucket( FOdysseyVectorObject* iObject
@@ -43,7 +44,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
                                        , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
 
     private:
-        std::vector<FOdysseyVectorCycle*> mPickedCycleArray;
         UOdysseyPainterEditorVectorPaintBucketTool* mPaintBucketTool;
         bool mAnyPaintGroupSelected;
+        ::ULIS::FVec2D mCursorAt;
 };

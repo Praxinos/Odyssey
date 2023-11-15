@@ -24,7 +24,7 @@ FOdysseyVectorUndoPathStitch::~FOdysseyVectorUndoPathStitch()
     mMergedSegmentArray.clear();
 }
 
-FOdysseyVectorUndoPathStitch::FOdysseyVectorUndoPathStitch( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoPathStitch::FOdysseyVectorUndoPathStitch( FOdysseyVectorGroupPaint* iScene
                                                           , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
                                                           , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                                           , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray

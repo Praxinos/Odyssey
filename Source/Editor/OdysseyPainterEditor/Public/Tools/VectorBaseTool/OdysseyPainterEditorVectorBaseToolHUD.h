@@ -19,14 +19,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         virtual ~FOdysseyPainterEditorVectorBaseToolHUD();
         FOdysseyPainterEditorVectorBaseToolHUD(  UOdysseyPainterEditorVectorBaseTool* iBaseTool );
 
-        virtual void Load( FOdysseyVectorScene* iScene );
-        virtual void Unload( FOdysseyVectorScene* iScene );
-        virtual void Reset( FOdysseyVectorScene* iScene ) override;
+        virtual void Load( FOdysseyVectorGroupPaint* iScene );
+        virtual void Unload( FOdysseyVectorGroupPaint* iScene );
+        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Draw( BLContext* iBLContext
-                         , FOdysseyVectorScene* iScene ) override;
+                         , FOdysseyVectorGroupPaint* iScene ) override;
 
         void DrawObjects( BLContext* iBLContext
-                        , FOdysseyVectorScene* iScene
+                        , FOdysseyVectorGroupPaint* iScene
                         , const BLRgba32& iForegroundColor
                         , const BLRgba32& iBackgroundColor
                         , const BLRgba32& iHighlightColor
@@ -35,17 +35,17 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         FSelectionBox& GetSelectionBox();
 
     protected:
-        void UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene );
+        void UpdateSelectionBoxVertexMode( FOdysseyVectorGroupPaint* iScene );
 
-        void UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
+        void UpdateSelectionBoxObjectMode( FOdysseyVectorGroupPaint* iScene
                                          , bool iForceWorld );
 
-        void UpdateSelectionBox( FOdysseyVectorScene* iScene
+        void UpdateSelectionBox( FOdysseyVectorGroupPaint* iScene
                                , bool iForceWorld
                                , uint64 iHUDFlags );
 
         void DrawSelectionBox( BLContext* iBLContext
-                             , FOdysseyVectorScene* iScene
+                             , FOdysseyVectorGroupPaint* iScene
                              , BLRgba32& iForegroundColor
                              , BLRgba32& iBackgroundColor
                              , BLRgba32& iHighlightColor

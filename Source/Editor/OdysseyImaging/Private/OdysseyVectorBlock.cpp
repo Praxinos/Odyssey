@@ -265,7 +265,7 @@ FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
 }
 
 void
-FOdysseyVectorBlock::OnVectorEngineSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags )
+FOdysseyVectorBlock::OnVectorEngineSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
 {
     if (!mEngine || mEngine->GetScene() != iScene)
         return;

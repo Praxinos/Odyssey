@@ -15,7 +15,7 @@ FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
     }
 }
 
-FOdysseyVectorUndoBucketAdd::FOdysseyVectorUndoBucketAdd( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoBucketAdd::FOdysseyVectorUndoBucketAdd( FOdysseyVectorGroupPaint* iScene
                                                         , std::vector<FOdysseyVectorBucket*>& iBucketArray )
     : FOdysseyVectorUndo( iScene )
 {

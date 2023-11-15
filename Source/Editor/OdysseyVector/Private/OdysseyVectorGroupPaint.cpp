@@ -604,10 +604,10 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
     /*Invalidate();*/
 }
 
-void
+bool
 FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
 {
-    FOdysseyVectorGroup::TransferChild( iFosterChild, iInsertAfter );
+    return FOdysseyVectorGroup::TransferChild( iFosterChild, iInsertAfter );
 }
 
 void
@@ -1388,30 +1388,40 @@ FOdysseyVectorGroupPaint::SetPainted( bool iPainted )
     Invalidate();
 }
 
-void
+bool
 FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
-    FOdysseyVectorObject::AddChild( iChild, iInsertAfter );
-
-    if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+    if( FOdysseyVectorObject::AddChild( iChild, iInsertAfter ) )
     {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
+        if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
 
-        mPathList.push_back( path );
+            mPathList.push_back( path );
+        }
+
+        return true;
     }
+
+    return false;
 }
 
-void
+bool
 FOdysseyVectorGroupPaint::RemoveChild( FOdysseyVectorObject* iChild )
 {
-    FOdysseyVectorObject::RemoveChild( iChild );
-
-    if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+    if( FOdysseyVectorObject::RemoveChild( iChild ) )
     {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
+        if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
 
-        mPathList.remove( path );
+            mPathList.remove( path );
+        }
+
+        return true;
     }
+
+    return false;
 }
 
 void
@@ -1761,7 +1771,7 @@ FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bo
 void
 FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray )
 {
-    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    BLImage* maskImage = GetEngine()->GetBLMask();
     BLImageData imageData;
 
     maskImage->getData( &imageData );
@@ -2152,7 +2162,7 @@ bool
 FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& iSectionArray
                                      ,  std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
 {
-    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    BLImage* maskImage = GetEngine()->GetBLMask();
     BLImageData maskData;
     ::ULIS::FRectD maskRect;
     bool picked = false;
@@ -2177,7 +2187,7 @@ FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& iSe
 bool
 FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
 {
-    BLImage* maskImage = GetScene()->GetEngine()->GetBLMask();
+    BLImage* maskImage = GetEngine()->GetBLMask();
     BLImageData maskData;
     ::ULIS::FRectD maskRect;
     bool picked = false;

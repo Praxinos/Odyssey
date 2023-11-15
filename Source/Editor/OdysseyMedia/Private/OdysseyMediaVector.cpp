@@ -7,12 +7,12 @@ FOdysseyMediaVector::~FOdysseyMediaVector()
 {
 }
 
-FOdysseyMediaVector::FOdysseyMediaVector(FOdysseyVectorScene* iScene)
+FOdysseyMediaVector::FOdysseyMediaVector(FOdysseyVectorGroupPaint* iScene)
     : mScene( iScene )
 {
 }
 
-FOdysseyVectorScene*
+FOdysseyVectorGroupPaint*
 FOdysseyMediaVector::GetScene() const
 {
     return mScene;

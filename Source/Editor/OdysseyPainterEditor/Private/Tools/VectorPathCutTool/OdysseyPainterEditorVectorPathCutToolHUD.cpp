@@ -14,7 +14,7 @@ FOdysseyPainterEditorVectorPathCutToolHUD::FOdysseyPainterEditorVectorPathCutToo
 }
 
 void
-FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
     SetP0( 0.0f, 0.0f );
     SetP1( 0.0f, 0.0f );
@@ -23,12 +23,12 @@ FOdysseyPainterEditorVectorPathCutToolHUD::Reset( FOdysseyVectorScene* iScene )
 }
 
 void
-FOdysseyPainterEditorVectorPathCutToolHUD::Load( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathCutToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
-FOdysseyPainterEditorVectorPathCutToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathCutToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
@@ -60,7 +60,7 @@ FOdysseyPainterEditorVectorPathCutToolHUD::GetP1()
 
 void
 FOdysseyPainterEditorVectorPathCutToolHUD::Draw( BLContext* iBLContext
-                                               , FOdysseyVectorScene* iScene )
+                                               , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();

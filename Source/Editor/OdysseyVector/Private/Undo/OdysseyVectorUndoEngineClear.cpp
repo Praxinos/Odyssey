@@ -14,7 +14,7 @@ FOdysseyVectorUndoEngineClear::FOdysseyVectorUndoEngineClear( FOdysseyVectorEngi
 void
 FOdysseyVectorUndoEngineClear::Apply( UObject* iIgnored )
 {
-    FOdysseyVectorScene* savedScene = mEngine->GetScene();
+    FOdysseyVectorGroupPaint* savedScene = mEngine->GetScene();
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
@@ -35,7 +35,7 @@ FOdysseyVectorUndoEngineClear::Apply( UObject* iIgnored )
 void
 FOdysseyVectorUndoEngineClear::Revert( UObject* iIgnored )
 {
-    FOdysseyVectorScene* savedScene = mEngine->GetScene();
+    FOdysseyVectorGroupPaint* savedScene = mEngine->GetScene();
 
     FOdysseyVectorUndo::Revert( iIgnored );
 

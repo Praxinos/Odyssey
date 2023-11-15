@@ -42,14 +42,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         virtual ~FOdysseyPainterEditorVectorGridToolHUD();
         FOdysseyPainterEditorVectorGridToolHUD(  UOdysseyPainterEditorVectorGridTool* iGridTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
-        virtual void Reset( FOdysseyVectorScene* iScene ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
 
         bool PickNodes( double iWorldX, double iWorldY, double iWorldRadius, bool iClearSelection );
         bool PickNodes( ::ULIS::FRectD& iWorldRect, bool iClearSelection );
         void ClearSelection();
         void GetSelection( std::vector<FGridNode*>& oNodeArray );
-        void MakeGrid( FOdysseyVectorScene* iScene, uint64 iHUDFlags );
+        void MakeGrid( FOdysseyVectorGroupPaint* iScene, uint64 iHUDFlags );
         void Deform();
         void StartSelectionRectangle( double iWorldX, double iWorldY );
         void DragSelectionRectangle( double iWorldX, double iWorldY );
@@ -65,7 +65,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         uint32 MapPaintGroupBuckets( FOdysseyVectorGroupPaint* iPaintGroup, BLMatrix2D& iInverseGridMatrix );
         void MakeNodes();
         void MakeCells();
-        void Map( FOdysseyVectorScene* iScene );
+        void Map( FOdysseyVectorGroupPaint* iScene );
         void DeformCell( FGridCell& iCell );
         void UnselectNodes();
         void DrawSelectionRectangle( BLContext* iBLContext, BLRgba32& iHighlightColor );

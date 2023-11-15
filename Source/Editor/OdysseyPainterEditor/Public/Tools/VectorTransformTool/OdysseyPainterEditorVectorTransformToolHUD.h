@@ -26,8 +26,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         virtual ~FOdysseyPainterEditorVectorTransformToolHUD();
         FOdysseyPainterEditorVectorTransformToolHUD(  UOdysseyPainterEditorVectorTransformTool* iTransformTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
-        virtual void Reset( FOdysseyVectorScene* iScene ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
 
         uint32 SetCursorPosition( double iWorldX, double iWorldY );
         void SetGizmo( double iLocalX, double iLocalY );
@@ -41,8 +41,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         uint32 PickSelectionBox( double iWorldX, double iWorldY );
         uint32 PickGizmo( double iWorldX, double iWorldY );
         void UpdateGizmo();
-        void DrawGizmo( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags );
-        void DrawScalers( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags );
+        void DrawGizmo( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags );
+        void DrawScalers( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags );
 
 
     private:

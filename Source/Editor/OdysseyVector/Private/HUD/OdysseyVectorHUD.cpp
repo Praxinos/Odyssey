@@ -4,7 +4,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorScene.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 
 FPointQuadTree::~FPointQuadTree()
@@ -41,7 +41,7 @@ FOdysseyVectorHUD::FOdysseyVectorHUD()
 }
 
 void
-FPointQuadTree::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags )
+FPointQuadTree::Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags )
 {
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -158,7 +158,7 @@ MapPoints( FOdysseyVectorObject* iObject
 }
 
 void
-FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene, uint64 iHUDFlags )
+FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene, uint64 iHUDFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;

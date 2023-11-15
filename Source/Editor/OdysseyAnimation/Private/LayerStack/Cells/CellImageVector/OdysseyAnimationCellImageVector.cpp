@@ -74,7 +74,7 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
     mWidth = iWidth;
     mHeight = iHeight;
 
-    mEngine = new FOdysseyVectorEngine( new FOdysseyVectorScene( "Scene" )
+    mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
                                        , (double)iWidth
                                        , (double)iHeight );
 
@@ -226,7 +226,7 @@ FOdysseyAnimationCellImageVector::CreateCellFromFrame(uint32 iFrameIndex) const
     //Copy Current Cell block at given frameindex
     //Create a new Vector cell from the given block
     TSharedRef<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(GetLayer(), 1, mWidth, mHeight);
-    FOdysseyVectorScene* newScene = static_cast<FOdysseyVectorScene*>(mEngine->GetScene()->Copy());
+    FOdysseyVectorGroupPaint* newScene = static_cast<FOdysseyVectorGroupPaint*>(mEngine->GetScene()->Copy());
     cell->GetEngine()->SetScene(newScene);
     newScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 

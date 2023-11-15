@@ -16,25 +16,25 @@ FOdysseyPainterEditorVectorPathPushToolHUD::FOdysseyPainterEditorVectorPathPushT
 }
 
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorGroupPaint* iScene)
 {
     // Updates the selection box
     UpdateSelectionBox( iScene, false, mPathPushTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Load(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorPathPushToolHUD::Load(FOdysseyVectorGroupPaint* iScene)
 {
 }
 
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathPushToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
 FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorScene* iScene )
+                                                , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -56,7 +56,7 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict pushing to the selection 
-    if( mPathPushTool->RestrictToSelectedObjects && iScene->GetSelectedObjectList().size() && ( mPathPushTool->IsDragging() == false ) )
+    if( mPathPushTool->RestrictToSelectedObjects && iScene->GetEngine()->GetSelectedObjectList().size() && ( mPathPushTool->IsDragging() == false ) )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

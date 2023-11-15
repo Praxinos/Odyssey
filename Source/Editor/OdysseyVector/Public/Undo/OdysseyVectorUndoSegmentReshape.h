@@ -35,10 +35,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSegmentReshape : public FOdysseyVector
 {
     public:
         ~FOdysseyVectorUndoSegmentReshape();
-        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene );
-        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene );
+        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
                                         , const std::vector<FOdysseyVectorVertex*>& iVertexArray );
-        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
                                         , const std::vector<FOdysseyVectorSegment*>& iSegmentArray );
 
         void RecordSegment( const std::vector<FOdysseyVectorSegment*>& iSegmentArray );

@@ -37,7 +37,7 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
 }
 
 void 
-UOdysseyPainterEditorVectorObjectView::Update( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorObjectView::Update( FOdysseyVectorGroupPaint* iScene
                                              , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     mScene = iScene;

@@ -37,14 +37,14 @@ FObjectTransform::MakeArrayFromObjectList( std::list<FOdysseyVectorObject*>& iOb
     }
 }
 
-FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene
                                                                     , FOdysseyVectorObject* iObject )
     : FOdysseyVectorUndo( iScene )
 {
     mObjectTransformArray.emplace_back( iObject );
 }
 
-FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene
                                                                     , std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
 {
