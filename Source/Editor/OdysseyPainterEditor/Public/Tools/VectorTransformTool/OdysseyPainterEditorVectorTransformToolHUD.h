@@ -35,6 +35,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         uint32 GetFlags();
         uint32 Pick( double iWorldX, double iWorldY );
         void CenterGizmo();
+        void SetCenterGizmo( bool iCenterGizmo );
 
     private:
         uint32 PickScalers( double iWorldX, double iWorldY );
@@ -51,4 +52,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         uint32 mFlags;
         ::ULIS::FVec2D mXAxis;
         ::ULIS::FVec2D mYAxis;
+        bool mCenterGizmo;
 };

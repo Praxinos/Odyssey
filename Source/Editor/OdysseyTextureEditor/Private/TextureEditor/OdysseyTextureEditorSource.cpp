@@ -176,7 +176,7 @@ FOdysseyTextureEditorSource::Clear()
         GEditor->EndTransaction();
 
         vectorEngine->SetScene( new FOdysseyVectorGroupPaint("Scene") );
-		vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+		vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
     }
 }
 

@@ -158,6 +158,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
+    mTransformHUD->SetCenterGizmo( false );
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -855,6 +857,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
         mDragging = false;
         mPickedPivot = nullptr;
     }
+
+    mTransformHUD->SetCenterGizmo( true );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;

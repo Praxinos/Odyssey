@@ -192,8 +192,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
                 break;
             }
         }
-        mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                       | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
+        mEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
     }
 }
 

@@ -8,6 +8,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransfo
 FOdysseyPainterEditorVectorTransformToolHUD::FOdysseyPainterEditorVectorTransformToolHUD( UOdysseyPainterEditorVectorTransformTool* iTransformTool )
     : FOdysseyPainterEditorVectorSelectionToolHUD( iTransformTool )
     , mFlags( 0 )
+    , mCenterGizmo( true )
 {
     mTransformTool = iTransformTool;
 
@@ -18,6 +19,12 @@ uint32
 FOdysseyPainterEditorVectorTransformToolHUD::GetFlags()
 {
     return mFlags;
+}
+
+void
+FOdysseyPainterEditorVectorTransformToolHUD::SetCenterGizmo( bool iCenterGizmo )
+{
+    mCenterGizmo = iCenterGizmo;
 }
 
 uint32
@@ -329,11 +336,10 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorGroupPaint* iSc
 {
     UpdateSelectionBox( iScene, mTransformTool->World, mTransformTool->GetEditor()->GetVectorHUDFlags() );
 
-    //FOdysseyPainterEditorVectorSelectionToolHUD::Reset( iScene ); // Updates the selection box
-/*
-    SetGizmo( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
-            , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
-*/
+    if( mCenterGizmo )
+    {
+        CenterGizmo();
+    }
 }
 
 void
