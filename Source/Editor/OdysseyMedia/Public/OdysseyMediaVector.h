@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "OdysseyMedia.h"
 
-class FOdysseyVectorScene;
+class FOdysseyVectorGroupPaint;
 
 class ODYSSEYMEDIA_API FOdysseyMediaVector
     : public IOdysseyMedia
@@ -17,13 +17,13 @@ public:
 public:
     //Destructor
     virtual ~FOdysseyMediaVector();
-    FOdysseyMediaVector(FOdysseyVectorScene* iScene);
+    FOdysseyMediaVector(FOdysseyVectorGroupPaint* iScene);
 
 public:
     //IOdysseyMedia API
-    FOdysseyVectorScene* GetScene() const;
+    FOdysseyVectorGroupPaint* GetScene() const;
 
 private:
-    FOdysseyVectorScene* mScene;
+    FOdysseyVectorGroupPaint* mScene;
 };
 

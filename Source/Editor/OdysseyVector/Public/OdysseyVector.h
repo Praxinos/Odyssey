@@ -91,7 +91,6 @@ namespace FOdysseyVector
 #include "OdysseyVectorPolygon.h"
 #include "OdysseyVectorBrush.h"
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorScene.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorVertex.h"

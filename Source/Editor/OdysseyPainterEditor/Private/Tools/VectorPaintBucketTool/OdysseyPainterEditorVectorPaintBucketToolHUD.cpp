@@ -13,17 +13,15 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::FOdysseyPainterEditorVectorPaintB
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
-    mPickedCycleArray.clear();
-
     UpdateSelectionBox( iScene, false, mPaintBucketTool->GetEditor()->GetVectorHUDFlags() );
 
     mAnyPaintGroupSelected = false;
 
     // check if any paint group is selected. this allows us to determinate when we can draw 
     // the hud for the whole scene
-    for( FOdysseyVectorObject* object : iScene->GetSelectedObjectList() )
+    for( FOdysseyVectorObject* object : iScene->GetEngine()->GetSelectedObjectList() )
     {
         if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
@@ -35,13 +33,13 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorScene* iScen
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::Load( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPaintBucketToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
     Reset( iScene );
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::Unload(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorPaintBucketToolHUD::Unload(FOdysseyVectorGroupPaint* iScene)
 {
 }
 
@@ -101,7 +99,15 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorScene* iScene
+FOdysseyPainterEditorVectorPaintBucketToolHUD::SetCursorPosition( double iWorldX
+                                                                , double iWorldY )
+{
+    mCursorAt.x = iWorldX;
+    mCursorAt.y = iWorldY;
+}
+
+void
+FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorGroupPaint* iScene
                                                          , double iWorldX
                                                          , double iWorldY
                                                          , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray )
@@ -118,10 +124,10 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorScene* 
       , iScene
       , vectorEngine
       , &iWorldX
-      , &iWorldY
+      , &iWorldY 
       , &oPickedCycleArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
         {
-            if( ( mAnyPaintGroupSelected == false ) || ( object->IsSelected() ) )
+            if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
             {
                 if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                 {
@@ -142,7 +148,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorScene* 
 }
 
 FOdysseyVectorBucket*
-FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorScene* iScene
+FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorGroupPaint* iScene
                                                          , double iWorldX
                                                          , double iWorldY )
 {
@@ -160,7 +166,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorScene* 
       , &iWorldY
       , &pickedBucket ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( ( mAnyPaintGroupSelected == false ) || ( object->IsSelected() ) )
+          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
               {
@@ -187,16 +193,9 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorScene* 
     return pickedBucket;
 }
 
-// must be set at eache mouse hover event for memory safety issues.
-void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::SetPickedCycles( std::vector<FOdysseyVectorCycle*>& pickedCycleArray )
-{
-    mPickedCycleArray = pickedCycleArray;
-}
-
 void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
-                                                   , FOdysseyVectorScene* iScene )
+                                                   , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -206,6 +205,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 viewBucketHandleFlag = mPaintBucketTool->GetShowControls() ? HUD_GROUPPAINT_BUCKET_HANDLE : 0;
     uint64 hudFlags = mPaintBucketTool->GetEditor()->GetVectorHUDFlags();
+    std::vector<FOdysseyVectorCycle*> pickedCycleArray;
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
@@ -235,7 +235,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
-    if( iScene->GetSelectedObjectList().size() )
+    if( iScene->GetEngine()->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
@@ -243,24 +243,28 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    for( int i = 0; i < mPickedCycleArray.size(); i++ )
+    if( mPaintBucketTool->GetShowControls() == false )
     {
-        FOdysseyVectorCycle* cycle = mPickedCycleArray[i];
-        FOdysseyVectorObject* owner = cycle->GetOwner();
-        BLMatrix2D& worldMatrix = owner->GetWorldMatrix();
+        PickCycles( iScene, mCursorAt.x, mCursorAt.y, pickedCycleArray );
 
-        iBLContext->setMatrix( worldMatrix );
+        for( FOdysseyVectorCycle* cycle : pickedCycleArray)
+        {
+            FOdysseyVectorObject* owner = cycle->GetOwner();
+            BLMatrix2D& worldMatrix = owner->GetWorldMatrix();
 
-        iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
-        iBLContext->setStrokeStyle( bgColor );
-        iBLContext->setStrokeWidth( 4.0f );
+            iBLContext->setMatrix( worldMatrix );
 
-        cycle->StrokePath( iBLContext, true );
+            iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
+            iBLContext->setStrokeStyle( bgColor );
+            iBLContext->setStrokeWidth( 4.0f );
 
-        iBLContext->setStrokeStyle( hcColor );
-        iBLContext->setStrokeWidth( 3.0f );
+            cycle->StrokePath( iBLContext, true );
 
-        cycle->StrokePath( iBLContext, true );
+            iBLContext->setStrokeStyle( hcColor );
+            iBLContext->setStrokeWidth( 3.0f );
+
+            cycle->StrokePath( iBLContext, true );
+        }
     }
 
     iBLContext->restore();

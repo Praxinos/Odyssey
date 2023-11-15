@@ -12,7 +12,7 @@ FOdysseyVectorUndoVertexAlignment::~FOdysseyVectorUndoVertexAlignment()
     }
 }
 
-FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVectorGroupPaint* iScene
                                                                     , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray )
     : FOdysseyVectorUndo( iScene )
 {

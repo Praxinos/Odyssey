@@ -12,8 +12,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectAdd : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoObjectAdd();
-        FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene, FOdysseyVectorObject* iObject );
-        FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
+        FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorObject* iObject );
+        FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

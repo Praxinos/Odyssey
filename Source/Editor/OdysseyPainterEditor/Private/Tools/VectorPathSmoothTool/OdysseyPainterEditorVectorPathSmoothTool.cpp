@@ -34,13 +34,13 @@ UOdysseyPainterEditorVectorPathSmoothTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
-UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -49,11 +49,11 @@ UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorScene* iSce
 }
 
 uint64
-UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FKey& iKey )
 {
     //FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    //FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+    //FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
     // backup SmoothingMode value
     SmoothingModeAtKeyDown = SmoothingMode;
@@ -73,11 +73,11 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorScene*
 }
 
 uint64
-UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FKey& iKey )
 {
     //FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    //FOdysseyVectorScene* vectorScene = vectorEngine->GetScene();
+    //FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
     // restore SmoothingMode value
     SmoothingMode = SmoothingModeAtKeyDown;
@@ -90,7 +90,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( FOdysseyVectorScene* i
 }
 
 uint64
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
@@ -126,7 +126,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorScen
 }
 
 uint64
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = PickingRadius * 2.0f;
@@ -142,7 +142,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorSce
 }
 
 uint64
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
     // Left mouse button clicked
@@ -194,7 +194,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorScen
 }
 
 uint64
-UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {

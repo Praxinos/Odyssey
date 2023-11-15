@@ -50,7 +50,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // init pathTracer's raster image
     mPathTracer.Init( iScene );
@@ -61,7 +61,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorScene* iSc
 }
 
 uint64
-UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
@@ -74,7 +74,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::GetPathTracer()
 }
 
 FOdysseyVectorVertex*
-UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorGroupPaint* iScene
                                                       , double iWorldX
                                                       , double iWorldY
                                                       , double iPickingRadius )
@@ -142,7 +142,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::SetPathColor( FOdysseyVectorPath* iP
 }
 
 void
-UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathExtend( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathExtend( FOdysseyVectorGroupPaint* iScene
                                                                 , FOdysseyVectorPath* iPath  )
 {
     // needed for valid GUndo pointer
@@ -157,7 +157,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathExtend( FOdysseyVector
 }
 
 void
-UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGroupPaint* iScene
                                                              , FOdysseyVectorPath* iPath  )
 {
     // needed for valid GUndo pointer
@@ -172,7 +172,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorSce
 }
 
 uint64
-UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FKey& iKey )
 {
     StitchAtKeyDown = Stitch;
@@ -186,7 +186,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorScene
 }
 
 uint64
-UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FKey& iKey )
 {
     Stitch = StitchAtKeyDown;
@@ -195,11 +195,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorScene* 
 }
 
 uint64
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    mPathTracer.Reset();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -259,7 +261,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorSce
 }
 
 uint64
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -283,7 +285,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorSc
 }
 
 uint64
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector);
@@ -329,7 +331,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorSce
 }
 
 uint64
-UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
@@ -371,7 +373,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorScene
 }
 
 uint64
-UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                                  , const FName& iPropertyName )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -445,22 +447,19 @@ UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
     TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
     TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
 
-    return SNew(SWrapBox)
-           .InnerSlotPadding(FVector2D(10.f, 3.f))
-           .UseAllottedSize(true)
+    return SNew(SUniformWrapPanel)
+           .SlotPadding(FVector2D(3.f, 3.f))
+           .EvenRowDistribution(true)
            .HAlign(HAlign_Fill)
-           + SWrapBox::Slot()
-           .HAlign(HAlign_Fill)
+           + SUniformWrapPanel::Slot()
            [
                UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
            ]
-           + SWrapBox::Slot()
-           .HAlign(HAlign_Fill)
+           + SUniformWrapPanel::Slot()
            [
                CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
            ]
-           + SWrapBox::Slot()
-           .HAlign(HAlign_Fill)
+           + SUniformWrapPanel::Slot()
            [
                CreatePropertyWidget(opacityHandle, opacityPropertyView).ToSharedRef()
            ];

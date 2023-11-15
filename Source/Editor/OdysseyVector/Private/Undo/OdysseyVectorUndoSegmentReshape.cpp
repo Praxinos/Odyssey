@@ -12,12 +12,12 @@ FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
     }
 }
 
-FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene )
+FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene )
     : FOdysseyVectorUndo( iScene )
 {
 }
 
-FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
                                                                   , const std::vector<FOdysseyVectorVertex*>& iVertexArray )
     : FOdysseyVectorUndo( iScene )
 {
@@ -37,7 +37,7 @@ FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVect
     RecordSegment( segmentArray );
 }
 
-FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
                                                                   , const std::vector<FOdysseyVectorSegment*>& iSegmentArray )
     : FOdysseyVectorUndo( iScene )
 {

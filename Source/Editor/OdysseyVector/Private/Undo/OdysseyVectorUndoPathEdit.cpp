@@ -12,7 +12,7 @@ FOdysseyVectorUndoPathEdit::~FOdysseyVectorUndoPathEdit()
     }
 }
 
-FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint* iScene
                                                       , const std::vector<FOdysseyVectorVertex*>& iEditedVertexArray
                                                       , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray )
     : FOdysseyVectorUndo( iScene )

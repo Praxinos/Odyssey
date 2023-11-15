@@ -37,7 +37,7 @@ UOdysseyPainterEditorVectorPathStitchTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -48,7 +48,7 @@ UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorScene* iSce
 }
 
 uint64
-UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -56,7 +56,7 @@ UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorScene* iS
 }
 
 uint64
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
@@ -108,9 +108,9 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorScen
 
                 if( mergedPath->IsSelected() )
                 {
-                    iScene->Unselect( mergedPath );
+                    iEngine->UnselectObject( mergedPath );
 
-                    iScene->Select( vertexA->GetPath() );
+                    iEngine->SelectObject( vertexA->GetPath() );
                 }
 
                 removedPathArray.push_back( mergedPath );
@@ -156,7 +156,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorScen
 }
 
 uint64
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = PickingRadius * 2.0f;
@@ -182,7 +182,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorSce
 }
 
 uint64
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
     // Left mouse button clicked
@@ -196,7 +196,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorScen
 }
 
 uint64
-UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
@@ -204,7 +204,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorScene*
 }
 
 uint64
-UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FName& iPropertyName )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();

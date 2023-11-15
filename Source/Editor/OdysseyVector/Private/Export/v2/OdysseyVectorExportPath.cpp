@@ -13,29 +13,43 @@ FOdysseyVectorExportV2::WritePathGeometrySegments( FOdysseyVectorPath& iPath, FA
                                 , Ar
                                 , [&iPath](FArchive &Ar) -> void
         {
-            uint32 segmentCount = iPath.GetSegmentList().size();
+            uint32 cubicSegmentCount = 0;
 
-            Ar << segmentCount;
-
-            for( std::list<FOdysseyVectorSegment*>::iterator it = iPath.GetSegmentList().begin(); it != iPath.GetSegmentList().end(); ++it )
+            // filter cubic segments
+            for( FOdysseyVectorSegment* segment : iPath.GetSegmentList() )
             {
-                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(*it);
-                uint32 p0ID = cubicSegment->GetPoint(0)->GetID();
-                uint32 p1ID = cubicSegment->GetPoint(1)->GetID();
-                ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
-                ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
-                double ctrlPoint0X = ctrlPoint0.x;
-                double ctrlPoint0Y = ctrlPoint0.y;
-                double ctrlPoint1X = ctrlPoint1.x;
-                double ctrlPoint1Y = ctrlPoint1.y;
+                if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+                {
+                    cubicSegmentCount++;
+                }
+            }
 
-                Ar << p0ID;
-                Ar << p1ID;
+            // write count
+            Ar << cubicSegmentCount;
 
-                Ar << ctrlPoint0X;
-                Ar << ctrlPoint0Y;
-                Ar << ctrlPoint1X;
-                Ar << ctrlPoint1Y;
+            for( FOdysseyVectorSegment* segment : iPath.GetSegmentList() )
+            {
+                if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+                {
+                    FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+
+                    uint32 p0ID = cubicSegment->GetPoint(0)->GetID();
+                    uint32 p1ID = cubicSegment->GetPoint(1)->GetID();
+                    ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
+                    ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
+                    double ctrlPoint0X = ctrlPoint0.x;
+                    double ctrlPoint0Y = ctrlPoint0.y;
+                    double ctrlPoint1X = ctrlPoint1.x;
+                    double ctrlPoint1Y = ctrlPoint1.y;
+
+                    Ar << p0ID;
+                    Ar << p1ID;
+
+                    Ar << ctrlPoint0X;
+                    Ar << ctrlPoint0Y;
+                    Ar << ctrlPoint1X;
+                    Ar << ctrlPoint1Y;
+                }
             }
         } );
     }
@@ -96,14 +110,12 @@ FOdysseyVectorExportV2::WritePathGeometryVertices( FOdysseyVectorPath& iPath, FA
                                 , Ar
                                 , [&iPath](FArchive &Ar) -> void
         {
-            uint32 vertexID = 0;
             uint32 vertexCount = iPath.GetVertexList().size();
 
             Ar << vertexCount;
 
-            for( std::list<FOdysseyVectorVertex*>::iterator it = iPath.GetVertexList().begin(); it != iPath.GetVertexList().end(); ++it )
+            for( FOdysseyVectorVertex* vertex : iPath.GetVertexList() )
             {
-                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(*it);
                 double x = vertex->GetX();
                 double y = vertex->GetY();
                 double radius = vertex->GetRadius();

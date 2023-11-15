@@ -35,13 +35,13 @@ UOdysseyPainterEditorVectorScenePanTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
-UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -50,7 +50,7 @@ UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorScene* iScene
 }
 
 uint64
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
@@ -78,7 +78,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorScene*
 
 void
 UOdysseyPainterEditorVectorScenePanTool::Pan( FOdysseyVectorEngine* iEngine
-                                            , FOdysseyVectorScene* iScene
+                                            , FOdysseyVectorGroupPaint* iScene
                                             , const FOdysseyPoint& iPointInTexture )
 {
     double factor = 1.0f;
@@ -100,7 +100,7 @@ UOdysseyPainterEditorVectorScenePanTool::Pan( FOdysseyVectorEngine* iEngine
 
 void
 UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
-                                              , FOdysseyVectorScene* iScene
+                                              , FOdysseyVectorGroupPaint* iScene
                                               , const FOdysseyPoint& iPointInTexture )
 {
     BLPoint worldMouseCoordsBefore = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
@@ -135,7 +135,7 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
 }
 
 uint64
-UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
@@ -159,7 +159,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorScene*
 }
 
 uint64
-UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {

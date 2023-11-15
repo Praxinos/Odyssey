@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorPathCutTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorPathCutTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathCutTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -40,7 +40,7 @@ UOdysseyPainterEditorVectorPathCutTool::UnloadVector( FOdysseyVectorScene* iScen
 }
 
 uint64
-UOdysseyPainterEditorVectorPathCutTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathCutTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -49,7 +49,7 @@ UOdysseyPainterEditorVectorPathCutTool::LoadVector( FOdysseyVectorScene* iScene 
 }
 
 uint64
-UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey )
 {
@@ -67,7 +67,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseDownVector( FOdysseyVectorScene* 
 }
 
 uint64
-UOdysseyPainterEditorVectorPathCutTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathCutTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture )
 {
 /*
@@ -140,7 +140,7 @@ UOdysseyPainterEditorVectorPathCutTool::CutObjectRecursive( FOdysseyVectorObject
 }
 
 uint64
-UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {

@@ -121,7 +121,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
                                     , double iRadius );
         bool MakeBezier( bool iForce );
         bool TestBezier( ::ULIS::FVec2D iBezier[4] );
-        void Init( FOdysseyVectorScene* iScene );
+        void Init( FOdysseyVectorGroupPaint* iScene );
         std::vector<FTracerPoint>& GetPointArray();
         std::vector<FTracerRecord>& GetRecordArray();
         std::vector<FTracerEdge>& GetEdgeArray();

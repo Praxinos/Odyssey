@@ -12,7 +12,7 @@ FOdysseyVectorUndoVertexRadius::~FOdysseyVectorUndoVertexRadius()
     }
 }
 
-FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
                                                               , std::vector<FOdysseyVectorPath*>& iPathArray )
     : FOdysseyVectorUndo( iScene )
 {
@@ -24,7 +24,7 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorSc
     }
 }
 
-FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
                                                               , std::vector<FOdysseyVectorVertex*>& iVertexArray )
     : FOdysseyVectorUndo( iScene )
 {

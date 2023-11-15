@@ -7,22 +7,22 @@
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorScene.h"
+#include "OdysseyVectorGroupPaint.h"
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoPathAlter : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoPathAlter();
-        FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                    , FOdysseyVectorVertex* iRemovedVertex
                                    , FOdysseyVectorSegment* iRemovedSegment
                                    , FOdysseyVectorVertex* iAddedVertex
                                    , FOdysseyVectorSegment* iAddedSegment );
-        FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                    , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                    , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                    , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
-        FOdysseyVectorUndoPathAlter( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                    , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
                                    , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                    , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray

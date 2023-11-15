@@ -37,10 +37,10 @@ protected:
 	TSharedRef<FTabManager::FSplitter>	CreateRightSection();
 
 public:
-    void BindVectorScene( FOdysseyVectorScene* iScene );
+    void BindVectorScene( FOdysseyVectorGroupPaint* iScene );
 
 protected:
-    void OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
+    void OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
 
 private:

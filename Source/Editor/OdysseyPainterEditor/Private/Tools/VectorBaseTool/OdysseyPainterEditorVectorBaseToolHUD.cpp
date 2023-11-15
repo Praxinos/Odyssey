@@ -12,18 +12,18 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
 }
 
 void 
-FOdysseyPainterEditorVectorBaseToolHUD::Load( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorBaseToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorBaseToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
 
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorBaseToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
 
 }
@@ -35,7 +35,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::GetSelectionBox()
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
@@ -93,10 +93,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorScene* iScene
+FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorGroupPaint* iScene
                                                                     , bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
     if( ( selectedObjectList.size() <= 1 ) && ( iForceWorld == false ) )
@@ -159,7 +159,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( FOdysseyVectorScene* iScene
+FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( FOdysseyVectorGroupPaint* iScene
                                                           , bool iForceWorld
                                                           , uint64 iHUDFlags )
 {
@@ -178,7 +178,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( FOdysseyVectorScene*
 
 void
 FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( BLContext* iBLContext
-                                                        , FOdysseyVectorScene* iScene
+                                                        , FOdysseyVectorGroupPaint* iScene
                                                         , BLRgba32& iForegroundColor
                                                         , BLRgba32& iBackgroundColor
                                                         , BLRgba32& iHighlightColor
@@ -210,7 +210,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( BLContext* iBLContext
         iBLContext->strokePath( path );
 
         // draw box as white if nothing is selected, colored if something is selected
-        iBLContext->setStrokeStyle( ( iScene->GetSelectedObjectList().size() == 0 ) ? white : iForegroundColor );
+        iBLContext->setStrokeStyle( ( iScene->GetEngine()->GetSelectedObjectList().size() == 0 ) ? white : iForegroundColor );
         iBLContext->setStrokeWidth( 1.0f );
         iBLContext->strokePath( path );
     }
@@ -220,7 +220,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( BLContext* iBLContext
 
 void
 FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
-                                                   , FOdysseyVectorScene* iScene
+                                                   , FOdysseyVectorGroupPaint* iScene
                                                    , const BLRgba32& iForegroundColor
                                                    , const BLRgba32& iBackgroundColor
                                                    , const BLRgba32& iHighlightColor
@@ -290,7 +290,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
 
 void
 FOdysseyPainterEditorVectorBaseToolHUD::Draw( BLContext* iBLContext
-                                            , FOdysseyVectorScene* iScene )
+                                            , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();

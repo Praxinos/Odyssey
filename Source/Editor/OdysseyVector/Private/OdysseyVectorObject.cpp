@@ -1,4 +1,5 @@
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorEngine.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
@@ -7,14 +8,10 @@
 
 FOdysseyVectorObject::~FOdysseyVectorObject()
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+    for( FOdysseyVectorObject *obj : mChildrenList )
     {
-        FOdysseyVectorObject *obj = (*it);
-
         delete obj;
     }
-
-    mChildrenList.clear();
 }
 
 FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
@@ -32,7 +29,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
 
     SetName( iName );
     SetOpacity( 1.0f );
-
+    SetExpanded(true);
     SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
 
     mForegroundBucket.SetColorMode( eBucketColorMode::SolidColor );
@@ -93,14 +90,10 @@ FOdysseyVectorObject::IsExpanded()
 static uint32
 CheckCommonClass( std::list<FOdysseyVectorObject*>& iObjectList, uint32 iCommonClass )
 {
-    std::list<FOdysseyVectorObject*>::iterator it;
-
     if( iObjectList.size() )
     {
-        for( it = iObjectList.begin(); it != iObjectList.end(); ++it )
+        for( FOdysseyVectorObject* object : iObjectList )
         {
-            FOdysseyVectorObject* object = (*it);
-
             if( object->HasBaseClass( iCommonClass ) )
             {
                 uint32 objectClass = object->GetClass();
@@ -326,9 +319,8 @@ FOdysseyVectorObject::Copy()
         CopySettings( *objectCopy ); // we need the matrices to properly import the child
 
         // recurse
-        for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        for( FOdysseyVectorObject *child : mChildrenList )
         {
-            FOdysseyVectorObject *child = (*it);
             FOdysseyVectorObject *childCopy = child->Copy() ;
 
             objectCopy->AppendChild( childCopy );
@@ -384,8 +376,9 @@ FOdysseyVectorObject::UpdateMatrix()
 void
 FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
 {
-    FOdysseyVectorScene* scene = GetScene();
+    FOdysseyVectorGroupPaint* scene = GetScene();
 
+    // TODO: I believe this check can be removed
     if( scene )
     {
         mLocalMatrix.reset();
@@ -409,10 +402,8 @@ FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
         }
 
         // recurse
-        for( std::list<FOdysseyVectorObject*>::iterator it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        for( FOdysseyVectorObject *child : mChildrenList )
         {
-            FOdysseyVectorObject *child = (*it);
-
             child->UpdateMatrix( false );
         }
 
@@ -436,9 +427,8 @@ FOdysseyVectorObject::GetBoundingBoxFromList( std::list<FOdysseyVectorObject*>& 
     ::ULIS::FRectD bbox;
     int init = 0;
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
+    for( FOdysseyVectorObject *obj : iObjectList )
     {
-        FOdysseyVectorObject *obj = (*it);
         ::ULIS::FRectD objBBox = obj->GetBBox( true );
 
         bbox = ( init == 0 ) ? objBBox : bbox | objBBox;
@@ -529,26 +519,38 @@ FOdysseyVectorObject::GetLastChild()
     return mChildrenList.size() ? mChildrenList.back() : nullptr;
 }
 
-void
+bool
 FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
 {
+    FOdysseyVectorObject* formerParent = iFosterChild->GetParent();
+    FOdysseyVectorObject* previousChild = formerParent->GetPreviousChild( iFosterChild );
     double translationX, translationY, rotation, scalingX, scalingY;
     BLMatrix2D localMatrix;
 
     FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, iFosterChild->mWorldMatrix, localMatrix );
     FOdysseyVector::ExtractTransformations( localMatrix, &translationX, &translationY, &rotation, &scalingX, &scalingY );
 
-    iFosterChild->GetParent()->RemoveChild( iFosterChild );
-    
-    AddChild( iFosterChild, iInsertAfter );
+    if( iFosterChild->GetParent()->RemoveChild( iFosterChild ) )
+    {
+        if( AddChild( iFosterChild, iInsertAfter ) )
+        {
+            iFosterChild->SetTransform( translationX
+                                      , translationY
+                                      , rotation / M_PI * 180.0f
+                                      , scalingX
+                                      , scalingY );
 
-    iFosterChild->SetTransform( translationX
-                              , translationY
-                              , rotation / M_PI * 180.0f
-                              , scalingX
-                              , scalingY );
+            iFosterChild->UpdateMatrix();
 
-    iFosterChild->UpdateMatrix();
+            return true; // transfer succeeded
+        }
+        else // add back
+        {
+            formerParent->AddChild( iFosterChild, previousChild );
+        }
+    }
+
+    return false;
 }
 
 void
@@ -621,8 +623,8 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
     mInvalidationFlags |= iInvalidationFlags;
 }
 
-FOdysseyVectorScene*
-FOdysseyVectorObject::GetScene()
+FOdysseyVectorEngine*
+FOdysseyVectorObject::GetEngine()
 {
     FOdysseyVectorObject* parent = mParent;
     FOdysseyVectorObject* root = this;
@@ -634,7 +636,15 @@ FOdysseyVectorObject::GetScene()
         parent = parent->GetParent();
     }
 
-    return ( root->GetClass() == FOdysseyVectorEngine::StaticClass() ) ?  static_cast<FOdysseyVectorEngine*>(root)->GetScene() : nullptr;
+    return ( root->GetClass() == FOdysseyVectorEngine::StaticClass() ) ? static_cast<FOdysseyVectorEngine*>(root) : nullptr;
+}
+
+FOdysseyVectorGroupPaint*
+FOdysseyVectorObject::GetScene()
+{
+    FOdysseyVectorEngine* engine = GetEngine();
+
+    return engine ? engine->GetScene() : nullptr;
 }
 
 void
@@ -756,21 +766,21 @@ FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::
     return nullptr;
 }
 
-void
+bool
 FOdysseyVectorObject::AppendChild( FOdysseyVectorObject* iChild )
 {
     FOdysseyVectorObject* lastItem = mChildrenList.size() ? mChildrenList.back() : nullptr;
 
-    AddChild( iChild, lastItem );
+    return AddChild( iChild, lastItem );
 }
 
-void
+bool
 FOdysseyVectorObject::PrependChild( FOdysseyVectorObject* iChild )
 {
-    AddChild( iChild, nullptr );
+    return AddChild( iChild, nullptr );
 }
 
-void
+bool
 FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
     FOdysseyVectorObject* lastItem = GetLastChild();
@@ -804,9 +814,11 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
     }
 
     iChild->Invalidate();
+
+    return true; // adding succeeded
 }
 
-void
+bool
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
     //iChild->mParent = nullptr;
@@ -815,6 +827,8 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
     mInvalidatedChildrenList.remove(iChild);
 
     Invalidate();
+
+    return true; // removal succeeded
 }
 
 void
@@ -880,10 +894,8 @@ FOdysseyVectorObject::TreeToList( FOdysseyVectorObject* iObject, std::list<FOdys
 {
     iOutList.push_back( iObject );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->mChildrenList.begin(); it != iObject->mChildrenList.end(); ++it )
+    for( FOdysseyVectorObject* childObject : iObject->mChildrenList )
     {
-        FOdysseyVectorObject* childObject = (*it);
-
         TreeToList( childObject, iOutList );
     }
 
@@ -898,10 +910,8 @@ FOdysseyVectorObject::TreeToArray( FOdysseyVectorObject* iObject, std::vector<FO
 
     iOutArray.push_back( iObject );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->mChildrenList.begin(); it != iObject->mChildrenList.end(); ++it )
+    for( FOdysseyVectorObject* childObject : iObject->mChildrenList )
     {
-        FOdysseyVectorObject* childObject = (*it);
-
         TreeToArray( childObject, iOutArray );
     }
 

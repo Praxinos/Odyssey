@@ -8,6 +8,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransfo
 FOdysseyPainterEditorVectorTransformToolHUD::FOdysseyPainterEditorVectorTransformToolHUD( UOdysseyPainterEditorVectorTransformTool* iTransformTool )
     : FOdysseyPainterEditorVectorSelectionToolHUD( iTransformTool )
     , mFlags( 0 )
+    , mCenterGizmo( true )
 {
     mTransformTool = iTransformTool;
 
@@ -18,6 +19,12 @@ uint32
 FOdysseyPainterEditorVectorTransformToolHUD::GetFlags()
 {
     return mFlags;
+}
+
+void
+FOdysseyPainterEditorVectorTransformToolHUD::SetCenterGizmo( bool iCenterGizmo )
+{
+    mCenterGizmo = iCenterGizmo;
 }
 
 uint32
@@ -90,7 +97,7 @@ GetWorldScalers( FSelectionBox& iSelectionBox, FSelectionBoxScaler iScaler[4] )
 
 void
 FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( BLContext* iBLContext
-                                                        , FOdysseyVectorScene* iScene
+                                                        , FOdysseyVectorGroupPaint* iScene
                                                         , uint64 iFlags )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
@@ -118,7 +125,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( BLContext* iBLContext
 
 void
 FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( BLContext* iBLContext
-                                                      , FOdysseyVectorScene* iScene
+                                                      , FOdysseyVectorGroupPaint* iScene
                                                       , uint64 iFlags )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
@@ -325,20 +332,19 @@ FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorGroupPaint* iScene)
 {
     UpdateSelectionBox( iScene, mTransformTool->World, mTransformTool->GetEditor()->GetVectorHUDFlags() );
 
-    //FOdysseyPainterEditorVectorSelectionToolHUD::Reset( iScene ); // Updates the selection box
-/*
-    SetGizmo( mSelectionBox.rect.x + ( mSelectionBox.rect.w * 0.5f )
-            , mSelectionBox.rect.y + ( mSelectionBox.rect.h * 0.5f ) );
-*/
+    if( mCenterGizmo )
+    {
+        CenterGizmo();
+    }
 }
 
 void
 FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
-                                                 , FOdysseyVectorScene* iScene )
+                                                 , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -346,7 +352,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint32 selectedObjectCount = iScene->GetSelectedObjectList().size();
+    uint32 selectedObjectCount = iScene->GetEngine()->GetSelectedObjectList().size();
     uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode

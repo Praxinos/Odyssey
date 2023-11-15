@@ -39,7 +39,7 @@ FOdysseyVectorPathTracer::SetDotLimit( double iDotLimit )
 }
 
 void
-FOdysseyVectorPathTracer::Init( FOdysseyVectorScene* iScene )
+FOdysseyVectorPathTracer::Init( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     BLImageData imageData;
@@ -470,9 +470,9 @@ FOdysseyVectorPathTracer::CommitVertex( bool iIsHandleAligned )
                                                               , localPoint.y
                                                               , localRadius );
 
-    newVertex->SetHandleAligned( iIsHandleAligned );
-
     mCubicPath->AddVertex( newVertex );
+
+    newVertex->SetHandleAligned( iIsHandleAligned );
 
     return newVertex;
 }
@@ -501,7 +501,15 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
 
     ClearTo( mBestBezier.lastRecordID, mBestBezier.lastEdgeID );
 
+    // must be done after segments are added to the path
+    // so that the topology exists
+    if( mPreviousVertex->IsHandleAligned() )
+    {
+        mPreviousVertex->AlignHandles();
+    }
+
     mPreviousVertex = iEndVertex;
+
     mSmoothVector = mBestBezier.pt[3] - mBestBezier.pt[2];
 
     if( mSmoothVector.Distance() )
@@ -511,7 +519,6 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
 
     // very important. there is no best bezier anymore.
     mBestBezier.inited = false;
-
 
     return newCubicSegment;
 }
@@ -597,11 +604,6 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                                              , lastRecord->coords.y
                                              , iWorldX
                                              , iWorldY );
-            // draw alpha to pixel buffer
-            TraceEdge( &newEdge, 1.0f );
-
-            // unsure if useful
-            mBLContext.flush(BL_CONTEXT_FLUSH_SYNC);
 
             ClearPointsTo( mPointID );
 
@@ -613,6 +615,12 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                     lastRecord->smooth = true;
                 }
             }
+
+            // draw alpha to pixel buffer
+            TraceEdge( &newEdge, 1.0f );
+
+            // unsure if useful
+            mBLContext.flush(BL_CONTEXT_FLUSH_SYNC);
 
             if( ( lastRecord->smooth == false ) && ( lastEdge != nullptr ) )
             {

@@ -31,7 +31,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         static bool DoubleClicked();
 
-        static bool DisplayObjectHUD( FOdysseyVectorScene* iScene
+        static bool DisplayObjectHUD( FOdysseyVectorGroupPaint* iScene
                                     , FOdysseyVectorObject* iObject
                                     , uint64 iTraversalFlags );
 
@@ -52,23 +52,23 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         bool IsDragging();
 
     protected:
-        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ){ return 0; };
-        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ){ return 0; };
-        virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+        virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
+        virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
+        virtual uint64 OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FKey& iKey );
-        virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FKey& iKey );
-        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey ){ return false; };
-        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture ){ return 0; };
-        virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture ){ return 0; };
-        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey ){ return false; };
-        virtual uint64 PropertyChangedVector( FOdysseyVectorScene* iScene
+        virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName );
 
         void PopupContextMenu();
@@ -76,15 +76,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
 
     private:
-        void OnKeyDownCommon( FOdysseyVectorScene* iScene, const FKey& iKey );
-        void OnKeyUpCommon( FOdysseyVectorScene* iScene, const FKey& iKey );
-        void PropertyChangedCommon(  FOdysseyVectorScene* iScene, const FName& iPropertyName );
+        void OnKeyDownCommon( FOdysseyVectorGroupPaint* iScene, const FKey& iKey );
+        void OnKeyUpCommon( FOdysseyVectorGroupPaint* iScene, const FKey& iKey );
+        void PropertyChangedCommon(  FOdysseyVectorGroupPaint* iScene, const FName& iPropertyName );
 
     protected:
-        void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
-        void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorScene* iScene );
+        void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
+        void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
 
-        void GetSelectedVertices( FOdysseyVectorScene* iScene
+        void GetSelectedVertices( FOdysseyVectorGroupPaint* iScene
                                 , std::vector<FOdysseyVectorVertex*>& oSelectedVertexArray );
         // static
         void GetSegmentHandlesFromVertices( const std::vector<FOdysseyVectorVertex*>& iVertexArray
@@ -96,16 +96,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         // this method are needed because we retrieve the object list as a local variable which
         // must exist when a menu action is run
-        void ApplyTransformations( FOdysseyVectorScene* iScene );
-        void ClearColoring( FOdysseyVectorScene* iScene );
-        void FlipVertical( FOdysseyVectorScene* iScene );
-        void FlipHorizontal( FOdysseyVectorScene* iScene  );
-        void DeletePointSelection( FOdysseyVectorScene* iScene  );
-        void AlignPointSelection( FOdysseyVectorScene* iScene  );
-        void UnalignPointSelection( FOdysseyVectorScene* iScene  );
-        void Group( FOdysseyVectorScene* iScene );
-        void Ungroup( FOdysseyVectorScene* iScene );
-        void MakePaintGroup( FOdysseyVectorScene* iScene );
+        void ApplyTransformations( FOdysseyVectorGroupPaint* iScene );
+        void ClearColoring( FOdysseyVectorGroupPaint* iScene );
+        void FlipVertical( FOdysseyVectorGroupPaint* iScene );
+        void FlipHorizontal( FOdysseyVectorGroupPaint* iScene  );
+        void DeletePointSelection( FOdysseyVectorGroupPaint* iScene  );
+        void AlignPointSelection( FOdysseyVectorGroupPaint* iScene  );
+        void UnalignPointSelection( FOdysseyVectorGroupPaint* iScene  );
+        void Group( FOdysseyVectorGroupPaint* iScene );
+        void Ungroup( FOdysseyVectorGroupPaint* iScene );
+        void MakePaintGroup( FOdysseyVectorGroupPaint* iScene );
 
     protected:
         FOdysseyPainterEditorVectorBaseToolHUD* mBaseHUD;

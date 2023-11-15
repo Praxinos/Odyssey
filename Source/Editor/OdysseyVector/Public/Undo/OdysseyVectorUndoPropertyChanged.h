@@ -24,7 +24,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPropertyChanged : public FOdysseyVecto
 {
     public:
         ~FOdysseyVectorUndoPropertyChanged();
-        FOdysseyVectorUndoPropertyChanged( FOdysseyVectorScene* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
+        FOdysseyVectorUndoPropertyChanged( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

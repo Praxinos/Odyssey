@@ -5,7 +5,7 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorScene* iScene
+FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorGroupPaint* iScene
                                           , uint32 iPreferredWidth
                                           , uint32 iPreferredHeight )
     : FOdysseyVectorObject( "Engine" )
@@ -75,25 +75,67 @@ FOdysseyVectorEngine::GetPreferredHeight()
 }
 
 void
-FOdysseyVectorEngine::SetScene( FOdysseyVectorScene* iScene )
+FOdysseyVectorEngine::SetScene( FOdysseyVectorGroupPaint* iScene )
 {
     mScene = iScene;
 
-    // todo: replace with RemoveAllChildren();
+    // We dont use AddChild or RemoveChild because they are
+    // overlodaded to prevent manual addition or removal of child objects.
+    mScene->SetParent( this );
     mChildrenList.clear();
-    AppendChild( iScene );
-
-//    SetSelectionSpace( iScene );
-
-    mScene->SetEngine( this );
+    mInvalidatedChildrenList.clear();
+    mChildrenList.push_back( iScene );
+    mSelectedObjectList.clear();
 
     ResetHUD();
 }
 
-FOdysseyVectorScene*
+FOdysseyVectorGroupPaint*
 FOdysseyVectorEngine::GetScene()
 {
     return mScene;
+}
+
+std::list<FOdysseyVectorObject*>&
+FOdysseyVectorEngine::GetSelectedObjectList()
+{
+    return mSelectedObjectList;
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorEngine::GetLastSelectedObject()
+{
+    return ( mSelectedObjectList.empty() == true ) ? nullptr : mSelectedObjectList.back();
+}
+
+void
+FOdysseyVectorEngine::ClearObjectSelection()
+{
+    for( FOdysseyVectorObject *obj : mSelectedObjectList )
+    {
+        obj->SetIsSelected ( false );
+    }
+
+    mSelectedObjectList.clear();
+}
+
+void
+FOdysseyVectorEngine::UnselectObject( FOdysseyVectorObject* iVecObj )
+{
+    iVecObj->SetIsSelected( false );
+
+    mSelectedObjectList.remove( iVecObj );
+}
+
+void
+FOdysseyVectorEngine::SelectObject( FOdysseyVectorObject* iVecObj )
+{
+    if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), iVecObj ) == mSelectedObjectList.end() )
+    {
+        iVecObj->SetIsSelected( true );
+
+        mSelectedObjectList.push_back( iVecObj );
+    }
 }
 
 void
@@ -130,7 +172,6 @@ void
 FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
-    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
 
     //UseImage( iBLImage );
 
@@ -186,15 +227,12 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 {
     // TODO: set scene as the default selection space
     FOdysseyVectorGroup* selectionSpace = mSelectionSpace ? mSelectionSpace : mScene;
-    std::list<FOdysseyVectorObject*>& childrenList = selectionSpace->GetChildrenList();
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = childrenList.begin(); it != childrenList.end(); ++it )
+    for( FOdysseyVectorObject *child : selectionSpace->GetChildrenList() )
     {
-        FOdysseyVectorObject *child = (*it);
-
-        mScene->Select( child );
+        mScene->GetEngine()->SelectObject( child );
     }
 }
 /*
@@ -227,7 +265,26 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
     if( mInvalidationFlags )
     {
+        BLRgba32 blFillColor;
+        FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? mScene->mGroupPaintParam.MonochromeColor
+                                                                                         : mScene->GetBackgroundColor();
+
+
+        iBLContext->save();
+        iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+
+        blFillColor.setR( fillColor.R );
+        blFillColor.setG( fillColor.G );
+        blFillColor.setB( fillColor.B );
+        blFillColor.setA( fillColor.A );
+
+        iBLContext->setFillStyle( blFillColor );
+
+        iBLContext->fillAll();
+
         mScene->Draw( iBLContext, 1.0f, iDrawingFlags );
+
+        iBLContext->restore();
 
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
@@ -248,10 +305,8 @@ FOdysseyVectorEngine::RecursiveErase( FOdysseyVectorObject* iObject
                                     , const ::ULIS::FRectD &iRoi
                                     , bool iSelectedOnly )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
+    for( FOdysseyVectorObject *child : iObject->GetChildrenList() )
     {
-        FOdysseyVectorObject *child = (*it);
-
         RecursiveErase( child
                       , iAddedObjectArray
                       , iAddedVertexArray
@@ -288,7 +343,7 @@ FOdysseyVectorEngine::RecursiveErase( FOdysseyVectorObject* iObject
 }
 
 void
-FOdysseyVectorEngine::Erase( FOdysseyVectorScene* iScene
+FOdysseyVectorEngine::Erase( FOdysseyVectorGroupPaint* iScene
                            , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                            , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                            , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
@@ -328,10 +383,8 @@ FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
                                             , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                             , bool iSelectedOnly )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
+    for( FOdysseyVectorObject *child : iObject->GetChildrenList() )
     {
-        FOdysseyVectorObject *child = (*it);
-
         RecursiveEraseSections( child
                               , iAddedVertexArray
                               , iAddedSegmentArray
@@ -394,7 +447,7 @@ FOdysseyVectorEngine::RecursiveEraseSections( FOdysseyVectorObject* iObject
 }
 
 void
-FOdysseyVectorEngine::EraseSections( FOdysseyVectorScene* iScene
+FOdysseyVectorEngine::EraseSections( FOdysseyVectorGroupPaint* iScene
                                    , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                    , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                    , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
@@ -493,99 +546,6 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
     return nullptr;
 }
 
-static void
-RecursivePickSegments( FOdysseyVectorObject* iObject
-                     , double iX
-                     , double iY
-                     , double iRadius
-                     , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
-                     , std::vector<double>* oDistanceArray )
-{
-    if( iObject->GetClass() == FOdysseyVectorPath::StaticClass() )
-    {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
-        BLPoint localVector = iObject->GetInverseWorldMatrix().mapVector( 0.7071f, 0.7071f );
-        ::ULIS::FVec2D factor = { localVector.x * iRadius, localVector.y * iRadius };
-        double localRadius = factor.Distance();
-        BLPoint localPoint = iObject->GetInverseWorldMatrix().mapPoint( iX, iY );
-        ::ULIS::FRectD pathBBox = path->GetBBox( false );
-
-        // get sure we hit the box be enlarging it with the picking circle radius value.
-        // otherwise we might not be able to pick points located at the box's boundaries.
-        pathBBox.x -=   localRadius;
-        pathBBox.y -=   localRadius;
-        pathBBox.w += ( localRadius * 2 );
-        pathBBox.h += ( localRadius * 2 );
-
-        if( pathBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
-        {
-            std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
-
-            for( std::list<FOdysseyVectorSegment*>::iterator it = segmentList.begin(); it != segmentList.end(); ++it )
-            {
-                FOdysseyVectorSegment* segment = (*it);
-                ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
-
-                segmentBBox.x -=   localRadius;
-                segmentBBox.y -=   localRadius;
-                segmentBBox.w += ( localRadius * 2 );
-                segmentBBox.h += ( localRadius * 2 );
-
-                if( segmentBBox.HitTest( ::ULIS::FVec2D( localPoint.x, localPoint.y ) ) == true )
-                {
-                    double smallestDistance;
-
-                    if( segment->ProximityTest( localPoint.x, localPoint.y, localRadius, smallestDistance ) )
-                    {
-                        oPickedSegmentArray.push_back( segment );
-
-                        if( oDistanceArray )
-                        {
-                            oDistanceArray->push_back( smallestDistance );
-                        }
-                    } 
-                }
-            }
-        }
-    }
-
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObject->GetChildrenList().begin(); it != iObject->GetChildrenList().end(); ++it )
-    {
-        FOdysseyVectorObject* child = (*it);
-
-        RecursivePickSegments( child, iX, iY, iRadius, oPickedSegmentArray, oDistanceArray );
-    }
-}
-
-void
-FOdysseyVectorEngine::PickSegments( FOdysseyVectorScene* iScene
-                                  , bool iRestrictToSelection
-                                  , double iX
-                                  , double iY
-                                  , double iRadius
-                                  , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
-                                  , std::vector<double>* oDistance )
-{
-    if( iRestrictToSelection )
-    {
-        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetSelectedObjectList();
-
-        for( std::list<FOdysseyVectorObject*>::iterator it = selectedObjectList.begin(); it != selectedObjectList.end(); ++it )
-        {
-            FOdysseyVectorObject* selectedObject = (*it);
-
-            if( selectedObject->HasSelectedAncestor() == false )
-            {
-                RecursivePickSegments( selectedObject, iX, iY, iRadius, oPickedSegmentArray, oDistance );
-            }
-        }
-    }
-    else
-    {
-        RecursivePickSegments( iScene, iX, iY, iRadius, oPickedSegmentArray, oDistance );
-    }
-}
-
 // static
 void
 FOdysseyVectorEngine::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
@@ -596,10 +556,8 @@ FOdysseyVectorEngine::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
 {
     FOdysseyVectorObject* pickedObject = ( iObj != iSelectionSpace ) ? iObj->Pick( iSelectionSpace, iRoi, iSelectionFlags ) : nullptr;
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObj->GetChildrenList().begin(); it != iObj->GetChildrenList().end(); ++it )
+    for( FOdysseyVectorObject* child : iObj->GetChildrenList() )
     {
-        FOdysseyVectorObject* child = (*it);
-
         RecursivePick( iSelectionSpace, child, oSelectedObjectArray, iRoi, iSelectionFlags );
     }
 
@@ -610,7 +568,7 @@ FOdysseyVectorEngine::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
 }
 
 void
-FOdysseyVectorEngine::Pick( FOdysseyVectorScene* iScene
+FOdysseyVectorEngine::Pick( FOdysseyVectorGroupPaint* iScene
                           , const ::ULIS::FRectD& iRoi
                           , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
                           , uint32 iSelectionFlags )
@@ -651,10 +609,8 @@ FOdysseyVectorEngine::ClearHUD()
 void
 FOdysseyVectorEngine::ResetHUD()
 {
-    for( std::list<FOdysseyVectorHUD*>::iterator hit = GetHUDList().begin(); hit != GetHUDList().end(); ++hit )
+    for( FOdysseyVectorHUD *hud : GetHUDList() )
     {
-        FOdysseyVectorHUD *hud = (*hit);
-
         hud->Reset( mScene );
     }
 }
@@ -1246,7 +1202,7 @@ FOdysseyVectorEngine::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oO
 
 
 bool
-FOdysseyVectorEngine::HasFocus( FOdysseyVectorScene* iScene
+FOdysseyVectorEngine::HasFocus( FOdysseyVectorGroupPaint* iScene
                               , FOdysseyVectorObject* iObject
                               , uint64 iTraversalFlags )
 {
@@ -1255,7 +1211,7 @@ FOdysseyVectorEngine::HasFocus( FOdysseyVectorScene* iScene
         return true;
     }
 
-    if( iScene->GetSelectedObjectList().size() == 0 )
+    if( GetSelectedObjectList().size() == 0 )
     {
         return true;
     }
@@ -1270,7 +1226,7 @@ FOdysseyVectorEngine::HasFocus( FOdysseyVectorScene* iScene
 
 // Execute callback on object tree
 uint64
-FOdysseyVectorEngine::Traverse( FOdysseyVectorScene* iScene
+FOdysseyVectorEngine::Traverse( FOdysseyVectorGroupPaint* iScene
                               , FOdysseyVectorObject* iObject
                               , uint64 iTraversalFlags
                               , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback )
@@ -1301,4 +1257,285 @@ FOdysseyVectorEngine::Traverse( FOdysseyVectorScene* iScene
     }
 
     return 0;
+}
+
+// static
+FOdysseyVectorGroupPaint*
+FOdysseyVectorEngine::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
+                                              , const std::list<FOdysseyVectorObject*>& iObjectList
+                                               , std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                               , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
+                                               , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray )
+{
+    // this array will help us to transfer buckets as well
+    std::vector<FOdysseyVectorGroupPaint*> parentPaintGroupArray;
+
+    if( iObjectList.size() )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = new FOdysseyVectorGroupPaint( "Paint Group" );
+
+        iParent->AppendChild( paintGroup );
+
+        paintGroup->UpdateMatrix();
+
+        for( FOdysseyVectorObject* selectedObject : iObjectList )
+        {
+            if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+            {
+                FOdysseyVectorPath* selectedCubicPath = static_cast<FOdysseyVectorPath*>( selectedObject );
+
+                oCubicPathArray.push_back( selectedCubicPath );
+            }
+        }
+
+        oCubicPathOldParentArray.resize( oCubicPathArray.size() );
+
+        for( int i = 0; i < oCubicPathArray.size(); i++ )
+        {
+            FOdysseyVectorObject* parentObject = oCubicPathArray[i]->GetParent();
+
+            oCubicPathOldParentArray[i] = parentObject;
+
+            paintGroup->TransferChild( oCubicPathArray[i], paintGroup->GetLastChild() );
+
+            // take andvantge of this loop to also extract buckets if over
+            if( parentObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                FOdysseyVectorGroupPaint* parentPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(parentObject);
+
+                if( std::find( parentPaintGroupArray.begin(), parentPaintGroupArray.end(), parentPaintGroup ) == parentPaintGroupArray.end() )
+                {
+                    parentPaintGroupArray.push_back( parentPaintGroup );
+                }
+            }
+        }
+
+        // update paths and detect cycles for bucket matching
+        paintGroup->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+        // extract buckets if over
+        for( FOdysseyVectorGroupPaint* parentPaintGroup : parentPaintGroupArray )
+        {
+            std::list<FOdysseyVectorBucket*>& bucketList = parentPaintGroup->GetBucketList();
+            BLMatrix2D& parentWorldMatrix = parentPaintGroup->GetWorldMatrix();
+
+            for( FOdysseyVectorBucket* bucket : bucketList )
+            {
+                ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
+                BLPoint bucketWorldCoords = parentWorldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
+
+                // TODO: that's a lot of conversion, kowing that both PickCycle 
+                // and FOdysseyVectorBucket() convert to their own space.
+                // We can optimize by creating a PickCycle
+                // with local coordinates as parameter. Same for FOdysseyVectorBucket()
+                if( paintGroup->PickCycle( bucketWorldCoords.x, bucketWorldCoords.y ) )
+                {
+                    FOdysseyVectorBucket* importedBucket = new FOdysseyVectorBucket( paintGroup, bucket );
+
+                    paintGroup->AddBucket( importedBucket );
+
+                    oRemovedBucketArray.push_back( bucket );
+                }
+            }
+        }
+
+        // we can't remove the bucket in the previous loop as it would alter the std:list
+        // we are looping into (unless we copy the list, yes I know).
+        for( int i = 0; i < oRemovedBucketArray.size(); i++ )
+        {
+            FOdysseyVectorObject* ownerObject = oRemovedBucketArray[i]->GetOwner();
+
+            if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                FOdysseyVectorGroupPaint* parentPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+            
+                parentPaintGroup->RemoveBucket( oRemovedBucketArray[i] );
+            }
+        }
+
+        return paintGroup;
+    }
+
+    return nullptr;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorEngine::GetPositionFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList )
+{
+    BLPoint averagePosition = BLPoint( 0.0f, 0.0f );
+
+    if ( iObjectList.size() )
+    {
+        for( FOdysseyVectorObject* obj : iObjectList )
+        {
+            ::ULIS::FRectD bbox = obj->GetBBox( true );
+            BLPoint middle = BLPoint( bbox.x + bbox.w * 0.5f
+                                    , bbox.y + bbox.h * 0.5f );
+
+            averagePosition.x += middle.x;
+            averagePosition.y += middle.y;
+        }
+
+        averagePosition.x /= iObjectList.size();
+        averagePosition.y /= iObjectList.size();
+    }
+
+    return ::ULIS::FVec2D( averagePosition.x, averagePosition.y );
+}
+
+// static
+void
+FOdysseyVectorEngine::FlipObjectsHorizontal( const std::list<FOdysseyVectorObject*>& iObjectList )
+{
+    FlipObjects( iObjectList, -1.0f, 1.0f );
+}
+
+// static
+void
+FOdysseyVectorEngine::FlipObjectsVertical( const std::list<FOdysseyVectorObject*>& iObjectList )
+{
+    FlipObjects( iObjectList, 1.0f, -1.0f );
+}
+
+// static
+void
+FOdysseyVectorEngine::FlipObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                 , double iXFactor
+                                 , double iYFactor )
+{
+    ::ULIS::FVec2D axisPosition = GetPositionFromObjects( iObjectList );
+    BLMatrix2D inverseAxisMatrix;
+    BLMatrix2D axisMatrix;
+    BLMatrix2D flippingMatrix;
+
+    axisMatrix.reset();
+    axisMatrix.translate( axisPosition.x, axisPosition.y );
+
+    BLMatrix2D::invert( inverseAxisMatrix, axisMatrix );
+
+    flippingMatrix.resetToScaling( iXFactor, iYFactor );
+
+    for( FOdysseyVectorObject *object : iObjectList )
+    {
+        BLMatrix2D& objectWorldMatrix = object->GetWorldMatrix();
+        BLPoint objectWorldCenter = objectWorldMatrix.mapPoint( 0.0f, 0.0f );
+        BLPoint objectLocalCenter = inverseAxisMatrix.mapPoint( objectWorldCenter ); 
+        BLPoint objectLocalFlippedCenter = flippingMatrix.mapPoint( objectLocalCenter );
+        BLPoint objectWorldFlippedCenter = axisMatrix.mapPoint( objectLocalFlippedCenter );
+
+        objectLocalCenter = object->GetParent()->GetInverseWorldMatrix().mapPoint( objectWorldFlippedCenter );
+
+        object->Translate( objectLocalCenter.x, objectLocalCenter.y );
+        object->Scale( iXFactor * object->GetScalingX(), iYFactor * object->GetScalingY() );
+        object->Rotate( -object->GetRotation() );
+
+        object->UpdateMatrix();
+    }
+}
+
+// static
+FOdysseyVectorGroup*
+FOdysseyVectorEngine::GroupObjects( FOdysseyVectorObject* iParent
+                                  , const std::list<FOdysseyVectorObject*>& iObjectList
+                                  , std::vector<FOdysseyVectorObject*>& oObjectArray
+                                  , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )
+{
+    BLPoint averageTranslation = { 0.0f, 0.0f };
+
+    if ( iObjectList.size() )
+    {
+        FOdysseyVectorGroup* group = new FOdysseyVectorGroup( FString("Group") );
+
+        iParent->AppendChild ( group );
+
+        //group->Translate( averageTranslation.x, averageTranslation.y );
+        group->UpdateMatrix();
+
+        oObjectArray.reserve( iObjectList.size() );
+        oObjectOldParentArray.reserve( iObjectList.size() );
+
+        for( FOdysseyVectorObject *obj : iObjectList )
+        {
+            oObjectArray.push_back( obj );
+            oObjectOldParentArray.push_back( obj->GetParent() );
+
+            group->TransferChild( obj, group->GetLastChild() );
+        }
+
+        group->Invalidate();
+
+        return group;
+    }
+
+    return nullptr;
+}
+
+
+#ifdef unused
+void
+FOdysseyVectorScene::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iDrawingFlags )
+{
+    static ::ULIS::FRectD zeroRectangle; // static variables are always zeroed by default
+    BLRgba32 blFillColor;
+    FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? mGroupPaintParam.MonochromeColor
+                                                                                     : mBackgroundBucket.GetColor();
+
+    iBLContext->save();
+
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+
+//UE_LOG(LogTemp, Warning, TEXT("Some warning message:%d %d %d %d"), roi.x, roi.y, roi.w, roi.h );
+
+    blFillColor.setR( fillColor.R );
+    blFillColor.setG( fillColor.G );
+    blFillColor.setB( fillColor.B );
+    blFillColor.setA( fillColor.A * iCombinedOpacity );
+
+    iBLContext->setFillStyle( blFillColor );
+
+    //iBLContext->resetMatrix();
+    //blctx->clearAll();
+    iBLContext->fillAll();
+
+    // TODO: possible optimization: only erase the invalidated part.
+    // however, fillRect can do the trick only if the matrix is set to identity.
+    //::ULIS::FRectI& rect = GetEngine()->GetInvalidatedRect();
+    //iBLContext->fillRect( rect.x, rect.y, rect.w, rect.h );
+
+    FOdysseyVectorGroupPaint::DrawShape( iBLContext, iCombinedOpacity, iDrawingFlags );
+
+    // view the updated zone ( testing purpose only )
+    /*iBLContext.setStrokeStyle(BLRgba32(0xFFFF0000));
+    iBLContext.setStrokeWidth(1.0f);
+    iBLContext.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
+    iBLContext->restore();
+}
+#endif // unused
+
+// forbid child removal
+bool
+FOdysseyVectorEngine::RemoveChild( FOdysseyVectorObject* iChild )
+{
+    return false;
+}
+
+// forbid child addition
+bool
+FOdysseyVectorEngine::AddChild( FOdysseyVectorObject* iChild
+                              , FOdysseyVectorObject* iInsertAfter )
+{
+    return false;
+}
+
+void
+FOdysseyVectorEngine::RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                   , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray )
+{
+    for( FOdysseyVectorObject* vectorObject : iObjectList )
+    {
+        if( vectorObject->GetParent()->RemoveChild( vectorObject ) )
+        {
+            oRemovedObjectArray.push_back( vectorObject );
+        }
+    }
 }

@@ -14,7 +14,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::FOdysseyPainterEditorVectorPathSmo
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
     uint64 hudFlags = mPathSmoothTool->GetEditor()->GetVectorHUDFlags();
 
@@ -27,18 +27,18 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorScene* iScene
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Load( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
 FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
-                                                  , FOdysseyVectorScene* iScene )
+                                                  , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -60,7 +60,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection 
-    if( mPathSmoothTool->RestrictToSelectedObjects  && iScene->GetSelectedObjectList().size() )
+    if( mPathSmoothTool->RestrictToSelectedObjects  && iScene->GetEngine()->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

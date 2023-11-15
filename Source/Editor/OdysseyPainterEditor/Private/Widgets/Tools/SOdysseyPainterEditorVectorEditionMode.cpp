@@ -85,7 +85,7 @@ SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags( ECheckBoxState iN
 
     if( mediaVectors.Num() )
     {
-        FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+        FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
         FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
         vectorEngine->ResetHUD();

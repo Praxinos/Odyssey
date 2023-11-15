@@ -15,7 +15,7 @@ FOdysseyVectorUndoObjectAdd::~FOdysseyVectorUndoObjectAdd()
     }
 }
 
-FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPaint* iScene
                                                         , FOdysseyVectorObject* iObject )
     : FOdysseyVectorUndo( iScene )
 {
@@ -23,14 +23,12 @@ FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* i
     mObjectArray.push_back( iObject );
 }
 
-FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPaint* iScene
                                                         , std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
 {
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : iObjectList )
     {
-        FOdysseyVectorObject* object = static_cast<FOdysseyVectorObject*>(*it);
-
         mFormerParentArray.push_back( object->GetParent() );
         mObjectArray.push_back( object );
     }
@@ -95,7 +93,7 @@ FOdysseyVectorUndoObjectAdd::Revert( UObject* iIgnored )
         mFormerParentArray[i] = currentParent;
     }
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );

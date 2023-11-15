@@ -4,7 +4,7 @@
 #include "OdysseyFile.h"
 
 void
-FOdysseyVectorImportV1::Read( FOdysseyVectorScene* iScene, FArchive &Ar, uint64 iChunkEnd )
+FOdysseyVectorImportV1::Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, uint64 iChunkEnd )
 {
     if( iScene )
     {

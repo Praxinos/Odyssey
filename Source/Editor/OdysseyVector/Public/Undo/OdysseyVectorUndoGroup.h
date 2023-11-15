@@ -11,13 +11,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoGroup : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoGroup();
-        FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                , FOdysseyVectorGroup* iAddedGroup
                                , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray
                                , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray );
 
-        FOdysseyVectorUndoGroup( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                , FOdysseyVectorGroup* iAddedGroup
                                , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray );

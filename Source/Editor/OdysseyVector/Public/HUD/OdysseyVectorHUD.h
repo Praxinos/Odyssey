@@ -10,7 +10,7 @@ class FOdysseyVectorPoint;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;
 class FOdysseyVectorGroupPaint;
-class FOdysseyVectorScene;
+class FOdysseyVectorGroupPaint;
 class FOdysseyVectorEngine;
 
 typedef struct _FPointQuadTreeEntry
@@ -35,7 +35,7 @@ class ODYSSEYVECTOR_API FPointQuadTree
 
         void Build( uint32 iMaxPointsPerQuad, std::vector<FPointQuadTreeEntry>& iParentPointQuadTreeEntryArray );
         void Draw( BLContext* iBLContext
-                 , FOdysseyVectorScene* iScene
+                 , FOdysseyVectorGroupPaint* iScene
                  , uint64 iFlags );
         void PickPoints( double iWorldX
                        , double iWorldY
@@ -163,8 +163,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 13 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) = 0;
-        virtual void Reset( FOdysseyVectorScene* iScene ) = 0;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) = 0;
+        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) = 0;
 
 
         void PickPoints( double iWorldX
@@ -172,7 +172,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                        , double iSelectionRadius
                        , std::vector<FOdysseyVectorPoint*>& oPickedPointArray );
 
-        void MakePointQuadTree( FOdysseyVectorScene *iScene,uint64 iHUDFlags );
+        void MakePointQuadTree( FOdysseyVectorGroupPaint *iScene,uint64 iHUDFlags );
 
     protected:
         FPointQuadTree* mPointQuadTree;

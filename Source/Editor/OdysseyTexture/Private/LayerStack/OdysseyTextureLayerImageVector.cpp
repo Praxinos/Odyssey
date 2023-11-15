@@ -57,7 +57,7 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     Width  = iWidth;
     Height = iHeight;
 
-    mEngine = new FOdysseyVectorEngine( new FOdysseyVectorScene( "Scene" )
+    mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
                                        , (double)iWidth
                                        , (double)iHeight );
 }
@@ -192,8 +192,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
                 break;
             }
         }
-        mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                       | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
+        mEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
     }
 }
 

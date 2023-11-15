@@ -11,7 +11,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathStitch : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoPathStitch();
-        FOdysseyVectorUndoPathStitch( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoPathStitch( FOdysseyVectorGroupPaint* iScene
                                     , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
                                     , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                     , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray

@@ -26,7 +26,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
                               , uint64 iChunkLen
                               , FArchive &Ar );
 
-    void Read( FOdysseyVectorScene* iScene, FArchive &Ar, uint64 iChunkEnd );
+    void Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, uint64 iChunkEnd );
     void ReadObject( FOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar );
     void ReadObjectsDeclare( uint64 iChunkEnd, FArchive &Ar );
     void ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar );
@@ -51,9 +51,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
                                       , FArchive &Ar );
     void ReadObjectBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar );
     void ReadObjectTransform( FOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar );
-    void ReadScene( FOdysseyVectorScene& iScene, uint64 iChunkEnd, FArchive &Ar );
+    void ReadScene( FOdysseyVectorGroupPaint& iScene, uint64 iChunkEnd, FArchive &Ar );
 
     private:
         std::vector<FOdysseyVectorObject*> mObjectArray;
-        FOdysseyVectorScene* mScene;
+        FOdysseyVectorGroupPaint* mScene;
 };

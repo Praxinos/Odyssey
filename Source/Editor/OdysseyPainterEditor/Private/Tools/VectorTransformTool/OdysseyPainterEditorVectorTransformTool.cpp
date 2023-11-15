@@ -41,13 +41,13 @@ UOdysseyPainterEditorVectorTransformTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorTransformTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorTransformTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
-UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
@@ -67,7 +67,7 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorScene* iScen
 }
 
 uint64
-UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FKey& iKey )
 {
     UniformAtKeyDown = Uniform;
@@ -81,7 +81,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorScene* 
 }
 
 uint64
-UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FKey& iKey )
 {
     Uniform = UniformAtKeyDown;
@@ -90,7 +90,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorScene* iS
 }
 
 uint64
-UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
@@ -125,7 +125,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorScen
 }
 
 void
-UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVectorGroupPaint* iScene
                                                                   , std::list<FOdysseyVectorObject*>& oObjectList )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -154,10 +154,12 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
 }
 
 uint64
-UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
+    mTransformHUD->SetCenterGizmo( false );
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -251,7 +253,7 @@ TransformPoint( FOdysseyVectorPoint* iPoint
 
 void
 UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVectorEngine* iEngine
-                                                                  , FOdysseyVectorScene* iScene
+                                                                  , FOdysseyVectorGroupPaint* iScene
                                                                   , const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
@@ -429,7 +431,7 @@ UOdysseyPainterEditorVectorTransformTool::GetRotationAngle( const FOdysseyPoint&
 
 void
 UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorEngine* iEngine
-                                                               , FOdysseyVectorScene* iScene
+                                                               , FOdysseyVectorGroupPaint* iScene
                                                                , const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
@@ -545,7 +547,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
 
 void
 UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEngine* iEngine
-                                                              , FOdysseyVectorScene* iScene
+                                                              , FOdysseyVectorGroupPaint* iScene
                                                               , const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
@@ -733,7 +735,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
 }
 
 uint64
-UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture )
 {
     // Left mouse button clicked
@@ -797,7 +799,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorScene
 }
 
 uint64
-UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey)
 {
@@ -856,12 +858,14 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorScene* 
         mPickedPivot = nullptr;
     }
 
+    mTransformHUD->SetCenterGizmo( true );
+
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
 }
 
 uint64
-UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                                , const FName& iPropertyName )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();

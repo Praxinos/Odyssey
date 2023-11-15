@@ -17,25 +17,25 @@ FOdysseyPainterEditorVectorScenePanToolHUD::FOdysseyPainterEditorVectorScenePanT
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorGroupPaint* iScene)
 {
     // it's unused but we could use it at some point so, we init it anyways
     UpdateSelectionBox( iScene, false, mScenePanTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::Load(FOdysseyVectorScene* iScene)
+FOdysseyPainterEditorVectorScenePanToolHUD::Load(FOdysseyVectorGroupPaint* iScene)
 {
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorScenePanToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::DrawText( BLContext* iBLContext
-                                                    , FOdysseyVectorScene* iScene
+                                                    , FOdysseyVectorGroupPaint* iScene
                                                     , ::ULIS::FRectD& iFrame )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
@@ -71,7 +71,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawText( BLContext* iBLContext
 
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( BLContext* iBLContext
-                                                     , FOdysseyVectorScene* iScene
+                                                     , FOdysseyVectorGroupPaint* iScene
                                                      , ::ULIS::FRectD& iFrame
                                                      , ::ULIS::FVec2D& iFrameLength )
 {
@@ -95,7 +95,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( BLContext* iBLContext
 
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorScene* iScene )
+                                                , FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();

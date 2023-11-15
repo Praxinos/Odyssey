@@ -10,7 +10,7 @@
 
 namespace FOdysseyVectorExportV2
 {
-    void ODYSSEYVECTOR_API Write( FOdysseyVectorScene* iScene, FArchive &Ar );
+    void ODYSSEYVECTOR_API Write( FOdysseyVectorGroupPaint* iScene, FArchive &Ar );
 
     ////////////////////////////////////
     void ODYSSEYVECTOR_API WriteObject( FOdysseyVectorObject& iObject, FArchive &Ar );
@@ -81,7 +81,4 @@ namespace FOdysseyVectorExportV2
     void WriteGroupPaintWireframeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
     void WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
     void WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
-
-    void ODYSSEYVECTOR_API WriteScene( FOdysseyVectorScene& iScene, FArchive &Ar );
-    void WriteSceneChunks( FOdysseyVectorScene& iScene, FArchive &Ar );
 }

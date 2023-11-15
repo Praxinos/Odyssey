@@ -61,33 +61,33 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
-        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
-        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
-        virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+        virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual uint64 OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                       , const FKey& iKey ) override;
-        virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
-        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey ) override;
-        virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                          , const FOdysseyPoint& iPointInTexture ) override;
-        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture ) override;
-        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey ) override;
-        virtual uint64 PropertyChangedVector( FOdysseyVectorScene* iScene
+        virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
 
     private:
         bool HasMedia() const;
-        FOdysseyVectorVertex* PickVertex( FOdysseyVectorScene* iScene
+        FOdysseyVectorVertex* PickVertex( FOdysseyVectorGroupPaint* iScene
                                         , double iWorldX
                                         , double iWorldY
                                         , double iPickingRadius );
         void SetPathColor( FOdysseyVectorPath* iPath );
-        void RecordUndoPathAdd( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath  );
-        void RecordUndoPathExtend( FOdysseyVectorScene* iScene, FOdysseyVectorPath* iPath );
+        void RecordUndoPathAdd( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorPath* iPath  );
+        void RecordUndoPathExtend( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorPath* iPath );
 
     public:
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )

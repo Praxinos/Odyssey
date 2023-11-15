@@ -10,7 +10,7 @@
 #include <Image/Block.h>
 
 class FOdysseyVectorPoint;
-class FOdysseyVectorScene;
+class FOdysseyVectorGroupPaint;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorVertex;
 class FOdysseyVectorSegmentCubic;
@@ -160,7 +160,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 {
     public:
         ~FOdysseyVectorUndo();
-        FOdysseyVectorUndo( FOdysseyVectorScene* iScene );
+        FOdysseyVectorUndo( FOdysseyVectorGroupPaint* iScene );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -173,5 +173,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 
     protected:
         bool mApplied;
-        FOdysseyVectorScene* mScene;
+        FOdysseyVectorGroupPaint* mScene;
 };

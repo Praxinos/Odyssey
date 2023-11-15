@@ -1,14 +1,12 @@
-#include "Undo/OdysseyVectorUndoSceneRemoveSelection.h"
+#include "Undo/OdysseyVectorUndoRemoveObjects.h"
 
-FOdysseyVectorUndoSceneRemoveSelection::~FOdysseyVectorUndoSceneRemoveSelection()
+FOdysseyVectorUndoRemoveObjects::~FOdysseyVectorUndoRemoveObjects()
 {
     // Removal confirmed
     if( mApplied )
     {
-        for( std::list<FOdysseyVectorObject*>::iterator it = mRemovedObjectList.begin(); it != mRemovedObjectList.end(); ++it )
+        for( FOdysseyVectorObject* object : mRemovedObjectArray )
         {
-            FOdysseyVectorObject* object = (*it);
-
             delete object;
         }
     }
@@ -18,26 +16,25 @@ FOdysseyVectorUndoSceneRemoveSelection::~FOdysseyVectorUndoSceneRemoveSelection(
     }
 }
 
-FOdysseyVectorUndoSceneRemoveSelection::FOdysseyVectorUndoSceneRemoveSelection( FOdysseyVectorScene* iScene )
+FOdysseyVectorUndoRemoveObjects::FOdysseyVectorUndoRemoveObjects( FOdysseyVectorGroupPaint* iScene
+                                                                , const std::vector<FOdysseyVectorObject*>& iRemovedObjectArray )
     : FOdysseyVectorUndo( iScene )
 {
-    mRemovedObjectList = mScene->GetSelectedObjectList();
+    mRemovedObjectArray = iRemovedObjectArray;
 }
 
 void
-FOdysseyVectorUndoSceneRemoveSelection::Apply( UObject* iIgnored )
+FOdysseyVectorUndoRemoveObjects::Apply( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mRemovedObjectList.begin(); it != mRemovedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : mRemovedObjectArray )
     {
-        FOdysseyVectorObject* object = (*it);
-
         object->GetParent()->RemoveChild( object );
     }
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -50,22 +47,20 @@ FOdysseyVectorUndoSceneRemoveSelection::Apply( UObject* iIgnored )
 }
 
 void
-FOdysseyVectorUndoSceneRemoveSelection::Revert( UObject* iIgnored )
+FOdysseyVectorUndoRemoveObjects::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mRemovedObjectList.begin(); it != mRemovedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : mRemovedObjectArray )
     {
-        FOdysseyVectorObject* object = (*it);
-
         // Note: GetParent is still valid even though the object was removed from the children list.
         // This helps us to add the object to its parent anew without having to store the pointer to the parent object.
         object->GetParent()->AppendChild( object );
 
-        mScene->Select( object );
+        //mScene->GetEngine()->SelectObject( object );
     }
 
     // update invalidated objects
@@ -80,7 +75,7 @@ FOdysseyVectorUndoSceneRemoveSelection::Revert( UObject* iIgnored )
 
 /** Describes this change (for debugging) */
 FString
-FOdysseyVectorUndoSceneRemoveSelection::ToString() const
+FOdysseyVectorUndoRemoveObjects::ToString() const
 {
-    return FString("FOdysseyVectorUndoSceneRemoveSelection");
+    return FString("FOdysseyVectorUndoRemoveObjects");
 }

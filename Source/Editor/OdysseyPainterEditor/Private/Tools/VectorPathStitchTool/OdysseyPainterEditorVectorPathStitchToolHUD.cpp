@@ -12,7 +12,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::FOdysseyPainterEditorVectorPathSti
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
     uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorHUDFlags();
 
@@ -28,12 +28,12 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorScene* iScene
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::Load( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathStitchToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorPathStitchToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
 }
 
@@ -83,7 +83,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX, doubl
 
 void
 FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
-                                                  , FOdysseyVectorScene* iScene )
+                                                  , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();

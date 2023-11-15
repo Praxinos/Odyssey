@@ -39,13 +39,13 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -54,7 +54,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorScene
 }
 
 uint64
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FKey& iKey )
 {
     UniformAtKeyDown = Uniform;
@@ -68,7 +68,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVector
 }
 
 uint64
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FKey& iKey )
 {
     Uniform = UniformAtKeyDown;
@@ -77,7 +77,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorSc
 }
 
 uint64
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                                   , const FOdysseyPoint& iPointInTexture
                                                                   , const FKey& iKey )
 {
@@ -131,8 +131,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
         primitive->Translate( localCoords.x, localCoords.y );
         primitive->UpdateMatrix();
 
-        iScene->ClearSelection();
-        iScene->Select( primitive );
+        iScene->GetEngine()->ClearObjectSelection();
+        iScene->GetEngine()->SelectObject( primitive );
 
         //mSelectionChanged.Broadcast(iScene);
 
@@ -166,13 +166,13 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetLineRotationAngle( FOdysseyV
 }
 
 uint64
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                                   , const FOdysseyPoint& iPointInTexture )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetLastSelected() );
+        FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetEngine()->GetLastSelectedObject() );
 
         if( primitive )
         {
@@ -249,14 +249,14 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
 }
 
 uint64
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FOdysseyPoint& iPointInTexture
                                                                 , const FKey& iKey )
 {
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetLastSelected() );
+        FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetEngine()->GetLastSelectedObject() );
 
         if( primitive )
         {
@@ -273,7 +273,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             }
             GEditor->EndTransaction();
 
-            iScene->ClearSelection();
+            iScene->GetEngine()->ClearObjectSelection();
             iScene->RemoveChild( primitive );
 
             delete primitive;
@@ -281,7 +281,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             iScene->AppendChild( path );
             //path->InvalidateAllSegments();
             path->UpdateMatrix();
-            iScene->Select( path );
+
+            iScene->GetEngine()->SelectObject( path );
         }
 
         iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidate objects

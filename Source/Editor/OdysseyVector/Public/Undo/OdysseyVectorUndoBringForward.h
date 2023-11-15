@@ -12,7 +12,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBringForward : public FOdysseyVectorUn
 {
     public:
         ~FOdysseyVectorUndoBringForward();
-        FOdysseyVectorUndoBringForward( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoBringForward( FOdysseyVectorGroupPaint* iScene
                                       , FOdysseyVectorObject* iObject );
 
         /** Called when redoing */

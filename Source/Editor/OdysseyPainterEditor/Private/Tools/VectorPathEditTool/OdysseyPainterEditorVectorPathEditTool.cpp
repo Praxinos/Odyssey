@@ -40,13 +40,13 @@ UOdysseyPainterEditorVectorPathEditTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
-UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
@@ -64,7 +64,7 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorScene* iScene
 }
 
 uint64
-UOdysseyPainterEditorVectorPathEditTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathEditTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FKey& iKey )
 {
     // then detect which keys are pressed and set display mode
@@ -92,7 +92,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownVector( FOdysseyVectorScene* i
 }
 
 uint64
-UOdysseyPainterEditorVectorPathEditTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathEditTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
@@ -106,7 +106,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpVector( FOdysseyVectorScene* iSc
 }
 
 void
-UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorGroupPaint* iScene
                                                                , const FOdysseyPoint& iPointInTexture
                                                                , const FKey& iKey )
 {
@@ -197,7 +197,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorS
 }
 
 void
-UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorGroupPaint* iScene
                                                               , std::vector<FOdysseyVectorPath*>& oPathArray )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -240,7 +240,7 @@ UOdysseyPainterEditorVectorPathEditTool::BuildSegmentAdjustments( const std::vec
 }
 
 void
-UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
@@ -401,7 +401,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorSce
 }
 
 uint64
-UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
@@ -429,7 +429,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorScene*
 }
 
 uint64
-UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture )
 {
     // we need the focus on the viewport for keyboard 
@@ -526,7 +526,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragVertex( FOdysseyVectorVertex *iVert
 }
 
 uint64
-UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
 /*
@@ -616,7 +616,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorScene*
 }
 
 uint64
-UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {

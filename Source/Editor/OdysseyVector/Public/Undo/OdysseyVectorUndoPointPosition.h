@@ -13,11 +13,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorU
 {
     public:
         ~FOdysseyVectorUndoPointPosition();
-        FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
+        FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                        , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                        , std::vector<FOdysseyVectorHandleSegment*>& iHandleArray );
-        FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene, std::vector<FOdysseyVectorPoint*>& iPointArray );
-        FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene, FOdysseyVectorPoint* iPoint );
+        FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene, std::vector<FOdysseyVectorPoint*>& iPointArray );
+        FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorPoint* iPoint );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

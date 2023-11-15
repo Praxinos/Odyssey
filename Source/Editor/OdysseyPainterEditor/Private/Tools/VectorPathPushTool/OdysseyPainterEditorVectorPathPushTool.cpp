@@ -35,7 +35,7 @@ UOdysseyPainterEditorVectorPathPushTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -44,7 +44,7 @@ UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorScene* iScene
 }
 
 uint64
-UOdysseyPainterEditorVectorPathPushTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorPathPushTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
      return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
@@ -64,7 +64,7 @@ UOdysseyPainterEditorVectorPathPushTool::GetPushedPoint( FOdysseyVectorPoint* iP
 }
 
 uint64
-UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
@@ -201,7 +201,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorScene*
 }
 
 uint64
-UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = Radius * 2.0f;
@@ -217,7 +217,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorScene
 }
 
 uint64
-UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
     // Left mouse button clicked
@@ -279,7 +279,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorScene*
 }
 
 uint64
-UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {

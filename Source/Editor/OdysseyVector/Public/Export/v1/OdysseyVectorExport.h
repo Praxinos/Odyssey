@@ -10,7 +10,7 @@
 
 namespace FOdysseyVectorExportV1
 {
-    void ODYSSEYVECTOR_API Write( FOdysseyVectorScene* iScene, FArchive &Ar );
+    void ODYSSEYVECTOR_API Write( FOdysseyVectorGroupPaint* iScene, FArchive &Ar );
 
     ////////////////////////////////////
     void WriteDefineObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );

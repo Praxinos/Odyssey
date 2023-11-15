@@ -24,7 +24,7 @@ public:
     void Initialize();
     void Finalize();
 	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
-    void OnVectorSceneSignal( FOdysseyVectorScene* iScene, uint64 iSignalFlags );
+    void OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
 
 protected:
     //Init

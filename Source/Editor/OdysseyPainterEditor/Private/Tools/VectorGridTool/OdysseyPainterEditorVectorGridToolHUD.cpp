@@ -248,14 +248,14 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( BLContext* iBLCo
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
     MakeGrid( iScene, mGridTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
 FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext
-                                            , FOdysseyVectorScene* iScene )
+                                            , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -361,7 +361,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
@@ -573,7 +573,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeCells()
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorScene* iScene, uint64 iHUDFlags )
+FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorGroupPaint* iScene, uint64 iHUDFlags )
 {
     // Updates the selection box
     UpdateSelectionBox( iScene, mGridTool->World, iHUDFlags );

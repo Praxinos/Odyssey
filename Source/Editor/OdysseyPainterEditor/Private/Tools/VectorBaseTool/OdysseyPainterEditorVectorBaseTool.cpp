@@ -50,7 +50,7 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
 }
 
 void
-UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorGroupPaint* iScene
                                                         , std::vector<FOdysseyVectorVertex*>& oSelectedVertexArray )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -118,7 +118,7 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 
         if( mediaVectors.Num() > 0 )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
@@ -147,7 +147,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
         if( mediaVectors.Num() > 0 )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
@@ -169,7 +169,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 }
 
 uint64
-UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                     , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
@@ -229,7 +229,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
@@ -237,13 +237,15 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 
             vectorEngine->Signal( signalFlags );
         }
+
+       return true;
     }
 
     return false;
 }
 
 uint64
-UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                   , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
@@ -267,7 +269,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
@@ -275,6 +277,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 
             vectorEngine->Signal( signalFlags );
         }
+
+       return true;
     }
 
     return false;
@@ -298,7 +302,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
@@ -306,10 +310,12 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 
             vectorEngine->Signal( signalFlags );
         }
+
+       return true;
     }
   }  // workaround
 
-    return true;
+    return false;
 }
 
 void
@@ -323,7 +329,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
@@ -347,7 +353,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInT
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
@@ -375,7 +381,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
@@ -391,13 +397,15 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
                 }
             }
         }
+
+       return true;
     }
 
     return false;
 }
 
 uint64
-UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FName& iPropertyName )
 {
     // RestrictToSelection was changed, return redraw flag
@@ -424,7 +432,7 @@ UOdysseyPainterEditorVectorBaseTool::PostEditChangeProperty( FPropertyChangedEve
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
         if( mediaVectors.Num() > 0 )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 signalFlags;
 
@@ -504,7 +512,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
         // Commented-out: sections are not needed here as they would conflict with the section
         // just created by the Edit Menu when this tool's menu appears in the Edit Menu
@@ -591,7 +599,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
-            FOdysseyVectorScene* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
         // Commented-out: sections are not needed here as they would conflict with the section
         // just created by the Edit Menu when this tool's menu appears in the Edit Menu

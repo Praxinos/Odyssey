@@ -7,6 +7,7 @@
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegment.h"
+#include "OdysseyVectorPath.h"
 
 class ODYSSEYVECTOR_API FOdysseyVectorPrimitive : public FOdysseyVectorPath
 {

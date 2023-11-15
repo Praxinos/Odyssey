@@ -51,7 +51,7 @@ FOdysseyVectorUndoErase::~FOdysseyVectorUndoErase()
     mRemovedSegmentArray.clear();
 }
 
-FOdysseyVectorUndoErase::FOdysseyVectorUndoErase( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoErase::FOdysseyVectorUndoErase( FOdysseyVectorGroupPaint* iScene
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                 , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray

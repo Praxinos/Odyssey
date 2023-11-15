@@ -130,16 +130,20 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorScene* iScene )
+SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorGroupPaint* iScene )
 {
     mRootItem = MakeShareable(new FVectorSceneTreeViewItem(iScene));
 
     BuildTree( mRootItem );
 
     mItemsSource.Empty();
+/*
     // We don't show the root item (the Scene) as it must not be selected
     // so we set its children as the TreeItemsSource
-    mItemsSource = mRootItem.Get()->mChildren;
+    //mItemsSource = mRootItem.Get()->mChildren;
+*/
+
+    mItemsSource.Add( mRootItem );
 
     RequestTreeRefresh();
 
@@ -181,7 +185,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
 {
     if( mRootItem && ( SelectInfo == ESelectInfo::Type::OnMouseClick ) )
     {
-        FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+        FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("VectorSceneTreeView","Selection Changed"));
@@ -193,7 +197,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
         }
         GEditor->EndTransaction();
 
-        scene->ClearSelection();
+        scene->GetEngine()->ClearObjectSelection();
 
         // iTtem is null when selection is empty
         if( iItem )
@@ -207,7 +211,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
                 {
                     FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
 
-                    scene->Select( selectedObject );
+                    scene->GetEngine()->SelectObject( selectedObject );
                 }
             }
         }
@@ -230,14 +234,14 @@ SOdysseyPainterEditorVectorSceneTreeView::SelectAll()
 */
 }
 
-//FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+//FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 
 void
 SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects()
 {
     if( mRootItem )
     {
-        FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+        FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 
         FOdysseyPainterEditor::DeleteObjects( scene );
     }
@@ -248,7 +252,7 @@ SOdysseyPainterEditorVectorSceneTreeView::CopyObjects()
 {
     if( mRootItem )
     {
-        FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+        FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 
         FOdysseyPainterEditor::CopyObjects( scene  );
     }
@@ -259,7 +263,7 @@ SOdysseyPainterEditorVectorSceneTreeView::PasteObjects()
 {
     if( mRootItem )
     {
-        FOdysseyVectorScene* scene = static_cast<FOdysseyVectorScene*>(mRootItem.Get()->GetVectorObject());
+        FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 
         FOdysseyPainterEditor::PasteObjects( scene );
     }

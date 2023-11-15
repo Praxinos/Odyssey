@@ -16,10 +16,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         virtual ~FOdysseyPainterEditorVectorPathEditToolHUD(  );
         FOdysseyPainterEditorVectorPathEditToolHUD( UOdysseyPainterEditorVectorPathEditTool* iPathEditTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
-        virtual void Reset( FOdysseyVectorScene* iScene ) override;
-        virtual void Load( FOdysseyVectorScene* iScene ) override;
-        virtual void Unload( FOdysseyVectorScene* iScene ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Load( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Unload( FOdysseyVectorGroupPaint* iScene ) override;
 
         bool SetCursorPosition( double iX, double iY );
 };

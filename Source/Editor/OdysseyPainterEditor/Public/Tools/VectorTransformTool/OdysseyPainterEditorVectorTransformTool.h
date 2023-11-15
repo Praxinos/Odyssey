@@ -30,36 +30,36 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
-        virtual uint64 LoadVector( FOdysseyVectorScene* iScene ) override;
-        virtual uint64 UnloadVector( FOdysseyVectorScene* iScene ) override;
-        virtual uint64 OnKeyDownVector( FOdysseyVectorScene* iScene
+        virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual uint64 OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                       , const FKey& iKey ) override;
-        virtual uint64 OnKeyUpVector( FOdysseyVectorScene* iScene, const FKey& iKey ) override;
-        virtual uint64 OnMouseDownVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey ) override;
+        virtual uint64 OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey ) override;
-        virtual uint64 OnMouseHoverVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                          , const FOdysseyPoint& iPointInTexture ) override;
-        virtual uint64 OnMouseDragVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture ) override;
-        virtual uint64 OnMouseUpVector( FOdysseyVectorScene* iScene
+        virtual uint64 OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey ) override;
-        virtual uint64 PropertyChangedVector( FOdysseyVectorScene* iScene
+        virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
 
     private:
         void TranslateObjectSelection( FOdysseyVectorEngine* iEngine
-                                     , FOdysseyVectorScene* iScene
+                                     , FOdysseyVectorGroupPaint* iScene
                                      , const FOdysseyPoint& iPointInTexture );
         void RotateObjectSelection( FOdysseyVectorEngine* iEngine
-                                  , FOdysseyVectorScene* iScene
+                                  , FOdysseyVectorGroupPaint* iScene
                                   , const FOdysseyPoint& iPointInTexture );
         double GetRotationAngle( const FOdysseyPoint& iPointInTexture );
         void ScaleObjectSelection( FOdysseyVectorEngine* iEngine
-                                 , FOdysseyVectorScene* iScene
+                                 , FOdysseyVectorGroupPaint* iScene
                                  , const FOdysseyPoint& iPointInTexture );
-        void GetTransformedObjectList( FOdysseyVectorScene* iScene
+        void GetTransformedObjectList( FOdysseyVectorGroupPaint* iScene
                                      , std::list<FOdysseyVectorObject*>& oObjectList );
 
     private:

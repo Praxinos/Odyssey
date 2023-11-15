@@ -16,7 +16,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::FOdysseyPainterEditorVectorSelectio
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::Load( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorSelectionToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint32 width = vectorEngine->GetPreferredWidth();
@@ -28,13 +28,13 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Load( FOdysseyVectorScene* iScene )
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
     mBLSelectionContext.end();
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorScene* iScene )
+FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
     UpdateSelectionBox( iScene, false, mSelectionTool->GetEditor()->GetVectorHUDFlags() );
 }
@@ -53,7 +53,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::ShowSelectionBox( bool iShowSelecti
 
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLContext
-                                                               , FOdysseyVectorScene* iScene
+                                                               , FOdysseyVectorGroupPaint* iScene
                                                                , uint64 iFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -152,7 +152,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( BLContext* iBLCont
 
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
-                                                 , FOdysseyVectorScene* iScene )
+                                                 , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -160,7 +160,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint32 selectedObjectCount = iScene->GetSelectedObjectList().size();
+    uint32 selectedObjectCount = iScene->GetEngine()->GetSelectedObjectList().size();
     uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
@@ -176,7 +176,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
-        if( iScene->GetSelectedObjectList().size() )
+        if( iScene->GetEngine()->GetSelectedObjectList().size() )
         {
             DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
         }

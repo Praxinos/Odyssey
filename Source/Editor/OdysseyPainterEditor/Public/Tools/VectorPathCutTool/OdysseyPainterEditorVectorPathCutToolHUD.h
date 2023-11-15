@@ -11,10 +11,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathCutToolHUD : publi
         virtual ~FOdysseyPainterEditorVectorPathCutToolHUD();
         FOdysseyPainterEditorVectorPathCutToolHUD(  UOdysseyPainterEditorVectorPathCutTool* iPathCutTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene ) override;
-        virtual void Reset( FOdysseyVectorScene* iScene ) override;
-        virtual void Load( FOdysseyVectorScene* iScene ) override;
-        virtual void Unload( FOdysseyVectorScene* iScene ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Load( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Unload( FOdysseyVectorGroupPaint* iScene ) override;
 
         void SetP0( double iX, double iY );
         void SetP1( double iX, double iY );

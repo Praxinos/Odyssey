@@ -31,13 +31,13 @@ UOdysseyPainterEditorVectorEraserTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
-UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -46,7 +46,7 @@ UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorScene* iScene )
 }
 
 uint64
-UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
@@ -67,7 +67,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorScene* i
 }
 
 uint64
-UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture )
 {
     double diameter = Radius * 2.0f;
@@ -93,7 +93,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorScene* 
 }
 
 uint64
-UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture )
 {
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -110,7 +110,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorScene* i
 }
 
 void
-UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* iScene
                                                     , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                                                     , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                                                     , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
@@ -190,7 +190,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorScene* iScen
 }
 
 void
-UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iScene
                                                  , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                                                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                                                  , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
@@ -246,7 +246,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorScene* iScene
 }
 
 uint64
-UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
 {

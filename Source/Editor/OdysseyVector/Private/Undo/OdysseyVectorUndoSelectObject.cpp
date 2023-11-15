@@ -5,26 +5,25 @@ FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
     mSelectedObjectList.clear();
 }
 
-FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorScene* iScene )
+FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorGroupPaint* iScene )
     : FOdysseyVectorUndo( iScene )
 {
-    mSelectedObjectList = mScene->GetSelectedObjectList();
+    mSelectedObjectList = mScene->GetEngine()->GetSelectedObjectList();
 }
 
 void
 FOdysseyVectorUndoSelectObject::Apply( UObject* iIgnored )
 {
     // save former selection
-    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetEngine()->GetSelectedObjectList();
+
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        FOdysseyVectorObject* object = static_cast<FOdysseyVectorObject*>(*it);
-
-        mScene->Select( object );
+        mScene->GetEngine()->SelectObject( object );
     }
 
     // prepare former selection for Revert()
@@ -44,16 +43,14 @@ void
 FOdysseyVectorUndoSelectObject::Revert( UObject* iIgnored )
 {
     // save former selection
-    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetEngine()->GetSelectedObjectList();
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->ClearSelection();
+    mScene->GetEngine()->ClearObjectSelection();
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = mSelectedObjectList.begin(); it != mSelectedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        FOdysseyVectorObject* object = static_cast<FOdysseyVectorObject*>(*it);
-
-        mScene->Select( object );
+        mScene->GetEngine()->SelectObject( object );
     }
 
     // prepare former selection for Apply()

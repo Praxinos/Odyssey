@@ -8,7 +8,8 @@
 
 #include "OdysseyVectorObject.generated.h"
 
-class FOdysseyVectorScene;
+class FOdysseyVectorEngine;
+class FOdysseyVectorGroupPaint;
 class FOdysseyVectorGroup;
 
 USTRUCT()
@@ -149,19 +150,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorBucket& GetBackgroundBucket();
         FOdysseyVectorBucket& GetForegroundBucket();
 
-        virtual void TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
+        virtual bool TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
         /*virtual void UpdateBoundingBox() = 0;*/
         virtual void DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags );
         void UpdateMatrix( );
         void Translate( double iX, double iY );
         void Rotate( double iAngle );
         void Scale( double iX, double iY );
-        void PrependChild( FOdysseyVectorObject* iChild );
-        void AppendChild( FOdysseyVectorObject* iChild );
+        bool PrependChild( FOdysseyVectorObject* iChild );
+        bool AppendChild( FOdysseyVectorObject* iChild );
 
 
-        virtual void AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter );
-        virtual void RemoveChild( FOdysseyVectorObject* iChild );
+        virtual bool AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter );
+        virtual bool RemoveChild( FOdysseyVectorObject* iChild );
 
         void ImportChild( FOdysseyVectorObject* iChild, BLMatrix2D& iInverseWorldMatrix );
         double GetScalingX();
@@ -195,7 +196,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void Invalidate( uint32 iInvalidationFlags );
         virtual void Invalidate();
         virtual void InvalidateChild( FOdysseyVectorObject* iChild );
-        FOdysseyVectorScene* GetScene();
+        FOdysseyVectorGroupPaint* GetScene();
+        FOdysseyVectorEngine* GetEngine();
         bool IsInvalidated();
         bool IsSelected();
         void SetExpanded( bool iIsExpanded );

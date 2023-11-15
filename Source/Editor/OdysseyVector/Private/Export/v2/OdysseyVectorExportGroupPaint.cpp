@@ -11,10 +11,8 @@ FOdysseyVectorExportV2::WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaint
                                 , Ar
                                 , [&iPaintGroup](FArchive &Ar) -> void
         {
-            for( std::list<FOdysseyVectorBucket*>::iterator it = iPaintGroup.GetBucketList().begin(); it != iPaintGroup.GetBucketList().end(); ++it )
+            for( FOdysseyVectorBucket* bucket : iPaintGroup.GetBucketList() )
             {
-                FOdysseyVectorBucket* bucket = static_cast<FOdysseyVectorBucket*>(*it);
-
                 FOdysseyVectorExportV2::WriteBucket( *bucket, Ar );
             }
         } );

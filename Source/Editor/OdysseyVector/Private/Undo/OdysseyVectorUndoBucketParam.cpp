@@ -16,7 +16,7 @@ FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
 }
 
 // Backup bucket params in the constructor
-FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGroupPaint* iScene
                                                             , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
 {
@@ -24,7 +24,7 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScen
 }
 
 // Backup bucket params in the constructor
-FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGroupPaint* iScene
                                                             , std::vector<FOdysseyVectorBucket*>& iAddedBucketArray
                                                             , std::vector<FOdysseyVectorBucket*>& iBucketArray )
     : FOdysseyVectorUndo( iScene )

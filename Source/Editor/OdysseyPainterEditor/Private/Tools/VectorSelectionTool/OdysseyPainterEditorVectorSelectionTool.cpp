@@ -50,7 +50,7 @@ UOdysseyPainterEditorVectorSelectionTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -59,13 +59,13 @@ UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorScene* iScen
 }
 
 uint64
-UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
-UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
@@ -85,7 +85,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorScene
 }
 
 uint64
-UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture )
 {
     //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
@@ -186,7 +186,7 @@ UOdysseyPainterEditorVectorSelectionTool::GenerateMask()
 }
 
 void
-UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVectorGroupPaint* iScene
                                                                    , const FOdysseyPoint& iPointInTexture
                                                                    , const FKey& iKey )
 {
@@ -230,7 +230,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         // deselect all if control key is not pressed
         if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
         {
-            iScene->ClearSelection();
+            iEngine->ClearObjectSelection();
         }
 
         // dragging occured
@@ -241,7 +241,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
             // when dragging occured, we select all objects lying in the selection area.
             for ( int i = 0; i < pickedObjectArray.size(); i++ )
             {
-                iScene->Select( pickedObjectArray[i] );
+                iEngine->SelectObject( pickedObjectArray[i] );
             }
         }
 
@@ -256,7 +256,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
             // if no dragging occured, we only select the object that is the most forward
             if( pickedObjectArray.size() )
             {
-                iScene->Select( pickedObjectArray.back() );
+                iEngine->SelectObject( pickedObjectArray.back() );
             }
         }
     }
@@ -265,7 +265,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
 }
 
 void
-UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVectorGroupPaint* iScene
                                                                    , const FOdysseyPoint& iPointInTexture
                                                                    , const FKey& iKey )
 {
@@ -376,7 +376,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
 }
 
 uint64
-UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey )
 {

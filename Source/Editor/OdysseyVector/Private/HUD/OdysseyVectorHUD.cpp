@@ -4,7 +4,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorScene.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 
 FPointQuadTree::~FPointQuadTree()
@@ -41,7 +41,7 @@ FOdysseyVectorHUD::FOdysseyVectorHUD()
 }
 
 void
-FPointQuadTree::Draw( BLContext* iBLContext, FOdysseyVectorScene* iScene, uint64 iFlags )
+FPointQuadTree::Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags )
 {
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -131,11 +131,8 @@ MapPath( FOdysseyVectorPath* iPath
        , const ::ULIS::FRectD& iRect
        , std::vector<FPointQuadTreeEntry>& oPointQuadTreeEntryArray )
 {
-    std::list<FOdysseyVectorVertex*>& vertexList = iPath->GetVertexList();
-
-    for( std::list<FOdysseyVectorVertex*>::iterator it = vertexList.begin(); it != vertexList.end(); ++it )
+    for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
     {
-        FOdysseyVectorVertex* vertex = (*it);
         ::ULIS::FVec2D& coords = vertex->GetCoords();
         BLPoint worldCoords = iPath->GetWorldMatrix().mapPoint( coords.x, coords.y );
         ::ULIS::FVec2D screenCoords = ::ULIS::FVec2D( worldCoords.x, worldCoords.y );
@@ -161,7 +158,7 @@ MapPoints( FOdysseyVectorObject* iObject
 }
 
 void
-FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorScene *iScene, uint64 iHUDFlags )
+FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene, uint64 iHUDFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;

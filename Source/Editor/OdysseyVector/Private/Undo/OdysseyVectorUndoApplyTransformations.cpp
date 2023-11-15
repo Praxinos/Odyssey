@@ -1,6 +1,6 @@
 #include "Undo/OdysseyVectorUndoApplyTransformations.h"
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorScene.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyVectorUndoApplyTransformations::~FOdysseyVectorUndoApplyTransformations()
 {
@@ -10,16 +10,14 @@ FOdysseyVectorUndoApplyTransformations::~FOdysseyVectorUndoApplyTransformations(
     }
 }
 
-FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( FOdysseyVectorGroupPaint* iScene
                                                                               , std::list<FOdysseyVectorObject*>& iObjectList )
     : FOdysseyVectorUndo( iScene )
 {
     mObjectSnapshotArray.reserve( iObjectList.size() );
 
-    for( std::list<FOdysseyVectorObject*>::iterator it = iObjectList.begin(); it != iObjectList.end(); ++it )
+    for( FOdysseyVectorObject* object : iObjectList )
     {
-        FOdysseyVectorObject* object = (*it);
-
         if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);

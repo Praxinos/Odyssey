@@ -12,14 +12,10 @@ UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaint
 void
 UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
 {
-    std::list<FOdysseyVectorObject*>::iterator it;
-
     UOdysseyPainterEditorVectorObjectView::ImportParam();
 
-    for( it = mFocusedObjectList.begin(); it != mFocusedObjectList.end(); ++it )
+    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
-        FOdysseyVectorObject* selectedObject = (*it);
-
         if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);

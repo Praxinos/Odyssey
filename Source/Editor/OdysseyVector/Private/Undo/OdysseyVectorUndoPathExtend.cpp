@@ -25,7 +25,7 @@ FOdysseyVectorUndoPathExtend::~FOdysseyVectorUndoPathExtend()
     mAddedSegmentArray.clear();
 }
 
-FOdysseyVectorUndoPathExtend::FOdysseyVectorUndoPathExtend( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoPathExtend::FOdysseyVectorUndoPathExtend( FOdysseyVectorGroupPaint* iScene
                                                           , FOdysseyVectorPath* iPath )
     : FOdysseyVectorUndo( iScene )
     , mPath( iPath )

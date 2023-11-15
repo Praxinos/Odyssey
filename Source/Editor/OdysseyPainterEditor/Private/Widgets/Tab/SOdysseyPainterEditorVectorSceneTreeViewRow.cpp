@@ -79,8 +79,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
     //FVector2D position = iGeometry.GetAbsolutePosition();
     FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
-    FOdysseyVectorScene* itemScene = itemObject->GetScene();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = itemScene->GetSelectedObjectList();
+    FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = itemScene->GetEngine()->GetSelectedObjectList();
     FOdysseyVectorObject* insertObject = itemObject;
     std::list<FOdysseyVectorObject*> droppedObjectList;
 
@@ -117,7 +117,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
             break;
 
             case DROPZONE_ONTO:
-                itemObject->TransferChild( selectedObject, itemObject->GetLastChild() );
+                itemObject->TransferChild( selectedObject, nullptr );
             break;
 
             case DROPZONE_BELOW:

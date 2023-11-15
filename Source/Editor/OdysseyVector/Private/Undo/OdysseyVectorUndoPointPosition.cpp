@@ -12,7 +12,7 @@ FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
     }
 }
 
-FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                                                 , std::vector<FOdysseyVectorPoint*>& iPointArray )
     : FOdysseyVectorUndo( iScene )
 {
@@ -24,7 +24,7 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
     }
 }
 
-FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                                                 , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                                                 , std::vector<FOdysseyVectorHandleSegment*>& iHandleArray )
     : FOdysseyVectorUndo( iScene )
@@ -42,7 +42,7 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
     }
 }
 
-FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorScene* iScene
+FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                                                 , FOdysseyVectorPoint* iPoint )
     : FOdysseyVectorUndo( iScene )
 {

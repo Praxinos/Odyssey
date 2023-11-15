@@ -5,6 +5,7 @@
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridToolHUD.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorGridTool"
 
 #ifndef M_PI
@@ -40,13 +41,13 @@ UOdysseyPainterEditorVectorGridTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
-UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorScene* iScene )
+UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -59,7 +60,7 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorScene* iScene )
 }
 
 uint64
-UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
 {
@@ -108,7 +109,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorScene* iSc
 }
 
 uint64
-UOdysseyPainterEditorVectorGridTool::OnMouseHoverVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorGridTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture )
 {
     // TODO: highlight grid handles ?
@@ -117,7 +118,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseHoverVector( FOdysseyVectorScene* iS
 }
 
 uint64
-UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
@@ -155,7 +156,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorScene* iSc
 }
 
 uint64
-UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
@@ -178,7 +179,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorScene* iScen
 }
 
 uint64
-UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorScene* iScene
+UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FName& iPropertyName )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
