@@ -141,7 +141,7 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
           // transform is recursive per se, do not recurse if the parent was transformed already
           if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
           {
-              if( vectorEngine->HasFocus( iScene, object, travesalFlags ) )
+              if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
               {
                   oObjectList.push_back( object );
 
@@ -335,7 +335,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
               // transform is recursive per se, do not recurse if the parent was transformed already
               if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
               {
-                  if( iEngine->HasFocus( iScene, object, travesalFlags ) )
+                  if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
                   {
                       double translationX;
                       double translationY;
@@ -483,7 +483,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
               // transform is recursive per se, do not recurse if the parent was transformed already
               if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
               {
-                  if( iEngine->HasFocus( iScene, object, travesalFlags ) )
+                  if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
                   {
                       double translationX;
                       double translationY;
@@ -678,7 +678,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                   // transform is recursive per se, do not recurse if the parent was transformed already
                   if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
                   {
-                      if( iEngine->HasFocus( iScene, object, travesalFlags ) )
+                      if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
                       {
                           double translationX;
                           double translationY;

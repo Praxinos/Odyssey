@@ -319,9 +319,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static const uint64 TRAVERSE_PARENT_ACCEPTED        = ( 1 << 2 );
         static const uint64 TRAVERSE_OBJECT_IGNORE_CHILDREN = ( 1 << 3 );
 
-        bool HasFocus( FOdysseyVectorGroupPaint* iScene
-                     , FOdysseyVectorObject* iObject
-                     , uint64 iTraversalFlags );
+        bool ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
+                           , FOdysseyVectorObject* iObject
+                           , uint64 iTraversalFlags );
 
         uint64 Traverse( FOdysseyVectorGroupPaint* iScene
                        , FOdysseyVectorObject* iObject
@@ -366,9 +366,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         void RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList
                           , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray);
 
-        virtual bool RemoveChild ( FOdysseyVectorObject* iChild ) override;
-        virtual bool AddChild( FOdysseyVectorObject* iChild
-                             , FOdysseyVectorObject* iInsertAfter ) override;
+        virtual uint32 RemoveChild ( FOdysseyVectorObject* iChild ) override;
+        virtual uint32 AddChild( FOdysseyVectorObject* iChild
+                               , FOdysseyVectorObject* iInsertAfter ) override;
 /*
        uint64 GetDrawingFlags();
        void SetDrawingFlags( uint64 iDrawingFlags );

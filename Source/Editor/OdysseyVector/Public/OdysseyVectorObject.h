@@ -67,6 +67,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 VECTORPATHTYPE       = 5;
         static const uint32 VECTORGROUPPAINTTYPE = 6;
 
+
+        // values for hierarchy change (AddChild, RemoveChild, TransferChild)
+        static const uint32 HIERARCHY_CHANGE_SUCCESS   = 0;
+        static const uint32 HIERARCHY_CHANGE_FORBIDDEN = 1;
+        static const uint32 HIERARCHY_CHANGE_ERROR     = 2;
+
+
         // update mask
         //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
         static const uint32 KEEPINVALIDATED   = ( 1 << 1 );
@@ -150,20 +157,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorBucket& GetBackgroundBucket();
         FOdysseyVectorBucket& GetForegroundBucket();
 
-        virtual bool TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
+        virtual uint32 TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
         /*virtual void UpdateBoundingBox() = 0;*/
         virtual void DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags );
         void UpdateMatrix( );
         void Translate( double iX, double iY );
         void Rotate( double iAngle );
         void Scale( double iX, double iY );
-        bool PrependChild( FOdysseyVectorObject* iChild );
-        bool AppendChild( FOdysseyVectorObject* iChild );
+        uint32 PrependChild( FOdysseyVectorObject* iChild );
+        uint32 AppendChild( FOdysseyVectorObject* iChild );
 
 
-        virtual bool AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter );
-        virtual bool RemoveChild( FOdysseyVectorObject* iChild );
-
+        virtual uint32 AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter );
+        virtual uint32 RemoveChild( FOdysseyVectorObject* iChild );
+        bool HasChild( FOdysseyVectorObject* iChild );
         void ImportChild( FOdysseyVectorObject* iChild, BLMatrix2D& iInverseWorldMatrix );
         double GetScalingX();
         double GetScalingY();

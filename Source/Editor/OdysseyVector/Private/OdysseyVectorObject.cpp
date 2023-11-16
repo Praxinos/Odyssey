@@ -519,40 +519,6 @@ FOdysseyVectorObject::GetLastChild()
     return mChildrenList.size() ? mChildrenList.back() : nullptr;
 }
 
-bool
-FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
-{
-    FOdysseyVectorObject* formerParent = iFosterChild->GetParent();
-    FOdysseyVectorObject* previousChild = formerParent->GetPreviousChild( iFosterChild );
-    double translationX, translationY, rotation, scalingX, scalingY;
-    BLMatrix2D localMatrix;
-
-    FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, iFosterChild->mWorldMatrix, localMatrix );
-    FOdysseyVector::ExtractTransformations( localMatrix, &translationX, &translationY, &rotation, &scalingX, &scalingY );
-
-    if( iFosterChild->GetParent()->RemoveChild( iFosterChild ) )
-    {
-        if( AddChild( iFosterChild, iInsertAfter ) )
-        {
-            iFosterChild->SetTransform( translationX
-                                      , translationY
-                                      , rotation / M_PI * 180.0f
-                                      , scalingX
-                                      , scalingY );
-
-            iFosterChild->UpdateMatrix();
-
-            return true; // transfer succeeded
-        }
-        else // add back
-        {
-            formerParent->AddChild( iFosterChild, previousChild );
-        }
-    }
-
-    return false;
-}
-
 void
 FOdysseyVectorObject::DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
 {
@@ -766,7 +732,7 @@ FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::
     return nullptr;
 }
 
-bool
+uint32
 FOdysseyVectorObject::AppendChild( FOdysseyVectorObject* iChild )
 {
     FOdysseyVectorObject* lastItem = mChildrenList.size() ? mChildrenList.back() : nullptr;
@@ -774,61 +740,123 @@ FOdysseyVectorObject::AppendChild( FOdysseyVectorObject* iChild )
     return AddChild( iChild, lastItem );
 }
 
-bool
+uint32
 FOdysseyVectorObject::PrependChild( FOdysseyVectorObject* iChild )
 {
     return AddChild( iChild, nullptr );
 }
 
-bool
+uint32
 FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
     FOdysseyVectorObject* lastItem = GetLastChild();
 
-    iChild->mParent = this;
+    if( HasAncestor( iChild ) == false )
+    {
+        iChild->mParent = this;
 
-    if( iInsertAfter == nullptr )
-    {
-        mChildrenList.push_front( iChild );
-    }
-    else
-    if( iInsertAfter == lastItem )
-    {
-        mChildrenList.push_back( iChild );
-    }
-    else
-    {
-        std::list<FOdysseyVectorObject*>::iterator it;
-
-        for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
+        if( iInsertAfter == nullptr )
         {
-            FOdysseyVectorObject* item = (*it);
+            mChildrenList.push_front( iChild );
+        }
+        else
+        if( iInsertAfter == lastItem )
+        {
+            mChildrenList.push_back( iChild );
+        }
+        else
+        {
+            std::list<FOdysseyVectorObject*>::iterator it;
 
-            if( item == iInsertAfter )
+            for( it = mChildrenList.begin(); it != mChildrenList.end(); ++it )
             {
-                mChildrenList.insert( ++it, iChild );
+                FOdysseyVectorObject* item = (*it);
 
-                break;
+                if( item == iInsertAfter )
+                {
+                    mChildrenList.insert( ++it, iChild );
+
+                    break;
+                }
             }
         }
+
+        iChild->Invalidate();
+
+        return 0; // adding succeeded
     }
 
-    iChild->Invalidate();
-
-    return true; // adding succeeded
+    return HIERARCHY_CHANGE_ERROR;
 }
 
-bool
+uint32
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
     //iChild->mParent = nullptr;
 
-    mChildrenList.remove(iChild);
-    mInvalidatedChildrenList.remove(iChild);
+    if( iChild->mParent == this )
+    {
+        mChildrenList.remove( iChild );
+        mInvalidatedChildrenList.remove( iChild );
 
-    Invalidate();
+        Invalidate();
 
-    return true; // removal succeeded
+        return HIERARCHY_CHANGE_SUCCESS; // removal succeeded
+    }
+
+    return HIERARCHY_CHANGE_ERROR;
+}
+
+uint32
+FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild
+                                   , FOdysseyVectorObject* iInsertAfter )
+{
+    FOdysseyVectorObject* formerParent = iFosterChild->GetParent();
+    FOdysseyVectorObject* previousChild = formerParent->GetPreviousChild( iFosterChild );
+    uint32 removalFlags = iFosterChild->GetParent()->RemoveChild( iFosterChild );
+
+    // removal succeeded
+    if( removalFlags == HIERARCHY_CHANGE_SUCCESS )
+    {
+        BLMatrix2D childFormerWorldMatrix = iFosterChild->mWorldMatrix;
+        uint32 additionFlags = AddChild( iFosterChild, iInsertAfter );
+
+        if( additionFlags == HIERARCHY_CHANGE_SUCCESS )
+        {
+            double translationX, translationY, rotation, scalingX, scalingY;
+            BLMatrix2D localMatrix;
+
+            FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, childFormerWorldMatrix, localMatrix );
+            FOdysseyVector::ExtractTransformations( localMatrix, &translationX, &translationY, &rotation, &scalingX, &scalingY );
+
+            iFosterChild->SetTransform( translationX
+                                      , translationY
+                                      , rotation / M_PI * 180.0f
+                                      , scalingX
+                                      , scalingY );
+
+            iFosterChild->UpdateMatrix();
+        }
+        else // add back
+        {
+            formerParent->AddChild( iFosterChild, previousChild );
+        }
+
+        return additionFlags; // transfer succeeded
+    }
+
+    return removalFlags;
+}
+
+bool
+FOdysseyVectorObject::HasChild( FOdysseyVectorObject* iChild )
+{
+    if( std::find( mChildrenList.begin(), mChildrenList.end(), iChild ) != mChildrenList.end() )
+    {
+        return true;
+    }
+
+    return false;
 }
 
 void

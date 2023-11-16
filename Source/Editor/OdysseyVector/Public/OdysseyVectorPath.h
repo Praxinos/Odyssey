@@ -30,28 +30,8 @@ enum ePointSelectionFlags
     Strict        = 8
 };
 
-constexpr enum ePointSelectionFlags operator~( const enum ePointSelectionFlags a )
-{
-    return (enum ePointSelectionFlags)(~uint32(a));
-}
-
-constexpr enum ePointSelectionFlags operator &( const enum ePointSelectionFlags a
-                                              , const enum ePointSelectionFlags b )
-{
-    return (enum ePointSelectionFlags)(uint32(a) & uint32(b));
-}
-
-constexpr enum ePointSelectionFlags operator |( const enum ePointSelectionFlags a
-                                              , const enum ePointSelectionFlags b )
-{
-    return (enum ePointSelectionFlags)(uint32(a) | uint32(b));
-}
-
-constexpr enum ePointSelectionFlags operator ^( const enum ePointSelectionFlags a
-                                              , const enum ePointSelectionFlags b )
-{
-    return (enum ePointSelectionFlags)(uint32(a) ^ uint32(b));
-}
+// define bitwise op
+ENUM_CLASS_FLAGS(ePointSelectionFlags)
 
 struct FVertexChain
 {
@@ -301,6 +281,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param iVertex the vertex to select
          */
         void SelectVertex( FOdysseyVectorVertex* iVertex );
+
+        void SelectAllVertices();
 
        /**
          * @brief Mark as filled or not. The closed path is filled with the background color.

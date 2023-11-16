@@ -47,6 +47,7 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
     }
 }
 
+
 void
 FOdysseyTextureEditorGUI::OnSourceChanged()
 {
@@ -57,7 +58,6 @@ FOdysseyTextureEditorGUI::OnSourceChanged()
 
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(source->GetLayerStack());
 
-    // layerStack might be NULL when closing the program
     if( layerStack )
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
@@ -67,6 +67,7 @@ FOdysseyTextureEditorGUI::OnSourceChanged()
             FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
             FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
+            // refresh the widgets when the source changes
             OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
         }
     }

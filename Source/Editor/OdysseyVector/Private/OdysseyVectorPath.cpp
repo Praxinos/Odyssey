@@ -108,6 +108,18 @@ FOdysseyVectorPath::SelectVertex( FOdysseyVectorVertex* iVertex )
     mSelectedVertexList.push_back( iVertex );
 }
 
+void
+FOdysseyVectorPath::SelectAllVertices()
+{
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        if( vertex->IsSelected() == false )
+        {
+            SelectVertex( vertex );
+        }
+    }
+}
+
 bool
 FOdysseyVectorPath::IsLoop()
 {

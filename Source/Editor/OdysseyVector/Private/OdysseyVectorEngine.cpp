@@ -160,6 +160,17 @@ FOdysseyVectorEngine::SetInvalidatedRect( const ::ULIS::FRectI& iRect )
     {
         mInvalidatedRect = mInvalidatedRect | iRect;
     }
+
+    // sanitize
+    if( mInvalidatedRect.x < 0.0f )
+    {
+        mInvalidatedRect.x = 0.0f;
+    }
+
+    if( mInvalidatedRect.y < 0.0f )
+    {
+        mInvalidatedRect.y = 0.0f;
+    }
 }
 
 ::ULIS::FRectI&
@@ -1168,7 +1179,7 @@ FOdysseyVectorEngine::GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& 
     , [ this
       , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( HasFocus( mScene, object, traversalFlags ) )
+          if( ObjectHasFocus( mScene, object, traversalFlags ) )
           {
               oObjectList.push_back( object );
 
@@ -1189,7 +1200,7 @@ FOdysseyVectorEngine::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oO
     , [ this
       , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( HasFocus( mScene, object, traversalFlags ) )
+          if( ObjectHasFocus( mScene, object, traversalFlags ) )
           {
               oObjectList.push_back( object );
 
@@ -1202,9 +1213,9 @@ FOdysseyVectorEngine::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oO
 
 
 bool
-FOdysseyVectorEngine::HasFocus( FOdysseyVectorGroupPaint* iScene
-                              , FOdysseyVectorObject* iObject
-                              , uint64 iTraversalFlags )
+FOdysseyVectorEngine::ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
+                                    , FOdysseyVectorObject* iObject
+                                    , uint64 iTraversalFlags )
 {
     if( iObject->IsSelected() )
     {
@@ -1513,18 +1524,18 @@ FOdysseyVectorScene::DrawShape( BLContext* iBLContext, double iCombinedOpacity, 
 #endif // unused
 
 // forbid child removal
-bool
+uint32
 FOdysseyVectorEngine::RemoveChild( FOdysseyVectorObject* iChild )
 {
-    return false;
+    return FOdysseyVectorObject::HIERARCHY_CHANGE_FORBIDDEN;
 }
 
 // forbid child addition
-bool
+uint32
 FOdysseyVectorEngine::AddChild( FOdysseyVectorObject* iChild
                               , FOdysseyVectorObject* iInsertAfter )
 {
-    return false;
+    return FOdysseyVectorObject::HIERARCHY_CHANGE_FORBIDDEN;
 }
 
 void

@@ -140,7 +140,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
       , &removedSegmentArray
       , &addedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -210,7 +210,7 @@ UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorGr
       , vectorEngine
       , &oPathArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -260,7 +260,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
       , vectorEngine
       , &iPointInTexture ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {

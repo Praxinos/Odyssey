@@ -93,7 +93,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
           , &iPointInTexture
           , &pickedSegmentDistanceArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
           {
-              if( iEngine->HasFocus( iScene, object, traversalFlags ) || ( RestrictToSelectedObjects == false ) )
+              if( iEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( RestrictToSelectedObjects == false ) )
               {
                   if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                   {

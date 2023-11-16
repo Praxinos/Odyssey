@@ -38,6 +38,7 @@ FSnapshotObject::~FSnapshotObject()
 FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectSnapshotFlags )
     : mObjectSnapshotFlags( iObjectSnapshotFlags )
     , mObject( iObject )
+    , mPreviousChild( nullptr )
 {
     if( iObjectSnapshotFlags & SNAPSHOT_TRANSFORMATIONS )
     {
@@ -46,6 +47,13 @@ FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectS
                              , mRotation
                              , mScalingX
                              , mScalingY );
+    }
+
+
+    if( iObjectSnapshotFlags & SNAPSHOT_HIERARCHY )
+    {
+        mParent = iObject->GetParent();
+        mPreviousChild = iObject->GetParent()->GetPreviousChild( iObject );
     }
 
     if( iObjectSnapshotFlags & SNAPSHOT_CHILDREN_TRANSFORMATIONS )
@@ -61,7 +69,7 @@ FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectS
     }
 }
 
-void
+bool
 FSnapshotObject::Restore()
 {
     if( mObjectSnapshotFlags & SNAPSHOT_TRANSFORMATIONS )
@@ -89,6 +97,32 @@ FSnapshotObject::Restore()
         mScalingY     = swapScalingY;
     }
 
+    if( mObjectSnapshotFlags & SNAPSHOT_HIERARCHY )
+    {
+        FOdysseyVectorObject* currentParent = mObject->GetParent();
+        FOdysseyVectorObject* currentPreviousChild = mObject->GetParent()->GetPreviousChild(mObject);
+        uint32 transferRetval = mParent->TransferChild( mObject, mPreviousChild );
+
+        if( transferRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
+        {
+            // swap
+            mParent = currentParent;
+            mPreviousChild = currentPreviousChild;
+        }
+
+        // the object could not be transferred, normally because the previous child
+        // has not been transferred yet.
+        if( transferRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_ERROR )
+        {
+            return false;
+        }
+
+        if( transferRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_FORBIDDEN )
+        {
+        // nothing to do, this is nominal for the root object
+        }
+    }
+
     if( mObjectSnapshotFlags & SNAPSHOT_CHILDREN_TRANSFORMATIONS )
     {
         for( int i = 0; i < mChildrenSnapshotArray.size(); i++ )
@@ -96,6 +130,8 @@ FSnapshotObject::Restore()
             mChildrenSnapshotArray[i]->Restore();
         }
     }
+
+    return true; // restore succeeded
 }
 
 FSnapshotPoint::~FSnapshotPoint()
@@ -253,42 +289,47 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
     }
 }
 
-void
+bool
 FSnapshotPath::Restore()
 {
-    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(mObject);
-
-    FSnapshotObject::Restore();
-
-    if( mPathSnapshotFlags & SNAPSHOT_VERTICES )
+    if( FSnapshotObject::Restore() )
     {
-        for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(mObject);
+
+        if( mPathSnapshotFlags & SNAPSHOT_VERTICES )
         {
-            mVertexSnapshotArray[i].Restore();
-        }
-    }
-
-    if( mPathSnapshotFlags & SNAPSHOT_SEGMENTS )
-    {
-        for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
-        {
-            mCubicSegmentSnapshotArray[i].Restore();
-        }
-    }
-
-    if( mPathSnapshotFlags & SNAPSHOT_SELECTED_VERTICES )
-    {
-        std::list<FOdysseyVectorVertex*> currentVertexList = path->GetSelectedVertexList();
-
-        path->UnselectAllVertices();
-
-        for( FOdysseyVectorVertex* vertex : mSelectedVertexList )
-        {
-            path->SelectVertex( vertex );
+            for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+            {
+                mVertexSnapshotArray[i].Restore();
+            }
         }
 
-        mSelectedVertexList = currentVertexList;
+        if( mPathSnapshotFlags & SNAPSHOT_SEGMENTS )
+        {
+            for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+            {
+                mCubicSegmentSnapshotArray[i].Restore();
+            }
+        }
+
+        if( mPathSnapshotFlags & SNAPSHOT_SELECTED_VERTICES )
+        {
+            std::list<FOdysseyVectorVertex*> currentVertexList = path->GetSelectedVertexList();
+
+            path->UnselectAllVertices();
+
+            for( FOdysseyVectorVertex* vertex : mSelectedVertexList )
+            {
+                path->SelectVertex( vertex );
+            }
+
+            mSelectedVertexList = currentVertexList;
+        }
+
+        return true;
     }
+
+    return false;
 }
 
 FSnapshotBucket::~FSnapshotBucket()
@@ -361,32 +402,37 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
     }
 }
 
-void
+bool
 FSnapshotGroupPaint::Restore()
 {
-    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mObject);
-
-    FSnapshotObject::Restore();
-
-    if( mPaintGroupSnapshotFlags & SNAPSHOT_BUCKETS )
+    if( FSnapshotObject::Restore() )
     {
-        for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mObject);
+
+        if( mPaintGroupSnapshotFlags & SNAPSHOT_BUCKETS )
         {
-            mBucketSnapshotArray[i].Restore();
-        }
-    }
-
-    if( mPaintGroupSnapshotFlags & SNAPSHOT_SELECTED_BUCKETS )
-    {
-        std::list<FOdysseyVectorBucket*> currentBucketList = paintGroup->GetSelectedBucketList();
-
-        paintGroup->UnselectAllBuckets();
-
-        for( FOdysseyVectorBucket* bucket : mSelectedBucketList )
-        {
-            paintGroup->SelectBucket( bucket );
+            for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
+            {
+                mBucketSnapshotArray[i].Restore();
+            }
         }
 
-        mSelectedBucketList = currentBucketList;
+        if( mPaintGroupSnapshotFlags & SNAPSHOT_SELECTED_BUCKETS )
+        {
+            std::list<FOdysseyVectorBucket*> currentBucketList = paintGroup->GetSelectedBucketList();
+
+            paintGroup->UnselectAllBuckets();
+
+            for( FOdysseyVectorBucket* bucket : mSelectedBucketList )
+            {
+                paintGroup->SelectBucket( bucket );
+            }
+
+            mSelectedBucketList = currentBucketList;
+        }
+
+        return true;
     }
+
+    return false;
 }

@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyVectorBlock.h"
-#include "OdysseyVectorEngine.h"
+#include "OdysseyVector.h"
 
 #define FOdysseyVectorBlock_CACHE_NAME TEXT("OdysseyVectorBlock")
 #define FOdysseyVectorBlock_CACHE_VERSION TEXT("79ED1F6D43774CB1B8BE2766ED7F0120")
@@ -74,25 +74,35 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
     ::ULIS::FRectI invalidatedRect = mEngine->GetInvalidatedRect();
+    ::ULIS::FRectI screen = ::ULIS::FRectI( 0, 0, mWidth, mHeight );
+    ::ULIS::FRectI santitizedRect;
 
-    //Render in a BLImage (also resets the internal invalidation rectangle)
-    mEngine->Render(mBlockData->mBLContext.Get(), iDrawingFlags);
+    FOdysseyVector::IntersectRegions( invalidatedRect
+                                    , screen
+                                    , &santitizedRect );
 
+
+    if( santitizedRect.Area() )
     {
-        TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
-        //Get a ULIS block pointing to the BLImage
-        BLImageData imgData;
-        mBlockData->mBLImage->getData(&imgData);
-        ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+        //Render in a BLImage (also resets the internal invalidation rectangle)
+        mEngine->Render(mBlockData->mBLContext.Get(), iDrawingFlags);
 
-        //Unpremultiply the render block
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-        ctx.Unpremultiply(renderBlock, invalidatedRect );
-        ctx.Finish();
+        {
+            TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
+            //Get a ULIS block pointing to the BLImage
+            BLImageData imgData;
+            mBlockData->mBLImage->getData(&imgData);
+            ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
 
-        //Convert the right ULIS block in the expected ULIS Format
-        ctx.ConvertFormat(renderBlock, ioBlock, invalidatedRect, ::ULIS::FVec2I( invalidatedRect.x, invalidatedRect.y ) );
-        ctx.Finish();
+            //Unpremultiply the render block
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
+            ctx.Unpremultiply(renderBlock, santitizedRect );
+            ctx.Finish();
+
+            //Convert the right ULIS block in the expected ULIS Format
+            ctx.ConvertFormat(renderBlock, ioBlock, santitizedRect, ::ULIS::FVec2I( santitizedRect.x, santitizedRect.y ) );
+            ctx.Finish();
+        }
     }
 }
 

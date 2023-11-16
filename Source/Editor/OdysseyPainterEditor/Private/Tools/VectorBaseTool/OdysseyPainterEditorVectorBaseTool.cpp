@@ -5,6 +5,7 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "Widgets/Layout/SWrapBox.h"
+#include "Framework/Commands/GenericCommands.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorBaseTool"
 
@@ -66,7 +67,7 @@ UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorGroupPai
       , vectorEngine
       , &oSelectedVertexArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->HasFocus( iScene, object, traversalFlags ) )
+          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -173,7 +174,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
                                                     , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
+/*
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
     {
         if( iKey == EKeys::C )
@@ -191,7 +192,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
             GetEditor()->SelectAll( iScene );
         }
     }
-
+*/
     if( iKey == EKeys::W )
     {
 /*
@@ -225,7 +226,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 
     if( hasVector )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
@@ -263,7 +264,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 
     if( hasVector )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
@@ -321,7 +322,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
 
     if( hasVector )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
@@ -345,7 +346,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInT
 
     if( hasVector )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
@@ -373,7 +374,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
 
     if( hasVector )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
@@ -443,6 +444,91 @@ void
 UOdysseyPainterEditorVectorBaseTool::Commit()
 {
 
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::BindShortcuts(FBaseToolkit* iToolkit)
+{
+    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+
+    Super::BindShortcuts(iToolkit);
+
+    toolkitCommands->MapAction(
+        FGenericCommands::Get().SelectAll,
+        FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::SelectAll )
+    );
+/*
+    toolkitCommands->MapAction(
+        FGenericCommands::Get().Delete,
+        FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Delete )
+    );
+*/
+    toolkitCommands->MapAction(
+        FGenericCommands::Get().Copy,
+        FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Copy )
+    );
+
+    toolkitCommands->MapAction(
+        FGenericCommands::Get().Paste,
+        FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Paste )
+    );
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::Copy()
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() > 0 )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+            FOdysseyPainterEditor::CopyObjects( vectorScene );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::Paste()
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() > 0 )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+            FOdysseyPainterEditor::PasteObjects( vectorScene );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::SelectAll()
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() > 0 )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+            //FOdysseyPainterEditor::SelectAllObjects( vectorScene );
+        }
+    }
 }
 
 TSharedRef<SWidget>
