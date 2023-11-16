@@ -113,8 +113,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         bool PressureSensitive;
 
-        UPROPERTY( EditAnywhere, Category = PathDrawingTool )
-        bool Absolute;
+        //UPROPERTY( EditAnywhere, Category = PathDrawingTool )
+        //bool Absolute;
 
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         bool UpdatePaintGroups;

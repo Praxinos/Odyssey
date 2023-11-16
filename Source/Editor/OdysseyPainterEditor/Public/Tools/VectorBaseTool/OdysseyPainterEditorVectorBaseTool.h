@@ -48,6 +48,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
         virtual void ExtendContextMenu( FMenuBuilder& menu );
+        virtual void BindShortcuts( FBaseToolkit* iToolkit );
 
         bool IsDragging();
 
@@ -79,6 +80,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void OnKeyDownCommon( FOdysseyVectorGroupPaint* iScene, const FKey& iKey );
         void OnKeyUpCommon( FOdysseyVectorGroupPaint* iScene, const FKey& iKey );
         void PropertyChangedCommon(  FOdysseyVectorGroupPaint* iScene, const FName& iPropertyName );
+
+        void Copy();
+        void Paste();
+        void SelectAll();
 
     protected:
         void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );

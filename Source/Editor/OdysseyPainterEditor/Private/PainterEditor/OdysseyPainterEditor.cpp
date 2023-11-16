@@ -895,7 +895,52 @@ FOdysseyPainterEditor::Group( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::SelectAll( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::SelectAllPoints( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::list<FOdysseyVectorObject*> objectList;
+
+    // concerns all selected objects of a branch including implicit selection
+    vectorEngine->GetFocusedObjectList( objectList );
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("SellectAllPoints","Sellect All Points"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+    for( FOdysseyVectorObject* focusedObject : objectList )
+    {
+        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(focusedObject);
+
+            path->SelectAllVertices();
+        }
+
+        if( focusedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            FOdysseyVectorGroupPaint* paintgroup = static_cast<FOdysseyVectorGroupPaint*>(focusedObject);
+
+            paintgroup->SelectAllBuckets();
+        }
+    }
+
+    iScene->Update( 0 ); // updated invalidated objects. No need to update paintgroups
+
+    vectorEngine->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+// static
+void
+FOdysseyPainterEditor::SelectAllObjects( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 

@@ -366,9 +366,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         void RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList
                           , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray);
 
-        virtual bool RemoveChild ( FOdysseyVectorObject* iChild ) override;
-        virtual bool AddChild( FOdysseyVectorObject* iChild
-                             , FOdysseyVectorObject* iInsertAfter ) override;
+        virtual uint32 RemoveChild ( FOdysseyVectorObject* iChild ) override;
+        virtual uint32 AddChild( FOdysseyVectorObject* iChild
+                               , FOdysseyVectorObject* iInsertAfter ) override;
 /*
        uint64 GetDrawingFlags();
        void SetDrawingFlags( uint64 iDrawingFlags );

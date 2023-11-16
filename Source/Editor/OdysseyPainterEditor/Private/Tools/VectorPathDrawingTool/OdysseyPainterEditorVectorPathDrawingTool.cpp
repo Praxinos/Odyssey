@@ -27,7 +27,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , Radius( 5.0f )
     , Opacity( 1.0f )
     , PressureSensitive( true )
-    , Absolute( true )
+    //, Absolute( true )
     , UpdatePaintGroups( true )
     , Stitch( false )
     , AverageStitchedRadius( true )

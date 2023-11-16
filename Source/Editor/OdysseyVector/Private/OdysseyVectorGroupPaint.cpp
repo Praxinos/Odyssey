@@ -459,6 +459,18 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
 }
 
 void
+FOdysseyVectorGroupPaint::SelectAllBuckets()
+{
+    for( FOdysseyVectorBucket* bucket : mBucketList )
+    {
+        if( bucket->IsSelected() == false )
+        {
+            SelectBucket( bucket );
+        }
+    }
+}
+
+void
 FOdysseyVectorGroupPaint::UnselectAllBuckets()
 {
     mSelectedBucketList.remove_if( []( FOdysseyVectorBucket* iSelectedBucket )
@@ -602,12 +614,6 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
     }
 
     /*Invalidate();*/
-}
-
-bool
-FOdysseyVectorGroupPaint::TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter )
-{
-    return FOdysseyVectorGroup::TransferChild( iFosterChild, iInsertAfter );
 }
 
 void
@@ -1388,10 +1394,12 @@ FOdysseyVectorGroupPaint::SetPainted( bool iPainted )
     Invalidate();
 }
 
-bool
+uint32
 FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
-    if( FOdysseyVectorObject::AddChild( iChild, iInsertAfter ) )
+    uint32 additionRetval = FOdysseyVectorObject::AddChild( iChild, iInsertAfter );
+
+    if( additionRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
     {
         if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
@@ -1399,17 +1407,17 @@ FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild, FOdysseyVector
 
             mPathList.push_back( path );
         }
-
-        return true;
     }
 
-    return false;
+    return additionRetval;
 }
 
-bool
+uint32
 FOdysseyVectorGroupPaint::RemoveChild( FOdysseyVectorObject* iChild )
 {
-    if( FOdysseyVectorObject::RemoveChild( iChild ) )
+    uint32 removalRetval = FOdysseyVectorObject::RemoveChild( iChild );
+
+    if( removalRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
     {
         if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
@@ -1417,11 +1425,9 @@ FOdysseyVectorGroupPaint::RemoveChild( FOdysseyVectorObject* iChild )
 
             mPathList.remove( path );
         }
-
-        return true;
     }
 
-    return false;
+    return removalRetval;
 }
 
 void

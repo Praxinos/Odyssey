@@ -101,7 +101,8 @@ public:
     static void MakePaintGroup( FOdysseyVectorGroupPaint* iScene );
     static void Ungroup( FOdysseyVectorGroupPaint* iScene );
     static void Group( FOdysseyVectorGroupPaint* iScene );
-    static void SelectAll( FOdysseyVectorGroupPaint* iScene );
+    static void SelectAllPoints( FOdysseyVectorGroupPaint* iScene );
+    static void SelectAllObjects( FOdysseyVectorGroupPaint* iScene );
     static void ResetView( FOdysseyVectorGroupPaint* iScene );
     static void UnalignPointSelection( FOdysseyVectorGroupPaint* iScene );
     static void AlignPointSelection( FOdysseyVectorGroupPaint* iScene );

@@ -101,25 +101,26 @@ FSnapshotObject::Restore()
     {
         FOdysseyVectorObject* currentParent = mObject->GetParent();
         FOdysseyVectorObject* currentPreviousChild = mObject->GetParent()->GetPreviousChild(mObject);
+        uint32 transferRetval = mParent->TransferChild( mObject, mPreviousChild );
 
-        if( ( ( mParent != currentParent ) && ( mPreviousChild != currentPreviousChild ) )
-         || ( ( mParent != currentParent ) && ( mPreviousChild == nullptr              ) ) )
+        if( transferRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
         {
-            // check the previous child is restored yet
-            if( ( mPreviousChild == nullptr ) || mParent->HasChild( mPreviousChild ) )
-            {
-                mParent->TransferChild( mObject, mPreviousChild );
-            }
-            else // or else return false to tell the restore failed
-            {
-                return false;
-            }
-
             // swap
             mParent = currentParent;
             mPreviousChild = currentPreviousChild;
         }
-        // else their is no hierarchy to restore, the hierarchy is already good
+
+        // the object could not be transferred, normally because the previous child
+        // has not been transferred yet.
+        if( transferRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_ERROR )
+        {
+            return false;
+        }
+
+        if( transferRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_FORBIDDEN )
+        {
+        // nothing to do, this is nominal for the root object
+        }
     }
 
     if( mObjectSnapshotFlags & SNAPSHOT_CHILDREN_TRANSFORMATIONS )
