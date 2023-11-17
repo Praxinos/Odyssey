@@ -23,8 +23,6 @@
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoGroup.h"
 #include "Undo/OdysseyVectorUndoUngroup.h"
-#include "Undo/OdysseyVectorUndoSendBackward.h"
-#include "Undo/OdysseyVectorUndoBringForward.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 #include "Undo/OdysseyVectorUndoRemoveObjects.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
@@ -35,6 +33,7 @@
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
+#include "Undo/OdysseyVectorUndoTransferObjects.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
@@ -671,7 +670,7 @@ FOdysseyPainterEditor::BringForward( FOdysseyVectorGroupPaint* iScene )
         GEditor->BeginTransaction(LOCTEXT("BringForward", "Bring forward"));
         if( GUndo )
         {
-           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBringForward( iScene, selectedObject );
+           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTransferObjects( iScene, selectedObject );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
@@ -701,7 +700,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyVectorGroupPaint* iScene )
         GEditor->BeginTransaction(LOCTEXT("SendBackward", "Send backward"));
         if( GUndo )
         {
-           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSendBackward( iScene, selectedObject );
+           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTransferObjects( iScene, selectedObject );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }

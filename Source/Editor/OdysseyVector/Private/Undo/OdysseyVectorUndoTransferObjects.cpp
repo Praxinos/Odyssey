@@ -14,6 +14,13 @@ FOdysseyVectorUndoTransferObjects::~FOdysseyVectorUndoTransferObjects()
 }
 
 FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
+                                                                    , FOdysseyVectorObject* iTransferredObject )
+    : FOdysseyVectorUndo( iScene )
+{
+    mTransferredObjectSnapshotArray.emplace_back( iTransferredObject, FSnapshotObject::SNAPSHOT_HIERARCHY );
+}
+
+FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
                                                                     , const std::list<FOdysseyVectorObject*>& iTransferredObjectList )
     : FOdysseyVectorUndo( iScene )
 {

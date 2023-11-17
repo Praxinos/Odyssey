@@ -603,7 +603,9 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                                              , lastRecord->coords.x
                                              , lastRecord->coords.y
                                              , iWorldX
-                                             , iWorldY );
+                                             , iWorldY
+                                             , lastRecord->radius
+                                             , iRadius );
 
             ClearPointsTo( mPointID );
 

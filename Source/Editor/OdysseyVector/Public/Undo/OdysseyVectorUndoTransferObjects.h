@@ -14,6 +14,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTransferObjects : public FOdysseyVecto
     public:
         ~FOdysseyVectorUndoTransferObjects();
         FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
+                                         , FOdysseyVectorObject* iTransferredObject );
+        FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
                                          , const std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */

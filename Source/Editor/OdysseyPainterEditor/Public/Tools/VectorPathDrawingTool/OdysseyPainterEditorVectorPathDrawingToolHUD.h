@@ -13,6 +13,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : p
         std::vector<FOdysseyVectorPoint*> mStitchedPointArray;
         UOdysseyPainterEditorVectorPathDrawingTool* mPathDrawingTool;
 
+        void DrawEdge( BLContext* iBLContext
+                     , FTracerEdge* iPrevEdge
+                     , FTracerEdge* iCurrEdge
+                     , FTracerEdge* iNextEdge );
+
     public:
         virtual ~FOdysseyPainterEditorVectorPathDrawingToolHUD();
 

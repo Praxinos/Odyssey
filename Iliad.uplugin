@@ -17,6 +17,10 @@
 	"IsExperimentalVersion": false,
 	"Plugins": [
 		{
+			"Enabled": true,
+			"Name": "EditorScriptingUtilities"
+		},
+		{
 			"Enabled": false,
 			"Name": "Paper2D",
 			"Optional": true
@@ -160,7 +164,7 @@
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		},
-                {
+		{
 			"Name": "OdysseyPainterEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"

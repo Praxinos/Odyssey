@@ -40,6 +40,8 @@ typedef struct _FTracerEdge
     ::ULIS::FVec2D vector;
     ::ULIS::FVec2D p0;
     ::ULIS::FVec2D p1;
+    double radius0;
+    double radius1;
     double length;
     uint32 id;
 
@@ -47,7 +49,7 @@ typedef struct _FTracerEdge
     {
     }
 
-    _FTracerEdge( uint32 iID, double iX0, double iY0, double iX1, double iY1 )
+    _FTracerEdge( uint32 iID, double iX0, double iY0, double iX1, double iY1, double iRadius0, double iRadius1 )
     {
         id = iID;
 
@@ -56,6 +58,9 @@ typedef struct _FTracerEdge
 
         p1.x = iX1;
         p1.y = iY1;
+
+        radius0 = iRadius0;
+        radius1 = iRadius1;
 
         vector = p1 - p0;
 

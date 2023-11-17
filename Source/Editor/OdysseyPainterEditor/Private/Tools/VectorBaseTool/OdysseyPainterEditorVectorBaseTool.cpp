@@ -6,6 +6,8 @@
 #include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Framework/Commands/GenericCommands.h"
+#include "OdysseyMediaVector.h"
+#include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorBaseTool"
 
@@ -31,9 +33,10 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
 {
 }
 
-UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( FOdysseyPainterEditorVectorBaseToolHUD* iBaseHUD )
+UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( FOdysseyPainterEditorVectorBaseToolHUD* iBaseHUD, bool iAutoCreateMedia )
     : mBaseHUD( iBaseHUD )
     , mHasContextMenu(true)
+    , mAutoCreateMedia( iAutoCreateMedia )
 {
 }
 
@@ -173,49 +176,14 @@ uint64
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                     , const FKey& iKey )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-/*
-    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
-    {
-        if( iKey == EKeys::C )
-        {
-            FOdysseyPainterEditor::CopyObjects( iScene );
-        }
-
-        if( iKey == EKeys::V )
-        {
-            FOdysseyPainterEditor::PasteObjects( iScene );
-        }
-
-        if( iKey == EKeys::A )
-        {
-            GetEditor()->SelectAll( iScene );
-        }
-    }
-*/
-    if( iKey == EKeys::W )
-    {
-/*
-        uint64 drawingflags = iEngine->GetDrawingFlags();
-
-        iEngine->SetDrawingFlags( drawingflags | FOdysseyVectorEngine::DRAWING_WIREFRAME );
-*/
-    }
-
     if( iKey == EKeys::Delete )
     {
-        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
-        {
-            GetEditor()->DeleteObjects( iScene );
-        }
+        Delete();
 
-        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
-        {
-            GetEditor()->DeletePointSelection( iScene );
-        }
+        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return 0;
 }
 
 bool
@@ -237,6 +205,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
             signalFlags = OnKeyDownVector( vectorScene, iKey );
 
             vectorEngine->Signal( signalFlags );
+
+            return signalFlags ? true : false;
         }
     }
 
@@ -248,11 +218,6 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iS
                                                   , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-/*
-    uint64 drawingflags = iEngine->GetDrawingFlags();
-
-    iEngine->SetDrawingFlags( drawingflags & (~FOdysseyVectorEngine::DRAWING_WIREFRAME) );
-*/
 
     return 0;
 }
@@ -295,7 +260,8 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 
     if( hasVector )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>();
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mAutoCreateMedia ? GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaVector>()
+                                                                                : GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
         if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
         {
@@ -457,12 +423,12 @@ UOdysseyPainterEditorVectorBaseTool::BindShortcuts(FBaseToolkit* iToolkit)
         FGenericCommands::Get().SelectAll,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::SelectAll )
     );
-/*
+
     toolkitCommands->MapAction(
         FGenericCommands::Get().Delete,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Delete )
     );
-*/
+
     toolkitCommands->MapAction(
         FGenericCommands::Get().Copy,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Copy )
@@ -488,7 +454,10 @@ UOdysseyPainterEditorVectorBaseTool::Copy()
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
-            FOdysseyPainterEditor::CopyObjects( vectorScene );
+            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
+            {
+                FOdysseyPainterEditor::CopyObjects( vectorScene );
+            }
         }
     }
 }
@@ -507,7 +476,10 @@ UOdysseyPainterEditorVectorBaseTool::Paste()
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
-            FOdysseyPainterEditor::PasteObjects( vectorScene );
+            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
+            {
+                FOdysseyPainterEditor::PasteObjects( vectorScene );
+            }
         }
     }
 }
@@ -526,7 +498,42 @@ UOdysseyPainterEditorVectorBaseTool::SelectAll()
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
-            //FOdysseyPainterEditor::SelectAllObjects( vectorScene );
+            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
+            {
+                FOdysseyPainterEditor::SelectAllObjects( vectorScene );
+            }
+
+            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+            {
+                FOdysseyPainterEditor::SelectAllPoints( vectorScene );
+            }
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::Delete()
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() > 0 )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
+            {
+                FOdysseyPainterEditor::DeleteObjects( vectorScene );
+            }
+
+            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+            {
+                FOdysseyPainterEditor::DeletePointSelection( vectorScene );
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 }
 
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathEditToolHUD( this ) )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathEditToolHUD( this ), false )
     , mPickingFlags ( FOdysseyVectorPath::PICK_VERTEX )
     , mPickingMode  ( ePathPickingMode::Vertex )
     , PickingRadius(10.0f)

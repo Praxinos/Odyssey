@@ -22,7 +22,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::~UOdysseyPainterEditorVectorPaintBuc
 }
 
 UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBucketTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPaintBucketToolHUD( this ) )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPaintBucketToolHUD( this ), false )
     , Propagate( true )
     , ColorMode ( eBucketColorMode::SolidColor )
     , Color1( 255, 255, 255, 255 )

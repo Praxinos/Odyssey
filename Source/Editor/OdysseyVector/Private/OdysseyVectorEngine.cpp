@@ -1317,6 +1317,8 @@ FOdysseyVectorEngine::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
                 if( std::find( parentPaintGroupArray.begin(), parentPaintGroupArray.end(), parentPaintGroup ) == parentPaintGroupArray.end() )
                 {
                     parentPaintGroupArray.push_back( parentPaintGroup );
+
+                    paintGroup->SetGapTolerance( parentPaintGroup->GetGapTolerance() );
                 }
             }
         }
@@ -1544,7 +1546,7 @@ FOdysseyVectorEngine::RemoveObjects( const std::list<FOdysseyVectorObject*>& iOb
 {
     for( FOdysseyVectorObject* vectorObject : iObjectList )
     {
-        if( vectorObject->GetParent()->RemoveChild( vectorObject ) )
+        if( vectorObject->GetParent()->RemoveChild( vectorObject ) == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
         {
             oRemovedObjectArray.push_back( vectorObject );
         }

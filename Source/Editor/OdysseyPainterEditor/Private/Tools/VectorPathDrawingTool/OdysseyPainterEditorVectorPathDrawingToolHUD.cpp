@@ -38,6 +38,59 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::GetStitchedPointArray()
     return mStitchedPointArray;
 }
 
+void 
+FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawEdge( BLContext* iBLContext
+                                                       , FTracerEdge* iPrevEdge
+                                                       , FTracerEdge* iCurrEdge
+                                                       , FTracerEdge* iNextEdge )
+{
+    ::ULIS::FVec2D prevEdgeVector = ( iPrevEdge ) ? iPrevEdge->vector : ::ULIS::FVec2D( 0.0f, 0.0f );
+    ::ULIS::FVec2D currEdgeVector = ( iCurrEdge ) ? iCurrEdge->vector : ::ULIS::FVec2D( 0.0f, 0.0f );
+    ::ULIS::FVec2D nextEdgeVector = ( iNextEdge ) ? iNextEdge->vector : ::ULIS::FVec2D( 0.0f, 0.0f );
+    ::ULIS::FVec2D prevEdgePerpendicularVector;
+    ::ULIS::FVec2D nextEdgePerpendicularVector;
+    ::ULIS::FVec2D combinedVector = iCurrEdge->vector;
+    BLPoint pt[4];
+
+    if( iPrevEdge )
+    {
+        combinedVector = prevEdgeVector + currEdgeVector;
+
+        if( combinedVector.DistanceSquared() )
+        {
+            combinedVector.Normalize();
+        }
+    }
+
+    prevEdgePerpendicularVector = ::ULIS::FVec2D( -combinedVector.y, combinedVector.x ) * iCurrEdge->radius0;
+
+    if( iNextEdge )
+    {
+        combinedVector = currEdgeVector + nextEdgeVector;
+
+        if( combinedVector.DistanceSquared() )
+        {
+            combinedVector.Normalize();
+        }
+    }
+
+    nextEdgePerpendicularVector = ::ULIS::FVec2D( -combinedVector.y, combinedVector.x ) * iCurrEdge->radius1;
+
+    pt[0] = BLPoint( iCurrEdge->p0.x + prevEdgePerpendicularVector.x
+                   , iCurrEdge->p0.y + prevEdgePerpendicularVector.y );
+
+    pt[1] = BLPoint( iCurrEdge->p1.x + nextEdgePerpendicularVector.x
+                   , iCurrEdge->p1.y + nextEdgePerpendicularVector.y );
+
+    pt[2] = BLPoint( iCurrEdge->p1.x - nextEdgePerpendicularVector.x
+                   , iCurrEdge->p1.y - nextEdgePerpendicularVector.y );
+
+    pt[3] = BLPoint( iCurrEdge->p0.x - prevEdgePerpendicularVector.x
+                   , iCurrEdge->p0.y - prevEdgePerpendicularVector.y );
+
+    iBLContext->fillPolygon( pt, 4 );
+}
+
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
                                                    , FOdysseyVectorGroupPaint* iScene )
@@ -128,18 +181,12 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
 
         for( int i = 0; i < edgeArray.size(); i++ )
         {
+            int p = i - 1;
             int n = i + 1;
-            ::ULIS::FVec2D perpendicular = ::ULIS::FVec2D( -edgeArray[i].vector.y, edgeArray[i].vector.x );
-            BLPoint pt[4] = { BLPoint( recordArray[i].coords.x + ( perpendicular.x * recordArray[i].radius )
-                                     , recordArray[i].coords.y + ( perpendicular.y * recordArray[i].radius ) )
-                           ,  BLPoint( recordArray[i].coords.x - ( perpendicular.x * recordArray[i].radius )
-                                     , recordArray[i].coords.y - ( perpendicular.y * recordArray[i].radius ) )
-                           ,  BLPoint( recordArray[n].coords.x - ( perpendicular.x * recordArray[n].radius )
-                                     , recordArray[n].coords.y - ( perpendicular.y * recordArray[n].radius ) )
-                           ,  BLPoint( recordArray[n].coords.x + ( perpendicular.x * recordArray[n].radius )
-                                     , recordArray[n].coords.y + ( perpendicular.y * recordArray[n].radius ) ) };
+            FTracerEdge* prevEdge = ( p >= 0               ) ? prevEdge = &edgeArray[p] : nullptr;
+            FTracerEdge* nextEdge = ( n < edgeArray.size() ) ? nextEdge = &edgeArray[n] : nullptr;
 
-            iBLContext->fillPolygon( pt, 4 );
+            DrawEdge( iBLContext, prevEdge, &edgeArray[i], nextEdge );
         }
 
         if( mPathDrawingTool->Debug )
