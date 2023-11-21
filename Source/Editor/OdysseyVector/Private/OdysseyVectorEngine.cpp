@@ -1317,7 +1317,9 @@ FOdysseyVectorEngine::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
                 if( std::find( parentPaintGroupArray.begin(), parentPaintGroupArray.end(), parentPaintGroup ) == parentPaintGroupArray.end() )
                 {
                     parentPaintGroupArray.push_back( parentPaintGroup );
-
+                    // the gap tolerance will be set multiple times
+                    // if there are multiples former parent paintgroups
+                    // but this does not matter.
                     paintGroup->SetGapTolerance( parentPaintGroup->GetGapTolerance() );
                 }
             }

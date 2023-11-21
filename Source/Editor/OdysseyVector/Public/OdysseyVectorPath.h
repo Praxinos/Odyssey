@@ -8,6 +8,7 @@
 #include "OdysseyVectorBrush.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegment.h"
+#include "OdysseyVectorChain.h"
 
 #include "OdysseyVectorPath.generated.h"
 
@@ -32,20 +33,6 @@ enum ePointSelectionFlags
 
 // define bitwise op
 ENUM_CLASS_FLAGS(ePointSelectionFlags)
-
-struct FVertexChain
-{
-    FOdysseyVectorVertex* vertex;
-    std::vector<FOdysseyVectorSegment*> segmentArray;
-    double length;
-    ::ULIS::FRectD bbox;
-
-    FVertexChain( FOdysseyVectorVertex* iVertex, uint32 iReserveSegmentCount )
-    {
-        vertex = iVertex;
-        segmentArray.reserve( iReserveSegmentCount );
-    }
-};
 
 USTRUCT()
 struct FPathParam
@@ -352,14 +339,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
 
+        void RemoveAllVertices();
+        void RemoveAllSegments();
+        bool HasVertex( FOdysseyVectorVertex* iVertex );
+        bool HasSegment( FOdysseyVectorSegment* iSegment );
+
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
         void UpdateBBox();
         void Fill();
-        void ExploreVertexChain( FVertexChain* iVertexChain );
-        void UpdateVertexChain( FVertexChain* iVertexChain );
-        void FindVertexChains();
-        void DrawVertexChain( BLContext* iBLContext, double iCombinedOpacity, const FVertexChain& iVertexChain, uint64 iDrawingFlags );
+        void ExploreChain( FOdysseyVectorChain* iChain );
+        void UpdateChain( FOdysseyVectorChain* iChain );
+        void FindChains();
+        void DrawChain( BLContext* iBLContext
+                      , double iCombinedOpacity
+                      , const FOdysseyVectorChain& iChain
+                      , uint64 iDrawingFlags );
         void DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                 , int8*  iScreenPixels
                                 , uint32 iScreenWidth
@@ -388,7 +383,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , uint64 iDrawingFlags );
 
     protected :
-        std::vector<FVertexChain> mVertexChainArray;
+        std::vector<FOdysseyVectorChain> mChainArray;
         std::list<FOdysseyVectorVertex*> mVertexList;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSegment*> mInvalidatedSegmentList;

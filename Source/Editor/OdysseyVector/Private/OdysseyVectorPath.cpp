@@ -26,7 +26,7 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
     mPathParam.Filled = false;
     SetMiterLimit( 4.0f );
 
-    mVertexChainArray.reserve( 10 );
+    mChainArray.reserve( 10 );
 /*
     mBrush = new BLImage();
     if( mBrush )
@@ -207,12 +207,12 @@ FOdysseyVectorPath::UpdateBBox()
     double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
     bool hasBBox = false;
 
-    for( FVertexChain& vertexChain : mVertexChainArray )
+    for( FOdysseyVectorChain& chain : mChainArray )
     {
-        double rx1 = vertexChain.bbox.x
-             , ry1 = vertexChain.bbox.y
-             , rx2 = vertexChain.bbox.x + vertexChain.bbox.w
-             , ry2 = vertexChain.bbox.y + vertexChain.bbox.h;
+        double rx1 = chain.mBBox.x
+             , ry1 = chain.mBBox.y
+             , rx2 = chain.mBBox.x + chain.mBBox.w
+             , ry2 = chain.mBBox.y + chain.mBBox.h;
 
         hasBBox = true;
 
@@ -223,6 +223,28 @@ FOdysseyVectorPath::UpdateBBox()
     }
 
     mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+}
+
+bool
+FOdysseyVectorPath::HasVertex( FOdysseyVectorVertex* iVertex )
+{
+    if( std::find( mVertexList.begin(), mVertexList.end(), iVertex ) == mVertexList.end() )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool
+FOdysseyVectorPath::HasSegment( FOdysseyVectorSegment* iSegment )
+{
+    if( std::find( mSegmentList.begin(), mSegmentList.end(), iSegment ) == mSegmentList.end() )
+    {
+        return false;
+    }
+
+    return true;
 }
 
 /*
@@ -247,9 +269,9 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
     mInvalidatedSegmentList.clear();
 
     // Updates vertex chains' length and bounding box
-    for( FVertexChain& vertexChain : mVertexChainArray )
+    for( FOdysseyVectorChain& chain : mChainArray )
     {
-        UpdateVertexChain( &vertexChain );
+        UpdateChain( &chain );
     }
 
     // TODO::Optimize this can be merged with the for loop above
@@ -408,6 +430,24 @@ FOdysseyVectorPath::RemoveVertex( FOdysseyVectorVertex* iVertex )
     {
         UnselectVertex( iVertex );
     }
+
+    //iVertex->SetPath( nullptr );
+}
+
+void
+FOdysseyVectorPath::RemoveAllVertices()
+{
+    mVertexList.remove_if( [this]( FOdysseyVectorVertex* vertex )
+                           {
+                               if( vertex->IsSelected() )
+                               {
+                                   UnselectVertex( vertex );
+                               }
+
+                               //vertex->SetPath( nullptr );
+
+                               return true;
+                           } );
 }
 
 void
@@ -422,8 +462,48 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 
     InvalidateSegment( iSegment );
 
-    FindVertexChains();
+    FindChains();
 }
+
+void
+FOdysseyVectorPath::RemoveAllSegments()
+{
+    mSegmentList.remove_if( []( FOdysseyVectorSegment* segment )
+                            {
+                                segment->GetVertex(0)->RemoveSegment( segment );
+                                segment->GetVertex(1)->RemoveSegment( segment );
+
+                                // segment->SetPath( nullptr );
+
+                                return true;
+                            } );
+
+    // DO NOT invalidate the segments here, only the path. Otherwise the segment 
+    // would be added to the list of segments to invalidate BUT the segment does
+    // not belong to the path anymore, leading to issues if it has been freed.
+    Invalidate();
+
+    FindChains();
+}
+
+void
+FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
+{
+    mSegmentList.remove( iSegment );
+
+    iSegment->GetVertex(0)->RemoveSegment( iSegment );
+    iSegment->GetVertex(1)->RemoveSegment( iSegment );
+
+    //iSegment->SetPath( nullptr );
+
+    // DO NOT invalidate the segment here, only the path. Otherwise the segment 
+    // would be added to the list of segments to invalidate BUT the segment does
+    // not belong to the path anymore, leading to issues if it has been freed.
+    Invalidate();
+
+    FindChains();
+}
+
 
 void
 FOdysseyVectorPath::Invalidate()
@@ -445,22 +525,6 @@ FOdysseyVectorPath::Invalidate( uint32 iInvalidationFlags )
     //}
 
     FOdysseyVectorObject::Invalidate( iInvalidationFlags );
-}
-
-void
-FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
-{
-    mSegmentList.remove( iSegment );
-
-    iSegment->GetVertex(0)->RemoveSegment( iSegment );
-    iSegment->GetVertex(1)->RemoveSegment( iSegment );
-
-    // DO NOT invalidate the segment here, only the path. Otherwise the segment 
-    // would be added to the list of segments to invalidate BUT the segment does
-    // not belong to the path anymore, leading to issues if it has been freed.
-    Invalidate();
-
-    FindVertexChains();
 }
 
 std::list<FOdysseyVectorSegment*>&
@@ -1367,24 +1431,24 @@ FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
 void
 FOdysseyVectorPath::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iDrawingFlags )
 {
-    for( FVertexChain& vertexChain : mVertexChainArray )
+    for( FOdysseyVectorChain& chain : mChainArray )
     {
-        DrawVertexChain( iBLContext, iCombinedOpacity, vertexChain, iDrawingFlags );
+        DrawChain( iBLContext, iCombinedOpacity, chain, iDrawingFlags );
     }
 }
 
 void
-FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
-                                   , double iCombinedOpacity
-                                   , const FVertexChain& iVertexChain
-                                   , uint64 iDrawingFlags )
+FOdysseyVectorPath::DrawChain( BLContext* iBLContext
+                             , double iCombinedOpacity
+                             , const FOdysseyVectorChain& iChain
+                             , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetEngine();
     FColor color = mForegroundBucket.GetColor();
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 ) 
                                                                                          : BLRgba32( color.R, color.G, color.B, color.A * iCombinedOpacity );
 
-    FOdysseyVectorVertex* currentVertex = iVertexChain.vertex;
+    FOdysseyVectorVertex* currentVertex = iChain.mVertex;
     UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();
     BLImageData imageData;
@@ -1408,7 +1472,7 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
             const FColor* brushData = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
             double startU = mBrush.Revert ? 1.0f : 0.0f;
 
-            for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
+            for( FOdysseyVectorSegment* segment : iChain.mSegmentArray )
             {
                 ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
                 FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex(currentVertex);
@@ -1422,11 +1486,11 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
                 {
                     if( mBrush.Revert )
                     {
-                        endU = iVertexChain.length ? startU - ( segmentAndJointLength / iVertexChain.length ) : 0.0f;
+                        endU = iChain.mLength ? startU - ( segmentAndJointLength / iChain.mLength ) : 0.0f;
                     }
                     else
                     {
-                        endU = iVertexChain.length ? startU + ( segmentAndJointLength / iVertexChain.length ) : 0.0f;
+                        endU = iChain.mLength ? startU + ( segmentAndJointLength / iChain.mLength ) : 0.0f;
                     }
                 }
                 else
@@ -1521,7 +1585,7 @@ FOdysseyVectorPath::DrawVertexChain( BLContext* iBLContext
             iBLContext->setFillStyle( strokeColor );
             iBLContext->setStrokeStyle( strokeColor );
 
-            for( FOdysseyVectorSegment* segment : iVertexChain.segmentArray )
+            for( FOdysseyVectorSegment* segment : iChain.mSegmentArray )
             {
                 FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( currentVertex );
                 ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
@@ -2006,17 +2070,17 @@ FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSe
 
 // Updates length and bounding box
 void
-FOdysseyVectorPath::UpdateVertexChain( FVertexChain* iVertexChain )
+FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
 {
-    FOdysseyVectorVertex* currentVertex = iVertexChain->vertex;
+    FOdysseyVectorVertex* currentVertex = iChain->mVertex;
     double xmin = DBL_MAX,ymin = DBL_MAX,xmax = -DBL_MAX,ymax = -DBL_MAX;
     bool hasBBox = false;
 
-    iVertexChain->length = 0.0f;
+    iChain->mLength = 0.0f;
 
     currentVertex->MakeJoint( nullptr );
 
-    for( FOdysseyVectorSegment* segment : iVertexChain->segmentArray )
+    for( FOdysseyVectorSegment* segment : iChain->mSegmentArray )
     {
         FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex(currentVertex);
         ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
@@ -2035,18 +2099,18 @@ FOdysseyVectorPath::UpdateVertexChain( FVertexChain* iVertexChain )
         // update joint
         nextVertex->MakeJoint( segment );
 
-        iVertexChain->length += segment->GetLength() + currentVertex->GetJointLength();
+        iChain->mLength += segment->GetLength() + currentVertex->GetJointLength();
 
         currentVertex = nextVertex;
     }
 
-    iVertexChain->bbox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+    iChain->mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
 void
-FOdysseyVectorPath::ExploreVertexChain( FVertexChain* iVertexChain )
+FOdysseyVectorPath::ExploreChain( FOdysseyVectorChain* iChain )
 {
-    FOdysseyVectorVertex* currentVertex = iVertexChain->vertex;
+    FOdysseyVectorVertex* currentVertex = iChain->mVertex;
     FOdysseyVectorSegment* currentSegment = currentVertex->GetFirstSegment();
 
     while( ( currentSegment ) && ( currentVertex->IsChained() == false ) )
@@ -2056,7 +2120,7 @@ FOdysseyVectorPath::ExploreVertexChain( FVertexChain* iVertexChain )
 
         currentVertex->SetChained( true );
 
-        iVertexChain->segmentArray.emplace_back( currentSegment );
+        iChain->mSegmentArray.emplace_back( currentSegment );
 
         currentVertex = nextVertex;
         currentSegment = nextSegment;
@@ -2067,9 +2131,9 @@ FOdysseyVectorPath::ExploreVertexChain( FVertexChain* iVertexChain )
 }
 
 void
-FOdysseyVectorPath::FindVertexChains()
+FOdysseyVectorPath::FindChains()
 {
-    mVertexChainArray.clear();
+    mChainArray.clear();
 
     for( FOdysseyVectorVertex* vertex : mVertexList )
     {
@@ -2083,9 +2147,9 @@ FOdysseyVectorPath::FindVertexChains()
         {
             if( vertex->GetSegmentCount() == 1 )
             {
-                mVertexChainArray.emplace_back( vertex, mSegmentList.size() );
+                mChainArray.emplace_back( vertex, mSegmentList.size() );
 
-                ExploreVertexChain( &mVertexChainArray.back() );
+                ExploreChain( &mChainArray.back() );
             }
         }
     }
@@ -2097,9 +2161,9 @@ FOdysseyVectorPath::FindVertexChains()
         {
             if( vertex->GetSegmentCount() == 2 )
             {
-                mVertexChainArray.emplace_back( vertex, mSegmentList.size() );
+                mChainArray.emplace_back( vertex, mSegmentList.size() );
 
-                ExploreVertexChain( &mVertexChainArray.back() );
+                ExploreChain( &mChainArray.back() );
             }
         }
     }

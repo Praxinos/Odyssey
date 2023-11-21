@@ -34,6 +34,7 @@
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
+#include "Undo/OdysseyVectorUndoPathAlter.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"

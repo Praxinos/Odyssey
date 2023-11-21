@@ -537,6 +537,8 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext, double iAncestorsOpacity, uin
     iBLContext->transform( mLocalMatrix );
 
     iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
+    //Get sure everything is drawn before we draw in the BLend2D buffer.
+    iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
     DrawShape( iBLContext, combinedOpacity, iFlags );
     // get sure the parent has finished drawing before drawing its children

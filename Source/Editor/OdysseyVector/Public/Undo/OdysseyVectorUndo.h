@@ -10,7 +10,7 @@
 #include <Image/Block.h>
 
 class FOdysseyVectorPoint;
-class FOdysseyVectorGroupPaint;
+class FOdysseyVectorObject;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorVertex;
 class FOdysseyVectorSegmentCubic;
@@ -122,6 +122,7 @@ class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
         static const uint32 SNAPSHOT_VERTICES          = ( 1 << 0 );
         static const uint32 SNAPSHOT_SEGMENTS          = ( 1 << 1 );
         static const uint32 SNAPSHOT_SELECTED_VERTICES = ( 1 << 2 );
+        static const uint32 SNAPSHOT_TOPOLOGY          = ( 1 << 3 );
         static const uint32 SNAPSHOT_ALL               = 0xFFFFFFFF;
 
         virtual ~FSnapshotPath();
@@ -136,6 +137,8 @@ class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
         std::vector<FSnapshotVertex> mVertexSnapshotArray;
         std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;
         std::list<FOdysseyVectorVertex*> mSelectedVertexList;
+        std::list<FOdysseyVectorVertex*> mTopologyVertexList;
+        std::list<FOdysseyVectorSegment*> mTopologySegmentList;
 };
 
 class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotObject
