@@ -6,18 +6,22 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorGroup.h"
 #include "OdysseyVectorSection.h"
-#include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorSegmentCubicGap.h"
-#include "OdysseyVectorGroup.h"
-#include "OdysseyVectorBucket.h"
-#include "OdysseyVectorCycle.h"
 
 #include "OdysseyVectorGroupPaint.generated.h"
+
+class FOdysseyVectorVertex;
+class FOdysseyVectorVertexIntersection;
+class FOdysseyVectorSection;
+class FOdysseyVectorIntersection;
+class FOdysseyVectorBucket;
+class FOdysseyVectorCycle;
 
 USTRUCT()
 struct FGroupPaintParam

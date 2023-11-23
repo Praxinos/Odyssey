@@ -353,7 +353,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void FindChains();
         void DrawChain( BLContext* iBLContext
                       , double iCombinedOpacity
-                      , const FOdysseyVectorChain& iChain
+                      , FOdysseyVectorChain& iChain
                       , uint64 iDrawingFlags );
         void DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                 , int8*  iScreenPixels

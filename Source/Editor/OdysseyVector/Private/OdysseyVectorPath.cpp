@@ -763,6 +763,63 @@ FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVerte
 
 bool
 FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
+                         , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                         , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                         , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                         , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
+{
+    BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
+
+    if( blimg )
+    {
+        BLImageData imageData;
+
+        blimg->getData( &imageData );
+
+        for( FOdysseyVectorChain& chain : mChainArray )
+        {
+            std::vector<FOdysseyVectorVertex*> newVertexArray;
+            std::vector<FOdysseyVectorSegment*> newSegmentArray;
+            std::vector<FOdysseyVectorSegment*> oldSegmentArray;
+            std::vector<FOdysseyVectorVertex*> oldVertexArray;
+
+            if( chain.HitMask( &imageData
+                             , newVertexArray
+                             , newSegmentArray
+                             , oldVertexArray
+                             , oldSegmentArray ) )
+            {
+                for( FOdysseyVectorSegment* segment : oldSegmentArray )
+                {
+                    RemoveSegment( segment );
+                }
+
+                for( FOdysseyVectorVertex* vertex : oldVertexArray )
+                {
+                    RemoveVertex( vertex );
+                }
+
+                for( FOdysseyVectorVertex* vertex : newVertexArray )
+                {
+                    AddVertex( vertex );
+                }
+
+                for( FOdysseyVectorSegment* segment : newSegmentArray )
+                {
+                    AddSegment( segment );
+                }
+            }
+        }
+    }
+
+    Invalidate();
+
+    return false;
+}
+
+#ifdef unused
+bool
+FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
                               , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                               , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                               , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
@@ -915,6 +972,7 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
 
     return ( mSegmentList.size() == 0 ) ? true : false;
 }
+#endif
 
 bool
 FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
@@ -1441,7 +1499,7 @@ FOdysseyVectorPath::DrawShape( BLContext* iBLContext, double iCombinedOpacity, u
 void
 FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                              , double iCombinedOpacity
-                             , const FOdysseyVectorChain& iChain
+                             , FOdysseyVectorChain& iChain
                              , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetEngine();
@@ -1449,7 +1507,6 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 ) 
                                                                                          : BLRgba32( color.R, color.G, color.B, color.A * iCombinedOpacity );
 
-    FOdysseyVectorVertex* currentVertex = iChain.mVertex;
     UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();
     BLImageData imageData;
@@ -1473,108 +1530,115 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
             const FColor* brushData = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
             double startU = mBrush.Revert ? 1.0f : 0.0f;
 
-            for( FOdysseyVectorSegment* segment : iChain.mSegmentArray )
-            {
-                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
-                FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex(currentVertex);
-                FOdysseyVectorJoint& joint = currentVertex->GetJoint();
-                double segmentLength = segment->GetLength();
-                double jointLength = joint.GetLength();
-                double segmentAndJointLength = segmentLength + jointLength;
-                double endU = 0.0f;
+            iChain.Iterate( [ this
+                            , texture
+                            , brushData
+                            , &imageData
+                            , &iCombinedOpacity
+                            , &iDrawingFlags
+                            , &startU
+                            , &screen
+                            , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
+                            {
+                                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
+                                FOdysseyVectorJoint& joint = vertex->GetJoint();
+                                double segmentLength = segment->GetLength();
+                                double jointLength = joint.GetLength();
+                                double segmentAndJointLength = segmentLength + jointLength;
+                                double endU = 0.0f;
 
-                if( mBrush.ExtendOverPath )
-                {
-                    if( mBrush.Revert )
-                    {
-                        endU = iChain.mLength ? startU - ( segmentAndJointLength / iChain.mLength ) : 0.0f;
-                    }
-                    else
-                    {
-                        endU = iChain.mLength ? startU + ( segmentAndJointLength / iChain.mLength ) : 0.0f;
-                    }
-                }
-                else
-                {
-                    if( mBrush.Revert )
-                    {
-                        startU = 0.0f;
-                        endU   = 1.0f;
-                    }
-                    else
-                    {
-                        startU = 1.0f;
-                        endU   = 0.0f;
-                    }
-                }
+                                if( mBrush.ExtendOverPath )
+                                {
+                                    if( mBrush.Revert )
+                                    {
+                                        endU = iChain.mLength ? startU - ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                                    }
+                                    else
+                                    {
+                                        endU = iChain.mLength ? startU + ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                                    }
+                                }
+                                else
+                                {
+                                    if( mBrush.Revert )
+                                    {
+                                        startU = 0.0f;
+                                        endU   = 1.0f;
+                                    }
+                                    else
+                                    {
+                                        startU = 1.0f;
+                                        endU   = 0.0f;
+                                    }
+                                }
 
-                if( segmentLength )
-                {
-                    double segmentStartU = ( currentVertex == segment->GetVertex(0) ) ? startU : endU;
-                    double segmentEndU   = ( currentVertex == segment->GetVertex(0) ) ? endU : startU;
+                                if( segmentLength )
+                                {
+                                    double segmentStartU = ( vertex == segment->GetVertex(0) ) ? startU : endU;
+                                    double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
 
-                    // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
-                    if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
-                    if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
+                                    // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
+                                    if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
+                                    if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
 
-                    // Textured joints are drawn only in texture mode (obviously) and if the texture
-                    // goes all over the path.
-                    if( ( currentVertex->IsHandleAligned() == false )
-                    && ( mBrush.ExtendOverPath == true ) )
-                    {
-                        double segmentJointRatio = jointLength / ( segmentAndJointLength );
-                        double jointStartU = segmentStartU;
-                        double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
+                                    // Textured joints are drawn only in texture mode (obviously) and if the texture
+                                    // goes all over the path.
+                                    if( ( vertex->IsHandleAligned() == false )
+                                    && ( mBrush.ExtendOverPath == true ) )
+                                    {
+                                        double segmentJointRatio = jointLength / ( segmentAndJointLength );
+                                        double jointStartU = segmentStartU;
+                                        double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
 
-                        segmentStartU = jointEndU;
+                                        segmentStartU = jointEndU;
 
-                        // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
-                        if ( jointStartU < 0.0f ) jointStartU = 0.0f;
-                        if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
+                                        // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
+                                        if ( jointStartU < 0.0f ) jointStartU = 0.0f;
+                                        if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
 
-                        // TODO : check for in-screen visibility
-                        DrawTexturedJoint( &joint
-                                         , (int8*)imageData.pixelData
-                                         , imageData.size.w
-                                         , imageData.size.h
-                                         , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                         , (int8*) brushData
-                                         , texture->GetSurfaceWidth()
-                                         , texture->GetSurfaceHeight()
-                                         , 32
-                                         , jointStartU
-                                         , jointEndU
-                                         , iCombinedOpacity
-                                         , iDrawingFlags );
-                    }
+                                        // TODO : check for in-screen visibility
+                                        DrawTexturedJoint( &joint
+                                                         , (int8*)imageData.pixelData
+                                                         , imageData.size.w
+                                                         , imageData.size.h
+                                                         , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                                         , (int8*) brushData
+                                                         , texture->GetSurfaceWidth()
+                                                         , texture->GetSurfaceHeight()
+                                                         , 32
+                                                         , jointStartU
+                                                         , jointEndU
+                                                         , iCombinedOpacity
+                                                         , iDrawingFlags );
+                                    }
 
-                    // don't draw if segment is outside the screen
-                    if( ( ( bbox.x          ) < screen.w )
-                     && ( ( bbox.x + bbox.w ) > 0        )
-                     && ( ( bbox.y          ) < screen.h )
-                     && ( ( bbox.y + bbox.h ) > 0        ) )
-                    {
-                        DrawTexturedSegment( segment
-                                            , (int8*)imageData.pixelData
-                                            , imageData.size.w
-                                            , imageData.size.h
-                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                            , (int8*) brushData
-                                            , texture->GetSurfaceWidth()
-                                            , texture->GetSurfaceHeight()
-                                            , 32
-                                            , segmentStartU
-                                            , segmentEndU
-                                            , iCombinedOpacity
-                                            , iDrawingFlags );
-                    }
-                }
+                                    // don't draw if segment is outside the screen
+                                    if( ( ( bbox.x          ) < screen.w )
+                                     && ( ( bbox.x + bbox.w ) > 0        )
+                                     && ( ( bbox.y          ) < screen.h )
+                                     && ( ( bbox.y + bbox.h ) > 0        ) )
+                                    {
+                                        DrawTexturedSegment( segment
+                                                            , (int8*)imageData.pixelData
+                                                            , imageData.size.w
+                                                            , imageData.size.h
+                                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                                            , (int8*) brushData
+                                                            , texture->GetSurfaceWidth()
+                                                            , texture->GetSurfaceHeight()
+                                                            , 32
+                                                            , segmentStartU
+                                                            , segmentEndU
+                                                            , iCombinedOpacity
+                                                            , iDrawingFlags );
+                                    }
+                                }
 
-                // only when mBrush.ExtendOverPath == true 
-                startU = endU;
+                                // only when mBrush.ExtendOverPath == true 
+                                startU = endU;
 
-                currentVertex = nextVertex;
-            }
+                                return false; // keep iterating
+                            } );
 
             texture->PlatformData->Mips[0].BulkData.Unlock();
         }
@@ -1586,28 +1650,30 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
             iBLContext->setFillStyle( strokeColor );
             iBLContext->setStrokeStyle( strokeColor );
 
-            for( FOdysseyVectorSegment* segment : iChain.mSegmentArray )
-            {
-                FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( currentVertex );
-                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
+            iChain.Iterate( [ this
+                            , iBLContext
+                            , &iDrawingFlags
+                            , &screen ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
+                            {
+                                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
 
-                // don't draw if segment is outside the screen
-                if( ( ( bbox.x          ) < screen.w )
-                 && ( ( bbox.x + bbox.w ) > 0        )
-                 && ( ( bbox.y          ) < screen.h )
-                 && ( ( bbox.y + bbox.h ) > 0        ) )
-                {
-                    segment->Draw( iBLContext );
-                }
+                                // don't draw if segment is outside the screen
+                                if( ( ( bbox.x          ) < screen.w )
+                                 && ( ( bbox.x + bbox.w ) > 0        )
+                                 && ( ( bbox.y          ) < screen.h )
+                                 && ( ( bbox.y + bbox.h ) > 0        ) )
+                                {
+                                    segment->Draw( iBLContext );
+                                }
 
-            // TODO : check for in-screen visibility
-                /*if( currentVertex->GetSegmentCount() == 2 )
-                {*/
-                    currentVertex->DrawJoint( iBLContext, iDrawingFlags );
-                /*}*/
+                            // TODO : check for in-screen visibility
+                                /*if( currentVertex->GetSegmentCount() == 2 )
+                                {*/
+                                    vertex->DrawJoint( iBLContext, iDrawingFlags );
+                                /*}*/
 
-                currentVertex = nextVertex;
-            }
+                                return false; // keep iterating
+                            } );
         }
     }
 }
@@ -2073,62 +2139,41 @@ FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSe
 void
 FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
 {
-    FOdysseyVectorVertex* currentVertex = iChain->mVertex;
-    double xmin = DBL_MAX,ymin = DBL_MAX,xmax = -DBL_MAX,ymax = -DBL_MAX;
+    double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
     bool hasBBox = false;
 
     iChain->mLength = 0.0f;
 
-    currentVertex->MakeJoint( nullptr );
+    iChain->Iterate( [ iChain
+                     , &xmin
+                     , &ymin
+                     , &xmax
+                     , &ymax
+                     , &hasBBox ] ( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
+                     {
+                         ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
+                         double rx1 = segmentBBox.x
+                              , ry1 = segmentBBox.y
+                              , rx2 = segmentBBox.x + segmentBBox.w
+                              , ry2 = segmentBBox.y + segmentBBox.h;
 
-    for( FOdysseyVectorSegment* segment : iChain->mSegmentArray )
-    {
-        FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex(currentVertex);
-        ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
-        double rx1 = segmentBBox.x
-             , ry1 = segmentBBox.y
-             , rx2 = segmentBBox.x + segmentBBox.w
-             , ry2 = segmentBBox.y + segmentBBox.h;
+                         hasBBox = true;
 
-        hasBBox = true;
+                         if ( rx1 < xmin ) xmin = rx1;
+                         if ( ry1 < ymin ) ymin = ry1;
+                         if ( rx2 > xmax ) xmax = rx2;
+                         if ( ry2 > ymax ) ymax = ry2;
 
-        if ( rx1 < xmin ) xmin = rx1;
-        if ( ry1 < ymin ) ymin = ry1;
-        if ( rx2 > xmax ) xmax = rx2;
-        if ( ry2 > ymax ) ymax = ry2;
+                         // update joint
+                         vertex->MakeJoint( segment );
 
-        // update joint
-        nextVertex->MakeJoint( segment );
+                         iChain->mLength += segment->GetLength() + vertex->GetJointLength();
 
-        iChain->mLength += segment->GetLength() + currentVertex->GetJointLength();
+                         return false; // keep iterating
+                     } );
 
-        currentVertex = nextVertex;
-    }
-
-    iChain->mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
-}
-
-void
-FOdysseyVectorPath::ExploreChain( FOdysseyVectorChain* iChain )
-{
-    FOdysseyVectorVertex* currentVertex = iChain->mVertex;
-    FOdysseyVectorSegment* currentSegment = currentVertex->GetFirstSegment();
-
-    while( ( currentSegment ) && ( currentVertex->IsChained() == false ) )
-    {
-        FOdysseyVectorVertex* nextVertex = currentSegment->GetOtherVertex( currentVertex );
-        FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( currentSegment );
-
-        currentVertex->SetChained( true );
-
-        iChain->mSegmentArray.emplace_back( currentSegment );
-
-        currentVertex = nextVertex;
-        currentSegment = nextSegment;
-    }
-
-    // set the last vertex as chained as well, no matter what
-    currentVertex->SetChained( true );
+    iChain->mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax )
+                                : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
 void
@@ -2136,6 +2181,7 @@ FOdysseyVectorPath::FindChains()
 {
     mChainArray.clear();
 
+    // reset status as FOdysseyVectorChain::Ctor is going to set it
     for( FOdysseyVectorVertex* vertex : mVertexList )
     {
         vertex->SetChained( false );
@@ -2148,9 +2194,7 @@ FOdysseyVectorPath::FindChains()
         {
             if( vertex->GetSegmentCount() == 1 )
             {
-                mChainArray.emplace_back( vertex, mSegmentList.size() );
-
-                ExploreChain( &mChainArray.back() );
+                mChainArray.emplace_back( this, vertex );
             }
         }
     }
@@ -2162,9 +2206,7 @@ FOdysseyVectorPath::FindChains()
         {
             if( vertex->GetSegmentCount() == 2 )
             {
-                mChainArray.emplace_back( vertex, mSegmentList.size() );
-
-                ExploreChain( &mChainArray.back() );
+                mChainArray.emplace_back( this, vertex );
             }
         }
     }

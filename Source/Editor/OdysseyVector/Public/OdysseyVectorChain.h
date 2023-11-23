@@ -44,7 +44,7 @@ class FOdysseyVectorChain
          FOdysseyVectorChain( FOdysseyVectorPath* iPath
                             , FOdysseyVectorVertex* iInitiatorVertex );
 
-        bool HitMask( BLContext* iBLContex
+        bool HitMask( BLImageData* iImageData
                     , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                     , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                     , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
@@ -58,8 +58,9 @@ class FOdysseyVectorChain
         uint8 GetAlpha( int32 iX, int32 iY, BLImageData* iImageData );
         bool CheckContrast( uint8 iAlphaValue0, uint8 iAlphaValue1 );
 
-        uint32 TraceLine( uint8 iLastAlphaValue
-                        , int32 iX0
+        bool SegmentCreationPolicy( FWayPoint* iWayPoint0, FWayPoint* iWayPoint1 );
+
+        uint32 TraceLine( int32 iX0
                         , int32 iY0
                         , double iT0
                         , int32 iX1
@@ -77,8 +78,8 @@ class FOdysseyVectorChain
 
     private :
         FOdysseyVectorPath* mPath;
-        std::vector<FOdysseyVectorVertex*> mVertexArray;
-        std::vector<FOdysseyVectorSegment*> mSegmentArray;
+        std::list<FOdysseyVectorVertex*> mVertexList;
+        std::list<FOdysseyVectorSegment*> mSegmentList;
         double mLength;
         ::ULIS::FRectD mBBox;
 };

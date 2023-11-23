@@ -1,3 +1,4 @@
+#include "OdysseyVector.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorEngine.h"
 #include "Palette/OdysseyPaletteEntryColor.h"

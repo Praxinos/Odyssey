@@ -1,4 +1,13 @@
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorVertexIntersection.h"
+#include "OdysseyVectorSection.h"
+#include "OdysseyVectorIntersection.h"
+#include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorSegmentCubicGap.h"
+#include "OdysseyVectorBucket.h"
+#include "OdysseyVectorCycle.h"
 
 // Some explanations are needed here, as this is by far the most complex process
 // of Odyssey's vector features. The principles is to find cycles chordless determined by
