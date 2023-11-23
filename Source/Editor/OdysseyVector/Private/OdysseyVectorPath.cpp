@@ -268,6 +268,11 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
     mInvalidatedSegmentList.clear();
 
+    if( mInvalidationFlags & INVALIDATE_TOPOLOGY )
+    {
+        FindChains();
+    }
+
     // Updates vertex chains' length and bounding box
     for( FOdysseyVectorChain& chain : mChainArray )
     {
@@ -462,7 +467,7 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 
     InvalidateSegment( iSegment );
 
-    FindChains();
+    Invalidate( INVALIDATE_TOPOLOGY );
 }
 
 void
@@ -481,9 +486,7 @@ FOdysseyVectorPath::RemoveAllSegments()
     // DO NOT invalidate the segments here, only the path. Otherwise the segment 
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
-    Invalidate();
-
-    FindChains();
+    Invalidate( INVALIDATE_TOPOLOGY );
 }
 
 void
@@ -499,9 +502,7 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
     // DO NOT invalidate the segment here, only the path. Otherwise the segment 
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
-    Invalidate();
-
-    FindChains();
+    Invalidate( INVALIDATE_TOPOLOGY );
 }
 
 

@@ -2,6 +2,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSegmentCubic.h"
 
 FOdysseyVectorChain::~FOdysseyVectorChain()
 {
@@ -69,8 +70,8 @@ FOdysseyVectorChain::Iterate( std::function<bool( FOdysseyVectorVertex*, FOdysse
 uint8
 FOdysseyVectorChain::GetAlpha( int32 iX, int32 iY, BLImageData* iImageData )
 {
-    if( ( x >= 0 ) && ( x < iImageData->size.w )
-     && ( y >= 0 ) && ( y < iImageData->size.h ) )
+    if( ( iX >= 0 ) && ( iX < iImageData->size.w )
+     && ( iY >= 0 ) && ( iY < iImageData->size.h ) )
     {
         uint8 *pixel = static_cast<uint8*>( iImageData->pixelData );
         uint32 offset = ( iY * iImageData->size.w ) + iX;
@@ -85,8 +86,8 @@ FOdysseyVectorChain::GetAlpha( int32 iX, int32 iY, BLImageData* iImageData )
 bool
 FOdysseyVectorChain::CheckContrast( uint8 iAlphaValue0, uint8 iAlphaValue1 )
 {
-    if( ( iAlphaValue0 == 0 ) && iAlphaValue1 )
-     || ( iAlphaValue0 && ( iAlphaValue1 == 0 ) )
+    if( ( ( iAlphaValue0 == 0 ) && iAlphaValue1 )
+     || ( iAlphaValue0 && ( iAlphaValue1 == 0 ) ) )
     {
         return true;
     }
@@ -94,8 +95,8 @@ FOdysseyVectorChain::CheckContrast( uint8 iAlphaValue0, uint8 iAlphaValue1 )
     return false;
 }
 
-// returns true if there were any intersection with the erasure zone
-bool
+// returns the number of times there were any intersection with the erasure zone
+uint32
 FOdysseyVectorChain::TraceLine( uint8 iLastAlphaValue
                               , int32 iX0
                               , int32 iY0
@@ -121,32 +122,26 @@ FOdysseyVectorChain::TraceLine( uint8 iLastAlphaValue
     double t   = iT0;
     uint32 cumul = 0;
     uint8 lastAlphaValue = iLastAlphaValue;
-    bool hasHit = false;
+    uint32 hitCount = 0;
 
     if ( ddx > ddy )
     {
         for ( uint32 i = 0; i <= ddx; i++ )
         {
-            if( i == ddx ) t = iT1; // to address imprecision, we set the exact value on the last loop
+            uint8 alphaValue = GetAlpha( x, y, iImageData );
 
-            // we don't trace endpoints
-            if( ( t != 0.0f ) && ( t != 1.0f ) )
+            if( CheckContrast( alphaValue, lastAlphaValue ) )
             {
-                uint8 alphaValue = GetAlpha( x, y, iImageData );
+                oWayPointArray.emplace_back( nullptr
+                                           , iSegment
+                                           , t
+                                           , ( alphaValue == 0 ) ? eWayPointType::LeavesErasureArea
+                                                                 : eWayPointType::EntersErasureArea );
 
-                if( CheckContrast( alphaValue, lastAlphaValue ) )
-                {
-                    oWayPointArray.emplace_back( nullptr
-                                               , iSegment
-                                               , t
-                                               , ( alphaValue == 0 ) ? eWayPointType::LeavesErasureArea
-                                                                     : eWayPointType::EntersErasureArea );
-
-                    hasHit = true;
-                }
-
-                lastAlphaValue = alphaValue;
+                hitCount++;
             }
+
+            lastAlphaValue = alphaValue;
 
             cumul += ddy;
             x     += px;
@@ -163,26 +158,20 @@ FOdysseyVectorChain::TraceLine( uint8 iLastAlphaValue
     {
         for ( uint32 i = 0; i <= ddy; i++ )
         {
-            if( i == ddy ) t = iT1; // to address imprecision, we set the exact value on the last loop
+            uint8 alphaValue = GetAlpha( x, y, iImageData );
 
-            // we don't trace endpoints
-            if( ( t != 0.0f ) && ( t != 1.0f ) )
+            if( CheckContrast( alphaValue, lastAlphaValue ) )
             {
-                uint8 alphaValue = GetAlpha( x, y, iImageData );
+                oWayPointArray.emplace_back( nullptr
+                                           , iSegment
+                                           , t
+                                           , ( alphaValue == 0 ) ? eWayPointType::LeavesErasureArea
+                                                                 : eWayPointType::EntersErasureArea );
 
-                if( CheckContrast( alphaValue, lastAlphaValue ) )
-                {
-                    oWayPointArray.emplace_back( nullptr
-                                               , iSegment
-                                               , t
-                                               , ( alphaValue == 0 ) ? eWayPointType::LeavesErasureArea
-                                                                     : eWayPointType::EntersErasureArea );
-
-                    hasHit = true;
-                }
-
-                lastAlphaValue = alphaValue;
+                hitCount++;
             }
+
+            lastAlphaValue = alphaValue;
 
             cumul += ddx;
             y     += py;
@@ -196,90 +185,179 @@ FOdysseyVectorChain::TraceLine( uint8 iLastAlphaValue
         }
     }
 
+    return hitCount;
+}
+
+bool
+FOdysseyVectorChain::Trace( BLImageData* iImageData
+                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
+{
+    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+    //std::list<FOdysseyVectorVertex*> newVertexList;
+    //std::list<FOdysseyVectorSegment*> newSegmentList;
+    bool hasHit = false;
+
+    Iterate( [ this
+             , iImageData
+             , &oAddedVertexArray
+             , &oAddedSegmentArray
+             , &oRemovedVertexArray
+             , &oRemovedSegmentArray 
+             , &hasHit
+             , &worldMatrix ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
+               {
+                   std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
+                   FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+                   FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+                   ::ULIS::FVec2D& coords0 = vertex0->GetCoords();
+                   ::ULIS::FVec2D& coords1 = vertex1->GetCoords();
+                   BLPoint point0 = worldMatrix.mapPoint( coords0.x, coords0.y );
+                   BLPoint point1 = worldMatrix.mapPoint( coords1.x, coords1.y );
+                   uint8 alpha0 = GetAlpha( point0.x, point0.y, iImageData );
+                   uint8 alpha1 = GetAlpha( point1.x, point1.y, iImageData );
+                   std::vector<FWayPoint> wayPointArray;
+                   uint32 hitCount = 0;
+
+                   wayPointArray.reserve( 10 );
+
+                   if( alpha0 == 0 ) // vertex in dark zone, keep it
+                   {
+                       wayPointArray.emplace_back( vertex0, segment, 0.0f, eWayPointType::OutsideErasureArea );
+                   }
+                   else
+                   {
+                       // add vertex0 to the array of removed vertices only if it was not already added to that array
+                       if( std::find( oRemovedVertexArray.begin(), oRemovedVertexArray.end(), vertex0 ) == oRemovedVertexArray.end() )
+                       {
+                           oRemovedVertexArray.push_back( vertex0 );
+                       }
+
+                       hitCount++;
+                   }
+
+                   // iteration
+                   for( auto it = fractionCache.begin(); it != fractionCache.end(); ++it )
+                   {
+                       FOdysseyVectorFraction& fraction = *it;
+
+                       BLPoint p0 = worldMatrix.mapPoint( fraction.lineVertex[0].x, fraction.lineVertex[0].y );
+                       BLPoint p1 = worldMatrix.mapPoint( fraction.lineVertex[1].x, fraction.lineVertex[1].y );
+
+                       hitCount += TraceLine( alpha0
+                                            , p0.x
+                                            , p0.y
+                                            , p1.x
+                                            , p1.y
+                                            , fraction.fromT
+                                            , fraction.toT
+                                            , segment
+                                            , iImageData
+                                            , wayPointArray );
+                   }
+
+                   if( alpha1 == 0 ) // otherVertex in dark zone, keep it
+                   {
+                       wayPointArray.emplace_back( vertex1, segment, 1.0f, eWayPointType::OutsideErasureArea );
+                   }
+                   else
+                   {
+                       // add vertex1 to the array of removed vertices only if it was not already added to that array
+                       if( std::find( oRemovedVertexArray.begin(), oRemovedVertexArray.end(), vertex1 ) == oRemovedVertexArray.end() )
+                       {
+                           oRemovedVertexArray.push_back( vertex1 );
+                       }
+
+                       hitCount++;
+                   }
+
+                    //---------------- parse hits ---------------------//
+                   if( hitCount )
+                   {
+                       hasHit = true;
+
+                       oRemovedSegmentArray.push_back( segment );
+
+                       //mPath->RemoveSegment( segment );
+
+                       // create new vertices
+                       for( FWayPoint& wayPoint : wayPointArray )
+                       {
+                           if( wayPoint.vertex == nullptr )
+                           {
+                               ::ULIS::FVec2D newVertexAt = segment->GetPointAt( wayPoint.t );
+                               FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( mPath
+                                                                                         , newVertexAt.x
+                                                                                         , newVertexAt.y
+                                                                                         , 1.0f );
+
+                               wayPoint.vertex = newVertex;
+
+                               oAddedVertexArray.push_back( newVertex );
+
+                               //mPath->AddVertex( newVertex );
+                           }
+                       }
+
+                       for( int i = 0; i < wayPointArray.size() - 1; i++ )
+                       {
+                           int n = i + 1;
+
+                           // both vertices cannot be outside the erasure area
+                           if( ( wayPointArray[i].type != eWayPointType::OutsideErasureArea )
+                            || ( wayPointArray[n].type != eWayPointType::OutsideErasureArea ) )
+                           {
+                               if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+                               {
+                                   FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+                                   ::ULIS::FVec2D *bezier = cubicSegment->GetBezier();
+                                   FOdysseyVectorSegment* newSegment = nullptr;
+                                   ::ULIS::FVec2D  sample[4];
+
+                                   FOdysseyVector::BezierExtract( bezier[0]
+                                                                , bezier[1]
+                                                                , bezier[2]
+                                                                , bezier[3]
+                                                                , wayPointArray[i].t
+                                                                , wayPointArray[n].t
+                                                                , sample[0]
+                                                                , sample[1]
+                                                                , sample[2]
+                                                                , sample[3] );
+
+                                   newSegment = new FOdysseyVectorSegmentCubic( mPath
+                                                                              , wayPointArray[i].vertex
+                                                                              , sample[1].x
+                                                                              , sample[1].y
+                                                                              , sample[2].x
+                                                                              , sample[2].y
+                                                                              , wayPointArray[n].vertex
+                                                                              , true );
+
+                                   oAddedSegmentArray.push_back( newSegment );
+
+                                  // mPath->AddSegment( newSegment );
+
+                                   //newSegmentArray.push_back( newSegment );
+                               }
+                           }
+                       }
+                   }
+
+                   return false;
+               } );
+
     return hasHit;
 }
 
 bool
-FOdysseyVectorChain::Trace( BLImageData* iImageData, std::vector<FWayPoint>& oWayPointarray )
-{
-    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
-    ::ULIS::FVec2D& vertexCoords = mVertex->GetCoords();
-    BLPoint vertexPoint = worldMatrix.mapPoint( vertexCoords.x, vertexCoords.y );
-    uint8 vertexAlpha = GetAlpha( vertexPoint.x, vertexPoint.y, imageData );
-    uint8 lastAlphaValue = vertexAlpha;
-    bool hasHit = false;
-
-    if( vertexAlpha == 0 ) // otherVertex in dark zone, keep it
-    {
-        oWayPointarray.emplace_back( otherVertex, segment, 0.0f );
-    }
-
-    Iterate( [ &worldMatrix
-             , &oWayPointarray
-             , &lastAlphaValue
-             , &hasHit ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
-             {
-                 std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
-                 FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex(vertex);
-                 ::ULIS::FVec2D& otherVertexCoords = otherVertex->GetCoords();
-                 BLPoint otherVertexPoint = worldMatrix.mapPoint( otherVertexCoords.x, otherVertexCoords.y );
-                 uint8 otherVertexAlpha = GetAlpha( otherVertexPoint.x, otherVertexPoint.y, imageData );
-
-                 if( vertex == segment->GetVertex(0) )
-                 {
-                     // iteration
-                     for( auto it = fractionCache.begin(); it != fractionCache.end(); ++it )
-                     {
-                         FOdysseyVectorFraction& fraction = *it;
-
-                         BLPoint p0 = worldMatrix.mapPoint( fraction.lineVertex[0].x, fraction.lineVertex[0].y );
-                         BLPoint p1 = worldMatrix.mapPoint( fraction.lineVertex[1].x, fraction.lineVertex[1].y );
-
-                         if( TraceLine( lastAlphaValue, p0.x, p0.y, p1.x, p1.y, fraction.fromT, fraction.toT, segment, iImageData, oWayPointarray ) )
-                         {
-                             hasHit = true;
-                         }
-                     }
-
-                     if( otherVertexAlpha == 0 ) // otherVertex in dark zone, keep it
-                     {
-                         oWayPointarray.emplace_back( otherVertex, segment, 0.0f, eWayPointType::OutsideErasureArea );
-                     }
-
-                     lastAlphaValue = otherVertexAlpha;
-                 }
-                 else
-                 {
-                     // iteration for inverted segments
-                     for( auto it = fractionCache.rbegin(); it != fractionCache.rend(); ++it )
-                     {
-                         FOdysseyVectorFraction& fraction = *it;
-
-                         BLPoint p0 = worldMatrix.mapPoint( fraction.lineVertex[0].x, fraction.lineVertex[0].y );
-                         BLPoint p1 = worldMatrix.mapPoint( fraction.lineVertex[1].x, fraction.lineVertex[1].y );
-
-                         if( TraceLine( lastAlphaValue, p1.x, p1.y, p0.x, p0.y, fraction.toT, fraction.fromT, segment, iImageData, oWayPointarray ) )
-                         {
-                             hasHit = true;
-                         }
-                     }
-
-                     if( otherVertexAlpha == 0 ) // otherVertex in dark zone, keep it
-                     {
-                         oWayPointarray.emplace_back( otherVertex, segment, 1.0f, eWayPointType::OutsideErasureArea );
-                     }
-
-                     lastAlphaValue = otherVertexAlpha;
-                 }
-
-                 return false;
-             } );
-
-    return hasHit;
-}
-
-uint32
-FOdysseyVectorChain::HitMask( BLContext* iBLContext, std::vector<FOdysseyVectorObject*>& oNewPathArray )
+FOdysseyVectorChain::HitMask( BLContext* iBLContex
+                            , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                            , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                            , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                            , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
     // the mask image must be selected by the vector engine at this point
     BLImage* blimg = mPath->GetEngine()->GetBLMask();
@@ -287,33 +365,16 @@ FOdysseyVectorChain::HitMask( BLContext* iBLContext, std::vector<FOdysseyVectorO
     if( blimg )
     {
         BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
-        std::vector<FWayPoint> wayPointarray;
         BLImageData imageData;
 
         blimg->getData( &imageData );
 
-        wayPointarray.reserve( 10 );
-
-        if( Trace( &imageData, wayPointarray ) )
-        {
-            FOdysseyVectorPath* newPath = nullptr;
-            FWayPoint* segmentWayPoint[2] = { &wayPointarray[0], nullptr };
-
-            for( int i = 0; i < wayPointarray.size() - 1; i++ )
-            {
-                int n = i + 1;
-
-                if( ( newPath == nullptr ) || ( wayPointarray[i].type == eWayPointType::LeavesErasureArea ) )
-                {
-                    newPath = new FOdysseyVectorPath( mPath->GetName() );
-                }
-
-                if( ( wayPointarray[i].type != eWayPointType::EntersErasureArea )
-                 && ( wayPointarray[n].type != eWayPointType::LeavesErasureArea ) )
-                {
-                    
-                }
-            }
-        }
+        return Trace( &imageData
+                    , oAddedVertexArray
+                    , oAddedSegmentArray
+                    , oRemovedVertexArray
+                    , oRemovedSegmentArray );
     }
+
+    return false;
 }

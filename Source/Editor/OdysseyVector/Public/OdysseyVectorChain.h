@@ -44,7 +44,12 @@ class FOdysseyVectorChain
          FOdysseyVectorChain( FOdysseyVectorPath* iPath
                             , FOdysseyVectorVertex* iInitiatorVertex );
 
-        uint32 HitMask( BLContext* iBLContext, std::vector<FOdysseyVectorObject*>& oNewPathArray );
+        bool HitMask( BLContext* iBLContex
+                    , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                    , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                    , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                    , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
+
         void Iterate( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSegment*)> iCallback );
 
         friend class FOdysseyVectorPath;
@@ -53,18 +58,22 @@ class FOdysseyVectorChain
         uint8 GetAlpha( int32 iX, int32 iY, BLImageData* iImageData );
         bool CheckContrast( uint8 iAlphaValue0, uint8 iAlphaValue1 );
 
-        bool TraceLine( uint8 iLastAlphaValue
-                      , int32 iX0
-                      , int32 iY0
-                      , double iT0
-                      , int32 iX1
-                      , int32 iY1
-                      , double iT1
-                      , BLImageData* iImageData
-                      , FOdysseyVectorSegment* iSegment
-                      , std::vector<FWayPoint>& oWayPointArray );
+        uint32 TraceLine( uint8 iLastAlphaValue
+                        , int32 iX0
+                        , int32 iY0
+                        , double iT0
+                        , int32 iX1
+                        , int32 iY1
+                        , double iT1
+                        , BLImageData* iImageData
+                        , FOdysseyVectorSegment* iSegment
+                        , std::vector<FWayPoint>& oWayPointArray );
 
-        void Trace( BLImageData* iImageData, std::vector<FWayPoint>& oWayPointarray );
+        bool Trace( BLImageData* iImageData
+                  , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                  , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
 
     private :
         FOdysseyVectorPath* mPath;

@@ -85,7 +85,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         //static const uint32 INVALIDATE_PARENT      = ( 1 << 2 ); // must not be set manually
         static const uint32 INVALIDATE_SHAPE       = ( 1 << 3 );
         static const uint32 INVALIDATE_COLOR       = ( 1 << 4 );
-        static const uint32 INVALIDATE_ALL         = ( INVALIDATE_SHAPE | INVALIDATE_COLOR );
+        static const uint32 INVALIDATE_TOPOLOGY    = ( 1 << 5 );
+        static const uint32 INVALIDATE_ALL         = ( INVALIDATE_SHAPE | INVALIDATE_TOPOLOGY | INVALIDATE_COLOR );
 
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
