@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2023-11-24 15:06\n"
-"PO-Revision-Date: 2023-11-24 15:06\n"
+"POT-Creation-Date: 2023-11-24 15:33\n"
+"PO-Revision-Date: 2023-11-24 15:33\n"
 "Language-Team: \n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
@@ -1920,224 +1920,224 @@ msgstr "Material Element {0}"
 #. Key:	copyright.epos
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(138)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(138)
-msgctxt "AboutWindow,copyright.epos"
+msgctxt "AboutWindowEpos,copyright.epos"
 msgid "EPOS"
 msgstr "EPOS"
 
 #. Key:	copyright.copyright
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(146)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(146)
-msgctxt "AboutWindow,copyright.copyright"
+msgctxt "AboutWindowEpos,copyright.copyright"
 msgid "EPOS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc"
 msgstr "EPOS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc"
 
 #. Key:	copyright.iddn
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(154)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(154)
-msgctxt "AboutWindow,copyright.iddn"
+msgctxt "AboutWindowEpos,copyright.iddn"
 msgid "IDDN.FR.001.220036.001.S.P.2021.000.00000"
 msgstr "IDDN.FR.001.220036.001.S.P.2021.000.00000"
 
 #. Key:	copyright.team-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(162)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(162)
-msgctxt "AboutWindow,copyright.team-label"
+msgctxt "AboutWindowEpos,copyright.team-label"
 msgid "Praxinos Team: "
 msgstr "Praxinos Team: "
 
 #. Key:	copyright.team-names-1
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(171)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(171)
-msgctxt "AboutWindow,copyright.team-names-1"
+msgctxt "AboutWindowEpos,copyright.team-names-1"
 msgid "Elodie Moog, Fabrice Debarge, Thomas Schmitt, Cléa Gonay, "
 msgstr "Elodie Moog, Fabrice Debarge, Thomas Schmitt, Cléa Gonay, "
 
 #. Key:	copyright.team-names-2
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(180)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(180)
-msgctxt "AboutWindow,copyright.team-names-2"
+msgctxt "AboutWindowEpos,copyright.team-names-2"
 msgid "Naomiki Sato, Gary Gabriel, Eric Scholl, Michael Schreiner"
 msgstr "Naomiki Sato, Gary Gabriel, Eric Scholl, Michael Schreiner"
 
 #. Key:	copyright.team-former-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(189)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(189)
-msgctxt "AboutWindow,copyright.team-former-label"
+msgctxt "AboutWindowEpos,copyright.team-former-label"
 msgid "Thanks to our former collaborators: "
 msgstr "Thanks to our former collaborators: "
 
 #. Key:	copyright.team-former-names
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(198)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(198)
-msgctxt "AboutWindow,copyright.team-former-names"
+msgctxt "AboutWindowEpos,copyright.team-former-names"
 msgid "Clément Berthaud, Antoine Antin"
 msgstr "Clément Berthaud, Antoine Antin"
 
 #. Key:	Close
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(274)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(274)
-msgctxt "AboutWindow,Close"
+msgctxt "AboutWindowEpos,Close"
 msgid "Close"
 msgstr "Close"
 
 #. Key:	tooltip-url
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(289)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(289)
-msgctxt "AboutWindow,tooltip-url"
+msgctxt "AboutWindowEpos,tooltip-url"
 msgid "{0} | {1}"
 msgstr "{0} | {1}"
 
 #. Key:	title
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(38)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(38)
-msgctxt "AboutWindow,title"
+msgctxt "AboutWindowEpos,title"
 msgid "About Epos"
 msgstr "About Epos"
 
 #. Key:	VersionLabel
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(72)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(72)
-msgctxt "AboutWindow,VersionLabel"
+msgctxt "AboutWindowEpos,VersionLabel"
 msgid "Version: {0}"
 msgstr "Version: {0}"
 
 #. Key:	tooltip.praxinos
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(76)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(76)
-msgctxt "AboutWindow,tooltip.praxinos"
+msgctxt "AboutWindowEpos,tooltip.praxinos"
 msgid "Go to Praxinos website"
 msgstr "Go to Praxinos website"
 
 #. Key:	url.praxinos
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(76)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(76)
-msgctxt "AboutWindow,url.praxinos"
+msgctxt "AboutWindowEpos,url.praxinos"
 msgid "https://praxinos.coop/"
 msgstr "https://praxinos.coop/"
 
 #. Key:	tooltip.epos
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(77)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(77)
-msgctxt "AboutWindow,tooltip.epos"
+msgctxt "AboutWindowEpos,tooltip.epos"
 msgid "Go to Epos webpage"
 msgstr "Go to Epos webpage"
 
 #. Key:	url.epos
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(77)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(77)
-msgctxt "AboutWindow,url.epos"
+msgctxt "AboutWindowEpos,url.epos"
 msgid "https://praxinos.coop/epos.php"
 msgstr "https://praxinos.coop/epos.php"
 
 #. Key:	tooltip.social.twitter
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(81)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(81)
-msgctxt "AboutWindow,tooltip.social.twitter"
+msgctxt "AboutWindowEpos,tooltip.social.twitter"
 msgid "Praxinos on Twitter"
 msgstr "Praxinos on Twitter"
 
 #. Key:	url.social.twitter
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(81)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(81)
-msgctxt "AboutWindow,url.social.twitter"
+msgctxt "AboutWindowEpos,url.social.twitter"
 msgid "https://twitter.com/praxinos"
 msgstr "https://twitter.com/praxinos"
 
 #. Key:	tooltip.social.facebook
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(82)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(82)
-msgctxt "AboutWindow,tooltip.social.facebook"
+msgctxt "AboutWindowEpos,tooltip.social.facebook"
 msgid "Praxinos on Facebook"
 msgstr "Praxinos on Facebook"
 
 #. Key:	url.social.facebook
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(82)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(82)
-msgctxt "AboutWindow,url.social.facebook"
+msgctxt "AboutWindowEpos,url.social.facebook"
 msgid "https://www.facebook.com/Praxinos"
 msgstr "https://www.facebook.com/Praxinos"
 
 #. Key:	tooltip.social.linkedin
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(83)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(83)
-msgctxt "AboutWindow,tooltip.social.linkedin"
+msgctxt "AboutWindowEpos,tooltip.social.linkedin"
 msgid "Praxinos on LinkedIn"
 msgstr "Praxinos on LinkedIn"
 
 #. Key:	url.social.linkedin
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(83)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(83)
-msgctxt "AboutWindow,url.social.linkedin"
+msgctxt "AboutWindowEpos,url.social.linkedin"
 msgid "https://www.linkedin.com/company/praxinos"
 msgstr "https://www.linkedin.com/company/praxinos"
 
 #. Key:	tooltip.social.instagram
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(84)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(84)
-msgctxt "AboutWindow,tooltip.social.instagram"
+msgctxt "AboutWindowEpos,tooltip.social.instagram"
 msgid "Praxinos on Instagram"
 msgstr "Praxinos on Instagram"
 
 #. Key:	url.social.instagram
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(84)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(84)
-msgctxt "AboutWindow,url.social.instagram"
+msgctxt "AboutWindowEpos,url.social.instagram"
 msgid "https://www.instagram.com/praxinos/"
 msgstr "https://www.instagram.com/praxinos/"
 
 #. Key:	tooltip.social.youtube
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(85)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(85)
-msgctxt "AboutWindow,tooltip.social.youtube"
+msgctxt "AboutWindowEpos,tooltip.social.youtube"
 msgid "Praxinos on Youtube"
 msgstr "Praxinos on Youtube"
 
 #. Key:	url.social.youtube
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(85)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(85)
-msgctxt "AboutWindow,url.social.youtube"
+msgctxt "AboutWindowEpos,url.social.youtube"
 msgid "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ"
 msgstr "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ"
 
 #. Key:	tooltip.social.discord
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(86)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(86)
-msgctxt "AboutWindow,tooltip.social.discord"
+msgctxt "AboutWindowEpos,tooltip.social.discord"
 msgid "Praxinos on Discord"
 msgstr "Praxinos on Discord"
 
 #. Key:	url.social.discord
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(86)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(86)
-msgctxt "AboutWindow,url.social.discord"
+msgctxt "AboutWindowEpos,url.social.discord"
 msgid "https://discord.gg/gEd6pj7"
 msgstr "https://discord.gg/gEd6pj7"
 
 #. Key:	tooltip.social.userDoc
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(87)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(87)
-msgctxt "AboutWindow,tooltip.social.userDoc"
+msgctxt "AboutWindowEpos,tooltip.social.userDoc"
 msgid "Go to Epos User Documentation"
 msgstr "Go to Epos User Documentation"
 
 #. Key:	url.social.userDoc
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(87)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(87)
-msgctxt "AboutWindow,url.social.userDoc"
+msgctxt "AboutWindowEpos,url.social.userDoc"
 msgid "https://praxinos.coop/Documentation/Epos/User/html/"
 msgstr "https://praxinos.coop/Documentation/Epos/User/html/"
 
 #. Key:	tooltip.social.git
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(88)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(88)
-msgctxt "AboutWindow,tooltip.social.git"
+msgctxt "AboutWindowEpos,tooltip.social.git"
 msgid "Praxinos on Git"
 msgstr "Praxinos on Git"
 
 #. Key:	url.social.git
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(88)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(88)
-msgctxt "AboutWindow,url.social.git"
+msgctxt "AboutWindowEpos,url.social.git"
 msgid "https://github.com/Praxinos/Epos"
 msgstr "https://github.com/Praxinos/Epos"
 

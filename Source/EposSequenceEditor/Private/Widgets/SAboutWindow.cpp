@@ -25,7 +25,7 @@
 
 #include "Styles/EposSequenceEditorStyle.h"
 
-#define LOCTEXT_NAMESPACE "AboutWindow"
+#define LOCTEXT_NAMESPACE "AboutWindowEpos"
 
 //---
 
