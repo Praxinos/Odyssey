@@ -21,21 +21,41 @@ enum eWayPointType : uint8
 };
 
 // a waypoint is met at segment vertex or when a constrast is met
-struct FWayPoint
+typedef struct _FWayPoint
 {
     FOdysseyVectorSegment* segment;
     FOdysseyVectorVertex* vertex;
     eWayPointType type;
     double t;
 
-    FWayPoint( FOdysseyVectorVertex* iVertex, FOdysseyVectorSegment* iSegment, double iT, eWayPointType iWayPointType )
+    _FWayPoint( FOdysseyVectorVertex* iVertex
+              , FOdysseyVectorSegment* iSegment
+              , double iT
+              , eWayPointType iWayPointType )
     {
-        vertex = iVertex;
         segment = iSegment;
-        t = iT;
+        vertex = iVertex;
         type = iWayPointType;
+        t = iT;
     }
-};
+} FWayPoint;
+
+typedef struct _FWaySegment
+{
+    uint32 indexWayPoint0;
+    uint32 indexWayPoint1;
+    ::ULIS::FVec2D bezier[4];
+
+    _FWaySegment( uint32 iIndexWayPoint0, uint32 iIndexWayPoint1, ::ULIS::FVec2D iBezier[4] )
+    {
+        // work with indexes because the wayPoint array is gonna be resized, so
+        // we can't work with pointers
+        indexWayPoint0 = iIndexWayPoint0;
+        indexWayPoint1 = iIndexWayPoint1;
+
+        memcpy( bezier, iBezier, sizeof( bezier ) ) ;
+    }
+} FWaySegment;
 
 class FOdysseyVectorChain
 {
@@ -44,17 +64,16 @@ class FOdysseyVectorChain
          FOdysseyVectorChain( FOdysseyVectorPath* iPath
                             , FOdysseyVectorVertex* iInitiatorVertex );
 
-        bool HitMask( BLImageData* iImageData
-                    , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                    , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
-                    , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                    , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
-
         void Iterate( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSegment*)> iCallback );
 
         friend class FOdysseyVectorPath;
 
     private :
+        bool HitMask( BLImageData* iImageData
+                    , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                    , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                    , std::vector<FWayPoint>& oWayPointArray
+                    , std::vector<FWaySegment>& oWaySegmentArray );
         uint8 GetAlpha( int32 iX, int32 iY, BLImageData* iImageData );
         bool CheckContrast( uint8 iAlphaValue0, uint8 iAlphaValue1 );
 
@@ -71,10 +90,10 @@ class FOdysseyVectorChain
                         , std::vector<FWayPoint>& oWayPointArray );
 
         bool Trace( BLImageData* iImageData
-                  , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
+                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                  , std::vector<FWayPoint>& oWayPointArray
+                  , std::vector<FWaySegment>& oWaySegmentArray );
 
     private :
         FOdysseyVectorPath* mPath;

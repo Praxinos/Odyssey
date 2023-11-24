@@ -191,6 +191,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
 
 void
 UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iScene
+                                                 , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                                                  , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                                                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                                                  , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
@@ -205,6 +206,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
     , GetEditor()->GetVectorHUDFlags()
     , [ iScene
       , vectorEngine
+      , &oAddedObjectArray
       , &oAddedVertexArray
       , &oAddedSegmentArray
       , &oRemovedVertexArray
@@ -219,6 +221,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
                   ::ULIS::FRectD unusedRect;
 
                   if( path->Erase( unusedRect
+                                 , oAddedObjectArray
                                  , oAddedVertexArray
                                  , oAddedSegmentArray
                                  , oRemovedVertexArray
@@ -234,6 +237,19 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
           return 0;
       } );
 
+    for( int i = 0; i < oAddedObjectArray.size(); i++ )
+    {
+        // parent is stored in mParent variable byt the Erase function even though it does not
+        // belong to the parent. It kinda sucks but it is easier that way, otherwise Traverse()
+        // will have some problems because we change the children list, and Traverse is recursive.
+        oAddedObjectArray[i]->GetParent()->AppendChild( oAddedObjectArray[i] );
+
+        oAddedObjectArray[i]->Invalidate();
+    }
+
+    // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
+    // so we can't alter the hierarchy, unles traverse works on copies of the children list but that 
+    // would be very inefficient.
     for( int i = 0; i < oRemovedObjectArray.size(); i++ )
     {
         if( oRemovedObjectArray[i]->GetChildrenList().size() == 0 )
@@ -241,6 +257,8 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
             oRemovedObjectArray[i]->GetParent()->RemoveChild( oRemovedObjectArray[i] );
         }
     }
+
+    iScene->UpdateMatrix();
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
@@ -279,6 +297,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         else
         {
             ErasePaths( iScene
+                      , addedObjectArray
                       , addedVertexArray
                       , addedSegmentArray
                       , removedVertexArray

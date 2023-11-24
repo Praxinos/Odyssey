@@ -191,6 +191,12 @@ bool
 FOdysseyVectorChain::SegmentCreationPolicy( FWayPoint* iWayPoint0, FWayPoint* iWayPoint1 )
 {
     if( ( iWayPoint0->type == eWayPointType::OutsideErasureArea )
+     && ( iWayPoint1->type == eWayPointType::OutsideErasureArea  ) )
+    {
+        return true;
+    }
+
+    if( ( iWayPoint0->type == eWayPointType::OutsideErasureArea )
      && ( iWayPoint1->type == eWayPointType::EntersErasureArea  ) )
     {
         return true;
@@ -213,20 +219,18 @@ FOdysseyVectorChain::SegmentCreationPolicy( FWayPoint* iWayPoint0, FWayPoint* iW
 
 bool
 FOdysseyVectorChain::Trace( BLImageData* iImageData
-                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                          , std::vector<FWayPoint>& oWayPointArray
+                          , std::vector<FWaySegment>& oWaySegmentArray )
 {
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
-    //std::list<FOdysseyVectorVertex*> newVertexList;
-    //std::list<FOdysseyVectorSegment*> newSegmentList;
     bool hasHit = false;
 
     Iterate( [ this
              , iImageData
-             , &oAddedVertexArray
-             , &oAddedSegmentArray
+             , &oWayPointArray
+             , &oWaySegmentArray
              , &oRemovedVertexArray
              , &oRemovedSegmentArray 
              , &hasHit
@@ -243,14 +247,12 @@ FOdysseyVectorChain::Trace( BLImageData* iImageData
                    BLPoint point1 = worldMatrix.mapPoint( coords1.x, coords1.y );
                    uint8 alpha0 = GetAlpha( point0.x, point0.y, iImageData );
                    uint8 alpha1 = GetAlpha( point1.x, point1.y, iImageData );
-                   std::vector<FWayPoint> wayPointArray;
+                   uint32 wayPointCountBeforeAlter = oWayPointArray.size();
                    uint32 hitCount = 0;
-
-                   wayPointArray.reserve( 10 );
 
                    if( alpha0 == 0 ) // vertex in dark zone, keep it
                    {
-                       wayPointArray.emplace_back( vertex0, segment, 0.0f, eWayPointType::OutsideErasureArea );
+                       oWayPointArray.emplace_back( vertex0, segment, 0.0f, eWayPointType::OutsideErasureArea );
                    }
                    else
                    {
@@ -279,12 +281,12 @@ FOdysseyVectorChain::Trace( BLImageData* iImageData
                                             , fraction.toT
                                             , iImageData
                                             , segment
-                                            , wayPointArray );
+                                            , oWayPointArray );
                    }
 
                    if( alpha1 == 0 ) // otherVertex in dark zone, keep it
                    {
-                       wayPointArray.emplace_back( vertex1, segment, 1.0f, eWayPointType::OutsideErasureArea );
+                       oWayPointArray.emplace_back( vertex1, segment, 1.0f, eWayPointType::OutsideErasureArea );
                    }
                    else
                    {
@@ -297,82 +299,46 @@ FOdysseyVectorChain::Trace( BLImageData* iImageData
                        hitCount++;
                    }
 
-                    //---------------- parse hits ---------------------//
+                    //---------------- parse hits if any ---------------------//
                    if( hitCount )
                    {
                        hasHit = true;
 
                        oRemovedSegmentArray.push_back( segment );
-
-                       //mPath->RemoveSegment( segment );
-
-                       // create new vertices
-                       for( FWayPoint& wayPoint : wayPointArray )
-                       {
-                           if( wayPoint.vertex == nullptr )
-                           {
-                               double radius = ( (        wayPoint.t ) * radius1 )
-                                             + ( ( 1.0f - wayPoint.t ) * radius0 );
-                               ::ULIS::FVec2D newVertexAt = segment->GetPointAt( wayPoint.t );
-                               FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( mPath
-                                                                                         , newVertexAt.x
-                                                                                         , newVertexAt.y
-                                                                                         , radius );
-
-                               wayPoint.vertex = newVertex;
-
-                               oAddedVertexArray.push_back( newVertex );
-
-                               //mPath->AddVertex( newVertex );
-                           }
-                       }
-
-                       if( wayPointArray.size() ) // because the for loop substracts 1
-                       {
-                           for( int i = 0; i < wayPointArray.size() - 1; i++ )
-                           {
-                               int n = i + 1;
-
-                               // both vertices cannot be outside the erasure area
-                               if( SegmentCreationPolicy( &wayPointArray[i], &wayPointArray[n] ) )
-                               {
-                                   if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-                                   {
-                                       FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
-                                       ::ULIS::FVec2D *bezier = cubicSegment->GetBezier();
-                                       FOdysseyVectorSegment* newSegment = nullptr;
-                                       ::ULIS::FVec2D  sample[4];
-
-                                       FOdysseyVector::BezierExtract( bezier[0]
-                                                                    , bezier[1]
-                                                                    , bezier[2]
-                                                                    , bezier[3]
-                                                                    , wayPointArray[i].t
-                                                                    , wayPointArray[n].t
-                                                                    , sample[0]
-                                                                    , sample[1]
-                                                                    , sample[2]
-                                                                    , sample[3] );
-
-                                       newSegment = new FOdysseyVectorSegmentCubic( mPath
-                                                                                  , wayPointArray[i].vertex
-                                                                                  , sample[1].x
-                                                                                  , sample[1].y
-                                                                                  , sample[2].x
-                                                                                  , sample[2].y
-                                                                                  , wayPointArray[n].vertex
-                                                                                  , true );
-
-                                       oAddedSegmentArray.push_back( newSegment );
-
-                                      // mPath->AddSegment( newSegment );
-
-                                       //newSegmentArray.push_back( newSegment );
-                                   }
-                               }
-                           }
-                       }
                    }
+
+                    if( wayPointCountBeforeAlter - oWayPointArray.size() ) // because the for loop substracts 1
+                    {
+                        for( int i = wayPointCountBeforeAlter; i < oWayPointArray.size() - 1; i++ )
+                        {
+                            int n = i + 1;
+
+                            // both vertices cannot be outside the erasure area
+                            //if( SegmentCreationPolicy( &oWayPointArray[i], &oWayPointArray[n] ) )
+                            //{
+                            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+                            {
+                                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+                                ::ULIS::FVec2D *bezier = cubicSegment->GetBezier();
+                                FOdysseyVectorSegment* newSegment = nullptr;
+                                ::ULIS::FVec2D  sample[4];
+
+                                FOdysseyVector::BezierExtract( bezier[0]
+                                                             , bezier[1]
+                                                             , bezier[2]
+                                                             , bezier[3]
+                                                             , oWayPointArray[i].t
+                                                             , oWayPointArray[n].t
+                                                             , sample[0]
+                                                             , sample[1]
+                                                             , sample[2]
+                                                             , sample[3] );
+
+                                oWaySegmentArray.emplace_back( i, n, sample );
+                            }
+                            //}
+                        }
+                    }
 
                    return false; // keep iterating;
                } );
@@ -382,18 +348,18 @@ FOdysseyVectorChain::Trace( BLImageData* iImageData
 
 bool
 FOdysseyVectorChain::HitMask( BLImageData* iImageData
-                            , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                            , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                             , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                            , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
+                            , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                            , std::vector<FWayPoint>& oWayPointArray
+                            , std::vector<FWaySegment>& oWaySegmentArray )
 {
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
 
     return Trace( iImageData
-                , oAddedVertexArray
-                , oAddedSegmentArray
                 , oRemovedVertexArray
-                , oRemovedSegmentArray );
+                , oRemovedSegmentArray
+                , oWayPointArray
+                , oWaySegmentArray );
 
     return false;
 }

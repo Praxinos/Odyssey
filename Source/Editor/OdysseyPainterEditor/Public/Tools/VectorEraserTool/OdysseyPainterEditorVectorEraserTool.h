@@ -48,6 +48,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
         //                                 , const FName& iPropertyName ) override;
 
         void ErasePaths( FOdysseyVectorGroupPaint* iScene
+                       , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                        , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                        , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                        , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray

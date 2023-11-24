@@ -317,6 +317,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
         uint32 mFlags;
+       
 
         double mDistanceToNearestSegment;
         double mNearestSegmentT;
