@@ -122,6 +122,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
        /**
          * @brief Erase path according to the mask image.
          * @param iRoi region of interest for faster discarding.
+         * @param iSplit
          * @param oAddedPathArray array of pointers to added split paths.
          * @param oAddedVertexArray array of pointers to added vertices.
          * @param oAddedSegmentArray array of pointers to added segments.
@@ -130,6 +131,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @return true if the path is empty, false otherwise.
          */
         bool Erase( const ::ULIS::FRectD &iRoi
+                  , bool iSplit
                   , std::vector<FOdysseyVectorObject*>& oAddedPathArray
                   , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
@@ -387,8 +389,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                          , std::vector<FWaySegment>& iWaySegmentArray
                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
+        void EraseSplit( std::vector<FWayPoint>& iWayPointArray
+                       , std::vector<FWaySegment>& iWaySegmentArray
+                       , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+                       , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
 
         bool EraseNoSplitSegmentCreationPolicy( FWayPoint* iWayPoint0, FWayPoint* iWayPoint1 );
+        bool EraseSplitSegmentCreationPolicy( FWayPoint* iWayPoint0, FWayPoint* iWayPoint1 );
 
     protected :
         std::vector<FOdysseyVectorChain> mChainArray;

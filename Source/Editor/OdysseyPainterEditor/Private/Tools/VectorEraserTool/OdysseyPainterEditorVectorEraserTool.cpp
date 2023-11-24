@@ -15,6 +15,7 @@ UOdysseyPainterEditorVectorEraserTool::~UOdysseyPainterEditorVectorEraserTool()
 UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorEraserToolHUD( this ), false )
     , Radius( 20.0f )
+    , Split( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 
@@ -204,7 +205,8 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
     ( iScene
     , iScene
     , GetEditor()->GetVectorHUDFlags()
-    , [ iScene
+    , [ this
+      , iScene
       , vectorEngine
       , &oAddedObjectArray
       , &oAddedVertexArray
@@ -221,6 +223,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
                   ::ULIS::FRectD unusedRect;
 
                   if( path->Erase( unusedRect
+                                 , Split
                                  , oAddedObjectArray
                                  , oAddedVertexArray
                                  , oAddedSegmentArray
@@ -255,6 +258,11 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
         if( oRemovedObjectArray[i]->GetChildrenList().size() == 0 )
         {
             oRemovedObjectArray[i]->GetParent()->RemoveChild( oRemovedObjectArray[i] );
+
+            if( oRemovedObjectArray[i]->IsSelected() )
+            {
+                vectorEngine->UnselectObject( oRemovedObjectArray[i] );
+            }
         }
     }
 

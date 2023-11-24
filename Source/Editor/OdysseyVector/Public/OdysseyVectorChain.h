@@ -42,12 +42,17 @@ typedef struct _FWayPoint
 
 typedef struct _FWaySegment
 {
+    FOdysseyVectorSegment* segment;
     uint32 indexWayPoint0;
     uint32 indexWayPoint1;
     ::ULIS::FVec2D bezier[4];
 
-    _FWaySegment( uint32 iIndexWayPoint0, uint32 iIndexWayPoint1, ::ULIS::FVec2D iBezier[4] )
+    _FWaySegment( FOdysseyVectorSegment* iSegment
+                , uint32 iIndexWayPoint0
+                , uint32 iIndexWayPoint1
+                , ::ULIS::FVec2D iBezier[4] )
     {
+        segment = iSegment;
         // work with indexes because the wayPoint array is gonna be resized, so
         // we can't work with pointers
         indexWayPoint0 = iIndexWayPoint0;

@@ -762,6 +762,136 @@ FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVerte
 }
 
 bool
+FOdysseyVectorPath::EraseSplitSegmentCreationPolicy( FWayPoint* iWayPoint0
+                                                   , FWayPoint* iWayPoint1 )
+{
+    if( ( iWayPoint0->type == eWayPointType::OutsideErasureArea )
+     && ( iWayPoint1->type == eWayPointType::OutsideErasureArea  ) )
+    {
+        return true;
+    }
+
+    if( ( iWayPoint0->type == eWayPointType::OutsideErasureArea )
+     && ( iWayPoint1->type == eWayPointType::EntersErasureArea  ) )
+    {
+        return true;
+    }
+
+    if( ( iWayPoint0->type == eWayPointType::LeavesErasureArea  )
+     && ( iWayPoint1->type == eWayPointType::OutsideErasureArea ) )
+    {
+        return true;
+    }
+
+    if( ( iWayPoint0->type == eWayPointType::LeavesErasureArea )
+     && ( iWayPoint1->type == eWayPointType::EntersErasureArea ) )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void
+FOdysseyVectorPath::EraseSplit( std::vector<FWayPoint>& iWayPointArray
+                              , std::vector<FWaySegment>& iWaySegmentArray
+                              , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+                              , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                              , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
+{
+    std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> vertexLookup;
+    FOdysseyVectorPath* newPath = nullptr;
+
+    // step 1 : create needed vertices
+    for( FWayPoint& wayPoint : iWayPointArray )
+    {
+        // first create a path that will receive the vertices
+        if( ( newPath == nullptr ) || ( wayPoint.type == eWayPointType::LeavesErasureArea ) )
+        {
+            newPath = new FOdysseyVectorPath( GetName() );
+            // for postprocessing. the path is not added to the parent yet
+            newPath->SetParent( mParent );
+            CopyTransformation( *newPath );
+
+            oAddedPathArray.push_back( newPath );
+        }
+
+        // these can only be unique (no risk of duplicates)
+        if( wayPoint.vertex == nullptr )
+        {
+            double radius0 = wayPoint.segment->GetVertex(0)->GetRadius();
+            double radius1 = wayPoint.segment->GetVertex(1)->GetRadius();
+            double radius = ( (          wayPoint.t ) * radius1 )
+                            + ( ( 1.0f - wayPoint.t ) * radius0 );
+
+            ::ULIS::FVec2D newVertexAt = wayPoint.segment->GetPointAt( wayPoint.t );
+
+            wayPoint.vertex = new FOdysseyVectorVertex( this
+                                                      , newVertexAt.x
+                                                      , newVertexAt.y
+                                                      , radius );
+
+            // Add now, as this does not need to be undoable
+            newPath->AddVertex( wayPoint.vertex );
+
+            // insert the new vertex in the lookup table. Yes it has the same value
+            vertexLookup[wayPoint.vertex] = wayPoint.vertex;
+        }
+        else
+        {
+            // mark for removal original vertices that were outside the erasure area.
+            // Those which where inside that area have already been marked for removal.
+            // the original vertices are not needed anymore because we erase in split mode.
+            if( std::find( oRemovedVertexArray.begin(), oRemovedVertexArray.end(), wayPoint.vertex ) == oRemovedVertexArray.end() )
+            {
+                ::ULIS::FVec2D& coords = wayPoint.vertex->GetCoords();
+                double radius = wayPoint.vertex->GetRadius();
+                FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( newPath
+                                                                          , coords.x
+                                                                          , coords.y
+                                                                          , radius );
+
+                // mark for removal.
+                oRemovedVertexArray.push_back( wayPoint.vertex );
+                // insert the new vertex in the lookup table
+                vertexLookup[wayPoint.vertex] = newVertex;
+
+                newPath->AddVertex( newVertex );
+            }
+        }
+    }
+
+    for( FWaySegment& waySegment : iWaySegmentArray )
+    {
+        FWayPoint* wayPoint0 = &iWayPointArray[waySegment.indexWayPoint0];
+        FWayPoint* wayPoint1 = &iWayPointArray[waySegment.indexWayPoint1];
+
+        if( EraseSplitSegmentCreationPolicy( wayPoint0, wayPoint1 ) )
+        {
+            FOdysseyVectorVertex* destVertex0 = vertexLookup.find( wayPoint0->vertex )->second;
+            FOdysseyVectorVertex* destVertex1 = vertexLookup.find( wayPoint1->vertex )->second;
+            FOdysseyVectorPath* path = destVertex0->GetPath();
+            FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( path
+                                                                                   , destVertex0
+                                                                                   , waySegment.bezier[1].x
+                                                                                   , waySegment.bezier[1].y
+                                                                                   , waySegment.bezier[2].x
+                                                                                   , waySegment.bezier[2].y
+                                                                                   , destVertex1
+                                                                                   , true );
+
+            path->AddSegment( newSegment );
+        }
+
+        // mark all original segments for deletion. No duplicates
+        if( std::find( oRemovedSegmentArray.begin(), oRemovedSegmentArray.end(), waySegment.segment ) == oRemovedSegmentArray.end() )
+        {
+            oRemovedSegmentArray.push_back( waySegment.segment );
+        }
+    }
+}
+
+bool
 FOdysseyVectorPath::EraseNoSplitSegmentCreationPolicy( FWayPoint* iWayPoint0
                                                      , FWayPoint* iWayPoint1 )
 {
@@ -839,6 +969,7 @@ FOdysseyVectorPath::EraseNoSplit( std::vector<FWayPoint>& iWayPointArray
 
 bool
 FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
+                         , bool iSplit
                          , std::vector<FOdysseyVectorObject*>& oAddedPathArray
                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
@@ -846,7 +977,7 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
     BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
-    bool hasHit = false;
+
 
     if( blimg )
     {
@@ -858,8 +989,6 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
 
         blimg->getData( &imageData );
 
-
-
         for( FOdysseyVectorChain& chain : mChainArray )
         {
             std::vector<FWaySegment> waySegmentArray;
@@ -868,149 +997,40 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
             wayPointArray.reserve( 10 );
             waySegmentArray.reserve( 10 );
 
+            // this will return an array of "way points". they are the original 
+            // points + the points at a contrast zone (erasure boundary).
+            // it will fill a "way segment" array, which are the segments that
+            // should be created between those way points.
+            // no vertex or segment is allocated in chain.HitMask(). the allocation differs
+            // depending on the spliting mode, so it is the responsibility of EraseNoSplit() and
+            // EraseNoSplit() to allocate new vertices / segments or paths 
             if( chain.HitMask( &imageData
                              , oRemovedVertexArray
                              , oRemovedSegmentArray
                              , wayPointArray
                              , waySegmentArray ) )
             {
-                hasHit = true;
-
-            // process now we know we have hit anything
+                // proceed now we know we have hit anything
                 // determine which vertices / segments will be deleted and which will be kept
                 // it differs in SPLIT and NOSPLIT modes. SPLIT modes erases only those erased,
                 // split erases all
-                if( /*NOSPLIT*/1 )
+                if( iSplit == false )
                 {
                     EraseNoSplit( wayPointArray
                                 , waySegmentArray
                                 , oAddedVertexArray
                                 , oAddedSegmentArray );
                 }
+                else // SPLIT
+                {
+                    EraseSplit( wayPointArray
+                              , waySegmentArray
+                              , oAddedPathArray
+                              , oRemovedVertexArray
+                              , oRemovedSegmentArray );
+                }
             }
         }
-
-#ifdef unused
-        if( 0 )
-        {
-            for( FWayPoint& wayPoint : wayPointArray )
-            {
-                // these can only be unique (no risk of duplicates)
-                if( wayPoint.vertex == nullptr )
-                {
-                    double radius0 = wayPoint.segment->GetVertex(0)->GetRadius();
-                    double radius1 = wayPoint.segment->GetVertex(1)->GetRadius();
-                    double radius = ( (          wayPoint.t ) * radius1 )
-                                    + ( ( 1.0f - wayPoint.t ) * radius0 );
-
-                    ::ULIS::FVec2D newVertexAt = wayPoint.segment->GetPointAt( wayPoint.t );
-
-                    wayPoint.vertex = new FOdysseyVectorVertex( this
-                                                              , newVertexAt.x
-                                                              , newVertexAt.y
-                                                              , radius );
-
-                    oAddedVertexArray.push_back( wayPoint.vertex );
-                }
-            }
-
-            for( FWaySegment& waySegment : waySegmentArray )
-            {
-                FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( this
-                                                                                       , wayPointArray[waySegment.indexWayPoint0].vertex
-                                                                                       , waySegment.bezier[1].x
-                                                                                       , waySegment.bezier[1].y
-                                                                                       , waySegment.bezier[2].x
-                                                                                       , waySegment.bezier[2].y
-                                                                                       , wayPointArray[waySegment.indexWayPoint1].vertex
-                                                                                       , true );
-
-                AddSegment( newSegment );
-                // addition rememberance is only needed in no-split mode
-                oAddedSegmentArray.push_back( newSegment );
-            }
-        }
-        else // SPLIT
-        {
-            std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> vertexLookup;
-            FOdysseyVectorPath* newPath = nullptr;
-
-            for( FWayPoint& wayPoint : wayPointArray )
-            {
-                if( ( newPath == nullptr ) || ( wayPoint.type == eWayPointType::LeavesErasureArea ) )
-                {
-                    newPath = new FOdysseyVectorPath( GetName() );
-                    // for postprocessing
-                    newPath->SetParent( mParent );
-                    CopyTransformation( *newPath );
-
-                    oAddedPathArray.push_back( newPath );
-                }
-
-                // these can only be unique (no risk of duplicates)
-                if( wayPoint.vertex == nullptr )
-                {
-                    double radius0 = wayPoint.segment->GetVertex(0)->GetRadius();
-                    double radius1 = wayPoint.segment->GetVertex(1)->GetRadius();
-                    double radius = ( (          wayPoint.t ) * radius1 )
-                                    + ( ( 1.0f - wayPoint.t ) * radius0 );
-
-                    ::ULIS::FVec2D newVertexAt = wayPoint.segment->GetPointAt( wayPoint.t );
-
-                    wayPoint.vertex = new FOdysseyVectorVertex( newPath
-                                                              , newVertexAt.x
-                                                              , newVertexAt.y
-                                                              , radius );
-                    // Add now, as this does not need to be undoable
-                    newPath->AddVertex( wayPoint.vertex );
-
-                    // insert the new vertex in the lookup table. Yes it has the same value
-                    vertexLookup[wayPoint.vertex] = wayPoint.vertex;
-                }
-                else
-                {
-                    // mark for removal original vertices that were outside the erasure area.
-                    // Those which where inside that area have already been marked for removal.
-                    // the original vertices are not needed anymore because we erase in split mode.
-                    if( std::find( oRemovedVertexArray.begin(), oRemovedVertexArray.end(), wayPoint.vertex ) == oRemovedVertexArray.end() )
-                    {
-                        ::ULIS::FVec2D& coords = wayPoint.vertex->GetCoords();
-                        double radius = wayPoint.vertex->GetRadius();
-                        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( newPath
-                                                                                  , coords.x
-                                                                                  , coords.y
-                                                                                  , radius );
-
-                        // mark for removal.
-                        oRemovedVertexArray.push_back( wayPoint.vertex );
-                        // insert the new vertex in the lookup table
-                        vertexLookup[wayPoint.vertex] = newVertex;
-
-                        newPath->AddVertex( newVertex );
-                    }
-                }
-            }
-
-            for( FWaySegment& waySegment : waySegmentArray )
-            {
-                FOdysseyVectorVertex* sourceVertex0 = wayPointArray[waySegment.indexWayPoint0].vertex;
-                FOdysseyVectorVertex* sourceVertex1 = wayPointArray[waySegment.indexWayPoint1].vertex;
-                FOdysseyVectorVertex* destVertex0 = vertexLookup.find( sourceVertex0 )->second;
-                FOdysseyVectorVertex* destVertex1 = vertexLookup.find( sourceVertex1 )->second;
-                FOdysseyVectorPath* path = destVertex0->GetPath();
-                FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( path
-                                                                                       , destVertex0
-                                                                                       , waySegment.bezier[1].x
-                                                                                       , waySegment.bezier[1].y
-                                                                                       , waySegment.bezier[2].x
-                                                                                       , waySegment.bezier[2].y
-                                                                                       , destVertex1
-                                                                                       , true );
-
-                path->AddSegment( newSegment );
-            }
-        }
-#endif
 
         for( int i = removedSegmentCountBeforeAlter; i < oRemovedSegmentArray.size(); i++ )
         {
@@ -1035,165 +1055,9 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
 
     Invalidate();
 
-    return false;//hasHit;
+    // return true if path is empty
+    return ( mVertexList.size() == 0 ) && ( mSegmentList.size() == 0 );
 }
-
-#ifdef unused
-bool
-FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
-                              , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                              , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
-                              , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                              , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
-{
-    BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
-
-    if( blimg )
-    {
-        BLImageData imageData;
-        std::vector<FOdysseyVectorSegment*> newSegmentArray;
-        std::vector<FOdysseyVectorSegment*> oldSegmentArray;
-        std::vector<FOdysseyVectorVertex*> newVertexArray;
-        std::vector<FOdysseyVectorVertex*> oldVertexArray;
-        std::list<FOdysseyVectorVertex*> vertexList = mVertexList; // work on a copy, for removal
-
-        blimg->getData( &imageData );
-
-        for( FOdysseyVectorSegment* segment : mSegmentList )
-        {
-            std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
-            ::ULIS::FVec2D& firstCoords = segment->GetVertex(0)->GetCoords();
-            BLPoint firstAt = mWorldMatrix.mapPoint( firstCoords.x, firstCoords.y );
-            std::vector<double> subVertexT;
-            int32 previousPixelValue;
-            std::vector<FOdysseyVectorSegment*> subSegmentArray;
-            bool hasHit = false;
-
-            for( uint32 i = 0; i < fractionCache.size(); i++ )
-            {
-                BLPoint p0 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[0].x, fractionCache[i].lineVertex[0].y );
-                BLPoint p1 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[1].x, fractionCache[i].lineVertex[1].y );
-
-                TraceLine( p0.x, p0.y, fractionCache[i].fromT
-                         , p1.x, p1.y, fractionCache[i].toT
-                         , [ segment
-                           , &imageData
-                           , &previousPixelValue
-                           , &subVertexT
-                           , &subSegmentArray
-                           , &newVertexArray
-                           , &hasHit]( int32 iX, int32 iY, double iT) -> bool
-                           {
-                               /*if( ( iX >= 0 && iX < imageData.size.w )
-                                && ( iY >= 0 && iY < imageData.size.h ) )
-                               {*/
-                                   uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
-                                   uint32 offset = ( iY * imageData.size.w ) + iX;
-                                   int32 pixelValue = ( ( iX >= 0 && iX < imageData.size.w )
-                                                     && ( iY >= 0 && iY < imageData.size.h ) ) ? pixel[offset] : 0;
-
-                                   if( pixelValue == 255 ) hasHit = true;
-
-                                   if( iT == 0.0f )
-                                   {
-                                       if( pixelValue == 0 )
-                                       {
-                                           subVertexT.push_back( iT );
-                                       }
-
-                                       previousPixelValue = pixelValue;
-                                   }
-
-                                   if( ( iT > 0.0f ) && ( iT < 1.0f ) )
-                                   {
-                                       if( (int32) abs( pixelValue - previousPixelValue ) == 255 )
-                                       {
-                                           subVertexT.push_back( iT );
-
-                                           previousPixelValue = pixelValue;
-                                       }
-                                   }
-
-                                   if( iT == 1.0f )
-                                   {
-                                       if( pixelValue == 0 )
-                                       {
-                                           subVertexT.push_back( iT );
-                                       }
-                                   }
-
-                                   if( subVertexT.size() == 2 )
-                                   {
-                                       uint32 tCount = subVertexT.size();
-                                       double t0 = subVertexT[0];
-                                       double t1 = subVertexT[1];
-
-                                        if( fabs( subVertexT[0] - subVertexT[1]) < 1.0f )
-                                        {
-                                            subSegmentArray.push_back( segment->Sample( t0, t1, newVertexArray ) );
-                                        }
-
-                                       subVertexT.clear();
-                                   }
-                               /*}*/
-
-                               // keep tracing the line
-                               return false;
-                           });
-            }
-
-            if( hasHit )
-            {
-                // won't insert anything if no subsegment were created
-                if( subSegmentArray.size() )
-                {
-                    newSegmentArray.insert( newSegmentArray.end(), subSegmentArray.begin(), subSegmentArray.end() );
-                }
-
-                // in case of a hit, old segment is deleted no matter what.
-                oldSegmentArray.push_back( segment );
-            }
-        }
-
-        for( int i = 0; i < oldSegmentArray.size(); i++ )
-        {
-            this->RemoveSegment( oldSegmentArray[i] );
-        }
-
-        for( int i = 0; i < newVertexArray.size(); i++ )
-        {
-            this->AddVertex( newVertexArray[i] );
-        }
-
-        for( int i = 0; i < newSegmentArray.size(); i++ )
-        {
-            this->AddSegment( newSegmentArray[i] );
-
-            newSegmentArray[i]->Invalidate();
-        }
-
-        // remove orphaned vertices
-        for( FOdysseyVectorVertex* vertex : vertexList )
-        {
-            if( vertex->GetSegmentCount() == 0 )
-            {
-                oldVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(vertex) );
-
-                this->RemoveVertex( vertex );
-            }
-        }
-
-        Invalidate();
-
-        oAddedVertexArray.insert( oAddedVertexArray.end(), newVertexArray.begin(), newVertexArray.end() );
-        oAddedSegmentArray.insert( oAddedSegmentArray.end(), newSegmentArray.begin(), newSegmentArray.end() );
-        oRemovedVertexArray.insert( oRemovedVertexArray.end(), oldVertexArray.begin(), oldVertexArray.end() );
-        oRemovedSegmentArray.insert( oRemovedSegmentArray.end(), oldSegmentArray.begin(), oldSegmentArray.end() );
-    }
-
-    return ( mSegmentList.size() == 0 ) ? true : false;
-}
-#endif
 
 bool
 FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )

@@ -307,38 +307,34 @@ FOdysseyVectorChain::Trace( BLImageData* iImageData
                        oRemovedSegmentArray.push_back( segment );
                    }
 
-                    if( wayPointCountBeforeAlter - oWayPointArray.size() ) // because the for loop substracts 1
-                    {
-                        for( int i = wayPointCountBeforeAlter; i < oWayPointArray.size() - 1; i++ )
-                        {
-                            int n = i + 1;
+                   if( wayPointCountBeforeAlter - oWayPointArray.size() ) // because the for loop substracts 1
+                   {
+                       for( int i = wayPointCountBeforeAlter; i < oWayPointArray.size() - 1; i++ )
+                       {
+                           int n = i + 1;
 
-                            // both vertices cannot be outside the erasure area
-                            //if( SegmentCreationPolicy( &oWayPointArray[i], &oWayPointArray[n] ) )
-                            //{
-                            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-                            {
-                                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
-                                ::ULIS::FVec2D *bezier = cubicSegment->GetBezier();
-                                FOdysseyVectorSegment* newSegment = nullptr;
-                                ::ULIS::FVec2D  sample[4];
+                           if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+                           {
+                               FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+                               ::ULIS::FVec2D *bezier = cubicSegment->GetBezier();
+                               FOdysseyVectorSegment* newSegment = nullptr;
+                               ::ULIS::FVec2D  sample[4];
 
-                                FOdysseyVector::BezierExtract( bezier[0]
-                                                             , bezier[1]
-                                                             , bezier[2]
-                                                             , bezier[3]
-                                                             , oWayPointArray[i].t
-                                                             , oWayPointArray[n].t
-                                                             , sample[0]
-                                                             , sample[1]
-                                                             , sample[2]
-                                                             , sample[3] );
+                               FOdysseyVector::BezierExtract( bezier[0]
+                                                            , bezier[1]
+                                                            , bezier[2]
+                                                            , bezier[3]
+                                                            , oWayPointArray[i].t
+                                                            , oWayPointArray[n].t
+                                                            , sample[0]
+                                                            , sample[1]
+                                                            , sample[2]
+                                                            , sample[3] );
 
-                                oWaySegmentArray.emplace_back( i, n, sample );
-                            }
-                            //}
-                        }
-                    }
+                               oWaySegmentArray.emplace_back( segment, i, n, sample );
+                           }
+                       }
+                   }
 
                    return false; // keep iterating;
                } );
