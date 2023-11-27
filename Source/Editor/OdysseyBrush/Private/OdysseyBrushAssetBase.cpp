@@ -710,7 +710,7 @@ UOdysseyBrushAssetBase::DebugStamp()
     int size = ::ULIS::FMath::Max( 20.f * GetPressure(), 1.f );
 
     ::ULIS::FBlock* debug_stamp = new ::ULIS::FBlock( size, size, mEditedBlock->Format() );
-    ::ULIS::FColor color = ::ULIS::FColor::RGB(255, 128, 255);
+    ::ULIS::FColor color = ::ULIS::FColor::FromRGB(255, 128, 255);
     color.SetAlphaF( 1.0f );
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( debug_stamp->Format() );

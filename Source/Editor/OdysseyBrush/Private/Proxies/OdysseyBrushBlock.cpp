@@ -550,16 +550,16 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
 
     // No need to copy before, we can do it during the Filter with memcpy
     ctx.FilterInto(
-        [Curve, PreserveNullAlpha ]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr )
+        [Curve, PreserveNullAlpha ]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
         {
-            ::ULIS::FPixel srcProxy( iSrcPtr, iSrcBlock.Format() );
-            ::ULIS::FPixel dstProxy( iDstPtr, iDstBlock.Format() );
-            memcpy( iDstPtr, iSrcPtr, srcProxy.BytesPerPixel() );
-
-            if( PreserveNullAlpha && srcProxy.AlphaF() == 0.0f )
-                dstProxy.SetAlphaF( 0.0f ); // Warning: this will fail if the format is not 8 bit depth !
-            else
-                dstProxy.SetAlphaF( Curve->GetFloatValue( srcProxy.AlphaF() ) ); // Warning: this will fail if the format is not 8 bit depth !
+            for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+            {
+                memcpy( iDstPixel.Bits(), iSrcPixel.Bits(), iSrcPixel.BytesPerPixel() );
+                if( PreserveNullAlpha && iSrcPixel.AlphaF() == 0.0f )
+                    iDstPixel.SetAlphaF( 0.0f ); // Warning: this will fail if the format is not 8 bit depth !
+                else
+                    iDstPixel.SetAlphaF( Curve->GetFloatValue( iSrcPixel.AlphaF() ) ); // Warning: this will fail if the format is not 8 bit depth !
+            }
         }
         , *block
         , *dst
@@ -663,16 +663,18 @@ UOdysseyBlockProxyFunctionLibrary::AdjustRGBA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    auto filterFunc = [CurveR, CurveG, CurveB, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
-        ::ULIS::FPixel srcProxy( iSrcPtr, iSrcBlock.Format() );
-        ::ULIS::FPixel dstProxy( iDstPtr, iDstBlock.Format() );
-        dstProxy.SetRF( CurveR ? CurveR->GetFloatValue( srcProxy.RF() ) : srcProxy.RF() );
-        dstProxy.SetGF( CurveG ? CurveG->GetFloatValue( srcProxy.GF() ) : srcProxy.GF() );
-        dstProxy.SetBF( CurveB ? CurveB->GetFloatValue( srcProxy.BF() ) : srcProxy.BF() );
-        if( PreserveNullAlpha && srcProxy.AlphaF() == 0.0f )
-            dstProxy.SetAlphaF( 0.0f );
-        else
-            dstProxy.SetAlphaF( CurveAlpha ? CurveAlpha->GetFloatValue( srcProxy.AlphaF() ) : srcProxy.AlphaF() );
+    auto filterFunc = [CurveR, CurveG, CurveB, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+    {
+        for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+        {
+            iDstPixel.SetRF( CurveR ? CurveR->GetFloatValue( iSrcPixel.RF() ) : iSrcPixel.RF() );
+            iDstPixel.SetGF( CurveG ? CurveG->GetFloatValue( iSrcPixel.GF() ) : iSrcPixel.GF() );
+            iDstPixel.SetBF( CurveB ? CurveB->GetFloatValue( iSrcPixel.BF() ) : iSrcPixel.BF() );
+            if( PreserveNullAlpha && iSrcPixel.AlphaF() == 0.0f )
+                iDstPixel.SetAlphaF( 0.0f );
+            else
+                iDstPixel.SetAlphaF( CurveAlpha ? CurveAlpha->GetFloatValue( iSrcPixel.AlphaF() ) : iSrcPixel.AlphaF() );
+        }
     };
 
     ADJUST(::ULIS::Format_RGBAF, filterFunc)
@@ -691,14 +693,16 @@ UOdysseyBlockProxyFunctionLibrary::AdjustGreyA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    auto filterFUnc = [CurveGrey, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
-        ::ULIS::FPixel srcProxy( iSrcPtr, iSrcBlock.Format() );
-        ::ULIS::FPixel dstProxy( iDstPtr, iDstBlock.Format() );
-        dstProxy.SetGreyF( CurveGrey ? CurveGrey->GetFloatValue( srcProxy.GreyF() ) : srcProxy.GreyF() );
-        if( PreserveNullAlpha && srcProxy.AlphaF() == 0.0f )
-            dstProxy.SetAlphaF( 0.0f );
-        else
-            dstProxy.SetAlphaF( CurveAlpha ? CurveAlpha->GetFloatValue( srcProxy.AlphaF() ) : srcProxy.AlphaF() );
+    auto filterFUnc = [CurveGrey, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+    {
+        for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+        {
+            iDstPixel.SetGreyF( CurveGrey ? CurveGrey->GetFloatValue( iSrcPixel.GreyF() ) : iSrcPixel.GreyF() );
+            if( PreserveNullAlpha && iSrcPixel.AlphaF() == 0.0f )
+                iDstPixel.SetAlphaF( 0.0f );
+            else
+                iDstPixel.SetAlphaF( CurveAlpha ? CurveAlpha->GetFloatValue( iSrcPixel.AlphaF() ) : iSrcPixel.AlphaF() );
+        }
     };
 
     ADJUST(::ULIS::Format_GAF, filterFUnc)
@@ -719,18 +723,19 @@ UOdysseyBlockProxyFunctionLibrary::AdjustHSVA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
     
-    auto filterFunc = [CurveH, CurveS, CurveV, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
-        ::ULIS::FPixel srcProxy(iSrcPtr, iSrcBlock.Format());
-        ::ULIS::FPixel dstProxy(iDstPtr, iDstBlock.Format());
+    auto filterFunc = [CurveH, CurveS, CurveV, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+    {
+        for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+        {
+            iDstPixel.SetHueF(CurveH ? CurveH->GetFloatValue(iSrcPixel.HueF()) : iSrcPixel.HueF());
+            iDstPixel.SetSaturationF(CurveS ? CurveS->GetFloatValue(iSrcPixel.SaturationF()) : iSrcPixel.SaturationF());
+            iDstPixel.SetValueF(CurveV ? CurveV->GetFloatValue(iSrcPixel.ValueF()) : iSrcPixel.ValueF());
 
-        dstProxy.SetHueF(CurveH ? CurveH->GetFloatValue(srcProxy.HueF()) : srcProxy.HueF());
-        dstProxy.SetSaturationF(CurveS ? CurveS->GetFloatValue(srcProxy.SaturationF()) : srcProxy.SaturationF());
-        dstProxy.SetValueF(CurveV ? CurveV->GetFloatValue(srcProxy.ValueF()) : srcProxy.ValueF());
-
-        if(PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
-            dstProxy.SetAlphaF(0.0f);
-        else
-            dstProxy.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(srcProxy.AlphaF()) : srcProxy.AlphaF());
+            if(PreserveNullAlpha && iSrcPixel.AlphaF() == 0.0f)
+                iDstPixel.SetAlphaF(0.0f);
+            else
+                iDstPixel.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(iSrcPixel.AlphaF()) : iSrcPixel.AlphaF());
+        }
     };
 
     ADJUST(::ULIS::Format_HSVAF, filterFunc)
@@ -751,18 +756,19 @@ UOdysseyBlockProxyFunctionLibrary::AdjustHSLA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    auto filterFunc = [CurveH, CurveS, CurveL, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
-        ::ULIS::FPixel srcProxy(iSrcPtr, iSrcBlock.Format());
-        ::ULIS::FPixel dstProxy(iDstPtr, iDstBlock.Format());
+    auto filterFunc = [CurveH, CurveS, CurveL, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+    {
+        for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+        {
+            iDstPixel.SetHueF(CurveH ? CurveH->GetFloatValue(iSrcPixel.HueF()) : iSrcPixel.HueF());
+            iDstPixel.SetSaturationF(CurveS ? CurveS->GetFloatValue(iSrcPixel.SaturationF()) : iSrcPixel.SaturationF());
+            iDstPixel.SetLightnessF(CurveL ? CurveL->GetFloatValue(iSrcPixel.LightnessF()) : iSrcPixel.LightnessF());
 
-        dstProxy.SetHueF(CurveH ? CurveH->GetFloatValue(srcProxy.HueF()) : srcProxy.HueF());
-        dstProxy.SetSaturationF(CurveS ? CurveS->GetFloatValue(srcProxy.SaturationF()) : srcProxy.SaturationF());
-        dstProxy.SetLightnessF(CurveL ? CurveL->GetFloatValue(srcProxy.LightnessF()) : srcProxy.LightnessF());
-
-        if(PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
-            dstProxy.SetAlphaF(0.0f);
-        else
-            dstProxy.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(srcProxy.AlphaF()) : srcProxy.AlphaF());
+            if(PreserveNullAlpha && iSrcPixel.AlphaF() == 0.0f)
+                iDstPixel.SetAlphaF(0.0f);
+            else
+                iDstPixel.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(iSrcPixel.AlphaF()) : iSrcPixel.AlphaF());
+        }
     };
 
     ADJUST(::ULIS::Format_HSLAF, filterFunc)
@@ -784,19 +790,20 @@ UOdysseyBlockProxyFunctionLibrary::AdjustCMYKA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    auto filterFunc = [CurveC, CurveM, CurveY, CurveK, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
-        ::ULIS::FPixel srcProxy(iSrcPtr, iSrcBlock.Format());
-        ::ULIS::FPixel dstProxy(iDstPtr, iDstBlock.Format());
+    auto filterFunc = [CurveC, CurveM, CurveY, CurveK, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+    {
+        for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+        {
+            iDstPixel.SetCyanF(CurveC ? CurveC->GetFloatValue(iSrcPixel.CyanF()) : iSrcPixel.CyanF());
+            iDstPixel.SetMagentaF(CurveM ? CurveM->GetFloatValue(iSrcPixel.MagentaF()) : iSrcPixel.MagentaF());
+            iDstPixel.SetYellowF(CurveY ? CurveY->GetFloatValue(iSrcPixel.YellowF()) : iSrcPixel.YellowF());
+            iDstPixel.SetKeyF(CurveK ? CurveK->GetFloatValue(iSrcPixel.KeyF()) : iSrcPixel.KeyF());
 
-        dstProxy.SetCyanF(CurveC ? CurveC->GetFloatValue(srcProxy.CyanF()) : srcProxy.CyanF());
-        dstProxy.SetMagentaF(CurveM ? CurveM->GetFloatValue(srcProxy.MagentaF()) : srcProxy.MagentaF());
-        dstProxy.SetYellowF(CurveY ? CurveY->GetFloatValue(srcProxy.YellowF()) : srcProxy.YellowF());
-        dstProxy.SetKeyF(CurveK ? CurveK->GetFloatValue(srcProxy.KeyF()) : srcProxy.KeyF());
-
-        if(PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
-            dstProxy.SetAlphaF(0.0f);
-        else
-            dstProxy.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(srcProxy.AlphaF()) : srcProxy.AlphaF());
+            if(PreserveNullAlpha && iSrcPixel.AlphaF() == 0.0f)
+                iDstPixel.SetAlphaF(0.0f);
+            else
+                iDstPixel.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(iSrcPixel.AlphaF()) : iSrcPixel.AlphaF());
+        }
     };
 
     ADJUST(::ULIS::Format_CMYKAF, filterFunc)
@@ -817,18 +824,19 @@ UOdysseyBlockProxyFunctionLibrary::AdjustLabA(
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    auto filterFunc = [CurveL, CurveA, CurveB, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FBlock& iSrcBlock, const uint8* iSrcPtr, ::ULIS::FBlock& iDstBlock, uint8* iDstPtr ) {
-        ::ULIS::FPixel srcProxy(iSrcPtr, iSrcBlock.Format());
-        ::ULIS::FPixel dstProxy(iDstPtr, iDstBlock.Format());
+    auto filterFunc = [CurveL, CurveA, CurveB, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+    {
+        for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+        {
+            iDstPixel.SetLF(CurveL ? CurveL->GetFloatValue(iSrcPixel.LF()) : iSrcPixel.LF());
+            iDstPixel.SetaF(CurveA ? CurveA->GetFloatValue(iSrcPixel.aF()) : iSrcPixel.aF());
+            iDstPixel.SetbF(CurveB ? CurveB->GetFloatValue(iSrcPixel.bF()) : iSrcPixel.bF());
 
-        dstProxy.SetLF(CurveL ? CurveL->GetFloatValue(srcProxy.LF()) : srcProxy.LF());
-        dstProxy.SetaF(CurveA ? CurveA->GetFloatValue(srcProxy.aF()) : srcProxy.aF());
-        dstProxy.SetbF(CurveB ? CurveB->GetFloatValue(srcProxy.bF()) : srcProxy.bF());
-
-        if(PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
-            dstProxy.SetAlphaF(0.0f);
-        else
-            dstProxy.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(srcProxy.AlphaF()) : srcProxy.AlphaF());
+            if(PreserveNullAlpha && iSrcPixel.AlphaF() == 0.0f)
+                iDstPixel.SetAlphaF(0.0f);
+            else
+                iDstPixel.SetAlphaF(CurveAlpha ? CurveAlpha->GetFloatValue(iSrcPixel.AlphaF()) : iSrcPixel.AlphaF());
+        }
     };
 
     ADJUST(::ULIS::Format_LabAF, filterFunc)

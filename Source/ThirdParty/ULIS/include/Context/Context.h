@@ -15,6 +15,7 @@
 #include "Image/Sample.h"
 #include "Image/Block.h"
 #include "Image/Gradient.h"
+#include "Image/StructuringElement.h"
 #include "Layer/Layer/LayerTypedefs.h"
 #include "Math/Geometry/Rectangle.h"
 #include "Math/Geometry/Vector.h"
@@ -626,7 +627,7 @@ public:
     ulError
     Fill(
           FBlock& iBlock
-        , const ISample& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -650,7 +651,7 @@ public:
     ulError
     Fill(
           FTiledBlock& iBlock
-        , const ISample& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::CacheEfficient
         , uint32 iNumWait = 0
@@ -675,7 +676,7 @@ public:
     ulError
     FillPreserveAlpha(
           FBlock& iBlock
-        , const ISample& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::CacheEfficient
         , uint32 iNumWait = 0
@@ -713,7 +714,7 @@ public:
         , const FFont& iFont
         , uint32 iFontSize = 12
         , const FMat3F& iTransform = FMat3F()
-        , const ISample& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -748,7 +749,7 @@ public:
         , const FFont& iFont
         , uint32 iFontSize = 12
         , const FMat3F& iTransform = FMat3F()
-        , const ISample& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -803,7 +804,7 @@ public:
         , const FMat3F& iTransformMatrix = FMat3F()
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -842,7 +843,7 @@ public:
         , const FMat3F& iTransformMatrix = FMat3F()
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -881,7 +882,7 @@ public:
         , const FMat3F& iTransformMatrix = FMat3F()
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -923,7 +924,7 @@ public:
         , const FRectI& iSourceRect = FRectI::Auto
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -959,7 +960,7 @@ public:
         , const FRectF& iDestinationRect = FRectF::Auto
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FBlock* iOptionalSummedAreaTable = nullptr
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
@@ -1069,7 +1070,7 @@ public:
         , const FRectI& iSourceRect = FRectI::Auto
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -1310,7 +1311,7 @@ public:
     */
     ulError
     Filter(
-          std::function< void( const FBlock&, const uint8* ) > iInvocation
+          std::function< void( const FPixel&, uint64 ) > iInvocation
         , const FBlock& iSource
         , const FRectI& iSourceRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
@@ -1327,7 +1328,7 @@ public:
     */
     ulError
     FilterInPlace(
-          std::function< void( FBlock&, uint8* ) > iInvocation
+          std::function< void( FPixel&, uint64 ) > iInvocation
         , FBlock& iDestination
         , const FRectI& iDestinationRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
@@ -1345,7 +1346,7 @@ public:
     */
     ulError
     FilterInto(
-          std::function< void( const FBlock&, const uint8*, FBlock&, uint8* ) >
+          std::function< void( const FPixel&, FPixel&, uint64 ) >
         , const FBlock& iSource
         , FBlock& iDestination
         , const FRectI& iSourceRect = FRectI::Auto
@@ -1608,7 +1609,7 @@ public:
         , const FVec2I& iPosition = FVec2I( 0 )
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -1628,7 +1629,7 @@ public:
         , const FVec2I& iPosition = FVec2I( 0 )
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -1648,7 +1649,7 @@ public:
         , const FVec2I& iPosition = FVec2I( 0 )
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -1670,7 +1671,7 @@ public:
         , const FVec2I& iPosition = FVec2I( 0 )
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -1692,7 +1693,7 @@ public:
         , const FVec2I& iPosition = FVec2I( 0 )
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -1714,7 +1715,7 @@ public:
         , const FVec2I& iPosition = FVec2I( 0 )
         , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
         , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
+        , const ISample& iBorderValue = FColor::FromRGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -1730,11 +1731,9 @@ public:
           const FBlock& iSource
         , FBlock& iDestination
         , const FStructuringElement& iKernel
+        , eMorphologicalOperator iMorphologicalOperator
         , const FRectI& iSourceRect = FRectI::Auto
         , const FVec2I& iPosition = FVec2I( 0 )
-        , eResamplingMethod iResamplingMethod = eResamplingMethod::Resampling_Bilinear
-        , eBorderMode iBorderMode = eBorderMode::Border_Transparent
-        , const ISample& iBorderValue = FColor::RGBA8( 0, 0, 0 )
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
@@ -1751,7 +1750,7 @@ public:
           FBlock& iBlock
         , const FVec2I& iP0
         , const FVec2I& iP1
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -1767,7 +1766,7 @@ public:
           FBlock& iBlock
         , const FVec2I& iP0
         , const FVec2I& iP1
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -1783,7 +1782,7 @@ public:
           FBlock& iBlock
         , const FVec2F& iP0
         , const FVec2F& iP1
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -1799,7 +1798,7 @@ public:
           FBlock& iBlock
         , const FVec2I& iCenter
         , const int iRadius
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -1816,7 +1815,7 @@ public:
           FBlock& iBlock
         , const FVec2I& iCenter
         , const int iRadius
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -1833,7 +1832,7 @@ public:
           FBlock& iBlock
         , const FVec2F& iCenter
         , const float iRadius
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -1852,7 +1851,7 @@ public:
         , const int iRadius
         , const int iStartDegree
         , const int iEndDegree
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -1870,7 +1869,7 @@ public:
         , const int iRadius
         , const int iStartDegree
         , const int iEndDegree
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -1888,7 +1887,7 @@ public:
         , const float iRadius
         , const int iStartDegree
         , const int iEndDegree
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -1905,7 +1904,7 @@ public:
         , const FVec2I& iCenter
         , const int iA
         , const int iB
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -1923,7 +1922,7 @@ public:
         , const FVec2I& iCenter
         , const int iA
         , const int iB
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -1941,7 +1940,7 @@ public:
         , const FVec2F& iCenter
         , const float iA
         , const float iB
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -1960,7 +1959,7 @@ public:
         , const int iA
         , const int iB
         , const int iRotationDegrees
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -1979,7 +1978,7 @@ public:
         , const int iA
         , const int iB
         , const int iRotationDegrees
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -1998,7 +1997,7 @@ public:
         , const float iA
         , const float iB
         , const int iRotationDegrees
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -2015,7 +2014,7 @@ public:
           FBlock& iBlock
         , const FVec2I& iTopLeft
         , const FVec2I& iBottomRight
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -2031,7 +2030,7 @@ public:
     DrawPolygon(
           FBlock& iBlock
         , const std::vector< FVec2I >& iPoints
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -2047,7 +2046,7 @@ public:
     DrawPolygonAA(
           FBlock& iBlock
         , const std::vector< FVec2I >& iPoints
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -2064,7 +2063,7 @@ public:
     DrawPolygonSP(
           FBlock& iBlock
         , const std::vector< FVec2F >& iPoints
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const bool iFilled = false
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
@@ -2083,7 +2082,7 @@ public:
         , const FVec2I& iCtrlPt1
         , const FVec2I& iCtrlPt2
         , const float iWeight
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -2102,7 +2101,7 @@ public:
         , const FVec2I& iCtrlPt1
         , const FVec2I& iCtrlPt2
         , const float iWeight
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -2121,7 +2120,7 @@ public:
         , const FVec2F& iCtrlPt1
         , const FVec2F& iCtrlPt2
         , const float iWeight
-        , const FColor& iColor = FColor::RGBA8( 0, 0, 0 )
+        , const FColor& iColor = FColor::FromRGBA8( 0, 0, 0 )
         , const FRectI& iClippingRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MonoChunk
         , uint32 iNumWait = 0
@@ -2201,6 +2200,41 @@ public:
         , int iSeed = -1
         , const FRectI& iRect = FRectI::Auto
         , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
+        , uint32 iNumWait = 0
+        , const FEvent* iWaitList = nullptr
+        , FEvent* iEvent = nullptr
+    );
+
+public:
+    /**
+     * @brief FloodFills iDstBlock with iDstColor starting at iX, iY, following iSrcColor in iSrcBlock
+     */
+    ulError
+    FloodFill(
+          const FBlock& iSrcBlock
+        , FBlock& iDstBlock
+        , int iX
+        , int iY
+        , const ISample& iSrcColor
+        , const ISample& iDstColor
+        , uint32 iNumWait = 0
+        , const FEvent* iWaitList = nullptr
+        , FEvent* iEvent = nullptr
+    );
+
+    /**
+     * @brief Makes an iAmount Circular Dilation of iBlock
+     * The source pixels to dilate value must be iScrColor
+     * The added pixels values will be iDstColor
+     * iAmount can be negative.
+     * To Erode, use a negative iAmount and an empty iDstColor
+     */
+    ulError
+    Dilate(
+        FBlock& iBlock
+        , float iAmount
+        , const ISample& iSrcColor
+        , const ISample& iDstColor
         , uint32 iNumWait = 0
         , const FEvent* iWaitList = nullptr
         , FEvent* iEvent = nullptr

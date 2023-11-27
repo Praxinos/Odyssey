@@ -251,7 +251,7 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 {
 	//Create Block
     ::ULIS::FBlock* blockPtr = new ::ULIS::FBlock( iWidth, iHeight, ULISFormatForTextureSourceFormat(iFormat), nullptr, ::ULIS::FOnInvalidBlock() );
-	::ULIS::FColor color(::ULIS::FColor::RGBAF(iBackgroundColor.R, iBackgroundColor.G, iBackgroundColor.B, iBackgroundColor.A));
+	::ULIS::FColor color(::ULIS::FColor::FromRGBAF(iBackgroundColor.R, iBackgroundColor.G, iBackgroundColor.B, iBackgroundColor.A));
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( blockPtr->Format());
     ctx.Fill(*blockPtr, color);
     ctx.Finish();

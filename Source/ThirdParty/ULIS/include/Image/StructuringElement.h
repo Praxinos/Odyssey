@@ -13,11 +13,19 @@
 #include "Image/Block.h"
 
 ULIS_NAMESPACE_BEGIN
-enum eMorphologicalElementValue {
+enum class eMorphologicalElementValue : uint8
+{
       MpE_Zero  = 0
     , MpE_One   = 1
     , MpE_Any   = 2
 };
+
+enum class eMorphologicalOperator: uint8
+{
+    Erode = 0
+    , Dilate = 1
+};
+
 
 /////////////////////////////////////////////////////
 /// @class      FStructuringElement
@@ -33,7 +41,7 @@ public:
 public:
     // Construction / Destruction
     ~FStructuringElement();
-    FStructuringElement( const FVec2I& iSize, eMorphologicalElementValue iValue = MpE_Zero );
+    FStructuringElement( const FVec2I& iSize, eMorphologicalElementValue iValue = eMorphologicalElementValue::MpE_Zero );
     FStructuringElement( const FVec2I& iSize, std::initializer_list< eMorphologicalElementValue > iNums );
     FStructuringElement( const FStructuringElement& );
     FStructuringElement( FStructuringElement&& );
@@ -43,8 +51,8 @@ public:
 public:
     // Public API
     void  Set( std::initializer_list< eMorphologicalElementValue > iNums );
-    eMorphologicalElementValue At( int iX, int iY ) const;
-    eMorphologicalElementValue At( const FVec2I& iPoint ) const;
+    const eMorphologicalElementValue* At( int iX, int iY ) const;
+    const eMorphologicalElementValue* At( const FVec2I& iPoint ) const;
     void SetAt( int iX, int iY, eMorphologicalElementValue iValue );
     void SetAt( const FVec2I& iPoint, eMorphologicalElementValue iValue );
     void Clear();

@@ -65,7 +65,7 @@ UOdysseyBrushColorFunctionLibrary::UOdysseyBrushColorFunctionLibrary( const  FOb
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeDebugColor()
 {
-    return  FOdysseyBrushColor( ::ULIS::FColor::RGBA8( 255, 0, 0, 255 ) );
+    return  FOdysseyBrushColor( ::ULIS::FColor::FromRGBA8( 255, 0, 0, 255 ) );
 }
 
 
@@ -132,7 +132,7 @@ UOdysseyBrushColorFunctionLibrary::ConvertToFormat(FOdysseyBrushColor Color, EOd
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGB( int R, int G, int B, int A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::RGBA8( R, G, B, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromRGBA8( R, G, B, A ) );
 }
 
 
@@ -140,7 +140,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGB( int R, int G, i
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromGrey( int Grey, int A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::GreyA8( Grey, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromGreyA8( Grey, A ) );
 }
  
 
@@ -148,7 +148,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromGrey( int Grey, int 
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSV( int H, int S, int V, int A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::HSVA8( H, S, V, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromHSVA8( H, S, V, A ) );
 }
 
 
@@ -156,7 +156,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSV( int H, int S, i
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSL( int H, int S, int L, int A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::HSLA8( H, S, L, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromHSLA8( H, S, L, A ) );
 }
 
 
@@ -164,14 +164,14 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSL( int H, int S, i
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYK( int C, int M, int Y, int K, int A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::CMYKA8( C, M, Y, K, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromCMYKA8( C, M, Y, K, A ) );
 }
 
 //static
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromLab(int L, int A, int B, int Alpha)
 {
-    return  FOdysseyBrushColor::FromTemp(::ULIS::FColor::LabA8(L, A, B, Alpha));
+    return  FOdysseyBrushColor::FromTemp(::ULIS::FColor::FromLabA8(L, A, B, Alpha));
 }
 
 //--------------------------------------------------------------------------------------
@@ -180,7 +180,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromLab(int L, int A, in
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGBF( float R, float G, float B, float A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::RGBAF( R, G, B, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromRGBAF( R, G, B, A ) );
 }
 
 
@@ -188,7 +188,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGBF( float R, float
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromGreyF( float Grey, float A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::GreyAF( Grey, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromGreyAF( Grey, A ) );
 }
 
 
@@ -196,7 +196,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromGreyF( float Grey, f
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSVF( float H, float S, float V, float A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::HSVAF( H, S, V, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromHSVAF( H, S, V, A ) );
 }
 
 
@@ -204,21 +204,21 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSVF( float H, float
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSLF( float H, float S, float L, float A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::HSLAF( H, S, L, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromHSLAF( H, S, L, A ) );
 }
 
 //static
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYKF( float C, float M, float Y, float K, float A )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::CMYKAF( C, M, Y, K, A ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromCMYKAF( C, M, Y, K, A ) );
 }
 
 //static
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromLabF( float L, float A, float B, float Alpha )
 {
-    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::LabAF( L, A, B, Alpha ) );
+    return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromLabAF( L, A, B, Alpha ) );
 }
 
 //--------------------------------------------------------------------------------------

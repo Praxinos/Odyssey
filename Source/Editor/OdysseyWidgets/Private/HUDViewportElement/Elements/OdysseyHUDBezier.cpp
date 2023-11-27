@@ -51,7 +51,7 @@ void FOdysseyHUDBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
         ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
         ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
         1.f,
-        ::ULIS::FColor::RGBA8(0, 255, 0, 255)
+        ::ULIS::FColor::FromRGBA8(0, 255, 0, 255)
     );
     if ( transformedStartPoint != transformedControlPoint )
     {
@@ -59,13 +59,13 @@ void FOdysseyHUDBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
             *(ioBlock),
             ::ULIS::FVec2I(transformedStartPoint.X,transformedStartPoint.Y),
             ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
-            ::ULIS::FColor::RGBA8(0, 255, 0, 95)
+            ::ULIS::FColor::FromRGBA8(0, 255, 0, 95)
         );
         ctx.DrawLine(
             *(ioBlock),
             ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
             ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-            ::ULIS::FColor::RGBA8(0, 255, 0, 95)
+            ::ULIS::FColor::FromRGBA8(0, 255, 0, 95)
         );
     }
     ctx.Finish();
@@ -97,7 +97,7 @@ void FOdysseyHUDBezier::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
         ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
         ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
         1.f,
-        ::ULIS::FColor::RGBA8(0, 255, 0, 0)
+        ::ULIS::FColor::FromRGBA8(0, 255, 0, 0)
     );
     if ( transformedStartPoint != transformedControlPoint )
     {
@@ -105,13 +105,13 @@ void FOdysseyHUDBezier::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
             *(ioBlock),
             ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y),
             ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
-            ::ULIS::FColor::RGBA8(0, 255, 0, 0)
+            ::ULIS::FColor::FromRGBA8(0, 255, 0, 0)
         );
         ctx.DrawLine(
             *(ioBlock),
             ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
             ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-            ::ULIS::FColor::RGBA8(0, 255, 0, 0)
+            ::ULIS::FColor::FromRGBA8(0, 255, 0, 0)
         );
     }
     ctx.Finish();

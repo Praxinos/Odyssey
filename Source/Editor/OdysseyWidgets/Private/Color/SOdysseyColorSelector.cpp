@@ -276,7 +276,7 @@ SOdysseyColorSelector::HexBoxOnTextCommited( const FText& iText, ETextCommit::Ty
     int r = HexStringToDecimal( str_r );
     int g = HexStringToDecimal( str_g );
     int b = HexStringToDecimal( str_b );
-    ::ULIS::FColor newColor = ::ULIS::FColor::RGBA8( r, g, b );
+    ::ULIS::FColor newColor = ::ULIS::FColor::FromRGBA8( r, g, b );
 
     //adv_color_wheel->SetColor( newColor );
 

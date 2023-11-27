@@ -48,7 +48,7 @@ void FOdysseyHUDCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
     int transformedRadius = (int)(iTransform.GetMatrix().GetScale().GetVector().X * mRadius);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawCircle(*(ioBlock), ::ULIS::FVec2I(transformedCenterPoint.X, transformedCenterPoint.Y), transformedRadius, ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+    ctx.DrawCircle(*(ioBlock), ::ULIS::FVec2I(transformedCenterPoint.X, transformedCenterPoint.Y), transformedRadius, ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
     ctx.Finish();
 
     mPreviousRadius = mRadius;
@@ -72,6 +72,6 @@ void FOdysseyHUDCircle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
     int transformedPreviousRadius = (int)(iTransform.GetMatrix().GetScale().GetVector().X * mPreviousRadius);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawCircle(*(ioBlock), ::ULIS::FVec2I(previousTransformedCenterPoint.X, previousTransformedCenterPoint.Y), transformedPreviousRadius, ::ULIS::FColor::RGBA8(0, 255, 0, 0));
+    ctx.DrawCircle(*(ioBlock), ::ULIS::FVec2I(previousTransformedCenterPoint.X, previousTransformedCenterPoint.Y), transformedPreviousRadius, ::ULIS::FColor::FromRGBA8(0, 255, 0, 0));
     ctx.Finish();
 }

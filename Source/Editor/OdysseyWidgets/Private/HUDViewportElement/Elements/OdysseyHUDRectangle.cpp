@@ -37,7 +37,7 @@ void FOdysseyHUDRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform
     FVector2D transformedBottomRightPoint = iTransform.TransformPoint(mBottomRightPoint);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedTopLeftPoint.X, transformedTopLeftPoint.Y), ::ULIS::FVec2I(transformedBottomRightPoint.X, transformedBottomRightPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedTopLeftPoint.X, transformedTopLeftPoint.Y), ::ULIS::FVec2I(transformedBottomRightPoint.X, transformedBottomRightPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
     ctx.Finish();
 
     mPreviousBottomRightPoint = mBottomRightPoint;
@@ -59,6 +59,6 @@ void FOdysseyHUDRectangle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransfor
     FVector2D transformedBottomRightPoint = mPreviousTransform.TransformPoint(mPreviousBottomRightPoint);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedTopLeftPoint.X, transformedTopLeftPoint.Y), ::ULIS::FVec2I(transformedBottomRightPoint.X, transformedBottomRightPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
+    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedTopLeftPoint.X, transformedTopLeftPoint.Y), ::ULIS::FVec2I(transformedBottomRightPoint.X, transformedBottomRightPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 0));
     ctx.Finish();
 }

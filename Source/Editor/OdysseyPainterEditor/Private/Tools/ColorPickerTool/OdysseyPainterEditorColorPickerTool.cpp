@@ -40,7 +40,7 @@ UOdysseyPainterEditorColorPickerTool::OnMouseUp( const FOdysseyPoint& iPointInTe
         fence.BeginFence();
         fence.Wait();
 
-        ::ULIS::FColor ulisColor = ::ULIS::FColor::RGBA8( colors[0].R, colors[0].G, colors[0].B, colors[0].A );
+        ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8( colors[0].R, colors[0].G, colors[0].B, colors[0].A );
         GetEditor()->PaintColor(ulisColor, true);
     }
 

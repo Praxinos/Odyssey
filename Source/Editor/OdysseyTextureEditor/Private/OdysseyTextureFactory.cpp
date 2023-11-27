@@ -57,7 +57,7 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
 
     // Init internal data
     ::ULIS::FBlock block( mTextureWidth, mTextureHeight, ULISFormatForTextureSourceFormat(mTextureFormat) );
-    ::ULIS::FColor color( ::ULIS::FColor::RGBAF( mBackgroundColor.R, mBackgroundColor.G, mBackgroundColor.B, mBackgroundColor.A ) );
+    ::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( mBackgroundColor.R, mBackgroundColor.G, mBackgroundColor.B, mBackgroundColor.A ) );
 
     //TODO: should fill the default native texture for the thumbnail
 

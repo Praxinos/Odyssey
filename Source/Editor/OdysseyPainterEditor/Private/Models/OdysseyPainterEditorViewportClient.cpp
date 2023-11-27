@@ -1177,7 +1177,7 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
                 int32 corner1 = edge;
                 int32 corner2 = (edge + 1) % 3;
                 FLinearColor lc = mMeshSelector->GetMeshColor();
-                ::ULIS::FColor c = ::ULIS::FColor::RGBAF( lc.R, lc.G, lc.B, lc.A );
+                ::ULIS::FColor c = ::ULIS::FColor::FromRGBAF( lc.R, lc.G, lc.B, lc.A );
 
                 FLinearColor color = ( isOutOfBounds[corner1] || isOutOfBounds[corner2] ) ? FLinearColor( 0.6f, 0.0f, 0.0f ) : FLinearColor( c.RedF(), c.GreenF(), c.BlueF(), c.AlphaF() );
 

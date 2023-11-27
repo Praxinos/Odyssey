@@ -37,7 +37,7 @@ void FOdysseyHUDHandle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
 
     FVector2D transformedReferencePoint = iTransform.TransformPoint(*mReferencePoint);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedReferencePoint.X - mHandleSize, transformedReferencePoint.Y - mHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mHandleSize, transformedReferencePoint.Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 255));
+    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedReferencePoint.X - mHandleSize, transformedReferencePoint.Y - mHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mHandleSize, transformedReferencePoint.Y + mHandleSize), ::ULIS::FColor::FromRGBA8(255, 0, 0, 255));
     ctx.Finish();
 
     mPreviousTransform = iTransform;
@@ -54,7 +54,7 @@ void FOdysseyHUDHandle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
 
     FVector2D transformedReferencePoint = mPreviousTransform.TransformPoint(mPreviousPosition);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedReferencePoint.X - mPreviousHandleSize, transformedReferencePoint.Y - mPreviousHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mPreviousHandleSize, transformedReferencePoint.Y + mPreviousHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 0));
+    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedReferencePoint.X - mPreviousHandleSize, transformedReferencePoint.Y - mPreviousHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mPreviousHandleSize, transformedReferencePoint.Y + mPreviousHandleSize), ::ULIS::FColor::FromRGBA8(255, 0, 0, 0));
     ctx.Finish();
 }
 

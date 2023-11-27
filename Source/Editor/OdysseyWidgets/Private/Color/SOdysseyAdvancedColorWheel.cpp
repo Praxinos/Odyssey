@@ -389,9 +389,9 @@ SOdysseyAdvancedColorWheel::PaintTriangle() const
     float triangleArea = triangle_buffer_size.X * triangle_buffer_size.Y * 0.5;
 
     // Bake base colors
-    ::ULIS::FColor Color1 = ::ULIS::FColor::RGBA8( 255, 255, 255 );             // pure white
-    ::ULIS::FColor Color2 = ::ULIS::FColor::HSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ).ToFormat( ::ULIS::Format_RGBA8 ); // pure hue, max sat
-    ::ULIS::FColor Color3 = ::ULIS::FColor::RGBA8( 0, 0, 0 );                   // pure black
+    ::ULIS::FColor Color1 = ::ULIS::FColor::FromRGBA8( 255, 255, 255 );             // pure white
+    ::ULIS::FColor Color2 = ::ULIS::FColor::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ).ToFormat( ::ULIS::Format_RGBA8 ); // pure hue, max sat
+    ::ULIS::FColor Color3 = ::ULIS::FColor::FromRGBA8( 0, 0, 0 );                   // pure black
 
     // Optimisation Constants
     float optconst1 = -triangle_buffer_size.Y / 2; // ( iPt2.Y - iPt3.Y )
@@ -582,7 +582,7 @@ SOdysseyAdvancedColorWheel::UpdateTint() const
 {
     ::ULIS::FColor color = mColor.Get().ToFormat( ::ULIS::Format_RGBA8 );
     result_tint = FLinearColor( FColor( color.Red8(), color.Green8(), color.Blue8() ) );
-    ::ULIS::FColor hsv_tint = ::ULIS::FColor::HSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ).ToFormat( ::ULIS::Format_RGBA8 );
+    ::ULIS::FColor hsv_tint = ::ULIS::FColor::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ).ToFormat( ::ULIS::Format_RGBA8 );
     hue_tint = FLinearColor( FColor( hsv_tint.Red8(), hsv_tint.Green8(), hsv_tint.Blue8() ) );
     ::ULIS::FColor HSVColor = color.ToFormat( ::ULIS::Format_HSVA8 );
     sat_tint = FLinearColor( FColor( HSVColor.Value8(), HSVColor.Value8(), HSVColor.Value8(), HSVColor.Saturation8() ) );
@@ -602,7 +602,7 @@ SOdysseyAdvancedColorWheel::GetColorResult() const
     float value = 1 - w;
     float sat = value != 0 ? v / value : 0.0f;
 
-    return ::ULIS::FColor::HSVAF( hue, sat, value, 1.0f );
+    return ::ULIS::FColor::FromHSVAF( hue, sat, value, 1.0f );
 }
 
 #undef LOCTEXT_NAMESPACE

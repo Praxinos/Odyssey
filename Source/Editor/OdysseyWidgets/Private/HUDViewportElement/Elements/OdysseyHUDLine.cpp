@@ -39,7 +39,7 @@ void FOdysseyHUDLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= 
     FVector2D transformedFinishPoint = iTransform.TransformPoint(mFinishPoint);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawLine(*(ioBlock), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+    ctx.DrawLine(*(ioBlock), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
     ctx.Finish();
 
     mPreviousFinishPoint = mFinishPoint;
@@ -61,6 +61,6 @@ void FOdysseyHUDLine::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*=
     FVector2D transformedFinishPoint = mPreviousTransform.TransformPoint(mPreviousFinishPoint);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawLine(*(ioBlock), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
+    ctx.DrawLine(*(ioBlock), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 0));
     ctx.Finish();
 }

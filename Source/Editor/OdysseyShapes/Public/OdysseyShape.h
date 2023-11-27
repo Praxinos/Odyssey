@@ -22,7 +22,7 @@ enum class EOdysseyDrawingPrecision : uint8
 struct FOdysseyShapeDrawOptions
 {
     //float size;
-    ::ULIS::FColor mColor = ::ULIS::FColor::RGBA8( 0, 0, 0, 255);
+    ::ULIS::FColor mColor = ::ULIS::FColor::FromRGBA8( 0, 0, 0, 255);
     bool mFilled = false;
     EOdysseyDrawingPrecision mPrecision = EOdysseyDrawingPrecision::kRaw;
 };

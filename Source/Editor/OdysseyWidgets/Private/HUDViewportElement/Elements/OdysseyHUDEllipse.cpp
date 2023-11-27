@@ -50,7 +50,7 @@ void FOdysseyHUDEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
     int transformedEllipseBaxis = FMath::Abs( transformedCenterPoint.Y - transformedBorderPoint.Y );
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawEllipse(*(ioBlock), ::ULIS::FVec2I(transformedCenterPoint.X, transformedCenterPoint.Y), transformedEllipseAaxis, transformedEllipseBaxis, ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+    ctx.DrawEllipse(*(ioBlock), ::ULIS::FVec2I(transformedCenterPoint.X, transformedCenterPoint.Y), transformedEllipseAaxis, transformedEllipseBaxis, ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
     ctx.Finish();
 
     mPreviousEllipseAaxis = mEllipseAaxis;
@@ -76,7 +76,7 @@ void FOdysseyHUDEllipse::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     int previousTransformedEllipseBaxis = FMath::Abs( previousTransformedCenterPoint.Y - previousTransformedBorderPoint.Y);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawEllipse(*(ioBlock), ::ULIS::FVec2I( previousTransformedCenterPoint.X, previousTransformedCenterPoint.Y ), previousTransformedEllipseAaxis, previousTransformedEllipseBaxis, ::ULIS::FColor::RGBA8(0, 255, 0, 0));
+    ctx.DrawEllipse(*(ioBlock), ::ULIS::FVec2I( previousTransformedCenterPoint.X, previousTransformedCenterPoint.Y ), previousTransformedEllipseAaxis, previousTransformedEllipseBaxis, ::ULIS::FColor::FromRGBA8(0, 255, 0, 0));
     ctx.Finish();
 }
 

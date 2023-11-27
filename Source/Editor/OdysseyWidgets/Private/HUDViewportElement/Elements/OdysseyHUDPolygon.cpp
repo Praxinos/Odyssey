@@ -46,11 +46,11 @@ void FOdysseyHUDPolygon::Draw( ::ULIS::FBlock* ioBlock, FTransform2D iTransform 
 
     if( vectors.size() == 2 )
     {
-        ctx.DrawLine(*(ioBlock), vectors[0], vectors[1], ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+        ctx.DrawLine(*(ioBlock), vectors[0], vectors[1], ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
     }
     else
     {
-        ctx.DrawPolygon(*(ioBlock), vectors, ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+        ctx.DrawPolygon(*(ioBlock), vectors, ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
     }
     ctx.Finish();
 
@@ -81,11 +81,11 @@ void FOdysseyHUDPolygon::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
     if (vectors.size() == 2)
     {
-        ctx.DrawLine(*(ioBlock), vectors[0], vectors[1], ::ULIS::FColor::RGBA8(0, 0, 0, 0));
+        ctx.DrawLine(*(ioBlock), vectors[0], vectors[1], ::ULIS::FColor::FromRGBA8(0, 0, 0, 0));
     }
     else
     {
-        ctx.DrawPolygon(*(ioBlock), vectors, ::ULIS::FColor::RGBA8(0, 0, 0, 0));
+        ctx.DrawPolygon(*(ioBlock), vectors, ::ULIS::FColor::FromRGBA8(0, 0, 0, 0));
     }
 
     ctx.Finish();
