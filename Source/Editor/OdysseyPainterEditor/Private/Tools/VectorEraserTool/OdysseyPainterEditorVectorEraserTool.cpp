@@ -223,12 +223,12 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
                   ::ULIS::FRectD unusedRect;
 
                   if( path->Erase( unusedRect
-                                 , Split
                                  , oAddedObjectArray
                                  , oAddedVertexArray
                                  , oAddedSegmentArray
                                  , oRemovedVertexArray
-                                 , oRemovedSegmentArray ) )
+                                 , oRemovedSegmentArray
+                                 , Split ) )
                   {
                       oRemovedObjectArray.push_back( path );
                   }

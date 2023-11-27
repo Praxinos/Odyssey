@@ -13,11 +13,13 @@ class FOdysseyVectorSegment;
 class FOdysseyVectorPath;
 class FOdysseyVectorObject;
 
-enum eWayPointType : uint8
+enum class eWayPointType : uint8
 {
-    OutsideErasureArea = 0,
-    EntersErasureArea  = 1,
-    LeavesErasureArea  = 2
+    Uninitialized      = 0,
+    OutsideErasureArea = 1,
+    EntersErasureArea  = 2,
+    InsideErasureArea  = 3,
+    LeavesErasureArea  = 4
 };
 
 // a waypoint is met at segment vertex or when a constrast is met
@@ -27,6 +29,21 @@ typedef struct _FWayPoint
     FOdysseyVectorVertex* vertex;
     eWayPointType type;
     double t;
+    uint32 lookupID;
+
+    _FWayPoint()
+    {
+        type = eWayPointType::Uninitialized;
+    }
+
+    _FWayPoint( FOdysseyVectorVertex* iVertex
+              , eWayPointType iWayPointType )
+    {
+        segment = nullptr;
+        vertex = iVertex;
+        type = iWayPointType;
+        t = 0.0f;
+    }
 
     _FWayPoint( FOdysseyVectorVertex* iVertex
               , FOdysseyVectorSegment* iSegment
@@ -102,8 +119,8 @@ class FOdysseyVectorChain
 
     private :
         FOdysseyVectorPath* mPath;
-        std::list<FOdysseyVectorVertex*> mVertexList;
-        std::list<FOdysseyVectorSegment*> mSegmentList;
+        std::vector<FOdysseyVectorVertex*> mVertexArray;
+        std::vector<FOdysseyVectorSegment*> mSegmentArray;
         double mLength;
         ::ULIS::FRectD mBBox;
 };

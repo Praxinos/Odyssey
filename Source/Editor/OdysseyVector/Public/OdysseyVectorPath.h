@@ -23,7 +23,7 @@ enum class eJointType : uint8
     Miter  = 3
 };
 
-enum ePointSelectionFlags
+enum ePointSelectionFlags : uint8
 {
     Vertex        = 1,
     SegmentHandle = 2,
@@ -33,6 +33,29 @@ enum ePointSelectionFlags
 
 // define bitwise op
 ENUM_CLASS_FLAGS(ePointSelectionFlags)
+
+enum class eSegmentAdditionFlags : uint8
+{
+    None                  =        0  ,
+    KeepOriginalSegment   = ( 1 << 0 ),
+    RemoveOriginalSegment = ( 1 << 1 ),
+    CreateDerivedSegment  = ( 1 << 2 )
+};
+
+// define bitwise op
+ENUM_CLASS_FLAGS(eSegmentAdditionFlags)
+
+enum class eVertexAdditionFlags : uint8
+{
+    None                 =        0  ,
+    KeepOriginalVertex   = ( 1 << 0 ),
+    RemoveOriginalVertex = ( 1 << 1 ),
+    CreateDerivedVertex  = ( 1 << 2 ),
+    CreateBoundaryVertex = ( 1 << 3 )
+};
+
+// define bitwise op
+ENUM_CLASS_FLAGS(eVertexAdditionFlags)
 
 USTRUCT()
 struct FPathParam
@@ -131,12 +154,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @return true if the path is empty, false otherwise.
          */
         bool Erase( const ::ULIS::FRectD &iRoi
-                  , bool iSplit
                   , std::vector<FOdysseyVectorObject*>& oAddedPathArray
                   , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
+                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                  , bool iSplit );
 
        /**
          * @brief Get the joint type.
@@ -385,18 +408,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , double iEndU
                               , double iCombinedOpacity
                               , uint64 iDrawingFlags );
-        void EraseNoSplit( std::vector<FWayPoint>& iWayPointArray
-                         , std::vector<FWaySegment>& iWaySegmentArray
-                         , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                         , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
-        void EraseSplit( std::vector<FWayPoint>& iWayPointArray
-                       , std::vector<FWaySegment>& iWaySegmentArray
-                       , std::vector<FOdysseyVectorObject*>& oAddedPathArray
-                       , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
 
-        bool EraseNoSplitSegmentCreationPolicy( FWayPoint* iWayPoint0, FWayPoint* iWayPoint1 );
-        bool EraseSplitSegmentCreationPolicy( FWayPoint* iWayPoint0, FWayPoint* iWayPoint1 );
+        void ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
+                           , std::vector<FWaySegment>& iWaySegmentArray
+                           , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                           , bool iSplit );
+
+        eVertexAdditionFlags VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit );
+        eSegmentAdditionFlags SegmentAdditionPolicy( FWayPoint* iWayPoint0
+                                                   , FWayPoint* iWayPoint1
+                                                   , bool iSplit );
 
     protected :
         std::vector<FOdysseyVectorChain> mChainArray;
