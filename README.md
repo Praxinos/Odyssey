@@ -9,6 +9,8 @@
     <img src="https://praxinos.coop/images/epos-logo.png" alt="Epos">
 </p>
 
+<!-- -->
+
 # Overview
 
 **Extended Production Of Storyboard** - or **EPOS** - is a storyboard manager plugin in Unreal Engine Editor.
@@ -21,13 +23,19 @@
 
 **EPOS** is **source-control and multi-user compatible**: storyboard artists, previz artists, background artists, film directors and all other people involved in preproduction can work together in real-time to share and enhance their vision of the art.
 
+<!-- -->
+
 # Installation
 
 Install the plugin directly to your Unreal Engine 5 via the [EpicGames Marketplace](https://www.unrealengine.com/marketplace/en-US/product/epos-2d-storyboard-animatic-plugin-for-unreal-engine) ... **it's free !** :heart_eyes::+1:
 
+<!-- -->
+
 # Documentation
 
 Read the [:blue_book:User Documentation](https://praxinos.coop/epos-user-doc) to learn how to use the plugin
+
+<!-- -->
 
 # Links
 
@@ -35,6 +43,8 @@ Read the [:blue_book:User Documentation](https://praxinos.coop/epos-user-doc) to
 [Official Repository](https://github.com/Praxinos/Epos)  
 [Official Homepage :house:](https://praxinos.coop/epos)  
 [Praxinos Website](https://praxinos.coop)  
+
+<!-- -->
 
 # Module hierarchy
 
@@ -69,26 +79,23 @@ Read the [:blue_book:User Documentation](https://praxinos.coop/epos-user-doc) to
                 └────────────────────────────────────────┘                          ╯
 ```
 
+<!-- -->
+
 # Setting Hooks (after cloning)
 
 - go to `.git/hooks` folder
 - rename `pre-commit.sample` to `pre-commit`
 - open `pre-commit` file
-- add this line after the last `fi`: `exec .githooks/check.py`
+- add this line after the last `fi`:  
+    `exec .githooks/check.py`
+
+<!-- -->
 
 # Making a Package
 
-- open a shell/cmd at the root of the plugin
-- execute `build-package.py ...` *(and follow the instructions (activate the venv) if needed)*
+See the [README](https://github.com/Praxinos/Installers#iliad--epos) of [Installers](https://github.com/Praxinos/Installers) repository
 
-## Examples
-
-| Command                               | Description                                       |
-| :---                                  | :---                                              |
-| `build-package.py -h`                 | display all options                               |
-| `build-package.py -t beta`            | build for beta (local)                            |
-| `build-package.py -t beta -u`         | build for beta (with upload on pcloud)            |
-| `build-package.py -t marketplace -u`  | build for marketplace (with upload on pcloud)     |
+<!-- -->
 
 # Commit comment rules
 
