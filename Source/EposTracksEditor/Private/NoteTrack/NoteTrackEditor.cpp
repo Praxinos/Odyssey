@@ -11,6 +11,7 @@
 #include "DragAndDrop/AssetDragDropOp.h"
 #include "EditorStyleSet.h"
 #include "ISequencerSection.h"
+#include "LevelSequence.h"
 #include "CommonMovieSceneTools.h"
 #include "MovieSceneTimeHelpers.h"
 #include "SequencerUtilities.h"
@@ -52,7 +53,7 @@ FNoteTrackEditor::OnInitialize() //override
             FEposTracksEditorCommands::Get().NewSectionWithNoteAtCurrentFrame,
             FExecuteAction::CreateLambda( [this]()
                                           {
-                                              UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetRootMovieSceneSequence(), GetSequencer()->GetFocusedMovieSceneSequence() );
+                                              UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetFocusedTemplateID() );
                                               if( !note )
                                                   return;
 
@@ -115,7 +116,7 @@ bool
 FNoteTrackEditor::SupportsSequence( UMovieSceneSequence* InSequence ) const //override
 {
     ETrackSupport TrackSupported = InSequence ? InSequence->IsTrackSupported( UMovieSceneNoteTrack::StaticClass() ) : ETrackSupport::NotSupported;
-    return TrackSupported == ETrackSupport::Supported;
+    return ( TrackSupported == ETrackSupport::Supported || InSequence->IsA( ULevelSequence::StaticClass() ) );
 }
 
 void
@@ -560,7 +561,7 @@ FNoteTrackEditor::OnNoteTextCommited( const FText& iText, ETextCommit::Type iTyp
     auto NoteTrack = Cast<UMovieSceneNoteTrack>( Track );
     NoteTrack->Modify();
 
-    UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetRootMovieSceneSequence(), GetSequencer()->GetFocusedMovieSceneSequence() );
+    UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetFocusedTemplateID() );
     if( !note )
         return;
 
@@ -651,7 +652,7 @@ FNoteTrackEditor::OnAttachedNoteTextCommited( const FText& iText, ETextCommit::T
     if( iType != ETextCommit::OnEnter )
         return;
 
-    UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetRootMovieSceneSequence(), GetSequencer()->GetFocusedMovieSceneSequence() );
+    UStoryNote* note = ProjectAssetTools::CreateNote( *GetSequencer(), GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetFocusedTemplateID() );
     if( !note )
         return;
 

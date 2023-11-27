@@ -7,6 +7,7 @@
 
 class IDetailsView;
 class ISequencer;
+class UEposMovieSceneSequence;
 class UExportImageSequenceSettings;
 class UExportImageSequenceUISettings;
 class UMovieSceneSequence;
@@ -22,7 +23,7 @@ class SExportImageSequenceSettings
         {}
     SLATE_END_ARGS()
 
-    void Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iSequencer, UMovieSceneSequence* iCurrentSequence );
+    void Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iSequencer, FMovieSceneSequenceIDRef iSequenceId );
 
 public:
     virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
@@ -47,8 +48,11 @@ private:
 
 private:
     TWeakPtr<ISequencer>        mSequencer;
-    UMovieSceneSequence*        mRootSequence;
-    UMovieSceneSequence*        mCurrentSequence;
+    UEposMovieSceneSequence*    mRootEposSequence;
+    FMovieSceneSequenceID       mRootEposSequenceId;
+    UEposMovieSceneSequence*    mCurrentEposSequence { nullptr };
+    UMovieSceneSequence*        mCurrentSequence { nullptr };
+    FMovieSceneSequenceID       mCurrentSequenceId;
 
     TSharedPtr<IDetailsView>                        mDetailsViewExportImageSequenceSettings;
     TArray<TSharedPtr<FPanelItem>>                  mPanelItemsList;

@@ -42,6 +42,11 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     if( BoardSequenceTools::IsDrawingInEditionMode( iSequencer, iSubSection ) )
         return nullptr;
 
+    FMovieSceneSequenceID epos_sequence_id;
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( BoardSequenceHelpers::FindSequenceOfSubSection( *iSequencer, iSubSection, epos_sequence_id ) );
+    if( !epos_sequence )
+        return nullptr;
+
     const FScopedTransaction transaction( LOCTEXT( "transaction.create-take", "Create Take" ) );
 
     //---
@@ -49,7 +54,7 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     FString sequence_path;
     FString sequence_name;
     FShotNameElements shot_name_elements;
-    FString sequence_pathname = NamingConvention::GenerateTakeAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), &iSubSection, sequence_path, sequence_name, shot_name_elements );
+    FString sequence_pathname = NamingConvention::GenerateTakeAssetPathName( *iSequencer, *epos_sequence, epos_sequence_id, &iSubSection, sequence_path, sequence_name, shot_name_elements );
 
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
     UObject* newAsset = assetTools.DuplicateAsset( sequence_name, sequence_path, subsequence );

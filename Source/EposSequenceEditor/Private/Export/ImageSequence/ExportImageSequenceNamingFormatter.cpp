@@ -3,6 +3,8 @@
 
 #include "Export/ImageSequence/ExportImageSequenceNamingFormatter.h"
 
+#include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
+#include "Evaluation/MovieSceneRootOverridePath.h"
 #include "Internationalization/Regex.h"
 #include "ISequencer.h"
 #include "MovieSceneCommonHelpers.h"
@@ -30,6 +32,24 @@ FExportImageSequenceNamingFormatter::FExportImageSequenceNamingFormatter( TWeakP
     , mIndex( iIndex )
     , mImageSequenceOptions( iOptions )
 {
+    check( mCurrentPanel );
+
+    mRootEposSequence = EposSequenceHelpers::GetRootEposSequence( *mSequencer.Pin().Get(), mCurrentPanel->mSequenceId, mRootEposSequenceId );
+    if( !mRootEposSequence )
+        return;
+
+    FMovieSceneSequenceTransform transform_to_sequence;
+    if( mRootEposSequenceId != MovieSceneSequenceID::Root )
+    {
+        const FMovieSceneSequenceHierarchy* hierarchy = mSequencer.Pin()->GetEvaluationTemplate().GetHierarchy();
+        const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( mRootEposSequenceId );
+        if( !subdata )
+            return;
+
+        transform_to_sequence = subdata->RootToSequenceTransform;
+    }
+
+    mFrameInRootEposSequence = ( mCurrentPanel->GlobalFrame * transform_to_sequence ).GetFrame();
 }
 
 //---
@@ -39,10 +59,12 @@ FExportImageSequenceNamingFormatter::FormatName( const FString& iPatternToFormat
 {
     if( !mCurrentPanel )
         return false;
+    if( !mRootEposSequence )
+        return false;
+    if( mRootEposSequenceId == MovieSceneSequenceID::Invalid )
+        return false;
 
     TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer.Pin()->GetNumericTypeInterface();
-
-    UMovieSceneSequence* root_sequence = mSequencer.Pin()->GetRootMovieSceneSequence();
 
     //---
 
@@ -57,9 +79,9 @@ FExportImageSequenceNamingFormatter::FormatName( const FString& iPatternToFormat
 
     parsed_string = ReplaceKeywordInt( EExportImageSequencePatternKeyword::PanelIndex, mIndex + 1, mImageSequenceOptions->PanelIndexFormat.NumDigits ); // To start at 1 and not 0, snif...
 
-    parsed_string = ReplaceKeywordFrame( EExportImageSequencePatternKeyword::PanelFrame, mCurrentPanel->GlobalFrame );
+    parsed_string = ReplaceKeywordFrame( EExportImageSequencePatternKeyword::PanelFrame, mFrameInRootEposSequence );
 
-    FString storyboard_name = root_sequence->GetName();
+    FString storyboard_name = mRootEposSequence->GetName();
     parsed_string = ReplaceKeywordString( EExportImageSequencePatternKeyword::StoryboardName, storyboard_name );
 
     //---
@@ -103,6 +125,11 @@ FExportImageSequenceNamingFormatter::GetShot() const
     {
         virtual void VisitSection( UMovieSceneTrack* iTrack, UMovieSceneSection* iSection, const FGuid& iGuid, const UE::MovieScene::FSubSequenceSpace& iLocalSpace )
         {
+            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, *mSequencer );
+
+            if( !subsequencepath.Contains( mRootEposSequenceId ) )
+                return;
+
             UMovieSceneSingleCameraCutSection* cameracut_section = Cast<UMovieSceneSingleCameraCutSection>( iSection );
             if( !cameracut_section )
                 return;
@@ -119,6 +146,9 @@ FExportImageSequenceNamingFormatter::GetShot() const
             mInfo = TTuple<UShotSequence*, FMovieSceneSequenceID>( sequence, iLocalSpace.SequenceID );
         }
 
+        ISequencer* mSequencer;
+        FMovieSceneSequenceID mRootEposSequenceId;
+
         FFrameNumber mGlobalFrame; // In tick resolution
 
         TTuple<UShotSequence*, FMovieSceneSequenceID> mInfo;
@@ -131,6 +161,8 @@ FExportImageSequenceNamingFormatter::GetShot() const
     params.bVisitSubSequences = true;
 
     FSequenceShotVisitor shot_visitor;
+    shot_visitor.mSequencer = mSequencer.Pin().Get();
+    shot_visitor.mRootEposSequenceId = mRootEposSequenceId;
     shot_visitor.mGlobalFrame = mCurrentPanel->GlobalFrame;
 
     // Visit all shots
@@ -149,7 +181,7 @@ FExportImageSequenceNamingFormatter::GetSequence() const
 {
     TTuple<UMovieSceneSequence*, FMovieSceneSequenceID> info;
 
-    UMovieSceneSequence* sequence = mSequencer.Pin()->GetRootMovieSceneSequence();
+    UMovieSceneSequence* sequence = mRootEposSequence;
     if( !sequence )
         return info;
 
@@ -161,7 +193,7 @@ FExportImageSequenceNamingFormatter::GetSequence() const
     if( !boardTrack )
         return info;
 
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( MovieSceneHelpers::FindSectionAtTime( boardTrack->GetAllSections(), mCurrentPanel->GlobalFrame ) );
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( MovieSceneHelpers::FindSectionAtTime( boardTrack->GetAllSections(), mFrameInRootEposSequence ) );
     if( !board_section )
         return info;
 

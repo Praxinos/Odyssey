@@ -36,6 +36,7 @@ struct FExportPanel
     FFrameNumber GlobalFrame;
 
     UMovieSceneSequence* mSequence;
+    FMovieSceneSequenceID mSequenceId;
 
     TOptional<FExportPanelSourceMark>      mSourceMark;
     TOptional<FExportPanelSourceDrawing>   mSourceDrawing;

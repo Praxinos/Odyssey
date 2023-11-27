@@ -3,6 +3,7 @@
 
 #include "Export/PDF/ExportPDFBlueprintLibrary.h"
 
+#include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "ImageUtils.h"
 //#include "ImageWriteTask.h"
 #include "ISequencer.h"
@@ -24,10 +25,15 @@ UExportPDFBlueprintLibrary::GetRootBoardName( const FExportStruct& iExportStruct
     if( !iExportStruct.mSequencer.IsValid() )
         return FText::GetEmpty();
 
-    if( !iExportStruct.mSequencer.Pin()->GetRootMovieSceneSequence() )
+    if( !iExportStruct.Panels.Num() )
         return FText::GetEmpty();
 
-    return iExportStruct.mSequencer.Pin()->GetRootMovieSceneSequence()->GetDisplayName();
+    UEposMovieSceneSequence* root_epos_sequence = EposSequenceHelpers::GetRootEposSequence( *iExportStruct.mSequencer.Pin().Get(), iExportStruct.Panels[0].mSequenceId );
+
+    if( !root_epos_sequence )
+        return FText::GetEmpty();
+
+    return root_epos_sequence->GetDisplayName();
 }
 
 //static
@@ -119,7 +125,7 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
     if( !iExportStruct.mSequencer.IsValid() )
         return nullptr;
 
-    float aspect_ratio = GetMostRelevantCameraAspectRatio( iExportStruct.mSequencer.Pin().Get(), iExportStruct.Panels[iPanelIndex].mSequence );
+    float aspect_ratio = GetMostRelevantCameraAspectRatio( iExportStruct.mSequencer.Pin().Get(), iExportStruct.Panels[iPanelIndex].mSequenceId );
 
     iHeight = ( iHeight <= 0 ) ? 512 : iHeight;
     FIntPoint image_size( iHeight * aspect_ratio, iHeight );
@@ -134,7 +140,7 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
 
     //---
 
-	// For testing real png image
+    // For testing real png image
     //FString name = FString::FormatAsNumber( iPanelIndex );
 
     //TUniquePtr<FImageWriteTask> ImageTask = MakeUnique<FImageWriteTask>();
@@ -183,7 +189,27 @@ UExportPDFBlueprintLibrary::GetPanelNotes( const FExportStruct& iExportStruct, i
     if( !iExportStruct.mSequencer.IsValid() )
         return notes;
 
-    return EposSequenceHelpers::GetNotesRecursive( iExportStruct.mSequencer.Pin()->GetRootMovieSceneSequence(), iExportStruct.Panels[iPanelIndex].GlobalFrame );
+    ISequencer* sequencer = iExportStruct.mSequencer.Pin().Get();
+
+    FMovieSceneSequenceID root_epos_sequence_id;
+    UEposMovieSceneSequence* root_epos_sequence = EposSequenceHelpers::GetRootEposSequence( *sequencer, iExportStruct.Panels[iPanelIndex].mSequenceId, root_epos_sequence_id );
+    if( !root_epos_sequence )
+        return notes;
+
+    FMovieSceneSequenceTransform transform_to_sequence;
+    if( root_epos_sequence_id != MovieSceneSequenceID::Root )
+    {
+        const FMovieSceneSequenceHierarchy* hierarchy = sequencer->GetEvaluationTemplate().GetHierarchy();
+        const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( root_epos_sequence_id );
+        if( !subdata )
+            return notes;
+
+        transform_to_sequence = subdata->RootToSequenceTransform;
+    }
+
+    FFrameTime local_time = iExportStruct.Panels[iPanelIndex].GlobalFrame * transform_to_sequence;
+
+    return EposSequenceHelpers::GetNotesRecursive( root_epos_sequence, local_time.GetFrame() );
 }
 
 //---

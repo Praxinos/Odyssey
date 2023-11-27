@@ -31,8 +31,6 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
-#include "EposNamingConventionBlueprintLibrary.h"
-#include "EposSequenceEditorBlueprintLibrary.h"
 #include "EposSequenceEditorCommands.h"
 #include "Export/ExportSequencerRenderer.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
@@ -174,10 +172,6 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
     GoToFocusedSequence( iSequences );
 
-    mSequencer->OnActorAddedToSequencer().AddSP( this, &FEposSequenceEditorToolkit::HandleActorAddedToSequencer );
-    mSequencer->OnActivateSequence().AddSP( this, &FEposSequenceEditorToolkit::HandleOnActivateSequence );
-    mSequencer->GetSelectionChangedSections().AddSP( this, &FEposSequenceEditorToolkit::HandleOnSelectionChangedSections );
-
     // Force the epos renderer when opening a board asset
     // And there is a bug in the render movie popup display, all renderers are checked, but it's only ui
     FString movie_render_name = mSequencer->GetSequencerSettings()->GetMovieRendererName();
@@ -194,8 +188,6 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     options.bRequiresLevelEvents = true;
     options.bRequiresActorEvents = true;
     FLevelEditorSequencerIntegration::Get().AddSequencer( mSequencer.ToSharedRef(), options );
-    UEposSequenceEditorBlueprintLibrary::SetSequencer( mSequencer.ToSharedRef() );
-    UEposNamingConventionBlueprintLibrary::SetSequencer( mSequencer.ToSharedRef() );
 
     // Reopen the scene outliner so that is refreshed with the sequencer columns
     {
@@ -220,48 +212,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
     //---
 
-    auto GetFirstPerspectiveClient = []() -> SLevelViewport*
-    {
-        FLevelEditorViewportClient* levelVC = nullptr;
-
-        for( FLevelEditorViewportClient* viewportClient : GEditor->GetLevelViewportClients() )
-        {
-            if( viewportClient
-                && viewportClient->GetViewMode() != VMI_Unknown
-                && viewportClient->AllowsCinematicControl()
-                && viewportClient->IsPerspective() )
-                //TODO: improve by getting an already "storyboard viewport" if exists
-            {
-                levelVC = viewportClient;
-                break;
-            }
-        }
-
-        if( !levelVC )
-        {
-            //TODO: improve by setting to perspective if no one find
-            //viewport->GetLevelViewportClient().SetViewportType(ELevelViewportType::LVT_Perspective); // Need to be called first
-
-            FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
-            return levelEditorModule.GetFirstActiveLevelViewport().Get();
-        }
-
-        TSharedPtr<SEditorViewport> viewport_widget = levelVC->GetEditorViewportWidget();
-        return StaticCastSharedPtr<SLevelViewport>( viewport_widget ).Get();
-    };
-
-    // Do not use a TSharedPtr<> !!!
-    // https://udn.unrealengine.com/s/question/0D54z00007bITs8CAG/changing-the-viewport-layout-type-makes-the-viewport-unfocused-and-gcurrentleveleditingviewportclient-nullptr
-    SLevelViewport* viewport = GetFirstPerspectiveClient();
-    if( viewport )
-    {
-        viewport->GetCommandList()->ExecuteAction( FEposSequenceEditorCommands::Get().ToggleStoryboardViewportCommand.ToSharedRef() );
-        viewport = nullptr; // viewport is no more valid after changing viewport layout type
-
-        // Only for 5.0.1
-        viewport = GetFirstPerspectiveClient();
-        viewport->GetLevelViewportClient().SetCurrentViewport();
-    }
+    ToolkitHelpers::SetStoryboardViewport();
 }
 
 TSharedPtr<ISequencer>
@@ -304,67 +255,8 @@ void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UEposMovieSceneSeq
 void
 FEposSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 {
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().StepToNextShot,
-        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToNextShot, mSequencer.Get() )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().StepToPreviousShot,
-        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToPreviousShot, mSequencer.Get() )
-    );
-
-    //---
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoPraxinos,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoPraxinos )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoForum,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoForum )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoDiscord,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoDiscord )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoUserDocumentation,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoUserDocumentation )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoProjects,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoProjects )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().OpenAboutWindow,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenAboutWindow )
-    );
-
-    //---
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenSequenceEditorSettings )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().OpenTrackEditorSettings,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenTrackEditorSettings )
-    );
-
-    CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().OpenNamingConventionEditorSettings,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenNamingConventionEditorSettings )
-    );
-
-    TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
-    levelEditor->AppendCommands( CommandList.ToSharedRef() );
+    // Adding commands here is certainly not a good idea, as they won't be created when this toolkit is not called
+    // For example, opening a level sequence (level sequence toolkit will be created) won't create this toolkit at all
 }
 
 //--- FGCObject interface
@@ -541,62 +433,6 @@ FEposSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Co
 }
 
 //---
-
-void FEposSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
-{
-    ToolkitHelpers::CreateDefaultTracksForActor( mSequencer.Get(), iActor, iBinding );
-
-    ToolkitHelpers::FixCameraBindingOnCameraCut( mSequencer.Get(), iActor, iBinding );
-
-    //PATCH: replace standard cameracut track (if exists) by our single cameracut track
-    ToolkitHelpers::PatchStandardCameraCutTrack( mSequencer.Get(), iActor, iBinding );
-}
-
-void FEposSequenceEditorToolkit::HandleOnActivateSequence( FMovieSceneSequenceIDRef iSequenceID )
-{
-    check( iSequenceID == mSequencer->GetFocusedTemplateID() );
-
-    auto playback_range = mSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange();
-    FQualifiedFrameTime time = mSequencer->GetLocalTime();
-
-    if( playback_range.Contains( time.Time.GetFrame() ) )
-        return;
-
-    mSequencer->SetLocalTime( playback_range.GetLowerBoundValue() );
-}
-
-void FEposSequenceEditorToolkit::HandleOnSelectionChangedSections( TArray<UMovieSceneSection*> iSections )
-{
-    if( !iSections.Num() )
-        return;
-
-    //PATCH: sometimes the given section is not inside the current sequence
-    // first down (of the double click) on a section in the root sequence
-    //     [2021.07.27 - 08.40.02:647][497]LogTemp : Warning : GetSelectionChangedSections : local time 102000
-    //     [2021.07.27 - 08.40.02:647][497]LogTemp : Warning : GetSelectionChangedSections : 1 sections
-    //     [2021.07.27 - 08.40.02:647][497]LogTemp : Warning : GetSelectionChangedSections : xxxboard0010_01xxx
-    // unselect the section before changing the focused sequence
-    //     [2021.07.27 - 08.40.02:715][505]LogTemp : Warning : GetSelectionChangedSections : local time 0
-    //     [2021.07.27 - 08.40.02:716][505]LogTemp : Warning : GetSelectionChangedSections : 0 sections
-    // change the focused sequence to make the subsequence the focused one
-    //     [2021.07.27 - 08.40.02:716][505]LogTemp : Warning : OnActivateSequence
-    // !!!
-    // the section inside the root sequence (previous focused sequence) is still set as selected (but not everytime)
-    // and this makes the "set local time" wrong due to the lower bound value of the section which is related to the root sequence and not the new focused one
-    // !!!
-    //     [2021.07.27 - 08.40.02:793][514]LogTemp : Warning : GetSelectionChangedSections : local time 0
-    //     [2021.07.27 - 08.40.02:793][514]LogTemp : Warning : GetSelectionChangedSections : 1 sections
-    //     [2021.07.27 - 08.40.02:793][514]LogTemp : Warning : GetSelectionChangedSections : xxxboard0010_01xxx
-    // so we check the given section is one of the section in the focused sequence
-    if( !mSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetAllSections().Contains( iSections.Last() ) )
-        return;
-
-    FQualifiedFrameTime time = mSequencer->GetLocalTime();
-    if( iSections.Last()->GetTrueRange().Contains( time.Time.GetFrame() ) )
-        return;
-
-    mSequencer->SetLocalTime( iSections.Last()->GetTrueRange().GetLowerBoundValue() );
-}
 
 void FEposSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )
 {

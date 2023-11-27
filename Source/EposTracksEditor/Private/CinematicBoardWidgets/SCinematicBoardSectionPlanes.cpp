@@ -1162,8 +1162,8 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-material-master-label", "Edit Master..." ),
                                 LOCTEXT( "edit-material-master-tooltip", "Edit the master material of all keys with its default editor\n(If it's not possible, the material is already opened)" ),
                                 FSlateIcon(),
-                                FUIAction( FExecuteAction::CreateLambda( EditKeyMaterial, MasterAssetTools::GetMasterMaterial( *sequencer, sequencer->GetRootMovieSceneSequence() ) ),
-                                           FCanExecuteAction::CreateLambda( CanEditKeyMaterial, MasterAssetTools::GetMasterMaterial( *sequencer, sequencer->GetRootMovieSceneSequence() ) ) ) );
+                                FUIAction( FExecuteAction::CreateLambda( EditKeyMaterial, MasterAssetTools::GetMasterMaterial( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID() ) ),
+                                           FCanExecuteAction::CreateLambda( CanEditKeyMaterial, MasterAssetTools::GetMasterMaterial( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID() ) ) ) );
 
     ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "clone-material-key-label", "Clone at {0}" ), FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) ) ),
                                 LOCTEXT( "clone-material-key-tooltip", "Clone the current key (material and texture) at the current frame" ),
@@ -2012,10 +2012,12 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
     UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    UEposMovieSceneSequence* inner_epos_sequence = Cast<UEposMovieSceneSequence>( result.mInnerSequence );
+    check( inner_epos_sequence );
 
     FString plane_path;
     TSharedRef<FString> plane_name = MakeShared<FString>();
-    NamingConvention::GeneratePlaneActorPathName( *sequencer, sequencer->GetRootMovieSceneSequence(), result.mInnerSequence, plane_path, *plane_name );
+    NamingConvention::GeneratePlaneActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, plane_path, *plane_name );
 
     //---
 

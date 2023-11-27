@@ -27,6 +27,9 @@ private:
 
 private:
     TWeakPtr<ISequencer>                mSequencer;
+    UEposMovieSceneSequence*            mRootEposSequence { nullptr };
+    FMovieSceneSequenceID               mRootEposSequenceId;
+    FFrameNumber                        mFrameInRootEposSequence;
     const FExportPanel*                 mCurrentPanel { nullptr };
     int32                               mIndex;
     const FExportImageSequenceOptions*  mImageSequenceOptions { nullptr };

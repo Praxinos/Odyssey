@@ -19,6 +19,7 @@
 #include "Subsystems/AssetEditorSubsystem.h"
 
 #include "Board/BoardSequence.h"
+#include "EposSequenceHelpers.h"
 #include "Export/ExportConverter.h"
 #include "Export/ImageSequence/ExportImageSequenceExporter.h"
 #include "Export/PDF/ExportPDFExporter.h"
@@ -47,7 +48,11 @@ UBoardSequenceEditorBlueprintLibrary::GetRootBoardSequence()
     if( !CurrentSequencer.IsValid() )
         return nullptr;
 
-    return Cast<UBoardSequence>(CurrentSequencer.Pin()->GetRootMovieSceneSequence());
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    UEposMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID() );
+
+    return Cast<UBoardSequence>( root_sequence );
 }
 
 
@@ -434,7 +439,11 @@ UShotSequenceEditorBlueprintLibrary::GetRootShotSequence()
     if( !CurrentSequencer.IsValid() )
         return nullptr;
 
-    return Cast<UShotSequence>(CurrentSequencer.Pin()->GetRootMovieSceneSequence());
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    UEposMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID() );
+
+    return Cast<UShotSequence>( root_sequence );
 }
 
 //static
@@ -579,11 +588,14 @@ bool UEposSequenceEditorBlueprintLibrary::OpenEposSequence( UEposMovieSceneSeque
 
 UEposMovieSceneSequence* UEposSequenceEditorBlueprintLibrary::GetRootEposSequence()
 {
-    if (CurrentSequencer.IsValid())
-    {
-        return Cast<UEposMovieSceneSequence>(CurrentSequencer.Pin()->GetRootMovieSceneSequence());
-    }
-    return nullptr;
+    if( !CurrentSequencer.IsValid() )
+        return nullptr;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    UEposMovieSceneSequence* root_sequence = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID() );
+
+    return root_sequence;
 }
 
 UEposMovieSceneSequence* UEposSequenceEditorBlueprintLibrary::GetFocusedEposSequence()
@@ -679,8 +691,13 @@ UEposSequenceEditorBlueprintLibrary::ExportAsPDF( const FExportPDFOptions& iOpti
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
+    FMovieSceneSequenceID epos_root_sequence_id;
+    UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID(), epos_root_sequence_id );
+    if( !epos_root_sequence )
+        return false;
+
     FExportStruct image_sequence_struct;
-    FExportConverter converter( CurrentSequencer, sequencer->GetRootMovieSceneSequence(), &iOptions.MarkSettings, &image_sequence_struct );
+    FExportConverter converter( CurrentSequencer, epos_root_sequence_id, &iOptions.MarkSettings, &image_sequence_struct );
 
     FExportPDFExporter exporter( CurrentSequencer, &image_sequence_struct, &iOptions );
     return exporter.Export();
@@ -695,8 +712,13 @@ UEposSequenceEditorBlueprintLibrary::ExportAsImageSequence( const FExportImageSe
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
+    FMovieSceneSequenceID epos_root_sequence_id;
+    UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID(), epos_root_sequence_id );
+    if( !epos_root_sequence )
+        return false;
+
     FExportStruct image_sequence_struct;
-    FExportConverter converter( CurrentSequencer, sequencer->GetRootMovieSceneSequence(), &iOptions.MarkSettings, &image_sequence_struct );
+    FExportConverter converter( CurrentSequencer, epos_root_sequence_id, &iOptions.MarkSettings, &image_sequence_struct );
 
     image_sequence_struct.mSequencer = CurrentSequencer;
 

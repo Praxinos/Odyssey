@@ -7,6 +7,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "EditorStyleSet.h"
+#include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "Factories/Factory.h"
 #include "FrameNumberDetailsCustomization.h"
 #include "Framework/Docking/TabManager.h"
@@ -51,17 +52,19 @@
 //---
 
 void
-SExportImageSequenceSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iSequencer, UMovieSceneSequence* iCurrentSequence )
+SExportImageSequenceSettings::Construct( const FArguments& InArgs, TWeakPtr<ISequencer> iSequencer, FMovieSceneSequenceIDRef iSequenceId )
 {
     mSequencer = iSequencer;
-    mCurrentSequence = iCurrentSequence;
-    mRootSequence = iSequencer.Pin()->GetRootMovieSceneSequence();
+    mCurrentSequenceId = iSequenceId;
+    mCurrentSequence = mSequencer.Pin()->GetEvaluationTemplate().GetSequence( mCurrentSequenceId );
+    mCurrentEposSequence = Cast<UEposMovieSceneSequence>( mCurrentSequence );
+    mRootEposSequence = EposSequenceHelpers::GetRootEposSequence( *mSequencer.Pin(), iSequenceId, mRootEposSequenceId );
 
     mExportImageSequenceSettings = GetMutableDefault<UExportImageSequenceSettings>();
     mExportImageSequenceUISettings = GetMutableDefault<UExportImageSequenceUISettings>();
 
     // Force initialize the ratio from the more relevant camera
-    mExportImageSequenceSettings->Options.AspectRatio = GetMostRelevantCameraAspectRatio( mSequencer.Pin().Get(), mRootSequence );
+    mExportImageSequenceSettings->Options.AspectRatio = GetMostRelevantCameraAspectRatio( mSequencer.Pin().Get(), mRootEposSequence ? mRootEposSequenceId : mCurrentSequenceId );
     mExportImageSequenceSettings->Options.ImageSize.X = mExportImageSequenceSettings->Options.ImageSize.Y * mExportImageSequenceSettings->Options.AspectRatio;
 
     FPropertyEditorModule& PropertyEditor = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -183,7 +186,7 @@ SExportImageSequenceSettings::MakePanelItems()
     mPanelItemsList.Empty();
 
     FExportStruct image_sequence_struct;
-    FExportConverter converter( mSequencer, mRootSequence, &mExportImageSequenceSettings->Options.MarkSettings, &image_sequence_struct );
+    FExportConverter converter( mSequencer, mRootEposSequence ? mRootEposSequenceId : mCurrentSequenceId, &mExportImageSequenceSettings->Options.MarkSettings, &image_sequence_struct );
 
     // Build a list of items - one for each panel
     for( int32 i = 0; i < image_sequence_struct.Panels.Num(); i++ )

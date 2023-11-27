@@ -12,6 +12,7 @@
 #include "GameFramework/Actor.h"
 #include "IMovieScenePlaybackClient.h"
 #include "ISequencer.h"
+#include "LevelEditor.h"
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
@@ -20,6 +21,7 @@
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
+#include "SLevelViewport.h"
 #include "Tracks/IMovieSceneTransformOrigin.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
@@ -27,6 +29,7 @@
 #include "Tracks/MovieSceneSkeletalAnimationTrack.h"
 #include "Tracks/MovieSceneVisibilityTrack.h"
 
+#include "EposSequenceEditorCommands.h"
 #include "EposSequenceHelpers.h"
 #include "PlaneActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
@@ -481,6 +484,120 @@ ToolkitHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iAc
     // But as it should only be called in FSequencer::AddActors(), after an auto track creation, it should be ok to replace without taking care to of the existing section
 
     ShotSequenceTools::CreateCameraCut( *iSequencer, sequence, camera_guid, iSequencer->GetLocalTime().Time.FloorToFrame() );
+}
+
+//---
+
+//static
+void
+ToolkitHelpers::SetStoryboardViewport()
+{
+    auto GetFirstPerspectiveClient = []() -> SLevelViewport*
+    {
+        FLevelEditorViewportClient* levelVC = nullptr;
+
+        for( FLevelEditorViewportClient* viewportClient : GEditor->GetLevelViewportClients() )
+        {
+            if( viewportClient
+                && viewportClient->GetViewMode() != VMI_Unknown
+                && viewportClient->AllowsCinematicControl()
+                && viewportClient->IsPerspective() )
+                //TODO: improve by getting an already "storyboard viewport" if exists
+            {
+                levelVC = viewportClient;
+                break;
+            }
+        }
+
+        if( !levelVC )
+        {
+            //TODO: improve by setting to perspective if no one find
+            //viewport->GetLevelViewportClient().SetViewportType(ELevelViewportType::LVT_Perspective); // Need to be called first
+
+            FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
+            return levelEditorModule.GetFirstActiveLevelViewport().Get();
+        }
+
+        TSharedPtr<SEditorViewport> viewport_widget = levelVC->GetEditorViewportWidget();
+        return StaticCastSharedPtr<SLevelViewport>( viewport_widget ).Get();
+    };
+
+    // Do not use a TSharedPtr<> !!!
+    // https://udn.unrealengine.com/s/question/0D54z00007bITs8CAG/changing-the-viewport-layout-type-makes-the-viewport-unfocused-and-gcurrentleveleditingviewportclient-nullptr
+    SLevelViewport* viewport = GetFirstPerspectiveClient();
+    if( viewport )
+    {
+        viewport->GetCommandList()->ExecuteAction( FEposSequenceEditorCommands::Get().ToggleStoryboardViewportCommand.ToSharedRef() );
+        viewport = nullptr; // viewport is no more valid after changing viewport layout type
+
+        // Only for 5.0.1
+        viewport = GetFirstPerspectiveClient();
+        viewport->GetLevelViewportClient().SetCurrentViewport();
+    }
+}
+
+//---
+
+//static
+void
+ToolkitHelpers::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding, ISequencer* iSequencer )
+{
+    ToolkitHelpers::CreateDefaultTracksForActor( iSequencer, iActor, iBinding );
+
+    ToolkitHelpers::FixCameraBindingOnCameraCut( iSequencer, iActor, iBinding );
+
+    //PATCH: replace standard cameracut track (if exists) by our single cameracut track
+    ToolkitHelpers::PatchStandardCameraCutTrack( iSequencer, iActor, iBinding );
+}
+
+//static
+void
+ToolkitHelpers::HandleOnActivateSequence( FMovieSceneSequenceIDRef iSequenceID, ISequencer* iSequencer )
+{
+    check( iSequenceID == iSequencer->GetFocusedTemplateID() );
+
+    auto playback_range = iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange();
+    FQualifiedFrameTime time = iSequencer->GetLocalTime();
+
+    if( playback_range.Contains( time.Time.GetFrame() ) )
+        return;
+
+    iSequencer->SetLocalTime( playback_range.GetLowerBoundValue() );
+}
+
+//static
+void
+ToolkitHelpers::HandleOnSelectionChangedSections( TArray<UMovieSceneSection*> iSections, ISequencer* iSequencer )
+{
+    if( !iSections.Num() )
+        return;
+
+    //PATCH: sometimes the given section is not inside the current sequence
+    // first down (of the double click) on a section in the root sequence
+    //     [2021.07.27 - 08.40.02:647][497]LogTemp : Warning : GetSelectionChangedSections : local time 102000
+    //     [2021.07.27 - 08.40.02:647][497]LogTemp : Warning : GetSelectionChangedSections : 1 sections
+    //     [2021.07.27 - 08.40.02:647][497]LogTemp : Warning : GetSelectionChangedSections : xxxboard0010_01xxx
+    // unselect the section before changing the focused sequence
+    //     [2021.07.27 - 08.40.02:715][505]LogTemp : Warning : GetSelectionChangedSections : local time 0
+    //     [2021.07.27 - 08.40.02:716][505]LogTemp : Warning : GetSelectionChangedSections : 0 sections
+    // change the focused sequence to make the subsequence the focused one
+    //     [2021.07.27 - 08.40.02:716][505]LogTemp : Warning : OnActivateSequence
+    // !!!
+    // the section inside the root sequence (previous focused sequence) is still set as selected (but not everytime)
+    // and this makes the "set local time" wrong due to the lower bound value of the section which is related to the root sequence and not the new focused one
+    // !!!
+    //     [2021.07.27 - 08.40.02:793][514]LogTemp : Warning : GetSelectionChangedSections : local time 0
+    //     [2021.07.27 - 08.40.02:793][514]LogTemp : Warning : GetSelectionChangedSections : 1 sections
+    //     [2021.07.27 - 08.40.02:793][514]LogTemp : Warning : GetSelectionChangedSections : xxxboard0010_01xxx
+    // so we check the given section is one of the section in the focused sequence
+    if( !iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetAllSections().Contains( iSections.Last() ) )
+        return;
+
+    FQualifiedFrameTime time = iSequencer->GetLocalTime();
+    if( iSections.Last()->GetTrueRange().Contains( time.Time.GetFrame() ) )
+        return;
+
+    iSequencer->SetLocalTime( iSections.Last()->GetTrueRange().GetLowerBoundValue() );
 }
 
 #undef LOCTEXT_NAMESPACE

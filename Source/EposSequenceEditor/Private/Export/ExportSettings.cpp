@@ -4,6 +4,7 @@
 #include "Export/ExportSettings.h"
 
 #include "Camera/CameraComponent.h"
+#include "Evaluation/MovieSceneRootOverridePath.h"
 #include "ISequencer.h"
 #include "MovieSceneSequenceVisitor.h"
 
@@ -14,13 +15,21 @@
 //---
 
 float
-GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* iSequence )
+GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, FMovieSceneSequenceIDRef iSequenceId )
 {
+    if( !iSequencer || iSequenceId == MovieSceneSequenceID::Invalid )
+        return 1.77777f;
+
     struct FSequenceCameraVisitor
         : UE::MovieScene::ISequenceVisitor
     {
-        virtual void VisitSection( UMovieSceneTrack* iTrack, UMovieSceneSection* iSection, const FGuid& iGuid, const UE::MovieScene::FSubSequenceSpace& iLocalSpace )
+        virtual void VisitSection( UMovieSceneTrack* iTrack, UMovieSceneSection* iSection, const FGuid& iGuid, const UE::MovieScene::FSubSequenceSpace& iLocalSpace ) override
         {
+            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, *mSequencer );
+
+            if( !subsequencepath.Contains( mSequenceId ) )
+                return;
+
             UMovieSceneSingleCameraCutSection* cameracut_section = Cast<UMovieSceneSingleCameraCutSection>( iSection );
             if( !cameracut_section )
                 return;
@@ -40,6 +49,7 @@ GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* i
         }
 
         ISequencer* mSequencer;
+        FMovieSceneSequenceID mSequenceId;
         TMap<float, int32>  mAspectRatios;
     };
 
@@ -52,9 +62,10 @@ GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, UMovieSceneSequence* i
 
     FSequenceCameraVisitor camera_visitor;
     camera_visitor.mSequencer = iSequencer;
+    camera_visitor.mSequenceId = iSequenceId;
 
     // Visit all notes
-    VisitSequence( iSequence, params, camera_visitor );
+    VisitSequence( iSequencer->GetRootMovieSceneSequence(), params, camera_visitor );
 
     //---
 

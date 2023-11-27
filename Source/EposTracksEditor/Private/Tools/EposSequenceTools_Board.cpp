@@ -665,12 +665,17 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, const 
 UMovieSceneSubSection*
 CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
+    FMovieSceneSequenceID epos_sequence_id = iSequencer->GetFocusedTemplateID();
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequencer->GetFocusedMovieSceneSequence() );
+    if( !epos_sequence )
+        return nullptr;
+
     const FScopedTransaction transaction( LOCTEXT( "transaction.insert-board", "Insert Board" ) );
 
     FString sequence_path;
     FString sequence_name;
     FBoardNameElements board_name_elements;
-    FString sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, board_name_elements );
+    FString sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, *epos_sequence, epos_sequence_id, iFrameNumber, sequence_path, sequence_name, board_name_elements );
 
     UMovieSceneSubSection* new_section = CreateSequenceInternal<UBoardSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, iDuration );
 
@@ -694,12 +699,17 @@ CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFra
 UMovieSceneSubSection*
 CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
+    FMovieSceneSequenceID epos_sequence_id = iSequencer->GetFocusedTemplateID();
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequencer->GetFocusedMovieSceneSequence() );
+    if( !epos_sequence )
+        return nullptr;
+
     const FScopedTransaction transaction( LOCTEXT( "transaction.insert-shot", "Insert Shot" ) );
 
     FString sequence_path;
     FString sequence_name;
     FShotNameElements shot_name_elements;
-    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, shot_name_elements );
+    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, *epos_sequence, epos_sequence_id, iFrameNumber, sequence_path, sequence_name, shot_name_elements );
 
     //---
 
@@ -807,12 +817,19 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
     if( subsequence->IsA<UBoardSequence>() )
         return nullptr;
 
+    FMovieSceneSequenceID epos_sequence_id;
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( BoardSequenceHelpers::FindSequenceOfSubSection( *iSequencer, *iSection, epos_sequence_id ) );
+    if( !epos_sequence )
+        return nullptr;
+
+    //---
+
     const FScopedTransaction transaction( LOCTEXT( "CloneSection_Transaction", "Clone Section" ) );
 
     FString sequence_path;
     FString sequence_name;
     FShotNameElements shot_name_elements;
-    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, shot_name_elements );
+    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, *epos_sequence, epos_sequence_id, iFrameNumber, sequence_path, sequence_name, shot_name_elements );
 
     // Duplicate the board and put it on the next available row
     UMovieSceneSubSection* new_section = CreateSequenceInternal<UShotSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, TOptional<int32>(), iSection );
@@ -871,9 +888,12 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
     if( !cloned_camera )
         return;
 
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+    check( epos_sequence );
+
     FString cloned_camera_path;
     FString cloned_camera_name;
-    NamingConvention::GenerateCameraActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_camera_path, cloned_camera_name );
+    NamingConvention::GenerateCameraActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_camera_path, cloned_camera_name );
     // We don't keep the same name as the original camera (like plane), to be able to increment the (global) index or to use the new shot name
 
     cloned_camera->SetFolderPath( *cloned_camera_path );
@@ -881,7 +901,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     //-
 
-    cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_camera );
+    cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_camera );
 
     // This part will create a new guid for the possessable, I don't know if it's wanted (just for info)
     //FMovieScenePossessable new_possessable( cloned_camera_name, cloned_camera->GetClass() );
@@ -934,7 +954,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
     {
         UStoryNote* original_note = note_section->GetNote();
 
-        UStoryNote* duplicate_note = ProjectAssetTools::CloneNote( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, original_note );
+        UStoryNote* duplicate_note = ProjectAssetTools::CloneNote( *iSequencer, iSequence, iSequenceID, original_note );
 
         note_section->SetNote( duplicate_note );
     }
@@ -954,9 +974,12 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
     if( !cloned_plane )
         return;
 
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+    check( epos_sequence );
+
     FString cloned_plane_path;
     FString cloned_plane_name;
-    NamingConvention::GeneratePlaneActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_plane_path, cloned_plane_name );
+    NamingConvention::GeneratePlaneActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_plane_path, cloned_plane_name );
     cloned_plane_name = iPlaneToClone->GetActorLabel(); // As the plane actor is cloned, just keep the same name (let see when shot/camera name are a part of the plane name...)
 
     cloned_plane->SetFolderPath( *cloned_plane_path );
@@ -972,7 +995,7 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
 
     //-
 
-    cloned_plane_name = NamingConvention::GeneratePlaneTrackName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_plane );
+    cloned_plane_name = NamingConvention::GeneratePlaneTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_plane );
 
     iSequence->UnbindPossessableObjects( iPlaneBinding );
     iSequence->BindPossessableObject( iPlaneBinding, *cloned_plane, iSequencer->GetPlaybackContext() );
@@ -990,7 +1013,9 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
         if( !material )
             continue;
 
-        UMaterialInstanceConstant* new_material = iEmptyDrawings ? ProjectAssetTools::CreateMaterialAndTexture( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, material ) : ProjectAssetTools::CloneMaterialAndTexture( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, material );
+        UMaterialInstanceConstant* new_material = iEmptyDrawings
+                                                  ? ProjectAssetTools::CreateMaterialAndTexture( *iSequencer, iSequence, iSequenceID, material )
+                                                  : ProjectAssetTools::CloneMaterialAndTexture( *iSequencer, iSequence, iSequenceID, material );
         if( !new_material )
             continue;
 

@@ -58,6 +58,7 @@ public:
     // ISequencerTrackEditor interface
     virtual void OnInitialize() override;
     virtual void OnRelease() override;
+    virtual void BindCommands( TSharedRef<FUICommandList> SequencerCommandBindings ) override;
     virtual void BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder ) override;
     virtual TSharedPtr<SWidget> BuildOutlinerEditWidget( const FGuid& iObjectBinding, UMovieSceneTrack* iTrack, const FBuildEditWidgetParams& iParams ) override;
     virtual TSharedRef<ISequencerSection> MakeSectionInterface( UMovieSceneSection& ioSectionObject, UMovieSceneTrack& ioTrack, FGuid iObjectBinding ) override;
@@ -98,12 +99,6 @@ public:
 
     /** Generate a menu for takes for this section */
     virtual void AddTakesMenu( UMovieSceneSubSection* Section, FMenuBuilder& MenuBuilder )
-    {
-        checkNoEntry();
-    }
-
-    /** Edit the section's metadata */
-    virtual void EditMetaData( UMovieSceneSubSection* Section )
     {
         checkNoEntry();
     }
@@ -150,6 +145,9 @@ protected:
 
     /** Callback for determining whether the "Add Subsequence" menu entry can execute. */
     virtual bool HandleAddSubTrackMenuEntryCanExecute() const;
+
+    /** Callback for determining whether the "Add Board" menu entry is visible. */
+    bool HandleAddCinematicBoardTrackMenuEntryIsVisible();
 
     /** Whether to handle this asset being dropped onto the sequence as opposed to a specific track. */
     virtual bool CanHandleAssetAdded( UMovieSceneSequence* Sequence ) const;

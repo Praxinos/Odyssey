@@ -153,5 +153,74 @@ FEposSequenceEditorActionCallbacks::OpenAboutWindow()
     SAboutWindow::Open( root );
 }
 
+//---
+
+//static
+void
+FEposSequenceEditorActionCallbacks::MapActions( TSharedPtr<FUICommandList> ioCommandList )
+{
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoPraxinos,
+        FExecuteAction::CreateStatic( &GotoPraxinos )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoForum,
+        FExecuteAction::CreateStatic( &GotoForum )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoDiscord,
+        FExecuteAction::CreateStatic( &GotoDiscord )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoUserDocumentation,
+        FExecuteAction::CreateStatic( &GotoUserDocumentation )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoProjects,
+        FExecuteAction::CreateStatic( &GotoProjects )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().OpenAboutWindow,
+        FExecuteAction::CreateStatic( &OpenAboutWindow )
+    );
+
+    //---
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings,
+        FExecuteAction::CreateStatic( &OpenSequenceEditorSettings )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().OpenTrackEditorSettings,
+        FExecuteAction::CreateStatic( &OpenTrackEditorSettings )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().OpenNamingConventionEditorSettings,
+        FExecuteAction::CreateStatic( &OpenNamingConventionEditorSettings )
+    );
+}
+
+//static
+void
+FEposSequenceEditorActionCallbacks::UnmapActions( TSharedPtr<FUICommandList> ioCommandList )
+{
+    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPraxinos );
+    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoForum );
+    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoDiscord );
+    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
+    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoProjects );
+    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenAboutWindow );
+
+    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings );
+    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenTrackEditorSettings );
+    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenNamingConventionEditorSettings );
+}
 
 #undef LOCTEXT_NAMESPACE

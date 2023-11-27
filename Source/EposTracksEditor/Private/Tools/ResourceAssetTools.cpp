@@ -11,6 +11,7 @@
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "IMovieScenePlayer.h"
+#include "ISequencer.h"
 #include "MaterialEditingLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
@@ -76,9 +77,9 @@
 
 //static
 bool
-MasterAssetTools::GetBackgroundVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetBackgroundVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     float use_background = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor" );
 
@@ -86,25 +87,25 @@ MasterAssetTools::GetBackgroundVisibility( const IMovieScenePlayer& iPlayer, UMo
 }
 //static
 void
-MasterAssetTools::SetBackgroundVisilibity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, bool iBackgroundVisibility )
+MasterAssetTools::SetBackgroundVisilibity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iBackgroundVisibility )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor", iBackgroundVisibility ? 1.f : 0.f );
     UMaterialEditingLibrary::UpdateMaterialInstance( material );
 }
 //static
 void
-MasterAssetTools::ToggleBackgroundVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::ToggleBackgroundVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    SetBackgroundVisilibity( iPlayer, iRootSequence, !GetBackgroundVisibility( iPlayer, iRootSequence ) );
+    SetBackgroundVisilibity( iPlayer, iSequence, iSequenceID, !GetBackgroundVisibility( iPlayer, iSequence, iSequenceID ) );
 }
 
 //static
 FLinearColor
-MasterAssetTools::GetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     FLinearColor background_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "BackgroundColor" );
 
@@ -112,9 +113,9 @@ MasterAssetTools::GetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSc
 }
 //static
 void
-MasterAssetTools::SetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iBackgroundColor )
+MasterAssetTools::SetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FLinearColor iBackgroundColor )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "BackgroundColor", iBackgroundColor );
     UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor", 1.f ); // Automatically use background if changing its color
@@ -125,9 +126,9 @@ MasterAssetTools::SetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSc
 
 //static
 bool
-MasterAssetTools::GetGridVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetGridVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     float use_grid = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "UseGrid" );
 
@@ -135,25 +136,25 @@ MasterAssetTools::GetGridVisibility( const IMovieScenePlayer& iPlayer, UMovieSce
 }
 //static
 void
-MasterAssetTools::SetGridVisilibity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, bool iGridVisibility )
+MasterAssetTools::SetGridVisilibity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iGridVisibility )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", iGridVisibility ? 1.f : 0.f );
     UMaterialEditingLibrary::UpdateMaterialInstance( material );
 }
 //static
 void
-MasterAssetTools::ToggleGridVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::ToggleGridVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    SetGridVisilibity( iPlayer, iRootSequence, !GetGridVisibility( iPlayer, iRootSequence ) );
+    SetGridVisilibity( iPlayer, iSequence, iSequenceID, !GetGridVisibility( iPlayer, iSequence, iSequenceID ) );
 }
 
 //static
 FLinearColor
-MasterAssetTools::GetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     FLinearColor grid_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "GridColor" );
 
@@ -161,9 +162,9 @@ MasterAssetTools::GetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSeq
 }
 //static
 void
-MasterAssetTools::SetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iGridColor )
+MasterAssetTools::SetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FLinearColor iGridColor )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
     UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "GridColor", iGridColor );
     UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", 1.f ); // Automatically use grid if changing its color
     UMaterialEditingLibrary::UpdateMaterialInstance( material );
@@ -171,9 +172,9 @@ MasterAssetTools::SetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSeq
 
 //static
 EGridType
-MasterAssetTools::GetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     int32 grid_type = int32( UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "GridType" ) );
     grid_type = FMath::Clamp( grid_type, 0, 4 );
@@ -182,9 +183,9 @@ MasterAssetTools::GetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequ
 }
 //static
 void
-MasterAssetTools::SetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, EGridType iGridType )
+MasterAssetTools::SetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGridType iGridType )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     int32 grid_type = static_cast<int32>( iGridType );
     UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "GridType", grid_type );
@@ -196,9 +197,9 @@ MasterAssetTools::SetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequ
 
 //static
 FLinearColor
-MasterAssetTools::GetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     FLinearColor previous_drawing_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "PreviousDrawingColor" );
 
@@ -207,9 +208,9 @@ MasterAssetTools::GetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMo
 
 //static
 void
-MasterAssetTools::SetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iColor )
+MasterAssetTools::SetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FLinearColor iColor )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "PreviousDrawingColor", iColor.CopyWithNewOpacity( 1.f ) );
     UMaterialEditingLibrary::UpdateMaterialInstance( material );
@@ -217,9 +218,9 @@ MasterAssetTools::SetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMo
 
 //static
 float
-MasterAssetTools::GetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     float previous_drawing_opacity = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "PreviousDrawingOpacity" );
 
@@ -228,9 +229,9 @@ MasterAssetTools::GetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, U
 
 //static
 void
-MasterAssetTools::SetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, float iOpacity )
+MasterAssetTools::SetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, float iOpacity )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "PreviousDrawingOpacity", iOpacity );
     UMaterialEditingLibrary::UpdateMaterialInstance( material );
@@ -240,9 +241,9 @@ MasterAssetTools::SetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, U
 
 //static
 FLinearColor
-MasterAssetTools::GetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     FLinearColor next_drawing_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "NextDrawingColor" );
 
@@ -251,9 +252,9 @@ MasterAssetTools::GetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieS
 
 //static
 void
-MasterAssetTools::SetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iColor )
+MasterAssetTools::SetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FLinearColor iColor )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "NextDrawingColor", iColor.CopyWithNewOpacity( 1.f ) );
     UMaterialEditingLibrary::UpdateMaterialInstance( material );
@@ -261,9 +262,9 @@ MasterAssetTools::SetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieS
 
 //static
 float
-MasterAssetTools::GetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     float next_drawing_opacity = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "NextDrawingOpacity" );
 
@@ -272,9 +273,9 @@ MasterAssetTools::GetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovi
 
 //static
 void
-MasterAssetTools::SetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, float iOpacity )
+MasterAssetTools::SetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, float iOpacity )
 {
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iSequence, iSequenceID );
 
     UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "NextDrawingOpacity", iOpacity );
     UMaterialEditingLibrary::UpdateMaterialInstance( material );
@@ -284,45 +285,52 @@ MasterAssetTools::SetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovi
 
 //static
 UTexture2D*
-MasterAssetTools::GetMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::GetMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPackageName, FString& oAssetName )
 {
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
-
-    FString texture_path;
-    FString texture_name;
-    FString texture_pathname = NamingConvention::GetMasterTexturePathName( iPlayer, iRootSequence, texture_path, texture_name );
-
-    //---
-
-    TArray<FAssetData> asset_datas;
-    assetRegistryModule.Get().GetAssetsByPackageName( *texture_pathname, asset_datas );
-    if( !asset_datas.Num() )
+    if( UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence ) )
     {
-        assetToolsModule.Get().CreateUniqueAssetName( texture_pathname, "", oPackageName, oAssetName );
-        //FString package_path = FPackageName::GetLongPackagePath( oPackageName );
-        return nullptr;
+        FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+        FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
+
+        FString texture_path;
+        FString texture_name;
+        FString texture_pathname = NamingConvention::GetMasterTexturePathName( iPlayer, *epos_sequence, iSequenceID, texture_path, texture_name );
+
+        //---
+
+        TArray<FAssetData> asset_datas;
+        assetRegistryModule.Get().GetAssetsByPackageName( *texture_pathname, asset_datas );
+        if( !asset_datas.Num() )
+        {
+            assetToolsModule.Get().CreateUniqueAssetName( texture_pathname, "", oPackageName, oAssetName );
+            //FString package_path = FPackageName::GetLongPackagePath( oPackageName );
+            return nullptr;
+        }
+
+        oPackageName = asset_datas[0].PackageName.ToString();
+        oAssetName = asset_datas[0].AssetName.ToString();
+        return Cast<UTexture2D>( asset_datas[0].GetAsset() );
     }
 
-    oPackageName = asset_datas[0].PackageName.ToString();
-    oAssetName = asset_datas[0].AssetName.ToString();
-    return Cast<UTexture2D>( asset_datas[0].GetAsset() );
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+    return nullptr;
 }
 
 //static
 UTexture2D*
-MasterAssetTools::GetMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
     FString package_name;
     FString asset_name;
-    return GetMasterTexture2D( iPlayer, iRootSequence, package_name, asset_name );
+    return GetMasterTexture2D( iPlayer, iSequence, iSequenceID, package_name, asset_name );
 }
 
 //static
 UTexture2D*
-MasterAssetTools::CreateMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::CreateMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPackageName, FString& oAssetName )
 {
-    UTexture2D* texture_master = GetMasterTexture2D( iPlayer, iRootSequence, oPackageName, oAssetName );
+    UTexture2D* texture_master = GetMasterTexture2D( iPlayer, iSequence, iSequenceID, oPackageName, oAssetName );
     if( texture_master )
         return texture_master;
 
@@ -341,46 +349,53 @@ MasterAssetTools::CreateMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovi
 
 //static
 UMaterialInstanceConstant*
-MasterAssetTools::GetMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::GetMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPackageName, FString& oAssetName )
 {
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
-
-    FString material_path;
-    FString material_name;
-    FString material_pathname = NamingConvention::GetMasterMaterialPathName( iPlayer, iRootSequence, material_path, material_name );
-
-    //---
-
-    TArray<FAssetData> asset_datas;
-    assetRegistryModule.Get().GetAssetsByPackageName( *material_pathname, asset_datas );
-    if( !asset_datas.Num() )
+    if( UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence ) )
     {
-        assetToolsModule.Get().CreateUniqueAssetName( material_pathname, "", oPackageName, oAssetName );
-        //FString package_path = FPackageName::GetLongPackagePath( oPackageName );
-        return nullptr;
+        FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+        FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
+
+        FString material_path;
+        FString material_name;
+        FString material_pathname = NamingConvention::GetMasterMaterialPathName( iPlayer, *epos_sequence, iSequenceID, material_path, material_name );
+
+        //---
+
+        TArray<FAssetData> asset_datas;
+        assetRegistryModule.Get().GetAssetsByPackageName( *material_pathname, asset_datas );
+        if( !asset_datas.Num() )
+        {
+            assetToolsModule.Get().CreateUniqueAssetName( material_pathname, "", oPackageName, oAssetName );
+            //FString package_path = FPackageName::GetLongPackagePath( oPackageName );
+            return nullptr;
+        }
+
+        oPackageName = asset_datas[0].PackageName.ToString();
+        oAssetName = asset_datas[0].AssetName.ToString();
+
+        return Cast<UMaterialInstanceConstant>( asset_datas[0].GetAsset() );
     }
 
-    oPackageName = asset_datas[0].PackageName.ToString();
-    oAssetName = asset_datas[0].AssetName.ToString();
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
 
-    return Cast<UMaterialInstanceConstant>( asset_datas[0].GetAsset() );
+    return nullptr;
 }
 
 //static
 UMaterialInstanceConstant*
-MasterAssetTools::GetMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
     FString package_name;
     FString asset_name;
-    return GetMasterMaterial( iPlayer, iRootSequence, package_name, asset_name );
+    return GetMasterMaterial( iPlayer, iSequence, iSequenceID, package_name, asset_name );
 }
 
 //static
 UMaterialInstanceConstant*
-MasterAssetTools::CreateMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::CreateMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName )
 {
-    UMaterialInstanceConstant* material_master = GetMasterMaterial( iPlayer, iRootSequence, oPackageName, oAssetName );
+    UMaterialInstanceConstant* material_master = GetMasterMaterial( iPlayer, iSequence, iSequenceID, oPackageName, oAssetName );
     if( material_master )
         return material_master;
 
@@ -448,139 +463,167 @@ ProjectAssetTools::GetTexture2D( UMovieSceneSequence* iSequence, UMaterialInstan
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CreateMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPackageName, FString& oAssetName )
 {
-    FString package_name_tmp;
-    FString asset_name_tmp;
-    UTexture2D* master_texture = MasterAssetTools::CreateMasterTexture2D( iPlayer, iRootSequence, package_name_tmp, asset_name_tmp );
-    if( !master_texture )
-        return nullptr;
+    if( UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence ) )
+    {
+        FString package_name_tmp;
+        FString asset_name_tmp;
+        UTexture2D* master_texture = MasterAssetTools::CreateMasterTexture2D( iPlayer, iSequence, iSequenceID, package_name_tmp, asset_name_tmp );
+        if( !master_texture )
+            return nullptr;
 
-    UMaterialInstanceConstant* master_material = MasterAssetTools::CreateMasterMaterial( iPlayer, iRootSequence, master_texture, package_name_tmp, asset_name_tmp );
-    if( !master_material )
-        return nullptr;
+        UMaterialInstanceConstant* master_material = MasterAssetTools::CreateMasterMaterial( iPlayer, iSequence, iSequenceID, master_texture, package_name_tmp, asset_name_tmp );
+        if( !master_material )
+            return nullptr;
 
-    //---
+        //---
 
-    FString material_path;
-    FString material_name;
-    FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iPlayer, iRootSequence, iSequence, material_path, material_name );
+        FString material_path;
+        FString material_name;
+        FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iPlayer, *epos_sequence, iSequenceID, material_path, material_name );
 
-    //---
+        //---
 
-    UMaterialInstanceConstantFactoryNew* factory = NewObject<UMaterialInstanceConstantFactoryNew>();
-    factory->InitialParent = master_material;
+        UMaterialInstanceConstantFactoryNew* factory = NewObject<UMaterialInstanceConstantFactoryNew>();
+        factory->InitialParent = master_material;
 
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    UObject* new_object = assetToolsModule.Get().CreateAsset( material_name, material_path, UMaterialInstanceConstant::StaticClass(), factory );
+        FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+        UObject* new_object = assetToolsModule.Get().CreateAsset( material_name, material_path, UMaterialInstanceConstant::StaticClass(), factory );
 
-    oPackageName = material_pathname;
-    oAssetName = material_name;
+        oPackageName = material_pathname;
+        oAssetName = material_name;
 
-    return Cast<UMaterialInstanceConstant>( new_object );
+        return Cast<UMaterialInstanceConstant>( new_object );
+    }
+
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+    return nullptr;
 }
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CloneMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CloneMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName )
 {
-    FString material_path;
-    FString material_name;
-    FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iPlayer, iRootSequence, iSequence, material_path, material_name );
+    if( UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence ) )
+    {
+        FString material_path;
+        FString material_name;
+        FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iPlayer, *epos_sequence, iSequenceID, material_path, material_name );
 
-    //---
+        //---
 
-    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iMaterialToClone, material_pathname );
+        UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iMaterialToClone, material_pathname );
 
-    oPackageName = material_pathname;
-    oAssetName = material_name;
+        oPackageName = material_pathname;
+        oAssetName = material_name;
 
-    return Cast<UMaterialInstanceConstant>( new_object );
+        return Cast<UMaterialInstanceConstant>( new_object );
+    }
+
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+    return nullptr;
 }
 
 //static
 UTexture2D*
-ProjectAssetTools::CreateTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CreateTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName )
 {
-    UTexture2D* texture_master = MasterAssetTools::GetMasterTexture2D( iPlayer, iRootSequence ); // The master texture always exists as CreateMaterial() should be called before CreateTexture2D() (as it takes a material parameter)
-    if( !texture_master )
-        return nullptr;
-
-    FString texture_path;
-    FString texture_name;
-    FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iPlayer, iRootSequence, iSequence, iMaterial, texture_path, texture_name );
-
-    //---
-
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    UObject* new_object = assetToolsModule.Get().CreateAsset( texture_name, texture_path, UTexture2D::StaticClass(), nullptr );
-
-    UTexture2D* new_texture = Cast<UTexture2D>( new_object );
-
-    oPackageName = texture_pathname;
-    oAssetName = texture_name;
-
-    //---
-
-    // Init texture like in UTexture2DFactoryNew
-    new_texture->Source.Init2DWithMipChain( iTextureSize.X, iTextureSize.Y, TSF_BGRA8 );
-
-    if( new_texture->Source.IsValid() )
+    if( UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence ) )
     {
-        TArray64<uint8> TexturePixels;
-        new_texture->Source.GetMipData( TexturePixels, 0 );
+        UTexture2D* texture_master = MasterAssetTools::GetMasterTexture2D( iPlayer, iSequence, iSequenceID ); // The master texture always exists as CreateMaterial() should be called before CreateTexture2D() (as it takes a material parameter)
+        if( !texture_master )
+            return nullptr;
 
-        uint8* DestData = new_texture->Source.LockMip( 0 );
-        FMemory::Memset( DestData, 0, TexturePixels.Num() * sizeof( uint8 ) );
-        new_texture->Source.UnlockMip( 0 );
+        FString texture_path;
+        FString texture_name;
+        FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iPlayer, *epos_sequence, iSequenceID, iMaterial, texture_path, texture_name );
 
-        // With 5.1, the PostEditChange() won't set texture mip settings to TMGS_NoMipmaps if it is not a power of 2 texture
-        // Thus, hardcode it here
-        // This this done after all previous stuff like in other files in ue
-        new_texture->MipGenSettings = TMGS_NoMipmaps;
-        // This function should be callable (instead of the above affectation) but it sets to TMGS_NoMipmaps only if
-        // - LODGroup == TEXTUREGROUP_ColorLookupTable
-        // - MipGenSettings != TMGS_NoMipmaps || SRGB != false
-        // So, I don't know if I need to change LODGroup before
-        // new_texture->ValidateSettingsAfterImportOrEdit();
+        //---
 
-        new_texture->PostEditChange();
+        FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+        UObject* new_object = assetToolsModule.Get().CreateAsset( texture_name, texture_path, UTexture2D::StaticClass(), nullptr );
+
+        UTexture2D* new_texture = Cast<UTexture2D>( new_object );
+
+        oPackageName = texture_pathname;
+        oAssetName = texture_name;
+
+        //---
+
+        // Init texture like in UTexture2DFactoryNew
+        new_texture->Source.Init2DWithMipChain( iTextureSize.X, iTextureSize.Y, TSF_BGRA8 );
+
+        if( new_texture->Source.IsValid() )
+        {
+            TArray64<uint8> TexturePixels;
+            new_texture->Source.GetMipData( TexturePixels, 0 );
+
+            uint8* DestData = new_texture->Source.LockMip( 0 );
+            FMemory::Memset( DestData, 0, TexturePixels.Num() * sizeof( uint8 ) );
+            new_texture->Source.UnlockMip( 0 );
+
+            // With 5.1, the PostEditChange() won't set texture mip settings to TMGS_NoMipmaps if it is not a power of 2 texture
+            // Thus, hardcode it here
+            // This this done after all previous stuff like in other files in ue
+            new_texture->MipGenSettings = TMGS_NoMipmaps;
+            // This function should be callable (instead of the above affectation) but it sets to TMGS_NoMipmaps only if
+            // - LODGroup == TEXTUREGROUP_ColorLookupTable
+            // - MipGenSettings != TMGS_NoMipmaps || SRGB != false
+            // So, I don't know if I need to change LODGroup before
+            // new_texture->ValidateSettingsAfterImportOrEdit();
+
+            new_texture->PostEditChange();
+        }
+
+        return new_texture;
     }
 
-    return new_texture;
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+    return nullptr;
 }
 
 //static
 UTexture*
-ProjectAssetTools::CloneTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CloneTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName )
 {
-    FString texture_path;
-    FString texture_name;
-    FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iPlayer, iRootSequence, iSequence, iMaterial, texture_path, texture_name );
+    if( UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence ) )
+    {
+        FString texture_path;
+        FString texture_name;
+        FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iPlayer, *epos_sequence, iSequenceID, iMaterial, texture_path, texture_name );
 
-    //---
+        //---
 
-    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iTextureToClone, texture_pathname );
+        UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iTextureToClone, texture_pathname );
 
-    oPackageName = texture_pathname;
-    oAssetName = texture_name;
+        oPackageName = texture_pathname;
+        oAssetName = texture_name;
 
-    return Cast<UTexture>( new_object );
+        return Cast<UTexture>( new_object );
+    }
+
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+    return nullptr;
 }
 
 //---
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, FIntPoint iTextureSize )
+ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FIntPoint iTextureSize )
 {
     FString package_name;
     FString asset_name;
-    UMaterialInstanceConstant* new_material = CreateMaterial( iPlayer, iRootSequence, iSequence, package_name, asset_name );
+    UMaterialInstanceConstant* new_material = CreateMaterial( iPlayer, iSequence, iSequenceID, package_name, asset_name );
     if( !new_material )
         return nullptr;
 
-    UTexture2D* new_texture = CreateTexture2D( iPlayer, iRootSequence, iSequence, new_material, iTextureSize, package_name, asset_name );
+    UTexture2D* new_texture = CreateTexture2D( iPlayer, iSequence, iSequenceID, new_material, iTextureSize, package_name, asset_name );
     if( !new_texture )
     {
         UEditorAssetLibrary::DeleteLoadedAsset( new_material );
@@ -594,11 +637,11 @@ ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, U
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialTemplate )
+ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInstance* iMaterialTemplate )
 {
     FString package_name;
     FString asset_name;
-    UMaterialInstanceConstant* new_material = CreateMaterial( iPlayer, iRootSequence, iSequence, package_name, asset_name );
+    UMaterialInstanceConstant* new_material = CreateMaterial( iPlayer, iSequence, iSequenceID, package_name, asset_name );
     if( !new_material )
         return nullptr;
 
@@ -606,7 +649,7 @@ ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, U
     iMaterialTemplate->GetTextureParameterValue( TEXT( "DrawingTexture" ), texture );
     FIntPoint texture_size( texture->GetSurfaceWidth(), texture->GetSurfaceHeight() ); // For UTexture2D, GetSurfaceWidth() returns GetSizeX() which returns an int32, so it should be ok
 
-    UTexture2D* new_texture = CreateTexture2D( iPlayer, iRootSequence, iSequence, new_material, texture_size, package_name, asset_name );
+    UTexture2D* new_texture = CreateTexture2D( iPlayer, iSequence, iSequenceID, new_material, texture_size, package_name, asset_name );
     if( !new_texture )
     {
         UEditorAssetLibrary::DeleteLoadedAsset( new_material );
@@ -620,11 +663,11 @@ ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, U
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UTexture2D* iTexture )
+ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UTexture2D* iTexture )
 {
     FString package_name;
     FString asset_name;
-    UMaterialInstanceConstant* new_material = CreateMaterial( iPlayer, iRootSequence, iSequence, package_name, asset_name );
+    UMaterialInstanceConstant* new_material = CreateMaterial( iPlayer, iSequence, iSequenceID, package_name, asset_name );
     if( !new_material )
         return nullptr;
 
@@ -647,18 +690,18 @@ ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, U
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CloneMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone )
+ProjectAssetTools::CloneMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInstance* iMaterialToClone )
 {
     FString package_name;
     FString asset_name;
-    UMaterialInstanceConstant* new_material = CloneMaterial( iPlayer, iRootSequence, iSequence, iMaterialToClone, package_name, asset_name );
+    UMaterialInstanceConstant* new_material = CloneMaterial( iPlayer, iSequence, iSequenceID, iMaterialToClone, package_name, asset_name );
     if( !new_material )
         return nullptr;
 
     UTexture* texture_to_clone;
     iMaterialToClone->GetTextureParameterValue( TEXT( "DrawingTexture" ), texture_to_clone );
 
-    UTexture* new_texture = CloneTexture( iPlayer, iRootSequence, iSequence, new_material, texture_to_clone, package_name, asset_name );
+    UTexture* new_texture = CloneTexture( iPlayer, iSequence, iSequenceID, new_material, texture_to_clone, package_name, asset_name );
     if( !new_texture )
     {
         UEditorAssetLibrary::DeleteLoadedAsset( new_material );
@@ -674,39 +717,53 @@ ProjectAssetTools::CloneMaterialAndTexture( const IMovieScenePlayer& iPlayer, UM
 
 //static
 UStoryNote*
-ProjectAssetTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence )
+ProjectAssetTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    FString note_path;
-    FString note_name;
-    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, iRootSequence, iSequence, note_path, note_name );
+    if( UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence ) )
+    {
+        FString note_path;
+        FString note_name;
+        FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, *epos_sequence, iSequenceID, note_path, note_name );
 
-    //---
+        //---
 
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    UObject* new_object = assetToolsModule.Get().CreateAsset( note_name, note_path, UStoryNote::StaticClass(), nullptr );
-    UStoryNote* new_note = Cast<UStoryNote>( new_object );
-    check( new_note );
+        FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+        UObject* new_object = assetToolsModule.Get().CreateAsset( note_name, note_path, UStoryNote::StaticClass(), nullptr );
+        UStoryNote* new_note = Cast<UStoryNote>( new_object );
+        check( new_note );
 
-    new_note->Text = TEXT( "Write a note here" ); // default text
+        new_note->Text = TEXT( "Write a note here" ); // default text
 
-    return new_note;
+        return new_note;
+    }
+
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+    return nullptr;
 }
 
 //static
 UStoryNote*
-ProjectAssetTools::CloneNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone )
+ProjectAssetTools::CloneNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UStoryNote* iNoteToClone )
 {
-    FString note_path;
-    FString note_name;
-    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, iRootSequence, iSequence, note_path, note_name );
+    if( UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence ) )
+    {
+        FString note_path;
+        FString note_name;
+        FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, *epos_sequence, iSequenceID, note_path, note_name );
 
-    //---
+        //---
 
-    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iNoteToClone, note_pathname );
+        UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iNoteToClone, note_pathname );
 
-    UStoryNote* new_note = Cast<UStoryNote>( new_object );
+        UStoryNote* new_note = Cast<UStoryNote>( new_object );
 
-    return new_note;
+        return new_note;
+    }
+
+    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+    return nullptr;
 }
 
 

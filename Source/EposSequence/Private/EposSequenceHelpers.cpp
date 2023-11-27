@@ -42,6 +42,40 @@
 
 #define LOCTEXT_NAMESPACE "EposSequenceHelpers"
 
+
+//static
+UMovieSceneSequence*
+BoardSequenceHelpers::FindSequenceOfSubSection( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceID& oSequenceID )
+{
+    oSequenceID = MovieSceneSequenceID::Invalid;
+
+    const FMovieSceneSequenceHierarchy* hierarchy = iPlayer.GetEvaluationTemplate().GetHierarchy();
+    if( !hierarchy )
+        return nullptr;
+
+    FMovieSceneSequenceID subsequence_id = MovieSceneSequenceID::Invalid;
+    for( const TTuple<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& Pair : hierarchy->AllSubSequenceData() )
+    {
+        if( Pair.Value.DeterministicSequenceID == iSubSection.GetSequenceID() )
+        {
+            subsequence_id = Pair.Key;
+            break;
+        }
+    }
+
+    const FMovieSceneSequenceHierarchyNode* node = hierarchy->FindNode( subsequence_id );
+    if( !node )
+        return nullptr;
+
+    oSequenceID = node->ParentID;
+
+    if( oSequenceID == MovieSceneSequenceID::Root )
+        return iPlayer.GetEvaluationTemplate().GetRootSequence();
+    else
+        return hierarchy->FindSubSequence( oSequenceID );
+
+}
+
 BoardSequenceHelpers::FInnerSequenceResult
 BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceId )
 {
@@ -329,6 +363,91 @@ ShotSequenceHelpers::GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneS
     }
 }
 
+
+//static
+FQualifiedFrameTime
+EposSequenceHelpers::GetIntermediateTime( IMovieScenePlayer& iPlayer, FQualifiedFrameTime iGlobalTime, FMovieSceneSequenceIDRef iToSequenceId )
+{
+    const FMovieSceneSequenceHierarchy* hierarchy = iPlayer.GetEvaluationTemplate().GetHierarchy();
+    if( !hierarchy )
+        return FQualifiedFrameTime();
+
+    if( iToSequenceId == MovieSceneSequenceID::Root )
+        return iGlobalTime;
+
+    const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iToSequenceId );
+    if( !subdata )
+        return FQualifiedFrameTime();
+
+    const FFrameTime root_time = ConvertFrameTime( iGlobalTime.Time, iGlobalTime.Rate, subdata->TickResolution );
+
+    return FQualifiedFrameTime( root_time * subdata->RootToSequenceTransform, subdata->TickResolution );
+}
+
+//static
+UEposMovieSceneSequence*
+EposSequenceHelpers::GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceId )
+{
+    FMovieSceneSequenceID root_sequence_id;
+    return GetRootEposSequence( iPlayer, iSequenceId, root_sequence_id );
+}
+
+//static
+UEposMovieSceneSequence*
+EposSequenceHelpers::GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceId, FMovieSceneSequenceID& oRootSequenceId )
+{
+    oRootSequenceId = MovieSceneSequenceID::Invalid;
+
+    if( iSequenceId == MovieSceneSequenceID::Root )
+    {
+        oRootSequenceId = MovieSceneSequenceID::Root;
+        return Cast<UEposMovieSceneSequence>( iPlayer.GetEvaluationTemplate().GetRootSequence() );
+    }
+
+    const FMovieSceneSequenceHierarchy* hierarchy = iPlayer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iPlayer.GetEvaluationTemplate().GetCompiledDataID() );
+    if( !hierarchy )
+        return nullptr;
+
+    TArray<FMovieSceneSequenceID> sequence_ids;
+    TArray<UEposMovieSceneSequence*> sequences;
+
+    // If the given sequence is not an UEposMovieSceneSequence, just return
+    UMovieSceneSequence* sequence = iPlayer.GetEvaluationTemplate().GetSequence( iSequenceId );
+    if( !sequence || !sequence->IsA<UEposMovieSceneSequence>() )
+        return nullptr;
+
+    sequence_ids.Add( iSequenceId );
+    sequences.Add( CastChecked<UEposMovieSceneSequence>( sequence ) );
+
+    const FMovieSceneSequenceHierarchyNode* hierarchyNode = hierarchy->FindNode( iSequenceId );
+    while( hierarchyNode && hierarchyNode->ParentID.IsValid() )
+    {
+        if( hierarchyNode->ParentID == MovieSceneSequenceID::Root )
+        {
+            UMovieSceneSequence* player_root_sequence = iPlayer.GetEvaluationTemplate().GetRootSequence();
+            if( Cast<UEposMovieSceneSequence>( player_root_sequence ) )
+            {
+                sequence_ids.Add( MovieSceneSequenceID::Root );
+                sequences.Add( CastChecked<UEposMovieSceneSequence>( player_root_sequence ) );
+            }
+        }
+        else
+        {
+            UMovieSceneSequence* parent_sequence = iPlayer.GetEvaluationTemplate().GetSequence( hierarchyNode->ParentID );
+            if( Cast<UEposMovieSceneSequence>( parent_sequence ) )
+            {
+                sequence_ids.Add( hierarchyNode->ParentID );
+                sequences.Add( CastChecked<UEposMovieSceneSequence>( parent_sequence ) );
+            }
+        }
+        hierarchyNode = hierarchy->FindNode( hierarchyNode->ParentID );
+    }
+
+    oRootSequenceId = sequence_ids.Num() ? sequence_ids.Last() : MovieSceneSequenceID::Invalid;
+
+    return sequences.Num() ? sequences.Last() : nullptr;
+}
+
 //static
 TArray<UStoryNote*>
 EposSequenceHelpers::GetNotesRecursive( UMovieSceneSequence* iSequence, FFrameNumber iFrameNumber )
@@ -352,44 +471,37 @@ EposSequenceHelpers::GetNotesRecursive( UMovieSceneSequence* iSequence, FFrameNu
     //---
 
     using FTrackAndSectionInfo = TTuple<UMovieSceneTrack*, UMovieSceneSection*>;
-    using FSequenceFrameInfo = TTuple<FMovieSceneSequenceID, TArray<FTrackAndSectionInfo>>;
 
     struct FSequenceNoteVisitor
         : UE::MovieScene::ISequenceVisitor
     {
         void SortInfo()
         {
-            for( auto& info : mInfo )
-            {
-                TArrayView<FTrackAndSectionInfo> track_and_section_view( info.Get<1>() );
+                mTrackAndSectionInfo.StableSort( []( const FTrackAndSectionInfo& iA, const FTrackAndSectionInfo& iB )
+                                                 {
+                                                     UMovieSceneSection* sectionA = iA.Get<1>();
+                                                     UMovieSceneSection* sectionB = iB.Get<1>();
 
-                track_and_section_view.StableSort( []( const FTrackAndSectionInfo& iA, const FTrackAndSectionInfo& iB )
-                                                   {
-                                                       UMovieSceneSection* sectionA = iA.Get<1>();
-                                                       UMovieSceneSection* sectionB = iB.Get<1>();
+                                                     TRangeBound<FFrameNumber> LowerBoundA = sectionA->GetRange().GetLowerBound();
+                                                     return TRangeBound<FFrameNumber>::MinLower( LowerBoundA, sectionB->GetRange().GetLowerBound() ) == LowerBoundA;
+                                                 } );
+                mTrackAndSectionInfo.StableSort( []( const FTrackAndSectionInfo& iA, const FTrackAndSectionInfo& iB )
+                                                 {
+                                                     UMovieSceneSection* sectionA = iA.Get<1>();
+                                                     UMovieSceneSection* sectionB = iB.Get<1>();
 
-                                                       TRangeBound<FFrameNumber> LowerBoundA = sectionA->GetRange().GetLowerBound();
-                                                       return TRangeBound<FFrameNumber>::MinLower( LowerBoundA, sectionB->GetRange().GetLowerBound() ) == LowerBoundA;
-                                                   } );
-                track_and_section_view.StableSort( []( const FTrackAndSectionInfo& iA, const FTrackAndSectionInfo& iB )
-                                                   {
-                                                       UMovieSceneSection* sectionA = iA.Get<1>();
-                                                       UMovieSceneSection* sectionB = iB.Get<1>();
-
-                                                       return sectionA->GetRowIndex() < sectionB->GetRowIndex();
-                                                   } );
+                                                     return sectionA->GetRowIndex() < sectionB->GetRowIndex();
+                                                 } );
 
 #if WITH_EDITORONLY_DATA
-                track_and_section_view.StableSort( []( const FTrackAndSectionInfo& iA, const FTrackAndSectionInfo& iB )
-                                                   {
-                                                       UMovieSceneTrack* trackA = iA.Get<0>();
-                                                       UMovieSceneTrack* trackB = iB.Get<0>();
+                mTrackAndSectionInfo.StableSort( []( const FTrackAndSectionInfo& iA, const FTrackAndSectionInfo& iB )
+                                                 {
+                                                     UMovieSceneTrack* trackA = iA.Get<0>();
+                                                     UMovieSceneTrack* trackB = iB.Get<0>();
 
-                                                       return trackA->GetSortingOrder() < trackB->GetSortingOrder();
-                                                   } );
+                                                     return trackA->GetSortingOrder() < trackB->GetSortingOrder();
+                                                 } );
 #endif
-            }
-
         }
 
         virtual void VisitSection( UMovieSceneTrack* iTrack, UMovieSceneSection* iSection, const FGuid& iGuid, const UE::MovieScene::FSubSequenceSpace& iLocalSpace )
@@ -402,29 +514,15 @@ EposSequenceHelpers::GetNotesRecursive( UMovieSceneSequence* iSequence, FFrameNu
             if( !iSection->IsTimeWithinSection( local_reference_time.GetFrame() ) )
                 return;
 
-            FMovieSceneSequenceID sequence_id_to_insert = iLocalSpace.SequenceID;
-            FSequenceFrameInfo* sequence_frame_info = mInfo.FindByPredicate( [sequence_id_to_insert]( const FSequenceFrameInfo& iInfo )
-                                                                             {
-                                                                                 return iInfo.Get<0>() == sequence_id_to_insert;
-                                                                             } );
-            if( sequence_frame_info )
-            {
-                FTrackAndSectionInfo track_and_section( iTrack, iSection );
-                sequence_frame_info->Get<1>().Add( track_and_section );
-            }
-            else
-            {
-                FTrackAndSectionInfo track_and_section( iTrack, iSection );
-                FSequenceFrameInfo info( sequence_id_to_insert, TArray<FTrackAndSectionInfo>( { track_and_section } ) );
-                mInfo.Insert( info, 0 );
-            }
+            FTrackAndSectionInfo track_and_section( iTrack, iSection );
+            mTrackAndSectionInfo.Add( track_and_section );
 
             SortInfo();
         }
 
         FFrameNumber mReferenceFrame; // In tick resolution
 
-        TArray<FSequenceFrameInfo> mInfo;
+        TSet<FTrackAndSectionInfo> mTrackAndSectionInfo;
     };
 
 
@@ -439,15 +537,12 @@ EposSequenceHelpers::GetNotesRecursive( UMovieSceneSequence* iSequence, FFrameNu
     // Visit all notes
     VisitSequence( iSequence, params, note_visitor );
 
-    for( auto info : note_visitor.mInfo )
+    for( auto track_and_section : note_visitor.mTrackAndSectionInfo )
     {
-        for( auto track_and_section : info.Get<1>() )
-        {
-            UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( track_and_section.Get<1>() );
-            check( note_section && note_section->GetNote() );
+        UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( track_and_section.Get<1>() );
+        check( note_section && note_section->GetNote() );
 
-            notes.Add( note_section->GetNote() );
-        }
+        notes.Add( note_section->GetNote() );
     }
 
     return notes;

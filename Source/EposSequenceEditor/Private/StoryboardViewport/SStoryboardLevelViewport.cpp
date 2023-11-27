@@ -216,7 +216,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     TypeInterfaceProxy = MakeShareable( new FTypeInterfaceProxy );
 
-    FEposSequenceEditorToolkit::OnOpened().AddSP(this, &SStoryboardLevelViewport::OnEditorOpened);
+    FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().AddSP( this, &SStoryboardLevelViewport::OnSequencerChanged );
 
     FLinearColor Gray(.3f, .3f, .3f, 1.f);
 
@@ -695,10 +695,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         ]
     ];
 
-    FEposSequenceEditorToolkit::IterateOpenToolkits([&](FEposSequenceEditorToolkit& Toolkit){
-        Setup(Toolkit);
-        return false;
-    });
+    OnSequencerChanged();
 
     //---
 
@@ -742,12 +739,12 @@ TSharedPtr<SLevelViewport> SStoryboardLevelViewport::GetLevelViewport() const
 
 int32 SStoryboardLevelViewport::GetVisibleWidgetIndex() const
 {
-    return CurrentToolkit.IsValid() ? 0 : 1;
+    return mCurrentSquencer.IsValid() ? 0 : 1;
 }
 
 EVisibility SStoryboardLevelViewport::GetControlsVisibility() const
 {
-    return CurrentToolkit.IsValid() ? EVisibility::Visible : EVisibility::Collapsed;
+    return mCurrentSquencer.IsValid() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 TOptional<double> SStoryboardLevelViewport::GetMinTime() const
@@ -1045,12 +1042,8 @@ FReply SStoryboardLevelViewport::OnKeyDown( const FGeometry& MyGeometry, const F
     return FReply::Unhandled();
 }
 
-void SStoryboardLevelViewport::Setup(FEposSequenceEditorToolkit& NewToolkit)
+void SStoryboardLevelViewport::Setup()
 {
-    CurrentToolkit = StaticCastSharedRef<FEposSequenceEditorToolkit>(NewToolkit.AsShared());
-
-    NewToolkit.OnClosed().AddSP(this, &SStoryboardLevelViewport::OnEditorClosed);
-
     ISequencer* Sequencer = GetSequencer();
     if (Sequencer)
     {
@@ -1076,44 +1069,32 @@ void SStoryboardLevelViewport::Setup(FEposSequenceEditorToolkit& NewToolkit)
 
 void SStoryboardLevelViewport::CleanUp()
 {
-    TransportControlsContainer->SetContent(SNullWidget::NullWidget);
-    TimeRangeContainer->SetContent(SNullWidget::NullWidget);
+    if( TransportControlsContainer )
+        TransportControlsContainer->SetContent(SNullWidget::NullWidget);
+    if( TimeRangeContainer )
+        TimeRangeContainer->SetContent(SNullWidget::NullWidget);
 
 }
 
-void SStoryboardLevelViewport::OnEditorOpened(FEposSequenceEditorToolkit& Toolkit)
-{
-    if (!CurrentToolkit.IsValid())
-    {
-        Setup(Toolkit);
-    }
-}
-
-void SStoryboardLevelViewport::OnEditorClosed()
+void SStoryboardLevelViewport::OnSequencerChanged()
 {
     CleanUp();
+    mCurrentSquencer = nullptr;
 
-    FEposSequenceEditorToolkit* NewToolkit = nullptr;
-    FEposSequenceEditorToolkit::IterateOpenToolkits([&](FEposSequenceEditorToolkit& Toolkit){
-        NewToolkit = &Toolkit;
-        return false;
-    });
+    //---
 
-    if (NewToolkit)
-    {
-        Setup(*NewToolkit);
-    }
+    TArray<TWeakPtr<ISequencer>> sequencers = FLevelEditorSequencerIntegration::Get().GetSequencers();
+    if( !sequencers.Num() )
+        return;
+
+    mCurrentSquencer = sequencers.Last();
+
+    Setup();
 }
 
 ISequencer* SStoryboardLevelViewport::GetSequencer() const
 {
-    TSharedPtr<FEposSequenceEditorToolkit> Toolkit = CurrentToolkit.Pin();
-    if (Toolkit.IsValid())
-    {
-        return Toolkit->GetSequencer().Get();
-    }
-
-    return nullptr;
+    return mCurrentSquencer.Pin().Get();
 }
 
 void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)

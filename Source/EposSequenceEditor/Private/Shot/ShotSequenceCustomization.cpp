@@ -4,13 +4,18 @@
 #include "Shot/ShotSequenceCustomization.h"
 
 #include "CineCameraActor.h"
+#include "ILevelEditor.h"
+#include "LevelEditor.h"
 
+#include "EposNamingConventionBlueprintLibrary.h"
+#include "EposSequenceEditorBlueprintLibrary.h"
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceToolbarHelpers.h"
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
 #include "Styles/EposTracksEditorStyle.h"
+#include "ToolkitHelpers.h"
 #include "Tools/EposSequenceTools.h"
 #include "Tools/LighttableTools.h"
 
@@ -41,7 +46,14 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FShotSequenceCustomization::OnPrePropertyChanged );
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw( this, &FShotSequenceCustomization::OnPostPropertyChanged );
 
-    ProcessCommands( mSequencer->GetCommandBindings(), kMap );
+    mShotCommandList = MakeShared<FUICommandList>();
+
+    BindCommands( mShotCommandList );
+
+    mSequencer->GetCommandBindings()->Append( mShotCommandList.ToSharedRef() );
+
+    TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" ).GetFirstLevelEditor();
+    levelEditor->AppendCommands( mShotCommandList.ToSharedRef() );
 
     //---
 
@@ -61,6 +73,13 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     customization.OnActorsDrop.BindRaw( this, &FShotSequenceCustomization::OnSequencerActorsDrop );
 
     ioBuilder.AddCustomization( customization );
+
+    UEposSequenceEditorBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
+    UEposNamingConventionBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
+
+    mSequencerActorAddedDelegates = mSequencer->OnActorAddedToSequencer().AddStatic( &ToolkitHelpers::HandleActorAddedToSequencer, mSequencer );
+    mSequencerActivatedDelegates = mSequencer->OnActivateSequence().AddStatic( &ToolkitHelpers::HandleOnActivateSequence, mSequencer );
+    mSequencerSelectionSectionChangedDelegates = mSequencer->GetSelectionChangedSections().AddStatic( &ToolkitHelpers::HandleOnSelectionChangedSections, mSequencer );
 }
 
 void
@@ -72,12 +91,14 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll( this );
     FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll( this );
 
+    mShotCommandList = nullptr;
+
     if( mSequencer )
     {
-        ProcessCommands( mSequencer->GetCommandBindings(), kUnmap );
+        mSequencer->OnActorAddedToSequencer().Remove( mSequencerActorAddedDelegates );
+        mSequencer->OnActivateSequence().Remove( mSequencerActivatedDelegates );
+        mSequencer->GetSelectionChangedSections().Remove( mSequencerSelectionSectionChangedDelegates );
     }
-
-    //---
 
     mSequencer = nullptr;
     mShotSequence = nullptr;
@@ -97,137 +118,118 @@ FShotSequenceCustomization::OnSequencerClosed( TSharedRef<ISequencer> iSequencer
 //---
 
 void
-FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap )
+FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandList )
 {
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreateCamera( mSequencer ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanCreateCamera( mSequencer ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime );
+    FEposSequenceEditorActionCallbacks::MapActions( ioCommandList );
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            // It doesn't work due to strange stuff between FMovieSceneSequenceID and FMovieSceneSequenceIDRef ...
-            //FExecuteAction::CreateStatic( &ShotSequenceTools::SnapCameraToViewport, mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID() ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanSnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StepToNextShot,
+        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToNextShot, mSequencer )
+    );
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::PilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanPilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::EjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanEjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoNextCameraPosition,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoNextCameraPosition );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StepToPreviousShot,
+        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToPreviousShot, mSequencer )
+    );
 
     //---
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanCreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreateCamera( mSequencer ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanCreateCamera( mSequencer ); } )
+    );
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
-            FExecuteAction::CreateLambda( [this]()
-                                          {
-                                              TArray<FGuid> plane_bindings;
-                                              int32 plane_count = ShotSequenceTools::GetAttachedPlanes( mSequencer, nullptr, &plane_bindings );
-                                              if( plane_count != 1 )
-                                                  return;
-                                              ShotSequenceTools::DetachPlane( mSequencer, plane_bindings[0] );
-                                          } ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) == 1; } ),
-            FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) <= 1; } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        // It doesn't work due to strange stuff between FMovieSceneSequenceID and FMovieSceneSequenceIDRef ...
+        //FExecuteAction::CreateStatic( &ShotSequenceTools::SnapCameraToViewport, mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID() ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanSnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::PilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanPilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::EjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanEjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition,
+        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoNextCameraPosition,
+        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
 
     //---
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime,
-            FExecuteAction::CreateLambda( [this]()
-                                          {
-                                              TArray<FGuid> plane_bindings;
-                                              int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
-                                              if( plane_count != 1 )
-                                                  return;
-                                              ShotSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                          } ),
-            FCanExecuteAction::CreateLambda( [this]()
-                                             {
-                                                 TArray<FGuid> plane_bindings;
-                                                 int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
-                                                 if( plane_count != 1 )
-                                                     return false;
-                                                 return ShotSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                             } ),
-            FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) <= 1; } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
+        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanCreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoPreviousDrawing,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPreviousDrawing );
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
+        FExecuteAction::CreateLambda( [this]()
+                                        {
+                                            TArray<FGuid> plane_bindings;
+                                            int32 plane_count = ShotSequenceTools::GetAttachedPlanes( mSequencer, nullptr, &plane_bindings );
+                                            if( plane_count != 1 )
+                                                return;
+                                            ShotSequenceTools::DetachPlane( mSequencer, plane_bindings[0] );
+                                        } ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) == 1; } ),
+        FIsActionChecked(),
+        FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) <= 1; } )
+    );
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoNextDrawing,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoNextDrawing );
+    //---
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime,
+        FExecuteAction::CreateLambda( [this]()
+                                        {
+                                            TArray<FGuid> plane_bindings;
+                                            int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
+                                            if( plane_count != 1 )
+                                                return;
+                                            ShotSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                        } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                            {
+                                                TArray<FGuid> plane_bindings;
+                                                int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
+                                                if( plane_count != 1 )
+                                                    return false;
+                                                return ShotSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                            } ),
+        FIsActionChecked(),
+        FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) <= 1; } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoPreviousDrawing,
+        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoNextDrawing,
+        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
 }
 
 //---

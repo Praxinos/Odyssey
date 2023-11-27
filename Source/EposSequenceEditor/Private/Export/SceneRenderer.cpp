@@ -83,8 +83,7 @@ FSceneRenderer::PreDraw()
 
     //SavedPlaybackStatus = sequencer->GetPlaybackStatus();
     sequencer->SetPlaybackStatus( EMovieScenePlayerStatus::Jumping );
-    sequencer->SetLocalTimeDirectly( mCurrentPanel->GlobalFrame );
-    //sequencer->SetLocalTimeDirectly( mCurrentPanel->GlobalFrame * sequencer->GetLocalTime().Rate );
+    sequencer->SetGlobalTime( mCurrentPanel->GlobalFrame );
     sequencer->ForceEvaluate();
 }
 
@@ -99,28 +98,13 @@ FSceneRenderer::PostDraw()
     sequencer->ExitSilentMode();
 }
 
+static
 UCameraComponent*
-FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID iInnerSequenceID, const FMovieSceneSequenceHierarchy& iHierarchy, IMovieScenePlayer& iPlayer )
+GetFirstCamera( UMovieSceneSequence* iSequence, FMovieSceneSequenceID iSequenceID, FFrameNumber iLocalTime, IMovieScenePlayer& iPlayer )
 {
-    const FMovieSceneSequenceHierarchyNode* Node = iHierarchy.FindNode( iInnerSequenceID );
-    const FMovieSceneSubSequenceData* SubData = iHierarchy.FindSubData( iInnerSequenceID );
-    if( !ensure( SubData && Node ) )
-    {
-        return nullptr;
-    }
-
-    UMovieSceneSequence* InnerSequence = SubData->GetSequence();
-    UMovieScene* InnerMovieScene = InnerSequence ? InnerSequence->GetMovieScene() : nullptr;
+    UMovieScene* InnerMovieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !InnerMovieScene )
-    {
         return nullptr;
-    }
-
-    FFrameNumber InnerTime = ( iGlobalTime * SubData->RootToSequenceTransform ).FloorToFrame();
-    if( !SubData->PlayRange.Value.Contains( InnerTime ) )
-    {
-        return nullptr;
-    }
 
     int32 LowestRow = TNumericLimits<int32>::Max();
     int32 HighestOverlap = 0;
@@ -132,7 +116,7 @@ FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID
         for( UMovieSceneSection* ItSection : CutTrack->GetAllSections() )
         {
             UMovieSceneSingleCameraCutSection* CutSection = Cast<UMovieSceneSingleCameraCutSection>( ItSection );
-            if( CutSection && CutSection->GetRange().Contains( InnerTime ) )
+            if( CutSection && CutSection->GetRange().Contains( iLocalTime ) )
             {
                 bool bSectionWins =
                     ( CutSection->GetRowIndex() < LowestRow ) ||
@@ -148,14 +132,34 @@ FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID
         }
     }
 
-    if( ActiveSection )
+    return ActiveSection ? ActiveSection->GetFirstCamera( iPlayer, iSequenceID ) : nullptr;
+}
+
+UCameraComponent*
+FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID iInnerSequenceID, const FMovieSceneSequenceHierarchy& iHierarchy, IMovieScenePlayer& iPlayer )
+{
+    const FMovieSceneSequenceHierarchyNode* Node = iHierarchy.FindNode( iInnerSequenceID );
+    const FMovieSceneSubSequenceData* SubData = iHierarchy.FindSubData( iInnerSequenceID );
+    if( !ensure( SubData && Node ) )
     {
-        return ActiveSection->GetFirstCamera( iPlayer, iInnerSequenceID );
+        return nullptr;
     }
+
+    UMovieSceneSequence* InnerSequence = SubData->GetSequence();
+
+    FFrameNumber InnerTime = ( iGlobalTime * SubData->RootToSequenceTransform ).FloorToFrame();
+    if( !SubData->PlayRange.Value.Contains( InnerTime ) )
+    {
+        return nullptr;
+    }
+
+    UCameraComponent* CameraComponent = GetFirstCamera( InnerSequence, iInnerSequenceID, InnerTime, iPlayer );
+    if( CameraComponent )
+        return CameraComponent;
 
     for( FMovieSceneSequenceID Child : Node->Children )
     {
-        UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( iGlobalTime, Child, iHierarchy, iPlayer );
+        CameraComponent = FindCameraCutComponentRecursive( iGlobalTime, Child, iHierarchy, iPlayer );
         if( CameraComponent )
         {
             return CameraComponent;
@@ -163,41 +167,6 @@ FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID
     }
 
     return nullptr;
-}
-
-static
-const UMovieSceneCinematicBoardSection*
-GetCurrentBoardSection( ISequencer* iSequencer )
-{
-    UMovieSceneCinematicBoardTrack* board_track = BoardSequenceTools::FindCinematicBoardTrack( iSequencer );
-    if( !board_track )
-        return nullptr;
-
-    UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), iSequencer->GetGlobalTime().Time.GetFrame() );
-
-    return Cast<UMovieSceneCinematicBoardSection>( section );
-}
-
-static
-const UMovieSceneSingleCameraCutSection*
-GetCurrentCameraCutSection( ISequencer* iSequencer )
-{
-    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
-    if( !sequence )
-        return nullptr;
-
-    UMovieScene* focusedMovieScene = sequence->GetMovieScene();
-    if( !focusedMovieScene )
-        return nullptr;
-
-    UMovieSceneSingleCameraCutTrack* cameracutTrack = Cast<UMovieSceneSingleCameraCutTrack>( focusedMovieScene->GetCameraCutTrack() );
-    //UMovieSceneSingleCameraCutTrack* cameracutTrack = focusedMovieScene->FindMasterTrack<UMovieSceneSingleCameraCutTrack>();
-    if( !cameracutTrack )
-        return nullptr;
-
-    UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( cameracutTrack->GetAllSections(), iSequencer->GetGlobalTime().Time.GetFrame() );
-
-    return Cast<UMovieSceneSingleCameraCutSection>( section );
 }
 
 void
@@ -209,53 +178,24 @@ FSceneRenderer::GetViewCamera()
 
     //---
 
-    const UMovieSceneCinematicBoardSection* board_section = GetCurrentBoardSection( sequencer.Get() );
-    if( board_section )
+    const FMovieSceneSequenceHierarchyNode* root_node = sequencer->GetEvaluationTemplate().GetHierarchy()->FindNode( sequencer->GetRootTemplateID() );
+
+    // Try to find the a camera in the root sequence at the current frame
+    UCameraComponent* CameraComponent = GetFirstCamera( sequencer->GetRootMovieSceneSequence(), sequencer->GetRootTemplateID(), sequencer->GetGlobalTime().Time.FrameNumber, *sequencer );
+    if( CameraComponent )
     {
-        const FMovieSceneSequenceID             ThisSequenceID = sequencer->GetFocusedTemplateID();
-        const FMovieSceneSequenceID             TargetSequenceID = board_section->GetSequenceID();
-        const FMovieSceneSequenceHierarchy*     Hierarchy = sequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( sequencer->GetEvaluationTemplate().GetCompiledDataID() );
-
-        if( !Hierarchy )
-            return;
-
-        const FMovieSceneSequenceHierarchyNode* ThisSequenceNode = Hierarchy->FindNode( ThisSequenceID );
-
-        check( ThisSequenceNode );
-
-        // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
-        const FMovieSceneSequenceID* InnerSequenceID = Algo::FindByPredicate( ThisSequenceNode->Children,
-                                                                              [Hierarchy, TargetSequenceID]( FMovieSceneSequenceID InSequenceID )
-                                                                              {
-                                                                                  const FMovieSceneSubSequenceData* SubData = Hierarchy->FindSubData( InSequenceID );
-                                                                                  return SubData && SubData->DeterministicSequenceID == TargetSequenceID;
-                                                                              }
-        );
-
-        if( InnerSequenceID )
-        {
-            mCameraComponent = FindCameraCutComponentRecursive( sequencer->GetGlobalTime().Time.FrameNumber, *InnerSequenceID, *Hierarchy, *sequencer );
-            if( mCameraComponent )
-                return;
-        }
+        mCameraComponent = CameraComponent;
+        return;
     }
 
-    //---
-
-    const UMovieSceneSingleCameraCutSection* cameracut_section = GetCurrentCameraCutSection( sequencer.Get() );
-    if( cameracut_section )
+    // Otherwise try to recursively find a camera in each child at the current frame
+    for( FMovieSceneSequenceID Child : root_node->Children )
     {
-        if( cameracut_section && sequencer.IsValid() )
+        CameraComponent = FindCameraCutComponentRecursive( sequencer->GetGlobalTime().Time.FrameNumber, Child, *sequencer->GetEvaluationTemplate().GetHierarchy(), *sequencer );
+        if( CameraComponent )
         {
-            mCameraComponent = cameracut_section->GetFirstCamera( *sequencer, sequencer->GetFocusedTemplateID() );
-            if( mCameraComponent )
-                return;
-
-            //FMovieSceneSpawnable* Spawnable = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->FindSpawnable( CameraCutSection->GetCameraBindingID().GetGuid() );
-            //if( Spawnable )
-            //{
-            //    return Cast<AActor>( Spawnable->GetObjectTemplate() );
-            //}
+            mCameraComponent = CameraComponent;
+            return;
         }
     }
 }
@@ -287,7 +227,7 @@ CalculateConstraintSize( const FMinimalViewInfo& iViewInfo, const FIntPoint& iUs
 void
 FSceneRenderer::RenderToTexture( TArray<FColor>& oSamples, FTextureRenderTargetResource* oRenderTarget )
 {
-    GetViewCamera();
+    checkf( mCameraComponent, TEXT( "No camera found at frame %d (in tick global time" ), mSequencer.Pin()->GetGlobalTime().Time.GetFrame().Value );
     if( !mCameraComponent )
         return;
 

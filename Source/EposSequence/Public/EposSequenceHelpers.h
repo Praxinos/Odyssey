@@ -14,6 +14,7 @@
 
 class ACineCameraActor;
 class APlaneActor;
+class UEposMovieSceneSequence;
 class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMovieScene;
@@ -59,6 +60,11 @@ typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelPr
 class EPOSSEQUENCE_API EposSequenceHelpers
 {
 public:
+    static UEposMovieSceneSequence* GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceId );
+    static UEposMovieSceneSequence* GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceId, FMovieSceneSequenceID& oRootSequenceId );
+    static FQualifiedFrameTime GetIntermediateTime( IMovieScenePlayer& iPlayer, FQualifiedFrameTime iGlobalTime, FMovieSceneSequenceIDRef iToSequenceId );
+
+public:
     static TArray<TWeakObjectPtr<UMovieSceneNoteSection>>   GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static TArray<UStoryNote*>                              GetNotesRecursive( UMovieSceneSequence* iSequence, FFrameNumber iFrameNumber );
 
@@ -68,6 +74,8 @@ public:
 class EPOSSEQUENCE_API BoardSequenceHelpers
 {
 public:
+    static UMovieSceneSequence* FindSequenceOfSubSection( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceID& oSequenceID );
+
     struct FInnerSequenceResult
     {
         UMovieSceneSequence*    mInnerSequence = nullptr;

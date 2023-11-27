@@ -31,12 +31,7 @@ private:
     TSharedRef<SWidget> MakeTextureMenu();
     TSharedRef<SWidget> MakeHelpMenu();
 
-    enum EMapping
-    {
-        kMap,
-        kUnmap,
-    };
-    void ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap );
+    void BindCommands( TSharedPtr<FUICommandList> ioCommandList );
 
 private:
     /**
@@ -81,7 +76,12 @@ private:
 
 private:
     ISequencer*     mSequencer;
+    FDelegateHandle mSequencerActorAddedDelegates;
+    FDelegateHandle mSequencerActivatedDelegates;
+    FDelegateHandle mSequencerSelectionSectionChangedDelegates;
     UShotSequence*  mShotSequence;
+
+    TSharedPtr<FUICommandList> mShotCommandList;
 
     /** Mapping of objects to their existing transform data (for comparing against new transform data) */
     TMap< TWeakObjectPtr<UObject>, FTransformData > mObjectToExistingTransform;

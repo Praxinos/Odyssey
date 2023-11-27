@@ -172,7 +172,7 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
 
         if( iDrawingArgs.mTexture.IsValid() )
         {
-            new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, iDrawingArgs.mTexture.Get() );
+            new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequence, iSequenceID, iDrawingArgs.mTexture.Get() );
         }
         else
         {
@@ -199,7 +199,7 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
                     texture_size = plane->ComputeTextureSize( camera, first_texture->GetSurfaceHeight() );
             }
 
-            new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, texture_size );
+            new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequence, iSequenceID, texture_size );
         }
 
         if( !new_material )
@@ -341,7 +341,7 @@ ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iS
 
     iSection->Modify();
 
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CloneMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, existing_material );
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CloneMaterialAndTexture( iSequencer, iSequence, iSequenceID, existing_material );
     if( !new_material )
         return;
 

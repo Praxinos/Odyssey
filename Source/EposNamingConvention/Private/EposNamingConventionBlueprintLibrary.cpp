@@ -5,6 +5,7 @@
 
 #include "ISequencer.h"
 
+//#include "EposMovieSceneSequence.h"
 #include "NamingConvention.h"
 #include "Settings/NamingConventionSettings.h"
 
@@ -26,7 +27,7 @@ UEposNamingConventionBlueprintLibrary::SetSequencer( TSharedRef<ISequencer> InSe
 
 //static
 FString
-UEposNamingConventionBlueprintLibrary::GenerateNoteAssetPathName( const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
+UEposNamingConventionBlueprintLibrary::GenerateNoteAssetPathName( FString& oPath, FString& oName )
 {
     oPath = TEXT( "" );
     oName = TEXT( "" );
@@ -34,12 +35,13 @@ UEposNamingConventionBlueprintLibrary::GenerateNoteAssetPathName( const UMovieSc
     if( !CurrentSequencer.IsValid() )
         return TEXT( "" );
 
-    if( !iSequence )
-        return TEXT( "" );
-
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
-    return NamingConvention::GenerateNoteAssetPathName( *sequencer, sequencer->GetRootMovieSceneSequence(), iSequence, oPath, oName );
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( sequencer->GetFocusedMovieSceneSequence() );
+    if( !epos_sequence )
+        return TEXT( "" );
+
+    return NamingConvention::GenerateNoteAssetPathName( *sequencer, *epos_sequence, sequencer->GetFocusedTemplateID(), oPath, oName );
 }
 
 //---

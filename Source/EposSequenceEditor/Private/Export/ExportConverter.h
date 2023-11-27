@@ -16,18 +16,23 @@ class UBoardSequence;
 class UEposMovieSceneSequence;
 class UShotSequence;
 struct FExportMarkSettings;
+struct FMovieSceneSequenceTransform;
 
 class FExportConverter
 {
 public:
-    FExportConverter( TWeakPtr<ISequencer> iSequencer, const UMovieSceneSequence* iRootSequence, const FExportMarkSettings* iMarkSettings, FExportStruct* oStruct );
+    FExportConverter( TWeakPtr<ISequencer> iSequencer, FMovieSceneSequenceIDRef iEposSequenceId, const FExportMarkSettings* iMarkSettings, FExportStruct* oStruct );
 
 private:
     void Convert();
 
+    void ProcessSequencerMarks( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const;
+    void ProcessDrawings( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const;
+    void ProcessFirstShotFrame( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const;
+
 private:
     TWeakPtr<ISequencer>            mSequencer;
-    const UMovieSceneSequence*      mRootSequence { nullptr };
+    FMovieSceneSequenceID           mSequenceId;
     const FExportMarkSettings*      mMarkSettings { nullptr };
 
     FExportStruct*                  mStruct { nullptr };

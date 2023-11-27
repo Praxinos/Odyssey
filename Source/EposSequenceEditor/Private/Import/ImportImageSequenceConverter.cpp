@@ -152,9 +152,12 @@ FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequence
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *iSubSection, sequencer->GetFocusedTemplateID() );
+    check( result.mInnerSequence )
+
     FString path;
     FString name;
-    NamingConvention::GenerateTextureAssetPathName( *sequencer, mBoardSequence, iSubSection->GetSequence(), nullptr, path, name );
+    NamingConvention::GenerateTextureAssetPathName( *sequencer, *CastChecked<UEposMovieSceneSequence>( result.mInnerSequence ), result.mInnerSequenceId, nullptr, path, name );
     FString destination_path = path;
 
     check( iPanels.Num() );
@@ -184,9 +187,6 @@ FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequence
     }
 
     //sequencer->ForceEvaluate();
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *iSubSection, sequencer->GetFocusedTemplateID() );
-    check( result.mInnerSequence )
 
     TArray<FGuid> plane_bindings;
     ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &plane_bindings );

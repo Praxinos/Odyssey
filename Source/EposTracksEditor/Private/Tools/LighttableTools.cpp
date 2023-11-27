@@ -172,9 +172,16 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
 {
     ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
 
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+    if( !epos_sequence )
+    {
+        checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+        return;
+    }
+
     FString texture_transparent_path;
     FString texture_transparent_name;
-    FString texture_transparent_pathname = NamingConvention::GetMasterTexturePathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), texture_transparent_path, texture_transparent_name );
+    FString texture_transparent_pathname = NamingConvention::GetMasterTexturePathName( iSequencer, *epos_sequence, iSequenceID, texture_transparent_path, texture_transparent_name );
 
     bool modified = false;
 
@@ -210,7 +217,7 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
             if( current_material_previous_texture
                 && current_material_previous_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
             {
-                UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequencer.GetRootMovieSceneSequence() ); // Slow operation
+                UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequence, iSequenceID ); // Slow operation
 
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), texture_transparent );
                 modified |= true;
@@ -218,7 +225,7 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
             if( current_material_next_texture
                 && current_material_next_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
             {
-                UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequencer.GetRootMovieSceneSequence() ); // Slow operation
+                UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequence, iSequenceID ); // Slow operation
 
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "NextDrawingTexture" ), texture_transparent );
                 modified |= true;

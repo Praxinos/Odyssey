@@ -33,7 +33,8 @@
 #include "SPrimaryButton.h"
 
 #include "Board/BoardSequence.h"
-#include "IEposSequenceEditorToolkit.h"
+#include "ILevelSequenceEditorToolkit.h"
+#include "EposSequenceEditorToolkit.h"
 #include "Export/ExportConverter.h"
 #include "Export/ExportStruct.h"
 #include "Export/ImageSequence/SImageSequenceExportDialog.h"
@@ -359,12 +360,21 @@ SExportStoryboardSettings::OnExportStoryboard()
 void
 ExportStoryboardDialog::OpenExportImageSequenceDialog( const TSharedRef<FTabManager>& TabManager, UMovieSceneSequence* iSequence )
 {
-    IAssetEditorInstance* assetEditor = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->FindEditorForAsset( iSequence, false );
-    IEposSequenceEditorToolkit* eposSequenceEditor = static_cast<IEposSequenceEditorToolkit*>( assetEditor );
-    TSharedPtr<ISequencer> sequencer = eposSequenceEditor ? eposSequenceEditor->GetSequencer() : nullptr;
-    check( sequencer.IsValid() );
+    TWeakPtr<ISequencer> current_sequencer = nullptr;
+    TArray<TWeakPtr<ISequencer>> sequencers = FLevelEditorSequencerIntegration::Get().GetSequencers();
+    for( auto sequencer : sequencers )
+    {
+        if( sequencer.IsValid() && sequencer.Pin()->GetRootMovieSceneSequence() == iSequence )
+        {
+            current_sequencer = sequencer;
+            break;
+        }
+    }
 
-    sequencer->ResetToNewRootSequence( *iSequence );
+    if( !current_sequencer.IsValid() )
+        return;
+
+    FMovieSceneSequenceID focused_sequence_id = current_sequencer.Pin()->GetFocusedTemplateID();
 
     //---
 
@@ -380,11 +390,11 @@ ExportStoryboardDialog::OpenExportImageSequenceDialog( const TSharedRef<FTabMana
                         .DefaultTab( EExportTab::kImageSequence )
                         .ImageSequenceSettings()
                         [
-                            SNew( SExportImageSequenceSettings, sequencer, iSequence )
+                            SNew( SExportImageSequenceSettings, current_sequencer, focused_sequence_id )
                         ]
                         .PDFSettings()
                         [
-                            SNew( SExportPDFSettings, sequencer, iSequence )
+                            SNew( SExportPDFSettings, current_sequencer, focused_sequence_id )
                         ]
                         );
 
@@ -406,12 +416,28 @@ ExportStoryboardDialog::OpenExportImageSequenceDialog( const TSharedRef<FTabMana
 void
 ExportStoryboardDialog::OpenExportPDFDialog( const TSharedRef<FTabManager>& TabManager, UMovieSceneSequence* iSequence )
 {
-    IAssetEditorInstance* assetEditor = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->FindEditorForAsset( iSequence, false );
-    IEposSequenceEditorToolkit* eposSequenceEditor = static_cast<IEposSequenceEditorToolkit*>( assetEditor );
-    TSharedPtr<ISequencer> sequencer = eposSequenceEditor ? eposSequenceEditor->GetSequencer() : nullptr;
-    check( sequencer.IsValid() );
+    TWeakPtr<ISequencer> current_sequencer = nullptr;
+    TArray<TWeakPtr<ISequencer>> sequencers = FLevelEditorSequencerIntegration::Get().GetSequencers();
+    for( auto sequencer : sequencers )
+    {
+        if( sequencer.IsValid() && sequencer.Pin()->GetRootMovieSceneSequence() == iSequence )
+        {
+            current_sequencer = sequencer;
+            break;
+        }
+    }
 
-    sequencer->ResetToNewRootSequence( *iSequence );
+    if( !current_sequencer.IsValid() )
+        return;
+
+    FMovieSceneSequenceID focused_sequence_id = current_sequencer.Pin()->GetFocusedTemplateID();
+
+    //IAssetEditorInstance* assetEditor = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->FindEditorForAsset( iSequence, false );
+    //IEposSequenceEditorToolkit* eposSequenceEditor = static_cast<IEposSequenceEditorToolkit*>( assetEditor );
+    //TSharedPtr<ISequencer> sequencer = eposSequenceEditor ? eposSequenceEditor->GetSequencer() : nullptr;
+    //check( sequencer.IsValid() );
+
+    //sequencer->ResetToNewRootSequence( *iSequence );
 
     //---
 
@@ -427,11 +453,11 @@ ExportStoryboardDialog::OpenExportPDFDialog( const TSharedRef<FTabManager>& TabM
                         .DefaultTab( EExportTab::kImageSequence )
                         .ImageSequenceSettings()
                         [
-                            SNew( SExportImageSequenceSettings, sequencer, iSequence )
+                            SNew( SExportImageSequenceSettings, current_sequencer, focused_sequence_id )
                         ]
                         .PDFSettings()
                         [
-                            SNew( SExportPDFSettings, sequencer, iSequence )
+                            SNew( SExportPDFSettings, current_sequencer, focused_sequence_id )
                         ]
                         );
 

@@ -101,17 +101,13 @@ public:
     virtual bool SupportsKeyboardFocus() const override { return true; }
 private:
 
-    /** Set up this viewport to operate on the specified toolkit */
-    void Setup(FEposSequenceEditorToolkit& NewToolkit);
+    /** Set up this viewport to operate on its sequencer */
+    void Setup();
 
-    /** Clean up this viewport after its toolkit has been closed */
+    /** Clean up this viewport after its sequencer has been closed */
     void CleanUp();
 
-    /** Called when a level sequence editor toolkit has been opened */
-    void OnEditorOpened(FEposSequenceEditorToolkit& Toolkit);
-
-    /** Called when the level sequence editor toolkit we were observing has been closed */
-    void OnEditorClosed();
+    void OnSequencerChanged();
 
 private:
 
@@ -175,8 +171,8 @@ private:
     /** Widget where the grid option are and which contains the widget where grid is drawn in */
     TSharedPtr<SFilmOverlayOptions> FilmOverlayOptions;
 
-    /** The toolkit we're currently editing */
-    TWeakPtr<FEposSequenceEditorToolkit> CurrentToolkit;
+    /** The sequencer we're currently editing */
+    TWeakPtr<ISequencer> mCurrentSquencer;
 
     /** Commandlist used in the viewport (Maps commands to viewport specific actions) */
     TSharedPtr<FUICommandList> CommandList;

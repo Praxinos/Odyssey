@@ -129,22 +129,23 @@ SColorPickerEntry::Construct( const FArguments& iArgs )
 void
 EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISequencer* iSequencer )
 {
-    UMovieSceneSequence* root_sequence = iSequencer->GetRootMovieSceneSequence();
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();
 
     iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.drawing-material.section-label", "Material" ) );
 
     //-
 
     iMenuBuilder.AddMenuEntry( FUIAction(
-                                   FExecuteAction::CreateLambda( [iSequencer, root_sequence]() { MasterAssetTools::ToggleBackgroundVisibility( *iSequencer, root_sequence ); } ),
+                                   FExecuteAction::CreateLambda( [iSequencer, sequence, sequence_id]() { MasterAssetTools::ToggleBackgroundVisibility( *iSequencer, sequence, sequence_id ); } ),
                                    FCanExecuteAction(),
-                                   FGetActionCheckState::CreateLambda( [iSequencer, root_sequence]() { return MasterAssetTools::GetBackgroundVisibility( *iSequencer, root_sequence ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
+                                   FGetActionCheckState::CreateLambda( [iSequencer, sequence, sequence_id]() { return MasterAssetTools::GetBackgroundVisibility( *iSequencer, sequence, sequence_id ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
                                ),
                                SNew( SColorPickerEntry )
                                    .Text( LOCTEXT( "settings.drawing-material.background-label", "Background" ) )
-                                   .Color( MasterAssetTools::GetBackgroundColor( *iSequencer, root_sequence ) )
+                                   .Color( MasterAssetTools::GetBackgroundColor( *iSequencer, sequence, sequence_id ) )
                                    .UseAlpha( true )
-                                   .OnColorCommitted_Lambda( [iSequencer, root_sequence]( FLinearColor iColor ) { MasterAssetTools::SetBackgroundColor( *iSequencer, root_sequence, iColor ); } ),
+                                   .OnColorCommitted_Lambda( [iSequencer, sequence, sequence_id]( FLinearColor iColor ) { MasterAssetTools::SetBackgroundColor( *iSequencer, sequence, sequence_id, iColor ); } ),
                                NAME_None,
                                LOCTEXT( "settings.drawing-material.background-tooltip", "Display background and select its color for the drawing materials" ),
                                EUserInterfaceActionType::ToggleButton );
@@ -152,29 +153,29 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
     //-
 
     iMenuBuilder.AddMenuEntry( FUIAction(
-                                   FExecuteAction::CreateLambda( [iSequencer, root_sequence]() { MasterAssetTools::ToggleGridVisibility( *iSequencer, root_sequence ); } ),
+                                   FExecuteAction::CreateLambda( [iSequencer, sequence, sequence_id]() { MasterAssetTools::ToggleGridVisibility( *iSequencer, sequence, sequence_id ); } ),
                                    FCanExecuteAction(),
-                                   FGetActionCheckState::CreateLambda( [iSequencer, root_sequence]() { return MasterAssetTools::GetGridVisibility( *iSequencer, root_sequence ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
+                                   FGetActionCheckState::CreateLambda( [iSequencer, sequence, sequence_id]() { return MasterAssetTools::GetGridVisibility( *iSequencer, sequence, sequence_id ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
                                ),
                                SNew( SColorPickerEntry )
                                    .Text( LOCTEXT( "settings.drawing-material.grid-label", "Grid" ) )
-                                   .Color( MasterAssetTools::GetGridColor( *iSequencer, root_sequence ) )
+                                   .Color( MasterAssetTools::GetGridColor( *iSequencer, sequence, sequence_id ) )
                                    .UseAlpha( false )
-                                   .OnColorCommitted_Lambda( [iSequencer, root_sequence]( FLinearColor iColor ) { MasterAssetTools::SetGridColor( *iSequencer, root_sequence, iColor ); } ),
+                                   .OnColorCommitted_Lambda( [iSequencer, sequence, sequence_id]( FLinearColor iColor ) { MasterAssetTools::SetGridColor( *iSequencer, sequence, sequence_id, iColor ); } ),
                                NAME_None,
                                LOCTEXT( "settings.drawing-material.grid-tooltip", "Display grid and select its color for the drawing materials" ),
                                EUserInterfaceActionType::ToggleButton );
 
     //-
 
-    auto grid_submenu = [iSequencer, root_sequence]( FMenuBuilder& iMenuBuilder )
+    auto grid_submenu = [iSequencer, sequence, sequence_id]( FMenuBuilder& iMenuBuilder )
     {
-        auto CreateEntry = [iSequencer, root_sequence]( FMenuBuilder& iMenuBuilder, EGridType iGridType, FName iBrushName, FText iToolTip )
+        auto CreateEntry = [iSequencer, sequence, sequence_id]( FMenuBuilder& iMenuBuilder, EGridType iGridType, FName iBrushName, FText iToolTip )
         {
             iMenuBuilder.AddMenuEntry( FUIAction(
-                                           FExecuteAction::CreateLambda( [iSequencer, root_sequence, iGridType]() { MasterAssetTools::SetGridType( *iSequencer, root_sequence, iGridType ); } ),
+                                           FExecuteAction::CreateLambda( [iSequencer, sequence, sequence_id, iGridType]() { MasterAssetTools::SetGridType( *iSequencer, sequence, sequence_id, iGridType ); } ),
                                            FCanExecuteAction(),
-                                           FGetActionCheckState::CreateLambda( [iSequencer, root_sequence, iGridType]() { return MasterAssetTools::GetGridType( *iSequencer, root_sequence ) == iGridType ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
+                                           FGetActionCheckState::CreateLambda( [iSequencer, sequence, sequence_id, iGridType]() { return MasterAssetTools::GetGridType( *iSequencer, sequence, sequence_id ) == iGridType ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
                                        ),
                                        SNew( SHorizontalBox )
                                        + SHorizontalBox::Slot()
@@ -203,18 +204,18 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
 
     iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.lighttable.section-label", "Lighttable" ) );
 
-    auto OnGetPreviousColor = [iSequencer, root_sequence]() -> FLinearColor
+    auto OnGetPreviousColor = [iSequencer, sequence, sequence_id]() -> FLinearColor
     {
-        FLinearColor color = MasterAssetTools::GetPreviousDrawingColor( *iSequencer, root_sequence );
-        color.A = MasterAssetTools::GetPreviousDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence() );
+        FLinearColor color = MasterAssetTools::GetPreviousDrawingColor( *iSequencer, sequence, sequence_id );
+        color.A = MasterAssetTools::GetPreviousDrawingOpacity( *iSequencer, sequence, sequence_id );
 
         return color;
     };
 
-    auto OnPreviousColorCommited = [iSequencer, root_sequence]( FLinearColor iColor )
+    auto OnPreviousColorCommited = [iSequencer, sequence, sequence_id]( FLinearColor iColor )
     {
-        MasterAssetTools::SetPreviousDrawingColor( *iSequencer, root_sequence, iColor );
-        MasterAssetTools::SetPreviousDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iColor.A );
+        MasterAssetTools::SetPreviousDrawingColor( *iSequencer, sequence, sequence_id, iColor );
+        MasterAssetTools::SetPreviousDrawingOpacity( *iSequencer, sequence, sequence_id, iColor.A );
     };
 
     iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
@@ -226,18 +227,18 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
 
     //-
 
-    auto OnGetNextColor = [iSequencer, root_sequence]() -> FLinearColor
+    auto OnGetNextColor = [iSequencer, sequence, sequence_id]() -> FLinearColor
     {
-        FLinearColor color = MasterAssetTools::GetNextDrawingColor( *iSequencer, root_sequence );
-        color.A = MasterAssetTools::GetNextDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence() );
+        FLinearColor color = MasterAssetTools::GetNextDrawingColor( *iSequencer, sequence, sequence_id );
+        color.A = MasterAssetTools::GetNextDrawingOpacity( *iSequencer, sequence, sequence_id );
 
         return color;
     };
 
-    auto OnNextColorCommited = [iSequencer, root_sequence]( FLinearColor iColor )
+    auto OnNextColorCommited = [iSequencer, sequence, sequence_id]( FLinearColor iColor )
     {
-        MasterAssetTools::SetNextDrawingColor( *iSequencer, root_sequence, iColor );
-        MasterAssetTools::SetNextDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iColor.A );
+        MasterAssetTools::SetNextDrawingColor( *iSequencer, sequence, sequence_id, iColor );
+        MasterAssetTools::SetNextDrawingOpacity( *iSequencer, sequence, sequence_id, iColor.A );
     };
 
     iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
