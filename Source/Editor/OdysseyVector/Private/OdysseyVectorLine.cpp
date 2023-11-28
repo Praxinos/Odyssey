@@ -12,8 +12,8 @@ FOdysseyVectorLine::FOdysseyVectorLine( const FString iName, double iWidth, doub
 
     SetSize( iWidth, iHeight );
 
-    mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
-    mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
+    mCubicVertex[0] = new FOdysseyVectorVertex( 0.0f, 0.0f, mStrokeWidth );
+    mCubicVertex[1] = new FOdysseyVectorVertex( 0.0f, 0.0f, mStrokeWidth );
 
     mCubicSegment = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1], true );
 

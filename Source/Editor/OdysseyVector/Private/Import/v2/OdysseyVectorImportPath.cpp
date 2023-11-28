@@ -90,7 +90,7 @@ FOdysseyVectorImportV2::ReadPathGeometryVertices( FOdysseyVectorPath& iPath
         Ar << y;
         Ar << radius;
 
-        cubicVertex = new FOdysseyVectorVertex( &iPath, x, y, radius );
+        cubicVertex = new FOdysseyVectorVertex( x, y, radius );
 
         iPath.AddVertex( cubicVertex );
 
@@ -139,7 +139,7 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
 
                 case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX:
                 {
-                    currentVertex = new FOdysseyVectorVertex( &iPath, 0.0f, 0.0f, 0.0f );
+                    currentVertex = new FOdysseyVectorVertex( 0.0f, 0.0f, 0.0f );
 
                     iPath.AddVertex( currentVertex );
                     // indexation required for creating segments

@@ -1941,8 +1941,7 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
             {
                 double radius = iSegment->GetVertex(0)->GetRadius() + ( radiusDelta * endVertex[0]->GetT( iSegment ) );
 
-                endVertex[0] = new FOdysseyVectorVertex( endVertex[0]->GetPath()
-                                                       , endVertex[0]->GetX()
+                endVertex[0] = new FOdysseyVectorVertex( endVertex[0]->GetX()
                                                        , endVertex[0]->GetY()
                                                        , radius );
 
@@ -1953,8 +1952,7 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
             {
                 double radius = iSegment->GetVertex(0)->GetRadius() + ( radiusDelta * endVertex[1]->GetT( iSegment ) );
 
-                endVertex[1] = new FOdysseyVectorVertex( endVertex[1]->GetPath()
-                                                       , endVertex[1]->GetX()
+                endVertex[1] = new FOdysseyVectorVertex( endVertex[1]->GetX()
                                                        , endVertex[1]->GetY()
                                                        , radius );
 

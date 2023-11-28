@@ -7,9 +7,9 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 {
 }
 
-FOdysseyVectorVertex::FOdysseyVectorVertex( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius )
+FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint( iX, iY, iRadius )
-   , mPath ( iPath )
+   , mPath ( nullptr )
    , mFlags( 0 )
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )

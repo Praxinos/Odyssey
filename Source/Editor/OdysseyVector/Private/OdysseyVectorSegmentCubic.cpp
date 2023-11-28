@@ -448,8 +448,8 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     double deltaRadius = ( radius1 - radius0 );
     double fromRadius = radius0 + ( deltaRadius * iFromT );
     double toRadius = radius0 + ( deltaRadius * iToT );
-    FOdysseyVectorVertex* vertex0 = ( iFromT == 0.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[0]) : new FOdysseyVectorVertex( mPath, pointAt0.x, pointAt0.y, fromRadius );
-    FOdysseyVectorVertex* vertex1 = ( iToT   == 1.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[1]) : new FOdysseyVectorVertex( mPath, pointAt1.x, pointAt1.y, toRadius   );
+    FOdysseyVectorVertex* vertex0 = ( iFromT == 0.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[0]) : new FOdysseyVectorVertex( pointAt0.x, pointAt0.y, fromRadius );
+    FOdysseyVectorVertex* vertex1 = ( iToT   == 1.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[1]) : new FOdysseyVectorVertex( pointAt1.x, pointAt1.y, toRadius   );
     FOdysseyVectorSegmentCubic* sampleSegment = new FOdysseyVectorSegmentCubic( mPath, vertex0, vertex1, true );
     ::ULIS::FVec2D& sampleCtrlPoint0 = sampleSegment->GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& sampleCtrlPoint1 = sampleSegment->GetHandle(1)->GetCoords();
@@ -566,7 +566,7 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
                                                                                         , ctrlPoint1
                                                                                         , point1
                                                                                         , segmentT );
-            FOdysseyVectorVertex* newCubicPoint = new FOdysseyVectorVertex( mPath, pointAt.x, pointAt.y, 0.0f );
+            FOdysseyVectorVertex* newCubicPoint = new FOdysseyVectorVertex( pointAt.x, pointAt.y, 0.0f );
 
             newCubicPoint->SetRadius( mPoint[0]->GetRadius() + ( difRadius * segmentT ) );
 

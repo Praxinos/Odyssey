@@ -13,71 +13,52 @@ class FOdysseyVectorSegment;
 class FOdysseyVectorPath;
 class FOdysseyVectorObject;
 
-enum class eWayPointType : uint8
-{
-    Uninitialized      = 0,
-    OutsideErasureArea = 1,
-    EntersErasureArea  = 2,
-    InsideErasureArea  = 3,
-    LeavesErasureArea  = 4
-};
-
 // a waypoint is met at segment vertex or when a constrast is met
-typedef struct _FWayPoint
+struct FWayPoint
 {
-    FOdysseyVectorSegment* segment;
     FOdysseyVectorVertex* vertex;
-    eWayPointType type;
+    uint32 flags;
     double t;
-    uint32 lookupID;
 
-    _FWayPoint()
+    // WayPoint flags
+    static const uint32 Original           = ( 1 << 0 );
+    static const uint32 OutsideErasureArea = ( 1 << 1 );
+    static const uint32 EntersErasureArea  = ( 1 << 2 );
+    static const uint32 InsideErasureArea  = ( 1 << 3 );
+    static const uint32 LeavesErasureArea  = ( 1 << 4 );
+
+    FWayPoint()
     {
-        type = eWayPointType::Uninitialized;
+        flags = 0;
     }
 
-    _FWayPoint( FOdysseyVectorVertex* iVertex
-              , eWayPointType iWayPointType )
+    FWayPoint( FOdysseyVectorVertex* iVertex, uint32 iWayPointFlags )
     {
-        segment = nullptr;
         vertex = iVertex;
-        type = iWayPointType;
-        t = 0.0f;
+        flags = iWayPointFlags;
     }
 
-    _FWayPoint( FOdysseyVectorVertex* iVertex
-              , FOdysseyVectorSegment* iSegment
-              , double iT
-              , eWayPointType iWayPointType )
+    FWayPoint( FOdysseyVectorVertex* iVertex, uint32 iWayPointFlags, double iT )
     {
-        segment = iSegment;
         vertex = iVertex;
-        type = iWayPointType;
+        flags = iWayPointFlags;
         t = iT;
     }
-} FWayPoint;
+};
 
-typedef struct _FWaySegment
+struct FWaySegment
 {
     FOdysseyVectorSegment* segment;
     uint32 indexWayPoint0;
     uint32 indexWayPoint1;
     ::ULIS::FVec2D bezier[4];
+    bool revert;
 
-    _FWaySegment( FOdysseyVectorSegment* iSegment
-                , uint32 iIndexWayPoint0
-                , uint32 iIndexWayPoint1
-                , ::ULIS::FVec2D iBezier[4] )
-    {
-        segment = iSegment;
-        // work with indexes because the wayPoint array is gonna be resized, so
-        // we can't work with pointers
-        indexWayPoint0 = iIndexWayPoint0;
-        indexWayPoint1 = iIndexWayPoint1;
-
-        memcpy( bezier, iBezier, sizeof( bezier ) ) ;
-    }
-} FWaySegment;
+    FWaySegment( FOdysseyVectorSegment* iSegment
+               , std::vector<FWayPoint>& iWayPointArray
+               , uint32 iIndexWayPoint0
+               , uint32 iIndexWayPoint1 );
+};
 
 class FOdysseyVectorChain
 {
@@ -101,15 +82,18 @@ class FOdysseyVectorChain
 
         bool SegmentCreationPolicy( FWayPoint* iWayPoint0, FWayPoint* iWayPoint1 );
 
-        uint32 TraceLine( int32 iX0
-                        , int32 iY0
-                        , double iT0
-                        , int32 iX1
-                        , int32 iY1
-                        , double iT1
-                        , BLImageData* iImageData
-                        , FOdysseyVectorSegment* iSegment
-                        , std::vector<FWayPoint>& oWayPointArray );
+        FWayPoint* TraceLine( int32 iX0
+                            , int32 iY0
+                            , double iT0
+                            , int32 iX1
+                            , int32 iY1
+                            , double iT1
+                            , BLImageData* iImageData
+                            , FWayPoint* lastWayPoint
+                            , std::vector<FWayPoint>& oWayPointArray
+                            , std::vector<FWaySegment>& oWaySegmentArray
+                            , FOdysseyVectorSegment* iSegment
+                            , bool iRevert );
 
         bool Trace( BLImageData* iImageData
                   , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray

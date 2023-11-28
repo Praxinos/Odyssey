@@ -465,8 +465,7 @@ FOdysseyVectorPathTracer::CommitVertex( bool iIsHandleAligned )
     BLPoint localVector = cubicPathInverseWorldMatrix.mapVector( mBestBezier.lastRecordRadius * 0.7071f
                                                                , mBestBezier.lastRecordRadius * 0.7071f );
     double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
-    FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( mCubicPath
-                                                              , localPoint.x
+    FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( localPoint.x
                                                               , localPoint.y
                                                               , localRadius );
 
@@ -579,8 +578,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
         }
         else
         {
-            mPreviousVertex = new FOdysseyVectorVertex( mCubicPath
-                                                      , localPoint.x
+            mPreviousVertex = new FOdysseyVectorVertex( localPoint.x
                                                       , localPoint.y
                                                       , localRadius );
             mCubicPath->AddVertex( mPreviousVertex );

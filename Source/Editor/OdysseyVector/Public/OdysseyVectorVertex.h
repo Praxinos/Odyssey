@@ -50,7 +50,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iY coordinates on Y axis
          * @param iRadius radius
          */
-        FOdysseyVectorVertex ( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius );
+        FOdysseyVectorVertex ( double iX, double iY, double iRadius );
         ~FOdysseyVectorVertex();
 
         static void ArrayToSegmentArray( const std::vector<FOdysseyVectorVertex*>& iVertexArray

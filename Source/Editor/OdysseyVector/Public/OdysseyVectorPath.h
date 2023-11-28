@@ -39,7 +39,8 @@ enum class eSegmentAdditionFlags : uint8
     None                  =        0  ,
     KeepOriginalSegment   = ( 1 << 0 ),
     RemoveOriginalSegment = ( 1 << 1 ),
-    CreateDerivedSegment  = ( 1 << 2 )
+    CreateDerivedSegment  = ( 1 << 2 ),
+    CreateNewPath         = ( 1 << 3 )
 };
 
 // define bitwise op
@@ -48,10 +49,9 @@ ENUM_CLASS_FLAGS(eSegmentAdditionFlags)
 enum class eVertexAdditionFlags : uint8
 {
     None                 =        0  ,
-    KeepOriginalVertex   = ( 1 << 0 ),
-    RemoveOriginalVertex = ( 1 << 1 ),
-    CreateDerivedVertex  = ( 1 << 2 ),
-    CreateBoundaryVertex = ( 1 << 3 )
+    RemoveOriginalVertex = ( 1 << 0 ),
+    CreateDerivedVertex  = ( 1 << 1 ),
+    CreateBoundaryVertex = ( 1 << 2 )
 };
 
 // define bitwise op

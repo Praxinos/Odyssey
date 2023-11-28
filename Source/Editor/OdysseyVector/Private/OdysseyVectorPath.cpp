@@ -772,37 +772,42 @@ FOdysseyVectorPath::SegmentAdditionPolicy( FWayPoint* iWayPoint0
     {
         retFlags |= eSegmentAdditionFlags::RemoveOriginalSegment;
 
-        if( ( iWayPoint0->type == eWayPointType::OutsideErasureArea )
-         && ( iWayPoint1->type == eWayPointType::OutsideErasureArea ) )
+        if( ( iWayPoint0->flags & FWayPoint::OutsideErasureArea )
+         && ( iWayPoint1->flags & FWayPoint::OutsideErasureArea ) )
         {
             retFlags |= eSegmentAdditionFlags::CreateDerivedSegment;
+        }
+
+        if( iWayPoint0->flags & FWayPoint::LeavesErasureArea )
+        {
+            retFlags |= eSegmentAdditionFlags::CreateNewPath;
         }
     }
     else
     {
-        if( ( iWayPoint0->type == eWayPointType::OutsideErasureArea )
-         && ( iWayPoint1->type == eWayPointType::OutsideErasureArea ) )
+        if( ( iWayPoint0->flags & FWayPoint::OutsideErasureArea )
+         && ( iWayPoint1->flags & FWayPoint::OutsideErasureArea ) )
         {
             retFlags |= eSegmentAdditionFlags::KeepOriginalSegment;
         }
     }
 
-    if( ( iWayPoint0->type == eWayPointType::OutsideErasureArea )
-     && ( iWayPoint1->type == eWayPointType::EntersErasureArea  ) )
+    if( ( iWayPoint0->flags & FWayPoint::OutsideErasureArea )
+     && ( iWayPoint1->flags & FWayPoint::EntersErasureArea  ) )
     {
         retFlags |= ( eSegmentAdditionFlags::RemoveOriginalSegment
                     | eSegmentAdditionFlags::CreateDerivedSegment );
     }
 
-    if( ( iWayPoint0->type == eWayPointType::LeavesErasureArea  )
-     && ( iWayPoint1->type == eWayPointType::OutsideErasureArea ) )
+    if( ( iWayPoint0->flags & FWayPoint::LeavesErasureArea  )
+     && ( iWayPoint1->flags & FWayPoint::OutsideErasureArea ) )
     {
         retFlags |= ( eSegmentAdditionFlags::RemoveOriginalSegment
                     | eSegmentAdditionFlags::CreateDerivedSegment );
     }
 
-    if( ( iWayPoint0->type == eWayPointType::LeavesErasureArea )
-     && ( iWayPoint1->type == eWayPointType::EntersErasureArea ) )
+    if( ( iWayPoint0->flags & FWayPoint::LeavesErasureArea )
+     && ( iWayPoint1->flags & FWayPoint::EntersErasureArea ) )
     {
         retFlags |= ( eSegmentAdditionFlags::RemoveOriginalSegment
                     | eSegmentAdditionFlags::CreateDerivedSegment );
@@ -818,31 +823,24 @@ FOdysseyVectorPath::VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit )
 
     if( iSplit )
     {
-        if( iWayPoint->type == eWayPointType::OutsideErasureArea )
+        if( iWayPoint->flags & FWayPoint::OutsideErasureArea )
         {
             retFlags |= ( eVertexAdditionFlags::RemoveOriginalVertex
                         | eVertexAdditionFlags::CreateDerivedVertex );
         }
     }
-    else
-    {
-        if( iWayPoint->type == eWayPointType::OutsideErasureArea )
-        {
-            retFlags |= eVertexAdditionFlags::KeepOriginalVertex;
-        }
-    }
 
-    if( iWayPoint->type == eWayPointType::InsideErasureArea )
+    if( iWayPoint->flags & FWayPoint::InsideErasureArea )
     {
         retFlags |= eVertexAdditionFlags::RemoveOriginalVertex;
     }
 
-    if( iWayPoint->type == eWayPointType::EntersErasureArea )
+    if( iWayPoint->flags & FWayPoint::EntersErasureArea )
     {
         retFlags |= eVertexAdditionFlags::CreateBoundaryVertex;
     }
 
-    if( iWayPoint->type == eWayPointType::LeavesErasureArea )
+    if( iWayPoint->flags & FWayPoint::LeavesErasureArea )
     {
         retFlags |= eVertexAdditionFlags::CreateBoundaryVertex;
     }
@@ -860,19 +858,27 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
                                   , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                                   , bool iSplit )
 {
-    std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> vertexLookup;
     FOdysseyVectorPath* currentPath = iSplit ? nullptr : this;
 
     if( iWayPointArray.size() )
     {
         FWayPoint& firstWayPoint = iWayPointArray[0];
 
-        if( currentPath == nullptr )
+        if( iSplit )
         {
-            if( firstWayPoint.type == eWayPointType::OutsideErasureArea )
+/*
+            if( firstWayPoint.flags & FWayPoint::OutsideErasureArea )
             {
                 currentPath = new FOdysseyVectorPath( GetName() );
+                // SetParent is used here as a temporary storage that we be used to call
+                // AddChild() to the right parent. The path is not added to the parent's
+                // children list yet.
+                currentPath->SetParent( mParent );
+                CopyTransformation( *currentPath );
+
+                oAddedPathArray.push_back( currentPath );
             }
+*/
         }
 
         // step 1 : create needed vertices
@@ -880,83 +886,34 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
         {
             eVertexAdditionFlags vertexAdditionFlags = VertexAdditionPolicy( &wayPoint, iSplit );
 
-            // in split mode we will have to create a new path each time we leave the erasure area
-            if( iSplit )
-            {
-                // first create a path that will receive the vertices
-                if( wayPoint.type == eWayPointType::LeavesErasureArea )
-                {
-                    currentPath = new FOdysseyVectorPath( GetName() );
-                    // for postprocessing. the path is not added to the parent yet
-                    currentPath->SetParent( mParent );
-                    CopyTransformation( *currentPath );
-
-                    oAddedPathArray.push_back( currentPath );
-                }
-            }
-
             if( ( vertexAdditionFlags & eVertexAdditionFlags::RemoveOriginalVertex ) == eVertexAdditionFlags::RemoveOriginalVertex )
             {
-                // add vertex to the array of removed vertices, no duplicates
-                if( std::find( oRemovedVertexArray.begin(), oRemovedVertexArray.end(), wayPoint.vertex ) == oRemovedVertexArray.end() )
-                {
-                    oRemovedVertexArray.push_back( wayPoint.vertex );
-                }
+
+            UE_LOG(LogTemp, Warning, TEXT("RemoveOriginalVertex: %d %x %x"), wayPoint.vertex->GetID(), wayPoint.vertex, wayPoint.vertex->GetPath() );
+
+                oRemovedVertexArray.push_back( wayPoint.vertex );
             }
 
             // boundary vertices are guaranteed unique per nature, no need to check uniqueness
             if( ( vertexAdditionFlags & eVertexAdditionFlags::CreateBoundaryVertex ) == eVertexAdditionFlags::CreateBoundaryVertex )
             {
-                double radius0 = wayPoint.segment->GetVertex(0)->GetRadius();
-                double radius1 = wayPoint.segment->GetVertex(1)->GetRadius();
-                double radius = ( (          wayPoint.t ) * radius1 )
-                                + ( ( 1.0f - wayPoint.t ) * radius0 );
-
-                ::ULIS::FVec2D newVertexAt = wayPoint.segment->GetPointAt( wayPoint.t );
-
-                wayPoint.vertex = new FOdysseyVectorVertex( currentPath
-                                                          , newVertexAt.x
-                                                          , newVertexAt.y
-                                                          , radius );
-
                 oAddedVertexArray.push_back( wayPoint.vertex );
-
-                // insert the new vertex in the lookup table. Yes it has the same value.
-                // This is not needed in no-split mode but we keep-it anyways 
-                // in order to have a generic algorithm.
-                vertexLookup[wayPoint.vertex] = wayPoint.vertex;
             }
 
             if( ( vertexAdditionFlags & eVertexAdditionFlags::CreateDerivedVertex ) == eVertexAdditionFlags::CreateDerivedVertex )
             {
-                // original vertices are not unique (2 consecutive waypoints can store the same vertex), so we have
-                // to ensure they haven't already been processed.
-                if( vertexLookup.find(wayPoint.vertex) == vertexLookup.end() )
-                {
-                    ::ULIS::FVec2D& coords = wayPoint.vertex->GetCoords();
-                    double radius = wayPoint.vertex->GetRadius();
-                    FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( currentPath
-                                                                              , coords.x
-                                                                              , coords.y
-                                                                              , radius );
+                ::ULIS::FVec2D& coords = wayPoint.vertex->GetCoords();
+                double radius = wayPoint.vertex->GetRadius();
+                bool handleAligned = wayPoint.vertex->IsHandleAligned();
+                uint32 vertexID = wayPoint.vertex->GetID();
+            UE_LOG(LogTemp, Warning, TEXT("CreateDerivedVertex: %d"), wayPoint.vertex->GetID() );
+                // replaces the current original vertex. The latter is already saved in oRemovedVertexArray
+                wayPoint.vertex = new FOdysseyVectorVertex( coords.x, coords.y, radius );
+                wayPoint.vertex->SetHandleAligned( handleAligned );
+                wayPoint.vertex->SetID( vertexID );
 
-                    newVertex->SetHandleAligned( wayPoint.vertex->IsHandleAligned() );
-
-                    // insert the new vertex in the lookup table
-                    vertexLookup[wayPoint.vertex] = newVertex;
-                    // a new vertex for each former vertex
-                    oAddedVertexArray.push_back( newVertex );
-                }
-            }
-
-            if( ( vertexAdditionFlags & eVertexAdditionFlags::KeepOriginalVertex ) == eVertexAdditionFlags::KeepOriginalVertex )
-            {
-                // insert the current vertex in the lookup table. Yes it has the same value.
-                // This is not needed in no-split mode but we keep-it anyways 
-                // in order to have a generic algorithm.
-                // Note: std::map ensures there won't be duplicates, but this will be called twice
-                // because waypoints are not guaranteed unique.
-                vertexLookup[wayPoint.vertex] = wayPoint.vertex;
+                // a new vertex for each former vertex
+                oAddedVertexArray.push_back( wayPoint.vertex );
             }
         }
 
@@ -965,6 +922,10 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
             FWayPoint* wayPoint0 = &iWayPointArray[waySegment.indexWayPoint0];
             FWayPoint* wayPoint1 = &iWayPointArray[waySegment.indexWayPoint1];
             eSegmentAdditionFlags segmentAdditionFlags = SegmentAdditionPolicy( wayPoint0, wayPoint1, iSplit );
+
+            UE_LOG(LogTemp, Warning, TEXT("segment : %d %d"), wayPoint0->vertex->GetID()
+                                                            , wayPoint1->vertex->GetID() );
+
 
             if( ( segmentAdditionFlags & eSegmentAdditionFlags::RemoveOriginalSegment ) == eSegmentAdditionFlags::RemoveOriginalSegment )
             {
@@ -977,10 +938,19 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
 
             if( ( segmentAdditionFlags & eSegmentAdditionFlags::CreateDerivedSegment ) == eSegmentAdditionFlags::CreateDerivedSegment )
             {
-                FOdysseyVectorVertex* destVertex0 = vertexLookup.find( wayPoint0->vertex )->second;
-                FOdysseyVectorVertex* destVertex1 = vertexLookup.find( wayPoint1->vertex )->second;
-                FOdysseyVectorPath* vertexPath = destVertex0->GetPath();
-                FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( vertexPath
+                if( ( currentPath == nullptr ) || ( ( segmentAdditionFlags & eSegmentAdditionFlags::CreateNewPath ) == eSegmentAdditionFlags::CreateNewPath ) )
+                {
+                    currentPath = new FOdysseyVectorPath( GetName() );
+                    // for postprocessing. the path is not added to the parent yet
+                    currentPath->SetParent( mParent );
+                    CopyTransformation( *currentPath );
+
+                    oAddedPathArray.push_back( currentPath );
+                }
+
+                FOdysseyVectorVertex* destVertex0 = wayPoint0->vertex;
+                FOdysseyVectorVertex* destVertex1 = wayPoint1->vertex;
+                FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( currentPath
                                                                                        , destVertex0
                                                                                        , waySegment.bezier[1].x
                                                                                        , waySegment.bezier[1].y
@@ -988,6 +958,11 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
                                                                                        , waySegment.bezier[2].y
                                                                                        , destVertex1
                                                                                        , true );
+
+                // store path here even if technically the vertex does not belong to the path yet.
+                // it will once we call path->AddVertex() in the FOdysseyVectorPath::Erase() func.
+                wayPoint0->vertex->SetPath( currentPath );
+                wayPoint1->vertex->SetPath( currentPath );
 
                 // mark new segment for addition
                 oAddedSegmentArray.push_back( newSegment );
@@ -1651,106 +1626,106 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                             , &startU
                             , &screen
                             , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
-                            {
-                                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
-                                FOdysseyVectorJoint& joint = vertex->GetJoint();
-                                double segmentLength = segment->GetLength();
-                                double jointLength = joint.GetLength();
-                                double segmentAndJointLength = segmentLength + jointLength;
-                                double endU = 0.0f;
+            {
+                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
+                FOdysseyVectorJoint& joint = vertex->GetJoint();
+                double segmentLength = segment->GetLength();
+                double jointLength = joint.GetLength();
+                double segmentAndJointLength = segmentLength + jointLength;
+                double endU = 0.0f;
 
-                                if( mBrush.ExtendOverPath )
-                                {
-                                    if( mBrush.Revert )
-                                    {
-                                        endU = iChain.mLength ? startU - ( segmentAndJointLength / iChain.mLength ) : 0.0f;
-                                    }
-                                    else
-                                    {
-                                        endU = iChain.mLength ? startU + ( segmentAndJointLength / iChain.mLength ) : 0.0f;
-                                    }
-                                }
-                                else
-                                {
-                                    if( mBrush.Revert )
-                                    {
-                                        startU = 0.0f;
-                                        endU   = 1.0f;
-                                    }
-                                    else
-                                    {
-                                        startU = 1.0f;
-                                        endU   = 0.0f;
-                                    }
-                                }
+                if( mBrush.ExtendOverPath )
+                {
+                    if( mBrush.Revert )
+                    {
+                        endU = iChain.mLength ? startU - ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                    }
+                    else
+                    {
+                        endU = iChain.mLength ? startU + ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                    }
+                }
+                else
+                {
+                    if( mBrush.Revert )
+                    {
+                        startU = 0.0f;
+                        endU   = 1.0f;
+                    }
+                    else
+                    {
+                        startU = 1.0f;
+                        endU   = 0.0f;
+                    }
+                }
 
-                                if( segmentLength )
-                                {
-                                    double segmentStartU = ( vertex == segment->GetVertex(0) ) ? startU : endU;
-                                    double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
+                if( segmentLength )
+                {
+                    double segmentStartU = ( vertex == segment->GetVertex(0) ) ? startU : endU;
+                    double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
 
-                                    // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
-                                    if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
-                                    if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
+                    // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
+                    if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
+                    if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
 
-                                    // Textured joints are drawn only in texture mode (obviously) and if the texture
-                                    // goes all over the path.
-                                    if( ( vertex->IsHandleAligned() == false )
-                                    && ( mBrush.ExtendOverPath == true ) )
-                                    {
-                                        double segmentJointRatio = jointLength / ( segmentAndJointLength );
-                                        double jointStartU = segmentStartU;
-                                        double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
+                    // Textured joints are drawn only in texture mode (obviously) and if the texture
+                    // goes all over the path.
+                    if( ( vertex->IsHandleAligned() == false )
+                    && ( mBrush.ExtendOverPath == true ) )
+                    {
+                        double segmentJointRatio = jointLength / ( segmentAndJointLength );
+                        double jointStartU = segmentStartU;
+                        double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
 
-                                        segmentStartU = jointEndU;
+                        segmentStartU = jointEndU;
 
-                                        // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
-                                        if ( jointStartU < 0.0f ) jointStartU = 0.0f;
-                                        if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
+                        // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
+                        if ( jointStartU < 0.0f ) jointStartU = 0.0f;
+                        if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
 
-                                        // TODO : check for in-screen visibility
-                                        DrawTexturedJoint( &joint
-                                                         , (int8*)imageData.pixelData
-                                                         , imageData.size.w
-                                                         , imageData.size.h
-                                                         , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                                         , (int8*) brushData
-                                                         , texture->GetSurfaceWidth()
-                                                         , texture->GetSurfaceHeight()
-                                                         , 32
-                                                         , jointStartU
-                                                         , jointEndU
-                                                         , iCombinedOpacity
-                                                         , iDrawingFlags );
-                                    }
+                        // TODO : check for in-screen visibility
+                        DrawTexturedJoint( &joint
+                                            , (int8*)imageData.pixelData
+                                            , imageData.size.w
+                                            , imageData.size.h
+                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                            , (int8*) brushData
+                                            , texture->GetSurfaceWidth()
+                                            , texture->GetSurfaceHeight()
+                                            , 32
+                                            , jointStartU
+                                            , jointEndU
+                                            , iCombinedOpacity
+                                            , iDrawingFlags );
+                    }
 
-                                    // don't draw if segment is outside the screen
-                                    if( ( ( bbox.x          ) < screen.w )
-                                     && ( ( bbox.x + bbox.w ) > 0        )
-                                     && ( ( bbox.y          ) < screen.h )
-                                     && ( ( bbox.y + bbox.h ) > 0        ) )
-                                    {
-                                        DrawTexturedSegment( segment
-                                                            , (int8*)imageData.pixelData
-                                                            , imageData.size.w
-                                                            , imageData.size.h
-                                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                                            , (int8*) brushData
-                                                            , texture->GetSurfaceWidth()
-                                                            , texture->GetSurfaceHeight()
-                                                            , 32
-                                                            , segmentStartU
-                                                            , segmentEndU
-                                                            , iCombinedOpacity
-                                                            , iDrawingFlags );
-                                    }
-                                }
+                    // don't draw if segment is outside the screen
+                    if( ( ( bbox.x          ) < screen.w )
+                        && ( ( bbox.x + bbox.w ) > 0        )
+                        && ( ( bbox.y          ) < screen.h )
+                        && ( ( bbox.y + bbox.h ) > 0        ) )
+                    {
+                        DrawTexturedSegment( segment
+                                            , (int8*)imageData.pixelData
+                                            , imageData.size.w
+                                            , imageData.size.h
+                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
+                                            , (int8*) brushData
+                                            , texture->GetSurfaceWidth()
+                                            , texture->GetSurfaceHeight()
+                                            , 32
+                                            , segmentStartU
+                                            , segmentEndU
+                                            , iCombinedOpacity
+                                            , iDrawingFlags );
+                    }
+                }
 
-                                // only when mBrush.ExtendOverPath == true 
-                                startU = endU;
+                // only when mBrush.ExtendOverPath == true 
+                startU = endU;
 
-                                return false; // keep iterating
-                            } );
+                return false; // keep iterating
+            } );
 
             texture->PlatformData->Mips[0].BulkData.Unlock();
         }
@@ -1828,8 +1803,7 @@ FOdysseyVectorPath::CopyShape()
 
     for( FOdysseyVectorVertex* originalVertex : mVertexList )
     {
-        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( cubicPathCopy
-                                                                  , originalVertex->GetX()
+        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( originalVertex->GetX()
                                                                   , originalVertex->GetY()
                                                                   , originalVertex->GetRadius() );
 
@@ -1893,7 +1867,7 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
             BLPoint pt = conversionMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
             BLPoint rd = conversionMatrix.mapVector( 0.7071 * vertex->GetRadius(), 0.7071 * vertex->GetRadius() );
             ::ULIS::FVec2D radius = ::ULIS::FVec2D( rd.x, rd.y );
-            FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( this, pt.x, pt.y, radius.Distance() );
+            FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( pt.x, pt.y, radius.Distance() );
 
             oAddedVertexArray.push_back( newVertex );
 
