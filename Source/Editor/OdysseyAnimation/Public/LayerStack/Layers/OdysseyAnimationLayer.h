@@ -49,7 +49,7 @@ protected:
 
 public:
 	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;

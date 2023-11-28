@@ -4,7 +4,7 @@
 #include "OdysseyStaticImageRenderingAbility.h"
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyStaticImageRenderingAbility::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const
+FOdysseyStaticImageRenderingAbility::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
 {
     check(false); //If you need it, override it in your class
     return nullptr;

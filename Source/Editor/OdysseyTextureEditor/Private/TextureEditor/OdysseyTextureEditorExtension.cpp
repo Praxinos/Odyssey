@@ -4,6 +4,7 @@
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 
 #include "LayerStack/OdysseyTextureLayer.h"
+#include "Tools/RasterPaintBucketTool/OdysseyTextureEditorRasterPaintBucketToolSourceProvider.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorExtension"
 
@@ -70,6 +71,8 @@ FOdysseyTextureEditorExtension::OnSourceChanged()
 
 	mTextureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditorExtension::OnCurrentLayerChanged);
+	
+	ConfigureTools();
 }
 
 UTexture2D*
@@ -81,6 +84,12 @@ FOdysseyTextureEditorExtension::Texture() const
 	return mTextureSource->GetTexture();
 }
 
+TSharedPtr<FOdysseyTextureEditorSource>
+FOdysseyTextureEditorExtension::GetTextureSource() const
+{
+	return mTextureSource;
+}
+
 void
 FOdysseyTextureEditorExtension::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
@@ -90,6 +99,13 @@ FOdysseyTextureEditorExtension::OnCurrentLayerChanged(UOdysseyLayerStack* iLayer
     // PATCH : We have to redraw all layers in order to draw all layers without the HUD of the tool.
     // This will be removed when we'll have a dedicated HUD layer.
 	Cast<UOdysseyTextureLayerStack>(iLayerStack)->UpdateTexture(true);
+}
+
+void
+FOdysseyTextureEditorExtension::ConfigureTools()
+{
+	TSharedPtr<FOdysseyTextureEditorRasterPaintBucketToolSourceProvider> provider = MakeShared<FOdysseyTextureEditorRasterPaintBucketToolSourceProvider>(this);
+	GetEditor()->GetRasterPaintBucketTool()->SetSourceProvider(provider);
 }
 
 #undef LOCTEXT_NAMESPACE

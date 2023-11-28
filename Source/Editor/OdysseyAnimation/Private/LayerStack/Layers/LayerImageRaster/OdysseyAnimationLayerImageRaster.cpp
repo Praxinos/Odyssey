@@ -383,9 +383,12 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+UOdysseyAnimationLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
-    return MakeShared<FOdysseyAnimationLayerImageRasterImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyAnimationLayerImageRasterImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

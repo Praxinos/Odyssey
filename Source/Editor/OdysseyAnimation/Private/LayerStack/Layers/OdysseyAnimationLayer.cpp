@@ -94,9 +94,12 @@ UOdysseyAnimationLayer::PropertyChanged(const FName& iPropertyName)
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+UOdysseyAnimationLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
-    return MakeShared<FOdysseyAnimationLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyAnimationLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

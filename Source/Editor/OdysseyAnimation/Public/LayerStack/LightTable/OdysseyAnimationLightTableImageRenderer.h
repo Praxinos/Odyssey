@@ -10,7 +10,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationLightTableImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
+    FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;

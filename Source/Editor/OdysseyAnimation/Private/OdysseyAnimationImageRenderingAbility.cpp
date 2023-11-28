@@ -4,7 +4,7 @@
 #include "OdysseyAnimationImageRenderingAbility.h"
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationImageRenderingAbility::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+FOdysseyAnimationImageRenderingAbility::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     check(false); //If you need it, override it in your class
     return nullptr;

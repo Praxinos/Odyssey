@@ -6,7 +6,7 @@
 #include "OdysseyTextureLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
 
-FOdysseyTextureLayerImageRenderer::FOdysseyTextureLayerImageRenderer(const UOdysseyTextureLayer* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyTextureLayerImageRenderer::FOdysseyTextureLayerImageRenderer(const UOdysseyTextureLayer* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {    
     const TArray<UOdysseyLayer*>& children = iLayer->GetChildren();
@@ -20,9 +20,12 @@ FOdysseyTextureLayerImageRenderer::FOdysseyTextureLayerImageRenderer(const UOdys
             continue;
 
         FChildData data;
-        data.mRenderer = child->BuildImageRenderer(iRenderType);
+        data.mRenderer = child->BuildImageRenderer(iRenderType, iFilter);
         data.mBlendMode = child->GetImageRenderingBlendMode();
         data.mOpacity = child->GetImageRenderingOpacity();
+
+        if (!data.mRenderer)
+            continue;
 
         mChildrenData.Add(data);
     }

@@ -5,7 +5,7 @@
 
 #include "LayerStack/OdysseyTextureLayerImageRasterImageRenderer.h"
 
-FOdysseyTextureLayerImageRasterImageRenderer::FOdysseyTextureLayerImageRasterImageRenderer(const UOdysseyTextureLayerImageRaster* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyTextureLayerImageRasterImageRenderer::FOdysseyTextureLayerImageRasterImageRenderer(const UOdysseyTextureLayerImageRaster* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mRasterBlock(iLayer->GetRasterBlock())
     , mBlock(nullptr)

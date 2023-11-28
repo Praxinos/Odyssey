@@ -247,9 +247,12 @@ UOdysseyTextureLayerImageVector::BlendModeChanged()
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const
+UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
 {
-    return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mVectorBlock, iRenderType, GetImageRenderingRects());
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mVectorBlock, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

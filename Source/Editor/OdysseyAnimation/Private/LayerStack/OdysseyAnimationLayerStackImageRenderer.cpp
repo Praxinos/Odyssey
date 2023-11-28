@@ -5,34 +5,44 @@
 
 #include "LayerStack/OdysseyAnimationLayerStackImageRenderer.h"
 
-FOdysseyAnimationLayerStackImageRenderer::FOdysseyAnimationLayerStackImageRenderer(const UOdysseyAnimationLayerStack* iLayerStack, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
+FOdysseyAnimationLayerStackImageRenderer::FOdysseyAnimationLayerStackImageRenderer(const UOdysseyAnimationLayerStack* iLayerStack, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mLayerRootRenderer(nullptr)
 {
     UOdysseyAnimationLayer* layerRoot = Cast<UOdysseyAnimationLayer>(iLayerStack->LayerRoot);
-    mLayerRootRenderer = layerRoot->BuildImageRenderer(iRenderType, iFrame);
+    mLayerRootRenderer = layerRoot->BuildImageRenderer(iRenderType, iFrame, iFilter);
 }
 
 void
 FOdysseyAnimationLayerStackImageRenderer::Init()
 {
-    mLayerRootRenderer->Init();
+    if (mLayerRootRenderer)
+        mLayerRootRenderer->Init();
 }
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLayerStackImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    if (!mLayerRootRenderer)
+        return iWaitList;
+
     return mLayerRootRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLayerStackImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    if (!mLayerRootRenderer)
+        return iWaitList;
+
     return mLayerRootRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 }
 
 bool
 FOdysseyAnimationLayerStackImageRenderer::IsGameThreadOnly()
 {
+    if (!mLayerRootRenderer)
+        return false;
+
     return mLayerRootRenderer->IsGameThreadOnly();
 }

@@ -11,7 +11,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationProxyImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationProxyImageRenderer(const UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects);
+    FOdysseyAnimationProxyImageRenderer(const UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;
@@ -26,4 +26,5 @@ public:
     int mFrameIndex;
     TSharedPtr<IOdysseyImageRenderer> mAnimationRenderer;
     TSharedPtr<::ULIS::FBlock> mBlock;
+    bool mForceRender;
 };

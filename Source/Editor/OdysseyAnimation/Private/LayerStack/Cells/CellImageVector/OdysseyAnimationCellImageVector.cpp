@@ -184,9 +184,12 @@ FOdysseyAnimationCellImageVector::IsImageRenderingGameThreadOnly() const
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationCellImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+FOdysseyAnimationCellImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
-    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects());
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

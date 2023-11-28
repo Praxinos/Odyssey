@@ -9,7 +9,7 @@ class FOdysseyAnimationLayerImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationLayerImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
+    FOdysseyAnimationLayerImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;

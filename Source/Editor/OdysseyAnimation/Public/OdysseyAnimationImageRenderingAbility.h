@@ -19,7 +19,7 @@ public:
      * For example : if you delete a layer, you should create a new renderer
      * but if you are just drawing on the layer, you can reuse the renderer
      */
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const;
 
     /**
      * @brief Returns the full Render Image Id, eventually composed of underlying ids

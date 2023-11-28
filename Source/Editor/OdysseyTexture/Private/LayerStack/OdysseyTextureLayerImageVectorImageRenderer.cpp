@@ -6,7 +6,7 @@
 #include "LayerStack/OdysseyTextureLayerImageVectorImageRenderer.h"
 #include "OdysseyVectorBlock.h"
 
-FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorImageRenderer(const UOdysseyTextureLayerImageVector* iLayer, TSharedPtr<FOdysseyVectorBlock> iVectorBlock, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorImageRenderer(const UOdysseyTextureLayerImageVector* iLayer, TSharedPtr<FOdysseyVectorBlock> iVectorBlock, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mVectorBlock(iVectorBlock)
     , mBlock(nullptr)

@@ -7,6 +7,8 @@
 #include "Misc/OdysseyHandle.h"
 #include <ULIS>
 
+class FOdysseyImageRenderingAbility;
+DECLARE_DELEGATE_RetVal_OneParam(bool, FImageRendererFilter, const FOdysseyImageRenderingAbility*);
 class ODYSSEYIMAGING_API IOdysseyImageRenderer
 {
 public:

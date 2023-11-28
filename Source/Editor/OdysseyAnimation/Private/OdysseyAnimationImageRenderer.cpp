@@ -5,34 +5,44 @@
 
 #include "OdysseyAnimationImageRenderer.h"
 
-FOdysseyAnimationImageRenderer::FOdysseyAnimationImageRenderer(const UOdysseyAnimation* iAnimation, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
+FOdysseyAnimationImageRenderer::FOdysseyAnimationImageRenderer(const UOdysseyAnimation* iAnimation, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mLayerStackRenderer(nullptr)
 {
     UOdysseyAnimationLayerStack* layerStack = iAnimation->GetLayerStack();
-    mLayerStackRenderer = layerStack->BuildImageRenderer(iRenderType, iFrame);
+    mLayerStackRenderer = layerStack->BuildImageRenderer(iRenderType, iFrame, iFilter);
 }
 
 void
 FOdysseyAnimationImageRenderer::Init()
 {
-    mLayerStackRenderer->Init();
+    if (mLayerStackRenderer)
+        mLayerStackRenderer->Init();
 }
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    if (!mLayerStackRenderer)
+        return iWaitList;
+
     return mLayerStackRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    if (!mLayerStackRenderer)
+        return iWaitList;
+
     return mLayerStackRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 }
 
 bool
 FOdysseyAnimationImageRenderer::IsGameThreadOnly()
 {
+    if (!mLayerStackRenderer)
+        return false;
+
     return mLayerStackRenderer->IsGameThreadOnly();
 }

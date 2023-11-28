@@ -120,9 +120,12 @@ FOdysseyAnimationLightTable::GetRange() const
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationLightTable::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+FOdysseyAnimationLightTable::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
-    return MakeShared<FOdysseyAnimationLightTableImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects());
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyAnimationLightTableImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

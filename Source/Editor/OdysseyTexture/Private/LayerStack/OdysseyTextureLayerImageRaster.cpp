@@ -285,9 +285,12 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const
+UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
 {
-    return MakeShared<FOdysseyTextureLayerImageRasterImageRenderer>(this, iRenderType, GetImageRenderingRects());
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyTextureLayerImageRasterImageRenderer>(this, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

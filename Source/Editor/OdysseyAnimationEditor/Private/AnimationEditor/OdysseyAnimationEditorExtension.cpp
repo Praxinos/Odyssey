@@ -8,6 +8,7 @@
 #include "OdysseyLayer.h"
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
+#include "Tools/RasterPaintBucketTool/OdysseyAnimationEditorRasterPaintBucketToolSourceProvider.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorExtension"
 
@@ -83,6 +84,8 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 	UOdysseyAnimation::OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnCurrentFrameChanged);
 	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationEditorExtension::OnImageRenderingChanged);
 	UOdysseyLayer::OnMediaChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnLayerMediaChanged);
+
+	ConfigureTools();
 }
 
 //--------------------------------------------------------------------------------------
@@ -171,4 +174,10 @@ FOdysseyAnimationEditorExtension::OnCurrentFrameChanged(UOdysseyAnimation* iAnim
 	GetEditor()->RefreshCurrentTool();
 }
 
+void
+FOdysseyAnimationEditorExtension::ConfigureTools()
+{
+	TSharedPtr<FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider> provider = MakeShared<FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider>(this);
+	GetEditor()->GetRasterPaintBucketTool()->SetSourceProvider(provider);
+}
 #undef LOCTEXT_NAMESPACE

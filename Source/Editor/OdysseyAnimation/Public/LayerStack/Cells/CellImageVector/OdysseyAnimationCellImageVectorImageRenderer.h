@@ -9,7 +9,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVectorImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationCellImageVectorImageRenderer(TSharedRef<const FOdysseyAnimationCellImageVector> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
+    FOdysseyAnimationCellImageVectorImageRenderer(TSharedRef<const FOdysseyAnimationCellImageVector> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;

@@ -5,34 +5,44 @@
 
 #include "LayerStack/OdysseyTextureLayerStackImageRenderer.h"
 
-FOdysseyTextureLayerStackImageRenderer::FOdysseyTextureLayerStackImageRenderer(const UOdysseyTextureLayerStack* iLayerStack, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects)
+FOdysseyTextureLayerStackImageRenderer::FOdysseyTextureLayerStackImageRenderer(const UOdysseyTextureLayerStack* iLayerStack, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mLayerRootRenderer(nullptr)
 {
     UOdysseyTextureLayer* layerRoot = Cast<UOdysseyTextureLayer>(iLayerStack->LayerRoot);
-    mLayerRootRenderer = layerRoot->BuildImageRenderer(iRenderType);
+    mLayerRootRenderer = layerRoot->BuildImageRenderer(iRenderType, iFilter);
 }
 
 void
 FOdysseyTextureLayerStackImageRenderer::Init()
 {
-    mLayerRootRenderer->Init();
+    if (mLayerRootRenderer)
+        mLayerRootRenderer->Init();
 }
 
 bool
 FOdysseyTextureLayerStackImageRenderer::IsGameThreadOnly()
 {
+    if (!mLayerRootRenderer)
+        return false;
+
     return mLayerRootRenderer->IsGameThreadOnly();
 }
 
 TArray<::ULIS::FEvent>
 FOdysseyTextureLayerStackImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    if (!mLayerRootRenderer)
+        return iWaitList;
+
     return mLayerRootRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
 FOdysseyTextureLayerStackImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    if (!mLayerRootRenderer)
+        return iWaitList;
+        
     return mLayerRootRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
 }

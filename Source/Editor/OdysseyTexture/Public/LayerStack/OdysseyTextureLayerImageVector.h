@@ -81,7 +81,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
     public:
         //FOdysseyImageRenderingAbility overrides
-        virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+        virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
         virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
         virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
         virtual float GetImageRenderingOpacity() const override;

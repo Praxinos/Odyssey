@@ -9,7 +9,7 @@ class FOdysseyTextureLayerImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyTextureLayerImageRenderer(const UOdysseyTextureLayer* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
+    FOdysseyTextureLayerImageRenderer(const UOdysseyTextureLayer* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;

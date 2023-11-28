@@ -5,7 +5,7 @@
 
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderer.h"
 
-FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
 
@@ -34,7 +34,7 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 
         FFrameData data;
         data.mOpacity = keysData[i].mOpacity;
-        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame);
+        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
         mFramesData.Add(data);
     }
 
@@ -53,7 +53,7 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 
         FFrameData data;
         data.mOpacity = keysData[i].mOpacity;
-        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame);
+        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
         mFramesData.Add(data);
     }
 }

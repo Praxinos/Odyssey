@@ -42,9 +42,12 @@ UOdysseyAnimationLayerStack::GetFrameRange() const
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+UOdysseyAnimationLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
-    return MakeShared<FOdysseyAnimationLayerStackImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyAnimationLayerStackImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

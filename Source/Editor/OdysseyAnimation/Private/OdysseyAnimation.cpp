@@ -229,10 +229,13 @@ bool UOdysseyAnimation::Validate() const
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimation::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+UOdysseyAnimation::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
 	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::BuildImageRenderer);
-    return MakeShared<FOdysseyAnimationProxyImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects());
+    return MakeShared<FOdysseyAnimationProxyImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

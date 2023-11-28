@@ -10,14 +10,6 @@
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterPaintBucketTool"
 
-static void floodFill ( int32 x
-                      , int32 y
-                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iSrcImage
-                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iDstImage
-                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iMask
-                      , ::ULIS::ISample& iColor
-                      , uint8 iTolerance );
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterPaintBucketTool::~UOdysseyPainterEditorRasterPaintBucketTool()
@@ -26,7 +18,11 @@ UOdysseyPainterEditorRasterPaintBucketTool::~UOdysseyPainterEditorRasterPaintBuc
 }
 
 UOdysseyPainterEditorRasterPaintBucketTool::UOdysseyPainterEditorRasterPaintBucketTool()
-    : Tolerance( 0 )
+    : ColorToleranceSource(EOdysseyRasterPaintBucketToolColorToleranceSource::ColorAndTransparency)
+    , ColorTolerance( 0 )
+    , Expansion( 0 )
+    , GapTolerance( 0 )
+    , mSourceProvider(nullptr)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 }
@@ -81,35 +77,68 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
-    ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
+    
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
-    /*::ULIS::FRectI rect = paintBlock->Rect();*/
     ::ULIS::eFormat format = paintBlock->Format();
-
     if (!paintBlock)
         return false;
+    
+    //TODO: define SourceBlock from the mSource value
+    TSharedPtr<::ULIS::FBlock> sourceBlock = GetSourceBlock();
+    if (!sourceBlock)
+        return false;
 
-    GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("OnPaintStroke", "FlooFill"), nullptr);
+    ::ULIS::FPixel sourceColor = sourceBlock->Pixel(iPointInTexture.x, iPointInTexture.y);
+    ::ULIS::FColor dstColor = GetEditor()->PaintColor().GetValue();
+    TSharedPtr<::ULIS::FBlock> sourceMaskBlock = CreateSourceMaskBlock(sourceBlock, sourceColor);
+    TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<::ULIS::FBlock>(iBlock->Width(), iBlock->Height(), ::ULIS::Format_G8);
 
-	//::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
-/*	ctx.Fill(*paintBlock, color);*/
+    if (GapTolerance > 0)
+    {
+        ctx.Dilate(
+              *sourceMaskBlock
+            , GapTolerance
+            , ::ULIS::FColor::FromGrey8(255)
+            , ::ULIS::FColor::FromGrey8(255)
+        );
+        ctx.Finish();
+    }
 
-    floodFill ( iPointInTexture.x
-              , iPointInTexture.y
-              , iBlock
-              , paintBlock
-              , nullptr
-              , color
-              , Tolerance );
+    //FloodFill
+    ctx.FloodFill(
+        *sourceMaskBlock
+        , *maskBlock
+        , iPointInTexture.x
+        , iPointInTexture.y
+        , ::ULIS::FColor::FromGrey8(0)
+        , ::ULIS::FColor::FromGrey8(255));
+	ctx.Finish();
 
-	/*ctx.Finish();*/
+    //Expansion and final step of gap tolerance is managed in a single dilate operation
+    if (Expansion != 0 || GapTolerance > 0)
+    {
+        float dilateAmount = Expansion + GapTolerance;
 
+        ctx.Dilate(
+              *maskBlock
+            , dilateAmount
+            , ::ULIS::FColor::FromGrey8(255)
+            , dilateAmount > 0 ? ::ULIS::FColor::FromGrey8(255) : ::ULIS::FColor::FromGrey8(0)
+        );
+        ctx.Finish();
+    }
+
+    //Apply the color to the paintblock
+    
+    GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("OnPaintStroke", "FloodFill"), nullptr);
+    ConvertMaskBlockToColorBlock(maskBlock, paintBlock, dstColor);
+    //ConvertMaskBlockToColorBlock(sourceMaskBlock, paintBlock, dstColor);
+    
 	paintBlock->Dirty();
-
     Commit();
-
     GEditor->EndTransaction();
 
     return true;
@@ -149,105 +178,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iP
 {
 }
 
-static void floodFill ( int32 x
-                      , int32 y
-                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iSrcImage
-                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iDstImage
-                      , TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iMask
-                      , ::ULIS::ISample& iColor
-                      , uint8 iTolerance ) {
-    if ( ( x >= 0 ) && ( x < iSrcImage->Width()  ) &&
-         ( y >= 0 ) && ( y < iSrcImage->Height() ) ) {
-        uint32 maxItems = 0xFFFF; // stack size for 65k pixels at first. Then we increase by 65k every time needed
-        int32 (*stack)[2] = (int32(*)[2]) calloc ( maxItems, sizeof(int32) * 2 );
-        // buffer to remember which pixels were already processed
-        uint8* passed = (uint8*) calloc ( iSrcImage->Width() * iSrcImage->Height(), sizeof(uint8) );
-        uint32 offset = ( y * iSrcImage->Width() ) + x;
-        ::ULIS::FColor oldColor = iSrcImage->Color( x, y );
-        int16 oldR = oldColor.R8();
-        int16 oldG = oldColor.G8();
-        int16 oldB = oldColor.B8();
-        int16 oldA = oldColor.A8();
-        uint32 nbItems = 0;
-        uint32 curItem = 0;
-        uint32 i;
-
-        // add first pixel to the stack
-        if ( ( iMask == nullptr ) || *(iMask->PixelBits(x,y)) ) {
-            stack[nbItems][0] = x;
-            stack[nbItems][1] = y;
-
-            nbItems++;
-        }
-
-        // process neighboring pixels
-        while ( curItem < nbItems ) {
-            int32 sx = stack[curItem][0],
-                  sy = stack[curItem][1];
-            int32 pos[4][2] = {{ sx + 1, sy     },
-                               { sx    , sy + 1 },
-                               { sx - 1, sy     },
-                               { sx    , sy - 1 }};
-
-            for ( i = 0; i < 4; i++ ) {
-                int32 nx = pos[i][0],
-                      ny = pos[i][1];
-
-                if ( ( nx >= 0 ) && ( nx < iSrcImage->Width()  ) &&
-                     ( ny >= 0 ) && ( ny < iSrcImage->Height() ) ) {
-                    uint32 noffset = ( ny * iSrcImage->Width() ) + nx;
-                    ::ULIS::FColor curColor = iSrcImage->Color( nx, ny );
-
-                    if ( ( iMask == nullptr ) || *(iMask->PixelBits(nx,ny)) ) {
-                        /*if ( ( dstPixel[0] != iNewR ) &&
-                             ( dstPixel[1] != iNewG ) &&
-                             ( dstPixel[2] != iNewB ) )  {*/
-                        if ( passed[noffset] == 0 ) {
-                            switch ( iSrcImage->BytesPerPixel() ) {
-                                case 3 :
-                                case 4 : {
-                                    if ( ( curColor.R8() >= ::ULIS::FMath::Max( oldR - iTolerance, 0x00 ) ) &&
-                                         ( curColor.R8() <= ::ULIS::FMath::Min( oldR + iTolerance, 0xFF ) ) &&
-                                         ( curColor.G8() >= ::ULIS::FMath::Max( oldG - iTolerance, 0x00 ) ) &&
-                                         ( curColor.G8() <= ::ULIS::FMath::Min( oldG + iTolerance, 0xFF ) ) &&
-                                         ( curColor.B8() >= ::ULIS::FMath::Max( oldB - iTolerance, 0x00 ) ) &&
-                                         ( curColor.B8() <= ::ULIS::FMath::Min( oldB + iTolerance, 0xFF ) ) &&
-                                         ( curColor.A8() >= ::ULIS::FMath::Max( oldA - iTolerance, 0x00 ) ) &&
-                                         ( curColor.A8() <= ::ULIS::FMath::Min( oldA + iTolerance, 0xFF ) ) ) {
-                                        stack[nbItems][0] = nx;
-                                        stack[nbItems][1] = ny;
-
-                                        // this is super slow
-                                        iDstImage->SetPixel( nx, ny, iColor );
-
-                                        nbItems++;
-
-                                        if ( nbItems == maxItems ) {
-                                            maxItems += 0xFFFF;
-
-                                            stack = (int32(*)[2]) realloc ( stack, sizeof ( int32 ) * 2 * maxItems );
-                                        }
-                                    }
-                                } break;
-
-                                default : 
-                                break;
-                            }
-
-                            passed[noffset] = 1;
-                        }
-                    }
-                }
-            }
-
-            curItem++;
-        }
-
-        free ( stack );
-        free ( passed );
-    }
-}
-
 bool
 UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
                                                      , const FKey& iKey )
@@ -266,6 +196,133 @@ UOdysseyPainterEditorRasterPaintBucketTool::PostEditChangeProperty( FPropertyCha
 {
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterPaintBucketTool::CreateSourceMaskBlock(TSharedPtr<::ULIS::FBlock> iBlock, const ::ULIS::ISample& iColor) const
+{
+    switch(ColorToleranceSource)
+    {
+        case EOdysseyRasterPaintBucketToolColorToleranceSource::Color: return CreateSourceMaskBlockFromColor(iBlock, iColor, true, false);
+        case EOdysseyRasterPaintBucketToolColorToleranceSource::Transparency: return CreateSourceMaskBlockFromColor(iBlock, iColor, false, true);
+        case EOdysseyRasterPaintBucketToolColorToleranceSource::ColorAndTransparency: return CreateSourceMaskBlockFromColor(iBlock, iColor, true, true);
+        case EOdysseyRasterPaintBucketToolColorToleranceSource::Luminosity: return CreateSourceMaskBlockFromLuminosity(iBlock, iColor);
+    }
+    return nullptr;
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterPaintBucketTool::CreateSourceMaskBlockFromColor(TSharedPtr<::ULIS::FBlock> iBlock, const ::ULIS::ISample& iColor, bool iUseColor, bool iUseTransparency) const
+{
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(iBlock->Width(), iBlock->Height(), ::ULIS::Format_G8);
+
+    ::ULIS::FColor color = iColor.ToFormat(iBlock->Format());
+    TArray<float> channelsMin;
+    TArray<float> channelsMax;
+    
+    for (int i = 0; i < color.SamplesPerPixel(); i++)
+    {
+        channelsMin.Add(color.ChannelF(i) - ColorTolerance / 100.f);
+        channelsMax.Add(color.ChannelF(i) + ColorTolerance / 100.f);
+    }
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_G8);
+    ctx.FilterInto(
+        [&, this]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+        {
+            for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+            {
+                iDstPixel.SetGrey8( 0 );
+                for (int j = 0; j < color.SamplesPerPixel(); j++)
+                {
+                    if (!iUseTransparency && color.HasAlpha() && color.AlphaIndex() == j)
+                        continue;
+
+                    if (!iUseColor && (!color.HasAlpha() || color.AlphaIndex() != j))
+                        continue;
+
+                    if( iSrcPixel.ChannelF(j) < channelsMin[j] || iSrcPixel.ChannelF(j) > channelsMax[j] )
+                    {
+                        iDstPixel.SetGrey8( 255 );
+                        break;
+                    }
+                }
+            }
+        }
+        , *iBlock
+        , *block
+    );
+    ctx.Finish();
+
+    return block;
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterPaintBucketTool::CreateSourceMaskBlockFromLuminosity(TSharedPtr<::ULIS::FBlock> iBlock, const ::ULIS::ISample& iColor) const
+{
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(iBlock->Width(), iBlock->Height(), ::ULIS::Format_G8);
+
+    float minLuma = iColor.LumaF() - ColorTolerance / 100.f;
+    float maxLuma = iColor.LumaF() + ColorTolerance / 100.f;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_G8);
+    ctx.FilterInto(
+        [this, minLuma, maxLuma]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+        {
+            for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+            {
+                if( iSrcPixel.LumaF() < minLuma || iSrcPixel.LumaF() > maxLuma )
+                    iDstPixel.SetGrey8( 255 );
+                else
+                    iDstPixel.SetGrey8( 0 );
+            }
+        }
+        , *iBlock
+        , *block
+    );
+    ctx.Finish();
+
+    return block;
+}
+
+void
+UOdysseyPainterEditorRasterPaintBucketTool::ConvertMaskBlockToColorBlock(TSharedPtr<::ULIS::FBlock> iMask, TSharedPtr<::ULIS::FBlock> iColorBlock, const ::ULIS::FColor& iColor) const
+{
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iColorBlock->Format());
+
+    ::ULIS::FColor color = iColor.ToFormat(iColorBlock->Format());
+    ::ULIS::FColor emptyColor = ::ULIS::FColor::Transparent;
+
+    ctx.FilterInto(
+        [this, color, emptyColor]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+        {
+            for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+            {
+                if( iSrcPixel.Grey8() == 255 )
+                    ::ULIS::ISample::ConvertFormat(color, iDstPixel);
+                else
+                    ::ULIS::ISample::ConvertFormat(emptyColor, iDstPixel);
+            }
+        }
+        , *iMask
+        , *iColorBlock
+    );
+    ctx.Finish();
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterPaintBucketTool::GetSourceBlock() const
+{
+    if (!mSourceProvider)
+        return nullptr;
+
+    return mSourceProvider->GetSourceBlock(Source);
+}
+
+void
+UOdysseyPainterEditorRasterPaintBucketTool::SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider)
+{
+    mSourceProvider = iProvider;
 }
 
 #undef LOCTEXT_NAMESPACE

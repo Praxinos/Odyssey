@@ -91,9 +91,12 @@ UOdysseyTextureLayerStack::GetTexture() const
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const
+UOdysseyTextureLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
 {
-    return MakeShared<FOdysseyTextureLayerStackImageRenderer>(this, iRenderType, GetImageRenderingRects());
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyTextureLayerStackImageRenderer>(this, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

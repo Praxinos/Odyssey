@@ -6,7 +6,7 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImageRenderer.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderer.h"
 
-FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRasterImageRenderer(const UOdysseyAnimationLayerImageRaster* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRasterImageRenderer(const UOdysseyAnimationLayerImageRaster* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCellRenderer(nullptr)
     , mBlendMode(::ULIS::eBlendMode(iLayer->BlendMode))
@@ -27,10 +27,10 @@ FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRaste
     TSharedPtr<FOdysseyAnimationCell> cell = iLayer->GetCellsContainer()->GetCellAtFrame(frame);
     int cellFrameIndex = iLayer->GetCellsContainer()->GetCellFrameAtFrame(frame);
     if (cell && cellFrameIndex != INDEX_NONE)
-        mCellRenderer = cell->BuildImageRenderer(iRenderType, cellFrameIndex);
+        mCellRenderer = cell->BuildImageRenderer(iRenderType, cellFrameIndex, iFilter);
 
     if ( iRenderType == IOdysseyImageRenderer::eRenderType::Editor && iLayer->bIsLightTableActivated )
-        mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer->GetLightTable().ToSharedRef(), iFrame, iRenderType, iDefaultRects);
+        mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer->GetLightTable().ToSharedRef(), iFrame, iRenderType, iDefaultRects, iFilter);
 }
     
 void

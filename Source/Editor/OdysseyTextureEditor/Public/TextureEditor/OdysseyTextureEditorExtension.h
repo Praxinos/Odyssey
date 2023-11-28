@@ -27,10 +27,13 @@ public:
 
 public:
     UTexture2D* Texture() const;
+    TSharedPtr<FOdysseyTextureEditorSource> GetTextureSource() const;
 
 private:
     void OnSourceChanged();
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
+    
+    void ConfigureTools();
 
 private:
     TSharedPtr<FOdysseyTextureEditorSource> mTextureSource;

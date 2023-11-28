@@ -91,7 +91,7 @@ public:
 
 public:
     //FOdysseyImageRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType) const override;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
     virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 

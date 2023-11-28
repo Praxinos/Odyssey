@@ -6,10 +6,21 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
+#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketToolSourceProvider.h"
 
 #include "OdysseyPainterEditorRasterPaintBucketTool.generated.h"
 
 class FOdysseyPaintEngine;
+class FOdysseyPainterEditorRasterPaintBucketToolSourceProvider;
+
+UENUM()
+enum class EOdysseyRasterPaintBucketToolColorToleranceSource : uint8
+{
+    Color,
+    Transparency,
+    ColorAndTransparency,
+    Luminosity
+};
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterPaintBucketTool : public UOdysseyPainterEditorTool
@@ -17,12 +28,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterPaintBucketTool : publ
     GENERATED_BODY()
 
 public:
+    DECLARE_DELEGATE_RetVal(TSharedPtr<::ULIS::FBlock>, FSourceGetter)
+
+public:
     //Inactivates the tool
     virtual bool IsActivable() const override;
 
     virtual void Load();
     virtual void Unload();
-
 
     static bool DoubleClicked();
 
@@ -48,8 +61,29 @@ public:
     virtual void Commit() override;
 
 public:
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool )
-    uint8 Tolerance;
+    void SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider);
+
+private:
+    TSharedPtr<::ULIS::FBlock> CreateSourceMaskBlock(TSharedPtr<::ULIS::FBlock> iBlock, const ::ULIS::ISample& iColor) const;
+    TSharedPtr<::ULIS::FBlock> CreateSourceMaskBlockFromColor(TSharedPtr<::ULIS::FBlock> iBlock, const ::ULIS::ISample& iColor, bool iUseColor, bool iUseTransparency) const;
+    TSharedPtr<::ULIS::FBlock> CreateSourceMaskBlockFromLuminosity(TSharedPtr<::ULIS::FBlock> iBlock, const ::ULIS::ISample& iColor) const;
+    void ConvertMaskBlockToColorBlock(TSharedPtr<::ULIS::FBlock> iMask, TSharedPtr<::ULIS::FBlock> iColorBlock, const ::ULIS::FColor& iColor) const;
+    TSharedPtr<::ULIS::FBlock> GetSourceBlock() const;
+
+public:
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool)
+    EOdysseyRasterPaintBucketToolSource Source = EOdysseyRasterPaintBucketToolSource::CurrentLayer;
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool)
+    EOdysseyRasterPaintBucketToolColorToleranceSource ColorToleranceSource;
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool, meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
+    float ColorTolerance; //0 - 100%
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool, meta=(LinearDeltaSensitivity=1) )
+    float Expansion; //pixels positive and negative
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool, meta=(ClampMin=0, UIMin=0, LinearDeltaSensitivity=1) )
+    float GapTolerance; //pixels positive only
+
+private:
+    TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> mSourceProvider;
 
 protected:
     FOdysseyPaintEngine mPaintEngine;
