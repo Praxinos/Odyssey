@@ -9,9 +9,16 @@
 #include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerFolderRow"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
+
+SOdysseyAnimationLayerFolderRow::SOdysseyAnimationLayerFolderRow()
+    : mSetOpacityTransactionName(LOCTEXT("layer-folder.transaction.set-opacity", "Change Layer Opacity"))
+{
+    
+}
+
 void SOdysseyAnimationLayerFolderRow::Construct(
     const FArguments& iArgs,
     const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
@@ -103,7 +110,7 @@ SOdysseyAnimationLayerFolderRow::GenerateOptionsWidget()
 void
 SOdysseyAnimationLayerFolderRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer BlendMode"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-folder.transaction.set-blend-mode", "Change Layer BlendMode"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, "BlendMode", iValue, EPropertyChangeType::ValueSet);
 }
 
@@ -111,7 +118,7 @@ void
 SOdysseyAnimationLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
@@ -125,7 +132,7 @@ void
 SOdysseyAnimationLayerFolderRow::OnOpacityBeginSliderMovement()
 {
     //Creating a transaction here manages entering a value using slider
-    GEditor->BeginTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    GEditor->BeginTransaction(mSetOpacityTransactionName);
 }
 
 void

@@ -45,7 +45,7 @@ void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
             [
                 SNew(STextBlock)
                 .TextStyle(FAppStyle::Get(), "NormalText.Important")
-                .Text(LOCTEXT("AddEntry", "Add Entry"))
+                .Text(LOCTEXT("add-entry-button.add-entry", "Add Entry"))
             ]
         ];
 
@@ -117,6 +117,10 @@ SOdysseyPaletteAddEntryButton::AddEntryFromClass(FAssetData iAssetData)
 
 	if ( !entryClass )
 		return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("add-entry-button.transaction.add-entry", "Add Entry"));
+#endif
 
     UOdysseyPaletteEntry* currentEntry = palette->CurrentEntry.Get();
     if (currentEntry)

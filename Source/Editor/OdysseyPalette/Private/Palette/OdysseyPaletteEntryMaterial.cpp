@@ -7,8 +7,8 @@
 
 UOdysseyPaletteEntryMaterial::UOdysseyPaletteEntryMaterial()
 {
-    EntryTypeName = LOCTEXT("EntryTypeName", "Material Entry");
-    DefaultName = LOCTEXT("DefaultName", "Material");
+    EntryTypeName = LOCTEXT("entry-material.type", "Material Entry");
+    DefaultName = LOCTEXT("entry-material.default-name", "Material");
     Icon = *FOdysseyStyle::GetBrush("OdysseyPalette.EntryMaterial");
 }
 

@@ -7,8 +7,8 @@
 
 UOdysseyPaletteEntryColor::UOdysseyPaletteEntryColor()
 {
-    EntryTypeName = LOCTEXT( "EntryTypeName", "Color Entry" );
-    DefaultName = LOCTEXT("DefaultName", "Color");
+    EntryTypeName = LOCTEXT( "entry-color.type", "Color Entry" );
+    DefaultName = LOCTEXT("entry-color.default-name", "Color");
     Icon = *FOdysseyStyle::GetBrush("OdysseyPalette.EntryColor");
     
     if( GetPalette() )

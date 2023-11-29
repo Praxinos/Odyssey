@@ -20,7 +20,7 @@
 #include "Misc/Paths.h"
 #include <string>
 
-#define LOCTEXT_NAMESPACE "OdysseyExportFolderExtension"
+#define LOCTEXT_NAMESPACE "ContentBrowserExtension"
 
 /*-----------------------------------------------------------------------------
    FOdysseyExportFolderExtension
@@ -39,8 +39,8 @@ FOdysseyExportFolderExtension::Register( FContentBrowserModule& iContentBrowserM
             FMenuExtensionDelegate::CreateLambda( [iSelectedPaths] ( FMenuBuilder& ioMenuBuilder )
             {
                 ioMenuBuilder.AddSubMenu(
-                  LOCTEXT( "CB_Extension_Texture_IliadActions", "ILIAD Actions" )
-                , LOCTEXT( "CB_Extension_Texture_IliadActions_ToolTip", "All actions related to ILIAD" )
+                  LOCTEXT( "context-menu.export-folder-submenu.name", "ILIAD Actions" )
+                , LOCTEXT( "context-menu.export-folder-submenu.tooltip", "All actions related to ILIAD" )
                 , FNewMenuDelegate::CreateStatic( &FOdysseyExportFolderExtension::PopulateIliadActionsSubMenu, iSelectedPaths )
                 , false
                 , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Iliad16" )
@@ -54,8 +54,8 @@ void
 FOdysseyExportFolderExtension::PopulateIliadActionsSubMenu( FMenuBuilder& ioMenuBuilder, const TArray<FString> iSelectedPaths )
 {
     ioMenuBuilder.AddMenuEntry(
-        LOCTEXT( "MyActionTitle", "Export all Textures" ),
-        LOCTEXT( "MyActionTooltip", "Export all Textures within the selected folder" ),
+        LOCTEXT( "context-menu.export-folder.export-all-textures.name", "Export all Textures" ),
+        LOCTEXT( "context-menu.export-folder.export-all-textures.tooltip", "Export all Textures within the selected folder" ),
         FSlateIcon( "OdysseyStyle", "OdysseyTexture.ExportTexture_16" ),
         FUIAction( FExecuteAction::CreateStatic( &FOdysseyExportFolderExtension::ExecuteExportFolder, iSelectedPaths ) )
     );
@@ -71,7 +71,7 @@ FOdysseyExportFolderExtension::ExecuteExportFolder( TArray<FString> iSelectedPat
         FAssetRegistryModule& assetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>( TEXT("AssetRegistry") );
         if ( assetRegistryModule.Get().IsLoadingAssets() )
         {
-            FMessageDialog::Open( EAppMsgType::Ok, LOCTEXT( "ExportFolderAssetsNotDiscovered", "You must wait until asset discovery is complete to export the folder content" ) );
+            FMessageDialog::Open( EAppMsgType::Ok, LOCTEXT( "export-folder.error.assets-not-yet-discovered", "You must wait until asset discovery is complete to export the folder content" ) );
             return;
         }
 
@@ -135,7 +135,7 @@ void FOdysseyExportFolderExtension::PerformExportFolder(TArray<FName> iPackageNa
     {
         const void* parentWindowWindowHandle = FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr);
 
-        const FString title = LOCTEXT("ExportToFolderTitle", "Choose a destination Export folder").ToString();
+        const FString title = LOCTEXT("export-folder.window.title", "Choose a destination Export folder").ToString();
 
         const bool bFolderSelected = desktopPlatform->OpenDirectoryDialog(
             parentWindowWindowHandle,
@@ -160,14 +160,14 @@ void FOdysseyExportFolderExtension::PerformExportFolder(TArray<FName> iPackageNa
     else
     {
         // Not on a platform that supports desktop functionality
-        FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("NoDesktopPlatform", "Error: This platform does not support a file dialog."));
+        FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("export-folder.error.platform-dialog-not-supported", "Error: This platform does not support a file dialog."));
         return;
     }
 
     // Form a full list of packages to move by including the dependencies of the supplied packages
     TSet<FName> allPackageNamesToMove;
     {
-        FScopedSlowTask slowTask( iPackageNamesToExport.Num(), LOCTEXT( "ExportFolders_GatheringDependencies", "Gathering Dependencies..." ) );
+        FScopedSlowTask slowTask( iPackageNamesToExport.Num(), LOCTEXT( "export-folder.dependencies-gathering.progressbar.title", "Gathering Dependencies..." ) );
         slowTask.MakeDialog();
 
         for ( auto packageIt = iPackageNamesToExport.CreateConstIterator(); packageIt; ++packageIt )
@@ -190,13 +190,13 @@ void FOdysseyExportFolderExtension::PerformExportFolder(TArray<FName> iPackageNa
     // Confirm that there is at least one package to move 
     if ( allPackageNamesToMove.Num() == 0 )
     {
-        FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("ExportFolder_NoFilesFound", "No files were found to export"));
+        FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("export-folder.error.no-files-found-to-export", "No files were found to export"));
         return;
     }
 
     // Prompt the user displaying all assets that are going to be exported
     {
-        const FText reportMessage = LOCTEXT("ExportFolderReportTitle", "The following assets will be exported to your system.");
+        const FText reportMessage = LOCTEXT("export-folder.report-message", "The following assets will be exported to your system.");
         TSharedPtr<TArray<ReportPackageData>> reportPackages = MakeShareable(new TArray<ReportPackageData>);
         for( auto packageIt = allPackageNamesToMove.CreateConstIterator(); packageIt; ++packageIt )
         {
@@ -218,7 +218,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
     if ( ( foundFiles.Num() > 0 ) == true )
     {
         EAppReturnType::Type answer;
-        const FText notEmptyFolder = FText::Format( LOCTEXT("ExportFolder_NotEmpty", "The Folder {0} is not empty, continue anyway ?"), FText::FromString( iDestinationFolder ) );
+        const FText notEmptyFolder = FText::Format( LOCTEXT("export-folder.error.folder-not-empty", "The Folder {0} is not empty, continue anyway ?"), FText::FromString( iDestinationFolder ) );
         answer = FMessageDialog::Open( EAppMsgType::YesNo, notEmptyFolder );
         if ( answer == EAppReturnType::No )
         {
@@ -231,7 +231,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
 
     // Copy all specified assets and their dependencies to the destination folder
     {
-        FScopedSlowTask slowTask( 1, LOCTEXT( "ExportFolder_CopyingFiles", "Copying Files..." ) );
+        FScopedSlowTask slowTask( 1, LOCTEXT( "export-folder.copying-files.progressbar.title", "Copying Files..." ) );
         slowTask.MakeDialog();
 
         EAppReturnType::Type lastResponse = EAppReturnType::Yes;
@@ -253,7 +253,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
                 // Check if the Content Browser file exists
                 if (!FPackageName::DoesPackageExist(packageName, &srcFilename))
                 {
-                    const FText errorMessage = FText::Format(LOCTEXT("ExportFolder_PackageMissing", "{0} does not exist on disk."), FText::FromString(packageName));
+                    const FText errorMessage = FText::Format(LOCTEXT("export-folder.error.package-does-not-exist-on-disk", "{0} does not exist on disk."), FText::FromString(packageName));
                 }
                 // Check if the Content Browser file is not in the Game folder
                 else if (srcFilename.Contains(FPaths::EngineContentDir()))
@@ -283,7 +283,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
                             }
                             else
                             {
-                                const FText message = FText::Format( LOCTEXT("ExportFolder_AlreadyExists", "An asset already exists at location {0} would you like to overwrite it?"), FText::FromString(destFilename) );
+                                const FText message = FText::Format( LOCTEXT("export-folder.asset-overwrite-prompt", "An asset already exists at location {0} would you like to overwrite it?"), FText::FromString(destFilename) );
                                 response = FMessageDialog::Open( EAppMsgType::YesNoYesAllNoAllCancel, message );
                                 if ( response == EAppReturnType::Cancel )
                                 {
@@ -318,7 +318,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
         }
     }
 
-    const FText exportFinished = FText::Format( LOCTEXT("ExportFolder_Finished", "The export operation is finished "), FText::FromString( iDestinationFolder ) );
+    const FText exportFinished = FText::Format( LOCTEXT("export-folder.operation-finished", "The export operation is finished "), FText::FromString( iDestinationFolder ) );
     FMessageDialog::Open( EAppMsgType::Ok, exportFinished );
 }
 

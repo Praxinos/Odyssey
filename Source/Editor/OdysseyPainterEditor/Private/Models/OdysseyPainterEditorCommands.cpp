@@ -5,7 +5,7 @@
 #include "OdysseyStyleSet.h"
 #include "Command/OdysseyCommandMacros.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorCommands"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 namespace
 {
@@ -18,14 +18,14 @@ namespace
 }
 
 FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
-    : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", NSLOCTEXT( "Contexts", "IliadPainterEditor", "Iliad Painter Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
+    : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", LOCTEXT( "editor-commands.name", "Iliad Painter Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
-    AddBundle(BrushBlendingModeShortcuts, LOCTEXT("BrushBlendingModeShortcutsCategory", "Brush Blending Mode Shortcuts"));
-    AddBundle(BrushAlphaModeShortcuts, LOCTEXT("BrushAlphaModeShortcutsCategory", "Brush Alpha Mode Shortcuts"));
-    AddBundle(ViewportShortcuts, LOCTEXT("ViewportShortcutsCategory", "Viewport Shortcuts"));
-    AddBundle(BrushStrokesShortcuts, LOCTEXT("Brushes&StrokesShortcutsShortcutsCategory", "Brushes & Strokes Shortcuts"));
-    AddBundle(HelpShortcuts, LOCTEXT("HelpShortcutsCategory", "Help Shortcuts"));
-    AddBundle(UncategorizedYetShortcuts, LOCTEXT("UncategorizedYetShortcutsCategory", "Uncategorized Yet Shortcuts"));
+    AddBundle(BrushBlendingModeShortcuts, LOCTEXT("editor-commands.category.brush-blending-mode-shortcuts", "Brush Blending Mode Shortcuts"));
+    AddBundle(BrushAlphaModeShortcuts, LOCTEXT("editor-commands.category.brush-alpha-mode-shortcuts", "Brush Alpha Mode Shortcuts"));
+    AddBundle(ViewportShortcuts, LOCTEXT("editor-commands.category.viewport-shortcuts", "Viewport Shortcuts"));
+    AddBundle(BrushStrokesShortcuts, LOCTEXT("editor-commands.category.brushes-ans-strokes-shortcuts", "Brushes & Strokes Shortcuts"));
+    AddBundle(HelpShortcuts, LOCTEXT("editor-commands.category.help-shortcuts", "Help Shortcuts"));
+    AddBundle(UncategorizedYetShortcuts, LOCTEXT("editor-commands.category.uncategorized-yet-shortcuts", "Uncategorized Yet Shortcuts"));
 }
 
 void

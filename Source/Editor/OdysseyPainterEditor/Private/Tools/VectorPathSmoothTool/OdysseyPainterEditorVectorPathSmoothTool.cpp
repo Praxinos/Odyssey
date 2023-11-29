@@ -111,7 +111,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
     if( iKey == EKeys::LeftMouseButton )
     {
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorPathSmoothTool","Vector Path Smooth Tool"));
+        GEditor->BeginTransaction(LOCTEXT("vector-path-smooth-tool.transaction.smooth-path","Vector Path Smooth Tool"));
         if( GUndo )
         {
             mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
@@ -216,8 +216,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
     FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, segmentArray );
 
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPathSmoothTool","Vector Path Smooth Tool"));
-    if( GUndo )
+    GEditor->BeginTransaction(LOCTEXT("vector-path-smooth-tool.transaction.smooth-path
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSegmentReshape( iScene, segmentArray );
 

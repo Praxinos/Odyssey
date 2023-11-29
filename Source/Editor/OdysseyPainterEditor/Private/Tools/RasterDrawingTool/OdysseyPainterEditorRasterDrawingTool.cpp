@@ -275,7 +275,7 @@ UOdysseyPainterEditorRasterDrawingTool::Flush()
 void
 UOdysseyPainterEditorRasterDrawingTool::Commit()
 {
-    FScopedTransaction transaction(LOCTEXT("OnPaintStroke", "Paint Stroke"));
+    FScopedTransaction transaction(LOCTEXT("raster-drawing-tool.transaction.paint-stroke", "Paint Stroke"));
     mPaintEngine.Commit(BlendParameters);
 }
 

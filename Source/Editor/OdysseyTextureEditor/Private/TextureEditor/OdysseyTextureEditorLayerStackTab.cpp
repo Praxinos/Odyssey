@@ -403,6 +403,10 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
     if ( !layerStack )
         return;
 
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.create-new-layer", "Add Layer"));
+#endif
+
     layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
 }
 
@@ -419,6 +423,10 @@ FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
     if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )
         return;
 
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.set-layer-opacity", "Change Layer Opacity"));
+#endif
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 

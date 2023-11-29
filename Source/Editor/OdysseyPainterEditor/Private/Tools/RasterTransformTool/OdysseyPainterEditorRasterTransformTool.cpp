@@ -570,7 +570,7 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
 {
     if( mRasterMutator.GetRasterBlock() != nullptr )
     {
-        GEditor->BeginTransaction(LOCTEXT("CommitTransform", "Transform"));
+        GEditor->BeginTransaction(LOCTEXT("raster-transform-tool.transaction.transform", "Transform"));
         mRasterMutator.Commit();
         mPaintEngine.Commit(FOdysseyBlendParameters());
         GEditor->EndTransaction();

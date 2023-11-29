@@ -10,7 +10,7 @@
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyLayerRow"
+#define LOCTEXT_NAMESPACE "LayerStackEditor"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyLayer* iLayer)
@@ -175,7 +175,7 @@ SOdysseyLayerRow::GenerateIsLockedWidget()
 void
 SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Active"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-activated", "Change Layer Active"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "IsActivated", iState == ECheckBoxState::Checked);
 }
 
@@ -188,7 +188,7 @@ SOdysseyLayerRow::GetIsActivatedCheckBoxState() const
 void
 SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged(ECheckBoxState iState)
 {
-	FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Lock"));
+	FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-locked", "Change Layer Lock"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "IsLocked", iState == ECheckBoxState::Checked);
 }
 
@@ -213,7 +213,7 @@ SOdysseyLayerRow::GetLayer()
 void
 SOdysseyLayerRow::OnLayerNameCommited(const FText& iText, ETextCommit::Type iType)
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Name"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-name", "Change Layer Name"));
 	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "Name", iText);
 }
 
@@ -367,17 +367,26 @@ SOdysseyLayerRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iD
     TArray<UOdysseyLayer*> layers = operation->GetLayers();
 	int index = mLayer->GetIndexInParent();
 
+	FText moveLayersTransactionName = LOCTEXT("layer.drag-drop.transaction.move-layers", "Move Layers");
+	FText copyLayersTransactionName = LOCTEXT("layer.drag-drop.transaction.copy-layers", "Copy Layers");
+
 	switch ( iDropZone )
 	{
 		case EItemDropZone::AboveItem:
 		{
 			//do nothing
 			if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
-			{
+			{				
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(moveLayersTransactionName);
+				#endif
 				layerStack->MoveLayers(layers, parent, index);
 			}
 			else
 			{
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(copyLayersTransactionName);
+				#endif
 				layerStack->CopyLayers(layers, parent, index);
 			}
 		}
@@ -387,8 +396,12 @@ SOdysseyLayerRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iD
 		{
 			if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
 			{
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(moveLayersTransactionName);
+				#endif
 				if ( mLayer->CanHaveChildren )
 				{
+					
 					layerStack->MoveLayers(layers, mLayer, 0);
 				}
 				else
@@ -398,6 +411,9 @@ SOdysseyLayerRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iD
 			}
 			else
 			{
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(copyLayersTransactionName);
+				#endif
 				if ( mLayer->CanHaveChildren )
 				{
 					layerStack->CopyLayers(layers, mLayer, 0);
@@ -414,10 +430,16 @@ SOdysseyLayerRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iD
 		{
 			if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
 			{
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(moveLayersTransactionName);
+				#endif
 				layerStack->MoveLayers(layers, parent, index + 1);
 			}
 			else
 			{
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(copyLayersTransactionName);
+				#endif
 				layerStack->CopyLayers(layers, parent, index + 1);
 			}
 		}

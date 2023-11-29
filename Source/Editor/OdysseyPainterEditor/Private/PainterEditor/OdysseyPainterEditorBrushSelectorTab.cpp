@@ -8,7 +8,7 @@
 #include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
 #include "ObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorBrushSelectorTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorBrushSelectorTab::StaticId()
@@ -26,7 +26,7 @@ FOdysseyPainterEditorBrushSelectorTab::~FOdysseyPainterEditorBrushSelectorTab()
 }
 
 FOdysseyPainterEditorBrushSelectorTab::FOdysseyPainterEditorBrushSelectorTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorBrushSelectorTab", "Brush Selector" ), FSlateIcon( "OdysseyStyle", "PainterEditor.BrushSelector16" ))
+	: FOdysseyEditorTab(LOCTEXT( "brush-selector-tab.name", "Brush Selector" ), FSlateIcon( "OdysseyStyle", "PainterEditor.BrushSelector16" ))
     , mEditor(iEditor)
 {
 }

@@ -9,7 +9,7 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerFolder"
+#define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationLayerFolder::FOnBlendModeChanged&
 UOdysseyAnimationLayerFolder::OnBlendModeChanged()
@@ -27,8 +27,8 @@ UOdysseyAnimationLayerFolder::OnOpacityChanged()
 
 UOdysseyAnimationLayerFolder::UOdysseyAnimationLayerFolder()
 {
-	LayerTypeName = LOCTEXT("LayerTypeName", "Folder Layer");
-    DefaultName = LOCTEXT("DefaultName", "Folder");
+	LayerTypeName = LOCTEXT("layer-folder.type", "Folder Layer");
+    DefaultName = LOCTEXT("layer-folder.default-name", "Folder");
     Icon = *FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderClosed" );
     IconExpanded = *FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderOpen" );
     CanHaveChildren = true;

@@ -26,7 +26,7 @@ FOdysseyPainterEditorToolsTab::~FOdysseyPainterEditorToolsTab()
 }
 
 FOdysseyPainterEditorToolsTab::FOdysseyPainterEditorToolsTab(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorToolsTab", "Tools" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
+    : FOdysseyEditorTab(LOCTEXT( "tools-tab.name", "Tools" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
 {
 }

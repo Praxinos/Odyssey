@@ -16,7 +16,7 @@
 #include "EditorStyleSet.h"
 #include "Interfaces/IMainFrameModule.h"
 
-#define LOCTEXT_NAMESPACE "PackageReportDialog"
+#define LOCTEXT_NAMESPACE "ContentBrowserExtension"
 
 struct FCompareFPackageReportNodeByName
 {
@@ -153,7 +153,7 @@ void SOdysseyPackageReportDialog::Construct( const FArguments& iInArgs, const FT
                 +SHorizontalBox::Slot()
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "format-export", "Image(s) Export Format :" ) )
+                    .Text( LOCTEXT( "package-report-window.export-format", "Image(s) Export Format :" ) )
                 ]
                 +SHorizontalBox::Slot()
                 .FillWidth( 2 )
@@ -180,7 +180,7 @@ void SOdysseyPackageReportDialog::Construct( const FArguments& iInArgs, const FT
                     .HAlign(HAlign_Center)
                     .ContentPadding( FAppStyle::GetMargin("StandardDialog.ContentPadding") )
                     .OnClicked(this, &SOdysseyPackageReportDialog::OkClicked)
-                    .Text(LOCTEXT("OkButton", "OK"))
+                    .Text(LOCTEXT("package-report-window.ok", "OK"))
                 ]
                 +SUniformGridPanel::Slot(1,0)
                 [
@@ -188,7 +188,7 @@ void SOdysseyPackageReportDialog::Construct( const FArguments& iInArgs, const FT
                     .HAlign(HAlign_Center)
                     .ContentPadding( FAppStyle::GetMargin("StandardDialog.ContentPadding") )
                     .OnClicked(this, &SOdysseyPackageReportDialog::CancelClicked)
-                    .Text(LOCTEXT("CancelButton", "Cancel"))
+                    .Text(LOCTEXT("package-report-window.cancel", "Cancel"))
                 ]
             ]
         ]
@@ -204,7 +204,7 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SOdysseyPackageReportDialog::OpenPackageReportDialog(const FText& iReportMessage, TArray<ReportPackageData>& iPackageNames, const FOnReportConfirmed& iInOnReportConfirmed)
 {
     TSharedRef<SWindow> reportWindow = SNew(SWindow)
-        .Title(LOCTEXT("ReportWindowTitle", "Asset Report"))
+        .Title(LOCTEXT("package-report-window.title", "Asset Report"))
         .ClientSize( FVector2D(600, 500) )
         .SupportsMaximize(false)
         .SupportsMinimize(false)

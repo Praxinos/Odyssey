@@ -132,7 +132,7 @@ TSharedRef<SWidget> SOdysseyPaletteEntryRow::GenerateExpandableHeaderWidget()
 void
 SOdysseyPaletteEntryRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Change Entry Active"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("entry-row.set-is-activated", "Change Entry Active"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, "IsActivated", iState == ECheckBoxState::Checked);
 }
 
@@ -157,7 +157,7 @@ SOdysseyPaletteEntryRow::GetEntryNameFont() const
 void
 SOdysseyPaletteEntryRow::OnEntryNameCommited(const FText& iText, ETextCommit::Type iType)
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Change Entry Name"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("entry-row.set-name", "Change Entry Name"));
 	FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, "EntryName", iText);
 }
 
@@ -283,10 +283,16 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
     TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
 	int index = mEntry->GetIndexInParent();
 
+	FText copyEntriesTransactionName = LOCTEXT("entry-row.drag-drop.transaction.copy-entries", "Copy Entries");
+	FText moveEntriesTransactionName = LOCTEXT("entry-row.transaction.move-entries", "Move Entries");
+
 	switch ( iDropZone )
 	{
 		case EItemDropZone::AboveItem:
 		{
+			#ifdef WITH_EDITOR
+				FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
+			#endif
 			//do nothing
 			if ( operationPalette == palette ) //dropped from same Palette, do a move of topmost dropped entries
 			{
@@ -303,6 +309,9 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 		{
 			if ( operationPalette == palette ) //droped from same palette, do a move of topmost dropped entries
 			{
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
+				#endif
 				if (mEntry->CanHaveChildren)
 				{
 					palette->MoveEntries(entries, mEntry, 0);
@@ -314,6 +323,9 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 			}
 			else
 			{
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(copyEntriesTransactionName);
+				#endif
 				if (mEntry->CanHaveChildren)
 				{
 					palette->CopyEntries(entries, mEntry, 0);
@@ -330,10 +342,16 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 		{
 			if (operationPalette == palette) //droped from same palette, do a move of topmost dropped entries
 			{
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
+				#endif
 				palette->MoveEntries(entries, parent, index + 1);
 			}
 			else
 			{
+				#ifdef WITH_EDITOR
+					FScopedTransaction ScopedTransaction(copyEntriesTransactionName);
+				#endif
 				palette->CopyEntries(entries, parent, index + 1);
 			}
 		}

@@ -5,7 +5,7 @@
 
 #include "Widgets/SOdysseyAnimationLightTable.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorLightTableTab"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 
 const FName&
@@ -24,7 +24,7 @@ FOdysseyAnimationEditorLightTableTab::~FOdysseyAnimationEditorLightTableTab()
 }
 
 FOdysseyAnimationEditorLightTableTab::FOdysseyAnimationEditorLightTableTab(FOdysseyAnimationEditorExtension* iExtension)
-	: FOdysseyEditorTab( LOCTEXT( "OdysseyAnimationEditorLightTableTab", "LightTable" )
+	: FOdysseyEditorTab( LOCTEXT( "lighttable-tab.name", "LightTable" )
     , FSlateIcon( "OdysseyStyle", "Animation.LightTable16" ))
     , mExtension(iExtension)
 {

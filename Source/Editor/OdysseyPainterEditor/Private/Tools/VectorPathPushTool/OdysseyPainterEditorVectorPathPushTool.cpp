@@ -186,7 +186,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         //FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, savedSegmentArray );
 
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorPathPushTool","Vector Path Push Tool"));
+        GEditor->BeginTransaction(LOCTEXT("vector-path-push-tool.transaction.push-path","Vector Path Push Tool"));
         if( GUndo )
         {
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoSegmentReshape( iScene, vertexArray );

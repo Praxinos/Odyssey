@@ -25,7 +25,7 @@ FOdysseyPainterEditorColorWheelTab::~FOdysseyPainterEditorColorWheelTab()
 }
 
 FOdysseyPainterEditorColorWheelTab::FOdysseyPainterEditorColorWheelTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorColorWheelTab", "Color Wheel" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorWheel16" ))
+	: FOdysseyEditorTab(LOCTEXT( "color-wheel-tab.name", "Color Wheel" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorWheel16" ))
     , mEditor(iEditor)
 {
 }

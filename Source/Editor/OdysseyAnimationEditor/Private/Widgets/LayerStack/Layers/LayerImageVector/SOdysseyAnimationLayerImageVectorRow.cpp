@@ -9,9 +9,16 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageVectorRow"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
+
+SOdysseyAnimationLayerImageVectorRow::SOdysseyAnimationLayerImageVectorRow()
+    : mSetOpacityTransactionName(LOCTEXT("layer-image-vector.transaction.set-opacity", "Change Layer Opacity"))
+{
+    
+}
+
 void SOdysseyAnimationLayerImageVectorRow::Construct(
     const FArguments& InArgs,
     const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
@@ -150,7 +157,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             .Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
             [
                 SNew(STextBlock)
-                .Text(LOCTEXT("OdysseyLayerImageVectorBlendingMode", "LightTable"))
+                .Text(LOCTEXT("layer-image-vector.timeline-header.lighttable", "LightTable"))
             ]
         ];
 }
@@ -165,14 +172,14 @@ SOdysseyAnimationLayerImageVectorRow::GenerateTimelineWidget()
 void
 SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Wireframe status"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "IsWireframe", iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Coloring"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "IsColored", iState == ECheckBoxState::Checked);
 }
 
@@ -186,7 +193,7 @@ void
 SOdysseyAnimationLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
@@ -200,7 +207,7 @@ void
 SOdysseyAnimationLayerImageVectorRow::OnOpacityBeginSliderMovement()
 {
     //Creating a transaction here manages entering a value using slider
-    GEditor->BeginTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    GEditor->BeginTransaction(mSetOpacityTransactionName);
 }
 
 void
@@ -231,7 +238,7 @@ void
 SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer BlendMode"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-blend-mode", "Change Layer BlendMode"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "BlendMode", iValue);
 }
 

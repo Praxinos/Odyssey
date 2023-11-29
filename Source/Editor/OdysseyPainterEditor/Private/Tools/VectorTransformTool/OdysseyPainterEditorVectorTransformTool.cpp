@@ -829,7 +829,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
             if( mUndo )
             {
                 // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("VectorTransformTool","Vector Transform Tool"));
+                GEditor->BeginTransaction(LOCTEXT("vector-transform-tool.transaction.transform","Vector Transform Tool"));
                 if( GUndo )
                 {
                     GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(mUndo) );

@@ -4,33 +4,21 @@
 #pragma once
 
 #include "OdysseyLayer.h"
-#include "OdysseyCustomLayer.generated.h"
+//#include "OdysseyCustomLayer.generated.h"
 
 /**
  * @brief Should be the base class for all Blueprint based Layers
  * 
  */
 
-UCLASS(Abstract, BlueprintType)
+/* UCLASS(Abstract, BlueprintType)
 class ODYSSEYLAYERSTACK_API UOdysseyCustomLayer
     : public UOdysseyLayer
 {
     GENERATED_BODY()
 
 public:
-    /**
-     * @brief Will return every custom layer classes made in blueprint, in FAssetData format
-     * 
-     * @return TArray<FAssetData> 
-     */
     static TArray<FAssetData> FindAllCustomLayerClassesAssetData();
-
-    /**
-     * @brief Will return the actual UClass contained in an FAssetData, wether it's a C++ or Blueprint UClass 
-     * 
-     * @param AssetData 
-     * @return UClass* 
-     */
     static UClass* LoadClassFromAssetData(const FAssetData& AssetData);
 
 public:
@@ -48,4 +36,4 @@ public:
 
     UPROPERTY(EditDefaultsOnly, Category="Layer")
 	TSet<UClass*> CompatibleLayerStacks;
-};
+}; */

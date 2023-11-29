@@ -7,6 +7,8 @@
 #include "OdysseyPaletteEntry.h"
 #include "OdysseyStyleSet.h"
 
+#define LOCTEXT_NAMESPACE "Palette"
+
 FOdysseyPaletteDragDropOperation::FOdysseyPaletteDragDropOperation(UOdysseyPalette* iPalette, TArray<UOdysseyPaletteEntry*> iPaletteEntries)
 	: mPalette(iPalette)
 	, mPaletteEntries(iPaletteEntries)
@@ -43,7 +45,7 @@ FOdysseyPaletteDragDropOperation::GetText() const
 	if (mPaletteEntries.Num() == 1)
 		return mPaletteEntries[0]->EntryName;
 	
-	return FText::Format(NSLOCTEXT("OdysseyPaletteDragDropOperation", "EntriesCount", "{0} Entries"), FText::AsNumber(mPaletteEntries.Num()));
+	return FText::Format(LOCTEXT("palette-drag-drop-operation.entries-count", "{0} Entries"), FText::AsNumber(mPaletteEntries.Num()));
 }
 
 const FSlateBrush*
@@ -92,3 +94,5 @@ FOdysseyPaletteDragDropOperation::GetPalette() const
 {
 	return mPalette;
 }
+
+#undef LOCTEXT_NAMESPACE

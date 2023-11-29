@@ -17,7 +17,7 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterExport.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImport.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageRaster"
+#define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationLayerImageRaster::FOnBlendModeChanged&
 UOdysseyAnimationLayerImageRaster::OnBlendModeChanged()
@@ -47,7 +47,7 @@ UOdysseyAnimationLayerImageRaster::~UOdysseyAnimationLayerImageRaster()
 UOdysseyAnimationLayerImageRaster::UOdysseyAnimationLayerImageRaster()
     : mCellsContainer(MakeShared<FOdysseyAnimationCellsContainer>())
 {
-	LayerTypeName = LOCTEXT("LayerTypeName", "Raster Image Layer");
+	LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
 
     mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageRaster::StaticType());
@@ -181,10 +181,6 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     UOdysseyAnimation* animation = GetAnimation();
     if ( !animation )
         return;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Merge Layers"));
-#endif
 
     //Get all frame ranges and combine them
     TArray<FInt32Range> frameRanges = {};
@@ -509,7 +505,7 @@ UOdysseyAnimationLayerImageRaster::CreateMediaRaster(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
 {
-    FScopedTransaction transaction(LOCTEXT("CreateCell", "Create Cell"));
+    FScopedTransaction transaction(LOCTEXT("layer-image-raster.create-cell-transaction", "Create Cell"));
 
     UOdysseyAnimation* animation = GetAnimation();
     //Check if iFrameIndex is Out Of Range

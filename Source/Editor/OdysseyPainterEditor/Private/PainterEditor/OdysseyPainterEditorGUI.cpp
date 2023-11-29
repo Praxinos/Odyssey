@@ -26,7 +26,7 @@
 #include "ToolMenus.h"
 #include "Toolkits/AssetEditorModeUILayer.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorGUI
@@ -151,43 +151,43 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuNam
             iOwner,
             NAME_None,
             "Iliad",
-            LOCTEXT("IliadMenu", "Iliad"),
-            LOCTEXT("IliadMenu_ToolTip", "Iliad Actions")
+            LOCTEXT("about-menu.iliad-submenu.name", "Iliad"),
+            LOCTEXT("about-menu.iliad-submenu.tooltip", "Iliad Actions")
         );
     }
     UToolMenu* menu = UToolMenus::Get()->FindMenu( *(iMenuName.ToString() + FString(".Iliad") ) );
 
     //Adding entries in our menu
-    FToolMenuSection& aboutSection = menu->AddSection("About ILIAD", LOCTEXT("OdysseyPainter", "ILIAD"));
+    FToolMenuSection& aboutSection = menu->AddSection("About ILIAD", LOCTEXT("about-menu.iliad.iliad-section.name", "ILIAD"));
     {
         aboutSection.AddMenuEntry(
             FOdysseyPainterEditorCommands::Get().AboutIliad
-            , LOCTEXT("AboutIliad", "About Iliad")
-            , LOCTEXT("AboutIliad_Tooltip", "to get more information about the plugin, the team that created it, etc.")
+            , LOCTEXT("about-menu.iliad.about-iliad.name", "About Iliad")
+            , LOCTEXT("about-menu.iliad.about-iliad.tooltip", "to get more information about the plugin, the team that created it, etc.")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
             , NAME_None);
         aboutSection.AddMenuEntry(
             FOdysseyPainterEditorCommands::Get().VisitPraxinosWebsite
-            , LOCTEXT("VisitPraxinosWebsite", "About Praxinos ...")
-            , LOCTEXT("VisitPraxinosWebsite_Tooltip", "to get more information about the company Praxinos, its projects, etc.")
+            , LOCTEXT("about-menu.iliad.about-iliad.visit-praxinos-website.name", "About Praxinos ...")
+            , LOCTEXT("about-menu.iliad.about-iliad.visit-praxinos-website.tooltip", "to get more information about the company Praxinos, its projects, etc.")
             , FSlateIcon("OdysseyStyle", "OdysseyLogo.PraxinosLogo16")
             , NAME_None );
         aboutSection.AddMenuEntry(
             FOdysseyPainterEditorCommands::Get().ManualAndReleaseNotes
-            , LOCTEXT("ManualAndReleaseNotes", "Manual and Release Notes ...")
-            , LOCTEXT("ReleaseNotes_Tooltip", "to get a full changelog of each Iliad version.")
+            , LOCTEXT("about-menu.iliad.about-iliad.manual-and-release-notes.name", "Manual and Release Notes ...")
+            , LOCTEXT("about-menu.iliad.about-iliad.manual-and-release-notes.tooltip", "to get a full changelog of each Iliad version.")
             , FSlateIcon("OdysseyStyle", "About.Manual16")
             , NAME_None );
         aboutSection.AddMenuEntry(
             FOdysseyPainterEditorCommands::Get().GetBrushPack
-            , LOCTEXT("GetMoreBrushes", "Get more brushes ...")
-            , LOCTEXT("ReleaseNotes_Tooltip", "Want more brushes ? Just follow this link !")
+            , LOCTEXT("about-menu.iliad.about-iliad.get-more-brushes.name", "Get more brushes ...")
+            , LOCTEXT("about-menu.iliad.about-iliad.get-more-brushes.tooltip", "Want more brushes ? Just follow this link !")
             , FSlateIcon("OdysseyStyle", "About.MorePencils16")
             , NAME_None );
         aboutSection.AddMenuEntry(
             FOdysseyPainterEditorCommands::Get().Discord
-            , LOCTEXT("TalkWithTheDeveloppers", "Talk with the developpers ...")
-            , LOCTEXT("ReleaseNotes_Tooltip", "For those who want to discuss with us about the next improvements")
+            , LOCTEXT("about-menu.iliad.about-iliad.talk-with-the-developpers.name", "Talk with the developpers ...")
+            , LOCTEXT("about-menu.iliad.about-iliad.talk-with-the-developpers.tooltip", "For those who want to discuss with us about the next improvements")
             , FSlateIcon("OdysseyStyle", "About.Discord2_16")
             , NAME_None );
     }

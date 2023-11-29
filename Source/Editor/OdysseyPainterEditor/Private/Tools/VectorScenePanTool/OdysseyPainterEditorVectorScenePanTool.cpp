@@ -59,7 +59,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
     mDragged = false;
 
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorScenePanTool","Pan Scene"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene-pan-tool.transaction.pan-scene","Pan Scene"));
     if( GUndo )
     {
         // save selected object translation/rotation/scaling before transform

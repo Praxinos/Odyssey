@@ -190,7 +190,7 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorGroupPain
           } );
 
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorPathCutTool","Vector Path Cut Tool"));
+        GEditor->BeginTransaction(LOCTEXT("vector-path-cut-tool.transaction.cut-path","Vector Path Cut Tool"));
         if( GUndo )
         {
             std::vector<FOdysseyVectorPath*> removedPathArray; // empty on purpose.

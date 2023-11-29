@@ -22,7 +22,7 @@ FOdysseyPaletteModule::RegisterAssetTypeActions()
     IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
     // Create Asset Categories
-    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
+    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
 
     //Create Asset Types Actions
     mIliadTypeActions = MakeShareable(new FOdysseyPaletteAssetTypeActions(category));

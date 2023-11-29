@@ -39,7 +39,7 @@ void SOdysseyPaletteTreeView::Construct(const FArguments& InArgs)
     TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
         .SplitterHandleSize(0.f) //Fixes alignment between header row and actual rows
         /* + SHeaderRow::Column("IsActivated")
-            .ToolTipText(LOCTEXT("OdysseyPaletteEntryIsActivatedButtonToolTip", "Toggle Entry Activation"))
+            .ToolTipText(LOCTEXT("entries-tree-view.header-row.is-activated", "Toggle Entry Activation"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
@@ -51,7 +51,7 @@ void SOdysseyPaletteTreeView::Construct(const FArguments& InArgs)
                 .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
             ]*/
         + SHeaderRow::Column("Header")
-            .DefaultLabel(LOCTEXT("", ""))
+            .DefaultLabel(FText())
             .VAlignCell(VAlign_Top)
             .FillWidth(InArgs._HeaderFillWidth)
             .FixedWidth(InArgs._HeaderFixedWidth)
@@ -228,13 +228,21 @@ SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
         return FReply::Unhandled();
 
     //do nothing
+	FText copyEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.copy-entries", "Copy Entries");
+	FText moveEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.move-entries", "Move Entries");
     TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
     if ( operationPalette == mPalette ) //dropped from same Palette, do a move of topmost dropped entries
     {
+        #ifdef WITH_EDITOR
+            FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
+        #endif
         mPalette->MoveEntries(entries, nullptr, mPalette->GetRootEntries().Num());
     }
     else
     {
+        #ifdef WITH_EDITOR
+            FScopedTransaction ScopedTransaction(copyEntriesTransactionName);
+        #endif
         mPalette->CopyEntries(entries, nullptr, mPalette->GetRootEntries().Num());
     }
 	return FReply::Handled();
@@ -421,12 +429,12 @@ void SOdysseyPaletteTreeView::CreateContextMenu()
 
     UToolMenu* Menu = ToolMenus->RegisterMenu(contextMenuName);
     
-    FToolMenuSection& selectionSection = Menu->AddSection("Selection", LOCTEXT("PaletteCommonSection", "Selection"));
+    FToolMenuSection& selectionSection = Menu->AddSection("Selection", LOCTEXT("entries-tree-view.context-menu.selection-section", "Selection"));
     {
         selectionSection.AddMenuEntry(FGenericCommands::Get().SelectAll);
     }
 
-    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("PaletteCommonSection", "Common"));
+    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("entries-tree-view.context-menu.common-section", "Common"));
     {
         commonSection.AddMenuEntry(FGenericCommands::Get().Delete);
         commonSection.AddMenuEntry(FGenericCommands::Get().Duplicate);
@@ -493,6 +501,10 @@ SOdysseyPaletteTreeView::DeleteSelectedEntries()
     if ( !mPalette )
         return;
 
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("tree-view.transaction.remove-selected-entries", "Remove Entries"));
+#endif
+
     TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
     mPalette->RemoveEntries(selectedEntries);
 }
@@ -527,6 +539,10 @@ SOdysseyPaletteTreeView::DuplicateSelectedEntries()
     TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
     if (selectedEntries.Num() <= 0)
         return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("tree-view.transaction.duplicate-selected-entries", "Duplicate Entries"));
+#endif
 
 	TArray<UOdysseyPaletteEntry*> duplicatedEntries = mPalette->DuplicateEntries(selectedEntries);
     SetItemSelection(duplicatedEntries, true);

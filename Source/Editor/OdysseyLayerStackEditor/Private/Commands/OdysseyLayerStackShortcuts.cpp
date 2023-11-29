@@ -9,7 +9,7 @@
 #include "OdysseyLayerStackClipboardData.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "FOdysseyLayerStackShortcuts"
+#define LOCTEXT_NAMESPACE "LayerStackEditor"
 
 FOdysseyLayerStackShortcuts::FOdysseyLayerStackShortcuts(TSharedPtr<SOdysseyLayerStackTreeView> iTreeView, UOdysseyLayerStack* iLayerStack)
     : mCommandList(MakeShared<FUICommandList>())
@@ -123,7 +123,7 @@ FOdysseyLayerStackShortcuts::Action_Cut()
     FOdysseyClipboard::Get().SetData(clipboardData);
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Cut Layers"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.cut-layers", "Cut Layers"));
 #endif
     Action_Delete();
 }
@@ -140,7 +140,7 @@ FOdysseyLayerStackShortcuts::Action_Paste()
         return;
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Paste Layers"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.paste-layers", "Paste Layers"));
 #endif
 
     TArray<UOdysseyLayer*> pastedLayers = clipboardData->Paste(mLayerStack);
@@ -172,6 +172,10 @@ FOdysseyLayerStackShortcuts::Action_Delete()
     if (!treeView)
         return;
 
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.remove-layers", "Remove Layers"));
+#endif
+
     TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
     mLayerStack->RemoveLayers(selectedLayers);
 }
@@ -189,6 +193,10 @@ FOdysseyLayerStackShortcuts::Action_Duplicate()
     TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.duplicate-layers", "Duplicate Layers"));
+#endif
 
 	//manage current layer seperately
 	TArray<UOdysseyLayer*> duplicatedLayers = mLayerStack->DuplicateLayers(selectedLayers);
@@ -276,6 +284,10 @@ FOdysseyLayerStackShortcuts::Action_MergeSelectedLayers()
     TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return;
+    
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.merge-layers", "Merge Layers"));
+#endif
 
     mLayerStack->MergeLayers(selectedLayers);
 }
@@ -328,6 +340,10 @@ FOdysseyLayerStackShortcuts::CanAction_FlattenSelectedLayers()
     TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return false;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.flatten-layers", "Flatten Layers"));
+#endif
 
     return mLayerStack->CanFlattenLayers(selectedLayers);
 }

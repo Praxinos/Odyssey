@@ -290,7 +290,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         vectorEngine->SetBLMask( nullptr );
 
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("EraserTool","Erase"));
+        GEditor->BeginTransaction(LOCTEXT("vector-eraser-tool.transaction.erase","Erase"));
         if( GUndo )
         {
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoErase( iScene

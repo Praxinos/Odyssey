@@ -36,8 +36,8 @@ public:
 
 public:
     //Layer Class Support
-    UFUNCTION(BlueprintCallable, Category="LayerStack")
-    TArray<UClass*> FindSupportedCustomLayerClasses() const;
+    //UFUNCTION(BlueprintCallable, Category="LayerStack")
+    //TArray<UClass*> FindSupportedCustomLayerClasses() const;
 
     UFUNCTION(BlueprintCallable, Category="LayerStack")
     bool SupportsLayerClass(UClass* Class) const;

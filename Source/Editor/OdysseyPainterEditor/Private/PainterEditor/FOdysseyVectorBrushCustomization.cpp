@@ -6,7 +6,7 @@
 
 #include "SlateBasics.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyVectorBrushCustomization"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 void
 FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> StructPropertyHandle
@@ -27,7 +27,6 @@ FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> S
 
     mBrushButton = SNew(SButton)
 			      .Visibility( EVisibility::Visible )
-			      .Text( LOCTEXT("VectorBrushButton", "Vector Brush Button") )
 			      .ToolTipText( this, &FOdysseyVectorBrushCustomization::UpdateButtonToolTip, StructPropertyHandle )
 			      .OnClicked( this, &FOdysseyVectorBrushCustomization::OnClicked, StructPropertyHandle )
 			      .HAlign(HAlign_Center)
@@ -93,7 +92,7 @@ FOdysseyVectorBrushCustomization::OnClicked( TSharedRef<IPropertyHandle> StructP
     Config.bAllowDragging = false;
 
     FSlateApplication::Get().AddModalWindow( SNew(SWindow)
-                                              .Title( LOCTEXT( "Pick Vector Brush", "Pick Vector Brush" ) )
+                                              .Title( LOCTEXT( "vector-brush.brush-picker-window.title", "Pick Vector Brush" ) )
                                               .ClientSize( FVector2D( 256, 256 ) )
                                                [
                                                    SNew(SBox)
@@ -239,17 +238,17 @@ FOdysseyVectorBrushCustomization::CustomizeChildren( TSharedRef<IPropertyHandle>
                                                    , class IDetailChildrenBuilder& StructBuilder
                                                    , IPropertyTypeCustomizationUtils& StructCustomizationUtils )
 {
-	TSharedPtr<IPropertyHandle> defaultProperty[3] = { StructPropertyHandle->GetChildHandle("ColorFromBrush")
-                                                     , StructPropertyHandle->GetChildHandle("ExtendOverPath")
-                                                     , StructPropertyHandle->GetChildHandle("Revert") };
-
-    for( int i = 0; i < 3; i++ )
+    uint32 numChildren = 0;
+    StructPropertyHandle->GetNumChildren(numChildren);
+    for( uint32 i = 0; i < numChildren; i++ )
     {
-	    StructBuilder.AddCustomRow(LOCTEXT("OdysseyVectorBrushRow", "OdysseyVectorBrush"))
-        .NameContent()[defaultProperty[i]->CreatePropertyNameWidget()]
-        .ValueContent()[defaultProperty[i]->CreatePropertyValueWidget()];
+        TSharedPtr<IPropertyHandle> propertyHandle = StructPropertyHandle->GetChildHandle(i);
+        StructBuilder.AddProperty(propertyHandle.ToSharedRef());
 
-        defaultProperty[i]->SetOnPropertyValueChanged( FSimpleDelegate::CreateRaw( this, &FOdysseyVectorBrushCustomization::OnChildPropertyValueChanged, StructPropertyHandle ) );
+        //SetOnPropertyValueChanged needed because StructBuilder.AddProperty()
+        //does not call PostEditChangeProperty when the property is changed
+        //It seems weird, but it is the case, sadly
+        propertyHandle->SetOnPropertyValueChanged( FSimpleDelegate::CreateRaw( this, &FOdysseyVectorBrushCustomization::OnChildPropertyValueChanged, StructPropertyHandle ) );
     }
 }
 

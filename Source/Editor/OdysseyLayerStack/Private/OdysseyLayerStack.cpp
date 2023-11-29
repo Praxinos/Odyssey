@@ -7,7 +7,7 @@
 #include "Misc/ScopedSlowTask.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyLayerStack"
+#define LOCTEXT_NAMESPACE "LayerStack"
 
 void
 UOdysseyLayerStack::PostInitProperties()
@@ -42,6 +42,7 @@ UOdysseyLayerStack::OnCurrentLayerChanged()
 
 //--- Layer Class Support
 
+/*
 TArray<UClass*>
 UOdysseyLayerStack::FindSupportedCustomLayerClasses() const
 {
@@ -61,6 +62,7 @@ UOdysseyLayerStack::FindSupportedCustomLayerClasses() const
 
     return supportedClasses;
 }
+*/
 
 bool
 UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
@@ -68,9 +70,9 @@ UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
     if (CompatibleLayers.Contains(iClass))
         return true;
 
-    UOdysseyCustomLayer* layerCDO = UOdysseyCustomLayer::StaticClass()->GetDefaultObject<UOdysseyCustomLayer>();
+    /* UOdysseyCustomLayer* layerCDO = UOdysseyCustomLayer::StaticClass()->GetDefaultObject<UOdysseyCustomLayer>();
     if (layerCDO && layerCDO->CompatibleLayerStacks.Contains(GetClass()))
-        return true;
+        return true; */
 
     return false;
 }
@@ -97,10 +99,6 @@ UOdysseyLayerStack::AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer
     if (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
         return nullptr;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Add Layer"));
-#endif
-
     //Create the Layer
 	UOdysseyLayer* layer = CreateLayer(LayerType);
     if (!layer )
@@ -119,9 +117,6 @@ UOdysseyLayerStack::RemoveLayer(UOdysseyLayer* Layer)
     if (!Layer || !ContainsLayer(Layer))
         return;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Remove Layers"));
-#endif
     RemoveLayersFromHierarchy({Layer});
 }
 
@@ -140,10 +135,6 @@ UOdysseyLayerStack::RemoveLayers(TArray<UOdysseyLayer*> Layers)
     if (Layers.Num() <= 0)
         return;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Remove Layers"));
-#endif
-
     RemoveLayersFromHierarchy(Layers);
 }
 
@@ -153,10 +144,6 @@ UOdysseyLayerStack::DuplicateLayer(UOdysseyLayer* Layer)
     //No Layer or not contained by the layerstack
     if(!Layer || !ContainsLayer(Layer))
         return nullptr;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Duplicate Layers"));
-#endif
 
     //Duplicate the layer
     UOdysseyLayer* layerDuplicate = CopyLayerInternal(Layer, Layer->Parent, Layer->Parent->Children.Find(Layer));
@@ -180,10 +167,6 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
     //No Layers    
     if (Layers.Num()<= 0)
         return layersDuplicates;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Duplicate Layers"));
-#endif
 
     Layers.Sort(
         [this](UOdysseyLayer& iLayerA, UOdysseyLayer& iLayerB)
@@ -235,10 +218,6 @@ UOdysseyLayerStack::CopyLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer, 
     if (ParentLayer && (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer)) )
         return nullptr;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Copy Layers"));
-#endif
-
     //Duplicate the layer
     UOdysseyLayer* layerCopy = CopyLayerInternal(Layer, ParentLayer, IndexInParent);
     return layerCopy;
@@ -266,10 +245,6 @@ UOdysseyLayerStack::CopyLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
     //No Layers
     if (Layers.Num()<= 0)
         return layerCopies;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Copy Layers"));
-#endif
 
     Layers.Sort(
         [this](UOdysseyLayer& iLayerA, UOdysseyLayer& iLayerB)
@@ -363,10 +338,6 @@ UOdysseyLayerStack::MergeLayers(TArray<UOdysseyLayer*> iLayers)
     layersToMerge = UOdysseyLayerStackFunctionLibrary::SortLayers(layersToMerge, true);
     if (layersToMerge.Num() <= 0) //We can have a single layer here if we selected a folder layer and one of its children, and it still works
         return nullptr;
-    
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Merge Layers"));
-#endif
 
     //Create the Layer
 	UOdysseyLayer* mergedLayer = CreateLayer(layerMergeType);
@@ -399,10 +370,6 @@ UOdysseyLayerStack::FlattenLayer(UOdysseyLayer* iLayer)
     TArray<UOdysseyLayer*> mergedLayers;
     if (!CanFlattenLayer(iLayer))
         return mergedLayers;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Flatten Layers"));
-#endif
 
     TSet<UClass*> layerMergeTypes = iLayer->GetMergeDefaultLayerTypes();
     UOdysseyLayer* parent = iLayer->Parent;
@@ -459,10 +426,6 @@ UOdysseyLayerStack::FlattenLayers(TArray<UOdysseyLayer*> iLayers)
     layersToFlatten = UOdysseyLayerStackFunctionLibrary::SortLayers(layersToFlatten, false);
     if (layersToFlatten.Num() <= 0)
         return mergedLayers;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Flatten Layers"));
-#endif
 
     for (UOdysseyLayer* layer : layersToFlatten)
     {
@@ -561,10 +524,6 @@ UOdysseyLayerStack::MoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer, 
     if (Layer->Parent == ParentLayer && oldIndex == IndexInParent)
         return;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Move Layers"));
-#endif
-
     bool bChangeParent = Layer->Parent != ParentLayer;
     
     if (bChangeParent)
@@ -636,10 +595,6 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
 	//No Layers
 	if ( Layers.Num() <= 0 )
 		return;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Move Layers"));
-#endif
 
     int index = FMath::Clamp(IndexInParent, 0, ParentLayer->Children.Num());
     for (UOdysseyLayer* layer : Layers)

@@ -7,7 +7,7 @@
 
 #include "IOdysseyAnimationEditorModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorToolkit"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorToolkit
@@ -36,7 +36,7 @@ FOdysseyAnimationEditorToolkit::OpenAsset(UObject* iObject)
 FText
 FOdysseyAnimationEditorToolkit::GetBaseToolkitName() const
 {
-    return LOCTEXT( "AppLabel", "Odyssey Animation Editor" );
+    return LOCTEXT( "editor.name", "Odyssey Animation Editor" );
 }
 
 FName
@@ -48,7 +48,7 @@ FOdysseyAnimationEditorToolkit::GetToolkitFName() const
 FString
 FOdysseyAnimationEditorToolkit::GetWorldCentricTabPrefix() const
 {
-    return LOCTEXT( "WorldCentricTabPrefix", "Animation" ).ToString();
+    return LOCTEXT( "editor.world-centric-tab-prefix", "Animation " ).ToString();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationMediaPlayerFactory"
+#define LOCTEXT_NAMESPACE "AnimationMedia"
 
 FOdysseyAnimationMediaPlayerFactory::FOdysseyAnimationMediaPlayerFactory()
 {
@@ -29,7 +29,7 @@ FOdysseyAnimationMediaPlayerFactory::CanPlayUrl(const FString& Url, const IMedia
     {
         if (OutErrors != nullptr)
         {
-            OutErrors->Add(LOCTEXT("NoSchemeFound", "No URI scheme found"));
+            OutErrors->Add(LOCTEXT("media-player-factory.errors.no-url-scheme-found", "No URL scheme found"));
         }
 
         return false;
@@ -39,7 +39,7 @@ FOdysseyAnimationMediaPlayerFactory::CanPlayUrl(const FString& Url, const IMedia
     {
         if (OutErrors != nullptr)
         {
-            OutErrors->Add(FText::Format(LOCTEXT("SchemeNotSupported", "The URI scheme '{0}' is not supported"), FText::FromString(Scheme)));
+            OutErrors->Add(FText::Format(LOCTEXT("media-player-factory.errors.url-scheme-not-supported", "The URL scheme '{0}' is not supported"), FText::FromString(Scheme)));
         }
 
         return false;
@@ -59,7 +59,7 @@ FOdysseyAnimationMediaPlayerFactory::CreatePlayer(IMediaEventSink& EventSink)
 FText
 FOdysseyAnimationMediaPlayerFactory::GetDisplayName() const
 {
-	return LOCTEXT("MediaPlayerDisplayName", "Odyssey Animation");
+	return LOCTEXT("media-player-factory.display-name", "Odyssey Animation");
 }
 
 FName

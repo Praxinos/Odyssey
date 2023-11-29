@@ -12,7 +12,7 @@
 #include "Misc/PackageName.h"
 #include "OdysseyBrushAssetBase.h"
 
-#define LOCTEXT_NAMESPACE "AssetTypeActions_OdysseyBrush"
+#define LOCTEXT_NAMESPACE "BrushEditor"
 
 
 /////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ FAssetTypeActions_OdysseyBrush::FAssetTypeActions_OdysseyBrush( EAssetTypeCatego
 FText
 FAssetTypeActions_OdysseyBrush::GetName()  const
 {
-    return  LOCTEXT( "AssetTypeActions_OdysseyBrush", "Odyssey Brush" );
+    return  LOCTEXT( "asset-type-actions.name", "Odyssey Brush" );
 }
 
 
@@ -57,18 +57,6 @@ FAssetTypeActions_OdysseyBrush::HasActions( const  TArray< UObject* >&  InObject
 void
 FAssetTypeActions_OdysseyBrush::GetActions( const  TArray< UObject* >& InObjects, FMenuBuilder& MenuBuilder )
 {
-    /*
-    auto Blueprints = GetTypedWeakObjectPtrs< UOdysseyBrush >( InObjects );
-
-    MenuBuilder.AddMenuEntry(
-        LOCTEXT( "OdysseyBrush_Edit", "Edit" ),
-        LOCTEXT( "OdysseyBrush_EditTooltip", "Opens the selected brush in the graph editor." ),
-        FSlateIcon( "OdysseyStyle", "OdysseyBrush.EditBrush16" ),
-        FUIAction(
-            FExecuteAction::CreateSP( this, &FAssetTypeActions_OdysseyBrush::ExecuteEdit, Blueprints ),
-            FCanExecuteAction()
-            )
-        );*/
 }
 
 

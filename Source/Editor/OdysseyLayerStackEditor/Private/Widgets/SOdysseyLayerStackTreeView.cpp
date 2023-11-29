@@ -10,7 +10,7 @@
 #include "Commands/OdysseyLayerStackShortcuts.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyLayerStackTreeView"
+#define LOCTEXT_NAMESPACE "LayerStackEditor"
 
 static FName contextMenuName = "OdysseyLayerStackContextMenu";
 
@@ -41,7 +41,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
     TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
         .SplitterHandleSize(0.f) //Fixes alignment between header row and actual rows
         + SHeaderRow::Column("IsActivated")
-            .ToolTipText(LOCTEXT("OdysseyLayerIsActivatedButtonToolTip", "Toggle Layer Activation"))
+            .ToolTipText(LOCTEXT("header-row.is-layer-activated.tooltip", "Toggle Layer Activation"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
@@ -55,7 +55,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
                 .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
             ]
         + SHeaderRow::Column("IsLocked")
-            .ToolTipText(LOCTEXT("OdysseyLayerLockedButtonToolTip", "Toggle Layer Locked State"))
+            .ToolTipText(LOCTEXT("header-row.is-layer-locked.tooltip", "Toggle Layer Locked State"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
@@ -69,7 +69,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
                 .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
             ]
         + SHeaderRow::Column("IsCollapsed")
-            .ToolTipText(LOCTEXT("OdysseyLayerIsOptionsDisplayedButtonToolTip", "Show/Hide inline Layer options"))
+            .ToolTipText(LOCTEXT("header-row.is-layer-collapsed.tooltip", "Collapse / Uncollapse Layer"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
@@ -83,7 +83,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
                 .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHeader16"))
             ]
         + SHeaderRow::Column("Header")
-            .DefaultLabel(LOCTEXT("", ""))
+            .DefaultLabel(FText())
             .VAlignCell(VAlign_Top)
             .FillWidth(InArgs._HeaderFillWidth)
             .FixedWidth(InArgs._HeaderFixedWidth)
@@ -287,10 +287,16 @@ SOdysseyLayerStackTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropE
     TArray<UOdysseyLayer*> layers = operation->GetLayers();
     if ( operationLayerStack == mLayerStack ) //droped from same layerstack, do a move of topmost dropped layers
     {
+        #ifdef WITH_EDITOR
+            FScopedTransaction ScopedTransaction(LOCTEXT("drag-drop.transaction.move-layers", "Move Layers"));
+        #endif
         mLayerStack->MoveLayers(layers, nullptr, mLayerStack->GetRootLayers().Num());
     }
     else
     {
+        #ifdef WITH_EDITOR
+            FScopedTransaction ScopedTransaction(LOCTEXT("drag-drop.transaction.copy-layers", "Copy Layers"));
+        #endif
         mLayerStack->CopyLayers(layers, nullptr, mLayerStack->GetRootLayers().Num());
     }
 	return FReply::Handled();
@@ -442,12 +448,12 @@ void SOdysseyLayerStackTreeView::CreateContextMenu()
 
     UToolMenu* Menu = ToolMenus->RegisterMenu(contextMenuName);
     
-    FToolMenuSection& selectionSection = Menu->AddSection("Selection", LOCTEXT("LayerStackCommonSection", "Selection"));
+    FToolMenuSection& selectionSection = Menu->AddSection("Selection", LOCTEXT("context-menu.selection-section", "Selection"));
     {
         selectionSection.AddMenuEntry(FGenericCommands::Get().SelectAll);
     }
 
-    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("LayerStackCommonSection", "Common"));
+    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("context-menu.common-section", "Common"));
     {
         commonSection.AddMenuEntry(FGenericCommands::Get().Duplicate);
         commonSection.AddMenuEntry(FGenericCommands::Get().Rename);
@@ -459,7 +465,7 @@ void SOdysseyLayerStackTreeView::CreateContextMenu()
         commonSection.AddMenuEntry(FGenericCommands::Get().Delete);
     }
 
-    FToolMenuSection& layerSection = Menu->AddSection("Layer", LOCTEXT("LayerStackLayerSection", "Layer"));
+    FToolMenuSection& layerSection = Menu->AddSection("Layer", LOCTEXT("context-menu.layer-section", "Layer"));
     {
         layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().MergeSelectedLayers);
         layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers);

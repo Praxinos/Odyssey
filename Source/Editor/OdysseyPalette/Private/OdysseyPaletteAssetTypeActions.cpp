@@ -19,7 +19,7 @@ FOdysseyPaletteAssetTypeActions::FOdysseyPaletteAssetTypeActions( EAssetTypeCate
 FText
 FOdysseyPaletteAssetTypeActions::GetName() const
 {
-    return LOCTEXT( "FOdysseyPaletteTypeActionsName", "Palette" );
+    return LOCTEXT( "asset-type-actions.name", "Palette" );
 }
 
 FColor

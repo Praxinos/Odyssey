@@ -146,7 +146,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathExtend( FOdysseyVector
                                                                 , FOdysseyVectorPath* iPath  )
 {
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
+    GEditor->BeginTransaction(LOCTEXT("vector-path-drawing-tool.transaction.draw-path-and-stitch","Vector Path Drawing Tool"));
     if( GUndo )
     {
         mUndoPathExtend = new FOdysseyVectorUndoPathExtend( iScene, iPath );
@@ -161,7 +161,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
                                                              , FOdysseyVectorPath* iPath  )
 {
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPathDrawingTool","Vector Path Drawing Tool"));
+    GEditor->BeginTransaction(LOCTEXT("vector-path-drawing-tool.transaction.draw-path","Vector Path Drawing Tool"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, iPath ) );

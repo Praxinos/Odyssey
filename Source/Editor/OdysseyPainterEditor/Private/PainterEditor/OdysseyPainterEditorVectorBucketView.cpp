@@ -55,7 +55,7 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
         FOdysseyVectorGroupPaint* vectorScene = mBucket->GetOwner()->GetScene();
 
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("PropertyChanged","Property Changed"));
+        GEditor->BeginTransaction(LOCTEXT("vector-bucket.transaction.property-changed","Property Changed"));
         if( GUndo )
         {
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoBucketParam( vectorScene, mBucket );

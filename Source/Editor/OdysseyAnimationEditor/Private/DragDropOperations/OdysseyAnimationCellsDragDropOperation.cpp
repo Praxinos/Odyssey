@@ -7,6 +7,8 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyStyleSet.h"
 
+#define LOCTEXT_NAMESPACE "AnimationEditor"
+
 TSharedRef<FOdysseyAnimationCellsDragDropOperation>
 FOdysseyAnimationCellsDragDropOperation::Create(UOdysseyAnimationLayer* iLayer, const FInt32Range& iSelectedFrames)
 {
@@ -60,7 +62,7 @@ FOdysseyAnimationCellsDragDropOperation::GetDefaultDecorator() const
 FText
 FOdysseyAnimationCellsDragDropOperation::GetText() const
 {	
-	return FText::Format(NSLOCTEXT("OdysseyAnimationCellsDragDropOperation", "Cells Count", "{0} Cells"), FText::AsNumber(mData.GetCellCount()));
+	return FText::Format(LOCTEXT("cells-drag-drop-operation.cells-count", "{0} Cells"), FText::AsNumber(mData.GetCellCount()));
 }
 
 const FSlateBrush*
@@ -68,3 +70,5 @@ FOdysseyAnimationCellsDragDropOperation::GetIcon() const
 {
 	return FOdysseyStyle::GetBrush("PainterEditor.Layers16");
 }
+
+#undef LOCTEXT_NAMESPACE

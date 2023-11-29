@@ -40,7 +40,7 @@
 #include <chrono>
 #include <ULIS>
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportClientt"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorViewportClient
@@ -1023,9 +1023,7 @@ FOdysseyPainterEditorViewportClient::GetDisplayedResolution() const
     uint32 height = 1;
     uint32 width = 1;
     mOdysseyPainterEditorViewportPtr.Pin()->ComputeTextureDisplayDimensions( width, height );
-    return FText::Format( NSLOCTEXT( "OdysseyPainterEditor",
-                                      "DisplayedResolution",
-                                      "Displayed: {0}x{1}" ),
+    return FText::Format( LOCTEXT( "viewport.display-resolution", "Displayed: {0}x{1}" ),
                            FText::AsNumber( FMath::Max( uint32( 1 ), width ) ),
                            FText::AsNumber( FMath::Max( uint32( 1 ), height ) ) );
 }

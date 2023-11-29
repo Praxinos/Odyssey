@@ -15,7 +15,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "PropertyCustomizationHelpers.h"
 
-#define LOCTEXT_NAMESPACE "FlipbookTimelineTrack"
+#define LOCTEXT_NAMESPACE "FlipbookEditor"
 
 SOdysseyFlipbookTimelineTrack::~SOdysseyFlipbookTimelineTrack()
 {
@@ -299,7 +299,7 @@ SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeom
 
 	FMenuBuilder MenuBuilder(true, frameCommandList);
 	{	
-		const FText KeyframeSectionTitle = LOCTEXT("OdysseyTimelineFrameActionsHeader", "Keyframe Actions");
+		const FText KeyframeSectionTitle = LOCTEXT("timeline.context-menu.keyframe-section.name", "Keyframe Actions");
 		MenuBuilder.BeginSection("KeyframeActions", KeyframeSectionTitle);
 		MenuBuilder.AddMenuEntry(FGenericCommands::Get().Duplicate);
 		MenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
@@ -311,7 +311,7 @@ SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeom
 
 		MenuBuilder.EndSection();
 
-		const FText SpriteSectionTitle = LOCTEXT("OdysseyTimelineSpriteActionsHeader", "Sprite Actions");
+		const FText SpriteSectionTitle = LOCTEXT("timeline.context-menu.sprite-section.name", "Sprite Actions");
 		MenuBuilder.BeginSection("SpriteActions", SpriteSectionTitle);
 		MenuBuilder.AddMenuEntry(flipbookCommands.ShowSpriteInContentBrowser);
 		//MenuBuilder.AddMenuEntry(flipbookCommands.EditSpriteForKeyFrame);

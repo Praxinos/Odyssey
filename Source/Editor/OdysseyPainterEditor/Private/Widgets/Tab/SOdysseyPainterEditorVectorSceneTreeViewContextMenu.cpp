@@ -19,38 +19,38 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
     menu.BeginSection("Context");
     {
     menu.AddMenuEntry(
-          LOCTEXT("Rename", "Rename")
-        , LOCTEXT("Rename", "Rename")
+          LOCTEXT("vector-scene-tree-view.context-menu.rename.name", "Rename")
+        , LOCTEXT("vector-scene-tree-view.context-menu.rename.tooltip", "Rename")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateRaw(iTreeView, &SOdysseyPainterEditorVectorSceneTreeView::RenameSelectedItem)));
     menu.AddMenuEntry(
-          LOCTEXT("GroupPaint", "Make Paint Group")
-        , LOCTEXT("GroupPaint", "Make Paint Group")
+          LOCTEXT("vector-scene-tree-view.context-menu.group-paint.name", "Make Paint Group")
+        , LOCTEXT("vector-scene-tree-view.context-menu.group-paint.tooltip", "Make Paint Group")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::MakePaintGroup, vectorScene )));
     menu.AddMenuEntry(
-          LOCTEXT("Group", "Group")
-        , LOCTEXT("Group", "Group")
+          LOCTEXT("vector-scene-tree-view.context-menu.group.name", "Group")
+        , LOCTEXT("vector-scene-tree-view.context-menu.group.tooltip", "Group")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Group, vectorScene )));
     menu.AddMenuEntry(
-          LOCTEXT("Ungroup", "Ungroup")
-        , LOCTEXT("Ungroup", "Ungroup")
+          LOCTEXT("vector-scene-tree-view.context-menu.ungroup.name", "Ungroup")
+        , LOCTEXT("vector-scene-tree-view.context-menu.ungroup.tooltip", "Ungroup")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, vectorScene )));
     menu.AddMenuEntry(
-          LOCTEXT("Copy", "Copy")
-        , LOCTEXT("Copy", "Copy")
+          LOCTEXT("vector-scene-tree-view.context-menu.copy.name", "Copy")
+        , LOCTEXT("vector-scene-tree-view.context-menu.copy.tooltip", "Copy")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::CopyObjects, vectorScene)));
     menu.AddMenuEntry(
-          LOCTEXT("Paste", "Paste")
-        , LOCTEXT("Paste", "Paste")
+          LOCTEXT("vector-scene-tree-view.context-menu.paste.name", "Paste")
+        , LOCTEXT("vector-scene-tree-view.context-menu.paste.tooltip", "Paste")
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteObjects, vectorScene)));
     menu.AddMenuEntry(
-          LOCTEXT("DeleteSelection","Delete Selection")
-        , LOCTEXT("DeleteSelection","Delete Selection")
+          LOCTEXT("vector-scene-tree-view.context-menu.delete-selection.name","Delete Selection")
+        , LOCTEXT("vector-scene-tree-view.context-menu.delete-selection.tooltip","Delete Selection")
         , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, vectorScene)));
     }

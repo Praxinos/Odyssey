@@ -10,7 +10,7 @@
 #include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorSource"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 const FGuid&
 FOdysseyAnimationEditorSource::StaticId()
@@ -155,11 +155,13 @@ FOdysseyAnimationEditorSource::OnPlayerStop()
 void
 FOdysseyAnimationEditorSource::Clear()
 {
+	FText transactionName = LOCTEXT("actions.clear", "Clear");
+
     UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->CurrentLayer.Get());
 	if (currentLayer)
 	{		
 	#ifdef WITH_EDITOR
-		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear"));
+		FScopedTransaction ScopedTransaction(transactionName);
 	#endif
 		FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(mAnimation->CurrentFrame);
 		if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
@@ -197,7 +199,7 @@ FOdysseyAnimationEditorSource::Clear()
             {
                 FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
 				// needed for undos
-				GEditor->BeginTransaction(LOCTEXT("ClearVectorScene", "Clear Vector Scene"));
+				GEditor->BeginTransaction(transactionName);
 				if (GUndo)
 				{
 					FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);

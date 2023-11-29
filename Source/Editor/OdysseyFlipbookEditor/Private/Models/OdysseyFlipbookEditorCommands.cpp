@@ -5,7 +5,7 @@
 #include "OdysseyStyleSet.h"
 #include "Command/OdysseyCommandMacros.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorCommands"
+#define LOCTEXT_NAMESPACE "FlipbookEditor"
 
 namespace
 {
@@ -16,12 +16,12 @@ namespace
 }
 
 FOdysseyFlipbookEditorCommands::FOdysseyFlipbookEditorCommands()
-    : TCommands<FOdysseyFlipbookEditorCommands>( "IliadFlipbookEditor", NSLOCTEXT( "Contexts", "IliadFlipbookEditor", "Iliad Flipbook Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
+    : TCommands<FOdysseyFlipbookEditorCommands>( "IliadFlipbookEditor", LOCTEXT( "editor-commands.name", "Iliad Flipbook Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
-    AddBundle(PlayBackShortcuts, LOCTEXT("PlayBackShortcutsCategory", "PlayBack Shortcuts"));
-    AddBundle(FrameShortcuts, LOCTEXT("FrameShortcutsCategory", "Frame Shortcuts"));
-    AddBundle(KeyFrameShortcuts, LOCTEXT("KeyFrameShortcutsCategory", "KeyFrame Shortcuts"));
-    AddBundle(OtherShortcuts, LOCTEXT("OtherShortcutsCategory", "Other Shortcuts"));
+    AddBundle(PlayBackShortcuts, LOCTEXT("editor-commands.category.playback-shortcuts", "PlayBack Shortcuts"));
+    AddBundle(FrameShortcuts, LOCTEXT("editor-commands.category.frame-shortcuts", "Frame Shortcuts"));
+    AddBundle(KeyFrameShortcuts, LOCTEXT("editor-commands.category.keyframe-shortcuts", "KeyFrame Shortcuts"));
+    AddBundle(OtherShortcuts, LOCTEXT("editor-commands.category.other-shortcuts", "Other Shortcuts"));
 }
 
 void

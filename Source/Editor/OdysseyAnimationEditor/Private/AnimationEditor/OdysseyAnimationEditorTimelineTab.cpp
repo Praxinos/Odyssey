@@ -14,7 +14,7 @@
 #include "Misc/ScopedSlowTask.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorTimelineTab"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 const FName&
 FOdysseyAnimationEditorTimelineTab::StaticId()
@@ -32,7 +32,7 @@ FOdysseyAnimationEditorTimelineTab::~FOdysseyAnimationEditorTimelineTab()
 }
 
 FOdysseyAnimationEditorTimelineTab::FOdysseyAnimationEditorTimelineTab(FOdysseyAnimationEditorExtension* iExtension)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyAnimationEditorTimelineTab", "Timeline" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
+	: FOdysseyEditorTab(LOCTEXT( "timeline-tab.name", "Timeline" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
     , mExtension(iExtension)
 {
 }
@@ -123,7 +123,7 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
 {
     UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
 
-    FToolMenuSection& section = menu->AddSection("OdysseyAnimation", LOCTEXT("OdysseyAnimation", "Odyssey Animation"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
+    FToolMenuSection& section = menu->AddSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.animation-section.name", "Odyssey Animation"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
     {
         section.AddMenuEntry( FOdysseyAnimationEditorCommands::Get().ImportTextureSequence );
     }
@@ -139,7 +139,7 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
 
     FOpenAssetDialogConfig openAssetDialogConfig;
-    openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures Sequence" );
+    openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "timeline-tab.import-texture-dialog.title", "Import Textures Sequence" );
     openAssetDialogConfig.DefaultPath = FPaths::GetPath(mExtension->Animation()->GetPathName() );
     openAssetDialogConfig.bAllowMultipleSelection = true;
     openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
@@ -160,7 +160,7 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     
     layerStack->Modify();
     
-    FScopedSlowTask progressBar(assetsData.Num(), LOCTEXT("LookingForUnusedAssetsText", "Importing Texture Sequence"));
+    FScopedSlowTask progressBar(assetsData.Num(), LOCTEXT("timeline-tab.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
     TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
@@ -211,6 +211,9 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
     if ( !layerStack )
         return;
 
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.create-new-layer", "Add Layer"));
+#endif
     layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
 }
 
@@ -227,6 +230,9 @@ FOdysseyAnimationEditorTimelineTab::ChangeLayerOpacity( float iOpacity )
     if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )
         return;
 
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.set-layer-opacity", "Change Layer Opacity"));
+#endif
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 
@@ -242,25 +248,6 @@ FOdysseyAnimationEditorTimelineTab::StepBackward()
 {
     int frame = FMath::Max(0, mExtension->Animation()->CurrentFrame - 1);
     FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
-}
-
-void
-FOdysseyAnimationEditorTimelineTab::OnLayerAdded(UOdysseyLayer* iLayer)
-{
-    if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
-    {
-        UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, Animation()->Width(), Animation()->Height(), Animation()->Format());
-
-#ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
-#endif
-        FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-        mutator.Add({ cell });
-        mutator.Commit();
-
-        return;
-    }
 }
 
 #undef LOCTEXT_NAMESPACE

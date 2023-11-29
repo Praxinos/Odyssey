@@ -111,7 +111,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         uint64 signalFlags;
 
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("PropertyChanged","Property Changed"));
+        GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
         if( GUndo )
         {
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPropertyChanged( mScene, mFocusedObjectList );

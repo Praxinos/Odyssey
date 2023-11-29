@@ -7,7 +7,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayerStack.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyLayerStackAddLayerButton"
+#define LOCTEXT_NAMESPACE "LayerStackEditor"
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 
@@ -45,7 +45,7 @@ void SOdysseyLayerStackAddLayerButton::Construct(const FArguments& InArgs)
             [
                 SNew(STextBlock)
                 .TextStyle(FAppStyle::Get(), "NormalText.Important")
-                .Text(LOCTEXT("AddLayer", "Add Layer"))
+                .Text(LOCTEXT("add-layer-button.add-layer", "Add Layer"))
             ]
         ];
 
@@ -85,7 +85,7 @@ TSharedRef<SWidget> SOdysseyLayerStackAddLayerButton::MakeMenu()
         }
 
         //Custom Layers
-        TArray<UClass*> supportedLayerClasses = layerStack->FindSupportedCustomLayerClasses();
+        /* TArray<UClass*> supportedLayerClasses = layerStack->FindSupportedCustomLayerClasses();
         for (UClass* layerClass : supportedLayerClasses)
         {
             UOdysseyLayer* layerCDO = layerClass->GetDefaultObject<UOdysseyLayer>();
@@ -101,7 +101,7 @@ TSharedRef<SWidget> SOdysseyLayerStackAddLayerButton::MakeMenu()
                 //between the moment the user clicks on the button, and the one he clicks on the menu entry.
                 //FAssetData will load the layerClass again if it's the case when calling FAssetData::GetAsset()
             );
-        }
+        } */
     }
     menuBuilder.EndSection();
 
@@ -128,7 +128,7 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
 
 #ifdef WITH_EDITOR
     //Allows to have a single undo if there is side effects (auto adding frames in animation layer) in mOnAdded callback
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStackTransaction", "Add Layer"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("add-layer-button.transaction.add-layer", "Add Layer"));
 #endif
 
     UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();

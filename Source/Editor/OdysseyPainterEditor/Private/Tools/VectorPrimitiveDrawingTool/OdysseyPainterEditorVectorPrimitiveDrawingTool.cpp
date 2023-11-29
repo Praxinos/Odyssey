@@ -264,7 +264,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
 
             // Undo must be called before association with parent object
             // needed for valid GUndo pointer
-            GEditor->BeginTransaction(LOCTEXT("VectorPrimitiveDrawingTool","Vector Primitive Drawing Tool"));
+            GEditor->BeginTransaction(LOCTEXT("vector-primitive-drawing-tool.transaction.draw-primitive","Vector Primitive Drawing Tool"));
             if( GUndo )
             {
                 FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path );
