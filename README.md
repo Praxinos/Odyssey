@@ -4,14 +4,14 @@
 [![UE4](https://img.shields.io/badge/UE4-4.25+-orange)](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)
 [![Release](https://img.shields.io/github/release/Praxinos/Iliad.svg)](https://github.com/Praxinos/Iliad/releases)
 
-## 
-<br>
-
 <p align="center">
     <img src="Meta/git/logo.png">
 </p>
 
-## Overview
+<!-- -->
+
+# Overview
+
 **Iliad** is a digital-painting plugin for Unreal Engine 5.  
 It comes with a dedicated interface to create and edit textures directly within the engine, eliminating the need for a workflow with multiple software.  
 Express your art and experience new creative possibilities with a powerful blueprint-based nodal brush engine.  
@@ -22,30 +22,10 @@ Create brushes to make traditional tools ( crayons, paintbrushes, pencils... ).
 - Creating 2D images like tile sets or sprites for 2D video games.
 - Drawing sketches for storyboard, design or illustration.
 
-# Making a Package
+<!-- -->
 
-- open a shell/cmd at the root of the plugin
-- execute `build-package.py ...`
+# Links
 
-## Examples
-
-- display all options:  
-    ```
-    build-package.py -h
-    ```
-- build for beta (local):  
-    ```
-    build-package.py -t beta
-    ```
-- build for beta (with upload on pcloud):  
-    ```
-    build-package.py -t beta -u
-    ```
-- build for marketplace (with upload on pcloud):  
-    ```
-    build-package.py -t marketplace -u
-
-## Links
 [Official Repository](https://github.com/Praxinos/Iliad)  
 [Marketplace](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)  
 [Developer Documentation](https://praxinos.coop/Documentation/Iliad/Developer/version/v0.6.426/html/)  
@@ -53,3 +33,9 @@ Create brushes to make traditional tools ( crayons, paintbrushes, pencils... ).
 [Praxinos Website](https://praxinos.coop)  
 [Iliad on Discord](https://discordapp.com/invite/gEd6pj7)  
 [Praxinos on Patreon](https://www.patreon.com/praxinos)
+
+<!-- -->
+
+# Making a Package
+
+See the [README](https://github.com/Praxinos/Installers#iliad--epos) of [Installers](https://github.com/Praxinos/Installers) repository
