@@ -90,7 +90,7 @@ FOdysseyVectorImportV1::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
 
                     Ar << jointType;
 
-                    iPath.SetJointType(static_cast<eJointType>(jointType));
+                    iPath.SetJointType(static_cast<eJointType>(jointType), true );
                 }
                 break;
 

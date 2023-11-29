@@ -308,7 +308,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @brief Set the joint type.
          * @param mJointType the joint type.
          */
-        void SetJointType( eJointType mJointType );
+        void SetJointType( eJointType mJointType, bool iInvalidate );
 
        /**
          * @brief Convert this path to the coordinate system of the object passed as parameter.
@@ -358,7 +358,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         void SetBrush( const FOdysseyVectorBrush& iBrush );
         FOdysseyVectorBrush& GetBrush();
-        void SetMiterLimit( double iMiterLimit );
+        void SetMiterLimit( double iMiterLimit, bool iInvalidate );
 
 
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
@@ -370,6 +370,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void RemoveAllSegments();
         bool HasVertex( FOdysseyVectorVertex* iVertex );
         bool HasSegment( FOdysseyVectorSegment* iSegment );
+        virtual void ExportParam( FOdysseyVectorObject* iDestinationObject, bool iInvalidate ) override;
 
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
@@ -410,7 +411,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , uint64 iDrawingFlags );
 
         void ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
-                           , std::vector<FWaySegment>& iWaySegmentArray
+                           , std::vector<FWayFragment>& iWayFragmentArray
                            , std::vector<FOdysseyVectorObject*>& oAddedPathArray
                            , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                            , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray

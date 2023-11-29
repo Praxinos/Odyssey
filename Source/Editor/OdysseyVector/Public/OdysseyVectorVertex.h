@@ -301,6 +301,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         double GetJointLength();
         uint32 GetFlags();
         void GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] );
+        bool HasErasedSectionsOnly();
 
     protected:
         /**

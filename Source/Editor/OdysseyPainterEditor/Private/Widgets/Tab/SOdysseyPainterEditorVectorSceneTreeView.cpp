@@ -183,7 +183,7 @@ void
 SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem
                                                             , ESelectInfo::Type SelectInfo )
 {
-    if( mRootItem && ( SelectInfo == ESelectInfo::Type::OnMouseClick ) )
+    if( mRootItem && ( SelectInfo != ESelectInfo::Type::Direct ) )
     {
         FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 

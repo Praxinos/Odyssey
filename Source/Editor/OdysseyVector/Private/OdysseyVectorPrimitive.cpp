@@ -25,7 +25,7 @@ FOdysseyVectorPrimitive::Convert()
 {
     FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(this->FOdysseyVectorPath::CopyShape());
 
-    this->CopySettings( *path );
+    this->CopySettings( path );
 
     return path;
 }

@@ -124,7 +124,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual ~FOdysseyVectorObject();
         FOdysseyVectorObject( const FString& iName );
         void SetName( const FString& iName );
-        void CopySettings( FOdysseyVectorObject& iDestinationObject );
+        void CopySettings( FOdysseyVectorObject* iDestinationObject );
 
         void Transfer( const BLMatrix2D& iMatrix );
         void GetTransform( double& oTranslationX
@@ -226,4 +226,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void ApplyMatrix( BLMatrix2D& iMatrix );
         void SetOpacity( double iOpacity );
         double GetOpacity();
+        virtual void ExportParam( FOdysseyVectorObject* iDestinationObject, bool iInvalidate );
 };

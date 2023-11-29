@@ -5,7 +5,7 @@
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 
-FWaySegment::FWaySegment( FOdysseyVectorSegment* iSegment
+FWayFragment::FWayFragment( FOdysseyVectorSegment* iSegment
                         , std::vector<FWayPoint>& iWayPointArray
                         , uint32 iIndexWayPoint0
                         , uint32 iIndexWayPoint1 )
@@ -114,8 +114,190 @@ FOdysseyVectorChain::FOdysseyVectorChain( FOdysseyVectorPath* iPath
 }
 
 // callback must return false to keep iterating
+
 void
-FOdysseyVectorChain::Iterate( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSegment*)> iCallback )
+FOdysseyVectorChain::IterateSections( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSection*)> iCallback )
+{
+    FOdysseyVectorVertex* firstVertex = mVertexArray.front();
+    FOdysseyVectorVertex* currentVertex = firstVertex;
+    FOdysseyVectorSection* currentSection = currentVertex->GetSection( mSegmentArray.front() );
+
+    while( currentSection )
+    {
+        FOdysseyVectorVertex* nextVertex = currentSection->GetOtherVertex( currentVertex );
+
+        if( iCallback( currentVertex, currentSection ) == true )
+        {
+            return;
+        }
+
+        if( nextVertex != firstVertex )
+        {
+            FOdysseyVectorSection* nextSection = nextVertex->GetOtherSection( currentSection, false );
+
+            currentVertex = nextVertex;
+            currentSection = nextSection;
+        }
+        else
+        {
+            currentVertex = nextVertex;
+            currentSection = nullptr;
+        }
+    }
+}
+
+bool
+FOdysseyVectorChain::EraseSections( BLImageData* iImageData
+                                  , std::vector<FWayPoint>& oWayPointArray
+                                  , std::vector<FWayFragment>& oWayFragmentArray )
+{
+    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+    std::vector<FWaySection> waySectionArray;
+    bool hasHit = false;
+
+    oWayPointArray.clear();
+    // reserve 1 point per vertex + 2 point per segment
+    oWayPointArray.reserve( mVertexArray.size() + ( mSegmentArray.size() * 2 ) );
+
+    // reserve 6 section per segment
+    waySectionArray.reserve( mSegmentArray.size() * 6 );
+
+    oWayFragmentArray.clear();
+    // reserve 3 segment per segment
+    oWayFragmentArray.reserve( mSegmentArray.size() * 3 );
+
+    // prepare indexes and determine if original vertices should be kept
+    for( int i = 0; i < mVertexArray.size(); i++ )
+    {
+        FOdysseyVectorVertex* vertex = mVertexArray[i];
+
+        if( vertex->HasErasedSectionsOnly() == false ) // vertex in "dark" zone, keep it
+        {
+            oWayPointArray.emplace_back( vertex
+                                       , FWayPoint::OutsideErasureArea
+                                       | FWayPoint::Original );
+        }
+        else
+        {
+            oWayPointArray.emplace_back( vertex
+                                       , FWayPoint::InsideErasureArea
+                                       | FWayPoint::Original );
+
+            hasHit = true;
+        }
+        // for indexing
+        vertex->SetID( i );
+    }
+
+    IterateSections( [ this
+                     , &oWayPointArray
+                     , &waySectionArray
+                     , &hasHit ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSection* section ) -> bool
+    {
+        FOdysseyVectorVertex* nextVertex = section->GetOtherVertex( vertex );
+        bool revert = ( vertex == section->GetVertex(0) ) ? false : true;
+        uint32 hitCount = 0;
+
+        if( nextVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+        {
+            // Note: nextSection cannot be NULL, as an intersection vertex cannot be the last
+            FOdysseyVectorSection* nextSection = nextVertex->GetOtherSection( section, false );
+            double t = nextVertex->GetT( section->GetSegment() );
+            uint32 wayPointCount = oWayPointArray.size();
+
+            if( ( section->IsErased() == false ) && ( nextSection->IsErased() == false ) )
+            {
+                oWayPointArray.emplace_back( nextVertex, FWayPoint::OutsideErasureArea, t );
+            }
+
+            if( ( section->IsErased() == true ) && ( nextSection->IsErased() == false ) )
+            {
+                oWayPointArray.emplace_back( nextVertex, FWayPoint::LeavesErasureArea, t );
+            }
+
+            if( ( section->IsErased() == true ) && ( nextSection->IsErased() == true ) )
+            {
+                oWayPointArray.emplace_back( nextVertex, FWayPoint::InsideErasureArea, t );
+            }
+
+            if( ( section->IsErased() == false ) && ( nextSection->IsErased() == true ) )
+            {
+                oWayPointArray.emplace_back( nextVertex, FWayPoint::EntersErasureArea, t );
+            }
+
+            nextVertex->SetID( wayPointCount );
+        }
+
+        // Note: waySections use waypoints ID because the array might grow (thus the pointer would change)
+        waySectionArray.emplace_back( section, vertex->GetID(), nextVertex->GetID() );
+
+
+        //---------------- parse hits if any ---------------------//
+        if( section->IsErased() == true )
+        {
+            hasHit = true;
+        }
+
+        return false; // keep iterating;
+    } );
+
+    IterateSegments( [ this
+                     , &oWayPointArray
+                     , &waySectionArray
+                     , &oWayFragmentArray
+                     , &hasHit ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
+    {
+        FWayPoint* firstWayPoint = &oWayPointArray[vertex->GetID()];
+
+        // check among all sections ...
+        for( FWaySection& waySection : waySectionArray )
+        {
+            // ... the sections belonging to this segment. They are consecutive.
+            if( waySection.section->GetSegment() == segment )
+            {
+                FWayPoint* secondWayPoint = &oWayPointArray[waySection.indexWayPoint1];
+
+                if( secondWayPoint->flags & FWayPoint::EntersErasureArea )
+                {
+                    oWayFragmentArray.emplace_back( segment
+                                                  , oWayPointArray
+                                                  , firstWayPoint ->vertex->GetID()
+                                                  , secondWayPoint->vertex->GetID() );
+
+                    firstWayPoint = secondWayPoint;
+                }
+
+                if( secondWayPoint->flags & FWayPoint::LeavesErasureArea )
+                {
+                    oWayFragmentArray.emplace_back( segment
+                                                  , oWayPointArray
+                                                  , firstWayPoint ->vertex->GetID()
+                                                  , secondWayPoint->vertex->GetID() );
+
+                    firstWayPoint = secondWayPoint;
+                }
+
+                if( secondWayPoint->flags & FWayPoint::Original )
+                {
+                    oWayFragmentArray.emplace_back( segment
+                                                  , oWayPointArray
+                                                  , firstWayPoint ->vertex->GetID()
+                                                  , secondWayPoint->vertex->GetID() );
+
+                    firstWayPoint = secondWayPoint;
+                }
+            }
+        }
+
+        return false; // keep iterating;
+    } );
+
+    return hasHit;
+}
+
+// callback must return false to keep iterating
+void
+FOdysseyVectorChain::IterateSegments( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSegment*)> iCallback )
 {
     FOdysseyVectorVertex* currentVertex = mVertexArray.front();
 
@@ -172,7 +354,7 @@ FOdysseyVectorChain::TraceLine( int32 iX0
                               , BLImageData* iImageData
                               , FWayPoint* iChainedWayPoint
                               , std::vector<FWayPoint>& oWayPointArray
-                              , std::vector<FWaySegment>& oWaySegmentArray
+                              , std::vector<FWayFragment>& oWayFragmentArray
                               , FOdysseyVectorSegment* iSegment
                               , bool iRevert )
 {
@@ -218,8 +400,8 @@ FOdysseyVectorChain::TraceLine( int32 iX0
                                                                             : FWayPoint::EntersErasureArea, t );
 
                 newVertex->SetID( wayPointCount );
-                // record waypoints ID because the array might grow (thus the pointer would change)
-                oWaySegmentArray.emplace_back( iSegment, oWayPointArray, iChainedWayPoint->vertex->GetID(), newVertex->GetID() );
+                // Note: wayFragments use waypoints ID because the array might grow (thus the pointer would change)
+                oWayFragmentArray.emplace_back( iSegment, oWayPointArray, iChainedWayPoint->vertex->GetID(), newVertex->GetID() );
                 // prepare the next iteration
                 iChainedWayPoint = &oWayPointArray.back();
 
@@ -259,7 +441,7 @@ FOdysseyVectorChain::TraceLine( int32 iX0
 
                 newVertex->SetID( wayPointCount );
                 // record waypoints ID because the array might grow (thus the pointer would change)
-                oWaySegmentArray.emplace_back( iSegment, oWayPointArray, iChainedWayPoint->vertex->GetID(), newVertex->GetID() );
+                oWayFragmentArray.emplace_back( iSegment, oWayPointArray, iChainedWayPoint->vertex->GetID(), newVertex->GetID() );
                 // prepare the next iteration
                 iChainedWayPoint = &oWayPointArray.back();
 
@@ -284,11 +466,9 @@ FOdysseyVectorChain::TraceLine( int32 iX0
 }
 
 bool
-FOdysseyVectorChain::Trace( BLImageData* iImageData
-                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                          , std::vector<FWayPoint>& oWayPointArray
-                          , std::vector<FWaySegment>& oWaySegmentArray )
+FOdysseyVectorChain::EraseSegments( BLImageData* iImageData
+                                  , std::vector<FWayPoint>& oWayPointArray
+                                  , std::vector<FWayFragment>& oWayFragmentArray )
 {
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
     FWayPoint* chainedWayPoint;
@@ -298,9 +478,9 @@ FOdysseyVectorChain::Trace( BLImageData* iImageData
     // reserve 1 point per vertex + 2 point per segment
     oWayPointArray.reserve( mVertexArray.size() + ( mSegmentArray.size() * 2 ) );
 
-    oWaySegmentArray.clear();
+    oWayFragmentArray.clear();
     // reserve 3 segment per segment
-    oWaySegmentArray.reserve( mSegmentArray.size() * 3 );
+    oWayFragmentArray.reserve( mSegmentArray.size() * 3 );
 
     // prepare indexes and determine if original vertices should be kept
     for( int i = 0; i < mVertexArray.size(); i++ )
@@ -312,16 +492,12 @@ FOdysseyVectorChain::Trace( BLImageData* iImageData
 
         if( alpha == 0 ) // vertex in dark zone, keep it
         {
-            // Note: this is written twice if a vertex has 2 segments.
-            // It does not matter because we use indexes.
             oWayPointArray.emplace_back( vertex
                                        , FWayPoint::OutsideErasureArea
                                        | FWayPoint::Original );
         }
         else
         {
-            // Note: this is written twice if a vertex has 2 segments.
-            // It does not matter because we use indexes.
             oWayPointArray.emplace_back( vertex
                                        , FWayPoint::InsideErasureArea
                                        | FWayPoint::Original );
@@ -334,110 +510,90 @@ FOdysseyVectorChain::Trace( BLImageData* iImageData
 
     chainedWayPoint = &oWayPointArray[0];
 
-    Iterate( [ this
-             , iImageData
-             , &chainedWayPoint
-             , &oWayPointArray
-             , &oWaySegmentArray
-             , &oRemovedVertexArray
-             , &oRemovedSegmentArray 
-             , &hasHit
-             , &worldMatrix ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
-               {
-                   std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
-                   FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-                   FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
-                   bool revert = ( vertex == segment->GetVertex(0) ) ? false : true;
-                   uint32 hitCount = 0;
+    IterateSegments( [ this
+                     , iImageData
+                     , &chainedWayPoint
+                     , &oWayPointArray
+                     , &oWayFragmentArray
+                     , &hasHit
+                     , &worldMatrix ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
+    {
+        std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
+        FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+        FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+        bool revert = ( vertex == segment->GetVertex(0) ) ? false : true;
+        uint32 hitCount = 0;
 
-                   // iteration
-                   if( revert == false )
-                   {
-                       for( auto it = fractionCache.begin(); it != fractionCache.end(); ++it )
-                       {
-                           FOdysseyVectorFraction& fraction = *it;
+        // iteration
+        if( revert == false )
+        {
+            for( auto it = fractionCache.begin(); it != fractionCache.end(); ++it )
+            {
+                FOdysseyVectorFraction& fraction = *it;
 
-                           BLPoint p0 = worldMatrix.mapPoint( fraction.lineVertex[0].x, fraction.lineVertex[0].y );
-                           BLPoint p1 = worldMatrix.mapPoint( fraction.lineVertex[1].x, fraction.lineVertex[1].y );
+                BLPoint p0 = worldMatrix.mapPoint( fraction.lineVertex[0].x, fraction.lineVertex[0].y );
+                BLPoint p1 = worldMatrix.mapPoint( fraction.lineVertex[1].x, fraction.lineVertex[1].y );
 
-                           chainedWayPoint = TraceLine( p0.x
-                                                      , p0.y
-                                                      , fraction.fromT
-                                                      , p1.x
-                                                      , p1.y
-                                                      , fraction.toT
-                                                      , iImageData
-                                                      , chainedWayPoint
-                                                      , oWayPointArray
-                                                      , oWaySegmentArray
-                                                      , segment
-                                                      , revert );
-                       }
-                       // don't forget the last sub-segment
-                       oWaySegmentArray.emplace_back( segment
-                                                    , oWayPointArray
-                                                    , chainedWayPoint->vertex->GetID()
-                                                    , vertex1->GetID() );
+                chainedWayPoint = TraceLine( p0.x
+                                           , p0.y
+                                           , fraction.fromT
+                                           , p1.x
+                                           , p1.y
+                                           , fraction.toT
+                                           , iImageData
+                                           , chainedWayPoint
+                                           , oWayPointArray
+                                           , oWayFragmentArray
+                                           , segment
+                                           , revert );
+            }
+            // don't forget the last sub-segment
+            oWayFragmentArray.emplace_back( segment
+                                         , oWayPointArray
+                                         , chainedWayPoint->vertex->GetID()
+                                         , vertex1->GetID() );
 
-                       chainedWayPoint = &oWayPointArray[vertex1->GetID()];
-                   }
-                   else
-                   {
-                       for( auto it = fractionCache.rbegin(); it != fractionCache.rend(); ++it )
-                       {
-                           FOdysseyVectorFraction& fraction = *it;
+            chainedWayPoint = &oWayPointArray[vertex1->GetID()];
+        }
+        else
+        {
+            for( auto it = fractionCache.rbegin(); it != fractionCache.rend(); ++it )
+            {
+                FOdysseyVectorFraction& fraction = *it;
 
-                           BLPoint p0 = worldMatrix.mapPoint( fraction.lineVertex[0].x, fraction.lineVertex[0].y );
-                           BLPoint p1 = worldMatrix.mapPoint( fraction.lineVertex[1].x, fraction.lineVertex[1].y );
+                BLPoint p0 = worldMatrix.mapPoint( fraction.lineVertex[0].x, fraction.lineVertex[0].y );
+                BLPoint p1 = worldMatrix.mapPoint( fraction.lineVertex[1].x, fraction.lineVertex[1].y );
 
-                           chainedWayPoint = TraceLine( p1.x
-                                                      , p1.y
-                                                      , fraction.toT
-                                                      , p0.x
-                                                      , p0.y
-                                                      , fraction.fromT
-                                                      , iImageData
-                                                      , chainedWayPoint
-                                                      , oWayPointArray
-                                                      , oWaySegmentArray
-                                                      , segment
-                                                      , revert );
-                       }
-                       // don't forget the last sub-segment
-                       oWaySegmentArray.emplace_back( segment
-                                                    , oWayPointArray
-                                                    , chainedWayPoint->vertex->GetID()
-                                                    , vertex0->GetID() );
+                chainedWayPoint = TraceLine( p1.x
+                                           , p1.y
+                                           , fraction.toT
+                                           , p0.x
+                                           , p0.y
+                                           , fraction.fromT
+                                           , iImageData
+                                           , chainedWayPoint
+                                           , oWayPointArray
+                                           , oWayFragmentArray
+                                           , segment
+                                           , revert );
+            }
+            // don't forget the last sub-segment
+            oWayFragmentArray.emplace_back( segment
+                                         , oWayPointArray
+                                         , chainedWayPoint->vertex->GetID()
+                                         , vertex0->GetID() );
 
-                       chainedWayPoint = &oWayPointArray[vertex0->GetID()];
-                   }
+            chainedWayPoint = &oWayPointArray[vertex0->GetID()];
+        }
 
-                    //---------------- parse hits if any ---------------------//
-                   if( oWayPointArray.size() > mVertexArray.size() )
-                   {
-                       hasHit = true;
-                   }
+        //---------------- parse hits if any ---------------------//
+        if( oWayPointArray.size() > mVertexArray.size() )
+        {
+            hasHit = true;
+        }
 
-                   return false; // keep iterating;
-               } );
+        return false; // keep iterating;
+    } );
 
     return hasHit;
-}
-
-bool
-FOdysseyVectorChain::HitMask( BLImageData* iImageData
-                            , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                            , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                            , std::vector<FWayPoint>& oWayPointArray
-                            , std::vector<FWaySegment>& oWaySegmentArray )
-{
-    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
-
-    return Trace( iImageData
-                , oRemovedVertexArray
-                , oRemovedSegmentArray
-                , oWayPointArray
-                , oWaySegmentArray );
-
-    return false;
 }
