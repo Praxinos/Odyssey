@@ -15,6 +15,12 @@
 	"Installed": false,
 	"EnabledByDefault": true,
 	"IsExperimentalVersion": false,
+	"LocalizationTargets": [
+		{
+			"Name": "Iliad",
+			"LoadingPolicy": "Editor"
+		}
+	],
 	"Plugins": [
 		{
 			"Enabled": false,
@@ -160,7 +166,7 @@
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		},
-                {
+		{
 			"Name": "OdysseyPainterEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"

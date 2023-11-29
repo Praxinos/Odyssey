@@ -1,0 +1,72 @@
+AboutWindow - copyright.external-libs.ULIS 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyAboutWindow.cpp(225) - "- littleCMS : http://www.littlecms.com/" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyAboutWindow.cpp(216) - "- ULIS : https://github.com/Praxinos/ULIS" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyAboutWindow.cpp(234) - "- glm : https://www.opengl.org/sdk/libs/GLM/" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyAboutWindow.cpp(243) - "- boost.preprocessor : https://www.boost.org/doc/libs/1_71_0/libs/preprocessor/doc/index.html" 
+
+OdysseyAnimationAssetTypeActions - FOdysseyAnimationTypeActionsName 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationAssetTypeActions.cpp(23) - "Animation" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/OdysseyAnimationAssetTypeActions.cpp(20) - "2D Animation" 
+
+SOdysseyPaletteEntryRow - PaletteTransaction 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteEntryRow.cpp(160) - "Change Entry Name" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteEntryRow.cpp(135) - "Change Entry Active" 
+
+SOdysseyPaletteTreeView - PaletteCommonSection 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(429) - "Common" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(424) - "Selection" 
+
+OdysseyPainterEditorGUI - ReleaseNotes_Tooltip 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(184) - "Want more brushes ? Just follow this link !" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(178) - "to get a full changelog of each Iliad version." 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(190) - "For those who want to discuss with us about the next improvements" 
+
+SOdysseyLayerRow - LayerTransaction 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerRow.cpp(191) - "Change Layer Lock" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerRow.cpp(178) - "Change Layer Active" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerRow.cpp(216) - "Change Layer Name" 
+
+SOdysseyLayerStackTreeView - LayerStackCommonSection 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(450) - "Common" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(445) - "Selection" 
+
+UOdysseyPainterEditorVectorPaintBucketTool - BucketProperties 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(584) - "Bucket Properties" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(583) - "Bucket properties" 
+
+UOdysseyPainterEditorVectorSelectionTool - VectorObjectSelectionTool 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.cpp(316) - "Vector Vertex Pick Tool" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.cpp(221) - "Vector Object Pick Tool" 
+
+SOdysseyTextureLayerFolderRow - LayerTransaction 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerFolderRow.cpp(94) - "Change Layer Opacity" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerFolderRow.cpp(86) - "Change Layer BlendMode" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerFolderRow.cpp(108) - "Change Layer Opacity" 
+
+SOdysseyTextureLayerImageRasterRow - LayerTransaction 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerImageRasterRow.cpp(137) - "Change Layer BlendMode" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerImageRasterRow.cpp(85) - "Change Layer Opacity" 
+
+SOdysseyTextureLayerImageVectorRow - LayerTransaction 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerImageVectorRow.cpp(100) - "Change Layer Coloring" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerImageVectorRow.cpp(93) - "Change Layer Wireframe Display" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerImageVectorRow.cpp(108) - "Change Layer Opacity" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerImageVectorRow.cpp(122) - "Change Layer Opacity" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerImageVectorRow.cpp(166) - "Change Layer BlendMode" 
+
+SOdysseyAnimationLayerFolderRow - LayerTransaction 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerFolder/SOdysseyAnimationLayerFolderRow.cpp(114) - "Change Layer Opacity" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerFolder/SOdysseyAnimationLayerFolderRow.cpp(106) - "Change Layer BlendMode" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerFolder/SOdysseyAnimationLayerFolderRow.cpp(128) - "Change Layer Opacity" 
+
+SOdysseyAnimationLayerImageRasterRow - LayerTransaction 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(208) - "Change Layer BlendMode" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(169) - "Change Layer Opacity" 
+
+SOdysseyAnimationLayerImageVectorRow - LayerTransaction 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(175) - "Change Layer Coloring" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(168) - "Change Layer Wireframe status" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(189) - "Change Layer Opacity" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(203) - "Change Layer Opacity" 
+	/Engine/Binaries/Win64/Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(234) - "Change Layer BlendMode" 
+
