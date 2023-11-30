@@ -112,11 +112,12 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPai
 
 void
 UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* iScene
+                                                    , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                                                     , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                                                     , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                                    , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray
                                                     , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                                                    , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                                                    , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray )
+                                                    , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
@@ -124,56 +125,31 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
     ( iScene
     , iScene
     , 0
-    , [ iScene
+    , [ this
+      , iScene
       , vectorEngine
+      , &oAddedObjectArray
       , &oAddedVertexArray
       , &oAddedSegmentArray
+      , &oRemovedObjectArray
       , &oRemovedVertexArray
-      , &oRemovedSegmentArray
-      , &oRemovedObjectArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      , &oRemovedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
           if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
-              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
+              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) ) 
               {
-                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
-                  FOdysseyVectorObject* parent = path->GetParent();
+                  FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+                  ::ULIS::FRectD unusedRect;
 
-                  if( parent->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                  {
-                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(parent);
-                      std::vector<FOdysseyVectorSection*> pathSectionArray;
-                      std::vector<FOdysseyVectorSection*> trimmedSectionArray;
-
-                      pathSectionArray.reserve( 10 );
-                      trimmedSectionArray.reserve( 10 );
-
-                      paintGroup->GetSectionsFromPath( path, pathSectionArray );
-                      // remove whole paths for paths without intersections
-                      if( pathSectionArray.size() == 0 )
-                      {
-                          ::ULIS::FRectD unusedRect;
-
-                          if( path->PickShape( unusedRect, FOdysseyVectorEngine::PICK_MASK_BASED ) )
-                          {
-                              oRemovedObjectArray.push_back( path );
-                          }
-                      }
-                      else
-                      {
-                          // remove sections only for paths with intersections
-                          paintGroup->PickSections( pathSectionArray, trimmedSectionArray );
-
-                          if( trimmedSectionArray.size() )
-                          {
-                              paintGroup->EraseSections( trimmedSectionArray
-                                                       , oAddedVertexArray
-                                                       , oAddedSegmentArray
-                                                       , oRemovedVertexArray
-                                                       , oRemovedSegmentArray );
-                          }
-                      }
-                  }
+                  paintGroup->EraseSections( unusedRect
+                                           , oAddedObjectArray
+                                           , oAddedVertexArray
+                                           , oAddedSegmentArray
+                                           , oRemovedObjectArray
+                                           , oRemovedVertexArray
+                                           , oRemovedSegmentArray
+                                           , Split );
               }
 
               return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
@@ -182,10 +158,33 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
           return 0;
       } );
 
-    for( int i = 0; i < oRemovedObjectArray.size(); i++ )
-    { 
-        oRemovedObjectArray[i]->GetParent()->RemoveChild( oRemovedObjectArray[i] );
+    for( int i = 0; i < oAddedObjectArray.size(); i++ )
+    {
+        // parent is stored in mParent variable byt the Erase function even though it does not
+        // belong to the parent. It kinda sucks but it is easier that way, otherwise Traverse()
+        // will have some problems because we change the children list, and Traverse is recursive.
+        oAddedObjectArray[i]->GetParent()->AppendChild( oAddedObjectArray[i] );
+
+        oAddedObjectArray[i]->Invalidate();
     }
+
+    // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
+    // so we can't alter the hierarchy, unles traverse works on copies of the children list but that 
+    // would be very inefficient.
+    for( int i = 0; i < oRemovedObjectArray.size(); i++ )
+    {
+        if( oRemovedObjectArray[i]->GetChildrenList().size() == 0 )
+        {
+            oRemovedObjectArray[i]->GetParent()->RemoveChild( oRemovedObjectArray[i] );
+
+            if( oRemovedObjectArray[i]->IsSelected() )
+            {
+                vectorEngine->UnselectObject( oRemovedObjectArray[i] );
+            }
+        }
+    }
+
+    iScene->UpdateMatrix();
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
@@ -228,6 +227,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
                                  , oAddedSegmentArray
                                  , oRemovedVertexArray
                                  , oRemovedSegmentArray
+                                 , false
                                  , Split ) )
                   {
                       oRemovedObjectArray.push_back( path );
@@ -296,11 +296,12 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
         {
             EraseSections( iScene
+                         , addedObjectArray
                          , addedVertexArray
                          , addedSegmentArray
+                         , removedObjectArray
                          , removedVertexArray
-                         , removedSegmentArray
-                         , removedObjectArray );
+                         , removedSegmentArray );
         }
         else
         {

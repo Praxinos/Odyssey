@@ -1891,6 +1891,7 @@ typedef struct _FVertexPair
     }
 } FVertexPair;
 
+/*
 void
 FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
                                       , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
@@ -1998,136 +1999,43 @@ FOdysseyVectorGroupPaint::EraseSegment( FOdysseyVectorSegment* iSegment
         }
     }
 }
+*/
 
 void
-FOdysseyVectorGroupPaint::ExtendErasedSection( FOdysseyVectorVertex* iVertex
-                                             , FOdysseyVectorSection* iInitiatorSection
-                                             , FOdysseyVectorSection* iFromSection
-                                             , std::vector<FOdysseyVectorSection*>& oErasedSectionArray )
-{
-    FOdysseyVectorSection* fromSection = iFromSection;
-    FOdysseyVectorVertex* currentVertex = iVertex;
-
-    while(   fromSection 
-        && ( fromSection->GetSegment()->GetClass() != FOdysseyVectorSegmentCubicGap::StaticClass() )
-        && ( currentVertex->GetClass() != FOdysseyVectorVertexIntersection::StaticClass() ) )
-    {
-        FOdysseyVectorSection* nextSection = currentVertex->GetOtherSection( fromSection, false );
-
-        if( nextSection == iInitiatorSection )
-        {
-            break;
-        }
-
-        if( nextSection )
-        {
-            if( nextSection->IsErased() == false )
-            {
-                oErasedSectionArray.push_back( nextSection );
-
-                nextSection->SetErased( true );
-
-                currentVertex = nextSection->GetOtherVertex( currentVertex );
-            }
-        }
-
-        fromSection = nextSection;
-    }
-}
-
-void
-FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorSection*>& iErasedSectionArray
+FOdysseyVectorGroupPaint::EraseSections( const ::ULIS::FRectD &iRoi
+                                       , std::vector<FOdysseyVectorObject*>& oAddedPathArray
                                        , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                                        , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                                       , std::vector<FOdysseyVectorObject*>& oRemovedPathArray
                                        , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
+                                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                                       , bool iSplit )
 {
-    std::vector<FOdysseyVectorSection*> extendedErasedSectionArray;
-                                        // Arbitrary value
-    extendedErasedSectionArray.reserve( iErasedSectionArray.size() * 2 );
-
     // first step : relink sections as they were all unlinked after the cycle detection process
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
         mSectionBuffer[i].Link();
     }
 
-    // second step. Extend erased section array with the neighbour sections
-    for( FOdysseyVectorSection* erasedSection : iErasedSectionArray )
+    for( FOdysseyVectorPath* path : mPathList )
     {
-        extendedErasedSectionArray.push_back( erasedSection );
-
-        erasedSection->SetErased( true );
-
-        ExtendErasedSection( erasedSection->GetVertex(0), erasedSection, erasedSection, extendedErasedSectionArray );
-        ExtendErasedSection( erasedSection->GetVertex(1), erasedSection, erasedSection, extendedErasedSectionArray );
-    }
-
-    // retrieve and prepare all concerned segments for removal
-    for( FOdysseyVectorSection* extendedErasedSection : extendedErasedSectionArray )
-    {
-        FOdysseyVectorSegment* segment = extendedErasedSection->GetSegment();
-
-        // filter. A segment could be a of type SegmentGap as well
-        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        if( path->Erase( iRoi
+                       , oAddedPathArray
+                       , oAddedVertexArray
+                       , oAddedSegmentArray
+                       , oRemovedVertexArray
+                       , oRemovedSegmentArray
+                       , true
+                       , iSplit ) )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
-            // check if not already removed.
-            if( std::find( oRemovedSegmentArray.begin(), oRemovedSegmentArray.end(), cubicSegment ) == oRemovedSegmentArray.end() )
-            {
-                oRemovedSegmentArray.push_back( cubicSegment );
-            }
+            oRemovedPathArray.push_back( path );
         }
-    }
-
-    // get sections for segment (there are no gap segments in this array)
-    for( FOdysseyVectorSegment* segment : oRemovedSegmentArray )
-    {
-        EraseSegment( segment, oAddedVertexArray, oAddedSegmentArray );
     }
 
     // unlink sections again
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
         mSectionBuffer[i].Unlink();
-    }
-
-    // remove erased segments
-    for( FOdysseyVectorSegment* segment : oRemovedSegmentArray )
-    {
-        segment->GetPath()->RemoveSegment( segment );
-    }
-
-    // add new vertices
-    for( FOdysseyVectorVertex* vertex : oAddedVertexArray )
-    {
-        vertex->GetPath()->AddVertex( vertex );
-    }
-
-    // add new segments
-    for( FOdysseyVectorSegment* segment : oAddedSegmentArray )
-    {
-        segment->GetPath()->AddSegment( segment );
-    }
-
-    // clean if needed
-    for( FOdysseyVectorSegment* segment : oRemovedSegmentArray )
-    {
-        if( segment->GetVertex(0)->GetSegmentCount() == 0 )
-        {
-            oRemovedVertexArray.push_back( segment->GetVertex(0) );
-        }
-
-        if( segment->GetVertex(1)->GetSegmentCount() == 0 )
-        {
-            oRemovedVertexArray.push_back( segment->GetVertex(1) );
-        }
-    }
-
-    // remove erased vertices
-    for( FOdysseyVectorVertex* vertex : oRemovedVertexArray )
-    {
-        vertex->GetPath()->RemoveVertex( vertex );
     }
 }
 
@@ -2151,75 +2059,6 @@ FOdysseyVectorGroupPaint::GetSectionsFromPath( FOdysseyVectorPath* iPath
             oPickedSectionArray.push_back( &mSectionBuffer[i] );
         }
     }
-}
-
-bool
-FOdysseyVectorGroupPaint::PickSection( FOdysseyVectorSection* iSection
-                                     , const ::ULIS::FRectD& iMaskRect
-                                     , const uint8* iMaskPixelData )
-{
-    ::ULIS::FVec2D* bezier = iSection->GetBezier();
-    BLPoint pt[4] = { mWorldMatrix.mapPoint( bezier[0].x, bezier[0].y )
-                    , mWorldMatrix.mapPoint( bezier[1].x, bezier[1].y )
-                    , mWorldMatrix.mapPoint( bezier[2].x, bezier[2].y )
-                    , mWorldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
-    ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
-                                    , ::ULIS::FVec2D( pt[1].x, pt[1].y )
-                                    , ::ULIS::FVec2D( pt[2].x, pt[2].y )
-                                    , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
-
-    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iMaskPixelData );
-}
-
-bool
-FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& iSectionArray
-                                     ,  std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
-{
-    BLImage* maskImage = GetEngine()->GetBLMask();
-    BLImageData maskData;
-    ::ULIS::FRectD maskRect;
-    bool picked = false;
-
-    maskImage->getData( &maskData );
-
-    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
-
-    for( int i = 0; i < iSectionArray.size(); i++ )
-    {
-        if( PickSection( iSectionArray[i], maskRect, (uint8*) maskData.pixelData ) )
-        {
-            oPickedSectionArray.push_back( iSectionArray[i] );
-
-            picked = true;
-        }
-    }
-
-    return picked;
-}
-
-bool
-FOdysseyVectorGroupPaint::PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
-{
-    BLImage* maskImage = GetEngine()->GetBLMask();
-    BLImageData maskData;
-    ::ULIS::FRectD maskRect;
-    bool picked = false;
-
-    maskImage->getData( &maskData );
-
-    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
-
-    for( int i = 0; i < mSectionBuffer.size(); i++ )
-    {
-        if( PickSection( &mSectionBuffer[i], maskRect, (uint8*) maskData.pixelData ) )
-        {
-            oPickedSectionArray.push_back( &mSectionBuffer[i] );
-
-            picked = true;
-        }
-    }
-
-    return picked;
 }
 
 // Section-less paths are listed at PaintGroup updates. They allow us to quickly determine

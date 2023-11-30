@@ -10,6 +10,7 @@
 
 class FOdysseyVectorVertex;
 class FOdysseyVectorSegment;
+class FOdysseyVectorSection;
 class FOdysseyVectorPath;
 class FOdysseyVectorObject;
 
@@ -120,6 +121,12 @@ class FOdysseyVectorChain
                   , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                   , std::vector<FWayPoint>& oWayPointArray
                   , std::vector<FWayFragment>& oWayFragmentArray );
+        bool PickSection( FOdysseyVectorSection* iSection
+                        , const ::ULIS::FRectD& iMaskRect
+                        , const uint8* iMaskPixelData );
+        bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
+        static void ExtendErasedSection( FOdysseyVectorVertex* iVertex
+                                       , FOdysseyVectorSection* iFromSection );
 
     private :
         FOdysseyVectorPath* mPath;

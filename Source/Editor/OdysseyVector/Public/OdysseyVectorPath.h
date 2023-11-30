@@ -159,6 +159,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                   , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                  , bool iWholeSection
                   , bool iSplit );
 
        /**

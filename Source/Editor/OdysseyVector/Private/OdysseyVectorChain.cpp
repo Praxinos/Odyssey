@@ -2,7 +2,9 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSection.h"
 #include "OdysseyVectorSegmentCubic.h"
 
 FWayFragment::FWayFragment( FOdysseyVectorSegment* iSegment
@@ -119,6 +121,10 @@ void
 FOdysseyVectorChain::IterateSections( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSection*)> iCallback )
 {
     FOdysseyVectorVertex* firstVertex = mVertexArray.front();
+    FOdysseyVectorVertex* lastVertex = mVertexArray.back();
+    // this ensures we won't get section from a gap segment. Gap segments are not linked to vertices
+    FOdysseyVectorSegment* lastSegment = mSegmentArray.back();
+    FOdysseyVectorSection* lastSection = lastVertex->GetSection( lastSegment );
     FOdysseyVectorVertex* currentVertex = firstVertex;
     FOdysseyVectorSection* currentSection = currentVertex->GetSection( mSegmentArray.front() );
 
@@ -131,7 +137,7 @@ FOdysseyVectorChain::IterateSections( std::function<bool( FOdysseyVectorVertex*,
             return;
         }
 
-        if( nextVertex != firstVertex )
+        if( currentSection != lastSection )
         {
             FOdysseyVectorSection* nextSection = nextVertex->GetOtherSection( currentSection, false );
 
@@ -140,10 +146,90 @@ FOdysseyVectorChain::IterateSections( std::function<bool( FOdysseyVectorVertex*,
         }
         else
         {
-            currentVertex = nextVertex;
+            currentVertex = nullptr;
             currentSection = nullptr;
         }
     }
+}
+
+// static
+void
+FOdysseyVectorChain::ExtendErasedSection( FOdysseyVectorVertex* iVertex
+                                        , FOdysseyVectorSection* iFromSection )
+{
+    FOdysseyVectorVertex* currentVertex = iVertex;
+    FOdysseyVectorSection* currentSection = iFromSection;
+
+    while(  currentSection
+       && ( currentSection->GetSegment()->GetClass() != FOdysseyVectorSegmentCubicGap::StaticClass()    )
+       && ( currentVertex->GetClass()                != FOdysseyVectorVertexIntersection::StaticClass() ) )
+    {
+        FOdysseyVectorVertex* nextVertex = currentSection->GetOtherVertex( currentVertex );
+
+        currentSection->SetErased( true );
+
+        if( currentSection != iFromSection )
+        {
+            FOdysseyVectorSection* nextSection = nextVertex->GetOtherSection( currentSection, false );
+
+            currentVertex = nextVertex;
+            currentSection = nextSection;
+        }
+        else
+        {
+            currentVertex = nullptr;
+            currentSection = nullptr;
+        }
+    }
+}
+
+bool
+FOdysseyVectorChain::PickSection( FOdysseyVectorSection* iSection
+                                , const ::ULIS::FRectD& iMaskRect
+                                , const uint8* iMaskPixelData )
+{
+    ::ULIS::FVec2D* bezier = iSection->GetBezier();
+    // Note, section are in paingroup coordinates (path's parent), not in path coordinates.
+    BLMatrix2D& worldMatrix = mPath->GetParent()->GetWorldMatrix();
+    BLPoint pt[4] = { worldMatrix.mapPoint( bezier[0].x, bezier[0].y )
+                    , worldMatrix.mapPoint( bezier[1].x, bezier[1].y )
+                    , worldMatrix.mapPoint( bezier[2].x, bezier[2].y )
+                    , worldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
+    ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
+                                    , ::ULIS::FVec2D( pt[1].x, pt[1].y )
+                                    , ::ULIS::FVec2D( pt[2].x, pt[2].y )
+                                    , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
+
+    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iMaskPixelData );
+}
+
+bool
+FOdysseyVectorChain::PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray )
+{
+    BLImage* maskImage = mPath->GetEngine()->GetBLMask();
+    BLImageData maskData;
+    ::ULIS::FRectD maskRect;
+
+    oPickedSectionArray.clear();
+
+    maskImage->getData( &maskData );
+
+    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
+
+    IterateSections( [ this
+                     , &maskRect
+                     , &maskData
+                     , &oPickedSectionArray ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSection* section ) -> bool
+    {
+        if( PickSection( section, maskRect, (uint8*) maskData.pixelData ) )
+        {
+            oPickedSectionArray.push_back( section );
+        }
+
+        return false; // keep iterating
+    } );
+
+    return oPickedSectionArray.size() ? true : false;
 }
 
 bool
@@ -152,145 +238,188 @@ FOdysseyVectorChain::EraseSections( BLImageData* iImageData
                                   , std::vector<FWayFragment>& oWayFragmentArray )
 {
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+    std::vector<FOdysseyVectorSection*> pickedSectionArray;
     std::vector<FWaySection> waySectionArray;
     bool hasHit = false;
 
-    oWayPointArray.clear();
-    // reserve 1 point per vertex + 2 point per segment
-    oWayPointArray.reserve( mVertexArray.size() + ( mSegmentArray.size() * 2 ) );
+    PickSections( pickedSectionArray );
 
-    // reserve 6 section per segment
-    waySectionArray.reserve( mSegmentArray.size() * 6 );
-
-    oWayFragmentArray.clear();
-    // reserve 3 segment per segment
-    oWayFragmentArray.reserve( mSegmentArray.size() * 3 );
-
-    // prepare indexes and determine if original vertices should be kept
-    for( int i = 0; i < mVertexArray.size(); i++ )
+    if( pickedSectionArray.size() )
     {
-        FOdysseyVectorVertex* vertex = mVertexArray[i];
-
-        if( vertex->HasErasedSectionsOnly() == false ) // vertex in "dark" zone, keep it
+        // second step. Extend erased section array with the neighbour sections until we reach
+        // the end of the chain or an intersection
+        for( FOdysseyVectorSection* pickedSection : pickedSectionArray )
         {
-            oWayPointArray.emplace_back( vertex
-                                       , FWayPoint::OutsideErasureArea
-                                       | FWayPoint::Original );
-        }
-        else
-        {
-            oWayPointArray.emplace_back( vertex
-                                       , FWayPoint::InsideErasureArea
-                                       | FWayPoint::Original );
+            pickedSection->SetErased( true );
 
-            hasHit = true;
+            // static call
+            FOdysseyVectorChain::ExtendErasedSection( pickedSection->GetVertex(0), pickedSection );
+            // static call
+            FOdysseyVectorChain::ExtendErasedSection( pickedSection->GetVertex(1), pickedSection );
         }
-        // for indexing
-        vertex->SetID( i );
+
+        oWayPointArray.clear();
+        // reserve 1 point per vertex + 2 point per segment
+        oWayPointArray.reserve( mVertexArray.size() + ( mSegmentArray.size() * 2 ) );
+
+        // reserve 6 section per segment
+        waySectionArray.reserve( mSegmentArray.size() * 6 );
+
+        oWayFragmentArray.clear();
+        // reserve 3 segment per segment
+        oWayFragmentArray.reserve( mSegmentArray.size() * 3 );
+
+        // prepare indexes and determine if original vertices should be kept
+        for( int i = 0; i < mVertexArray.size(); i++ )
+        {
+            FOdysseyVectorVertex* vertex = mVertexArray[i];
+
+            if( vertex->HasErasedSectionsOnly() == false ) // vertex in "dark" zone, keep it
+            {
+                oWayPointArray.emplace_back( vertex
+                                           , FWayPoint::OutsideErasureArea
+                                           | FWayPoint::Original );
+            }
+            else
+            {
+                oWayPointArray.emplace_back( vertex
+                                           , FWayPoint::InsideErasureArea
+                                           | FWayPoint::Original );
+
+                hasHit = true;
+            }
+            // for indexing
+            vertex->SetID( i );
+        }
+
+        IterateSections( [ this
+                         , &oWayPointArray
+                         , &waySectionArray
+                         , &hasHit ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSection* section ) -> bool
+        {
+            FOdysseyVectorVertex* nextVertex = section->GetOtherVertex( vertex );
+            bool revert = ( vertex == section->GetVertex(0) ) ? false : true;
+            uint32 hitCount = 0;
+
+            if( nextVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+            {
+                // Note: nextSection cannot be NULL, as an intersection vertex cannot be the last
+                FOdysseyVectorSection* nextSection = nextVertex->GetOtherSection( section, false );
+                double t = nextVertex->GetT( section->GetSegment() );
+                uint32 wayPointCount = oWayPointArray.size();
+
+                if( ( section->IsErased() == false ) && ( nextSection->IsErased() == false ) )
+                {
+                    oWayPointArray.emplace_back( nextVertex, FWayPoint::OutsideErasureArea, t );
+                }
+
+                if( ( section->IsErased() == true ) && ( nextSection->IsErased() == false ) )
+                {
+                    oWayPointArray.emplace_back( nextVertex, FWayPoint::LeavesErasureArea, t );
+                }
+
+                if( ( section->IsErased() == true ) && ( nextSection->IsErased() == true ) )
+                {
+                    oWayPointArray.emplace_back( nextVertex, FWayPoint::InsideErasureArea, t );
+                }
+
+                if( ( section->IsErased() == false ) && ( nextSection->IsErased() == true ) )
+                {
+                    oWayPointArray.emplace_back( nextVertex, FWayPoint::EntersErasureArea, t );
+                }
+
+                nextVertex->SetID( wayPointCount );
+            }
+
+            // Note: waySections use waypoints ID because the array might grow (thus the pointer would change)
+            waySectionArray.emplace_back( section, vertex->GetID(), nextVertex->GetID() );
+
+
+            //---------------- parse hits if any ---------------------//
+            if( section->IsErased() == true )
+            {
+                hasHit = true;
+            }
+
+            return false; // keep iterating;
+        } );
+
+        // second pass will build segment fragments from sections.
+        IterateSegments( [ this
+                         , &oWayPointArray
+                         , &waySectionArray
+                         , &oWayFragmentArray
+                         , &hasHit ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
+        {
+            FWayPoint* firstWayPoint = &oWayPointArray[vertex->GetID()];
+
+            // check among all sections ...
+            for( FWaySection& waySection : waySectionArray )
+            {
+                // ... the sections belonging to this segment. They are consecutive.
+                if( waySection.section->GetSegment() == segment )
+                {
+                    FWayPoint* secondWayPoint = &oWayPointArray[waySection.indexWayPoint1];
+
+                    if( secondWayPoint->flags & FWayPoint::EntersErasureArea )
+                    {
+                        // only vertex at intersection can have the EntersErasureArea flag
+                        // the cast is only for clarity
+                        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(secondWayPoint->vertex);
+                        ::ULIS::FVec2D& coords = intersectionVertex->GetCoords();
+                        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( coords.x
+                                                                                  , coords.y
+                                                                                  , 1.0f );
+
+                        newVertex->SetID( intersectionVertex->GetID() );
+                        // replace intersection vertex with this new vertex
+                        secondWayPoint->vertex = newVertex;
+
+                        oWayFragmentArray.emplace_back( segment
+                                                      , oWayPointArray
+                                                      , firstWayPoint ->vertex->GetID()
+                                                      , secondWayPoint->vertex->GetID() );
+
+                        firstWayPoint = secondWayPoint;
+                    }
+
+                    if( secondWayPoint->flags & FWayPoint::LeavesErasureArea )
+                    {
+                        // only vertex at intersection can have the LeavesErasureArea flag
+                        // the cast is only for clarity
+                        FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(secondWayPoint->vertex);
+                        ::ULIS::FVec2D& coords = intersectionVertex->GetCoords();
+                        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( coords.x
+                                                                                  , coords.y
+                                                                                  , 1.0f );
+
+                        newVertex->SetID( intersectionVertex->GetID() );
+                        // replace intersection vertex with this new vertex
+                        secondWayPoint->vertex = newVertex;
+
+                        oWayFragmentArray.emplace_back( segment
+                                                      , oWayPointArray
+                                                      , firstWayPoint ->vertex->GetID()
+                                                      , secondWayPoint->vertex->GetID() );
+
+                        firstWayPoint = secondWayPoint;
+                    }
+
+                    if( secondWayPoint->flags & FWayPoint::Original )
+                    {
+                        oWayFragmentArray.emplace_back( segment
+                                                      , oWayPointArray
+                                                      , firstWayPoint ->vertex->GetID()
+                                                      , secondWayPoint->vertex->GetID() );
+
+                        firstWayPoint = secondWayPoint;
+                    }
+                }
+            }
+
+            return false; // keep iterating;
+        } );
     }
-
-    IterateSections( [ this
-                     , &oWayPointArray
-                     , &waySectionArray
-                     , &hasHit ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSection* section ) -> bool
-    {
-        FOdysseyVectorVertex* nextVertex = section->GetOtherVertex( vertex );
-        bool revert = ( vertex == section->GetVertex(0) ) ? false : true;
-        uint32 hitCount = 0;
-
-        if( nextVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
-        {
-            // Note: nextSection cannot be NULL, as an intersection vertex cannot be the last
-            FOdysseyVectorSection* nextSection = nextVertex->GetOtherSection( section, false );
-            double t = nextVertex->GetT( section->GetSegment() );
-            uint32 wayPointCount = oWayPointArray.size();
-
-            if( ( section->IsErased() == false ) && ( nextSection->IsErased() == false ) )
-            {
-                oWayPointArray.emplace_back( nextVertex, FWayPoint::OutsideErasureArea, t );
-            }
-
-            if( ( section->IsErased() == true ) && ( nextSection->IsErased() == false ) )
-            {
-                oWayPointArray.emplace_back( nextVertex, FWayPoint::LeavesErasureArea, t );
-            }
-
-            if( ( section->IsErased() == true ) && ( nextSection->IsErased() == true ) )
-            {
-                oWayPointArray.emplace_back( nextVertex, FWayPoint::InsideErasureArea, t );
-            }
-
-            if( ( section->IsErased() == false ) && ( nextSection->IsErased() == true ) )
-            {
-                oWayPointArray.emplace_back( nextVertex, FWayPoint::EntersErasureArea, t );
-            }
-
-            nextVertex->SetID( wayPointCount );
-        }
-
-        // Note: waySections use waypoints ID because the array might grow (thus the pointer would change)
-        waySectionArray.emplace_back( section, vertex->GetID(), nextVertex->GetID() );
-
-
-        //---------------- parse hits if any ---------------------//
-        if( section->IsErased() == true )
-        {
-            hasHit = true;
-        }
-
-        return false; // keep iterating;
-    } );
-
-    IterateSegments( [ this
-                     , &oWayPointArray
-                     , &waySectionArray
-                     , &oWayFragmentArray
-                     , &hasHit ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
-    {
-        FWayPoint* firstWayPoint = &oWayPointArray[vertex->GetID()];
-
-        // check among all sections ...
-        for( FWaySection& waySection : waySectionArray )
-        {
-            // ... the sections belonging to this segment. They are consecutive.
-            if( waySection.section->GetSegment() == segment )
-            {
-                FWayPoint* secondWayPoint = &oWayPointArray[waySection.indexWayPoint1];
-
-                if( secondWayPoint->flags & FWayPoint::EntersErasureArea )
-                {
-                    oWayFragmentArray.emplace_back( segment
-                                                  , oWayPointArray
-                                                  , firstWayPoint ->vertex->GetID()
-                                                  , secondWayPoint->vertex->GetID() );
-
-                    firstWayPoint = secondWayPoint;
-                }
-
-                if( secondWayPoint->flags & FWayPoint::LeavesErasureArea )
-                {
-                    oWayFragmentArray.emplace_back( segment
-                                                  , oWayPointArray
-                                                  , firstWayPoint ->vertex->GetID()
-                                                  , secondWayPoint->vertex->GetID() );
-
-                    firstWayPoint = secondWayPoint;
-                }
-
-                if( secondWayPoint->flags & FWayPoint::Original )
-                {
-                    oWayFragmentArray.emplace_back( segment
-                                                  , oWayPointArray
-                                                  , firstWayPoint ->vertex->GetID()
-                                                  , secondWayPoint->vertex->GetID() );
-
-                    firstWayPoint = secondWayPoint;
-                }
-            }
-        }
-
-        return false; // keep iterating;
-    } );
 
     return hasHit;
 }

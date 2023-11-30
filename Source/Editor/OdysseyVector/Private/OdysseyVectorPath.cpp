@@ -852,7 +852,8 @@ FOdysseyVectorPath::VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit )
 
     if( iSplit )
     {
-        if( iWayPoint->flags & FWayPoint::OutsideErasureArea )
+        if( ( iWayPoint->flags & FWayPoint::OutsideErasureArea )
+         && ( iWayPoint->flags & FWayPoint::Original           ) )
         {
             retFlags |= ( eVertexAdditionFlags::RemoveOriginalVertex
                         | eVertexAdditionFlags::CreateDerivedVertex );
@@ -933,8 +934,8 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
             FWayPoint* wayPoint1 = &iWayPointArray[wayFragment.indexWayPoint1];
             eSegmentAdditionFlags segmentAdditionFlags = SegmentAdditionPolicy( wayPoint0, wayPoint1, iSplit );
 
-            //UE_LOG(LogTemp, Warning, TEXT("segment : %d %d"), wayPoint0->vertex->GetID()
-            //                                                , wayPoint1->vertex->GetID() );
+            UE_LOG(LogTemp, Warning, TEXT("fragment : %d:%x %d:%x"), wayPoint0->vertex->GetID(), wayPoint0->flags
+                                                                   , wayPoint1->vertex->GetID(), wayPoint1->flags );
 
 
             if( ( segmentAdditionFlags & eSegmentAdditionFlags::RemoveOriginalSegment ) == eSegmentAdditionFlags::RemoveOriginalSegment )
@@ -1037,6 +1038,7 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                         , bool iWholeSection
                          , bool iSplit )
 {
     BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
@@ -1067,9 +1069,14 @@ FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
             // no vertex or segment is allocated in chain.HitMask(). the allocation differs
             // depending on the spliting mode, so it is the responsibility of EraseNoSplit() and
             // EraseNoSplit() to allocate new vertices / segments or paths 
-            if( chain.EraseSegments( &imageData
-                                   , wayPointArray
-                                   , wayFragmentArray ) )
+            bool hit = iWholeSection ? chain.EraseSections( &imageData
+                                                          , wayPointArray
+                                                          , wayFragmentArray )
+                                     : chain.EraseSegments( &imageData
+                                                          , wayPointArray
+                                                          , wayFragmentArray );
+
+            if( hit )
             {
                 // proceed now we know we have hit anything
                 // determine which vertices / segments will be deleted and which will be kept

@@ -55,11 +55,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
                        , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                        , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray );
         void EraseSections( FOdysseyVectorGroupPaint* iScene
+                          , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                          , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray
                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                          , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray );
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
 
     public:
         UPROPERTY( EditAnywhere, Category = EraserTool, meta = (ClampMin = "0.0", UIMin = "0.0") )

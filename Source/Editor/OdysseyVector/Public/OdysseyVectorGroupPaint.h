@@ -162,17 +162,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void SetMonochromeColor( const FColor& iMonochromeColor );
         void GetSectionsFromPath( FOdysseyVectorPath* iPath
                                 , std::vector<FOdysseyVectorSection*>& oSectionArray );
-        bool PickSection( FOdysseyVectorSection* iSection
-                        , const ::ULIS::FRectD& iMaskRect
-                        , const uint8* iMaskPixelData );
-        bool PickSections( std::vector<FOdysseyVectorSection*>& iSectionArray
-                        ,  std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
-        bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
-        void EraseSections( std::vector<FOdysseyVectorSection*>& iErasedSectionArray
+        void EraseSections( const ::ULIS::FRectD &iRoi
+                          , std::vector<FOdysseyVectorObject*>& oAddedPathArray
                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                          , std::vector<FOdysseyVectorObject*>& oRemovedPathArray
                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                          , bool iSplit );
         void GetSectionsFromSegment( FOdysseyVectorSegment* iSegment
                                    , std::vector<FOdysseyVectorSection*>& oSectionArray );
 
@@ -255,18 +252,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                , std::vector<FOdysseyVectorSection>& iSectionBuffer
                                , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer );
 
-        void ExtendErasedSection( FOdysseyVectorVertex* iVertex
-                                , FOdysseyVectorSection* iInitiatorSection
-                                , FOdysseyVectorSection* iFromSection
-                                , std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
-        void EraseSegment( FOdysseyVectorSegment* iSegment
-                         , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                         , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
         FOdysseyVectorVertex* ReachVertexFromSection( FOdysseyVectorVertex* iVertex
                                                     , FOdysseyVectorSection* iFromSection
                                                     , FOdysseyVectorSegment* iOwnerSegment );
         void GetSectionsForSegment( FOdysseyVectorSegment* iSegment
                                   , std::vector<FOdysseyVectorSection*>& oSectionArray );
+        bool PickSection( FOdysseyVectorSection* iSection
+                        , const ::ULIS::FRectD& iMaskRect
+                        , const uint8* iMaskPixelData );
+        bool PickSections( std::vector<FOdysseyVectorSection*>& iSectionArray
+                        ,  std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
+        bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
 
     protected:
         static const uint32 NOCYCLE  = 0;
