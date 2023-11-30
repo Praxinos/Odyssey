@@ -10,7 +10,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Widgets/Views/STileView.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPaletteTreeView"
+#define LOCTEXT_NAMESPACE "Palette"
 
 static FName contextMenuName = "OdysseyPaletteContextMenu";
 

@@ -4,8 +4,6 @@
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterRectangleSelection.h"
 #include "OdysseyHUDPolygon.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterRectangleSelection"
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterRectangleSelection::~UOdysseyPainterEditorRasterRectangleSelection()
@@ -108,5 +106,3 @@ void UOdysseyPainterEditorRasterRectangleSelection::ConstrainSelectionToRectangl
         points[3] = FVector2D(points[0].X, iPosition.Y);
     }
 }
-
-#undef LOCTEXT_NAMESPACE

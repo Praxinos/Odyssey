@@ -16,8 +16,6 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "TexturePaintHelpers.h"
 
-#define LOCTEXT_NAMESPACE "IOdysseyViewportDrawingEditorAdapter"
-
 IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
 {
 }
@@ -477,5 +475,3 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
 
     mStylusLastEventTime = std::chrono::steady_clock::now();
 }
-
-#undef LOCTEXT_NAMESPACE

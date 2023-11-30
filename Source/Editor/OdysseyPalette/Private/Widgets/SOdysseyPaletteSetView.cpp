@@ -5,7 +5,7 @@
 #include "SOdysseyPaletteSetTile.h"
 #include "Framework/Commands/GenericCommands.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPaletteSetView"
+#define LOCTEXT_NAMESPACE "Palette"
 
 static FName contextSetMenuName = "OdysseyPaletteSetContextMenu";
 

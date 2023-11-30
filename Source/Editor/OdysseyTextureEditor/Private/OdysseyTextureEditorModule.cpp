@@ -22,7 +22,7 @@
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorModule"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 /*-----------------------------------------------------------------------------
    FOdysseyTextureEditorModule
@@ -33,7 +33,7 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
 {
 	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
 		TEXT("OdysseyTextureEditor"),
-		LOCTEXT("WorkspaceMenu_OdysseyTextureEditor", "Odyssey Texture2D Editor"),
+		LOCTEXT("main-menu.category", "Odyssey Texture2D Editor"),
 		iTexture,
 		"OdysseyTextureEditor_Layout"
 	);
@@ -114,7 +114,7 @@ FOdysseyTextureEditorModule::RegisterAssetTypeActions()
 	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
 	// Create Asset Categories
-	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
+	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
 
 	//Create Asset Types Actions
 	mIliadTypeActions = MakeShareable(new FOdysseyTextureAssetTypeActions(category));
@@ -141,8 +141,8 @@ FOdysseyTextureEditorModule::RegisterSettings()
 		return;
 
 	settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADTexture2DEditor"
-										, LOCTEXT( "OdysseyTextureEditorSettingsName", "ILIAD Texture2D Editor" )
-										, LOCTEXT( "OdysseyTextureEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
+										, LOCTEXT( "settings.name", "ILIAD Texture2D Editor" )
+										, LOCTEXT( "settings.tooltip", "Configure the look and feel of the ILIAD Editor." )
 										, GetMutableDefault<UOdysseyTextureEditorSettings>() );
 }
 

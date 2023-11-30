@@ -5,7 +5,7 @@
 #include "IAssetTools.h"
 #include "OdysseyPaletteAssetTypeActions.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPaletteModule"
+#define LOCTEXT_NAMESPACE "Palette"
 
 void FOdysseyPaletteModule::StartupModule()
 {

@@ -3,8 +3,6 @@
 
 #include "Tools/RasterPaintBucketTool/OdysseyTextureEditorRasterPaintBucketToolSourceProvider.h"
 
-#define LOCTEXT_NAMESPACE "RasterPaintBucketTool"
-
 FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::~FOdysseyTextureEditorRasterPaintBucketToolSourceProvider()
 {
 }
@@ -207,5 +205,3 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetForegroundLayersToE
 
 	return resultLayers;
 }
-
-#undef LOCTEXT_NAMESPACE

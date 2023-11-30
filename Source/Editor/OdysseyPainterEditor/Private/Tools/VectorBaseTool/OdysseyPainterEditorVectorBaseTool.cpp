@@ -7,7 +7,7 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "Framework/Commands/GenericCommands.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorBaseTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

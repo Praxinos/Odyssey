@@ -13,7 +13,7 @@
 
 #include <chrono>
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorSelectionTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

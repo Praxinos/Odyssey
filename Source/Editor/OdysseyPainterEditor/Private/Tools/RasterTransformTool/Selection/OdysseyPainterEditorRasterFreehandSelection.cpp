@@ -3,8 +3,6 @@
 
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterFreehandSelection.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterFreehandSelection"
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterFreehandSelection::~UOdysseyPainterEditorRasterFreehandSelection()
@@ -160,5 +158,3 @@ TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterFreehandSelection::GetSelectio
 
     return rectangles;
 }
-
-#undef LOCTEXT_NAMESPACE

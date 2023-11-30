@@ -7,8 +7,6 @@
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "Framework/Docking/LayoutExtender.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
-
 /////////////////////////////////////////////////////
 // FOdysseyFlipbookEditorGUI
 //--------------------------------------------------------------------------------------
@@ -125,6 +123,3 @@ FOdysseyFlipbookEditorGUI::GetTimelineTab()
 {
 	return mTimelineTab;
 }
-
-
-#undef LOCTEXT_NAMESPACE

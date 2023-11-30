@@ -6,7 +6,7 @@
 #include "Mesh/SOdysseyMeshSelector.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorMeshSelectorTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorMeshSelectorTab::StaticId()

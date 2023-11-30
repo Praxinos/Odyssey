@@ -7,7 +7,7 @@
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorSceneTreeView"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 FVectorSceneTreeViewItem::~FVectorSceneTreeViewItem()
 {

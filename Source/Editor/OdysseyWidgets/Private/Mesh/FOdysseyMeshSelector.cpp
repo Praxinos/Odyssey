@@ -3,8 +3,6 @@
 
 #include "Mesh/FOdysseyMeshSelector.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyMeshSelector"
-
 
 /////////////////////////////////////////////////////
 // FOdysseyMeshSelector
@@ -104,5 +102,3 @@ ECheckBoxState FOdysseyMeshSelector::GetUVChannelCheckState(int InUVChannel)
 {
     return (CurrentUV == InUVChannel ? ECheckBoxState::Checked : ECheckBoxState::Unchecked);
 }
-
-#undef LOCTEXT_NAMESPACE

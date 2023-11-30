@@ -5,8 +5,6 @@
 
 #include "IMediaModule.h"
 
-#define LOCTEXT_NAMESPACE "Animation"
-
 void FOdysseyAnimationModule::StartupModule()
 {
 	RegisterMedia();
@@ -38,5 +36,3 @@ FOdysseyAnimationModule::UnregisterMedia()
 }
 
 IMPLEMENT_MODULE(FOdysseyAnimationModule, OdysseyAnimation);
-
-#undef LOCTEXT_NAMESPACE

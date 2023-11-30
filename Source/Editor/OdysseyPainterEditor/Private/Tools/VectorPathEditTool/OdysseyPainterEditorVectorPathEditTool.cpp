@@ -10,7 +10,7 @@
 #include "Undo/OdysseyVectorUndoPathEdit.h"
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathEditTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

@@ -19,6 +19,7 @@ public:
 
 public:
     // Construction / Destruction
+    SOdysseyTextureLayerImageVectorRow();
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, class UOdysseyTextureLayerImageVector* iTextureLayerImageVector);
     
 private:
@@ -28,6 +29,7 @@ private:
     ECheckBoxState GetIsColoredIsChecked() const;
     void OnIsWireframeCheckStateChanged( ECheckBoxState iState );
     ECheckBoxState GetIsWireframeIsChecked() const;
+    EVisibility GetCollapsedOpacityVisibility() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
@@ -38,4 +40,5 @@ private:
 
 private:
     class UOdysseyTextureLayerImageVector* mTextureLayerImageVector;
+    FText mSetOpacityTransactionName;
 };

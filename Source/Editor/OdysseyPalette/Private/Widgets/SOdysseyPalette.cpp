@@ -9,9 +9,6 @@
 #include "SOdysseyPaletteFolderRow.h"
 #include "SOdysseyPaletteColorRow.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPalette"
-
-
 /////////////////////////////////////////////////////
 // SOdysseyPalette
 //--------------------------------------------------------------------------------------
@@ -135,5 +132,3 @@ TSharedRef<ITableRow> SOdysseyPalette::OnGenerateRow(UOdysseyPaletteEntry* iEntr
 
     return SNew(SOdysseyPaletteEntryRow, mPaletteTreeView.ToSharedRef(), Cast<UOdysseyPaletteEntry>(iEntry)); //Default widget
 }
-
-#undef LOCTEXT_NAMESPACE

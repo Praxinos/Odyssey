@@ -1,7 +1,7 @@
 #include "OdysseyPainterEditorVectorObjectView.h"
 #include "Undo/OdysseyVectorUndoPropertyChanged.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorObjectView"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 UOdysseyPainterEditorVectorObjectView::~UOdysseyPainterEditorVectorObjectView()
 {

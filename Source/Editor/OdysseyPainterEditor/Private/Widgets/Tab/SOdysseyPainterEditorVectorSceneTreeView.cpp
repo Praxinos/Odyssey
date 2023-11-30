@@ -9,7 +9,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorSceneTreeView"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 
 SOdysseyPainterEditorVectorSceneTreeView::~SOdysseyPainterEditorVectorSceneTreeView()

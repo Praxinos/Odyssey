@@ -5,8 +5,6 @@
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerRow"
-
 //PUBLIC API-----------------------------------------------------------
 
 void
@@ -56,6 +54,3 @@ SOdysseyAnimationLayerRow::GenerateTimelineWidget()
 {
     return SNullWidget::NullWidget;
 }
-
-
-#undef LOCTEXT_NAMESPACE

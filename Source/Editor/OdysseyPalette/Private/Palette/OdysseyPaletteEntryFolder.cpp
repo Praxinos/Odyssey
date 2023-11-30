@@ -3,7 +3,7 @@
 
 #include "OdysseyPaletteEntryFolder.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPaletteEntryFolder"
+#define LOCTEXT_NAMESPACE "Palette"
 
 UOdysseyPaletteEntryFolder::UOdysseyPaletteEntryFolder()
 {

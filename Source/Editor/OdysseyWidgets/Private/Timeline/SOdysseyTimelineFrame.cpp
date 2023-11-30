@@ -8,8 +8,6 @@
 
 #include "SOdysseyTimelineFrameHandle.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTimeline"
-
 void SOdysseyTimelineFrame::Construct( const SOdysseyTimelineFrame::FArguments& InArgs )
 {
     mFrameSize = InArgs._FrameSize;
@@ -190,5 +188,3 @@ SOdysseyTimelineFrame::OnMouseButtonUp(const FGeometry& iGeometry, const FPointe
 	}
 	return FReply::Unhandled();
 }
-
-#undef LOCTEXT_NAMESPACE 

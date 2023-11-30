@@ -6,8 +6,6 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyInterpolationCatmullRom"
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyInterpolationCatmullRom::~FOdysseyInterpolationCatmullRom()
@@ -117,7 +115,3 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationCatmullRom::ComputePoints()
 
     return  mResultPoints;
 }
-
-//---
-
-#undef LOCTEXT_NAMESPACE

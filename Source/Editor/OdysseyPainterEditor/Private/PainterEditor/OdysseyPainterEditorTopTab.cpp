@@ -13,7 +13,7 @@
 #include "ObjectEditorUtils.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorTopTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorTopTab::StaticId()

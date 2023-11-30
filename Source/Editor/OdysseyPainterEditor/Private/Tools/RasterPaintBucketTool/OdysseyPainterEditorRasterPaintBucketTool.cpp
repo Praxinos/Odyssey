@@ -8,7 +8,7 @@
 #include "OdysseyMediaRaster.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterPaintBucketTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

@@ -6,9 +6,6 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyColorSlider"
-
-
 /////////////////////////////////////////////////////
 // IOdysseyChannelSlider
 //--------------------------------------------------------------------------------------
@@ -218,7 +215,3 @@ IOdysseyChannelSlider::SetColorForProportion_Imp( ::ULIS::FColor& color, float t
 {
     color.SetRedF( t );
 }
-
-
-#undef LOCTEXT_NAMESPACE
-

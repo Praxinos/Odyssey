@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathSmoothTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

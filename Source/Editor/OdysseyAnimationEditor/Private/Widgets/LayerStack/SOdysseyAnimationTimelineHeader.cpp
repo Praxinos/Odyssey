@@ -7,8 +7,6 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTimeline"
-
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineHeader
 
@@ -167,7 +165,3 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, co
 	
 	return FReply::Unhandled();
 }
-
-//////////////////////////////////////////////////////////////////////////
-
-#undef LOCTEXT_NAMESPACE

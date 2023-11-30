@@ -22,7 +22,7 @@
 #include "PainterEditor/OdysseyPainterEditorGUI.h"
 #include <ULIS>
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 /*-----------------------------------------------------------------------------
    FOdysseyPainterEditorModule

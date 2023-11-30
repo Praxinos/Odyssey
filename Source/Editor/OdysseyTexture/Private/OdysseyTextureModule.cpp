@@ -6,8 +6,6 @@
 #include "AssetToolsModule.h"
 #include "Settings/ContentBrowserSettings.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureModule"
-
 // From ...\UnrealEngine\Engine\Source\Editor\ContentBrowser\Private\SAssetView.cpp#3543
 void FOdysseyTextureModule::ShowPluginContentInContentBrowser()
 {
@@ -40,5 +38,3 @@ void FOdysseyTextureModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE(FOdysseyTextureModule, OdysseyTexture);
-
-#undef LOCTEXT_NAMESPACE

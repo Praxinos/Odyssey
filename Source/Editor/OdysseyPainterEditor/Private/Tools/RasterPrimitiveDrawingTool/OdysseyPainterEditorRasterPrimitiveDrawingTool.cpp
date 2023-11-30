@@ -4,7 +4,7 @@
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterPrimitiveDrawingTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

@@ -3,11 +3,7 @@
 
 #include "Widgets/LayerStack/Cells/CellImageVector/SOdysseyAnimationCellImageVector.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationCellImageVector"
-
 void
 SOdysseyAnimationCellImageVector::Construct(const FArguments& iArgs)
 {
 }
-
-#undef LOCTEXT_NAMESPACE

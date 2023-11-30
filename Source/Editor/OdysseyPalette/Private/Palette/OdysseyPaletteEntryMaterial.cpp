@@ -3,7 +3,7 @@
 
 #include "OdysseyPaletteEntryMaterial.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPaletteEntryMaterial"
+#define LOCTEXT_NAMESPACE "Palette"
 
 UOdysseyPaletteEntryMaterial::UOdysseyPaletteEntryMaterial()
 {

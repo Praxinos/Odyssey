@@ -7,8 +7,6 @@
 #include "MeshPaintHelpers.h"
 #include "Kismet/GameplayStatics.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorTextureBasedAdapter"
-
 FOdysseyViewportDrawingEditorTextureBasedAdapter::~FOdysseyViewportDrawingEditorTextureBasedAdapter()
 {
 }
@@ -64,5 +62,3 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
 
     return drawingTool->GetBrushInstance()->StampInternal(iStampParams);
 }
-
-#undef LOCTEXT_NAMESPACE

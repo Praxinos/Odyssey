@@ -13,9 +13,6 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
-
-#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorMeshBasedAdapter"
-
 FOdysseyViewportDrawingEditorMeshBasedAdapter::~FOdysseyViewportDrawingEditorMeshBasedAdapter()
 {
 }
@@ -647,5 +644,3 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::Tick(float iDelta)
     if ( mPaintingTexture2DRenderTarget )
         FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(mTexture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
-
-#undef LOCTEXT_NAMESPACE

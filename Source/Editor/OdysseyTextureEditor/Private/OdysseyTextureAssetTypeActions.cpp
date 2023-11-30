@@ -12,7 +12,7 @@
 #include "OdysseyTexture.h"
 #include "OdysseyStyleSet.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureAssetTypeActions"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 //////////////////////////////////////////////////////////////////////////
 // FOdysseyTextureAssetTypeActions
@@ -24,7 +24,7 @@ FOdysseyTextureAssetTypeActions::FOdysseyTextureAssetTypeActions( EAssetTypeCate
 FText
 FOdysseyTextureAssetTypeActions::GetName() const
 {
-    return LOCTEXT( "FOdysseyTextureTypeActionsName", "Texture" );
+    return LOCTEXT( "asset-type-actions.name", "Texture" );
 }
 
 FColor

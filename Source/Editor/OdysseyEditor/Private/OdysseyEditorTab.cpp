@@ -189,5 +189,3 @@ FOdysseyEditorTab::Widget() const
 {
 	return mWidget;
 }
-
-#undef LOCTEXT_NAMESPACE

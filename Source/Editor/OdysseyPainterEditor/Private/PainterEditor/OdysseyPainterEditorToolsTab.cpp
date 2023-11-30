@@ -8,7 +8,7 @@
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Views/STileView.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolsTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorToolsTab::StaticId()

@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 #include "Proxies/OdysseyBrushColor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyBrushColor"
 /////////////////////////////////////////////////////
 // Odyssey Brush Color
 
@@ -364,6 +363,3 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoLabF( const  FOdyss
     B = conv.bF();
     Alpha = conv.AF();
 }
-
-
-#undef LOCTEXT_NAMESPACE

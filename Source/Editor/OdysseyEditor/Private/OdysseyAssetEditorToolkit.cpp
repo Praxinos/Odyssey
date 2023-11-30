@@ -5,8 +5,6 @@
 
 #include "OdysseyEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAssetEditorToolkit"
-
 /////////////////////////////////////////////////////
 // FOdysseyAssetEditorToolkit
 //--------------------------------------------------------------------------------------
@@ -127,5 +125,3 @@ FOdysseyAssetEditorToolkit::OnRemoveEditedObject(UObject* iObject)
 {
     AddEditingObject(iObject);
 }
-
-#undef LOCTEXT_NAMESPACE

@@ -4,8 +4,6 @@
 #include "OdysseyLayerStackEditorModule.h"
 #include "Commands/OdysseyLayerStackEditorCommands.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyLayerStackEditorModule"
-
 void FOdysseyLayerStackEditorModule::StartupModule()
 {
     RegisterCommands();
@@ -27,5 +25,3 @@ void FOdysseyLayerStackEditorModule::UnregisterCommands()
 }
 
 IMPLEMENT_MODULE(FOdysseyLayerStackEditorModule, OdysseyLayerStack);
-
-#undef LOCTEXT_NAMESPACE

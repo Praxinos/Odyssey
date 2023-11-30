@@ -6,7 +6,7 @@
 #include "SOdysseyPalette.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorPaletteTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorPaletteTab::StaticId()

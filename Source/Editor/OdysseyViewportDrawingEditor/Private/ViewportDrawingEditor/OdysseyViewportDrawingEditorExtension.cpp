@@ -15,7 +15,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorExtension"
+#define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -518,7 +518,10 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 		return;
 		
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+
 	bool displayWarning = true;
+	FText textureAlreadyOpenedTitle = LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened");
+	FText textureAlreadyOpenedMessage = LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture.");
 
 	//try to select the previously selected texture for the selected component
 	FInstanceTexturePaintSettings& texturePaintSettings = mComponentToTexturePaintSettingsMap.FindOrAdd(mComponent);
@@ -535,8 +538,7 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 		
 		if (displayWarning) //only display the Warning Message for the first texture
 		{
-			FText Title = LOCTEXT("TitleSelectedtextureAlreadyOpened", "Selected Texture Already Opened");
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("SelectedtextureAlreadyOpened", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
+			FMessageDialog::Open(EAppMsgType::Ok, textureAlreadyOpenedMessage, &textureAlreadyOpenedTitle);
 			displayWarning = false;
 		}
 	}
@@ -555,8 +557,7 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 		{
 			if (displayWarning) //only display the Warning Message for the first texture
 			{
-				FText Title = LOCTEXT("TitleSelectedtextureAlreadyOpened", "Selected Texture Already Opened");
-				FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("SelectedtextureAlreadyOpened", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
+				FMessageDialog::Open(EAppMsgType::Ok, textureAlreadyOpenedMessage, &textureAlreadyOpenedTitle);
 				displayWarning = false;
 			}
 			continue;

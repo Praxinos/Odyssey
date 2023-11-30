@@ -17,6 +17,8 @@
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
 
+#define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
+
 IMPLEMENT_MODULE(FOdysseyViewportDrawingEditorModule, OdysseyViewportDrawingEditor );
 
 void
@@ -48,7 +50,7 @@ FOdysseyViewportDrawingEditorModule::RegisterEditorMode()
 {
 	FEditorModeRegistry::Get().RegisterMode<FOdysseyViewportDrawingEditorEdMode>(
 		FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId,
-		NSLOCTEXT("OdysseyPaintInViewportMode", "OdysseyViewportPaint_ModeName", "Iliad"),
+		LOCTEXT("editor-mode.name", "Iliad"),
 		FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
 		true, 200 );
 }
@@ -103,3 +105,5 @@ FOdysseyViewportDrawingEditorModule::UnregisterPropertyModuleCustomizations()
 		PropertyModule->UnregisterCustomPropertyTypeLayout("OdysseyViewportDrawingEditorTexturePaintSettings");
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

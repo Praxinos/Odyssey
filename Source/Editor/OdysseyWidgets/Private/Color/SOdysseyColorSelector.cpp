@@ -9,7 +9,7 @@
 #include "Widgets/Text/STextBlock.h"
 #include "Brushes/SlateColorBrush.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyColorSelector"
+#define LOCTEXT_NAMESPACE "Widgets"
 
 
 /////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
                 .VAlign( VAlign_Center )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "Selector", "Selector" ) )
+                    .Text( LOCTEXT( "color-selector.selector", "Selector" ) )
                 ]
             ]
             +SHorizontalBox::Slot()
@@ -176,7 +176,7 @@ SOdysseyColorSelector::GetCurrentItemLabel() const
         return FText::FromString(*CurrentItem);
     }
 
-    return LOCTEXT("InvalidComboEntryText", "<<Invalid option>>");
+    return LOCTEXT("color-selector.invalid-selected-item", "<<Invalid option>>");
 }
 
 

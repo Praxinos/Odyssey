@@ -5,8 +5,6 @@
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationMediaView"
-
 FOdysseyAnimationMediaView::FOdysseyAnimationMediaView()
 {
 }
@@ -28,6 +26,3 @@ FOdysseyAnimationMediaView::OnClose()
 {
 
 }
-
-
-#undef LOCTEXT_NAMESPACE

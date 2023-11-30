@@ -7,8 +7,6 @@
 #include "Materials/MaterialExpressionTextureSample.h"
 #include "Materials/MaterialExpressionTextureSampleParameter.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorUtils"
-
 void FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(UTexture* SourceTexture, UTextureRenderTarget2D* RenderTargetTexture, ERHIFeatureLevel::Type FeatureLevel)
 {
 	check(SourceTexture != nullptr);
@@ -385,5 +383,3 @@ FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(UMeshComponent* MeshCompone
 
 	return RetVal;
 }
-
-#undef LOCTEXT_NAMESPACE // "OdysseyViewportDrawingEditorUtils"

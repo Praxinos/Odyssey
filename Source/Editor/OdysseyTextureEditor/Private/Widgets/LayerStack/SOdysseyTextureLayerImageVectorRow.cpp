@@ -6,9 +6,15 @@
 #include "OdysseyStyleSet.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyTextureLayerImageVectorRow"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
+SOdysseyTextureLayerImageVectorRow::SOdysseyTextureLayerImageVectorRow()
+    : mSetOpacityTransactionName(LOCTEXT("layer-image-vector.transaction.set-opacity", "Change Layer Opacity"))
+{
+    
+}
+
 void SOdysseyTextureLayerImageVectorRow::Construct( const FArguments& InArgs
                                                   , const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView
                                                   , UOdysseyTextureLayerImageVector* iTextureLayerImageVector )
@@ -33,7 +39,6 @@ SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
     const FCheckBoxStyle* coloredToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.ColoredToggle");
     const FCheckBoxStyle* wireframeToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.WireframeToggle");
 
-	TSharedRef<SWidget> defaultWidget = SOdysseyLayerRow::GenerateHeaderWidget();
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
@@ -41,6 +46,27 @@ SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
         [
             //LayerName
             SOdysseyLayerRow::GenerateHeaderWidget()
+        ]
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
+        .VAlign(VAlign_Center)
+        .AutoWidth()
+        [
+            SNew(SNumericEntryBox<int>)
+            .Visibility(this, &SOdysseyTextureLayerImageVectorRow::GetCollapsedOpacityVisibility)
+            .Value_Lambda([this]() { return (int)(mTextureLayerImageVector->Opacity * 100.f + 0.5f);})
+            .AllowSpin(true)
+            .ShiftMouseMovePixelPerDelta(10)
+            .Delta(1)
+            .MinValue(0)
+            .MinSliderValue(0)
+            .MaxValue(100)
+            .MaxSliderValue(100)
+            .OnValueChanged(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityValueChanged)
+            .OnValueCommitted(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityValueCommitted)
+            .OnBeginSliderMovement(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityBeginSliderMovement)
+            .OnEndSliderMovement(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityEndSliderMovement)
+            //.MinDesiredValueWidth  
         ]
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
@@ -63,41 +89,59 @@ SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
             .Style(coloredToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged)
             .IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked)
-        ]
-        +SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
-        .VAlign(VAlign_Center)
-        .AutoWidth()
-        [
-            SNew(SNumericEntryBox<int>)
-            .Value_Lambda([this]() { return (int)(mTextureLayerImageVector->Opacity * 100.f + 0.5f);})
-            .AllowSpin(true)
-            .ShiftMouseMovePixelPerDelta(10)
-            .Delta(1)
-            .MinValue(0)
-            .MinSliderValue(0)
-            .MaxValue(100)
-            .MaxSliderValue(100)
-            .OnValueChanged(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityValueChanged)
-            .OnValueCommitted(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityValueCommitted)
-            .OnBeginSliderMovement(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityBeginSliderMovement)
-            .OnEndSliderMovement(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityEndSliderMovement)
-            //.MinDesiredValueWidth  
         ];
 }
 
+TSharedRef<SWidget>
+SOdysseyTextureLayerImageVectorRow::GenerateOptionsWidget()
+{
+	return SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0, 2.f, 0, 0))
+        .AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            +SHorizontalBox::Slot()
+            .Padding(FMargin(0, 0, 1.f, 0))
+            [
+                SNew(SNumericEntryBox<int>)
+                .Value_Lambda([this]() { return (int)(mTextureLayerImageVector->Opacity * 100.f + 0.5f);})
+                .AllowSpin(true)
+                .ShiftMouseMovePixelPerDelta(10)
+                .Delta(1)
+                .MinValue(0)
+                .MinSliderValue(0)
+                .MaxValue(100)
+                .MaxSliderValue(100)
+                .OnValueChanged(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityValueChanged)
+                .OnValueCommitted(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityValueCommitted)
+                .OnBeginSliderMovement(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityBeginSliderMovement)
+                .OnEndSliderMovement(this, &SOdysseyTextureLayerImageVectorRow::OnOpacityEndSliderMovement)
+                //.MinDesiredValueWidth  
+            ]
+            +SHorizontalBox::Slot()
+            .Padding(FMargin(1.f, 0, 0, 0))
+            .VAlign(VAlign_Center)
+            [
+                SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+                .CurrentValue_Lambda([this](){ return (int32)mTextureLayerImageVector->BlendMode;})
+                .ContentPadding(FMargin(0))
+                .OnEnumSelectionChanged(this, &SOdysseyTextureLayerImageVectorRow::OnBlendModeComboBoxChanged)
+            ]
+        ];
+}
 
 void
 SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Wireframe Display"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "IsWireframe", iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Coloring"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "IsColored", iState == ECheckBoxState::Checked);
 }
 
@@ -105,7 +149,7 @@ void
 SOdysseyTextureLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
@@ -119,7 +163,7 @@ void
 SOdysseyTextureLayerImageVectorRow::OnOpacityBeginSliderMovement()
 {
     //Creating a transaction here manages entering a value using slider
-    GEditor->BeginTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    GEditor->BeginTransaction(mSetOpacityTransactionName);
 }
 
 void
@@ -140,31 +184,18 @@ SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked() const
 	return mTextureLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
-TSharedRef<SWidget>
-SOdysseyTextureLayerImageVectorRow::GenerateOptionsWidget()
-{
-	return SNew(SHorizontalBox)
-        +SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
-        [
-            SNew(STextBlock)
-            .Text(LOCTEXT("OdysseyLayerImageVectorBlendingMode", "Blending Mode"))
-        ]
-        +SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
-        [
-            SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-            .CurrentValue_Lambda([this](){ return (int32)mTextureLayerImageVector->BlendMode;})
-            .OnEnumSelectionChanged(this, &SOdysseyTextureLayerImageVectorRow::OnBlendModeComboBoxChanged)
-        ];
-}
-
 void
 SOdysseyTextureLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer BlendMode"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-blend-mode", "Change Layer BlendMode"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "BlendMode", iValue);
+}
+
+EVisibility
+SOdysseyTextureLayerImageVectorRow::GetCollapsedOpacityVisibility() const
+{
+    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

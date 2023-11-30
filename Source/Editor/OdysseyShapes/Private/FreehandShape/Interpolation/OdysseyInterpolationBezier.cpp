@@ -4,10 +4,6 @@
 #include "FreehandShape/Interpolation/OdysseyInterpolationBezier.h"
 #include "Math/OdysseyMathUtils.h"
 
-
-#define LOCTEXT_NAMESPACE "OdysseyInterpolationBezier"
-
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyInterpolationBezier::~FOdysseyInterpolationBezier()
@@ -103,7 +99,3 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationBezier::ComputePoints()
 
     return mResultPoints;
 }
-
-//---
-
-#undef LOCTEXT_NAMESPACE

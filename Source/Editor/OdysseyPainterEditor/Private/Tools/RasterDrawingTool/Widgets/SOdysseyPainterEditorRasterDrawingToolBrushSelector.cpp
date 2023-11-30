@@ -8,8 +8,6 @@
 #include "ISinglePropertyView.h"
 #include "Widgets/Brush/SOdysseyBrushSelector.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPainterEditorRasterDrawingToolBrushSelector"
-
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorRasterDrawingToolBrushSelector
 //--------------------------------------------------------------------------------------
@@ -67,6 +65,3 @@ SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnToolBrushChanged()
     mDetailsView->SetObject(mTool->GetBrushInstance());
     mDetailsView->ForceRefresh();
 }
-
-#undef LOCTEXT_NAMESPACE
-

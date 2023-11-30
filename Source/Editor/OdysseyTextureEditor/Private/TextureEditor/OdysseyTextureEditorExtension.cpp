@@ -6,8 +6,6 @@
 #include "LayerStack/OdysseyTextureLayer.h"
 #include "Tools/RasterPaintBucketTool/OdysseyTextureEditorRasterPaintBucketToolSourceProvider.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorExtension"
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -107,5 +105,3 @@ FOdysseyTextureEditorExtension::ConfigureTools()
 	TSharedPtr<FOdysseyTextureEditorRasterPaintBucketToolSourceProvider> provider = MakeShared<FOdysseyTextureEditorRasterPaintBucketToolSourceProvider>(this);
 	GetEditor()->GetRasterPaintBucketTool()->SetSourceProvider(provider);
 }
-
-#undef LOCTEXT_NAMESPACE

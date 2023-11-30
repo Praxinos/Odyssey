@@ -8,7 +8,7 @@
 #include "ObjectEditorUtils.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorSlidersTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorColorSlidersTab::StaticId()

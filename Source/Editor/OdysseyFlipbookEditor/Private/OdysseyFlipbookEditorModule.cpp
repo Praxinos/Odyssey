@@ -10,7 +10,7 @@
 #include "FlipbookEditor/OdysseyFlipbookEditorGUI.h"
 #include "LevelEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorModule"
+#define LOCTEXT_NAMESPACE "FlipbookEditor"
 
 /*-----------------------------------------------------------------------------
    FOdysseyFlipbookEditorModule

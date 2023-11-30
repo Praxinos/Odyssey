@@ -7,7 +7,7 @@
 
 #include "IOdysseyTextureEditorModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 /////////////////////////////////////////////////////
 // FOdysseyTextureEditorToolkit
@@ -36,7 +36,7 @@ FOdysseyTextureEditorToolkit::OpenAsset(UObject* iObject)
 FText
 FOdysseyTextureEditorToolkit::GetBaseToolkitName() const
 {
-    return LOCTEXT( "AppLabel", "Odyssey Texture Editor" );
+    return LOCTEXT( "editor.name", "Odyssey Texture Editor" );
 }
 
 FName
@@ -48,7 +48,7 @@ FOdysseyTextureEditorToolkit::GetToolkitFName() const
 FString
 FOdysseyTextureEditorToolkit::GetWorldCentricTabPrefix() const
 {
-    return LOCTEXT( "WorldCentricTabPrefix", "Texture" ).ToString();
+    return LOCTEXT( "editor.world-centric-tab-prefix", "Texture" ).ToString();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -13,7 +13,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorBucketView.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPaintBucketTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

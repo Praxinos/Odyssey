@@ -3,8 +3,6 @@
 
 #include "OdysseyEditorBrushBlueprintsModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyEditorBrushBlueprintsModule"
-
 void
 FOdysseyEditorBrushBlueprintsModule::StartupModule()
 {
@@ -16,5 +14,3 @@ FOdysseyEditorBrushBlueprintsModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE(FOdysseyEditorBrushBlueprintsModule, OdysseyEditorBrushBlueprints);
-
-#undef LOCTEXT_NAMESPACE

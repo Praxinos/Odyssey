@@ -8,9 +8,15 @@
 #include "OdysseyStyleSet.h"
 #include "LayerStack/OdysseyTextureLayerFolder.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyTextureLayerFolderRow"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
+SOdysseyTextureLayerFolderRow::SOdysseyTextureLayerFolderRow()
+    : mSetOpacityTransactionName(LOCTEXT("layer-folder.transaction.set-opacity", "Change Layer Opacity"))
+{
+    
+}
+
 void SOdysseyTextureLayerFolderRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyTextureLayerFolder* iTextureLayerFolder)
 {
     ensure(iTextureLayerFolder);
@@ -30,8 +36,7 @@ void SOdysseyTextureLayerFolderRow::Construct(const FArguments& InArgs, const TS
 TSharedRef<SWidget>
 SOdysseyTextureLayerFolderRow::GenerateHeaderWidget()
 {
-	TSharedRef<SWidget> defaultWidget = SOdysseyLayerRow::GenerateHeaderWidget();
-	return SNew(SHorizontalBox)
+    return SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
         .VAlign(VAlign_Center)
 		[
@@ -39,10 +44,12 @@ SOdysseyTextureLayerFolderRow::GenerateHeaderWidget()
 			SOdysseyLayerRow::GenerateHeaderWidget()
 		]
         +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
         .VAlign(VAlign_Center)
         .AutoWidth()
         [
             SNew(SNumericEntryBox<int>)
+            .Visibility(this, &SOdysseyTextureLayerFolderRow::GetCollapsedOpacityVisibility)
             .Value_Lambda([this]() { return (int)(mTextureLayerFolder->Opacity * 100.f + 0.5f);})
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
@@ -64,26 +71,38 @@ SOdysseyTextureLayerFolderRow::GenerateOptionsWidget()
 {
 	return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
+        .Padding(FMargin(0, 0, 1.f, 0))
+        [
+            SNew(SNumericEntryBox<int>)
+            .Value_Lambda([this]() { return (int)(mTextureLayerFolder->Opacity * 100.f + 0.5f);})
+            .AllowSpin(true)
+            .ShiftMouseMovePixelPerDelta(10)
+            .Delta(1)
+            .MinValue(0)
+            .MinSliderValue(0)
+            .MaxValue(100)
+            .MaxSliderValue(100)
+            .OnValueChanged(this, &SOdysseyTextureLayerFolderRow::OnOpacityValueChanged)
+            .OnValueCommitted(this, &SOdysseyTextureLayerFolderRow::OnOpacityValueCommitted)
+            .OnBeginSliderMovement(this, &SOdysseyTextureLayerFolderRow::OnOpacityBeginSliderMovement)
+            .OnEndSliderMovement(this, &SOdysseyTextureLayerFolderRow::OnOpacityEndSliderMovement)
+            //.MinDesiredValueWidth  
+        ]
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(1.f, 0, 0, 0))
         .VAlign(VAlign_Center)
         [
-            SNew(STextBlock)
-            .Text(LOCTEXT("OdysseyLayerFolderBlendingMode", "Blending Mode"))
-        ]
-		+ SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
-        .VAlign(VAlign_Center)
-		[
-			SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-			.CurrentValue_Lambda([this]() { return (int32)mTextureLayerFolder->BlendMode; })
-		    .OnEnumSelectionChanged(this, &SOdysseyTextureLayerFolderRow::OnBlendModeComboBoxChanged)
-		];
+            SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+            .CurrentValue_Lambda([this](){ return (int32)mTextureLayerFolder->BlendMode;})
+            .ContentPadding(FMargin(0))
+            .OnEnumSelectionChanged(this, &SOdysseyTextureLayerFolderRow::OnBlendModeComboBoxChanged)
+        ];
 }
 
 void
 SOdysseyTextureLayerFolderRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer BlendMode"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-folder.transaction.set-blend-mode", "Change Layer BlendMode"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, "BlendMode", iValue, EPropertyChangeType::ValueSet);
 }
 
@@ -91,7 +110,7 @@ void
 SOdysseyTextureLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
@@ -105,13 +124,19 @@ void
 SOdysseyTextureLayerFolderRow::OnOpacityBeginSliderMovement()
 {
     //Creating a transaction here manages entering a value using slider
-    GEditor->BeginTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    GEditor->BeginTransaction(mSetOpacityTransactionName);
 }
 
 void
 SOdysseyTextureLayerFolderRow::OnOpacityEndSliderMovement(int iValue)
 {
     GEditor->EndTransaction();
+}
+
+EVisibility
+SOdysseyTextureLayerFolderRow::GetCollapsedOpacityVisibility() const
+{
+    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

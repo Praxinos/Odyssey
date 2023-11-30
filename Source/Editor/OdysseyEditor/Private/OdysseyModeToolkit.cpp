@@ -5,8 +5,6 @@
 #include "LevelEditor.h"
 #include "Interfaces/IMainFrameModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyModeToolkit"
-
 /////////////////////////////////////////////////////
 // FOdysseyModeToolkit
 //--------------------------------------------------------------------------------------
@@ -229,5 +227,3 @@ FOdysseyModeToolkit::LoadOpenedTabs()
         tab->Open();
     }
 }
-
-#undef LOCTEXT_NAMESPACE // "OdysseyModeToolkit"

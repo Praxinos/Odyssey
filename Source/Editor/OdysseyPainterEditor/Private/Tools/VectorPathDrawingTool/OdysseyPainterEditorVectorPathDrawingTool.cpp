@@ -11,7 +11,7 @@
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathDrawingTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

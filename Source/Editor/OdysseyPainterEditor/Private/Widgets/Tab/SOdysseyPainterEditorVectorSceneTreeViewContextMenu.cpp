@@ -5,7 +5,7 @@
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorSceneTreeViewContextMenu"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 // static
 TSharedPtr<SWidget>

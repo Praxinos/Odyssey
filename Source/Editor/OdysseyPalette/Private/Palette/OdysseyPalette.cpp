@@ -6,8 +6,6 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPalette"
-
 UOdysseyPalette::UOdysseyPalette()
 {
     FString text = FString("Set0");
@@ -593,5 +591,3 @@ void UOdysseyPalette::GetEntriesUniqueParents(TArray<UOdysseyPaletteEntry*> iEnt
         oParents.AddUnique(entry->Parent);
     }
 }
-
-#undef LOCTEXT_NAMESPACE

@@ -5,8 +5,6 @@
 #include "LayerStack/Cells/OdysseyAnimationCellExport.h"
 #include "LayerStack/Cells/OdysseyAnimationCellImport.h"
 
-#define LOCTEXT_NAMESPACE "FOdysseyAnimationCell"
-
 /* FOdysseyAnimationCell::FOnLengthChanged&
 FOdysseyAnimationCell::OnLengthChanged()
 {
@@ -71,5 +69,3 @@ FOdysseyAnimationCell::CreateCellFromFrame(uint32 iFrameIndex) const
 {
     return nullptr;
 }
-
-#undef LOCTEXT_NAMESPACE

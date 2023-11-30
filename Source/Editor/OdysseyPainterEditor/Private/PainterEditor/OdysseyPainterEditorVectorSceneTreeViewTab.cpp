@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVector.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorSceneTreeViewTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorVectorSceneTreeViewTab::StaticId()

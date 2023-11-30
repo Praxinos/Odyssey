@@ -30,7 +30,7 @@
 #include "UObject/UObjectGlobals.h"
 #include "Editor/EditorPerProjectUserSettings.h"
 
-#define LOCTEXT_NAMESPACE "FOdysseyViewportDrawingEditorEdMode"
+#define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
 const FEditorModeID FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId = TEXT("EM_OdysseyViewportDrawingEditorEdMode");
 
@@ -136,7 +136,7 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 
     mEditor = MakeShared<FOdysseyPainterEditor>(
 		TEXT("OdysseyViewportDrawingEditor"),
-		LOCTEXT("WorkspaceMenu_OdysseyViewportDrawingEditor", "Odyssey Viewport Drawing Editor"),
+		LOCTEXT("main-menu.category", "Odyssey Viewport Drawing Editor"),
 		nullptr,
 		"OdysseyViewportDrawingEditor_Layout"
 	);
@@ -191,8 +191,8 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 
     if( !UPhysicsSettings::Get()->bSupportUVFromHitResults )
     {
-        FText Title = LOCTEXT("TitleCollisionUVNoSupport","CollisionUVNoSupport");
-        FMessageDialog::Open(EAppMsgType::Ok,LOCTEXT("Enable FindCollisionUV","'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."),&Title);
+        FText Title = LOCTEXT("editor-mode.no-collision-uv-support-window.title","CollisionUVNoSupport");
+        FMessageDialog::Open(EAppMsgType::Ok,LOCTEXT("editor-mode.no-collision-uv-support-window.message","'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."),&Title);
     }
 }
 

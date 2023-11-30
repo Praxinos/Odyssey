@@ -6,7 +6,7 @@
 #include "OdysseyStylusInputSettings.h"
 #include "Dialog/SCustomDialog.h"
 
-#define LOCTEXT_NAMESPACE "TabletAPISwitcher"
+#define LOCTEXT_NAMESPACE "Widgets"
 
 //---
 
@@ -19,9 +19,9 @@ SOdysseyTabletAPISwitcher::Open()
 
 	TSharedPtr<SCustomDialog> customDialog;
 
-	FText dialogTitle = LOCTEXT("SelectTabletAPI", "Select Tablet API" );
-	FText oKText = LOCTEXT("OkSwitchAPI", "OK" );
-	FText cancelText = LOCTEXT("CancelSwitchAPI", "Cancel");
+	FText dialogTitle = LOCTEXT("tablet-api-switcher.select-tablet-api", "Select Tablet API" );
+	FText oKText = LOCTEXT("tablet-api-switcher.ok", "OK" );
+	FText cancelText = LOCTEXT("tablet-api-switcher.cancel", "Cancel");
 
     customDialog = SNew( SCustomDialog )
         .Title( dialogTitle )

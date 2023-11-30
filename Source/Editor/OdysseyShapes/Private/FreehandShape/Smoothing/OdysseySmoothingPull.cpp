@@ -5,10 +5,6 @@
 #include "Math/OdysseyMathUtils.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
-
-#define LOCTEXT_NAMESPACE "OdysseySmoothingPull"
-
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 FOdysseySmoothingPull::~FOdysseySmoothingPull()
@@ -69,7 +65,3 @@ FOdysseySmoothingPull::ComputePoint()
 
     return point;
 }
-
-//---
-
-#undef LOCTEXT_NAMESPACE

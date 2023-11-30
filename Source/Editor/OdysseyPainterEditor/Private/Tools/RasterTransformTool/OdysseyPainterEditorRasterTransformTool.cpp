@@ -10,7 +10,7 @@
 #include "OdysseyBrushTransform.h"
 #include "GeomTools.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterTransformTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

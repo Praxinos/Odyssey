@@ -6,7 +6,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/SOdysseyPaletteExpanderArrow.h"
 	
-#define LOCTEXT_NAMESPACE "SOdysseyPaletteEntryRow"
+#define LOCTEXT_NAMESPACE "Palette"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyPaletteEntryRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntry* iEntry)

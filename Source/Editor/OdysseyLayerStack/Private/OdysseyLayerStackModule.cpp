@@ -3,8 +3,6 @@
 
 #include "OdysseyLayerStackModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyLayerStackModule"
-
 void FOdysseyLayerStackModule::StartupModule()
 {
 }
@@ -14,5 +12,3 @@ void FOdysseyLayerStackModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE(FOdysseyLayerStackModule, OdysseyLayerStack);
-
-#undef LOCTEXT_NAMESPACE

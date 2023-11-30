@@ -25,7 +25,7 @@
 #include "ULISLoaderModule.h"
 #include <ULIS>
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureContentBrowserExtensions"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -92,8 +92,8 @@ public:
             {
                 if (!warningDisplayed)
                 {
-                    FText Title = LOCTEXT("TitleTextureAlreadyOpened", "Texture Already Opened");
-                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("MessageTextureAlreadyOpened", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), &Title);
+                    FText Title = LOCTEXT("content-browser-extension.edit-texture.texture-already-opened-dialog.title", "Texture Already Opened");
+                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.texture-already-opened-dialog.message", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), &Title);
                     warningDisplayed = true;
                 }
 			    continue;
@@ -127,7 +127,7 @@ public:
             UTexture2D* currentTexture = *textureIt;
             bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
                   FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
-                , LOCTEXT("TitleExportTexture", "Select Export Path & Name").ToString()
+                , LOCTEXT("content-browser-extension.export-texture.save-dialog.title", "Select Export Path & Name").ToString()
                 , FPaths::ProjectDir()
                 , currentTexture->GetName()
                 , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
@@ -138,8 +138,8 @@ public:
 
             if( ( textureIt.GetIndex() != ( iTextures.Num() - 1 ) ) && ( !saveSuccess ) )
             {
-                FText Title = LOCTEXT("TitleSaveCancel", "Save cancelled");
-                EAppReturnType::Type answer = FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("MessageSaveCancel", "Continue the remaing files export ?"), &Title);
+                FText Title = LOCTEXT("content-browser-extension.export-texture.cancel-dialog.title", "Save cancelled");
+                EAppReturnType::Type answer = FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("content-browser-extension.export-texture.cancel-dialog.message", "Continue the remaing files export ?"), &Title);
                 if( answer == EAppReturnType::Yes )
                 { 
                     continue;
@@ -169,8 +169,8 @@ public:
 
                 if( !extensionFound )
                 {
-                    FText Title = LOCTEXT("TitleExtensionNotFound", "Invalid extension");
-                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("MessageExtensionNotFound", "The file extension or the file format is not supported"), &Title);
+                    FText Title = LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.title", "Invalid extension");
+                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.message", "The file extension or the file format is not supported"), &Title);
                     continue;
                 }
 
@@ -262,8 +262,8 @@ void
 FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
 {
     ioMenuBuilder.AddSubMenu(
-          LOCTEXT( "CB_Extension_Texture_IliadActions", "ILIAD Actions" )
-        , LOCTEXT( "CB_Extension_Texture_IliadActions_ToolTip", "All actions related to ILIAD" )
+          LOCTEXT( "content-browser-extension.texture-action-menu.iliad-submenu.name", "ILIAD Actions" )
+        , LOCTEXT( "content-browser-extension.texture-action-menu.iliad-submenu.tooltip", "All actions related to ILIAD" )
         , FNewMenuDelegate::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu, iSelectedAssets )
         , false
         , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Iliad16" )
@@ -283,16 +283,16 @@ FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu( FMe
         FExecuteAction::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( exportTextureFunctor ) ) );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "CB_Extension_Texture_OpenPaintEditor", "Edit Texture" )
-        , LOCTEXT( "CB_Extension_Texture_OpenPaintEditor_Tooltip", "Open ILIAD paint editor for the selected Texture" )
+          LOCTEXT( "content-browser-extension.texture-action-menu.iliad.edit-texture.name", "Edit Texture" )
+        , LOCTEXT( "content-browser-extension.texture-action-menu.iliad.edit-texture.tooltip", "Open ILIAD paint editor for the selected Texture" )
         , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
         , action_EditTexture
         , NAME_None
         , EUserInterfaceActionType::Button );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "CB_Extension_Texture_Export", "Export Texture" )
-        , LOCTEXT( "CB_Extension_Texture_Export_Tooltip", "Export Texture with ILIAD" )
+          LOCTEXT( "content-browser-extension.texture-action-menu.iliad.export-texture.name", "Export Texture" )
+        , LOCTEXT( "content-browser-extension.texture-action-menu.iliad.export-texture.tooltip", "Export Texture with ILIAD" )
         , FSlateIcon( "OdysseyStyle", "OdysseyTexture.ExportTexture_16" )
         , action_ExportTexture
         , NAME_None

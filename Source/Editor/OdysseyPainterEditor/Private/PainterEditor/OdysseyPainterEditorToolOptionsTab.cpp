@@ -6,7 +6,7 @@
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolOptionsTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorToolOptionsTab::StaticId()

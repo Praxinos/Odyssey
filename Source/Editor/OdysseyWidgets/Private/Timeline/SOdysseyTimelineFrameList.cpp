@@ -10,8 +10,6 @@
 #include "SOdysseyDropWidget.h"
 #include "FOdysseyTimelineFrameDragDropOperation.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTimeline"
-
 //---
 //---
 //---
@@ -641,5 +639,3 @@ SOdysseyTimelineFrameList::GetLengthHandlePadding() const
 		FMargin(0.0f, 0.0f, 0.f, 0.f) :
 		FMargin(0.0f, 0.0f, -mTimingHandleBrush->ImageSize.X / 2, 0.f);
 }
-
-#undef LOCTEXT_NAMESPACE

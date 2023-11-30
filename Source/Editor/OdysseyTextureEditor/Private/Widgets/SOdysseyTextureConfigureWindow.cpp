@@ -11,7 +11,7 @@
 
 /////////////////////////////////////////////////////
 // Defines
-#define LOCTEXT_NAMESPACE "OdysseyTextureFactory"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 #define MAX_CANVAS_SIZE 8192
 #define MIN_CANVAS_SIZE 1
@@ -21,7 +21,7 @@ SOdysseyTextureConfigureWindow::FProperties::FProperties()
     mWidth = 1024;
     mHeight = 1024;
     mFormat = TSF_BGRA8;
-    mName = LOCTEXT("default-name", "T_Drawing");
+    mName = LOCTEXT("configure-window.default-texture-name", "T_Drawing");
     mBackgroundColor = kTransparent;
 }
 
@@ -50,7 +50,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
     //---
 
     SWindow::Construct( SWindow::FArguments()
-        .Title( LOCTEXT( "title", "Create Texture Asset" ) )
+        .Title( LOCTEXT( "configure-window.title", "Create Texture Asset" ) )
         // Remove the empty space at the bottom but doesn't scale anymore
         //.SizingRule( ESizingRule::FixedSize )
         //.ClientSize( FVector2D( 300, 180 ) )
@@ -71,7 +71,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                     +SHorizontalBox::Slot()
                     [
                         SNew( STextBlock )
-                        .Text( LOCTEXT( "name-label", "Name" ) )
+                        .Text( LOCTEXT( "configure-window.name", "Name" ) )
                     ]
                     +SHorizontalBox::Slot()
                     .FillWidth( 2 )
@@ -91,7 +91,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                     +SHorizontalBox::Slot()
                     [
                         SNew( STextBlock )
-                        .Text( LOCTEXT( "width-label", "Width" ) )
+                        .Text( LOCTEXT( "configure-window.width", "Width" ) )
                     ]
                     +SHorizontalBox::Slot()
                     .FillWidth( 2 )
@@ -115,7 +115,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                     +SHorizontalBox::Slot()
                     [
                         SNew( STextBlock )
-                        .Text( LOCTEXT( "height-label", "Height" ) )
+                        .Text( LOCTEXT( "configure-window.height", "Height" ) )
                     ]
                     +SHorizontalBox::Slot()
                     .FillWidth( 2 )
@@ -139,7 +139,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                     +SHorizontalBox::Slot()
                     [
                         SNew( STextBlock )
-                        .Text( LOCTEXT( "format-label", "Format" ) )
+                        .Text( LOCTEXT( "configure-window.format", "Format" ) )
                     ]
                     +SHorizontalBox::Slot()
                     .FillWidth( 2 )
@@ -163,7 +163,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                     +SHorizontalBox::Slot()
                     [
                         SNew( STextBlock )
-                        .Text( LOCTEXT( "background-label", "Color" ) )
+                        .Text( LOCTEXT( "configure-window.background", "Color" ) )
                     ]
                     +SHorizontalBox::Slot()
                     .FillWidth( 2 )
@@ -246,7 +246,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                         SNew( SButton )
                         .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
                         .HAlign( HAlign_Center )
-                        .Text( LOCTEXT( "create-asset", "Create Asset" ) )
+                        .Text( LOCTEXT( "configure-window.create-asset", "Create Asset" ) )
                         .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnAccept )
                     ]
 
@@ -255,7 +255,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
                         SNew( SButton )
                         .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
                         .HAlign( HAlign_Center )
-                        .Text( LOCTEXT( "cancel", "Cancel" ) )
+                        .Text( LOCTEXT( "configure-window.cancel", "Cancel" ) )
                         .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnCancel )
                     ]
                 ]
@@ -393,13 +393,13 @@ SOdysseyTextureConfigureWindow::GetFormatText( TSharedPtr<ETextureSourceFormat> 
 {
     switch( *iFormat )
     {
-        case TSF_G8:        return LOCTEXT( "g8", "Grey 8" );
-        case TSF_G16:       return LOCTEXT( "g16", "Grey 16" );
+        case TSF_G8:        return LOCTEXT( "configure-window.format.g8", "Grey 8" );
+        case TSF_G16:       return LOCTEXT( "configure-window.format.g16", "Grey 16" );
         default:
-        case TSF_BGRA8:     return LOCTEXT( "bgra8", "BGRA 8" );
-        case TSF_BGRE8:     return LOCTEXT( "bgre8", "BGRE 8" );
-        case TSF_RGBA16:    return LOCTEXT( "rgba16", "RGBA 16" );
-        case TSF_RGBA16F:   return LOCTEXT( "rgba16f", "RGBA 16 F" );
+        case TSF_BGRA8:     return LOCTEXT( "configure-window.format.bgra8", "BGRA 8" );
+        case TSF_BGRE8:     return LOCTEXT( "configure-window.format.bgre8", "BGRE 8" );
+        case TSF_RGBA16:    return LOCTEXT( "configure-window.format.rgba16", "RGBA 16" );
+        case TSF_RGBA16F:   return LOCTEXT( "configure-window.format.rgba16f", "RGBA 16 F" );
     }
 }
 
@@ -424,9 +424,9 @@ SOdysseyTextureConfigureWindow::GetBackgroundColorText( EBackgroundColor iBackgr
     switch( iBackgroundColor )
     {
         default:
-        case kTransparent:  return LOCTEXT( "background-color-transparent", "Transparent" );
-        case kWhite:        return LOCTEXT( "background-color-white", "White" );
-        case kNormal:       return LOCTEXT( "background-color-normal", "Purple (127, 127, 255)" );
+        case kTransparent:  return LOCTEXT( "configure-window.background-color.transparent", "Transparent" );
+        case kWhite:        return LOCTEXT( "configure-window.background-color.white", "White" );
+        case kNormal:       return LOCTEXT( "configure-window.background-color.normal", "Purple (127, 127, 255)" );
     }
 }
 

@@ -4,8 +4,6 @@
 #include "Proxies/OdysseyBrushShape.h"
 #include <ULIS>
 
-#define LOCTEXT_NAMESPACE "OdysseyBrushShape"
-
 //////////////////////////////////////////////////////////////////////////
 // UOdysseyBrushShape
 //--------------------------------------------------------------------------------------
@@ -106,6 +104,3 @@ UOdysseyBrushShape::GeneratePolygonPoints(TArray<FVector2D> PolygonPoints, TArra
         GeneratedPoints.Add(FVector2D(pointsArray[i].x, pointsArray[i].y));
     }
 }
-
-#undef LOCTEXT_NAMESPACE
-

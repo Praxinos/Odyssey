@@ -7,7 +7,7 @@
 #include "IContentBrowserSingleton.h"
 #include "OdysseyPalette.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPaletteAssetTypeActions"
+#define LOCTEXT_NAMESPACE "Palette"
 
 //////////////////////////////////////////////////////////////////////////
 // FOdysseyPaletteAssetTypeActions

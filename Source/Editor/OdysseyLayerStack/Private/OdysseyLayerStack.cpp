@@ -7,8 +7,6 @@
 #include "Misc/ScopedSlowTask.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "LayerStack"
-
 void
 UOdysseyLayerStack::PostInitProperties()
 {
@@ -801,5 +799,3 @@ UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEv
         PropertyChanged(propertyName);
     }
 }
-
-#undef LOCTEXT_NAMESPACE

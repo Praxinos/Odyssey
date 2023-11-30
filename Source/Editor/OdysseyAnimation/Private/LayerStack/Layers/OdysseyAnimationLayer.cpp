@@ -7,8 +7,6 @@
 #include "OdysseyAnimationLayerImageRenderer.h"
 #include "ULISLoaderModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationLayer"
-
 //===========================
 
 UOdysseyAnimation*
@@ -218,5 +216,3 @@ UOdysseyAnimationLayer::GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBeh
 
     return frame;
 }
-
-#undef LOCTEXT_NAMESPACE

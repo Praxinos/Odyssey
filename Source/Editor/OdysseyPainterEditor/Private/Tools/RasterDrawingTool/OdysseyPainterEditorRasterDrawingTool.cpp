@@ -19,7 +19,7 @@
 #include "Widgets/Layout/SWrapBox.h"
 
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

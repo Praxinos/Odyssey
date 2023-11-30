@@ -3,7 +3,7 @@
 
 #include "OdysseyPaletteEntryColor.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPaletteEntryColor"
+#define LOCTEXT_NAMESPACE "Palette"
 
 UOdysseyPaletteEntryColor::UOdysseyPaletteEntryColor()
 {

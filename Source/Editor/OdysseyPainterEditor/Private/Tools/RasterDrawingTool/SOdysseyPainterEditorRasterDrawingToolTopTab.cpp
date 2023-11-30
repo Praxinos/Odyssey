@@ -6,7 +6,7 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Widgets/Layout/SUniformWrapPanel.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingToolTopTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorRasterDrawingToolTopTab

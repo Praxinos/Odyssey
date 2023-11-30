@@ -8,7 +8,7 @@
 
 #include "IOdysseyStylusInputModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyStylusInputSettings"
+#define LOCTEXT_NAMESPACE "StylusInput"
 
 // The better default value for each OS
 #if PLATFORM_WINDOWS
@@ -60,16 +60,16 @@ UOdysseyStylusInputSettings::GetFormatText( TSharedPtr<EOdysseyStylusInputDriver
 {
     switch( *iStylusInputDriver )
     {
-        case OdysseyStylusInputDriver_None:     return LOCTEXT( "OdysseyStylusInputDriver_None", "None" );
+        case OdysseyStylusInputDriver_None:     return LOCTEXT( "settings.driver.none", "None" );
 #if PLATFORM_WINDOWS
-        case OdysseyStylusInputDriver_Ink:      return LOCTEXT( "OdysseyStylusInputDriver_Ink", "Ink" );
-        case OdysseyStylusInputDriver_Wintab:   return LOCTEXT( "OdysseyStylusInputDriver_Wintab", "Wintab" );
+        case OdysseyStylusInputDriver_Ink:      return LOCTEXT( "settings.driver.ink", "Ink" );
+        case OdysseyStylusInputDriver_Wintab:   return LOCTEXT( "settings.driver.wintab", "Wintab" );
 #elif PLATFORM_MAC
-        case OdysseyStylusInputDriver_NSEvent:  return LOCTEXT( "OdysseyStylusInputDriver_NSEvent", "NSEvent" );
+        case OdysseyStylusInputDriver_NSEvent:  return LOCTEXT( "settings.driver.nsevent", "NSEvent" );
 #endif
     }
 
-    return LOCTEXT( "OdysseyStylusInputDriver_Invalid", "Invalid" );
+    return LOCTEXT( "settings.driver.invalid", "Invalid" );
 }
 
 #undef LOCTEXT_NAMESPACE

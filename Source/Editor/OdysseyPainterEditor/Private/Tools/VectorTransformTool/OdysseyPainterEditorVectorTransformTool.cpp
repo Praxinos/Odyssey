@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorTransformTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L

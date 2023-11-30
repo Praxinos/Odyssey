@@ -5,8 +5,6 @@
 
 #include "FreehandShape/Smoothing/IOdysseySmoothing.h"
 
-#define LOCTEXT_NAMESPACE "IOdysseySmoothing"
-
 //---
 
 IOdysseySmoothing::~IOdysseySmoothing()
@@ -38,7 +36,3 @@ IOdysseySmoothing::CanCatchUp() const
 {
     return false;
 }
-
-//---
-
-#undef LOCTEXT_NAMESPACE

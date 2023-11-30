@@ -14,8 +14,6 @@
 // from module OdysseyFile
 #include "OdysseyFile.h"
 
-#define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageVector"
-
 TSharedRef<FOdysseyAnimationCellImageVector>
 FOdysseyAnimationCellImageVector::Create(UOdysseyAnimationLayerImageVector* iLayer, int iLength, int iWidth, int iHeight)
 {
@@ -241,5 +239,3 @@ FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated(bool iIsInteractive)
 {
     ImageRenderingChanged(iIsInteractive);
 }
-
-#undef LOCTEXT_NAMESPACE

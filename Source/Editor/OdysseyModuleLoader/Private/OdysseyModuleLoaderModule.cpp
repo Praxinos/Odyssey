@@ -4,8 +4,6 @@
 #include "OdysseyModuleLoaderModule.h"
 #include "interfaces/IPluginManager.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyModuleLoaderModule"
-
 void
 FOdysseyModuleLoaderModule::StartupModule()
 {
@@ -44,5 +42,3 @@ void FOdysseyModuleLoaderModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE(FOdysseyModuleLoaderModule, OdysseyModuleLoaderModule );
-
-#undef LOCTEXT_NAMESPACE

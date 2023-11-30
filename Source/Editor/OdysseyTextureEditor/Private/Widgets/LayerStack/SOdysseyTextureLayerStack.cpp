@@ -4,7 +4,7 @@
 #include "Widgets/LayerStack/SOdysseyTextureLayerStack.h"
 #include "Widgets/SOdysseyLayerStackAddLayerButton.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyTextureLayerStack"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 SLATE_IMPLEMENT_WIDGET(SOdysseyTextureLayerStack)
 void
@@ -69,7 +69,7 @@ SOdysseyTextureLayerStack::RebuildWidgets()
          * 
          */
         widget = SNew(STextBlock)
-        .Text(LOCTEXT("EmptyLayerStackInstructions", "No Layer Stack can be displayed"));
+        .Text(LOCTEXT("texture-layerstack.no-layerstack", "No Layer Stack can be displayed"));
     }
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());

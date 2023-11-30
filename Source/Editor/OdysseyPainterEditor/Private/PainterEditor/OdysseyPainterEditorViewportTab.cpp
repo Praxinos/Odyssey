@@ -9,7 +9,7 @@
 #include "Models/OdysseyPainterEditorViewportClient.h"
 #include "OdysseyBrushOptions.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorViewportTab::StaticId()

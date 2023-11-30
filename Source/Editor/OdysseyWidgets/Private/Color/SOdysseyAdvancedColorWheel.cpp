@@ -6,9 +6,6 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include <ULIS>
 
-#define LOCTEXT_NAMESPACE "OdysseyAdvancedColorWheel"
-
-
 /////////////////////////////////////////////////////
 // Default Values Defines
 #define BASE_WIDTH              1024.f
@@ -604,6 +601,3 @@ SOdysseyAdvancedColorWheel::GetColorResult() const
 
     return ::ULIS::FColor::FromHSVAF( hue, sat, value, 1.0f );
 }
-
-#undef LOCTEXT_NAMESPACE
-

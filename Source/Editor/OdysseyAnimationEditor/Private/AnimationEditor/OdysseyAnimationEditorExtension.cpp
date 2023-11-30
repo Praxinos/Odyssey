@@ -10,8 +10,6 @@
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 #include "Tools/RasterPaintBucketTool/OdysseyAnimationEditorRasterPaintBucketToolSourceProvider.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorExtension"
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -180,4 +178,3 @@ FOdysseyAnimationEditorExtension::ConfigureTools()
 	TSharedPtr<FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider> provider = MakeShared<FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider>(this);
 	GetEditor()->GetRasterPaintBucketTool()->SetSourceProvider(provider);
 }
-#undef LOCTEXT_NAMESPACE

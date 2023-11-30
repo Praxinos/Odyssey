@@ -8,7 +8,7 @@
 #include "OdysseyPaletteEntryFolder.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPaletteAddEntryButton"
+#define LOCTEXT_NAMESPACE "Palette"
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 

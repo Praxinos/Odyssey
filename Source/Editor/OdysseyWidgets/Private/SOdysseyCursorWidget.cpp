@@ -4,9 +4,6 @@
 #include "SOdysseyCursorWidget.h"
 #include "Rendering/DrawElements.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyCursorWidget"
-
-
 /////////////////////////////////////////////////////
 // SOdysseyCursorWidget
 //--------------------------------------------------------------------------------------
@@ -56,7 +53,3 @@ SOdysseyCursorWidget::ComputeDesiredSize( float ) const
 {
     return FVector2D( DesiredWidth, DesiredHeight );
 }
-
-
-#undef LOCTEXT_NAMESPACE
-
