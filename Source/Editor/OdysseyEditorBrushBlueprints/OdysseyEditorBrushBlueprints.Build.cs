@@ -15,10 +15,15 @@ public class OdysseyEditorBrushBlueprints : ModuleRules
                 "CoreUObject",
                 "InputCore",
                 "Engine",
+                "MediaAssets",
 
+                "OdysseyAnimation",
                 "OdysseyBrush",
                 "OdysseyLayerStack",
+                "OdysseyLayerStackEditor",
                 "OdysseyPainterEditor",
+                "OdysseyTexture",
+                "OdysseyImaging",
 
                 "ULIS",
                 "ULISLoader",

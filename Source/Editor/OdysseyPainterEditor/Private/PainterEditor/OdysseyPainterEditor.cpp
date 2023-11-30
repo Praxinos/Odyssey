@@ -257,7 +257,7 @@ FOdysseyPainterEditor::InitTools()
 	mColorPickerTool->SetEditor(this);
 	mVectorGridTool->SetEditor(this);
 	mVectorTransformTool->SetEditor(this);
-	mRasterDrawingTool->SetBrushContexts(mBrushContexts);
+	mRasterDrawingTool->SetBrushContexts(&mBrushContexts);
 
     //Default Tools a defined by their position in mTools
     //example: mRasterDrawingTool appears before mRasterTransformTool
@@ -420,6 +420,11 @@ FOdysseyPainterEditor::GetColorPickerTool() const
     return mColorPickerTool;
 }
 
+TArray<FOdysseyBrushContext*>&
+FOdysseyPainterEditor::GetBrushContexts()
+{
+    return mBrushContexts;
+}
 
 FOdysseyHUDSystem* 
 FOdysseyPainterEditor::HUDSystem() const

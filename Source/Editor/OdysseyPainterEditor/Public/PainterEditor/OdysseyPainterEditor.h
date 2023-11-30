@@ -88,6 +88,9 @@ public:
     virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
 
+    
+    TArray<FOdysseyBrushContext*>& GetBrushContexts();
+
     void SetVectorHUDFlags( uint64 iVectorHUDFlags );
     uint64 GetVectorHUDFlags();
 

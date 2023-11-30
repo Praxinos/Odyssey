@@ -147,7 +147,7 @@ public:
 
 public:
     //Context Management
-    void AddContext(FOdysseyBrushContext* iContext);
+    void SetContexts(TArray<FOdysseyBrushContext*>* iContext);
     template<class T> T* GetContext(FString iName);
     
 public:
@@ -444,7 +444,7 @@ private:
 #endif
 
 private:
-    TArray<FOdysseyBrushContext*>           mContexts;
+    TArray<FOdysseyBrushContext*>*           mContexts;
 
     // External
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock;
@@ -463,12 +463,15 @@ private:
 template<class T> T*
 UOdysseyBrushAssetBase::GetContext(FString iName)
 {
-    for (int i = 0; i < mContexts.Num(); i++)
+    if (!mContexts)
+        return nullptr;
+
+    for (int i = 0; i < mContexts->Num(); i++)
     {
-        if (mContexts[i]->Name() != iName)
+        if ((*mContexts)[i]->Name() != iName)
             continue;
 
-        return static_cast<T*>(mContexts[i]);
+        return static_cast<T*>((*mContexts)[i]);
     }
 
     return nullptr;

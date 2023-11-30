@@ -70,7 +70,7 @@ public:
 public:
     // Setters
     // Sets the BrushContexts to apply to brushInstance
-    void SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts);
+    void SetBrushContexts(TArray<FOdysseyBrushContext*>* iContexts);
 
     // Recreates the brush instance
     void RefreshBrushInstance();
@@ -215,7 +215,7 @@ protected:
 
     //Resources
     FOdysseyPaintEngine                 mPaintEngine;
-    TArray<FOdysseyBrushContext*>       mBrushContexts;
+    TArray<FOdysseyBrushContext*>*       mBrushContexts;
     FOdysseyPainterEditorRasterDrawingToolWorker     mWorker;
     float mBaseSize; //Size on which the tool is based to compute its size from a percentage
 

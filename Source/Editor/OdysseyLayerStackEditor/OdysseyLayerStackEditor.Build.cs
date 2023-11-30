@@ -23,6 +23,7 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "ToolMenus",
 
                 "OdysseyCore",
+                "OdysseyBrush",
                 "OdysseyEditor",
                 "OdysseyImaging",
                 "OdysseyLayerStack",

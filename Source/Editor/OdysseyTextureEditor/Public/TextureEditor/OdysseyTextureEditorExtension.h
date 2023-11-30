@@ -9,6 +9,7 @@
 class FOdysseyPainterEditor;
 class FOdysseyTextureEditorGUI;
 class FOdysseyTextureEditorSource;
+class FOdysseyLayerStackEditorBrushContext;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorExtension
     : public FOdysseyPainterEditorExtension
@@ -38,4 +39,5 @@ private:
 private:
     TSharedPtr<FOdysseyTextureEditorSource> mTextureSource;
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
+    TSharedPtr<FOdysseyLayerStackEditorBrushContext> mLayerStackBrushEditorContext;
 };

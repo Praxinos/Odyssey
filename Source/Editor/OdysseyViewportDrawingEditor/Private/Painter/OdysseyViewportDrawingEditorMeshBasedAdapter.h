@@ -10,6 +10,8 @@
 #include "MeshPaintTypes.h"
 #include "TexturePaintHelpers.h"
 
+class FOdysseyViewportEditorBrushContext;
+
 /* -------------------------------------------------------------------  */
 
 /** Mesh Based Painting

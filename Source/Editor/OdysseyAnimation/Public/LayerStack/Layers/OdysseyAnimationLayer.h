@@ -7,12 +7,14 @@
 
 #include "UObject/OdysseyObjectPropertyTracker.h"
 #include "Misc/OdysseyHandle.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
 #include <ULIS>
 
 #include "OdysseyAnimationLayer.generated.h"
 
 class FOdysseyAnimationCellsContainer;
 class FOdysseyAnimationLightTable;
+class UOdysseyAnimation;
 
 UENUM(BlueprintType)
 enum class EOdysseyAnimationLayerImagePostBehaviour

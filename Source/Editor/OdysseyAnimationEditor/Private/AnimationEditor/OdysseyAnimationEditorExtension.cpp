@@ -9,6 +9,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 #include "Tools/RasterPaintBucketTool/OdysseyAnimationEditorRasterPaintBucketToolSourceProvider.h"
+#include "BrushContext/OdysseyLayerStackEditorBrushContext.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -23,6 +24,7 @@ FOdysseyAnimationEditorExtension::FOdysseyAnimationEditorExtension(FOdysseyPaint
 	, mGUI(nullptr)
 	, mTimeline(this)
 	, mPlaybackFramesPerSecond(0)
+	, mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
 {
 }
 
@@ -62,6 +64,7 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
 	if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
 	{
+		GetEditor()->GetBrushContexts().Remove(mLayerStackBrushEditorContext.Get());
 		mAnimationSource = nullptr;
 		mTimeline.Finalize();
 		UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
@@ -82,6 +85,9 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 	UOdysseyAnimation::OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnCurrentFrameChanged);
 	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationEditorExtension::OnImageRenderingChanged);
 	UOdysseyLayer::OnMediaChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnLayerMediaChanged);
+
+	GetEditor()->GetBrushContexts().Add(mLayerStackBrushEditorContext.Get());
+	mLayerStackBrushEditorContext->SetLayerStack(mAnimationSource->GetLayerStack());
 
 	ConfigureTools();
 }

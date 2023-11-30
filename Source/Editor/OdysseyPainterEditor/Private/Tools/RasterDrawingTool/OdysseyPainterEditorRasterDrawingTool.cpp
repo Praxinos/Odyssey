@@ -38,6 +38,7 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     //Internal
     , mPaintEngine()
     , mBaseSize(0)
+    , mBrushContexts(nullptr)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
 
@@ -432,7 +433,7 @@ UOdysseyPainterEditorRasterDrawingTool::AdaptShapeStep(float iStep)
 //------------------------------------------------------------------------------ Setters
 
 void
-UOdysseyPainterEditorRasterDrawingTool::SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts)
+UOdysseyPainterEditorRasterDrawingTool::SetBrushContexts(TArray<FOdysseyBrushContext*>* iContexts)
 {
     mBrushContexts = iContexts;
 }
@@ -613,10 +614,7 @@ UOdysseyPainterEditorRasterDrawingTool::ConfigureBrushInstance(UOdysseyBrushAsse
 {
     iBrushInstance->SetBrushOptions(BrushOptions); //Share BrushOptions between every selected brushes
     //Set BrushContexts
-    for (int i = 0; i < mBrushContexts.Num(); i++)
-    {
-        iBrushInstance->AddContext(mBrushContexts[i]); //Set the brush context so that context nodes can be used
-    }
+    iBrushInstance->SetContexts(mBrushContexts); //Set the brush context so that context nodes can be used
     iBrushInstance->SetBlock(mPaintEngine.PaintBlock());
     iBrushInstance->ExecuteSelected();
     iBrushInstance->ExecuteStateChanged();

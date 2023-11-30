@@ -51,6 +51,7 @@ UOdysseyBrushAssetBase::UOdysseyBrushAssetBase()
     //Internal
     , mEditedBlock(nullptr)
     , mIsDrawing(false)
+    , mContexts(nullptr)
 {
     ::ULIS::FContext::MarkEventFinished(&mEvent);
 }
@@ -117,9 +118,9 @@ UOdysseyBrushAssetBase::PostLoad()
 //-------------------------------------------------------------------- Brush Context API
 
 void
-UOdysseyBrushAssetBase::AddContext(FOdysseyBrushContext* iContext)
+UOdysseyBrushAssetBase::SetContexts(TArray<FOdysseyBrushContext*>* iContexts)
 {
-    mContexts.Add(iContext);
+    mContexts = iContexts;
 }
 
 //--------------------------------------------------------------------------------------

@@ -14,6 +14,7 @@ class UOdysseyAnimationLayerStack;
 class UOdysseyAnimationPlayer;
 class FOdysseyAnimationEditorSource;
 class FOdysseyAnimationEditorGUI;
+class FOdysseyLayerStackEditorBrushContext;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorExtension
     : public FOdysseyPainterEditorExtension
@@ -51,4 +52,5 @@ public:
 
     float mPlaybackFramesPerSecond;
     TArray<FGuid> mImageRenderingComposition;
+    TSharedPtr<FOdysseyLayerStackEditorBrushContext> mLayerStackBrushEditorContext;
 };

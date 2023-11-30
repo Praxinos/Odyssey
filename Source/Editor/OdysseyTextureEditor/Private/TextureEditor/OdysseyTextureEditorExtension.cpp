@@ -5,6 +5,7 @@
 
 #include "LayerStack/OdysseyTextureLayer.h"
 #include "Tools/RasterPaintBucketTool/OdysseyTextureEditorRasterPaintBucketToolSourceProvider.h"
+#include "BrushContext/OdysseyLayerStackEditorBrushContext.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -17,6 +18,7 @@ FOdysseyTextureEditorExtension::FOdysseyTextureEditorExtension(FOdysseyPainterEd
 	: FOdysseyPainterEditorExtension(iEditor)
 	, mTextureSource(nullptr)
 	, mGUI(nullptr)
+	, mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
 {
 }
 
@@ -65,10 +67,16 @@ FOdysseyTextureEditorExtension::OnSourceChanged()
     //Is the source an texture
     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
 	if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())	
+	{
+		GetEditor()->GetBrushContexts().Remove(mLayerStackBrushEditorContext.Get());
 		return;
+	}
 
 	mTextureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditorExtension::OnCurrentLayerChanged);
+
+	GetEditor()->GetBrushContexts().Add(mLayerStackBrushEditorContext.Get());
+	mLayerStackBrushEditorContext->SetLayerStack(mTextureSource->GetLayerStack());
 	
 	ConfigureTools();
 }

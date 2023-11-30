@@ -611,10 +611,6 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush)
 {
     IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance( iBindBrush );
-    if (iBindBrush)
-    {
-        iBindBrush->AddContext( new FOdysseyViewportEditorBrushContext() );
-    }
 }
 
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)

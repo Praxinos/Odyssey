@@ -8,14 +8,14 @@
 #include "Proxies/OdysseyBrushBlock.h"
 #include "Proxies/OdysseyBrushRect.h"
 
-#include "OdysseyTextureEditorFunctionLibrary.generated.h"
+#include "OdysseyLayerStackBrushEditorFunctionLibrary.generated.h"
 
 class UOdysseyBrushAssetBase;
 
 //---
 
 UCLASS(Blueprintable)
-class UOdysseyTextureEditorFunctionLibrary 
+class UOdysseyLayerStackBrushEditorFunctionLibrary 
     : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
@@ -23,7 +23,7 @@ class UOdysseyTextureEditorFunctionLibrary
 public:
     //Creates and Odyssey Block Reference with current layer.
     //X | Y input are an offset.
-    /*UFUNCTION(BlueprintPure, Category = "Odyssey|Block")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Block")
     static FOdysseyBlockProxy GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushRect Area );
     
     //Creates and Odyssey Block Reference with a layer to be identified with its name (to be entered in a string).
@@ -35,10 +35,4 @@ public:
     //X | Y input are an offset.
     UFUNCTION( BlueprintPure, Category = "Odyssey|Block" )
     static FOdysseyBlockProxy GetBlockOfLayerByIndex( UOdysseyBrushAssetBase* BrushContext, int Index, FOdysseyBrushRect Area );
-    
-#if 0
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Block" )
-    static FOdysseyBlockProxy GetResultBlock( UOdysseyBrushAssetBase* BrushContext );
-#endif
-	*/
 };

@@ -630,10 +630,6 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush)
 {
     IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance( iBindBrush );
-    if (iBindBrush)
-    {
-        iBindBrush->AddContext( new FOdysseyViewportEditorBrushContext() );
-    }
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::Tick(float iDelta)
