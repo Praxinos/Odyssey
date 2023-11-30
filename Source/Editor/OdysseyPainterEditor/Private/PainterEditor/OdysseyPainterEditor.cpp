@@ -170,6 +170,8 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 void
 FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
+    FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
+
     GetGUI()->ExtendMenu(iOwner, iMenuName);
 
     mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
