@@ -9,7 +9,7 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "OdysseyStyleSet.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationCells"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 SOdysseyAnimationCells::~SOdysseyAnimationCells()
@@ -435,7 +435,7 @@ SOdysseyAnimationCells::OnCellsMouseButtonUp(const FGeometry& iGeometry, const F
         mLayerOffsetData.mIsDragDetected = false;
 
 #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Change Layer Offset"));
+        FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cells.transaction.set-offset", "Change Layer Offset"));
 #endif
         FOdysseyAnimationCellsMutator mutator(mAnimationLayer, mCellsContainer.ToSharedRef());
         mutator.SetOffset(mOffset);
@@ -496,7 +496,7 @@ void
 SOdysseyAnimationCells::OnLengthHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Change Cell Length"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cells.transaction.set-cell-length", "Change Cell Length"));
 #endif
     FOdysseyAnimationCellsMutator mutator(mAnimationLayer, mCellsContainer.ToSharedRef());
     mutator.SetLength(mLengthHandleDragData.mCellData->mCellIndex, mLengthHandleDragData.mCellData->mLength);
@@ -663,7 +663,7 @@ SOdysseyAnimationCells::OnTimingHandleDragStopped(const FGeometry& iGeometry, co
     if ( mEditingOffset || !mTimingHandleDragData.mEditedCellData.IsEmpty() || mTimingHandleDragData.mNumCellsToRemove > 0 )
     {
 #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Change Cell Timing"));
+        FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cells.transaction.set-cell-timing", "Change Cell Timing"));
 #endif
 
         FOdysseyAnimationCellsMutator mutator(mAnimationLayer, mCellsContainer.ToSharedRef());
@@ -860,7 +860,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, 
         if ( mAddCellsHandleDragData.mOffset > 0 )
         {
 #ifdef WITH_EDITOR
-            FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Add Cells"));
+            FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cells.transaction.add-cells-at-start", "Add Cells"));
 #endif
 
             //Create cells to add
@@ -878,7 +878,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, 
         else
         {
 #ifdef WITH_EDITOR
-            FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Change Cell Timing"));
+            FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cells.transaction.shrink-cells-at-start", "Change Cell Timing"));
 #endif
 
             FOdysseyAnimationCellsMutator mutator(mAnimationLayer, mCellsContainer.ToSharedRef());
@@ -900,7 +900,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, 
         if ( mAddCellsHandleDragData.mOffset < 0 )
         {
 #ifdef WITH_EDITOR
-            FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Add Cells"));
+            FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cells.transaction.add-cells-at-end", "Add Cells"));
 #endif
 
             //Create cells to add
@@ -924,7 +924,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, 
         else
         {
 #ifdef WITH_EDITOR
-            FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Change Cell Timing"));
+            FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cells.transaction.shrink-cells-at-end", "Change Cell Timing"));
 #endif
 
             FOdysseyAnimationCellsMutator mutator(mAnimationLayer, mCellsContainer.ToSharedRef());

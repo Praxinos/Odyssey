@@ -6,8 +6,6 @@
 #include "Widgets/LayerStack/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterTimeline"
-
 SOdysseyAnimationLayerImageRasterTimeline::~SOdysseyAnimationLayerImageRasterTimeline()
 {
 }
@@ -70,5 +68,3 @@ SOdysseyAnimationLayerImageRasterTimeline::GetShowStaggerCellContent() const
 {
     return !IsCollapsed();
 }
-
-#undef LOCTEXT_NAMESPACE

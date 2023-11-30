@@ -5,7 +5,7 @@
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerMutator.h"
 #include "Widgets/Input/SSpinBox.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationCellImageStagger"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 void
 SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, TSharedPtr<FOdysseyAnimationCellImageStagger> iCell, FOdysseyAnimationEditorExtension* iExtension)
@@ -175,7 +175,7 @@ void
 SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit::Type iType)
 {    
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("OdysseyAnimationCellImageStagger::SetReach", "Set Stagger Cell Reach"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
 #endif
     FOdysseyAnimationCellImageStaggerMutator mutator(mCell->GetLayer(), mCell);
     mutator.SetReach(FMath::Max(0, iReach));
@@ -235,10 +235,10 @@ SOdysseyAnimationCellImageStagger::MapActions(TSharedPtr<FUICommandList> iComman
 void
 SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 {  
-    iMenuBuilder.BeginSection("Behaviour", LOCTEXT("AnimationCellImageStagger-BehaviourMenu-BehaviourSection", "Behaviour"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourHold, NAME_None, LOCTEXT("AnimationCellImageStagger-BehaviourMenu-Behaviour-Hold", "Hold"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourLoop, NAME_None, LOCTEXT("AnimationCellImageStagger-BehaviourMenu-Behaviour-Loop", "Loop"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourPingPong, NAME_None, LOCTEXT("AnimationCellImageStagger-BehaviourMenu-Behaviour-PingPong", "PingPong"));
+    iMenuBuilder.BeginSection("Behaviour", LOCTEXT("cell-image-stagger.behaviour-menu.behaviour-section.name", "Behaviour"));
+        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourHold, NAME_None, LOCTEXT("cell-image-stagger.behaviour-menu.hold", "Hold"));
+        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourLoop, NAME_None, LOCTEXT("cell-image-stagger.behaviour-menu.loop", "Loop"));
+        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourPingPong, NAME_None, LOCTEXT("cell-image-stagger.behaviour-menu.pingpong", "PingPong"));
     iMenuBuilder.EndSection();
 
     //TODO: Reach
@@ -248,7 +248,7 @@ void
 SOdysseyAnimationCellImageStagger::SetBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour)
 {
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("OdysseyAnimationCellImageStagger::SetBehaviour", "Set Stagger Cell Behaviour"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.transaction.set-behaviour", "Set Stagger Cell Behaviour"));
 #endif
     FOdysseyAnimationCellImageStaggerMutator mutator(mCell->GetLayer(), mCell);
     mutator.SetBehaviour(iBehaviour);

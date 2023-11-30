@@ -5,7 +5,7 @@
 #include "OdysseyStyleSet.h"
 #include "Command/OdysseyCommandMacros.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyLayerStackEditorCommands"
+#define LOCTEXT_NAMESPACE "LayerStackEditor"
 
 namespace
 {
@@ -13,9 +13,9 @@ namespace
 }
 
 FOdysseyLayerStackEditorCommands::FOdysseyLayerStackEditorCommands()
-    : TCommands<FOdysseyLayerStackEditorCommands>( "LayerStackEditor", NSLOCTEXT( "Contexts", "LayerStackEditor", "LayerStack" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
+    : TCommands<FOdysseyLayerStackEditorCommands>( "LayerStackEditor", LOCTEXT( "editor-commands.name", "LayerStack" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
-    AddBundle(LayerStackShortcuts, LOCTEXT("LayerStackShortcutsCategory", "LayerStack Shortcuts"));
+    AddBundle(LayerStackShortcuts, LOCTEXT("editor-commands.category.layerstack-shortcuts", "LayerStack Shortcuts"));
 }
 
 void

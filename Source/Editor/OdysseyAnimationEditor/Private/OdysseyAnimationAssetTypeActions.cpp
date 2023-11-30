@@ -8,7 +8,7 @@
 #include "OdysseyAnimationEditorModule.h"
 #include "OdysseyAnimation.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationAssetTypeActions"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 //////////////////////////////////////////////////////////////////////////
 // FOdysseyAnimationAssetTypeActions
@@ -20,7 +20,7 @@ FOdysseyAnimationAssetTypeActions::FOdysseyAnimationAssetTypeActions( EAssetType
 FText
 FOdysseyAnimationAssetTypeActions::GetName() const
 {
-    return LOCTEXT( "FOdysseyAnimationTypeActionsName", "Animation" );
+    return LOCTEXT( "asset-type-actions.name", "Animation" );
 }
 
 FColor

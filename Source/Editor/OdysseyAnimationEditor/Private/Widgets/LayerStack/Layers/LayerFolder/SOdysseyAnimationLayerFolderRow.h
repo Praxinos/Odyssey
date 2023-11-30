@@ -20,6 +20,7 @@ public:
     SLATE_END_ARGS()
 
 public:
+    SOdysseyAnimationLayerFolderRow();
     // Construction / Destruction
     void Construct(
         const FArguments& iArgs,
@@ -42,4 +43,5 @@ private:
 
 private:
     class UOdysseyAnimationLayerFolder* mAnimationLayerFolder;
+    FText mSetOpacityTransactionName;
 };

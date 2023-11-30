@@ -5,8 +5,6 @@
 
 #include "FreehandShape/Interpolation/IOdysseyInterpolation.h"
 
-#define LOCTEXT_NAMESPACE "IOdysseyInterpolation"
-
 //---
 
 IOdysseyInterpolation::~IOdysseyInterpolation()
@@ -53,5 +51,3 @@ IOdysseyInterpolation::SetStep(float iValue)
 {
     mStep = iValue;
 }
-
-#undef LOCTEXT_NAMESPACE

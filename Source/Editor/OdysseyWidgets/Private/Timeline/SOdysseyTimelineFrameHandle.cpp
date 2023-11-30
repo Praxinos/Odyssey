@@ -5,8 +5,6 @@
 
 #include "Fonts/FontMeasure.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTimeline"
-
 void SOdysseyTimelineFrameHandle::Construct( const SOdysseyTimelineFrameHandle::FArguments& InArgs )
 {
     mFrameSize = InArgs._FrameSize;
@@ -67,5 +65,3 @@ SOdysseyTimelineFrameHandle::FrameSize() const
 {
 	return mFrameSize.Get();
 }
-
-#undef LOCTEXT_NAMESPACE

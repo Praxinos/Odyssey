@@ -3,8 +3,6 @@
 
 #include "SOdysseyAnimationTimelineFrameSelector.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationTimelineFrameSelector"
-
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineFrameSelector
 
@@ -271,7 +269,3 @@ SOdysseyAnimationTimelineFrameSelection::OnDragDetected(const FGeometry& iGeomet
 
 	return FReply::Unhandled();
 }
-
-//////////////////////////////////////////////////////////////////////////
-
-#undef LOCTEXT_NAMESPACE

@@ -3,8 +3,6 @@
 
 #include "SOdysseyPaletteSetTile.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPaletteSetTile"
-
 SOdysseyPaletteSetTile::~SOdysseyPaletteSetTile()
 {
 }
@@ -54,5 +52,3 @@ SOdysseyPaletteSetTile::IsEnabled() const
 {
     return true;
 }
-
-#undef LOCTEXT_NAMESPACE

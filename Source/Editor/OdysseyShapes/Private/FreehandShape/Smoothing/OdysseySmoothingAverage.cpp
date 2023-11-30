@@ -4,10 +4,6 @@
 #include "FreehandShape/Smoothing/OdysseySmoothingAverage.h"
 #include "Math/OdysseyMathUtils.h"
 
-
-#define LOCTEXT_NAMESPACE "OdysseySmoothingAverage"
-
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 FOdysseySmoothingAverage::~FOdysseySmoothingAverage()
@@ -55,7 +51,3 @@ FOdysseySmoothingAverage::CanCatchUp() const
 {
     return true;
 }
-
-//---
-
-#undef LOCTEXT_NAMESPACE

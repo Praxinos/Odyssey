@@ -13,7 +13,7 @@
 
 #include <chrono>
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorSelectionTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -218,7 +218,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
     else
     {
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorObjectSelectionTool","Vector Object Pick Tool"));
+        GEditor->BeginTransaction(LOCTEXT("vector-object-selection-tool.transaction.select-object","Vector Object Pick Tool"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
@@ -313,7 +313,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     } );
 
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorObjectSelectionTool","Vector Vertex Pick Tool"));
+    GEditor->BeginTransaction(LOCTEXT("vector-object-selection-tool.transaction.select-vertex","Vector Vertex Pick Tool"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList );

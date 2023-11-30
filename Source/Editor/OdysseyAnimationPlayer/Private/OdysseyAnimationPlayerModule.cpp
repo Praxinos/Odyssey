@@ -3,8 +3,6 @@
 
 #include "OdysseyAnimationPlayerModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationPlayerModule"
-
 void FOdysseyAnimationPlayerModule::StartupModule()
 {
 }
@@ -14,5 +12,3 @@ void FOdysseyAnimationPlayerModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE(FOdysseyAnimationPlayerModule, OdysseyAnimationPlayer);
-
-#undef LOCTEXT_NAMESPACE

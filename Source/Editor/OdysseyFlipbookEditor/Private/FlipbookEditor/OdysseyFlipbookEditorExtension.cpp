@@ -9,8 +9,6 @@
 #include "Widgets/SOdysseyFlipbookTimelineView.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorExtension"
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
@@ -187,5 +185,3 @@ FOdysseyFlipbookEditorExtension::OnSpriteTextureChanged(UPaperSprite* iSprite, U
 
 	SetTextureAtKeyframeIndex(index);
 }
-
-#undef LOCTEXT_NAMESPACE

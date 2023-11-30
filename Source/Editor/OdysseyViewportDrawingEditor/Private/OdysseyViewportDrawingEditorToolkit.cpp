@@ -7,7 +7,7 @@
 #include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorToolkit"
+#define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
 FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TSharedRef<FOdysseyPainterEditor> iEditor, FEdMode* iEdMode)
 	: FOdysseyModeToolkit(iEditor)
@@ -31,7 +31,7 @@ FOdysseyViewportDrawingEditorToolkit::GetToolkitFName() const
 FText
 FOdysseyViewportDrawingEditorToolkit::GetBaseToolkitName() const
 {
-	return LOCTEXT("ToolkitName", "Odyssey Mesh Paint");
+	return LOCTEXT("editor.name", "Odyssey Mesh Paint");
 }
 
 void
@@ -71,7 +71,7 @@ FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FT
         Args.Add("TabName", tab->GetName());
 
         FText description = FText::Format(
-            LOCTEXT("ViewportDrawingEditorToggleTopTabTooltip", "Display {TabName}"),
+            LOCTEXT("master-tab.display-tab.tooltip", "Display {TabName}"),
             Args
         );
 
@@ -85,4 +85,4 @@ FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FT
     }
 }
 
-#undef LOCTEXT_NAMESPACE // "OdysseyViewportDrawingEditorToolkit"
+#undef LOCTEXT_NAMESPACE

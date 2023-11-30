@@ -3,8 +3,6 @@
 
 #include "Proxies/OdysseyBrushMath.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyBrushMathLibrary"
-
 //////////////////////////////////////////////////////////////////////////
 // UOdysseyBrushMathLibrary
 //--------------------------------------------------------------------------------------
@@ -27,6 +25,3 @@ UOdysseyBrushMathLibrary::ConvertCartesianToPolarCoordinates( float DeltaX, floa
     AngleRad = atan2(DeltaY, DeltaX);
     Radius = sqrt(DeltaY * DeltaY + DeltaX * DeltaX);
 }
-
-#undef LOCTEXT_NAMESPACE
-

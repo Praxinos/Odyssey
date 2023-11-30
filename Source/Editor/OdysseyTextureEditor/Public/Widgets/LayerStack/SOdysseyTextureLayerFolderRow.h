@@ -19,11 +19,13 @@ public:
 
 public:
     // Construction / Destruction
+    SOdysseyTextureLayerFolderRow();
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, class UOdysseyTextureLayerFolder* iTextureLayerFolder);
     
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
     virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
+    EVisibility GetCollapsedOpacityVisibility() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
@@ -34,4 +36,5 @@ private:
 
 private:
     class UOdysseyTextureLayerFolder* mTextureLayerFolder;
+    FText mSetOpacityTransactionName;
 };

@@ -13,7 +13,7 @@
 #include "SOdysseyFlipbookTimelineTrack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbook"
+#define LOCTEXT_NAMESPACE "FlipbookEditor"
 #define MaxZoom 1.0
 #define MinZoom 0.01
 #define ZoomStep 0.01
@@ -49,28 +49,21 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
     FMenuBuilder ZoomMenuBuilder(true, NULL);
     {
         FUIAction Zoom25Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 0.25));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom25Action", "25%"), LOCTEXT("Zoom25ActionHint", "Show the texture at a quarter of its size."), FSlateIcon(), Zoom25Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("timeline.zoom.25percent.name", "25%"), LOCTEXT("timeline.zoom.25percent.tooltip", "Show the texture at a quarter of its size."), FSlateIcon(), Zoom25Action);
 
         FUIAction Zoom50Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 0.5));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom50Action", "50%"), LOCTEXT("Zoom50ActionHint", "Show the texture at half its size."), FSlateIcon(), Zoom50Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("timeline.zoom.50percent.name", "50%"), LOCTEXT("timeline.zoom.50percent.tooltip", "Show the texture at half its size."), FSlateIcon(), Zoom50Action);
 
         FUIAction Zoom100Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 1.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom100Action", "100%"), LOCTEXT("Zoom100ActionHint", "Show the texture in its original size."), FSlateIcon(), Zoom100Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("timeline.zoom.100percent.name", "100%"), LOCTEXT("timeline.zoom.100percent.tooltip", "Show the texture in its original size."), FSlateIcon(), Zoom100Action);
 
         FUIAction Zoom200Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 2.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom200Action", "200%"), LOCTEXT("Zoom200ActionHint", "Show the texture at twice its size."), FSlateIcon(), Zoom200Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("timeline.zoom.200percent.name", "200%"), LOCTEXT("timeline.zoom.200percent.tooltip", "Show the texture at twice its size."), FSlateIcon(), Zoom200Action);
 
         FUIAction Zoom400Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 4.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom400Action", "400%"), LOCTEXT("Zoom400ActionHint", "Show the texture at four times its size."), FSlateIcon(), Zoom400Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("timeline.zoom.400percent.name", "400%"), LOCTEXT("timeline.zoom.400percent.tooltip", "Show the texture at four times its size."), FSlateIcon(), Zoom400Action);
 
         ZoomMenuBuilder.AddMenuSeparator();
-
-        /* FUIAction ZoomFitAction(
-            FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuFitClicked),
-            FCanExecuteAction(),
-            FIsActionChecked::CreateSP(this, &SOdysseyFlipbookTimelineView::IsZoomMenuFitChecked)
-            );
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("ZoomFitAction", "Scale To Fit"), LOCTEXT("ZoomFillActionHint", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton); */
     }
 
     ChildSlot
@@ -110,7 +103,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
 				[
 					SNew(SButton)
 					//.HAlign(HAlign_Center)
-					.Text(LOCTEXT("AddKeyframe", "Add Keyframe"))
+					.Text(LOCTEXT("timeline.add-keyframe", "Add Keyframe"))
 					.OnClicked(this, &SOdysseyFlipbookTimelineView::OnAddFrameClicked)
 				]
 				+ SHorizontalBox::Slot()
@@ -119,7 +112,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
 					SNew(SButton)
 					.Visibility(this, &SOdysseyFlipbookTimelineView::FixCurrentFrameVisibility)
 					//.HAlign(HAlign_Center)
-					.Text(LOCTEXT("Fix Current Keyframe", "Fix Current Keyframe"))
+					.Text(LOCTEXT("timeline.fix-current-keyframe", "Fix Current Keyframe"))
 					.OnClicked(this, &SOdysseyFlipbookTimelineView::OnFixCurrentFrameClicked)
 				]
 			]
@@ -129,7 +122,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
 				SNew(SNumericDropDown<float>)
 				.bShowNamedValue(false)
 				.DropDownValues(FrameRateDropDownValues())
-                .LabelText(LOCTEXT("FrameRate", "Frame rate"))
+                .LabelText(LOCTEXT("timeline.framerate", "Frame rate"))
                 .MinDesiredValueWidth(50)
                 .OnValueChanged(this, &SOdysseyFlipbookTimelineView::OnFrameRateChanged)
                 .Orientation(EOrientation::Orient_Horizontal)
@@ -170,7 +163,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
                 .VAlign(VAlign_Center)
                 [
                     SNew(STextBlock)
-                        .Text(LOCTEXT("ZoomLabel", "Zoom:"))
+                        .Text(LOCTEXT("timeline.zoom", "Zoom:"))
                 ]
 
                 + SHorizontalBox::Slot()
@@ -777,15 +770,20 @@ TArray<SNumericDropDown<float>::FNamedValue>
 SOdysseyFlipbookTimelineView::FrameRateDropDownValues() const
 {
     TArray<SNumericDropDown<float>::FNamedValue> values;
-    values.Add(SNumericDropDown<float>::FNamedValue(1.0f, LOCTEXT("1Fps", "1 FPS"), LOCTEXT("1FpsDescription", "1 frame per second")));
-    values.Add(SNumericDropDown<float>::FNamedValue(2.0f, LOCTEXT("2Fps", "2 FPS"), LOCTEXT("2FpsDescription", "2 frames per second")));
-    values.Add(SNumericDropDown<float>::FNamedValue(3.0f, LOCTEXT("3Fps", "3 FPS"), LOCTEXT("3FpsDescription", "3 frames per second")));
-    values.Add(SNumericDropDown<float>::FNamedValue(6.0f, LOCTEXT("6Fps", "6 FPS"), LOCTEXT("6FpsDescription", "6 frames per second")));
-    values.Add(SNumericDropDown<float>::FNamedValue(12.0f, LOCTEXT("12Fps", "12 FPS"), LOCTEXT("12FpsDescription", "12 frames per second")));
-    values.Add(SNumericDropDown<float>::FNamedValue(24.0f, LOCTEXT("24Fps", "24 FPS"), LOCTEXT("24FpsDescription", "24 frames per second")));
-    values.Add(SNumericDropDown<float>::FNamedValue(29.97f, LOCTEXT("29.97Fps", "29.97 FPS"), LOCTEXT("29.97FpsDescription", "29.97 frames per second")));
-    values.Add(SNumericDropDown<float>::FNamedValue(30.0f, LOCTEXT("30Fps", "30 FPS"), LOCTEXT("30FpsDescription", "30 frames per second")));
-    values.Add(SNumericDropDown<float>::FNamedValue(60.0f, LOCTEXT("60Fps", "60 FPS"), LOCTEXT("60FpsDescription", "60 frames per second")));
+    FText nameFormat = LOCTEXT("timeline.framerate.n-fps.name", "{0} FPS");
+    FText tooltipFormat = LOCTEXT("timeline.framerate.n-fps.tooltip", "{0} frame(s) per second");
+
+    FText::Format(nameFormat, FText::FromString("1"));
+    FText::Format(tooltipFormat, FText::FromString("1"));
+    values.Add(SNumericDropDown<float>::FNamedValue(1.0f, FText::Format(nameFormat, FText::FromString("1")), FText::Format(tooltipFormat, FText::FromString("1"))));
+    values.Add(SNumericDropDown<float>::FNamedValue(2.0f, FText::Format(nameFormat, FText::FromString("2")), FText::Format(tooltipFormat, FText::FromString("2"))));
+    values.Add(SNumericDropDown<float>::FNamedValue(3.0f, FText::Format(nameFormat, FText::FromString("3")), FText::Format(tooltipFormat, FText::FromString("3"))));
+    values.Add(SNumericDropDown<float>::FNamedValue(6.0f, FText::Format(nameFormat, FText::FromString("6")), FText::Format(tooltipFormat, FText::FromString("6"))));
+    values.Add(SNumericDropDown<float>::FNamedValue(12.0f, FText::Format(nameFormat, FText::FromString("12")), FText::Format(tooltipFormat, FText::FromString("12"))));
+    values.Add(SNumericDropDown<float>::FNamedValue(24.0f, FText::Format(nameFormat, FText::FromString("24")), FText::Format(tooltipFormat, FText::FromString("24"))));
+    values.Add(SNumericDropDown<float>::FNamedValue(29.97f, FText::Format(nameFormat, FText::FromString("29.97")), FText::Format(tooltipFormat, FText::FromString("29.97"))));
+    values.Add(SNumericDropDown<float>::FNamedValue(30.0f, FText::Format(nameFormat, FText::FromString("30")), FText::Format(tooltipFormat, FText::FromString("30"))));
+    values.Add(SNumericDropDown<float>::FNamedValue(60.0f, FText::Format(nameFormat, FText::FromString("60")), FText::Format(tooltipFormat, FText::FromString("60"))));
 
     return values;
 }

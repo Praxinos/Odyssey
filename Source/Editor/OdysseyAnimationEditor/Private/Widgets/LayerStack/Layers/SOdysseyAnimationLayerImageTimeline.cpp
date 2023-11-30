@@ -5,7 +5,7 @@
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTable.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageTimeline"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 SOdysseyAnimationLayerImageTimeline::~SOdysseyAnimationLayerImageTimeline()
 {
@@ -255,32 +255,10 @@ SOdysseyAnimationLayerImageTimeline::OnDrop(const FGeometry& iGeometry, const FD
     if (mDragState == kDrag_Copy)
     {
     #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Copy Cells"));
+        FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.dnd-copy", "Copy Cells"));
     #endif
         operation->GetData().Paste(mLayer, mDragPosition);
     }
-
-    /* if (mDragState == kDrag_Move)
-    {
-    #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Move Cells"));
-    #endif
-
-        //Remove frames from original layer
-        UOdysseyAnimationLayer* layer = operation->GetData().GetLayer();
-        FInt32Range selectedFrames = operation->GetData().GetSelectedFrames();
-        FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-        mutator.RemoveFrameRange(selectedFrames);
-        if (iFrame > selectedFrames.GetUpperBoundValue())
-        {
-            int numDeletedFrames = selectedFrames.GetUpperBoundValue() - selectedFrames.GetLowerBoundValue() + 1;
-            mutator.SetOffset(layer->GetCellsContainer()->GetOffset() + numDeletedFrames);
-        }
-        mutator.Commit();
-
-        operation->GetData().Paste(mLayer, mDragPosition);
-    }
-    */
     mIsDraggingOver = false;
     return FReply::Handled();
 }
@@ -303,7 +281,7 @@ void
 SOdysseyAnimationLayerImageTimeline::CutFrames()
 {
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Cut Frames"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.cut", "Cut Frames"));
 #endif
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(mLayer, mExtension->Timeline()->GetSelectedFrames());
     FOdysseyClipboard::Get().SetData(clipboardData);
@@ -321,7 +299,7 @@ SOdysseyAnimationLayerImageTimeline::PasteFrames()
         return;
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Paste Frames"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.paste", "Paste Frames"));
 #endif
 
     clipboardData->Paste(mLayer, mExtension->Animation()->CurrentFrame);
@@ -331,7 +309,7 @@ void
 SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames()
 {
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Remove Frames"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.delete", "Remove Frames"));
 #endif
 
     FOdysseyAnimationCellsMutator mutator(mLayer, mLayer->GetCellsContainer());
@@ -371,7 +349,7 @@ SOdysseyAnimationLayerImageTimeline::StaggerCell( int iFrame )
         return;
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Stagger Cell"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.create-stagger-cell", "Stagger Cell"));
 #endif
     
     int cellStaggerLength = cell->GetLength() - cellFrame;
@@ -459,11 +437,11 @@ SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged()
 void
 SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 {   
-    iMenuBuilder.BeginSection("Selection", LOCTEXT("LayerImageTimeline-ContextMenu-SelectionSection", "Selection"));
+    iMenuBuilder.BeginSection("Selection", LOCTEXT("timeline-cells.context-menu.selection-section.name", "Selection"));
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
     iMenuBuilder.EndSection();
 
-    iMenuBuilder.BeginSection("Common", LOCTEXT("LayerImageTimeline-ContextMenu-CommonSection", "Common"));
+    iMenuBuilder.BeginSection("Common", LOCTEXT("timeline-cells.context-menu.common-section.name", "Common"));
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Duplicate);
         iMenuBuilder.AddSeparator("");
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Cut);
@@ -473,19 +451,19 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
     iMenuBuilder.EndSection();
 
-    iMenuBuilder.BeginSection("Cells", LOCTEXT("LayerImageTimeline-ContextMenu-CellsSection", "Cells"));
+    iMenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
         iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().StaggerCell);
     iMenuBuilder.EndSection();
 
-    iMenuBuilder.BeginSection("Layer", LOCTEXT("LayerImageTimeline-ContextMenu-LayerSection", "Layer"));
+    iMenuBuilder.BeginSection("Layer", LOCTEXT("timeline-cells.context-menu.layer-section.name", "Layer"));
         iMenuBuilder.AddSubMenu(
-            LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour", "Pre Behaviour"),
-            LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-Tooltip", "Set Layer's Pre Behaviour"),
+            LOCTEXT("timeline-cells.context-menu.pre-behaviour-submenu.name", "Pre Behaviour"),
+            LOCTEXT("timeline-cells.context-menu.pre-behaviour-submenu.tooltip", "Set Layer's Pre Behaviour"),
             FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildPreBehaviourSubMenu)
         );
         iMenuBuilder.AddSubMenu(
-            LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour", "Post Behaviour"),
-            LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-Tooltip", "Set Layer's Post Behaviour"),
+            LOCTEXT("timeline-cells.context-menu.post-behaviour-submenu.name", "Post Behaviour"),
+            LOCTEXT("timeline-cells.context-menu.post-behaviour-submenu.tooltip", "Set Layer's Post Behaviour"),
             FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu)
         );
     iMenuBuilder.EndSection();
@@ -495,7 +473,7 @@ void
 SOdysseyAnimationLayerImageTimeline::BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder)
 {
     iMenuBuilder.AddMenuEntry(
-        LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-None", "None"),
+        LOCTEXT("timeline-cells.context-menu.pre-behaviour.none", "None"),
         TAttribute<FText>(),
         FSlateIcon(),
         FUIAction(
@@ -507,7 +485,7 @@ SOdysseyAnimationLayerImageTimeline::BuildPreBehaviourSubMenu(FMenuBuilder& iMen
         EUserInterfaceActionType::RadioButton
     );
     iMenuBuilder.AddMenuEntry(
-        LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-Hold", "Hold"),
+        LOCTEXT("timeline-cells.context-menu.pre-behaviour.hold", "Hold"),
         TAttribute<FText>(),
         FSlateIcon(),
         FUIAction(
@@ -519,7 +497,7 @@ SOdysseyAnimationLayerImageTimeline::BuildPreBehaviourSubMenu(FMenuBuilder& iMen
         EUserInterfaceActionType::RadioButton
     );
     iMenuBuilder.AddMenuEntry(
-        LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-Loop", "Loop"),
+        LOCTEXT("timeline-cells.context-menu.pre-behaviour.loop", "Loop"),
         TAttribute<FText>(),
         FSlateIcon(),
         FUIAction(
@@ -531,7 +509,7 @@ SOdysseyAnimationLayerImageTimeline::BuildPreBehaviourSubMenu(FMenuBuilder& iMen
         EUserInterfaceActionType::RadioButton
     );
     iMenuBuilder.AddMenuEntry(
-        LOCTEXT("LayerImageTimeline-ContextMenu-PreBehaviour-PingPong", "PingPong"),
+        LOCTEXT("timeline-cells.context-menu.pre-behaviour.pingpong", "PingPong"),
         TAttribute<FText>(),
         FSlateIcon(),
         FUIAction(
@@ -548,7 +526,7 @@ void
 SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder)
 {
     iMenuBuilder.AddMenuEntry(
-        LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-None", "None"),
+        LOCTEXT("timeline-cells.context-menu.post-behaviour.none", "None"),
         TAttribute<FText>(),
         FSlateIcon(),
         FUIAction(
@@ -560,7 +538,7 @@ SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu(FMenuBuilder& iMe
         EUserInterfaceActionType::RadioButton
     );
     iMenuBuilder.AddMenuEntry(
-        LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-Hold", "Hold"),
+        LOCTEXT("timeline-cells.context-menu.post-behaviour.hold", "Hold"),
         TAttribute<FText>(),
         FSlateIcon(),
         FUIAction(
@@ -572,7 +550,7 @@ SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu(FMenuBuilder& iMe
         EUserInterfaceActionType::RadioButton
     );
     iMenuBuilder.AddMenuEntry(
-        LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-Loop", "Loop"),
+        LOCTEXT("timeline-cells.context-menu.post-behaviour.loop", "Loop"),
         TAttribute<FText>(),
         FSlateIcon(),
         FUIAction(
@@ -584,7 +562,7 @@ SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu(FMenuBuilder& iMe
         EUserInterfaceActionType::RadioButton
     );
     iMenuBuilder.AddMenuEntry(
-        LOCTEXT("LayerImageTimeline-ContextMenu-PostBehaviour-PingPong", "PingPong"),
+        LOCTEXT("timeline-cells.context-menu.post-behaviour.pingpong", "PingPong"),
         TAttribute<FText>(),
         FSlateIcon(),
         FUIAction(
@@ -601,7 +579,7 @@ void
 SOdysseyAnimationLayerImageTimeline::SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour)
 {
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Set Post Behaviour"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-post-behaviour", "Set Post Behaviour"));
 #endif
     FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "PostBehaviour", iBehaviour);
 }
@@ -622,7 +600,7 @@ void
 SOdysseyAnimationLayerImageTimeline::SetPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour)
 {
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Set Pre Behaviour"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-pre-behaviour", "Set Pre Behaviour"));
 #endif
     FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "PreBehaviour", iBehaviour);
 }

@@ -16,7 +16,7 @@
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorExport.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImport.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyAnimationLayerImageVector"
+#define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationLayerImageVector::FOnBlendModeChanged&
 UOdysseyAnimationLayerImageVector::OnBlendModeChanged()
@@ -46,7 +46,7 @@ UOdysseyAnimationLayerImageVector::~UOdysseyAnimationLayerImageVector()
 UOdysseyAnimationLayerImageVector::UOdysseyAnimationLayerImageVector()
     : mCellsContainer(MakeShared<FOdysseyAnimationCellsContainer>())
 {
-	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
+	LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerVector16");
 
     mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageVector::StaticType());
@@ -331,7 +331,7 @@ UOdysseyAnimationLayerImageVector::CreateMediaVector(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 {
-    FScopedTransaction transaction(LOCTEXT("CreateCell", "Create Cell"));
+    FScopedTransaction transaction(LOCTEXT("layer-image-vector.create-cell-transaction", "Create Cell"));
     UOdysseyAnimation* animation = GetAnimation();
     //Check if iFrameIndex is Out Of Range
     FInt32Range range = mCellsContainer->GetFrameRange();

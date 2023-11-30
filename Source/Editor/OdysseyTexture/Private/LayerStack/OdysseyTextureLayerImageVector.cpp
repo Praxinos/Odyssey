@@ -21,7 +21,7 @@
 
 #include "blend2d.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyTextureLayerImageVector"
+#define LOCTEXT_NAMESPACE "Texture"
 
 UOdysseyTextureLayerImageVector::FOnBlendModeChanged&
 UOdysseyTextureLayerImageVector::OnBlendModeChanged()
@@ -47,7 +47,7 @@ UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
     : mEngine(nullptr)
 {
-	LayerTypeName = LOCTEXT("LayerTypeName", "Vector Image Layer");
+	LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerVector16");
 }
 

@@ -6,8 +6,6 @@
 #include "ContentBrowserModule.h"
 #include "Modules/ModuleManager.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyContentBrowserExtensionsModule"
-
 /*-----------------------------------------------------------------------------
    FOdysseyContentBrowserExtensionsModule
 -----------------------------------------------------------------------------*/
@@ -26,6 +24,3 @@ FOdysseyContentBrowserExtensionsModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE( FOdysseyContentBrowserExtensionsModule, OdysseyContentBrowserExtensions );
-
-#undef LOCTEXT_NAMESPACE
-

@@ -10,7 +10,7 @@
 #include "FlipbookEditor/OdysseyFlipbookEditorGUI.h"
 #include "LevelEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorModule"
+#define LOCTEXT_NAMESPACE "FlipbookEditor"
 
 /*-----------------------------------------------------------------------------
    FOdysseyFlipbookEditorModule
@@ -67,7 +67,7 @@ FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
 {
 	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
     // Create Asset Categories
-	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
+	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
 
     if( !mUETypeActions )
         mUETypeActions = assetTools.GetAssetTypeActionsForClass(UPaperFlipbook::StaticClass() ).Pin();
@@ -112,8 +112,8 @@ FOdysseyFlipbookEditorModule::RegisterSettings()
 		return;
 
 	settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADFlipbookEditor"
-										, LOCTEXT( "OdysseyFlipbookEditorSettingsName", "ILIAD Flipbook Editor" )
-										, LOCTEXT( "OdysseyFlipbookEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
+										, LOCTEXT( "settings.name", "ILIAD Flipbook Editor" )
+										, LOCTEXT( "settings.tooltip", "Configure the look and feel of the ILIAD Editor." )
 										, GetMutableDefault<UOdysseyFlipbookEditorSettings>() );
 }
 
@@ -133,7 +133,7 @@ FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlip
 {
 	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
 		TEXT("OdysseyFlipbookEditor"),
-		LOCTEXT("WorkspaceMenu_OdysseyFlipbookEditor", "Odyssey Flipbook Editor"),
+		LOCTEXT("main-menu.category", "Odyssey Flipbook Editor"),
 		iFlipbook,
 		"OdysseyFlipbookEditor_Layout"
 	);

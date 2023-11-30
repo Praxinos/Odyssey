@@ -7,7 +7,7 @@
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorSceneTreeView"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 FVectorSceneTreeViewItem::~FVectorSceneTreeViewItem()
 {
@@ -83,7 +83,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     std::list<FOdysseyVectorObject*>& selectedObjectList = itemScene->GetEngine()->GetSelectedObjectList();
     FOdysseyVectorObject* insertObject = itemObject;
 
-    GEditor->BeginTransaction(LOCTEXT("DropObjects", "Drop Objects"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.drag-drop-object", "Drop Objects"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene, selectedObjectList ) );

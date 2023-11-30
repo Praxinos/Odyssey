@@ -8,8 +8,6 @@
 #include "ISinglePropertyView.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPainterEditorToolOptions"
-
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorToolOptions
 //--------------------------------------------------------------------------------------
@@ -37,6 +35,3 @@ SOdysseyPainterEditorToolOptions::Construct( const FArguments& InArgs )
         mDetailsView.ToSharedRef()
     ];
 }
-
-#undef LOCTEXT_NAMESPACE
-

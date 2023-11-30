@@ -7,8 +7,6 @@
 #include "SOdysseyPaletteEntryRow.h"
 #include "Widgets/SOdysseyPaletteTreeView.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPaletteFolderRow"
-
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyPaletteFolderRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntryFolder* iFolderEntry)
 {
@@ -38,5 +36,3 @@ SOdysseyPaletteFolderRow::GenerateHeaderWidget()
             SOdysseyPaletteEntryRow::GenerateHeaderWidget()
 		];
 }
-
-#undef LOCTEXT_NAMESPACE

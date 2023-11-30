@@ -5,8 +5,6 @@
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationMediaCache"
-
 FOdysseyAnimationMediaCache::FOdysseyAnimationMediaCache()
     : mAnimation(nullptr)
 {
@@ -58,5 +56,3 @@ FOdysseyAnimationMediaCache::GetSampleCount(EMediaCacheState State) const
     //TODO:
     return 0;
 }
-
-#undef LOCTEXT_NAMESPACE

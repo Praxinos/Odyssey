@@ -18,7 +18,7 @@
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerImageRasterExport.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyTextureLayerImageRaster"
+#define LOCTEXT_NAMESPACE "Texture"
 
 UOdysseyTextureLayerImageRaster::FOnBlendModeChanged&
 UOdysseyTextureLayerImageRaster::OnBlendModeChanged()
@@ -41,7 +41,7 @@ UOdysseyTextureLayerImageRaster::~UOdysseyTextureLayerImageRaster()
 UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
     : RasterBlock(MakeShared<FOdysseyRasterBlock>(this))
 {
-	LayerTypeName = LOCTEXT("LayerTypeName", "Raster Image Layer");
+	LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
     Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerBitmap16");
 }
 
@@ -96,11 +96,7 @@ UOdysseyTextureLayerImageRaster::OnBlockPtrChanged()
 
 void
 UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
-{
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Merge Layers"));
-#endif
-    
+{   
     FOdysseyRasterBlockMutator mutator(RasterBlock);
     mutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) },

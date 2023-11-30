@@ -4,7 +4,7 @@
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterPrimitiveDrawingTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -178,7 +178,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::SelectedShapeChanged()
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdysseyPoint& iPoint)
 {
-    GEditor->BeginTransaction(TEXT("DrawShape"), LOCTEXT("OnDrawPrimitiveShape", "Draw Primitive Shape"), nullptr);
+    GEditor->BeginTransaction(TEXT("DrawShape"), LOCTEXT("raster-primitive-drawing-tool.transaction.draw-shape", "Draw Primitive Shape"), nullptr);
 
     FOdysseyShapeDrawOptions options;
 

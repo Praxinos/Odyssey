@@ -34,7 +34,7 @@
 #define ScrollbarSpaceRatio (1.f - ScrollbarThumbRatio)
 
 
-#define LOCTEXT_NAMESPACE "OdysseyViewport"
+#define LOCTEXT_NAMESPACE "Widgets"
 
 /////////////////////////////////////////////////////
 // SOdysseyViewport
@@ -51,19 +51,19 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
     FMenuBuilder ZoomMenuBuilder(true, NULL);
     {
         FUIAction Zoom25Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 0.25));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom25Action", "25%"), LOCTEXT("Zoom25ActionHint", "Show the texture at a quarter of its size."), FSlateIcon(), Zoom25Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.25percent.name", "25%"), LOCTEXT("viewport.zoom.25percent.tooltip", "Show the texture at a quarter of its size."), FSlateIcon(), Zoom25Action);
 
         FUIAction Zoom50Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 0.5));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom50Action", "50%"), LOCTEXT("Zoom50ActionHint", "Show the texture at half its size."), FSlateIcon(), Zoom50Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.50percent.name", "50%"), LOCTEXT("viewport.zoom.50percent.tooltip", "Show the texture at half its size."), FSlateIcon(), Zoom50Action);
 
         FUIAction Zoom100Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 1.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom100Action", "100%"), LOCTEXT("Zoom100ActionHint", "Show the texture in its original size."), FSlateIcon(), Zoom100Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.100percent.name", "100%"), LOCTEXT("viewport.zoom.100percent.tooltip", "Show the texture in its original size."), FSlateIcon(), Zoom100Action);
 
         FUIAction Zoom200Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 2.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom200Action", "200%"), LOCTEXT("Zoom200ActionHint", "Show the texture at twice its size."), FSlateIcon(), Zoom200Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.200percent.name", "200%"), LOCTEXT("viewport.zoom.200percent.tooltip", "Show the texture at twice its size."), FSlateIcon(), Zoom200Action);
 
         FUIAction Zoom400Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 4.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom400Action", "400%"), LOCTEXT("Zoom400ActionHint", "Show the texture at four times its size."), FSlateIcon(), Zoom400Action);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.400percent.name", "400%"), LOCTEXT("viewport.zoom.400percent.tooltip", "Show the texture at four times its size."), FSlateIcon(), Zoom400Action);
 
         ZoomMenuBuilder.AddMenuSeparator();
 
@@ -72,7 +72,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
             FCanExecuteAction(),
             FIsActionChecked::CreateSP(this, &SOdysseyViewport::IsZoomMenuFitChecked)
             );
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("ZoomFitAction", "Scale To Fit"), LOCTEXT("ZoomFillActionHint", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton);
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.fit.name", "Scale To Fit"), LOCTEXT("viewport.zoom.fit.tooltip", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton);
     }
 
 
@@ -163,7 +163,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                     .VAlign(VAlign_Center)
                     [
                         SNew(STextBlock)
-                        .Text(LOCTEXT("RotationLabel", "Rotation: "))
+                        .Text(LOCTEXT("viewport.rotation", "Rotation: "))
                     ]
                 + SHorizontalBox::Slot()
                     .Padding(2.0f, 0.0f)
@@ -226,7 +226,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                     .VAlign(VAlign_Center)
                     [
                         SNew(STextBlock)
-                            .Text(LOCTEXT("ZoomLabel", "Zoom:"))
+                            .Text(LOCTEXT("viewport.zoom", "Zoom:"))
                     ]
 
                 + SHorizontalBox::Slot()
@@ -505,9 +505,9 @@ SOdysseyViewport::GetTextureInfosValue( ) const
 {
     UTexture* texture       = GetTexture();
     if (!texture)
-        return NSLOCTEXT("No Texture Provided","No Texture Provided", "No Texture Provided");
+        return LOCTEXT("viewport.no-texture-provided", "No Texture Provided");
 
-    return FText::Format( NSLOCTEXT("Texture Infos","Texture Infos","{0}x{1} px"), FText::AsNumber(texture->GetSurfaceWidth() ), FText::AsNumber(texture->GetSurfaceHeight() ));
+    return FText::Format( LOCTEXT("viewport.texture-dimensions","{0}x{1} px"), FText::AsNumber(texture->GetSurfaceWidth() ), FText::AsNumber(texture->GetSurfaceHeight() ));
 }
 
 

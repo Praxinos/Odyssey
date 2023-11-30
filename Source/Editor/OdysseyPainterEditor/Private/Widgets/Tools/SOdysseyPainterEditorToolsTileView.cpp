@@ -4,8 +4,6 @@
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Layout/SWrapBox.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPainterEditorToolsTileView"
-
 SOdysseyPainterEditorToolsTileView::~SOdysseyPainterEditorToolsTileView()
 {
 }
@@ -68,5 +66,3 @@ SOdysseyPainterEditorToolsTileView::IsToolChecked(UOdysseyPainterEditorTool* iTo
 {
     return iTool->IsActivated() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
-
-#undef LOCTEXT_NAMESPACE

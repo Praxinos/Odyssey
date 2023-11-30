@@ -7,9 +7,6 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyLeafWidget"
-
-
 /////////////////////////////////////////////////////
 // SOdysseyLeafWidget
 //--------------------------------------------------------------------------------------
@@ -202,7 +199,3 @@ SOdysseyLeafWidget::PaintInternalBuffer( int iReason ) const
 
     surface->Invalidate();
 }
-
-
-#undef LOCTEXT_NAMESPACE
-

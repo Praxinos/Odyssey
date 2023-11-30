@@ -22,7 +22,7 @@
 	#include "Mac/NSEventStylusInputInterface.h"
 #endif
 
-#define LOCTEXT_NAMESPACE "FOdysseyStylusInputModule"
+#define LOCTEXT_NAMESPACE "StylusInput"
 
 //---
 
@@ -40,8 +40,8 @@ public:
 		if (settingsModule)
 		{
 			settingsModule->RegisterSettings("Editor", "Plugins", "ILIADStylusInput"
-				, LOCTEXT("OdysseyPainterEditorSettingsName", "ILIAD Stylus Input")
-				, LOCTEXT("OdysseyPainterEditorSettingsDescription", "Configure the behaviour of stylus inputs in ILIAD.")
+				, LOCTEXT("settings.name", "ILIAD Stylus Input")
+				, LOCTEXT("settings.tooltip", "Configure the behaviour of stylus inputs in ILIAD.")
 				, GetMutableDefault<UOdysseyStylusInputSettings>());
 		}
 	}
@@ -86,8 +86,8 @@ void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 
 	TabManager->RegisterNomadTabSpawner(StylusInputDebugTabName,
 		FOnSpawnTab::CreateUObject(this, &UOdysseyStylusInputSubsystem::OnSpawnPluginTab))
-		.SetDisplayName(LOCTEXT("DebugTabTitle", "Stylus Input Debug"))
-		.SetTooltipText(LOCTEXT("DebugTabTooltip", "Debug panel to display current values of stylus inputs."))
+		.SetDisplayName(LOCTEXT("debug-tab.name", "Stylus Input Debug"))
+		.SetTooltipText(LOCTEXT("debug-tab.tooltip", "Debug panel to display current values of stylus inputs."))
 		.SetGroup(MenuStructure.GetDeveloperToolsMiscCategory());
 }
 

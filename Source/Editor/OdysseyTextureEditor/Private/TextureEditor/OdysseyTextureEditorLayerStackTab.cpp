@@ -18,7 +18,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 
 const FName&
@@ -37,7 +37,7 @@ FOdysseyTextureEditorLayerStackTab::~FOdysseyTextureEditorLayerStackTab()
 }
 
 FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditorExtension* iExtension)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyTextureEditorLayerStackTab", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
+	: FOdysseyEditorTab(LOCTEXT( "layerstack-tab.name", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
     , mExtension(iExtension)
 {
 }
@@ -118,7 +118,7 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
 {
     UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
 
-    FToolMenuSection& section = menu->AddSection("OdysseyTexture", LOCTEXT("OdysseyTexture", "Odyssey Texture"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
+    FToolMenuSection& section = menu->AddSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-section.name", "Odyssey Texture"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
     {
         section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
         section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
@@ -141,7 +141,7 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
     TArray< FString > filenames;
     bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
         FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
-        , LOCTEXT("TitleExportTexture", "Select Export Path & Name").ToString()
+        , LOCTEXT("export-texture-to-os.save-dialog.title", "Select Export Path & Name").ToString()
         , FPaths::ProjectDir()
         , currentTexture->GetName()
         , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
@@ -169,8 +169,8 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 
         if( !extensionFound )
         {
-            FText Title = LOCTEXT("TitleExtensionNotFound", "Invalid extension");
-            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("MessageExtensionNotFound", "The file extension or the file format is not supported"), &Title);
+            FText Title = LOCTEXT("export-texture-to-os.invalid-extension-dialog.title", "Invalid extension");
+            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("export-texture-to-os.invalid-extension-dialog.message", "The file extension or the file format is not supported"), &Title);
         }
         else
         {
@@ -244,10 +244,10 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
     TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
     UTexture* currentTexture = textureSource->GetTexture();
 
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures As Layers"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("import-textures-as-layers.transaction.import", "Import Textures As Layers"));
 
     FOpenAssetDialogConfig openAssetDialogConfig;
-    openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures As Layers" );
+    openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "import-textures-as-layers.open-asset-dialog.title", "Import Textures As Layers" );
     openAssetDialogConfig.DefaultPath = FPaths::GetPath(currentTexture->GetPathName() );
     openAssetDialogConfig.bAllowMultipleSelection = true;
     openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
@@ -288,7 +288,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
     UTexture* texture = textureSource->GetTexture();
 
     FSaveAssetDialogConfig saveAssetDialogConfig;
-    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ExportLayerDialogTitle", "Export Layers As Texture" );
+    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "export-layers-as-textures.save-asset-dialog.title", "Export Layers As Texture" );
     saveAssetDialogConfig.DefaultPath = FPaths::GetPath(texture->GetPathName() );
     saveAssetDialogConfig.DefaultAssetName = texture->GetName();
     saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
@@ -403,6 +403,10 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
     if ( !layerStack )
         return;
 
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.create-new-layer", "Add Layer"));
+#endif
+
     layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
 }
 
@@ -419,6 +423,10 @@ FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
     if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )
         return;
 
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.set-layer-opacity", "Change Layer Opacity"));
+#endif
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 

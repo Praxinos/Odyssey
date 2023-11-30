@@ -3,12 +3,12 @@
 
 #include "OdysseyPaletteEntryMaterial.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPaletteEntryMaterial"
+#define LOCTEXT_NAMESPACE "Palette"
 
 UOdysseyPaletteEntryMaterial::UOdysseyPaletteEntryMaterial()
 {
-    EntryTypeName = LOCTEXT("EntryTypeName", "Material Entry");
-    DefaultName = LOCTEXT("DefaultName", "Material");
+    EntryTypeName = LOCTEXT("entry-material.type", "Material Entry");
+    DefaultName = LOCTEXT("entry-material.default-name", "Material");
     Icon = *FOdysseyStyle::GetBrush("OdysseyPalette.EntryMaterial");
 }
 

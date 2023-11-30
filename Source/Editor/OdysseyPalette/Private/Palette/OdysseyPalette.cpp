@@ -6,8 +6,6 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPalette"
-
 UOdysseyPalette::UOdysseyPalette()
 {
     FString text = FString("Set0");
@@ -41,10 +39,6 @@ UOdysseyPaletteEntry* UOdysseyPalette::AddEntry(TSubclassOf<UOdysseyPaletteEntry
     if (!iParentEntry->CanHaveChildren || !ContainsEntry(iParentEntry))
         return nullptr;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Add Entry"));
-#endif
-
     //Create the entry
 	UOdysseyPaletteEntry* entry = CreateEntry(entryType);
     if (!entry)
@@ -62,9 +56,6 @@ void UOdysseyPalette::RemoveEntry(UOdysseyPaletteEntry* iEntry)
     if (!iEntry || !ContainsEntry(iEntry))
         return;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Remove Entries"));
-#endif
     RemoveEntriesFromHierarchy({ iEntry });
 }
 
@@ -81,10 +72,6 @@ void UOdysseyPalette::RemoveEntries(TArray<UOdysseyPaletteEntry*> iEntries)
     //No Layers
     if (iEntries.Num() <= 0)
         return;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Remove Entries"));
-#endif
 
     RemoveEntriesFromHierarchy(iEntries);
 }
@@ -116,10 +103,6 @@ UOdysseyPaletteEntry* UOdysseyPalette::DuplicateEntry(UOdysseyPaletteEntry* iEnt
     if(!iEntry || !ContainsEntry(iEntry))
         return nullptr;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Duplicate Entries"));
-#endif
-
     //Duplicate the entry
     UOdysseyPaletteEntry* entryDuplicate = CopyEntryInternal(iEntry, iEntry->Parent, iEntry->Parent->Children.Find(iEntry));
 
@@ -141,10 +124,6 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPalette::DuplicateEntries(TArray<UOdysseyP
     //No entry    
     if (iEntries.Num()<= 0)
         return entriesDuplicates;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Duplicate Entries"));
-#endif
 
     iEntries.Sort(
         [this](UOdysseyPaletteEntry& iEntryA, UOdysseyPaletteEntry& iEntryB)
@@ -195,10 +174,6 @@ UOdysseyPaletteEntry* UOdysseyPalette::CopyEntry(UOdysseyPaletteEntry* iEntry, U
     if (iParentEntry && (!iParentEntry->CanHaveChildren || !ContainsEntry(iParentEntry)) )
         return nullptr;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Copy Entries"));
-#endif
-
     //Duplicate the entry
     UOdysseyPaletteEntry* entryCopy = CopyEntryInternal(iEntry, iParentEntry, iIndexInParent);
     return entryCopy;
@@ -225,10 +200,6 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPalette::CopyEntries(TArray<UOdysseyPalett
     //No Layers
     if (iEntries.Num()<= 0)
         return entryCopies;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Copy Entries"));
-#endif
 
     iEntries.Sort(
         [this](UOdysseyPaletteEntry& iEntryA, UOdysseyPaletteEntry& iEntryB)
@@ -325,10 +296,6 @@ void UOdysseyPalette::MoveEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEnt
     if (iEntry->Parent == iParentEntry && oldIndex == iIndexInParent)
         return;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Move Entries"));
-#endif
-
     bool bChangeParent = iEntry->Parent != iParentEntry;
     
     if (bChangeParent)
@@ -399,10 +366,6 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
 	//No Entries
 	if ( iEntries.Num() <= 0 )
 		return;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("PaletteTransaction", "Move Entries"));
-#endif
 
     int index = FMath::Clamp(iIndexInParent, 0, iParentEntry->Children.Num());
     for (UOdysseyPaletteEntry* entry : iEntries)
@@ -628,5 +591,3 @@ void UOdysseyPalette::GetEntriesUniqueParents(TArray<UOdysseyPaletteEntry*> iEnt
         oParents.AddUnique(entry->Parent);
     }
 }
-
-#undef LOCTEXT_NAMESPACE

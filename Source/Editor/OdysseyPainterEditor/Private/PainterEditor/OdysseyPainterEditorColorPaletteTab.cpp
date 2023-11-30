@@ -6,7 +6,7 @@
 #include "SOdysseyPalette.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorPaletteTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorPaletteTab::StaticId()
@@ -24,7 +24,7 @@ FOdysseyPainterEditorPaletteTab::~FOdysseyPainterEditorPaletteTab()
 }
 
 FOdysseyPainterEditorPaletteTab::FOdysseyPainterEditorPaletteTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorPaletteTab", "Palette" ), FSlateIcon( "OdysseyStyle", "OdysseyPalette.PaletteTab" ))
+	: FOdysseyEditorTab(LOCTEXT( "palette-tab.name", "Palette" ), FSlateIcon( "OdysseyStyle", "OdysseyPalette.PaletteTab" ))
     , mEditor(iEditor)
     , mPaletteWidget(nullptr)
 {

@@ -8,7 +8,7 @@
 #include "Types/NavigationMetaData.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorTimelineTab"
+#define LOCTEXT_NAMESPACE "FlipbookEditor"
 
 const FName&
 FOdysseyFlipbookEditorTimelineTab::StaticId()
@@ -26,7 +26,7 @@ FOdysseyFlipbookEditorTimelineTab::~FOdysseyFlipbookEditorTimelineTab()
 }
 
 FOdysseyFlipbookEditorTimelineTab::FOdysseyFlipbookEditorTimelineTab(FOdysseyFlipbookEditorExtension* iExtension)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyFlipbookEditorTimelineTab", "Timeline" ),
+	: FOdysseyEditorTab(LOCTEXT( "timeline-tab.name", "Timeline" ),
                         FSlateIcon( "OdysseyStyle", "FlipbookEditor.Layers16" )) //TODO: Timeline Icon
     , mExtension(iExtension)
     , mTimeline(nullptr)

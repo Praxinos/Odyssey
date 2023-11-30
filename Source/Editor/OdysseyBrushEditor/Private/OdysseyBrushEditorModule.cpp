@@ -12,7 +12,7 @@
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "OdysseyBrush_ContentBrowserExtensions.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyBrushEditorModule"
+#define LOCTEXT_NAMESPACE "BrushEditor"
 
 //////////////////////////////////////////////////////////////////////////
 // FOdysseyBrushEditorModule
@@ -24,26 +24,18 @@ void FOdysseyBrushEditorModule::StartupModule()
     // Register the asset type
     IAssetTools&  AssetTools = FModuleManager::LoadModuleChecked< FAssetToolsModule >( "AssetTools" ).Get();
 
-    // Sub Menu Advanced Category
-    //EAssetTypeCategories::Type OdysseyBrushAssetCategoryBit = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("OdysseyBrush")), LOCTEXT("OdysseyBrushAssetCategory", "OdysseyBrush"));
     // Basic Category
-    EAssetTypeCategories::Type OdysseyBrushAssetCategoryBit = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "ILIAD" ) ), LOCTEXT( "IliadPainterAssetCategory", "ILIAD" ) );
+    EAssetTypeCategories::Type OdysseyBrushAssetCategoryBit = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "ILIAD" ) ), LOCTEXT( "asset-category.name", "ILIAD" ) );
 
     OdysseyBrushAssetTypeActions = MakeShareable( new  FAssetTypeActions_OdysseyBrush( OdysseyBrushAssetCategoryBit ) );
     AssetTools.RegisterAssetTypeActions( OdysseyBrushAssetTypeActions.ToSharedRef() );
 
-    // Register the thumbnail renderers
-    //UThumbnailManager::Get().RegisterCustomRenderer( UOdysseyBrush::StaticClass(), UOdysseyBrushThumbnailRenderer::StaticClass() );
     /////////////////
     
     if( !IsRunningCommandlet() )
     {
         FOdysseyBrushContentBrowserExtensions::InstallHooks();
     }
-
-    // Register internal SCS editor customizations
-    //RegisterSCSEditorCustomization("InstancedStaticMeshComponent", FOdysseySCSEditorCustomizationBuilder::CreateStatic(&FInstancedStaticMeshSCSEditorCustomization::MakeInstance));
-    //RegisterSCSEditorCustomization("HierarchicalInstancedStaticMeshComponent", FOdysseySCSEditorCustomizationBuilder::CreateStatic(&FInstancedStaticMeshSCSEditorCustomization::MakeInstance));
 }
 
 void FOdysseyBrushEditorModule::ShutdownModule()

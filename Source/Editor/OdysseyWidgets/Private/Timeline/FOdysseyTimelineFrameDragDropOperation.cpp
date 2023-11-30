@@ -3,12 +3,12 @@
 
 #include "FOdysseyTimelineFrameDragDropOperation.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTimeline"
+#define LOCTEXT_NAMESPACE "Widgets"
 
 FOdysseyTimelineFrameDragDropOperation::FOdysseyTimelineFrameDragDropOperation(TSharedPtr<SOdysseyTimelineFrame> iFrame, TSharedPtr<SOdysseyTimelineFrameList> iFrameList)
 	: mFrame(iFrame)
 	, mFrameList(iFrameList)
-    , mTransaction(LOCTEXT("MovedFramesInTimeline", "Reorder key frames"))
+    , mTransaction(LOCTEXT("timeline.drag-drop-operation.moved-frames-in-timeline", "Reorder key frames"))
 {
 	Construct();
 	

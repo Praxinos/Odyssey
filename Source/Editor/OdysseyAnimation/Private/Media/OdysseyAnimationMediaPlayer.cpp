@@ -6,8 +6,6 @@
 #include "IMediaTextureSample.h"
 #include "IMediaSamples.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationMediaPlayer"
-
 FOdysseyAnimationMediaPlayer::~FOdysseyAnimationMediaPlayer()
 {
 	Close();
@@ -223,6 +221,3 @@ FOdysseyAnimationMediaPlayer::Tick(float DeltaTime)
 		mCurrentDuration = duration;
 	}
 }
-
-#undef LOCTEXT_NAMESPACE
-

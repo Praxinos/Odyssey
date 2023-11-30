@@ -10,8 +10,6 @@
 #include "IDetailGroup.h"
 #include "OdysseyBrushAssetBase.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyBrushCustomization"
-
 class FOdysseyBrushDetails : public IDetailCustomization
 {
 public:
@@ -59,5 +57,3 @@ FOdysseyBrushCustomization::Register()
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
     PropertyModule.RegisterCustomClassLayout(UOdysseyBrushAssetBase::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyBrushDetails::MakeInstance));
 }
-
-#undef LOCTEXT_NAMESPACE

@@ -22,7 +22,7 @@
 #include "PainterEditor/OdysseyPainterEditorGUI.h"
 #include <ULIS>
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 /*-----------------------------------------------------------------------------
    FOdysseyPainterEditorModule
@@ -60,8 +60,8 @@ FOdysseyPainterEditorModule::RegisterSettings()
         return;
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyPainterEditor"
-                                        , LOCTEXT( "OdysseyPainterEditorSettingsName", "ILIAD Painter Editor" )
-                                        , LOCTEXT( "OdysseyPainterEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
+                                        , LOCTEXT( "settings.name", "ILIAD Painter Editor" )
+                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the ILIAD Editor." )
                                         , GetMutableDefault<UOdysseyPainterEditorSettings>() );
 }
 

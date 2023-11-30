@@ -6,8 +6,6 @@
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerImageRenderer.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureLayer"
-
 void
 UOdysseyTextureLayer::IsActivatedChanged()
 {
@@ -67,5 +65,3 @@ UOdysseyTextureLayer::GetImageRenderingRects() const
 
     return layerStack->GetImageRenderingRects();
 }
-
-#undef LOCTEXT_NAMESPACE

@@ -10,7 +10,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
 #include "Framework/Commands/GenericCommands.h"
 
-#define LOCTEXT_NAMESPACE "FOdysseyLayerStackShortcuts"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(TSharedPtr<SOdysseyAnimationLayerStackTreeView> iTreeView, UOdysseyAnimationLayerStack* iLayerStack, FOdysseyAnimationEditorTimeline* iTimelineContext)
     : mCommandList(MakeShared<FUICommandList>())
@@ -94,7 +94,7 @@ FOdysseyAnimationTimelineShortcuts::Action_Cut()
         return;
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Cut Frames"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.cut-frame", "Cut Frames"));
 #endif
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(layer, selectedFrames);
     FOdysseyClipboard::Get().SetData(clipboardData);
@@ -120,7 +120,7 @@ FOdysseyAnimationTimelineShortcuts::Action_Paste()
         return;
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Timeline", "Paste Frames"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.paste-frame", "Paste Frames"));
 #endif
 
     clipboardData->Paste(layer, layer->GetAnimation()->CurrentFrame);
@@ -153,7 +153,7 @@ FOdysseyAnimationTimelineShortcuts::Action_Delete()
         return;
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Remove Frames"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.remove-frame", "Remove Frames"));
 #endif
 
     FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
@@ -166,25 +166,6 @@ FOdysseyAnimationTimelineShortcuts::Action_Delete()
 void
 FOdysseyAnimationTimelineShortcuts::Action_StaggerCell()
 {
-    /* UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
-    if (!layer)
-        return;
-
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
-    FInt32Range selectedFrames = mTimelineContext->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
-        return;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("Layer", "Remove Frames"));
-#endif
-
-    FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
-    mutator.RemoveFrameRange(selectedFrames);
-    mutator.Commit(); */
 }
 
 bool
@@ -272,19 +253,6 @@ FOdysseyAnimationTimelineShortcuts::CanAction_Delete()
 bool
 FOdysseyAnimationTimelineShortcuts::CanAction_StaggerCell()
 {
-    /* UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
-    if (!layer)
-        return false;
-
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
-    if (!cellsContainer)
-        return false;
-
-    FInt32Range selectedFrames = mTimelineContext->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
-        return false;
-
-    return true; */
     return true;
 }
 

@@ -9,7 +9,7 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathStitchTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -125,7 +125,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                 removedVertexArray.push_back( vertexB );
 
                 // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("VectorPathStitchTool","Vector Path Stitch Tool"));
+                GEditor->BeginTransaction(LOCTEXT("vector-path-stitch-tool.transaction.stitch-path","Vector Path Stitch Tool"));
                 if( GUndo )
                 {
                     FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathStitch( iScene

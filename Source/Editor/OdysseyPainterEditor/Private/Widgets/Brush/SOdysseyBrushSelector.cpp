@@ -3,9 +3,6 @@
 
 #include "Widgets/Brush/SOdysseyBrushSelector.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyBrushSelector"
-
-
 /////////////////////////////////////////////////////
 // SOdysseyBrushSelector
 //--------------------------------------------------------------------------------------
@@ -60,6 +57,3 @@ void SOdysseyBrushSelector::OnObjectChanged( const FAssetData& AssetData )
 
     OnBrushChanged.ExecuteIfBound( brush );
 }
-
-
-#undef LOCTEXT_NAMESPACE

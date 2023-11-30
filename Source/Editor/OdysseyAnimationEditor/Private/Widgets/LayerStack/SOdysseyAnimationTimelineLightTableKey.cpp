@@ -5,8 +5,6 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationTimelineLightTableKey"
-
 SOdysseyAnimationTimelineLightTableKey::SOdysseyAnimationTimelineLightTableKey()
 	: mLayer(nullptr)
 	, mKeyIndex(INDEX_NONE)
@@ -152,5 +150,3 @@ SOdysseyAnimationTimelineLightTableKey::ComputeDesiredSize(float iLayoutScaleMul
 {
 	return FVector2D(mDesiredWidth, mDesiredHeight);
 }
-
-#undef LOCTEXT_NAMESPACE

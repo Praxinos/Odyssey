@@ -5,7 +5,7 @@
 #include "Command/OdysseyCommandMacros.h"
 #include "OdysseyStyleSet.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorCommands"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 namespace
 {
@@ -16,12 +16,12 @@ namespace
 }
 
 FOdysseyAnimationEditorCommands::FOdysseyAnimationEditorCommands()
-    : TCommands<FOdysseyAnimationEditorCommands>( "OdysseyAnimationEditorCommands", NSLOCTEXT( "Contexts", "IliadAnimationEditor", "Iliad Texture Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
+    : TCommands<FOdysseyAnimationEditorCommands>( "OdysseyAnimationEditorCommands", LOCTEXT( "editor-commands.name", "Iliad Texture Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
-    AddBundle(ImportExportShortcuts, LOCTEXT("ImportExportShortcutsCategory", "Import & Export Shortcuts"));
-    AddBundle(TimelineShortcuts, LOCTEXT("TimelineShortcutsCategory", "Timeline Shortcuts"));
-    AddBundle(LayersShortcuts, LOCTEXT("LayersShortcutsCategory", "Layers Shortcuts"));
-    AddBundle(CellsShortcuts, LOCTEXT("CellsShortcutsCategory", "Cells Shortcuts"));
+    AddBundle(ImportExportShortcuts, LOCTEXT("editor-commands.category.import-export-shortcuts", "Import & Export Shortcuts"));
+    AddBundle(TimelineShortcuts, LOCTEXT("editor-commands.category.timeline-shortcuts", "Timeline Shortcuts"));
+    AddBundle(LayersShortcuts, LOCTEXT("editor-commands.category.layers-shortcuts", "Layers Shortcuts"));
+    AddBundle(CellsShortcuts, LOCTEXT("editor-commands.category.cells-shortcuts", "Cells Shortcuts"));
 }
 
 void

@@ -10,7 +10,7 @@
 
 #include <ULIS>
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorHUDTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorHUDTab::StaticId()
@@ -28,7 +28,7 @@ FOdysseyPainterEditorHUDTab::~FOdysseyPainterEditorHUDTab()
 }
 
 FOdysseyPainterEditorHUDTab::FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorHUDTab", "HUD" ), FSlateIcon( "OdysseyStyle", "PainterEditor.HUD16" ))
+	: FOdysseyEditorTab(LOCTEXT( "hud-tab.name", "HUD" ), FSlateIcon( "OdysseyStyle", "PainterEditor.HUD16" ))
     , mEditor(iEditor)
 {
 }

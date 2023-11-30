@@ -3,8 +3,6 @@
 
 #include "OdysseyAnimationTextureModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationTextureModule"
-
 void FOdysseyAnimationTextureModule::StartupModule()
 {
 }
@@ -14,5 +12,3 @@ void FOdysseyAnimationTextureModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE(FOdysseyAnimationTextureModule, OdysseyAnimationTexture);
-
-#undef LOCTEXT_NAMESPACE

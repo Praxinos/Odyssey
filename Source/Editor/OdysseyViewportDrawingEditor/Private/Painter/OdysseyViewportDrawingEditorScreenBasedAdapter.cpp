@@ -13,9 +13,6 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
-
-#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorScreenBasedAdapter"
-
 FOdysseyViewportDrawingEditorScreenBasedAdapter::~FOdysseyViewportDrawingEditorScreenBasedAdapter()
 {
 }
@@ -659,5 +656,3 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::FinishPainting()
     if ( mPaintingTexture2DRenderTarget )
         FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
 }
-
-#undef LOCTEXT_NAMESPACE

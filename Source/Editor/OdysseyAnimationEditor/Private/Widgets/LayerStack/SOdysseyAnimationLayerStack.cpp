@@ -9,7 +9,7 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerStack"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationLayerStack)
 void
@@ -86,7 +86,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
             .AdditionalColumns(
                 {
                     SHeaderRow::Column("Timeline")
-                    .DefaultLabel(LOCTEXT("", ""))
+                    .DefaultLabel(FText())
                     .VAlignCell(VAlign_Fill)
                     .HAlignCell(HAlign_Fill)
                     [
@@ -113,7 +113,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
          * 
          */
         widget = SNew(STextBlock)
-        .Text(LOCTEXT("EmptyLayerStackInstructions", "No Timeline can be displayed"));
+        .Text(LOCTEXT("timeline.nothing-to-display", "No Timeline can be displayed"));
     }
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());
@@ -208,33 +208,18 @@ SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
     {
         UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
         TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, mExtension->Animation()->Width(), mExtension->Animation()->Height(), mExtension->Animation()->Format());
-
-#ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Add Frame"));
-#endif
         FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
         mutator.Add({ cell });
         mutator.Commit();
-
-        return;
     }
-
-    if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
+    else if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
     {
         UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
         TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(layer, 1, mExtension->Animation()->Width(), mExtension->Animation()->Height());
-
-#ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Vector", "Add Frame"));
-#endif
         FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
         mutator.Add({ cell });
         mutator.Commit();
-
-        return;
     }
-
-    //TODO: Vector Layer
 }
 
 float

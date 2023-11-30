@@ -6,9 +6,15 @@
 #include "OdysseyStyleSet.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyTextureLayerImageRasterRow"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
+SOdysseyTextureLayerImageRasterRow::SOdysseyTextureLayerImageRasterRow()
+    : mSetOpacityTransactionName(LOCTEXT("layer-image-raster.transaction.set-opacity", "Change Layer Opacity"))
+{
+    
+}
+
 void SOdysseyTextureLayerImageRasterRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyTextureLayerImageRaster* iTextureLayerImageRaster)
 {
     ensure(iTextureLayerImageRaster);
@@ -28,9 +34,9 @@ void SOdysseyTextureLayerImageRasterRow::Construct(const FArguments& InArgs, con
 TSharedRef<SWidget>
 SOdysseyTextureLayerImageRasterRow::GenerateHeaderWidget()
 {
+    
     const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.AlphaLockedToggle");
 
-	TSharedRef<SWidget> defaultWidget = SOdysseyLayerRow::GenerateHeaderWidget();
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
@@ -44,18 +50,8 @@ SOdysseyTextureLayerImageRasterRow::GenerateHeaderWidget()
         .VAlign(VAlign_Center)
         .AutoWidth()
         [
-            //AlphaLock
-            SNew(SCheckBox)
-            .Style(alphaLockedToggleStyle)
-            .OnCheckStateChanged(this, &SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
-            .IsChecked(this, &SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked)
-        ]
-        +SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
-        .VAlign(VAlign_Center)
-        .AutoWidth()
-        [
             SNew(SNumericEntryBox<int>)
+            .Visibility(this, &SOdysseyTextureLayerImageRasterRow::GetCollapsedOpacityVisibility)
             .Value_Lambda([this]() { return (int)(mTextureLayerImageRaster->Opacity * 100.f + 0.5f);})
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
@@ -69,6 +65,56 @@ SOdysseyTextureLayerImageRasterRow::GenerateHeaderWidget()
             .OnBeginSliderMovement(this, &SOdysseyTextureLayerImageRasterRow::OnOpacityBeginSliderMovement)
             .OnEndSliderMovement(this, &SOdysseyTextureLayerImageRasterRow::OnOpacityEndSliderMovement)
             //.MinDesiredValueWidth  
+        ]
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
+        .VAlign(VAlign_Center)
+        .AutoWidth()
+        [
+            //AlphaLock
+            SNew(SCheckBox)
+            .Style(alphaLockedToggleStyle)
+            .OnCheckStateChanged(this, &SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
+            .IsChecked(this, &SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked)
+        ];
+}
+
+TSharedRef<SWidget>
+SOdysseyTextureLayerImageRasterRow::GenerateOptionsWidget()
+{
+	return SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0, 2.f, 0, 0))
+        .AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            +SHorizontalBox::Slot()
+            .Padding(FMargin(0, 0, 1.f, 0))
+            [
+                SNew(SNumericEntryBox<int>)
+                .Value_Lambda([this]() { return (int)(mTextureLayerImageRaster->Opacity * 100.f + 0.5f);})
+                .AllowSpin(true)
+                .ShiftMouseMovePixelPerDelta(10)
+                .Delta(1)
+                .MinValue(0)
+                .MinSliderValue(0)
+                .MaxValue(100)
+                .MaxSliderValue(100)
+                .OnValueChanged(this, &SOdysseyTextureLayerImageRasterRow::OnOpacityValueChanged)
+                .OnValueCommitted(this, &SOdysseyTextureLayerImageRasterRow::OnOpacityValueCommitted)
+                .OnBeginSliderMovement(this, &SOdysseyTextureLayerImageRasterRow::OnOpacityBeginSliderMovement)
+                .OnEndSliderMovement(this, &SOdysseyTextureLayerImageRasterRow::OnOpacityEndSliderMovement)
+                //.MinDesiredValueWidth  
+            ]
+            +SHorizontalBox::Slot()
+            .Padding(FMargin(1.f, 0, 0, 0))
+            .VAlign(VAlign_Center)
+            [
+                SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+                .CurrentValue_Lambda([this](){ return (int32)mTextureLayerImageRaster->BlendMode;})
+                .ContentPadding(FMargin(0))
+                .OnEnumSelectionChanged(this, &SOdysseyTextureLayerImageRasterRow::OnBlendModeComboBoxChanged)
+            ]
         ];
 }
 
@@ -82,7 +128,7 @@ void
 SOdysseyTextureLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
@@ -96,7 +142,7 @@ void
 SOdysseyTextureLayerImageRasterRow::OnOpacityBeginSliderMovement()
 {
     //Creating a transaction here manages entering a value using slider
-    GEditor->BeginTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    GEditor->BeginTransaction(mSetOpacityTransactionName);
 }
 
 void
@@ -111,31 +157,18 @@ SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 	return mTextureLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
-TSharedRef<SWidget>
-SOdysseyTextureLayerImageRasterRow::GenerateOptionsWidget()
-{
-	return SNew(SHorizontalBox)
-        +SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
-        [
-            SNew(STextBlock)
-            .Text(LOCTEXT("OdysseyLayerImageRasterBlendingMode", "Blending Mode"))
-        ]
-        +SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
-        [
-            SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-            .CurrentValue_Lambda([this](){ return (int32)mTextureLayerImageRaster->BlendMode;})
-            .OnEnumSelectionChanged(this, &SOdysseyTextureLayerImageRasterRow::OnBlendModeComboBoxChanged)
-        ];
-}
-
 void
 SOdysseyTextureLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer BlendMode"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-raster.transaction.set-blend-mode", "Change Layer BlendMode"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, "BlendMode", iValue);
+}
+
+EVisibility
+SOdysseyTextureLayerImageRasterRow::GetCollapsedOpacityVisibility() const
+{
+    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -53,7 +53,7 @@
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 
-#define LOCTEXT_NAMESPACE "FOdysseyPainterEditor"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditor
@@ -668,7 +668,7 @@ FOdysseyPainterEditor::BringForward( FOdysseyVectorGroupPaint* iScene )
     if( selectedObject )
     {
         // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("BringForward", "Bring forward"));
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.bring-forward", "Bring forward"));
         if( GUndo )
         {
            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBringForward( iScene, selectedObject );
@@ -698,7 +698,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyVectorGroupPaint* iScene )
     if( selectedObject )
     {
         // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("SendBackward", "Send backward"));
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.send-backward", "Send backward"));
         if( GUndo )
         {
            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSendBackward( iScene, selectedObject );
@@ -730,7 +730,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorGroupPaint* iScene )
 
     // Backup before, for undoing
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("ApplyTransformations", "Apply Transformations"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.apply-transformations", "Apply Transformations"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoApplyTransformations( iScene, objectList );
@@ -776,7 +776,7 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyVectorGroupPaint* iScene )
     if( paintGroup )
     {
         // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("GroupPaint", "Group Paint"));
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.make-group-paint", "Group Paint"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoGroup( iScene
@@ -819,7 +819,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorGroupPaint* iScene )
             std::list<FOdysseyVectorObject*> childrenList = group->GetChildrenList();
 
             // needed for undos
-            GEditor->BeginTransaction(LOCTEXT("Ungroup", "Ungroup"));
+            GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.ungroup", "Ungroup"));
             if( GUndo )
             {
                 FOdysseyVectorUndo* undo = new FOdysseyVectorUndoUngroup( iScene, group );
@@ -867,7 +867,7 @@ FOdysseyPainterEditor::Group( FOdysseyVectorGroupPaint* iScene )
     if( group )
     {
         // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("Group", "group"));
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.group", "Group"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoGroup( iScene
@@ -904,7 +904,7 @@ FOdysseyPainterEditor::SelectAllPoints( FOdysseyVectorGroupPaint* iScene )
     vectorEngine->GetFocusedObjectList( objectList );
 
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("SellectAllPoints","Sellect All Points"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.select-all-points","Select All Points"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList );
@@ -945,7 +945,7 @@ FOdysseyPainterEditor::SelectAllObjects( FOdysseyVectorGroupPaint* iScene )
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("SelectAll", "Select All"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.select-all-objects", "Select All"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
@@ -970,7 +970,7 @@ FOdysseyPainterEditor::ResetView( FOdysseyVectorGroupPaint* iScene )
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("ResetView", "Reset view"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-view", "Reset view"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
@@ -1029,7 +1029,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorGroupPaint* iScene )
         } );
 
     //------------- undo ----------------//
-    GEditor->BeginTransaction(LOCTEXT("UnalignPointSelection","Unalign Point Selection"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.unalign-point-selection","Unalign Point Selection"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, unalignedVertexArray );
@@ -1094,7 +1094,7 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorGroupPaint* iScene )
         } );
 
     //------------- undo ----------------//
-    GEditor->BeginTransaction(LOCTEXT("AlignPointSelection","Align Point Selection"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.align-point-selection","Align Point Selection"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, alignedVertexArray );
@@ -1170,7 +1170,7 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorGroupPaint* iScene )
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
 
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("DeletePointSelection","Delete Point Selection"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-point-selection","Delete Point Selection"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
@@ -1206,7 +1206,7 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyVectorGroupPaint* iScene )
     vectorEngine->ClearObjectSelection();
 
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("DeleteObjects", "Delete Objects"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-objects", "Delete Objects"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoRemoveObjects( iScene
@@ -1236,7 +1236,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorGroupPaint* iScene )
     vectorEngine->GetFocusedAncestorList( objectList );
  
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("FlipHorizontal", "Flip Horizontal"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.flip-horizontal", "Flip Horizontal"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList );
@@ -1266,7 +1266,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyVectorGroupPaint* iScene )
     vectorEngine->GetFocusedAncestorList( objectList );
 
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("FlipVertical", "Flip Vertical"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.flip-vertical", "Flip Vertical"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList );
@@ -1325,7 +1325,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyVectorGroupPaint* iScene )
     }
 
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("ClearColoring", "Clear Coloring"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.clear-coloring", "Clear Coloring"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, bucketArray );
@@ -1357,7 +1357,7 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyVectorBucket* iBucket )
         paintGroup->RemoveBucket( iBucket );
 
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("DeleteBucket","Delete Bucket"));
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-bucket","Delete Bucket"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( scene, iBucket );
@@ -1380,7 +1380,7 @@ SetBucketPropagation( FOdysseyVectorBucket* iBucket, bool iPropagate )
     FOdysseyVectorGroupPaint* scene = ownerObject->GetScene();
 
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("PropagateBucket","Propagate Bucket"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.propagate-bucket","Propagate Bucket"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( scene, iBucket );
@@ -1459,7 +1459,7 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyVectorGroupPaint* iScene )
 
     // This undo must be set before association with the new parent object
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("DefaultTool","Paste"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.paste-objects","Paste"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, pastedObjectList ) );
@@ -1538,7 +1538,7 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyVectorGroupPaint* iScene
             removedVertexArray.push_back( iVertexB );
 
             // needed for valid GUndo pointer
-            GEditor->BeginTransaction(LOCTEXT("VectorPathStitchTool","Vector Path Stitch Tool"));
+            GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.stitch-vertices","Vector Path Stitch Tool"));
             if( GUndo )
             {
                 FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathStitch( iScene

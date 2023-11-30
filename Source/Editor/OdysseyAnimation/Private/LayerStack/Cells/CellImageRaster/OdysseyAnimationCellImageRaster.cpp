@@ -11,8 +11,6 @@
 #include "Misc/OdysseyDuplicate.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 
-#define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageRaster"
-
 TSharedRef<FOdysseyAnimationCellImageRaster>
 FOdysseyAnimationCellImageRaster::Create(UOdysseyAnimationLayerImageRaster* iLayer, int iLength, int iWidth, int iHeight, ::ULIS::eFormat iFormat)
 {
@@ -250,5 +248,3 @@ FOdysseyAnimationCellImageRaster::CreateCellFromFrame(uint32 iFrameIndex) const
     //Create a new raster cell from the given block
     return FOdysseyAnimationCellImageRaster::Create(GetLayer(), 1, block);
 }
-
-#undef LOCTEXT_NAMESPACE

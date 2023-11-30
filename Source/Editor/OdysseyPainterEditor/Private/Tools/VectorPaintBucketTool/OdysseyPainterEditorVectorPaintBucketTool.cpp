@@ -13,7 +13,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorBucketView.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPaintBucketTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -97,7 +97,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVectorRotateBucket( FOdys
                                                                          , FOdysseyVectorBucket* iBucket )
 {
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPaintBucketTool","Paint Bucket"));
+    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.rotate-bucket","Paint Bucket"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
@@ -140,7 +140,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                 {
                     case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_BUCKET :
                         // needed for valid GUndo pointer
-                        GEditor->BeginTransaction(LOCTEXT("VectorPaintBucketTool","Paint Bucket"));
+                        GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.move-bucket","Paint Bucket"));
                         if( GUndo )
                         {
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedBucket );
@@ -406,7 +406,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     }
 
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPaintBucketTool","Paint Bucket"));
+    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.create-bucket","Paint Bucket"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
@@ -437,7 +437,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorRemoveBucket( FOdysse
     }
 
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPaintBucketTool","Paint Bucket"));
+    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.remove-bucket","Paint Bucket"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, iBucket );
@@ -453,7 +453,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorPropagateBucket( FOdy
                                                                           , bool iPropagate )
 {
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPaintBucketTool","Paint Bucket"));
+    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.propagate-bucket","Paint Bucket"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
@@ -470,7 +470,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorColorBucket( FOdyssey
                                                                       , FOdysseyVectorBucket* iBucket )
 {
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPaintBucketTool","Paint Bucket"));
+    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.color-bucket","Paint Bucket"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
@@ -487,7 +487,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorClearBucket( FOdyssey
                                                                       , FOdysseyVectorBucket* iBucket )
 {
     // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("VectorPaintBucketTool","Paint Bucket"));
+    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.clear-bucket","Paint Bucket"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
@@ -555,33 +555,33 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
         iMenu.BeginSection("Context");
         {
             iMenu.AddMenuEntry(
-                LOCTEXT("DeleteBucket", "Delete Bucket")
-              , LOCTEXT("DeleteBucket", "Delete Bucket")
+                LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.name", "Delete Bucket")
+              , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.tooltip", "Delete Bucket")
               , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
               , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, mPickedBucket )));
             iMenu.AddMenuEntry(
-                LOCTEXT("PropagateBucket", "Propagate Bucket")
-              , LOCTEXT("PropagateBucket", "Propagate Bucket")
+                LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.name", "Propagate Bucket")
+              , LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip", "Propagate Bucket")
               , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
               , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, mPickedBucket )));
             iMenu.AddMenuEntry(
-                LOCTEXT("UnpropagateBucket", "Unpropagate Bucket")
-              , LOCTEXT("UnpropagateBucket", "Unpropagate Bucket")
+                LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.name", "Unpropagate Bucket")
+              , LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip", "Unpropagate Bucket")
               , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
               , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, mPickedBucket )));
             iMenu.AddMenuEntry(
-                LOCTEXT("CopyBucketParam", "Copy Bucket Param")
-              , LOCTEXT("CopyBucketParam", "Copy Bucket Param")
+                LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.name", "Copy Bucket Param")
+              , LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.tooltip", "Copy Bucket Param")
               , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::CopyBucketParam, mPickedBucket )));
             iMenu.AddMenuEntry(
-              LOCTEXT("PasteBucketParam", "Paste Bucket Param")
-              , LOCTEXT("PasteBucketParam", "Paste Bucket Param")
+              LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.name", "Paste Bucket Param")
+              , LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.tooltip", "Paste Bucket Param")
               , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam, mPickedBucket )));
             iMenu.AddMenuEntry(
-                LOCTEXT("BucketProperties", "Bucket properties")
-              , LOCTEXT("BucketProperties", "Bucket Properties")
+                LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.name", "Bucket properties")
+              , LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.tooltip", "Bucket Properties")
               , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties, GetEditor(), mPickedBucket )));
         }

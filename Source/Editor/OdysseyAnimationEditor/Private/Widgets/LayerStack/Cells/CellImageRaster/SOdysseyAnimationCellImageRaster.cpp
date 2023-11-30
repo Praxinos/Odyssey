@@ -3,11 +3,7 @@
 
 #include "Widgets/LayerStack/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationCellImageRaster"
-
 void
 SOdysseyAnimationCellImageRaster::Construct(const FArguments& iArgs)
 {
 }
-
-#undef LOCTEXT_NAMESPACE

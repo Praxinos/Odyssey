@@ -10,7 +10,7 @@
 class FOdysseyViewportDrawingEditorCommands : public TCommands<FOdysseyViewportDrawingEditorCommands>
 {
 public:
-	FOdysseyViewportDrawingEditorCommands() : TCommands<FOdysseyViewportDrawingEditorCommands> ( "OdysseyViewportDrawingEditMode", NSLOCTEXT("Contexts", "OdysseyViewportDrawingEditMode", "Odyssey Viewport Drawing Edit Mode"), NAME_None, FOdysseyStyle::GetStyleSetName()) {}
+	FOdysseyViewportDrawingEditorCommands();
 
 	/**
 	* Initialize commands

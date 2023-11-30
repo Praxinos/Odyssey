@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 #include "Proxies/OdysseyBrushRect.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyBrushRect"
 /////////////////////////////////////////////////////
 // Odyssey Brush Rect
 
@@ -134,5 +133,3 @@ UOdysseyBrushRectFunctionLibrary::BreakToXYWH(FOdysseyBrushRect Rectangle, int& 
     Width = rect.w;
     Height = rect.h;
 }
-
-#undef LOCTEXT_NAMESPACE

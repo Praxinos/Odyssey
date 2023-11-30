@@ -5,10 +5,10 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Misc/ScopedSlowTask.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyCustomLayer"
-
+#define LOCTEXT_NAMESPACE "LayerStack"
+/*
 #if WITH_EDITOR
-void
+ void
 UOdysseyCustomLayer::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const
 {
 	Super::GetAssetRegistryTags(OutTags);
@@ -72,7 +72,7 @@ UOdysseyCustomLayer::LoadClassFromAssetData(const FAssetData& AssetData)
     UObject* LoadedAsset = AssetData.FastGetAsset();
     if (!LoadedAsset)
     {
-        FScopedSlowTask SlowTask(1.f, FText::Format(LOCTEXT("LoadingClass", "Loading asset {0}"), FText::FromName(AssetData.AssetName)));
+        FScopedSlowTask SlowTask(1.f, FText::Format(LOCTEXT("custom-layer.loading-assets-progressbar", "Loading asset {0}"), FText::FromName(AssetData.AssetName)));
         SlowTask.MakeDialogDelayed(1.f);
 
         LoadedAsset = AssetData.GetAsset();
@@ -92,6 +92,6 @@ UOdysseyCustomLayer::LoadClassFromAssetData(const FAssetData& AssetData)
         return Blueprint->GeneratedClass;
     }
     return nullptr;
-}
+} */
 
 #undef LOCTEXT_NAMESPACE

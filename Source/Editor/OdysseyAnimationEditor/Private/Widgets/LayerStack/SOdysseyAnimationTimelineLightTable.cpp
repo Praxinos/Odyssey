@@ -5,8 +5,6 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationTimelineLightTable"
-
 SOdysseyAnimationTimelineLightTable::SOdysseyAnimationTimelineLightTable()
 	: mLayer(nullptr)
 	, mExtension(nullptr)
@@ -232,5 +230,3 @@ SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated(int iCellOffset
 {
 	return mLayer->GetLightTable()->GetKeyIsActivated(iCellOffset);
 }
-
-#undef LOCTEXT_NAMESPACE

@@ -21,6 +21,8 @@ public:
 
 public:
     // Construction / Destruction
+    SOdysseyAnimationLayerImageRasterRow();
+
     void Construct(
         const FArguments& iArgs,
         const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
@@ -48,4 +50,5 @@ private:
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
+    FText mSetOpacityTransactionName;
 };

@@ -4,8 +4,6 @@
 #include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "ISinglePropertyView.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPainterEditorVectorEditionMode"
-
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorVectorEditionMode
 //--------------------------------------------------------------------------------------
@@ -93,6 +91,3 @@ SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags( ECheckBoxState iN
         vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 }
-
-#undef LOCTEXT_NAMESPACE
-

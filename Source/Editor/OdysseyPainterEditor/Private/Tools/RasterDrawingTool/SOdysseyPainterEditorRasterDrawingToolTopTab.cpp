@@ -6,7 +6,7 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Widgets/Layout/SUniformWrapPanel.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterDrawingToolTopTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorRasterDrawingToolTopTab
@@ -99,7 +99,7 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArg
             [
                 SNew( SButton )
                 .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-                .ToolTipText( LOCTEXT("EraserButton", "Switch the current tool to Eraser mode.") )
+                .ToolTipText( LOCTEXT("raster-drawing-tool.top-tab.eraser", "Switch the current tool to Eraser mode.") )
                 .VAlign( VAlign_Center )
                 .ContentPadding( FMargin( 0.0, 0.0 ) )
                 .OnClicked( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::OnEraserButtonClicked )

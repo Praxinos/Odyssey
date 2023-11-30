@@ -10,7 +10,7 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyTextureLayerFolder"
+#define LOCTEXT_NAMESPACE "Texture"
 
 UOdysseyTextureLayerFolder::FOnBlendModeChanged&
 UOdysseyTextureLayerFolder::OnBlendModeChanged()
@@ -28,8 +28,8 @@ UOdysseyTextureLayerFolder::OnOpacityChanged()
 
 UOdysseyTextureLayerFolder::UOdysseyTextureLayerFolder()
 {
-	LayerTypeName = LOCTEXT("LayerTypeName", "Folder Layer");
-    DefaultName = LOCTEXT("DefaultName", "Folder");
+	LayerTypeName = LOCTEXT("layer-folder.type", "Folder Layer");
+    DefaultName = LOCTEXT("layer-folder.default-name", "Folder");
     Icon = *FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderClosed" );
     IconExpanded = *FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderOpen" );
     CanHaveChildren = true;

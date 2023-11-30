@@ -6,7 +6,7 @@
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolOptionsTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorToolOptionsTab::StaticId()
@@ -24,7 +24,7 @@ FOdysseyPainterEditorToolOptionsTab::~FOdysseyPainterEditorToolOptionsTab()
 }
 
 FOdysseyPainterEditorToolOptionsTab::FOdysseyPainterEditorToolOptionsTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorToolOptionsTab", "Tool Options" ), FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters16" ))
+	: FOdysseyEditorTab(LOCTEXT( "tool-options-tab.name", "Tool Options" ), FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters16" ))
     , mEditor(iEditor)
 {
 }

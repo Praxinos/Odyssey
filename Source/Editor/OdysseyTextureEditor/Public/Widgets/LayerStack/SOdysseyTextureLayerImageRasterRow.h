@@ -19,6 +19,7 @@ public:
 
 public:
     // Construction / Destruction
+    SOdysseyTextureLayerImageRasterRow();
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, class UOdysseyTextureLayerImageRaster* iTextureLayerImageRaster);
     
 private:
@@ -26,6 +27,7 @@ private:
     virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
     void OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsAlphaLockedIsChecked() const;
+    EVisibility GetCollapsedOpacityVisibility() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
@@ -36,4 +38,5 @@ private:
 
 private:
     class UOdysseyTextureLayerImageRaster* mTextureLayerImageRaster;
+    FText mSetOpacityTransactionName;
 };

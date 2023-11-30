@@ -4,8 +4,6 @@
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterSelection.h"
 #include "GeomTools.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterSelection"
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterSelection::~UOdysseyPainterEditorRasterSelection()
@@ -175,5 +173,3 @@ void UOdysseyPainterEditorRasterSelection::ClearBlock(TSharedPtr<::ULIS::FBlock,
 
     ctx.Finish();
 }
-
-#undef LOCTEXT_NAMESPACE

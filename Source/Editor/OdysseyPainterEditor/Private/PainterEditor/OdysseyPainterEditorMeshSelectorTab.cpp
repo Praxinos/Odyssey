@@ -6,7 +6,7 @@
 #include "Mesh/SOdysseyMeshSelector.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorMeshSelectorTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorMeshSelectorTab::StaticId()
@@ -24,7 +24,7 @@ FOdysseyPainterEditorMeshSelectorTab::~FOdysseyPainterEditorMeshSelectorTab()
 }
 
 FOdysseyPainterEditorMeshSelectorTab::FOdysseyPainterEditorMeshSelectorTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorMeshSelectorTab", "Mesh Selector" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Mesh16" ))
+	: FOdysseyEditorTab(LOCTEXT( "mesh-selector-tab.name", "Mesh Selector" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Mesh16" ))
     , mEditor(iEditor)
 {
 }

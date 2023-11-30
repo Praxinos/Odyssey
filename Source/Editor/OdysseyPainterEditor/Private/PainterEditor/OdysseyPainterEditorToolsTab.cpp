@@ -8,7 +8,7 @@
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Views/STileView.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolsTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorToolsTab::StaticId()
@@ -26,7 +26,7 @@ FOdysseyPainterEditorToolsTab::~FOdysseyPainterEditorToolsTab()
 }
 
 FOdysseyPainterEditorToolsTab::FOdysseyPainterEditorToolsTab(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorToolsTab", "Tools" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
+    : FOdysseyEditorTab(LOCTEXT( "tools-tab.name", "Tools" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
 {
 }

@@ -3,9 +3,6 @@
 
 #include "FOdysseyPalette.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPalette"
-
-
 /////////////////////////////////////////////////////
 // FOdysseyMeshSelector
 //--------------------------------------------------------------------------------------
@@ -32,8 +29,3 @@ void FOdysseyPalette::SetPalette(UOdysseyPalette* iColorPalette)
 {
     mPalette = iColorPalette;
 }
-
-//CALLBACKS -------------------------------------------
-
-
-#undef LOCTEXT_NAMESPACE

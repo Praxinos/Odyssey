@@ -17,7 +17,7 @@
 #include "EditorWidgetsModule.h"
 #include "Interfaces/IMainFrameModule.h"
 
-#define LOCTEXT_NAMESPACE "DiscoveringAssetsDialog"
+#define LOCTEXT_NAMESPACE "ContentBrowserExtension"
 
 SOdysseyDiscoveringAssetsDialog::~SOdysseyDiscoveringAssetsDialog()
 {
@@ -57,7 +57,7 @@ void SOdysseyDiscoveringAssetsDialog::Construct( const FArguments& iInArgs )
                 .HAlign(HAlign_Center)
                 [
                     SNew(STextBlock)
-                    .Text(LOCTEXT("DiscoveringAssets", "Please wait while assets are being discovered."))
+                    .Text(LOCTEXT("discovering-assets-window.wait", "Please wait while assets are being discovered."))
                 ]
 
                 +SVerticalBox::Slot()
@@ -76,7 +76,7 @@ void SOdysseyDiscoveringAssetsDialog::Construct( const FArguments& iInArgs )
             [
                 SNew(SButton)
                 .OnClicked(this, &SOdysseyDiscoveringAssetsDialog::CancelClicked)
-                .Text(LOCTEXT("CancelButton", "Cancel"))
+                .Text(LOCTEXT("discovering-assets-window.cancel", "Cancel"))
             ]
         ]
     ];
@@ -96,7 +96,7 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SOdysseyDiscoveringAssetsDialog::OpenDiscoveringAssetsDialog(const FOnAssetsDiscovered& iInOnAssetsDiscovered)
 {
     TSharedRef<SWindow> renameWindow = SNew(SWindow)
-        .Title(LOCTEXT("DiscoveringAssetsDialog", "Discovering Assets..."))
+        .Title(LOCTEXT("discovering-assets-window.title", "Discovering Assets..."))
         .SizingRule( ESizingRule::Autosized )
         .SupportsMaximize(false)
         .SupportsMinimize(false)

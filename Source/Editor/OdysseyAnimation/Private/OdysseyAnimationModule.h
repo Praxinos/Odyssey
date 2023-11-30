@@ -22,10 +22,6 @@ public:
     void RegisterMedia();
     void UnregisterMedia();
 
-	void RegisterAssetTypeActions();
-	void UnregisterAssetTypeActions();
-
 public:
-    TSharedPtr<IAssetTypeActions> mIliadTypeActions;
     FOdysseyAnimationMediaPlayerFactory mAnimationMediaPlayerFactory;
 };

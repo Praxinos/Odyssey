@@ -6,8 +6,6 @@
 #include "Fonts/FontMeasure.h"
 #include "Widgets/Layout/SGridPanel.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTimeline"
-
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyTimeline
 
@@ -394,7 +392,3 @@ SOdysseyTimeline::GetScrollBoxVHeight() const
 	float hSize = mScrollBoxV->GetCachedGeometry().GetLocalSize().Y - 1.0f;
 	return FOptionalSize(hSize);
 }
-
-//////////////////////////////////////////////////////////////////////////
-
-#undef LOCTEXT_NAMESPACE

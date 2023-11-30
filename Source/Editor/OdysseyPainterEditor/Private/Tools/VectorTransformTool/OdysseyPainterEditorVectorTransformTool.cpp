@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorTransformTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -829,7 +829,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
             if( mUndo )
             {
                 // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("VectorTransformTool","Vector Transform Tool"));
+                GEditor->BeginTransaction(LOCTEXT("vector-transform-tool.transaction.transform","Vector Transform Tool"));
                 if( GUndo )
                 {
                     GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(mUndo) );

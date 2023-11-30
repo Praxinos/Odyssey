@@ -7,7 +7,7 @@
 #include "IContentBrowserSingleton.h"
 #include "OdysseyPalette.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPaletteAssetTypeActions"
+#define LOCTEXT_NAMESPACE "Palette"
 
 //////////////////////////////////////////////////////////////////////////
 // FOdysseyPaletteAssetTypeActions
@@ -19,7 +19,7 @@ FOdysseyPaletteAssetTypeActions::FOdysseyPaletteAssetTypeActions( EAssetTypeCate
 FText
 FOdysseyPaletteAssetTypeActions::GetName() const
 {
-    return LOCTEXT( "FOdysseyPaletteTypeActionsName", "Palette" );
+    return LOCTEXT( "asset-type-actions.name", "Palette" );
 }
 
 FColor

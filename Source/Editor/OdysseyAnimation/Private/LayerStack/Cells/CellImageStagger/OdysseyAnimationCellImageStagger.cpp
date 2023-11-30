@@ -9,8 +9,6 @@
 
 #include "Misc/OdysseyDuplicate.h"
 
-#define LOCTEXT_NAMESPACE "FOdysseyAnimationCellImageStagger"
-
 TSharedRef<FOdysseyAnimationCellImageStagger>
 FOdysseyAnimationCellImageStagger::Create(UOdysseyAnimationLayer* iLayer, int iLength)
 {
@@ -209,5 +207,3 @@ FOdysseyAnimationCellImageStagger::CreateCellFromFrame(uint32 iFrameIndex) const
 
     return cell->CreateCellFromFrame(cellFrameIndex);
 }
-
-#undef LOCTEXT_NAMESPACE

@@ -6,7 +6,7 @@
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyMeshSelector"
+#define LOCTEXT_NAMESPACE "Widgets"
 
 
 /////////////////////////////////////////////////////
@@ -116,8 +116,8 @@ TSharedRef<SWidget> SOdysseyMeshSelector::CreateLODMenuWidget()
         LODAction.GetActionCheckState.BindSP(MeshSelector.Get(), &FOdysseyMeshSelector::GetLODCheckState, -1);
 
         MenuBuilder.AddMenuEntry(
-            LOCTEXT("SelecLODToggle", "None"),
-            LOCTEXT("SelectLODToggle_Tooltip", "Toggles selection of the static mesh's LOD."),
+            LOCTEXT("mesh-selector.LOD.none.name", "None"),
+            LOCTEXT("mesh-selector.LOD.none.tooltip", "Toggles selection of the static mesh's LOD."),
             FSlateIcon(),
             LODAction,
             NAME_None,
@@ -136,8 +136,8 @@ TSharedRef<SWidget> SOdysseyMeshSelector::CreateLODMenuWidget()
             MenuAction.GetActionCheckState.BindSP(MeshSelector.Get(), &FOdysseyMeshSelector::GetLODCheckState, LODLevel);
 
             MenuBuilder.AddMenuEntry(
-                FText::Format(LOCTEXT("LOD Level", "LOD Level {0}"), FText::AsNumber(LODLevel)),
-                FText::Format(LOCTEXT("LODLevel_ToolTip", "Select LOD Level {0} for the UV Map"), FText::AsNumber(LODLevel)),
+                FText::Format(LOCTEXT("mesh-selector.LOD.name", "LOD Level {0}"), FText::AsNumber(LODLevel)),
+                FText::Format(LOCTEXT("mesh-selector.LOD.tooltip", "Select LOD Level {0} for the UV Map"), FText::AsNumber(LODLevel)),
                 FSlateIcon(),
                 MenuAction,
                 NAME_None,
@@ -156,7 +156,7 @@ TSharedRef<SWidget> SOdysseyMeshSelector::CreateLODMenuWidget()
             .AutoHeight()
             [
                 SNew(STextBlock)
-                .Text(LOCTEXT("Mesh LOD", "Mesh LOD"))
+                .Text(LOCTEXT("mesh-selector.mesh-LOD", "Mesh LOD"))
             ]
             + SVerticalBox::Slot()
             .Padding( 2 )
@@ -184,8 +184,8 @@ TSharedRef<SWidget> SOdysseyMeshSelector::CreateUVMenuWidget()
         UVAction.GetActionCheckState.BindSP(MeshSelector.Get(), &FOdysseyMeshSelector::GetUVChannelCheckState, -1);
 
         MenuBuilder.AddMenuEntry(
-            LOCTEXT("ShowUVSToggle", "None"),
-            LOCTEXT("ShowUVSToggle_Tooltip", "Toggles display of the static mesh's UVs."),
+            LOCTEXT("mesh-selector.uv-channel.none.name", "None"),
+            LOCTEXT("mesh-selector.uv-channel.none.tooltip", "Toggles display of the static mesh's UVs."),
             FSlateIcon(),
             UVAction,
             NAME_None,
@@ -207,8 +207,8 @@ TSharedRef<SWidget> SOdysseyMeshSelector::CreateUVMenuWidget()
             MenuAction.GetActionCheckState.BindSP(MeshSelector.Get(), &FOdysseyMeshSelector::GetUVChannelCheckState, UVChannelID);
 
             MenuBuilder.AddMenuEntry(
-                FText::Format(LOCTEXT("UVChannel_ID", "UV Channel {0}"), FText::AsNumber(UVChannelID)),
-                FText::Format(LOCTEXT("UVChannel_ID_ToolTip", "Overlay UV Channel {0} on the viewport"), FText::AsNumber(UVChannelID)),
+                FText::Format(LOCTEXT("mesh-selector.uv-channel.name", "UV Channel {0}"), FText::AsNumber(UVChannelID)),
+                FText::Format(LOCTEXT("mesh-selector.uv-channel.name", "Overlay UV Channel {0} on the viewport"), FText::AsNumber(UVChannelID)),
                 FSlateIcon(),
                 MenuAction,
                 NAME_None,
@@ -225,7 +225,7 @@ TSharedRef<SWidget> SOdysseyMeshSelector::CreateUVMenuWidget()
             .AutoHeight()
             [
                 SNew(STextBlock)
-                .Text(LOCTEXT("Mesh UV Channel", "Mesh UV Channel"))
+                .Text(LOCTEXT("mesh-selector.mesh-uv-channel", "Mesh UV Channel"))
             ]
             + SVerticalBox::Slot()
             .Padding( 2 )

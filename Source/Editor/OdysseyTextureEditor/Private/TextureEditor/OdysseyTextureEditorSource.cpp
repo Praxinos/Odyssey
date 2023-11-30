@@ -6,7 +6,7 @@
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorSource"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 const FGuid&
 FOdysseyTextureEditorSource::StaticId()
@@ -138,11 +138,12 @@ FOdysseyTextureEditorSource::Clear()
     UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
     UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
+	#ifdef WITH_EDITOR
+		FScopedTransaction ScopedTransaction(LOCTEXT("actions.clear", "Clear"));
+	#endif
+
 	if (currentLayerRaster)
 	{		
-	#ifdef WITH_EDITOR
-		FScopedTransaction ScopedTransaction(LOCTEXT("Layer Image Raster", "Clear Canvas"));
-	#endif
 		
 		TSharedPtr<FOdysseyRasterBlock> rasterBlock = currentLayerRaster->GetRasterBlock();
 		FOdysseyRasterBlockMutator mutator(rasterBlock);
@@ -166,14 +167,11 @@ FOdysseyTextureEditorSource::Clear()
         FOdysseyVectorEngine* vectorEngine = currentLayerVector->GetEngine();
 
         // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("ClearVectorScene", "Clear Vector Scene"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear( vectorEngine );
-
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
-        GEditor->EndTransaction();
 
         vectorEngine->SetScene( new FOdysseyVectorGroupPaint("Scene") );
 		vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );

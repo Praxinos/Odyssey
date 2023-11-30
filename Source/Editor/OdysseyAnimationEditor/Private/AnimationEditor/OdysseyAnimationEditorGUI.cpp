@@ -11,8 +11,6 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorEngine.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorGUI"
-
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorGUI
 //--------------------------------------------------------------------------------------
@@ -138,5 +136,3 @@ FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScen
         }
     }
 }
-
-#undef LOCTEXT_NAMESPACE

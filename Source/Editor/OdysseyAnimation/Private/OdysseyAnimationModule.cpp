@@ -5,33 +5,14 @@
 
 #include "IMediaModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationModule"
-
 void FOdysseyAnimationModule::StartupModule()
 {
-	RegisterAssetTypeActions();
 	RegisterMedia();
 }
 
 void FOdysseyAnimationModule::ShutdownModule()
 {
-	UnregisterAssetTypeActions();
 	UnregisterMedia();
-}
-
-void
-FOdysseyAnimationModule::RegisterAssetTypeActions()
-{
-	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-
-	// Create Asset Categories
-	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
-
-	//Create Asset Types Actions
-	mIliadTypeActions = MakeShareable(new FOdysseyAnimationAssetTypeActions(category));
-
-	//Register created Asset Type Actions
-	assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
 }
 
 void
@@ -45,16 +26,6 @@ FOdysseyAnimationModule::RegisterMedia()
 }
 
 void
-FOdysseyAnimationModule::UnregisterAssetTypeActions()
-{
-	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
-		return;
-	
-	IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
-}
-
-void
 FOdysseyAnimationModule::UnregisterMedia()
 {
 	// unregister player factory
@@ -65,5 +36,3 @@ FOdysseyAnimationModule::UnregisterMedia()
 }
 
 IMPLEMENT_MODULE(FOdysseyAnimationModule, OdysseyAnimation);
-
-#undef LOCTEXT_NAMESPACE

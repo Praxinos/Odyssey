@@ -54,5 +54,3 @@ SOdysseyDropWidget::OnDrop(const FGeometry& iGeometry, const FDragDropEvent& iDr
 	}
 	return FReply::Unhandled();
 }
-
-#undef LOCTEXT_NAMESPACE 

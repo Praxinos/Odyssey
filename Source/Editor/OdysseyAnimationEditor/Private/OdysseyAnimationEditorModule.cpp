@@ -19,7 +19,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationEditorModule"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 /*-----------------------------------------------------------------------------
    FOdysseyAnimationEditorModule
@@ -30,7 +30,7 @@ FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* 
 {
 	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
 		TEXT("OdysseyAnimationEditor"),
-		LOCTEXT("WorkspaceMenu_OdysseyAnimationEditor", "Odyssey Animation Editor"),
+		LOCTEXT("main-menu.category", "Odyssey Animation Editor"),
 		iAnimation,
 		"OdysseyAnimationEditor_Layout"
 	);
@@ -101,7 +101,7 @@ FOdysseyAnimationEditorModule::RegisterAssetTypeActions()
 	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
 	// Create Asset Categories
-	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
+	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
 
 	//Create Asset Types Actions
 	mIliadTypeActions = MakeShareable(new FOdysseyAnimationAssetTypeActions(category));

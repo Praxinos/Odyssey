@@ -10,7 +10,7 @@
 #include "Undo/OdysseyVectorUndoPathEdit.h"
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPathEditTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -179,7 +179,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
         iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
 
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
+        GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.delete-point","Vector Path Edit Tool"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
@@ -286,7 +286,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
         FOdysseyVectorVertex* vertex = mPickedVertexArray[0];
 
         //-------------- undo ---------------//
-        GEditor->BeginTransaction(LOCTEXT("AlignPointSelection","Align Point Selection"));
+        GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.align-point-selection","Align Point Selection"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, mPickedVertexArray );
@@ -310,7 +310,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
         {
             case ePathPickingMode::VertexHandle :
                 // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
+                GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.edit-vertex-handle","Vector Path Edit Tool"));
                 if( GUndo )
                 {
                     FOdysseyVectorUndo* undo;
@@ -355,7 +355,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                 }
 
                 // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
+                GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.edit-vertex","Vector Path Edit Tool"));
                 if( GUndo )
                 {
                     FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathEdit( iScene
@@ -380,7 +380,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                 FOdysseyVectorVertex::ArrayToSegmentArray( connectedVertexArray, alteredSegmentArray );
 
                 // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("VectorPathEditTool","Vector Path Edit Tool"));
+                GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.edit-segment-handle","Vector Path Edit Tool"));
                 if( GUndo )
                 {
                     FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathEdit( iScene

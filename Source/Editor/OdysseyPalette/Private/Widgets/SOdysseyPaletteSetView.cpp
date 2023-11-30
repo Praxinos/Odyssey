@@ -5,7 +5,7 @@
 #include "SOdysseyPaletteSetTile.h"
 #include "Framework/Commands/GenericCommands.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPaletteSetView"
+#define LOCTEXT_NAMESPACE "Palette"
 
 static FName contextSetMenuName = "OdysseyPaletteSetContextMenu";
 
@@ -127,7 +127,7 @@ void SOdysseyPaletteSetView::CreateContextMenu()
 
     UToolMenu* Menu = ToolMenus->RegisterMenu(contextSetMenuName);
 
-    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("PaletteSetCommonSection", "Common"));
+    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("set-view.context-menu.common-section.name", "Common"));
     {
         commonSection.AddMenuEntry(FGenericCommands::Get().Delete);
         commonSection.AddMenuEntry(FGenericCommands::Get().Duplicate);

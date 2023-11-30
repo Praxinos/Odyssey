@@ -4,8 +4,6 @@
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterEllipseSelection.h"
 #include "OdysseyBrushShape.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterEllipseSelection"
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterEllipseSelection::~UOdysseyPainterEditorRasterEllipseSelection()
@@ -166,5 +164,3 @@ TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterEllipseSelection::GetSelection
 
     return rectangles;
 }
-
-#undef LOCTEXT_NAMESPACE

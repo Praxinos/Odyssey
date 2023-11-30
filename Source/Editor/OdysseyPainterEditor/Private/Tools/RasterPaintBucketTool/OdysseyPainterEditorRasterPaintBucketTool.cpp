@@ -8,7 +8,7 @@
 #include "OdysseyMediaRaster.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorRasterPaintBucketTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -133,7 +133,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
 
     //Apply the color to the paintblock
     
-    GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("OnPaintStroke", "FloodFill"), nullptr);
+    GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("raster-paint-bucket-tool.transaction.paint-stroke", "FloodFill"), nullptr);
     ConvertMaskBlockToColorBlock(maskBlock, paintBlock, dstColor);
     //ConvertMaskBlockToColorBlock(sourceMaskBlock, paintBlock, dstColor);
     

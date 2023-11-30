@@ -5,7 +5,7 @@
 
 #include "IOdysseyFlipbookEditorModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
+#define LOCTEXT_NAMESPACE "FlipbookEditor"
 
 /////////////////////////////////////////////////////
 // FOdysseyFlipbookEditorToolkit
@@ -31,7 +31,7 @@ FOdysseyFlipbookEditorToolkit::OpenAsset(UObject* iObject)
 FText
 FOdysseyFlipbookEditorToolkit::GetBaseToolkitName() const
 {
-    return LOCTEXT( "AppLabel", "Odyssey Flipbook Editor" );
+    return LOCTEXT( "editor.name", "Odyssey Flipbook Editor" );
 }
 
 FName
@@ -43,7 +43,7 @@ FOdysseyFlipbookEditorToolkit::GetToolkitFName() const
 FString
 FOdysseyFlipbookEditorToolkit::GetWorldCentricTabPrefix() const
 {
-    return LOCTEXT( "WorldCentricTabPrefix", "Flipbook" ).ToString();
+    return LOCTEXT( "editor.world-centric-tab-prefix", "Flipbook " ).ToString();
 }
 
 #undef LOCTEXT_NAMESPACE

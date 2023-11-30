@@ -25,7 +25,7 @@
 
 #include "OdysseyBrushEditorModule.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyBrush_ContentBrowserExtensions"
+#define LOCTEXT_NAMESPACE "BrushEditor"
 
 
 /////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ SOdysseyThumbnailSelectWindow::Construct( const FArguments& iArgs )
     mAssetThumbnailPool = MakeShareable( new FAssetThumbnailPool( 1024 ) );
 
     SWindow::Construct( SWindow::FArguments()
-        .Title( LOCTEXT( "SelectThumbnailOdysseyBrush", "Select Thumbnail for Brush" ) )
+        .Title( LOCTEXT( "thumbnail-select-window.title", "Select Thumbnail for Brush" ) )
         .SizingRule( ESizingRule::FixedSize )
         .ClientSize( FVector2D( 320, 64 ) )
         .SupportsMinimize( false )
@@ -100,14 +100,14 @@ SOdysseyThumbnailSelectWindow::Construct( const FArguments& iArgs )
                     +SHorizontalBox::Slot()
                     [
                         SNew( SButton )
-                        .Text( LOCTEXT( "Switch Thumbnail", "Switch Thumbnail" ) )
+                        .Text( LOCTEXT( "thumbnail-select-window.ok", "Switch Thumbnail" ) )
                         .HAlign( HAlign_Center )
                         .OnClicked_Raw( this, &SOdysseyThumbnailSelectWindow::OnAccept )
                     ]
                     +SHorizontalBox::Slot()
                     [
                         SNew( SButton )
-                        .Text( LOCTEXT( "Cancel", "Cancel" ) )
+                        .Text( LOCTEXT( "thumbnail-select-window.cancel", "Cancel" ) )
                         .HAlign( HAlign_Center )
                         .OnClicked_Raw( this, &SOdysseyThumbnailSelectWindow::OnCancel )
                     ]
@@ -307,8 +307,8 @@ FOdysseyBrushContentBrowserExtensions_Impl::PopulateBrushActionsMenu( FMenuBuild
         FExecuteAction::CreateStatic( &FOdysseyBrushContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( editBrushFunctor ) ) );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "CB_Extension_Brush_EditThumbnail", "Edit Thumbnail" )
-        , LOCTEXT( "CB_Extension_Brush_EditThumbnail_Tooltip", "Change the thumbnail by the content of a texture" )
+          LOCTEXT( "content-browser.action-menu.edit-thumbnail.name", "Edit Thumbnail" )
+        , LOCTEXT( "content-browser.action-menu.edit-thumbnail.tooltip", "Change the thumbnail by the content of a texture" )
         , FSlateIcon( "OdysseyStyle", "BrushEditor.EditThumbnail16" )
         , action_EditBrush
         , NAME_None

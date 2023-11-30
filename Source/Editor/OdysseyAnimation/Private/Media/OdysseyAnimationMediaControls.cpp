@@ -5,8 +5,6 @@
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationMediaControls"
-
 FOdysseyAnimationMediaControls::FOdysseyAnimationMediaControls()
 	: mAnimation(nullptr)
 	, mState(EMediaState::Closed)
@@ -164,5 +162,3 @@ FOdysseyAnimationMediaControls::SetState(EMediaState iState)
 {
 	mState = iState;
 }
-
-#undef LOCTEXT_NAMESPACE

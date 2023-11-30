@@ -13,6 +13,8 @@
 #include "Engine/Texture2DArray.h"
 #include "TextureEditorSettings.h"
 
+#define LOCTEXT_NAMESPACE "TextureEditor"
+
 // defined in VolumeTexturePreview.cpp of UnrealEd Module
 UNREALED_API void GetBestFitForNumberOfTiles(int32 InSize, int32& OutRatioX, int32& OutRatioY);
 
@@ -192,9 +194,9 @@ SOdysseyTextureDetails::GetImportedText() const
 	Options.UseGrouping = false;
     
     if (VolumeTexture || VolumeTextureRT)
-		return FText::Format( NSLOCTEXT("TextureEditor", "QuickInfo_Imported_3x", "Imported: {0}x{1}x{2}"), FText::AsNumber(ImportedWidth, &Options), FText::AsNumber(ImportedHeight, &Options), FText::AsNumber(ImportedDepth, &Options));
+		return FText::Format( LOCTEXT("texture-details.quick-info.imported-3-dimensions", "Imported: {0}x{1}x{2}"), FText::AsNumber(ImportedWidth, &Options), FText::AsNumber(ImportedHeight, &Options), FText::AsNumber(ImportedDepth, &Options));
     
-    return FText::Format( NSLOCTEXT("TextureEditor", "QuickInfo_Imported_2x", "Imported: {0}x{1}"), FText::AsNumber(ImportedWidth, &Options), FText::AsNumber(ImportedHeight, &Options));
+    return FText::Format( LOCTEXT("texture-details.quick-info.imported-2-dimensions", "Imported: {0}x{1}"), FText::AsNumber(ImportedWidth, &Options), FText::AsNumber(ImportedHeight, &Options));
 }
 
 
@@ -243,15 +245,15 @@ SOdysseyTextureDetails::GetCurrentText() const
 	Options.UseGrouping = false;
     
     if (VolumeTexture || VolumeTextureRT)
-        return FText::Format( NSLOCTEXT("TextureEditor", "QuickInfo_Displayed_3x", "Displayed: {0}x{1}x{2}"), FText::AsNumber(PreviewEffectiveTextureWidth, &Options ), FText::AsNumber(PreviewEffectiveTextureHeight, &Options), FText::AsNumber(PreviewEffectiveTextureDepth, &Options));
+        return FText::Format( LOCTEXT("texture-details.quick-info.displayed-3-dimensions", "Displayed: {0}x{1}x{2}"), FText::AsNumber(PreviewEffectiveTextureWidth, &Options ), FText::AsNumber(PreviewEffectiveTextureHeight, &Options), FText::AsNumber(PreviewEffectiveTextureDepth, &Options));
     
     FText CubemapAdd;
     if(TextureCube)
     {
-        CubemapAdd = NSLOCTEXT("TextureEditor", "QuickInfo_PerCubeSide", "x6 (CubeMap)");
+        CubemapAdd = LOCTEXT("texture-details.quick-info.per-cube-side", "x6 (CubeMap)");
     }
 
-    return FText::Format( NSLOCTEXT("TextureEditor", "QuickInfo_Displayed_2x", "Displayed: {0}x{1}{2}"), FText::AsNumber(PreviewEffectiveTextureWidth, &Options ), FText::AsNumber(PreviewEffectiveTextureHeight, &Options), CubemapAdd);
+    return FText::Format( LOCTEXT("texture-details.quick-info.displayed-2-dimensions", "Displayed: {0}x{1}{2}"), FText::AsNumber(PreviewEffectiveTextureWidth, &Options ), FText::AsNumber(PreviewEffectiveTextureHeight, &Options), CubemapAdd);
 }
 
 FText
@@ -292,16 +294,16 @@ SOdysseyTextureDetails::GetMaxInGameText() const
 	Options.UseGrouping = false;
     
     if (VolumeTexture || VolumeTextureRT)
-		return FText::Format( NSLOCTEXT("TextureEditor", "QuickInfo_MaxInGame_3x", "Max In-Game: {0}x{1}x{2}"), FText::AsNumber(MaxInGameWidth, &Options), FText::AsNumber(MaxInGameHeight, &Options), FText::AsNumber(MaxInGameDepth, &Options));
+		return FText::Format( LOCTEXT("texture-details.quick-info.max-in-game-3-dimensions", "Max In-Game: {0}x{1}x{2}"), FText::AsNumber(MaxInGameWidth, &Options), FText::AsNumber(MaxInGameHeight, &Options), FText::AsNumber(MaxInGameDepth, &Options));
     
 
     FText CubemapAdd;
     if(TextureCube)
     {
-        CubemapAdd = NSLOCTEXT("TextureEditor", "QuickInfo_PerCubeSide", "x6 (CubeMap)");
+        CubemapAdd = LOCTEXT("texture-details.quick-info.per-cube-side", "x6 (CubeMap)");
     }
 
-    return FText::Format( NSLOCTEXT("TextureEditor", "QuickInfo_MaxInGame_2x", "Max In-Game: {0}x{1}{2}"), FText::AsNumber(MaxInGameWidth, &Options), FText::AsNumber(MaxInGameHeight, &Options), CubemapAdd);
+    return FText::Format( LOCTEXT("texture-details.quick-info.max-in-game-2-dimensions", "Max In-Game: {0}x{1}{2}"), FText::AsNumber(MaxInGameWidth, &Options), FText::AsNumber(MaxInGameHeight, &Options), CubemapAdd);
 }
 
 FText
@@ -318,7 +320,7 @@ SOdysseyTextureDetails::GetSizeText() const
 	SizeOptions.UseGrouping = false;
 	SizeOptions.MaximumFractionalDigits = 0;
 
-    return FText::Format(NSLOCTEXT("TextureEditor", "QuickInfo_ResourceSize", "Resource Size: {0} Kb"), FText::AsNumber(Size, &SizeOptions));
+    return FText::Format(LOCTEXT("texture-details.quick-info.resource-size", "Resource Size: {0} Kb"), FText::AsNumber(Size, &SizeOptions));
 }
 
 FText
@@ -328,11 +330,11 @@ SOdysseyTextureDetails::GetMethodText() const
     if (!texture)
         return FText();
 
-    FText Method = texture->IsCurrentlyVirtualTextured() ? NSLOCTEXT("TextureEditor", "QuickInfo_MethodVirtualStreamed", "Virtual Streamed")
-                                                : (!texture->IsStreamable() ? NSLOCTEXT("TextureEditor", "QuickInfo_MethodNotStreamed", "Not Streamed")
-                                                                        : NSLOCTEXT("TextureEditor", "QuickInfo_MethodStreamed", "Streamed") );
+    FText Method = texture->IsCurrentlyVirtualTextured() ? LOCTEXT("texture-details.quick-info.method-virtual-streamed", "Virtual Streamed")
+                                                : (!texture->IsStreamable() ? LOCTEXT("texture-details.quick-info.method-virtual-not-streamed", "Not Streamed")
+                                                                        : LOCTEXT("texture-details.quick-info.method-streamed", "Streamed") );
 
-    return FText::Format(NSLOCTEXT("TextureEditor", "QuickInfo_Method", "Method: {0}"), Method);
+    return FText::Format(LOCTEXT("texture-details.quick-info.method", "Method: {0}"), Method);
 }
 
 FText
@@ -390,7 +392,7 @@ SOdysseyTextureDetails::GetFormatText() const
 	if (TextureFormatIndex == PF_MAX)
         return FText();
 	
-	return FText::Format(NSLOCTEXT("TextureEditor", "QuickInfo_Format", "Format: {0}"), FText::FromString(GPixelFormats[TextureFormatIndex].Name));
+	return FText::Format(LOCTEXT("texture-details.quick-info.format", "Format: {0}"), FText::FromString(GPixelFormats[TextureFormatIndex].Name));
 }
 
 FText
@@ -400,7 +402,7 @@ SOdysseyTextureDetails::GetLODBiasText() const
     if (!texture)
         return FText();
 
-    return FText::Format(NSLOCTEXT("TextureEditor", "QuickInfo_LODBias", "Combined LOD Bias: {0}"), FText::AsNumber(texture->GetCachedLODBias()));
+    return FText::Format(LOCTEXT("texture-details.quick-info.LODBias", "Combined LOD Bias: {0}"), FText::AsNumber(texture->GetCachedLODBias()));
 }
 
 FText
@@ -415,8 +417,8 @@ SOdysseyTextureDetails::GetHasAlphaChannelText() const
     if (!Texture2D)
         return FText();
         
-    return FText::Format(NSLOCTEXT("TextureEditor", "QuickInfo_HasAlphaChannel", "Has Alpha Channel: {0}"),
-        Texture2D->HasAlphaChannel() ? NSLOCTEXT("TextureEditor", "True", "True") : NSLOCTEXT("TextureEditor", "False", "False"));
+    return FText::Format(LOCTEXT("texture-details.quick-info.has-alpha-channel", "Has Alpha Channel: {0}"),
+        Texture2D->HasAlphaChannel() ? LOCTEXT("texture-details.quick-info.has-alpha-channel.true", "True") : LOCTEXT("texture-details.quick-info.has-alpha-channel.false", "False"));
 }
 
 FText
@@ -469,7 +471,7 @@ SOdysseyTextureDetails::GetNumMipsText() const
 		NumMips = VolumeTextureRT->GetNumMips();
 	}
 
-    return FText::Format(NSLOCTEXT("TextureEditor", "QuickInfo_NumMips", "Number of Mips: {0}"), FText::AsNumber(NumMips));
+    return FText::Format(LOCTEXT("texture-details.quick-info.numl-mips", "Number of Mips: {0}"), FText::AsNumber(NumMips));
 }
 
 EVisibility
@@ -492,3 +494,5 @@ SOdysseyTextureDetails::Tick(const FGeometry& AllottedGeometry, const double InC
         mTexturePropertiesWidget->SetObject(texture);
     }
 }
+
+#undef LOCTEXT_NAMESPACE

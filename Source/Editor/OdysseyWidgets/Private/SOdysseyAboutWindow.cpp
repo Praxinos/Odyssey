@@ -25,7 +25,7 @@
 
 #include "OdysseyStyleSet.h"
 
-#define LOCTEXT_NAMESPACE "AboutWindow"
+#define LOCTEXT_NAMESPACE "Widgets"
 
 //---
 
@@ -35,7 +35,7 @@ SOdysseyAboutWindow::Open(TSharedPtr<SWindow> iParentWindow)
 {
     TSharedRef<SWindow> window =
         SNew( SWindow )
-        .Title( LOCTEXT( "title", "About Iliad" ) )
+        .Title( LOCTEXT( "about-window.title", "About Iliad" ) )
         .SupportsMaximize( false )
         .SupportsMinimize( false )
         .SizingRule( ESizingRule::Autosized )
@@ -69,23 +69,23 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
     if( pluginDescriptor.bIsBetaVersion )
         version += "-beta";
 
-    FText VersionFull = FText::Format( LOCTEXT( "VersionLabel", "Version: {0}" ), FText::FromString( version ) );
+    FText VersionFull = FText::Format( LOCTEXT( "about-window.version-label", "Version: {0}" ), FText::FromString( version ) );
 
     //---
 
-    mLogos.Add( ELogo::kPraxinos,    { TEXT( "About.Praxinos" ),    LOCTEXT( "tooltip.praxinos", "Go to Praxinos website" ),                LOCTEXT( "url.praxinos", "https://praxinos.coop/" ) } );
-    mLogos.Add( ELogo::kIliad,        { TEXT( "About.Iliad" ),        LOCTEXT( "tooltip.iliad", "Go to Iliad webpage" ),                        LOCTEXT( "url.iliad", "https://praxinos.coop/iliad.php" ) } );
-    //mLogos.Add( ELogo::kForum,       { TEXT( "About.Forum" ),       LOCTEXT( "tooltip.forum", "Go to Praxinos forum" ),                     LOCTEXT( "url.forum", "https://praxinos.coop/forum/" ) } );
-    //mLogos.Add( ELogo::kContactUs,   { TEXT( "About.ContactUs" ),   LOCTEXT( "tooltip.contact-us", "Go to contact-us form" ),               LOCTEXT( "url.contact-us", "https://praxinos.coop/contact.php" ) } );
+    mLogos.Add( ELogo::kPraxinos,    { TEXT( "about-window.praxinos.name" ),    LOCTEXT( "about-window.praxinos.tooltip", "Go to Praxinos website" ),                LOCTEXT( "about-window.praxinos.url", "https://praxinos.coop/" ) } );
+    mLogos.Add( ELogo::kIliad,        { TEXT( "about-window.iliad.name" ),        LOCTEXT( "about-window.iliad.tooltip", "Go to Iliad webpage" ),                        LOCTEXT( "about-window.iliad.url", "https://praxinos.coop/iliad.php" ) } );
+    //mLogos.Add( ELogo::kForum,       { TEXT( "about-window.forum.name" ),       LOCTEXT( "about-window.forum.tooltip", "Go to Praxinos forum" ),                     LOCTEXT( "about-window.forum.url", "https://praxinos.coop/forum/" ) } );
+    //mLogos.Add( ELogo::kContactUs,   { TEXT( "about-window.contact-us.name" ),   LOCTEXT( "about-window.contact-us.tooltip", "Go to contact-us form" ),               LOCTEXT( "about-window.contact-us.url", "https://praxinos.coop/contact.php" ) } );
 
-    mLogos.Add( ELogo::kTwitter,     { TEXT( "About.Twitter" ),     LOCTEXT( "tooltip.social.twitter", "Praxinos on Twitter" ),             LOCTEXT( "url.social.twitter", "https://twitter.com/praxinos" ) } );
-    mLogos.Add( ELogo::kFacebook,    { TEXT( "About.Facebook" ),    LOCTEXT( "tooltip.social.facebook", "Praxinos on Facebook" ),           LOCTEXT( "url.social.facebook", "https://www.facebook.com/Praxinos" ) } );
-    mLogos.Add( ELogo::kLinkedin,    { TEXT( "About.LinkedIn" ),    LOCTEXT( "tooltip.social.linkedin", "Praxinos on LinkedIn" ),           LOCTEXT( "url.social.linkedin", "https://www.linkedin.com/company/praxinos" ) } );
-    mLogos.Add( ELogo::kInstagram,   { TEXT( "About.Instagram" ),   LOCTEXT( "tooltip.social.instagram", "Praxinos on Instagram" ),         LOCTEXT( "url.social.instagram", "https://www.instagram.com/praxinos/" ) } );
-    mLogos.Add( ELogo::kYoutube,     { TEXT( "About.Youtube" ),     LOCTEXT( "tooltip.social.youtube", "Praxinos on Youtube" ),             LOCTEXT( "url.social.youtube", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) } );
-    mLogos.Add( ELogo::kDiscord,     { TEXT( "About.Discord" ),     LOCTEXT( "tooltip.social.discord", "Praxinos on Discord" ),             LOCTEXT( "url.social.discord", "https://discord.gg/gEd6pj7" ) } );
-    mLogos.Add( ELogo::kIliadUserDoc, { TEXT( "About.UserDoc" ),     LOCTEXT( "tooltip.social.userDoc", "Go to Iliad User Documentation" ),   LOCTEXT( "url.social.userDoc", "https://praxinos.coop/Documentation/Iliad/User/html/" ) } );
-    mLogos.Add( ELogo::kIliadGit,     { TEXT( "About.Git" ),         LOCTEXT( "tooltip.social.git", "Praxinos on Git" ),                     LOCTEXT( "url.social.git", "https://github.com/Praxinos/Iliad" ) } );
+    mLogos.Add( ELogo::kTwitter,     { TEXT( "about-window.twitter.name" ),     LOCTEXT( "about-window.twitter.tooltip", "Praxinos on Twitter" ),             LOCTEXT( "about-window.twitter.url", "https://twitter.com/praxinos" ) } );
+    mLogos.Add( ELogo::kFacebook,    { TEXT( "about-window.facebook.name" ),    LOCTEXT( "about-window.facebook.tooltip", "Praxinos on Facebook" ),           LOCTEXT( "about-window.facebook.url", "https://www.facebook.com/Praxinos" ) } );
+    mLogos.Add( ELogo::kLinkedin,    { TEXT( "about-window.linkedIn.name" ),    LOCTEXT( "about-window.linkedin.tooltip", "Praxinos on LinkedIn" ),           LOCTEXT( "about-window.linkedin.url", "https://www.linkedin.com/company/praxinos" ) } );
+    mLogos.Add( ELogo::kInstagram,   { TEXT( "about-window.instagram.name" ),   LOCTEXT( "about-window.instagram.tooltip", "Praxinos on Instagram" ),         LOCTEXT( "about-window.instagram.url", "https://www.instagram.com/praxinos/" ) } );
+    mLogos.Add( ELogo::kYoutube,     { TEXT( "about-window.youtube.name" ),     LOCTEXT( "about-window.youtube.tooltip", "Praxinos on Youtube" ),             LOCTEXT( "about-window.youtube.url", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) } );
+    mLogos.Add( ELogo::kDiscord,     { TEXT( "about-window.discord.name" ),     LOCTEXT( "about-window.discord.tooltip", "Praxinos on Discord" ),             LOCTEXT( "about-window.discord.url", "https://discord.gg/gEd6pj7" ) } );
+    mLogos.Add( ELogo::kIliadUserDoc, { TEXT( "about-window.userDoc.name" ),     LOCTEXT( "about-window.userDoc.tooltip", "Go to Iliad User Documentation" ),   LOCTEXT( "about-window.userDoc.url", "https://praxinos.coop/Documentation/Iliad/User/html/" ) } );
+    mLogos.Add( ELogo::kIliadGit,     { TEXT( "about-window.git.name" ),         LOCTEXT( "about-window.git.tooltip", "Praxinos on Git" ),                     LOCTEXT( "about-window.git.url", "https://github.com/Praxinos/Iliad" ) } );
 
     ChildSlot
     [
@@ -135,7 +135,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 2.f, 0.f, 12.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.iliad", "ILIAD" ) )
+                    .Text( LOCTEXT( "about-window.copyright.iliad", "ILIAD" ) )
                     .TextStyle( &FOdysseyStyle::Get(), "About.BigText" )
                 ]
                 +SVerticalBox::Slot()
@@ -143,7 +143,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.copyright", "ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc" ) )
+                    .Text( LOCTEXT( "about-window.copyright.copyright", "ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc" ) )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
                 +SVerticalBox::Slot()
@@ -151,7 +151,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 2.f, 0.f, 12.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.iddn", "IDDN.FR.001.250001.006.S.P.2019.000.00000" ) )
+                    .Text( LOCTEXT( "about-window.copyright.iddn", "IDDN.FR.001.250001.006.S.P.2019.000.00000" ) )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
                 + SVerticalBox::Slot()
@@ -159,7 +159,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 5.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-label", "Praxinos Team: " ) )
+                    .Text( LOCTEXT( "about-window.copyright.team-label", "Praxinos Team: " ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.UnderlineText" )
                 ]
@@ -168,7 +168,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-names-1", "Elodie Moog, Fabrice Debarge, Thomas Schmitt, Cléa Gonay, " ) )
+                    .Text( LOCTEXT( "about-window.copyright.team-names-1", "Elodie Moog, Fabrice Debarge, Thomas Schmitt, Cléa Gonay, " ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
@@ -177,7 +177,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-names-2", "Naomiki Sato, Gary Gabriel, Eric Scholl, Michael Schreiner" ) )
+                    .Text( LOCTEXT( "about-window.copyright.team-names-2", "Naomiki Sato, Gary Gabriel, Eric Scholl, Michael Schreiner" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
@@ -186,7 +186,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 5.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-former-label", "Former Collaborators: " ) )
+                    .Text( LOCTEXT( "about-window.copyright.team-former-label", "Former Collaborators: " ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.UnderlineSubduedText" )
                 ]
@@ -195,7 +195,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-former-names", "Clément Berthaud, Antoine Antin" ) )
+                    .Text( LOCTEXT( "about-window.copyright.team-former-names", "Clément Berthaud, Antoine Antin" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallSubduedText" )
                 ]
@@ -204,7 +204,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 5.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.external-libs", "External libraries:" ) )
+                    .Text( LOCTEXT( "about-window.copyright.external-libs", "External libraries:" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.UnderlineText" )
                 ]
@@ -213,7 +213,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.external-libs.ULIS", "- ULIS : https://github.com/Praxinos/ULIS" ) )
+                    .Text( LOCTEXT( "about-window.copyright.external-libs.ULIS", "- ULIS : https://github.com/Praxinos/ULIS" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
@@ -222,7 +222,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.external-libs.ULIS", "- littleCMS : http://www.littlecms.com/" ) )
+                    .Text( LOCTEXT( "about-window.copyright.external-libs.ULIS", "- littleCMS : http://www.littlecms.com/" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
@@ -231,7 +231,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.external-libs.ULIS", "- glm : https://www.opengl.org/sdk/libs/GLM/" ) )
+                    .Text( LOCTEXT( "about-window.copyright.external-libs.ULIS", "- glm : https://www.opengl.org/sdk/libs/GLM/" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
@@ -240,7 +240,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.external-libs.ULIS", "- boost.preprocessor : https://www.boost.org/doc/libs/1_71_0/libs/preprocessor/doc/index.html" ) )
+                    .Text( LOCTEXT( "about-window.copyright.external-libs.ULIS", "- boost.preprocessor : https://www.boost.org/doc/libs/1_71_0/libs/preprocessor/doc/index.html" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
@@ -316,7 +316,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                         SNew( SButton )
                         .HAlign( HAlign_Center )
                         .VAlign( VAlign_Center )
-                        .Text( LOCTEXT( "Close", "Close" ) )
+                        .Text( LOCTEXT( "about-window.close", "Close" ) )
                         .ButtonColorAndOpacity( FLinearColor( 0.6f, 0.6f, 0.6f ) )
                         .OnClicked( this, &SOdysseyAboutWindow::OnClose )
                     ]
@@ -331,7 +331,7 @@ SOdysseyAboutWindow::NewButtonImage( ELogo iLogo )
 {
     const FLogo& logo = mLogos.FindChecked( iLogo );
 
-    FText tooltip_with_url = FText::Format( LOCTEXT( "tooltip-url", "{0} | {1}" ), logo.mTooltip, logo.mUrl );
+    FText tooltip_with_url = FText::Format( LOCTEXT( "about-window.tooltip-and-url", "{0} | {1}" ), logo.mTooltip, logo.mUrl );
 
     TSharedRef<SButton> button = SNew( SButton )
         .ButtonStyle( FAppStyle::Get(), "NoBorder" )

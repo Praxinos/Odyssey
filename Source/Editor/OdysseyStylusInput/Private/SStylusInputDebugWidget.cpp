@@ -9,7 +9,7 @@
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Input/SCheckBox.h"
 
-#define LOCTEXT_NAMESPACE "StylusInputDebugWidget"
+#define LOCTEXT_NAMESPACE "StylusInput"
 
 SStylusInputDebugWidget::SStylusInputDebugWidget()
 {
@@ -36,7 +36,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("MostRecentIndex", "Most Recent Index"))
+				.Text(LOCTEXT("debug-tab.most-recent-index", "Most Recent Index"))
 			]
 			+ SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -54,7 +54,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("Position", "Position"))
+				.Text(LOCTEXT("debug-tab.position", "Position"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -72,7 +72,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("NormalPressure", "Normal Pressure"))
+				.Text(LOCTEXT("debug-tab.normal-pressure", "Normal Pressure"))
 			]
 			+ SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -90,7 +90,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("TangentPressure", "Tangent Pressure"))
+				.Text(LOCTEXT("debug-tab.tangent-pressure", "Tangent Pressure"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -108,7 +108,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("Z", "Z"))
+				.Text(LOCTEXT("debug-tab.z", "Z"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -126,7 +126,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("Twist", "Twist"))
+				.Text(LOCTEXT("debug-tab.twist", "Twist"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -144,7 +144,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("Azimuth", "Azimuth"))
+				.Text(LOCTEXT("debug-tab.azimuth", "Azimuth"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -162,7 +162,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("Altitude", "Altitude"))
+				.Text(LOCTEXT("debug-tab.altitude", "Altitude"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -180,7 +180,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("Tilt", "Tilt"))
+				.Text(LOCTEXT("debug-tab.tilt", "Tilt"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -198,7 +198,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("Size", "Size"))
+				.Text(LOCTEXT("debug-tab.size", "Size"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -215,7 +215,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("IsTouching", "Is Touching?"))
+				.Text(LOCTEXT("debug-tab.is-touching", "Is Touching?"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)
@@ -232,7 +232,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("IsInverted", "Is Inverted?"))
+				.Text(LOCTEXT("debug-tab.is-inverted", "Is Inverted?"))
 			]
 			+SHorizontalBox::Slot()
 			.FillWidth(1)

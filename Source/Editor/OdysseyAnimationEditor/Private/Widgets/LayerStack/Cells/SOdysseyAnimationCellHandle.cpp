@@ -3,8 +3,6 @@
 
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCellHandle.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationCellHandle"
-
 void
 SOdysseyAnimationCellHandle::Construct( const SOdysseyAnimationCellHandle::FArguments& InArgs)
 {	
@@ -54,5 +52,3 @@ SOdysseyAnimationCellHandle::OnMouseButtonUp(const FGeometry& iGeometry, const F
 	}
 	return FReply::Unhandled();
 }
-
-#undef LOCTEXT_NAMESPACE

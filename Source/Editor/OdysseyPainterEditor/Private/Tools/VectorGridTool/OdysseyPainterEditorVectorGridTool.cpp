@@ -6,7 +6,7 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorGridTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -70,7 +70,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
     if( iKey == EKeys::LeftMouseButton )
     {
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("VectorGridTool","Vector Grid Tool"));
+        GEditor->BeginTransaction(LOCTEXT("vector-grid-tool.transaction.edit-grid","Vector Grid Tool"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );

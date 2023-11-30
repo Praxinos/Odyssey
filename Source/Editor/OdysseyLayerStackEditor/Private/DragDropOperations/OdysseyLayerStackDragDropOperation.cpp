@@ -7,6 +7,8 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyStyleSet.h"
 
+#define LOCTEXT_NAMESPACE "LayerStackEditor"
+
 FOdysseyLayerStackDragDropOperation::FOdysseyLayerStackDragDropOperation(UOdysseyLayerStack* iLayerStack, TArray<UOdysseyLayer*> iLayers)
 	: mLayerStack(iLayerStack)
 	, mLayers(iLayers)
@@ -43,7 +45,7 @@ FOdysseyLayerStackDragDropOperation::GetText() const
 	if (mLayers.Num() == 1)
 		return mLayers[0]->Name;
 	
-	return FText::Format(NSLOCTEXT("OdysseyLayerStackDragDropOperation", "LayerCount", "{0} Layers"), FText::AsNumber(mLayers.Num()));
+	return FText::Format(LOCTEXT("drag-drop-operation.transaction.layers-count", "{0} Layers"), FText::AsNumber(mLayers.Num()));
 }
 
 const FSlateBrush*
@@ -91,3 +93,5 @@ FOdysseyLayerStackDragDropOperation::GetLayerStack() const
 {
 	return mLayerStack;
 }
+
+#undef LOCTEXT_NAMESPACE

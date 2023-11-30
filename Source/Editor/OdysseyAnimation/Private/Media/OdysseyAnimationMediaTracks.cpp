@@ -5,7 +5,7 @@
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationMediaTracks"
+#define LOCTEXT_NAMESPACE "AnimationMedia"
 
 FOdysseyAnimationMediaTracks::FOdysseyAnimationMediaTracks()
 {
@@ -124,7 +124,7 @@ FOdysseyAnimationMediaTracks::GetTrackDisplayName(EMediaTrackType TrackType, int
 	switch(TrackType)
 	{
 		case EMediaTrackType::Video:
-			return LOCTEXT("DefaultVideoTrackName", "Video Track");
+			return LOCTEXT("media-tracks.default-video-track-name", "Video Track");
 
 		case EMediaTrackType::Audio:
 		case EMediaTrackType::Caption:

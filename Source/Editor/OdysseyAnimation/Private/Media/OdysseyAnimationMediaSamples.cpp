@@ -7,8 +7,6 @@
 #include "Media/OdysseyAnimationMediaTextureSample.h"
 #include "Engine/Texture2D.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyAnimationMediaSamples"
-
 FOdysseyAnimationMediaSamples::FOdysseyAnimationMediaSamples()
 	: mAnimation(nullptr)
     , mCurrentFrameIndex(INDEX_NONE)
@@ -382,5 +380,3 @@ FOdysseyAnimationMediaSamples::Tick(float DeltaTime)
 	CopyBlockToTexture(block, mInvalidTileMap.InvalidRects());
     mInvalidTileMap.Clear();
 }
-
-#undef LOCTEXT_NAMESPACE

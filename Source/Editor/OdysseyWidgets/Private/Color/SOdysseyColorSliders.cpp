@@ -12,7 +12,7 @@
 #include "Widgets/Views/SListView.h"
 #include "Color/SOdysseyColorSlider.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyColorSliders"
+#define LOCTEXT_NAMESPACE "Widgets"
 
 
 /////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ SOdysseyColorSliders::Construct( const FArguments& InArgs )
                 .VAlign( VAlign_Center )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "Sliders", "Sliders" ) )
+                    .Text( LOCTEXT( "color-sliders.sliders", "Sliders" ) )
                 ]
             ]
             +SHorizontalBox::Slot()

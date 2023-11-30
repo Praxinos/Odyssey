@@ -8,8 +8,6 @@
 #include "Widgets/SOdysseyPaletteTreeView.h"
 #include "Widgets/Colors/SColorPicker.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyPaletteColorRow"
-
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntryColor* iColorEntry)
 {
@@ -82,5 +80,3 @@ FLinearColor SOdysseyPaletteColorRow::GetEntryColorAsLinear() const
 {
     return FLinearColor( mColorEntry->GetUsedColor() );
 }
-
-#undef LOCTEXT_NAMESPACE

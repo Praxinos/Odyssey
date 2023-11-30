@@ -5,7 +5,7 @@
 
 #include "Widgets/SOdysseyTextureDetails.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorTextureDetailsTab"
+#define LOCTEXT_NAMESPACE "TextureEditor"
 
 const FName&
 FOdysseyTextureEditorTextureDetailsTab::StaticId()
@@ -23,7 +23,7 @@ FOdysseyTextureEditorTextureDetailsTab::~FOdysseyTextureEditorTextureDetailsTab(
 }
 
 FOdysseyTextureEditorTextureDetailsTab::FOdysseyTextureEditorTextureDetailsTab(FOdysseyTextureEditorExtension* iExtension)
-	: FOdysseyEditorTab( LOCTEXT( "OdysseyTextureEditorTextureDetailsTab", "Texture Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
+	: FOdysseyEditorTab( LOCTEXT( "texture-details-tab.name", "Texture Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
     , mExtension(iExtension)
 {
 }

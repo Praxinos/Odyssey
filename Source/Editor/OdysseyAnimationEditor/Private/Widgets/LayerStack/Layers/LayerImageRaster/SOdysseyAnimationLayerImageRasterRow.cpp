@@ -9,9 +9,16 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 
-#define LOCTEXT_NAMESPACE "SOdysseyAnimationLayerImageRasterRow"
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
+
+SOdysseyAnimationLayerImageRasterRow::SOdysseyAnimationLayerImageRasterRow()
+    : mSetOpacityTransactionName(LOCTEXT("layer-image-raster.transaction.set-opacity", "Change Layer Opacity"))
+{
+    
+}
+
 void SOdysseyAnimationLayerImageRasterRow::Construct(
     const FArguments& InArgs,
     const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
@@ -138,7 +145,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             .Visibility(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility)
             [
                 SNew(STextBlock)
-                .Text(LOCTEXT("OdysseyLayerImageRasterBlendingMode", "LightTable"))
+                .Text(LOCTEXT("layer-image-raster.timeline-header.lighttable", "LightTable"))
             ]
         ];
 }
@@ -166,7 +173,7 @@ void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
@@ -180,7 +187,7 @@ void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityBeginSliderMovement()
 {
     //Creating a transaction here manages entering a value using slider
-    GEditor->BeginTransaction(LOCTEXT("LayerTransaction", "Change Layer Opacity"));
+    GEditor->BeginTransaction(mSetOpacityTransactionName);
 }
 
 void
@@ -205,7 +212,7 @@ void
 SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerTransaction", "Change Layer BlendMode"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-raster.transaction.set-blend-mode", "Change Layer BlendMode"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "BlendMode", iValue);
 }
 

@@ -12,7 +12,7 @@
 #define M_PI 3.14159265358979323846L
 #endif
 
-#define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorPrimitiveDrawingTool"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -264,7 +264,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
 
             // Undo must be called before association with parent object
             // needed for valid GUndo pointer
-            GEditor->BeginTransaction(LOCTEXT("VectorPrimitiveDrawingTool","Vector Primitive Drawing Tool"));
+            GEditor->BeginTransaction(LOCTEXT("vector-primitive-drawing-tool.transaction.draw-primitive","Vector Primitive Drawing Tool"));
             if( GUndo )
             {
                 FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path );

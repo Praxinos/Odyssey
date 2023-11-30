@@ -13,7 +13,7 @@
 
 /////////////////////////////////////////////////////
 // Defines
-#define LOCTEXT_NAMESPACE "OdysseyAnimationFactory"
+#define LOCTEXT_NAMESPACE "Animation"
 
 #define MAX_CANVAS_SIZE 8192
 #define MIN_CANVAS_SIZE 1
@@ -51,7 +51,7 @@ SOdysseyAnimationConfigureWindow::Construct( const FArguments& iArgs)
     //---
 
     SWindow::Construct( SWindow::FArguments()
-        .Title( LOCTEXT( "title", "Create Texture Asset" ) )
+        .Title( LOCTEXT( "configure-window.title", "Create Texture Asset" ) )
         // Remove the empty space at the bottom but doesn't scale anymore
         //.SizingRule( ESizingRule::FixedSize )
         //.ClientSize( FVector2D( 300, 180 ) )
@@ -79,7 +79,7 @@ SOdysseyAnimationConfigureWindow::Construct( const FArguments& iArgs)
                     SNew( SButton )
                     .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
                     .HAlign( HAlign_Center )
-                    .Text( LOCTEXT( "create-asset", "Create Asset" ) )
+                    .Text( LOCTEXT( "configure-window.create-asset", "Create Asset" ) )
                     .OnClicked_Raw( this, &SOdysseyAnimationConfigureWindow::OnAccept )
                 ]
 
@@ -88,7 +88,7 @@ SOdysseyAnimationConfigureWindow::Construct( const FArguments& iArgs)
                     SNew( SButton )
                     .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
                     .HAlign( HAlign_Center )
-                    .Text( LOCTEXT( "cancel", "Cancel" ) )
+                    .Text( LOCTEXT( "configure-window.cancel", "Cancel" ) )
                     .OnClicked_Raw( this, &SOdysseyAnimationConfigureWindow::OnCancel )
                 ]
             ]

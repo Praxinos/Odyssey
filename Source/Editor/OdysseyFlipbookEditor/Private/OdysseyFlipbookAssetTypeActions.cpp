@@ -12,7 +12,7 @@
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyPainterEditorSettings.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbook_AssetTypeActions"
+#define LOCTEXT_NAMESPACE "FlipbookEditor"
 
 //////////////////////////////////////////////////////////////////////////
 // FOdysseyFlipbookAssetTypeActions
@@ -24,7 +24,7 @@ FOdysseyFlipbookAssetTypeActions::FOdysseyFlipbookAssetTypeActions( EAssetTypeCa
 FText
 FOdysseyFlipbookAssetTypeActions::GetName() const
 {
-    return LOCTEXT( "FOdysseyFlipbookTypeActionsName", "Flipbook" );
+    return LOCTEXT( "asset-type-actions.name", "Flipbook" );
 }
 
 FColor

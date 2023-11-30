@@ -8,7 +8,7 @@
 #include "ObjectEditorUtils.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorColorSlidersTab"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
 FOdysseyPainterEditorColorSlidersTab::StaticId()
@@ -26,7 +26,7 @@ FOdysseyPainterEditorColorSlidersTab::~FOdysseyPainterEditorColorSlidersTab()
 }
 
 FOdysseyPainterEditorColorSlidersTab::FOdysseyPainterEditorColorSlidersTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "OdysseyPainterEditorColorSlidersTab", "Color Sliders" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorSliders_2_16" ))
+	: FOdysseyEditorTab(LOCTEXT( "color-sliders-tab.name", "Color Sliders" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorSliders_2_16" ))
     , mEditor(iEditor)
 {
 }
