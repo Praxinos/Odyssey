@@ -4,6 +4,7 @@
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserToolHUD.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorVectorEraserTool"
 
