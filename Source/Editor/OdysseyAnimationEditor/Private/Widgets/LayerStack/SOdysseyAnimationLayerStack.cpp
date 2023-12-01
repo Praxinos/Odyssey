@@ -8,6 +8,7 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -49,13 +50,14 @@ void
 SOdysseyAnimationLayerStack::RebuildWidgets()
 {
     this->ChildSlot.DetachWidget();
-    
-    TSharedPtr<SWidget> widget = SNullWidget::NullWidget;
-
     UOdysseyLayerStack* layerstack = mLayerStack.Get();
-    if (layerstack)
-    {
-        widget = SNew(SVerticalBox)
+    
+    TSharedPtr<SWidget> widget =
+    SNew(SWidgetSwitcher)
+    .WidgetIndex_Lambda([this](){ return mLayerStack.Get() == nullptr ? 1 : 0; })
+    +SWidgetSwitcher::Slot()
+    [
+        SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .AutoHeight()
         [
@@ -104,17 +106,17 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
             SAssignNew(mTimelineScrollBar, SScrollBar)
             .Orientation( Orient_Horizontal )
             .OnUserScrolled_Raw(this, &SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled)
-        ];
-    }
-    else
-    {
+        ]
+    ]
+    + SWidgetSwitcher::Slot()
+    [
         /**
          * Display a PlaceHolder when no layerstack can be displayed
          * 
          */
-        widget = SNew(STextBlock)
-        .Text(LOCTEXT("timeline.nothing-to-display", "No Timeline can be displayed"));
-    }
+        SNew(STextBlock)
+        .Text(LOCTEXT("timeline.nothing-to-display", "No Timeline can be displayed"))
+    ];
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());
 }

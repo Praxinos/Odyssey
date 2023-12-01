@@ -121,12 +121,18 @@ SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs, FOdysseyA
 bool
 SOdysseyAnimationPlaybackControls::IsPlayingForward() const
 {
+	if (!mExtension->Player())
+		return false;
+
     return mExtension->Player()->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && !mExtension->Player()->IsBackward();
 }
 
 bool
 SOdysseyAnimationPlaybackControls::IsPlayingBackward() const
 {
+	if (!mExtension->Player())
+		return false;
+		
 	return mExtension->Player()->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && mExtension->Player()->IsBackward();
 }
 
@@ -146,12 +152,18 @@ SOdysseyAnimationPlaybackControls::GetPlayBackwardButtonVisibility() const
 EVisibility
 SOdysseyAnimationPlaybackControls::GetLoopingButtonVisibility() const
 {
+	if (!mExtension->Player())
+		return EVisibility::Collapsed;
+
 	return mExtension->Player()->GetIsLooping() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
 SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 {
+	if (!mExtension->Player())
+		return EVisibility::Collapsed;
+
 	return mExtension->Player()->GetIsLooping() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
