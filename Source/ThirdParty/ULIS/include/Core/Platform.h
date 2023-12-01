@@ -279,7 +279,10 @@ namespace ULIS_NAMESPACE_NAME {}
 #define _mm_storeu_si32(p, a) (void)(*(int*)(p) = _mm_cvtsi128_si32((a)))
 #endif
 #endif
+#ifndef __aarch64__ //ARM64
 #include <immintrin.h>
+#define INCL_IMMINTRIN
+#endif
 #endif
 
 /////////////////////////////////////////////////////

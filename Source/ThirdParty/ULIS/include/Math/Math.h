@@ -26,7 +26,7 @@ namespace FMath
     static constexpr float  kGoldenRatio = 1.61803398875f;
 
     static ULIS_FORCEINLINE int32 FloorToInt( ufloat iValue ) {
-        #ifdef ULIS_COMPILED_WITH_SIMD_SUPPORT
+        #if defined(ULIS_COMPILED_WITH_SIMD_SUPPORT) && defined(INCL_IMMINTRIN)
             return  _mm_cvt_ss2si( _mm_set_ss( iValue + iValue - 0.5f ) ) >> 1;
         #else
             return  static_cast< int32>( floor( iValue ) );
@@ -38,7 +38,7 @@ namespace FMath
     }
 
     static ULIS_FORCEINLINE int32 CeilToInt( ufloat iValue ) {
-        #ifdef ULIS_COMPILED_WITH_SIMD_SUPPORT
+    #if defined(ULIS_COMPILED_WITH_SIMD_SUPPORT) && defined(INCL_IMMINTRIN)
             return -( _mm_cvt_ss2si( _mm_set_ss( -0.5f - ( iValue + iValue ) ) ) >> 1 );
         #else
             return  static_cast< int32>( ceil( iValue ) );
