@@ -47,22 +47,6 @@ struct FWayPoint
     }
 };
 
-struct FWaySection
-{
-    FOdysseyVectorSection* section;
-    uint32 indexWayPoint0;
-    uint32 indexWayPoint1;
-
-    FWaySection( FOdysseyVectorSection* iSection
-               , uint32 iIndexWayPoint0
-               , uint32 iIndexWayPoint1 )
-    {
-        section = iSection;
-        indexWayPoint0 = iIndexWayPoint0;
-        indexWayPoint1 = iIndexWayPoint1;
-    }
-};
-
 struct FWayFragment
 {
     FOdysseyVectorSegment* segment;
@@ -127,7 +111,9 @@ class FOdysseyVectorChain
         bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
         static void ExtendErasedSection( FOdysseyVectorVertex* iVertex
                                        , FOdysseyVectorSection* iFromSection );
-
+        static uint32 GetErasureFlag( FOdysseyVectorSection* iPreviousSection
+                                    , FOdysseyVectorVertex* iVertex
+                                    , FOdysseyVectorSection* iCurrentSection );
     private :
         FOdysseyVectorPath* mPath;
         std::vector<FOdysseyVectorVertex*> mVertexArray;

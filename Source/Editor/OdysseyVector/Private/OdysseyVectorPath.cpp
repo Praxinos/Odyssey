@@ -852,11 +852,23 @@ FOdysseyVectorPath::VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit )
 
     if( iSplit )
     {
-        if( ( iWayPoint->flags & FWayPoint::OutsideErasureArea )
-         && ( iWayPoint->flags & FWayPoint::Original           ) )
+        if( iWayPoint->flags & FWayPoint::Original )
         {
-            retFlags |= ( eVertexAdditionFlags::RemoveOriginalVertex
-                        | eVertexAdditionFlags::CreateDerivedVertex );
+            retFlags |= ( eVertexAdditionFlags::RemoveOriginalVertex );
+
+            if( ( iWayPoint->flags & FWayPoint::LeavesErasureArea )
+             || ( iWayPoint->flags & FWayPoint::EntersErasureArea ) )
+            {
+                if( iWayPoint->vertex->GetSegmentCount() == 2 )
+                {
+                    retFlags |= ( eVertexAdditionFlags::CreateDerivedVertex );
+                }
+            }
+
+            if( iWayPoint->flags & FWayPoint::OutsideErasureArea )
+            {
+                retFlags |= ( eVertexAdditionFlags::CreateDerivedVertex );
+            }
         }
     }
 
@@ -867,12 +879,18 @@ FOdysseyVectorPath::VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit )
 
     if( iWayPoint->flags & FWayPoint::EntersErasureArea )
     {
-        retFlags |= eVertexAdditionFlags::CreateBoundaryVertex;
+        if( ( iWayPoint->flags & FWayPoint::Original ) == 0 )
+        {
+            retFlags |= eVertexAdditionFlags::CreateBoundaryVertex;
+        }
     }
 
     if( iWayPoint->flags & FWayPoint::LeavesErasureArea )
     {
-        retFlags |= eVertexAdditionFlags::CreateBoundaryVertex;
+        if( ( iWayPoint->flags & FWayPoint::Original ) == 0 )
+        {
+            retFlags |= eVertexAdditionFlags::CreateBoundaryVertex;
+        }
     }
 
     return retFlags;
