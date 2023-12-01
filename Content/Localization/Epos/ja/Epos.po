@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2023-11-24 15:33\n"
-"PO-Revision-Date: 2023-11-24 15:33\n"
+"POT-Creation-Date: 2023-12-01 11:00\n"
+"PO-Revision-Date: 2023-12-01 11:00\n"
 "Language-Team: \n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -182,43 +182,43 @@ msgid "EPOS"
 msgstr ""
 
 #. Key:	multiple-planes
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(192)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(192)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(204)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(204)
 msgctxt "BoardSequenceCustomization,multiple-planes"
 msgid "There are multiple planes. Select one of them."
 msgstr ""
 
 #. Key:	Settings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(464)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(464)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(469)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(469)
 msgctxt "BoardSequenceCustomization,Settings"
 msgid "Settings"
 msgstr ""
 
 #. Key:	SettingsToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(465)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(465)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(470)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(470)
 msgctxt "BoardSequenceCustomization,SettingsToolTip"
 msgid "Set settings"
 msgstr ""
 
 #. Key:	Help
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(473)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(473)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(478)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(478)
 msgctxt "BoardSequenceCustomization,Help"
 msgid "Help"
 msgstr ""
 
 #. Key:	HelpToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(474)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(474)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(479)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(479)
 msgctxt "BoardSequenceCustomization,HelpToolTip"
 msgid "Help"
 msgstr ""
 
 #. Key:	infobar-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(482)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(482)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(487)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(487)
 msgctxt "BoardSequenceCustomization,infobar-tooltip"
 msgid "Double-click on the infobar to open its pattern settings"
 msgstr ""
@@ -651,197 +651,197 @@ msgid "Configure the look and feel of the Epos Sequencer Editor."
 msgstr ""
 
 #. Key:	AppLabel
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(404)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(404)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(296)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(296)
 msgctxt "EposSequenceEditorToolkit,AppLabel"
 msgid "Epos Sequence Editor"
 msgstr ""
 
 #. Key:	WorldCentricTabPrefix
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(415)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(415)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(307)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(307)
 msgctxt "EposSequenceEditorToolkit,WorldCentricTabPrefix"
 msgid "Sequencer "
 msgstr ""
 
 #. Key:	TabSuffixAsterix
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(435)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(435)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(327)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(327)
 msgctxt "EposSequenceEditorToolkit,TabSuffixAsterix"
 msgid "*"
 msgstr ""
 
 #. Key:	ComponentsSection
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(480)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(480)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(372)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(372)
 msgctxt "EposSequenceEditorToolkit,ComponentsSection"
 msgid "Components"
 msgstr ""
 
 #. Key:	ComponentToolTipFormat
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(499)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(499)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(391)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(391)
 msgctxt "EposSequenceEditorToolkit,ComponentToolTipFormat"
 msgid "Add {0} component"
 msgstr ""
 
 #. Key:	AddComponent
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(510)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(510)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(402)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(402)
 msgctxt "EposSequenceEditorToolkit,AddComponent"
 msgid "Add Component"
 msgstr ""
 
 #. Key:	settings.drawing-material.section-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(134)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(134)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(135)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(135)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.section-label"
 msgid "Material"
 msgstr ""
 
 #. Key:	settings.drawing-material.background-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(144)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(144)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(145)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(145)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.background-label"
 msgid "Background"
 msgstr ""
 
 #. Key:	settings.drawing-material.background-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(149)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(149)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(150)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(150)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.background-tooltip"
 msgid "Display background and select its color for the drawing materials"
 msgstr ""
 
 #. Key:	settings.drawing-material.grid-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(160)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(160)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(161)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(161)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.grid-label"
 msgid "Grid"
 msgstr ""
 
 #. Key:	settings.drawing-material.grid-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(165)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(165)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(166)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(166)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.grid-tooltip"
 msgid "Display grid and select its color for the drawing materials"
 msgstr ""
 
 #. Key:	settings.drawing-material.grid-type-none-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(191)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(191)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(192)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(192)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.grid-type-none-tooltip"
 msgid "No grid"
 msgstr ""
 
 #. Key:	settings.drawing-material.grid-type-2x2-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(192)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(192)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(193)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(193)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.grid-type-2x2-tooltip"
 msgid "2x2"
 msgstr ""
 
 #. Key:	settings.drawing-material.grid-type-3x3-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(193)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(193)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(194)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(194)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.grid-type-3x3-tooltip"
 msgid "3x3"
 msgstr ""
 
 #. Key:	settings.drawing-material.grid-type-crosshair-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(194)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(194)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(195)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(195)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.grid-type-crosshair-tooltip"
 msgid "Crosshair"
 msgstr ""
 
 #. Key:	settings.drawing-material.grid-type-rabatment-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(195)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(195)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(196)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(196)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.grid-type-rabatment-tooltip"
 msgid "Rabatment"
 msgstr ""
 
 #. Key:	settings.drawing-material.grid-type-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(198)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(198)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(199)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(199)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.grid-type-label"
 msgid "Grid Type"
 msgstr ""
 
 #. Key:	settings.drawing-material.grid-type-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(198)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(198)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(199)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(199)
 msgctxt "EposSequenceToolbarHelpers,settings.drawing-material.grid-type-tooltip"
 msgid "Select the inner grid type"
 msgstr ""
 
 #. Key:	settings.lighttable.section-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(204)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(204)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(205)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(205)
 msgctxt "EposSequenceToolbarHelpers,settings.lighttable.section-label"
 msgid "Lighttable"
 msgstr ""
 
 #. Key:	settings.lighttable.previous-drawing-color-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(221)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(221)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(222)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(222)
 msgctxt "EposSequenceToolbarHelpers,settings.lighttable.previous-drawing-color-tooltip"
 msgid "Select the color of the previous drawing when the lighttable is enabled"
 msgstr ""
 
 #. Key:	settings.lighttable.previous-drawing-color-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(225)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(225)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(226)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(226)
 msgctxt "EposSequenceToolbarHelpers,settings.lighttable.previous-drawing-color-label"
 msgid "Previous Drawing Color"
 msgstr ""
 
 #. Key:	settings.lighttable.next-drawing-color-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(244)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(244)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(245)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(245)
 msgctxt "EposSequenceToolbarHelpers,settings.lighttable.next-drawing-color-tooltip"
 msgid "Select the color of the next drawing when the lighttable is enabled"
 msgstr ""
 
 #. Key:	settings.lighttable.next-drawing-color-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(248)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(248)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(249)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(249)
 msgctxt "EposSequenceToolbarHelpers,settings.lighttable.next-drawing-color-label"
 msgid "Next Drawing Color"
 msgstr ""
 
 #. Key:	settings.advanced-settings.section-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(254)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(254)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(255)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceToolbarHelpers.cpp(255)
 msgctxt "EposSequenceToolbarHelpers,settings.advanced-settings.section-label"
 msgid "Advanced Settings"
 msgstr ""
 
 #. Key:	ExportStoryboard
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(107)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(107)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(108)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(108)
 msgctxt "ImageSequenceExportDialog,ExportStoryboard"
 msgid "Export Panels"
 msgstr ""
 
 #. Key:	export-storyboard.tabs.export-image-sequence
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(142)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(142)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(143)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(143)
 msgctxt "ImageSequenceExportDialog,export-storyboard.tabs.export-image-sequence"
 msgid "Image Sequence"
 msgstr ""
 
 #. Key:	export-storyboard.tabs.export-pdf
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(157)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(157)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(158)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(158)
 msgctxt "ImageSequenceExportDialog,export-storyboard.tabs.export-pdf"
 msgid "PDF"
 msgstr ""
 
 #. Key:	ExportStoryboardDialogTitle
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(372)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(372)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(382)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ExportDialog.cpp(382)
 msgctxt "ImageSequenceExportDialog,ExportStoryboardDialogTitle"
 msgid "Export Storyboard Settings"
 msgstr ""
@@ -973,50 +973,50 @@ msgid "multiple planes"
 msgstr ""
 
 #. Key:	thumbnail-scale-mulitplier.tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(125)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(125)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(128)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(128)
 msgctxt "ImageSequenceExportDialog,thumbnail-scale-mulitplier.tooltip"
 msgid "Change the size of the thumbnails."
 msgstr ""
 
 #. Key:	StoryboardEmptyName
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(242)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(242)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(245)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(245)
 msgctxt "ImageSequenceExportDialog,StoryboardEmptyName"
 msgid "Error: Empty Storyboard Pattern"
 msgstr ""
 
 #. Key:	StoryboardEmptyPath
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(245)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(245)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(248)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(248)
 msgctxt "ImageSequenceExportDialog,StoryboardEmptyPath"
 msgid "Error: Empty Storyboard Path"
 msgstr ""
 
 #. Key:	WrongPattern
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(248)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(248)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(251)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/SImageSequenceExportDialog.cpp(251)
 msgctxt "ImageSequenceExportDialog,WrongPattern"
 msgid "Error: Wrong Pattern"
 msgstr ""
 
 #. Key:	StoryboardEmptyPath
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(244)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(244)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(247)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(247)
 msgctxt "PDFExportDialog,StoryboardEmptyPath"
 msgid "Error: Empty Storyboard Path"
 msgstr ""
 
 #. Key:	StoryboardEmptyFile
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(247)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(247)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(250)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(250)
 msgctxt "PDFExportDialog,StoryboardEmptyFile"
 msgid "Error: Empty Storyboard File"
 msgstr ""
 
 #. Key:	ConstructAndRenderPDFLayout
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(93)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(93)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(96)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/PDF/SPDFExportDialog.cpp(96)
 msgctxt "PDFExportDialog,ConstructAndRenderPDFLayout"
 msgid "Construct and Render PDF Layout..."
 msgstr ""
@@ -1358,78 +1358,78 @@ msgid "EPOS"
 msgstr ""
 
 #. Key:	CameraOptions
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(248)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(248)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(250)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(250)
 msgctxt "ShotSequenceCustomization,CameraOptions"
 msgid "Options"
 msgstr ""
 
 #. Key:	CameraOptionsToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(249)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(249)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(251)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(251)
 msgctxt "ShotSequenceCustomization,CameraOptionsToolTip"
 msgid "Camera Options"
 msgstr ""
 
 #. Key:	TextureOptions
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(260)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(260)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(262)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(262)
 msgctxt "ShotSequenceCustomization,TextureOptions"
 msgid "Options"
 msgstr ""
 
 #. Key:	TextureOptionsToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(261)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(261)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(263)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(263)
 msgctxt "ShotSequenceCustomization,TextureOptionsToolTip"
 msgid "Texture Options"
 msgstr ""
 
 #. Key:	enable-lighttable-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(286)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(286)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(288)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(288)
 msgctxt "ShotSequenceCustomization,enable-lighttable-tooltip"
 msgid "Enable the lighttable"
 msgstr ""
 
 #. Key:	disable-lighttable-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(289)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(289)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(291)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(291)
 msgctxt "ShotSequenceCustomization,disable-lighttable-tooltip"
 msgid "Disable the lighttable"
 msgstr ""
 
 #. Key:	LighttableOptionsTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(341)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(341)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(343)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(343)
 msgctxt "ShotSequenceCustomization,LighttableOptionsTooltip"
 msgid "Activate/Deactivate lighttable on planes"
 msgstr ""
 
 #. Key:	Settings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(372)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(372)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(374)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(374)
 msgctxt "ShotSequenceCustomization,Settings"
 msgid "Settings"
 msgstr ""
 
 #. Key:	SettingsToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(373)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(373)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(375)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(375)
 msgctxt "ShotSequenceCustomization,SettingsToolTip"
 msgid "Set sequence settings"
 msgstr ""
 
 #. Key:	Help
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(381)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(381)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(383)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(383)
 msgctxt "ShotSequenceCustomization,Help"
 msgid "Help"
 msgstr ""
 
 #. Key:	HelpToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(382)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(382)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(384)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(384)
 msgctxt "ShotSequenceCustomization,HelpToolTip"
 msgid "Help"
 msgstr ""
@@ -1659,8 +1659,8 @@ msgid "Display the notes at the current frame on the 3D scene."
 msgstr ""
 
 #. Key:	TimeFormat
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1157)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1157)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1138)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1138)
 msgctxt "SStoryboardLevelViewport,TimeFormat"
 msgid "{0}"
 msgstr ""
@@ -1764,15 +1764,15 @@ msgid "No active Board/Shot Sequence Editor detected. Please edit a Board/Shot S
 msgstr ""
 
 #. Key:	storyboard-viewport-add-rotation-section
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(906)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(906)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(903)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(903)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-add-rotation-section"
 msgid "Add Viewport Rotation"
 msgstr ""
 
 #. Key:	storyboard-viewport-set-rotation-section
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(911)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(911)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(908)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(908)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-set-rotation-section"
 msgid "Set Viewport Rotation"
 msgstr ""
@@ -1911,8 +1911,8 @@ msgid "Storyboard Viewport"
 msgstr ""
 
 #. Key:	MaterialTrackName_Format
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/ToolkitHelpers.cpp(151)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/ToolkitHelpers.cpp(151)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/ToolkitHelpers.cpp(154)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/ToolkitHelpers.cpp(154)
 msgctxt "ToolkitHelpers,MaterialTrackName_Format"
 msgid "Material Element {0}"
 msgstr ""
@@ -2317,57 +2317,57 @@ msgid "New Take"
 msgstr ""
 
 #. Key:	TrackText
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(144)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(144)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(146)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(146)
 msgctxt "FCinematicBoardTrackEditor,TrackText"
 msgid "Track"
 msgstr ""
 
 #. Key:	CreateBoardShotText
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(189)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(189)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(201)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(201)
 msgctxt "FCinematicBoardTrackEditor,CreateBoardShotText"
 msgid "Shot/Board"
 msgstr ""
 
 #. Key:	BoardTrackName
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(243)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(243)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(255)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(255)
 msgctxt "FCinematicBoardTrackEditor,BoardTrackName"
 msgid "Board"
 msgstr ""
 
 #. Key:	BoardTrackToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(249)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(249)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(261)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(261)
 msgctxt "FCinematicBoardTrackEditor,BoardTrackToolTip"
 msgid "A cinematic board track."
 msgstr ""
 
 #. Key:	ArrangeSections
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(474)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(474)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(486)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(486)
 msgctxt "FCinematicBoardTrackEditor,ArrangeSections"
 msgid "Arrange Sections"
 msgstr ""
 
 #. Key:	ArrangeSectionsTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(475)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(475)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(487)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(487)
 msgctxt "FCinematicBoardTrackEditor,ArrangeSectionsTooltip"
 msgid "Arrange sections."
 msgstr ""
 
 #. Key:	UnlockBoards
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(861)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(861)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(873)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(873)
 msgctxt "FCinematicBoardTrackEditor,UnlockBoards"
 msgid "Unlock Viewport from Boards"
 msgstr ""
 
 #. Key:	LockBoards
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(862)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(862)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(874)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(874)
 msgctxt "FCinematicBoardTrackEditor,LockBoards"
 msgid "Lock Viewport to Boards"
 msgstr ""
@@ -2828,15 +2828,15 @@ msgid "Create a new plane"
 msgstr ""
 
 #. Key:	create-plane-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(2062)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(2062)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(2064)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(2064)
 msgctxt "SCinematicBoardSectionPlanes,create-plane-label"
 msgid "Create a new plane"
 msgstr ""
 
 #. Key:	create-plane-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(2063)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(2063)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(2065)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(2065)
 msgctxt "SCinematicBoardSectionPlanes,create-plane-tooltip"
 msgid "Create a new plane with those settings"
 msgstr ""
@@ -2926,80 +2926,73 @@ msgid "Add a new board or shot after"
 msgstr ""
 
 #. Key:	create-camera-and-plane-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(273)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(273)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(275)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(275)
 msgctxt "SCinematicBoardSectionThumbnails,create-camera-and-plane-label"
 msgid "Create a new camera and its plane"
 msgstr ""
 
 #. Key:	create-camera-and-plane-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(274)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(274)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(276)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(276)
 msgctxt "SCinematicBoardSectionThumbnails,create-camera-and-plane-tooltip"
 msgid "Create a new camera and its plane with those settings"
 msgstr ""
 
 #. Key:	TakeNumberTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(315)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(315)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(317)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(317)
 msgctxt "SCinematicBoardSectionThumbnails,TakeNumberTooltip"
 msgid "Switch to {0}"
 msgstr ""
 
 #. Key:	NewTake
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(327)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(327)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(329)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(329)
 msgctxt "SCinematicBoardSectionThumbnails,NewTake"
 msgid "New Take"
 msgstr ""
 
 #. Key:	NewTakeTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(328)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(328)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(330)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(330)
 msgctxt "SCinematicBoardSectionThumbnails,NewTakeTooltip"
 msgid "Create a new take for {0}"
 msgstr ""
 
 #. Key:	section.create-shot-before-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(357)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(357)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(359)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(359)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-before-label"
 msgid "New {0}|plural(one=Shot,other=Shots)"
 msgstr ""
 
 #. Key:	section.create-shot-before-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(359)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(359)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(361)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(361)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-before-tooltip"
 msgid "Create a new section containing a new shot before this section with the same duration as the current section"
 msgstr ""
 
 #. Key:	section.create-shot-before-with-duration-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(376)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(376)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(378)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(378)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-before-with-duration-label"
 msgid "New {0}|plural(one=Shot,other=Shots)"
 msgstr ""
 
 #. Key:	section.create-shot-before-with-duration-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(378)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(378)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(380)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(380)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-before-with-duration-tooltip"
 msgid "Create a new section containing a new shot before this section with the specified duration"
 msgstr ""
 
 #. Key:	section.create-board-before-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(397)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(397)
-msgctxt "SCinematicBoardSectionThumbnails,section.create-board-before-label"
-msgid "New {0}|plural(one=Board,other=Boards)"
-msgstr ""
-
-#. Key:	section.create-board-before-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(399)
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(399)
-msgctxt "SCinematicBoardSectionThumbnails,section.create-board-before-tooltip"
-msgid "Create a new section containing a new board before this section with the same duration as the current section"
+msgctxt "SCinematicBoardSectionThumbnails,section.create-board-before-label"
+msgid "New {0}|plural(one=Board,other=Boards)"
 msgstr ""
 
 #. Key:	AddBoardBefore
@@ -3009,86 +3002,93 @@ msgctxt "SCinematicBoardSectionThumbnails,AddBoardBefore"
 msgid "Add a new board or shot before"
 msgstr ""
 
+#. Key:	section.create-board-before-tooltip
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(401)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(401)
+msgctxt "SCinematicBoardSectionThumbnails,section.create-board-before-tooltip"
+msgid "Create a new section containing a new board before this section with the same duration as the current section"
+msgstr ""
+
 #. Key:	section.create-board-before-with-duration-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(416)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(416)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(418)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(418)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-before-with-duration-label"
 msgid "New {0}|plural(one=Board,other=Boards)"
 msgstr ""
 
 #. Key:	section.create-board-before-with-duration-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(418)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(418)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(420)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(420)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-before-with-duration-tooltip"
 msgid "Create a new section containing a new board before this section with the specified duration"
 msgstr ""
 
 #. Key:	section.clone-section-before-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(444)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(444)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(446)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(446)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-before-label"
 msgid "Clone Shot"
 msgstr ""
 
 #. Key:	section.clone-section-before-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(445)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(445)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(447)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(447)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-before-tooltip"
 msgid "Clone this shot before (actors and drawing assets will be cloned as well)"
 msgstr ""
 
 #. Key:	section.clone-section-before-and-empty-drawings-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(450)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(450)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(452)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(452)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-before-and-empty-drawings-label"
 msgid "Clone Shot (with empty drawings)"
 msgstr ""
 
 #. Key:	section.clone-section-before-and-empty-drawings-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(451)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(451)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(453)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(453)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-before-and-empty-drawings-tooltip"
 msgid "Clone this shot before (actors and empty drawing assets will be cloned as well)"
 msgstr ""
 
 #. Key:	section.create-shot-after-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(477)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(477)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(479)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(479)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-after-label"
 msgid "New {0}|plural(one=Shot,other=Shots)"
 msgstr ""
 
 #. Key:	section.create-shot-after-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(479)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(479)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(481)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(481)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-after-tooltip"
 msgid "Create a new section containing a new shot after this section with the same duration as the current section"
 msgstr ""
 
 #. Key:	section.create-shot-after-with-duration-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(496)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(496)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(498)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(498)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-after-with-duration-label"
 msgid "New {0}|plural(one=Shot,other=Shots)"
 msgstr ""
 
 #. Key:	section.create-shot-after-with-duration-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(498)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(498)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(500)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(500)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-after-with-duration-tooltip"
 msgid "Create a new section containing a new shot after this section with the specified duration"
 msgstr ""
 
 #. Key:	section.create-board-after-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(517)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(517)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(519)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(519)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-after-label"
 msgid "New {0}|plural(one=Board,other=Boards)"
 msgstr ""
 
 #. Key:	section.create-board-after-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(519)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(519)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(521)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(521)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-after-tooltip"
 msgid "Create a new section containing a new board after this section with the same duration as the current section"
 msgstr ""
@@ -3101,15 +3101,15 @@ msgid "Switch take"
 msgstr ""
 
 #. Key:	section.create-board-after-with-duration-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(536)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(536)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(538)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(538)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-after-with-duration-label"
 msgid "New {0}|plural(one=Board,other=Boards)"
 msgstr ""
 
 #. Key:	section.create-board-after-with-duration-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(538)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(538)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(540)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(540)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-after-with-duration-tooltip"
 msgid "Create a new section containing a new board after this section with the specified duration"
 msgstr ""
@@ -3122,29 +3122,29 @@ msgid "Switch take\n\nDrawing(s) must not be in edition mode"
 msgstr ""
 
 #. Key:	section.clone-section-after-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(564)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(564)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(566)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(566)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-after-label"
 msgid "Clone Shot"
 msgstr ""
 
 #. Key:	section.clone-section-after-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(565)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(565)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(567)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(567)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-after-tooltip"
 msgid "Clone this shot after (actors and drawing assets will be cloned as well)"
 msgstr ""
 
 #. Key:	section.clone-section-after-and-empty-drawings-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(570)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(570)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(572)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(572)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-after-and-empty-drawings-label"
 msgid "Clone Shot (with empty drawings)"
 msgstr ""
 
 #. Key:	section.clone-section-after-and-empty-drawings-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(571)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(571)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(573)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(573)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-after-and-empty-drawings-tooltip"
 msgid "Clone this shot after (actors and empty drawing assets will be cloned as well)"
 msgstr ""
@@ -3395,64 +3395,64 @@ msgid "([Ctrl] + Double-click) on the note section to open the note editor"
 msgstr ""
 
 #. Key:	DropAssets
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(203)
-#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(203)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(204)
+#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(204)
 msgctxt "FNoteTrackEditor,DropAssets"
 msgid "Drop Assets"
 msgstr ""
 
 #. Key:	NoteText
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(259)
-#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(259)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(260)
+#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(260)
 msgctxt "FNoteTrackEditor,NoteText"
 msgid "Note"
 msgstr ""
 
 #. Key:	AddNote_Transaction
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(277)
-#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(277)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(278)
+#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(278)
 msgctxt "FNoteTrackEditor,AddNote_Transaction"
 msgid "Add Note"
 msgstr ""
 
 #. Key:	NoteTrackName
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(355)
-#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(355)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(356)
+#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(356)
 msgctxt "FNoteTrackEditor,NoteTrackName"
 msgid "Note"
 msgstr ""
 
 #. Key:	AddNoteTrack_Transaction
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(434)
-#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(434)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(435)
+#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(435)
 msgctxt "Sequencer,AddNoteTrack_Transaction"
 msgid "Add Note Track"
 msgstr ""
 
 #. Key:	menu-new-note-label
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(508)
-#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(508)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(509)
+#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(509)
 msgctxt "FNoteTrackEditor,menu-new-note-label"
 msgid "New Note"
 msgstr ""
 
 #. Key:	AddNote_Transaction
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(558)
-#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(558)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(559)
+#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(559)
 msgctxt "Sequencer,AddNote_Transaction"
 msgid "Add Note"
 msgstr ""
 
 #. Key:	AddTrack
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(85)
-#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(85)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(86)
+#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(86)
 msgctxt "FNoteTrackEditor,AddTrack"
 msgid "Note Track"
 msgstr ""
 
 #. Key:	AddTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(86)
-#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(86)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(87)
+#: Plugins/Epos/Source/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(87)
 msgctxt "FNoteTrackEditor,AddTooltip"
 msgid "Adds a new master note track that can play sounds."
 msgstr ""
@@ -3535,85 +3535,85 @@ msgid "Set Camera Cut"
 msgstr ""
 
 #. Key:	AddSingleCameraCutTrack
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(115)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(115)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(116)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(116)
 msgctxt "FSingleCameraCutTrackEditor,AddSingleCameraCutTrack"
 msgid "Single Camera Cut Track"
 msgstr ""
 
 #. Key:	AddSingleCameraCutTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(116)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(116)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(117)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(117)
 msgctxt "FSingleCameraCutTrackEditor,AddSingleCameraCutTooltip"
 msgid "Adds a single camera cut track, as well as a new camera cut at the current scrubber location if a camera is selected."
 msgstr ""
 
 #. Key:	SingleCameraCutText
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(204)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(204)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(205)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(205)
 msgctxt "FSingleCameraCutTrackEditor,SingleCameraCutText"
 msgid "Camera"
 msgstr ""
 
 #. Key:	AddCameraCutTrack_Transaction
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(398)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(398)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(399)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(399)
 msgctxt "FSingleCameraCutTrackEditor,AddCameraCutTrack_Transaction"
 msgid "Add Camera Cut Track"
 msgstr ""
 
 #. Key:	SingleCameraCutTrack
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(45)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(45)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(46)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(46)
 msgctxt "Contexts,SingleCameraCutTrack"
 msgid "SingleCameraCutTrack"
 msgstr ""
 
 #. Key:	ExistingBinding
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(502)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(502)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(503)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(503)
 msgctxt "FSingleCameraCutTrackEditor,ExistingBinding"
 msgid "Existing Binding"
 msgstr ""
 
 #. Key:	NewBinding
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(503)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(503)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(504)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(504)
 msgctxt "FSingleCameraCutTrackEditor,NewBinding"
 msgid "New Binding"
 msgstr ""
 
 #. Key:	NewBinding_Tip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(510)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(510)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(511)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(511)
 msgctxt "FSingleCameraCutTrackEditor,NewBinding_Tip"
 msgid "Add a new camera cut by creating a new binding to an object in the world."
 msgstr ""
 
 #. Key:	UnlockCamera
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(612)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(612)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(613)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(613)
 msgctxt "FSingleCameraCutTrackEditor,UnlockCamera"
 msgid "Unlock Viewport from Camera Cuts"
 msgstr ""
 
 #. Key:	LockCamera
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(613)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(613)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(614)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(614)
 msgctxt "FSingleCameraCutTrackEditor,LockCamera"
 msgid "Lock Viewport to Camera Cuts"
 msgstr ""
 
 #. Key:	ToggleLockCamera
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(66)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(66)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(67)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(67)
 msgctxt "UICommands.FSingleCameraCutTrackEditor,ToggleLockCamera"
 msgid "Toggle Lock Camera"
 msgstr ""
 
 #. Key:	ToggleLockCamera_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(66)
-#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(66)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(67)
+#: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(67)
 msgctxt "UICommands.FSingleCameraCutTrackEditor,ToggleLockCamera_ToolTip"
 msgid "Toggle locking the viewport to the single camera cut track."
 msgstr ""
@@ -3626,15 +3626,15 @@ msgid "Set Track Name"
 msgstr ""
 
 #. Key:	transaction.insert-board
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(668)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(668)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(673)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(673)
 msgctxt "EposSequenceTools_Board,transaction.insert-board"
 msgid "Insert Board"
 msgstr ""
 
 #. Key:	transaction.insert-shot
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(697)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(697)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(707)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(707)
 msgctxt "EposSequenceTools_Board,transaction.insert-shot"
 msgid "Insert Shot"
 msgstr ""
@@ -3647,15 +3647,15 @@ msgid "Add Board Track"
 msgstr ""
 
 #. Key:	CloneSection_Transaction
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(810)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(810)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(827)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(827)
 msgctxt "EposSequenceTools_Board,CloneSection_Transaction"
 msgid "Clone Section"
 msgstr ""
 
 #. Key:	transaction.stop-piloting-storycamera
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(1153)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(1153)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(1156)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(1156)
 msgctxt "EposSequenceTools_Camera,transaction.stop-piloting-storycamera"
 msgid "Stop Piloting Storyboard Camera"
 msgstr ""
@@ -3668,15 +3668,15 @@ msgid "Create Storyboard Camera Here"
 msgstr ""
 
 #. Key:	transaction.snap-storycamera-to-viewport
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(445)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(445)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(448)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(448)
 msgctxt "EposSequenceTools_Camera,transaction.snap-storycamera-to-viewport"
 msgid "Snap Storyboard Camera To Viewport"
 msgstr ""
 
 #. Key:	transaction.delete-storycamera-transform
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(560)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(560)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(563)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(563)
 msgctxt "EposSequenceTools_Camera,transaction.delete-storycamera-transform"
 msgid "Delete camera keys"
 msgstr ""
@@ -3738,43 +3738,43 @@ msgid "Set plane opacity"
 msgstr ""
 
 #. Key:	CreateStoryPlaneHere
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(325)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(325)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(328)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(328)
 msgctxt "EposSequenceTools_Plane,CreateStoryPlaneHere"
 msgid "Create Storyboard Plane Here"
 msgstr ""
 
 #. Key:	DetachPlane
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(484)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(484)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(487)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(487)
 msgctxt "EposSequenceTools_Plane,DetachPlane"
 msgid "Detach Plane"
 msgstr ""
 
 #. Key:	DeletePlane
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(639)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(639)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(642)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(642)
 msgctxt "EposSequenceTools_Plane,DeletePlane"
 msgid "Delete Plane"
 msgstr ""
 
 #. Key:	TogglePlaneVisibility
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(765)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(765)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(768)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Plane.cpp(768)
 msgctxt "EposSequenceTools_Plane,TogglePlaneVisibility"
 msgid "Toggle Plane Visibility"
 msgstr ""
 
 #. Key:	transaction.switch-take
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Take.cpp(125)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Take.cpp(125)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Take.cpp(130)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Take.cpp(130)
 msgctxt "EposSequenceTools_Take,transaction.switch-take"
 msgid "Switch Take"
 msgstr ""
 
 #. Key:	transaction.create-take
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Take.cpp(45)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Take.cpp(45)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Take.cpp(50)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Take.cpp(50)
 msgctxt "EposSequenceTools_Take,transaction.create-take"
 msgid "Create Take"
 msgstr ""
