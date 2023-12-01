@@ -76,6 +76,10 @@ private:
     void PasteFrames();
     void StaggerCell(int iFrame);
 
+    bool CanDeleteSelectedFrames() const;
+    bool CanCopyFrames() const;
+    bool CanCutFrames() const;
+    bool CanPasteFrames() const;
     bool CanStaggerCell(int iFrame) const;
 
     void SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);

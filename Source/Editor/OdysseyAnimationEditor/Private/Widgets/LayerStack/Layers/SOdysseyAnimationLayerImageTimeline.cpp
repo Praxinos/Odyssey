@@ -88,6 +88,19 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
         if (frame == INDEX_NONE)
             return FReply::Unhandled();
 
+        FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
+        if (selectedFrames.IsEmpty() || frame < selectedFrames.GetLowerBoundValue() ||  frame > selectedFrames.GetUpperBoundValue())
+        {
+            mExtension->Timeline()->SetSelectedFrames(FInt32Range::Empty());
+            int cellIndex = mLayer->GetCellsContainer()->GetCellIndexAtFrame(frame);
+            if (cellIndex != INDEX_NONE)
+            {
+                int startFrame = mLayer->GetCellsContainer()->GetCellFrame(mLayer->GetCellsContainer()->GetCells()[cellIndex]);
+                int endFrame = startFrame + mLayer->GetCellsContainer()->GetCells()[cellIndex]->GetLength() - 1;
+                mExtension->Timeline()->SetSelectedFrames( FInt32Range::Inclusive(startFrame, endFrame) );
+            }
+        }
+
         TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
         MapActions(commandList, frame);
 		FMenuBuilder menuBuilder(true, commandList);
@@ -362,6 +375,48 @@ SOdysseyAnimationLayerImageTimeline::StaggerCell( int iFrame )
 }
 
 bool
+SOdysseyAnimationLayerImageTimeline::CanDeleteSelectedFrames() const
+{
+    FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
+    if (selectedFrames.IsEmpty())
+        return false;
+
+    return true;
+}
+bool
+SOdysseyAnimationLayerImageTimeline::CanCopyFrames() const
+{
+    FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
+    if (selectedFrames.IsEmpty())
+        return false;
+
+    return true;
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::CanCutFrames() const
+{
+    FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
+    if (selectedFrames.IsEmpty())
+        return false;
+
+    return true;
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::CanPasteFrames() const
+{
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyAnimationCellClipboardData>();
+    if (!clipboardData)
+        return false;
+
+    if (!clipboardData->CanPaste(mLayer))
+        return false;
+
+    return true;
+}
+
+bool
 SOdysseyAnimationLayerImageTimeline::CanStaggerCell( int iFrame ) const
 {
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
@@ -442,8 +497,6 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
     iMenuBuilder.EndSection();
 
     iMenuBuilder.BeginSection("Common", LOCTEXT("timeline-cells.context-menu.common-section.name", "Common"));
-        iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Duplicate);
-        iMenuBuilder.AddSeparator("");
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Cut);
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Copy);
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().Paste);
@@ -627,22 +680,26 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
 
     iCommandList->MapAction(
         FGenericCommands::Get().Delete,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames)
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanDeleteSelectedFrames)
     );
 
 	iCommandList->MapAction(
         FGenericCommands::Get().Copy,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CopyFrames)
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CopyFrames),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanCopyFrames)
     );
 
     iCommandList->MapAction(
         FGenericCommands::Get().Cut,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CutFrames)
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CutFrames),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanCutFrames)
     );
 
     iCommandList->MapAction(
         FGenericCommands::Get().Paste,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::PasteFrames)
+        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::PasteFrames),
+        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanPasteFrames)
     );
 
     iCommandList->MapAction(
