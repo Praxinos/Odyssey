@@ -105,18 +105,26 @@ IOdysseyViewportDrawingEditorAdapter::GetDrawingTool()
 
 void IOdysseyViewportDrawingEditorAdapter::UnbindStampBrushInstance(UOdysseyBrushAssetBase* iUnbindBrush)
 {
-    if (iUnbindBrush)
-        iUnbindBrush->GetStampOverrideDelegate().Unbind();
+    /* if (iUnbindBrush)
+        iUnbindBrush->GetStampOverrideDelegate().Unbind();*/
 }
 
 void IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush)
 {
-    if (iBindBrush)
-        iBindBrush->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
+    /* if (iBindBrush)
+        iBindBrush->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride); */
 }
 
 void IOdysseyViewportDrawingEditorAdapter::StartPainting()
 {
+    UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
+    if (rasterDrawingTool)
+    {
+        UOdysseyBrushAssetBase* brushInstance = rasterDrawingTool->GetBrushInstance();
+        if (brushInstance)
+            brushInstance->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
+    }
+
     if (mTool)
         mTool->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
 }
@@ -135,6 +143,14 @@ void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
         return;
     
     mTool->OnMouseUp(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
+
+    UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
+    if (rasterDrawingTool)
+    {
+        UOdysseyBrushAssetBase* brushInstance = rasterDrawingTool->GetBrushInstance();
+        if (brushInstance)
+            brushInstance->GetStampOverrideDelegate().Unbind();
+    }
 }
 
 FVector2D IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FVector2D iPositionInViewport, FEditorViewportClient* iViewportClient)
