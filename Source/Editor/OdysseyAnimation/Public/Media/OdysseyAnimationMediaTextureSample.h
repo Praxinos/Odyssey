@@ -8,7 +8,7 @@
 
 class FOdysseyAnimationMediaTextureSampleConverter;
 
-class FOdysseyAnimationMediaTextureSample
+class ODYSSEYANIMATION_API FOdysseyAnimationMediaTextureSample
 	: public IMediaTextureSample
 	, public TSharedFromThis<FOdysseyAnimationMediaTextureSample>
 {

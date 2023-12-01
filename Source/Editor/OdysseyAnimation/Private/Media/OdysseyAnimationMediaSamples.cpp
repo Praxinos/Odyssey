@@ -38,6 +38,25 @@ FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
 	mTexture->UpdateResource();
 }
 
+IOdysseyImageRenderer::eRenderType
+FOdysseyAnimationMediaSamples::GetRenderType() const
+{
+	return mRenderType;
+}
+
+void
+FOdysseyAnimationMediaSamples::SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType)
+{
+	mRenderType = iRenderType;
+
+	TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
+	if ( imageRenderingComposition == mImageRenderingComposition )
+		return;
+
+	mInvalidTileMap.Invalidate();
+	mImageRenderingComposition = imageRenderingComposition;
+}
+
 void
 FOdysseyAnimationMediaSamples::OnClose()
 {
@@ -255,7 +274,7 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 {
     mCurrentFrameIndex = iFrameIndex;
 
-	TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, mCurrentFrameIndex);
+	TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
 
     TRange<FTimespan> timeRange = mAnimation->GetFrameTimeRange(mCurrentFrameIndex);
 	FMediaTimeStamp frameTime = FMediaTimeStamp(timeRange.GetLowerBoundValue(), iSequenceIndex);
@@ -272,7 +291,7 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->Format());
 	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height());
 	TArray<::ULIS::FEvent> events;
-	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, mCurrentFrameIndex);
+	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
 	renderer->Init();
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
 	renderer->Copy(block, rect, ::ULIS::FVec2I(0), {});
@@ -346,7 +365,7 @@ FOdysseyAnimationMediaSamples::OnImageRenderingChanged(const FOdysseyImageRender
 
 	if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
 	{
-		TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, mCurrentFrameIndex);
+		TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
 		if ( imageRenderingComposition == mImageRenderingComposition )
 			return;
 
@@ -369,7 +388,7 @@ FOdysseyAnimationMediaSamples::Tick(float DeltaTime)
     if ( mInvalidTileMap.InvalidTiles().IsEmpty() )
         return;
 
-	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, mCurrentFrameIndex);
+	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
 	renderer->Init();
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
 	renderer->Copy(block, mInvalidTileMap.InvalidRects(), {});

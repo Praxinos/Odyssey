@@ -7,7 +7,7 @@
 #include "IMediaCache.h"
 #include "IMediaSamples.h"
 
-class FOdysseyAnimationMediaCache
+class ODYSSEYANIMATION_API FOdysseyAnimationMediaCache
 	: public IMediaCache
 {
 public:

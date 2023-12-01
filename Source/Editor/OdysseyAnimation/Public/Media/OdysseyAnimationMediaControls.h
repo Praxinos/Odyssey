@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "IMediaControls.h"
 
-class FOdysseyAnimationMediaControls
+class ODYSSEYANIMATION_API FOdysseyAnimationMediaControls
 	: public IMediaControls
 {
 public:
