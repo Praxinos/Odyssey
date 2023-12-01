@@ -25,6 +25,7 @@ FOdysseyAssetEditorToolkit::Initialize(UObject* iEditedObject, TSharedPtr<FOdyss
     //TArray<UObject*> editedObjects = mEditor->GetEditedObjects();
     mEditor = iEditor;
     mEditor->Initialize();
+    mEditor->InitTabs();
 
     TArray<UObject*> editedObjects = mEditor->GetAdditionalEditedObjects(); //Editor can add some side edited objects
     editedObjects.Add(iEditedObject);

@@ -3,6 +3,7 @@
 
 #include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
 
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorGUI.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "LevelEditorSequencerIntegration.h"
@@ -64,11 +65,16 @@ FOdysseyViewportDrawingEditorExtension::Initialize()
     SetAllDelegatesSequencers();
 
 	SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased);
+
+	mGUI = MakeShareable(new FOdysseyViewportDrawingEditorGUI(this));
+	mGUI->Initialize();
 }
 
 void
 FOdysseyViewportDrawingEditorExtension::Finalize()
 {
+	mGUI->Finalize();
+	
 	SetActor(nullptr);
 
 	mPaintingAdapter->SetTexture(nullptr);

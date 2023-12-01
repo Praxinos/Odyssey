@@ -21,6 +21,9 @@ public:
     virtual ~FOdysseyAnimationEditorTimelineTab();
     FOdysseyAnimationEditorTimelineTab(FOdysseyAnimationEditorExtension* iExtension);
 
+public:
+    void SetEmptyTimelineWidget(TSharedRef<SWidget> iWidget);
+
 protected:
     // FOdysseyAnimationEditorTab interface
     virtual const FName& GetId() const override;
@@ -52,7 +55,11 @@ private:
     void StepForward();
     void StepBackward();
 
+    TSharedPtr<SWidget> CreateDefaultEmptyTimelineTabWidget() const;
+
 private:
     FOdysseyAnimationEditorExtension* mExtension;
+    FText mEmptyTimelineMessage;
+    TSharedPtr<SWidget> mEmptyTimelineTabWidget;
 };
 

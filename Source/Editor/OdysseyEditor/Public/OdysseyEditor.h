@@ -36,6 +36,7 @@ public:
     void AddTab(TSharedRef<FOdysseyEditorTab> iTab);
     template<class T> TSharedPtr<T> FindTab() const;
     const TArray<TSharedPtr<FOdysseyEditorTab>>& GetTabs() const;
+    void InitTabs();
     void CloseAllTabs();
 
     void RegisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );

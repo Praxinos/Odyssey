@@ -39,6 +39,7 @@ FOdysseyAnimationEditorExtension::Initialize()
 void
 FOdysseyAnimationEditorExtension::Finalize()
 {
+	mGUI->Finalize();
     GetEditor()->OnSourceChanged().RemoveAll(this);
 
 	//Ensure all deleates are removed

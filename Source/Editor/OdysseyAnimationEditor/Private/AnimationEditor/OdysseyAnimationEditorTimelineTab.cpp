@@ -13,6 +13,7 @@
 #include "ContentBrowserModule.h"
 #include "Misc/ScopedSlowTask.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -34,7 +35,14 @@ FOdysseyAnimationEditorTimelineTab::~FOdysseyAnimationEditorTimelineTab()
 FOdysseyAnimationEditorTimelineTab::FOdysseyAnimationEditorTimelineTab(FOdysseyAnimationEditorExtension* iExtension)
 	: FOdysseyEditorTab(LOCTEXT( "timeline-tab.name", "Timeline" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
     , mExtension(iExtension)
+    , mEmptyTimelineTabWidget(CreateDefaultEmptyTimelineTabWidget())
 {
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::SetEmptyTimelineWidget(TSharedRef<SWidget> iWidget)
+{
+    mEmptyTimelineTabWidget = iWidget;
 }
 
 //--------------------------------------------------------------------------------------
@@ -49,8 +57,27 @@ FOdysseyAnimationEditorTimelineTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyAnimationEditorTimelineTab::CreateWidget()
 {
-    return SNew(SOdysseyAnimationLayerStack, mExtension)
-        .LayerStack(this, &FOdysseyAnimationEditorTimelineTab::LayerStack);
+    
+    return 
+        SNew(SWidgetSwitcher)
+        .WidgetIndex_Lambda([this](){ return LayerStack() == nullptr ? 1 : 0; })
+        +SWidgetSwitcher::Slot()
+        [
+            SNew(SOdysseyAnimationLayerStack, mExtension)
+            .LayerStack(this, &FOdysseyAnimationEditorTimelineTab::LayerStack)
+        ]
+        +SWidgetSwitcher::Slot()
+        [
+            //Display a PlaceHolder when no layerstack can be displayed
+            mEmptyTimelineTabWidget.ToSharedRef()
+        ];
+}
+
+TSharedPtr<SWidget>
+FOdysseyAnimationEditorTimelineTab::CreateDefaultEmptyTimelineTabWidget() const
+{
+    return SNew(STextBlock)
+        .Text(LOCTEXT("timeline-tab.nothing-to-display", "No Timeline can be displayed"));
 }
 
 void

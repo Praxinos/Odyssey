@@ -20,6 +20,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStack)
         {}
+        SLATE_DEFAULT_SLOT(FArguments, Content)
         SLATE_ATTRIBUTE( UOdysseyAnimationLayerStack*, LayerStack )
     SLATE_END_ARGS()
 

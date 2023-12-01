@@ -88,7 +88,15 @@ void
 FOdysseyEditor::AddTab(TSharedRef<FOdysseyEditorTab> iTab)
 {
     mTabs.Add(iTab);
-    iTab->Init();
+}
+
+void
+FOdysseyEditor::InitTabs()
+{
+    for (const TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        tab->Init();
+    }
 }
 
 const TArray<TSharedPtr<FOdysseyEditorTab>>&
