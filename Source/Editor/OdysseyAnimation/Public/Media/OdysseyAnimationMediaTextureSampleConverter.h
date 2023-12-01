@@ -5,7 +5,7 @@
 
 #include "IMediaTextureSampleConverter.h"
 
-class FOdysseyAnimationMediaTextureSampleConverter
+class ODYSSEYANIMATION_API FOdysseyAnimationMediaTextureSampleConverter
 	: public IMediaTextureSampleConverter
 {
 public:

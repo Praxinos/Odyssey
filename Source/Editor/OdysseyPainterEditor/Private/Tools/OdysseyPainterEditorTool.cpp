@@ -61,7 +61,6 @@ UOdysseyPainterEditorTool::Inactivate()
 {
 	//mToolContext->OnChanged().RemoveAll(this);
     Flush(); //Finish everything
-    Commit(); //Commit the jobs that has been done
     Unload();
     mIsActivated = false;
 }

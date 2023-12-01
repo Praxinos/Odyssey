@@ -43,6 +43,18 @@ FOdysseyAnimationMediaPlayer::GetEventSink()
 	return mEventSink;
 }
 
+IOdysseyImageRenderer::eRenderType
+FOdysseyAnimationMediaPlayer::GetRenderType() const
+{
+	return mSamples->GetRenderType();
+}
+
+void
+FOdysseyAnimationMediaPlayer::SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType)
+{
+	return mSamples->SetRenderType(iRenderType);
+}
+
 //~ IMediaPlayer interface
 
 bool

@@ -5,8 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "IMediaSamples.h"
+#include "OdysseyImageRenderer.h"
 
-class FOdysseyAnimationMediaSamples
+class ODYSSEYANIMATION_API FOdysseyAnimationMediaSamples
 	: public IMediaSamples
 	, public FTickableEditorObject //Allows us to react to Tick events
 {
@@ -32,6 +33,8 @@ private:
 public:
 	void Update(int iFrameIndex, int64 iSequenceIndex);
 	void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
+	IOdysseyImageRenderer::eRenderType GetRenderType() const;
+	void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
 	
 protected:
 	// FTickableEditorObject implementation
@@ -50,6 +53,6 @@ private:
 	int mCurrentFrameIndex;
 	TArray<FGuid> mImageRenderingComposition;
 	TStrongObjectPtr<UTexture2D> mTexture; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
-	//TStrongObjectPtr<UTexture2D> mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
 	FULISInvalidTileMap mInvalidTileMap;
+	IOdysseyImageRenderer::eRenderType mRenderType = IOdysseyImageRenderer::eRenderType::Render;
 };

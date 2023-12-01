@@ -5,7 +5,7 @@
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
 
-#define LOCTEXT_NAMESPACE "AnimationMedia"
+#define LOCTEXT_NAMESPACE "Animation"
 
 FOdysseyAnimationMediaTracks::FOdysseyAnimationMediaTracks()
 {

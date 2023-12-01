@@ -3,6 +3,7 @@
 
 #include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
 
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorGUI.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "LevelEditorSequencerIntegration.h"
@@ -14,6 +15,8 @@
 #include "ComponentReregisterContext.h"
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Media/OdysseyAnimationMediaPlayer.h"
+#include "MediaPlayerFacade.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -62,11 +65,16 @@ FOdysseyViewportDrawingEditorExtension::Initialize()
     SetAllDelegatesSequencers();
 
 	SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased);
+
+	mGUI = MakeShareable(new FOdysseyViewportDrawingEditorGUI(this));
+	mGUI->Initialize();
 }
 
 void
 FOdysseyViewportDrawingEditorExtension::Finalize()
 {
+	mGUI->Finalize();
+	
 	SetActor(nullptr);
 
 	mPaintingAdapter->SetTexture(nullptr);
@@ -301,15 +309,37 @@ FOdysseyViewportDrawingEditorExtension::SetMaterial(UMaterialInterface* iMateria
 void
 FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 {
+	//Cleanup previous texture if it exist
+	if (mTexture)
+	{
+		if (mTexture->IsA(UMediaTexture::StaticClass()))
+		{
+			UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
+			UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
+			if (mediaPlayer)
+			{
+				UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
+				int32 index = mediaPlayer->GetPlaylistIndex();
+				UMediaSource* mediaSource = playlist.Get(index);
+				if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
+				{
+					TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
+					TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
+					animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+				}
+			}
+		}
+	}
+
 	mTexture = nullptr;
 	mEditor->SetSource(nullptr);
 	if (!iTexture)
 		return;
 
 	mTexture = iTexture;
-	if (iTexture->IsA(UTexture2D::StaticClass()))
+	if (mTexture->IsA(UTexture2D::StaticClass()))
 	{
-		UTexture2D* texture = Cast<UTexture2D>(iTexture);
+		UTexture2D* texture = Cast<UTexture2D>(mTexture);
 
 		//TODO: change the texture for display
 
@@ -317,9 +347,9 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 		mEditor->SetSource(source);
 	}
 
-	if (iTexture->IsA(UMediaTexture::StaticClass()))
+	if (mTexture->IsA(UMediaTexture::StaticClass()))
 	{
-		UMediaTexture* texture = Cast<UMediaTexture>(iTexture);
+		UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
 		UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
 		if (mediaPlayer)
 		{
@@ -328,6 +358,10 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 			UMediaSource* mediaSource = playlist.Get(index);
 			if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
 			{
+				TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
+				TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
+				animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+
 				UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
 				TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animation);
 				mEditor->SetSource(animationSource);
@@ -347,7 +381,10 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
 		if (!mediaPlayer) //If the mediaplayer has been removed, remove the source
 		{
 			if (mCurrentSource)
+			{
+				//TODO: IOdysseyImageRenderer::eRenderType::Render
 				mEditor->SetSource(nullptr);
+			}
 			return;
 		}
 
@@ -359,6 +396,10 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
 			if (!mediaSource || !mediaSource->IsA(UOdysseyAnimation::StaticClass()))
 				return;
 			
+			TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
+			TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
+			animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+
 			UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
 			TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animation);
 			mEditor->SetSource(animationSource);

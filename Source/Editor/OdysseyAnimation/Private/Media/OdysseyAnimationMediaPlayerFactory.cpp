@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#define LOCTEXT_NAMESPACE "AnimationMedia"
+#define LOCTEXT_NAMESPACE "Animation"
 
 FOdysseyAnimationMediaPlayerFactory::FOdysseyAnimationMediaPlayerFactory()
 {

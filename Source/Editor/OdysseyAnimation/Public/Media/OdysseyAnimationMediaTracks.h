@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "IMediaTracks.h"
 
-class FOdysseyAnimationMediaTracks
+class ODYSSEYANIMATION_API FOdysseyAnimationMediaTracks
 	: public IMediaTracks
 {
 public:

@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "IMediaView.h"
 
-class FOdysseyAnimationMediaView
+class ODYSSEYANIMATION_API FOdysseyAnimationMediaView
 	: public IMediaView
 {
 public:

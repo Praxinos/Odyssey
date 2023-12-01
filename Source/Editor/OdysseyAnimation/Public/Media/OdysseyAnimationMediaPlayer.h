@@ -13,7 +13,7 @@
 #include "IMediaPlayer.h"
 #include "IMediaEventSink.h"
 
-class FOdysseyAnimationMediaPlayer
+class ODYSSEYANIMATION_API FOdysseyAnimationMediaPlayer
 	: public IMediaPlayer
 	, public FTickableEditorObject //Allows us to react to Tick events
 	, public TSharedFromThis<FOdysseyAnimationMediaPlayer>
@@ -39,6 +39,9 @@ public:
 
 	/** Returns the player's event sink */
 	IMediaEventSink& GetEventSink();
+
+	IOdysseyImageRenderer::eRenderType GetRenderType() const;
+	void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
 
 public:
 

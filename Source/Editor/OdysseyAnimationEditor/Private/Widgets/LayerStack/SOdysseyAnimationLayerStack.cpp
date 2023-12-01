@@ -49,72 +49,59 @@ void
 SOdysseyAnimationLayerStack::RebuildWidgets()
 {
     this->ChildSlot.DetachWidget();
-    
-    TSharedPtr<SWidget> widget = SNullWidget::NullWidget;
-
     UOdysseyLayerStack* layerstack = mLayerStack.Get();
-    if (layerstack)
-    {
-        widget = SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .AutoHeight()
+    
+    TSharedPtr<SWidget> widget =
+    SNew(SVerticalBox)
+    + SVerticalBox::Slot()
+    .AutoHeight()
+    [
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
         [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SNew(SOdysseyLayerStackAddLayerButton)
-                .LayerStack(mExtension->LayerStack())
-                .OnAdded( this, &SOdysseyAnimationLayerStack::OnLayerAdded)
-            ]
-            + SHorizontalBox::Slot()
-            .FillWidth(1.f)
-            .HAlign( HAlign_Center )
-            .VAlign( VAlign_Center )
-            [
-                SNew(SOdysseyAnimationPlaybackControls, mExtension)
-                .PlaybackFramesPerSecond(this, &SOdysseyAnimationLayerStack::PlaybackFramesPerSecond)
-            ]
-        ]
-        +SVerticalBox::Slot()
-        .FillHeight(1.0f)
-        [
-            SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView, mExtension)
+            SNew(SOdysseyLayerStackAddLayerButton)
             .LayerStack(mExtension->LayerStack())
-            .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
-            .HeaderManualWidth(200.f)
-            .AdditionalColumns(
-                {
-                    SHeaderRow::Column("Timeline")
-                    .DefaultLabel(FText())
-                    .VAlignCell(VAlign_Fill)
-                    .HAlignCell(HAlign_Fill)
-                    [
-                        SAssignNew(mTimelineControl, SOdysseyAnimationTimelineControl, mExtension)
-                        [
-                            SNew(SOdysseyAnimationTimelineHeader, mExtension)
-                        ]
-                    ]
-                }
-            )
+            .OnAdded( this, &SOdysseyAnimationLayerStack::OnLayerAdded)
         ]
-        +SVerticalBox::Slot()
-        .AutoHeight()
+        + SHorizontalBox::Slot()
+        .FillWidth(1.f)
+        .HAlign( HAlign_Center )
+        .VAlign( VAlign_Center )
         [
-            SAssignNew(mTimelineScrollBar, SScrollBar)
-            .Orientation( Orient_Horizontal )
-            .OnUserScrolled_Raw(this, &SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled)
-        ];
-    }
-    else
-    {
-        /**
-         * Display a PlaceHolder when no layerstack can be displayed
-         * 
-         */
-        widget = SNew(STextBlock)
-        .Text(LOCTEXT("timeline.nothing-to-display", "No Timeline can be displayed"));
-    }
+            SNew(SOdysseyAnimationPlaybackControls, mExtension)
+            .PlaybackFramesPerSecond(this, &SOdysseyAnimationLayerStack::PlaybackFramesPerSecond)
+        ]
+    ]
+    +SVerticalBox::Slot()
+    .FillHeight(1.0f)
+    [
+        SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView, mExtension)
+        .LayerStack(mExtension->LayerStack())
+        .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
+        .HeaderManualWidth(200.f)
+        .AdditionalColumns(
+            {
+                SHeaderRow::Column("Timeline")
+                .DefaultLabel(FText())
+                .VAlignCell(VAlign_Fill)
+                .HAlignCell(HAlign_Fill)
+                [
+                    SAssignNew(mTimelineControl, SOdysseyAnimationTimelineControl, mExtension)
+                    [
+                        SNew(SOdysseyAnimationTimelineHeader, mExtension)
+                    ]
+                ]
+            }
+        )
+    ]
+    +SVerticalBox::Slot()
+    .AutoHeight()
+    [
+        SAssignNew(mTimelineScrollBar, SScrollBar)
+        .Orientation( Orient_Horizontal )
+        .OnUserScrolled_Raw(this, &SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled)
+    ];
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());
 }

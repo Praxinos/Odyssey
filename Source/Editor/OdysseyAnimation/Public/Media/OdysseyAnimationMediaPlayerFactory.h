@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "IMediaPlayerFactory.h"
 
-class FOdysseyAnimationMediaPlayerFactory
+class ODYSSEYANIMATION_API FOdysseyAnimationMediaPlayerFactory
 	: public IMediaPlayerFactory
 {
 public:

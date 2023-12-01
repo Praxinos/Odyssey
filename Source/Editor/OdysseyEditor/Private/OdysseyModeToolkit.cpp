@@ -50,6 +50,7 @@ FOdysseyModeToolkit::Initialize(
     //mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
     //mEditor->LoadOpenedTabs();
 
+    mEditor->InitTabs();
     mEditor->ExtendMenu( this, FName("LevelEditor.MainMenu") );
     mEditor->BindShortcuts(this);
 
