@@ -35,6 +35,7 @@
 #include "SOdysseyViewport.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 #include "PainterEditor/OdysseyPainterEditorHUDTab.h"
+#include "OdysseyKeyState.h"
 
 #include <memory>
 #include <chrono>
@@ -342,42 +343,6 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     mLastKey = iKey;
     mLastEvent = iEvent;
 
-    //ToolSystem InputKey
-    /*if (mCurrentToolState == eState::kIdle)
-    {
-        FReply replyHUD = FReply::Unhandled();
-
-        if( mOdysseyPainterEditor->ToolSystem()->GetSelectedTool() )
-        {
-            //ReplyHUD can be changed in the function below
-            mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, replyHUD);
-        }
-        if ( !mOdysseyPainterEditor->ToolSystem()->GetSelectedTool() && mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush && iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed)
-        {
-            mIsReadyToCreateTool = true;
-            return true;
-        }
-        if (mOdysseyPainterEditor->ToolSystem()->GetSelectedTool() && mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->IsReadyToBeApplied())
-        {
-            ::ULIS::TArray<::ULIS::FVec2I> pointsGenerated = mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->GenerateToolPoints();
-            if( pointsGenerated.Size() > 0 )
-            {
-                mOdysseyPainterEditor->PaintEngine()->BeginStroke( FOdysseyStrokePoint( pointsGenerated[0].x, pointsGenerated[0].y ), mCurrentPointInTexture );
-
-                for (int i = 1; i < pointsGenerated.Size(); i++)
-                {
-                    mOdysseyPainterEditor->PaintEngine()->PushStroke( FOdysseyStrokePoint( pointsGenerated[i].x, pointsGenerated[i].y ) );
-                }
-
-                mOdysseyPainterEditor->PaintEngine()->EndStroke();
-            }
-            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( nullptr );
-            //TODO: Need to change for the erasure of a single tool and its HUD, instead of refreshing the whole block
-            mOdysseyPainterEditor->HUDSystem()->RefreshHUDSurface( FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ) );
-        }
-        if (replyHUD.IsEventHandled())
-            return true;
-    }*/
     //---
 
     auto end_time = std::chrono::steady_clock::now();
@@ -487,7 +452,9 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
                                       , 0 // iState.GetRoll()
                                       , 0 ); // iState.GetYaw() );
 
-    stroke_point.keysDown = mKeysPressed;
+    TArray<FKey> pressedKeys = mKeysPressed;
+    pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+    stroke_point.keysDown = pressedKeys;
   //---
 
     static TQueue< FOdysseyPoint > queue;
@@ -592,11 +559,11 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
 FOdysseyPainterEditorViewportClient::eState
 FOdysseyPainterEditorViewportClient::InputChordToState()
 {
-    if (mKeysPressed.Num() == 0)
+    if (FOdysseyKeyState::GetLastKey() == FKey())
         return eState::kIdle;
 
     FModifierKeysState ModifierKeysState = FSlateApplication::Get().GetModifierKeys();
-    const FInputChord activeChord(mKeysPressed[0],
+    const FInputChord activeChord(FOdysseyKeyState::GetLastKey(),
         EModifierKey::FromBools(
             ModifierKeysState.IsControlDown(),
             ModifierKeysState.IsAltDown(),
@@ -633,16 +600,20 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint(const FOdysseyPoint
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
     if (!texture)
         return false;
+    
+    TArray<FKey> pressedKeys = mKeysPressed;
+    if (FOdysseyKeyState::GetLastKey() != FKey())
+        pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
 
     //Point In Viewport
     FOdysseyPoint pointInViewport = iPointInViewport;
-    pointInViewport.keysDown = mKeysPressed;
+    pointInViewport.keysDown = pressedKeys;
     pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
     mCurrentPointInViewport = pointInViewport;
 
     //Point In Texture
     FOdysseyPoint pointInTexture = GetLocalMousePosition(iPointInViewport);
-    pointInTexture.keysDown = mKeysPressed;
+    pointInTexture.keysDown = pressedKeys;
     pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
     mCurrentPointInTexture = pointInTexture;
 
@@ -679,8 +650,6 @@ FOdysseyPainterEditorViewportClient::OnInputEventRaw(const FOdysseyPoint& iPoint
         if (iEvent == EInputEvent::IE_Pressed)
         {
             //LeftMouse Down
-            //mCurrentToolState = eState::kDrawing;
-            //mKeysPressed.Contains(EKeys::LeftMouseButton);
             mIsCurrentModeActive = true;
             return mOnMouseDown.IsBound() && mOnMouseDown.Execute(mCurrentPointInTexture, iKey);
         }
@@ -821,15 +790,19 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     if (!texture)
         return;
 
+    TArray<FKey> pressedKeys = mKeysPressed;
+    if (FOdysseyKeyState::GetLastKey() != FKey())
+        pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+
     //Point In Viewport
     FOdysseyPoint pointInViewport = iPointInViewport;
-    pointInViewport.keysDown = mKeysPressed;
+    pointInViewport.keysDown = pressedKeys;
     pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
     mCurrentPointInViewport = pointInViewport;
 
     //Point In Texture
     FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
-    pointInTexture.keysDown = mKeysPressed;
+    pointInTexture.keysDown = pressedKeys;
     pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
     bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
     mCurrentPointInTexture = pointInTexture;
@@ -921,17 +894,21 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
     if (!texture)
         return;
 
+    TArray<FKey> pressedKeys = mKeysPressed;
+    if (FOdysseyKeyState::GetLastKey() != FKey())
+        pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+
     //Point In Viewport
     FOdysseyPoint pointInViewport = mCurrentPointInViewport;
     pointInViewport.x = iX;
     pointInViewport.y = iY;
-    pointInViewport.keysDown = mKeysPressed;
+    pointInViewport.keysDown = pressedKeys;
     pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
     mCurrentPointInViewport = pointInViewport;
 
     //Point In Texture
     FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
-    pointInTexture.keysDown = mKeysPressed;
+    pointInTexture.keysDown = pressedKeys;
     pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
     bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
     mCurrentPointInTexture = pointInTexture;
