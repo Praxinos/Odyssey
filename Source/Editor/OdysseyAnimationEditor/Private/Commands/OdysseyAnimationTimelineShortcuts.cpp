@@ -152,6 +152,19 @@ FOdysseyAnimationTimelineShortcuts::Action_Delete()
     if (selectedFrames.IsEmpty())
         return;
 
+    bool isLowerClosed = selectedFrames.GetLowerBound().IsClosed();
+    bool isUpperClosed = selectedFrames.GetUpperBound().IsClosed();
+
+    if (!isLowerClosed || !isUpperClosed)
+        return;
+
+    if (FInt32Range::Difference(cellsContainer->GetFrameRange(), selectedFrames).IsEmpty())
+    {
+        selectedFrames.SetLowerBoundValue(selectedFrames.GetLowerBoundValue() + 1);
+        if (selectedFrames.IsEmpty())
+            return;
+    }
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.remove-frame", "Remove Frames"));
 #endif

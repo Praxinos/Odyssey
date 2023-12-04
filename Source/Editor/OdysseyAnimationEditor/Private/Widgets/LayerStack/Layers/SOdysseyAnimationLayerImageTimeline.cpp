@@ -321,24 +321,33 @@ SOdysseyAnimationLayerImageTimeline::PasteFrames()
 void
 SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames()
 {
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return;
+
+    FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
+    if (selectedFrames.IsEmpty())
+        return;
+
+    bool isLowerClosed = selectedFrames.GetLowerBound().IsClosed();
+    bool isUpperClosed = selectedFrames.GetUpperBound().IsClosed();
+
+    if (!isLowerClosed || !isUpperClosed)
+        return;
+        
+    if (FInt32Range::Difference(cellsContainer->GetFrameRange(), selectedFrames).IsEmpty())
+    {
+        selectedFrames.SetLowerBoundValue(selectedFrames.GetLowerBoundValue() + 1);
+        if (selectedFrames.IsEmpty())
+            return;
+    }
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.delete", "Remove Frames"));
 #endif
 
-    FOdysseyAnimationCellsMutator mutator(mLayer, mLayer->GetCellsContainer());
-
-    bool isLowerClosed = mExtension->Timeline()->GetSelectedFrames().GetLowerBound().IsClosed();
-    bool isUpperClosed = mExtension->Timeline()->GetSelectedFrames().GetUpperBound().IsClosed();
-
-    if ( !isLowerClosed || !isUpperClosed )
-    {
-        mutator.RemoveFrame(mExtension->Animation()->CurrentFrame);
-    }
-    else
-    {
-        mutator.RemoveFrameRange(mExtension->Timeline()->GetSelectedFrames());
-    }
-
+    FOdysseyAnimationCellsMutator mutator(mLayer, cellsContainer);
+    mutator.RemoveFrameRange(selectedFrames);
     mutator.Commit();
 }
 
@@ -377,9 +386,26 @@ SOdysseyAnimationLayerImageTimeline::StaggerCell( int iFrame )
 bool
 SOdysseyAnimationLayerImageTimeline::CanDeleteSelectedFrames() const
 {
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return false;
+
     FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
     if (selectedFrames.IsEmpty())
         return false;
+
+    bool isLowerClosed = selectedFrames.GetLowerBound().IsClosed();
+    bool isUpperClosed = selectedFrames.GetUpperBound().IsClosed();
+
+    if (!isLowerClosed || !isUpperClosed)
+        return false;
+        
+    if (FInt32Range::Difference(cellsContainer->GetFrameRange(), selectedFrames).IsEmpty())
+    {
+        selectedFrames.SetLowerBoundValue(selectedFrames.GetLowerBoundValue() + 1);
+        if (selectedFrames.IsEmpty())
+            return false;
+    }
 
     return true;
 }
