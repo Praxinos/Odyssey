@@ -115,6 +115,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void MakePaintGroup( FOdysseyVectorGroupPaint* iScene );
 
     protected:
+        // to force keyboard focus on mouse hover.
+        // Prevents the user from having to click at least once in the viewport.
+        TSharedPtr< SViewport > mViewportWidget;
         FOdysseyPainterEditorVectorBaseToolHUD* mBaseHUD;
         bool mHasContextMenu;
         bool mDoubleMouseDown_WorkAround;

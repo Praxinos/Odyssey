@@ -809,17 +809,3 @@ FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iCurrentSegment )
 
     mJoint.MakeNone();
 }
-
-bool
-FOdysseyVectorVertex::HasErasedSectionsOnly()
-{
-    for( FOdysseyVectorSection* section : mSectionList )
-    {
-        if( section->IsErased() == false )
-        {
-            return false;
-        }
-    }
-
-    return true;
-}

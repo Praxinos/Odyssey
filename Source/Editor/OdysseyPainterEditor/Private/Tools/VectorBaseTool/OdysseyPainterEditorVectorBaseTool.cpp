@@ -8,6 +8,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorViewportTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorVectorBaseTool"
 
@@ -142,7 +143,11 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 void
 UOdysseyPainterEditorVectorBaseTool::Load()
 {
+    // we need the focus on the viewport for keyboard 
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    mViewportWidget = viewportTab->GetViewport()->GetViewportWidget();
 
     if( hasVector )
     {
@@ -285,6 +290,9 @@ void
 UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    // we need the focus on the viewport for keyboard 
+    //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget );
 
     if( hasVector )
     {

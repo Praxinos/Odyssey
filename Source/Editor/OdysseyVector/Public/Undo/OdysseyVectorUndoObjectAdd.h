@@ -12,7 +12,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectAdd : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoObjectAdd();
-        FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorObject* iObject );
+        FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorObject* iObject);
         FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
@@ -25,6 +25,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectAdd : public FOdysseyVectorUndo
         virtual FString ToString() const override;
 
     private:
-        std::vector<FOdysseyVectorObject*> mFormerParentArray;
         std::vector<FOdysseyVectorObject*> mObjectArray;
+        std::vector<FOdysseyVectorObject*> mParentArray;
 };

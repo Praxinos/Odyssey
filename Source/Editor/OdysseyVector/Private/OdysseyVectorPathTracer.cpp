@@ -90,6 +90,7 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
         return nullptr;
     }
 
+
     if( mEdgeArray.size() )
     {
         MakeBezier( true );

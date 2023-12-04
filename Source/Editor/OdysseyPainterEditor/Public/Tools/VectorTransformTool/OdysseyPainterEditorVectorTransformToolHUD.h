@@ -9,7 +9,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
 {
     public:
         static const uint32 AXIS_LENGTH   = 70;
-        static const uint32 GIZMO_RADIUS  = 10;
+        static const uint32 GIZMO_RADIUS  = 5;
         static const uint32 SCALER_RADIUS = 5;
 
         static const uint32 PICK_XAXIS              = ( 1      );

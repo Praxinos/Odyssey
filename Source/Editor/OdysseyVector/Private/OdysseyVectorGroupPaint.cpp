@@ -366,8 +366,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                         double segment0T = segment0Poly->fromT + ( segment0PolySubT * ( segment0Poly->toT - segment0Poly->fromT ) );
                         double segment1T = segment1Poly->fromT + ( segment1PolySubT * ( segment1Poly->toT - segment1Poly->fromT ) );
 
-                        if( ( segment0T != 0.0f && segment1T != 1.0f )
-                         && ( segment0T != 1.0f && segment1T != 0.0f ) )
+                        if( ( segment0T >= 0.0f && segment1T < 1.0f  )
+                         && ( segment0T <  1.0f && segment1T >= 0.0f ) )
                         {
                             bool selfIntersects = ( iSegment0 == iSegment1 );
                             FOdysseyVectorIntersection* intersection = new FOdysseyVectorIntersection( selfIntersects

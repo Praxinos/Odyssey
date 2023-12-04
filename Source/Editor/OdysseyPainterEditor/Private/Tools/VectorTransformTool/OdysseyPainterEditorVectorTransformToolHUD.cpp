@@ -277,7 +277,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::PickGizmo( double iWorldX, double i
 
     toPivot = ::ULIS::FVec2D( worldGizmo.x - iWorldX, worldGizmo.y - iWorldY );
 
-    if( toPivot.Distance() < GIZMO_RADIUS )
+    if( toPivot.Distance() < mTransformTool->PickingRadius )
     {
         newFlags = PICK_ZAXIS;
     }

@@ -86,8 +86,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                         , double iWorldY
                                         , double iPickingRadius );
         void SetPathColor( FOdysseyVectorPath* iPath );
-        void RecordUndoPathAdd( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorPath* iPath  );
-        void RecordUndoPathExtend( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorPath* iPath );
+        static void RecordUndoPathAdd( FOdysseyVectorGroupPaint* iScene
+                                     , FOdysseyVectorPath* iPath
+                                     , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                     , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
+        static void RecordUndoPathAlter( FOdysseyVectorGroupPaint* iScene
+                                       , FOdysseyVectorPath* iPath
+                                       , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                       , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 
     public:
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )
@@ -133,8 +139,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         bool Debug;
 
     private:
+        std::vector<FOdysseyVectorVertex*> mAddedVertexArray;
+        std::vector<FOdysseyVectorSegment*> mAddedSegmentArray;
         FOdysseyPainterEditorVectorPathDrawingToolHUD* mPathDrawingHUD;
         FOdysseyVectorPathTracer mPathTracer;
         FOdysseyVectorVertex* mStitchedVertex;
-        FOdysseyVectorUndoPathExtend* mUndoPathExtend;
 };
