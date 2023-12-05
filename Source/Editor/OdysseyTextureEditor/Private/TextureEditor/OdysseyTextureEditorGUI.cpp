@@ -9,6 +9,7 @@
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "Framework/Docking/LayoutExtender.h"
 #include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
+#include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorGUI"
 
@@ -51,23 +52,16 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
 void
 FOdysseyTextureEditorGUI::OnSourceChanged()
 {
-    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
- 
-   if (!source)
-        return;
-
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(source->GetLayerStack());
-
-    if( layerStack )
+    if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
     {
-        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
-        if( currentVectorLayer )
+        if( mediaVectors.Num() > 0 )
         {
-            FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-            FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
-            // refresh the widgets when the source changes
             OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
         }
     }

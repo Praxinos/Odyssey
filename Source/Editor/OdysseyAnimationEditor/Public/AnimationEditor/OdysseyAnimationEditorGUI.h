@@ -27,6 +27,7 @@ public:
     void OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnCurrentFrameChanged( UOdysseyAnimation* iAnimation );
     void ParseVectorSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
+    void OnSourceChanged();
 
 protected:
     //Init

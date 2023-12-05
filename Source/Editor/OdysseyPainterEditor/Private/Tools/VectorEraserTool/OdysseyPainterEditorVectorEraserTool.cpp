@@ -152,6 +152,27 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                                            , Split );
               }
 
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+                  FOdysseyVectorObject* parent = path->GetParent();
+
+                  if( parent->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                  {
+                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(parent);
+                      ::ULIS::FRectD unusedRect;
+
+                      paintGroup->EraseSections( unusedRect
+                                               , oAddedObjectArray
+                                               , oAddedVertexArray
+                                               , oAddedSegmentArray
+                                               , oRemovedObjectArray
+                                               , oRemovedVertexArray
+                                               , oRemovedSegmentArray
+                                               , Split );
+                  }
+              }
+
               return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
           }
 

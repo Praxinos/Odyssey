@@ -76,6 +76,18 @@ FOdysseyVectorChain::~FOdysseyVectorChain()
 {
 }
 
+std::vector<FOdysseyVectorVertex*>&
+FOdysseyVectorChain::GetVertexArray()
+{
+    return mVertexArray;
+}
+
+std::vector<FOdysseyVectorSegment*>&
+FOdysseyVectorChain::GetSegmentArray()
+{
+    return mSegmentArray;
+}
+
 FOdysseyVectorChain::FOdysseyVectorChain( FOdysseyVectorPath* iPath
                                         , FOdysseyVectorVertex* iUnchainedVertex )
     : mLength( 0.0f )
@@ -121,26 +133,43 @@ void
 FOdysseyVectorChain::IterateSections( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSection*)> iCallback )
 {
     FOdysseyVectorVertex* firstVertex = mVertexArray.front();
-    FOdysseyVectorVertex* lastVertex = mVertexArray.back();
+    FOdysseyVectorSegment* firstSegment = mSegmentArray.front();
+    FOdysseyVectorSection* firstSection = firstVertex->GetSection( firstSegment );
     // this ensures we won't get section from a gap segment. Gap segments are not linked to vertices
-    FOdysseyVectorSegment* lastSegment = mSegmentArray.back();
-    FOdysseyVectorSection* lastSection = lastVertex->GetSection( lastSegment );
     FOdysseyVectorVertex* currentVertex = firstVertex;
-    FOdysseyVectorSection* currentSection = currentVertex->GetSection( mSegmentArray.front() );
+    FOdysseyVectorSegment* currentSegment = firstSegment;
+    FOdysseyVectorSection* currentSection = firstSection;
 
     while( currentSection )
     {
         FOdysseyVectorVertex* nextVertex = currentSection->GetOtherVertex( currentVertex );
+        FOdysseyVectorSection* nextSection = nullptr;
 
         if( iCallback( currentVertex, currentSection ) == true )
         {
             return;
         }
 
-        if( currentSection != lastSection )
+        if( nextVertex->GetClass() == FOdysseyVectorVertex::StaticClass() )
         {
-            FOdysseyVectorSection* nextSection = nextVertex->GetOtherSection( currentSection, false );
+            // note: gap segment are not linked. there is no risk to retrieve a gap segment
+            FOdysseyVectorSegment* nextSegment = nextVertex->GetOtherSegment( currentSegment );
 
+            if( nextSegment )
+            {
+                nextSection = nextVertex->GetSection( nextSegment );
+
+                currentSegment = nextSegment;
+            }
+        }
+
+        if( nextVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+        {
+            nextSection = nextVertex->GetOtherSection( currentSection, true );
+        }
+
+        if( nextSection != firstSection ) // loop detection
+        {
             currentVertex = nextVertex;
             currentSection = nextSection;
         }
@@ -167,7 +196,7 @@ FOdysseyVectorChain::ExtendErasedSection( FOdysseyVectorVertex* iVertex
 
         currentSection->SetErased( true );
 
- UE_LOG(LogTemp, Warning, TEXT("marking section: %d:%d"), currentSection, currentVertex->GetSectionCount() );
+ //UE_LOG(LogTemp, Warning, TEXT("marking section: %d:%d"), currentSection, currentVertex->GetSectionCount() );
 
         if( nextVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
         {

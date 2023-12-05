@@ -1418,6 +1418,62 @@ GetCopiedObjectList()
     return copiedObjectList;
 }
 
+static FOdysseyVectorObject*
+GetStoreObject()
+{
+    static FOdysseyVectorObject storeObject("StoreObject");
+
+    return &storeObject;
+}
+
+// static
+void
+FOdysseyPainterEditor::CopyTransformation( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
+
+    if( selectedObject )
+    {
+        FOdysseyVectorObject* storeObject = GetStoreObject();
+
+        selectedObject->CopyTransformation( *storeObject );
+    }
+}
+
+// static
+void
+FOdysseyPainterEditor::PasteTransformation( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
+
+    if( selectedObject )
+    {
+        FOdysseyVectorObject* storeObject = GetStoreObject();
+
+        //----- needed for undos -----//
+        GEditor->BeginTransaction(LOCTEXT("PasteTransformation", "Paste Transformation"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, selectedObject );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+        // -------------------------- //
+
+        storeObject->CopyTransformation( *selectedObject );
+
+        selectedObject->UpdateMatrix();
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    vectorEngine->ResetHUD();
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+}
+
 // static
 void
 FOdysseyPainterEditor::CopyObjects( FOdysseyVectorGroupPaint* iScene )

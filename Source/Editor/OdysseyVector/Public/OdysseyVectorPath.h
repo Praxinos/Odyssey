@@ -373,6 +373,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         bool HasSegment( FOdysseyVectorSegment* iSegment );
         virtual void ExportParam( FOdysseyVectorObject* iDestinationObject, bool iInvalidate ) override;
 
+        std::vector<FOdysseyVectorChain>& GetChainArray();
+
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
         void UpdateBBox();

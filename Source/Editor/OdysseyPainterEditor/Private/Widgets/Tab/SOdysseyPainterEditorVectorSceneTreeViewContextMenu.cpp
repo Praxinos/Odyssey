@@ -49,6 +49,16 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
         , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
         , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteObjects, vectorScene)));
     menu.AddMenuEntry(
+          LOCTEXT("CopyTransformation", "Copy Transformation")
+        , LOCTEXT("CopyTransformation", "Copy Transformation")
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::CopyTransformation, vectorScene)));
+    menu.AddMenuEntry(
+          LOCTEXT("PasteTransformation", "Paste Transformation")
+        , LOCTEXT("PasteTransformation", "Paste Transformation")
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteTransformation, vectorScene)));
+    menu.AddMenuEntry(
           LOCTEXT("DeleteSelection","Delete Selection")
         , LOCTEXT("DeleteSelection","Delete Selection")
         , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")

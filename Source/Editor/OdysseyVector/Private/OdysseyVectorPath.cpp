@@ -201,6 +201,12 @@ FOdysseyVectorPath::ExportParam( FOdysseyVectorObject* iDestinationObject, bool 
     }
 }
 
+std::vector<FOdysseyVectorChain>&
+FOdysseyVectorPath::GetChainArray()
+{
+    return mChainArray;
+}
+
 void
 FOdysseyVectorPath::UnselectAllVertices()
 {
@@ -952,8 +958,8 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
             FWayPoint* wayPoint1 = &iWayPointArray[wayFragment.indexWayPoint1];
             eSegmentAdditionFlags segmentAdditionFlags = SegmentAdditionPolicy( wayPoint0, wayPoint1, iSplit );
 
-            UE_LOG(LogTemp, Warning, TEXT("fragment : %d:%x %d:%x"), wayPoint0->vertex->GetID(), wayPoint0->flags
-                                                                   , wayPoint1->vertex->GetID(), wayPoint1->flags );
+            //UE_LOG(LogTemp, Warning, TEXT("fragment : %d:%x %d:%x"), wayPoint0->vertex->GetID(), wayPoint0->flags
+            //                                                       , wayPoint1->vertex->GetID(), wayPoint1->flags );
 
 
             if( ( segmentAdditionFlags & eSegmentAdditionFlags::RemoveOriginalSegment ) == eSegmentAdditionFlags::RemoveOriginalSegment )

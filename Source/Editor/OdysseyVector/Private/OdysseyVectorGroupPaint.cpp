@@ -2011,6 +2011,11 @@ FOdysseyVectorGroupPaint::EraseSections( const ::ULIS::FRectD &iRoi
                                        , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                                        , bool iSplit )
 {
+    BLImageData imageData;
+    BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
+
+    blimg->getData( &imageData );
+
     // first step : relink sections as they were all unlinked after the cycle detection process
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
@@ -2036,6 +2041,43 @@ FOdysseyVectorGroupPaint::EraseSections( const ::ULIS::FRectD &iRoi
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
         mSectionBuffer[i].Unlink();
+    }
+
+    // also check paths that were not intersected. If they hit, delete the whole thing.
+    for( FOdysseyVectorPath* path : mSectionLessPathList )
+    {
+        for( FOdysseyVectorChain& chain : path->GetChainArray() )
+        {
+            std::vector<FWayFragment> wayFragmentArray;
+            std::vector<FWayPoint> wayPointArray;
+
+            wayPointArray.reserve( 10 );
+            wayFragmentArray.reserve( 10 );
+
+            if( chain.EraseSegments( &imageData
+                                   , wayPointArray
+                                   , wayFragmentArray ) )
+            {
+                for( FOdysseyVectorVertex* vertex : chain.GetVertexArray() )
+                {
+                    path->RemoveVertex( vertex );
+
+                   oRemovedVertexArray.push_back( vertex );
+                }
+
+                for( FOdysseyVectorSegment* segment : chain.GetSegmentArray() )
+                {
+                    path->RemoveSegment( segment );
+
+                    oRemovedSegmentArray.push_back( segment );
+                }
+            }
+        }
+
+        if( path->GetSegmentList().size() == 0 )
+        {
+            oRemovedPathArray.push_back( path );
+        }
     }
 }
 

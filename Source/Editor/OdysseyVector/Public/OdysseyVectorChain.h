@@ -70,6 +70,9 @@ class FOdysseyVectorChain
         friend class FOdysseyVectorPath;
         friend class FOdysseyVectorGroupPaint;
 
+        std::vector<FOdysseyVectorVertex*>& GetVertexArray();
+        std::vector<FOdysseyVectorSegment*>& GetSegmentArray();
+
     private :
         void IterateSegments( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSegment*)> iCallback );
         void IterateSections( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSection*)> iCallback );

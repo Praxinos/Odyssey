@@ -11,6 +11,7 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyAnimation.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyAnimationEditorGUI"
 
@@ -20,6 +21,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 {
+	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll( this );
 	FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
 }
 
@@ -29,6 +31,8 @@ FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorEx
     UOdysseyAnimation::OnCurrentFrameChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentFrameChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyAnimationEditorGUI::OnVectorSceneSignal );
+    // bind refresh function to delegates on existing vector scenes when the source changes. Needed to refresh necessary widgets.
+    mExtension->GetEditor()->OnSourceChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnSourceChanged );
 }
 
 //--------------------------------------------------------------------------------------
@@ -107,6 +111,24 @@ TSharedPtr<FOdysseyAnimationEditorLightTableTab>&
 FOdysseyAnimationEditorGUI::GetLightTableTab()
 {
 	return mLightTableTab;
+}
+
+void
+FOdysseyAnimationEditorGUI::OnSourceChanged()
+{
+    if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
+    {
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() > 0 )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+            OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+        }
+    }
 }
 
 void
