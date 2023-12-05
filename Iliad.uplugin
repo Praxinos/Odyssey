@@ -103,8 +103,7 @@
 		},
 		{
 			"Name": "OdysseyStylusInput",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"Type": "Editor"
 		},
 		{
 			"Name": "OdysseyPalette",

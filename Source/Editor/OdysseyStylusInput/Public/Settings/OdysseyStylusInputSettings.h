@@ -37,6 +37,6 @@ public:
 
 public:
     /** Driver to use to interpret Stylus inputs. */
-    UPROPERTY(config, EditAnywhere, Category=StylusDriver )
+    UPROPERTY(config, EditAnywhere, Category=StylusDriver, meta = (ConfigRestartRequired = true) )
     TEnumAsByte<EOdysseyStylusInputDriver> StylusInputDriver;
 };

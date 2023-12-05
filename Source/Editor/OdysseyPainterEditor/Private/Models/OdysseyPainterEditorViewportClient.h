@@ -109,9 +109,6 @@ public:
 
 public:
     // Public API
-    void        ModifyCheckerboardTextureColors();
-    FText       GetDisplayedResolution() const;
-
 	FOnPickColor&	OnPickColor() { return mOnPickColor; }
     FOnMouseDown&   OnMouseDown()   { return mOnMouseDown; }
     FOnMouseUp&     OnMouseUp()     { return mOnMouseUp; }
@@ -122,6 +119,7 @@ public:
 
 private:
     // Private API
+    void        CreateCheckerboardTexture();
     void        DestroyCheckerboardTexture();
     void        ZoomInInViewport( const FVector2D& iPositionInViewport );
     void        ZoomOutInViewport( const FVector2D& iPositionInViewport );
@@ -134,12 +132,8 @@ private:
     bool        InputKeyWithStrokePoint( const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
     bool        OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
     bool        OnInputEventWithState(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
-    void        ForceKeysUp(FKey iKey);
-    void        ForceKeysDown(FKey iKey);
 
     void        CapturedMouseMoveWithStrokePoint( const FOdysseyPoint& iPointInViewport ) ;
-
-    void        OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput );
 
     void        OnViewportPropertyWillChange();
     void        OnViewportPropertyChanged();

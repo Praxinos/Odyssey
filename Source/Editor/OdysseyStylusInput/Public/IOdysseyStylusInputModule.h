@@ -114,4 +114,6 @@ private:
 
 	// A delegate to know when the driver type (wintab/ink/nsevent) is changed
 	FOnStylusInputChanged						OnStylusInputChangedCB;
+
+	EOdysseyStylusInputDriver mDriver = OdysseyStylusInputDriver_None;
 };

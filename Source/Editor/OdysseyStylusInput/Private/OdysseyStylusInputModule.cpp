@@ -36,7 +36,6 @@ public:
 	{
 		// register settings
 		ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
-
 		if (settingsModule)
 		{
 			settingsModule->RegisterSettings("Editor", "Plugins", "ILIADStylusInput"
@@ -106,7 +105,10 @@ void UOdysseyStylusInputSubsystem::Deinitialize()
 
 void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDriver iDriver)
 {
-	InputInterface.Reset();
+	if (iDriver == mDriver)
+		return;
+
+	mDriver = iDriver;
 
 	switch (iDriver)
 	{

@@ -47,6 +47,12 @@
 // FOdysseyPainterEditorViewportClient
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
+FOdysseyPainterEditorViewportClient::~FOdysseyPainterEditorViewportClient( )
+{
+    InputSubsystem->RemoveMessageHandler( *this );
+    DestroyCheckerboardTexture();
+}
+
 FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdysseyPainterEditor*                    iOdysseyPainterEditor,
                                                                           TWeakPtr< SOdysseyViewport >              iOdysseyPainterEditorViewport,
                                                                           FOdysseyMeshSelector*                     iMeshSelector)
@@ -66,18 +72,16 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
     , mIsCurrentModeActive(false)
     , mIsReadyToCreateTool(false)
 {
-    check( // mOdysseyPainterEditor.IsValid() &&
-           mOdysseyPainterEditorViewportPtr.IsValid() );
+    check( mOdysseyPainterEditorViewportPtr.IsValid() );
 
     InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
 
     //PATCH: as I don't know how to initialize usubsystem inside settings ctor (as usubsystem are called after)
-	UOdysseyStylusInputSettings* settings = GetMutableDefault< UOdysseyStylusInputSettings >();
-    settings->RefreshStylusInputDriver();
+	//UOdysseyStylusInputSettings* settings = GetMutableDefault< UOdysseyStylusInputSettings >();
+    //settings->RefreshStylusInputDriver();
     //PATCH
 
     InputSubsystem->AddMessageHandler( *this );
-    InputSubsystem->OnStylusInputChanged().BindRaw( this, &FOdysseyPainterEditorViewportClient::OnStylusInputChanged );
 
     ENQUEUE_RENDER_COMMAND(InitOdysseyPainterEditorViewportClientTextures)(
         [&](FRHICommandListImmediate& RHICmdList)
@@ -93,24 +97,11 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
     fence.BeginFence();
     fence.Wait();
 
-    ModifyCheckerboardTextureColors();
-}
-
-FOdysseyPainterEditorViewportClient::~FOdysseyPainterEditorViewportClient( )
-{
-    InputSubsystem->OnStylusInputChanged().Unbind();
-    InputSubsystem->RemoveMessageHandler( *this );
-
-    DestroyCheckerboardTexture();
-}
-
-void
-FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput )
-{
+    CreateCheckerboardTexture();
 }
 
 //--------------------------------------------------------------------------------------
-//------------------------------------------------------------------ FViewportClient API
+//------------------------------------------------------------------ Draw Viewport
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
@@ -134,7 +125,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     //if SViewport->GetPan() == 0,0, it means the center of the texture should be centered in the viewport
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
     pan += mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter() - (FVector2D(width, height) / 2.0f);
-    //FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToDisplayedTexture().TransformPoint(FVector2D(0, 0));
 
     // Fully stream in the texture before drawing it.
     texture->SetForceMipLevelsToBeResident( 30.0f );
@@ -160,8 +150,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
     FVector2D viewport_center( iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2 );
-    //FVector2D position_in_texture = GetLocalMousePosition( viewport_center, false );
-    //mPivotPointRatio = FVector2D( position_in_texture.X / texture->GetSurfaceWidth(), position_in_texture.Y / texture->GetSurfaceHeight());
 
     // Draw background Checker
     {
@@ -229,15 +217,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
                     RenderModule.LoadPendingVirtualTextureTiles(RHICmdList, InFeatureLevel);
                 });
         }
-
-        // TODO: Unreal BoxItem doesn't support rotation, so we can't draw it properly. We'll have to come up with our own HUD
-        // Draw a white border around the texture to show its extents
-        // if( settings.TextureBorderEnabled )
-        // {
-        //     FCanvasBoxItem boxItem( FVector2D( xPos, yPos ), FVector2D( width , height ) );
-        //     boxItem.SetColor( Settings.TextureBorderColor );
-        //     Canvas->DrawItem( boxItem );
-        // }
     }
 
     //Tool system HUD drawing
@@ -272,31 +251,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         tileItem.PivotPoint = pivotPoint;
         ioCanvas->DrawItem( tileItem );
     }
-    //---
-
-    // Draw Cursor Preview
-    /* if (mOdysseyPainterEditor->DrawBrushPreview())
-    {
-        //auto paintEngine = mOdysseyPainterEditor->PaintEngine();
-        // paintEngine->UpdateBrushCursorPreview();
-        if (paintEngine->mBrushCursorPreviewSurface)
-        {
-            paintEngine->mBrushCursorPreviewSurface->Texture()->SetForceMipLevelsToBeResident( 30.0f );
-            paintEngine->mBrushCursorPreviewSurface->Texture()->WaitForStreaming();
-            FVector2D pos_in_viewport( iViewport->GetMouseX(), iViewport->GetMouseY() );
-            FVector2D shift = paintEngine->mBrushCursorPreviewShift;
-            FVector2D pos = pos_in_viewport + shift * GetZoom();
-            FVector2D size = FVector2D( paintEngine->mBrushCursorPreviewSurface->Block()->Width(), paintEngine->mBrushCursorPreviewSurface->Block()->Height() ) * GetZoom();
-            FCanvasTileItem cursorItem( pos, paintEngine->mBrushCursorPreviewSurface->Texture()->Resource, size, FLinearColor::White );
-            uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
-            result += ( 1 << 0 );
-            result += ( 1 << 1 );
-            result += ( 1 << 2 );
-            result += ( 1 << 3 );
-            cursorItem.BlendMode = (ESimpleElementBlendMode)result;
-            ioCanvas->DrawItem( cursorItem );
-        }
-    } */
 
     if( mMeshSelector->GetCurrentMesh() )
     {
@@ -306,7 +260,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         {
             FRawMesh rawMesh;
             //ODYSSEY: PATCH
-            //mMeshSelector->GetCurrentMesh()->SourceModels[currentLOD].LoadRawMesh(RawMesh);
             mMeshSelector->GetCurrentMesh()->GetSourceModel( currentLOD ).LoadRawMesh( rawMesh );
 
             FIndexArrayView indexBuffer = mMeshSelector->GetCurrentMesh()->GetRenderData()->LODResources[currentLOD].IndexBuffer.GetArrayView();
@@ -315,10 +268,41 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 }
 
+EMouseCursor::Type
+FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, int32 iY )
+{
+    if( mCurrentToolState == eState::kPan )
+        mCurrentMouseCursor = EMouseCursor::GrabHand;
+    else if( mCurrentToolState == eState::kPick )
+        mCurrentMouseCursor = EMouseCursor::EyeDropper;
+    else if( mOdysseyPainterEditor->GetSelectedTool() )
+        mCurrentMouseCursor = mOdysseyPainterEditor->GetSelectedTool()->GetMouseCursor();
+
+    return mCurrentMouseCursor;
+}
+
+TOptional< TSharedRef< SWidget > >
+FOdysseyPainterEditorViewportClient::MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply )
+{
+    return FViewportClient::MapCursor( iViewport, iCursorReply );
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------ Viewport Inputs
+
+EMouseCaptureMode
+FOdysseyPainterEditorViewportClient::GetMouseCaptureMode() const
+{
+    //No Capture, the capture is managed by FOdysseySceneViewport
+    //Because this capture activates HighPrecisionMouseMovements, which is applying acceleration to the mouse (on Mac at least)
+    //And we don't want that
+    return EMouseCaptureMode::NoCapture;
+}
+
 bool
 FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
-    //UE_LOG( LogStylusInput, Log, TEXT( "InputKey Key:%s Event:%d" ), *iKey.GetFName().ToString(), iEvent );
+    //Here you receive Mouse Buttons and Keyboard keys events
 
     //Cleanup PressedKeys
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
@@ -360,30 +344,11 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
+    //This is called when the mouse is down and moving in the viewport
+    //The viewport has already captured the mouse
+
     auto end_time = std::chrono::steady_clock::now();
     auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
-
-    //ToolSystem CapturedMouseMove
-    /*if (mCurrentToolState == eState::kIdle)
-    {
-        if (mIsReadyToCreateTool)
-        {
-            mIsReadyToCreateTool = false;
-            if (mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush)
-            {
-                FVector2D posInTexture = GetLocalMousePosition( FVector2D( iX, iY ) );
-                CreateTool(mOdysseyPainterEditor->GetGUISelectedTool(), posInTexture );
-                return;
-            }
-        }
-        if (mOdysseyPainterEditor->ToolSystem()->GetSelectedTool())
-        {
-            FVector2D posInTexture = GetLocalMousePosition(FVector2D(iX, iY));
-            mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->CapturedMouseMove(iViewport, posInTexture.X, posInTexture.Y);
-            return;
-        }
-    }*/
-    //---
 
     if (mIsCapturedByStylus || delta < 500)
         return;
@@ -394,23 +359,69 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     CapturedMouseMoveWithStrokePoint( point_in_viewport );
 }
 
-FKey
-FOdysseyPainterEditorViewportClient::GetPointingDevicePressedKey()
+void
+FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* iViewport, int32 iX, int32 iY )
 {
-    if( mLastKey == EKeys::RightMouseButton )
-    {
-        return EKeys::RightMouseButton;
-    }
+    if( mIsCurrentModeActive )
+        return;
 
-    return EKeys::LeftMouseButton;
+    mCurrentToolState = eState::kIdle;
 }
+
+void
+FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
+{
+    if( mIsCurrentModeActive )
+        return;
+
+    mCurrentToolState = eState::kIdle;
+}
+
+
+void
+FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+{
+    //This is called when the mouse hovers the viewport (really not the best name for that function)
+
+    //If we don't have a surface, then we don't interact with anything
+    UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
+    if (!texture)
+        return;
+
+    TArray<FKey> pressedKeys = mKeysPressed;
+    if (FOdysseyKeyState::GetLastKey() != FKey())
+        pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+
+    //Point In Viewport
+    FOdysseyPoint pointInViewport = mCurrentPointInViewport;
+    pointInViewport.x = iX;
+    pointInViewport.y = iY;
+    pointInViewport.keysDown = pressedKeys;
+    pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
+    mCurrentPointInViewport = pointInViewport;
+
+    //Point In Texture
+    FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
+    pointInTexture.keysDown = pressedKeys;
+    pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
+    bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
+    mCurrentPointInTexture = pointInTexture;
+
+    if (mCurrentToolState == eState::kIdle)
+    {
+        if (!hasMoved)
+            return;
+
+        mOnMouseHover.ExecuteIfBound(mCurrentPointInTexture);
+    }
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------ Stylus Functions
 
 void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
-    /*if (mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush)
-        return;*/
-        
     //If we don't have a surface, then we don't interact with anything
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
     if (!texture)
@@ -429,16 +440,8 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
 
     //---
 
-    /* UE_LOG( LogStylusInput, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d tilt:%f %f azimuth:%f altitude:%f"), iIndex, 
-            iState.GetPosition().X, iState.GetPosition().Y, 
-            iState.GetPressure(), iState.IsStylusDown(), 
-            iState.GetTilt().X, iState.GetTilt().Y, 
-            iState.GetAzimuth(), iState.GetAltitude() ); */
-
     float scale_dpi = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D position_in_viewport = widget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() ) * scale_dpi;
-	
-    //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged AbsoluteToLocal: screen:%f %f -> local (ref widget): %f %f" ), iState.GetPosition().X, iState.GetPosition().Y, position_in_viewport.X, position_in_viewport.Y );
 
     FOdysseyPoint stroke_point( position_in_viewport.X
                                       , position_in_viewport.Y
@@ -466,80 +469,20 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
     bool isMoveEvent = stylusWasDown == iState.IsStylusDown();
 
     stylusWasDown = iState.IsStylusDown();
-
-    //enqueue stroke points if stylus is down or was down in last event
-    //queue will be emptied when a EInputEvent::IE_Released will be received
-    /* if (iState.IsStylusDown() || stylusWasDown )
-    {
-        queue.Enqueue( stroke_point );
-    } */
-
-    
-
-    /* if( !iState.IsStylusDown() )
-        queue.Enqueue( stroke_point ); */
-
     
     if( isDownEvent )
     {
-        //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Pressed" ) );
-        // is_dragging = true;
-
-        /* FOdysseyPoint point;
-        queue.Dequeue( point ); */
         InputKeyWithStrokePoint( stroke_point, 0, GetPointingDevicePressedKey(), EInputEvent::IE_Pressed );
         mIsCapturedByStylus = true;
-
-        /* while( queue.Dequeue( point ) ) // Process all the down'd points which occur before having the ue pressed event
-        {
-            //If stylus is up, then we keep an event for the release
-            if (!iState.IsStylusDown() && queue.IsEmpty())
-            {
-                queue.Enqueue( point );
-                break;
-            }
-            CapturedMouseMoveWithStrokePoint( point );
-        } */
     }
     else if( isUpEvent )
     {
-        //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Released" ) );
-
         InputKeyWithStrokePoint( stroke_point, 0, GetPointingDevicePressedKey(), EInputEvent::IE_Released );
         mIsCapturedByStylus = false;
-
-        /* FOdysseyPoint point;
-        while( queue.Dequeue( point ) )
-        {
-            //If stylus is up, then we keep an event for the release
-            if (queue.IsEmpty())
-            {
-                InputKeyWithStrokePoint( point, 0, mLastKey, mLastEvent );
-                break;
-            }
-            CapturedMouseMoveWithStrokePoint( point );
-        }
-	
-		is_dragging = false;*/
     }
     else if( iState.IsStylusDown() ) // MUSTY BE the last, or at least after "is_dragging = false;"
     {
-        //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Dragging" ) );
-
         CapturedMouseMoveWithStrokePoint( stroke_point );
-        
-        /* FOdysseyPoint point;
-        while( queue.Dequeue( point ) )
-        {
-            //If stylus is up, then we keep an event for the release
-            if (!iState.IsStylusDown() && queue.IsEmpty())
-            {
-                queue.Enqueue( point );
-                break;
-            }
-            CapturedMouseMoveWithStrokePoint( point );
-        } */
-
     }
     else
     {
@@ -548,12 +491,25 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
         mCurrentPointInViewport = stroke_point;
         //Point In Texture
 		mCurrentPointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
-        //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Nothing" ) );
     }
 
     mStylusLastEventTime = std::chrono::steady_clock::now();
     mLastKey = EKeys::Invalid;
     mLastEvent = EInputEvent::IE_MAX;
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------ Internal Input Functions
+
+FKey
+FOdysseyPainterEditorViewportClient::GetPointingDevicePressedKey()
+{
+    if( mLastKey == EKeys::RightMouseButton )
+    {
+        return EKeys::RightMouseButton;
+    }
+
+    return EKeys::LeftMouseButton;
 }
 
 FOdysseyPainterEditorViewportClient::eState
@@ -596,6 +552,7 @@ FOdysseyPainterEditorViewportClient::InputChordToState()
 bool
 FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint(const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad)
 {
+
     //If we don't have a surface, then we don't interact with anything
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
     if (!texture)
@@ -628,7 +585,6 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint(const FOdysseyPoint
         if (mCurrentToolState == eState::kIdle)
             return OnInputEventRaw(iPointInViewport, iKey, iEvent);
         
-        ForceKeysUp(iKey);
         return OnInputEventWithState(iPointInViewport, iKey, iEvent);
     }
 
@@ -637,8 +593,6 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint(const FOdysseyPoint
     if (mCurrentToolState != eState::kIdle)
         return OnInputEventWithState(iPointInViewport, iKey, iEvent);
 
-    //TODO: Force Down for previously pressed keys
-    ForceKeysDown(iKey);
     return OnInputEventRaw(iPointInViewport, iKey, iEvent);
 }
 
@@ -739,7 +693,6 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
             mZoomReference = ::FMath::Loge(zoom);
             mZoomSizeReference = width;
             mZoomViewportPointReference = FVector2D(iPointInViewport.x, iPointInViewport.y);
-            //mZoomTexturePointReference = mOdysseyPainterEditorViewportPtr.Pin()->ToLocal(mZoomViewportPointReference );
             return true;
         }
         else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
@@ -773,18 +726,9 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
 }
 
 void
-FOdysseyPainterEditorViewportClient::ForceKeysUp(FKey iKey)
-{
-}
-
-void
-FOdysseyPainterEditorViewportClient::ForceKeysDown(FKey iKey)
-{
-}
-
-void
 FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOdysseyPoint& iPointInViewport )
 {
+
     //If we don't have a surface, then we don't interact with anything
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
     if (!texture)
@@ -867,109 +811,6 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     }
 }
 
-void
-FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* iViewport, int32 iX, int32 iY )
-{
-    if( mIsCurrentModeActive )
-        return;
-
-    mCurrentToolState = eState::kIdle;
-}
-
-void
-FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
-{
-    if( mIsCurrentModeActive )
-        return;
-
-    mCurrentToolState = eState::kIdle;
-}
-
-
-void
-FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
-{
-    //If we don't have a surface, then we don't interact with anything
-    UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
-    if (!texture)
-        return;
-
-    TArray<FKey> pressedKeys = mKeysPressed;
-    if (FOdysseyKeyState::GetLastKey() != FKey())
-        pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
-
-    //Point In Viewport
-    FOdysseyPoint pointInViewport = mCurrentPointInViewport;
-    pointInViewport.x = iX;
-    pointInViewport.y = iY;
-    pointInViewport.keysDown = pressedKeys;
-    pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
-    mCurrentPointInViewport = pointInViewport;
-
-    //Point In Texture
-    FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
-    pointInTexture.keysDown = pressedKeys;
-    pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
-    bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
-    mCurrentPointInTexture = pointInTexture;
-
-    if (mCurrentToolState == eState::kIdle)
-    {
-        if (!hasMoved)
-            return;
-
-        //if (mOdysseyPainterEditor->StrokeEngine()->GetBrushInstance())
-            //mOdysseyPainterEditor->StrokeEngine()->GetBrushInstance()->StrokeMoveTo(mCurrentPointInTexture);
-        mOnMouseHover.ExecuteIfBound(mCurrentPointInTexture);
-
-        //ToolSystem MouseMove
-        /*if (mIsReadyToCreateTool)
-        {
-            mIsReadyToCreateTool = false;
-            if( mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush )
-            {
-                CreateTool(mOdysseyPainterEditor->GetGUISelectedTool(), FVector2D(lastPointInTexture.x, lastPointInTexture.y));
-            }
-        }
-        if (mOdysseyPainterEditor->ToolSystem()->GetSelectedTool())
-        {
-            FVector2D posInTexture = GetLocalMousePosition(FVector2D(iX, iY));
-            mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->MouseMove(iViewport, posInTexture.X, posInTexture.Y);
-        }*/
-
-
-        //---
-    }
-}
-
-EMouseCursor::Type
-FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, int32 iY )
-{
-    if( mCurrentToolState == eState::kPan )
-        mCurrentMouseCursor = EMouseCursor::GrabHand;
-    else if( mCurrentToolState == eState::kPick )
-        mCurrentMouseCursor = EMouseCursor::EyeDropper;
-    else if( mOdysseyPainterEditor->GetSelectedTool() )
-        mCurrentMouseCursor = mOdysseyPainterEditor->GetSelectedTool()->GetMouseCursor();
-
-    return mCurrentMouseCursor;
-}
-
-TOptional< TSharedRef< SWidget > >
-FOdysseyPainterEditorViewportClient::MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply )
-{
-    return FViewportClient::MapCursor( iViewport, iCursorReply );
-}
-
-EMouseCaptureMode
-FOdysseyPainterEditorViewportClient::GetMouseCaptureMode() const
-{
-    //No Capture, the capture is managed by FOdysseySceneViewport
-    //Because this capture activates HighPrecisionMouseMovements, which is applying acceleration to the mouse (on Mac at least)
-    //And we don't want that
-    return EMouseCaptureMode::NoCapture;
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------ FGCObject API
 void
@@ -984,29 +825,16 @@ FString FOdysseyPainterEditorViewportClient::GetReferencerName() const
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------- Public API
+//-------------------------------------------------------------------------- Private API
+
 void
-FOdysseyPainterEditorViewportClient::ModifyCheckerboardTextureColors()
+FOdysseyPainterEditorViewportClient::CreateCheckerboardTexture()
 {
     DestroyCheckerboardTexture();
 
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
     mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, settings.CheckerSize );
 }
-
-FText
-FOdysseyPainterEditorViewportClient::GetDisplayedResolution() const
-{
-    uint32 height = 1;
-    uint32 width = 1;
-    mOdysseyPainterEditorViewportPtr.Pin()->ComputeTextureDisplayDimensions( width, height );
-    return FText::Format( LOCTEXT( "viewport.display-resolution", "Displayed: {0}x{1}" ),
-                           FText::AsNumber( FMath::Max( uint32( 1 ), width ) ),
-                           FText::AsNumber( FMath::Max( uint32( 1 ), height ) ) );
-}
-
-//--------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------- Private API
 
 void
 FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()

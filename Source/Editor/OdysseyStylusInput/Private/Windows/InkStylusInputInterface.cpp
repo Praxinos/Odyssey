@@ -83,19 +83,22 @@ void FInkStylusInputInterface::Tick()
 	// If the stylus is down (= drawing), don't change the focused window (and current widget) of the plugin
 	// When we draw on a zoomed viewport and the mouse go over the limits of the viewport, 
 	// we want to continue drawing on the right window and widget and not start "drawing" on the new hovered window and widget
-	for (const FInkTabletContextInfo& Context : Impl->StylusPlugin->TabletContexts)
+	/* for (const FInkTabletContextInfo& Context : Impl->StylusPlugin->TabletContexts)
 	{
 		if ( Context.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); }) )
 		{
 			return;
 		}
-	}
+	} */
+
+	FSlateApplication& Application = FSlateApplication::Get();
+
+	if (Application.GetMouseCaptureWindow() != nullptr)
+		return;
 
 	// Get the current window referenced by the plugin
 	HANDLE_PTR HCurrentWnd;
 	Impl->RealTimeStylus->get_HWND(&HCurrentWnd);
-
-	FSlateApplication& Application = FSlateApplication::Get();
 
 	// Get the widget hovered by the stylus/mouse
 	FWidgetPath WidgetPath = Application.LocateWindowUnderMouse(Application.GetCursorPos(), Application.GetInteractiveTopLevelWindows());
@@ -189,8 +192,8 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceInk()
 	FPlatformProcess::PopDllDirectory(*InkDLLDirectory);
 
 	// Create RealTimeStylus interface
-	void* OutInstance { nullptr };
-	HRESULT hr = ::CoCreateInstance(__uuidof(RealTimeStylus), nullptr, CLSCTX_INPROC, __uuidof(IRealTimeStylus), &OutInstance);
+	IRealTimeStylus* OutInstance { nullptr };
+	HRESULT hr = ::CoCreateInstance(__uuidof(RealTimeStylus), nullptr, CLSCTX_INPROC, __uuidof(IRealTimeStylus), (void**)&WindowsImpl->RealTimeStylus);
 	if (FAILED(hr))
 	{
 		FWindowsPlatformMisc::CoUninitialize();
@@ -198,7 +201,6 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceInk()
 		return nullptr;
 	}
 
-	WindowsImpl->RealTimeStylus = static_cast<IRealTimeStylus*>(OutInstance);
 	WindowsImpl->StylusPlugin = MakeShareable(new FInkRealTimeStylusPlugin());
 	
 	// Create free-threaded marshaller for the plugin

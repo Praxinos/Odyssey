@@ -37,7 +37,7 @@ UOdysseyStylusInputSettings::PostEditChangeProperty( struct FPropertyChangedEven
     // in the future this will fail to compile and we can update it.  
     if( ( PropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyStylusInputSettings, StylusInputDriver ) ) )
     {
-        RefreshStylusInputDriver();
+        //RefreshStylusInputDriver();
     }
 }
 
@@ -50,8 +50,8 @@ UOdysseyStylusInputSettings::GetStylusDriver() const
 void
 UOdysseyStylusInputSettings::RefreshStylusInputDriver()
 {
-    UOdysseyStylusInputSubsystem* input_subsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    input_subsystem->SetStylusInputDriver(StylusInputDriver);
+    /* UOdysseyStylusInputSubsystem* input_subsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    input_subsystem->SetStylusInputDriver(StylusInputDriver); */
 }
 
 //static
