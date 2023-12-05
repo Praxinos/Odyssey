@@ -85,7 +85,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         //static const uint32 INVALIDATE_PARENT      = ( 1 << 2 ); // must not be set manually
         static const uint32 INVALIDATE_SHAPE       = ( 1 << 3 );
         static const uint32 INVALIDATE_COLOR       = ( 1 << 4 );
-        static const uint32 INVALIDATE_ALL         = ( INVALIDATE_SHAPE | INVALIDATE_COLOR );
+        static const uint32 INVALIDATE_TOPOLOGY    = ( 1 << 5 );
+        static const uint32 INVALIDATE_ALL         = ( INVALIDATE_SHAPE | INVALIDATE_TOPOLOGY | INVALIDATE_COLOR );
 
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
@@ -123,7 +124,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual ~FOdysseyVectorObject();
         FOdysseyVectorObject( const FString& iName );
         void SetName( const FString& iName );
-        void CopySettings( FOdysseyVectorObject& iDestinationObject );
+        void CopySettings( FOdysseyVectorObject* iDestinationObject );
 
         void Transfer( const BLMatrix2D& iMatrix );
         void GetTransform( double& oTranslationX
@@ -225,4 +226,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void ApplyMatrix( BLMatrix2D& iMatrix );
         void SetOpacity( double iOpacity );
         double GetOpacity();
+        virtual void ExportParam( FOdysseyVectorObject* iDestinationObject, bool iInvalidate );
 };

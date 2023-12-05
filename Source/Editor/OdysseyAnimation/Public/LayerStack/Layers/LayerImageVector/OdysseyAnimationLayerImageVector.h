@@ -12,6 +12,8 @@
 
 #include "OdysseyAnimationLayerImageVector.generated.h"
 
+class FOdysseyAnimationCell;
+
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageVector
     : public UOdysseyAnimationLayer

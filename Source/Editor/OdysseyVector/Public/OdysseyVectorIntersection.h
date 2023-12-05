@@ -8,7 +8,7 @@
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorVertexIntersection.h"
 
-class FOdysseyVectorIntersection
+class ODYSSEYVECTOR_API FOdysseyVectorIntersection
 {
     public:
        /**

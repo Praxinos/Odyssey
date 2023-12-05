@@ -19,7 +19,6 @@ FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPai
                                                         , FOdysseyVectorObject* iObject )
     : FOdysseyVectorUndo( iScene )
 {
-    mFormerParentArray.push_back( iObject->GetParent() );
     mObjectArray.push_back( iObject );
 }
 
@@ -29,12 +28,9 @@ FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPai
 {
     for( FOdysseyVectorObject* object : iObjectList )
     {
-        mFormerParentArray.push_back( object->GetParent() );
         mObjectArray.push_back( object );
     }
 }
-
-
 
 void
 FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
@@ -44,18 +40,7 @@ FOdysseyVectorUndoObjectAdd::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mObjectArray.size(); i++ )
     {
-        FOdysseyVectorObject* currentParent = mObjectArray[i]->GetParent();
-
-        if( currentParent )
-        {
-            mFormerParentArray[i]->TransferChild( mObjectArray[i], mFormerParentArray[i]->GetLastChild() );
-        }
-        else
-        {
-            mFormerParentArray[i]->AppendChild( mObjectArray[i] );
-        }
-
-        mFormerParentArray[i] = currentParent;
+        mParentArray[i]->AppendChild( mObjectArray[i] );
     }
 
     // update invalidated objects and call callbacks if any (for refreshing GUI e.g)
@@ -75,22 +60,16 @@ FOdysseyVectorUndoObjectAdd::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( int i = 0; i < mObjectArray.size(); i++ )
+    if( mObjectArray.size() )
     {
-        FOdysseyVectorObject* currentParent = mObjectArray[i]->GetParent();
+        mParentArray.resize( mObjectArray.size() );
 
-        if( mFormerParentArray[i] )
+        for( int i = 0; i < mObjectArray.size(); i++ )
         {
-            mFormerParentArray[i]->TransferChild( mObjectArray[i], mFormerParentArray[i]->GetLastChild() );
-        }
-        else
-        {
-            currentParent->RemoveChild( mObjectArray[i] );
+            mParentArray[i] = mObjectArray[i]->GetParent();
 
-            mObjectArray[i]->SetParent( nullptr );
+            mParentArray[i]->RemoveChild( mObjectArray[i] );
         }
-
-        mFormerParentArray[i] = currentParent;
     }
 
     mScene->GetEngine()->ClearObjectSelection();

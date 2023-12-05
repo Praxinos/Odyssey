@@ -1,4 +1,5 @@
 #include "OdysseyVectorObject.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
@@ -316,7 +317,7 @@ FOdysseyVectorObject::Copy()
 
     if( objectCopy )
     {
-        CopySettings( *objectCopy ); // we need the matrices to properly import the child
+        CopySettings( objectCopy ); // we need the matrices to properly import the child
 
         // recurse
         for( FOdysseyVectorObject *child : mChildrenList )
@@ -330,29 +331,42 @@ FOdysseyVectorObject::Copy()
     return objectCopy;
 }
 
+// TODO: export flags
 void
-FOdysseyVectorObject::CopySettings( FOdysseyVectorObject& iDestinationObject )
+FOdysseyVectorObject::ExportParam( FOdysseyVectorObject* iDestinationObject, bool iInvalidate )
 {
-    CopyTransformation( iDestinationObject );
+    iDestinationObject->mForegroundBucket.SetPaletteEntry( mForegroundBucket.GetPaletteEntry() );
+    iDestinationObject->mForegroundBucket.SetSolidColor( mForegroundBucket.GetSolidColor() );
+    iDestinationObject->mForegroundBucket.SetColorMode( mForegroundBucket.GetColorMode() );
+    iDestinationObject->mForegroundBucket.SetGradientColor0( mForegroundBucket.GetGradientColor0() );
+    iDestinationObject->mForegroundBucket.SetGradientColor1( mForegroundBucket.GetGradientColor1() );
 
-    iDestinationObject.UpdateMatrix();
+    iDestinationObject->mBackgroundBucket.SetPaletteEntry( mBackgroundBucket.GetPaletteEntry() );
+    iDestinationObject->mBackgroundBucket.SetSolidColor( mBackgroundBucket.GetSolidColor() );
+    iDestinationObject->mBackgroundBucket.SetColorMode( mBackgroundBucket.GetColorMode() );
+    iDestinationObject->mBackgroundBucket.SetGradientColor0( mBackgroundBucket.GetGradientColor0() );
+    iDestinationObject->mBackgroundBucket.SetGradientColor1( mBackgroundBucket.GetGradientColor1() );
 
-    iDestinationObject.mForegroundBucket.SetPaletteEntry( mForegroundBucket.GetPaletteEntry() );
-    iDestinationObject.mForegroundBucket.SetSolidColor( mForegroundBucket.GetSolidColor() );
-    iDestinationObject.mForegroundBucket.SetColorMode( mForegroundBucket.GetColorMode() );
-    iDestinationObject.mForegroundBucket.SetGradientColor0( mForegroundBucket.GetGradientColor0() );
-    iDestinationObject.mForegroundBucket.SetGradientColor1( mForegroundBucket.GetGradientColor1() );
+    iDestinationObject->SetOpacity( mObjectParam.Opacity );
 
-    iDestinationObject.mBackgroundBucket.SetPaletteEntry( mBackgroundBucket.GetPaletteEntry() );
-    iDestinationObject.mBackgroundBucket.SetSolidColor( mBackgroundBucket.GetSolidColor() );
-    iDestinationObject.mBackgroundBucket.SetColorMode( mBackgroundBucket.GetColorMode() );
-    iDestinationObject.mBackgroundBucket.SetGradientColor0( mBackgroundBucket.GetGradientColor0() );
-    iDestinationObject.mBackgroundBucket.SetGradientColor1( mBackgroundBucket.GetGradientColor1() );
+    if( iInvalidate )
+    {
+        iDestinationObject->Invalidate();
+    }
+}
 
-    iDestinationObject.mBBox = mBBox;
+void
+FOdysseyVectorObject::CopySettings( FOdysseyVectorObject* iDestinationObject )
+{
+    CopyTransformation( *iDestinationObject );
 
-    iDestinationObject.SetName( mObjectParam.Name );
-    iDestinationObject.SetOpacity( mObjectParam.Opacity );
+    iDestinationObject->UpdateMatrix();
+
+    ExportParam( iDestinationObject, false );
+
+    iDestinationObject->mBBox = mBBox;
+
+    iDestinationObject->SetName( mObjectParam.Name );
 }
 
 double
@@ -537,6 +551,8 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext, double iAncestorsOpacity, uin
     iBLContext->transform( mLocalMatrix );
 
     iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
+    //Get sure everything is drawn before we draw in the BLend2D buffer.
+    iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
     DrawShape( iBLContext, combinedOpacity, iFlags );
     // get sure the parent has finished drawing before drawing its children

@@ -19,10 +19,10 @@ FOdysseyVectorEllipse::FOdysseyVectorEllipse( const FString& iName
     , mRadiusX( iRadiusX )
     , mRadiusY( iRadiusY )
 {
-    mCubicVertex[0] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
-    mCubicVertex[1] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
-    mCubicVertex[2] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
-    mCubicVertex[3] = new FOdysseyVectorVertex( this, 0.0f, 0.0f, mStrokeWidth );
+    mCubicVertex[0] = new FOdysseyVectorVertex( 0.0f, 0.0f, mStrokeWidth );
+    mCubicVertex[1] = new FOdysseyVectorVertex( 0.0f, 0.0f, mStrokeWidth );
+    mCubicVertex[2] = new FOdysseyVectorVertex( 0.0f, 0.0f, mStrokeWidth );
+    mCubicVertex[3] = new FOdysseyVectorVertex( 0.0f, 0.0f, mStrokeWidth );
 
     mCubicSegment[0] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[0], mCubicVertex[1], true );
     mCubicSegment[1] = new FOdysseyVectorSegmentCubic( this, mCubicVertex[1], mCubicVertex[2], true );

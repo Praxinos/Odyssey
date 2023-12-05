@@ -127,6 +127,8 @@ public:
     static void StitchVertices( FOdysseyVectorGroupPaint* iScene
                               , FOdysseyVectorVertex* iVertexA
                               , FOdysseyVectorVertex* iVertexB );
+    static void CopyTransformation( FOdysseyVectorGroupPaint* iScene );
+    static void PasteTransformation( FOdysseyVectorGroupPaint* iScene );
 
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );

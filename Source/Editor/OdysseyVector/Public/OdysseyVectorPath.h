@@ -8,6 +8,7 @@
 #include "OdysseyVectorBrush.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSegment.h"
+#include "OdysseyVectorChain.h"
 
 #include "OdysseyVectorPath.generated.h"
 
@@ -22,7 +23,7 @@ enum class eJointType : uint8
     Miter  = 3
 };
 
-enum ePointSelectionFlags
+enum ePointSelectionFlags : uint8
 {
     Vertex        = 1,
     SegmentHandle = 2,
@@ -33,19 +34,28 @@ enum ePointSelectionFlags
 // define bitwise op
 ENUM_CLASS_FLAGS(ePointSelectionFlags)
 
-struct FVertexChain
+enum class eSegmentAdditionFlags : uint8
 {
-    FOdysseyVectorVertex* vertex;
-    std::vector<FOdysseyVectorSegment*> segmentArray;
-    double length;
-    ::ULIS::FRectD bbox;
-
-    FVertexChain( FOdysseyVectorVertex* iVertex, uint32 iReserveSegmentCount )
-    {
-        vertex = iVertex;
-        segmentArray.reserve( iReserveSegmentCount );
-    }
+    None                  =        0  ,
+    KeepOriginalSegment   = ( 1 << 0 ),
+    RemoveOriginalSegment = ( 1 << 1 ),
+    CreateDerivedSegment  = ( 1 << 2 ),
+    CreateNewPath         = ( 1 << 3 )
 };
+
+// define bitwise op
+ENUM_CLASS_FLAGS(eSegmentAdditionFlags)
+
+enum class eVertexAdditionFlags : uint8
+{
+    None                 =        0  ,
+    RemoveOriginalVertex = ( 1 << 0 ),
+    CreateDerivedVertex  = ( 1 << 1 ),
+    CreateBoundaryVertex = ( 1 << 2 )
+};
+
+// define bitwise op
+ENUM_CLASS_FLAGS(eVertexAdditionFlags)
 
 USTRUCT()
 struct FPathParam
@@ -135,6 +145,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
        /**
          * @brief Erase path according to the mask image.
          * @param iRoi region of interest for faster discarding.
+         * @param iSplit
+         * @param oAddedPathArray array of pointers to added split paths.
          * @param oAddedVertexArray array of pointers to added vertices.
          * @param oAddedSegmentArray array of pointers to added segments.
          * @param oRemovedVertexArray array of pointers to removed vertices.
@@ -142,10 +154,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @return true if the path is empty, false otherwise.
          */
         bool Erase( const ::ULIS::FRectD &iRoi
+                  , std::vector<FOdysseyVectorObject*>& oAddedPathArray
                   , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
+                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                  , bool iWholeSection
+                  , bool iSplit );
 
        /**
          * @brief Get the joint type.
@@ -294,7 +309,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @brief Set the joint type.
          * @param mJointType the joint type.
          */
-        void SetJointType( eJointType mJointType );
+        void SetJointType( eJointType mJointType, bool iInvalidate );
 
        /**
          * @brief Convert this path to the coordinate system of the object passed as parameter.
@@ -344,7 +359,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         void SetBrush( const FOdysseyVectorBrush& iBrush );
         FOdysseyVectorBrush& GetBrush();
-        void SetMiterLimit( double iMiterLimit );
+        void SetMiterLimit( double iMiterLimit, bool iInvalidate );
 
 
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
@@ -352,14 +367,25 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual bool PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
 
+        void RemoveAllVertices();
+        void RemoveAllSegments();
+        bool HasVertex( FOdysseyVectorVertex* iVertex );
+        bool HasSegment( FOdysseyVectorSegment* iSegment );
+        virtual void ExportParam( FOdysseyVectorObject* iDestinationObject, bool iInvalidate ) override;
+
+        std::vector<FOdysseyVectorChain>& GetChainArray();
+
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
         void UpdateBBox();
         void Fill();
-        void ExploreVertexChain( FVertexChain* iVertexChain );
-        void UpdateVertexChain( FVertexChain* iVertexChain );
-        void FindVertexChains();
-        void DrawVertexChain( BLContext* iBLContext, double iCombinedOpacity, const FVertexChain& iVertexChain, uint64 iDrawingFlags );
+        void ExploreChain( FOdysseyVectorChain* iChain );
+        void UpdateChain( FOdysseyVectorChain* iChain );
+        void FindChains();
+        void DrawChain( BLContext* iBLContext
+                      , double iCombinedOpacity
+                      , FOdysseyVectorChain& iChain
+                      , uint64 iDrawingFlags );
         void DrawTexturedSegment( FOdysseyVectorSegment* iSegment
                                 , int8*  iScreenPixels
                                 , uint32 iScreenWidth
@@ -387,8 +413,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , double iCombinedOpacity
                               , uint64 iDrawingFlags );
 
+        void ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
+                           , std::vector<FWayFragment>& iWayFragmentArray
+                           , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                           , bool iSplit );
+
+        eVertexAdditionFlags VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit );
+        eSegmentAdditionFlags SegmentAdditionPolicy( FWayPoint* iWayPoint0
+                                                   , FWayPoint* iWayPoint1
+                                                   , bool iSplit );
+
     protected :
-        std::vector<FVertexChain> mVertexChainArray;
+        std::vector<FOdysseyVectorChain> mChainArray;
         std::list<FOdysseyVectorVertex*> mVertexList;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSegment*> mInvalidatedSegmentList;

@@ -27,7 +27,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         //Constructor
         UOdysseyPainterEditorVectorBaseTool();
-        UOdysseyPainterEditorVectorBaseTool( FOdysseyPainterEditorVectorBaseToolHUD* iBaseHUD );
+        UOdysseyPainterEditorVectorBaseTool( FOdysseyPainterEditorVectorBaseToolHUD* iBaseHUD
+                                           , bool iAutoCreateFrame );
 
         static bool DoubleClicked();
 
@@ -84,6 +85,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void Copy();
         void Paste();
         void SelectAll();
+        void Delete();
 
     protected:
         void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
@@ -113,10 +115,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void MakePaintGroup( FOdysseyVectorGroupPaint* iScene );
 
     protected:
+        // to force keyboard focus on mouse hover.
+        // Prevents the user from having to click at least once in the viewport.
+        TSharedPtr< SViewport > mViewportWidget;
         FOdysseyPainterEditorVectorBaseToolHUD* mBaseHUD;
         bool mHasContextMenu;
         bool mDoubleMouseDown_WorkAround;
         bool mDragging;
+        bool mAutoCreateMedia;
 
     public:
         //UPROPERTY( EditAnywhere, Category = Behavior )

@@ -64,7 +64,7 @@ FOdysseyVectorImportV1::ReadPathGeometryVertices( FOdysseyVectorPath& iPath
         Ar << y;
         Ar << radius;
 
-        cubicVertex = new FOdysseyVectorVertex( &iPath, x, y, radius );
+        cubicVertex = new FOdysseyVectorVertex( x, y, radius );
 
         iPath.AddVertex( cubicVertex );
 
@@ -90,7 +90,7 @@ FOdysseyVectorImportV1::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
 
                     Ar << jointType;
 
-                    iPath.SetJointType(static_cast<eJointType>(jointType));
+                    iPath.SetJointType(static_cast<eJointType>(jointType), true );
                 }
                 break;
 

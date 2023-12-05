@@ -50,7 +50,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iY coordinates on Y axis
          * @param iRadius radius
          */
-        FOdysseyVectorVertex ( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius );
+        FOdysseyVectorVertex ( double iX, double iY, double iRadius );
         ~FOdysseyVectorVertex();
 
         static void ArrayToSegmentArray( const std::vector<FOdysseyVectorVertex*>& iVertexArray
@@ -301,6 +301,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         double GetJointLength();
         uint32 GetFlags();
         void GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] );
+        bool HasErasedSectionsOnly();
 
     protected:
         /**
@@ -317,6 +318,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         std::list<FOdysseyVectorSection*> mSectionList;
         FOdysseyVectorPath* mPath;
         uint32 mFlags;
+       
 
         double mDistanceToNearestSegment;
         double mNearestSegmentT;

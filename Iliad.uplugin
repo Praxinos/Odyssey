@@ -23,6 +23,10 @@
 	],
 	"Plugins": [
 		{
+			"Enabled": true,
+			"Name": "EditorScriptingUtilities"
+		},
+		{
 			"Enabled": false,
 			"Name": "Paper2D",
 			"Optional": true

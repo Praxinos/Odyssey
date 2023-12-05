@@ -6,14 +6,13 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
-#include "OdysseyVectorObject.h"
 
-class ODYSSEYVECTOR_API FOdysseyVectorUndoSendBackward : public FOdysseyVectorUndo
+class ODYSSEYVECTOR_API FOdysseyVectorUndoDeleteVertex : public FOdysseyVectorUndo
 {
     public:
-        ~FOdysseyVectorUndoSendBackward();
-        FOdysseyVectorUndoSendBackward( FOdysseyVectorGroupPaint* iScene
-                                      , FOdysseyVectorObject* iObject );
+        ~FOdysseyVectorUndoDeleteVertex();
+         FOdysseyVectorUndoDeleteVertex( FOdysseyVectorGroupPaint* iScene
+                                       , const std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -25,5 +24,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSendBackward : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorObject* mObject;
+        std::vector<FSnapshotPath> mPathSnapshotArray;
 };

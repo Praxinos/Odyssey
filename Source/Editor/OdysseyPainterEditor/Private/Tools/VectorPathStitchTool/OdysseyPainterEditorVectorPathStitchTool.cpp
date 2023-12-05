@@ -18,7 +18,7 @@ UOdysseyPainterEditorVectorPathStitchTool::~UOdysseyPainterEditorVectorPathStitc
 }
 
 UOdysseyPainterEditorVectorPathStitchTool::UOdysseyPainterEditorVectorPathStitchTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathStitchToolHUD( this ) )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathStitchToolHUD( this ), false )
     , PickingRadius(20.0f)
 //    , RestrictToSelection( false )
 {

@@ -41,7 +41,7 @@ UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
 
             if( iPropertyName == "JointType" )
-                selectedPath->SetJointType( JointType );
+                selectedPath->SetJointType( JointType, true );
 
             if( iPropertyName == "Brush" )
                 selectedPath->SetBrush( Brush );

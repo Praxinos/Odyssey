@@ -23,8 +23,6 @@
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoGroup.h"
 #include "Undo/OdysseyVectorUndoUngroup.h"
-#include "Undo/OdysseyVectorUndoSendBackward.h"
-#include "Undo/OdysseyVectorUndoBringForward.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 #include "Undo/OdysseyVectorUndoRemoveObjects.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
@@ -35,6 +33,8 @@
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
+#include "Undo/OdysseyVectorUndoTransferObjects.h"
+#include "Undo/OdysseyVectorUndoPathAlter.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
@@ -678,7 +678,7 @@ FOdysseyPainterEditor::BringForward( FOdysseyVectorGroupPaint* iScene )
         GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.bring-forward", "Bring forward"));
         if( GUndo )
         {
-           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBringForward( iScene, selectedObject );
+           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTransferObjects( iScene, selectedObject );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
@@ -708,7 +708,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyVectorGroupPaint* iScene )
         GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.send-backward", "Send backward"));
         if( GUndo )
         {
-           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSendBackward( iScene, selectedObject );
+           FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTransferObjects( iScene, selectedObject );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
@@ -1423,6 +1423,62 @@ GetCopiedObjectList()
     static std::list<FOdysseyVectorObject*> copiedObjectList;
 
     return copiedObjectList;
+}
+
+static FOdysseyVectorObject*
+GetStoreObject()
+{
+    static FOdysseyVectorObject storeObject("StoreObject");
+
+    return &storeObject;
+}
+
+// static
+void
+FOdysseyPainterEditor::CopyTransformation( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
+
+    if( selectedObject )
+    {
+        FOdysseyVectorObject* storeObject = GetStoreObject();
+
+        selectedObject->CopyTransformation( *storeObject );
+    }
+}
+
+// static
+void
+FOdysseyPainterEditor::PasteTransformation( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
+
+    if( selectedObject )
+    {
+        FOdysseyVectorObject* storeObject = GetStoreObject();
+
+        //----- needed for undos -----//
+        GEditor->BeginTransaction(LOCTEXT("PasteTransformation", "Paste Transformation"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, selectedObject );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        }
+        GEditor->EndTransaction();
+        // -------------------------- //
+
+        storeObject->CopyTransformation( *selectedObject );
+
+        selectedObject->UpdateMatrix();
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    vectorEngine->ResetHUD();
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
 }
 
 // static

@@ -4,7 +4,7 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
-#include "Undo/OdysseyVectorUndoPathExtend.h"
+#include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "Palette/OdysseyPalette.h"
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
@@ -20,7 +20,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 }
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathDrawingToolHUD( this ) )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathDrawingToolHUD( this ), true )
     , ColorSource( ePathDrawingToolColorSource::ColorWheel )
     , TracingType( eTracingType::Organic )
     , TracingFidelity( eTracingFidelity::Average )
@@ -141,24 +141,37 @@ UOdysseyPainterEditorVectorPathDrawingTool::SetPathColor( FOdysseyVectorPath* iP
     iPath->GetForegroundBucket().SetColorMode( (eBucketColorMode)ColorSource );
 }
 
+// static
 void
-UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathExtend( FOdysseyVectorGroupPaint* iScene
-                                                                , FOdysseyVectorPath* iPath  )
+UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorGroupPaint* iScene
+                                                               , FOdysseyVectorPath* iPath
+                                                               , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                                               , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
 {
+    std::vector<FOdysseyVectorPath*> addedObjectArray;
+
+    addedObjectArray.push_back( iPath );
+
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-drawing-tool.transaction.draw-path-and-stitch","Vector Path Drawing Tool"));
     if( GUndo )
     {
-        mUndoPathExtend = new FOdysseyVectorUndoPathExtend( iScene, iPath );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
+                                                                  , addedObjectArray
+                                                                  , iAddedVertexArray
+                                                                  , iAddedSegmentArray );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(mUndoPathExtend) );
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 }
 
+//static
 void
 UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGroupPaint* iScene
-                                                             , FOdysseyVectorPath* iPath  )
+                                                             , FOdysseyVectorPath* iPath
+                                                             , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
+                                                             , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
 {
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-drawing-tool.transaction.draw-path","Vector Path Drawing Tool"));
@@ -166,7 +179,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, iPath ) );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 }
@@ -208,8 +221,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
     {
         FOdysseyVectorPath* path = nullptr;
 
-        mUndoPathExtend = nullptr;
-        mStitchedVertex = nullptr;
+        mAddedVertexArray.clear();
+        mAddedSegmentArray.clear();
 
         if( Stitch )
         {
@@ -221,17 +234,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
             {
                 path = mStitchedVertex->GetPath();
             }
-
-            // This undo must be set before association with the new parent object
-            RecordUndoPathExtend( iScene, path );
         }
 
         if( path == nullptr )
         {
             path = new FOdysseyVectorPath( "Path" );
-
-            // This undo must be set before association with the new parent object
-            RecordUndoPathAdd( iScene, path );
 
             iScene->AppendChild( path );
             path->UpdateMatrix();
@@ -305,9 +312,12 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
 
         newSegment = mPathTracer.Trace( mStitchedVertex, iPointInTexture.x, iPointInTexture.y, pointRadius );
 
-        if( newSegment && mStitchedVertex )
+        if( newSegment )
         {
-            mUndoPathExtend->RecordSegment( newSegment, newSegment->GetVertex(1) );
+            mAddedVertexArray.push_back( newSegment->GetVertex(1) );
+            mAddedSegmentArray.push_back( newSegment );
+
+            //mUndoPathExtend->RecordSegment( newSegment, newSegment->GetVertex(1) );
         }
 
         // dont redraw everything if no new segment was created
@@ -341,6 +351,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
         // check path validity in case we get a UP without a DOWN first
         if( mPathTracer.GetPath() )
         {
+            FOdysseyVectorPath* path = mPathTracer.GetPath();
             FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
             FOdysseyVectorSegment* newSegment;
             FOdysseyVectorVertex* endingVertex = PickVertex( iScene
@@ -349,17 +360,48 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , StitchingRadius );
 
             // stitching to another path at MouseUp is CURRENTLY not supported
-            if( endingVertex && ( endingVertex->GetPath() != mPathTracer.GetPath() ) )
+            if( endingVertex && ( endingVertex->GetPath() != path ) )
             {
                 endingVertex = nullptr;
             }
 
             newSegment = mPathTracer.Flush( endingVertex );
 
-            if( newSegment && mStitchedVertex )
+            if( newSegment )
             {
-                mUndoPathExtend->RecordSegment( newSegment, endingVertex ? nullptr : newSegment->GetVertex(1) );
+                if( endingVertex == nullptr )
+                {
+                    mAddedVertexArray.push_back( newSegment->GetVertex(1) );
+                }
+
+                mAddedSegmentArray.push_back( newSegment );
+
+                if( mStitchedVertex )
+                {
+                    RecordUndoPathAlter( iScene
+                                       , path
+                                       , mAddedVertexArray
+                                       , mAddedSegmentArray );
+                }
+                else
+                {
+                    RecordUndoPathAdd( iScene
+                                     , path
+                                     , mAddedVertexArray
+                                     , mAddedSegmentArray );
+                }
             }
+            else // delete any path with single vertex that was create at mouse down
+            {
+                // TODO: this is only for NEW path
+                if (path->GetVertexList().size() <= 1)
+                {
+                    path->GetParent()->RemoveChild( path );
+                    vectorEngine->UnselectObject( path );
+                    delete path;
+                }
+            }
+
 
             iScene->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATEPAINTGROUPS : 0 ); // update invalidated objects
 

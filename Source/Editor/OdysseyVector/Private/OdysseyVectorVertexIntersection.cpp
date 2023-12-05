@@ -11,10 +11,11 @@ FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVect
                                                                   , double iX
                                                                   , double iY
                                                                   , double iT )
-    : FOdysseyVectorVertex ( iPath, iX, iY, 0.0f )
+    : FOdysseyVectorVertex ( iX, iY, 0.0f )
     , mIntersection( iIntersection )
     , mT( iT )
 {
+    SetPath( iPath );
 }
 
 uint32

@@ -1,14 +1,15 @@
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorHandleSegment.h"
+#include "OdysseyVectorIntersection.h"
 
 FOdysseyVectorVertex::~FOdysseyVectorVertex()
 {
 }
 
-FOdysseyVectorVertex::FOdysseyVectorVertex( FOdysseyVectorPath* iPath, double iX, double iY, double iRadius )
+FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint( iX, iY, iRadius )
-   , mPath ( iPath )
+   , mPath ( nullptr )
    , mFlags( 0 )
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )
@@ -752,16 +753,16 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags )
 }
 
 void
-FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iPreviousSegment )
+FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iCurrentSegment )
 {
-    if( iPreviousSegment )
+    if( iCurrentSegment )
     {
-        FOdysseyVectorSegment* nextSegment = GetOtherSegment( iPreviousSegment );
+        FOdysseyVectorSegment* prevSegment = GetOtherSegment( iCurrentSegment );
 
-        if( iPreviousSegment && nextSegment )
+        if( iCurrentSegment && prevSegment )
         {
-            ::ULIS::FVec2D segment0Vector = GetVectorOnSegment( iPreviousSegment, false );
-            ::ULIS::FVec2D segment1Vector = GetVectorOnSegment( nextSegment     , false );
+            ::ULIS::FVec2D segment0Vector = GetVectorOnSegment( iCurrentSegment, false );
+            ::ULIS::FVec2D segment1Vector = GetVectorOnSegment( prevSegment    , false );
 
             if( segment0Vector.DistanceSquared() )
             {

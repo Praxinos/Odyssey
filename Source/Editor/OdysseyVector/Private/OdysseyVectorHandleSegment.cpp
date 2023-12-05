@@ -1,4 +1,6 @@
 #include "OdysseyVectorHandleSegment.h"
+#include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSegmentCubic.h"
 
 // static
 void

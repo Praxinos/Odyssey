@@ -244,6 +244,27 @@ FSnapshotSegmentCubic::Restore()
 
 FSnapshotPath::~FSnapshotPath()
 {
+    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(mObject);
+
+    // free removed vertices and segments
+    if( mPathSnapshotFlags & SNAPSHOT_TOPOLOGY )
+    {
+        for( FOdysseyVectorVertex* vertex : mTopologyVertexList )
+        { 
+            if( path->HasVertex( vertex ) == false )
+            {
+                delete vertex;
+            }
+        }
+
+        for( FOdysseyVectorSegment* segment : mTopologySegmentList )
+        {
+            if( path->HasSegment( segment ) == false )
+            {
+                delete segment;
+            }
+        }
+    }
 }
 
 FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
@@ -252,6 +273,12 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
     : FSnapshotObject( iPath, iObjectSnapshotFlags )
     , mPathSnapshotFlags( iPathSnapshotFlags )
 {
+    if( iPathSnapshotFlags & SNAPSHOT_TOPOLOGY )
+    {
+        mTopologyVertexList = iPath->GetVertexList();
+        mTopologySegmentList = iPath->GetSegmentList();
+    }
+
     if( iPathSnapshotFlags & SNAPSHOT_VERTICES )
     {
         std::list<FOdysseyVectorVertex*>& vertexList = iPath->GetVertexList();
@@ -292,9 +319,31 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
 bool
 FSnapshotPath::Restore()
 {
+    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(mObject);
+
     if( FSnapshotObject::Restore() )
     {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(mObject);
+        if( mPathSnapshotFlags & SNAPSHOT_TOPOLOGY )
+        {
+            std::list<FOdysseyVectorVertex*> swapTopologyVertexList = path->GetVertexList();
+            std::list<FOdysseyVectorSegment*> swapTopologySegmentList = path->GetSegmentList();
+
+            path->RemoveAllSegments();
+            path->RemoveAllVertices();
+
+            for( FOdysseyVectorVertex* vertex : mTopologyVertexList )
+            {
+                path->AddVertex( vertex );
+            }
+
+            for( FOdysseyVectorSegment* segment : mTopologySegmentList )
+            {
+                path->AddSegment( segment );
+            }
+
+            mTopologyVertexList = swapTopologyVertexList;
+            mTopologySegmentList = swapTopologySegmentList;
+        }
 
         if( mPathSnapshotFlags & SNAPSHOT_VERTICES )
         {
