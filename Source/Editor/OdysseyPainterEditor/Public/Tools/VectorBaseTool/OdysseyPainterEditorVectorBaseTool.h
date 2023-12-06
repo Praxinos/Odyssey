@@ -11,6 +11,13 @@
 
 class FOdysseyPainterEditorVectorBaseToolHUD;
 
+UENUM()
+enum class eBaseToolColorSource : uint8
+{
+    ColorWheel = eBucketColorMode::SolidColor,
+    Palette  = eBucketColorMode::Palette
+};
+
 UCLASS(Abstract)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdysseyPainterEditorTool
 {
@@ -96,6 +103,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // static
         void GetSegmentHandlesFromVertices( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                           , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray );
+        void SetPathColor( FOdysseyVectorPath* iPath
+                         , eBaseToolColorSource iColorSource );
 
     private:
         void ExtendContextMenuObject( FMenuBuilder& menu );

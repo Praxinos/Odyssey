@@ -152,6 +152,10 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                                            , oRemovedVertexArray
                                            , oRemovedSegmentArray
                                            , Split );
+
+                  // do not erase children. this is useless and would cause a crash because the paintgroup
+                  // is not updated yet.
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
               }
 
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
@@ -172,6 +176,10 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                                                , oRemovedVertexArray
                                                , oRemovedSegmentArray
                                                , Split );
+
+                      // do not erase children. this is useless and would cause a crash because the paintgroup
+                      // is not updated yet.
+                      return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
                   }
               }
 

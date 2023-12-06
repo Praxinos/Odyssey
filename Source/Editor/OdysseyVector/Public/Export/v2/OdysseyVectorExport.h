@@ -64,6 +64,7 @@ namespace FOdysseyVectorExportV2
     void WritePathGeometryVertexHandleAlignment( FOdysseyVectorVertex& iVertex, FArchive &Ar );
     void WritePathGeometry( FOdysseyVectorPath& iPath, FArchive &Ar );
     void WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar );
+    void WritePathMiterLimit( FOdysseyVectorPath& iPath, FArchive &Ar );
     void WritePathBrush( FOdysseyVectorPath& iPath, FArchive &Ar );
 
     ////////////////////////////////////

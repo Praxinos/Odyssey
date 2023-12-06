@@ -169,6 +169,12 @@ FOdysseyVectorPath::SetJointType( eJointType iJointType, bool iInvalidate )
     }
 }
 
+double
+FOdysseyVectorPath::GetMiterLimit()
+{
+    return mPathParam.MiterLimit;
+}
+
 void
 FOdysseyVectorPath::SetMiterLimit( double iMiterLimit, bool iInvalidate )
 {

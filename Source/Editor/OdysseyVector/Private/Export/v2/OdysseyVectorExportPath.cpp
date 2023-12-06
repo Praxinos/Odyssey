@@ -170,6 +170,20 @@ FOdysseyVectorExportV2::WritePathJoint( FOdysseyVectorPath& iPath, FArchive &Ar 
 
 //static
 void
+FOdysseyVectorExportV2::WritePathMiterLimit( FOdysseyVectorPath& iPath, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_MITERLIMIT
+                            , Ar
+                            , [&iPath](FArchive &Ar) -> void
+    {
+        double miterLimit = iPath.GetMiterLimit();
+
+        Ar << miterLimit;
+    } );
+}
+
+//static
+void
 FOdysseyVectorExportV2::WritePathBrush( FOdysseyVectorPath& iPath, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_BRUSH
@@ -193,6 +207,7 @@ FOdysseyVectorExportV2::WritePath( FOdysseyVectorPath& iPath, FArchive &Ar )
 
         // own chunks
         WritePathJoint( iPath, Ar );
+        WritePathMiterLimit( iPath, Ar );
         WritePathGeometry( iPath, Ar );
         WritePathBrush( iPath, Ar );
     } );

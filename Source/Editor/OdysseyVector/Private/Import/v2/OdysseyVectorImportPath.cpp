@@ -126,6 +126,16 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_PATH_MITERLIMIT:
+                {
+                    double miterLimit;
+
+                    Ar << miterLimit;
+
+                    iPath.SetMiterLimit( miterLimit, true );
+                }
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_PATH_BRUSH:
                     currentBrush = &iPath.GetBrush();
                 break;

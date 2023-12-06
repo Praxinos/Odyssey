@@ -20,9 +20,9 @@ UOdysseyPainterEditorVectorPathView::ImportParam()
         {
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            JointType = selectedPath->GetJointType();
-
-            Brush = selectedPath->GetBrush();
+            JointType  = selectedPath->GetJointType();
+            Brush      = selectedPath->GetBrush();
+            MiterLimit = selectedPath->GetMiterLimit();
 
             break; // only one
         }
@@ -45,6 +45,9 @@ UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
 
             if( iPropertyName == "Brush" )
                 selectedPath->SetBrush( Brush );
+
+            if( iPropertyName == "MiterLimit" )
+                selectedPath->SetMiterLimit( MiterLimit, true );
         }
     }
 

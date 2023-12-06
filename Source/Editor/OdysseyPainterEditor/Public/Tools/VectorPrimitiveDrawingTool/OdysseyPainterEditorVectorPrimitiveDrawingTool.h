@@ -10,6 +10,13 @@
 #include "OdysseyPainterEditorVectorPrimitiveDrawingTool.generated.h"
 
 UENUM()
+enum class ePrimitiveDrawingToolColorSource : uint8
+{
+    ColorWheel = eBucketColorMode::SolidColor,
+    Palette  = eBucketColorMode::Palette
+};
+
+UENUM()
 enum class EOdysseyVectorPrimitiveType : uint8
 {
     Ellipse,
@@ -58,6 +65,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
     public:
         UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
         EOdysseyVectorPrimitiveType PrimitiveType;
+
+        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
+        eBaseToolColorSource ColorSource;
+
+        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        double Opacity;
+
+        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
+        FOdysseyVectorBrush Brush;
 
         UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool , meta = (ClampMin = "0.0", UIMin = "0.0"))
         double StrokeWidth;

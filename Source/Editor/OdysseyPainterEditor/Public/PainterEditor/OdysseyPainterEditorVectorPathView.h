@@ -29,6 +29,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
         eJointType JointType;
 
         UPROPERTY( EditAnywhere, Category = Path )
+        double MiterLimit;
+
+        UPROPERTY( EditAnywhere, Category = Path )
         FOdysseyVectorBrush Brush;
 
         //UPROPERTY(EditAnywhere,Category = Path, meta = (ContentDir = ))

@@ -360,7 +360,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void SetBrush( const FOdysseyVectorBrush& iBrush );
         FOdysseyVectorBrush& GetBrush();
         void SetMiterLimit( double iMiterLimit, bool iInvalidate );
-
+        double GetMiterLimit();
 
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
         virtual void DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ) override;

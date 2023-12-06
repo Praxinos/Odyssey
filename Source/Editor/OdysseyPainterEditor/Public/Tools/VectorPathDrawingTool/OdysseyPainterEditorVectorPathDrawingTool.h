@@ -15,13 +15,6 @@ class FOdysseyPainterEditorVectorPathDrawingToolHUD;
 class FOdysseyVectorUndoPathExtend;
 
 UENUM()
-enum class ePathDrawingToolColorSource : uint8
-{
-    ColorWheel = eBucketColorMode::SolidColor,
-    Palette  = eBucketColorMode::Palette
-};
-
-UENUM()
 enum class eTracingType : uint8
 {
     Organic  = 0,
@@ -80,12 +73,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                             , const FName& iPropertyName ) override;
 
     private:
-        bool HasMedia() const;
         FOdysseyVectorVertex* PickVertex( FOdysseyVectorGroupPaint* iScene
                                         , double iWorldX
                                         , double iWorldY
                                         , double iPickingRadius );
-        void SetPathColor( FOdysseyVectorPath* iPath );
+
         static void RecordUndoPathAdd( FOdysseyVectorGroupPaint* iScene
                                      , FOdysseyVectorPath* iPath
                                      , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
@@ -97,7 +89,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
     public:
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )
-        ePathDrawingToolColorSource ColorSource;
+        eBaseToolColorSource ColorSource;
+
+        UPROPERTY( EditAnywhere, Category = PathDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        double Opacity;
 
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         FOdysseyVectorBrush Brush;
@@ -112,9 +107,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         double Radius;
         // computed based upon whether or not the pencil size is relative to the object's transformation matrix
         double mRealSize;
-
-        UPROPERTY( EditAnywhere, Category = PathDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
-        double Opacity;
 
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         bool PressureSensitive;
