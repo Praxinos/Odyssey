@@ -158,9 +158,9 @@ FOdysseyVectorChain::IterateSections( std::function<bool( FOdysseyVectorVertex*,
             if( nextSegment )
             {
                 nextSection = nextVertex->GetSection( nextSegment );
-
-                currentSegment = nextSegment;
             }
+
+            currentSegment = nextSegment;
         }
 
         if( nextVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
