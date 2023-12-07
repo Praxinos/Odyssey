@@ -222,7 +222,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "about-window.copyright.external-libs.ULIS", "- littleCMS : http://www.littlecms.com/" ) )
+                    .Text( LOCTEXT( "about-window.copyright.external-libs.littlecms", "- littleCMS : http://www.littlecms.com/" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
@@ -231,7 +231,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "about-window.copyright.external-libs.ULIS", "- glm : https://www.opengl.org/sdk/libs/GLM/" ) )
+                    .Text( LOCTEXT( "about-window.copyright.external-libs.glm", "- glm : https://www.opengl.org/sdk/libs/GLM/" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
@@ -240,7 +240,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "about-window.copyright.external-libs.ULIS", "- boost.preprocessor : https://www.boost.org/doc/libs/1_71_0/libs/preprocessor/doc/index.html" ) )
+                    .Text( LOCTEXT( "about-window.copyright.external-libs.boost-preprocessor", "- boost.preprocessor : https://www.boost.org/doc/libs/1_71_0/libs/preprocessor/doc/index.html" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]

@@ -208,7 +208,7 @@ TSharedRef<SWidget> SOdysseyMeshSelector::CreateUVMenuWidget()
 
             MenuBuilder.AddMenuEntry(
                 FText::Format(LOCTEXT("mesh-selector.uv-channel.name", "UV Channel {0}"), FText::AsNumber(UVChannelID)),
-                FText::Format(LOCTEXT("mesh-selector.uv-channel.name", "Overlay UV Channel {0} on the viewport"), FText::AsNumber(UVChannelID)),
+                FText::Format(LOCTEXT("mesh-selector.uv-channel.tooltip", "Overlay UV Channel {0} on the viewport"), FText::AsNumber(UVChannelID)),
                 FSlateIcon(),
                 MenuAction,
                 NAME_None,
