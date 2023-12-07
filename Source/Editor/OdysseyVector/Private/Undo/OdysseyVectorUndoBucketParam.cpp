@@ -20,7 +20,7 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGrou
                                                             , FOdysseyVectorBucket* iBucket )
     : FOdysseyVectorUndo( iScene )
 {
-    mBucketSnapshotArray.emplace_back( iBucket, FSnapshotBucket::SNAPSHOT_PARAM );
+    mBucketSnapshotArray.push_back( FSnapshotBucket( iBucket, FSnapshotBucket::SNAPSHOT_PARAM ));
 }
 
 // Backup bucket params in the constructor
@@ -37,7 +37,7 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGrou
     {
         // Note: setting the owner does not make sense per se, as the bucket is only
         // temporary, but is mandatory in the ctor
-        mBucketSnapshotArray.emplace_back( iBucketArray[i], FSnapshotBucket::SNAPSHOT_PARAM );
+        mBucketSnapshotArray.push_back( FSnapshotBucket( iBucketArray[i], FSnapshotBucket::SNAPSHOT_PARAM ));
     }
 }
 

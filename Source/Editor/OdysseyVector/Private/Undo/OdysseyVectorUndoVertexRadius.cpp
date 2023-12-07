@@ -23,7 +23,7 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
 
     for( int i = 0; i < iPathArray.size(); i++ )
     {
-        mPathSnapshotArray.emplace_back( iPathArray[i], FSnapshotFlags::Object::Path::VERTICES );
+        mPathSnapshotArray.push_back( FSnapshotPath( iPathArray[i], FSnapshotFlags::Object::Path::VERTICES ));
     }
 }
 
@@ -35,7 +35,7 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
 
     for( FOdysseyVectorVertex* vertex : iVertexArray )
     {
-        mVertexSnapshotArray.emplace_back( vertex, FSnapshotPoint::SNAPSHOT_RADIUS, 0 );
+        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotPoint::SNAPSHOT_RADIUS, 0 ));
     }
 }
 

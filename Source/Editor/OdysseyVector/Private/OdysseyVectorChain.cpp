@@ -554,8 +554,10 @@ FOdysseyVectorChain::TraceLine( int32 iX0
                                                                           , newVertexAt.y
                                                                           , radius );
 
-                oWayPointArray.emplace_back( newVertex, ( alphaValue == 0 ) ? FWayPoint::LeavesErasureArea
-                                                                            : FWayPoint::EntersErasureArea, t );
+                FWayPoint wayPoint = FWayPoint( newVertex, ( alphaValue == 0 ) ?                                                       FWayPoint::LeavesErasureArea
+                                               : FWayPoint::EntersErasureArea, t );
+                
+                oWayPointArray.push_back( wayPoint );
 
                 newVertex->SetID( wayPointCount );
                 // Note: wayFragments use waypoints ID because the array might grow (thus the pointer would change)
@@ -594,8 +596,10 @@ FOdysseyVectorChain::TraceLine( int32 iX0
                                                                           , newVertexAt.y
                                                                           , radius );
 
-                oWayPointArray.emplace_back( newVertex, ( alphaValue == 0 ) ? FWayPoint::LeavesErasureArea
-                                                                            : FWayPoint::EntersErasureArea, t );
+                FWayPoint wayPoint = FWayPoint( newVertex, ( alphaValue == 0 ) ?                                                       FWayPoint::LeavesErasureArea
+                                               : FWayPoint::EntersErasureArea, t );
+                
+                oWayPointArray.push_back( wayPoint );
 
                 newVertex->SetID( wayPointCount );
                 // record waypoints ID because the array might grow (thus the pointer would change)

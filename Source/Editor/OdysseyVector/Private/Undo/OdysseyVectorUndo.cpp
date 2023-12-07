@@ -329,9 +329,7 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath, uint64 iSnapshotFlags )
 
         for( FOdysseyVectorVertex* vertex : vertexList )
         {
-            mVertexSnapshotArray.emplace_back( vertex
-                                             , FSnapshotPoint::SNAPSHOT_ALL
-                                             , FSnapshotVertex::SNAPSHOT_ALL );
+            mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotPoint::SNAPSHOT_ALL, FSnapshotVertex::SNAPSHOT_ALL) );
         }
     }
 
@@ -348,7 +346,7 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath, uint64 iSnapshotFlags )
             {
                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-                mCubicSegmentSnapshotArray.emplace_back( cubicSegment, FSnapshotSegmentCubic::SNAPSHOT_ALL );
+                mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic(cubicSegment, FSnapshotSegmentCubic::SNAPSHOT_ALL));
             }
         }
     }
@@ -524,7 +522,7 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
 
         for( FOdysseyVectorBucket* bucket : bucketList )
         {
-            mBucketSnapshotArray.emplace_back( bucket, FSnapshotBucket::SNAPSHOT_ALL );
+            mBucketSnapshotArray.push_back( FSnapshotBucket( bucket, FSnapshotBucket::SNAPSHOT_ALL ));
         }
     }
 

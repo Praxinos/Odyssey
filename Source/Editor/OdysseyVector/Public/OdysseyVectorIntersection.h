@@ -41,7 +41,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorIntersection
          * @param the vertex index
          * return a pointer to the vertex
          */
-        inline FOdysseyVectorVertexIntersection* GetVertex( int iNum );
+        FOdysseyVectorVertexIntersection* GetVertex( int iNum );
 
        /**
          * @brief Checks whether or not a vertex belongs to this intersection
@@ -58,7 +58,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorIntersection
          */
         void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
 
-        inline bool SelfIntersects();
+        bool SelfIntersects();
 
     protected:
         FOdysseyVectorVertexIntersection mVertex[2];

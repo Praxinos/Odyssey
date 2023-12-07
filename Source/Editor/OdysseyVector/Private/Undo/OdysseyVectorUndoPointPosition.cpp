@@ -20,7 +20,7 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 
     for( int i = 0; i < iPointArray.size(); i++ )
     {
-        mPointSnapshotArray.emplace_back( iPointArray[i], FSnapshotPoint::SNAPSHOT_ALL );
+        mPointSnapshotArray.push_back( FSnapshotPoint( iPointArray[i], FSnapshotPoint::SNAPSHOT_ALL) );
     }
 }
 
@@ -33,12 +33,12 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 
     for( int i = 0; i < iVertexArray.size(); i++ )
     {
-        mPointSnapshotArray.emplace_back( iVertexArray[i], FSnapshotPoint::SNAPSHOT_ALL );
+        mPointSnapshotArray.push_back( FSnapshotPoint( iVertexArray[i], FSnapshotPoint::SNAPSHOT_ALL) );
     }
 
     for( int i = 0; i < iHandleArray.size(); i++ )
     {
-        mPointSnapshotArray.emplace_back( iHandleArray[i], FSnapshotPoint::SNAPSHOT_ALL );
+        mPointSnapshotArray.push_back( FSnapshotPoint( iHandleArray[i], FSnapshotPoint::SNAPSHOT_ALL) );
     }
 }
 
@@ -46,7 +46,7 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
                                                                 , FOdysseyVectorPoint* iPoint )
     : FOdysseyVectorUndo( iScene )
 {
-    mPointSnapshotArray.emplace_back( iPoint, FSnapshotPoint::SNAPSHOT_ALL );
+    mPointSnapshotArray.push_back( FSnapshotPoint( iPoint, FSnapshotPoint::SNAPSHOT_ALL) );
 }
 
 void

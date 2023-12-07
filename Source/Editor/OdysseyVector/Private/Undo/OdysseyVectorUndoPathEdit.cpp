@@ -22,10 +22,10 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
 
     for( FOdysseyVectorVertex* vertex : iEditedVertexArray )
     {
-        mVertexSnapshotArray.emplace_back( vertex
-                                         , FSnapshotVertex::SNAPSHOT_POSITION
-                                         | FSnapshotVertex::SNAPSHOT_RADIUS
-                                         , 0 );
+        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
+                                                        , FSnapshotVertex::SNAPSHOT_POSITION
+                                                        | FSnapshotVertex::SNAPSHOT_RADIUS
+                                                        , 0 ));
     }
 
     for( FOdysseyVectorSegment* segment : iEditedSegmentArray )
@@ -34,7 +34,7 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-            mCubicSegmentSnapshotArray.emplace_back( cubicSegment, FSnapshotSegmentCubic::SNAPSHOT_HANDLES );
+            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotSegmentCubic::SNAPSHOT_HANDLES ));
         }
     }
 }
