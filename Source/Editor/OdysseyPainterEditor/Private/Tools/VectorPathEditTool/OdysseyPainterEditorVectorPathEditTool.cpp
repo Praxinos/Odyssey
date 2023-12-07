@@ -118,15 +118,12 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
     std::vector<FOdysseyVectorPath*> addedPathArray;
     std::vector<FOdysseyVectorVertex*> addedVertexArray; // not filled, here just for the undo record
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    bool hasHit = false;
 
     removedPathArray.reserve( 10 );
     removedVertexArray.reserve( 10 );
     removedSegmentArray.reserve( 10 );
     addedSegmentArray.reserve( 10 );
-
-    mPickedHandleArray.clear();
-    mPickedVertexArray.clear();
-    mPickedVertexArray.reserve( 10 );
 
     vectorEngine->Traverse
     ( iScene
@@ -135,6 +132,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
     , [ this
       , iScene
       , vectorEngine
+      , &hasHit
       , &iPointInTexture
       , &removedPathArray
       , &removedVertexArray
@@ -146,20 +144,28 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+                  // work on fresh new arrays to prevent double selection or something.
+                  std::vector<FOdysseyVectorVertex*> pickedVertexArray;
+                  std::vector<FOdysseyVectorHandleSegment*> pickedHandleSegmentArray;
 
                   path->PickPoint( iPointInTexture.x
                                  , iPointInTexture.y
                                  , PickingRadius
-                                 , mPickedVertexArray
-                                 , mPickedHandleArray
+                                 , pickedVertexArray
+                                 , pickedHandleSegmentArray // will be empty
                                  , FOdysseyVectorPath::PICK_VERTEX );
 
                   FOdysseyVectorPath::DeleteVertex( path
-                                                  , mPickedVertexArray
+                                                  , pickedVertexArray
                                                   , removedVertexArray
                                                   , removedSegmentArray
                                                   , removedPathArray
                                                   , addedSegmentArray );
+
+                  if( pickedVertexArray.size() )
+                  {
+                      hasHit = true;
+                  }
               }
 
               return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
@@ -168,8 +174,11 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
           return 0;
       } );
 
-    if( mPickedVertexArray.size() )
+    if( hasHit )
     {
+        // mPickedVertexArray is used as a boolean in MouseUp to trigger or not the picking mode
+        mPickedVertexArray = removedVertexArray;
+
         for( int i = 0; i < removedPathArray.size(); i++ )
         {
             FOdysseyVectorPath* path = removedPathArray[i];

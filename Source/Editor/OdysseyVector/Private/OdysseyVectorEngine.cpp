@@ -88,6 +88,9 @@ FOdysseyVectorEngine::SetScene( FOdysseyVectorGroupPaint* iScene )
     mSelectedObjectList.clear();
 
     ResetHUD();
+
+    mScene->UpdateMatrix();
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
 
 FOdysseyVectorGroupPaint*

@@ -129,6 +129,8 @@ public:
                               , FOdysseyVectorVertex* iVertexB );
     static void CopyTransformation( FOdysseyVectorGroupPaint* iScene );
     static void PasteTransformation( FOdysseyVectorGroupPaint* iScene );
+    static void MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
+                           , const TArray<FOdysseyVectorGroupPaint*>& iSourceSceneArray );
 
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );

@@ -1556,6 +1556,29 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyVectorGroupPaint* iScene )
                         | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
 }
 
+// static
+void
+FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
+                                  , const TArray<FOdysseyVectorGroupPaint*>& iSourceSceneArray )
+{
+    FOdysseyVectorEngine* vectorEngine = iDestinationScene->GetEngine();
+
+    for( int i = 0; i < iSourceSceneArray.Num(); i++ )
+    {
+        for( FOdysseyVectorObject* child : iSourceSceneArray[i]->GetChildrenList() )
+        {
+            FOdysseyVectorObject* copiedChild = child->Copy();
+
+            iDestinationScene->AppendChild( copiedChild );
+        }
+    }
+
+    iDestinationScene->UpdateMatrix();
+    iDestinationScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+}
+
 void
 FOdysseyPainterEditor::StitchVertices( FOdysseyVectorGroupPaint* iScene
                                      , FOdysseyVectorVertex* iVertexA

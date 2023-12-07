@@ -93,6 +93,7 @@ namespace FOdysseyFile
                     static const uint32 CHUNK_PATH = 0x138d0bec; // container
                         // ... inherited chunks.
                         static const uint32 CHUNK_PATH_JOINT = 0x272518f6; // uint32(type)
+                        static const uint32 CHUNK_PATH_MITERLIMIT = 0x9c7e37dd; // double(MiterLimit)
                         static const uint32 CHUNK_PATH_GEOMETRY = 0x904a4229; // container
                             // packed version
                             static const uint32 CHUNK_PATH_GEOMETRY_VERTICES = 0x1116a85d; // uint32(count), array[double(X)-double(Y)-double(Radius)]

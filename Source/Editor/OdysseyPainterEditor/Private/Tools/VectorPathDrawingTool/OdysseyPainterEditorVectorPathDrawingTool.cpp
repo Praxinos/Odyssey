@@ -5,9 +5,6 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
-#include "Palette/OdysseyPaletteEntryColor.h"
-#include "Palette/OdysseyPalette.h"
-#include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
 
@@ -21,7 +18,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathDrawingToolHUD( this ), true )
-    , ColorSource( ePathDrawingToolColorSource::ColorWheel )
+    , ColorSource( eBaseToolColorSource::ColorWheel )
     , TracingType( eTracingType::Organic )
     , TracingFidelity( eTracingFidelity::Average )
     , Radius( 5.0f )
@@ -99,46 +96,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorGroupPaint
     }
 
     return nullptr;
-}
-
-void
-UOdysseyPainterEditorVectorPathDrawingTool::SetPathColor( FOdysseyVectorPath* iPath )
-{
-    switch( ColorSource )
-    {
-        case ePathDrawingToolColorSource::ColorWheel:
-        {
-            ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
-            ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-            FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
-
-            iPath->GetForegroundBucket().SetSolidColor( ueColor );
-        }
-        break;
-
-        case ePathDrawingToolColorSource::Palette:
-        {
-            TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
-            UOdysseyPalette* palette = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette();
-
-            if( palette )
-            {
-                UOdysseyPaletteEntry * paletteEntry = palette->CurrentEntry.Get();
-
-                if( paletteEntry && paletteEntry->IsA( UOdysseyPaletteEntryColor::StaticClass() ) )
-                {
-                    iPath->GetForegroundBucket().SetPaletteEntry( paletteEntry );
-                }
-            }
-        }
-        break;
-
-        default:
-        break;
-    }
-
-    iPath->SetOpacity( Opacity );
-    iPath->GetForegroundBucket().SetColorMode( (eBucketColorMode)ColorSource );
 }
 
 // static
@@ -243,7 +200,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
             iScene->AppendChild( path );
             path->UpdateMatrix();
 
-            SetPathColor( path );
+            SetPathColor( path, ColorSource );
+
+            path->SetOpacity( Opacity );
         }
 
         path->SetBrush( Brush );

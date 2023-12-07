@@ -23,7 +23,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorBaseToolHUD( this ), true )
     , PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
+    , ColorSource( eBaseToolColorSource::ColorWheel )
     , StrokeWidth( 4.0f )
+    , Opacity( 1.0f )
     , Uniform( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle64");
@@ -85,24 +87,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     if( iKey == EKeys::LeftMouseButton )
     {
         BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
-        ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-        FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
         FOdysseyVectorPrimitive* primitive;
         UOdysseyPaletteEntry* entry = nullptr;
         BLPoint widthVector = iScene->GetInverseWorldMatrix().mapVector( 0.7071f * StrokeWidth, 0.7071f * StrokeWidth );
         ::ULIS::FVec2D width = ::ULIS::FVec2D( widthVector.x, widthVector.y );
-
-        TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
-        if (colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette())
-        {
-            entry = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette()->CurrentEntry.Get();
-            if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-            {
-                FColor colorEntry = Cast< UOdysseyPaletteEntryColor >(entry)->GetUsedColor();
-                ueColor = colorEntry;
-            }
-        }
 
         mMouseDown.x = iPointInTexture.x;
         mMouseDown.y = iPointInTexture.y;
@@ -122,12 +110,12 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
             break;
         }
 
-        if (entry && entry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-            primitive->GetForegroundBucket().SetPaletteEntry(entry);
-
         iScene->AppendChild( primitive );
 
-        primitive->SetForegroundColor( ueColor );
+        SetPathColor( primitive, ColorSource );
+        primitive->SetOpacity( Opacity );
+        primitive->SetBrush( Brush );
+        //primitive->SetForegroundColor( ueColor );
         primitive->Translate( localCoords.x, localCoords.y );
         primitive->UpdateMatrix();
 
