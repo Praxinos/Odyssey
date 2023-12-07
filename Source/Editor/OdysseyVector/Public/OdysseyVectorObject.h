@@ -157,6 +157,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         FOdysseyVectorBucket& GetBackgroundBucket();
         FOdysseyVectorBucket& GetForegroundBucket();
+        void SetBackgroundBucket( const FOdysseyVectorBucket& iBucket );
+        void SetForegroundBucket( const FOdysseyVectorBucket& iBucket );
 
         virtual uint32 TransferChild( FOdysseyVectorObject* iFosterChild, FOdysseyVectorObject* iInsertAfter );
         /*virtual void UpdateBoundingBox() = 0;*/

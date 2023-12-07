@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoDeleteVertex.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoDeleteVertex::~FOdysseyVectorUndoDeleteVertex()
 {
@@ -16,7 +18,7 @@ FOdysseyVectorUndoDeleteVertex::FOdysseyVectorUndoDeleteVertex( FOdysseyVectorGr
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-            mPathSnapshotArray.emplace_back( path, 0, FSnapshotPath::SNAPSHOT_TOPOLOGY );
+            mPathSnapshotArray.emplace_back( path, FSnapshotFlags::Object::Path::TOPOLOGY );
         }
     }
 }

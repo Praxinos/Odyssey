@@ -35,9 +35,13 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
 }
 
 uint64
-UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
+UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iPropertyName
+                                                          , const FName& iMemberPropertyName
+                                                          , const FName& iCategory )
 {
-    uint64 signalFlags = UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName, iCategory );
+    uint64 signalFlags = UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
+                                                                               , iMemberPropertyName
+                                                                               , iCategory );
 
     for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {

@@ -22,8 +22,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
 
     protected:
         virtual void ImportParam() override;
-        virtual uint64 PropertyChanged( const FName& iPropertyName, const FName& iCategory ) override;
-
+        virtual uint64 PropertyChanged( const FName& iPropertyName
+                                      , const FName& iMemberPropertyName
+                                      , const FName& iCategory ) override;
     public:
         UPROPERTY( EditAnywhere, Category = Path )
         eJointType JointType;

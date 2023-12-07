@@ -1,4 +1,7 @@
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoSelectVertex::~FOdysseyVectorUndoSelectVertex()
 {
@@ -16,14 +19,14 @@ FOdysseyVectorUndoSelectVertex::FOdysseyVectorUndoSelectVertex( FOdysseyVectorGr
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-            mPathSnapshotArray.emplace_back( path, 0, FSnapshotPath::SNAPSHOT_SELECTED_VERTICES );
+            mPathSnapshotArray.emplace_back( path, FSnapshotFlags::Object::Path::SELECTED_VERTICES );
         }
 
         if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
-            mPaintgroupSnapshotArray.emplace_back( paintGroup, 0, FSnapshotGroupPaint::SNAPSHOT_SELECTED_BUCKETS );
+            mPaintgroupSnapshotArray.emplace_back( paintGroup, FSnapshotFlags::Object::GroupPaint::SELECTED_BUCKETS );
         }
     }
 }

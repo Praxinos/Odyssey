@@ -35,12 +35,12 @@ FSnapshotObject::~FSnapshotObject()
     }
 }
 
-FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectSnapshotFlags )
-    : mObjectSnapshotFlags( iObjectSnapshotFlags )
+FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint64 iSnapshotFlags )
+    : mSnapshotFlags( iSnapshotFlags )
     , mObject( iObject )
     , mPreviousChild( nullptr )
 {
-    if( iObjectSnapshotFlags & SNAPSHOT_TRANSFORMATIONS )
+    if( mSnapshotFlags & FSnapshotFlags::Object::TRANSFORMATIONS )
     {
         iObject->GetTransform( mTranslationX
                              , mTranslationY
@@ -50,13 +50,13 @@ FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectS
     }
 
 
-    if( iObjectSnapshotFlags & SNAPSHOT_HIERARCHY )
+    if( mSnapshotFlags & FSnapshotFlags::Object::HIERARCHY )
     {
         mParent = iObject->GetParent();
         mPreviousChild = iObject->GetParent()->GetPreviousChild( iObject );
     }
 
-    if( iObjectSnapshotFlags & SNAPSHOT_CHILDREN_TRANSFORMATIONS )
+    if( mSnapshotFlags & FSnapshotFlags::Object::CHILDREN_TRANSFORMATIONS )
     {
         std::list<FOdysseyVectorObject*>& childrenObjectList = iObject->GetChildrenList();
 
@@ -64,15 +64,34 @@ FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint32 iObjectS
 
         for( FOdysseyVectorObject* child : childrenObjectList )
         {
-            mChildrenSnapshotArray.push_back( new FSnapshotObject( child, SNAPSHOT_TRANSFORMATIONS ) );
+            mChildrenSnapshotArray.push_back( new FSnapshotObject( child, FSnapshotFlags::Object::TRANSFORMATIONS ) );
         }
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::COLORING )
+    {
+        FOdysseyVectorBucket& foregroundBucket = iObject->GetForegroundBucket();
+        FOdysseyVectorBucket& backgroundBucket = iObject->GetBackgroundBucket();
+
+        mForegroundBucketSnapshot = FSnapshotBucket( &foregroundBucket, FSnapshotBucket::SNAPSHOT_PARAM );
+        mBackgroundBucketSnapshot = FSnapshotBucket( &backgroundBucket, FSnapshotBucket::SNAPSHOT_PARAM );
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::OPACITY )
+    {
+        mOpacity = iObject->GetOpacity();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::NAME )
+    {
+        mName = iObject->GetName();
     }
 }
 
 bool
 FSnapshotObject::Restore()
 {
-    if( mObjectSnapshotFlags & SNAPSHOT_TRANSFORMATIONS )
+    if( mSnapshotFlags & FSnapshotFlags::Object::TRANSFORMATIONS )
     {
         double swapTranslationX, swapTranslationY, swapRotation, swapScalingX, swapScalingY;
 
@@ -97,7 +116,7 @@ FSnapshotObject::Restore()
         mScalingY     = swapScalingY;
     }
 
-    if( mObjectSnapshotFlags & SNAPSHOT_HIERARCHY )
+    if( mSnapshotFlags & FSnapshotFlags::Object::HIERARCHY )
     {
         FOdysseyVectorObject* currentParent = mObject->GetParent();
         FOdysseyVectorObject* currentPreviousChild = mObject->GetParent()->GetPreviousChild(mObject);
@@ -123,12 +142,36 @@ FSnapshotObject::Restore()
         }
     }
 
-    if( mObjectSnapshotFlags & SNAPSHOT_CHILDREN_TRANSFORMATIONS )
+    if( mSnapshotFlags & FSnapshotFlags::Object::CHILDREN_TRANSFORMATIONS )
     {
         for( int i = 0; i < mChildrenSnapshotArray.size(); i++ )
         {
             mChildrenSnapshotArray[i]->Restore();
         }
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::COLORING )
+    {
+        mForegroundBucketSnapshot.Restore();
+        mBackgroundBucketSnapshot.Restore();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::OPACITY )
+    {
+        double currentOpacity = mObject->GetOpacity();
+
+        mObject->SetOpacity( mOpacity );
+        // swap
+        mOpacity = currentOpacity;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::NAME )
+    {
+        FString currentName = mObject->GetName();
+
+        mObject->SetName( mName );
+        // swap
+        mName = currentName;
     }
 
     return true; // restore succeeded
@@ -247,10 +290,10 @@ FSnapshotPath::~FSnapshotPath()
     FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(mObject);
 
     // free removed vertices and segments
-    if( mPathSnapshotFlags & SNAPSHOT_TOPOLOGY )
+    if( mSnapshotFlags & FSnapshotFlags::Object::Path::TOPOLOGY )
     {
         for( FOdysseyVectorVertex* vertex : mTopologyVertexList )
-        { 
+        {
             if( path->HasVertex( vertex ) == false )
             {
                 delete vertex;
@@ -267,19 +310,18 @@ FSnapshotPath::~FSnapshotPath()
     }
 }
 
-FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
-                            , uint32 iObjectSnapshotFlags
-                            , uint32 iPathSnapshotFlags )
-    : FSnapshotObject( iPath, iObjectSnapshotFlags )
-    , mPathSnapshotFlags( iPathSnapshotFlags )
+FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath, uint64 iSnapshotFlags )
+    : FSnapshotObject( iPath, iSnapshotFlags )
 {
-    if( iPathSnapshotFlags & SNAPSHOT_TOPOLOGY )
+    // snapshot vertex and segment list
+    if( iSnapshotFlags & FSnapshotFlags::Object::Path::TOPOLOGY )
     {
         mTopologyVertexList = iPath->GetVertexList();
         mTopologySegmentList = iPath->GetSegmentList();
     }
 
-    if( iPathSnapshotFlags & SNAPSHOT_VERTICES )
+     // Snapshot vertices position & radius
+    if( iSnapshotFlags & FSnapshotFlags::Object::Path::VERTICES )
     {
         std::list<FOdysseyVectorVertex*>& vertexList = iPath->GetVertexList();
 
@@ -293,7 +335,8 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
         }
     }
 
-    if( iPathSnapshotFlags & SNAPSHOT_SEGMENTS )
+     // Snapshot segments' handles position
+    if( iSnapshotFlags & FSnapshotFlags::Object::Path::SEGMENTS )
     {
         std::list<FOdysseyVectorSegment*>& segmentList = iPath->GetSegmentList();
 
@@ -310,9 +353,24 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
         }
     }
 
-    if( iPathSnapshotFlags & SNAPSHOT_SELECTED_VERTICES )
+    if( iSnapshotFlags & FSnapshotFlags::Object::Path::SELECTED_VERTICES )
     {
         mSelectedVertexList = iPath->GetSelectedVertexList();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Object::Path::JOINTTYPE )
+    {
+        mJointType = iPath->GetJointType();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Object::Path::MITERLIMIT )
+    {
+        mMiterLimit = iPath->GetMiterLimit();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Object::Path::BRUSH )
+    {
+        mBrush = iPath->GetBrush();
     }
 }
 
@@ -323,7 +381,7 @@ FSnapshotPath::Restore()
 
     if( FSnapshotObject::Restore() )
     {
-        if( mPathSnapshotFlags & SNAPSHOT_TOPOLOGY )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Path::TOPOLOGY )
         {
             std::list<FOdysseyVectorVertex*> swapTopologyVertexList = path->GetVertexList();
             std::list<FOdysseyVectorSegment*> swapTopologySegmentList = path->GetSegmentList();
@@ -345,7 +403,7 @@ FSnapshotPath::Restore()
             mTopologySegmentList = swapTopologySegmentList;
         }
 
-        if( mPathSnapshotFlags & SNAPSHOT_VERTICES )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Path::VERTICES )
         {
             for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
             {
@@ -353,7 +411,7 @@ FSnapshotPath::Restore()
             }
         }
 
-        if( mPathSnapshotFlags & SNAPSHOT_SEGMENTS )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Path::SEGMENTS )
         {
             for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
             {
@@ -361,7 +419,7 @@ FSnapshotPath::Restore()
             }
         }
 
-        if( mPathSnapshotFlags & SNAPSHOT_SELECTED_VERTICES )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Path::SELECTED_VERTICES )
         {
             std::list<FOdysseyVectorVertex*> currentVertexList = path->GetSelectedVertexList();
 
@@ -373,6 +431,33 @@ FSnapshotPath::Restore()
             }
 
             mSelectedVertexList = currentVertexList;
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::Path::JOINTTYPE )
+        {
+            eJointType currentJointType = path->GetJointType();
+
+            path->SetJointType( mJointType, true );
+            // swap
+            mJointType = currentJointType;
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::Path::MITERLIMIT )
+        {
+            double currentMiterLimit = path->GetMiterLimit();
+
+            path->SetMiterLimit( mMiterLimit, true );
+
+            mMiterLimit = currentMiterLimit;
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::Path::BRUSH )
+        {
+            FOdysseyVectorBrush currentBrush = path->GetBrush();
+
+            path->SetBrush( mBrush );
+            // swap
+            mBrush = currentBrush;
         }
 
         return true;
@@ -428,12 +513,10 @@ FSnapshotGroupPaint::~FSnapshotGroupPaint()
 }
 
 FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
-                                        , uint32 iObjectSnapshotFlags
-                                        , uint32 iPaintGroupSnapshotFlags )
-    : FSnapshotObject( iPaintGroup, iObjectSnapshotFlags )
-    , mPaintGroupSnapshotFlags( iPaintGroupSnapshotFlags )
+                                        , uint64 iSnapshotFlags )
+    : FSnapshotObject( iPaintGroup, iSnapshotFlags )
 {
-    if( iPaintGroupSnapshotFlags & SNAPSHOT_BUCKETS )
+    if( iSnapshotFlags & FSnapshotFlags::Object::GroupPaint::BUCKETS )
     {
         std::list<FOdysseyVectorBucket*>& bucketList = iPaintGroup->GetBucketList();
 
@@ -445,9 +528,43 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
         }
     }
 
-    if( iPaintGroupSnapshotFlags & SNAPSHOT_SELECTED_BUCKETS )
+    if( iSnapshotFlags & FSnapshotFlags::Object::GroupPaint::SELECTED_BUCKETS )
     {
         mSelectedBucketList = iPaintGroup->GetSelectedBucketList();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::PAINTED )
+    {
+        bPainted = iPaintGroup->IsPainted();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::MONOCHROME )
+    {
+        bMonochrome = iPaintGroup->IsMonochrome();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::MONOCHROMECOLOR )
+    {
+        mMonochromeColor = iPaintGroup->GetMonochromeColor();
+    }
+    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::REALTIME )
+    {
+        bRealtime = iPaintGroup->IsRealtime();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::GAPTOLERANCE )
+    {
+        mGapTolerance = iPaintGroup->GetGapTolerance();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::WIREFRAME )
+    {
+        bWireframe = iPaintGroup->IsWireframe();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::WIREFRAMECOLOR )
+    {
+        mWireframeColor = iPaintGroup->GetWireframeColor();
     }
 }
 
@@ -458,7 +575,7 @@ FSnapshotGroupPaint::Restore()
     {
         FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mObject);
 
-        if( mPaintGroupSnapshotFlags & SNAPSHOT_BUCKETS )
+        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::BUCKETS )
         {
             for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
             {
@@ -466,7 +583,7 @@ FSnapshotGroupPaint::Restore()
             }
         }
 
-        if( mPaintGroupSnapshotFlags & SNAPSHOT_SELECTED_BUCKETS )
+        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::SELECTED_BUCKETS )
         {
             std::list<FOdysseyVectorBucket*> currentBucketList = paintGroup->GetSelectedBucketList();
 
@@ -476,8 +593,70 @@ FSnapshotGroupPaint::Restore()
             {
                 paintGroup->SelectBucket( bucket );
             }
-
+            // swap
             mSelectedBucketList = currentBucketList;
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::PAINTED )
+        {
+            bool currentPainted = paintGroup->IsPainted();
+
+            paintGroup->SetPainted( bPainted );
+            // swap
+            bPainted = currentPainted;
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::MONOCHROME )
+        {
+            bool currentMonochrome = paintGroup->IsMonochrome();
+
+            paintGroup->SetMonochrome( bMonochrome );
+            // swap
+            bMonochrome = currentMonochrome;
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::MONOCHROMECOLOR )
+        {
+            FColor currentMonochromeColor = paintGroup->GetMonochromeColor();
+
+            paintGroup->SetMonochromeColor( mMonochromeColor );
+            // swap
+            mMonochromeColor = currentMonochromeColor;
+        }
+        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::REALTIME )
+        {
+            bool currentRealtime = paintGroup->IsRealtime();
+
+            paintGroup->SetRealtime( bRealtime );
+            // swap
+            bRealtime = currentRealtime;
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::GAPTOLERANCE )
+        {
+            double currentGapTolerance = paintGroup->GetGapTolerance();
+
+            paintGroup->SetGapTolerance( mGapTolerance );
+            // swap
+            mGapTolerance = currentGapTolerance;
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::WIREFRAME )
+        {
+            bool currentWireframe = paintGroup->IsWireframe();
+
+            paintGroup->SetWireframe( bWireframe );
+            // swap
+            bWireframe = currentWireframe;
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::WIREFRAMECOLOR )
+        {
+            FColor currentWireframeColor = paintGroup->GetWireframeColor();
+
+            paintGroup->SetWireframeColor( mWireframeColor );
+            // swap
+            mWireframeColor = currentWireframeColor;
         }
 
         return true;

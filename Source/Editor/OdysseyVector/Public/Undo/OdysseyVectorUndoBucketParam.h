@@ -28,9 +28,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketParam : public FOdysseyVectorUnd
         /** Describes this change (for debugging) */
         virtual FString ToString() const override;
 
-    protected:
-        void Swap();
-
     private:
         std::vector<FOdysseyVectorBucket*> mAddedBucketArray;
         std::vector<FSnapshotBucket> mBucketSnapshotArray;

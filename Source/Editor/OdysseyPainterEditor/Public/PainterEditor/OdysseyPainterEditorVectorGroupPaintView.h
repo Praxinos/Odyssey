@@ -22,7 +22,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
 
     protected:
         virtual void ImportParam() override;
-        virtual uint64 PropertyChanged( const FName& iPropertyName, const FName& iCategory ) override;
+        virtual uint64 PropertyChanged( const FName& iPropertyName
+                                      , const FName& iMemberPropertyName
+                                      , const FName& iCategory ) override;
 
     public:
         UPROPERTY( EditAnywhere, Category = PaintGroup )
