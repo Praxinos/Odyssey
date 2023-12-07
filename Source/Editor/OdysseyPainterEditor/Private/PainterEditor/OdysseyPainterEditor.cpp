@@ -1158,12 +1158,15 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorGroupPaint* iScene )
 
             path->GetSelectedVertices( selectedVertexArray );
 
-            FOdysseyVectorPath::DeleteVertex( path
-                                            , selectedVertexArray
-                                            , removedVertexArray
-                                            , removedSegmentArray
-                                            , removedPathArray
-                                            , addedSegmentArray );
+            if( selectedVertexArray.size() )
+            {
+                FOdysseyVectorPath::DeleteVertex( path
+                                                , selectedVertexArray
+                                                , removedVertexArray
+                                                , removedSegmentArray
+                                                , removedPathArray
+                                                , addedSegmentArray );
+            }
         }
     }
 

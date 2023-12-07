@@ -1467,7 +1467,10 @@ FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
                 if( stitchingVertex[0] )
                 {
                     // for vertices that were not picked but that cannot be stitched, delete them as well.
-                    extendedVertexArray.push_back( stitchingVertex[0] );
+                    if( std::find( extendedVertexArray.begin(), extendedVertexArray.end(), stitchingVertex[0] ) == extendedVertexArray.end() )
+                    {
+                        extendedVertexArray.push_back( stitchingVertex[0] );
+                    }
                 }
             }
             else // stitchingVertex[0] != stitchingVertex[1]
@@ -1487,13 +1490,19 @@ FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
                     if( stitchingVertex[0] && ( stitchingVertex[0]->GetSegmentCount() == 1 ) )
                     {
                         // for vertices that were not picked but that cannot be stitched, delete them as well.
-                        extendedVertexArray.push_back( stitchingVertex[0] );
+                        if( std::find( extendedVertexArray.begin(), extendedVertexArray.end(), stitchingVertex[0] ) == extendedVertexArray.end() )
+                        {
+                            extendedVertexArray.push_back( stitchingVertex[0] );
+                        }
                     }
 
                     if( stitchingVertex[1] && ( stitchingVertex[1]->GetSegmentCount() == 1 ) )
                     {
                         // for vertices that were not picked but that cannot be stitched, delete them as well.
-                        extendedVertexArray.push_back( stitchingVertex[1] );
+                        if( std::find( extendedVertexArray.begin(), extendedVertexArray.end(), stitchingVertex[1] ) == extendedVertexArray.end() )
+                        {
+                            extendedVertexArray.push_back( stitchingVertex[1] );
+                        }
                     }
                 }
             }
