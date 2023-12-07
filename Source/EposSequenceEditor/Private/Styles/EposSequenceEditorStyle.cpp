@@ -50,6 +50,8 @@ FEposSequenceEditorStyle::Unregister()
 FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     : FSlateStyleSet( "EposSequenceEditorStyle" )
 {
+    SetParentStyleName( FAppStyle::Get().GetStyleSetName() );
+
     InitSequencer();
     InitCommands();
     InitAbout();
@@ -76,7 +78,7 @@ FEposSequenceEditorStyle::InitSequencer()
     //---
 
     Set( "Sequencer.InfoBar",
-         FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) )
+         FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
          .SetFont( DEFAULT_FONT( "Regular", 10 ) )
          .SetColorAndOpacity( FLinearColor( FColor( 96, 96, 96 ) ) )
     );
