@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoTransferObjects::~FOdysseyVectorUndoTransferObjects()
 {
@@ -17,7 +19,7 @@ FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVe
                                                                     , FOdysseyVectorObject* iTransferredObject )
     : FOdysseyVectorUndo( iScene )
 {
-    mTransferredObjectSnapshotArray.emplace_back( iTransferredObject, FSnapshotObject::SNAPSHOT_HIERARCHY );
+    mTransferredObjectSnapshotArray.emplace_back( iTransferredObject, FSnapshotFlags::Object::HIERARCHY );
 }
 
 FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
@@ -26,7 +28,7 @@ FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVe
 {
     for( FOdysseyVectorObject* transferredObject : iTransferredObjectList )
     {
-        mTransferredObjectSnapshotArray.emplace_back( transferredObject, FSnapshotObject::SNAPSHOT_HIERARCHY );
+        mTransferredObjectSnapshotArray.emplace_back( transferredObject, FSnapshotFlags::Object::HIERARCHY );
     }
 }
 

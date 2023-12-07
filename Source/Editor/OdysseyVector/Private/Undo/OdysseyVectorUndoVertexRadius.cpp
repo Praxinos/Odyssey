@@ -1,4 +1,7 @@
 #include "Undo/OdysseyVectorUndoVertexRadius.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoVertexRadius::~FOdysseyVectorUndoVertexRadius()
 {
@@ -20,7 +23,7 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
 
     for( int i = 0; i < iPathArray.size(); i++ )
     {
-        mPathSnapshotArray.emplace_back( iPathArray[i], 0, FSnapshotPath::SNAPSHOT_VERTICES );
+        mPathSnapshotArray.emplace_back( iPathArray[i], FSnapshotFlags::Object::Path::VERTICES );
     }
 }
 

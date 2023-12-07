@@ -974,6 +974,18 @@ FOdysseyVectorObject::GetBackgroundColor()
     return mBackgroundBucket.GetColor();
 }
 
+void
+FOdysseyVectorObject::SetForegroundBucket( const FOdysseyVectorBucket& iBucket  )
+{
+    mForegroundBucket = iBucket;
+}
+
+void
+FOdysseyVectorObject::SetBackgroundBucket( const FOdysseyVectorBucket& iBucket )
+{
+    mBackgroundBucket = iBucket;
+}
+
 uint32
 FOdysseyVectorObject::GetID()
 {

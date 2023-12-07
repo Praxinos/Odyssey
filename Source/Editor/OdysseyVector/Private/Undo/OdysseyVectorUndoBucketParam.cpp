@@ -42,21 +42,15 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGrou
 }
 
 void
-FOdysseyVectorUndoBucketParam::Swap()
-{
-    for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
-    {
-        mBucketSnapshotArray[i].Restore();
-    }
-}
-
-void
 FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    Swap();
+    for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
+    {
+        mBucketSnapshotArray[i].Restore();
+    }
 
     for( int i = 0; i < mAddedBucketArray.size(); i++ )
     {
@@ -84,7 +78,10 @@ FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    Swap();
+    for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
+    {
+        mBucketSnapshotArray[i].Restore();
+    }
 
     for( int i = 0; i < mAddedBucketArray.size(); i++ )
     {

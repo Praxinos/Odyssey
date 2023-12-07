@@ -1,5 +1,7 @@
 #include "OdysseyPainterEditorVectorObjectView.h"
-#include "Undo/OdysseyVectorUndoPropertyChanged.h"
+//#include "Undo/OdysseyVectorUndoPropertyChanged.h"
+#include "Undo/OdysseyVectorUndoObjectParam.h"
+#include "OdysseyVectorEngine.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -47,7 +49,9 @@ UOdysseyPainterEditorVectorObjectView::Update( FOdysseyVectorGroupPaint* iScene
 }
 
 uint64
-UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
+UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyName
+                                                      , const FName& iMemberPropertyName
+                                                      , const FName& iCategory )
 {
     uint64 signalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
@@ -69,7 +73,7 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
             selectedObject->Translate( TranslationX, selectedObject->GetTranslationY() );
 
         if( iPropertyName == "TranslationY" )
-            selectedObject->Translate( selectedObject->GetTranslationY(), TranslationY );
+            selectedObject->Translate( selectedObject->GetTranslationX(), TranslationY );
 
         if( iPropertyName == "Rotation" )
             selectedObject->Rotate( Rotation );
@@ -78,7 +82,7 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
             selectedObject->Scale( ScalingX, selectedObject->GetScalingY() );
 
         if( iPropertyName == "ScalingY" )
-            selectedObject->Scale( selectedObject->GetScalingY(), ScalingY );
+            selectedObject->Scale( selectedObject->GetScalingX(), ScalingY );
 
         if( iCategory == "Transform" )
             selectedObject->UpdateMatrix();
@@ -87,10 +91,10 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == "Opacity" )
             selectedObject->SetOpacity( Opacity );
 
-        if( iPropertyName == "ForegroundColor" )
+        if( ( iPropertyName == "ForegroundColor" ) || ( iMemberPropertyName == "ForegroundColor" ) )
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
 
-        if( iPropertyName == "BackgroundColor" )
+        if( ( iPropertyName == "BackgroundColor" ) || ( iMemberPropertyName == "BackgroundColor" ) )
             selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
 
     }
@@ -114,7 +118,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPropertyChanged( mScene, mFocusedObjectList );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( mScene, mFocusedObjectList );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
@@ -123,6 +127,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         GEditor->EndTransaction();
 
         signalFlags = PropertyChanged( PropertyChangedEvent.GetPropertyName()
+                                     , PropertyChangedEvent.MemberProperty->GetFName()
                                      , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );

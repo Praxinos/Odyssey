@@ -1,6 +1,8 @@
 #include "Undo/OdysseyVectorUndoApplyTransformations.h"
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoApplyTransformations::~FOdysseyVectorUndoApplyTransformations()
 {
@@ -23,9 +25,9 @@ FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( 
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
             mObjectSnapshotArray.push_back( new FSnapshotPath( path
-                                                             , FSnapshotObject::SNAPSHOT_TRANSFORMATIONS
-                                                             , FSnapshotPath::SNAPSHOT_VERTICES 
-                                                             | FSnapshotPath::SNAPSHOT_SEGMENTS ) );
+                                                             , FSnapshotFlags::Object::TRANSFORMATIONS
+                                                             | FSnapshotFlags::Object::Path::VERTICES 
+                                                             | FSnapshotFlags::Object::Path::SEGMENTS ) );
         }
         else
         if( object->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
@@ -33,14 +35,14 @@ FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( 
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
             mObjectSnapshotArray.push_back( new FSnapshotGroupPaint( paintGroup
-                                                                   , FSnapshotObject::SNAPSHOT_TRANSFORMATIONS
-                                                                   | FSnapshotObject::SNAPSHOT_CHILDREN_TRANSFORMATIONS
-                                                                   , FSnapshotGroupPaint::SNAPSHOT_BUCKETS ) );
+                                                                   , FSnapshotFlags::Object::TRANSFORMATIONS
+                                                                   //| FSnapshotFlags::Object::CHILDREN_TRANSFORMATIONS
+                                                                   | FSnapshotFlags::Object::GroupPaint::BUCKETS ) );
         }
         else
         {
             mObjectSnapshotArray.push_back( new FSnapshotObject( object
-                                                               , FSnapshotObject::SNAPSHOT_TRANSFORMATIONS ) );
+                                                               , FSnapshotFlags::Object::TRANSFORMATIONS ) );
         }
     }
 }
