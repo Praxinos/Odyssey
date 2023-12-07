@@ -279,4 +279,29 @@ UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated(bool iIsInteractive)
     ImageRenderingChanged(iIsInteractive);
 }
 
+void
+UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
+{
+    FOdysseyVectorGroupPaint* destinationScene = mEngine->GetScene();
+
+    for( int i = 0; i < iLayers.Num(); i++ )
+    {
+        UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayers[i]);
+        if (!vectorLayer)
+            continue;
+        
+        FOdysseyVectorGroupPaint* scene = vectorLayer->GetEngine()->GetScene();
+        for( FOdysseyVectorObject* child : scene->GetChildrenList() )
+        {
+            FOdysseyVectorObject* copiedChild = child->Copy();
+            destinationScene->AppendChild( copiedChild );
+        }
+    }
+
+    destinationScene->UpdateMatrix();
+    destinationScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    
+    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+}
+
 #undef LOCTEXT_NAMESPACE

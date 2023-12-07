@@ -67,6 +67,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         virtual void OnCreated_Implementation() override;
         virtual void PostInitProperties() override;
         virtual void PostLoad() override;
+        virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
         FOdysseyVectorEngine* GetEngine();
  

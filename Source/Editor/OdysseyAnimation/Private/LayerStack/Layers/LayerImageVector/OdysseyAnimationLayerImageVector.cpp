@@ -400,4 +400,114 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
     mutator.Commit();
 }
 
+void
+UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
+
+    //Get all frame ranges and combine them
+    TArray<FInt32Range> frameRanges = {};
+    for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
+    {
+        UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
+        if ( !layer )
+            continue;
+
+        frameRanges.Add(layer->GetFrameRange());
+    }
+    FInt32Range frameRange = FInt32Range::Hull(frameRanges);
+
+    //Deduce offset from frame ranges
+    int offset = frameRange.GetLowerBoundValue();
+
+    //Get cell ranges from each frame ImageRenderAbility composition
+    int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
+	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
+    TArray<FGuid> previousIds;
+    TArray<FInt32Range> cellRanges;
+    for (int frameIndex = startFrame; frameIndex <= endFrame; frameIndex++)
+    {
+        TArray<FGuid> currentIds;
+        for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
+        {
+            UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
+            if ( !layer )
+                continue;
+
+            currentIds.Append(layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, frameIndex));
+        }
+
+        //Do we need a new cell
+        if (currentIds != previousIds)
+        {
+            //do we already have a cell at this position
+            cellRanges.Add(FInt32Range::Inclusive(frameIndex, frameIndex));
+            previousIds = currentIds;
+        }
+        else
+        {
+            cellRanges.Last().SetUpperBoundValue(frameIndex);
+        }
+    }
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+    
+    FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
+    mutator.Remove(0, mCellsContainer->GetCells().Num());
+    
+    for (const FInt32Range& cellRange : cellRanges)
+    {
+        int cellLength = cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1;
+        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(this, cellLength, animation->Width(), animation->Height());
+        int frame = cellRange.GetLowerBoundValue();
+
+        FOdysseyVectorGroupPaint* destinationScene = cell->GetEngine()->GetScene();
+
+        for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
+        {
+            UOdysseyAnimationLayerImageVector* vectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayers[layerIndex]);
+            if ( !vectorLayer )
+                continue;
+
+            TSharedPtr<FOdysseyAnimationCell> srcCell = vectorLayer->GetCellsContainer()->GetCellAtFrame(frame);
+            int srcCellFrame = vectorLayer->GetCellsContainer()->GetCellFrameAtFrame(frame);
+            while(srcCell && srcCell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
+            {
+                TSharedPtr<FOdysseyAnimationCellImageStagger> cellStagger = StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(srcCell);
+                srcCell = cellStagger->GetReferenceCellAtFrame(srcCellFrame, &srcCellFrame);
+            }
+
+            TSharedPtr<FOdysseyAnimationCellImageVector> cellVector = StaticCastSharedPtr<FOdysseyAnimationCellImageVector>(srcCell);
+            if (!cellVector)
+                continue;
+
+            FOdysseyVectorGroupPaint* scene = cellVector->GetEngine()->GetScene();
+            for( FOdysseyVectorObject* child : scene->GetChildrenList() )
+            {
+                FOdysseyVectorObject* copiedChild = child->Copy();
+                destinationScene->AppendChild( copiedChild );
+            }
+        }
+
+        cells.Add(cell);
+    }
+    
+    mutator.Add(cells);
+    mutator.SetOffset(offset);
+    mutator.Commit();
+    
+    for ( TSharedPtr<FOdysseyAnimationCell> cell : mCellsContainer->GetCells())
+    {
+        TSharedPtr<FOdysseyAnimationCellImageVector> vectorCell = StaticCastSharedPtr<FOdysseyAnimationCellImageVector>(cell);
+        FOdysseyVectorEngine* engine = vectorCell->GetEngine();
+        FOdysseyVectorGroupPaint* scene = engine->GetScene();
+        scene->UpdateMatrix();
+        scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        engine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+    }
+}
+
 #undef LOCTEXT_NAMESPACE

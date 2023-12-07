@@ -63,6 +63,7 @@ public:
     //UOdysseyLayer overrides
     virtual void OnCreated_Implementation() override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
+    virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
 public:
     //UOdysseyAnimationLayer overrides
