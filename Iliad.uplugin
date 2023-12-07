@@ -125,6 +125,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "OdysseyFile",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OdysseyVector",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
