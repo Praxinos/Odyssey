@@ -11,8 +11,8 @@ FOdysseyTextureLayerImageVectorImageRenderer::FOdysseyTextureLayerImageVectorIma
     , mVectorBlock(iVectorBlock)
     , mBlock(nullptr)
     , mHUDBlock(nullptr)
-    , mRenderHUD(false)
     , mDrawingFlags(0)
+    , mRenderHUD(false)
 {
     UOdysseyLayerStack* layerStack = iLayer->GetLayerStack();
     if (!layerStack)

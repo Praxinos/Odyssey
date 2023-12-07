@@ -24,8 +24,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorBaseToolHUD( this ), true )
     , PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
     , ColorSource( eBaseToolColorSource::ColorWheel )
-    , StrokeWidth( 4.0f )
     , Opacity( 1.0f )
+    , StrokeWidth( 4.0f )
     , Uniform( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle64");

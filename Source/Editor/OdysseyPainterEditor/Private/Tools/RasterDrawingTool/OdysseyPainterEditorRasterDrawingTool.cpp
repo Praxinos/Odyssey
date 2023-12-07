@@ -37,8 +37,8 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     , SelectedShapeInstance(nullptr)
     //Internal
     , mPaintEngine()
-    , mBaseSize(0)
     , mBrushContexts(nullptr)
+    , mBaseSize(0)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
 

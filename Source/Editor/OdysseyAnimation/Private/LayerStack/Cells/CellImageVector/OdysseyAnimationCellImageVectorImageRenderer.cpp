@@ -16,8 +16,8 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
     , mCell(iCell)
     , mBlock(nullptr)
     , mHUDBlock(nullptr)
-    , mRenderHUD(false)
     , mDrawingFlags(0)
+    , mRenderHUD(false)
 {
     /* TEMPORARY FOR DISPLAYING TOOLS HUD */
     UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(mCell->GetLayer());

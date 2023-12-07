@@ -49,9 +49,9 @@ UOdysseyBrushAssetBase::UOdysseyBrushAssetBase()
     : BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyBrushAssetBase::BrushOptions"))
 
     //Internal
+    , mContexts(nullptr)
     , mEditedBlock(nullptr)
     , mIsDrawing(false)
-    , mContexts(nullptr)
 {
     ::ULIS::FContext::MarkEventFinished(&mEvent);
 }

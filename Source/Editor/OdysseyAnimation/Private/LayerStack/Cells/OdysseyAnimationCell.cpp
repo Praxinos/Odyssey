@@ -17,8 +17,8 @@ FOdysseyAnimationCell::~FOdysseyAnimationCell()
 }
 
 FOdysseyAnimationCell::FOdysseyAnimationCell(int iLength, UOdysseyAnimationLayer* iLayer)
-    : mLength(iLength)
-    , mLayer(iLayer)
+    : mLayer(iLayer)
+    , mLength(iLength)
 {
 }
 

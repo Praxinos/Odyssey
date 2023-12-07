@@ -38,9 +38,7 @@
 //          But what if there is no section going the right way ?
 //         Then we choose the section with the biggest dot product
 //
-//               \            
-//                \           
-//                 B          
+//                 B
 //                  \         Here, the smallest dot product wins (S.B).
 //      _____ A______\
 //                   o

@@ -90,9 +90,9 @@ FOdysseyVectorChain::GetSegmentArray()
 
 FOdysseyVectorChain::FOdysseyVectorChain( FOdysseyVectorPath* iPath
                                         , FOdysseyVectorVertex* iUnchainedVertex )
-    : mLength( 0.0f )
+    : mPath( iPath )
+    , mLength( 0.0f )
     , mBBox( 0.0f, 0.0f, 0.0f, 0.0f )
-    , mPath( iPath )
 {
     FOdysseyVectorVertex* currentVertex = iUnchainedVertex;
     FOdysseyVectorSegment* currentSegment = currentVertex->GetFirstSegment();

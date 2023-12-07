@@ -38,9 +38,9 @@ UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FK
         mHUD->AddElement(mPolygon);
 
         mPolygon->mPoints.Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
-        FOdysseyHUDHandle* handle1 = new FOdysseyHUDHandle(FName("handle" + mPolygon->mPoints.Num()), mPolygon, &(mPolygon->mPoints.Last()));
+        FOdysseyHUDHandle* handle1 = new FOdysseyHUDHandle(FName("handle" + FString::FromInt(mPolygon->mPoints.Num())), mPolygon, &(mPolygon->mPoints.Last()));
         mPolygon->mPoints.Add(FVector2D(iPointInTexture.x, iPointInTexture.y));
-        FOdysseyHUDHandle* handle2 = new FOdysseyHUDHandle(FName("handle" + mPolygon->mPoints.Num()), mPolygon, &(mPolygon->mPoints.Last()));
+        FOdysseyHUDHandle* handle2 = new FOdysseyHUDHandle(FName("handle" + FString::FromInt(mPolygon->mPoints.Num())), mPolygon, &(mPolygon->mPoints.Last()));
 
         mPolygon->AddElement(handle2);
         mPolygon->AddElement(handle1);
@@ -75,7 +75,7 @@ UOdysseyPolygonShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey
         else
         {
             mPolygon->mPoints.Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
-            FOdysseyHUDHandle* handle = new FOdysseyHUDHandle(FName("handle" + mPolygon->mPoints.Num()), mPolygon, &(mPolygon->mPoints.Last()));
+            FOdysseyHUDHandle* handle = new FOdysseyHUDHandle(FName("handle" + FString::FromInt(mPolygon->mPoints.Num())), mPolygon, &(mPolygon->mPoints.Last()));
             mPolygon->AddElement(handle);
             mHandles.Add(handle);
             mHandles.Last()->Capture();

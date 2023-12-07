@@ -12,8 +12,8 @@
 UENUM()
 enum class ePrimitiveDrawingToolColorSource : uint8
 {
-    ColorWheel = eBucketColorMode::SolidColor,
-    Palette  = eBucketColorMode::Palette
+    ColorWheel = uint8(eBucketColorMode::SolidColor),
+    Palette  = uint8(eBucketColorMode::Palette)
 };
 
 UENUM()

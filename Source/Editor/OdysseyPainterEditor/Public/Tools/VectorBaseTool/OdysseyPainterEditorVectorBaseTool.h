@@ -14,8 +14,8 @@ class FOdysseyPainterEditorVectorBaseToolHUD;
 UENUM()
 enum class eBaseToolColorSource : uint8
 {
-    ColorWheel = eBucketColorMode::SolidColor,
-    Palette  = eBucketColorMode::Palette
+    ColorWheel = uint8(eBucketColorMode::SolidColor),
+    Palette  = uint8(eBucketColorMode::Palette)
 };
 
 UCLASS(Abstract)
