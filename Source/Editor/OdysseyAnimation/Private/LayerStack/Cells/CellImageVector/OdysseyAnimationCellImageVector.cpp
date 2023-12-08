@@ -61,7 +61,10 @@ FOdysseyAnimationCellImageVector::Clone(UOdysseyAnimationLayer* iLayer, int iLen
 UOdysseyAnimationLayerImageVector*
 FOdysseyAnimationCellImageVector::GetLayer() const
 {
-    return Cast<UOdysseyAnimationLayerImageVector>(FOdysseyAnimationCell::GetLayer());
+    UOdysseyLayer* layer = FOdysseyAnimationCell::GetLayer();
+    if (!layer)
+        return nullptr;
+    return Cast<UOdysseyAnimationLayerImageVector>(layer);
 }
 
 void

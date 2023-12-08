@@ -4,6 +4,7 @@
 #include "OdysseyRasterBlockMutator.h"
 
 #include "OdysseyRasterBlock.h"
+#include "Editor.h"
 
 FOdysseyRasterBlockMutator::~FOdysseyRasterBlockMutator()
 {
@@ -138,7 +139,7 @@ FOdysseyRasterBlockMutator::Commit()
     
     mRasterBlock->InvalidateCache();
     mRasterBlock->OnBlockCommited().Broadcast(mInvalidTileMap.InvalidRects());
-    if ( mStoreUndo )
+    if ( mStoreUndo && GEditor->IsTransactionActive() )
     {
         mRasterBlockUndoBuilder.StoreUndo(*this);
     }

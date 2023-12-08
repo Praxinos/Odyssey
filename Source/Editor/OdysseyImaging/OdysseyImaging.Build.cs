@@ -21,6 +21,7 @@ public class OdysseyImaging : ModuleRules
                 "TargetPlatform",
                 "TextureCompressor",
                 "TextureBuildUtilities",
+                "UnrealEd",
 
                 "OdysseyCore",
                 "OdysseyFile",
