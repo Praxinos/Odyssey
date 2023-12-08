@@ -1,4 +1,5 @@
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
@@ -237,13 +238,13 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
 
     mIntersectionArray.reserve( 60 );
 
-    mGroupPaintParam.Painted = true;
-    mGroupPaintParam.Monochrome = false;
-    mGroupPaintParam.MonochromeColor = FColor( 160, 160, 160, 255 );
-    mGroupPaintParam.GapTolerance = 12.0f;
-    mGroupPaintParam.Realtime = false;
-    mGroupPaintParam.Wireframe = false;
-    mGroupPaintParam.WireframeColor = FColor( 255, 255, 255, 255 );
+    bPainted = true;
+    bMonochrome = false;
+    mMonochromeColor = FColor( 160, 160, 160, 255 );
+    mGapTolerance = 12.0f;
+    bRealtime = false;
+    bWireframe = false;
+    mWireframeColor = FColor( 255, 255, 255, 255 );
  
     mBackgroundBucket.SetSolidColor( 160, 160, 160, 0 );
 
@@ -289,13 +290,13 @@ DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
 void
 FOdysseyVectorGroupPaint::SetRealtime( bool iRealtime )
 {
-    mGroupPaintParam.Realtime = iRealtime;
+    bRealtime = iRealtime;
 }
 
 bool
 FOdysseyVectorGroupPaint::IsRealtime()
 {
-    return mGroupPaintParam.Realtime;
+    return bRealtime;
 }
 
 // CubicSegment-CubicSegment intersection test. The test is performed using straight sub-segments
@@ -628,10 +629,10 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
    BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
 
-    if( mGroupPaintParam.Painted )
+    if( bPainted )
     {
-        if( ( mGroupPaintParam.Realtime == true  )
-       || ( ( mGroupPaintParam.Realtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
+        if( ( bRealtime == true  )
+       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
         {
             for( FOdysseyVectorObject* childPath : mPathList )
             {
@@ -686,10 +687,10 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 
     FOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
 
-    if( mGroupPaintParam.Painted )
+    if( bPainted )
     {
-        if( ( mGroupPaintParam.Realtime == true  )
-       || ( ( mGroupPaintParam.Realtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
+        if( ( bRealtime == true  )
+       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
         {
             if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
             {
@@ -770,10 +771,10 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext, double iCombinedOpac
 {
     for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        cycle->Draw( iBLContext, iCombinedOpacity, iFlags, mGroupPaintParam.Monochrome, mGroupPaintParam.MonochromeColor );
+        cycle->Draw( iBLContext, iCombinedOpacity, iFlags, bMonochrome, mMonochromeColor );
     }
 
-    if( iFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME/* mGroupPaintParam.Wireframe*/ )
+    if( iFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME/* mWireframe*/ )
     {
         iBLContext->save();
         iBLContext->resetMatrix();
@@ -944,7 +945,7 @@ FOdysseyVectorGroupPaint::IntersectSegmentWithList( FOdysseyVectorSegment* iSegm
             {
                 intersectionCount += IntersectSegment( static_cast<FOdysseyVectorSegmentCubic*>(iSegment)
                                                      , static_cast<FOdysseyVectorSegmentCubic*>(intersectSegment)
-                                                     , mGroupPaintParam.GapTolerance
+                                                     , mGapTolerance
                                                      , iIntersectionArray );
             }
         }
@@ -1292,13 +1293,13 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
 double
 FOdysseyVectorGroupPaint::GetGapTolerance()
 {
-    return mGroupPaintParam.GapTolerance;
+    return mGapTolerance;
 }
 
 void
 FOdysseyVectorGroupPaint::SetGapTolerance( double iGapTolerance )
 {
-    mGroupPaintParam.GapTolerance = iGapTolerance;
+    mGapTolerance = iGapTolerance;
 
     Invalidate();
 }
@@ -1306,97 +1307,97 @@ FOdysseyVectorGroupPaint::SetGapTolerance( double iGapTolerance )
 bool
 FOdysseyVectorGroupPaint::IsMonochrome()
 {
-    return mGroupPaintParam.Monochrome;
+    return bMonochrome;
 }
 
 void
 FOdysseyVectorGroupPaint::SetMonochrome( bool iIsMonochrome )
 {
-    mGroupPaintParam.Monochrome = iIsMonochrome;
+    bMonochrome = iIsMonochrome;
 }
 
 FColor&
 FOdysseyVectorGroupPaint::GetMonochromeColor()
 {
-    return mGroupPaintParam.MonochromeColor;
+    return mMonochromeColor;
 }
 
 void
 FOdysseyVectorGroupPaint::SetMonochromeColor( const FColor& iMonochromeColor )
 {
-    mGroupPaintParam.MonochromeColor = iMonochromeColor;
+    mMonochromeColor = iMonochromeColor;
 }
 
 void
 FOdysseyVectorGroupPaint::SetMonochromeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mGroupPaintParam.MonochromeColor.R = iR;
-    mGroupPaintParam.MonochromeColor.G = iG;
-    mGroupPaintParam.MonochromeColor.B = iB;
-    mGroupPaintParam.MonochromeColor.A = iA;
+    mMonochromeColor.R = iR;
+    mMonochromeColor.G = iG;
+    mMonochromeColor.B = iB;
+    mMonochromeColor.A = iA;
 }
 
 void
 FOdysseyVectorGroupPaint::GetMonochromeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA )
 {
-    oR = mGroupPaintParam.MonochromeColor.R;
-    oG = mGroupPaintParam.MonochromeColor.G;
-    oB = mGroupPaintParam.MonochromeColor.B;
-    oA = mGroupPaintParam.MonochromeColor.A;
+    oR = mMonochromeColor.R;
+    oG = mMonochromeColor.G;
+    oB = mMonochromeColor.B;
+    oA = mMonochromeColor.A;
 }
 
 bool
 FOdysseyVectorGroupPaint::IsWireframe()
 {
-    return mGroupPaintParam.Wireframe;
+    return bWireframe;
 }
 
 void
 FOdysseyVectorGroupPaint::SetWireframe( bool iIsWireframe )
 {
-    mGroupPaintParam.Wireframe = iIsWireframe;
+    bWireframe = iIsWireframe;
 }
 
 FColor&
 FOdysseyVectorGroupPaint::GetWireframeColor()
 {
-    return mGroupPaintParam.WireframeColor;
+    return mWireframeColor;
 }
 
 void
 FOdysseyVectorGroupPaint::SetWireframeColor( const FColor& iWireframeColor )
 {
-    mGroupPaintParam.WireframeColor = iWireframeColor;
+    mWireframeColor = iWireframeColor;
 }
 
 void
 FOdysseyVectorGroupPaint::SetWireframeColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mGroupPaintParam.WireframeColor.R = iR;
-    mGroupPaintParam.WireframeColor.G = iG;
-    mGroupPaintParam.WireframeColor.B = iB;
-    mGroupPaintParam.WireframeColor.A = iA;
+    mWireframeColor.R = iR;
+    mWireframeColor.G = iG;
+    mWireframeColor.B = iB;
+    mWireframeColor.A = iA;
 }
 
 void
 FOdysseyVectorGroupPaint::GetWireframeColor( uint8 &oR, uint8 &oG, uint8& oB, uint8& oA )
 {
-    oR = mGroupPaintParam.WireframeColor.R;
-    oG = mGroupPaintParam.WireframeColor.G;
-    oB = mGroupPaintParam.WireframeColor.B;
-    oA = mGroupPaintParam.WireframeColor.A;
+    oR = mWireframeColor.R;
+    oG = mWireframeColor.G;
+    oB = mWireframeColor.B;
+    oA = mWireframeColor.A;
 }
 
 bool
 FOdysseyVectorGroupPaint::IsPainted()
 {
-    return mGroupPaintParam.Painted;
+    return bPainted;
 }
 
 void
 FOdysseyVectorGroupPaint::SetPainted( bool iPainted )
 {
-    mGroupPaintParam.Painted = iPainted;
+    bPainted = iPainted;
 
     Invalidate();
 }
@@ -1678,8 +1679,8 @@ FOdysseyVectorGroupPaint::Clear()
             for( FOdysseyVectorSegment *segment : path->GetSegmentList() )
             {
                 // reset nearest segment
-                segment->GetVertex(0)->SetNearestSegment( nullptr, mGroupPaintParam.GapTolerance/*DBL_MAX*/, 0.0f );
-                segment->GetVertex(1)->SetNearestSegment( nullptr, mGroupPaintParam.GapTolerance/*DBL_MAX*/, 0.0f );
+                segment->GetVertex(0)->SetNearestSegment( nullptr, mGapTolerance/*DBL_MAX*/, 0.0f );
+                segment->GetVertex(1)->SetNearestSegment( nullptr, mGapTolerance/*DBL_MAX*/, 0.0f );
             }
         }
     }
@@ -1728,7 +1729,13 @@ FOdysseyVectorGroupPaint::CopyShape()
 {
     FOdysseyVectorGroupPaint* groupPaintCopy = new FOdysseyVectorGroupPaint( "Paint Group Copy" );
 
-    groupPaintCopy->mGroupPaintParam = mGroupPaintParam;
+    groupPaintCopy->SetPainted( bPainted );
+    groupPaintCopy->SetMonochrome( bMonochrome );
+    groupPaintCopy->SetMonochromeColor( mMonochromeColor );
+    groupPaintCopy->SetRealtime( bRealtime );
+    groupPaintCopy->SetGapTolerance( mGapTolerance );
+    groupPaintCopy->SetWireframe( bWireframe );
+    groupPaintCopy->SetWireframeColor( mWireframeColor );
 
     CopyBuckets( groupPaintCopy, false );
 

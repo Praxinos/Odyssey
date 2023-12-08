@@ -19,6 +19,8 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     , mIsActivated(false)
 {
     mHUD = new FOdysseyHUDElement( FName("RootHUD") );
+
+    mInputProcessor = MakeShared<FOdysseyPainterEditorToolInputProcessor>(this);
 }
 
 void
@@ -51,6 +53,9 @@ UOdysseyPainterEditorTool::OnToolContextChanged()
 void
 UOdysseyPainterEditorTool::Activate()
 {    
+    // register IInputProcessor interface for handling global key press
+    FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
+
     //mToolContext->OnChanged().AddUObject(this, &UOdysseyPainterEditorTool::OnToolContextChanged );
     mIsActivated = true;
     Load();
@@ -59,6 +64,9 @@ UOdysseyPainterEditorTool::Activate()
 void
 UOdysseyPainterEditorTool::Inactivate()
 {
+    // unregister IInputProcessor interface
+    FSlateApplication::Get().UnregisterInputPreProcessor(mInputProcessor);
+
 	//mToolContext->OnChanged().RemoveAll(this);
     Flush(); //Finish everything
     Unload();
@@ -173,6 +181,18 @@ FOdysseyHUDElement* UOdysseyPainterEditorTool::GetHUD()
 EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor()
 {
     return mMouseCursor;
+}
+
+bool
+UOdysseyPainterEditorTool::OnKeyDownGlobal(const FKey& iKey)
+{
+    return false; //false means Unreal will continue as if we did nothing
+}
+
+bool
+UOdysseyPainterEditorTool::OnKeyUpGlobal(const FKey& iKey)
+{
+    return false; //false means Unreal will continue as if we did nothing
 }
 
 void

@@ -6,28 +6,9 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
-#include "OdysseyVectorObject.h"
-#include "OdysseyVectorGroupPaint.h"
 
-struct ODYSSEYVECTOR_API FObjectTransform
-{
-    FOdysseyVectorObject* object;
-    double translationX;
-    double translationY;
-    double rotation;
-    double scalingX;
-    double scalingY;
-
-    FObjectTransform( FOdysseyVectorObject* iObject )
-    {
-        object = iObject;
-
-        iObject->GetTransform( translationX, translationY, rotation, scalingX, scalingY );
-    }
-
-    static void MakeArrayFromObjectList( std::list<FOdysseyVectorObject*>& iObjectList
-                                       , std::vector<FObjectTransform>& oObjectTransformArray );
-};
+class FOdysseyVectorObject;
+class FOdysseyVectorGroupPaint;
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectTransform : public FOdysseyVectorUndo
 {
@@ -46,5 +27,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectTransform : public FOdysseyVecto
         virtual FString ToString() const override;
 
     private:
-        std::vector<FObjectTransform> mObjectTransformArray;
+        std::vector<FSnapshotObject> mObjectSnapshotArray;
 };

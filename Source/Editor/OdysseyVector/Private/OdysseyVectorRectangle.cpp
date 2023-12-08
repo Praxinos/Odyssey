@@ -87,7 +87,7 @@ FOdysseyVectorRectangle::UpdateShape( uint32 iUpdateFlags )
 FOdysseyVectorObject*
 FOdysseyVectorRectangle::CopyShape()
 {
-    FOdysseyVectorRectangle* rectangleCopy = new FOdysseyVectorRectangle( mObjectParam.Name
+    FOdysseyVectorRectangle* rectangleCopy = new FOdysseyVectorRectangle( mName
                                                                         , mWidth
                                                                         , mHeight
                                                                         , mStrokeWidth );

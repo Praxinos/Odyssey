@@ -1,4 +1,7 @@
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVector.h"
 
 FOdysseyVectorPath::~FOdysseyVectorPath()
 {
@@ -23,7 +26,7 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
 {
     SetJointType( eJointType::Miter, false );
 
-    mPathParam.Filled = false;
+    bFilled = false;
     SetMiterLimit( 4.0f, false );
 
     mChainArray.reserve( 10 );
@@ -131,7 +134,7 @@ FOdysseyVectorPath::IsLoop()
 bool
 FOdysseyVectorPath::IsFilled()
 {
-    return mPathParam.Filled;
+    return bFilled;
 }
 
 FOdysseyVectorBrush&
@@ -149,19 +152,19 @@ FOdysseyVectorPath::SetBrush( const FOdysseyVectorBrush& iBrush )
 void
 FOdysseyVectorPath::SetFilled( bool iIsFilled )
 {
-    mPathParam.Filled = iIsFilled;
+    bFilled = iIsFilled;
 }
 
 eJointType
 FOdysseyVectorPath::GetJointType()
 {
-    return mPathParam.JointType;
+    return mJointType;
 }
 
 void
 FOdysseyVectorPath::SetJointType( eJointType iJointType, bool iInvalidate )
 {
-    mPathParam.JointType = iJointType;
+    mJointType = iJointType;
 
     if( iInvalidate )
     {
@@ -172,13 +175,13 @@ FOdysseyVectorPath::SetJointType( eJointType iJointType, bool iInvalidate )
 double
 FOdysseyVectorPath::GetMiterLimit()
 {
-    return mPathParam.MiterLimit;
+    return mMiterLimit;
 }
 
 void
 FOdysseyVectorPath::SetMiterLimit( double iMiterLimit, bool iInvalidate )
 {
-    mPathParam.MiterLimit = iMiterLimit;
+    mMiterLimit = iMiterLimit;
 
     if( iInvalidate )
     {
@@ -196,9 +199,9 @@ FOdysseyVectorPath::ExportParam( FOdysseyVectorObject* iDestinationObject, bool 
         FOdysseyVectorPath* destinationPath = static_cast<FOdysseyVectorPath*>(iDestinationObject);
 
         destinationPath->SetBrush( mBrush );
-        destinationPath->SetFilled( mPathParam.Filled );
-        destinationPath->SetJointType( mPathParam.JointType, false );
-        destinationPath->SetMiterLimit( mPathParam.MiterLimit, false );
+        destinationPath->SetFilled( bFilled );
+        destinationPath->SetJointType( mJointType, false );
+        destinationPath->SetMiterLimit( mMiterLimit, false );
     }
 
     if( iInvalidate )
@@ -1467,6 +1470,7 @@ FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
                 if( stitchingVertex[0] )
                 {
                     // for vertices that were not picked but that cannot be stitched, delete them as well.
+                    // they could aready be part of the picked vertices. We have to check if that's not already the case.
                     if( std::find( extendedVertexArray.begin(), extendedVertexArray.end(), stitchingVertex[0] ) == extendedVertexArray.end() )
                     {
                         extendedVertexArray.push_back( stitchingVertex[0] );
@@ -1490,6 +1494,7 @@ FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
                     if( stitchingVertex[0] && ( stitchingVertex[0]->GetSegmentCount() == 1 ) )
                     {
                         // for vertices that were not picked but that cannot be stitched, delete them as well.
+                        // they could aready be part of the picked vertices. We have to check if that's not already the case.
                         if( std::find( extendedVertexArray.begin(), extendedVertexArray.end(), stitchingVertex[0] ) == extendedVertexArray.end() )
                         {
                             extendedVertexArray.push_back( stitchingVertex[0] );
@@ -1499,6 +1504,7 @@ FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
                     if( stitchingVertex[1] && ( stitchingVertex[1]->GetSegmentCount() == 1 ) )
                     {
                         // for vertices that were not picked but that cannot be stitched, delete them as well.
+                        // they could aready be part of the picked vertices. We have to check if that's not already the case.
                         if( std::find( extendedVertexArray.begin(), extendedVertexArray.end(), stitchingVertex[1] ) == extendedVertexArray.end() )
                         {
                             extendedVertexArray.push_back( stitchingVertex[1] );
@@ -1919,6 +1925,11 @@ FOdysseyVectorPath::CopyShape()
 {
     FOdysseyVectorPath* cubicPathCopy = new FOdysseyVectorPath( FString("Cubic Path") );
     std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> lookupTable;
+
+    cubicPathCopy->SetBrush( mBrush );
+    cubicPathCopy->SetJointType( mJointType, false );
+    cubicPathCopy->SetMiterLimit( mMiterLimit, false );
+    cubicPathCopy->SetFilled( bFilled );
 
     for( FOdysseyVectorVertex* originalVertex : mVertexList )
     {

@@ -6,44 +6,9 @@
 #include <ULIS>
 #include "OdysseyVectorBucket.h"
 
-#include "OdysseyVectorObject.generated.h"
-
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorGroup;
-
-USTRUCT()
-struct FObjectParam
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, Category="Identity")
-    FString Name;
-
-    UPROPERTY(EditAnywhere,Category="Appearance", meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
-    double Opacity;
-
-    UPROPERTY(EditAnywhere, Category="Transform")
-    double TranslationX;
-
-    UPROPERTY(EditAnywhere, Category="Transform")
-    double TranslationY;
-
-    //UPROPERTY(EditAnywhere, Category="Transform")
-    //double TranslationZ;
-
-    UPROPERTY(EditAnywhere, Category="Transform")
-    double Rotation;
-
-    UPROPERTY(EditAnywhere, Category="Transform")
-    double ScalingX;
-
-    UPROPERTY(EditAnywhere, Category="Transform")
-    double ScalingY;
-
-    //UPROPERTY(EditAnywhere, Category="Coloring")
-    //FColor Foreground;
-};
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
 {
@@ -90,9 +55,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         static constexpr float BBOX_POINT_RADIUS = 4.0f;
 
-    public:
-        FObjectParam mObjectParam;
-
     protected:
         BLMatrix2D mLocalMatrix;
         BLMatrix2D mInverseLocalMatrix;
@@ -111,9 +73,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         /*uint32 mStrokeColor;*/
         /*uint32 mFillColor;*/
 
-        // used when saving
         uint32 mID;
         uint32 mInvalidationFlags;
+        FString mName;
+        double mOpacity;
+        double mTranslationX;
+        double mTranslationY;
+        double mRotation;
+        double mScalingX;
+        double mScalingY;
 
     public:
         static uint32 TreeToList( FOdysseyVectorObject* iObject, std::list<FOdysseyVectorObject*>& iOutList );

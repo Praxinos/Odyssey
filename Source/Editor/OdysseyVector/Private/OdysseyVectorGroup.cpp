@@ -43,7 +43,7 @@ FOdysseyVectorGroup::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFla
 FOdysseyVectorObject*
 FOdysseyVectorGroup::CopyShape()
 {
-    return new FOdysseyVectorGroup( mObjectParam.Name );
+    return new FOdysseyVectorGroup( mName );
 }
 
 void

@@ -57,21 +57,6 @@ enum class eVertexAdditionFlags : uint8
 // define bitwise op
 ENUM_CLASS_FLAGS(eVertexAdditionFlags)
 
-USTRUCT()
-struct FPathParam
-{
-    GENERATED_BODY()
-
-    UPROPERTY( EditAnywhere, Category="Default" )
-    eJointType JointType;
-
-    UPROPERTY( EditAnywhere, Category="Default" )
-    double MiterLimit;
-
-    //UPROPERTY(EditAnywhere,Category="General")
-    bool Filled; // unused for now
-};
-
 class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 {
     private:
@@ -436,9 +421,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         uint32 mPaintingCode;
         BLPath mBLPath;
         FOdysseyVectorBrush mBrush;
-
-    public:
-        FPathParam mPathParam;
+        eJointType mJointType;
+        double mMiterLimit;
+        bool bFilled; // unused for now
 
     public:
         static const uint64 PICK_HANDLE_VERTEX  = 1;

@@ -221,6 +221,39 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 }
 
 uint64
+UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                          , const FKey& iKey )
+{
+    return 0;
+}
+
+bool
+UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKey& iKey )
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    bool ret = false;
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            uint64 signalFlags;
+
+            signalFlags = OnKeyDownGlobalVector( vectorScene, iKey );
+
+            vectorEngine->Signal( signalFlags );
+        }
+    }
+
+    // always return false to allow other widget to get the event
+    return false;
+}
+
+uint64
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                     , const FKey& iKey )
 {
@@ -233,6 +266,16 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
 
     return 0;
 }
+
+/** Key down input */
+/*bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent )
+{
+}*/
+
+/** Key up input */
+/*bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+{
+}*/
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
@@ -262,11 +305,41 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 }
 
 uint64
+UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                        , const FKey& iKey )
+{
+    return 0;
+}
+
+bool
+UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKey& iKey )
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() && ( mediaVectors[0]->IsLocked() == false ) )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+            uint64 signalFlags;
+
+            signalFlags = OnKeyUpGlobalVector(vectorScene,iKey);
+
+            vectorEngine->Signal( signalFlags );
+        }
+    }
+
+    // always return false to allow other widget to get the event
+    return false;
+}
+
+uint64
 UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                   , const FKey& iKey )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
     return 0;
 }
 
@@ -288,6 +361,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
             signalFlags = OnKeyUpVector(vectorScene,iKey);
 
             vectorEngine->Signal( signalFlags );
+
+            return signalFlags ? true : false;
         }
     }
 

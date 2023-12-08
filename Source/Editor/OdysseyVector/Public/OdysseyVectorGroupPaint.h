@@ -14,41 +14,12 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorSegmentCubicGap.h"
 
-#include "OdysseyVectorGroupPaint.generated.h"
-
 class FOdysseyVectorVertex;
 class FOdysseyVectorVertexIntersection;
 class FOdysseyVectorSection;
 class FOdysseyVectorIntersection;
 class FOdysseyVectorBucket;
 class FOdysseyVectorCycle;
-
-USTRUCT()
-struct FGroupPaintParam
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, Category="General")
-    bool Painted;
-
-    UPROPERTY(EditAnywhere,Category="General")
-    bool Monochrome;
-
-    UPROPERTY(EditAnywhere,Category="General")
-    FColor MonochromeColor;
-
-    UPROPERTY(EditAnywhere, Category="General")
-    bool Realtime; // relatime updates
-
-    UPROPERTY(EditAnywhere, Category="General", meta = (ClampMin = "0.0", UIMin = "0.0"))
-    double GapTolerance;
-
-    UPROPERTY(EditAnywhere, Category="General")
-    bool Wireframe;
-
-    UPROPERTY(EditAnywhere,Category="General")
-    FColor WireframeColor;
-};
 
 class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 {
@@ -279,6 +250,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::vector<FOdysseyVectorSection> mSectionBuffer;
         std::vector<FOdysseyVectorSegmentCubicGap> mGapSegmentBuffer;
 
-    public:
-        FGroupPaintParam mGroupPaintParam;
+        bool bPainted;
+        bool bMonochrome;
+        FColor mMonochromeColor;
+        bool bRealtime; // relatime updates
+        double mGapTolerance;
+        bool bWireframe;
+        FColor mWireframeColor;
 };

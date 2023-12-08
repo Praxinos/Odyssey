@@ -87,9 +87,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
-        virtual uint64 OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                      , const FKey& iKey ) override;
-        virtual uint64 OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey ) override;
+        virtual uint64 OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                          , const FKey& iKey ) override;
+        virtual uint64 OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                            , const FKey& iKey ) override;
         virtual uint64 OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey ) override;
