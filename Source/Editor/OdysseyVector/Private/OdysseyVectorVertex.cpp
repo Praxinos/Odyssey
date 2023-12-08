@@ -1,5 +1,6 @@
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
+#include "OdysseyVectorPath.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorIntersection.h"
 
@@ -774,7 +775,7 @@ FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iCurrentSegment )
                 segment1Vector.Normalize();
             }
 
-            switch( mPath->mPathParam.JointType )
+            switch( mPath->GetJointType() )
             {
                 case eJointType::Linear :
                     mJoint.MakeLinear( mCoords
@@ -788,7 +789,7 @@ FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iCurrentSegment )
                                     , segment0Vector
                                     , segment1Vector
                                     , mRadius
-                                    , mPath->mPathParam.MiterLimit );
+                                    , mPath->GetMiterLimit() );
                 break;
 
                 case eJointType::Radial :

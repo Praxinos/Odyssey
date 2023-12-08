@@ -55,25 +55,25 @@ FOdysseyVectorObject::GetForegroundBucket()
 double
 FOdysseyVectorObject::GetOpacity()
 {
-    return mObjectParam.Opacity;
+    return mOpacity;
 }
 
 void
 FOdysseyVectorObject::SetOpacity( double iOpacity )
 {
-    mObjectParam.Opacity = iOpacity;
+    mOpacity = iOpacity;
 }
 
 void
 FOdysseyVectorObject::SetName( const FString& iName )
 {
-    mObjectParam.Name = iName;
+    mName = iName;
 }
 
 FString&
 FOdysseyVectorObject::GetName()
 {
-    return mObjectParam.Name;
+    return mName;
 }
 
 void
@@ -217,11 +217,11 @@ FOdysseyVectorObject::Transfer( const BLMatrix2D& iMatrix )
 
     FOdysseyVector::MatrixMultiply( inverseMatrix, mWorldMatrix, localMatrix );
     FOdysseyVector::ExtractTransformations( localMatrix
-                                          , &mObjectParam.TranslationX
-                                          , &mObjectParam.TranslationY
-                                          , &mObjectParam.Rotation
-                                          , &mObjectParam.ScalingX
-                                          , &mObjectParam.ScalingY );
+                                          , &mTranslationX
+                                          , &mTranslationY
+                                          , &mRotation
+                                          , &mScalingX
+                                          , &mScalingY );
 
     //UpdateMatrix();
 }
@@ -229,8 +229,8 @@ FOdysseyVectorObject::Transfer( const BLMatrix2D& iMatrix )
 void
 FOdysseyVectorObject::Translate( double iX, double iY )
 {
-    mObjectParam.TranslationX = iX;
-    mObjectParam.TranslationY = iY;
+    mTranslationX = iX;
+    mTranslationY = iY;
 
     Invalidate( INVALIDATE_MATRIX );
 }
@@ -238,7 +238,7 @@ FOdysseyVectorObject::Translate( double iX, double iY )
 void
 FOdysseyVectorObject::Rotate( double iAngle )
 {
-    mObjectParam.Rotation = iAngle;
+    mRotation = iAngle;
 
     Invalidate( INVALIDATE_MATRIX );
 }
@@ -246,8 +246,8 @@ FOdysseyVectorObject::Rotate( double iAngle )
 void
 FOdysseyVectorObject::Scale( double iX, double iY )
 {
-    mObjectParam.ScalingX = iX;
-    mObjectParam.ScalingY = iY;
+    mScalingX = iX;
+    mScalingY = iY;
 
     Invalidate( INVALIDATE_MATRIX );
 }
@@ -255,19 +255,19 @@ FOdysseyVectorObject::Scale( double iX, double iY )
 double
 FOdysseyVectorObject::GetScalingX()
 {
-    return mObjectParam.ScalingX;
+    return mScalingX;
 }
 
 double
 FOdysseyVectorObject::GetScalingY()
 {
-    return mObjectParam.ScalingY;
+    return mScalingY;
 }
 
 double
 FOdysseyVectorObject::GetRotation()
 {
-    return mObjectParam.Rotation;
+    return mRotation;
 }
 
 void
@@ -277,11 +277,11 @@ FOdysseyVectorObject::GetTransform( double& oTranslationX
                                   , double& oScalingX
                                   , double& oScalingY )
 {
-    oTranslationX = mObjectParam.TranslationX;
-    oTranslationY = mObjectParam.TranslationY;
-    oRotation = mObjectParam.Rotation;
-    oScalingX = mObjectParam.ScalingX;
-    oScalingY = mObjectParam.ScalingY;
+    oTranslationX = mTranslationX;
+    oTranslationY = mTranslationY;
+    oRotation = mRotation;
+    oScalingX = mScalingX;
+    oScalingY = mScalingY;
 }
 
 void
@@ -291,11 +291,11 @@ FOdysseyVectorObject::SetTransform( double iTranslationX
                                   , double iScalingX
                                   , double iScalingY )
 {
-    mObjectParam.TranslationX = iTranslationX;
-    mObjectParam.TranslationY = iTranslationY;
-    mObjectParam.Rotation = iRotation;
-    mObjectParam.ScalingX = iScalingX;
-    mObjectParam.ScalingY = iScalingY;
+    mTranslationX = iTranslationX;
+    mTranslationY = iTranslationY;
+    mRotation = iRotation;
+    mScalingX = iScalingX;
+    mScalingY = iScalingY;
 
     Invalidate( INVALIDATE_MATRIX );
 }
@@ -347,7 +347,7 @@ FOdysseyVectorObject::ExportParam( FOdysseyVectorObject* iDestinationObject, boo
     iDestinationObject->mBackgroundBucket.SetGradientColor0( mBackgroundBucket.GetGradientColor0() );
     iDestinationObject->mBackgroundBucket.SetGradientColor1( mBackgroundBucket.GetGradientColor1() );
 
-    iDestinationObject->SetOpacity( mObjectParam.Opacity );
+    iDestinationObject->SetOpacity( mOpacity );
 
     if( iInvalidate )
     {
@@ -366,19 +366,19 @@ FOdysseyVectorObject::CopySettings( FOdysseyVectorObject* iDestinationObject )
 
     iDestinationObject->mBBox = mBBox;
 
-    iDestinationObject->SetName( mObjectParam.Name );
+    iDestinationObject->SetName( mName );
 }
 
 double
 FOdysseyVectorObject::GetTranslationX()
 {
-    return mObjectParam.TranslationX;
+    return mTranslationX;
 }
 
 double
 FOdysseyVectorObject::GetTranslationY()
 {
-    return mObjectParam.TranslationY;
+    return mTranslationY;
 }
 
 void
@@ -396,9 +396,9 @@ FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
     if( scene )
     {
         mLocalMatrix.reset();
-        mLocalMatrix.translate( mObjectParam.TranslationX, mObjectParam.TranslationY );
-        mLocalMatrix.rotate( mObjectParam.Rotation * M_PI / 180.0f );
-        mLocalMatrix.scale( mObjectParam.ScalingX, mObjectParam.ScalingY );
+        mLocalMatrix.translate( mTranslationX, mTranslationY );
+        mLocalMatrix.rotate( mRotation * M_PI / 180.0f );
+        mLocalMatrix.scale( mScalingX, mScalingY );
 
         BLMatrix2D::invert( mInverseLocalMatrix, mLocalMatrix );
 
@@ -545,7 +545,7 @@ FOdysseyVectorObject::DrawChildren( BLContext* iBLContext, double iCombinedOpaci
 void
 FOdysseyVectorObject::Draw( BLContext* iBLContext, double iAncestorsOpacity, uint64 iFlags )
 {
-    double combinedOpacity = iAncestorsOpacity *= mObjectParam.Opacity;
+    double combinedOpacity = iAncestorsOpacity *= mOpacity;
 
     iBLContext->save();
     iBLContext->transform( mLocalMatrix );
@@ -902,11 +902,11 @@ FOdysseyVectorObject::SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA
 void 
 FOdysseyVectorObject::CopyTransformation( FOdysseyVectorObject& iObject )
 {
-    iObject.SetTransform( mObjectParam.TranslationX
-                        , mObjectParam.TranslationY
-                        , mObjectParam.Rotation
-                        , mObjectParam.ScalingX
-                        , mObjectParam.ScalingY );
+    iObject.SetTransform( mTranslationX
+                        , mTranslationY
+                        , mRotation
+                        , mScalingX
+                        , mScalingY );
 }
 
 std::list<FOdysseyVectorObject*>&

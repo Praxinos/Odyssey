@@ -104,7 +104,7 @@ FOdysseyVectorEllipse::UpdateShape( uint32 iUpdateFlags )
 FOdysseyVectorObject*
 FOdysseyVectorEllipse::CopyShape()
 {
-    FOdysseyVectorEllipse* circleCopy = new FOdysseyVectorEllipse( mObjectParam.Name
+    FOdysseyVectorEllipse* circleCopy = new FOdysseyVectorEllipse( mName
                                                                  , mRadiusX
                                                                  , mRadiusY
                                                                  , mStrokeWidth );

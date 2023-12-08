@@ -8,6 +8,7 @@
 #include "Input/OdysseyPoint.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyPainterEditorToolContext.h"
+#include "OdysseyPainterEditorToolInputProcessor.h"
 #include "OdysseyPainterEditorTool.generated.h"
 
 class FOdysseyPainterEditor;
@@ -53,6 +54,9 @@ public:
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture);
     virtual bool OnKeyDown(const FKey& iKey);
     virtual bool OnKeyUp(const FKey& iKey);
+    // For global key press events
+	virtual bool OnKeyUpGlobal(const FKey& iKey);
+    virtual bool OnKeyDownGlobal(const FKey& iKey);
 
     // Tick
     virtual void Tick(float iDeltaTime);
@@ -85,6 +89,7 @@ public:
     //template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
 
 protected:
+    TSharedPtr<FOdysseyPainterEditorToolInputProcessor> mInputProcessor;
     FOdysseyPainterEditor*              mEditor;
     FOdysseyHUDElement*                 mHUD;
     EMouseCursor::Type                  mMouseCursor; //If the cursor should be changed while using this tool
@@ -92,6 +97,5 @@ protected:
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")
     FSlateBrush Icon;
-
     bool mIsActivated;
 };

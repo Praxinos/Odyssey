@@ -45,10 +45,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
+	    //virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+	    //virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+
         virtual void Load();
         virtual void Unload();
         virtual bool OnKeyDown( const FKey& iKey ) override;
         virtual bool OnKeyUp( const FKey& iKey ) override;
+        virtual bool OnKeyDownGlobal( const FKey& iKey ) override;
+        virtual bool OnKeyUpGlobal( const FKey& iKey ) override;
         virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
         virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture );
         virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture );
@@ -63,6 +68,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
     protected:
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
+        virtual uint64 OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                            , const FKey& iKey );
+        virtual uint64 OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                          , const FKey& iKey );
         virtual uint64 OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FKey& iKey );
         virtual uint64 OnKeyUpVector( FOdysseyVectorGroupPaint* iScene

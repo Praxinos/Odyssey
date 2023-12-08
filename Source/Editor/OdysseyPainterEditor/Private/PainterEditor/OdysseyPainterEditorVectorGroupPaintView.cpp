@@ -26,7 +26,7 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
             MonochromeColor = selectedPaintGroup->GetMonochromeColor();
             Realtime        = selectedPaintGroup->IsRealtime();
             GapTolerance    = selectedPaintGroup->GetGapTolerance();
-            Wireframe       = selectedPaintGroup->IsWireframe();
+            //Wireframe       = selectedPaintGroup->IsWireframe();
             WireframeColor  = selectedPaintGroup->GetWireframeColor();
 
             break; // only one for now
@@ -64,8 +64,8 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
             if( iPropertyName == "GapTolerance" )
                 selectedPaintGroup->SetGapTolerance( GapTolerance );
 
-            if( iPropertyName == "Wireframe" )
-                selectedPaintGroup->SetWireframe( Wireframe );
+            //if( iPropertyName == "Wireframe" )
+            //    selectedPaintGroup->SetWireframe( Wireframe );
 
             if( iPropertyName == "WireframeColor" )
                 selectedPaintGroup->SetWireframeColor( WireframeColor );

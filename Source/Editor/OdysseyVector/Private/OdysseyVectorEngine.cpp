@@ -280,7 +280,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
     if( mInvalidationFlags )
     {
         BLRgba32 blFillColor;
-        FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? mScene->mGroupPaintParam.MonochromeColor
+        FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? mScene->GetMonochromeColor()
                                                                                          : mScene->GetBackgroundColor();
 
 

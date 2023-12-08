@@ -68,8 +68,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupP
     //UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey )
-         | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey );
 }
 
 uint64
@@ -85,8 +84,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( FOdysseyVectorGroupPai
     //UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
     //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey )
-         | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey );
 }
 
 uint64
