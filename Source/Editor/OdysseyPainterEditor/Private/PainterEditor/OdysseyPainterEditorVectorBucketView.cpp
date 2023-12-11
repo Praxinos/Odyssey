@@ -20,7 +20,14 @@ UOdysseyPainterEditorVectorBucketView::UOdysseyPainterEditorVectorBucketView( FO
 void
 UOdysseyPainterEditorVectorBucketView::ImportParam()
 {
-    BucketParam = mBucket->mBucketParam;
+    ColorMode = mBucket->GetColorMode();
+    SpreadingPolicy = mBucket->GetSpreadingPolicy();
+    SolidColor  = mBucket->GetSolidColor();
+    Rotation = mBucket->GetRotation();
+    Propagated = mBucket->IsPropagated();
+    GradientColor0 = mBucket->GetGradientColor0();
+    GradientColor1 = mBucket->GetGradientColor1();
+    RadialRadius = mBucket->GetRadialRadius();
 }
 
 void 
@@ -36,7 +43,29 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
 {
     if( mBucket )
     {
-        mBucket->mBucketParam = BucketParam;
+        if( iPropertyName == "ColorMode" )
+            mBucket->SetColorMode( ColorMode );
+
+        if( iPropertyName == "SpreadingPolicy" )
+            mBucket->SetSpreadingPolicy( SpreadingPolicy );
+
+        if( iPropertyName == "SolidColor" )
+            mBucket->SetSolidColor( SolidColor );
+
+        if( iPropertyName == "Rotation" )
+            mBucket->SetRotation( Rotation );
+
+        if( iPropertyName == "Propagated" )
+            mBucket->SetPropagated( Propagated );
+
+        if( iPropertyName == "GradientColor0" )
+            mBucket->SetGradientColor0( GradientColor0 );
+
+        if( iPropertyName == "GradientColor1" )
+            mBucket->SetGradientColor1( GradientColor1 );
+
+        if( iPropertyName == "RadialRadius" )
+            mBucket->SetRadialRadius( RadialRadius );
 
         mBucket->Invalidate();
     }

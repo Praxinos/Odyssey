@@ -30,8 +30,7 @@ FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVect
     for( int i = 0; i < iVertexArray.size(); i++ )
     {
         mVertexSnapshotArray.push_back( FSnapshotVertex( iVertexArray[i]
-                                                        , FSnapshotPoint::SNAPSHOT_ALL
-                                                        , FSnapshotVertex::SNAPSHOT_ALL));
+                                                        , FSnapshotFlags::ALL ) );
     }
 
     RecordSegment( segmentArray );
@@ -55,7 +54,7 @@ FOdysseyVectorUndoSegmentReshape::RecordSegment( const std::vector<FOdysseyVecto
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegmentArray[i]);
 
-            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotSegmentCubic::SNAPSHOT_ALL ));
+            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::ALL ));
         }
     }
 }
@@ -67,7 +66,7 @@ FOdysseyVectorUndoSegmentReshape::RecordSegment( FOdysseyVectorSegment* iSegment
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
 
-        mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotSegmentCubic::SNAPSHOT_ALL ));
+        mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::ALL ));
     }
 }
 

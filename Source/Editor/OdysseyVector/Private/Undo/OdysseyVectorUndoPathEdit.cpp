@@ -12,6 +12,37 @@ FOdysseyVectorUndoPathEdit::~FOdysseyVectorUndoPathEdit()
     }
 }
 
+bool
+FOdysseyVectorUndoPathEdit::HasRecordedVertex( FOdysseyVectorVertex* iVertex )
+{
+    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    {
+        if( mVertexSnapshotArray[i].GetVertex() == iVertex )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+FOdysseyVectorUndoPathEdit::HasRecordedSegment( FOdysseyVectorSegment* iSegment )
+{
+    if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+    {
+        for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+        {
+            if( mCubicSegmentSnapshotArray[i].GetCubicSegment() == iSegment )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint* iScene
                                                       , const std::vector<FOdysseyVectorVertex*>& iEditedVertexArray
                                                       , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray )
@@ -23,9 +54,9 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
     for( FOdysseyVectorVertex* vertex : iEditedVertexArray )
     {
         mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
-                                                        , FSnapshotVertex::SNAPSHOT_POSITION
-                                                        | FSnapshotVertex::SNAPSHOT_RADIUS
-                                                        , 0 ));
+                                                        , FSnapshotFlags::Point::POSITION
+                                                        | FSnapshotFlags::Point::RADIUS
+                                                        | FSnapshotFlags::Point::Vertex::ALIGNMENT ) );
     }
 
     for( FOdysseyVectorSegment* segment : iEditedSegmentArray )
@@ -34,7 +65,7 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotSegmentCubic::SNAPSHOT_HANDLES ));
+            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::Segment::Cubic::HANDLES ));
         }
     }
 }

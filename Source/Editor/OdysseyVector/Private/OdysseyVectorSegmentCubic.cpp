@@ -3,7 +3,7 @@
 
 #include <algorithm> // for std::clamp
 
-#define MINRECURSE 2
+#define MINRECURSE 4
 #define MAXRECURSE 7
 
 static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0

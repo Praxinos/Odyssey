@@ -28,40 +28,6 @@ enum class eBucketSpreadingPolicy : uint8
     Local = 1
 };
 
-USTRUCT()
-struct FBucketParam
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, Category="Bucket")
-    eBucketColorMode ColorMode;
-
-    UPROPERTY(EditAnywhere,Category="Bucket")
-    eBucketSpreadingPolicy SpreadingPolicy;
-
-    UPROPERTY(EditAnywhere,Category="Bucket")
-    FColor SolidColor;
-
-    UPROPERTY(EditAnywhere,Category="Bucket")
-    double Rotation;
-
-    UPROPERTY(EditAnywhere,Category="Bucket")
-    bool Propagated;
-
-    UPROPERTY(EditAnywhere,Category="Bucket")
-    FColor GradientColor0;
-
-    UPROPERTY(EditAnywhere,Category="Bucket")
-    FColor GradientColor1;
-
-    UPROPERTY(EditAnywhere,Category="Bucket")
-    double RadialRadius; // radius in radial mode
-    ::ULIS::FVec2D RadialOffset; // distance from the radial-gradient to the bucket.
-
-    /* The Palette Entry associated with this vector object, if any*/
-    UOdysseyPaletteEntry* PaletteEntry = nullptr;
-};
-
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
     private:
@@ -181,5 +147,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         bool mIsSelected;
 
     public:
-        FBucketParam mBucketParam;
+        eBucketColorMode mColorMode;
+        eBucketSpreadingPolicy mSpreadingPolicy;
+        FColor mSolidColor;
+        double mRotation;
+        bool bPropagated;
+        FColor mGradientColor0;
+        FColor mGradientColor1;
+        double mRadialRadius; // radius in radial mode
+        ::ULIS::FVec2D mRadialOffset; // distance from the radial-gradient to the bucket.
+        /* The Palette Entry associated with this vector object, if any*/
+        UOdysseyPaletteEntry* mPaletteEntry = nullptr;
 };

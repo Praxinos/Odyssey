@@ -24,7 +24,7 @@ FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVe
 
     for( FOdysseyVectorVertex* vertex : iAlignedVertexArray )
     {
-        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, 0, FSnapshotVertex::SNAPSHOT_ALIGNMENT ));
+        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotFlags::Point::Vertex::ALIGNMENT ));
     }
 
     //------ Backup segment handles part ---------//
@@ -39,7 +39,7 @@ FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVe
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotSegmentCubic::SNAPSHOT_HANDLES ));
+            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::Segment::Cubic::HANDLES ));
         }
     }
 }

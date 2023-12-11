@@ -18,84 +18,56 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorVertex;
 class FOdysseyVectorSegmentCubic;
 
-class ODYSSEYVECTOR_API FSnapshotPoint
-{
-    public:
-        static const uint32 SNAPSHOT_POSITION = ( 1 << 0 );
-        static const uint32 SNAPSHOT_RADIUS   = ( 1 << 1 );
-        static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
-
-        virtual ~FSnapshotPoint();
-        FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint32 iPointSnapshotFlags );
-
-        virtual void Restore();
-
-    protected:
-        uint32 mPointSnapshotFlags;
-        FOdysseyVectorPoint* mPoint;
-        ULIS::FVec2D mCoords;
-        double mRadius;
-};
-
-class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
-{
-    public:
-        static const uint32 SNAPSHOT_ALIGNMENT = ( 1 << 0 );
-        static const uint32 SNAPSHOT_ALL       = 0xFFFFFFFF;
-
-        virtual ~FSnapshotVertex();
-        FSnapshotVertex( FOdysseyVectorVertex* iVertex
-                       , uint32 iPointSnapshotFlags
-                       , uint32 iVertexSnapshotFlags );
-
-        virtual void Restore() override;
-
-    protected:
-        uint32 mVertexSnapshotFlags;
-        bool mAlignment;
-};
-
-class ODYSSEYVECTOR_API FSnapshotSegmentCubic
-{
-    public:
-        static const uint32 SNAPSHOT_HANDLES = ( 1 << 0 );
-        static const uint32 SNAPSHOT_ALL     = 0xFFFFFFFF;
-
-        ~FSnapshotSegmentCubic();
-        FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic* iCubicSegment, uint32 iCubicSegmentSnapshotFlags );
-
-        void Restore();
-
-        FOdysseyVectorSegmentCubic* GetCubicSegment();
-
-    private:
-        uint32 mCubicSegmentSnapshotFlags;
-        FOdysseyVectorSegmentCubic* mCubicSegment;
-        ULIS::FVec2D mHandleCoords[2];
-};
-
-class ODYSSEYVECTOR_API FSnapshotBucket
-{
-    public:
-        static const uint32 SNAPSHOT_POSITION = ( 1 << 0 );
-        static const uint32 SNAPSHOT_PARAM    = ( 1 << 1 );
-        static const uint32 SNAPSHOT_ALL      = 0xFFFFFFFF;
-
-        ~FSnapshotBucket();
-        FSnapshotBucket(){};
-        FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint32 iBucketSnapshotFlags );
-
-        void Restore();
-
-    private:
-        uint32 mBucketSnapshotFlags;
-        FOdysseyVectorBucket* mBucket;
-        ULIS::FVec2D mCoords;
-        FBucketParam mBucketParam;
-};
-
 namespace FSnapshotFlags
 {
+    static const uint64 ALL = 0xFFFFFFFFFFFFFFFFULL;
+
+    namespace Point
+    {
+        static const uint64 POSITION = ( 1ULL <<  0 );
+        static const uint64 RADIUS   = ( 1ULL <<  1 );
+
+        namespace Vertex
+        {
+            static const uint64 ALIGNMENT       = ( 1ULL <<  2 );
+            static const uint64 PARAM           = ( ALIGNMENT );
+        }
+
+        namespace Bucket
+        {
+            static const uint64 COLORMODE       = ( 1ULL <<  2 );
+            static const uint64 SPREADINGPOLICY = ( 1ULL <<  3 );
+            static const uint64 SOLIDCOLOR      = ( 1ULL <<  4 );
+            static const uint64 ROTATION        = ( 1ULL <<  5 );
+            static const uint64 PROPAGATION     = ( 1ULL <<  6 );
+            static const uint64 GRADIENTCOLOR0  = ( 1ULL <<  7 );
+            static const uint64 GRADIENTCOLOR1  = ( 1ULL <<  8 );
+            static const uint64 RADIALRADIUS    = ( 1ULL <<  9 );
+            static const uint64 RADIALOFFSET    = ( 1ULL << 10 );
+            static const uint64 PALETTEENTRY    = ( 1ULL << 11 );
+            static const uint64 PARAM = ( COLORMODE
+                                        | SPREADINGPOLICY
+                                        | SOLIDCOLOR 
+                                        | ROTATION
+                                        | PROPAGATION
+                                        | GRADIENTCOLOR0
+                                        | GRADIENTCOLOR1 
+                                        | RADIALRADIUS
+                                        | RADIALOFFSET
+                                        | PALETTEENTRY );
+        }
+    }
+
+    namespace Segment
+    {
+        namespace Cubic
+        {
+            static const uint64 HANDLES = ( 1ULL << 0 );
+        }
+
+        //static const uint32 SNAPSHOT_ALL = 0xFFFFFFFFFFFFFFFFULL;
+    }
+
     namespace Object
     {
         static const uint64 TRANSFORMATIONS           = ( 1ULL <<  0 );
@@ -140,9 +112,77 @@ namespace FSnapshotFlags
                                                             | WIREFRAME
                                                             | WIREFRAMECOLOR );
         }
-        static const uint64 ALL                      = 0xFFFFFFFFFFFFFFFFULL;
     }
 }
+
+class ODYSSEYVECTOR_API FSnapshotPoint
+{
+    public:
+        virtual ~FSnapshotPoint();
+        FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint64 iSnapshotFlags );
+
+        virtual void Restore();
+
+    protected:
+        uint64 mSnapshotFlags;
+        FOdysseyVectorPoint* mPoint;
+        ULIS::FVec2D mCoords;
+        double mRadius;
+};
+
+class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
+{
+    public:
+        virtual ~FSnapshotVertex();
+        FSnapshotVertex( FOdysseyVectorVertex* iVertex, uint64 iSnapshotFlags );
+
+        FOdysseyVectorVertex* GetVertex();
+
+        virtual void Restore() override;
+
+    protected:
+        bool mAlignment;
+};
+
+class ODYSSEYVECTOR_API FSnapshotBucket : public FSnapshotPoint
+{
+    public:
+        ~FSnapshotBucket();
+        //FSnapshotBucket();
+        FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint64 iSnapshotFlags );
+
+        void Restore();
+
+        FOdysseyVectorBucket* GetBucket();
+
+    private:
+        eBucketColorMode mColorMode;
+        eBucketSpreadingPolicy mSpreadingPolicy;
+        FColor mSolidColor;
+        double mRotation;
+        bool mPropagated;
+        FColor mGradientColor0;
+        FColor mGradientColor1;
+        double mRadialRadius;
+        ::ULIS::FVec2D mRadialOffset;
+        UOdysseyPaletteEntry* mPaletteEntry;
+};
+
+class ODYSSEYVECTOR_API FSnapshotSegmentCubic
+{
+    public:
+        ~FSnapshotSegmentCubic();
+        FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic* iCubicSegment, uint64 iSnapshotFlags );
+
+        void Restore();
+
+        FOdysseyVectorSegmentCubic* GetCubicSegment();
+
+    private:
+        uint32 mSnapshotFlags;
+        FOdysseyVectorSegmentCubic* mCubicSegment;
+        ULIS::FVec2D mHandleCoords[2];
+};
 
 class ODYSSEYVECTOR_API FSnapshotObject
 {
