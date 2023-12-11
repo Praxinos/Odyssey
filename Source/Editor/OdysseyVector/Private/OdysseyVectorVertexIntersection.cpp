@@ -79,7 +79,7 @@ FOdysseyVectorVertexIntersection::GetCycleNextSection( FOdysseyVectorSection* iL
     {
         ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( partnerVertex, false, false );
 
-        if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation > 0.0f ) )
+        if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation >= 0.0f ) )
         {
             return section;
         }
