@@ -144,7 +144,7 @@ public:
 /**
  * An implementation of an IStylusSyncPlugin for use with the RealTimeStylus API.
  */
-class FInkRealTimeStylusPlugin : public IStylusSyncPlugin
+class FInkRealTimeStylusPlugin : public IStylusAsyncPlugin
 {
 public:
 	FInkRealTimeStylusPlugin() = default;

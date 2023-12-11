@@ -304,6 +304,8 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 {
     //Here you receive Mouse Buttons and Keyboard keys events
 
+    UE_LOG(LogTemp, Warning, TEXT("InputKey %s"), *iKey.ToString());
+
     //Cleanup PressedKeys
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
     for (int i = mKeysPressed.Num() - 1; i >= 0; i--)
@@ -332,7 +334,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     auto end_time = std::chrono::steady_clock::now();
     auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
 
-    if( (mIsCapturedByStylus || delta < 500) && ( iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton ) )
+    if( (mIsCapturedByStylus || delta < 500) && ( iKey == EKeys::LeftMouseButton ) )
         return true;
 
     FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
@@ -344,6 +346,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
+    UE_LOG(LogTemp, Warning, TEXT("InputKey"));
     //This is called when the mouse is down and moving in the viewport
     //The viewport has already captured the mouse
 

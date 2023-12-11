@@ -213,7 +213,7 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceInk()
 	}
 
 	// Add stylus plugin to the interface
-	hr = WindowsImpl->RealTimeStylus->AddStylusSyncPlugin(0, WindowsImpl->StylusPlugin.Get());
+	hr = WindowsImpl->RealTimeStylus->AddStylusAsyncPlugin(0, WindowsImpl->StylusPlugin.Get());
 	if (FAILED(hr))
 	{
 		FWindowsPlatformMisc::CoUninitialize();
