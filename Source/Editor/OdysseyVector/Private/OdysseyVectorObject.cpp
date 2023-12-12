@@ -17,8 +17,8 @@ FOdysseyVectorObject::~FOdysseyVectorObject()
 
 FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
-    , mIsSelected( false )
-    , mIsExpanded( false )
+    , bSelected( false )
+    , bExpanded( false )
     , mBackgroundBucket( this, 0.0f, 0.0f, false )
     , mForegroundBucket( this, 0.0f, 0.0f, false )
     , mInvalidationFlags ( 0 )
@@ -79,13 +79,13 @@ FOdysseyVectorObject::GetName()
 void
 FOdysseyVectorObject::SetExpanded( bool iIsExpanded )
 {
-    mIsExpanded = iIsExpanded;
+    bExpanded = iIsExpanded;
 }
 
 bool
 FOdysseyVectorObject::IsExpanded()
 {
-    return mIsExpanded;
+    return bExpanded;
 }
 
 static uint32
@@ -167,9 +167,9 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 }
 
 void
-FOdysseyVectorObject::SetIsSelected( bool iIsSelected )
+FOdysseyVectorObject::SetSelected( bool iIsSelected )
 {
-    mIsSelected = iIsSelected;
+    bSelected = iIsSelected;
 }
 
 void FOdysseyVectorObject::ApplyMatrix( BLMatrix2D& iMatrix )
@@ -384,12 +384,6 @@ FOdysseyVectorObject::GetTranslationY()
 void
 FOdysseyVectorObject::UpdateMatrix()
 {
-    UpdateMatrix( true );
-}
-
-void
-FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
-{
     FOdysseyVectorGroupPaint* scene = GetScene();
 
     // TODO: I believe this check can be removed
@@ -418,20 +412,11 @@ FOdysseyVectorObject::UpdateMatrix( bool iInvalidate )
         // recurse
         for( FOdysseyVectorObject *child : mChildrenList )
         {
-            child->UpdateMatrix( false );
+            child->UpdateMatrix();
         }
 
         mInvalidationFlags &= (~INVALIDATE_MATRIX);
     }
-/*
-    if( iInvalidate )
-    {
-        if( mParent )
-        {
-            mParent->Invalidate( mParent->mInvalidationFlags | INVALIDATE_CHILD );
-        }
-    }
-*/
 }
 
 //static
@@ -461,24 +446,6 @@ FOdysseyVectorObject::HasAncestor( FOdysseyVectorObject* iCandidateAncestor )
     while ( parent )
     {
         if( parent == iCandidateAncestor )
-        {
-            return true;
-        }
-
-        parent = parent->GetParent();
-    }
-
-    return false;
-}
-
-bool
-FOdysseyVectorObject::HasSelectedAncestor()
-{
-    FOdysseyVectorObject* parent = mParent;
-
-    while ( parent )
-    {
-        if( parent->IsSelected() == true )
         {
             return true;
         }
@@ -572,7 +539,7 @@ FOdysseyVectorObject::IsInvalidated()
 bool
 FOdysseyVectorObject::IsSelected()
 {
-    return mIsSelected;
+    return bSelected;
 }
 
 void
@@ -633,20 +600,6 @@ void
 FOdysseyVectorObject::SetParent( FOdysseyVectorObject* iObject )
 {
     mParent = iObject;
-}
-
-::ULIS::FVec2D
-FOdysseyVectorObject::WorldCoordinatesToLocal( double iX, double iY )
-{
-    BLPoint localCoords;
-    ::ULIS::FVec2D localPoint;
-
-    localCoords = mInverseWorldMatrix.mapPoint( iX, iY );
-
-    localPoint.x = localCoords.x;
-    localPoint.y = localCoords.y;
-
-    return localPoint;
 }
 
 FOdysseyVectorObject*
@@ -876,37 +829,37 @@ FOdysseyVectorObject::HasChild( FOdysseyVectorObject* iChild )
 }
 
 void
-FOdysseyVectorObject::SetForegroundColor( FColor& iColor )
+FOdysseyVectorObject::SetForegroundSolidColor( FColor& iColor )
 {
     mForegroundBucket.SetSolidColor( iColor );
 }
 
 void
-FOdysseyVectorObject::SetBackgroundColor( FColor& iColor )
+FOdysseyVectorObject::SetBackgroundSolidColor( FColor& iColor )
 {
     mBackgroundBucket.SetSolidColor( iColor );
 }
 
 void
-FOdysseyVectorObject::SetForegroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+FOdysseyVectorObject::SetForegroundSolidColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     mForegroundBucket.SetSolidColor( iR, iG, iB, iA );
 }
 
 void
-FOdysseyVectorObject::SetBackgroundColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+FOdysseyVectorObject::SetBackgroundSolidColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
     mBackgroundBucket.SetSolidColor( iR, iG, iB, iA );
 }
 
 void 
-FOdysseyVectorObject::CopyTransformation( FOdysseyVectorObject& iObject )
+FOdysseyVectorObject::CopyTransformation( FOdysseyVectorObject& iDestinationObject )
 {
-    iObject.SetTransform( mTranslationX
-                        , mTranslationY
-                        , mRotation
-                        , mScalingX
-                        , mScalingY );
+    iDestinationObject.SetTransform( mTranslationX
+                                   , mTranslationY
+                                   , mRotation
+                                   , mScalingX
+                                   , mScalingY );
 }
 
 std::list<FOdysseyVectorObject*>&
@@ -996,10 +949,4 @@ void
 FOdysseyVectorObject::SetID( uint32 iID )
 {
     mID = iID;
-}
-
-uint32
-FOdysseyVectorObject::GetType()
-{
-    return FOdysseyVectorObject::VECTOROBJECTTYPE;
 }

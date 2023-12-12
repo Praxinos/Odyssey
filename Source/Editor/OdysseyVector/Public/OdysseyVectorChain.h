@@ -60,6 +60,9 @@ struct FWayFragment
                 , uint32 iIndexWayPoint1 );
 };
 
+/** A class that contains an ordered and contiguous chain of segments and vertices
+ *  (a FOdysseyVectorPath can have multiple sub-paths, i.e multiple chains).
+*/
 class FOdysseyVectorChain
 {
     public:

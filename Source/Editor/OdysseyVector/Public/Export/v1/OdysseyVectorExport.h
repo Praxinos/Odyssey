@@ -12,6 +12,8 @@ namespace FOdysseyVectorExportV1
 {
     void ODYSSEYVECTOR_API Write( FOdysseyVectorGroupPaint* iScene, FArchive &Ar );
 
+    uint32 GetObjectType( FOdysseyVectorObject& iObject );
+
     ////////////////////////////////////
     void WriteDefineObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
     void WriteDefineObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar );

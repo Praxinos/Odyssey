@@ -11,20 +11,20 @@ FOdysseyVectorImportV2::CreateObject( uint32 iObjectType )
     switch ( iObjectType )
     {
         // Legacy, when FOdysseyVectorScene was a thing.
-        case FOdysseyVectorObject::VECTORROOTTYPE :
+        case FOdysseyFile::VectorV2::ObjectType::ROOT :
             // don't create anything, the scene is already created by the vector layer
             newObject = mScene;
         break;
 
-        case FOdysseyVectorObject::VECTORPATHTYPE :
+        case FOdysseyFile::VectorV2::ObjectType::PATH :
             newObject = new FOdysseyVectorPath( FString("Path"));
         break;
 
-        case FOdysseyVectorObject::VECTORGROUPTYPE :
+        case FOdysseyFile::VectorV2::ObjectType::GROUP :
             newObject = new FOdysseyVectorGroup( FString("Group"));
         break;
 
-        case FOdysseyVectorObject::VECTORGROUPPAINTTYPE :
+        case FOdysseyFile::VectorV2::ObjectType::GROUPPAINT :
             // the root paintgroup
             if( mObjectArray.size() == 0 )
             {

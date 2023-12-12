@@ -124,8 +124,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param iStrokeWidth width of the path to draw.
          * @param iWorld draw in world coordinates system.
          */
-        using FOdysseyVectorObject::DrawStructure;
-        virtual void DrawStructure(  BLContext* iBLContext, const BLRgba32& iStrokeColor, double iStrokeWidth, bool iWorld );
+        void DrawStructure(  BLContext* iBLContext, const BLRgba32& iStrokeColor, double iStrokeWidth, bool iWorld );
 
        /**
          * @brief Erase path according to the mask image.
@@ -301,7 +300,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                   The path's matrix can then be set to the identity matrix if this path is a 
                   child of the said object.
          */
-        void SwitchSpace( FOdysseyVectorObject& iObject );
+        //void SwitchSpace( FOdysseyVectorObject& iObject );
 
        /**
          * @brief Get all vertices and sections as arrays. For use by the GroupPaint class
@@ -432,8 +431,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         void SetPaintingCode( uint32 iPaintingCode );
         uint32 GetPaintingCode();
-
-        //BLPath& GetBLPath();
-
-        uint32 GetType();
 };

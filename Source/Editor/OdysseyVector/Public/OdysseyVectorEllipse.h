@@ -4,9 +4,11 @@
 
 #include <blend2d.h>
 #include <ULIS>
-#include "OdysseyVectorVertex.h"
-#include "OdysseyVectorSegmentCubic.h"
+
 #include "OdysseyVectorPrimitive.h"
+
+class FOdysseyVectorVertex;
+class FOdysseyVectorSegmentCubic;
 
 class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
 {
@@ -29,19 +31,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
          FOdysseyVectorEllipse( const FString& iName, double iRadiusX, double iRadiusY, double iStrokeWidth );
 
        /**
-         * @brief Set ellipse radius on both X and Y axis.
-         * @param iRadius the radius.
-         */
-        void SetRadius( double iRadius );
-
-       /**
-         * @brief Set ellipse radius.
-         * @param iRadiusX radius on X axis
-         * @param iRadiusY radius on Y axis
-         */
-        void SetRadius( double iRadiusX, double iRadiusY );
-
-       /**
          * @brief Get ellipse's radius on X axis.
          * @return radius on X axis
          */
@@ -54,10 +43,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
         double GetRadiusY();
 
        /**
-         * @brief Get object type
-         * @return VECTORELLIPSETYPE.
+         * @brief Set ellipse radius on both X and Y axis.
+         * @param iRadius the radius.
          */
-        virtual uint32 GetType() override;
+        void SetRadius( double iRadius );
+
+       /**
+         * @brief Set ellipse radius.
+         * @param iRadiusX radius on X axis
+         * @param iRadiusY radius on Y axis
+         */
+        void SetRadius( double iRadiusX, double iRadiusY );
+
 
     protected:
        /**

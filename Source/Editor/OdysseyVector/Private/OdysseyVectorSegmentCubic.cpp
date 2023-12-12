@@ -1,5 +1,6 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVector.h"
 
 #include <algorithm> // for std::clamp
 

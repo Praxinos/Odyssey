@@ -525,12 +525,6 @@ FOdysseyVectorGroupPaint::HasBaseClass( uint32 iBaseClassID )
     return FOdysseyVectorGroup::HasBaseClass( iBaseClassID );
 }
 
-uint32
-FOdysseyVectorGroupPaint::GetType()
-{
-    return FOdysseyVectorObject::VECTORGROUPPAINTTYPE;
-}
-
 std::list<FOdysseyVectorBucket*>&
 FOdysseyVectorGroupPaint::GetBucketList()
 {

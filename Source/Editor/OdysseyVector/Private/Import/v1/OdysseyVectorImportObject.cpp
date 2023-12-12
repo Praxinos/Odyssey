@@ -10,15 +10,15 @@ FOdysseyVectorImportV1::CreateObject( uint32 iObjectType )
 
     switch ( iObjectType )
     {
-        case FOdysseyVectorObject::VECTORROOTTYPE :
+        case FOdysseyFile::VectorV1::ObjectType::ROOT :
             // do nothing, the scene is already created by the vector layer
         break;
 
-        case FOdysseyVectorObject::VECTORPATHTYPE :
+        case FOdysseyFile::VectorV1::ObjectType::PATH :
             newObject = new FOdysseyVectorPath( FString("Path"));
         break;
 
-        case FOdysseyVectorObject::VECTORGROUPPAINTTYPE :
+        case FOdysseyFile::VectorV1::ObjectType::GROUPPAINT :
             newObject = new FOdysseyVectorGroupPaint( FString("PaintGroup") );
         break;
 

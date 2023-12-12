@@ -1,4 +1,8 @@
 #include "OdysseyVectorCycle.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorSection.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorBucket.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L

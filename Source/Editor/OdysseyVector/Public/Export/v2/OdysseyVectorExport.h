@@ -10,6 +10,8 @@
 
 namespace FOdysseyVectorExportV2
 {
+    uint32 GetObjectType( FOdysseyVectorObject& iObject );
+
     void ODYSSEYVECTOR_API Write( FOdysseyVectorGroupPaint* iScene, FArchive &Ar );
 
     ////////////////////////////////////

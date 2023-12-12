@@ -30,10 +30,14 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
     Set( ownerSpaceCoords.x, ownerSpaceCoords.y );
 }
 
-FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner, double iX, double iY, bool iPropagated )
+FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
+                                          , double iX
+                                          , double iY
+                                          , bool iPropagated )
     : FOdysseyVectorPoint( iX, iY, 0.0f )
     , mOwner ( iOwner )
-    , mIsSelected( false )
+    , bSelected( false )
+    , mPaletteEntry( nullptr )
 {
     SetSolidColor( 128, 128, 128, 255 );
 
@@ -118,13 +122,13 @@ FOdysseyVectorBucket::SetRotation( double iRotation )
 bool
 FOdysseyVectorBucket::IsSelected()
 {
-    return mIsSelected;
+    return bSelected;
 }
 
 void
 FOdysseyVectorBucket::SetSelected( bool iIsSelected )
 {
-    mIsSelected = iIsSelected;
+    bSelected = iIsSelected;
 }
 
 void

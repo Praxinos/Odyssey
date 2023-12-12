@@ -866,8 +866,7 @@ FOdysseyPainterEditor::Group( FOdysseyVectorGroupPaint* iScene )
     std::list<FOdysseyVectorObject*> objectList;
     FOdysseyVectorGroup* group;
 
-    // concerns all selected objects of a branch but the scene
-    vectorEngine->GetFocusedObjectList( objectList );
+    vectorEngine->GetFocusedAncestorList( objectList );
 
     group = vectorEngine->GroupObjects( iScene, objectList, objectArray, objectOldParentArray );
 
@@ -886,7 +885,7 @@ FOdysseyPainterEditor::Group( FOdysseyVectorGroupPaint* iScene )
         }
         GEditor->EndTransaction();
 
-        iScene->Update(0); // no paintgroups to update
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
         vectorEngine->ClearObjectSelection();
         vectorEngine->SelectObject( group );

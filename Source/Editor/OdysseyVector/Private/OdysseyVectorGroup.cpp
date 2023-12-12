@@ -11,12 +11,6 @@ FOdysseyVectorGroup::Init( FString& iName )
     SetName( iName );
 }
 
-uint32
-FOdysseyVectorGroup::GetType()
-{
-    return FOdysseyVectorObject::VECTORGROUPTYPE;
-}
-
 bool
 FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
 {

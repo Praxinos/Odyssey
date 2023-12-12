@@ -2037,12 +2037,6 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
     Update( 0 );
 }
 
-uint32
-FOdysseyVectorPath::GetType()
-{
-    return FOdysseyVectorObject::VECTORPATHTYPE;
-}
-
 void
 FOdysseyVectorPath::ApplyMatrix( BLMatrix2D& iMatrix )
 {
@@ -2089,6 +2083,7 @@ FOdysseyVectorPath::ApplyTransformations()
     FOdysseyVectorObject::ApplyTransformations();
 }
 
+/*
 void
 FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
 {
@@ -2134,6 +2129,7 @@ FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
         InvalidateSegment( segment );
     }
 }
+*/
 
 //static
 ::ULIS::FVec2D
