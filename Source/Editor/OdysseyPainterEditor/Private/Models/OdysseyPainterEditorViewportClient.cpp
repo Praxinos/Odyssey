@@ -304,7 +304,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 {
     //Here you receive Mouse Buttons and Keyboard keys events
 
-    UE_LOG(LogTemp, Warning, TEXT("InputKey %s"), *iKey.ToString());
+    //UE_LOG(LogTemp, Warning, TEXT("InputKey %s"), *iKey.ToString());
 
     //Cleanup PressedKeys
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
@@ -346,7 +346,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
-    UE_LOG(LogTemp, Warning, TEXT("InputKey"));
+    //UE_LOG(LogTemp, Warning, TEXT("InputKey"));
     //This is called when the mouse is down and moving in the viewport
     //The viewport has already captured the mouse
 
