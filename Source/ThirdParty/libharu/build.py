@@ -176,13 +176,13 @@ libpng = {
 }
 
 if not zlib['include'].exists():
-    raise FileNotFoundError( Fore.RED + f'zlib include dir doesn\'t exist: {zlib["include"]}' )
+    raise FileNotFoundError( Fore.RED + f'zlib include dir doesn\'t exist: {zlib["include"]}\nCreate and fill a .env file (from .env.sample) or check the values' )
 if not zlib['lib'].exists():
-    raise FileNotFoundError( Fore.RED + f'zlib lib file doesn\'t exist: {zlib["lib"]}' )
+    raise FileNotFoundError( Fore.RED + f'zlib lib file doesn\'t exist: {zlib["lib"]}\nCreate and fill a .env file (from .env.sample) or check the values' )
 if not libpng['lib'].exists():
-    raise FileNotFoundError( Fore.RED + f'libpng lib dir doesn\'t exist: {libpng["include"]}' )
+    raise FileNotFoundError( Fore.RED + f'libpng lib dir doesn\'t exist: {libpng["include"]}\nCreate and fill a .env file (from .env.sample) or check the values' )
 if not libpng['lib'].exists():
-    raise FileNotFoundError( Fore.RED + f'libpng lib file doesn\'t exist: {libpng["lib"]}' )
+    raise FileNotFoundError( Fore.RED + f'libpng lib file doesn\'t exist: {libpng["lib"]}\nCreate and fill a .env file (from .env.sample) or check the values' )
 
 #---
 
