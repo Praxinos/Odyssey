@@ -2,6 +2,21 @@
 // from module OdysseyFile
 #include "OdysseyFile.h"
 
+uint32
+FOdysseyVectorExportV2::GetObjectType( FOdysseyVectorObject& iObject )
+{
+    if( iObject.GetClass() == FOdysseyVectorPath::StaticClass() )
+        return FOdysseyFile::VectorV2::ObjectType::PATH;
+
+    if( iObject.GetClass() == FOdysseyVectorGroup::StaticClass() )
+        return FOdysseyFile::VectorV2::ObjectType::GROUP;
+
+    if( iObject.GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        return FOdysseyFile::VectorV2::ObjectType::GROUPPAINT;
+
+    return FOdysseyFile::VectorV2::ObjectType::NONE;
+}
+
 void
 FOdysseyVectorExportV2::WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
@@ -9,7 +24,7 @@ FOdysseyVectorExportV2::WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, 
                             , Ar
                             , [&iObject](FArchive &Ar) -> void
     {
-        uint32 objectType = iObject.GetType();
+        uint32 objectType = GetObjectType( iObject );
 
         Ar << objectType;
     } );
@@ -231,9 +246,9 @@ FOdysseyVectorExportV2::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, F
     {
         WriteDefineObjectID( iObject, Ar );
 
-        switch( iObject.GetType() )
+        switch( GetObjectType( iObject ) )
         {
-            case FOdysseyVectorObject::VECTORPATHTYPE:
+            case FOdysseyFile::VectorV2::ObjectType::PATH:
             {
                 FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(&iObject);
 
@@ -241,7 +256,7 @@ FOdysseyVectorExportV2::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, F
             }
             break;
 
-            case FOdysseyVectorObject::VECTORGROUPTYPE:
+            case FOdysseyFile::VectorV2::ObjectType::GROUP:
             {
                 FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>(&iObject);
 
@@ -249,7 +264,7 @@ FOdysseyVectorExportV2::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, F
             }
             break;
 
-            case FOdysseyVectorObject::VECTORGROUPPAINTTYPE:
+            case FOdysseyFile::VectorV2::ObjectType::GROUPPAINT:
             {
                 FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(&iObject);
 

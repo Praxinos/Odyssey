@@ -175,11 +175,15 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
                 if( SmoothingMode == ePathSmoothingMode::Sharp )
                 {
                     FOdysseyVectorPath::SharpSegments( vertex, PreserveHandleLength );
+
+                    vertex->SetHandleAligned( false );
                 }
 
                 if( SmoothingMode == ePathSmoothingMode::Round )
                 {
                     FOdysseyVectorPath::SmoothSegments( vertex, PreserveHandleLength );
+
+                    vertex->SetHandleAligned( true );
                 }
             }
         }

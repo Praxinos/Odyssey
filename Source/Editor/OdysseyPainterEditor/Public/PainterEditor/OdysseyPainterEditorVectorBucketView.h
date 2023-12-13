@@ -32,5 +32,26 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
 
     public:
         UPROPERTY(EditAnywhere, Category="Bucket")
-        FBucketParam BucketParam; // UStruct from OdysseyVectorBucket.h
+        eBucketColorMode ColorMode;
+
+        UPROPERTY(EditAnywhere,Category="Bucket")
+        eBucketSpreadingPolicy SpreadingPolicy;
+
+        UPROPERTY(EditAnywhere,Category="Bucket")
+        FColor SolidColor;
+
+        UPROPERTY(EditAnywhere,Category="Bucket")
+        double Rotation;
+
+        UPROPERTY(EditAnywhere,Category="Bucket")
+        bool Propagated;
+
+        UPROPERTY(EditAnywhere,Category="Bucket")
+        FColor GradientColor0;
+
+        UPROPERTY(EditAnywhere,Category="Bucket")
+        FColor GradientColor1;
+
+        UPROPERTY(EditAnywhere,Category="Bucket")
+        double RadialRadius; // radius in radial mode
 };

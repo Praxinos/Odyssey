@@ -78,8 +78,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         void CopyBuckets( FOdysseyVectorGroupPaint* iDestination, bool iSwitchSpace );
 
-        virtual uint32 GetType();
-
         FOdysseyVectorBucket* Bucket( double iX, double iY, uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         std::list<FOdysseyVectorBucket*>& GetBucketList();
         std::list<FOdysseyVectorCycle*>& GetCycleList();

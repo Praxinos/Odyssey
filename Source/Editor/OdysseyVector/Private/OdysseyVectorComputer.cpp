@@ -23,13 +23,14 @@ FOdysseyVectorComputer::FOdysseyVectorComputer()
 {
     mProcessorCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
 
-    mProcessorThreadArray.resize( mProcessorCount );
-    mProcessorArray.resize( mProcessorCount );
+    mProcessorThreadArray.reserve( mProcessorCount );
+    mProcessorArray.reserve( mProcessorCount );
 
     for( uint32 i = 0; i < mProcessorCount; i++ )
     {
-        mProcessorArray[i] = new FOdysseyVectorProcessor( this, i );
-        mProcessorThreadArray[i] = std::thread( &FOdysseyVectorProcessor::Run, mProcessorArray[i] );
+        mProcessorArray.push_back( new FOdysseyVectorProcessor( this, i ) );
+
+        mProcessorThreadArray.emplace_back( &FOdysseyVectorProcessor::Run, mProcessorArray.back() );
 
         // loop until thread as started
         while( mProcessorArray[i]->mRunning == false );

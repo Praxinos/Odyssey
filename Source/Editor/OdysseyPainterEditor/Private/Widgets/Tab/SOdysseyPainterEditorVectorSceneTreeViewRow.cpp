@@ -100,23 +100,35 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-                parentObject->TransferChild( selectedObject, parentObject->GetPreviousChild( insertObject ) );
+                // don't drop onto the same object or else expect some infinite loop
+                if( parentObject != selectedObject )
+                {
+                    parentObject->TransferChild( selectedObject, parentObject->GetPreviousChild( insertObject ) );
 
-                insertObject = selectedObject;
+                    insertObject = selectedObject;
+                }
             }
             break;
 
             case DROPZONE_ONTO:
-                itemObject->TransferChild( selectedObject, nullptr );
+                // don't drop onto the same object or else expect some infinite loop
+                if( itemObject != selectedObject )
+                {
+                    itemObject->TransferChild( selectedObject, nullptr );
+                }
             break;
 
             case DROPZONE_BELOW:
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-                parentObject->TransferChild( selectedObject, insertObject );
+                // don't drop onto the same object or else expect some infinite loop
+                if( parentObject != selectedObject )
+                {
+                    parentObject->TransferChild( selectedObject, insertObject );
 
-                insertObject = selectedObject;
+                    insertObject = selectedObject;
+                }
             }
             break;
 

@@ -2,6 +2,21 @@
 // from module OdysseyFile
 #include "OdysseyFile.h"
 
+uint32
+FOdysseyVectorExportV1::GetObjectType( FOdysseyVectorObject& iObject )
+{
+    if( iObject.GetClass() == FOdysseyVectorPath::StaticClass() )
+        return FOdysseyFile::VectorV1::ObjectType::PATH;
+
+    if( iObject.GetClass() == FOdysseyVectorGroup::StaticClass() )
+        return FOdysseyFile::VectorV1::ObjectType::GROUP;
+
+    if( iObject.GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+        return FOdysseyFile::VectorV1::ObjectType::GROUPPAINT;
+
+    return FOdysseyFile::VectorV1::ObjectType::NONE;
+}
+
 void
 FOdysseyVectorExportV1::WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
@@ -9,7 +24,7 @@ FOdysseyVectorExportV1::WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, 
                             , Ar
                             , [&iObject](FArchive &Ar) -> void
     {
-        uint32 objectType = iObject.GetType();
+        uint32 objectType = GetObjectType( iObject );
 
         Ar << objectType;
     } );
@@ -189,9 +204,9 @@ FOdysseyVectorExportV1::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, F
         WriteObjectForegroundBucket( iObject, Ar );
         WriteObjectBackgroundBucket( iObject, Ar );
 
-        switch( iObject.GetType() )
+        switch( GetObjectType( iObject ) )
         {
-            case FOdysseyVectorObject::VECTORPATHTYPE:
+            case FOdysseyFile::VectorV1::ObjectType::PATH:
             {
                 FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(&iObject);
 
@@ -199,7 +214,7 @@ FOdysseyVectorExportV1::WriteDefineObjectEntry( FOdysseyVectorObject& iObject, F
             }
             break;
 
-            case FOdysseyVectorObject::VECTORGROUPPAINTTYPE:
+            case FOdysseyFile::VectorV1::ObjectType::GROUPPAINT:
             {
                 FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(&iObject);
 

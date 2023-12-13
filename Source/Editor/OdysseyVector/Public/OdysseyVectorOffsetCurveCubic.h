@@ -31,8 +31,24 @@ class ODYSSEYVECTOR_API FOdysseyVectorOffsetCurveCubic
         ~FOdysseyVectorOffsetCurveCubic();
         FOdysseyVectorOffsetCurveCubic();
 
+        /**
+         * @brief Alloc memory for iBezierCount bezier fragment
+         * @param iBezierCount the number of bezier fragments to allocate.
+         */
         void Resize( uint32 iBezierCount );
+
+        /**
+         * @brief Get a reference to the bezier fragment array
+         * @return a reference to the bezier fragment array
+         */
         std::vector<FOdysseyVectorBezierFragment>& GetBezierFragmentArray();
+
+        /**
+         * @brief Get a point located at iT. iT is in the range 0.0f-1.0f and is absolute to
+         *        the parent bezier curve. This function converts iT into the fragment's range.
+         * @param iT
+         * @return a position
+         */
         ::ULIS::FVec2D GetPointAt( double iT );
 
     private:

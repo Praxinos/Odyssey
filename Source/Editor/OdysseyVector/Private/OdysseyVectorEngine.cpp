@@ -1,4 +1,5 @@
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorPath.h"
 //#include <future>
 
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
@@ -116,7 +117,7 @@ FOdysseyVectorEngine::ClearObjectSelection()
 {
     for( FOdysseyVectorObject *obj : mSelectedObjectList )
     {
-        obj->SetIsSelected ( false );
+        obj->SetSelected ( false );
     }
 
     mSelectedObjectList.clear();
@@ -125,7 +126,7 @@ FOdysseyVectorEngine::ClearObjectSelection()
 void
 FOdysseyVectorEngine::UnselectObject( FOdysseyVectorObject* iVecObj )
 {
-    iVecObj->SetIsSelected( false );
+    iVecObj->SetSelected( false );
 
     mSelectedObjectList.remove( iVecObj );
 }
@@ -135,7 +136,7 @@ FOdysseyVectorEngine::SelectObject( FOdysseyVectorObject* iVecObj )
 {
     if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), iVecObj ) == mSelectedObjectList.end() )
     {
-        iVecObj->SetIsSelected( true );
+        iVecObj->SetSelected( true );
 
         mSelectedObjectList.push_back( iVecObj );
     }
@@ -835,6 +836,7 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
 /*
         FOdysseyVectorComputer& mainComputer = FOdysseyVectorComputer::GetMainComputer();
 
+
         mainComputer.Run( [ this
                           , &ymin
                           , &ymax
@@ -1278,6 +1280,7 @@ FOdysseyVectorEngine::GroupObjects( FOdysseyVectorObject* iParent
                                   , std::vector<FOdysseyVectorObject*>& oObjectArray
                                   , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )
 {
+    FOdysseyVectorGroupPaint* scene = iParent->GetScene();
     BLPoint averageTranslation = { 0.0f, 0.0f };
 
     if ( iObjectList.size() )
@@ -1294,10 +1297,13 @@ FOdysseyVectorEngine::GroupObjects( FOdysseyVectorObject* iParent
 
         for( FOdysseyVectorObject *obj : iObjectList )
         {
-            oObjectArray.push_back( obj );
-            oObjectOldParentArray.push_back( obj->GetParent() );
+            if( obj != scene )
+            {
+                oObjectArray.push_back( obj );
+                oObjectOldParentArray.push_back( obj->GetParent() );
 
-            group->TransferChild( obj, group->GetLastChild() );
+                group->TransferChild( obj, group->GetLastChild() );
+            }
         }
 
         group->Invalidate();

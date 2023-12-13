@@ -26,6 +26,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathEdit : public FOdysseyVectorUndo
         /** Describes this change (for debugging) */
         virtual FString ToString() const override;
 
+        bool HasRecordedVertex( FOdysseyVectorVertex* iVertex );
+        bool HasRecordedSegment( FOdysseyVectorSegment* iSegment );
+
     protected:
         std::vector<FSnapshotVertex> mVertexSnapshotArray;
         std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;

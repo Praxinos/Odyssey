@@ -1,4 +1,6 @@
 #include "OdysseyVectorEllipse.h"
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorSegmentCubic.h"
 
 // https://stackoverflow.com/a/27863181
 // https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%c3%a9zier-curves
@@ -87,18 +89,6 @@ FOdysseyVectorEllipse::UpdateShape( uint32 iUpdateFlags )
     mCubicSegment[3]->GetHandle(1)->Set( -ctlDistX,  mRadiusY );
 
     FOdysseyVectorPath::UpdateShape( iUpdateFlags );
-/*
-    mCubicSegment[0]->Update( nullptr );
-    mCubicSegment[1]->Update( nullptr );
-    mCubicSegment[2]->Update( nullptr );
-    mCubicSegment[3]->Update( nullptr );
-
-    // Update the bounding box
-    mBBox.x = - mRadiusX - mStrokeWidth;
-    mBBox.y = - mRadiusY - mStrokeWidth;
-    mBBox.w =  ( mRadiusX +  mStrokeWidth ) * 2;
-    mBBox.h =  ( mRadiusY +  mStrokeWidth ) * 2;
-*/
 }
 
 FOdysseyVectorObject*
@@ -146,10 +136,4 @@ double
 FOdysseyVectorEllipse::GetRadiusY()
 {
     return mRadiusY;
-}
-
-uint32
-FOdysseyVectorEllipse::GetType()
-{
-    return FOdysseyVectorObject::VECTORELLIPSETYPE;
 }

@@ -39,6 +39,8 @@ FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint64 iSnapsho
     : mSnapshotFlags( iSnapshotFlags )
     , mObject( iObject )
     , mPreviousChild( nullptr )
+    , mForegroundBucketSnapshot( &iObject->GetForegroundBucket(), 0 )
+    , mBackgroundBucketSnapshot( &iObject->GetBackgroundBucket(), 0 )
 {
     if( mSnapshotFlags & FSnapshotFlags::Object::TRANSFORMATIONS )
     {
@@ -73,8 +75,8 @@ FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint64 iSnapsho
         FOdysseyVectorBucket& foregroundBucket = iObject->GetForegroundBucket();
         FOdysseyVectorBucket& backgroundBucket = iObject->GetBackgroundBucket();
 
-        mForegroundBucketSnapshot = FSnapshotBucket( &foregroundBucket, FSnapshotBucket::SNAPSHOT_PARAM );
-        mBackgroundBucketSnapshot = FSnapshotBucket( &backgroundBucket, FSnapshotBucket::SNAPSHOT_PARAM );
+        mForegroundBucketSnapshot = FSnapshotBucket( &foregroundBucket, FSnapshotFlags::Point::Bucket::PARAM );
+        mBackgroundBucketSnapshot = FSnapshotBucket( &backgroundBucket, FSnapshotFlags::Point::Bucket::PARAM );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Object::OPACITY )
@@ -181,19 +183,25 @@ FSnapshotPoint::~FSnapshotPoint()
 {
 }
 
-FSnapshotPoint::FSnapshotPoint( FOdysseyVectorPoint* iPoint
-                              , uint32 iPointSnapshotFlags )
-    : mPointSnapshotFlags( iPointSnapshotFlags )
+FSnapshotPoint::FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint64 iSnapshotFlags )
+    : mSnapshotFlags( iSnapshotFlags )
     , mPoint( iPoint )
-    , mCoords( iPoint->GetCoords() )
-    , mRadius( iPoint->GetRadius() )
 {
+    if( iSnapshotFlags & FSnapshotFlags::Point::POSITION )
+    {
+        mCoords = iPoint->GetCoords();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::RADIUS )
+    {
+        mRadius = iPoint->GetRadius();
+    }
 }
 
 void
 FSnapshotPoint::Restore()
 {
-    if( mPointSnapshotFlags & SNAPSHOT_POSITION )
+    if( mSnapshotFlags & FSnapshotFlags::Point::POSITION )
     {
         ::ULIS::FVec2D swapCoords = mPoint->GetCoords();
 
@@ -202,7 +210,7 @@ FSnapshotPoint::Restore()
         mCoords = swapCoords;
     }
 
-    if( mPointSnapshotFlags & SNAPSHOT_RADIUS )
+    if( mSnapshotFlags & FSnapshotFlags::Point::RADIUS )
     {
         double swapRadius = mPoint->GetRadius();
 
@@ -216,13 +224,10 @@ FSnapshotVertex::~FSnapshotVertex()
 {
 }
 
-FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex
-                                , uint32 iPointSnapshotFlags
-                                , uint32 iVertexSnapshotFlags )
-    : FSnapshotPoint( iVertex, iPointSnapshotFlags)
-    , mVertexSnapshotFlags( iVertexSnapshotFlags )
+FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex, uint64 iSnapshotFlags )
+    : FSnapshotPoint( iVertex, iSnapshotFlags )
 {
-    if( iVertexSnapshotFlags & SNAPSHOT_ALIGNMENT )
+    if( iSnapshotFlags & FSnapshotFlags::Point::Vertex::ALIGNMENT )
     {
         // note: we only save the flags that are "manually" set by the user,
         // i am unsure about the consistency of other flags
@@ -230,14 +235,21 @@ FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex
     }
 }
 
+FOdysseyVectorVertex*
+FSnapshotVertex::GetVertex()
+{
+    return static_cast<FOdysseyVectorVertex*>(mPoint);
+}
+
 void
 FSnapshotVertex::Restore()
 {
+    FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(mPoint);
+
     FSnapshotPoint::Restore();
 
-    if( mVertexSnapshotFlags & SNAPSHOT_ALIGNMENT )
+    if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::ALIGNMENT )
     {
-        FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(mPoint);
         bool alignment = vertex->IsHandleAligned();
 
         vertex->SetHandleAligned( mAlignment );
@@ -247,16 +259,178 @@ FSnapshotVertex::Restore()
     }
 }
 
+FSnapshotBucket::~FSnapshotBucket()
+{
+}
+
+FSnapshotBucket::FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint64 iSnapshotFlags )
+    : FSnapshotPoint( iBucket, iSnapshotFlags )
+{
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::COLORMODE )
+    {
+        mColorMode = iBucket->GetColorMode();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::SPREADINGPOLICY )
+    {
+        mSpreadingPolicy = iBucket->GetSpreadingPolicy();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::SOLIDCOLOR )
+    {
+        mSolidColor = iBucket->GetSolidColor();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::ROTATION )
+    {
+        mRotation = iBucket->GetRotation();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::PROPAGATION )
+    {
+        mPropagated = iBucket->IsPropagated();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::GRADIENTCOLOR0 )
+    {
+        mGradientColor0 = iBucket->GetGradientColor0();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::GRADIENTCOLOR1 )
+    {
+        mGradientColor1 = iBucket->GetGradientColor1();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::RADIALRADIUS )
+    {
+        mRadialRadius = iBucket->GetRadialRadius();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::RADIALOFFSET )
+    {
+        mRadialOffset = iBucket->GetRadialOffset();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::PALETTEENTRY )
+    {
+        mPaletteEntry = iBucket->GetPaletteEntry();
+    }
+}
+
+FOdysseyVectorBucket*
+FSnapshotBucket::GetBucket()
+{
+    return static_cast<FOdysseyVectorBucket*>(mPoint);
+}
+
+void
+FSnapshotBucket::Restore()
+{
+    FOdysseyVectorBucket* bucket = static_cast<FOdysseyVectorBucket*>(mPoint);
+
+    FSnapshotPoint::Restore();
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::COLORMODE )
+    {
+        eBucketColorMode currentColorMode = bucket->GetColorMode();
+
+        bucket->SetColorMode( mColorMode );
+        // swap
+        mColorMode = currentColorMode;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::SPREADINGPOLICY )
+    {
+        eBucketSpreadingPolicy currentSpreadingPolicy = bucket->GetSpreadingPolicy();
+
+        bucket->SetSpreadingPolicy( mSpreadingPolicy );
+        // swap
+        mSpreadingPolicy = currentSpreadingPolicy;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::SOLIDCOLOR )
+    {
+        FColor currentSolidColor = bucket->GetSolidColor();
+
+        bucket->SetSolidColor( mSolidColor );
+
+        mSolidColor = currentSolidColor;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::ROTATION )
+    {
+        double currentRotation = bucket->GetRotation();
+
+        bucket->SetRotation( mRotation );
+        // swap
+        mRotation = currentRotation;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::PROPAGATION )
+    {
+        bool currentPropagated = bucket->IsPropagated();
+
+        bucket->SetPropagated( mPropagated );
+        // swap
+        mPropagated = currentPropagated;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::GRADIENTCOLOR0 )
+    {
+        FColor currrentGradientColor0 = bucket->GetGradientColor0();
+
+        bucket->SetGradientColor0( mGradientColor0 );
+        // swap
+        mGradientColor0 = currrentGradientColor0;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::GRADIENTCOLOR1 )
+    {
+        FColor currrentGradientColor1 = bucket->GetGradientColor1();
+
+        bucket->SetGradientColor1( mGradientColor1 );
+        // swap
+        mGradientColor1 = currrentGradientColor1;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::RADIALRADIUS )
+    {
+        double currentRadialRadius = bucket->GetRadialRadius();
+
+        bucket->SetRadialRadius( mRadialRadius );
+        // swap
+        mRadialRadius = currentRadialRadius;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::RADIALOFFSET )
+    {
+        ::ULIS::FVec2D currentRadialOffset = bucket->GetRadialOffset();
+
+        bucket->SetRadialOffset( mRadialOffset );
+        // swap
+        mRadialOffset = currentRadialOffset;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::PALETTEENTRY )
+    {
+        UOdysseyPaletteEntry* currentPaletteEntry = bucket->GetPaletteEntry();
+
+        bucket->SetPaletteEntry( mPaletteEntry );
+        // swap
+        mPaletteEntry = currentPaletteEntry;
+    }
+}
+
 FSnapshotSegmentCubic::~FSnapshotSegmentCubic()
 {
 }
 
 FSnapshotSegmentCubic::FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic *iCubicSegment
-                                            , uint32 iCubicSegmentSnapshotFlags )
-    : mCubicSegmentSnapshotFlags( iCubicSegmentSnapshotFlags )
+                                            , uint64 iSnapshotFlags )
+    : mSnapshotFlags( iSnapshotFlags )
     , mCubicSegment( iCubicSegment )
 {
-    if( mCubicSegmentSnapshotFlags & SNAPSHOT_HANDLES )
+    if( iSnapshotFlags & FSnapshotFlags::Segment::Cubic::HANDLES )
     {
         mHandleCoords[0] = iCubicSegment->GetHandle(0)->GetCoords();
         mHandleCoords[1] = iCubicSegment->GetHandle(1)->GetCoords();
@@ -272,7 +446,7 @@ FSnapshotSegmentCubic::GetCubicSegment()
 void
 FSnapshotSegmentCubic::Restore()
 {
-    if( mCubicSegmentSnapshotFlags & SNAPSHOT_HANDLES )
+    if( mSnapshotFlags & FSnapshotFlags::Segment::Cubic::HANDLES )
     {
         ::ULIS::FVec2D swapCoords[2] = { mCubicSegment->GetHandle(0)->GetCoords()
                                        , mCubicSegment->GetHandle(1)->GetCoords() };
@@ -329,7 +503,7 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath, uint64 iSnapshotFlags )
 
         for( FOdysseyVectorVertex* vertex : vertexList )
         {
-            mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotPoint::SNAPSHOT_ALL, FSnapshotVertex::SNAPSHOT_ALL) );
+            mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotFlags::ALL ) );
         }
     }
 
@@ -346,7 +520,7 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath, uint64 iSnapshotFlags )
             {
                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-                mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic(cubicSegment, FSnapshotSegmentCubic::SNAPSHOT_ALL));
+                mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::ALL ) );
             }
         }
     }
@@ -464,48 +638,6 @@ FSnapshotPath::Restore()
     return false;
 }
 
-FSnapshotBucket::~FSnapshotBucket()
-{
-}
-
-FSnapshotBucket::FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint32 iBucketSnapshotFlags )
-    : mBucketSnapshotFlags( iBucketSnapshotFlags )
-    , mBucket ( iBucket )
-{
-    if( mBucketSnapshotFlags & SNAPSHOT_POSITION )
-    {
-        mCoords = iBucket->GetCoords();
-    }
-
-    if( mBucketSnapshotFlags & SNAPSHOT_PARAM )
-    {
-        mBucketParam = iBucket->mBucketParam;
-    }
-}
-
-void
-FSnapshotBucket::Restore()
-{
-    if( mBucketSnapshotFlags & SNAPSHOT_POSITION )
-    {
-        ::ULIS::FVec2D swapCoords = mBucket->GetCoords();
-
-        mBucket->Set( mCoords.x, mCoords.y );
-        // swap
-        mCoords = swapCoords;
-    }
-
-    if( mBucketSnapshotFlags & SNAPSHOT_PARAM )
-    {
-        FBucketParam swapBucketParam = mBucket->mBucketParam;
-
-        mBucket->mBucketParam = mBucketParam;
-        mBucket->Invalidate();
-        // swap
-        mBucketParam = swapBucketParam;
-    }
-}
-
 FSnapshotGroupPaint::~FSnapshotGroupPaint()
 {
 }
@@ -522,7 +654,7 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
 
         for( FOdysseyVectorBucket* bucket : bucketList )
         {
-            mBucketSnapshotArray.push_back( FSnapshotBucket( bucket, FSnapshotBucket::SNAPSHOT_ALL ));
+            mBucketSnapshotArray.push_back( FSnapshotBucket( bucket, FSnapshotFlags::ALL ) );
         }
     }
 

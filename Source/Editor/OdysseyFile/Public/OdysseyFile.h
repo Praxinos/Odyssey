@@ -8,6 +8,18 @@ namespace FOdysseyFile
     // chunk IDs for module OdysseyVector version 1 (deprecated)
     namespace VectorV1
     {
+        namespace ObjectType
+        {
+            // DO NOT CHANGE ! These values are saved in the save file.
+            static const uint32 ROOT       = 0;
+            static const uint32 NONE       = 1;
+            static const uint32 GROUP      = 2;
+            static const uint32 ELLIPSE    = 3;
+            static const uint32 RECTANGLE  = 4;
+            static const uint32 PATH       = 5;
+            static const uint32 GROUPPAINT = 6;
+        }
+
         // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
         // Just be sure the Chunk ID is unique and any ID will make it.
         // You can use website https://crc32.online/ to generate a code
@@ -63,6 +75,18 @@ namespace FOdysseyFile
     // chunk IDs for module OdysseyVector version 2 (current)
     namespace VectorV2
     {
+        namespace ObjectType
+        {
+            // DO NOT CHANGE ! These values are saved in the save file.
+            static const uint32 ROOT       = 0;
+            static const uint32 NONE       = 1;
+            static const uint32 GROUP      = 2;
+            static const uint32 ELLIPSE    = 3;
+            static const uint32 RECTANGLE  = 4;
+            static const uint32 PATH       = 5;
+            static const uint32 GROUPPAINT = 6;
+        }
+
         // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
         // Just be sure the Chunk ID is unique and any ID will make it.
         // You can use website https://crc32.online/ to generate a code

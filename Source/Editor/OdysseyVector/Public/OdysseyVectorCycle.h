@@ -4,14 +4,9 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-#include "OdysseyVectorObject.h"
-#include "OdysseyVectorPoint.h"
-#include "OdysseyVectorSection.h"
-#include "OdysseyVectorSegmentCubic.h"
-#include "OdysseyVectorPath.h"
-#include "OdysseyVectorBucket.h"
-
-class FOdysseyVectorSegmentCubic;
+class FOdysseyVectorObject;
+class FOdysseyVectorSection;
+class FOdysseyVectorBucket;
 
 class ODYSSEYVECTOR_API FOdysseyVectorCycle
 {
@@ -51,23 +46,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         void Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor );
 
         /**
-         * @brief collision test with coordinates passed as parameters.
-         * @param iX local coordinate on X-Axis.
-         * @param iY local coordinate on Y-Axis.
+         * @brief Test whether or not this cycle fits entirely within the cycle passed as parameter.
+         * @param iParentCandidate the candidate parent cycle.
          */
-        bool HitTest( double iLocalX, double iLocalY );
+        bool FitsIn( FOdysseyVectorCycle* iParentCandidate );
 
         /**
-         * @brief Set this cycle's parent cycle (the cycle that this one fits in).
-         * @param iParent a pointer to this cycle's parent cycle.
+         * @brief Gets this cycle's bounding box
+         * @return the bounding box as a rectangle
          */
-        void SetParentCycle( FOdysseyVectorCycle *iParent );
-
-        /**
-         * @brief Get this cycle's parent cycle.
-         * @return this cycle's parent cycle.
-         */
-        FOdysseyVectorCycle* GetParentCycle();
+        ::ULIS::FRectD GetBBox();
 
         /**
          * @brief Get the attached bucket, if any.
@@ -76,22 +64,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         FOdysseyVectorBucket* GetBucket();
 
         /**
-         * @brief Attach a bucket. Can be nullptr.
-         * @param iBucket the bucket to attach.
+         * @brief Get the pointer to this cycle's owner object
+         * @return a pointer to this cycle's owner object
          */
-        void SetBucket( FOdysseyVectorBucket* iBucket );
+        FOdysseyVectorObject* GetOwner();
 
         /**
-         * @brief Test whether or not this cycle fits entirely within the cycle passed as parameter.
-         * @param iParentCandidate the candidate parent cycle.
+         * @brief Get this cycle's parent cycle.
+         * @return this cycle's parent cycle.
          */
-        bool FitsIn( FOdysseyVectorCycle* iParentCandidate );
-
-        /**
-         * @brief Sets a bucket that should color this cycle without being its official bucket.
-         * @param iPropagatedBucket the propagated bucket
-         */
-        void SetPropagatedBucket( FOdysseyVectorBucket* iPropagatedBucket );
+        FOdysseyVectorCycle* GetParentCycle();
 
         /**
          * @brief Gets the bucket that should color this cycle without being its official bucket.
@@ -100,10 +82,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         FOdysseyVectorBucket* GetPropagatedBucket();
 
         /**
-         * @brief Gets a propagated bucket from any neighbour cycle
-         * @return true if it got any, false otherwise
+         * @brief collision test with coordinates passed as parameters.
+         * @param iX local coordinate on X-Axis.
+         * @param iY local coordinate on Y-Axis.
          */
-        bool PropagateBucket();
+        bool HitTest( double iLocalX, double iLocalY );
 
         /**
          * @brief Merge this cycle's contour path with the contour path of the cycle passed as parameter
@@ -113,14 +96,34 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         void Merge( FOdysseyVectorCycle* iMergeCycle );
 
         /**
+         * @brief Gets a propagated bucket from any neighbour cycle
+         * @return true if it got any, false otherwise
+         */
+        bool PropagateBucket();
+
+        /**
+         * @brief Attach a bucket. Can be nullptr.
+         * @param iBucket the bucket to attach.
+         */
+        void SetBucket( FOdysseyVectorBucket* iBucket );
+
+        /**
+         * @brief Set this cycle's parent cycle (the cycle that this one fits in).
+         * @param iParent a pointer to this cycle's parent cycle.
+         */
+        void SetParentCycle( FOdysseyVectorCycle *iParent );
+
+        /**
+         * @brief Sets a bucket that should color this cycle without being its official bucket.
+         * @param iPropagatedBucket the propagated bucket
+         */
+        void SetPropagatedBucket( FOdysseyVectorBucket* iPropagatedBucket );
+
+        /**
          * @brief Stroke the path using BLend2D API. The context (path width, color) can be set before calling this method.
          * @param iWorld true if it should be drawn in world coordinates, false otherwise
          */
         void StrokePath( BLContext* iBLContext, bool iWorld );
-
-        ::ULIS::FRectD GetBBox();
-
-        FOdysseyVectorObject* GetOwner();
 
     private :
         bool PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray );

@@ -365,8 +365,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                         double segment0T = segment0Poly->fromT + ( segment0PolySubT * ( segment0Poly->toT - segment0Poly->fromT ) );
                         double segment1T = segment1Poly->fromT + ( segment1PolySubT * ( segment1Poly->toT - segment1Poly->fromT ) );
 
-                        if( ( segment0T >= 0.0f && segment1T < 1.0f  )
-                         && ( segment0T <  1.0f && segment1T >= 0.0f ) )
+                        if( ( segment0T > 0.0f && segment1T < 1.0f  )
+                         && ( segment0T < 1.0f && segment1T > 0.0f ) )
                         {
                             bool selfIntersects = ( iSegment0 == iSegment1 );
                             FOdysseyVectorIntersection* intersection = new FOdysseyVectorIntersection( selfIntersects
@@ -523,12 +523,6 @@ FOdysseyVectorGroupPaint::HasBaseClass( uint32 iBaseClassID )
     }
 
     return FOdysseyVectorGroup::HasBaseClass( iBaseClassID );
-}
-
-uint32
-FOdysseyVectorGroupPaint::GetType()
-{
-    return FOdysseyVectorObject::VECTORGROUPPAINTTYPE;
 }
 
 std::list<FOdysseyVectorBucket*>&
@@ -1014,6 +1008,8 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     iVertexArray.push_back( iVertex );
     iSection->Block( iVertex );
 
+//PrintSection( iSection );
+
     // loop checking if initiator is of type 
     if( iVertexArray[0]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
     {
@@ -1031,8 +1027,10 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     && ( ( ( iReturnSection->IsLinked() == true ) && ( iReturnSection == iSection ) ) // 1 return path accepted
         || ( iReturnSection->IsLinked() == false ) ) ) // any return path accepted
     {
+//UE_LOG(LogTemp, Warning, TEXT("Cycle detected %f"), GetCycleNormalVector( iVertexArray, iSectionArray ) ); 
         if( GetCycleNormalVector( iVertexArray, iSectionArray ) > 0.0f )
         {
+//UE_LOG(LogTemp, Warning, TEXT("Cycle committed") ); 
             mCycleList.push_back( new FOdysseyVectorCycle( this, iVertexArray, iSectionArray ) );
         }
 
@@ -1140,26 +1138,35 @@ GetCycleNormalVector( std::vector<FOdysseyVectorVertex*>& iVertexArray
         // Note: we use FOdysseyVectorSection::GetVertexCoords() because coords will be in Paintgroup's space.
         ::ULIS::FVec2D& viCoords = sectioni->GetVertexCoords( vertexi );
         ::ULIS::FVec2D& vnCoords = sectioni->GetVertexCoords( vertexn );
-        double ti = vertexi->GetT( sectioni );
-        double tn = vertexn->GetT( sectioni );
-        double deltaT = tn - ti;
-        int subdiv = 8;
-        double stepT = deltaT / subdiv;
-        double t0 = ti;
 
-        // By relying only on start and end points of a section, we lack precision. 
-        // Here we rely on more acurate computation by getting intermediate points.
-        for( int j = 0; j < subdiv; j++ )
+        if( segment->GetClass() == FOdysseyVectorSegmentCubicGap::StaticClass() )
         {
-            double t1 = t0 + stepT;
-            // however at end points, we need the same coordinates for each section. Relying on T value does not guarantee that
-            // due to imprecision and would fake the calculation. So, we use the value stored in viCoords and vnCoords.
-            ::ULIS::FVec2D v0Coords = ( j == 0          ) ? viCoords : sectioni->GetPointAt( t0 );
-            ::ULIS::FVec2D v1Coords = ( j == subdiv - 1 ) ? vnCoords : sectioni->GetPointAt( t1 );
+            z += ( ( viCoords.x - vnCoords.x ) * ( viCoords.y + vnCoords.y ) );
+        }
 
-            z += ( ( v0Coords.x - v1Coords.x ) * ( v0Coords.y + v1Coords.y ) );
+        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        {
+            double ti = vertexi->GetT( sectioni );
+            double tn = vertexn->GetT( sectioni );
+            double deltaT = tn - ti;
+            int subdiv = 8;
+            double stepT = deltaT / subdiv;
+            double t0 = ti;
 
-            t0 += stepT;
+            // By relying only on start and end points of a section, we lack precision. 
+            // Here we rely on more acurate computation by getting intermediate points.
+            for( int j = 0; j < subdiv; j++ )
+            {
+                double t1 = t0 + stepT;
+                // however at end points, we need the same coordinates for each section. Relying on T value does not guarantee that
+                // due to imprecision and would fake the calculation. So, we use the value stored in viCoords and vnCoords.
+                ::ULIS::FVec2D v0Coords = ( j == 0          ) ? viCoords : sectioni->GetPointAt( t0 );
+                ::ULIS::FVec2D v1Coords = ( j == subdiv - 1 ) ? vnCoords : sectioni->GetPointAt( t1 );
+
+                z += ( ( v0Coords.x - v1Coords.x ) * ( v0Coords.y + v1Coords.y ) );
+
+                t0 += stepT;
+            }
         }
 
 // https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal

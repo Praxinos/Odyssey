@@ -1,4 +1,5 @@
 #include "OdysseyVectorPathTracer.h"
+#include "OdysseyVectorSegmentCubic.h"
 
 FOdysseyVectorPathTracer::~FOdysseyVectorPathTracer()
 {

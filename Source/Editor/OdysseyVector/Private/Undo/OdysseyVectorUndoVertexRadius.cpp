@@ -35,7 +35,7 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
 
     for( FOdysseyVectorVertex* vertex : iVertexArray )
     {
-        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotPoint::SNAPSHOT_RADIUS, 0 ));
+        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotFlags::Point::RADIUS ));
     }
 }
 
