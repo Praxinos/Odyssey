@@ -29,6 +29,14 @@ gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if gOperatingSystem not in [ 'windows', 'darwin' ]:
     raise NotImplementedError( Fore.RED + f'This platform is not supported: {gOperatingSystem}' )
 
+def IsWindows() -> bool:
+    global gOperatingSystem
+    return gOperatingSystem == 'windows'
+
+def IsMacOSX() -> bool:
+    global gOperatingSystem
+    return gOperatingSystem == 'darwin'
+
 script_path = Path( __file__ ).resolve().parent
 intermediate_path = script_path / 'Intermediate'
 intermediate_path.mkdir( exist_ok=True )
@@ -83,16 +91,16 @@ def DownloadAndUnzip_LibharuSources( iScriptPath: Path, iIntermediatePath: Path 
 #--- Download/Unzip cmake source files (if not already in the PATH)
 #---
 
-def DownloadAndUnzip_CMakeSources( iPlatform: str, iIntermediatePath: Path ) -> list[str]:
+def DownloadAndUnzip_CMakeSources( iIntermediatePath: Path ) -> list[str]:
     cmake_cmd = [ 'cmake' ]
 
     if shutil.which( cmake_cmd[0] ) is not None:
         return cmake_cmd
 
     cmake_version = '3.23.2'
-    if iPlatform == 'windows':
+    if IsWindows():
         cmake_zip_file = f'cmake-{cmake_version}-windows-x86_64.zip'
-    elif iPlatform == 'darwin':
+    elif IsMacOSX():
         cmake_zip_file = f'cmake-{cmake_version}-macos10.10-universal.tar.gz'
 
     # Download cmake source files
@@ -116,9 +124,9 @@ def DownloadAndUnzip_CMakeSources( iPlatform: str, iIntermediatePath: Path ) -> 
     #-
 
     # Check the cmake binary exists
-    if iPlatform == 'windows':
+    if IsWindows():
         cmake_pathfile = cmake_path / 'bin' / 'cmake.exe'
-    elif iPlatform == 'darwin':
+    elif IsMacOSX:
         cmake_pathfile = cmake_path / 'bin' / 'cmake'
 
     if not cmake_pathfile.exists():
@@ -134,7 +142,7 @@ def DownloadAndUnzip_CMakeSources( iPlatform: str, iIntermediatePath: Path ) -> 
 
 src_path = DownloadAndUnzip_LibharuSources( script_path, intermediate_path )
 
-cmake_cmd = DownloadAndUnzip_CMakeSources( gOperatingSystem, intermediate_path )
+cmake_cmd = DownloadAndUnzip_CMakeSources( intermediate_path )
 
 #---
 #--- Define all configuration parameters
@@ -143,11 +151,11 @@ cmake_cmd = DownloadAndUnzip_CMakeSources( gOperatingSystem, intermediate_path )
 configuration = 'Release'
 target = 'install'
 
-if gOperatingSystem == 'windows':
+if IsWindows():
     generator = 'Visual Studio 17 2022'
     compiler = 'vs2022'
     architecture = 'x64'
-elif gOperatingSystem == 'darwin':
+elif IsMacOSX():
     generator = 'Xcode'
     compiler = 'xcode'
     architecture = ''
@@ -155,10 +163,10 @@ elif gOperatingSystem == 'darwin':
 #-
 
 # final_*_path are the ones used in the ue .Build.cs file
-if gOperatingSystem == 'windows':
+if IsWindows():
     final_include_path = script_path / 'include' / 'win64' / 'vs2022'
     final_lib_path = script_path / 'lib' / 'win64' / 'vs2022'
-elif gOperatingSystem == 'darwin':
+elif IsMacOSX():
     final_include_path = script_path / 'include' / 'macosx'
     final_lib_path = script_path / 'lib' / 'macosx'
 
@@ -260,7 +268,7 @@ cmake_args = [
 if architecture:
     cmake_args += [ '-A', architecture ]
 
-if gOperatingSystem == 'darwin':
+if IsMacOSX():
     cmake_args += [ '-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15' ]
     cmake_args += [ '-CMAKE_OSX_ARCHITECTURES=x86_64;arm64' ]
 
