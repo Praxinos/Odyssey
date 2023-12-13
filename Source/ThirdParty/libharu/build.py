@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # IDDN.FR.001.220036.001.S.P.2021.000.00000
 # EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 import argparse
 import locale
+import os
 from pathlib import Path
 import platform
 import shutil
@@ -11,19 +12,25 @@ import subprocess
 import sys
 import zipfile
 
+# [BEFORE] > must work without venv
+from venv_setup import init
+init()
+# [AFTER]  > venv is valid (with all its modules)
+
 from colorama import init, Fore, Back, Style
 init( autoreset=True )
+from dotenv import load_dotenv
+load_dotenv()
 import requests
 
 #---
 
 gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if gOperatingSystem not in [ 'windows', 'darwin' ]:
-    print( Fore.RED + f'This platform is not supported: {gOperatingSystem}' )
-    sys.exit( 5 )
+    raise NotImplementedError( Fore.RED + f'This platform is not supported: {gOperatingSystem}' )
 
 script_path = Path( __file__ ).resolve().parent
-intermediate_path = script_path / 'Intermediate' # Already '.gitignored'
+intermediate_path = script_path / 'Intermediate'
 intermediate_path.mkdir( exist_ok=True )
 
 #---
@@ -38,8 +45,7 @@ def FindSingleRootDirectoryInZip( iZipPathFile ):
 
         # If more than 1 directories in the root, make an error
         if len( inner_firstpart_paths ) != 1:
-            print( Fore.RED + f'More than 1 root directory in zip file: {iZipPathFile}' )
-            sys.exit( 5 )
+            raise ValueError( Fore.RED + f'More than 1 root directory in zip file: {iZipPathFile}' )
 
         return list(inner_firstpart_paths)[0]
 
@@ -47,45 +53,50 @@ def FindSingleRootDirectoryInZip( iZipPathFile ):
 #--- Download/Unzip libharu source files
 #---
 
-# Download libharu source files
-libharu_src_zip_file = 'RELEASE_2_3_0.zip'
-# libharu_src_zip_file = 'libharu-2.4.0-rc1' # error on configuring...
-libharu_src_zip_pathfile = intermediate_path / f'libharu_{libharu_src_zip_file}'
-libharu_src_url = f'https://github.com/libharu/libharu/archive/refs/tags/{libharu_src_zip_file}'
-if not libharu_src_zip_pathfile.exists():
-    print( f'Request libharu source zip file... : {libharu_src_url}')
-    r = requests.get( libharu_src_url )
-    with libharu_src_zip_pathfile.open( 'wb' ) as file:
-        file.write( r.content )
+def DownloadAndUnzip_LibharuSources( iScriptPath: Path, iIntermediatePath: Path ) -> Path:
+    # Download libharu source files
+    libharu_src_zip_file = 'RELEASE_2_3_0.zip'
+    # libharu_src_zip_file = 'libharu-2.4.0-rc1' # error on configuring...
+    libharu_src_zip_pathfile = iIntermediatePath / f'libharu_{libharu_src_zip_file}'
+    libharu_src_url = f'https://github.com/libharu/libharu/archive/refs/tags/{libharu_src_zip_file}'
+    if not libharu_src_zip_pathfile.exists():
+        print( f'Request libharu source zip file... : {libharu_src_url}')
+        r = requests.get( libharu_src_url )
+        with libharu_src_zip_pathfile.open( 'wb' ) as file:
+            file.write( r.content )
 
-inner_root_path = FindSingleRootDirectoryInZip( libharu_src_zip_pathfile )
-src_path = script_path / inner_root_path
+    inner_root_path = FindSingleRootDirectoryInZip( libharu_src_zip_pathfile )
+    src_path = iScriptPath / inner_root_path
 
-# Unzip libharu source files
-if not src_path.exists():
-    print( f'Extract libharu zip file... : {libharu_src_zip_pathfile}')
-    with zipfile.ZipFile( libharu_src_zip_pathfile, 'r' ) as zip_ref:
-        zip_ref.extractall( script_path )
+    # Unzip libharu source files
+    if not src_path.exists():
+        print( f'Extract libharu zip file... : {libharu_src_zip_pathfile}')
+        with zipfile.ZipFile( libharu_src_zip_pathfile, 'r' ) as zip_ref:
+            zip_ref.extractall( iScriptPath )
 
-if not src_path.exists():
-    print( Fore.RED + f'libharu src dir doesn\'t exist: {src_path}' )
-    sys.exit( 8 )
+    if not src_path.exists():
+        raise FileNotFoundError( Fore.RED + f'libharu src dir doesn\'t exist: {src_path}' )
+
+    return src_path
 
 #---
 #--- Download/Unzip cmake source files (if not already in the PATH)
 #---
 
-cmake_cmd = [ 'cmake' ]
+def DownloadAndUnzip_CMakeSources( iPlatform: str, iIntermediatePath: Path ) -> list[str]:
+    cmake_cmd = [ 'cmake' ]
 
-if shutil.which( cmake_cmd[0] ) is None:
+    if shutil.which( cmake_cmd[0] ) is not None:
+        return cmake_cmd
+
     cmake_version = '3.23.2'
-    if gOperatingSystem == 'windows':
+    if iPlatform == 'windows':
         cmake_zip_file = f'cmake-{cmake_version}-windows-x86_64.zip'
-    elif gOperatingSystem == 'darwin':
+    elif iPlatform == 'darwin':
         cmake_zip_file = f'cmake-{cmake_version}-macos10.10-universal.tar.gz'
 
     # Download cmake source files
-    cmake_zip_pathfile = intermediate_path / cmake_zip_file
+    cmake_zip_pathfile = iIntermediatePath / cmake_zip_file
     cmake_url = f'https://github.com/Kitware/CMake/releases/download/v{cmake_version}/{cmake_zip_file}'
     if not cmake_zip_pathfile.exists():
         print( f'Request cmake zip file... : {cmake_url}')
@@ -94,27 +105,36 @@ if shutil.which( cmake_cmd[0] ) is None:
             file.write( r.content )
 
     inner_root_path = FindSingleRootDirectoryInZip( cmake_zip_pathfile )
-    cmake_path = intermediate_path / inner_root_path
+    cmake_path = iIntermediatePath / inner_root_path
 
     # Unzip cmake source files
     if not cmake_path.exists():
         print( f'Extract cmake zip file... : {cmake_zip_pathfile}')
         with zipfile.ZipFile( cmake_zip_pathfile, 'r' ) as zip_ref:
-            zip_ref.extractall( intermediate_path )
+            zip_ref.extractall( iIntermediatePath )
 
     #-
 
     # Check the cmake binary exists
-    if gOperatingSystem == 'windows':
+    if iPlatform == 'windows':
         cmake_pathfile = cmake_path / 'bin' / 'cmake.exe'
-    elif gOperatingSystem == 'darwin':
+    elif iPlatform == 'darwin':
         cmake_pathfile = cmake_path / 'bin' / 'cmake'
 
     if not cmake_pathfile.exists():
-        print( Fore.RED + 'cmake file doesn\'t exist, add it to the current directory or install it' )
-        sys.exit( 35 )
+        raise FileNotFoundError( Fore.RED + 'cmake file doesn\'t exist, add it to the current directory or install it' )
 
     cmake_cmd = [ str( cmake_pathfile ) ]
+
+    return cmake_cmd
+
+#---
+#--- Download
+#---
+
+src_path = DownloadAndUnzip_LibharuSources( script_path, intermediate_path )
+
+cmake_cmd = DownloadAndUnzip_CMakeSources( gOperatingSystem, intermediate_path )
 
 #---
 #--- Define all configuration parameters
@@ -134,7 +154,7 @@ elif gOperatingSystem == 'darwin':
 
 #-
 
-# final_*path are the ones used in the ue .Build.cs file
+# final_*_path are the ones used in the ue .Build.cs file
 if gOperatingSystem == 'windows':
     final_include_path = script_path / 'include' / 'win64' / 'vs2022'
     final_lib_path = script_path / 'lib' / 'win64' / 'vs2022'
@@ -144,54 +164,25 @@ elif gOperatingSystem == 'darwin':
 
 #-
 
-# Get the thirdparty ue5 directory
-if gOperatingSystem == 'windows':
-    ue_thirdparty_path = Path( 'C:/' ) / 'Epic Games' / 'UE_5.0' / 'Engine' / 'Source' / 'ThirdParty'
-    if not ue_thirdparty_path.exists():
-        ue_thirdparty_path = Path( 'D:/' ) / 'Epic Games' / 'UE_5.0' / 'Engine' / 'Source' / 'ThirdParty'
-elif gOperatingSystem == 'darwin':
-    ue_thirdparty_path = Path( '/' ) / 'Users' / 'Shared' / 'Epic Games' / 'UE_5.0' / 'Engine' / 'Source' / 'ThirdParty'
-
-if not ue_thirdparty_path.exists():
-    print( Fore.RED + f'ue5 thirdparty dir doesn\'t exist: {ue_thirdparty_path}' )
-    sys.exit( 10 )
-
-#-
-
 # Get the zlib/libpng stuff from ue5 thirdparty
-if gOperatingSystem == 'windows':
-    zlib = {
-        'include' : ue_thirdparty_path / 'zlib' / 'v1.2.8' / 'include' / 'Win64' / 'VS2015',
-        'lib'     : ue_thirdparty_path / 'zlib' / 'v1.2.8' / 'lib' / 'Win64-llvm' / 'Release' / 'zlibstatic.lib'
-    }
+zlib = {
+    'include' : Path( os.getenv( 'UE_THIRDPARTY_ZLIB_INCLUDE' ) ),
+    'lib'     : Path( os.getenv( 'UE_THIRDPARTY_ZLIB_LIB' ) ),
+}
 
-    libpng = {
-        'include' : ue_thirdparty_path / 'libPNG' / 'libPNG-1.5.2',
-        'lib'     : ue_thirdparty_path / 'libPNG' / 'libPNG-1.5.2' / 'lib' / 'Win64-llvm' / 'Release' / 'libpng15_static.lib'
-    }
-elif gOperatingSystem == 'darwin':
-    zlib = {
-        'include' : ue_thirdparty_path / 'zlib' / 'v1.2.8' / 'include' / 'Mac',
-        'lib'     : ue_thirdparty_path / 'zlib' / 'v1.2.8' / 'lib' / 'Mac' / 'libz.a'
-    }
-
-    libpng = {
-        'include' : ue_thirdparty_path / 'libPNG' / 'libPNG-1.5.27',
-        'lib'     : ue_thirdparty_path / 'libPNG' / 'libPNG-1.5.27' / 'lib' / 'Mac' / 'libpng.a'
-    }
+libpng = {
+    'include' : Path( os.getenv( 'UE_THIRDPARTY_LIBPNG_INCLUDE' ) ),
+    'lib'     : Path( os.getenv( 'UE_THIRDPARTY_LIBPNG_LIB' ) ),
+}
 
 if not zlib['include'].exists():
-    print( Fore.RED + f'zlib include dir doesn\'t exist: {zlib["include"]}' )
-    sys.exit( 20 )
+    raise FileNotFoundError( Fore.RED + f'zlib include dir doesn\'t exist: {zlib["include"]}' )
 if not zlib['lib'].exists():
-    print( Fore.RED + f'zlib lib file doesn\'t exist: {zlib["lib"]}' )
-    sys.exit( 21 )
+    raise FileNotFoundError( Fore.RED + f'zlib lib file doesn\'t exist: {zlib["lib"]}' )
 if not libpng['lib'].exists():
-    print( Fore.RED + f'libpng lib dir doesn\'t exist: {libpng["include"]}' )
-    sys.exit( 22 )
+    raise FileNotFoundError( Fore.RED + f'libpng lib dir doesn\'t exist: {libpng["include"]}' )
 if not libpng['lib'].exists():
-    print( Fore.RED + f'libpng lib file doesn\'t exist: {libpng["lib"]}' )
-    sys.exit( 23 )
+    raise FileNotFoundError( Fore.RED + f'libpng lib file doesn\'t exist: {libpng["lib"]}' )
 
 #---
 
@@ -231,7 +222,7 @@ print( Fore.GREEN + f'{"configuration":20}: {configuration}' )
 print( 'Everything\'s ok ? [Y/n]: ' )
 choice = input().lower()
 if choice not in [ 'yes', 'y', '' ]:
-    sys.exit( 50 )
+    sys.exit()
 
 #---
 #---
