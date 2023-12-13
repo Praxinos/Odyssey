@@ -42,6 +42,7 @@ public:
 
 private:
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
+    void OnPlayerPlay();
     void OnPlayerStop();
 
 public:

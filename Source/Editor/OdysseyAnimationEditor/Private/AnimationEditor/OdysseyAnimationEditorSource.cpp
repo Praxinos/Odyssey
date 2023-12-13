@@ -47,6 +47,7 @@ FOdysseyAnimationEditorSource::Activate()
 
 	//Seek at current frame 
     mPlayer->SeekToFrame(mAnimation->CurrentFrame);
+	mPlayer->OnPlay().AddRaw(this, &FOdysseyAnimationEditorSource::OnPlayerPlay);
 	mPlayer->OnStop().AddRaw(this, &FOdysseyAnimationEditorSource::OnPlayerStop);
 
 	mAnimation->OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditorSource::OnCurrentFrameChanged);
@@ -57,6 +58,8 @@ FOdysseyAnimationEditorSource::Activate()
 void
 FOdysseyAnimationEditorSource::Inactivate()
 {
+	
+	mPlayer->OnPlay().RemoveAll(this);
 	mPlayer->OnStop().RemoveAll(this);
 	mPlayer->Stop();
 	mPlayer->SetAnimation(nullptr);
@@ -141,11 +144,21 @@ FOdysseyAnimationEditorSource::OnCurrentFrameChanged(UOdysseyAnimation* iAnimati
 }
 
 void
+FOdysseyAnimationEditorSource::OnPlayerPlay()
+{
+	if (!mAnimation)
+		return;
+
+	mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+}
+
+void
 FOdysseyAnimationEditorSource::OnPlayerStop()
 {
 	if (!mAnimation)
 		return;
 
+	mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
 	mPlayer->SeekToFrame(mAnimation->CurrentFrame);
 }
 

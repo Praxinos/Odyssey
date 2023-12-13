@@ -32,14 +32,6 @@ class ODYSSEYANIMATIONPLAYER_API UOdysseyAnimationPlayer
 {
 	GENERATED_BODY()
 
-//TODO: Events
-// - Animation Changed
-// - Texture Changed
-// - FramesPerSecond Changed
-// - OnSeek Changed
-// - OnPlay Changed
-// - OnPause Changed
-// - OnStop Changed
 public:
 	//Events
 	FSimpleMulticastDelegate& OnAnimationChanged();
