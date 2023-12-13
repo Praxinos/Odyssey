@@ -20,6 +20,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() override { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
     public:
         virtual ~FOdysseyVectorSegmentCubic();
@@ -214,7 +215,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
 
         virtual ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
         ::ULIS::FVec2D* GetBezier();
-        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
+
 
         FOdysseyVectorOffsetCurveCubic* GetOffsetCurve( uint32 iID );
 

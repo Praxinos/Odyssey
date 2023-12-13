@@ -836,6 +836,7 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
 /*
         FOdysseyVectorComputer& mainComputer = FOdysseyVectorComputer::GetMainComputer();
 
+
         mainComputer.Run( [ this
                           , &ymin
                           , &ymax

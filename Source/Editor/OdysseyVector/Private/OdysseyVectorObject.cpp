@@ -313,11 +313,9 @@ FOdysseyVectorObject::Copy()
 {
     FOdysseyVectorObject* objectCopy = CopyShape();
 
-   // TODO, update matrices once we get a BLContext object
-
     if( objectCopy )
     {
-        CopySettings( objectCopy ); // we need the matrices to properly import the child
+        CopySettings( objectCopy );
 
         // recurse
         for( FOdysseyVectorObject *child : mChildrenList )
@@ -782,6 +780,7 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild
 {
     FOdysseyVectorObject* formerParent = iFosterChild->GetParent();
     FOdysseyVectorObject* previousChild = formerParent->GetPreviousChild( iFosterChild );
+
     uint32 removalFlags = iFosterChild->GetParent()->RemoveChild( iFosterChild );
 
     // removal succeeded

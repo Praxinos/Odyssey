@@ -59,6 +59,7 @@ FOdysseyVectorOffsetCurveCubic::GetPointAt( double iT )
         }
     }
 
+    // then if nothing was found, we check in all fragments
     for( int i = 0; i < fragmentCount; i++ )
     {
         int n = ( i + 1 ) % fragmentCount;

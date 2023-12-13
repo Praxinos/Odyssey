@@ -29,6 +29,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID );
 
        /**
          * @brief function to allocate a new segment.
@@ -174,7 +175,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         void SetPaintingReady( bool iIsPaintingReady );
         bool IsPaintingReady();
-        virtual bool HasBaseClass( uint32 iBaseClassID );
+
         virtual bool Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData ) = 0;
         virtual bool Pick( double iX, double iY, double iRadius ) = 0;
         ::ULIS::FVec2D GetFractionCacheStartPointInParent();

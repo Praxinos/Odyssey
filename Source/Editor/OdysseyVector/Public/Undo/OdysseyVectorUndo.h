@@ -193,12 +193,12 @@ class ODYSSEYVECTOR_API FSnapshotObject
         virtual bool Restore();
 
     protected:
-        FSnapshotBucket mForegroundBucketSnapshot;
-        FSnapshotBucket mBackgroundBucketSnapshot;
         uint64 mSnapshotFlags;
         FOdysseyVectorObject* mObject;
         FOdysseyVectorObject* mParent;
         FOdysseyVectorObject* mPreviousChild;
+        FSnapshotBucket mForegroundBucketSnapshot;
+        FSnapshotBucket mBackgroundBucketSnapshot;
         std::vector<FSnapshotObject*> mChildrenSnapshotArray;
         double mTranslationX;
         double mTranslationY;

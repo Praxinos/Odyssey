@@ -16,6 +16,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubicGap : public FOdysseyVectorSeg
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() override { return mStaticClass; };
+        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
 
     public:
         virtual ~FOdysseyVectorSegmentCubicGap();
@@ -35,7 +36,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubicGap : public FOdysseyVectorSeg
          * @brief Update cached data for this segment.
          */
         virtual void Update() override;
-        virtual bool HasBaseClass( uint32 iBaseClassID ) override;
+
 
     private:
         FOdysseyVectorGroupPaint* mPaintgroup;

@@ -488,7 +488,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void ApplyMatrix( BLMatrix2D& iMatrix );
 
 
-protected:
+    protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
         virtual void DrawShape ( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ){};
