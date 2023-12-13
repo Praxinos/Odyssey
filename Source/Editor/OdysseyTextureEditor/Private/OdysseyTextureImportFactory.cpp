@@ -21,7 +21,7 @@ UOdysseyTextureImportFactory::UOdysseyTextureImportFactory( const FObjectInitial
     ImportPriority = 101; //Default other factories importing textures are at 100
     SupportedClass = UTexture2D::StaticClass();
 
-    Formats.Add(TEXT("psdfix;Texture"));
+    Formats.Add(TEXT("psd;Texture"));
 }
 
 bool UOdysseyTextureImportFactory::ConfigureProperties()
