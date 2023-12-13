@@ -262,6 +262,7 @@ if architecture:
 
 if gOperatingSystem == 'darwin':
     cmake_args += [ '-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15' ]
+    cmake_args += [ '-CMAKE_OSX_ARCHITECTURES=x86_64;arm64' ]
 
 cmake_args += [
     '-DCMAKE_INSTALL_PREFIX=' + str( install_path ),
@@ -312,4 +313,5 @@ if lib_to_remove.exists():
 #---
 
 print()
-print( Fore.GREEN + 'Don\'t forget to check/update .cs file with the path(s)' )
+print( Fore.YELLOW + 'Don\'t forget to check/update .cs file with the path(s)' )
+print()
