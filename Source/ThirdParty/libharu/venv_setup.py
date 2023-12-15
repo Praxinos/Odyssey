@@ -22,8 +22,12 @@ import sys
 
 #---
 
+def ConvertCommandToShell( iCommand: list[str] ) -> str:
+    return ' '.join( f'"{argument}"' if ' ' in argument else argument for argument in iCommand )
+
 def _RunCommand( iCommand ):
-    completed_process = subprocess.run( iCommand, capture_output=True, text=True )
+    command = ConvertCommandToShell( iCommand )
+    completed_process = subprocess.run( command, shell=True, capture_output=True, text=True )
     if completed_process.stdout:
         print( completed_process.stdout )
 
@@ -67,9 +71,10 @@ def _CreateAndUpgradeVenv():
 
     print()
     print( f'Now, activate the virtual environement with: ' )
-    print( '\tcmd       : ' + '\033[32m' + f'{venv_activation[0]}' + '\033[0m' )           # colorama is not imported here, so hardcode values
+    venv_activation_str = ConvertCommandToShell( venv_activation )
+    print( '\tcmd       : ' + '\033[32m' + f'{venv_activation_str}' + '\033[0m' )           # colorama is not imported here, so hardcode values
     if _IsWindows():
-        print( '\tpowershell: ' + '\033[32m' + f'{venv_activation[0].replace( "activate.bat", "Activate.ps1" )}' + '\033[0m' )
+        print( '\tpowershell: ' + '\033[32m' + f'{venv_activation_str.replace( "activate.bat", "Activate.ps1" )}' + '\033[0m' )
 
     print( f'Then, once in the venv, execute your command again.' )
 
