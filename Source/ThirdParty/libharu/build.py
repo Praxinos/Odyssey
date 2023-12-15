@@ -270,7 +270,9 @@ if architecture:
 
 if IsMacOSX():
     cmake_args += [ '-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15' ]
-    cmake_args += [ '-CMAKE_OSX_ARCHITECTURES=x86_64;arm64' ]
+    cmake_args += [ '-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64' ]
+    cmake_args += [ '-DCMAKE_C_COMPILER=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc' ]
+    cmake_args += [ '-DCMAKE_CXX_COMPILER=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++' ]
 
 cmake_args += [
     '-DCMAKE_INSTALL_PREFIX=' + str( install_path ),
