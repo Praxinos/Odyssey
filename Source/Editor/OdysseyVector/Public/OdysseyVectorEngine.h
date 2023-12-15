@@ -16,12 +16,11 @@
 
 typedef struct _FHorizontalLine
 {
+    int32 y;
     int32 x0;
-    int32 y0;
     double u0;
     double v0;
     int32 x1;
-    int32 y1;
     double u1;
     double v1;
     int inited;
@@ -268,30 +267,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                        , uint32 iImageWidth
                        , uint32 iImageHeight );
 
-        void TraceHorizontalLine ( int32 iLineNumber
-                                 , double iOpacity
-                                 , int8*  iPixelData
-                                 , uint32 iImageWidth
-                                 , uint32 iImageHeight
-                                 , int32  iBitsPerPixel
-                                 , const FColor& iColor
-                                 , int8*  iBrushPixelData
-                                 , uint32 iBrushWidth
-                                 , uint32 iBrushHeight
-                                 , int32  iBrushBitsPerPixel
-                                 , bool   iBrushAlphaOnly );
-        void DrawPolygon( ::ULIS::FVec2I* iPoint
-                        , double* iU
-                        , double* iV
+        void DrawPolygon( const  ::ULIS::FVec2I* iPoint
+                        , const  double* iU
+                        , const  double* iV
                         , uint32 pointCount
                         , double iOpacity
-                        , int8*  iImagePixelData
+                        , const  int8* iImagePixelData
                         , uint32 iImageWidth
                         , uint32 iImageHeight
                         , int32  iImageBitsPerPixel
-                        , const FColor& iColor
+                        , const  FColor& iColor
                         // temp
-                        , int8*  iBrushPixelData
+                        , const  int8* iBrushPixelData
                         , uint32 iBrushWidth
                         , uint32 iBrushHeight
                         , int32  iBrushBitsPerPixel

@@ -1,6 +1,8 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorPath.h"
-//#include <future>
+#include "OdysseyVectorComputer.h"
+#include <future>
+#include <execution>
 
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
@@ -514,7 +516,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
                     if( mHorizontalLineBuffer[y].inited == 0 )
                     {
                         mHorizontalLineBuffer[y].inited = 1;
-
+                        mHorizontalLineBuffer[y].y  = y;
                         mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
                         mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
                         mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
@@ -569,7 +571,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
                     if( mHorizontalLineBuffer[y].inited == 0 )
                     {
                          mHorizontalLineBuffer[y].inited = 1;
-
+                         mHorizontalLineBuffer[y].y  = y;
                          mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
                          mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
                          mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
@@ -654,22 +656,20 @@ struct _EngineTexture
 };
 */
 
-void
-FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
-                                          , double iOpacity
-                                          , int8*  iImagePixelData
-                                          , uint32 iImageWidth
-                                          , uint32 iImageHeight
-                                          , int32  iImageBitsPerPixel
-                                          , const  FColor& iColor
-                                          // Temp
-                                          , int8*  iBrushPixelData
-                                          , uint32 iBrushWidth
-                                          , uint32 iBrushHeight
-                                          , int32  iBrushBitsPerPixel
-                                          , bool   iBrushAlphaOnly )
+static void TraceHorizontalLine ( const FHorizontalLine *hline
+                                , double iOpacity
+                                , const int8*  iImagePixelData
+                                , uint32 iImageWidth
+                                , uint32 iImageHeight
+                                , int32  iImageBitsPerPixel
+                                , const  FColor& iColor
+                                    // Temp
+                                , const int8*  iBrushPixelData
+                                , uint32 iBrushWidth
+                                , uint32 iBrushHeight
+                                , int32  iBrushBitsPerPixel
+                                , bool   iBrushAlphaOnly )
 {
-    FHorizontalLine *hline = &mHorizontalLineBuffer[iLineNumber];
     int32 x0 = hline->x0,
           x1 = hline->x1;
     double u0 = hline->u0;
@@ -681,7 +681,7 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
     double u = u0;
     double v = v0;
     double opacityFactor = iOpacity / 255.0f;
-    uint32 offset = ( iLineNumber * iImageWidth );
+    uint32 offset = ( hline->y * iImageWidth );
     int32 screenx = dx;
     unsigned char BR = iColor.R, BG = iColor.G, BB = iColor.B, BA = iColor.A;
 
@@ -713,8 +713,8 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
                         , iBrushHeight
                         , iBrushBitsPerPixel
                         , iBrushAlphaOnly
-                        , fmod(u,1.0f) // function call might slow things (maybe not that much, as fmod is declared inline)
-                        , fmod(v,1.0f) // function call might slow things (maybe not that much, as fmod is declared inline)
+                        , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
+                        , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
                         , BR
                         , BG
                         , BB
@@ -751,53 +751,20 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
         v += pv;
     }
 }
-/*
-void
-FOdysseyVectorEngine::DrawQuadThread( uint32 iProcessorID
-                                    , uint32 iProcessorCount
-                                    , int32  iFirstLine
-                                    , int32  iLastLine
-                                    , double iOpacity
-                                    , int8*  iPixelData
-                                    , int32  iBitsPerPixel
-                                    // Temp
-                                    , int8*  iBrushPixelData
-                                    , uint32 iBrushWidth
-                                    , uint32 iBrushHeight
-                                    , int32  iBrushBitsPerPixel )
-{
-    for( int i = iFirstLine + iProcessorID; i <= iLastLine ; i += iProcessorCount )
-    {
-        if( mHorizontalLineBuffer[i].inited == 2 )
-        {
-            TraceHorizontalLine( i
-                               , iOpacity
-                               , iPixelData
-                               , iBitsPerPixel
-                               , iBrushPixelData
-                               , iBrushWidth
-                               , iBrushHeight
-                               , iBrushBitsPerPixel );
-        }
-
-        mHorizontalLineBuffer[i].inited = 0;
-    }
-}
-*/
 
 void
-FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
-                                 , double* iU
-                                 , double* iV
+FOdysseyVectorEngine::DrawPolygon( const ::ULIS::FVec2I* iPoint
+                                 , const double* iU
+                                 , const double* iV
                                  , uint32 pointCount
                                  , double iOpacity
-                                 , int8*  iImagePixelData
+                                 , const int8*  iImagePixelData
                                  , uint32 iImageWidth
                                  , uint32 iImageHeight
                                  , int32  iImageBitsPerPixel
                                  , const FColor& iColor
                                  // temp
-                                 , int8*  iBrushPixelData
+                                 , const int8*  iBrushPixelData
                                  , uint32 iBrushWidth
                                  , uint32 iBrushHeight
                                  , int32  iBrushBitsPerPixel
@@ -834,147 +801,52 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
     if ( ymin <= ymax )
     {
 /*
-        FOdysseyVectorComputer& mainComputer = FOdysseyVectorComputer::GetMainComputer();
-
-
-        mainComputer.Run( [ this
-                          , &ymin
-                          , &ymax
-                          , &iOpacity
-                          , &iImagePixelData
-                          , &iImageWidth
-                          , &iImageHeight
-                          , &iImageBitsPerPixel
-                          , &iColor
-                          , &iBrushPixelData
-                          , &iBrushWidth
-                          , &iBrushHeight
-                          , &iBrushBitsPerPixel
-                          , &iBrushAlphaOnly ]( uint32 iProcessorID, uint32 iProcessorCount ) -> bool
+        std::for_each( std::execution::par_unseq
+                     , mHorizontalLineBuffer.begin() + ymin
+                     , mHorizontalLineBuffer.begin() + ymax + 1
+                     , [ &iOpacity
+                       , &iImagePixelData
+                       , &iImageWidth
+                       , &iImageHeight
+                       , &iImageBitsPerPixel
+                       , &iColor
+                       , &iBrushPixelData
+                       , &iBrushWidth
+                       , &iBrushHeight
+                       , &iBrushBitsPerPixel
+                       , &iBrushAlphaOnly ]( FHorizontalLine& line )
+                       {
+                          if( line.inited == 2 )
                           {
-                              for( int i = ymin + iProcessorID; i <= ymax ; i += iProcessorCount )
+                              if ( ( line.x1 >= 0 ) && ( line.x0 < (int32)iImageWidth ) )
                               {
-                                  if( mHorizontalLineBuffer[i].inited == 2 )
-                                  {
-                                      TraceHorizontalLine( i
-                                                         , iOpacity
-                                                         , iImagePixelData
-                                                         , iImageWidth
-                                                         , iImageHeight
-                                                         , iImageBitsPerPixel
-                                                         , iColor
-                                                         , iBrushPixelData
-                                                         , iBrushWidth
-                                                         , iBrushHeight
-                                                         , iBrushBitsPerPixel
-                                                         , iBrushAlphaOnly );
-                                  }
-
-                                  mHorizontalLineBuffer[i].inited = 0;
-
-                                  if( i == ymax )
-                                  {
-                                      return true;
-                                  }
+                                   TraceHorizontalLine( &line
+                                                      , iOpacity
+                                                      , iImagePixelData
+                                                      , iImageWidth
+                                                      , iImageHeight
+                                                      , iImageBitsPerPixel
+                                                      , iColor
+                                                      , iBrushPixelData
+                                                      , iBrushWidth
+                                                      , iBrushHeight
+                                                      , iBrushBitsPerPixel
+                                                      , iBrushAlphaOnly );
                               }
-
-                              return false;
-                          } );
-*/
-/*
-        std::vector<std::future<void>> threads;
-
-//mProcessorCount = 2;
-
-        threads.resize( mProcessorCount );
-
-        int totalThreads = ( ymax - ymin  + 1 ) < (int) mProcessorCount ? ( ymax - ymin  + 1 ) :  (int)mProcessorCount;
-
-        for( int32 i = 0; i < totalThreads; i++ )
-        //for( uint32 i = 0; i < threads.size(); i++ )
-        {
-            threads[i] = std::async( std::launch::async
-                                    , [ this
-                                      , &ymin
-                                      , &ymax
-                                      , &iOpacity
-                                      , &iPixelData
-                                      , &iBitsPerPixel
-                                      , &iBrushPixelData
-                                      , &iBrushWidth
-                                      , &iBrushHeight
-                                      , &iBrushBitsPerPixel]( uint32 iProcessorID, uint32 iProcessorCount )
-                                      {
-
-                                          FGenericPlatformProcess::SetThreadAffinityMask( (uint64) 1 << iProcessorID );
-
-                                          for( int i = ymin + iProcessorID; i <= ymax ; i += iProcessorCount )
-                                          {
-                                              if( mHorizontalLineBuffer[i].inited == 2 )
-                                              {
-                                                    TraceHorizontalLine( i
-                                                                     , iOpacity
-                                                                     , iPixelData
-                                                                     , iBitsPerPixel
-                                                                     , iBrushPixelData
-                                                                     , iBrushWidth
-                                                                     , iBrushHeight
-                                                                     , iBrushBitsPerPixel );
-                                              }
-
-                                              mHorizontalLineBuffer[i].inited = 0;
-                                          }
-                                      }
-                                  , i
-                                  , mProcessorCount );
-        }
-
-        for( uint32 i = 0; i < (uint32)totalThreads; i++ )
-        {
-            threads[i].wait();
-        }
-*/
-/*
-        int32 lineCount = ( ymax - ymin ) + 1;
-
-        ParallelFor( lineCount
-                  , [ this
-                    , &ymin
-                    , &iOpacity
-                    , iPixelData
-                    , &iBitsPerPixel
-                    , iBrushPixelData
-                    , &iBrushWidth
-                    , &iBrushHeight
-                    , &iBrushBitsPerPixel ]( int32 iIndex )
-                      {
-                          int32 lineID = iIndex + ymin;
-
-                          if( mHorizontalLineBuffer[lineID].inited == 2 )
-                          {
-                              TraceHorizontalLine( lineID
-                                                 , iOpacity
-                                                 , iPixelData
-                                                 , iBitsPerPixel
-                                                 , iBrushPixelData
-                                                 , iBrushWidth
-                                                 , iBrushHeight
-                                                 , iBrushBitsPerPixel );
                           }
 
-                          mHorizontalLineBuffer[lineID].inited = 0;
-                      } );
+                           line.inited = 0;
+                       } );
 */
 
     // Single CPU version. The one that actually works.
-
         for ( int i = ymin; i <= ymax; i++ )
         {
             if( mHorizontalLineBuffer[i].inited == 2 )
             {
                 if( mHorizontalLineBuffer[i].x1 >= 0 )
                 {
-                    TraceHorizontalLine( i
+                    TraceHorizontalLine( &mHorizontalLineBuffer[i]
                                        , iOpacity
                                        , iImagePixelData
                                        , iImageWidth

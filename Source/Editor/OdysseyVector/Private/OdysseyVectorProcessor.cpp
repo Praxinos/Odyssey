@@ -25,6 +25,23 @@ FOdysseyVectorProcessor::Run()
 
     while( mComputer->mRunning )
     {
+        //UE_LOG(LogTemp, Warning, TEXT("waiting:%d"), mProcessorID );
 
+        mComputer->mCondition.wait(lock, [this] { return mComputer->mProcessing & ( 1 << mProcessorID ); });
+
+        //UE_LOG(LogTemp, Warning, TEXT("executing!%d"), mProcessorID );
+
+        lock.unlock();
+        mComputer->mInstruction( mProcessorID, mComputer->mProcessorCount );
+        lock.lock();
+
+        mComputer->mProcessing &= ~(1 << mProcessorID);
+
+ //UE_LOG(LogTemp, Warning, TEXT("ending!%d"), mComputer->mProcessing );
+        if( mComputer->mProcessing == 0 )
+        {
+ //UE_LOG(LogTemp, Warning, TEXT("notifying!%d"), mProcessorID );
+            mComputer->mFinishedCondition.notify_one();
+        }
     }
 }

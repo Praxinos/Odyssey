@@ -18,7 +18,6 @@ FOdysseyVectorComputer::~FOdysseyVectorComputer()
 
 FOdysseyVectorComputer::FOdysseyVectorComputer()
     : mRunning ( true )
-    , mStarted ( false )
     , mInstruction ( nullptr )
 {
     mProcessorCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
@@ -35,6 +34,8 @@ FOdysseyVectorComputer::FOdysseyVectorComputer()
         // loop until thread as started
         while( mProcessorArray[i]->mRunning == false );
     }
+
+    FPlatformProcess::Sleep(0.3f);
 }
 
 uint32
@@ -46,32 +47,23 @@ FOdysseyVectorComputer::GetProcessorCount()
 void
 FOdysseyVectorComputer::Run( std::function<bool(uint32 iProcessorID,uint32 iProcessorCount)> iInstruction )
 {
-    std::unique_lock<std::mutex> lock( mMutex );
+    std::unique_lock<std::mutex> lock( mFinishedMutex );
 
     //mMutex.lock();
-    
 
-    mInstruction = iInstruction;
+
     
 //UE_LOG(LogTemp, Warning, TEXT("--- notifying all ---") );
 
-    mStarted = true;
-    mCondition.notify_all();
-/*
-    for( uint32 i = 0; i < mProcessorCount; i++ )
-    {
-        mProcessorArray[i]->mProcessedMutex.lock();
-        mProcessorArray[i]->mProcessedMutex.unlock();
-    }
-*/
-    //mMutex.unlock();
+    mMutex.lock();
 
-    /*while( mStarted == true )
-    {*/
-//UE_LOG(LogTemp, Warning, TEXT("before Finished")  );
-        mFinishedCondition.wait(lock);
-//UE_LOG(LogTemp, Warning, TEXT("after Finished")  );
-    /*}*/
+    mInstruction = iInstruction;
+    mProcessing = 0xFFFFFFFF >> ( 32 - mProcessorCount );
+    mCondition.notify_all();
+
+    mMutex.unlock();
+
+    mFinishedCondition.wait( lock, [this]{ return mProcessing == 0; } );
 }
 
 //static
