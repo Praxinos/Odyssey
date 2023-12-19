@@ -118,21 +118,21 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::StartPainting()
     IOdysseyViewportDrawingEditorAdapter::StartPainting();
 
     if (mPaintingTexture2DRenderTarget)
-        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::Paint()
 {
     IOdysseyViewportDrawingEditorAdapter::Paint();
     if ( mPaintingTexture2DRenderTarget )
-        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::FinishPainting()
 {
     IOdysseyViewportDrawingEditorAdapter::FinishPainting();
     if ( mPaintingTexture2DRenderTarget )
-        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
@@ -366,7 +366,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
         meshPaintBatchedElementParameters->ShaderParams.StampQuality = GetStampQuality();
     }
 
-    const ERHIFeatureLevel::Type featureLevel = mExtension->Component()->GetWorld()->FeatureLevel;
+    const ERHIFeatureLevel::Type featureLevel = mExtension->Component()->GetWorld()->GetFeatureLevel();
 
     FTextureRenderTargetResource* strokeRenderTargetResource = mStrokeBufferRenderTarget2D->GameThread_GetRenderTargetResource();
     FCanvas strokePaintCanvas(strokeRenderTargetResource, nullptr, 0, 0, 0, featureLevel);
@@ -638,5 +638,5 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::Tick(float iDelta)
         return;
 
     if ( mPaintingTexture2DRenderTarget )
-        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(mTexture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(mTexture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 }

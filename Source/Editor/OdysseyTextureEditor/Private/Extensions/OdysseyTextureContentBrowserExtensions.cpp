@@ -92,8 +92,7 @@ public:
             {
                 if (!warningDisplayed)
                 {
-                    FText Title = LOCTEXT("content-browser-extension.edit-texture.texture-already-opened-dialog.title", "Texture Already Opened");
-                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.texture-already-opened-dialog.message", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), &Title);
+                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.texture-already-opened-dialog.message", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), LOCTEXT("content-browser-extension.edit-texture.texture-already-opened-dialog.title", "Texture Already Opened"));
                     warningDisplayed = true;
                 }
 			    continue;
@@ -138,8 +137,7 @@ public:
 
             if( ( textureIt.GetIndex() != ( iTextures.Num() - 1 ) ) && ( !saveSuccess ) )
             {
-                FText Title = LOCTEXT("content-browser-extension.export-texture.cancel-dialog.title", "Save cancelled");
-                EAppReturnType::Type answer = FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("content-browser-extension.export-texture.cancel-dialog.message", "Continue the remaing files export ?"), &Title);
+                EAppReturnType::Type answer = FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("content-browser-extension.export-texture.cancel-dialog.message", "Continue the remaing files export ?"), LOCTEXT("content-browser-extension.export-texture.cancel-dialog.title", "Save cancelled"));
                 if( answer == EAppReturnType::Yes )
                 { 
                     continue;
@@ -169,8 +167,7 @@ public:
 
                 if( !extensionFound )
                 {
-                    FText Title = LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.title", "Invalid extension");
-                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.message", "The file extension or the file format is not supported"), &Title);
+                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.message", "The file extension or the file format is not supported"), LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.title", "Invalid extension"));
                     continue;
                 }
 

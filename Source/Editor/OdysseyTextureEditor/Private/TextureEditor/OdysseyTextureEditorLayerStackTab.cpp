@@ -169,8 +169,7 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 
         if( !extensionFound )
         {
-            FText Title = LOCTEXT("export-texture-to-os.invalid-extension-dialog.title", "Invalid extension");
-            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("export-texture-to-os.invalid-extension-dialog.message", "The file extension or the file format is not supported"), &Title);
+            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("export-texture-to-os.invalid-extension-dialog.message", "The file extension or the file format is not supported"), LOCTEXT("export-texture-to-os.invalid-extension-dialog.title", "Invalid extension"));
         }
         else
         {

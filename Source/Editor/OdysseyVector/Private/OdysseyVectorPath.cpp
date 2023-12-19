@@ -1726,7 +1726,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     {
         if( texture )
         {
-            const FColor* brushData = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
+            const FColor* brushData = static_cast<const FColor*>(texture->GetPlatformData()->Mips[0].BulkData.LockReadOnly());
             double startU = mBrush.Revert ? 1.0f : 0.0f;
 
             iChain.IterateSegments( [ this
@@ -1839,7 +1839,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 return false; // keep iterating
             } );
 
-            texture->PlatformData->Mips[0].BulkData.Unlock();
+            texture->GetPlatformData()->Mips[0].BulkData.Unlock();
         }
         else
         {

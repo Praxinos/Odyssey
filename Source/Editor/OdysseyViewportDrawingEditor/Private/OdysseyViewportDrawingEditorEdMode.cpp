@@ -111,7 +111,7 @@ bool FOdysseyViewportDrawingEditorEdMode::CapturedMouseMove(FEditorViewportClien
 
 bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 {
-	return GetWorld() ? GetWorld()->FeatureLevel >= ERHIFeatureLevel::SM5 : false;
+	return GetWorld() ? GetWorld()->GetFeatureLevel() >= ERHIFeatureLevel::SM5 : false;
 }
 
 void FOdysseyViewportDrawingEditorEdMode::OnResetViewMode()
@@ -191,8 +191,7 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 
     if( !UPhysicsSettings::Get()->bSupportUVFromHitResults )
     {
-        FText Title = LOCTEXT("editor-mode.no-collision-uv-support-window.title","CollisionUVNoSupport");
-        FMessageDialog::Open(EAppMsgType::Ok,LOCTEXT("editor-mode.no-collision-uv-support-window.message","'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."),&Title);
+        FMessageDialog::Open(EAppMsgType::Ok,LOCTEXT("editor-mode.no-collision-uv-support-window.message","'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."),LOCTEXT("editor-mode.no-collision-uv-support-window.title","CollisionUVNoSupport"));
     }
 }
 

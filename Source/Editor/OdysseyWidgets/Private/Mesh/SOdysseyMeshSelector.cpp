@@ -286,7 +286,7 @@ FReply SOdysseyMeshSelector::HandleMeshColorBlockMouseButtonDown( const FGeometr
         PickerArgs.bOnlyRefreshOnOk = false;
         PickerArgs.sRGBOverride = false;
         PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateSP(this, &SOdysseyMeshSelector::OnSetMeshColorFromColorPicker);
-        PickerArgs.InitialColorOverride = MeshSelector->GetMeshColor();
+        PickerArgs.InitialColor = MeshSelector->GetMeshColor();
         PickerArgs.ParentWidget = ColorBlockWidget;
         PickerArgs.OptionalOwningDetailsView = ColorBlockWidget;
         FWidgetPath ParentWidgetPath;

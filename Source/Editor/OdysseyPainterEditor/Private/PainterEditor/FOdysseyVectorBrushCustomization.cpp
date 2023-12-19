@@ -117,7 +117,7 @@ FOdysseyVectorBrushCustomization::FilterAsset( const struct FAssetData& InAssetD
     // It was the only way to have the content browser display the vector brushes onyl.
     // All other solutions I've tried using the FAssetPickerConfig.Filter didn't seem
     // to offer the possibility to filter a specific folder.
-    if( InAssetData.ObjectPath.ToString().Contains( vectorBrushesDir ) )
+    if( InAssetData.GetObjectPathString().Contains( vectorBrushesDir ) )
     {
         return false;
     }

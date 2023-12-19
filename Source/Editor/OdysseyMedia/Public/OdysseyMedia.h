@@ -6,9 +6,12 @@
 #include "CoreMinimal.h"
 
 #define DECLARE_ODYSSEY_MEDIA() \
-static const FGuid& StaticId() { static FGuid id = FGuid::NewGuid(); return id; } \
-virtual const FGuid& Id() override { return StaticId(); }
+static const FGuid& StaticId(); \
+virtual const FGuid& Id() override;
 
+#define IMPLEMENT_ODYSSEY_MEDIA(ClassName) \
+const FGuid& ClassName::StaticId() { static FGuid id = FGuid::NewGuid(); return id; } \
+const FGuid& ClassName::Id() { return StaticId(); }
 
 class ODYSSEYMEDIA_API IOdysseyMedia
 {

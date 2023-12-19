@@ -3,6 +3,8 @@
 
 #include "OdysseyMediaRaster.h"
 
+IMPLEMENT_ODYSSEY_MEDIA(FOdysseyMediaRaster)
+
 FOdysseyMediaRaster::~FOdysseyMediaRaster()
 {
 }

@@ -272,7 +272,7 @@ FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(UMeshComponent* MeshCompone
 
 	{
 		// Create a canvas for the render target and clear it to white
-		FCanvas Canvas(RenderTargetResource, nullptr, FGameTime(), GEditor->GetEditorWorldContext().World()->FeatureLevel);
+		FCanvas Canvas(RenderTargetResource, nullptr, FGameTime(), GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 		Canvas.Clear(FLinearColor::White);
 
 		TArray<FCanvasUVTri> TriList;

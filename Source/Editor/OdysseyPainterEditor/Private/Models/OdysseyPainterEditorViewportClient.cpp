@@ -228,7 +228,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
     // Draw HUD Surface
-    if( HUDTexture && HUDTexture->Resource )
+    if( HUDTexture && HUDTexture->GetResource() )
     {
         FTransform2D transformMinusCenter = FTransform2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter() * -1);
         FTransform2D transformAddHalfTexture = FTransform2D( FVector2D(texture->GetSurfaceWidth(), texture->GetSurfaceHeight()) / 2.f );
@@ -240,7 +240,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         if( mOdysseyPainterEditor->GetSelectedTool() && mOdysseyPainterEditor->GetSelectedTool()->GetHUD() )
             mOdysseyPainterEditor->GetSelectedTool()->GetHUD()->Draw( HUDSurface->Block().Get(), transform );
         
-        FCanvasTileItem tileItem(FVector2D(0, 0), HUDTexture->Resource, FVector2D(iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y), FLinearColor::White);
+        FCanvasTileItem tileItem(FVector2D(0, 0), HUDTexture->GetResource(), FVector2D(iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y), FLinearColor::White);
         tileItem.BatchedElementParameters = batchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
         result += ( 1 << 0 );

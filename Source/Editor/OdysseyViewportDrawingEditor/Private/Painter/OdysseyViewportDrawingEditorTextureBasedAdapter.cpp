@@ -49,8 +49,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
         mLastPoint = FVector2D( mCurrentStrokeRay.mPoint.x, mCurrentStrokeRay.mPoint.y);
     }
 
-    float thresholdX = mTexture->Resource->GetSizeX() / 5.f; //20% of texture Size
-    float thresholdY = mTexture->Resource->GetSizeY() / 5.f; //20% of texture Size
+    float thresholdX = mTexture->GetResource()->GetSizeX() / 5.f; //20% of texture Size
+    float thresholdY = mTexture->GetResource()->GetSizeY() / 5.f; //20% of texture Size
 
     if ((::FMath::Abs( float(mLastPoint.X) - mCurrentStrokeRay.mPoint.x ) > thresholdX || ::FMath::Abs(float(mLastPoint.Y) - mCurrentStrokeRay.mPoint.y) > thresholdY))
     {

@@ -177,7 +177,7 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
 {
     ::ULIS::FVec2D tangent = { 0.0f, 0.0f };
 
-    if( /*( mSegment == nullptr ) || */( iStraight == true ) )
+    if( /*( mSegment == nullptr ) || */ iStraight == true )
     {
         tangent =  ( iVertex == mVertex[0] ) ? mBezier[3] - mBezier[0]
                                              : mBezier[0] - mBezier[3];

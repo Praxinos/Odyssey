@@ -65,7 +65,7 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::InitializeRenderTarget()
     mSeamRenderTarget2D->AddToRoot();
 
     FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(mExtension->Component(), mExtension->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, texture, mPaintingTexture2DRenderTarget);
-	FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(texture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+	FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(texture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 }
 
 void
@@ -363,7 +363,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
         screenPaintBatchedElementParameters->ShaderParams.yScreenAxis = yScreenAxis;
     }
 
-    const ERHIFeatureLevel::Type featureLevel = mExtension->Component()->GetWorld()->FeatureLevel;
+    const ERHIFeatureLevel::Type featureLevel = mExtension->Component()->GetWorld()->GetFeatureLevel();
 
     FTextureRenderTargetResource* strokeRenderTargetResource = mStrokeBufferRenderTarget2D->GameThread_GetRenderTargetResource();
     FCanvas strokePaintCanvas(strokeRenderTargetResource, nullptr, 0, 0, 0, featureLevel);
@@ -619,7 +619,7 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
         return;
 
     if ( mPaintingTexture2DRenderTarget )
-        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(mTexture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(mTexture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
         
     if (!mLastKnownViewport)
         return;
@@ -636,19 +636,19 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::StartPainting()
     IOdysseyViewportDrawingEditorAdapter::StartPainting();
 
     if (mPaintingTexture2DRenderTarget)
-        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 }
 
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::Paint()
 {
     IOdysseyViewportDrawingEditorAdapter::Paint();
     if ( mPaintingTexture2DRenderTarget )
-        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 }
 
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::FinishPainting()
 {
     IOdysseyViewportDrawingEditorAdapter::FinishPainting();
     if ( mPaintingTexture2DRenderTarget )
-        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(GetTexture(), mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 }

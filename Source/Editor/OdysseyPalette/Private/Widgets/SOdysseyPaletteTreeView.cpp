@@ -94,10 +94,10 @@ SOdysseyPaletteTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& Allot
 
     if (mDisplayDropZone)
     {
-        if (!ItemsSource || ItemsSource->Num() <= 0)
+        if ( GetRootItems().Num() == 0 )
             return entryId;
 
-        TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(ItemsSource->Last()));
+        TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(GetRootItems().Last()));
         if (!rowWidget)
             return entryId;
 
@@ -170,10 +170,10 @@ SOdysseyPaletteTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragDrop
 	if ( !operationPalette)
 		return FReply::Unhandled();
 
-    if (!ItemsSource || ItemsSource->Num() <= 0)
+    if (GetRootItems().Num() == 0)
         return FReply::Unhandled();
 
-    TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(ItemsSource->Last()));
+    TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(GetRootItems().Last()));
     if (!rowWidget)
         return FReply::Unhandled();
 
@@ -215,7 +215,7 @@ SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
 	if ( !operationPalette)
 		return FReply::Unhandled();
 
-    TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(ItemsSource->Last()));
+    TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(GetRootItems().Last()));
     if (!rowWidget)
         return FReply::Unhandled();
     
@@ -492,7 +492,7 @@ SOdysseyPaletteTreeView::SelectAllEntries()
 
     //ItemsSource is the ListView::ItemsSource, which contains all displayed items, even deep children
     //It is NOT the same as TreeItemsSource or mRootEntries which only contain root elements
-    SetItemSelection(*ItemsSource, true);
+    SetItemSelection( SListView<UOdysseyPaletteEntry*>::GetItems(), true);
 }
 
 void

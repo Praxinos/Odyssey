@@ -365,8 +365,7 @@ SOdysseyViewportDrawingEditorMasterTab::OnTextureChanged(const FAssetData& iAsse
         UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
         if (texture != mExtension->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
         {
-            FText Title = LOCTEXT("master-tab.selected-texture-already-opened-window.title", "Selected Texture Already Opened");
-            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("master-tab.selected-texture-already-opened-window.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
+            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("master-tab.selected-texture-already-opened-window.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), LOCTEXT("master-tab.selected-texture-already-opened-window.title", "Selected Texture Already Opened"));
             return;
         }
 

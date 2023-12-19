@@ -564,8 +564,6 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 
 	bool displayWarning = true;
-	FText textureAlreadyOpenedTitle = LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened");
-	FText textureAlreadyOpenedMessage = LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture.");
 
 	//try to select the previously selected texture for the selected component
 	FInstanceTexturePaintSettings& texturePaintSettings = mComponentToTexturePaintSettingsMap.FindOrAdd(mComponent);
@@ -582,7 +580,7 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 		
 		if (displayWarning) //only display the Warning Message for the first texture
 		{
-			FMessageDialog::Open(EAppMsgType::Ok, textureAlreadyOpenedMessage, &textureAlreadyOpenedTitle);
+			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened"), LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."));
 			displayWarning = false;
 		}
 	}
@@ -601,7 +599,7 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 		{
 			if (displayWarning) //only display the Warning Message for the first texture
 			{
-				FMessageDialog::Open(EAppMsgType::Ok, textureAlreadyOpenedMessage, &textureAlreadyOpenedTitle);
+				FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened"), LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."));
 				displayWarning = false;
 			}
 			continue;

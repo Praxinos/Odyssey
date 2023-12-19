@@ -3,6 +3,8 @@
 
 #include "OdysseyMediaVector.h"
 
+IMPLEMENT_ODYSSEY_MEDIA(FOdysseyMediaVector)
+
 FOdysseyMediaVector::~FOdysseyMediaVector()
 {
 }
