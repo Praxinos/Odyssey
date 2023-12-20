@@ -1,7 +1,7 @@
 {
   "FileVersion": 3,
-  "Version": 8,
-  "VersionName": "0.8.53",
+  "Version": 9,
+  "VersionName": "0.9.53",
   "FriendlyName": "Epos",
   "Description": "2D Storyboard & Animatic plugin for Unreal Engine",
   "Category": "2D",
