@@ -7,9 +7,18 @@
 class FOdysseyAnimationEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyAnimationCellsContainer;
+class FOdysseyAnimationTimelineTool;
+class FOdysseyAnimationTimelineSelectionTool;
 
+enum class EOdysseyTimelineTool
+{
+    None,
+    Selection
+};
 class FOdysseyAnimationEditorTimeline
 {
+public:
+
 public:
     ~FOdysseyAnimationEditorTimeline();
     FOdysseyAnimationEditorTimeline(FOdysseyAnimationEditorExtension* iExtension);
@@ -18,6 +27,10 @@ public:
     void  Finalize();
 
 public:
+    TSharedPtr<FOdysseyAnimationTimelineTool> GetTool() const;
+    EOdysseyTimelineTool GetSelectedTool() const;
+    void SetSelectedTool(EOdysseyTimelineTool iTool);
+
     void ZoomIn();
     void ZoomOut();
 
@@ -36,7 +49,6 @@ public:
 
 public:
     //Events
-    FSimpleMulticastDelegate& OnSelectedFramesChanged();
     FSimpleMulticastDelegate& OnOffsetChanged();
     FSimpleMulticastDelegate& OnZoomChanged();
 
@@ -57,7 +69,9 @@ private:
 
     FSimpleMulticastDelegate mOnZoomChanged;
     FSimpleMulticastDelegate mOnOffsetChanged;
-    FSimpleMulticastDelegate mOnSelectedFramesChanged;
 
     TWeakPtr<FOdysseyAnimationCellsContainer> mCellsContainer; 
+
+    EOdysseyTimelineTool mSelectedTool;
+    TSharedPtr<FOdysseyAnimationTimelineSelectionTool> mSelectionTool;
 };

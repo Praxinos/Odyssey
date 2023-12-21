@@ -15,8 +15,8 @@ SOdysseyAnimationLayerImageTimeline::SOdysseyAnimationLayerImageTimeline()
     : mIsDraggingOver(false)
     , mDragState(kDrag_None)
     , mDragPosition(0)
-    , mIsSelectingFrames(false)
-	, mInteractiveFrameSelection(FInt32Range::Empty())
+    //, mIsSelectingFrames(false)
+	//, mInteractiveFrameSelection(FInt32Range::Empty())
 {
 }
 
@@ -58,7 +58,7 @@ SOdysseyAnimationLayerImageTimeline::Construct(
                     .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
                     .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
                 ]
-                + SVerticalBox::Slot()
+                /* + SVerticalBox::Slot()
                 .AutoHeight()
                 [
                     SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
@@ -67,7 +67,7 @@ SOdysseyAnimationLayerImageTimeline::Construct(
                     .OnSelectionStarted(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionStarted)
                     .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
                     .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
-                ]
+                ] */
             ]
         ]
         + SVerticalBox::Slot()
@@ -80,6 +80,48 @@ SOdysseyAnimationLayerImageTimeline::Construct(
 }
 
 FReply
+SOdysseyAnimationLayerImageTimeline::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+    FOdysseyAnimationTimelineTool::FMouseEventParams params =
+    {
+        iGeometry,
+        iEvent,
+        SharedThis(this),
+        FOdysseyAnimationTimelineTool::EMouseEventOrigin::Layer,
+        mLayer
+    };
+    return mExtension->Timeline()->GetTool()->OnMouseButtonDown(params);
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+    FOdysseyAnimationTimelineTool::FMouseEventParams params =
+    {
+        iGeometry,
+        iEvent,
+        SharedThis(this),
+        FOdysseyAnimationTimelineTool::EMouseEventOrigin::Layer,
+        mLayer
+    };
+    return mExtension->Timeline()->GetTool()->OnMouseMove(params);
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+{
+    FOdysseyAnimationTimelineTool::FMouseEventParams params =
+    {
+        iGeometry,
+        iEvent,
+        SharedThis(this),
+        FOdysseyAnimationTimelineTool::EMouseEventOrigin::Layer,
+        mLayer
+    };
+    return mExtension->Timeline()->GetTool()->OnDragDetected(params);
+}
+
+FReply
 SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
 	if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
@@ -88,6 +130,7 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
         if (frame == INDEX_NONE)
             return FReply::Unhandled();
 
+        //On Right click, select frames if none are selected yet
         FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
         if (selectedFrames.IsEmpty() || frame < selectedFrames.GetLowerBoundValue() ||  frame > selectedFrames.GetUpperBoundValue())
         {
@@ -111,10 +154,16 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
 		FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
     	return FReply::Handled();
 	}
-    else
+    
+    FOdysseyAnimationTimelineTool::FMouseEventParams params =
     {
-        mExtension->Timeline()->SetSelectedFrames(FInt32Range::Empty());
-    }
+        iGeometry,
+        iEvent,
+        SharedThis(this),
+        FOdysseyAnimationTimelineTool::EMouseEventOrigin::Layer,
+        mLayer
+    };
+    mExtension->Timeline()->GetTool()->OnMouseButtonUp(params);
 	return FReply::Unhandled();
 }
 
@@ -464,23 +513,23 @@ SOdysseyAnimationLayerImageTimeline::CanStaggerCell( int iFrame ) const
     return true;
 }
 
-FInt32Range
+/* FInt32Range
 SOdysseyAnimationLayerImageTimeline::GetSelectableFrames() const
 {
     return mExtension->Timeline()->GetSelectableFrames();
-}
+} */
 
 FInt32Range
 SOdysseyAnimationLayerImageTimeline::GetSelectedFrames() const
 {
-    if (mIsSelectingFrames)
-        return mInteractiveFrameSelection;
+    /* if (mIsSelectingFrames)
+        return mInteractiveFrameSelection;*/
 
     bool isCurrentLayer = mLayer->GetLayerStack()->CurrentLayer == mLayer;
 	return isCurrentLayer ? mExtension->Timeline()->GetSelectedFrames() : FInt32Range::Empty();
 }
 
-void
+/* void
 SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged(FInt32Range iSelectedFrames)
 {
 	mInteractiveFrameSelection = iSelectedFrames;
@@ -507,6 +556,7 @@ SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded(int iFrame)
 
     FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
 }
+*/
 
 FReply
 SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged()
@@ -747,11 +797,11 @@ SOdysseyAnimationLayerImageTimeline::IsCollapsed() const
     return mIsCollapsed.Get();
 }
 
-EVisibility
+/* EVisibility
 SOdysseyAnimationLayerImageTimeline::GetFrameSelectorVisibility() const
 {
     return mIsCollapsed.Get() ? EVisibility::Collapsed : EVisibility::Visible;
-}
+} */
 
 bool
 SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const

@@ -11,6 +11,12 @@ public:
     virtual ~IOdysseyMutation() {}
 
 public:
+    //Returns true if the mutation actually changes something
+    //Returns false if the mutation does nothing
+    //example : if we create a mutation to change a cell's length, but adjust the mutation later so that the length does not change
+    //          the mutation still exists even if it does nothing
+    virtual bool IsDirty() const { return true; }
+
     //Applies the mutation
     virtual void Apply() = 0;
 
@@ -22,7 +28,7 @@ class ODYSSEYCORE_API FOdysseyMutator
 {
 public:
     //Destructor
-    ~FOdysseyMutator();
+    virtual ~FOdysseyMutator();
 
     //Constructor
     FOdysseyMutator(UObject* iObject, const FString& iName, bool iGenerateUndo = true);
@@ -30,20 +36,26 @@ public:
 public:
     //Getters
     TSharedPtr<FOdysseyRootMutation> GetRootMutation() const;
+    bool IsDirty() const;
 
 public:
     //Setters
+    void AddMutation(TSharedPtr<IOdysseyMutation> iMutation);
+    void ApplyMutation(TSharedPtr<IOdysseyMutation> iMutation);
     void AddAndApplyMutation(TSharedPtr<IOdysseyMutation> iMutation);
     
     //Defines the current state as an intermediate state (non commited)
     //Allows for UI to change interactively while changing values
-    void Change();
+    virtual void Change();
 
     //Commits the current state as the definitive value
-    void Commit();
+    virtual void Commit();
 
-    //Aborts any change to go back to the original state
-    void Abort();
+    //Reverts the all the mutations stored by the mutator and resets the mutator
+    virtual void Revert();
+
+    //Reset the mutator, removing all mutations
+    virtual void Reset();
 
 private:
     UObject* mObject;
@@ -62,6 +74,9 @@ public:
     FSimpleDelegate& OnCommited();
 
 public:
+    //Applies the mutation
+    virtual bool IsDirty() const override;
+
     //Applies the mutation
     virtual void Apply() override;
 

@@ -11,7 +11,12 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellsMutator
     : public FOdysseyMutator
 {
 public:
+    virtual ~FOdysseyAnimationCellsMutator() {};
     FOdysseyAnimationCellsMutator(UObject* iOwner, TSharedPtr<FOdysseyAnimationCellsContainer> iContainer);
+
+public:
+    virtual void Commit() override;
+    virtual void Reset() override;
 
 public:
     void Add(TArray<TSharedPtr<FOdysseyAnimationCell>> iCells, int iIndex = INDEX_NONE);
@@ -25,6 +30,9 @@ public:
 
 private:
     TSharedPtr<FOdysseyAnimationCellsContainer> mContainer;
+
+    TSharedPtr<FOdysseySetCellsOffsetMutation> mOffsetMutation;
+    TMap<TSharedPtr<FOdysseyAnimationCell>, TSharedPtr<FOdysseySetCellLengthMutation>> mCellMutations;
 };
 
 class ODYSSEYANIMATION_API FOdysseyAddCellsMutation
@@ -69,9 +77,14 @@ class ODYSSEYANIMATION_API FOdysseySetCellLengthMutation
     : public IOdysseyMutation
 {
 public:
-    FOdysseySetCellLengthMutation(TSharedPtr<FOdysseyAnimationCellsContainer> iContainer, int iIndex, int iNewLength, int iOldLength);
+    FOdysseySetCellLengthMutation(TSharedPtr<FOdysseyAnimationCell> iCell, int iNewLength, int iOldLength);
 
 public:
+    void Set(int iNewLength);
+
+public:
+    virtual bool IsDirty() const override;
+    
     //Applies the mutation
     virtual void Apply() override;
 
@@ -79,8 +92,7 @@ public:
     virtual void Revert() override;
 
 public:
-    TSharedPtr<FOdysseyAnimationCellsContainer> mContainer;
-    int mIndex; //Index of the cells
+    TSharedPtr<FOdysseyAnimationCell> mCell;
     int mNewLength; //Index of the cells
     int mOldLength; //Index of the cells
 };
@@ -92,6 +104,11 @@ public:
     FOdysseySetCellsOffsetMutation(TSharedPtr<FOdysseyAnimationCellsContainer> iContainer, int iNewOffset, int iOldOffset);
     
 public:
+    void Set(int iNewOffset);
+
+public:
+    virtual bool IsDirty() const override;
+
     //Applies the mutation
     virtual void Apply() override;
 

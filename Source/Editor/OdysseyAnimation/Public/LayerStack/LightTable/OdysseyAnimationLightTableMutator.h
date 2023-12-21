@@ -9,6 +9,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationLightTableMutator
     : public FOdysseyMutator
 {
 public:
+    virtual ~FOdysseyAnimationLightTableMutator() {};
     FOdysseyAnimationLightTableMutator(TSharedPtr<FOdysseyAnimationLightTable> iLightTable);
 
 public:

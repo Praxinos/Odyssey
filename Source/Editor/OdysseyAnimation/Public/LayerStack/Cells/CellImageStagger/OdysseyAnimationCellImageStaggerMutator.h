@@ -11,6 +11,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageStaggerMutator
     : public FOdysseyMutator
 {
 public:
+    virtual ~FOdysseyAnimationCellImageStaggerMutator() {};
     FOdysseyAnimationCellImageStaggerMutator(UObject* iOwner, TSharedPtr<FOdysseyAnimationCellImageStagger> iCell);
 
 public:

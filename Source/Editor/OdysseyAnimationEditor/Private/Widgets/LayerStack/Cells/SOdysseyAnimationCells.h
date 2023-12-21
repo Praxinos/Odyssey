@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 class FOdysseyAnimationCell;
 /**
@@ -42,7 +43,10 @@ public:
     //SWidget overrides
 	virtual bool SupportsKeyboardFocus() const override;
     virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
-    FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent);
+    virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
+    virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
+    virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
+    virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
 
 private:
     void RequestRefresh();
@@ -73,6 +77,7 @@ private:
 private:
     //Widget Methods
     float GetOffset() const;
+    void UpdateHandlesVisibility();
 
     //EVisibility GetFrameSelectorVisibility() const;
 
@@ -96,9 +101,9 @@ private:
     void OnAddCellsHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
-    FReply OnCellsMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent);
-    FReply OnCellsMouseMove(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
-    FReply OnCellsMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
+    //FReply OnCellsMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    //FReply OnCellsMouseMove(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
+    //FReply OnCellsMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& MouseEvent);
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;
@@ -122,11 +127,15 @@ private:
 
 private:
     //Events structures
+    FVector2D mMousePosition;
     bool mIsRefreshPending;
     bool mIsRebuildPending;
-    bool mOffsettingLayer;
-    int  mOffset;
-    bool mEditingOffset;
+
+    TSharedPtr<FOdysseyAnimationCellsMutator> mCellsMutator;
+
+    bool mLockHandlesVisibility;
+    TSharedPtr<FOdysseyAnimationCell> mLengthHandleCell; //cell that can display its length handle
+    TArray<TSharedPtr<FOdysseyAnimationCell>> mTimingHandleCells; //cells that can display their timing handle
 
     struct FCellData
     {
@@ -140,26 +149,16 @@ private:
         int  mLength;
     };
     TArray<TSharedPtr<FCellData>> mCellsData;
-
-    struct
-    {
-        bool mIsDragDetected;
-        double mMousePosition;
-    } mLayerOffsetData;
-
     struct
     {
         TSharedPtr<FCellData> mCellData;
         double mMousePosition;
+        int mInitialLength;
     } mLengthHandleDragData;
 
     struct
     {
         TSharedPtr<FCellData> mCellData;
-        TArray<TSharedPtr<FCellData>> mEditedCellData;
-        int mFirstCellToRemove;
-        int mNumCellsToRemove;
-
         int mMinOffset;
         bool mHasMaxOffset;
         int mMaxOffset;
