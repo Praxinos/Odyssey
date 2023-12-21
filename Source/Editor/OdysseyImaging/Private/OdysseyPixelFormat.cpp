@@ -15,8 +15,6 @@ int TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat)
         case TSF_BGRE8:     return 4;
         case TSF_RGBA16:    return 8;
         case TSF_RGBA16F:   return 8;
-        case TSF_RGBA8:     return 4;
-        case TSF_RGBE8:     return 4;
         case TSF_Invalid:
         case TSF_MAX:
         default: break;
@@ -30,7 +28,6 @@ bool TextureSourceFormatNeedsConversionToULISFormat( ETextureSourceFormat iForma
     {
         case TSF_BGRE8:
         case TSF_RGBA16F:
-        case TSF_RGBE8:
             return true;
         default:
             break;
@@ -55,28 +52,6 @@ ConvertTextureSourceFormatToULISFormat( const uint8* iSrc, uint8* oDst, int iWid
                     int i = y * iWidth + x;
                     proxy.SetPointer(dst->PixelBits(x, y));
                     FLinearColor rgba = bgre[i].FromRGBE();
-                    proxy.SetRF(rgba.R);
-                    proxy.SetGF(rgba.G);
-                    proxy.SetBF(rgba.B);
-                }
-            }
-            delete dst;
-        }
-        break;
-
-        case TSF_RGBE8:
-        {
-            FColor* rgbe = (FColor*)(iSrc);
-            ::ULIS::FBlock* dst = new ::ULIS::FBlock(oDst, iWidth, iHeight, ::ULIS::Format_RGBF);
-            ::ULIS::FPixel proxy(oDst, ::ULIS::Format_RGBF);
-            for (int y = 0; y < iHeight; y++)
-            {
-                for (int x = 0; x < iWidth; x++)
-                {
-                    int i = y * iWidth + x;
-                    FColor bgre(rgbe[i].B, rgbe[i].G, rgbe[i].R, rgbe[i].A);
-                    proxy.SetPointer(dst->PixelBits(x, y));
-                    FLinearColor rgba = bgre.FromRGBE();
                     proxy.SetRF(rgba.R);
                     proxy.SetGF(rgba.G);
                     proxy.SetBF(rgba.B);
@@ -127,26 +102,6 @@ ConvertULISFormatToTextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWid
         }
         break;
 
-        case TSF_RGBE8:
-        {
-            ::ULIS::FBlock* src = new ::ULIS::FBlock((uint8*)iSrc, iWidth, iHeight, ::ULIS::Format_RGBF);
-            ::ULIS::FPixel proxy(iSrc, ::ULIS::Format_RGBF);
-            FColor* rgbe = (FColor*)(oDst);
-            for (int y = 0; y < iHeight; y++)
-            {
-                for (int x = 0; x < iWidth; x++)
-                {
-                    int i = y * iWidth + x;
-                    proxy.SetPointer(src->PixelBits(x, y));
-                    FLinearColor rgba(proxy.RF(), proxy.GF(), proxy.BF(), 1.0f);
-                    FColor bgre = rgba.ToRGBE();
-                    rgbe[i] = FColor(bgre.B, bgre.G, bgre.R, bgre.A);
-                }
-            }
-            delete src;
-        }
-        break;
-
         case TSF_RGBA16F:
         {
             FLinearColor* rgbaf = (FLinearColor*)(iSrc);
@@ -175,8 +130,6 @@ ConvertULISFormatToTextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWid
         case TSF_BGRE8:     ret = ::ULIS::Format_RGBF;      break;
         case TSF_RGBA16:    ret = ::ULIS::Format_RGBA16;    break;
         case TSF_RGBA16F:   ret = ::ULIS::Format_RGBAF;     break; //TODO: Change to RGBA16G ULIS FORMAT (RGBA half floating points 16 bits, see Unreal implementation)
-        case TSF_RGBA8:     ret = ::ULIS::Format_RGBA8;     break;
-        case TSF_RGBE8:     ret = ::ULIS::Format_RGBF;      break;
         case TSF_MAX:       ret = 0;                        break;
         default:            ret = 0;                        break;
     }
@@ -216,7 +169,6 @@ ETextureSourceFormat TextureSourceFormatForULISFormat( ::ULIS::eFormat iFormat )
         case ::ULIS::Format_G8:     ret = TSF_G8;       break;
         case ::ULIS::Format_G16:    ret = TSF_G16;      break;
         case ::ULIS::Format_BGRA8:  ret = TSF_BGRA8;    break;
-        case ::ULIS::Format_RGBA8:  ret = TSF_RGBA8;    break;
         case ::ULIS::Format_RGBA16: ret = TSF_RGBA16;   break;
         case ::ULIS::Format_RGBAF:  ret = TSF_RGBA16F;  break;
         default:                    ret = TSF_Invalid;  break;
