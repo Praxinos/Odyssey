@@ -235,7 +235,7 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
     // WheelBG
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId,
-                                AllottedGeometry.ToPaintGeometry( decal, draw_size ),
+                                AllottedGeometry.ToPaintGeometry( draw_size, FSlateLayoutTransform(1.0, TransformPoint(1.0, decal) ) ),
                                 WheelBG,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 FLinearColor( 1, 1, 1, 1 ) );
@@ -243,7 +243,7 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
     // InnerWheelBG
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId,
-                                AllottedGeometry.ToPaintGeometry( decal, draw_size ),
+                                AllottedGeometry.ToPaintGeometry( draw_size, FSlateLayoutTransform(1.0, TransformPoint(1.0, decal) ) ),
                                 InnerWheelBG,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 lum_tint );
@@ -251,7 +251,7 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
     // InnerWheelHue
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId,
-                                AllottedGeometry.ToPaintGeometry( decal, draw_size ),
+                                AllottedGeometry.ToPaintGeometry( draw_size, FSlateLayoutTransform(1.0, TransformPoint(1.0, decal) ) ),
                                 InnerWheelHue,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 sat_tint );
@@ -259,7 +259,7 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
     // InnerWheelDropShadow
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId,
-                                AllottedGeometry.ToPaintGeometry( decal, draw_size ),
+                                AllottedGeometry.ToPaintGeometry( draw_size, FSlateLayoutTransform(1.0, TransformPoint(1.0, decal) ) ),
                                 InnerWheelDropShadow,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 FLinearColor( 1, 1, 1, 1 ) );
@@ -267,7 +267,7 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
     // HintColorA
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId,
-                                AllottedGeometry.ToPaintGeometry( decal + HINT_COLOR_A_LOC_RATIO * draw_size, HintColorA->GetImageSize() * draw_ratio ),
+                                AllottedGeometry.ToPaintGeometry( HintColorA->GetImageSize() * draw_ratio, FSlateLayoutTransform(1.0, TransformPoint(1.0, decal + HINT_COLOR_A_LOC_RATIO * draw_size) ) ),
                                 HintColorA,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 result_tint );
@@ -275,7 +275,7 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
     // HintColorB
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId,
-                                AllottedGeometry.ToPaintGeometry( decal + HINT_COLOR_B_LOC_RATIO * draw_size, HintColorB->GetImageSize() * draw_ratio ),
+                                AllottedGeometry.ToPaintGeometry( HintColorB->GetImageSize() * draw_ratio, FSlateLayoutTransform(1.0, TransformPoint(1.0, decal + HINT_COLOR_B_LOC_RATIO * draw_size) ) ),
                                 HintColorB,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 FLinearColor( 1, 1, 1, 1 ) );
@@ -294,14 +294,14 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
     // ItemBrush Triangle
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId +1,
-                                AllottedGeometry.ToPaintGeometry( decal + TRIANGLE_LOC_RATIO * draw_size, triangle_buffer_size ),
+                                AllottedGeometry.ToPaintGeometry( triangle_buffer_size, FSlateLayoutTransform(1.0, TransformPoint(1.0, decal + TRIANGLE_LOC_RATIO * draw_size) ) ),
                                 ItemBrush.Get(),
                                 ESlateDrawEffect::NoPixelSnapping,
                                 FLinearColor( 1, 1, 1, 1 ) );
     // TriangleOverlay
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId +1,
-                                AllottedGeometry.ToPaintGeometry( decal, TriangleOverlay->GetImageSize() * draw_ratio ),
+                                AllottedGeometry.ToPaintGeometry( TriangleOverlay->GetImageSize() * draw_ratio, FSlateLayoutTransform(1.0, TransformPoint(1.0, decal) ) ),
                                 TriangleOverlay,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 FLinearColor( 1, 1, 1, 1 ) );
@@ -309,14 +309,14 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
     // HueCursor
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId +1,
-                                AllottedGeometry.ToPaintGeometry( hue_cursor_position, HueCursor->GetImageSize() * draw_ratio ),
+                                AllottedGeometry.ToPaintGeometry( HueCursor->GetImageSize() * draw_ratio, FSlateLayoutTransform(1.0, TransformPoint(1.0, hue_cursor_position) ) ),
                                 HueCursorBG,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 hue_tint );
 
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId +1,
-                                AllottedGeometry.ToPaintGeometry( hue_cursor_position, HueCursor->GetImageSize() * draw_ratio ),
+                                AllottedGeometry.ToPaintGeometry( HueCursor->GetImageSize() * draw_ratio, FSlateLayoutTransform(1.0, TransformPoint(1.0, hue_cursor_position) ) ),
                                 HueCursor,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 FLinearColor( 1, 1, 1, 1 ) );
@@ -324,14 +324,14 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
     // TriangleCursor
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId +1,
-                                AllottedGeometry.ToPaintGeometry( triangle_cursor_cartesian_position, TriangleCursor->GetImageSize() * draw_ratio ),
+                                AllottedGeometry.ToPaintGeometry( TriangleCursor->GetImageSize() * draw_ratio, FSlateLayoutTransform(1.0, TransformPoint(1.0, triangle_cursor_cartesian_position) ) ),
                                 TriangleCursorBG,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 result_tint );
 
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId +1,
-                                AllottedGeometry.ToPaintGeometry( triangle_cursor_cartesian_position, TriangleCursor->GetImageSize() * draw_ratio ),
+                                AllottedGeometry.ToPaintGeometry( TriangleCursor->GetImageSize() * draw_ratio, FSlateLayoutTransform(1.0, TransformPoint(1.0, triangle_cursor_cartesian_position) ) ),
                                 TriangleCursor,
                                 ESlateDrawEffect::NoPixelSnapping,
                                 FLinearColor( 1, 1, 1, 1 ) );

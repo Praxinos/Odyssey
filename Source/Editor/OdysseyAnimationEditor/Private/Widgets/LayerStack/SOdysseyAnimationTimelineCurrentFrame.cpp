@@ -36,7 +36,7 @@ SOdysseyAnimationTimelineCurrentFrame::OnPaint(const FPaintArgs& Args, const FGe
 	FSlateDrawElement::MakeBox(
 		OutDrawElements,
 		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(currentFramePos, 0.f), FVector2D(frameSize, height)),
+        AllottedGeometry.ToPaintGeometry( FVector2D(frameSize, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(currentFramePos, 0.f) ) ) ),
 		GenericBrush,
 		ESlateDrawEffect::None,
 		lineColor

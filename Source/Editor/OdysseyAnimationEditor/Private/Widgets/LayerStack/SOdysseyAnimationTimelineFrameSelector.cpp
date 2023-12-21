@@ -184,7 +184,7 @@ int32 SOdysseyAnimationTimelineFrameSelection::OnPaint(const FPaintArgs& Args, c
 		FSlateDrawElement::MakeBox(
 			OutDrawElements,
 			LayerId,
-			AllottedGeometry.ToPaintGeometry(FVector2D(firstFramePos, 0.f), FVector2D(selectionSize, height)),
+        	AllottedGeometry.ToPaintGeometry( FVector2D(selectionSize, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(firstFramePos, 0.f) ) ) ),
 			GenericBrush,
 			ESlateDrawEffect::None,
 			lineColor

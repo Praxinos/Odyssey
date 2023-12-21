@@ -88,7 +88,7 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
             FSlateDrawElement::MakeBox(
                 OutDrawElements,
                 LayerId,
-                AllottedGeometry.ToPaintGeometry(FVector2D(x, 7.f), FVector2D(1, height - 7.f)),
+                AllottedGeometry.ToPaintGeometry( FVector2D(1, height - 7.f), FSlateLayoutTransform(1.0, TransformPoint(1.0, FVector2D(x, 7.f)) ) ),
                 GenericBrush,
                 ESlateDrawEffect::None,
                 staggerLengthColor
@@ -102,7 +102,7 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
     FSlateDrawElement::MakeBox(
         OutDrawElements,
         LayerId,
-        AllottedGeometry.ToPaintGeometry(FVector2D(3, 0), FVector2D(width - 3.f, 7.f)),
+        AllottedGeometry.ToPaintGeometry( FVector2D(width - 3.f, 7.f), FSlateLayoutTransform(1.0, TransformPoint(1.0, FVector2D(3, 0)) ) ),
         ArrowBrushTop,
         ESlateDrawEffect::None,
         arrowsColor
@@ -112,7 +112,7 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
     FSlateDrawElement::MakeBox(
         OutDrawElements,
         LayerId,
-        AllottedGeometry.ToPaintGeometry(FVector2D(3, height - 7.f), FVector2D(width - 3.f, 7.f)),
+        AllottedGeometry.ToPaintGeometry( FVector2D(width - 3.f, 7.f), FSlateLayoutTransform(1.0, TransformPoint(1.0, FVector2D(3, height - 7.f)) ) ),
         ArrowBrushBottom,
         ESlateDrawEffect::None,
         arrowsColor
@@ -126,7 +126,7 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             LayerId,
-            AllottedGeometry.ToPaintGeometry(FVector2D(reach * frameSize * -1, (height - 32.f) / 2.f ), FVector2D(reach * frameSize, 32.f)),
+            AllottedGeometry.ToPaintGeometry( FVector2D(reach * frameSize, 32.f), FSlateLayoutTransform(1.0, TransformPoint(1.0, FVector2D(reach * frameSize * -1, (height - 32.f) / 2.f )) ) ),
             reachBrush,
             ESlateDrawEffect::None,
             reachColor

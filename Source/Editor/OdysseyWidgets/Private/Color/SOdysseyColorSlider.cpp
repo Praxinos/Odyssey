@@ -57,8 +57,12 @@ IOdysseyChannelSlider::OnPaint( const FPaintArgs& Args
     float prop = GetProportionForColor(mColor.Get());
     cursor_pos = decal + FVector2D( ( InternalSize.X - cursor_size.X ) * prop, 0 );
 
-    FSlateDrawElement::MakeBox(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry( decal, InternalSize ), ItemBrush.Get(), ESlateDrawEffect::None, FLinearColor( 1, 1, 1, 1 ) );
-    FSlateDrawElement::MakeBox(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry( cursor_pos, cursor_size ), cursor_brush.Get(), ESlateDrawEffect::None, FLinearColor( 1, 1, 1, 1 ) );
+    FSlateDrawElement::MakeBox(OutDrawElements, LayerId,
+                               AllottedGeometry.ToPaintGeometry( InternalSize, FSlateLayoutTransform(1.0, TransformPoint(1.0, decal) ) ),
+                               ItemBrush.Get(), ESlateDrawEffect::None, FLinearColor( 1, 1, 1, 1 ) );
+    FSlateDrawElement::MakeBox(OutDrawElements, LayerId,
+                               AllottedGeometry.ToPaintGeometry( cursor_size, FSlateLayoutTransform(1.0, TransformPoint(1.0, cursor_pos) ) ),
+                               cursor_brush.Get(), ESlateDrawEffect::None, FLinearColor( 1, 1, 1, 1 ) );
     return LayerId;
 }
 

@@ -137,7 +137,7 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 		FSlateDrawElement::MakeBox(
 			OutDrawElements,
 			backgroundLayer,
-			AllottedGeometry.ToPaintGeometry(pos, size),
+            AllottedGeometry.ToPaintGeometry( size, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, pos ) ) ),
 			GenericBrush,
 			ESlateDrawEffect::None,
 			InWidgetStyle.GetColorAndOpacityTint() * backgroundColor
@@ -169,8 +169,8 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 			FSlateDrawElement::MakeText(
 				OutDrawElements,
 				textLayer,
-				AllottedGeometry.ToPaintGeometry(textPos, textSize),
-				frameString, 
+                AllottedGeometry.ToPaintGeometry( textSize, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, textPos ) ) ),
+				frameString,
 				textFontInfo, 
 				ESlateDrawEffect::None);
 		}
@@ -193,7 +193,7 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	FSlateDrawElement::MakeBox(
 		OutDrawElements,
 		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(linePosition - 8.0f, 0.f), FVector2D(17.0f, height)),
+        AllottedGeometry.ToPaintGeometry( FVector2D(17.0f, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(linePosition - 8.0f, 0.f) ) ) ),
 		GenericBrush,
 		ESlateDrawEffect::None,
 		lineColor
@@ -202,7 +202,7 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	FSlateDrawElement::MakeBox(
 		OutDrawElements,
 		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(linePosition - 1.0f, 0.f), FVector2D(3.0f, height)),
+        AllottedGeometry.ToPaintGeometry( FVector2D(3.0f, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(linePosition - 1.0f, 0.f) ) ) ),
 		GenericBrush,
 		ESlateDrawEffect::None,
 		FLinearColor::Red

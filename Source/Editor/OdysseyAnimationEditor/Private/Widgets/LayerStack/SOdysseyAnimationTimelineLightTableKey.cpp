@@ -49,7 +49,7 @@ SOdysseyAnimationTimelineLightTableKey::OnPaint(const FPaintArgs& Args, const FG
 	FSlateDrawElement::MakeBox(
 		OutDrawElements,
 		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(0.f, 0.f), FVector2D(width, height)),
+        AllottedGeometry.ToPaintGeometry( FVector2D(width, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(0.f, 0.f) ) ) ),
 		backBrush,
 		mIsActivated.Get() ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect,
 		background.GetSpecifiedColor()
@@ -58,7 +58,7 @@ SOdysseyAnimationTimelineLightTableKey::OnPaint(const FPaintArgs& Args, const FG
 	FSlateDrawElement::MakeBox(
 		OutDrawElements,
 		LayerId,
-		AllottedGeometry.ToPaintGeometry(FVector2D(0.f, height * (1.0f - opacity)), FVector2D(width, height * opacity)),
+        AllottedGeometry.ToPaintGeometry( FVector2D(width, height * opacity), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(0.f, height * (1.0f - opacity)) ) ) ),
 		frontBrush,
 		mIsActivated.Get() ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect,
 		primary.GetSpecifiedColor()

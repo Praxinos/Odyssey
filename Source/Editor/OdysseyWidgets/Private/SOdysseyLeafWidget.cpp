@@ -43,7 +43,9 @@ SOdysseyLeafWidget::OnPaint( const FPaintArgs& Args
                            , bool bParentEnabled ) const
 {
     CheckResize( AllottedGeometry.GetLocalSize() );
-    FSlateDrawElement::MakeBox(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry( ExternalSize / 2 - InternalSize / 2, InternalSize ), ItemBrush.Get(), ESlateDrawEffect::None, FLinearColor( 1, 1, 1, 1 ) );
+    FSlateDrawElement::MakeBox(OutDrawElements, LayerId,
+                            AllottedGeometry.ToPaintGeometry( InternalSize, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, ExternalSize / 2 - InternalSize / 2 ) ) ),
+                            ItemBrush.Get(), ESlateDrawEffect::None, FLinearColor( 1, 1, 1, 1 ) );
     return LayerId;
 }
 

@@ -142,7 +142,7 @@ SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeom
 		FSlateDrawElement::MakeBox(
 			OutDrawElements,
 			LayerId,
-			AllottedGeometry.ToPaintGeometry(FVector2D(dragPos, 0.f), FVector2D(3.f, height)),
+            AllottedGeometry.ToPaintGeometry( FVector2D(3.f, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(dragPos, 0.f) ) ) ),
 			GenericBrush,
 			ESlateDrawEffect::None,
 			lineColor
@@ -156,7 +156,7 @@ SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeom
             FSlateDrawElement::MakeBox(
                 OutDrawElements,
                 LayerId,
-                AllottedGeometry.ToPaintGeometry(FVector2D(dragPos + 5.f,  5.f + plusSize), FVector2D( 3 * plusSize, plusSize)),
+                AllottedGeometry.ToPaintGeometry( FVector2D( 3 * plusSize, plusSize), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(dragPos + 5.f,  5.f + plusSize) ) ) ),
                 GenericBrush,
                 ESlateDrawEffect::None,
                 lineColor
@@ -166,7 +166,7 @@ SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeom
             FSlateDrawElement::MakeBox(
                 OutDrawElements,
                 LayerId,
-                AllottedGeometry.ToPaintGeometry(FVector2D(dragPos + 5.f + plusSize,  5.f), FVector2D(plusSize, 3 * plusSize)),
+                AllottedGeometry.ToPaintGeometry( FVector2D(plusSize, 3 * plusSize), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(dragPos + 5.f + plusSize,  5.f) ) ) ),
                 GenericBrush,
                 ESlateDrawEffect::None,
                 lineColor

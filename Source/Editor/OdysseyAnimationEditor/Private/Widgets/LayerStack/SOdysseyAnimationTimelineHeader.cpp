@@ -66,7 +66,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 		FSlateDrawElement::MakeBox(
 			OutDrawElements,
 			backgroundLayer,
-			AllottedGeometry.ToPaintGeometry(pos, size),
+        	AllottedGeometry.ToPaintGeometry( size, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, pos ) ) ),
 			GenericBrush,
 			ESlateDrawEffect::None,
 			InWidgetStyle.GetColorAndOpacityTint() * backgroundColor
@@ -84,7 +84,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 			FSlateDrawElement::MakeText(
 				OutDrawElements,
 				textLayer,
-				AllottedGeometry.ToPaintGeometry(textPos, textSize),
+        		AllottedGeometry.ToPaintGeometry( textSize, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, textPos ) ) ),
 				frameString, 
 				textFontInfo, 
 				ESlateDrawEffect::None);
@@ -101,7 +101,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
 				proxyLayer,
-				AllottedGeometry.ToPaintGeometry(proxyPos, proxySize),
+        		AllottedGeometry.ToPaintGeometry( proxySize, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, proxyPos ) ) ),
 				GenericBrush,
 				ESlateDrawEffect::None,
 				InWidgetStyle.GetColorAndOpacityTint() * color
