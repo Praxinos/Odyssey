@@ -8,7 +8,37 @@
 FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UObject* iOwner, TSharedPtr<FOdysseyAnimationCellsContainer> iContainer)
     : FOdysseyMutator(iOwner, "FOdysseyAnimationCellsMutator")
     , mContainer(iContainer)
+    , mOffsetMutation(nullptr)
 {
+    GetRootMutation()->OnCommited().BindLambda(
+        [container = mContainer]()
+        {
+            container->OnCellsChanged().Broadcast();
+        }
+    );
+}
+
+void
+FOdysseyAnimationCellsMutator::Commit()
+{
+    //Sanitize cells (remove all cells with length <= 0)
+    TArray<TSharedPtr<FOdysseyAnimationCell>> cells = mContainer->GetCells();
+    for (int i = cells.Num() - 1; i >= 0 ; i--)
+    {
+        if (cells[i]->GetLength() <= 0)
+            Remove(i, 1);
+    }
+
+    FOdysseyMutator::Commit();
+}
+
+void
+FOdysseyAnimationCellsMutator::Reset()
+{
+    mOffsetMutation = nullptr;
+    mCellMutations.Empty();
+    FOdysseyMutator::Reset();
+
     GetRootMutation()->OnCommited().BindLambda(
         [container = mContainer]()
         {
@@ -232,17 +262,27 @@ FOdysseyAnimationCellsMutator::SetLength(int iIndex, int iLength)
     if (iIndex < 0 || iIndex >= mContainer->mCells.Num())
         return;
 
-    int oldLength = mContainer->mCells[iIndex]->GetLength();
-
-    TSharedPtr<FOdysseySetCellLengthMutation> mutation = MakeShared<FOdysseySetCellLengthMutation>(mContainer, iIndex, iLength, oldLength);
-    AddAndApplyMutation(mutation);
+    TSharedPtr<FOdysseyAnimationCell> cell = mContainer->mCells[iIndex];
+    if (!mCellMutations.Contains(cell))
+    {
+        TSharedPtr<FOdysseySetCellLengthMutation> mutation = MakeShared<FOdysseySetCellLengthMutation>(cell, iLength, cell->GetLength());
+        mCellMutations.Add(cell, mutation);
+        AddMutation(mCellMutations[cell]);
+    }
+    mCellMutations[cell]->Set(iLength);
+    ApplyMutation(mCellMutations[cell]);
 }
 
 void
 FOdysseyAnimationCellsMutator::SetOffset(int iOffset)
 {
-    TSharedPtr<FOdysseySetCellsOffsetMutation> mutation = MakeShared<FOdysseySetCellsOffsetMutation>(mContainer, iOffset, mContainer->GetOffset());
-    AddAndApplyMutation(mutation);
+    if (!mOffsetMutation)
+    {
+        mOffsetMutation = MakeShared<FOdysseySetCellsOffsetMutation>(mContainer, iOffset, mContainer->GetOffset());
+        AddMutation(mOffsetMutation);
+    }
+    mOffsetMutation->Set(iOffset);
+    ApplyMutation(mOffsetMutation);
 }
 
 //=======================================================================================
@@ -289,24 +329,35 @@ FOdysseyRemoveCellsMutation::Revert()
 
 //=======================================================================================
 
-FOdysseySetCellLengthMutation::FOdysseySetCellLengthMutation(TSharedPtr<FOdysseyAnimationCellsContainer> iContainer, int iIndex, int iNewLength, int iOldLength)
-    : mContainer(iContainer)
-    , mIndex(iIndex)
+FOdysseySetCellLengthMutation::FOdysseySetCellLengthMutation(TSharedPtr<FOdysseyAnimationCell> iCell, int iNewLength, int iOldLength)
+    : mCell(iCell)
     , mNewLength(iNewLength)
     , mOldLength(iOldLength)
 {
 }
 
+bool 
+FOdysseySetCellLengthMutation::IsDirty() const
+{
+    return mNewLength != mOldLength;
+}
+
+void
+FOdysseySetCellLengthMutation::Set(int iNewLength)
+{
+    mNewLength = iNewLength;
+}
+
 void
 FOdysseySetCellLengthMutation::Apply()
 {
-    mContainer->mCells[mIndex]->mLength = mNewLength;
+    mCell->mLength = mNewLength;
 }
 
 void
 FOdysseySetCellLengthMutation::Revert()
 {
-    mContainer->mCells[mIndex]->mLength = mOldLength;
+    mCell->mLength = mOldLength;
 }
 
 //=======================================================================================
@@ -317,6 +368,18 @@ FOdysseySetCellsOffsetMutation::FOdysseySetCellsOffsetMutation(TSharedPtr<FOdyss
     , mNewOffset(iNewOffset)
     , mOldOffset(iOldOffset)
 {
+}
+
+bool 
+FOdysseySetCellsOffsetMutation::IsDirty() const
+{
+    return mNewOffset != mOldOffset;
+}
+
+void
+FOdysseySetCellsOffsetMutation::Set(int iNewOffset)
+{
+    mNewOffset = iNewOffset;
 }
 
 void

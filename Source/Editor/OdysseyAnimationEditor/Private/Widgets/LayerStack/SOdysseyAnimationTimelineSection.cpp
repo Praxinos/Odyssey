@@ -18,8 +18,8 @@ SOdysseyAnimationTimelineSection::Construct(
 		.WidthOverride_Raw(this, &SOdysseyAnimationTimelineSection::GetSectionWidth)
 		.MinDesiredWidth(this, &SOdysseyAnimationTimelineSection::GetSectionWidth)
 		.MaxDesiredWidth(this, &SOdysseyAnimationTimelineSection::GetSectionWidth)
-		.HAlign(HAlign_Fill)
-		.VAlign(VAlign_Fill)
+		.HAlign(iArgs._HAlign)
+		.VAlign(iArgs._VAlign)
 		[
 			iArgs._Content.Widget
 		]

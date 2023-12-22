@@ -12,9 +12,13 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineSection
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineSection)
-        {}
+        : _HAlign(HAlign_Fill)
+        , _VAlign(VAlign_Fill)
+    {}
         SLATE_DEFAULT_SLOT( FArguments, Content )
         SLATE_ATTRIBUTE(float, WidthInFrames)
+        SLATE_ARGUMENT(EHorizontalAlignment, HAlign)
+        SLATE_ARGUMENT(EVerticalAlignment, VAlign)
     SLATE_END_ARGS()
 
 public:

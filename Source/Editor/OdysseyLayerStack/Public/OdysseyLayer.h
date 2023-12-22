@@ -202,11 +202,11 @@ public:
     UPROPERTY(EditDefaultsOnly, Category="Layer")
 	FText Description = FText::FromString(TEXT(""));
 
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
-    FSlateBrush Icon;
+    //UPROPERTY(EditDefaultsOnly, Category="Layer")
+    FSlateIcon Icon;
 
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
-    FSlateBrush IconExpanded;
+    //UPROPERTY(EditDefaultsOnly, Category="Layer")
+    FSlateIcon IconExpanded;
     
     //Defaults Properties
     UPROPERTY(EditDefaultsOnly, Category="Layer")

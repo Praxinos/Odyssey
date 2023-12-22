@@ -52,7 +52,7 @@ const FSlateBrush*
 FOdysseyLayerStackDragDropOperation::GetIcon() const
 {
 	if (mLayers.Num() == 1)
-		return &mLayers[0]->Icon;
+		return mLayers[0]->Icon.GetIcon();
 
 	return FOdysseyStyle::GetBrush("PainterEditor.Layers16");
 }

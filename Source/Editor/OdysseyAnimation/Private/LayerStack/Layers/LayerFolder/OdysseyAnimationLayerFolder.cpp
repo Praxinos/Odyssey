@@ -29,8 +29,9 @@ UOdysseyAnimationLayerFolder::UOdysseyAnimationLayerFolder()
 {
 	LayerTypeName = LOCTEXT("layer-folder.type", "Folder Layer");
     DefaultName = LOCTEXT("layer-folder.default-name", "Folder");
-    Icon = *FAppStyle::GetBrush( "ContentBrowser.AssetTreeFolderClosed" );
-    IconExpanded = *FAppStyle::GetBrush( "ContentBrowser.AssetTreeFolderOpen" );
+    
+    Icon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderClosed");
+    IconExpanded = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderOpen");
     CanHaveChildren = true;
 }
 

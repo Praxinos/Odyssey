@@ -669,6 +669,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "ClassIcon.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_16", mIcon16x16 ) );
     Set( "ClassThumbnail.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_64", mIcon64x64 ) );
 
+    Set("Animation.Timeline.Tools.Selection", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Selection", mIcon16x16));
+    Set("Animation.Timeline.Tools.Move", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Move", mIcon16x16));
+    
     Set("Animation.LightTable64", new IMAGE_BRUSH("OdysseyAnimation/LightTable_64", mIcon64x64));
     Set("Animation.LightTable24", new IMAGE_BRUSH("OdysseyAnimation/LightTable_24", mIcon24x24));
     Set("Animation.LightTable16", new IMAGE_BRUSH("OdysseyAnimation/LightTable_16", mIcon16x16));
@@ -703,13 +706,21 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
     Set("Animation.CellTimingHandle", new IMAGE_BRUSH("OdysseyAnimation/CellTimingHandle_16", mIcon16x16));
     Set("Animation.CellLengthHandle", new IMAGE_BRUSH("OdysseyAnimation/CellLengthHandle_16", mIcon16x16));
+
+    Set("Animation.LayerImage.BehaviourColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
+    Set("Animation.LayerImage.Behaviour.None", new IMAGE_BRUSH("OdysseyAnimation/LayerImage/BehaviourNone", mIcon16x16));
+    Set("Animation.LayerImage.Behaviour.Hold", new IMAGE_BRUSH("OdysseyAnimation/LayerImage/BehaviourHold", mIcon16x16));
+    Set("Animation.LayerImage.Behaviour.Loop", new IMAGE_BRUSH("OdysseyAnimation/LayerImage/BehaviourLoop", mIcon16x16));
+    Set("Animation.LayerImage.Behaviour.PingPong", new IMAGE_BRUSH("OdysseyAnimation/LayerImage/BehaviourPingPong", mIcon16x16));
+
+
     Set("Animation.CellImageStagger.PreviewReachColor", FLinearColor(0.2f, 0.3f, 1.0f, 0.5f));
     Set("Animation.CellImageStagger.ArrowPreviewReach", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowPreviewReach", mIcon32x32, FLinearColor::White, ESlateBrushTileType::Horizontal));
     Set("Animation.CellImageStagger.ArrowsColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
     Set("Animation.CellImageStagger.ArrowTop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowTop", FVector2D(10, 7), FLinearColor::White, ESlateBrushTileType::Horizontal));
     Set("Animation.CellImageStagger.ArrowBottom", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerArrowBottom", FVector2D(10, 7), FLinearColor::White, ESlateBrushTileType::Horizontal));
     Set("Animation.CellImageStagger.StaggerLengthColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
-    Set("Animation.CellImageStagger.BeheviourColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
+    Set("Animation.CellImageStagger.BehaviourColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
     Set("Animation.CellImageStagger.Behaviour.Hold", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourHold", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.Loop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourLoop", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.PingPong", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourPingPong", mIcon16x16));

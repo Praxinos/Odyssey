@@ -6,6 +6,7 @@
 #include "EditorFontGlyphs.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayerStack.h"
+#include "SPositiveActionButton.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 
@@ -21,35 +22,12 @@ void SOdysseyLayerStackAddLayerButton::Construct(const FArguments& InArgs)
     mLayerStack = InArgs._LayerStack;
     mOnAdded = InArgs._OnAdded;
 
-    SComboButton::FArguments args;
-    args.OnGetMenuContent(this, &SOdysseyLayerStackAddLayerButton::MakeMenu)
-        .ButtonStyle(FAppStyle::Get(), "FlatButton.Success")
-        .ContentPadding(FMargin(0.0f, 5.0f))
-        .HasDownArrow(true)
-        .ButtonContent()
-        [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .VAlign(VAlign_Bottom)
-            .AutoWidth()
-            [
-                SNew(STextBlock)
-                .TextStyle(FAppStyle::Get(), "NormalText.Important")
-                .Font(FAppStyle::Get().GetFontStyle("FontAwesome.10"))
-                .Text(FEditorFontGlyphs::Plus)
-            ]
-
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .Padding(4, 0, 0, 0)
-            [
-                SNew(STextBlock)
-                .TextStyle(FAppStyle::Get(), "NormalText.Important")
-                .Text(LOCTEXT("add-layer-button.add-layer", "Add Layer"))
-            ]
-        ];
-
-    SComboButton::Construct(args);
+    ChildSlot
+    [
+        SNew(SPositiveActionButton)
+        .Text(LOCTEXT("add-layer-button.add-layer", "Add"))
+        .OnGetMenuContent(this, &SOdysseyLayerStackAddLayerButton::MakeMenu)
+    ];
 }
 
 //--------------------------------------------------------------------------------------
@@ -76,7 +54,7 @@ TSharedRef<SWidget> SOdysseyLayerStackAddLayerButton::MakeMenu()
             menuBuilder.AddMenuEntry(
                 layerCDO->LayerTypeName,
                 layerCDO->Description,
-                FSlateIcon(),
+                layerCDO->Icon,
                 FUIAction(FExecuteAction::CreateRaw(this, &SOdysseyLayerStackAddLayerButton::AddLayerFromClass, FAssetData(layerClass)))
                 //We give a FAssetData(layerClass) instead of the layerClass directly, because layerClass could be detroyed
                 //between the moment the user clicks on the button, and the one he clicks on the menu entry.

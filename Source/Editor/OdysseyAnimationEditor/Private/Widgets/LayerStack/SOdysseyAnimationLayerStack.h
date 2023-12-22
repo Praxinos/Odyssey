@@ -43,6 +43,9 @@ private:
     void OnLayerAdded(UOdysseyLayer* iLayer);
     float PlaybackFramesPerSecond() const;
 
+    EOdysseyTimelineTool GetSelectedTool() const;
+    void OnToolChecked(EOdysseyTimelineTool iTool, ECheckBoxState iState);
+
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;

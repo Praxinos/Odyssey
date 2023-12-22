@@ -25,6 +25,8 @@ public:
 	virtual void Apply( UObject* Object ) override
     {
         mRootMutation->Apply();
+        mRootMutation->OnChanged().ExecuteIfBound();
+        mRootMutation->OnCommited().ExecuteIfBound();
     }
 
 	/** Reverts change to the object */
@@ -32,6 +34,8 @@ public:
 	virtual void Revert( UObject* Object ) override
     {
         mRootMutation->Revert();
+        mRootMutation->OnChanged().ExecuteIfBound();
+        mRootMutation->OnCommited().ExecuteIfBound();
     }
 
 	/** Describes this change (for debugging) */
@@ -64,11 +68,29 @@ FOdysseyMutator::GetRootMutation() const
     return mRootMutation;
 }
 
+bool
+FOdysseyMutator::IsDirty() const
+{
+    return mRootMutation->IsDirty();
+}
+
+void
+FOdysseyMutator::AddMutation(TSharedPtr<IOdysseyMutation> iMutation)
+{
+    mRootMutation->AddMutation(iMutation);
+}
+
+void
+FOdysseyMutator::ApplyMutation(TSharedPtr<IOdysseyMutation> iMutation)
+{
+    iMutation->Apply();
+}
+
 void
 FOdysseyMutator::AddAndApplyMutation(TSharedPtr<IOdysseyMutation> iMutation)
 {
-    iMutation->Apply();
-    mRootMutation->AddMutation(iMutation);
+    AddMutation(iMutation);
+    ApplyMutation(iMutation);
 }
 
 void
@@ -92,13 +114,19 @@ FOdysseyMutator::Commit()
         GUndo->StoreUndo(mObject, MakeUnique<FOdysseyMutationsUndo>(mRootMutation));
 
     mRootMutation->OnCommited().ExecuteIfBound();
-    mRootMutation = MakeShared<FOdysseyRootMutation>(mRootMutation->GetName());
+    Reset();
 }
 
 void
-FOdysseyMutator::Abort()
+FOdysseyMutator::Revert()
 {
     mRootMutation->Revert();
+    Reset();
+}
+
+void
+FOdysseyMutator::Reset()
+{
     mRootMutation = MakeShared<FOdysseyRootMutation>(mRootMutation->GetName());
 }
 
@@ -122,15 +150,31 @@ FOdysseyRootMutation::OnCommited()
     return mOnCommited;
 }
 
+bool
+FOdysseyRootMutation::IsDirty() const
+{
+    if (mMutations.IsEmpty())
+        return false;
+
+    for (int i = 0; i < mMutations.Num(); i++)
+    {
+        if (mMutations[i]->IsDirty())
+            return true;
+    }
+
+    return false;
+}
+
 void
 FOdysseyRootMutation::Apply()
 {
     for (int i = 0; i < mMutations.Num(); i++)
     {
+        if (!mMutations[i]->IsDirty())
+            continue;
+
         mMutations[i]->Apply();
     }
-    mOnChanged.ExecuteIfBound();
-    mOnCommited.ExecuteIfBound();
 }
 
 void
@@ -138,10 +182,11 @@ FOdysseyRootMutation::Revert()
 {
     for (int i = mMutations.Num() - 1; i >= 0; i--)
     {
+        if (!mMutations[i]->IsDirty())
+            continue;
+            
         mMutations[i]->Revert();
     }
-    mOnChanged.ExecuteIfBound();
-    mOnCommited.ExecuteIfBound();
 }
 
 const FString&

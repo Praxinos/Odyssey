@@ -2,6 +2,9 @@
 
 #include "OdysseyLayerStack.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
+#include "LayerStack/Tools/OdysseyAnimationTimelineSelectionTool.h"
+#include "LayerStack/Tools/OdysseyAnimationTimelineMoveTool.h"
 
 //Define base frame width to be 50 pixels
 #define BASE_FRAMEWIDTH 50.f
@@ -20,12 +23,19 @@ FOdysseyAnimationEditorTimeline::FOdysseyAnimationEditorTimeline(FOdysseyAnimati
     , mOffset(0.f)
     , mSelectedFrames(FInt32Range::Empty())
     , mCellsContainer(nullptr)
+    , mSelectedTool(EOdysseyTimelineTool::None)
+    , mSelectionTool()
+    , mMoveTool()
 {
 }
 
 void 
 FOdysseyAnimationEditorTimeline::Initialize()
 {
+    mSelectedTool = EOdysseyTimelineTool::Selection;
+    mSelectionTool = MakeShared<FOdysseyAnimationTimelineSelectionTool>(this);
+    mMoveTool = MakeShared<FOdysseyAnimationTimelineMoveTool>(this);
+
     BindCurrentLayerChanged();
     BindOnCellsChanged();
 }
@@ -107,6 +117,35 @@ FOdysseyAnimationEditorTimeline::UnbindOnCellsChanged()
     cellsContainer->OnCellsChanged().RemoveAll(this);
 }
 
+
+TSharedPtr<FOdysseyAnimationTimelineTool>
+FOdysseyAnimationEditorTimeline::GetTool() const
+{
+    switch(mSelectedTool)
+    {
+        case EOdysseyTimelineTool::Selection: return mSelectionTool;
+        case EOdysseyTimelineTool::Move: return mMoveTool;
+    }
+
+    return nullptr;
+}
+
+EOdysseyTimelineTool
+FOdysseyAnimationEditorTimeline::GetSelectedTool() const
+{
+    return mSelectedTool;
+}
+
+void
+FOdysseyAnimationEditorTimeline::SetSelectedTool(EOdysseyTimelineTool iTool)
+{
+    if (iTool == mSelectedTool)
+        return;
+
+    mSelectedTool = iTool;
+    //TODO: Send a ToolChanged event
+}
+
 void 
 FOdysseyAnimationEditorTimeline::ZoomIn()
 {
@@ -137,8 +176,6 @@ void
 FOdysseyAnimationEditorTimeline::SetSelectedFrames(const FInt32Range& iSelectedFrames)
 {
     mSelectedFrames = FInt32Range::Intersection(iSelectedFrames, GetSelectableFrames());
-
-    mOnSelectedFramesChanged.Broadcast();
 }
 
 //static

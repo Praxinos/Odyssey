@@ -47,7 +47,7 @@ UOdysseyAnimationLayerImageVector::UOdysseyAnimationLayerImageVector()
     : mCellsContainer(MakeShared<FOdysseyAnimationCellsContainer>())
 {
 	LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Image Layer");
-    Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerVector16");
+    Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerVector16");
 
     mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageVector::StaticType());
     mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageStagger::StaticType());

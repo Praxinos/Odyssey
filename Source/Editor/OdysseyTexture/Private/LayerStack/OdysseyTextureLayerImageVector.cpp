@@ -48,7 +48,7 @@ UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
     : mEngine(nullptr)
 {
 	LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Image Layer");
-    Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.LayerVector16");
+    Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerVector16");
 }
 
 void
