@@ -112,9 +112,10 @@ SOdysseyAnimationCells::AddTempCellSection()
     TSharedRef<SWidget> widget = SNew(SOdysseyAnimationTimelineSection, mExtension)
     .WidthInFrames(1)
     [
-        SNew(SBorder)
-        .BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
-        .BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
+        SNew(SImage)
+        .Image(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
+        //.BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
+        .ColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.3f))
     ];
 
     //Cells widgets

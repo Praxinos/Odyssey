@@ -27,7 +27,7 @@ private:
     struct
     {
         float mInitialOffset;
-        bool mIsDragDetected;
+        bool mIsDragDetected = false;
         double mMousePosition;
     } mLayerOffsetData;
 };

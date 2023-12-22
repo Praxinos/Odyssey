@@ -94,8 +94,8 @@ SOdysseyLayerRow::GenerateExpandableHeaderWidget()
         [
             SNew( SOdysseyLayerExpanderArrow, SharedThis(this) )
                 .ArrowPadding(FMargin(0.f, 2.f, 0.f, 0.f))
-                .ExpanderImageOpened(&mLayer->IconExpanded)
-                .ExpanderImageClosed(&mLayer->Icon)
+                .ExpanderImageOpened(mLayer->IconExpanded.GetIcon())
+                .ExpanderImageClosed(mLayer->Icon.GetIcon())
                 .IndentAmount(16.f)
                 .ShouldDrawWires( true )
         ]

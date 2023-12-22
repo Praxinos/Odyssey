@@ -4,14 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/Input/SComboButton.h"
 
 class UOdysseyLayerStack;
 
 /**
  * Implements the Layer stack widget
  */
-class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerStackAddLayerButton : public SComboButton
+class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerStackAddLayerButton
+    : public SCompoundWidget
 {
 public:
     DECLARE_DELEGATE_OneParam(FOnAdded, UOdysseyLayer*);

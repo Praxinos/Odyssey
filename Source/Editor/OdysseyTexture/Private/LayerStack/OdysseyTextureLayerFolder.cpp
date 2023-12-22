@@ -30,8 +30,8 @@ UOdysseyTextureLayerFolder::UOdysseyTextureLayerFolder()
 {
 	LayerTypeName = LOCTEXT("layer-folder.type", "Folder Layer");
     DefaultName = LOCTEXT("layer-folder.default-name", "Folder");
-    Icon = *FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderClosed" );
-    IconExpanded = *FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderOpen" );
+    Icon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderClosed");
+    IconExpanded = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderOpen");
     CanHaveChildren = true;
 }
 

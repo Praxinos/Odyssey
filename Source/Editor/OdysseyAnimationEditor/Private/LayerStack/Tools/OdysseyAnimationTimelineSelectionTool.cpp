@@ -15,6 +15,9 @@ FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(F
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnMouseButtonDown(const FMouseEventParams& iParams)
 {
+	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
+        return FReply::Unhandled();
+
     if (iParams.mMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
         //startDragDetection
@@ -70,11 +73,8 @@ FOdysseyAnimationTimelineSelectionTool::OnDragDetected(const FMouseEventParams& 
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnMouseMove(const FMouseEventParams& iParams)
 {
-    if (iParams.mOrigin == EMouseEventOrigin::CellsTimeline)
-    {
-        mTimelineParams->SetSelectedFrames(FInt32Range::Empty());
+    if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
         return FReply::Unhandled();
-    }
 
     if(mIsSelecting)
 	{

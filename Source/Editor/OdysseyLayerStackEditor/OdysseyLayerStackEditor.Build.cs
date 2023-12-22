@@ -21,6 +21,7 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "UMG",
                 "UnrealEd",
                 "ToolMenus",
+                "ToolWidgets",
 
                 "OdysseyCore",
                 "OdysseyBrush",

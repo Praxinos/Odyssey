@@ -669,6 +669,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "ClassIcon.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_16", mIcon16x16 ) );
     Set( "ClassThumbnail.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_64", mIcon64x64 ) );
 
+    Set("Animation.Timeline.Tools.Selection", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Selection", mIcon16x16));
+    Set("Animation.Timeline.Tools.Move", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Move", mIcon16x16));
+    
     Set("Animation.LightTable64", new IMAGE_BRUSH("OdysseyAnimation/LightTable_64", mIcon64x64));
     Set("Animation.LightTable24", new IMAGE_BRUSH("OdysseyAnimation/LightTable_24", mIcon24x24));
     Set("Animation.LightTable16", new IMAGE_BRUSH("OdysseyAnimation/LightTable_16", mIcon16x16));

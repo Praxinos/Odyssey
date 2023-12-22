@@ -26,7 +26,7 @@ private:
 	TAttribute<FInt32Range> mSelectableFrames;
     struct
     {
-		bool mIsDragDetected;
+		bool mIsDragDetected = false;
 		int mCursorFrame;
         FInt32Range mSelectedFrames;
     } mSelectionData;

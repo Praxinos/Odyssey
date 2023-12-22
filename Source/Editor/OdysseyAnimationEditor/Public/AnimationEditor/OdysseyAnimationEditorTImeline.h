@@ -9,11 +9,13 @@ class UOdysseyLayerStack;
 class FOdysseyAnimationCellsContainer;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyAnimationTimelineSelectionTool;
+class FOdysseyAnimationTimelineMoveTool;
 
 enum class EOdysseyTimelineTool
 {
     None,
-    Selection
+    Selection,
+    Move
 };
 class FOdysseyAnimationEditorTimeline
 {
@@ -74,4 +76,5 @@ private:
 
     EOdysseyTimelineTool mSelectedTool;
     TSharedPtr<FOdysseyAnimationTimelineSelectionTool> mSelectionTool;
+    TSharedPtr<FOdysseyAnimationTimelineMoveTool> mMoveTool;
 };

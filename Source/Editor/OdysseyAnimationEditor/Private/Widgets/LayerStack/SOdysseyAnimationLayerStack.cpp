@@ -8,6 +8,8 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
+#include "OdysseyAnimationEditorTimeline.h"
+#include "Widgets/Input/SSegmentedControl.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -57,21 +59,50 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     .AutoHeight()
     [
         SNew(SHorizontalBox)
+
+        //Left part 
+        + SHorizontalBox::Slot()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(SOdysseyLayerStackAddLayerButton)
+                .LayerStack(mExtension->LayerStack())
+                .OnAdded( this, &SOdysseyAnimationLayerStack::OnLayerAdded)
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign(VAlign_Center)
+            [
+                SNew(SSegmentedControl<EOdysseyTimelineTool>)
+                .Value(this, &SOdysseyAnimationLayerStack::GetSelectedTool)
+                .OnValueChecked(this, &SOdysseyAnimationLayerStack::OnToolChecked)
+
+                //Selection Tool
+                + SSegmentedControl<EOdysseyTimelineTool>::Slot(EOdysseyTimelineTool::Selection)
+                .Icon(FOdysseyStyle::GetBrush( "Animation.Timeline.Tools.Selection" ))
+                .ToolTip(LOCTEXT("timeline.selection-tool.tooltip", "Selection Tool"))
+
+                //Move Tool
+                + SSegmentedControl<EOdysseyTimelineTool>::Slot(EOdysseyTimelineTool::Move)
+                .Icon(FOdysseyStyle::GetBrush( "Animation.Timeline.Tools.Move" ))
+                .ToolTip(LOCTEXT("timeline.move-tool.tooltip", "Move Tool"))
+            ]
+        ]
+
+        //Center part
         + SHorizontalBox::Slot()
         .AutoWidth()
-        [
-            SNew(SOdysseyLayerStackAddLayerButton)
-            .LayerStack(mExtension->LayerStack())
-            .OnAdded( this, &SOdysseyAnimationLayerStack::OnLayerAdded)
-        ]
-        + SHorizontalBox::Slot()
-        .FillWidth(1.f)
-        .HAlign( HAlign_Center )
         .VAlign( VAlign_Center )
         [
             SNew(SOdysseyAnimationPlaybackControls, mExtension)
             .PlaybackFramesPerSecond(this, &SOdysseyAnimationLayerStack::PlaybackFramesPerSecond)
         ]
+
+        //Right part (empty but needed to center the center part)
+        + SHorizontalBox::Slot()
+        
     ]
     +SVerticalBox::Slot()
     .FillHeight(1.0f)
@@ -104,6 +135,19 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     ];
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());
+}
+
+EOdysseyTimelineTool
+SOdysseyAnimationLayerStack::GetSelectedTool() const
+{
+    return mExtension->Timeline()->GetSelectedTool();
+}
+
+void
+SOdysseyAnimationLayerStack::OnToolChecked(EOdysseyTimelineTool iTool, ECheckBoxState iState)
+{
+    if (iState == ECheckBoxState::Checked)
+        mExtension->Timeline()->SetSelectedTool(iTool);
 }
 
 TSharedRef<ITableRow>

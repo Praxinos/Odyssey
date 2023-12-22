@@ -48,7 +48,7 @@ UOdysseyAnimationLayerImageRaster::UOdysseyAnimationLayerImageRaster()
     : mCellsContainer(MakeShared<FOdysseyAnimationCellsContainer>())
 {
 	LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
-    Icon = *FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
+    Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
 
     mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageRaster::StaticType());
     mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageStagger::StaticType());
