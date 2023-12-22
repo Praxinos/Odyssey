@@ -39,15 +39,13 @@ public:
 public:
     //SWidget overrides
 	virtual bool SupportsKeyboardFocus() const override;
-    virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
     virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
 
 private:
-    void RequestRefresh();
-    void RequestRebuild();
+    const TArray<TSharedPtr<FOdysseyAnimationCell>>& GetCells() const;
 
     TSharedRef<SWidget> CreateCellWidget(int iCellIndex);
     TSharedRef<SWidget> CreateTimingHandleWidget(int iCellIndex);
@@ -55,9 +53,9 @@ private:
     TSharedRef<SWidget> CreateAddCellsHandleRightWidget();
     TSharedRef<SWidget> CreateAddCellsHandleLeftWidget();
 
-    void RefreshWidgets();
-    //void InsertCellSection(int iIndex, TSharedPtr<FCellData> iCellData);
+    void RefreshCells();
     void AddCellSection(int iCellIndex);
+    void AddTempCellSection();
 
     void SelectAllFrames();
     void DeleteSelectedFrames();
@@ -72,16 +70,16 @@ private:
 
     //EVisibility GetFrameSelectorVisibility() const;
 
-    EVisibility GetCellVisibility(int iCellIndex) const;
+    EVisibility GetCellVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const;
     float GetCellHeight() const;
-    float GetCellLength(int iCellIndex) const;
+    float GetCellLength(TSharedPtr<FOdysseyAnimationCell> iCell) const;
 
-    EVisibility GetLengthHandleVisibility(int iCellIndex) const;
+    EVisibility GetLengthHandleVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const;
     void OnLengthHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, int iCellIndex);
     void OnLengthHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnLengthHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
-    EVisibility GetTimingHandleVisibility(int iCellIndex) const;
+    EVisibility GetTimingHandleVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const;
     void OnTimingHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, int iCellIndex);
     void OnTimingHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnTimingHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
@@ -109,6 +107,7 @@ private:
 
     //Box containing the cells widgets
     TSharedPtr<SHorizontalBox> mCellsBox;
+    //TSharedPtr<SListView<TSharedPtr<FOdysseyAnimationCell>>> mCellsList;
 
     //Handles brushes
     const FSlateBrush* mTimingHandleBrush;
@@ -119,8 +118,9 @@ private:
 private:
     //Events structures
     FVector2D mMousePosition;
-    bool mIsRefreshPending;
     TSharedPtr<FOdysseyAnimationCellsMutator> mCellsMutator;
+    uint32 mNumTempCellsToPrepend;
+    uint32 mNumTempCellsToAppend;
 
     struct
     {
@@ -138,16 +138,12 @@ private:
         double mMousePosition;
     } mTimingHandleDragData;
 
-    /* struct
+    struct
     {
-        TArray<TSharedPtr<FCellData>> mEditedCellData;
-        int mFirstCellToRemove;
-        int mNumCellsToRemove;
         int mMinOffset;
         int mMaxOffset;
         bool mHasMaxOffset;
-        int mOffset;
         double mMousePosition;
         bool mIsRightHandle;
-    } mAddCellsHandleDragData; */
+    } mAddCellsHandleDragData;
 };
