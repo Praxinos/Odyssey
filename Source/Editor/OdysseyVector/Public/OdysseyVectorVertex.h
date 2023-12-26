@@ -192,7 +192,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iOrientation the orientation for the desired next section (1.0f or -1.0f).
          * @return a pointer to the next section to go trough.
          */
-        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
+        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection
+                                                          , double iOrientation );
 
         /**
          * @brief Mark all connected segments for update.
@@ -223,15 +224,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         bool IsVisited();
 
+        ::ULIS::FVec2D GetNearestSegmentIntersectionCoords();
         double GetNearestSegmentT();
         double GetDistanceToNearestSegment();
         FOdysseyVectorSegment* GetNearestSegment();
         void SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
                               , double iDistanceToNearestSegment
-                              , double iNearestSegmentT );
+                              , double iNearestSegmentT
+                              , const ::ULIS::FVec2D& iNearestSegmentIntersectionCoords );
         void SetNearestVertex( FOdysseyVectorVertex* iNearestVertex );
         FOdysseyVectorVertex* GetNearestVertex();
-
+        void ResetNearestSegment();
 
 
         /**
@@ -322,6 +325,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         double mDistanceToNearestSegment;
         double mNearestSegmentT;
+        ::ULIS::FVec2D mNearestSegmentIntersectionCoords;
         FOdysseyVectorSegment* mNearestSegment;
         FOdysseyVectorVertex* mNearestVertex;
 

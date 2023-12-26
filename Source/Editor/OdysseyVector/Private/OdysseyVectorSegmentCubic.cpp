@@ -4,7 +4,7 @@
 
 #include <algorithm> // for std::clamp
 
-#define MINRECURSE 4
+#define MINRECURSE 1
 #define MAXRECURSE 7
 
 static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
@@ -654,34 +654,6 @@ CreateAlmostIntersection( FAlmostIntersect aisx[4]
     return intersectionCount;
 }
 */
-static void
-IntersectVertices( FOdysseyVectorVertex* iVertex0, FOdysseyVectorVertex* iVertex1, double iTolerance )
-{
-    if( iVertex0 != iVertex1 )
-    {
-        if( ( iVertex0->GetSegmentCount() == 1 ) /*&& ( iVertex1->GetSegmentCount() == 1 )*/ )
-        {
-            ::ULIS::FVec2D& point0 = iVertex0->GetCoords();
-            ::ULIS::FVec2D& point1 = iVertex1->GetCoords();
-            ::ULIS::FVec2D dif = point0 - point1;
-            double distance = dif.Distance();
-
-            if( distance < iTolerance )
-            {
-                if( distance < iVertex0->GetDistanceToNearestSegment() )
-                {
-                    //FOdysseyVectorSegment* segment0 = iVertex0->GetFirstSegment();
-                    FOdysseyVectorSegment* segment1 = iVertex1->GetFirstSegment();
-                    //double t0 = iVertex0->GetT( segment0 );
-                    double t1 = iVertex1->GetT( segment1 );
-
-                    iVertex0->SetNearestSegment( segment1, distance, t1 );
-                    //iVertex1->SetNearestSegment( segment0, distance, t0 );
-                }
-            }
-        }
-    }
-}
 
 void
 FOdysseyVectorSegmentCubic::DrawStructure( BLContext* iBLContext

@@ -1,8 +1,12 @@
 #include "OdysseyVectorCycle.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorBucket.h"
+#include "OdysseyVectorEngine.h"
+// for measurements
+#include <chrono>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -14,8 +18,9 @@ FOdysseyVectorCycle::~FOdysseyVectorCycle()
 
 //static
 FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
-                                        , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                        , std::vector<FOdysseyVectorSection*>& iSectionArray )
+                                        , const std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                        , const std::vector<FOdysseyVectorSection*>& iSectionArray
+                                        , double iNormal )
     : mOwner( iOwner )
     , mBucket( nullptr )
     , mPropagatedBucket( nullptr )
@@ -23,8 +28,9 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
     , mSectionArray (iSectionArray)
     , mParentCycle( nullptr )
     , mPropagated( false )
+    , mNormal( iNormal )
 {
-    Build( mVertexArray, mSectionArray );
+    Build( );
 }
 
 void
@@ -122,28 +128,28 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
 }
 
 void
-FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
-                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
+FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
+                          , std::vector<FOdysseyVectorSection*>& iSectionArray*/ )
 {
-    int32 arraySize = iSectionArray.size();
+    int32 arraySize = mSectionArray.size();
     int seg = 0;
 
-    if ( iSectionArray.size() ) 
+    if ( mSectionArray.size() ) 
     {
         // Note: section::GetVertexCoords() return the coords in paintgroup's coordinates
-        ::ULIS::FVec2D originAt = iSectionArray[0]->GetVertexCoords( iVertexArray[0] );
+        ::ULIS::FVec2D originAt = mSectionArray[0]->GetVertexCoords( mVertexArray[0] );
 
         mContourPath.moveTo( originAt.x, originAt.y );
 
         for( int i = 0; i < arraySize; i++ )
         {
             int n = ( i + 1 ) % arraySize;
-            FOdysseyVectorSection* section = iSectionArray[i];
+            FOdysseyVectorSection* section = mSectionArray[i];
             FOdysseyVectorVertex* sectionVertex0 = section->GetVertex(0);
             FOdysseyVectorVertex* sectionVertex1 = section->GetVertex(1);
             ::ULIS::FVec2D* sectionBezier = section->GetBezier();
-            FOdysseyVectorVertex* vertexi = iVertexArray[i];
-            FOdysseyVectorVertex* vertexn = iVertexArray[n];
+            FOdysseyVectorVertex* vertexi = mVertexArray[i];
+            FOdysseyVectorVertex* vertexn = mVertexArray[n];
 
             section->AddCycle( this );
 
@@ -151,7 +157,7 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
             {
                 FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
 
-                if( ( iSectionArray[i]->GetSegment() != iSectionArray[n]->GetSegment() )
+                if( ( mSectionArray[i]->GetSegment() != mSectionArray[n]->GetSegment() )
                  || ( intersectionVertex->GetIntersection()->SelfIntersects() == true ) )
                 {
                     vertexn = intersectionVertex->GetPartner();

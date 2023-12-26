@@ -12,6 +12,7 @@
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorBucketView.h"
+#include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

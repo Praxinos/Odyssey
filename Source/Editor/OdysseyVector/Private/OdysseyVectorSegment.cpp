@@ -344,6 +344,18 @@ FOdysseyVectorSegment::GetLength()
     return ::ULIS::FVec2D( mPoint[1]->GetCoords() - mPoint[0]->GetCoords() ).Distance();
 }
 
+void
+FOdysseyVectorSegment::SetBBoxInParent( const ::ULIS::FRectD& iBBoxInParent )
+{
+    mBBoxInParent = iBBoxInParent;
+}
+
+::ULIS::FRectD&
+FOdysseyVectorSegment::GetBBoxInParent()
+{
+    return mBBoxInParent;
+}
+
 /*
 void
 FOdysseyVectorSegment::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )

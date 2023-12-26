@@ -1,4 +1,8 @@
+#include "OdysseyVector.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorSegmentCubic.h"
+
+
 
 FOdysseyVectorSection::~FOdysseyVectorSection()
 {
@@ -43,13 +47,22 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
         ::ULIS::FVec2D* segmentBezier = cubicSegment->GetBezier();
+        ::ULIS::FVec2D subBezier[4];
         BLPoint convertedPoint[4];
 
         if( fabs( t0 - t1 ) < 1.0f )
         {
             FOdysseyVector::BezierExtract( segmentBezier[0], segmentBezier[1], segmentBezier[2], segmentBezier[3]
                                          , t0, t1
-                                         , mBezier[0], mBezier[1], mBezier[2], mBezier[3] );
+                                         , subBezier[0], subBezier[1], subBezier[2], subBezier[3] );
+
+            mBezier[0] = iVertex0->GetCoords();
+            mBezier[3] = iVertex1->GetCoords();
+
+            mBezier[1] = subBezier[1];
+            mBezier[2] = subBezier[2];
+            mBezier[1] = mBezier[0] + ( subBezier[1] - subBezier[0] );
+            mBezier[2] = mBezier[3] + ( subBezier[2] - subBezier[3] );
         }
         else
         {

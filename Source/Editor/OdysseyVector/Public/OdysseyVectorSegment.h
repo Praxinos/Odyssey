@@ -186,6 +186,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                                              , double iToT
                                              , std::vector<FOdysseyVectorVertex*>& oNewVertexArray ){ return nullptr; };
 
+        ::ULIS::FRectD& GetBBoxInParent();
+        void SetBBoxInParent( const ::ULIS::FRectD& iBBoxInParent );
+
     protected:
         void DrawFractionCache( BLContext* iBLContext );
 
@@ -194,6 +197,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
+        ::ULIS::FRectD mBBoxInParent;
         bool mIsInvalidated;
         bool mIsPaintingReady;
         uint32 mID;

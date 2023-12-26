@@ -1,6 +1,7 @@
 #include "OdysseyVectorSegmentCubicGap.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVector.h"
 
 FOdysseyVectorSegmentCubicGap::~FOdysseyVectorSegmentCubicGap()
 {

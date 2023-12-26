@@ -844,7 +844,8 @@ FOdysseyVectorEngine::DrawPolygon( const ::ULIS::FVec2I* iPoint
         {
             if( mHorizontalLineBuffer[i].inited == 2 )
             {
-                if( mHorizontalLineBuffer[i].x1 >= 0 )
+                if( ( mHorizontalLineBuffer[i].x1 >= 0 )
+                 && ( mHorizontalLineBuffer[i].x0 < (int32)iImageWidth ) )
                 {
                     TraceHorizontalLine( &mHorizontalLineBuffer[i]
                                        , iOpacity

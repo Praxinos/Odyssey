@@ -28,12 +28,6 @@ UOdysseyPainterEditorVectorBaseTool::~UOdysseyPainterEditorVectorBaseTool()
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
     : mBaseHUD( nullptr )
     , mHasContextMenu( true )
-    // to prevent a double mouse down bug detected in
-    // FOdysseyPainterEditorViewportClient::InputKey
-    // FOdysseyPainterEditorViewportClient::OnStylusStateChanged
-    // they sometimes are both called and both trigger 
-    // FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint
-    , mDoubleMouseDown_WorkAround( false )
 {
 }
 
@@ -191,6 +185,8 @@ UOdysseyPainterEditorVectorBaseTool::Load()
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
     mViewportWidget = viewportTab->GetViewport()->GetViewportWidget();
+
+    mPreviousMouseEvent = eMouseEventName::MouseHover;
 
     if( hasVector )
     {
@@ -377,9 +373,9 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 
     mDragging = false;
 
-  if( mDoubleMouseDown_WorkAround == false ) // workaround
-  {                                          // workaround
-    mDoubleMouseDown_WorkAround = true;      // workaround
+    // workaround for buggy stylus drivers
+    if( FilterMouseEvent( eMouseEventName::MouseDown ) == false ) 
+        return false;
 
     if( hasVector )
     {
@@ -399,7 +395,6 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 
        return true;
     }
-  }  // workaround
 
     return false;
 }
@@ -408,6 +403,10 @@ void
 UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    // workaround for buggy stylus drivers
+    if( FilterMouseEvent( eMouseEventName::MouseHover ) == false )
+        return;
 
     // we need the focus on the viewport for keyboard 
     //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget );
@@ -429,10 +428,53 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
     }
 }
 
+// WorkAround for faulty stylus drivers
+bool // true = allow, false = reject
+UOdysseyPainterEditorVectorBaseTool::FilterMouseEvent( eMouseEventName iCurrentMouseEvent )
+{
+    bool ret = false;
+
+//UE_LOG(LogTemp, Warning, TEXT("%d : %d"), mPreviousMouseEvent, iCurrentMouseEvent );
+
+    switch( iCurrentMouseEvent )
+    {
+        case eMouseEventName::MouseDown :
+            ret = ( ( mPreviousMouseEvent == eMouseEventName::MouseUp    )
+                 || ( mPreviousMouseEvent == eMouseEventName::MouseHover ) ) ? true : false;
+        break;
+
+        case eMouseEventName::MouseUp :
+            ret = ( ( mPreviousMouseEvent == eMouseEventName::MouseDown  )
+                 || ( mPreviousMouseEvent == eMouseEventName::MouseDrag  ) ) ? true : false;
+        break;
+
+        case eMouseEventName::MouseDrag :
+            ret = ( ( mPreviousMouseEvent == eMouseEventName::MouseDown  )
+                 || ( mPreviousMouseEvent == eMouseEventName::MouseDrag  ) ) ? true : false;
+        break;
+
+        case eMouseEventName::MouseHover :
+            ret = ( ( mPreviousMouseEvent == eMouseEventName::MouseHover )
+                 || ( mPreviousMouseEvent == eMouseEventName::MouseUp    ) ) ? true : false;
+        break;
+
+        default :
+        break;
+    }
+
+    mPreviousMouseEvent = iCurrentMouseEvent;
+
+    return ret;
+}
+
 void
 UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    // workaround for buggy stylus drivers
+    if( FilterMouseEvent( eMouseEventName::MouseDrag ) == false )
+        return;
 
     mDragging = true;
 
@@ -460,7 +502,9 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
     bool ret = false;
 
-    mDoubleMouseDown_WorkAround = false; // workaround
+    // workaround for buggy stylus drivers
+    if( FilterMouseEvent( eMouseEventName::MouseUp ) == false )
+        return false;
 
     mDragging = false;
 

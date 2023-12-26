@@ -3,6 +3,8 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorIntersection.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVector.h"
 
 FOdysseyVectorVertex::~FOdysseyVectorVertex()
 {
@@ -110,7 +112,8 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
                 {
                     rightSideSection.push_back( section );
                 }
-                else
+
+                if( ( FOdysseyVector::Cross2D( -lastSectionVector, sectionVector ) * iOrientation <= 0.0f ) )
                 {
                     wrongSideSection.push_back( section );
                 }
@@ -317,6 +320,12 @@ FOdysseyVectorVertex::GetNearestSegment()
     return mNearestSegment;
 }
 
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetNearestSegmentIntersectionCoords()
+{
+    return mNearestSegmentIntersectionCoords;
+}
+
 double
 FOdysseyVectorVertex::GetDistanceToNearestSegment()
 {
@@ -330,14 +339,26 @@ FOdysseyVectorVertex::GetNearestSegmentT()
 }
 
 void
+FOdysseyVectorVertex::ResetNearestSegment()
+{
+    mNearestSegment = nullptr;
+    mDistanceToNearestSegment = DBL_MAX;
+    mNearestSegmentT = 0.0f;
+    mNearestSegmentIntersectionCoords = 0.0f;
+    mNearestVertex = nullptr;
+}
+
+void
 FOdysseyVectorVertex::SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
                                        , double iDistanceToNearestSegment
-                                       , double iNearestSegmentT )
+                                       , double iNearestSegmentT
+                                       , const ::ULIS::FVec2D& iNearestSegmentIntersectionCoords )
 {
     mNearestSegment = iNearestSegment;
     mDistanceToNearestSegment = iDistanceToNearestSegment;
     mNearestSegmentT = iNearestSegmentT;
     mNearestVertex = nullptr;
+    mNearestSegmentIntersectionCoords = iNearestSegmentIntersectionCoords;
 }
 
 void
@@ -401,13 +422,13 @@ FOdysseyVectorVertex::GetSegmentList()
 FOdysseyVectorSegment*
 FOdysseyVectorVertex::GetLastSegment()
 {
-    return mSegmentList.back();
+    return mSegmentList.size() ? mSegmentList.back() : nullptr;
 }
 
 FOdysseyVectorSegment*
 FOdysseyVectorVertex::GetFirstSegment()
 {
-    return mSegmentList.front();
+    return mSegmentList.size() ? mSegmentList.front() : nullptr;
 }
 /*
 ::ULIS::FVec2D

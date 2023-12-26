@@ -18,6 +18,14 @@ enum class eBaseToolColorSource : uint8
     Palette  = uint8(eBucketColorMode::Palette)
 };
 
+enum class eMouseEventName : uint8
+{
+    MouseHover = 0,
+    MouseDown  = 1,
+    MouseDrag  = 2,
+    MouseUp    = 3
+};
+
 UCLASS(Abstract)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdysseyPainterEditorTool
 {
@@ -88,6 +96,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
                                       , const FKey& iKey ){ return false; };
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName );
+        bool FilterMouseEvent( eMouseEventName iCurrentMouseEvent );
 
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
@@ -138,9 +147,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         TSharedPtr< SViewport > mViewportWidget;
         FOdysseyPainterEditorVectorBaseToolHUD* mBaseHUD;
         bool mHasContextMenu;
-        bool mDoubleMouseDown_WorkAround;
         bool mDragging;
         bool mAutoCreateMedia;
+        // to prevent a double mouse down bug detected in
+        // FOdysseyPainterEditorViewportClient::InputKey
+        // FOdysseyPainterEditorViewportClient::OnStylusStateChanged
+        // they sometimes are both called and both trigger 
+        // FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint
+        eMouseEventName mPreviousMouseEvent; // filter faulty stylus events
 
     public:
         //UPROPERTY( EditAnywhere, Category = Behavior )
