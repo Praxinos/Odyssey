@@ -11,6 +11,10 @@
 #include "OdysseyVectorCycle.h"
 #include <execution>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
 // Some explanations are needed here, as this is by far the most complex process
 // of Odyssey's vector features. The principles is to find cycles chordless determined by
 // the intersected paths. To do so we have a multi-step process :
@@ -313,6 +317,90 @@ FOdysseyVectorGroupPaint::IsRealtime()
     return bRealtime;
 }
 
+// https://www.particleincell.com/2013/cubic-line-intersection/
+// sign of number
+double sgn( double x )
+{
+    return ( x < 0.0f ) ? -1.0f : 1.0f;
+}
+
+// https://www.particleincell.com/2013/cubic-line-intersection/
+void cubicRoots( const double iPoly[4], double oRoots[3] )
+{
+    if( iPoly[0] )
+    {
+        double A = iPoly[1] / iPoly[0];
+        double B = iPoly[2] / iPoly[0];
+        double C = iPoly[3] / iPoly[0];
+        double Q = ( 3 * B     - A * A ) / 9;
+        double R = ( 9 * A * B - 27 * C - 2 * A * A * A ) / 54;
+        double D = Q * Q * Q + R * R; // polynomial discriminant
+ 
+        if( D >= 0 ) // complex or duplicate roots
+        {
+            double sqrtD = sqrt(D);
+            double S = sgn( R + sqrtD ) * pow( fabs( R + sqrtD ), ( 1 / 3 ) );
+            double T = sgn( R - sqrtD ) * pow( fabs( R - sqrtD ), ( 1 / 3 ) );
+            double Im = fabs( sqrt(3)*(S - T)/2); // complex part of root pair
+
+            oRoots[0] = -A / 3 + ( S + T );     // real root
+            oRoots[1] = -A / 3 - ( S + T ) / 2; // real part of complex root
+            oRoots[2] = -A / 3 - ( S + T ) / 2; // real part of complex root
+ 
+            /*discard complex roots*/
+            if ( Im != 0 )
+            {
+                oRoots[1] = -1.0f;
+                oRoots[2] = -1.0f;
+            }
+        }
+        else                                          // distinct real roots
+        {
+            double th = acos( R / sqrt( -pow( Q, 3 ) ) );
+            double sqrtMinusQ = sqrt( -Q );
+
+            oRoots[0] = 2 * sqrtMinusQ * cos( th / 3 ) - A / 3;
+            oRoots[1] = 2 * sqrtMinusQ * cos( ( th + 2 * M_PI ) / 3 ) - A / 3;
+            oRoots[2] = 2 * sqrtMinusQ * cos( ( th + 4 * M_PI ) / 3 ) - A / 3;
+        }
+    }
+}
+
+//https://www.xarg.org/book/computer-graphics/line-segment-bezier-curve-intersection/
+::ULIS::FVec2D lineBezier( const ::ULIS::FVec2D& iLineP0
+                         , const ::ULIS::FVec2D& iLineP1
+                         , const ::ULIS::FVec2D iBezier[4] )
+{
+    double Ax = 3 * (iBezier[1].x - iBezier[2].x) + iBezier[3].x - iBezier[0].x;
+    double Ay = 3 * (iBezier[1].y - iBezier[2].y) + iBezier[3].y - iBezier[0].y;
+    double Bx = 3 * (iBezier[0].x - 2 * iBezier[1].x + iBezier[2].x);
+    double By = 3 * (iBezier[0].y - 2 * iBezier[1].y + iBezier[2].y);
+    double Cx = 3 * (iBezier[1].x - iBezier[0].x);
+    double Cy = 3 * (iBezier[1].y - iBezier[0].y);
+    double Dx = iBezier[0].x;
+    double Dy = iBezier[0].y;
+    double vx = iLineP1.y - iLineP0.y;
+    double vy = iLineP0.x - iLineP1.x;
+    double d = iLineP0.x * vx + iLineP0.y * vy;
+    double poly[4] = { vx * Ax + vy * Ay
+                     , vx * Bx + vy * By
+                     , vx * Cx + vy * Cy
+                     , vx * Dx + vy * Dy - d };
+    double roots[3];
+
+    cubicRoots( poly, roots );
+
+    for( double& t : roots )
+    {
+        if ( ( t < 0.0f ) || ( t > 1.0f ) ) continue;
+
+        return ::ULIS::FVec2D( ( ( Ax * t + Bx ) * t + Cx ) * t + Dx
+                             , ( ( Ay * t + By ) * t + Cy ) * t + Dy );
+    }
+
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
 // CubicSegment-CubicSegment intersection test. The test is performed using straight sub-segments
 // that are precomputed by the PaintGroup object when updated and stored in the path's FractionCache,
 // as it would be too complicated to do maths using the parametric bezier and I'm not that smart.
@@ -340,6 +428,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
     std::vector<FOdysseyVectorFraction>& segment1FractionCache = iSegment1->GetFractionCache();
     ::ULIS::FVec2D segment1Point0InParent = iSegment1->GetFractionCacheStartPointInParent();
     ::ULIS::FVec2D segment1Point1InParent = iSegment1->GetFractionCacheEndPointInParent();
+    ::ULIS::FVec2D* segment1Bezier = iSegment1->GetBezier();
 
     //uint32 intersectionCount = 0;
 
@@ -495,58 +584,6 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
         }
 ///////////////////////////////////
     }
-/*
-    if( ( iTolerance ) && ( iSegment0 != iSegment1 ) )
-    {
-        double s0p0s1p0Distance = ::ULIS::FVec2D( segment1Point0InParent - segment0Point0InParent ).Distance();
-        double s0p0s1p1Distance = ::ULIS::FVec2D( segment1Point1InParent - segment0Point0InParent ).Distance();
-        double s0p1s1p0Distance = ::ULIS::FVec2D( segment1Point0InParent - segment0Point1InParent ).Distance();
-        double s0p1s1p1Distance = ::ULIS::FVec2D( segment1Point1InParent - segment0Point1InParent ).Distance();
-
-        if( segment0Vertex0->GetSegmentCount() == 1 )
-        {
-            if( segment1Vertex0->GetSegmentCount() == 1 )
-            {
-                if( ( s0p0s1p0Distance < iTolerance )
-                 && ( s0p0s1p0Distance < segment0Vertex0->GetDistanceToNearestSegment() ) )
-                {
-                    segment0Vertex0->SetNearestSegment( iSegment1, s0p0s1p0Distance, 0.0f, ::ULIS::FVec2D(0.0f,0.0f) );
-                }
-            }
-
-            if( segment1Vertex1->GetSegmentCount() == 1 )
-            {
-                if( ( s0p0s1p1Distance < iTolerance )
-                 && ( s0p0s1p1Distance < segment0Vertex0->GetDistanceToNearestSegment() ) )
-                {
-                    segment0Vertex0->SetNearestSegment( iSegment1, s0p0s1p1Distance, 1.0f, ::ULIS::FVec2D(0.0f,0.0f) );
-                }
-            }
-        }
-
-        if( segment0Vertex1->GetSegmentCount() == 1 )
-        {
-            if( segment1Vertex0->GetSegmentCount() == 1 )
-            {
-                if( ( s0p1s1p0Distance < iTolerance )
-                 && ( s0p1s1p0Distance < segment0Vertex1->GetDistanceToNearestSegment() ) )
-                {
-                    segment0Vertex1->SetNearestSegment( iSegment1, s0p1s1p0Distance, 0.0f, ::ULIS::FVec2D(0.0f,0.0f) );
-                }
-            }
-
-            if( segment1Vertex1->GetSegmentCount() == 1 )
-            {
-                if( ( s0p1s1p1Distance < iTolerance )
-                 && ( s0p1s1p1Distance < segment0Vertex1->GetDistanceToNearestSegment() ) )
-                {
-                    segment0Vertex1->SetNearestSegment( iSegment1, s0p1s1p1Distance, 1.0f, ::ULIS::FVec2D(0.0f,0.0f) );
-                }
-            }
-        }
-    }
-*/
-    //return intersectionCount;
 }
 
 void
@@ -1371,7 +1408,7 @@ FOdysseyVectorGroupPaint::FindCycles()
     }
 
     // sort cycles in order to always have a propagation that starts from the same cycles.
-    // this is required when using multithreading.
+    // This is only required when using multithreading.
     mCycleList.sort( []( FOdysseyVectorCycle* iCycleA, FOdysseyVectorCycle* iCycleB )
                      {
                          return iCycleA->mNormal > iCycleB->mNormal;

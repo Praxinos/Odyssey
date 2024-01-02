@@ -28,6 +28,7 @@ public:
     void OnCurrentFrameChanged( UOdysseyAnimation* iAnimation );
     void ParseVectorSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnSourceChanged();
+    void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
 
 protected:
     //Init

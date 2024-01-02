@@ -10,6 +10,7 @@
 #include "Framework/Docking/LayoutExtender.h"
 #include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -45,6 +46,13 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
         FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
         OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+    }
+    else
+    {
+        TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
+
+        vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( nullptr );
+        vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( nullptr );
     }
 }
 

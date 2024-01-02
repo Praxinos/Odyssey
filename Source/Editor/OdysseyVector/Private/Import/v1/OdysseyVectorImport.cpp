@@ -6,7 +6,10 @@
 void
 FOdysseyVectorImportV1::Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, uint64 iChunkEnd )
 {
-    if( iScene )
+    // prevent reloading when the scene already exists.
+    // This happens when undoing layer deletion for example.
+    // Emptying the scene would create inconsistencies in the undo layer stack.
+    if( iScene && ( iScene->GetChildrenList().size() == 0 ) )
     {
         std::vector<FOdysseyVectorObject*> vectorObjectArray;
 

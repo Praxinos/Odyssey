@@ -708,6 +708,37 @@ UOdysseyPainterEditorVectorBaseTool::Delete()
     }
 }
 
+TSharedPtr<SWidget>
+UOdysseyPainterEditorVectorBaseTool::CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
+                                                         , const TSharedPtr<ISinglePropertyView> iView )
+{
+    if (!iPropertyHandle)
+        return nullptr;
+
+    TSharedRef<SWidget> nameWidget = iPropertyHandle->CreatePropertyNameWidget();
+    TSharedRef<SWidget> valueWidget = iPropertyHandle->CreatePropertyValueWidget(false);
+
+    iView->SetVisibility(EVisibility::Collapsed);
+
+    return SNew(SHorizontalBox)
+    + SHorizontalBox::Slot()
+    .AutoWidth()
+    [
+        //PATCH:
+        iView.ToSharedRef()
+    ]
+    + SHorizontalBox::Slot()
+    .AutoWidth()
+    .Padding(0.f, 0.f, 3.f, 0.f)
+    [
+        nameWidget
+    ]
+    + SHorizontalBox::Slot()
+    [
+        valueWidget
+    ];
+}
+
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
 {

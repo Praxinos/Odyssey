@@ -8,6 +8,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyVector.h"
 #include "OdysseyPainterEditor.h"
+#include "Undo/OdysseyVectorUndoSelectObject.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -132,26 +133,26 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
 void
 SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorGroupPaint* iScene )
 {
-    mRootItem = MakeShareable(new FVectorSceneTreeViewItem(iScene));
-
-    BuildTree( mRootItem );
-
     mItemsSource.Empty();
-/*
-    // We don't show the root item (the Scene) as it must not be selected
-    // so we set its children as the TreeItemsSource
-    //mItemsSource = mRootItem.Get()->mChildren;
-*/
-
-    mItemsSource.Add( mRootItem );
 
     RequestTreeRefresh();
 
-    // Expand items if need
-    ExpandTree( mRootItem );
-    // Select items if needed
-    SelectedItems.Empty();
-    SelectTree( mRootItem );
+    if( iScene )
+    {
+        mRootItem = MakeShareable(new FVectorSceneTreeViewItem(iScene));
+
+        BuildTree( mRootItem );
+
+        mItemsSource.Add( mRootItem );
+
+        RequestTreeRefresh();
+
+        // Expand items if need
+        ExpandTree( mRootItem );
+        // Select items if needed
+        SelectedItems.Empty();
+        SelectTree( mRootItem );
+    }
 }
 
 void

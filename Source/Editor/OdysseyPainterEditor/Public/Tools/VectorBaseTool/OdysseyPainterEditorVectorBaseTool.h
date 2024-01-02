@@ -52,6 +52,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
                                     , uint64 iTraversalFlags );
 
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
+        TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
+                                                , const TSharedPtr<ISinglePropertyView> iView );
 
 	    //virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 	    //virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;

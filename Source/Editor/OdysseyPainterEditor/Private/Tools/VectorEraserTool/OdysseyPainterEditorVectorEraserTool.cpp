@@ -5,6 +5,7 @@
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserToolHUD.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "ISinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -17,7 +18,7 @@ UOdysseyPainterEditorVectorEraserTool::~UOdysseyPainterEditorVectorEraserTool()
 UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorEraserToolHUD( this ), false )
     , Radius( 20.0f )
-    , Split( true )
+    , SplitPath( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 
@@ -151,7 +152,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                                            , oRemovedObjectArray
                                            , oRemovedVertexArray
                                            , oRemovedSegmentArray
-                                           , Split );
+                                           , SplitPath );
 
                   // do not erase children. this is useless and would cause a crash because the paintgroup
                   // is not updated yet.
@@ -175,7 +176,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                                                , oRemovedObjectArray
                                                , oRemovedVertexArray
                                                , oRemovedSegmentArray
-                                               , Split );
+                                               , SplitPath );
 
                       // do not erase children. this is useless and would cause a crash because the paintgroup
                       // is not updated yet.
@@ -259,7 +260,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
                                  , oRemovedVertexArray
                                  , oRemovedSegmentArray
                                  , false
-                                 , Split ) )
+                                 , SplitPath ) )
                   {
                       oRemovedObjectArray.push_back( path );
                   }
@@ -370,6 +371,34 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorEraserTool::CreateTopTabWidget()
+{
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> splitPathPropertyView = propertyEditorModule.CreateSingleProperty(this, "SplitPath", defaultPropertyParams);
+    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> splitPathHandle = splitPathPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+
+    return SNew(SUniformWrapPanel)
+           .SlotPadding(FVector2D(3.f, 3.f))
+           .EvenRowDistribution(true)
+           .HAlign(HAlign_Fill)
+           + SUniformWrapPanel::Slot()
+           [
+               UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
+           ]
+           + SUniformWrapPanel::Slot()
+           [
+               CreatePropertyWidget(splitPathHandle, splitPathPropertyView).ToSharedRef()
+           ]
+           + SUniformWrapPanel::Slot()
+           [
+               CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
+           ];
 }
 
 #undef LOCTEXT_NAMESPACE
