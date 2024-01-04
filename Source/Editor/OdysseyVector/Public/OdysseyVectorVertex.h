@@ -299,7 +299,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void SetChained( bool iChained );
         bool IsChained();
         void MakeJoint( FOdysseyVectorSegment* iPreviousSegment );
-        void DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags );
+        void DrawJoint( BLContext* iBLContext
+                      , double iStartU
+                      , double iEndU
+                      , double iCombinedOpacity
+                      , uint64 iDrawingFlags );
         FOdysseyVectorJoint& GetJoint();
         double GetJointLength();
         uint32 GetFlags();

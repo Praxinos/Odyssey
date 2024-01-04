@@ -13,6 +13,7 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint( iX, iY, iRadius )
    , mPath ( nullptr )
+   , mJoint( nullptr )
    , mFlags( 0 )
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )
@@ -387,6 +388,8 @@ void
 FOdysseyVectorVertex::SetPath( FOdysseyVectorPath* iPath )
 {
     mPath = iPath;
+
+    mJoint.SetPath( mPath );
 }
 
 void
@@ -747,11 +750,17 @@ FOdysseyVectorVertex::GetJointLength()
 }
 
 void
-FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags )
+FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
+                               , double iStartU
+                               , double iEndU
+                               , double iCombinedOpacity
+                               , uint64 iDrawingFlags )
 {
     if( mSegmentList.size() == 2 )
     {
-        if( IsHandleAligned() == true )
+        // Note: in semi-transparent mode, the drawing is done via our own drawing routines that are pixel aligned
+        // and not sub-pixel precise, thus there is no need for stroking the joint with a thin line.
+        if( ( IsHandleAligned() == true ) && ( iCombinedOpacity == 1.0f ) )
         {
             BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
             ::ULIS::FVec2D localHandlePosition[2];
@@ -769,7 +778,7 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags )
         }
         else
         {
-            mJoint.Draw( iBLContext, iDrawingFlags );
+            mJoint.Draw( iBLContext, iStartU, iEndU, iCombinedOpacity, iDrawingFlags );
         }
     }
 }

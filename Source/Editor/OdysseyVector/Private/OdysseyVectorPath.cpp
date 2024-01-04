@@ -1565,79 +1565,21 @@ FOdysseyVectorPath::AlterRadius( double iDeltaRadius )
 }
 
 void
-FOdysseyVectorPath::DrawTexturedJoint( FOdysseyVectorJoint* iJoint
-                                     , int8*  iScreenPixels
-                                     , uint32 iScreenWidth
-                                     , uint32 iScreenHeight
-                                     , uint32 iScreenBitsPerPixel
-                                     , int8*  iTexturePixels
-                                     , uint32 iTextureWidth
-                                     , uint32 iTextureHeight
-                                     , uint32 iTextureBitsPerPixel
-                                     , double iStartU
-                                     , double iEndU
-                                     , double iCombinedOpacity
-                                     , uint64 iDrawingFlags )
-{
-    // TODO: transform this to an argument to avoid repetitive calls. I guess.
-    FOdysseyVectorEngine* vectorEngine = GetEngine();
-    std::vector<FOdysseyVectorPolygon5>& polygonCache = iJoint->GetPolygonCache();
-    FColor foregroundColor = GetForegroundColor();
-    double difU = iEndU - iStartU;
-
-    for( int i = 0; i < polygonCache.size(); i++ )
-    {
-        FOdysseyVectorPolygon5* polygon = &polygonCache[i];
-        BLPoint worldPoint[5];
-        ::ULIS::FVec2I int32Point[5];
-        double polyU[5];
-
-        for( uint32 j = 0; j < polygon->pointCount; j++ )
-        {
-           worldPoint[j] = mWorldMatrix.mapPoint( polygon->point[j].x, polygon->point[j].y );
-           int32Point[j].x = (int32) worldPoint[j].x;
-           int32Point[j].y = (int32) worldPoint[j].y;
-           polyU[j] = iStartU + ( polygon->U[j] * difU );
-        }
-
-        // TODO : check for in-screen visibility
-            vectorEngine->DrawPolygon( int32Point
-                                     , polyU
-                                     , polygon->V
-                                     , polygon->pointCount
-                                     , iCombinedOpacity
-                                     , iScreenPixels
-                                     , iScreenWidth
-                                     , iScreenHeight
-                                     , iScreenBitsPerPixel
-                                     , foregroundColor
-                                     , iTexturePixels
-                                     , iTextureWidth
-                                     , iTextureHeight
-                                     , iTextureBitsPerPixel
-                                     , mBrush.ColorFromBrush ? false : true );
-    }
-}
-
-void
-FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
-                                       , int8*  iScreenPixels
-                                       , uint32 iScreenWidth
-                                       , uint32 iScreenHeight
-                                       , uint32 iScreenBitsPerPixel
-                                       , int8*  iTexturePixels
-                                       , uint32 iTextureWidth
-                                       , uint32 iTextureHeight
-                                       , uint32 iTextureBitsPerPixel
-                                       , double iStartU
-                                       , double iEndU
-                                       , double iCombinedOpacity
-                                       , uint64 iDrawingFlags )
+FOdysseyVectorPath::DrawSegment( FOdysseyVectorSegment* iSegment
+                               , double iStartU
+                               , double iEndU
+                               , double iCombinedOpacity
+                               , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetEngine();
     std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
     FColor foregroundColor = GetForegroundColor();
     double difU = iEndU - iStartU;
+    // to prevent overlapping of polygons,
+    // which would be visible when opacity < 1.0f.
+    // this could be solved via a Z Buffer, but we'll keep this idea for later
+    bool skipFirstHorizontalLine = iSegment->GetVertex(0)->GetSegmentCount() == 2 ? true : false;
+    BLImageData& imageData = vectorEngine->GetRenderData();
 
     for( int i = 0; i < fractionCache.size(); i++ )
     {
@@ -1656,32 +1598,34 @@ FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
         int32 ymax = ::ULIS::FMath::Max4( intPt[0].y, intPt[1].y, intPt[2].y, intPt[3].y );
 
         // don't draw if quad is outside the screen
-        if( ( ( xmin ) < (int32)iScreenWidth  )
-         && ( ( xmax ) > 0                    )
-         && ( ( ymin ) < (int32)iScreenHeight )
-         && ( ( ymax ) > 0                    ) )
+        if( ( ( xmin ) < (int32)imageData.size.w )
+         && ( ( xmax ) > 0                       )
+         && ( ( ymin ) < (int32)imageData.size.h )
+         && ( ( ymax ) > 0                       ) )
         {
             double quadU[4] = { iStartU + ( fraction->polygon.U[0] * difU )
                               , iStartU + ( fraction->polygon.U[1] * difU )
                               , iStartU + ( fraction->polygon.U[2] * difU )
                               , iStartU + ( fraction->polygon.U[3] * difU ) };
+            uint64 polygonDrawingFlags = 0;
+
+            polygonDrawingFlags |= skipFirstHorizontalLine ? FPolygonDrawingFlags::SKIPFIRSTHLINE : 0;
+            polygonDrawingFlags |= mBrush.ColorFromBrush   ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
 
             // should be a static function
-            vectorEngine->DrawPolygon( intPt
+            vectorEngine->FillPolygon( intPt
                                      , quadU
                                      , fraction->polygon.V
                                      , 4
                                      , iCombinedOpacity
-                                     , iScreenPixels
-                                     , iScreenWidth
-                                     , iScreenHeight
-                                     , iScreenBitsPerPixel
                                      , foregroundColor
-                                     , iTexturePixels
-                                     , iTextureWidth
-                                     , iTextureHeight
-                                     , iTextureBitsPerPixel
-                                     , mBrush.ColorFromBrush ? false : true );
+                                     , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                     , mBrush.width
+                                     , mBrush.height
+                                     , mBrush.bitsPerPixel
+                                     , polygonDrawingFlags );
+
+            skipFirstHorizontalLine = ( intPt[1].y == intPt[2].y ) ? true : false;
         }
     }
 }
@@ -1708,10 +1652,8 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
 
     UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();
-    BLImageData imageData;
+    BLImageData& imageData = vectorEngine->GetRenderData();
     ::ULIS::FRectD screen;
-
-    image->makeMutable( &imageData );
 
     screen.x = 0;
     screen.y = 0;
@@ -1724,15 +1666,15 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     }
     else
     {
-        if( texture )
+        if( mBrush.GetTexture() )
         {
-            const FColor* brushData = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
             double startU = mBrush.Revert ? 1.0f : 0.0f;
+
+            mBrush.Lock();
 
             iChain.IterateSegments( [ this
                                     , texture
-                                    , brushData
-                                    , &imageData
+                                    , iBLContext
                                     , &iCombinedOpacity
                                     , &iDrawingFlags
                                     , &startU
@@ -1796,40 +1738,24 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                         if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
 
                         // TODO : check for in-screen visibility
-                        DrawTexturedJoint( &joint
-                                            , (int8*)imageData.pixelData
-                                            , imageData.size.w
-                                            , imageData.size.h
-                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                            , (int8*) brushData
-                                            , texture->GetSurfaceWidth()
-                                            , texture->GetSurfaceHeight()
-                                            , 32
-                                            , jointStartU
-                                            , jointEndU
-                                            , iCombinedOpacity
-                                            , iDrawingFlags );
+                        vertex->DrawJoint( iBLContext
+                                         , jointStartU
+                                         , jointEndU
+                                         , iCombinedOpacity
+                                         , iDrawingFlags );
                     }
 
                     // don't draw if segment is outside the screen
                     if( ( ( bbox.x          ) < screen.w )
-                        && ( ( bbox.x + bbox.w ) > 0        )
-                        && ( ( bbox.y          ) < screen.h )
-                        && ( ( bbox.y + bbox.h ) > 0        ) )
+                     && ( ( bbox.x + bbox.w ) > 0        )
+                     && ( ( bbox.y          ) < screen.h )
+                     && ( ( bbox.y + bbox.h ) > 0        ) )
                     {
-                        DrawTexturedSegment( segment
-                                            , (int8*)imageData.pixelData
-                                            , imageData.size.w
-                                            , imageData.size.h
-                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                            , (int8*) brushData
-                                            , texture->GetSurfaceWidth()
-                                            , texture->GetSurfaceHeight()
-                                            , 32
-                                            , segmentStartU
-                                            , segmentEndU
-                                            , iCombinedOpacity
-                                            , iDrawingFlags );
+                        DrawSegment( segment
+                                   , segmentStartU
+                                   , segmentEndU
+                                   , iCombinedOpacity
+                                   , iDrawingFlags );
                     }
                 }
 
@@ -1839,7 +1765,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 return false; // keep iterating
             } );
 
-            texture->PlatformData->Mips[0].BulkData.Unlock();
+            mBrush.Unlock();
         }
         else
         {
@@ -1851,6 +1777,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
 
             iChain.IterateSegments( [ this
                                     , iBLContext
+                                    , &iCombinedOpacity
                                     , &iDrawingFlags
                                     , &screen ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
             {
@@ -1862,13 +1789,24 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                  && ( ( bbox.y          ) < screen.h )
                  && ( ( bbox.y + bbox.h ) > 0        ) )
                 {
-                    segment->Draw( iBLContext );
+                    if( iCombinedOpacity != 1.0f )
+                    {
+                        DrawSegment( segment
+                                   , 0.0f
+                                   , 0.0f
+                                   , iCombinedOpacity
+                                   , iDrawingFlags );
+                    }
+                    else
+                    {
+                        segment->Draw( iBLContext );
+                    }
                 }
 
             // TODO : check for in-screen visibility
                 /*if( currentVertex->GetSegmentCount() == 2 )
                 {*/
-                    vertex->DrawJoint( iBLContext, iDrawingFlags );
+                    vertex->DrawJoint( iBLContext, 0.0f, 0.0f, iCombinedOpacity, iDrawingFlags );
                 /*}*/
 
                 return false; // keep iterating

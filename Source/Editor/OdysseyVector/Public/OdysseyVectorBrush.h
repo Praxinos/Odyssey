@@ -25,6 +25,10 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 
     FOdysseyVectorBrush()
     {
+        width  = 0;
+        height = 0;
+        bitsPerPixel = 0;
+        pixels = nullptr;
         texture = nullptr;
         ColorFromBrush = false;
         ExtendOverPath = true;
@@ -33,14 +37,26 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 
     FOdysseyVectorBrush( UTexture2D* iTexture )
     {
-        texture = iTexture;
+        width  = 0;
+        height = 0;
+        bitsPerPixel = 0;
+        pixels = nullptr;
         ColorFromBrush = false;
         ExtendOverPath = true;
         Revert = false;
+
+        SetTexture( iTexture );
     }
 
     void SetTexture( UTexture2D* iTexture );
     UTexture2D* GetTexture() const;
+    void Lock();
+    void Unlock();
+
+    FColor* pixels;
+    uint32  width;
+    uint32  height;
+    uint32  bitsPerPixel;
 
     private:
         UTexture2D* texture;

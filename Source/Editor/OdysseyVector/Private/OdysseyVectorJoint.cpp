@@ -1,12 +1,21 @@
 #include "OdysseyVectorJoint.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorJoint::~FOdysseyVectorJoint()
 {
 }
 
-FOdysseyVectorJoint::FOdysseyVectorJoint()
-    : mLength( 0.0f )
+FOdysseyVectorJoint::FOdysseyVectorJoint( FOdysseyVectorPath* iPath )
+    : mPath( iPath )
+    , mLength( 0.0f )
 {
+}
+
+void
+FOdysseyVectorJoint::SetPath( FOdysseyVectorPath* iPath )
+{
+    mPath = iPath;
 }
 
 // https://gamedev.net/forums/topic/647810-intersection-point-of-two-vectors/5094071/
@@ -37,11 +46,75 @@ FOdysseyVectorJoint::GetLength()
 }
 
 void
-FOdysseyVectorJoint::Draw( BLContext* iBLContext, uint64 iDrawingFlags )
+FOdysseyVectorJoint::Draw( BLContext* iBLContext
+                         , double iStartU
+                         , double iEndU
+                         , double iCombinedOpacity
+                         , uint64 iDrawingFlags )
 {
-    for( int i = 0; i < mPolygonCache.size(); i++ )
+    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+    FOdysseyVectorEngine* vectorEngine = mPath->GetEngine();
+    FOdysseyVectorBrush& brush = mPath->GetBrush();
+    FColor foregroundColor = mPath->GetForegroundColor();
+    double difU = iEndU - iStartU;
+    bool skipFirstHorizontalLine = false; // to prevent overlapping of polygons,
+                                          // which would be visible when opacity < 1.0f.
+
+    // use Blend2D if there is no semi-transparency.
+    if( iCombinedOpacity == 1.0f )
     {
-        iBLContext->fillPolygon( mPolygonCache[i].point, mPolygonCache[i].pointCount );
+        for( int i = 0; i < mPolygonCache.size(); i++ )
+        {
+            iBLContext->fillPolygon( mPolygonCache[i].point, mPolygonCache[i].pointCount );
+        }
+
+        // this is to prevent a thin line between polygons because BLend2D draw them at sub-pixel level and this
+        // might create a thin line between the polygons. So we draw a one-pixel line at the edges.
+        iBLContext->save();
+        iBLContext->resetMatrix();
+        iBLContext->setStrokeWidth( 1.0f );
+        for ( int i = 0; i < mPolygonCache.size(); i++ )
+        {
+            iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y )
+                                  , worldMatrix.mapPoint( mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y ) );
+            iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y )
+                                  , worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y ) );
+        }
+        iBLContext->restore();
+    }
+    else //otherwise use our own routines. Pixel-aligned.
+    {
+        for( int i = 0; i < mPolygonCache.size(); i++ )
+        {
+            FOdysseyVectorPolygon3* polygon = &mPolygonCache[i];
+            uint64 polygonDrawingFlags = 0;
+            ::ULIS::FVec2I int32Point[3];
+            BLPoint worldPoint[3];
+            double polyU[3];
+
+            polygonDrawingFlags |= skipFirstHorizontalLine ? FPolygonDrawingFlags::SKIPFIRSTHLINE : 0;
+            polygonDrawingFlags |= brush.ColorFromBrush   ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
+
+            for( uint32 j = 0; j < polygon->pointCount; j++ )
+            {
+                worldPoint[j] = worldMatrix.mapPoint( polygon->point[j].x, polygon->point[j].y );
+                int32Point[j].x = (int32) worldPoint[j].x;
+                int32Point[j].y = (int32) worldPoint[j].y;
+                polyU[j] = iStartU + ( polygon->U[j] * difU );
+            }
+
+            vectorEngine->FillPolygon( int32Point
+                                     , polyU
+                                     , polygon->V
+                                     , polygon->pointCount
+                                     , iCombinedOpacity
+                                     , foregroundColor
+                                     , (int8*) brush.pixels 
+                                     , brush.width
+                                     , brush.height
+                                     , brush.bitsPerPixel
+                                     , polygonDrawingFlags );
+        }
     }
 }
 
@@ -101,6 +174,10 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iOrigin
 
             if ( miterRatio < iMiterLimit )
             {
+                // 2 triangles
+                mPolygonCache.resize(2);
+
+                // first triangle
                 mPolygonCache[0].point[0].x = iOrigin.x;
                 mPolygonCache[0].point[0].y = iOrigin.y;
                 mPolygonCache[0].U[0] = 0.0f;
@@ -116,15 +193,32 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iOrigin
                 mPolygonCache[0].U[2] = 0.5f;
                 mPolygonCache[0].V[2] = side == 1.0f ? 1.0f : 0.0f;
 
-                mPolygonCache[0].point[3].x = edge1Point.x;
-                mPolygonCache[0].point[3].y = edge1Point.y;
-                mPolygonCache[0].U[3] = 1.0f;
-                mPolygonCache[0].V[3] = side == 1.0f ? 1.0f : 0.0f;
-                // default pointCount for joint's polygons is 5. Set it to 4.
-                mPolygonCache[0].pointCount = 4;
+                //mPolygonCache[0].pointCount = 3;
+
+                // second triangle
+                mPolygonCache[1].point[0].x = iOrigin.x;
+                mPolygonCache[1].point[0].y = iOrigin.y;
+                mPolygonCache[1].U[0] = 0.0f;
+                mPolygonCache[1].V[0] = 0.5f;
+
+                mPolygonCache[1].point[1].x = intersectionPoint.x;
+                mPolygonCache[1].point[1].y = intersectionPoint.y;
+                mPolygonCache[1].U[1] = 0.5f;
+                mPolygonCache[1].V[1] = side == 1.0f ? 1.0f : 0.0f;
+
+                mPolygonCache[1].point[2].x = edge1Point.x;
+                mPolygonCache[1].point[2].y = edge1Point.y;
+                mPolygonCache[1].U[2] = 1.0f;
+                mPolygonCache[1].V[2] = side == 1.0f ? 1.0f : 0.0f;
+
+                //mPolygonCache[1].pointCount = 3;
             }
             else
             {
+                // 3 triangles
+                mPolygonCache.resize(3);
+
+                // first triangle
                 mPolygonCache[0].point[0].x = iOrigin.x;
                 mPolygonCache[0].point[0].y = iOrigin.y;
                 mPolygonCache[0].U[0] = 0.0f;
@@ -140,18 +234,40 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iOrigin
                 mPolygonCache[0].U[2] = 0.33f;
                 mPolygonCache[0].V[2] = side == 1.0f ? 1.0f : 0.0f;
 
-                mPolygonCache[0].point[3].x = edge1Point.x - ( parallelVec1.x * iMiterLimit * iRadius );
-                mPolygonCache[0].point[3].y = edge1Point.y - ( parallelVec1.y * iMiterLimit * iRadius );
-                mPolygonCache[0].U[3] = 0.66f;
-                mPolygonCache[0].V[3] = side == 1.0f ? 1.0f : 0.0f;
+                // third triangle
+                mPolygonCache[2].point[0].x = iOrigin.x;
+                mPolygonCache[2].point[0].y = iOrigin.y;
+                mPolygonCache[2].U[0] = 0.0f;
+                mPolygonCache[2].V[0] = 0.5f;
 
-                mPolygonCache[0].point[4].x = edge1Point.x;
-                mPolygonCache[0].point[4].y = edge1Point.y;
-                mPolygonCache[0].U[4] = 1.0f;
-                mPolygonCache[0].V[4] = side == 1.0f ? 1.0f : 0.0f;
+                mPolygonCache[2].point[1].x = edge1Point.x - ( parallelVec1.x * iMiterLimit * iRadius );
+                mPolygonCache[2].point[1].y = edge1Point.y - ( parallelVec1.y * iMiterLimit * iRadius );
+                mPolygonCache[2].U[1] = 0.66f;
+                mPolygonCache[2].V[1] = side == 1.0f ? 1.0f : 0.0f;
+
+                mPolygonCache[2].point[2].x = edge1Point.x;
+                mPolygonCache[2].point[2].y = edge1Point.y;
+                mPolygonCache[2].U[2] = 1.0f;
+                mPolygonCache[2].V[2] = side == 1.0f ? 1.0f : 0.0f;
+
+                // middle triangle
+                mPolygonCache[1].point[0].x = iOrigin.x;
+                mPolygonCache[1].point[0].y = iOrigin.y;
+                mPolygonCache[1].U[0] = 0.0f;
+                mPolygonCache[1].V[0] = 0.5f;
+
+                mPolygonCache[1].point[1].x = mPolygonCache[0].point[2].x;
+                mPolygonCache[1].point[1].y = mPolygonCache[0].point[2].y;
+                mPolygonCache[1].U[1] = mPolygonCache[0].U[2];
+                mPolygonCache[1].V[1] = mPolygonCache[0].V[2];
+
+                mPolygonCache[1].point[2].x = mPolygonCache[2].point[1].x;
+                mPolygonCache[1].point[2].y = mPolygonCache[2].point[1].y;
+                mPolygonCache[1].U[2] = mPolygonCache[2].U[1];
+                mPolygonCache[1].V[2] = mPolygonCache[2].V[1];
 
                 // default pointCount might have been altered, reset it
-                mPolygonCache[0].pointCount = 5;
+                //mPolygonCache[0].pointCount = 3;
             }
         }
     }
@@ -222,7 +338,7 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iOrigin
         mPolygonCache[i].V[2] = side == 1.0f ? 1.0f : 0.0f;
 
         // default pointCount for joint's polygons is 5. Set it to 3.
-        mPolygonCache[i].pointCount = 3;
+        //mPolygonCache[i].pointCount = 3;
 
         U += stepU;
 
@@ -279,12 +395,12 @@ FOdysseyVectorJoint::MakeLinear( ::ULIS::FVec2D& iOrigin
     mPolygonCache[0].V[2] = side == 1.0f ? 1.0f : 0.0f;
 
     // default pointCount for joint's polygons is 5. Set it to 3.
-    mPolygonCache[0].pointCount = 3;
+    //mPolygonCache[0].pointCount = 3;
 
     mLength = shortestTest.Distance();
 }
 
-std::vector<FOdysseyVectorPolygon5>&
+std::vector<FOdysseyVectorPolygon3>&
 FOdysseyVectorJoint::GetPolygonCache()
 {
     return mPolygonCache;

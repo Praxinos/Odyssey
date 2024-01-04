@@ -9,17 +9,24 @@
 #include <blend2d.h>
 #include "OdysseyVectorPolygon.h"
 
+class FOdysseyVectorPath;
+
 class ODYSSEYVECTOR_API FOdysseyVectorJoint
 {
     public:
         ~FOdysseyVectorJoint();
-        FOdysseyVectorJoint();
+        FOdysseyVectorJoint( FOdysseyVectorPath* iPath );
+        void SetPath( FOdysseyVectorPath* iPath );
 
         double
         GetLength();
 
         void
-        Draw( BLContext* iBLContext, uint64 iDrawingFlags );
+        Draw( BLContext* iBLContext
+            , double iStartU
+            , double iEndU
+            , double iCombinedOpacity
+            , uint64 iDrawingFlags );
 
         void MakeNone();
 
@@ -39,9 +46,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorJoint
                        , ::ULIS::FVec2D& iVector1
                        , double iRadius );
 
-        std::vector<FOdysseyVectorPolygon5>& GetPolygonCache();
+        std::vector<FOdysseyVectorPolygon3>& GetPolygonCache();
 
     protected:
-        std::vector<FOdysseyVectorPolygon5> mPolygonCache;
+        std::vector<FOdysseyVectorPolygon3> mPolygonCache;
+        FOdysseyVectorPath* mPath;
         double mLength;
 };

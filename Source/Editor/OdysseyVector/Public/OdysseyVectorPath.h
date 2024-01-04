@@ -461,28 +461,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                       , double iCombinedOpacity
                       , FOdysseyVectorChain& iChain
                       , uint64 iDrawingFlags );
-        void DrawTexturedSegment( FOdysseyVectorSegment* iSegment
-                                , int8*  iScreenPixels
-                                , uint32 iScreenWidth
-                                , uint32 iScreenHeight
-                                , uint32 iScreenBitsPerPixel
-                                , int8*  iTexturePixels
-                                , uint32 iTextureWidth
-                                , uint32 iTextureHeight
-                                , uint32 iTextureBitsPerPixel
-                                , double iStartU
-                                , double iEndU
-                                , double iCombinedOpacity
-                                , uint64 iDrawingFlags );
+        void DrawSegment( FOdysseyVectorSegment* iSegment
+                        , double iStartU
+                        , double iEndU
+                        , double iCombinedOpacity
+                        , uint64 iDrawingFlags );
         void DrawTexturedJoint( FOdysseyVectorJoint* iJoint
-                              , int8*  iScreenPixels
-                              , uint32 iScreenWidth
-                              , uint32 iScreenHeight
-                              , uint32 iScreenBitsPerPixel
-                              , int8*  iTexturePixels
-                              , uint32 iTextureWidth
-                              , uint32 iTextureHeight
-                              , uint32 iTextureBitsPerPixel
                               , double iStartU
                               , double iEndU
                               , double iCombinedOpacity
