@@ -9,7 +9,7 @@
 
 template<int size>
 struct FOdysseyVectorPolygon {
-    BLPoint point[size];
+    ::ULIS::FVec2D point[size];
     double U[size];
     double V[size];
     uint32 pointCount = size;

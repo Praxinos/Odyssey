@@ -1,4 +1,5 @@
 #include "OdysseyVectorSegment.h"
+#include "OdysseyVectorPath.h"
 
 FOdysseyVectorSegment::~FOdysseyVectorSegment()
 {
@@ -65,6 +66,12 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
 
     for ( int i = 0; i < mFractionCache.size(); i++ )
     {
+        BLPoint pt[4] = { { mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y }
+                        , { mFractionCache[i].polygon.point[1].x, mFractionCache[i].polygon.point[1].y }
+                        , { mFractionCache[i].polygon.point[2].x, mFractionCache[i].polygon.point[2].y }
+                        , { mFractionCache[i].polygon.point[3].x, mFractionCache[i].polygon.point[3].y } };
+
+
         // the stroke thing is very slow and slows the all thing, we have to find something better
         //iBLContext.strokePolygon( mFractionCache[i].vertex, 4 );
 /*
@@ -73,7 +80,7 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
                         , { mFractionCache[i].polygon.point[2].x, mFractionCache[i].polygon.point[2].y }
                         , { mFractionCache[i].polygon.point[3].x, mFractionCache[i].polygon.point[3].y } };
 */
-        iBLContext->fillPolygon( mFractionCache[i].polygon.point, 4 );
+        iBLContext->fillPolygon( pt, 4 );
     }
 
     // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons

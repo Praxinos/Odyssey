@@ -716,6 +716,102 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
 }
 
 void
+FOdysseyVectorEngine::FillQuad( BLContext* iBLContext
+                              , const ::ULIS::FVec2D* iPoint
+                              , const double* iU
+                              , const double* iV
+                              , double iOpacity
+                              //
+                              , const FColor& iColor
+                              //
+                              , const int8*  iBrushPixelData
+                              , uint32 iBrushWidth
+                              , uint32 iBrushHeight
+                              , int32  iBrushBitsPerPixel
+                              , uint64 iPolygonDrawingFlags )
+{
+    const BLMatrix2D& userMatrix = iBLContext->userMatrix();
+    BLPoint worldPoint[4] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
+                            , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
+                            , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y )
+                            , userMatrix.mapPoint( iPoint[3].x, iPoint[3].y ) };
+    ::ULIS::FVec2I intPt[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                              , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                              , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
+                              , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
+    int32 xmin = ::ULIS::FMath::Min4( intPt[0].x, intPt[1].x, intPt[2].x, intPt[3].x );
+    int32 xmax = ::ULIS::FMath::Max4( intPt[0].x, intPt[1].x, intPt[2].x, intPt[3].x );
+    int32 ymin = ::ULIS::FMath::Min4( intPt[0].y, intPt[1].y, intPt[2].y, intPt[3].y );
+    int32 ymax = ::ULIS::FMath::Max4( intPt[0].y, intPt[1].y, intPt[2].y, intPt[3].y );
+
+    // don't draw if quad is outside the screen
+    if( ( ( xmin ) < (int32) mRenderData.size.w )
+     && ( ( xmax ) > 0                          )
+     && ( ( ymin ) < (int32) mRenderData.size.h )
+     && ( ( ymax ) > 0                          ) )
+    {
+        FillPolygon( intPt
+                   , iU
+                   , iV
+                   , 4
+                   , iOpacity
+                   , iColor
+                   , iBrushPixelData
+                   , iBrushWidth
+                   , iBrushHeight
+                   , iBrushBitsPerPixel
+                   , iPolygonDrawingFlags );
+    }
+}
+
+void
+FOdysseyVectorEngine::FillTriangle( BLContext* iBLContext
+                                  , const ::ULIS::FVec2D* iPoint
+                                  , const double* iU
+                                  , const double* iV
+                                  , double iOpacity
+                                  //
+                                  , const FColor& iColor
+                                  //
+                                  , const int8*  iBrushPixelData
+                                  , uint32 iBrushWidth
+                                  , uint32 iBrushHeight
+                                  , int32  iBrushBitsPerPixel
+                                  , uint64 iPolygonDrawingFlags )
+{
+    const BLMatrix2D& userMatrix = iBLContext->userMatrix();
+    BLPoint worldPoint[3] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
+                            , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
+                            , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y ) };
+    ::ULIS::FVec2I intPt[3] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                              , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                              , { (int32)worldPoint[2].x, (int32)worldPoint[2].y } };
+    int32 xmin = ::ULIS::FMath::Min3( intPt[0].x, intPt[1].x, intPt[2].x );
+    int32 xmax = ::ULIS::FMath::Max3( intPt[0].x, intPt[1].x, intPt[2].x );
+    int32 ymin = ::ULIS::FMath::Min3( intPt[0].y, intPt[1].y, intPt[2].y );
+    int32 ymax = ::ULIS::FMath::Max3( intPt[0].y, intPt[1].y, intPt[2].y );
+
+    // don't draw if quad is outside the screen
+    if( ( ( xmin ) < (int32) mRenderData.size.w )
+     && ( ( xmax ) > 0                          )
+     && ( ( ymin ) < (int32) mRenderData.size.h )
+     && ( ( ymax ) > 0                          ) )
+    {
+        FillPolygon( intPt
+                   , iU
+                   , iV
+                   , 3
+                   , iOpacity
+                   , iColor
+                   , iBrushPixelData
+                   , iBrushWidth
+                   , iBrushHeight
+                   , iBrushBitsPerPixel
+                   , iPolygonDrawingFlags );
+    }
+}
+
+void
 FOdysseyVectorEngine::FillPolygon( const ::ULIS::FVec2I* iPoint
                                  , const double* iU
                                  , const double* iV
@@ -776,12 +872,12 @@ FOdysseyVectorEngine::FillPolygon( const ::ULIS::FVec2I* iPoint
                 {
                     // this is to prevent overlapping in semi-transparent drawings.
                     // Note: this could be made useless by using a Z-buffer, but we'll save this option for later.
-                    if( ( i == iPoint[0].y )
-                     && ( i == iPoint[3].y )
-                     && ( iPolygonDrawingFlags & FPolygonDrawingFlags::SKIPFIRSTHLINE ) )
-                    {
-                        continue;
-                    }
+                    //if( ( i == iPoint[0].y )
+                    // && ( i == iPoint[3].y )
+                    // && ( iPolygonDrawingFlags & FPolygonDrawingFlags::SKIPFIRSTHLINE ) )
+                    //{
+                    //    continue;
+                    //}
 
                     TraceHorizontalLine( &mHorizontalLineBuffer[i]
                                        , iOpacity
@@ -1053,7 +1149,7 @@ FOdysseyVectorEngine::ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
         return true;
     }
 
-    if( iTraversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED )
+    if( iTraversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS )
     {
         return true;
     }
@@ -1077,7 +1173,7 @@ FOdysseyVectorEngine::Traverse( FOdysseyVectorGroupPaint* iScene
 
     if( objectTraversalFlags & TRAVERSE_OBJECT_ACCEPTED )
     {
-        iTraversalFlags |= TRAVERSE_PARENT_ACCEPTED;
+        iTraversalFlags |= TRAVERSE_PARENT_HASFOCUS;
     }
 
     if( ( objectTraversalFlags & TRAVERSE_OBJECT_IGNORE_CHILDREN ) == 0 )

@@ -461,7 +461,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                       , double iCombinedOpacity
                       , FOdysseyVectorChain& iChain
                       , uint64 iDrawingFlags );
-        void DrawSegment( FOdysseyVectorSegment* iSegment
+        void DrawSegment( BLContext* iBLContext
+                        , FOdysseyVectorSegment* iSegment
                         , double iStartU
                         , double iEndU
                         , double iCombinedOpacity

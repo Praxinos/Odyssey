@@ -1565,68 +1565,49 @@ FOdysseyVectorPath::AlterRadius( double iDeltaRadius )
 }
 
 void
-FOdysseyVectorPath::DrawSegment( FOdysseyVectorSegment* iSegment
+FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
+                               , FOdysseyVectorSegment* iSegment
                                , double iStartU
                                , double iEndU
                                , double iCombinedOpacity
                                , uint64 iDrawingFlags )
 {
-    FOdysseyVectorEngine* vectorEngine = GetEngine();
-    std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
-    FColor foregroundColor = GetForegroundColor();
-    double difU = iEndU - iStartU;
-    // to prevent overlapping of polygons,
-    // which would be visible when opacity < 1.0f.
-    // this could be solved via a Z Buffer, but we'll keep this idea for later
-    bool skipFirstHorizontalLine = iSegment->GetVertex(0)->GetSegmentCount() == 2 ? true : false;
-    BLImageData& imageData = vectorEngine->GetRenderData();
-
-    for( int i = 0; i < fractionCache.size(); i++ )
+    // if the segment is textured, use our own routines.
+    if( mBrush.pixels )
     {
-        FOdysseyVectorFraction* fraction = &fractionCache[i];
-        BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( fraction->polygon.point[0].x, fraction->polygon.point[0].y )
-                                , mWorldMatrix.mapPoint( fraction->polygon.point[1].x, fraction->polygon.point[1].y ) 
-                                , mWorldMatrix.mapPoint( fraction->polygon.point[2].x, fraction->polygon.point[2].y ) 
-                                , mWorldMatrix.mapPoint( fraction->polygon.point[3].x, fraction->polygon.point[3].y ) };
-        ::ULIS::FVec2I intPt[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
-                                  , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
-                                  , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
-                                  , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
-        int32 xmin = ::ULIS::FMath::Min4( intPt[0].x, intPt[1].x, intPt[2].x, intPt[3].x );
-        int32 xmax = ::ULIS::FMath::Max4( intPt[0].x, intPt[1].x, intPt[2].x, intPt[3].x );
-        int32 ymin = ::ULIS::FMath::Min4( intPt[0].y, intPt[1].y, intPt[2].y, intPt[3].y );
-        int32 ymax = ::ULIS::FMath::Max4( intPt[0].y, intPt[1].y, intPt[2].y, intPt[3].y );
+        std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
+        FColor foregroundColor = GetForegroundColor();
+        FOdysseyVectorEngine* vectorEngine = GetEngine();
+        double difU = iEndU - iStartU;
 
-        // don't draw if quad is outside the screen
-        if( ( ( xmin ) < (int32)imageData.size.w )
-         && ( ( xmax ) > 0                       )
-         && ( ( ymin ) < (int32)imageData.size.h )
-         && ( ( ymax ) > 0                       ) )
+        for( int i = 0; i < fractionCache.size(); i++ )
         {
+            FOdysseyVectorFraction* fraction = &fractionCache[i];
             double quadU[4] = { iStartU + ( fraction->polygon.U[0] * difU )
                               , iStartU + ( fraction->polygon.U[1] * difU )
                               , iStartU + ( fraction->polygon.U[2] * difU )
                               , iStartU + ( fraction->polygon.U[3] * difU ) };
             uint64 polygonDrawingFlags = 0;
 
-            polygonDrawingFlags |= skipFirstHorizontalLine ? FPolygonDrawingFlags::SKIPFIRSTHLINE : 0;
-            polygonDrawingFlags |= mBrush.ColorFromBrush   ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
+            polygonDrawingFlags |= mBrush.ColorFromBrush ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
 
             // should be a static function
-            vectorEngine->FillPolygon( intPt
-                                     , quadU
-                                     , fraction->polygon.V
-                                     , 4
-                                     , iCombinedOpacity
-                                     , foregroundColor
-                                     , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
-                                     , mBrush.width
-                                     , mBrush.height
-                                     , mBrush.bitsPerPixel
-                                     , polygonDrawingFlags );
-
-            skipFirstHorizontalLine = ( intPt[1].y == intPt[2].y ) ? true : false;
+            vectorEngine->FillQuad( iBLContext
+                                  , fraction->polygon.point
+                                  , quadU
+                                  , fraction->polygon.V
+                                  , iCombinedOpacity
+                                  , foregroundColor
+                                  , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                  , mBrush.width
+                                  , mBrush.height
+                                  , mBrush.bitsPerPixel
+                                  , polygonDrawingFlags );
         }
+    }
+    else // otherwise use Blend2D's
+    {
+        iSegment->Draw( iBLContext );
     }
 }
 
@@ -1648,7 +1629,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     FOdysseyVectorEngine* vectorEngine = GetEngine();
     FColor color = mForegroundBucket.GetColor();
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 ) 
-                                                                                         : BLRgba32( color.R, color.G, color.B, color.A * iCombinedOpacity );
+                                                                                         : BLRgba32( color.R, color.G, color.B, 255/*color.A * iCombinedOpacity*/ );
 
     UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();
@@ -1681,7 +1662,8 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                                     , &screen
                                     , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
             {
-                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
+                ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( true );
+                ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( true );
                 FOdysseyVectorJoint& joint = vertex->GetJoint();
                 double segmentLength = segment->GetLength();
                 double jointLength = joint.GetLength();
@@ -1737,21 +1719,28 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                         if ( jointStartU < 0.0f ) jointStartU = 0.0f;
                         if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
 
-                        // TODO : check for in-screen visibility
-                        vertex->DrawJoint( iBLContext
-                                         , jointStartU
-                                         , jointEndU
-                                         , iCombinedOpacity
-                                         , iDrawingFlags );
+                        // don't draw if joint is outside the screen
+                        if( ( ( jointBBox.x               ) < screen.w )
+                         && ( ( jointBBox.x + jointBBox.w ) > 0        )
+                         && ( ( jointBBox.y               ) < screen.h )
+                         && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
+                        {
+                            vertex->DrawJoint( iBLContext
+                                             , jointStartU
+                                             , jointEndU
+                                             , iCombinedOpacity
+                                             , iDrawingFlags );
+                        }
                     }
 
                     // don't draw if segment is outside the screen
-                    if( ( ( bbox.x          ) < screen.w )
-                     && ( ( bbox.x + bbox.w ) > 0        )
-                     && ( ( bbox.y          ) < screen.h )
-                     && ( ( bbox.y + bbox.h ) > 0        ) )
+                    if( ( ( segmentBBox.x                 ) < screen.w )
+                     && ( ( segmentBBox.x + segmentBBox.w ) > 0        )
+                     && ( ( segmentBBox.y                 ) < screen.h )
+                     && ( ( segmentBBox.y + segmentBBox.h ) > 0        ) )
                     {
-                        DrawSegment( segment
+                        DrawSegment( iBLContext
+                                   , segment
                                    , segmentStartU
                                    , segmentEndU
                                    , iCombinedOpacity
@@ -1781,33 +1770,31 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                                     , &iDrawingFlags
                                     , &screen ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
             {
-                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
+                ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( true );
+                ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( true );
 
                 // don't draw if segment is outside the screen
-                if( ( ( bbox.x          ) < screen.w )
-                 && ( ( bbox.x + bbox.w ) > 0        )
-                 && ( ( bbox.y          ) < screen.h )
-                 && ( ( bbox.y + bbox.h ) > 0        ) )
+                if( ( ( segmentBBox.x                 ) < screen.w )
+                 && ( ( segmentBBox.x + segmentBBox.w ) > 0        )
+                 && ( ( segmentBBox.y                 ) < screen.h )
+                 && ( ( segmentBBox.y + segmentBBox.h ) > 0        ) )
                 {
-                    if( iCombinedOpacity != 1.0f )
-                    {
-                        DrawSegment( segment
-                                   , 0.0f
-                                   , 0.0f
-                                   , iCombinedOpacity
-                                   , iDrawingFlags );
-                    }
-                    else
-                    {
-                        segment->Draw( iBLContext );
-                    }
+                    DrawSegment( iBLContext
+                               , segment
+                               , 0.0f
+                               , 0.0f
+                               , iCombinedOpacity
+                               , iDrawingFlags );
                 }
 
-            // TODO : check for in-screen visibility
-                /*if( currentVertex->GetSegmentCount() == 2 )
-                {*/
+                // don't draw if joint is outside the screen
+                if( ( ( jointBBox.x               ) < screen.w )
+                 && ( ( jointBBox.x + jointBBox.w ) > 0        )
+                 && ( ( jointBBox.y               ) < screen.h )
+                 && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
+                {
                     vertex->DrawJoint( iBLContext, 0.0f, 0.0f, iCombinedOpacity, iDrawingFlags );
-                /*}*/
+                }
 
                 return false; // keep iterating
             } );

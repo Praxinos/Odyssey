@@ -24,7 +24,7 @@ namespace FPolygonDrawingFlags
 	static const uint64 STROKE3        = 1ULL << 3;
 	static const uint64 STROKEALL      = STROKE0 | STROKE1 | STROKE2 | STROKE3;
 	static const uint64 FILL           = 1ULL << 4;
-	static const uint64 SKIPFIRSTHLINE = 1ULL << 5;
+	static const uint64 NOOVERLAP      = 1ULL << 5;
 	static const uint64 BRUSHALPHAONLY = 1ULL << 6;
 };
 
@@ -281,18 +281,33 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                        , uint32 iImageWidth
                        , uint32 iImageHeight );
 
-        void FillPolygon( const  ::ULIS::FVec2I* iPoint
-                        , const  double* iU
-                        , const  double* iV
-                        , uint32 pointCount
-                        , double iOpacity
-                        , const  FColor& iColor
-                        // temp
-                        , const  int8* iBrushPixelData
-                        , uint32 iBrushWidth
-                        , uint32 iBrushHeight
-                        , int32  iBrushBitsPerPixel
-                        , uint64 iPolygonDrawingFlags );
+        void FillQuad( BLContext* iBLContext
+                     , const ::ULIS::FVec2D* iPoint
+                     , const double* iU
+                     , const double* iV
+                     , double iOpacity
+                     //
+                     , const FColor& iColor
+                     //
+                     , const int8*  iBrushPixelData
+                     , uint32 iBrushWidth
+                     , uint32 iBrushHeight
+                     , int32  iBrushBitsPerPixel
+                     , uint64 iPolygonDrawingFlags );
+
+        void FillTriangle( BLContext* iBLContext
+                         , const ::ULIS::FVec2D* iPoint
+                         , const double* iU
+                         , const double* iV
+                         , double iOpacity
+                         //
+                         , const FColor& iColor
+                         //
+                         , const int8*  iBrushPixelData
+                         , uint32 iBrushWidth
+                         , uint32 iBrushHeight
+                         , int32  iBrushBitsPerPixel
+                         , uint64 iPolygonDrawingFlags );
 
         void SetBLMask( BLImage* iBLMask );
 
@@ -302,7 +317,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         static const uint64 TRAVERSE_STOP                   = ( 1 << 0 );
         static const uint64 TRAVERSE_OBJECT_ACCEPTED        = ( 1 << 1 );
-        static const uint64 TRAVERSE_PARENT_ACCEPTED        = ( 1 << 2 );
+        static const uint64 TRAVERSE_PARENT_HASFOCUS        = ( 1 << 2 );
         static const uint64 TRAVERSE_OBJECT_IGNORE_CHILDREN = ( 1 << 3 );
 
         bool ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
@@ -397,6 +412,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         static void GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
                                                , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
+
+        void FillPolygon( const  ::ULIS::FVec2I* iPoint
+                        , const  double* iU
+                        , const  double* iV
+                        , uint32 pointCount
+                        , double iOpacity
+                        , const  FColor& iColor
+                        // temp
+                        , const  int8* iBrushPixelData
+                        , uint32 iBrushWidth
+                        , uint32 iBrushHeight
+                        , int32  iBrushBitsPerPixel
+                        , uint64 iPolygonDrawingFlags );
 
     protected:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;

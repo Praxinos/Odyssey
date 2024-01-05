@@ -139,7 +139,7 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
       , &oObjectList ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
           // transform is recursive per se, do not recurse if the parent was transformed already
-          if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
+          if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS ) == 0 )
           {
               if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
               {
@@ -333,7 +333,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
           , &translateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
           {
               // transform is recursive per se, do not recurse if the parent was transformed already
-              if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
+              if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS ) == 0 )
               {
                   if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
                   {
@@ -481,7 +481,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
           , &rotateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
           {
               // transform is recursive per se, do not recurse if the parent was transformed already
-              if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
+              if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS ) == 0 )
               {
                   if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
                   {
@@ -676,7 +676,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
              , &scalingMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
              {
                   // transform is recursive per se, do not recurse if the parent was transformed already
-                  if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
+                  if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS ) == 0 )
                   {
                       if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
                       {

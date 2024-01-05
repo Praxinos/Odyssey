@@ -13,7 +13,7 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint( iX, iY, iRadius )
    , mPath ( nullptr )
-   , mJoint( nullptr )
+   , mJoint( this )
    , mFlags( 0 )
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )
@@ -388,8 +388,6 @@ void
 FOdysseyVectorVertex::SetPath( FOdysseyVectorPath* iPath )
 {
     mPath = iPath;
-
-    mJoint.SetPath( mPath );
 }
 
 void
@@ -758,9 +756,7 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
 {
     if( mSegmentList.size() == 2 )
     {
-        // Note: in semi-transparent mode, the drawing is done via our own drawing routines that are pixel aligned
-        // and not sub-pixel precise, thus there is no need for stroking the joint with a thin line.
-        if( ( IsHandleAligned() == true ) && ( iCombinedOpacity == 1.0f ) )
+        if( IsHandleAligned() == true )
         {
             BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
             ::ULIS::FVec2D localHandlePosition[2];
@@ -786,57 +782,5 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
 void
 FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iCurrentSegment )
 {
-    if( iCurrentSegment )
-    {
-        FOdysseyVectorSegment* prevSegment = GetOtherSegment( iCurrentSegment );
-
-        if( iCurrentSegment && prevSegment )
-        {
-            ::ULIS::FVec2D segment0Vector = GetVectorOnSegment( iCurrentSegment, false );
-            ::ULIS::FVec2D segment1Vector = GetVectorOnSegment( prevSegment    , false );
-
-            if( segment0Vector.DistanceSquared() )
-            {
-                segment0Vector.Normalize();
-            }
-
-            if( segment1Vector.DistanceSquared() )
-            {
-                segment1Vector.Normalize();
-            }
-
-            switch( mPath->GetJointType() )
-            {
-                case eJointType::Linear :
-                    mJoint.MakeLinear( mCoords
-                                     , segment0Vector
-                                     , segment1Vector
-                                     , mRadius );
-                break;
-
-                case eJointType::Miter :
-                    mJoint.MakeMiter( mCoords
-                                    , segment0Vector
-                                    , segment1Vector
-                                    , mRadius
-                                    , mPath->GetMiterLimit() );
-                break;
-
-                case eJointType::Radial :
-                    mJoint.MakeRadial( mCoords
-                                     , segment0Vector
-                                     , segment1Vector
-                                     , mRadius );
-                break;
-
-                default:
-                    mJoint.MakeNone();
-                break;
-            }
-
-            return;
-        }
-    }
-
-    mJoint.MakeNone();
+    mJoint.Make( iCurrentSegment );
 }

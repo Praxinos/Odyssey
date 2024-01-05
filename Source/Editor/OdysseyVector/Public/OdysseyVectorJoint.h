@@ -9,14 +9,14 @@
 #include <blend2d.h>
 #include "OdysseyVectorPolygon.h"
 
-class FOdysseyVectorPath;
+class FOdysseyVectorVertex;
+class FOdysseyVectorSegment;
 
 class ODYSSEYVECTOR_API FOdysseyVectorJoint
 {
     public:
         ~FOdysseyVectorJoint();
-        FOdysseyVectorJoint( FOdysseyVectorPath* iPath );
-        void SetPath( FOdysseyVectorPath* iPath );
+        FOdysseyVectorJoint( FOdysseyVectorVertex* iVertex );
 
         double
         GetLength();
@@ -28,28 +28,23 @@ class ODYSSEYVECTOR_API FOdysseyVectorJoint
             , double iCombinedOpacity
             , uint64 iDrawingFlags );
 
-        void MakeNone();
-
-        void MakeMiter( ::ULIS::FVec2D& iOrigin
-                      , ::ULIS::FVec2D& iVector0
-                      , ::ULIS::FVec2D& iVector1
-                      , double iRadius
-                      , double iMiterLimit );
-
-        void MakeLinear( ::ULIS::FVec2D& iOrigin
-                       , ::ULIS::FVec2D& iVector0
-                       , ::ULIS::FVec2D& iVector1
-                       , double iRadius );
-
-        void MakeRadial( ::ULIS::FVec2D& iOrigin
-                       , ::ULIS::FVec2D& iVector0
-                       , ::ULIS::FVec2D& iVector1
-                       , double iRadius );
-
         std::vector<FOdysseyVectorPolygon3>& GetPolygonCache();
+        void UpdateBBox();
+        ::ULIS::FRectD GetBBox( bool iWorld );
+        void Make( FOdysseyVectorSegment* iCurrentSegment );
+
+    private:
+        void MakeNone();
+        void MakeMiter( ::ULIS::FVec2D& iVector0
+                      , ::ULIS::FVec2D& iVector1 );
+        void MakeLinear( ::ULIS::FVec2D& iVector0
+                       , ::ULIS::FVec2D& iVector1 );
+        void MakeRadial( ::ULIS::FVec2D& iVector0
+                       , ::ULIS::FVec2D& iVector1 );
 
     protected:
         std::vector<FOdysseyVectorPolygon3> mPolygonCache;
-        FOdysseyVectorPath* mPath;
+        FOdysseyVectorVertex* mVertex;
+        ::ULIS::FRectD mBBox;
         double mLength;
 };
