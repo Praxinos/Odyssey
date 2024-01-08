@@ -101,13 +101,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorGroupPaint
 // static
 void
 UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorGroupPaint* iScene
-                                                               , FOdysseyVectorPath* iPath
                                                                , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                                , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
 {
+    // stays empty
     std::vector<FOdysseyVectorPath*> addedObjectArray;
-
-    addedObjectArray.push_back( iPath );
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-drawing-tool.transaction.draw-path-and-stitch","Vector Path Drawing Tool"));
@@ -338,7 +336,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 if( mStitchedVertex )
                 {
                     RecordUndoPathAlter( iScene
-                                       , path
                                        , mAddedVertexArray
                                        , mAddedSegmentArray );
                 }

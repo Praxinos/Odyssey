@@ -253,6 +253,25 @@ FOdysseyVectorPath::UpdateBBox()
         if ( ry2 > ymax ) ymax = ry2;
     }
 
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        if( vertex->GetSegmentCount() )
+        {
+            ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( false );
+            double rx1 = jointBBox.x
+                 , ry1 = jointBBox.y
+                 , rx2 = jointBBox.x + jointBBox.w
+                 , ry2 = jointBBox.y + jointBBox.h;
+
+            hasBBox = true;
+
+            if ( rx1 < xmin ) xmin = rx1;
+            if ( ry1 < ymin ) ymin = ry1;
+            if ( rx2 > xmax ) xmax = rx2;
+            if ( ry2 > ymax ) ymax = ry2;
+        }
+    }
+
     mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
@@ -1614,26 +1633,46 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
 void
 FOdysseyVectorPath::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iDrawingFlags )
 {
-    for( FOdysseyVectorChain& chain : mChainArray )
+    FOdysseyVectorEngine* vectorEngine = GetEngine();
+    ::ULIS::FRectD worldBBox = GetBBox( true );
+    BLImageData& imageData = vectorEngine->GetRenderData();
+    ::ULIS::FRectD screen;
+
+    screen.x = 0;
+    screen.y = 0;
+    screen.w = imageData.size.w;
+    screen.h = imageData.size.h;
+
+    if( worldBBox.Area() > 1.0f ) // do not draw if < 1 pixel
     {
-        DrawChain( iBLContext, iCombinedOpacity, chain, iDrawingFlags );
+        // do not draw if outside screen
+        if( ( ( worldBBox.x               ) < screen.w )
+         && ( ( worldBBox.x + worldBBox.w ) > 0        )
+         && ( ( worldBBox.y               ) < screen.h )
+         && ( ( worldBBox.y + worldBBox.h ) > 0        ) )
+        {
+            for( FOdysseyVectorChain& chain : mChainArray )
+            {
+                DrawChain( iBLContext, vectorEngine, iCombinedOpacity, chain, iDrawingFlags );
+            }
+        }
     }
 }
 
 void
 FOdysseyVectorPath::DrawChain( BLContext* iBLContext
+                             , FOdysseyVectorEngine* iVectorEngine
                              , double iCombinedOpacity
                              , FOdysseyVectorChain& iChain
                              , uint64 iDrawingFlags )
 {
-    FOdysseyVectorEngine* vectorEngine = GetEngine();
     FColor color = mForegroundBucket.GetColor();
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 ) 
                                                                                          : BLRgba32( color.R, color.G, color.B, 255/*color.A * iCombinedOpacity*/ );
 
     UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();
-    BLImageData& imageData = vectorEngine->GetRenderData();
+    BLImageData& imageData = iVectorEngine->GetRenderData();
     ::ULIS::FRectD screen;
 
     screen.x = 0;

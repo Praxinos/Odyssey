@@ -81,7 +81,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                      , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                      , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
         static void RecordUndoPathAlter( FOdysseyVectorGroupPaint* iScene
-                                       , FOdysseyVectorPath* iPath
                                        , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                        , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 

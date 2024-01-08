@@ -1,5 +1,5 @@
-#include "OdysseyVector.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorSegmentCubic.h"
 
 

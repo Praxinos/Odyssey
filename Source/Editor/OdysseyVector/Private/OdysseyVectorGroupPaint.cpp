@@ -898,9 +898,34 @@ FOdysseyVectorGroupPaint::RemoveAllBuckets()
 void
 FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
 {
+    FOdysseyVectorEngine* vectorEngine = GetEngine();
+    BLImageData& imageData = vectorEngine->GetRenderData();
+
+    ::ULIS::FRectD screen;
+
+    screen.x = 0;
+    screen.y = 0;
+    screen.w = imageData.size.w;
+    screen.h = imageData.size.h;
+
     for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        cycle->Draw( iBLContext, iCombinedOpacity, iFlags, bMonochrome, mMonochromeColor );
+        ::ULIS::FRectD cycleWorldBBox = cycle->GetBBox( true );
+
+        if( cycleWorldBBox.Area() > 1.0f )
+        {
+            if( ( ( cycleWorldBBox.x                    ) < screen.w )
+             && ( ( cycleWorldBBox.x + cycleWorldBBox.w ) > 0        )
+             && ( ( cycleWorldBBox.y                    ) < screen.h )
+             && ( ( cycleWorldBBox.y + cycleWorldBBox.h ) > 0        ) )
+            {
+                cycle->Draw( iBLContext
+                           , iCombinedOpacity
+                           , iFlags
+                           , bMonochrome
+                           , mMonochromeColor );
+            }
+        }
     }
 
     if( iFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME/* mWireframe*/ )

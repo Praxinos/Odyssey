@@ -47,7 +47,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @brief draw the cycle (in parent coordinates system).
          * @param iFlags drawing flags.
          */
-        void Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor );
+        void Draw( BLContext* iBLContext
+                 , double iOpacity
+                 , uint64 iFlags
+                 , bool iMonochrome
+                 , FColor iMonochromeColor );
 
         /**
          * @brief Test whether or not this cycle fits entirely within the cycle passed as parameter.
@@ -59,7 +63,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @brief Gets this cycle's bounding box
          * @return the bounding box as a rectangle
          */
-        ::ULIS::FRectD GetBBox();
+        ::ULIS::FRectD GetBBox( bool iWorld );
 
         /**
          * @brief Get the attached bucket, if any.
@@ -143,6 +147,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         std::vector<FOdysseyVectorSection*> mInnerSectionArray;
         std::list<FOdysseyVectorCycle*> mChildrenList;
         FOdysseyVectorCycle* mParentCycle;
+        ::ULIS::FRectD mBBox;
         bool mPropagated;
         double mNormal;
 };

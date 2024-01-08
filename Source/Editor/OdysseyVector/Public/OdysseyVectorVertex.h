@@ -331,6 +331,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         double mNearestSegmentT;
         ::ULIS::FVec2D mNearestSegmentIntersectionCoords;
         FOdysseyVectorSegment* mNearestSegment;
+
+        double mDistanceToNearestVertex;
         FOdysseyVectorVertex* mNearestVertex;
 
     public :

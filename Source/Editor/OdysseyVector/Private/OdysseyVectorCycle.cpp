@@ -133,6 +133,7 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
 {
     int32 arraySize = mSectionArray.size();
     int seg = 0;
+    BLBox bbox;
 
     if ( mSectionArray.size() ) 
     {
@@ -184,6 +185,10 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
     }
 
     mCombinedPath = mContourPath;
+
+    mContourPath.getBoundingBox( &bbox );
+
+    mBBox = ::ULIS::FRectD::FromMinMax( bbox.x0, bbox.y0, bbox.x1, bbox.y1 );
 }
 
 void
@@ -341,17 +346,32 @@ ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
 }
 
 ::ULIS::FRectD
-FOdysseyVectorCycle::GetBBox()
+FOdysseyVectorCycle::GetBBox( bool iWorld )
 {
-    BLBox bbox;
+    if( iWorld )
+    {
+        BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
+        BLPoint pt[4] = { worldMatrix.mapPoint( mBBox.x          , mBBox.y           )
+                        , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           )
+                        , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h )
+                        , worldMatrix.mapPoint( mBBox.x          , mBBox.y + mBBox.h ) };
+        double xmin = ::ULIS::FMath::Min4( pt[0].x, pt[1].x, pt[2].x, pt[3].x )
+             , ymin = ::ULIS::FMath::Min4( pt[0].y, pt[1].y, pt[2].y, pt[3].y )
+             , xmax = ::ULIS::FMath::Max4( pt[0].x, pt[1].x, pt[2].x, pt[3].x )
+             , ymax = ::ULIS::FMath::Max4( pt[0].y, pt[1].y, pt[2].y, pt[3].y );
 
-    mContourPath.getBoundingBox( &bbox );
+        return ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+    }
 
-    return ::ULIS::FRectD::FromMinMax( bbox.x0, bbox.y0, bbox.x1, bbox.y1 );
+    return mBBox;
 }
 
 void
-FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor )
+FOdysseyVectorCycle::Draw( BLContext* iBLContext
+                         , double iOpacity
+                         , uint64 iFlags
+                         , bool iMonochrome
+                         , FColor iMonochromeColor )
 {
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
@@ -359,9 +379,9 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
     if( iMonochrome || ( iFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) )
     {
         BLRgba32 BLColor = BLRgba32( iMonochromeColor.R
-                                   , iMonochromeColor.G
-                                   , iMonochromeColor.B
-                                   , iMonochromeColor.A );
+                                    , iMonochromeColor.G
+                                    , iMonochromeColor.B
+                                    , iMonochromeColor.A );
 
         iBLContext->setStrokeStyle( BLColor );
         iBLContext->setFillStyle( BLColor );
@@ -375,7 +395,7 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
                 case eBucketColorMode::LinearGradient :
                 {
                     eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
+                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox( false );
                     double linearMinX = /*bbox.x0*/bbox.x;
                     double linearMinY = /*bbox.y0*/bbox.y;
                     double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
@@ -420,14 +440,14 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
                 case eBucketColorMode::RadialGradient :
                 {
                     eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
+                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox( false );
                     ::ULIS::FVec2D& radialOffset = bucket->GetRadialOffset();
                     ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
                     BLGradient radial( BLRadialGradientValues( bucketCoords.x + radialOffset.x
-                                                             , bucketCoords.y + radialOffset.y
-                                                             , bucketCoords.x + radialOffset.x
-                                                             , bucketCoords.y + radialOffset.y
-                                                             , bucket->GetRadialRadius() ) );
+                                                                , bucketCoords.y + radialOffset.y
+                                                                , bucketCoords.x + radialOffset.x
+                                                                , bucketCoords.y + radialOffset.y
+                                                                , bucket->GetRadialRadius() ) );
                     FColor& gradientColor0 = bucket->GetGradientColor0();
                     FColor& gradientColor1 = bucket->GetGradientColor1();
                     BLRgba32 BLColor0;
@@ -455,9 +475,9 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
                 {
                     FColor color = bucket->GetColor();
                     BLRgba32 BLColor = BLRgba32( color.R
-                                               , color.G
-                                               , color.B
-                                               , color.A * iOpacity );
+                                                , color.G
+                                                , color.B
+                                                , color.A * iOpacity );
 
                     iBLContext->setStrokeStyle( BLColor );
                     iBLContext->setFillStyle( BLColor );
@@ -469,12 +489,12 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
         {
             FColor& color = mOwner->GetBackgroundBucket().GetSolidColor();
             BLRgba32 BLColor = BLRgba32( color.R
-                                       , color.G
-                                       , color.B
-                                       , color.A * iOpacity );
+                                        , color.G
+                                        , color.B
+                                        , color.A * iOpacity );
 
-           iBLContext->setStrokeStyle( BLColor );
-           iBLContext->setFillStyle( BLColor );
+            iBLContext->setStrokeStyle( BLColor );
+            iBLContext->setFillStyle( BLColor );
         }
     }
 

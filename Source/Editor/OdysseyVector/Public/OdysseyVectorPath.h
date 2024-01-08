@@ -458,6 +458,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void UpdateChain( FOdysseyVectorChain* iChain );
         void FindChains();
         void DrawChain( BLContext* iBLContext
+                      , FOdysseyVectorEngine* iVectorEngine
                       , double iCombinedOpacity
                       , FOdysseyVectorChain& iChain
                       , uint64 iDrawingFlags );
