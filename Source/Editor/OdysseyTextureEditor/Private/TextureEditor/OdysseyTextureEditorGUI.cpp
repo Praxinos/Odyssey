@@ -145,7 +145,6 @@ FOdysseyTextureEditorGUI::CreateRightSection()
 void
 FOdysseyTextureEditorGUI::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
-    ExtendMenuAbout(iOwner, iMenuName);
 }
 
 void
@@ -157,42 +156,6 @@ FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorGUI::__VA_ARGS__ ), FCanExecuteAction() );
 
     #undef MAP_ACTION
-}
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------- Menu and Toolbar
-void
-FOdysseyTextureEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName )
-{
-    UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
-    //Adding entries in our menu
-    FToolMenuSection& fileSection = menu->AddSection("ILIAD Textures", LOCTEXT("main-menu.file.iliad-section.name", "ILIAD"));
-    {
-        fileSection.AddMenuEntry(
-            FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers
-            , LOCTEXT("main-menu.file.iliad.import-textures-as-layers.name", "Import Textures As Layers")
-            , LOCTEXT("main-menu.file.iliad.import-textures-as-layers.tooltip", "Import several textures from the content - browser as layers")
-            , FSlateIcon()
-            , NAME_None);
-        fileSection.AddMenuEntry(
-            FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures
-            , LOCTEXT("main-menu.file.iliad.export-layers-as-textures.name", "Export Layers As Textures")
-            , LOCTEXT("main-menu.file.iliad.export-layers-as-textures.tooltip", "Export existing layers as textures within the content-browser")
-            , FSlateIcon()
-            , NAME_None);
-        fileSection.AddMenuEntry(
-            FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture
-            , LOCTEXT("main-menu.file.iliad.export-current-layer-as-texture.name", "Export Current Layer As Texture")
-            , LOCTEXT("main-menu.file.iliad.export-current-layer-as-texture.tooltip", "Export current layers as texture within the content-browser")
-            , FSlateIcon()
-            , NAME_None);
-        fileSection.AddMenuEntry(
-            FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem
-            , LOCTEXT("main-menu.file.iliad.export-texture-to-os.name", "Export Texture To Operating System")
-            , LOCTEXT("main-menu.file.iliad.export-texture-to-os.tooltip", "Export current texture to your operating system, several file format are available")
-            , FSlateIcon()
-            , NAME_None);
-    }
 }
 
 //--------------------------------------------------------------------------------------

@@ -31,7 +31,6 @@ public:
 private:
     //Init
 	void CreateTabs();
-    void ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName );
 
 protected:
 	TSharedRef<FTabManager::FSplitter>	CreateRightSection();
