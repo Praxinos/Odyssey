@@ -43,8 +43,37 @@ FOdysseyViewportDrawingEditorGUI::CustomizeAnimationEditorTimeline()
 		return;
 	
     timelineTab->SetEmptyTimelineWidget(
-		SNew(STextBlock)
-        .Text(LOCTEXT("animation.timeline-tab.empty-timeline-message", "The actor (plane, 3D object, etc.) selected in the 3D viewport contains no 2D animation. If you are using a Sequencer, position your cursor at the time when a 2D animation is applied to the actor."))
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(STextBlock)
+			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-1", "Your timeline panel is empty for one of the following reasons:"))
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(STextBlock)
+			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-2", "- The selected Actor does not use a 2D Animation"))
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(STextBlock)
+			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-3", "- The Sequencer is not open."))
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(STextBlock)
+			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-4", "- The 2D Animation is not used in the Sequencer as a Media Track."))
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(STextBlock)
+			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-5", "- The cursor in the Sequencer is off of the corresponding Media Track."))
+		]
 	);
 }
 
