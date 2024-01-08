@@ -399,14 +399,17 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
 			}
 				
 			TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
-			UOdysseyAnimation* animation = animationSource->GetAnimation();
+			if (animationSource)
+			{
+				UOdysseyAnimation* animation = animationSource->GetAnimation();
 
-			FTimespan timespan = mediaPlayer->GetTime() + FTimespan(1); //for precision purposes, otherwise "frame" can be the previous frame because of double imprecision
-			double seconds = timespan.GetTotalSeconds();
-			int frame = seconds * animation->GetFramesPerSecond();
+				FTimespan timespan = mediaPlayer->GetTime() + FTimespan(1); //for precision purposes, otherwise "frame" can be the previous frame because of double imprecision
+				double seconds = timespan.GetTotalSeconds();
+				int frame = seconds * animation->GetFramesPerSecond();
 
-			if (frame != animation->CurrentFrame)
-				FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frame);
+				if (frame != animation->CurrentFrame)
+					FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frame);
+			}
 		}
 		else if (mCurrentSource)
 		{
