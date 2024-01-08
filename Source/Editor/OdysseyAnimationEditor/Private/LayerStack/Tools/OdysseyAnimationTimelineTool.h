@@ -11,7 +11,7 @@ public:
     enum class EMouseEventOrigin
     {
         Layer, //The whole layer timeline
-        CellsTimeline, //the timeline section containing the cells
+        CellsTimeline, //the timeline section containing all the cells
         Cell, //a single cell
 
         //As other examples, we could have

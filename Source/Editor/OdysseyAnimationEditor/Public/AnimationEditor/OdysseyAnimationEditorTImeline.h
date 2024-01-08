@@ -10,12 +10,14 @@ class FOdysseyAnimationCellsContainer;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyAnimationTimelineSelectionTool;
 class FOdysseyAnimationTimelineMoveTool;
+class FOdysseyAnimationTimelineCutTool;
 
 enum class EOdysseyTimelineTool
 {
     None,
     Selection,
-    Move
+    Move,
+    Cut
 };
 class FOdysseyAnimationEditorTimeline
 {
@@ -77,4 +79,5 @@ private:
     EOdysseyTimelineTool mSelectedTool;
     TSharedPtr<FOdysseyAnimationTimelineSelectionTool> mSelectionTool;
     TSharedPtr<FOdysseyAnimationTimelineMoveTool> mMoveTool;
+    TSharedPtr<FOdysseyAnimationTimelineCutTool> mCutTool;
 };

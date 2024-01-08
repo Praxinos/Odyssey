@@ -5,6 +5,7 @@
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineSelectionTool.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineMoveTool.h"
+#include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
 
 //Define base frame width to be 50 pixels
 #define BASE_FRAMEWIDTH 50.f
@@ -26,6 +27,7 @@ FOdysseyAnimationEditorTimeline::FOdysseyAnimationEditorTimeline(FOdysseyAnimati
     , mSelectedTool(EOdysseyTimelineTool::None)
     , mSelectionTool()
     , mMoveTool()
+    , mCutTool()
 {
 }
 
@@ -35,6 +37,7 @@ FOdysseyAnimationEditorTimeline::Initialize()
     mSelectedTool = EOdysseyTimelineTool::Selection;
     mSelectionTool = MakeShared<FOdysseyAnimationTimelineSelectionTool>(this);
     mMoveTool = MakeShared<FOdysseyAnimationTimelineMoveTool>(this);
+    mCutTool = MakeShared<FOdysseyAnimationTimelineCutTool>(this);
 
     BindCurrentLayerChanged();
     BindOnCellsChanged();
@@ -125,6 +128,7 @@ FOdysseyAnimationEditorTimeline::GetTool() const
     {
         case EOdysseyTimelineTool::Selection: return mSelectionTool;
         case EOdysseyTimelineTool::Move: return mMoveTool;
+        case EOdysseyTimelineTool::Cut: return mCutTool;
     }
 
     return nullptr;

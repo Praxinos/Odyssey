@@ -671,6 +671,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set("Animation.Timeline.Tools.Selection", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Selection", mIcon16x16));
     Set("Animation.Timeline.Tools.Move", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Move", mIcon16x16));
+    Set("Animation.Timeline.Tools.Cut", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Cut", mIcon16x16));
     
     Set("Animation.LightTable64", new IMAGE_BRUSH("OdysseyAnimation/LightTable_64", mIcon64x64));
     Set("Animation.LightTable24", new IMAGE_BRUSH("OdysseyAnimation/LightTable_24", mIcon24x24));
@@ -706,6 +707,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
     Set("Animation.CellTimingHandle", new IMAGE_BRUSH("OdysseyAnimation/CellTimingHandle_16", mIcon16x16));
     Set("Animation.CellLengthHandle", new IMAGE_BRUSH("OdysseyAnimation/CellLengthHandle_16", mIcon16x16));
+    Set("Animation.CellBreakIndicator", new IMAGE_BRUSH("OdysseyAnimation/CellBreakIndicator", FVector2D(1, 2), FLinearColor::White, ESlateBrushTileType::Vertical));
 
     Set("Animation.LayerImage.BehaviourColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
     Set("Animation.LayerImage.Behaviour.None", new IMAGE_BRUSH("OdysseyAnimation/LayerImage/BehaviourNone", mIcon16x16));

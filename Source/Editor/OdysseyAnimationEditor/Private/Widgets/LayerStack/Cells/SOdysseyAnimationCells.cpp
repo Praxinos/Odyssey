@@ -19,12 +19,13 @@ SOdysseyAnimationCells::~SOdysseyAnimationCells()
 
 SOdysseyAnimationCells::SOdysseyAnimationCells()
     : mLockHandlesVisibility(false)
-    , mLengthHandleCell(nullptr)
+    , mHoveredCell(nullptr)
     , mTimingHandleCells()
     , mTimingHandleBrush(nullptr)
     , mLengthHandleBrush(nullptr)
     , mAddCellsHandleRightBrush(nullptr)
     , mAddCellsHandleLeftBrush(nullptr)
+    , mCellBreakIndicatorBrush(nullptr)
     , mCellsMutator(nullptr)
     , mNumTempCellsToPrepend(0)
     , mNumTempCellsToAppend(0)
@@ -47,6 +48,7 @@ SOdysseyAnimationCells::Construct(
 	mLengthHandleBrush = FOdysseyStyle::GetBrush("Animation.CellLengthHandle");
     mAddCellsHandleLeftBrush = FOdysseyStyle::GetBrush("Animation.AddCellsHandleLeft");
     mAddCellsHandleRightBrush = FOdysseyStyle::GetBrush("Animation.AddCellsHandleRight");
+    mCellBreakIndicatorBrush = FOdysseyStyle::GetBrush("Animation.CellBreakIndicator");
     mAnimationLayer = iAnimationLayer;
     mCellsContainer = iCellsContainer;
 
@@ -157,6 +159,13 @@ SOdysseyAnimationCells::AddCellSection(int iCellIndex)
             [
                 CreateLengthHandleWidget(iCellIndex)
             ]
+
+            + SOverlay::Slot() //Length Handle Top Right
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Fill)
+            [
+                CreateCellBreakIndicatorWidget(iCellIndex)
+            ]
         ];
 
     //Cells widgets
@@ -225,6 +234,20 @@ SOdysseyAnimationCells::CreateLengthHandleWidget(int iCellIndex)
                 SNew(SImage)
                 .Image(mLengthHandleBrush)
             ]
+        ];
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationCells::CreateCellBreakIndicatorWidget(int iCellIndex)
+{
+    TSharedPtr<FOdysseyAnimationCell> cell = mCellsContainer->GetCells()[iCellIndex];
+    return SNew(SOdysseyAnimationTimelineSection, mExtension)
+        .WidthInFrames(this, &SOdysseyAnimationCells::GetCellBreakIndicatorOffset, cell)
+        .Visibility(this, &SOdysseyAnimationCells::GetCellBreakIndicatorVisibility, cell)
+        .HAlign(HAlign_Right)
+        [
+            SNew(SImage)
+            .Image(mCellBreakIndicatorBrush)
         ];
 }
 
@@ -326,7 +349,7 @@ SOdysseyAnimationCells::OnMouseButtonDown(const FGeometry& iGeometry, const FPoi
 void
 SOdysseyAnimationCells::UpdateHandlesVisibility()
 {
-    mLengthHandleCell = nullptr;
+    mHoveredCell = nullptr;
     mTimingHandleCells.Empty();
 
     //Find frame
@@ -345,7 +368,7 @@ SOdysseyAnimationCells::UpdateHandlesVisibility()
     }
     else
     {
-        mLengthHandleCell = mCellsContainer->GetCells()[cellIndex];
+        mHoveredCell = mCellsContainer->GetCells()[cellIndex];
         mTimingHandleCells.Add(mCellsContainer->GetCells()[cellIndex]);
         if (cellIndex < mCellsContainer->GetCells().Num() - 1)
         {
@@ -400,22 +423,68 @@ SOdysseyAnimationCells::OnDragDetected(const FGeometry& iGeometry, const FPointe
   	return mExtension->Timeline()->GetTool()->OnDragDetected(params);
 }
 
+float
+SOdysseyAnimationCells::GetCellBreakIndicatorOffset(TSharedPtr<FOdysseyAnimationCell> iCell) const
+{
+    if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Cut)
+        return 0.f;
+
+    if (GetCellBreakIndicatorVisibility(iCell) != EVisibility::Visible)
+        return 0.f;
+    
+    //Find frame
+    int timelineOffset = mExtension->Timeline()->GetOffset();
+    float frameWidth = mExtension->Timeline()->GetFrameWidth();
+    float frame = mMousePosition.X / frameWidth + timelineOffset + 0.5f;
+
+    int cellFrame = mCellsContainer->GetCellFrameAtFrame(frame);
+
+    return cellFrame;
+}
+
+EVisibility
+SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const
+{
+    if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Cut)
+        return EVisibility::Hidden;
+
+    if (!IsHovered() || iCell != mHoveredCell)
+        return EVisibility::Hidden;
+
+    //Find frame
+    int timelineOffset = mExtension->Timeline()->GetOffset();
+    float frameWidth = mExtension->Timeline()->GetFrameWidth();
+    float frame = mMousePosition.X / frameWidth + timelineOffset + 0.5f;
+
+    int cellFrame = mCellsContainer->GetCellFrameAtFrame(frame);
+    if (cellFrame == INDEX_NONE || cellFrame == 0)
+        return EVisibility::Hidden;
+    
+    return EVisibility::Visible;
+}
+
 EVisibility
 SOdysseyAnimationCells::GetTimingHandleVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const
 {
-    if ((IsHovered() || mLockHandlesVisibility) && mTimingHandleCells.Contains(iCell))
-        return EVisibility::Visible;
+    if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Selection)
+        return EVisibility::Hidden;
+
+    if ((!IsHovered() && !mLockHandlesVisibility) || !mTimingHandleCells.Contains(iCell))
+        return EVisibility::Hidden;
     
-    return EVisibility::Hidden;
+    return EVisibility::Visible;
 }
 
 EVisibility
 SOdysseyAnimationCells::GetLengthHandleVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const
 {
-    if ((IsHovered() || mLockHandlesVisibility) && iCell == mLengthHandleCell)
-        return EVisibility::Visible;
+    if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Selection)
+        return EVisibility::Hidden;
+
+    if ((!IsHovered() && !mLockHandlesVisibility) || iCell != mHoveredCell)
+        return EVisibility::Hidden;
     
-    return EVisibility::Hidden;
+    return EVisibility::Visible;
 }
 
 EVisibility

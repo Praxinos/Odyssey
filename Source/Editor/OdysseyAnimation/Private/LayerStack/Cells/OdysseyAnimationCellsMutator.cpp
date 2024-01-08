@@ -137,7 +137,7 @@ FOdysseyAnimationCellsMutator::BreakCellAtFrame(int iFrame)
         return;
 
     int cellIndex = mContainer->GetCellIndexAtFrame(iFrame);
-    if (cellIndex == 0)
+    if (cellIndex == INDEX_NONE)
         return;
 
     TSharedPtr<FOdysseyAnimationCell> cell = mContainer->mCells[cellIndex];

@@ -88,6 +88,11 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
                 + SSegmentedControl<EOdysseyTimelineTool>::Slot(EOdysseyTimelineTool::Move)
                 .Icon(FOdysseyStyle::GetBrush( "Animation.Timeline.Tools.Move" ))
                 .ToolTip(LOCTEXT("timeline.move-tool.tooltip", "Move Tool"))
+
+                //Cut Tool
+                + SSegmentedControl<EOdysseyTimelineTool>::Slot(EOdysseyTimelineTool::Cut)
+                .Icon(FOdysseyStyle::GetBrush( "Animation.Timeline.Tools.Cut" ))
+                .ToolTip(LOCTEXT("timeline.cut-tool.tooltip", "Cut Tool"))
             ]
         ]
 

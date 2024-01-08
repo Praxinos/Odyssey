@@ -52,6 +52,7 @@ private:
     TSharedRef<SWidget> CreateLengthHandleWidget(int iCellIndex);
     TSharedRef<SWidget> CreateAddCellsHandleRightWidget();
     TSharedRef<SWidget> CreateAddCellsHandleLeftWidget();
+    TSharedRef<SWidget> CreateCellBreakIndicatorWidget(int iCellIndex);
 
     void RefreshCells();
     void AddCellSection(int iCellIndex);
@@ -90,6 +91,9 @@ private:
     void OnAddCellsHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
+    EVisibility GetCellBreakIndicatorVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const;
+    float GetCellBreakIndicatorOffset(TSharedPtr<FOdysseyAnimationCell> iCell) const;
+
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     class UOdysseyAnimationLayer* mAnimationLayer;
@@ -102,7 +106,7 @@ private:
     //Handles visibility management
     TAttribute<bool> mShowHandles;
     bool mLockHandlesVisibility;
-    TSharedPtr<FOdysseyAnimationCell> mLengthHandleCell; //cell that can display its length handle
+    TSharedPtr<FOdysseyAnimationCell> mHoveredCell; //cell that can display its length handle
     TArray<TSharedPtr<FOdysseyAnimationCell>> mTimingHandleCells; //cells that can display their timing handle
 
     //Box containing the cells widgets
@@ -114,6 +118,7 @@ private:
     const FSlateBrush* mLengthHandleBrush;
     const FSlateBrush* mAddCellsHandleRightBrush;
     const FSlateBrush* mAddCellsHandleLeftBrush;
+    const FSlateBrush* mCellBreakIndicatorBrush;
 
 private:
     //Events structures
