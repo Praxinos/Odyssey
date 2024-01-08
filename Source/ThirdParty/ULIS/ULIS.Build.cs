@@ -67,7 +67,7 @@ public class ULIS : ModuleRules
             PublicAdditionalLibraries.Add( Path.Combine( binPath, binName ) );
 
             string binariesPath = CopyToBinaries( Path.Combine( binPath, binName ), iTarget );
-            RuntimeDependencies.Add( "$(BinaryOutputDir)/" + binName, "$(ModuleDir)/bin/" + binName );
+            RuntimeDependencies.Add( "$(BinaryOutputDir)/" + binName, ModuleDirectory + "/bin/" + binName );
 
             System.Console.WriteLine( "Using " + baseName +" DYLIB: " + binariesPath );
         }
