@@ -378,42 +378,40 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
 		UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
 
 		UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
-		if (!mediaPlayer) //If the mediaplayer has been removed, remove the source
+		if (mediaPlayer) //If the mediaplayer has been removed, remove the source
 		{
-			if (mCurrentSource)
-			{
-				//TODO: IOdysseyImageRenderer::eRenderType::Render
-				mEditor->SetSource(nullptr);
-			}
-			return;
-		}
-
-		if (!mCurrentSource)
-		{
+			//Ensures the animationMediaPlayer
 			UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
 			int32 index = mediaPlayer->GetPlaylistIndex();
 			UMediaSource* mediaSource = playlist.Get(index);
-			if (!mediaSource || !mediaSource->IsA(UOdysseyAnimation::StaticClass()))
-				return;
-			
-			TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
-			TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
-			animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+			if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
+			{
+				TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
+				TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
+				animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
 
-			UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
-			TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animation);
-			mEditor->SetSource(animationSource);
+				if (!mCurrentSource)
+				{
+					UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
+					TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animation);
+					mEditor->SetSource(animationSource);
+				}
+			}
+				
+			TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
+			UOdysseyAnimation* animation = animationSource->GetAnimation();
+
+			FTimespan timespan = mediaPlayer->GetTime() + FTimespan(1); //for precision purposes, otherwise "frame" can be the previous frame because of double imprecision
+			double seconds = timespan.GetTotalSeconds();
+			int frame = seconds * animation->GetFramesPerSecond();
+
+			if (frame != animation->CurrentFrame)
+				FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frame);
 		}
-			
-		TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
-		UOdysseyAnimation* animation = animationSource->GetAnimation();
-
-		FTimespan timespan = mediaPlayer->GetTime() + FTimespan(1); //for precision purposes, otherwise "frame" can be the previous frame because of double imprecision
-		double seconds = timespan.GetTotalSeconds();
-		int frame = seconds * animation->GetFramesPerSecond();
-
-		if (frame != animation->CurrentFrame)
-			FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frame);
+		else if (mCurrentSource)
+		{
+			mEditor->SetSource(nullptr);
+		}		
 	}
 }
 

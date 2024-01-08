@@ -47,6 +47,9 @@ FOdysseyAnimationMediaSamples::GetRenderType() const
 void
 FOdysseyAnimationMediaSamples::SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType)
 {
+	if (!mAnimation)
+		return;
+		
 	mRenderType = iRenderType;
 
 	TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
@@ -60,6 +63,8 @@ FOdysseyAnimationMediaSamples::SetRenderType(IOdysseyImageRenderer::eRenderType 
 void
 FOdysseyAnimationMediaSamples::OnClose()
 {
+	SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+	Render();
 	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
 	
 	mInvalidTileMap.Clear();
@@ -381,6 +386,12 @@ FOdysseyAnimationMediaSamples::OnImageRenderingChanged(const FOdysseyImageRender
 
 void
 FOdysseyAnimationMediaSamples::Tick(float DeltaTime)
+{
+	Render();
+}
+
+void
+FOdysseyAnimationMediaSamples::Render()
 {
 	if ( !mAnimation )
 		return;

@@ -31,6 +31,7 @@ private:
 	bool SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeRange, bool bReverse);
 
 public:
+	void Render();
 	void Update(int iFrameIndex, int64 iSequenceIndex);
 	void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
 	IOdysseyImageRenderer::eRenderType GetRenderType() const;
