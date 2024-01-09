@@ -440,7 +440,7 @@ UOdysseyAnimationLayerImageRaster::GetCellMediaRaster(uint32 iFrameIndex) const
 {
 	int celFrameIndex = mCellsContainer->GetCellFrameAtFrame(iFrameIndex);
     TSharedPtr<FOdysseyAnimationCell> cell = mCellsContainer->GetCellAtFrame(iFrameIndex);
-    if (!cell || celFrameIndex != 0)
+    if (!cell)
         return nullptr;
 
     FOdysseyMediaProvider provider = cell->GetMediaProvider(celFrameIndex);
@@ -544,56 +544,6 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
         mutator.Commit();
         return;
     }
-    
-    //iFrameIndex is not Out Of Range
-
-    int cellIndex = mCellsContainer->GetCellIndexAtFrame(iFrameIndex);
-    if (cellIndex == INDEX_NONE)
-        return;
-
-    int cellFrameIndex = mCellsContainer->GetCellFrameAtFrame(iFrameIndex);
-    if (cellFrameIndex == INDEX_NONE)
-        return;
-
-    if (cellFrameIndex == 0) //is Cell Head
-        return;
-
-    //Is Not Head
-    if (!bAutoBreakCells) //If breaking a cell is not allowed, return
-        return;
-
-    TSharedPtr<FOdysseyAnimationCell> currentCell = mCellsContainer->GetCells()[cellIndex];
-    int currentCellLength = cellFrameIndex;
-    int newCellLength = currentCell->GetLength() - currentCellLength;
-
-    TSharedPtr<FOdysseyAnimationCell> cell = currentCell->CreateCellFromFrame(cellFrameIndex);
-
-    FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
-    mutator.SetLength(cellIndex, currentCellLength);
-    mutator.Add({ cell }, cellIndex + 1);
-    mutator.SetLength(cellIndex + 1, newCellLength);
-    mutator.Commit();
-
-    /* TSharedPtr<FOdysseyAnimationCell> currentCell = mCellsContainer->GetCells()[cellIndex];
-    int currentCellLength = cellFrameIndex;
-    int newCellLength = currentCell->GetLength() - currentCellLength;
-
-    //Copy Current Cell block at given frameindex
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
-    TSharedPtr<IOdysseyImageRenderer> renderer = currentCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrameIndex);
-    renderer->Init();
-    renderer->Copy(block, block->Rect(), {});
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-    ctx.Finish();
-
-    //Create a new raster cell from the given block
-    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, block);
-    cell->SetLength(newCellLength);
-
-    FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
-    mutator.SetLength(cellIndex, currentCellLength);
-    mutator.Add({ cell }, cellIndex + 1);
-    mutator.Commit(); */
 }
 
 #undef LOCTEXT_NAMESPACE

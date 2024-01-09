@@ -119,9 +119,6 @@ public:
     bool bIsLightTableActivated = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    bool bAutoBreakCells = true;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     bool bAutoAddCells = true;
 
 private:

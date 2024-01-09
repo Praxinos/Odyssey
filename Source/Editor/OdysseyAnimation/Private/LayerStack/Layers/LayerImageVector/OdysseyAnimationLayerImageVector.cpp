@@ -266,7 +266,7 @@ UOdysseyAnimationLayerImageVector::GetCellMediaVector(uint32 iFrameIndex) const
 {
 	int celFrameIndex = mCellsContainer->GetCellFrameAtFrame(iFrameIndex);
     TSharedPtr<FOdysseyAnimationCell> cell = mCellsContainer->GetCellAtFrame(iFrameIndex);
-    if (!cell || celFrameIndex != 0)
+    if (!cell)
         return nullptr;
 
     FOdysseyMediaProvider provider = cell->GetMediaProvider(celFrameIndex);
@@ -369,35 +369,6 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
         mutator.Commit();
         return;
     }
-    
-    //iFrameIndex is not Out Of Range
-
-    int cellIndex = mCellsContainer->GetCellIndexAtFrame(iFrameIndex);
-    if (cellIndex == INDEX_NONE)
-        return;
-
-    int cellFrameIndex = mCellsContainer->GetCellFrameAtFrame(iFrameIndex);
-    if (cellFrameIndex == INDEX_NONE)
-        return;
-
-    if (cellFrameIndex == 0) //is Cell Head
-        return;
-
-    //Is Not Head
-    if (!bAutoBreakCells) //If breaking a cell is not allowed, return
-        return;
-
-    TSharedPtr<FOdysseyAnimationCell> currentCell = mCellsContainer->GetCells()[cellIndex];
-    int currentCellLength = cellFrameIndex;
-    int newCellLength = currentCell->GetLength() - currentCellLength;
-
-    TSharedPtr<FOdysseyAnimationCell> cell = currentCell->CreateCellFromFrame(cellFrameIndex); //TODO: Find a better name than "Break" to extract a cell from a single frame of another cell
-
-    FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
-    mutator.SetLength(cellIndex, currentCellLength);
-    mutator.Add({ cell }, cellIndex + 1);
-    mutator.SetLength(cellIndex + 1, newCellLength);
-    mutator.Commit();
 }
 
 void
