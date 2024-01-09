@@ -119,8 +119,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                              , FOdysseyVectorSegmentCubic* iSegment1
                              , const ::ULIS::FVec2D& iSegment1MinInParentWithTolerance
                              , const ::ULIS::FVec2D& iSegment1MaxInParentWithTolerance
-                             , double iTolerance
                              , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
+        void IntersectVertex( FOdysseyVectorVertex* iVertex0
+                            , const ::ULIS::FVec2D& iPoint0InParent
+                            , FOdysseyVectorVertex* iVertex1
+                            , const ::ULIS::FVec2D& iPoint1InParent );
         virtual void ApplyTransformations() override;
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
 
@@ -238,6 +241,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void SetSegmentBBox( FOdysseyVectorSegment* iSegment
                            , BLMatrix2D& iConversionMatrix );
+        bool IntersectGapSection( FOdysseyVectorSection* iGapSection
+                                , FOdysseyVectorSegmentCubic* iSegment );
 
     protected:
         static const uint32 NOCYCLE  = 0;

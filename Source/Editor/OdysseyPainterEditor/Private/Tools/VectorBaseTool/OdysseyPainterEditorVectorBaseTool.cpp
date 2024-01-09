@@ -462,7 +462,10 @@ UOdysseyPainterEditorVectorBaseTool::FilterMouseEvent( eMouseEventName iCurrentM
         break;
     }
 
-    mPreviousMouseEvent = iCurrentMouseEvent;
+    if( ret == true )
+    {
+        mPreviousMouseEvent = iCurrentMouseEvent;
+    }
 
     return ret;
 }

@@ -60,18 +60,6 @@ FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVert
     return false;
 }
 
-void
-FOdysseyVectorVertex::SetNearestVertex( FOdysseyVectorVertex* iNearestVertex )
-{
-    mNearestVertex = iNearestVertex;
-}
-
-FOdysseyVectorVertex*
-FOdysseyVectorVertex::GetNearestVertex()
-{
-    return mNearestVertex;
-}
-
 FOdysseyVectorPath* 
 FOdysseyVectorVertex::GetPath()
 {
@@ -346,7 +334,7 @@ FOdysseyVectorVertex::ResetNearestSegment()
     mDistanceToNearestSegment = DBL_MAX;
     mNearestSegmentT = 0.0f;
     mNearestSegmentIntersectionCoords = 0.0f;
-    mNearestVertex = nullptr;
+    //mNearestVertex = nullptr;
 }
 
 void
@@ -358,8 +346,35 @@ FOdysseyVectorVertex::SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
     mNearestSegment = iNearestSegment;
     mDistanceToNearestSegment = iDistanceToNearestSegment;
     mNearestSegmentT = iNearestSegmentT;
-    mNearestVertex = nullptr;
     mNearestSegmentIntersectionCoords = iNearestSegmentIntersectionCoords;
+    //mNearestVertex = nullptr;
+}
+
+void
+FOdysseyVectorVertex::ResetNearestVertex()
+{
+    mDistanceToNearestVertex = DBL_MAX;
+    mNearestVertex = nullptr;
+}
+
+void
+FOdysseyVectorVertex::SetNearestVertex( FOdysseyVectorVertex* iNearestVertex
+                                      , double iDistanceToNearestVertex )
+{
+    mDistanceToNearestVertex = iDistanceToNearestVertex;
+    mNearestVertex = iNearestVertex;
+}
+
+FOdysseyVectorVertex*
+FOdysseyVectorVertex::GetNearestVertex()
+{
+    return mNearestVertex;
+}
+
+double
+FOdysseyVectorVertex::GetDistanceToNearestVertex()
+{
+    return mDistanceToNearestVertex;
 }
 
 void

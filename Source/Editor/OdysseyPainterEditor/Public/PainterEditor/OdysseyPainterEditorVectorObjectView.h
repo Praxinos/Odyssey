@@ -56,6 +56,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         double Opacity;
 
         UPROPERTY( EditAnywhere, Category = Appearance )
+        bool Visible;
+
+        UPROPERTY( EditAnywhere, Category = Appearance )
         FColor ForegroundColor;
 
         UPROPERTY( EditAnywhere, Category = Appearance )

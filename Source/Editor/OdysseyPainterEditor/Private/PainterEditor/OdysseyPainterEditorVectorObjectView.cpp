@@ -31,6 +31,8 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
 
         // Category "Appearance"
         Opacity         = focusedObject->GetOpacity();
+        Visible = Opacity ? true : false;
+
         ForegroundColor = focusedObject->GetForegroundBucket().GetSolidColor();
         BackgroundColor = focusedObject->GetBackgroundBucket().GetSolidColor();
 
@@ -90,6 +92,10 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         // Category "Appearance"
         if( iPropertyName == "Opacity" )
             selectedObject->SetOpacity( Opacity );
+
+        if( iPropertyName == "Visible" )
+            selectedObject->SetOpacity( Visible ? 1.0f : 0.0f );
+
 
         if( ( iPropertyName == "ForegroundColor" ) || ( iMemberPropertyName == "ForegroundColor" ) )
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );

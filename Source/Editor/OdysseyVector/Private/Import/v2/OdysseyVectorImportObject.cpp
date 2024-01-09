@@ -198,7 +198,7 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
 
             Ar << opacity;
 
-            iObject.SetOpacity( opacity );
+            iObject.SetOpacity( opacity ? 1.0f : 0.0f );
         }
         break;
 

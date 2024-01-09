@@ -232,10 +232,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                               , double iDistanceToNearestSegment
                               , double iNearestSegmentT
                               , const ::ULIS::FVec2D& iNearestSegmentIntersectionCoords );
-        void SetNearestVertex( FOdysseyVectorVertex* iNearestVertex );
-        FOdysseyVectorVertex* GetNearestVertex();
         void ResetNearestSegment();
 
+        FOdysseyVectorVertex* GetNearestVertex();
+        void SetNearestVertex( FOdysseyVectorVertex* iNearestVertex, double iDistanceToNearestVertex );
+        void ResetNearestVertex();
+        double GetDistanceToNearestVertex();
 
         /**
          * @brief Build exploration pairs. an exploration pair is composed of an entry section,

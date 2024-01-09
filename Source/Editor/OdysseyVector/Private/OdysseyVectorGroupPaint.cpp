@@ -401,6 +401,73 @@ void cubicRoots( const double iPoly[4], double oRoots[3] )
     return ::ULIS::FVec2D( 0.0f, 0.0f );
 }
 
+void
+FOdysseyVectorGroupPaint::IntersectVertex( FOdysseyVectorVertex* iVertex0
+                                         , const ::ULIS::FVec2D& iPoint0InParent
+                                         , FOdysseyVectorVertex* iVertex1
+                                         , const ::ULIS::FVec2D& iPoint1InParent )
+{
+    if( iVertex0 != iVertex1 )
+    {
+        if( iVertex0->GetSegmentCount() == 1 )
+        {
+            if( mGapTolerance )
+            {
+                ::ULIS::FVec2D dif = ::ULIS::FVec2D( iPoint1InParent - iPoint0InParent );
+                double distance = dif.Distance();
+
+                if( distance < mGapTolerance )
+                {
+                    if( distance < iVertex0->GetDistanceToNearestVertex() )
+                    {
+                        iVertex0->SetNearestVertex( iVertex1, distance );
+                    }
+                }
+            }
+        }
+    }
+}
+
+static bool
+IntersectGapSection( FOdysseyVectorSection* iGapSection
+                   , FOdysseyVectorSegment* iSegment )
+{
+    std::vector<FOdysseyVectorFraction>& segmentFractionCache = iSegment->GetFractionCache();
+    ::ULIS::FVec2D* bezier = iGapSection->GetBezier();
+    ::ULIS::FVec2D gapSectionPoint0 = bezier[0];
+    ::ULIS::FVec2D gapSectionPoint1 = bezier[3];
+
+    for( int j = 0; j < segmentFractionCache.size(); j++ )
+    {
+        FOdysseyVectorFraction* segmentPoly = &segmentFractionCache[j];
+        double gapSectionT, segmentPolySubT;
+
+        // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
+        //if( ( segment0Poly->xMaxInParent > segmentPoly->xMinInParent ) && ( segment0Poly->xMinInParent < segmentPoly->xMaxInParent )
+        // && ( segment0Poly->yMaxInParent > segmentPoly->yMinInParent ) && ( segment0Poly->yMinInParent < segmentPoly->yMaxInParent ) )
+        //{
+            // Test intersections in PaintGroup's coordinates system (struct member lineVertexInParent).
+            if ( FOdysseyVector::IntersectSegment ( gapSectionPoint0
+                                                  , gapSectionPoint1
+                                                  , segmentPoly->lineVertexInParent[0]
+                                                  , segmentPoly->lineVertexInParent[1]
+                                                  , &gapSectionT
+                                                  , &segmentPolySubT ) )
+            {
+                double segmentT = segmentPoly->fromT + ( segmentPolySubT * ( segmentPoly->toT - segmentPoly->fromT ) );
+
+                if( ( segmentT > 0.0f && segmentT < 1.0f )
+                 && ( segmentT > 0.0f && segmentT < 1.0f ) )
+                {
+                    return true;
+                }
+            }
+        //}
+    }
+
+    return false;
+}
+
 // CubicSegment-CubicSegment intersection test. The test is performed using straight sub-segments
 // that are precomputed by the PaintGroup object when updated and stored in the path's FractionCache,
 // as it would be too complicated to do maths using the parametric bezier and I'm not that smart.
@@ -414,7 +481,6 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                                           , FOdysseyVectorSegmentCubic* iSegment1
                                           , const ::ULIS::FVec2D& iSegment1MinInParentWithTolerance
                                           , const ::ULIS::FVec2D& iSegment1MaxInParentWithTolerance
-                                          , double iTolerance
                                           , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray )
 {
     FOdysseyVectorVertex* segment0Vertex0 = iSegment0->GetVertex(0);
@@ -514,13 +580,13 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
 
 // this part is for detecting near-intersections. We only consider path tips (segmentCount = 1)
 ////////////////////////////// Gap detection /////////////////////////////////
-        if( ( iTolerance  ) && ( iSegment0 != iSegment1 ) )
+        if( ( mGapTolerance  ) && ( iSegment0 != iSegment1 ) )
         {
             if( segment1Vertex0->GetSegmentCount() == 1 )
             {
                 // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
-                if ( ( segment1Point0InParent.x > ( segment0Poly->xMinInParent - iTolerance ) ) && ( segment1Point0InParent.x < ( segment0Poly->xMaxInParent + iTolerance ) )
-                  && ( segment1Point0InParent.y > ( segment0Poly->yMinInParent - iTolerance ) ) && ( segment1Point0InParent.y < ( segment0Poly->yMaxInParent + iTolerance ) ) )
+                if ( ( segment1Point0InParent.x > ( segment0Poly->xMinInParent - mGapTolerance ) ) && ( segment1Point0InParent.x < ( segment0Poly->xMaxInParent + mGapTolerance ) )
+                  && ( segment1Point0InParent.y > ( segment0Poly->yMinInParent - mGapTolerance ) ) && ( segment1Point0InParent.y < ( segment0Poly->yMaxInParent + mGapTolerance ) ) )
                 {
                     // check distance at endpoints
                     double distance;
@@ -532,7 +598,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                     //if ( ( t > 0.0f ) && ( t < 1.0f ) )
                     {
                         mMutex.lock();
-                        if( ( distance < iTolerance )
+                        if( ( distance < mGapTolerance )
                          && ( distance < segment1Vertex0->GetDistanceToNearestSegment() ) )
                         {
                             double segmentT = segment0Poly->fromT + ( ( segment0Poly->toT - segment0Poly->fromT ) * t );
@@ -553,8 +619,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
             if( segment1Vertex1->GetSegmentCount() == 1 )
             {
                 // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
-                if ( ( segment1Point1InParent.x > ( segment0Poly->xMinInParent - iTolerance ) ) && ( segment1Point1InParent.x < ( segment0Poly->xMaxInParent + iTolerance ) )
-                  && ( segment1Point1InParent.y > ( segment0Poly->yMinInParent - iTolerance ) ) && ( segment1Point1InParent.y < ( segment0Poly->yMaxInParent + iTolerance ) ) )
+                if ( ( segment1Point1InParent.x > ( segment0Poly->xMinInParent - mGapTolerance ) ) && ( segment1Point1InParent.x < ( segment0Poly->xMaxInParent + mGapTolerance ) )
+                  && ( segment1Point1InParent.y > ( segment0Poly->yMinInParent - mGapTolerance ) ) && ( segment1Point1InParent.y < ( segment0Poly->yMaxInParent + mGapTolerance ) ) )
                 {
                     double distance;
                     double t = DistanceToSegmentConstrained( segment1Point1InParent
@@ -565,7 +631,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                     //if ( ( t > 0.0f ) && ( t < 1.0f ) )
                     {
                         mMutex.lock();
-                        if( ( distance < iTolerance )
+                        if( ( distance < mGapTolerance )
                          && ( distance < segment1Vertex1->GetDistanceToNearestSegment() ) )
                         {
                             double segmentT = segment0Poly->fromT + ( ( segment0Poly->toT - segment0Poly->fromT ) * t );
@@ -584,6 +650,13 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
         }
 ///////////////////////////////////
     }
+
+    mMutex.lock();
+    IntersectVertex( segment0Vertex0, segment0Point0InParent, segment1Vertex0, segment1Point0InParent );
+    IntersectVertex( segment0Vertex0, segment0Point0InParent, segment1Vertex1, segment1Point1InParent );
+    IntersectVertex( segment0Vertex1, segment0Point1InParent, segment1Vertex0, segment1Point0InParent );
+    IntersectVertex( segment0Vertex1, segment0Point1InParent, segment1Vertex1, segment1Point1InParent );
+    mMutex.unlock();
 }
 
 void
@@ -1082,7 +1155,6 @@ FOdysseyVectorGroupPaint::IntersectSegmentWithList( FOdysseyVectorSegment* iSegm
                             , static_cast<FOdysseyVectorSegmentCubic*>(intersectSegment)
                             , intersectSegmentMinInParentWithTolerance
                             , intersectSegmentMaxInParentWithTolerance
-                            , mGapTolerance
                             , iIntersectionArray );
         }
     }
@@ -1475,19 +1547,13 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
                       , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray )
 {
     FOdysseyVectorSegment *nearestSegment = iVertex->GetNearestSegment();
-    FOdysseyVectorVertex* nearestVertex = nullptr;
+    FOdysseyVectorVertex* nearestVertex = iVertex->GetNearestVertex();
 
-    if( nearestSegment )
+    if ( ( iVertex->GetDistanceToNearestSegment() < iVertex->GetDistanceToNearestVertex() ) && nearestSegment )
     {
         double nearestSegmentT = iVertex->GetNearestSegmentT();
 
-        if( ( nearestSegmentT == 0.0f ) || ( nearestSegmentT == 1.0f ) )
-        {
-            nearestVertex = iVertex->GetNearestSegment()->GetVertex( (int) nearestSegmentT );
-
-            iVertex->SetNearestVertex( nearestVertex );
-        }
-        else
+        if( ( nearestSegmentT > 0.0f ) && ( nearestSegmentT < 1.0f ) )
         {
             //::ULIS::FVec2D nearestVertexAt = nearestSegment->GetPointAt( nearestSegmentT );
             ::ULIS::FVec2D nearestVertexAt = iVertex->GetNearestSegmentIntersectionCoords();
@@ -1507,7 +1573,7 @@ CreateNearIntersection( FOdysseyVectorVertex *iVertex
 
             nearestVertex = intersection->GetVertex(1);
 
-            iVertex->SetNearestVertex( nearestVertex );
+            iVertex->SetNearestVertex( nearestVertex, 0.0f );
         }
     }
 
@@ -1930,7 +1996,10 @@ GapSectionIntersects( FOdysseyVectorSection& iSection
                     , std::vector<FOdysseyVectorSection>& iGapSectionBuffer )
 {
     ::ULIS::FVec2D* sectionBezier = iSection.GetBezier();
+    FOdysseyVectorVertex* vertex0 = iSection.GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = iSection.GetVertex(1);
 
+    // check a gap section does not cross another gap section.
     for( FOdysseyVectorSection& otherSection : iGapSectionBuffer )
     {
         if( ( &otherSection != &iSection ) && otherSection.IsLinked() )
@@ -1949,6 +2018,27 @@ GapSectionIntersects( FOdysseyVectorSection& iSection
                 // dont consider intersections at endpoints
                 if( ( sectionT      > 0.0f ) && ( sectionT      < 1.0f )
                  && ( otherSectionT > 0.0f ) && ( otherSectionT < 1.0f ) )
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    // check the gap section does not cross the segment it is connected to.
+    if( ( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
+     && ( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() ) )
+    {
+        // Reminder: the gap segment is not linked, thus we only retrieve an original segment
+        // and test for intersection with this one.
+        FOdysseyVectorSegment* vertex0Segment = vertex0->GetSegment( vertex1 );
+        FOdysseyVectorSegment* vertex1Segment = vertex1->GetSegment( vertex0 );
+
+        if( vertex0Segment && vertex1Segment )
+        {
+            if( vertex0Segment == vertex1Segment )
+            {
+                if( IntersectGapSection( &iSection, vertex0Segment ) )
                 {
                     return true;
                 }
@@ -2050,9 +2140,14 @@ FOdysseyVectorGroupPaint::Clear()
                          , segmentList.end()
                          , []( FOdysseyVectorSegment *segment )
             {
+                FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+                FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+
                 // reset nearest segment
-                segment->GetVertex(0)->ResetNearestSegment();
-                segment->GetVertex(1)->ResetNearestSegment();
+                vertex0->ResetNearestSegment();
+                vertex1->ResetNearestSegment();
+                vertex0->ResetNearestVertex();
+                vertex1->ResetNearestVertex();
             } );
         } );
     }

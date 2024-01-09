@@ -1668,7 +1668,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
 {
     FColor color = mForegroundBucket.GetColor();
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 ) 
-                                                                                         : BLRgba32( color.R, color.G, color.B, 255/*color.A * iCombinedOpacity*/ );
+                                                                                         : BLRgba32( color.R, color.G, color.B, 255 * iCombinedOpacity /*color.A * iCombinedOpacity*/ );
 
     UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();

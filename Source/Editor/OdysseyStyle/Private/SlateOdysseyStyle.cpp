@@ -371,6 +371,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.RotateReset64", new IMAGE_BRUSH( "PainterEditor/rotate_reset_64", mIcon64x64 ) );
     Set( "PainterEditor.RotateReset16", new IMAGE_BRUSH( "PainterEditor/rotate_reset_16", mIcon16x16 ) );
 
+    //PainterEditor - Vector Scene Tree View
+    Set( "PainterEditor.VectorSceneTreeView.Paintgroup16", new IMAGE_BRUSH( "PainterEditor/VectorSceneTreeView/paintgroup_16", mIcon16x16 ) );
+    Set( "PainterEditor.VectorSceneTreeView.Path16", new IMAGE_BRUSH( "PainterEditor/VectorSceneTreeView/path_16", mIcon16x16 ) );
+    Set( "PainterEditor.VectorSceneTreeView.Group16", new IMAGE_BRUSH( "PainterEditor/VectorSceneTreeView/group_16", mIcon16x16 ) );
+
     //PainterEditor - Top Bar
     Set( "PainterEditor.TopBar.Undo32", new IMAGE_BRUSH( "PainterEditor/undo_32", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Redo32", new IMAGE_BRUSH( "PainterEditor/redo_32", mIcon32x32 ) );

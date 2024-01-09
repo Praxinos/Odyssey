@@ -39,6 +39,27 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
                                                       , const TSharedPtr<FVectorSceneTreeViewItem> iItem )
 {
     STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::Construct( InArgs, InOwnerTableView );
+    FOdysseyVectorObject* vectorObject = iItem->GetVectorObject();
+    const FSlateBrush* icon = nullptr;
+
+    if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+    {
+        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup16" );
+    }
+    else
+    if ( vectorObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+    {
+        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group16" );
+    }
+    else
+    if ( vectorObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    {
+        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path16" );
+    }
+    else
+    {
+        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.null16" );
+    }
 
     mItem = iItem;
 
@@ -47,7 +68,20 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
                        .OnVerifyTextChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
                        .OnTextCommitted( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged );
 
-    SetContent( mTextBlockWidget.ToSharedRef() );
+    SetContent( SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew( SImage )
+                    .Image( icon )
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    mTextBlockWidget.ToSharedRef()
+                ] );
+
+    //SetContent( mTextBlockWidget.ToSharedRef() );
 }
 
 bool
