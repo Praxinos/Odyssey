@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
+
 class FOdysseyAnimationCellsDragDropOperation : public FDragDropOperation
 {
 public:

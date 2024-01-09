@@ -3,7 +3,7 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 
-#include "Commands/OdysseyAnimationTimelineShortcuts.h"
+#include "Shortcuts/Timeline/OdysseyAnimationTimelineShortcuts.h"
 
 SOdysseyAnimationLayerStackTreeView::SOdysseyAnimationLayerStackTreeView()
     : mTimelineShortcuts(nullptr)
@@ -11,12 +11,18 @@ SOdysseyAnimationLayerStackTreeView::SOdysseyAnimationLayerStackTreeView()
 {
 }
 
+FOdysseyAnimationEditorExtension*
+SOdysseyAnimationLayerStackTreeView::GetAnimationEditorExtension() const
+{
+    return mExtension;
+}
+
 void
 SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iAnimationExtension)
 {
     SOdysseyLayerStackTreeView::Construct(InArgs);
     mExtension = iAnimationExtension;
-    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(SharedThis(this), Cast<UOdysseyAnimationLayerStack>(mLayerStack), mExtension->Timeline());
+    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(SharedThis(this));
 }
 
 FReply

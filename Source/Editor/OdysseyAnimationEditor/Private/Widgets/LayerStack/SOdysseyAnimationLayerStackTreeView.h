@@ -14,6 +14,9 @@ public:
     SOdysseyAnimationLayerStackTreeView();
     void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iAnimationExtension);
 
+public:
+    FOdysseyAnimationEditorExtension* GetAnimationEditorExtension() const;
+
 private:
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
     virtual FReply OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent) override;

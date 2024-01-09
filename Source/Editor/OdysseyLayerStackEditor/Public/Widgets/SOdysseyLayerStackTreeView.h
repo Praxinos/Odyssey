@@ -45,6 +45,7 @@ public:
     void Construct(const FArguments& InArgs);
     
 public:
+    UOdysseyLayerStack* GetLayerStack() const;
     void SetIsRenamePending(bool iValue);
     TSharedPtr<FOdysseyLayerStackDragDropOperation> CreateDragDropOperation() const;
 

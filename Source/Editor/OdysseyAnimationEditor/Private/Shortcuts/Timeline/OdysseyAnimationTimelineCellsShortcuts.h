@@ -4,18 +4,17 @@
 #pragma once
 
 class SOdysseyAnimationLayerStackTreeView;
-class UOdysseyAnimationLayerStack;
-class FUICommandList;
-class FOdysseyAnimationEditorTimeline;
 
-class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineShortcuts
+class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellsShortcuts
 {
 public:
-    FOdysseyAnimationTimelineShortcuts(TSharedPtr<SOdysseyAnimationLayerStackTreeView> iTreeView, UOdysseyAnimationLayerStack* iLayerStack, FOdysseyAnimationEditorTimeline* iTimelineContext);
+    FOdysseyAnimationTimelineCellsShortcuts(TSharedPtr<SOdysseyAnimationLayerStackTreeView> iTreeView);
 
 public:
-    TSharedRef<FUICommandList> GetCommandList() const;
+    //Shortcuts
+    void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList);
 
+public:
     //Common Shortcuts
     void Action_Copy();
     void Action_Cut();
@@ -32,12 +31,5 @@ public:
     bool CanAction_StaggerCell();
 
 private:
-    //Shortcuts
-    void MapActionsToCommandList(); 
-
-private:
-    TSharedRef<FUICommandList> mCommandList;
     TWeakPtr<SOdysseyAnimationLayerStackTreeView> mTreeView;
-    UOdysseyAnimationLayerStack* mLayerStack;
-    FOdysseyAnimationEditorTimeline* mTimelineContext;
 };

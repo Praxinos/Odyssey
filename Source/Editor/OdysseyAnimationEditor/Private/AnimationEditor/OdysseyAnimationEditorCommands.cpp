@@ -62,6 +62,12 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( SetStaggerCellBehaviourHold, CellsShortcuts, "Set Stagger Cell Behaviour to Hold", "Set Stagger Cell Behaviour to Hold", EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( SetStaggerCellBehaviourLoop, CellsShortcuts, "Set Stagger Cell Behaviour to Loop", "Set Stagger Cell Behaviour to Loop", EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( SetStaggerCellBehaviourPingPong, CellsShortcuts, "Set Stagger Cell Behaviour to PingPong", "Set Stagger Cell Behaviour to PingPong", EUserInterfaceActionType::Button, FInputChord());
+
+    UI_BUNDLE_COMMAND( ActivateTimelineSelectionTool, TimelineShortcuts, "Activate Timeline Selection Tool", "Activates the timeline Selection Tool", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ActivateTimelineMoveTool, TimelineShortcuts, "Activate Timeline Move Tool", "Activates the timeline Move Tool", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ActivateTimelineCutTool, TimelineShortcuts, "Activate Timeline Cut Tool", "Activates the timeline Cut Tool", EUserInterfaceActionType::Button, FInputChord());
+
+    UI_BUNDLE_COMMAND( BreakCell, TimelineShortcuts, "Break Cell", "Breaks Cell at Current Frame in Current Layer", EUserInterfaceActionType::Button, FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE

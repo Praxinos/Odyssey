@@ -83,4 +83,9 @@ public:
     TSharedPtr<FUICommandInfo> SetStaggerCellBehaviourHold;
     TSharedPtr<FUICommandInfo> SetStaggerCellBehaviourLoop;
     TSharedPtr<FUICommandInfo> SetStaggerCellBehaviourPingPong;
+
+    TSharedPtr<FUICommandInfo> ActivateTimelineSelectionTool;
+    TSharedPtr<FUICommandInfo> ActivateTimelineMoveTool;
+    TSharedPtr<FUICommandInfo> ActivateTimelineCutTool;
+    TSharedPtr<FUICommandInfo> BreakCell;
 };

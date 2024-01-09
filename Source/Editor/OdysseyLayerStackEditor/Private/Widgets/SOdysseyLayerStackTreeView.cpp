@@ -114,6 +114,12 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
     CreateContextMenu();
 }
 
+UOdysseyLayerStack*
+SOdysseyLayerStackTreeView::GetLayerStack() const
+{
+    return mLayerStack;
+}
+
 void
 SOdysseyLayerStackTreeView::SetIsRenamePending(bool iValue)
 {
