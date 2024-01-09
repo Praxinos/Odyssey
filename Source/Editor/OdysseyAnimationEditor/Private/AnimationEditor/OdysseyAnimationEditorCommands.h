@@ -87,5 +87,8 @@ public:
     TSharedPtr<FUICommandInfo> ActivateTimelineSelectionTool;
     TSharedPtr<FUICommandInfo> ActivateTimelineMoveTool;
     TSharedPtr<FUICommandInfo> ActivateTimelineCutTool;
+    TSharedPtr<FUICommandInfo> HoldActivateTimelineSelectionTool;
+    TSharedPtr<FUICommandInfo> HoldActivateTimelineMoveTool;
+    TSharedPtr<FUICommandInfo> HoldActivateTimelineCutTool;
     TSharedPtr<FUICommandInfo> BreakCell;
 };
