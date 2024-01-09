@@ -15,9 +15,11 @@ class UOdysseyAnimationPlayer;
 class FOdysseyAnimationEditorSource;
 class FOdysseyAnimationEditorGUI;
 class FOdysseyLayerStackEditorBrushContext;
+class FOdysseyAnimationGlobalShortcuts;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorExtension
     : public FOdysseyPainterEditorExtension
+    , public TSharedFromThis<FOdysseyAnimationEditorExtension>
 {   
 public:
     // Construction / Destruction
@@ -28,6 +30,7 @@ public:
     virtual void Initialize() override;
     virtual void Finalize() override;
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
     UOdysseyAnimation*				    Animation() const;
@@ -53,4 +56,6 @@ public:
     float mPlaybackFramesPerSecond;
     TArray<FGuid> mImageRenderingComposition;
     TSharedPtr<FOdysseyLayerStackEditorBrushContext> mLayerStackBrushEditorContext;
+
+    TSharedPtr<FOdysseyAnimationGlobalShortcuts> mGlobalShortcuts;
 };

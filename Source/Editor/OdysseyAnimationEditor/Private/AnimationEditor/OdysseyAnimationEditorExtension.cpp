@@ -10,6 +10,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 #include "Tools/RasterPaintBucketTool/OdysseyAnimationEditorRasterPaintBucketToolSourceProvider.h"
 #include "BrushContext/OdysseyLayerStackEditorBrushContext.h"
+#include "Shortcuts/Global/OdysseyAnimationGlobalShortcuts.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -25,12 +26,15 @@ FOdysseyAnimationEditorExtension::FOdysseyAnimationEditorExtension(FOdysseyPaint
 	, mTimeline(this)
 	, mPlaybackFramesPerSecond(0)
 	, mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
+	, mGlobalShortcuts(nullptr)
 {
 }
 
 void
 FOdysseyAnimationEditorExtension::Initialize()
 {
+	mGlobalShortcuts = MakeShared<FOdysseyAnimationGlobalShortcuts>(AsShared());
+
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnSourceChanged);
 	mGUI = MakeShareable(new FOdysseyAnimationEditorGUI(this));
 	mGUI->Initialize();
@@ -53,6 +57,13 @@ void
 FOdysseyAnimationEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
 {
 	mGUI->BuildLayout(iBuilder);
+}
+
+void
+FOdysseyAnimationEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
+{
+	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+	mGlobalShortcuts->MapActionsToCommandList(toolkitCommands);
 }
 
 //--------------------------------------------------------------------------------------

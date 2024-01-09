@@ -5,6 +5,7 @@
 
 class SOdysseyAnimationLayerStackTreeView;
 class FUICommandList;
+class FOdysseyAnimationTimelineCellsShortcuts;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineShortcuts
 {
