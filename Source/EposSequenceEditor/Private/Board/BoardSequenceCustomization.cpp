@@ -14,6 +14,8 @@
 #include "MovieSceneTimeHelpers.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "Widgets/Notifications/SNotificationList.h"
+#include "MVVM/ViewModels/ObjectBindingModel.h"
+#include "MVVM/ViewModels/SequencerEditorViewModel.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -23,6 +25,7 @@
 #include "EposSequenceHelpers.h"
 #include "EposSequenceToolbarHelpers.h"
 #include "EposTracksModule.h"
+#include "Misc/EposSequenceFBXInterop.h"
 #include "PlaneActor.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
@@ -74,6 +77,8 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     TSharedRef<FExtender> ToolbarExtender = MakeShared<FExtender>();
     ToolbarExtender->AddToolBarExtension( "CurveEditor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FBoardSequenceCustomization::ExtendSequencerToolbar ) );
     customization.ToolbarExtender = ToolbarExtender;
+
+    customization.OnBuildObjectBindingContextMenu = FOnGetSequencerMenuExtender::CreateRaw(this, &FBoardSequenceCustomization::CreateObjectBindingContextMenuExtender);
 
     //customization.OnReceivedDragOver.BindRaw( this, &FBoardSequenceCustomization::OnSequencerReceiveDragOver );
     //customization.OnReceivedDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerReceiveDrop );
@@ -509,6 +514,81 @@ FBoardSequenceCustomization::MakeHelpMenu()
     EposSequenceToolbarHelpers::MakeHelpEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
+}
+
+//---
+
+TSharedPtr<FExtender>
+FBoardSequenceCustomization::CreateObjectBindingContextMenuExtender(UE::Sequencer::FViewModelPtr InViewModel)
+{
+    TSharedRef<FExtender> Extender = MakeShared<FExtender>();
+    TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel = InViewModel->CastThisShared<UE::Sequencer::FObjectBindingModel>();
+    Extender->AddMenuExtension(
+        "ObjectBindingActions", EExtensionHook::Before, nullptr,
+        FMenuExtensionDelegate::CreateRaw(this, &FBoardSequenceCustomization::ExtendObjectBindingContextMenu, ObjectBindingModel));
+    return Extender.ToSharedPtr();
+}
+
+void
+FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBuilder, TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel)
+{
+    ISequencer* Sequencer = mSequencer;
+    //TSharedPtr<ISequencer> Sequencer = WeakSequencer.Pin();
+    TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> EditorViewModel = Sequencer->GetViewModel();
+
+    FGuid ObjectBindingID = ObjectBindingModel->GetObjectGuid();
+    UMovieScene* MovieScene = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
+
+    if (!MovieScene || !ObjectBindingID.IsValid())
+    {
+        return;
+    }
+
+    FMovieSceneSpawnable* Spawnable = MovieScene->FindSpawnable(ObjectBindingID);
+
+    if (Spawnable)
+    {
+        check(!"todo: from FLevelSequenceCustomization in Plugins")
+    }
+    else
+    {
+        //MenuBuilder.BeginSection("Possessable");
+
+        //MenuBuilder.AddMenuEntry(FSequencerCommands::Get().ConvertToSpawnable);
+
+        //MenuBuilder.AddSubMenu(
+        //    LOCTEXT("DynamicPossession", "Dynamic Possession"),
+        //    LOCTEXT("DynamicPossessionTooltip", "Specify a Blueprint method that will find a compatible actor for this binding"),
+        //    FNewMenuDelegate::CreateRaw(this, &FLevelSequenceCustomization::AddDynamicPossessionMenu, ObjectBindingModel));
+
+        //MenuBuilder.EndSection();
+    }
+
+    MenuBuilder.BeginSection("Import/Export", LOCTEXT("ImportExportMenuSectionName", "Import/Export"));
+
+    MenuBuilder.AddMenuEntry(
+        LOCTEXT("ImportFBX", "Import..."),
+        LOCTEXT("ImportFBXTooltip", "Import FBX animation to this object"),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateLambda([=] {
+                FEposSequenceFBXInterop Interop(EditorViewModel->GetSequencer());
+                Interop.ImportFBXOntoSelectedNodes();
+                })
+        ));
+
+    MenuBuilder.AddMenuEntry(
+        LOCTEXT("ExportFBX", "Export..."),
+        LOCTEXT("ExportFBXTooltip", "Export FBX animation from this object"),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateLambda([=] {
+                FEposSequenceFBXInterop Interop(EditorViewModel->GetSequencer());
+                Interop.ExportFBX();
+                })
+        ));
+
+    MenuBuilder.EndSection();
 }
 
 //---

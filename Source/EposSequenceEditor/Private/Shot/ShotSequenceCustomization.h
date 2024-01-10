@@ -4,11 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MVVM/ViewModelPtr.h"
 #include "UObject/ObjectMacros.h"
 #include "SequencerCustomizationManager.h"
 #include "TransformData.h"
 #include "Widgets/SWidget.h"
 
+namespace UE::Sequencer
+{
+    class FObjectBindingModel;
+    class FSequencerEditorViewModel;
+}
 class UShotSequence;
 
 /**
@@ -32,6 +38,9 @@ private:
     TSharedRef<SWidget> MakeHelpMenu();
 
     void BindCommands( TSharedPtr<FUICommandList> ioCommandList );
+
+    TSharedPtr<FExtender> CreateObjectBindingContextMenuExtender(UE::Sequencer::FViewModelPtr InViewModel);
+    void ExtendObjectBindingContextMenu(FMenuBuilder& MenuBuilder, TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel);
 
 private:
     /**
