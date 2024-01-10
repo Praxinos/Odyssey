@@ -1,0 +1,35 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+//////////////////////////////////////////////////////////////////////////
+// SOdysseyAnimationTimelineLightTableHeader
+class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableHeader : public SCompoundWidget
+{
+public:
+    SOdysseyAnimationTimelineLightTableHeader();
+
+public:
+	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableHeader)
+		: _LightTable(nullptr)
+		{}
+		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationLightTable>, LightTable)
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs);
+
+private:
+    FLinearColor GetLightTablePreviousKeysColor() const;
+    FLinearColor GetLightTableNextKeysColor() const;
+
+    FReply OnLightTablePreviousKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
+    FReply OnLightTableNextKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
+
+private:
+	TWeakPtr<FOdysseyAnimationLightTable> mLightTable;
+    TSharedPtr<SColorBlock> mLightTablePreviousKeysColorBlockWidget;
+    TSharedPtr<SColorBlock> mLightTableNextKeysColorBlockWidget;
+};

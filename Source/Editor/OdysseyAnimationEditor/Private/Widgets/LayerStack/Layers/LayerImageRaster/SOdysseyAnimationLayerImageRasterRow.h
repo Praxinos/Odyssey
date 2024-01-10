@@ -38,10 +38,8 @@ private:
     ECheckBoxState GetIsAlphaLockedIsChecked() const;
     void OnLightTableCheckStateChanged(ECheckBoxState iState);
     ECheckBoxState GetLightTableIsChecked() const;
-    EVisibility GetLightTableVisibility() const;
     EVisibility GetCollapsedOpacityVisibility() const;
-    FLinearColor GetLightTablePreviousKeysColor() const;
-    FLinearColor GetLightTableNextKeysColor() const;
+    EVisibility GetLightTableVisibility() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
@@ -49,12 +47,8 @@ private:
     void OnOpacityValueCommitted(int iValue, ETextCommit::Type iType);
     void OnOpacityBeginSliderMovement();
     void OnOpacityEndSliderMovement(int iValue);
-    FReply OnLightTablePreviousKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
-    FReply OnLightTableNextKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
     FText mSetOpacityTransactionName;
-    TSharedPtr<SColorBlock> mLightTablePreviousKeysColorBlockWidget;
-    TSharedPtr<SColorBlock> mLightTableNextKeysColorBlockWidget;
 };

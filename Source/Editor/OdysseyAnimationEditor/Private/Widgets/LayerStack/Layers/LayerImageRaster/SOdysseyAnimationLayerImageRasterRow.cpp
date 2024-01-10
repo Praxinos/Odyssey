@@ -7,11 +7,10 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -19,8 +18,6 @@
 
 SOdysseyAnimationLayerImageRasterRow::SOdysseyAnimationLayerImageRasterRow()
     : mSetOpacityTransactionName(LOCTEXT("layer-image-raster.transaction.set-opacity", "Change Layer Opacity"))
-    , mLightTablePreviousKeysColorBlockWidget(nullptr)
-    , mLightTableNextKeysColorBlockWidget(nullptr)
 {
     
 }
@@ -146,116 +143,10 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SBox)
-            .HeightOverride(FOptionalSize(SOdysseyAnimationTimelineLightTableKey::mDesiredHeight))
-            .Visibility(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility)
-            [
-                SNew(SVerticalBox)
-                + SVerticalBox::Slot()
-                [
-                    SNew(STextBlock)
-                    .Text(LOCTEXT("layer-image-raster.timeline-header.lighttable", "LightTable"))
-                ]
-                + SVerticalBox::Slot()
-                [
-                    SNew(SHorizontalBox)
-                    + SHorizontalBox::Slot()
-                    [
-                        SAssignNew(mLightTablePreviousKeysColorBlockWidget, SColorBlock)
-					    .CornerRadius(FVector4(4.0f,4.0f,4.0f,4.0f))
-                        .Color(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTablePreviousKeysColor)
-                        .UseSRGB(true)
-                        .OnMouseButtonDown(this, &SOdysseyAnimationLayerImageRasterRow::OnLightTablePreviousKeysColorMouseButtonDown)
-                        .ShowBackgroundForAlpha(true)
-                        //.IgnoreAlpha(true)
-                    ]
-                    + SHorizontalBox::Slot()
-                    [
-                        SAssignNew(mLightTableNextKeysColorBlockWidget, SColorBlock)
-                        .CornerRadius(FVector4(4.0f,4.0f,4.0f,4.0f))
-                        .Color(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableNextKeysColor)
-                        .UseSRGB(true)
-                        .OnMouseButtonDown(this, &SOdysseyAnimationLayerImageRasterRow::OnLightTableNextKeysColorMouseButtonDown)
-                        .ShowBackgroundForAlpha(true)
-                        //.IgnoreAlpha(true)
-                    ]
-                ]
-            ]
+            SNew(SOdysseyAnimationTimelineLightTableHeader)
+            .LightTable(mAnimationLayerImageRaster->GetLightTable())
+		    .Visibility(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility)
         ];
-}
-
-FLinearColor
-SOdysseyAnimationLayerImageRasterRow::GetLightTablePreviousKeysColor() const
-{
-    TSharedPtr<FOdysseyAnimationLightTable> lightTable = mAnimationLayerImageRaster->GetLightTable();
-    return lightTable->GetPreviousKeysColor();
-}
-
-FLinearColor
-SOdysseyAnimationLayerImageRasterRow::GetLightTableNextKeysColor() const
-{
-    TSharedPtr<FOdysseyAnimationLightTable> lightTable = mAnimationLayerImageRaster->GetLightTable();
-    return lightTable->GetNextKeysColor();
-}
-
-FReply
-SOdysseyAnimationLayerImageRasterRow::OnLightTablePreviousKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const
-{
-    FColorPickerArgs PickerArgs;
-	{
-		PickerArgs.bUseAlpha = true;
-		PickerArgs.bOnlyRefreshOnMouseUp = false;
-		PickerArgs.bOnlyRefreshOnOk = false;
-		PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
-            [this](FLinearColor iColor)
-            {
-                TSharedPtr<FOdysseyAnimationLightTable> lightTable = mAnimationLayerImageRaster->GetLightTable();
-                FOdysseyAnimationLightTableMutator mutator(lightTable);
-                mutator.SetPreviousKeysColor(iColor);
-            }
-        );
-		//PickerArgs.OnColorPickerCancelled = FOnColorPickerCancelled::CreateSP(this, &FColorStructCustomization::OnColorPickerCancelled);
-		//PickerArgs.OnColorPickerWindowClosed = FOnWindowClosed::CreateSP(this, &FColorStructCustomization::OnColorPickerWindowClosed);
-		//PickerArgs.OnInteractivePickBegin = FSimpleDelegate::CreateSP(this, &FColorStructCustomization::OnColorPickerInteractiveBegin);
-		//PickerArgs.OnInteractivePickEnd = FSimpleDelegate::CreateSP(this, &FColorStructCustomization::OnColorPickerInteractiveEnd);
-		PickerArgs.InitialColor = GetLightTablePreviousKeysColor();
-		PickerArgs.ParentWidget = mLightTablePreviousKeysColorBlockWidget;
-		PickerArgs.bOpenAsMenu = true;
-	}
-
-	OpenColorPicker(PickerArgs);
-
-    return FReply::Handled();
-}
-
-FReply
-SOdysseyAnimationLayerImageRasterRow::OnLightTableNextKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const
-{
-    FColorPickerArgs PickerArgs;
-	{
-		PickerArgs.bUseAlpha = true;
-		PickerArgs.bOnlyRefreshOnMouseUp = false;
-		PickerArgs.bOnlyRefreshOnOk = false;
-		PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
-            [this](FLinearColor iColor)
-            {
-                TSharedPtr<FOdysseyAnimationLightTable> lightTable = mAnimationLayerImageRaster->GetLightTable();
-                FOdysseyAnimationLightTableMutator mutator(lightTable);
-                mutator.SetNextKeysColor(iColor);
-            }
-        );
-		//PickerArgs.OnColorPickerCancelled = FOnColorPickerCancelled::CreateSP(this, &FColorStructCustomization::OnColorPickerCancelled);
-		//PickerArgs.OnColorPickerWindowClosed = FOnWindowClosed::CreateSP(this, &FColorStructCustomization::OnColorPickerWindowClosed);
-		//PickerArgs.OnInteractivePickBegin = FSimpleDelegate::CreateSP(this, &FColorStructCustomization::OnColorPickerInteractiveBegin);
-		//PickerArgs.OnInteractivePickEnd = FSimpleDelegate::CreateSP(this, &FColorStructCustomization::OnColorPickerInteractiveEnd);
-		PickerArgs.InitialColor = GetLightTableNextKeysColor();
-		PickerArgs.ParentWidget = mLightTableNextKeysColorBlockWidget;
-		PickerArgs.bOpenAsMenu = true;
-	}
-
-	OpenColorPicker(PickerArgs);
-
-    return FReply::Handled();
 }
 
 TSharedRef<SWidget>
@@ -325,15 +216,15 @@ SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, E
 }
 
 EVisibility
-SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility() const
-{
-    return mAnimationLayerImageRaster->bIsLightTableActivated ? EVisibility::Visible : EVisibility::Collapsed;
-}
-
-EVisibility
 SOdysseyAnimationLayerImageRasterRow::GetCollapsedOpacityVisibility() const
 {
     return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility
+SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility() const
+{
+    return mAnimationLayerImageRaster->bIsLightTableActivated ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

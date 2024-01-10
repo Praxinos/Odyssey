@@ -152,13 +152,9 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SBox)
-            .HeightOverride(FOptionalSize(SOdysseyAnimationTimelineLightTableKey::mDesiredHeight))
-            .Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
-            [
-                SNew(STextBlock)
-                .Text(LOCTEXT("layer-image-vector.timeline-header.lighttable", "LightTable"))
-            ]
+            SNew(SOdysseyAnimationTimelineLightTableHeader)
+            .LightTable(mAnimationLayerImageVector->GetLightTable())
+		    .Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
         ];
 }
 
