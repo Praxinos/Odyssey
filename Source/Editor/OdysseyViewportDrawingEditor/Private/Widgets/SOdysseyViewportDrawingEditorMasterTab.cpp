@@ -297,13 +297,13 @@ SOdysseyViewportDrawingEditorMasterTab::ShouldFilterMaterialAsset(const FAssetDa
 {
     TArray<UMaterialInterface*> materialsArray;
     mExtension->SelectableMaterials( materialsArray );
-    return !(materialsArray.ContainsByPredicate([=](const UMaterialInterface* iMaterial) { return iMaterial->GetFullName() == iAssetData.GetFullName(); }));
+    return !(materialsArray.ContainsByPredicate([=](const UMaterialInterface* iMaterial) { return (iAssetData.FastGetAsset() != nullptr && iMaterial->GetFullName() == iAssetData.FastGetAsset()->GetFullName() ); }));
 }
 
 bool
 SOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
 {
-    return !(mExtension->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
+    return !(mExtension->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return (iAssetData.FastGetAsset() != nullptr && iTexture.Texture->GetFullName() == iAssetData.FastGetAsset()->GetFullName() ); }));
 }
 
 //--------------------------------------------------------------------------------------

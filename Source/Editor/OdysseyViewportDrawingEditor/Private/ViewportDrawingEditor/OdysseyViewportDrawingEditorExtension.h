@@ -171,6 +171,4 @@ private:
 
     /** Used to track the animation media being scrubbed */
     FTimespan mAnimationMediaTimespan;
-
-    TSharedPtr<class FOdysseyViewportEditorBrushContext> mViewportEditorBrushContext;
 };

@@ -36,7 +36,6 @@ FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension()
     , mMaterial(nullptr)
 	, mTexture(nullptr)
 	, mCurrentSource(nullptr)
-	, mViewportEditorBrushContext(MakeShared<FOdysseyViewportEditorBrushContext>())
 {}
 
 FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension(FOdysseyPainterEditor* iEditor)
@@ -48,7 +47,6 @@ FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension(F
     , mMaterial(nullptr)
 	, mTexture(nullptr)
 	, mCurrentSource(nullptr)
-	, mViewportEditorBrushContext(MakeShared<FOdysseyViewportEditorBrushContext>())
 {
 }
 
@@ -58,7 +56,6 @@ FOdysseyViewportDrawingEditorExtension::Initialize()
 	//Handle Object Property Changed Callback to refresh when actors's visibility changes for example
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditorExtension::OnObjectPropertyChanged);
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnSourceChanged);
-	GetEditor()->GetBrushContexts().Add( mViewportEditorBrushContext.Get() );
     
 	FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().AddRaw( this, &FOdysseyViewportDrawingEditorExtension::OnSequencersChanged );
     mSequencers = FLevelEditorSequencerIntegration::Get().GetSequencers();

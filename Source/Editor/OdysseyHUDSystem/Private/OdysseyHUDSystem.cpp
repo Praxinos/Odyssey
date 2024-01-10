@@ -58,6 +58,9 @@ void FOdysseyHUDSystem::RebuildHUDSurface(FVector2D iSize)
 
 void FOdysseyHUDSystem::ClearHUDSurface()
 {
+    if( !mHUDSurface )
+        return;
+
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
     ctx.Clear(*mHUDBlock);
     ctx.Finish();
