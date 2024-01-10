@@ -26,5 +26,4 @@ public:
         ::ULIS::FColor mColor;
     };
     TArray<FFrameData> mFramesData;
-    FOdysseyAnimationLightTable::eFrameDisplayMode mDisplayMode;
 };

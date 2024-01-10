@@ -15,7 +15,6 @@ public:
 public:
     void SetSourceLayer(UOdysseyAnimationLayer* iLayer);
     void SetDisplayPosition(EOdysseyLightTableDisplayPosition iDisplayPosition);
-    void SetDisplayMode(EOdysseyLightTableDisplayMode iDisplayMode);
 
 public:
     void SetKeyIsActivated(int iIndex, bool iIsActivated);

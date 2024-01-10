@@ -69,28 +69,6 @@ FOdysseyAnimationLightTableMutator::SetDisplayPosition(EOdysseyLightTableDisplay
     AddAndApplyMutation(mutation);
 }
 
-struct FSetDisplayModeData
-{
-    EOdysseyLightTableDisplayMode mNewDisplayMode;
-    EOdysseyLightTableDisplayMode mOldDisplayMode;
-};
-
-void
-FOdysseyAnimationLightTableMutator::SetDisplayMode(EOdysseyLightTableDisplayMode iDisplayMode)
-{
-    TSharedRef<FSetDisplayModeData> data = MakeShared<FSetDisplayModeData>();
-    data->mNewDisplayMode = iDisplayMode;
-    data->mOldDisplayMode = mLightTable->mDisplayMode;
-
-    TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetDisplayModeData>>(
-        data,
-        FOdysseyMutation<FSetDisplayModeData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetDisplayModeData> iData) { lighttable->mDisplayMode = iData->mNewDisplayMode; }),
-        FOdysseyMutation<FSetDisplayModeData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetDisplayModeData> iData) { lighttable->mDisplayMode = iData->mOldDisplayMode; })
-    );
-
-    AddAndApplyMutation(mutation);
-}
-
 struct FSetKeyIsActivatedData
 {
     int mIndex;

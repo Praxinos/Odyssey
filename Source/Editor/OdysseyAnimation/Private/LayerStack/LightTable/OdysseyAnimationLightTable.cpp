@@ -11,8 +11,6 @@ FOdysseyAnimationLightTable::FOdysseyAnimationLightTable(UOdysseyAnimationLayer*
     : mOwnerLayer(iLayer)
     , mSourceLayer(iLayer)
     , mDisplayPosition(EOdysseyLightTableDisplayPosition::UnderLayer)
-    //, mDisplayMode(EOdysseyLightTableDisplayMode::Default)
-    , mDisplayMode(EOdysseyLightTableDisplayMode::Color)
     , mPreviousKeysColor(FColor::Orange)
     , mNextKeysColor(FColor::Cyan)
 {
@@ -55,12 +53,6 @@ FOdysseyAnimationLightTable::GetDisplayPosition() const
     return mDisplayPosition;
 }
 
-EOdysseyLightTableDisplayMode
-FOdysseyAnimationLightTable::GetDisplayMode() const
-{
-    return mDisplayMode;
-}
-
 bool
 FOdysseyAnimationLightTable::GetKeyIsActivated(int iIndex) const
 {
@@ -86,21 +78,6 @@ FOdysseyAnimationLightTable::GetKeyOpacity(int iIndex) const
         return 0;
 
     return mKeysData[iIndex].mOpacity;
-}
-
-FOdysseyAnimationLightTable::eFrameDisplayMode
-FOdysseyAnimationLightTable::GetKeyDisplayMode() const
-{
-    switch ( mDisplayMode )
-    {
-        case EOdysseyLightTableDisplayMode::Default: return eFrameDisplayMode::kDefault;
-        case EOdysseyLightTableDisplayMode::Color: return eFrameDisplayMode::kColored;
-        case EOdysseyLightTableDisplayMode::Tint: return eFrameDisplayMode::kTint;
-        case EOdysseyLightTableDisplayMode::ColorGradient: return eFrameDisplayMode::kColored;
-        case EOdysseyLightTableDisplayMode::TintGradient: return eFrameDisplayMode::kTint;
-    }
-
-    return eFrameDisplayMode::kDefault;
 }
 
 ::ULIS::FColor

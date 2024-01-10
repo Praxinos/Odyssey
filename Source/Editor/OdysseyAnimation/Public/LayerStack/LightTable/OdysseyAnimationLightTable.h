@@ -8,16 +8,6 @@
 #include "OdysseyAnimationLightTable.generated.h"
 
 UENUM()
-enum class EOdysseyLightTableDisplayMode
-{
-    Default,
-    Color, //Full color keeps opacity
-    Tint, //Tint uses Luminosity to define color
-    ColorGradient, //Tint uses Luminosity to define color
-    TintGradient, //Tint uses Luminosity to define color
-};
-
-UENUM()
 enum class EOdysseyLightTableDisplayPosition
 {
     AboveLayer,
@@ -33,24 +23,14 @@ public:
     FOdysseyAnimationLightTable(UOdysseyAnimationLayer* iLayer);
 
 public:
-    enum eFrameDisplayMode
-    {
-        kDefault,
-        kColored, //Full color keeps opacity
-        kTint, //Tint uses Luminosity to define color
-    };
-
-public:
     UOdysseyAnimationLayer* GetOwnerLayer() const;
     UOdysseyAnimationLayer* GetSourceLayer() const;
     EOdysseyLightTableDisplayPosition GetDisplayPosition() const;
-    EOdysseyLightTableDisplayMode GetDisplayMode() const;
 
 public:
     bool GetKeyIsActivated(int iIndex) const;
     int GetKeyOffset(int iIndex) const;
     float GetKeyOpacity(int iIndex) const;
-    eFrameDisplayMode GetKeyDisplayMode() const;
     ::ULIS::FColor GetKeyColor(int iIndex) const;
     const FLinearColor& GetNextKeysColor() const;
     const FLinearColor& GetPreviousKeysColor() const;
@@ -77,7 +57,6 @@ private:
     UOdysseyAnimationLayer* mOwnerLayer;
     UOdysseyAnimationLayer* mSourceLayer;
     EOdysseyLightTableDisplayPosition mDisplayPosition;
-    TEnumAsByte<EOdysseyLightTableDisplayMode> mDisplayMode;
     FLinearColor mPreviousKeysColor;
     FLinearColor mNextKeysColor;
 
