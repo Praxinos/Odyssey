@@ -11,7 +11,10 @@ FOdysseyAnimationLightTable::FOdysseyAnimationLightTable(UOdysseyAnimationLayer*
     : mOwnerLayer(iLayer)
     , mSourceLayer(iLayer)
     , mDisplayPosition(EOdysseyLightTableDisplayPosition::UnderLayer)
-    , mDisplayMode(EOdysseyLightTableDisplayMode::Default)
+    //, mDisplayMode(EOdysseyLightTableDisplayMode::Default)
+    , mDisplayMode(EOdysseyLightTableDisplayMode::Color)
+    , mPreviousKeysColor(FColor::Orange)
+    , mNextKeysColor(FColor::Cyan)
 {
     //assume 10 frames on the left + 10 frames on the left + 1 current frame
     for (int i = -1; i >= -GetRange(); i--)
@@ -103,8 +106,19 @@ FOdysseyAnimationLightTable::GetKeyDisplayMode() const
 ::ULIS::FColor
 FOdysseyAnimationLightTable::GetKeyColor(int iIndex) const
 {
-    //TODO:
-    return ::ULIS::FColor();
+    return iIndex > 0 ? ::ULIS::FColor::FromRGBAF(mNextKeysColor.R, mNextKeysColor.G, mNextKeysColor.B, mNextKeysColor.A) : ::ULIS::FColor::FromRGBAF(mPreviousKeysColor.R, mPreviousKeysColor.G, mPreviousKeysColor.B, mPreviousKeysColor.A);
+}
+
+const FLinearColor&
+FOdysseyAnimationLightTable::GetNextKeysColor() const
+{
+    return mNextKeysColor;
+}
+
+const FLinearColor&
+FOdysseyAnimationLightTable::GetPreviousKeysColor() const
+{
+    return mPreviousKeysColor;
 }
 
 const TMap<int, FOdysseyAnimationLightTable::FKeyData>&

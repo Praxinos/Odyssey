@@ -164,3 +164,40 @@ FOdysseyAnimationLightTableMutator::SetKeyOpacity(int iIndex, float iOpacity)
     AddAndApplyMutation(mutation);
 }
 
+struct FSetKeysColorData
+{
+    FLinearColor mNewColor;
+    FLinearColor mOldColor;
+};
+
+void
+FOdysseyAnimationLightTableMutator::SetNextKeysColor(const FLinearColor& iColor)
+{
+    TSharedRef<FSetKeysColorData> data = MakeShared<FSetKeysColorData>();
+    data->mNewColor = iColor;
+    data->mOldColor = mLightTable->mNextKeysColor;
+
+    TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeysColorData>>(
+        data,
+        FOdysseyMutation<FSetKeysColorData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeysColorData> iData) { lighttable->mNextKeysColor = iData->mNewColor; }),
+        FOdysseyMutation<FSetKeysColorData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeysColorData> iData) { lighttable->mNextKeysColor = iData->mOldColor; })
+    );
+
+    AddAndApplyMutation(mutation);
+}
+
+void
+FOdysseyAnimationLightTableMutator::SetPreviousKeysColor(const FLinearColor& iColor)
+{
+    TSharedRef<FSetKeysColorData> data = MakeShared<FSetKeysColorData>();
+    data->mNewColor = iColor;
+    data->mOldColor = mLightTable->mPreviousKeysColor;
+
+    TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeysColorData>>(
+        data,
+        FOdysseyMutation<FSetKeysColorData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeysColorData> iData) { lighttable->mPreviousKeysColor = iData->mNewColor; }),
+        FOdysseyMutation<FSetKeysColorData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeysColorData> iData) { lighttable->mPreviousKeysColor = iData->mOldColor; })
+    );
+
+    AddAndApplyMutation(mutation);
+}

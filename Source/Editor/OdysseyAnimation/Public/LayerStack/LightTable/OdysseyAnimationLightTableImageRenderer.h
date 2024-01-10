@@ -23,6 +23,8 @@ public:
     {
         float mOpacity;
         TSharedPtr<IOdysseyImageRenderer> mRenderer;
+        ::ULIS::FColor mColor;
     };
     TArray<FFrameData> mFramesData;
+    FOdysseyAnimationLightTable::eFrameDisplayMode mDisplayMode;
 };

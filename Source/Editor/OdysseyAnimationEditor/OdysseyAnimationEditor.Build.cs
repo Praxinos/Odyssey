@@ -37,6 +37,7 @@ namespace UnrealBuildTool.Rules
 				new string[]
                 {
 					"AssetTools",
+					"AppFramework",
 					"Core",
                 	"CoreUObject",
                     "DesktopPlatform",

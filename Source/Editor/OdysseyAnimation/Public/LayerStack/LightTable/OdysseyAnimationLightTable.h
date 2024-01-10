@@ -52,6 +52,8 @@ public:
     float GetKeyOpacity(int iIndex) const;
     eFrameDisplayMode GetKeyDisplayMode() const;
     ::ULIS::FColor GetKeyColor(int iIndex) const;
+    const FLinearColor& GetNextKeysColor() const;
+    const FLinearColor& GetPreviousKeysColor() const;
 
     struct FKeyData
     {
@@ -76,6 +78,8 @@ private:
     UOdysseyAnimationLayer* mSourceLayer;
     EOdysseyLightTableDisplayPosition mDisplayPosition;
     TEnumAsByte<EOdysseyLightTableDisplayMode> mDisplayMode;
+    FLinearColor mPreviousKeysColor;
+    FLinearColor mNextKeysColor;
 
     TMap<int, FKeyData> mKeysData;
 };
