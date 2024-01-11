@@ -52,9 +52,6 @@ uint64
 UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FKey& iKey )
 {
-    //FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    //FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
-
     // backup SmoothingMode value
     SmoothingModeAtKeyDown = SmoothingMode;
 
@@ -65,9 +62,6 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupP
                                                                        : ePathSmoothingMode::Round;
     }
 
-    //UOdysseyPainterEditorDefaultTool::OnKeyDownVector( vectorEngine, vectorScene, iKey );
-    //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-
     return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey );
 }
 
@@ -75,14 +69,8 @@ uint64
 UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FKey& iKey )
 {
-    //FOdysseyVectorEngine* vectorEngine = mToolContext->GetVectorEngine();
-    //FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
-
     // restore SmoothingMode value
     SmoothingMode = SmoothingModeAtKeyDown;
-
-    //UOdysseyPainterEditorDefaultTool::OnKeyUpVector( vectorEngine, vectorScene, iKey );
-    //iScene->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
     return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey );
 }
@@ -92,19 +80,6 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
-    /*mPickedPointArray.clear();
-
-    iEngine->PickPoints( iScene
-                       , RestrictToSelection
-                       , iPointInTexture.x
-                       , iPointInTexture.y
-                       , Radius
-                       , mPickedPointArray
-                       , FOdysseyVectorPath::PICK_POINT );*/
-
-    //FOdysseyVectorPoint::ArrayToVertexArray( pickedPointArray, vertexArray );
-    //FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, segmentArray );
-
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -157,18 +132,11 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
             if( pickedPointArray[i]->GetClass() == FOdysseyVectorVertex::StaticClass() )
             {
                 FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(pickedPointArray[i]);
-                FOdysseyVectorSegment* segment[2] = { vertex->GetFirstSegment()
-                                                    , vertex->GetLastSegment() };
 
-                // record segment for undos first
-                if( segment[0] && mUndoSegmentReshape->HasSegment( segment[0] ) == false )
+                // record vertex and connected segments segment for undos first
+                if( mUndoSegmentReshape->HasVertex( vertex ) == false )
                 {
-                    mUndoSegmentReshape->RecordSegment( segment[0] );
-                }
-
-                if( segment[1] && mUndoSegmentReshape->HasSegment( segment[1] ) == false )
-                {
-                    mUndoSegmentReshape->RecordSegment( segment[1] );
+                    mUndoSegmentReshape->RecordVertex( vertex );
                 }
 
                 // then sharp or smooth
@@ -213,19 +181,6 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
         vectorEngine->ResetHUD();
     }
 
-/*
-    FOdysseyVectorPoint::ArrayToVertexArray( pickedPointArray, vertexArray );
-    FOdysseyVectorVertex::ArrayToSegmentArray( vertexArray, segmentArray );
-
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("vector-path-smooth-tool.transaction.smooth-path
-    {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSegmentReshape( iScene, segmentArray );
-
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
-    }
-    GEditor->EndTransaction();
-*/
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 

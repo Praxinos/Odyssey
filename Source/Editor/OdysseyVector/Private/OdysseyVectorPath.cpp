@@ -1087,8 +1087,7 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
 }
 
 bool
-FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
-                         , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
@@ -2283,6 +2282,7 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
                              , &ymax
                              , &hasBBox ] ( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
     {
+        FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( vertex );
         ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
         double rx1 = segmentBBox.x
              , ry1 = segmentBBox.y

@@ -3,7 +3,7 @@
 
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
-#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
+//#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyMediaVector.h"
@@ -745,12 +745,11 @@ UOdysseyPainterEditorVectorBaseTool::CreatePropertyWidget( TSharedPtr<class IPro
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
 {
-    return SNew(SWrapBox)
-           .InnerSlotPadding(FVector2D(10.f, 3.f))
-           .UseAllottedSize(true)
-           .HAlign(HAlign_Fill)
-           + SWrapBox::Slot()
-           .HAlign(HAlign_Fill)
+    return SNew(SUniformWrapPanel)
+           .SlotPadding(FVector2D(3.f, 0.f))
+           .EvenRowDistribution(true)
+           .HAlign(HAlign_Left)
+           + SUniformWrapPanel::Slot()
            [
                SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
            ];

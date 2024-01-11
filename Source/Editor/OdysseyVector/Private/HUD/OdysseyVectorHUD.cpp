@@ -566,14 +566,14 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
     BLRgba32 fillColor = BLRgba32( bucketColor.R, bucketColor.G, bucketColor.B, bucketColor.A );
     BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF )
                                                  : BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+    static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+    static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
     if( iHUDFlags & HUD_GROUPPAINT_BUCKET_HANDLE )
     {
         if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
         {
             ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetBucketHandleVector( iBucket, true ) * HANDLE_DISTANCE );
-            BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
-            BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
             // Bucket-to-handle line
             iBLContext->setStrokeWidth( 2.0f );
@@ -598,9 +598,6 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
             ::ULIS::FVec2D radialWorldCoords = GetBucketRadialPosition( iBucket, true );
             ::ULIS::FVec2D radialHandleWorldCoords = GetBucketRadialHandlePosition( iBucket, true );
             double radialRadius = ( radialHandleWorldCoords - radialWorldCoords ).Distance();
-
-            BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
-            BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
             // Bucket-to-radial line
             iBLContext->setStrokeWidth( 2.0f );
@@ -652,11 +649,51 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
     iBLContext->fillCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
 
     iBLContext->setStrokeWidth( 2.0f );
-    iBLContext->setStrokeStyle( BLRgba32( 0x00, 0x00, 0x00, 0xFF ) );
+    iBLContext->setStrokeStyle( blackColor );
     iBLContext->strokeCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
+
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->setStrokeStyle( propColor ); // green if propagated, white otherwise
     iBLContext->strokeCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
+
+    if( iBucket->IsPropagated() )
+    {
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->setStrokeStyle( blackColor );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 0.0f
+                             , 1.0472f );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 2.0944f
+                             , 1.0472f );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 4.1888f
+                             , 1.0472f );
+
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->setStrokeStyle( propColor ); // green if propagated, white otherwise
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 0.0f
+                             , 1.0472f );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 2.0944f
+                             , 1.0472f );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 4.1888f
+                             , 1.0472f );
+    }
 }
 
 // static

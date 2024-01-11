@@ -82,6 +82,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
 
         uint64 GetPickingFlags();
         ePathPickingMode GetPickingMode();
+        virtual TSharedRef<SWidget> CreateTopTabWidget();
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

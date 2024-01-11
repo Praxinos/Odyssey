@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
-
+#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "OdysseyPainterEditorVectorBaseTool.generated.h"
 
 class FOdysseyPainterEditorVectorBaseToolHUD;
@@ -144,6 +144,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void MakePaintGroup( FOdysseyVectorGroupPaint* iScene );
 
     protected:
+        // to store the top tab widget in order to create it only once. this will prevent sizing 
+        // issues in the top bar.
+        TSharedPtr<SUniformWrapPanel> mTopTabWidget;
         // to force keyboard focus on mouse hover.
         // Prevents the user from having to click at least once in the viewport.
         TSharedPtr< SViewport > mViewportWidget;

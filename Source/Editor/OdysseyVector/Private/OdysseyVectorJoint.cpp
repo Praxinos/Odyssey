@@ -453,6 +453,19 @@ FOdysseyVectorJoint::Make( FOdysseyVectorSegment* iCurrentSegment )
 }
 
 void
+FOdysseyVectorJoint::ResetBBox()
+{
+    ::ULIS::FVec2D& vertexCoords = mVertex->GetCoords();
+    double radius = mVertex->GetRadius();
+    double xmin = vertexCoords.x - radius
+         , ymin = vertexCoords.y - radius
+         , xmax = vertexCoords.x + radius
+         , ymax = vertexCoords.y + radius;
+
+    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+}
+
+void
 FOdysseyVectorJoint::UpdateBBox()
 {
     ::ULIS::FVec2D& vertexCoords = mVertex->GetCoords();

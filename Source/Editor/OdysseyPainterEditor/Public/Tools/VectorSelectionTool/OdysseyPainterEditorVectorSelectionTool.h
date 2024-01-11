@@ -42,6 +42,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public
 
         EOdysseyVectorSelectionShape GetSelectionShape();
 
+        TSharedRef<SWidget> CreateTopTabWidget();
+
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;

@@ -435,7 +435,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
                                                                , const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-    BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
+    BLMatrix2D spaceMatrix/* = selectionBox.worldMatrix*/;
     BLMatrix2D inverseSpaceMatrix;
     ::ULIS::FVec2D& pivot = mTransformHUD->GetGizmo();
     BLMatrix2D rotateMatrix;
@@ -444,7 +444,8 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
 
     rotateMatrix.resetToRotation( rotationAngle ); // Radians
 
-    spaceMatrix.translate( pivot.x, pivot.y );
+    spaceMatrix.reset();
+    spaceMatrix.translate( worldPivot.x, worldPivot.y );
 
     BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );
 
@@ -879,6 +880,13 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorG
 
     return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName )
          | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
+{
+    // return the BaseTool top tab instead the SelectionTool top tab (which is the base class for this class).
+    return UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget();
 }
 
 #undef LOCTEXT_NAMESPACE

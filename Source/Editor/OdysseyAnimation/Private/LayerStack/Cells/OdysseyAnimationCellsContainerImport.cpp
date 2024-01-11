@@ -21,7 +21,7 @@ FOdysseyAnimationCellsContainerImport::Read( FOdysseyAnimationCellsContainer* iA
     switch( chunkID )
     {
         case FOdysseyFile::Animation::CHUNK_CELLSCONTAINER :
-            UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLSCONTAINER") );
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLSCONTAINER") );
 
             FOdysseyAnimationCellsContainerImport::Read( iAnimationCellsContainer, Ar, chunkEnd );
         break;

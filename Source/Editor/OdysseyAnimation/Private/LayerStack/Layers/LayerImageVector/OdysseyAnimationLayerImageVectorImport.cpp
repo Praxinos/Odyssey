@@ -21,7 +21,7 @@ FOdysseyAnimationLayerImageVectorImport::Read( UOdysseyAnimationLayerImageVector
     switch( chunkID )
     {
         case FOdysseyFile::Animation::CHUNK_LAYERIMAGEVECTOR :
-            UE_LOG(LogTemp, Warning, TEXT("CHUNK_LAYERIMAGEVECTOR") );
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_LAYERIMAGEVECTOR") );
 
             FOdysseyAnimationLayerImageVectorImport::Read( iAnimationLayerImageVector, Ar, chunkEnd );
         break;

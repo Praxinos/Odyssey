@@ -51,6 +51,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
 
 
         void ErasePaths( FOdysseyVectorGroupPaint* iScene
+                       , const ::ULIS::FRectD& iErasureArea
                        , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                        , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                        , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
@@ -58,6 +59,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
                        , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                        , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray );
         void EraseSections( FOdysseyVectorGroupPaint* iScene
+                          , const ::ULIS::FRectD& iErasureArea
                           , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
@@ -74,5 +76,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
 
     private:
         FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;
-
+        ::ULIS::FVec2D mMin;
+        ::ULIS::FVec2D mMax;
 };

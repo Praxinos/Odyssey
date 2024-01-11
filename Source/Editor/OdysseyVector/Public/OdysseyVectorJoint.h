@@ -32,6 +32,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorJoint
         void UpdateBBox();
         ::ULIS::FRectD GetBBox( bool iWorld );
         void Make( FOdysseyVectorSegment* iCurrentSegment );
+        void ResetBBox();
 
     private:
         void MakeNone();

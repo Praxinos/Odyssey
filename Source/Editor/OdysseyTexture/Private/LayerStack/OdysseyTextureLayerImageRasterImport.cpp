@@ -21,7 +21,7 @@ FOdysseyTextureLayerImageRasterImport::Read( UOdysseyTextureLayerImageRaster* iT
     switch( chunkID )
     {
         case FOdysseyFile::Texture::CHUNK_TEXTURELAYERIMAGERASTER :
-            UE_LOG(LogTemp, Warning, TEXT("CHUNK_TEXTURELAYERIMAGERASTER") );
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_TEXTURELAYERIMAGERASTER") );
 
             FOdysseyTextureLayerImageRasterImport::Read( iTextureLayerImageRaster, Ar, chunkEnd );
         break;

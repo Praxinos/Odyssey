@@ -172,7 +172,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
             switch( chunkID )
             {
                 case FOdysseyFile::VectorV1::CHUNK_VECTOR_MAGIC_V1 :
-                    UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V1") );
+                    //UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V1") );
 
                     FOdysseyVectorImportV1::Read( mEngine->GetScene(), Ar, chunkEnd );
                 break;
@@ -181,7 +181,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
                 {
                     FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
 
-                    UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
+                    //UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
 
                     importerV2.Read( mEngine->GetScene(), Ar, chunkEnd );
                 }

@@ -396,6 +396,8 @@ FOdysseyVectorVertex::SetCoords( double iX, double iY, double iRadius )
 
     FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
 
+    mJoint.ResetBBox();
+
     InvalidateSegments();
 }
 

@@ -203,12 +203,26 @@ FOdysseyVectorExportV2::WriteObjectOpacity( FOdysseyVectorObject& iObject, FArch
 }
 
 void
+FOdysseyVectorExportV2::WriteObjectExpansion( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_EXPANSION
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
+    {
+        uint32 expanded = static_cast<uint32>(iObject.IsExpanded());
+
+        Ar << expanded;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteObjectChunks( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     WriteObjectParentID( iObject, Ar );
     WriteObjectName( iObject, Ar );
     WriteObjectTransform( iObject, Ar );
     WriteObjectOpacity( iObject, Ar );
+    WriteObjectExpansion( iObject, Ar );
     WriteObjectForegroundBucket( iObject, Ar );
     WriteObjectBackgroundBucket( iObject, Ar );
 }

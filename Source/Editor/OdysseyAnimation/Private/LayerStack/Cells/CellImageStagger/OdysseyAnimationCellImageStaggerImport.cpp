@@ -21,7 +21,7 @@ FOdysseyAnimationCellImageStaggerImport::Read( FOdysseyAnimationCellImageStagger
     switch( chunkID )
     {
         case FOdysseyFile::Animation::CHUNK_CELLIMAGESTAGGER :
-            UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGESTAGGER") );
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGESTAGGER") );
 
             FOdysseyAnimationCellImageStaggerImport::Read( iAnimationCellImageStagger, Ar, chunkEnd );
         break;

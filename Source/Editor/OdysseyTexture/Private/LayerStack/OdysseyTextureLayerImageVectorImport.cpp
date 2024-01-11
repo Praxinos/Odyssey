@@ -1,5 +1,6 @@
 #include "LayerStack/OdysseyTextureLayerImageVectorImport.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "Import/v2/OdysseyVectorImport.h"
 #include "OdysseyFile.h"
 
 bool
@@ -21,7 +22,7 @@ FOdysseyTextureLayerImageVectorImport::Read( UOdysseyTextureLayerImageVector* iT
     switch( chunkID )
     {
         case FOdysseyFile::Texture::CHUNK_TEXTURELAYERIMAGEVECTOR :
-            UE_LOG(LogTemp, Warning, TEXT("CHUNK_TEXTURELAYERIMAGEVECTOR") );
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_TEXTURELAYERIMAGEVECTOR") );
 
             FOdysseyTextureLayerImageVectorImport::Read( iTextureLayerImageVector, Ar, chunkEnd );
         break;
@@ -50,7 +51,7 @@ FOdysseyTextureLayerImageVectorImport::Read( UOdysseyTextureLayerImageVector* iT
                     FOdysseyVectorEngine* vectorEngine = iTextureLayerImageVector->GetEngine();
                     FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
 
-                    UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
+                    //UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
 
                     importerV2.Read( vectorEngine->GetScene(), Ar, Ar.Tell() + iChunkLen );
                 }

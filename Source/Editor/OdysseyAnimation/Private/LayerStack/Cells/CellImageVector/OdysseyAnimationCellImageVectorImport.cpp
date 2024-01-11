@@ -22,7 +22,7 @@ FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* 
     switch( chunkID )
     {
         case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR :
-            UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGEVECTOR") );
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGEVECTOR") );
 
             FOdysseyAnimationCellImageVectorImport::Read( iAnimationCellImageVector, Ar, chunkEnd );
         break;
@@ -83,7 +83,7 @@ FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* 
                     FOdysseyVectorEngine* vectorEngine = iAnimationCellImageVector->GetEngine();
                     FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
 
-                    UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
+                    //UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
 
                     importerV2.Read( vectorEngine->GetScene(), Ar, Ar.Tell() + iChunkLen );
                 }

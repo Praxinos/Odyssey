@@ -6,6 +6,7 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
+#include "OdysseyVector.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -56,6 +57,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPai
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
+    mMin.x = mMax.x = iPointInTexture.x;
+    mMin.y = mMax.y = iPointInTexture.y;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -100,6 +104,11 @@ uint64
 UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture )
 {
+    if( iPointInTexture.x < mMin.x ) mMin.x = iPointInTexture.x;
+    if( iPointInTexture.y < mMin.y ) mMin.y = iPointInTexture.y;
+    if( iPointInTexture.x > mMax.x ) mMax.x = iPointInTexture.x;
+    if( iPointInTexture.y > mMax.y ) mMax.y = iPointInTexture.y;
+
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
         mEraserHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
@@ -115,6 +124,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPai
 
 void
 UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* iScene
+                                                    , const ::ULIS::FRectD& iErasureArea
                                                     , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                                                     , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                                                     , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
@@ -131,6 +141,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
     , [ this
       , iScene
       , vectorEngine
+      , &iErasureArea
       , &oAddedObjectArray
       , &oAddedVertexArray
       , &oAddedSegmentArray
@@ -143,16 +154,20 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
               if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) ) 
               {
                   FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
-                  ::ULIS::FRectD unusedRect;
+                  ::ULIS::FRectD paintGroupWorldBBox = paintGroup->GetBBox( true );
 
-                  paintGroup->EraseSections( unusedRect
-                                           , oAddedObjectArray
-                                           , oAddedVertexArray
-                                           , oAddedSegmentArray
-                                           , oRemovedObjectArray
-                                           , oRemovedVertexArray
-                                           , oRemovedSegmentArray
-                                           , SplitPath );
+                  if( FOdysseyVector::IntersectRegions<double>( paintGroupWorldBBox
+                                                              , iErasureArea
+                                                              , nullptr ) )
+                  {
+                      paintGroup->EraseSections( oAddedObjectArray
+                                               , oAddedVertexArray
+                                               , oAddedSegmentArray
+                                               , oRemovedObjectArray
+                                               , oRemovedVertexArray
+                                               , oRemovedSegmentArray
+                                               , SplitPath );
+                  }
 
                   // do not erase children. this is useless and would cause a crash because the paintgroup
                   // is not updated yet.
@@ -167,17 +182,20 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                   if( parent->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                   {
                       FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(parent);
-                      ::ULIS::FRectD unusedRect;
+                      ::ULIS::FRectD paintGroupWorldBBox = paintGroup->GetBBox( true );
 
-                      paintGroup->EraseSections( unusedRect
-                                               , oAddedObjectArray
-                                               , oAddedVertexArray
-                                               , oAddedSegmentArray
-                                               , oRemovedObjectArray
-                                               , oRemovedVertexArray
-                                               , oRemovedSegmentArray
-                                               , SplitPath );
-
+                      if( FOdysseyVector::IntersectRegions<double>( paintGroupWorldBBox
+                                                                  , iErasureArea
+                                                                  , nullptr ) )
+                      {
+                          paintGroup->EraseSections( oAddedObjectArray
+                                                   , oAddedVertexArray
+                                                   , oAddedSegmentArray
+                                                   , oRemovedObjectArray
+                                                   , oRemovedVertexArray
+                                                   , oRemovedSegmentArray
+                                                   , SplitPath );
+                      }
                       // do not erase children. this is useless and would cause a crash because the paintgroup
                       // is not updated yet.
                       return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
@@ -223,6 +241,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
 
 void
 UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iScene
+                                                 , const ::ULIS::FRectD& iErasureArea
                                                  , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                                                  , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                                                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
@@ -239,6 +258,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
     , [ this
       , iScene
       , vectorEngine
+      , &iErasureArea
       , &oAddedObjectArray
       , &oAddedVertexArray
       , &oAddedSegmentArray
@@ -251,18 +271,22 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
-                  ::ULIS::FRectD unusedRect;
+                  ::ULIS::FRectD pathWorldBBox = path->GetBBox( true );
 
-                  if( path->Erase( unusedRect
-                                 , oAddedObjectArray
-                                 , oAddedVertexArray
-                                 , oAddedSegmentArray
-                                 , oRemovedVertexArray
-                                 , oRemovedSegmentArray
-                                 , false
-                                 , SplitPath ) )
+                  if( FOdysseyVector::IntersectRegions<double>( pathWorldBBox
+                                                              , iErasureArea
+                                                              , nullptr ) )
                   {
-                      oRemovedObjectArray.push_back( path );
+                      if( path->Erase( oAddedObjectArray
+                                     , oAddedVertexArray
+                                     , oAddedSegmentArray
+                                     , oRemovedVertexArray
+                                     , oRemovedSegmentArray
+                                     , false
+                                     , SplitPath ) )
+                      {
+                          oRemovedObjectArray.push_back( path );
+                      }
                   }
               }
 
@@ -283,7 +307,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
     }
 
     // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
-    // so we can't alter the hierarchy, unles traverse works on copies of the children list but that 
+    // so we can't alter the hierarchy, unless traverse works on copies of the children list but that 
     // would be very inefficient.
     for( int i = 0; i < oRemovedObjectArray.size(); i++ )
     {
@@ -309,6 +333,10 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                       , const FKey& iKey )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    ::ULIS::FRectD erasureArea = ::ULIS::FRectD::FromMinMax( mMin.x - Radius
+                                                           , mMin.y - Radius
+                                                           , mMax.x + Radius
+                                                           , mMax.y + Radius );
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -328,6 +356,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
         {
             EraseSections( iScene
+                         , erasureArea
                          , addedObjectArray
                          , addedVertexArray
                          , addedSegmentArray
@@ -338,6 +367,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         else
         {
             ErasePaths( iScene
+                      , erasureArea
                       , addedObjectArray
                       , addedVertexArray
                       , addedSegmentArray
@@ -383,22 +413,28 @@ UOdysseyPainterEditorVectorEraserTool::CreateTopTabWidget()
     TSharedPtr<class IPropertyHandle> splitPathHandle = splitPathPropertyView->GetPropertyHandle();
     TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
 
-    return SNew(SUniformWrapPanel)
-           .SlotPadding(FVector2D(3.f, 3.f))
-           .EvenRowDistribution(true)
-           .HAlign(HAlign_Fill)
-           + SUniformWrapPanel::Slot()
-           [
-               UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
-           ]
-           + SUniformWrapPanel::Slot()
-           [
-               CreatePropertyWidget(splitPathHandle, splitPathPropertyView).ToSharedRef()
-           ]
-           + SUniformWrapPanel::Slot()
-           [
-               CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
-           ];
+    // we create the topTab widget only once, or else it creates a sizing issue in the top tab
+    if( mTopTabWidget.Get() == nullptr )
+    {
+        mTopTabWidget = SNew(SUniformWrapPanel)
+                       .SlotPadding(FVector2D(3.f, 0.f))
+                       .EvenRowDistribution(true)
+                       .HAlign(HAlign_Left)
+                       + SUniformWrapPanel::Slot()
+                       [
+                           SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(splitPathHandle, splitPathPropertyView).ToSharedRef()
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
+                       ];
+    }
+
+    return mTopTabWidget.ToSharedRef();
 }
 
 #undef LOCTEXT_NAMESPACE

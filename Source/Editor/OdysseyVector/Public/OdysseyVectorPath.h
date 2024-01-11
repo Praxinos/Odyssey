@@ -152,7 +152,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         /**
          * @brief Erase path according to the mask image.
-         * @param iRoi region of interest for faster discarding.
          * @param iSplit
          * @param oAddedPathArray array of pointers to added split paths.
          * @param oAddedVertexArray array of pointers to added vertices.
@@ -161,8 +160,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param oRemovedSegmentArray array of pointers to removed segments.
          * @return true if the path is empty, false otherwise.
          */
-        bool Erase( const ::ULIS::FRectD &iRoi
-                  , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+        bool Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                   , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray

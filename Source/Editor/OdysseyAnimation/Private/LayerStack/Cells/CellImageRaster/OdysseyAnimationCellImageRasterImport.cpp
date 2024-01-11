@@ -21,7 +21,7 @@ FOdysseyAnimationCellImageRasterImport::Read( FOdysseyAnimationCellImageRaster* 
     switch( chunkID )
     {
         case FOdysseyFile::Animation::CHUNK_CELLIMAGERASTER :
-            UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGERASTER") );
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGERASTER") );
 
             FOdysseyAnimationCellImageRasterImport::Read( iAnimationCellImageRaster, Ar, chunkEnd );
         break;

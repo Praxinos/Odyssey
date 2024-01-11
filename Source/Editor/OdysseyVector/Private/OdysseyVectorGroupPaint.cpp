@@ -2374,8 +2374,7 @@ typedef struct _FVertexPair
 } FVertexPair;
 
 void
-FOdysseyVectorGroupPaint::EraseSections( const ::ULIS::FRectD &iRoi
-                                       , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                                        , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                                        , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                                        , std::vector<FOdysseyVectorObject*>& oRemovedPathArray
@@ -2401,8 +2400,7 @@ FOdysseyVectorGroupPaint::EraseSections( const ::ULIS::FRectD &iRoi
 
     for( FOdysseyVectorPath* path : mPathList )
     {
-        if( path->Erase( iRoi
-                       , oAddedPathArray
+        if( path->Erase( oAddedPathArray
                        , oAddedVertexArray
                        , oAddedSegmentArray
                        , oRemovedVertexArray

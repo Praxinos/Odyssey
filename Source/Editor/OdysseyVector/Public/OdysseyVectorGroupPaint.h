@@ -136,8 +136,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void SetMonochromeColor( const FColor& iMonochromeColor );
         void GetSectionsFromPath( FOdysseyVectorPath* iPath
                                 , std::vector<FOdysseyVectorSection*>& oSectionArray );
-        void EraseSections( const ::ULIS::FRectD &iRoi
-                          , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+        void EraseSections( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                           , std::vector<FOdysseyVectorObject*>& oRemovedPathArray
