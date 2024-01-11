@@ -2,14 +2,15 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTableExport.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTableImport.h"
 
 FOdysseyAnimationLightTable::~FOdysseyAnimationLightTable()
 {
 }
 
 FOdysseyAnimationLightTable::FOdysseyAnimationLightTable(UOdysseyAnimationLayer* iLayer)
-    : mOwnerLayer(iLayer)
-    , mSourceLayer(iLayer)
+    : mLayer(iLayer)
     , mDisplayPosition(EOdysseyLightTableDisplayPosition::UnderLayer)
     , mPreviousKeysColor(FColor::Orange)
     , mNextKeysColor(FColor::Cyan) 
@@ -19,34 +20,25 @@ FOdysseyAnimationLightTable::FOdysseyAnimationLightTable(UOdysseyAnimationLayer*
     //assume 10 frames on the left + 10 frames on the left + 1 current frame
     for (int i = -1; i >= -GetRange(); i--)
     {
-        FKeyData keyData;
-        keyData.mIsActivated = false;
-        keyData.mOpacity = 0.5f;
-        mKeysData.Add(i, keyData);
+        FKey key;
+        key.mIsActivated = (i == -1);
+        key.mOpacity = 0.5f;
+        mKeys.Add(key);
     }
 
     for (int i = 1; i <= GetRange(); i++)
     {
-        FKeyData keyData;
-        keyData.mIsActivated = false;
-        keyData.mOpacity = 0.5f;
-        mKeysData.Add(i, keyData);
+        FKey key;
+        key.mIsActivated = (i == 1);
+        key.mOpacity = 0.5f;
+        mKeys.Add(key);
     }
-    
-    mKeysData[1].mIsActivated = true;
-    mKeysData[-1].mIsActivated = true;
 }
 
 UOdysseyAnimationLayer*
-FOdysseyAnimationLightTable::GetOwnerLayer() const
+FOdysseyAnimationLightTable::GetLayer() const
 {
-    return mOwnerLayer;
-}
-
-UOdysseyAnimationLayer*
-FOdysseyAnimationLightTable::GetSourceLayer() const
-{
-    return mSourceLayer;
+    return mLayer;
 }
 
 EOdysseyLightTableDisplayPosition
@@ -55,31 +47,46 @@ FOdysseyAnimationLightTable::GetDisplayPosition() const
     return mDisplayPosition;
 }
 
+const FOdysseyAnimationLightTable::FKey*
+FOdysseyAnimationLightTable::GetKey(int iIndex) const
+{
+    if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
+        return nullptr;
+
+    int index = iIndex > 0 ? iIndex + GetRange() - 1 :  -iIndex - 1;
+
+    return &mKeys[index];
+}
+
+FOdysseyAnimationLightTable::FKey*
+FOdysseyAnimationLightTable::GetKey(int iIndex)
+{
+    if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
+        return nullptr;
+
+    int index = iIndex > 0 ? iIndex + GetRange() - 1 :  -iIndex - 1;
+
+    return &mKeys[index];
+}
+
 bool
 FOdysseyAnimationLightTable::GetKeyIsActivated(int iIndex) const
 {
-    if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
+    const FKey* key = GetKey(iIndex);
+    if (!key)
         return false;
 
-    return mKeysData[iIndex].mIsActivated;
-}
-
-int
-FOdysseyAnimationLightTable::GetKeyOffset(int iIndex) const
-{
-    if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
-        return 0;
-
-    return mKeysData[iIndex].mOffset;
+    return key->mIsActivated;
 }
 
 float
 FOdysseyAnimationLightTable::GetKeyOpacity(int iIndex) const
 {
-    if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
-        return 0;
+    const FKey* key = GetKey(iIndex);
+    if (!key)
+        return 0.f;
 
-    return mKeysData[iIndex].mOpacity;
+    return key->mOpacity;
 }
 
 ::ULIS::FColor
@@ -112,12 +119,6 @@ FOdysseyAnimationLightTable::GetPreviousKeysContrast() const
     return mPreviousKeysContrast;
 }
 
-const TMap<int, FOdysseyAnimationLightTable::FKeyData>&
-FOdysseyAnimationLightTable::GetKeysData() const
-{
-    return mKeysData;
-}
-
 int
 FOdysseyAnimationLightTable::GetRange() const
 {
@@ -138,29 +139,48 @@ FOdysseyAnimationLightTable::GetImageRenderingComposition(IOdysseyImageRenderer:
 {
     TArray<FGuid> idComposition = { GetImageRenderingId() };
 
-    if(!mSourceLayer)
+    if(!mLayer)
+        return idComposition;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
         return idComposition;
 
     for (int i = -1; i >= -GetRange(); i--)
     {
-        if (!mKeysData[i].mIsActivated)
+        if (!GetKeyIsActivated(i))
             continue;
 
+        int cellIndex = cellsContainer->GetCellIndexAtFrame(iFrameIndex);
+        if (cellIndex == INDEX_NONE)
+            continue;
+
+        cellIndex += i;
+        if (cellIndex < 0)
+            continue;
+
+        int cellStartFrame = cellsContainer->GetCellFrame(cellsContainer->GetCells()[cellIndex]);
+
         //Find the cell or frame 
-        int offset = mKeysData[i].mOffset;
-        int celFrameIndex = INDEX_NONE;
-        idComposition.Append(mSourceLayer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, iFrameIndex + offset));
+        idComposition.Append(mLayer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, cellStartFrame));
     }
 
     for (int i = 1; i <= GetRange(); i++)
     {
-        if (!mKeysData[i].mIsActivated)
+        if (!GetKeyIsActivated(i))
             continue;
 
         //Find the cell or frame 
-        int offset = mKeysData[i].mOffset;
-        int celFrameIndex = INDEX_NONE;
-        idComposition.Append(mSourceLayer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, iFrameIndex + offset));
+        int cellIndex = cellsContainer->GetCellIndexAtFrame(iFrameIndex);
+        if (cellIndex == INDEX_NONE)
+            continue;
+
+        cellIndex += i;
+        if (cellIndex >= cellsContainer->GetCells().Num())
+            continue;
+
+        int cellStartFrame = cellsContainer->GetCellFrame(cellsContainer->GetCells()[cellIndex]);
+        idComposition.Append(mLayer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, cellStartFrame));
     }
 
     return idComposition;
@@ -169,8 +189,25 @@ FOdysseyAnimationLightTable::GetImageRenderingComposition(IOdysseyImageRenderer:
 TArray<::ULIS::FRectI>
 FOdysseyAnimationLightTable::GetImageRenderingRects() const
 {
-    if (!mSourceLayer)
+    if (!mLayer)
         return {};
 
-    return mSourceLayer->GetImageRenderingRects();
+    return mLayer->GetImageRenderingRects();
+}
+
+void
+FOdysseyAnimationLightTable::Serialize(FArchive& Ar)
+{
+    if ( Ar.IsTransacting() || !Ar.IsPersistent() )
+        return;
+
+    if( Ar.IsSaving() )
+    {
+        FOdysseyAnimationLightTableExport::Write( this, Ar );
+    }
+
+    if( Ar.IsLoading() )
+    {
+        FOdysseyAnimationLightTableImport::Read( this, Ar );
+    }
 }

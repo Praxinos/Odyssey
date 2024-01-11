@@ -13,12 +13,10 @@ public:
     FOdysseyAnimationLightTableMutator(TSharedPtr<FOdysseyAnimationLightTable> iLightTable);
 
 public:
-    void SetSourceLayer(UOdysseyAnimationLayer* iLayer);
     void SetDisplayPosition(EOdysseyLightTableDisplayPosition iDisplayPosition);
 
 public:
     void SetKeyIsActivated(int iIndex, bool iIsActivated);
-    void SetKeyFrameOffset(int iIndex, int iOffset);
     void SetKeyOpacity(int iIndex, float iOpacity);
     void SetNextKeysColor(const FLinearColor& iColor);
     void SetPreviousKeysColor(const FLinearColor& iColor);

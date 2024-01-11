@@ -23,8 +23,7 @@ public:
     FOdysseyAnimationLightTable(UOdysseyAnimationLayer* iLayer);
 
 public:
-    UOdysseyAnimationLayer* GetOwnerLayer() const;
-    UOdysseyAnimationLayer* GetSourceLayer() const;
+    UOdysseyAnimationLayer* GetLayer() const;
     EOdysseyLightTableDisplayPosition GetDisplayPosition() const;
 
 public:
@@ -37,14 +36,16 @@ public:
     float GetNextKeysContrast() const;
     float GetPreviousKeysContrast() const;
 
-    struct FKeyData
+    struct FKey
     {
+        friend class FOdysseyAnimationLightTableKeyImport;
+        friend class FOdysseyAnimationLightTableKeyExport;
+
         bool mIsActivated;
-        int mOffset;
         float mOpacity;
     };
 
-    const TMap<int, FKeyData>& GetKeysData() const;
+    const FKey* GetKey(int iIndex) const;
     int GetRange() const;
 
 public:
@@ -53,16 +54,22 @@ public:
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
+    void Serialize(FArchive& Ar);
+
+private:
+    FKey* GetKey(int iIndex);
+
 private:
     friend class FOdysseyAnimationLightTableMutator;
+    friend class FOdysseyAnimationLightTableImport;
+    friend class FOdysseyAnimationLightTableExport;
 
-    UOdysseyAnimationLayer* mOwnerLayer;
-    UOdysseyAnimationLayer* mSourceLayer;
+    UOdysseyAnimationLayer* mLayer;
     EOdysseyLightTableDisplayPosition mDisplayPosition;
     FLinearColor mPreviousKeysColor;
     FLinearColor mNextKeysColor;
     float mPreviousKeysContrast;
     float mNextKeysContrast;
 
-    TMap<int, FKeyData> mKeysData;
+    TArray<FKey> mKeys;
 };

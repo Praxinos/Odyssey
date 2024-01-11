@@ -9,7 +9,7 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iLightTable->GetSourceLayer()->GetCellsContainer();
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iLightTable->GetLayer()->GetCellsContainer();
     int currentCellIndex = cellsContainer->GetCellIndexAtFrame(iFrame);
     if (currentCellIndex == INDEX_NONE)
         return;
@@ -18,7 +18,6 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
     if (currentCellIndex == INDEX_NONE)
         return;
 
-    const TMap<int, FOdysseyAnimationLightTable::FKeyData>& keysData = iLightTable->GetKeysData();
     for (int i = -1; i >= -iLightTable->GetRange(); i--)
     {
         int cellIndex = currentCellIndex + i;
@@ -27,14 +26,14 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 
         TSharedPtr<FOdysseyAnimationCell> cell = cells[cellIndex];
 
-        if (!keysData[i].mIsActivated)
+        if (!iLightTable->GetKeyIsActivated(i))
             continue;
 
         int cellFirstFrame = cellsContainer->GetCellFrame(cell);
 
         FFrameData data;
-        data.mOpacity = keysData[i].mOpacity;
-        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
+        data.mOpacity = iLightTable->GetKeyOpacity(i);
+        data.mRenderer = iLightTable->GetLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
         data.mColor = iLightTable->GetKeyColor(i);
         data.mContrast = iLightTable->GetPreviousKeysContrast();
         mFramesData.Add(data);
@@ -48,14 +47,14 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 
         TSharedPtr<FOdysseyAnimationCell> cell = cells[cellIndex];
 
-        if (!keysData[i].mIsActivated)
+        if (!iLightTable->GetKeyIsActivated(i))
             continue;
 
         int cellFirstFrame = cellsContainer->GetCellFrame(cell);
 
         FFrameData data;
-        data.mOpacity = keysData[i].mOpacity;
-        data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
+        data.mOpacity = iLightTable->GetKeyOpacity(i);
+        data.mRenderer = iLightTable->GetLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
         data.mColor = iLightTable->GetKeyColor(i);
         data.mContrast = iLightTable->GetNextKeysContrast();
         mFramesData.Add(data);

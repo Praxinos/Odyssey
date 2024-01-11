@@ -89,8 +89,6 @@ SOdysseyAnimationLightTable::Rebuild()
 	if (!lightTable)
 		return;
 
-	const TMap<int, FOdysseyAnimationLightTable::FKeyData>& keysData = lightTable->GetKeysData();
-
 	for (int i = -lightTable->GetRange(); i <= -1 ; i++)
     {
 		mSlidersBox->AddSlot()

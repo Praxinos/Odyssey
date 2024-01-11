@@ -196,9 +196,21 @@ namespace FOdysseyFile
 
         static const uint32 CHUNK_LAYERIMAGERASTER = 0xc19199d8; //container
             static const uint32 CHUNK_LAYERIMAGERASTER_CELLSCONTAINER = 0x8334465; //FOdysseyAnimationCellsContainer(CellContainer)
+            static const uint32 CHUNK_LAYERIMAGERASTER_LIGHTTABLE = 0x914a7195; //FOdysseyAnimationLightTable(LightTable)
 
         static const uint32 CHUNK_LAYERIMAGEVECTOR = 0x576c21b; //container
             static const uint32 CHUNK_LAYERIMAGEVECTOR_CELLSCONTAINER = 0x75494fd4; //FOdysseyAnimationCellsContainer(CellContainer)
+            static const uint32 CHUNK_LAYERIMAGEVECTOR_LIGHTTABLE = 0x484ee3b4; //FOdysseyAnimationLightTable(LightTable)
+
+        static const uint32 CHUNK_LIGHTTABLE = 0x5240eec2; //container
+            static const uint32 CHUNK_LIGHTTABLE_DISPLAY_POSITION = 0x472555c;
+            static const uint32 CHUNK_LIGHTTABLE_COLORS = 0x854e88aa;
+            static const uint32 CHUNK_LIGHTTABLE_CONTRAST = 0x4e98233c;
+            static const uint32 CHUNK_LIGHTTABLE_KEYS = 0x825ce6e5;
+                static const uint32 CHUNK_LIGHTTABLE_KEY = 0x5b785423;
+                    static const uint32 CHUNK_LIGHTTABLE_KEY_ISACTIVATED = 0xea8a5d86;
+                    static const uint32 CHUNK_LIGHTTABLE_KEY_OPACITY = 0x21ab66;
+
     }
 
     namespace RasterBlock

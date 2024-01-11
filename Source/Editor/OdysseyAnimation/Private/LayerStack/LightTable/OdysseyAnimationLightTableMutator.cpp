@@ -4,7 +4,7 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
 
 FOdysseyAnimationLightTableMutator::FOdysseyAnimationLightTableMutator(TSharedPtr<FOdysseyAnimationLightTable> iLightTable)
-    : FOdysseyMutator(iLightTable->GetOwnerLayer(), "FOdysseyAnimationLightTableMutator", false) //false means we never generate undo, we could also pass nullptr instead of the ownerlayer here
+    : FOdysseyMutator(iLightTable->GetLayer(), "FOdysseyAnimationLightTableMutator", false) //false means we never generate undo, we could also pass nullptr instead of the ownerlayer here
     , mLightTable(iLightTable)
 {
     GetRootMutation()->OnChanged().BindLambda(
@@ -21,28 +21,6 @@ FOdysseyAnimationLightTableMutator::FOdysseyAnimationLightTableMutator(TSharedPt
             lightTable->ImageRenderingChanged();
         }
     );
-}
-
-struct FSetSourceLayerData
-{
-    UOdysseyAnimationLayer* mNewSourceLayer;
-    UOdysseyAnimationLayer* mOldSourceLayer;
-};
-
-void
-FOdysseyAnimationLightTableMutator::SetSourceLayer(UOdysseyAnimationLayer* iLayer)
-{
-    TSharedRef<FSetSourceLayerData> data = MakeShared<FSetSourceLayerData>();
-    data->mNewSourceLayer = iLayer;
-    data->mOldSourceLayer = mLightTable->mSourceLayer;
-
-    TSharedPtr<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetSourceLayerData>>(
-        data,
-        FOdysseyMutation<FSetSourceLayerData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetSourceLayerData> iData) { lighttable->mSourceLayer = iData->mNewSourceLayer; }),
-        FOdysseyMutation<FSetSourceLayerData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetSourceLayerData> iData) { lighttable->mSourceLayer = iData->mOldSourceLayer; })
-    );
-
-    AddAndApplyMutation(mutation);
 }
 
 struct FSetDisplayPositionData
@@ -83,36 +61,12 @@ FOdysseyAnimationLightTableMutator::SetKeyIsActivated(int iIndex, bool iIsActiva
     TSharedRef<FSetKeyIsActivatedData> data = MakeShared<FSetKeyIsActivatedData>();
     data->mIndex = iIndex;
     data->mNewIsActivated = iIsActivated;
-    data->mOldIsActivated = mLightTable->mKeysData[iIndex].mIsActivated;
+    data->mOldIsActivated = mLightTable->GetKeyIsActivated(iIndex);
 
     TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeyIsActivatedData>>(
         data,
-        FOdysseyMutation<FSetKeyIsActivatedData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyIsActivatedData> iData) { lighttable->mKeysData[iData->mIndex].mIsActivated = iData->mNewIsActivated; }),
-        FOdysseyMutation<FSetKeyIsActivatedData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyIsActivatedData> iData) { lighttable->mKeysData[iData->mIndex].mIsActivated = iData->mOldIsActivated; })
-    );
-
-    AddAndApplyMutation(mutation);
-}
-
-struct FSetKeyFrameOffsetData
-{
-    int mIndex;
-    int mNewOffset;
-    int mOldOffset;
-};
-
-void
-FOdysseyAnimationLightTableMutator::SetKeyFrameOffset(int iIndex, int iOffset)
-{
-    TSharedRef<FSetKeyFrameOffsetData> data = MakeShared<FSetKeyFrameOffsetData>();
-    data->mIndex = iIndex;
-    data->mNewOffset = iOffset;
-    data->mOldOffset = mLightTable->mKeysData[iIndex].mOffset;
-
-    TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeyFrameOffsetData>>(
-        data,
-        FOdysseyMutation<FSetKeyFrameOffsetData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyFrameOffsetData> iData) { lighttable->mKeysData[iData->mIndex].mOffset = iData->mNewOffset; }),
-        FOdysseyMutation<FSetKeyFrameOffsetData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyFrameOffsetData> iData) { lighttable->mKeysData[iData->mIndex].mOffset = iData->mOldOffset; })
+        FOdysseyMutation<FSetKeyIsActivatedData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyIsActivatedData> iData) { lighttable->GetKey(iData->mIndex)->mIsActivated = iData->mNewIsActivated; }),
+        FOdysseyMutation<FSetKeyIsActivatedData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyIsActivatedData> iData) { lighttable->GetKey(iData->mIndex)->mIsActivated = iData->mOldIsActivated; })
     );
 
     AddAndApplyMutation(mutation);
@@ -131,12 +85,12 @@ FOdysseyAnimationLightTableMutator::SetKeyOpacity(int iIndex, float iOpacity)
     TSharedRef<FSetKeyOpacityData> data = MakeShared<FSetKeyOpacityData>();
     data->mIndex = iIndex;
     data->mNewOpacity = FMath::Clamp(iOpacity, 0.f, 1.f);
-    data->mOldOpacity = mLightTable->mKeysData[iIndex].mOpacity;
+    data->mOldOpacity = mLightTable->GetKeyOpacity(iIndex);
 
     TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeyOpacityData>>(
         data,
-        FOdysseyMutation<FSetKeyOpacityData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyOpacityData> iData) { lighttable->mKeysData[iData->mIndex].mOpacity = iData->mNewOpacity; }),
-        FOdysseyMutation<FSetKeyOpacityData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyOpacityData> iData) { lighttable->mKeysData[iData->mIndex].mOpacity = iData->mOldOpacity; })
+        FOdysseyMutation<FSetKeyOpacityData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyOpacityData> iData) { lighttable->GetKey(iData->mIndex)->mOpacity = iData->mNewOpacity; }),
+        FOdysseyMutation<FSetKeyOpacityData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeyOpacityData> iData) { lighttable->GetKey(iData->mIndex)->mOpacity = iData->mOldOpacity; })
     );
 
     AddAndApplyMutation(mutation);

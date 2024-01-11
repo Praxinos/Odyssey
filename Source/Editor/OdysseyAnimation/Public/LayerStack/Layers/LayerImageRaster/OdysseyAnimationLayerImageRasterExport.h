@@ -12,4 +12,5 @@ public:
 private:
     ////////////////////////////////////
     static void WriteCellsContainer( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster, FArchive &Ar );
+    static void WriteLightTable( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster, FArchive &Ar );
 };

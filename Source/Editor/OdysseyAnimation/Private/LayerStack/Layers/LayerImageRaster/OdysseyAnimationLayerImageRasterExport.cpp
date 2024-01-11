@@ -15,6 +15,18 @@ FOdysseyAnimationLayerImageRasterExport::WriteCellsContainer( UOdysseyAnimationL
 }
 
 void
+FOdysseyAnimationLayerImageRasterExport::WriteLightTable( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
+                                                       , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_LAYERIMAGERASTER_LIGHTTABLE
+                            , Ar
+                            , [iAnimationLayerImageRaster](FArchive &Ar) -> void
+    {
+        iAnimationLayerImageRaster->mLightTable->Serialize(Ar);
+    });
+}
+
+void
 FOdysseyAnimationLayerImageRasterExport::Write( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
                                              , FArchive &Ar )
 {
@@ -23,5 +35,6 @@ FOdysseyAnimationLayerImageRasterExport::Write( UOdysseyAnimationLayerImageRaste
                             , [iAnimationLayerImageRaster](FArchive &Ar) -> void
     {
         WriteCellsContainer( iAnimationLayerImageRaster, Ar );
+        WriteLightTable( iAnimationLayerImageRaster, Ar );
     } );
 }

@@ -15,6 +15,18 @@ FOdysseyAnimationLayerImageVectorExport::WriteCellsContainer( UOdysseyAnimationL
 }
 
 void
+FOdysseyAnimationLayerImageVectorExport::WriteLightTable( UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
+                                                       , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_LAYERIMAGEVECTOR_LIGHTTABLE
+                            , Ar
+                            , [iAnimationLayerImageVector](FArchive &Ar) -> void
+    {
+        iAnimationLayerImageVector->mLightTable->Serialize(Ar);
+    });
+}
+
+void
 FOdysseyAnimationLayerImageVectorExport::Write( UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
                                              , FArchive &Ar )
 {
@@ -23,5 +35,6 @@ FOdysseyAnimationLayerImageVectorExport::Write( UOdysseyAnimationLayerImageVecto
                             , [iAnimationLayerImageVector](FArchive &Ar) -> void
     {
         WriteCellsContainer( iAnimationLayerImageVector, Ar );
+        WriteLightTable( iAnimationLayerImageVector, Ar );
     } );
 }

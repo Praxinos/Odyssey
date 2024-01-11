@@ -51,6 +51,12 @@ FOdysseyAnimationLayerImageRasterImport::Read( UOdysseyAnimationLayerImageRaster
                 }
                 break;
 
+                case FOdysseyFile::Animation::CHUNK_LAYERIMAGERASTER_LIGHTTABLE :
+                {
+                    iAnimationLayerImageRaster->mLightTable->Serialize(Ar);
+                }
+                break;
+
                 default:
 				// Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
