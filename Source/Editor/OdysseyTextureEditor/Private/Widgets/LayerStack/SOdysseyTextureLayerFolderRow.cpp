@@ -7,6 +7,9 @@
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/OdysseyTextureLayerFolder.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Math/UnitConversion.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -51,6 +54,7 @@ SOdysseyTextureLayerFolderRow::GenerateHeaderWidget()
             SNew(SNumericEntryBox<int>)
             .Visibility(this, &SOdysseyTextureLayerFolderRow::GetCollapsedOpacityVisibility)
             .Value_Lambda([this]() { return (int)(mTextureLayerFolder->Opacity * 100.f + 0.5f);})
+            .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
             .Delta(1)

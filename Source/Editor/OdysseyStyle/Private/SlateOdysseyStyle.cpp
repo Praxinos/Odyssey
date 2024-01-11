@@ -80,6 +80,7 @@ public:
     const FSlateColor mDefaultForeground;
 
     FButtonStyle mButton;
+    FComboButtonStyle mComboButton;
 
     FTableRowStyle mCoreTableRowStyle;
 };
@@ -116,6 +117,7 @@ FOdysseyStyleDefault::FOdysseyStyleDefault()
     , mDefaultForeground( mDefaultForeground_LinearRef )
 
     , mButton()
+    , mComboButton()
 
     , mCoreTableRowStyle()
 {
@@ -140,7 +142,8 @@ FOdysseyStyleDefault::Initialize()
 void
 FOdysseyStyleDefault::SetupGeneralStyles()
 {
-    mCoreTableRowStyle = FCoreStyle::Get().GetWidgetStyle<FTableRowStyle>("TableView.Row");
+    mCoreTableRowStyle = FAppStyle::Get().GetWidgetStyle<FTableRowStyle>("TableView.Row");
+    mComboButton = FAppStyle::Get().GetWidgetStyle< FComboButtonStyle >( "ComboButton" );
 }
 
 void
@@ -702,6 +705,17 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
 	);
+
+    Set("Animation.LightTable.Options", FComboButtonStyle(mComboButton)
+        .SetShadowOffset(FVector2D(0))
+        .SetButtonStyle( FButtonStyle(mButton)
+            .SetNormalPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+            .SetPressedPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+            .SetNormal(IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_OFF", mIcon16x16))
+            .SetHovered(IMAGE_BRUSH_SVG("OdysseyFlipbook/LightTable_Options_OFF", mIcon16x16))
+            .SetPressed(IMAGE_BRUSH_SVG("OdysseyFlipbook/LightTable_Options_ON", mIcon16x16))
+        )
+	);    
 
     Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleRight_16", mIcon16x16));
     Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));

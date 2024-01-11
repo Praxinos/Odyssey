@@ -24,6 +24,7 @@ public:
         float mOpacity;
         TSharedPtr<IOdysseyImageRenderer> mRenderer;
         ::ULIS::FColor mColor;
+        float mContrast;
     };
     TArray<FFrameData> mFramesData;
 };

@@ -28,6 +28,14 @@ private:
     FReply OnLightTablePreviousKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
     FReply OnLightTableNextKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
 
+    TSharedRef< SWidget > OnOptionsGetMenuContent();
+
+    void OnPreviousKeysContrastValueCommitted(int iValue, ETextCommit::Type iType);
+    void OnPreviousKeysContrastValueChanged(int iValue);
+
+    void OnNextKeysContrastValueCommitted(int iValue, ETextCommit::Type iType);
+    void OnNextKeysContrastValueChanged(int iValue);
+
 private:
 	TWeakPtr<FOdysseyAnimationLightTable> mLightTable;
     TSharedPtr<SColorBlock> mLightTablePreviousKeysColorBlockWidget;

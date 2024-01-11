@@ -179,3 +179,41 @@ FOdysseyAnimationLightTableMutator::SetPreviousKeysColor(const FLinearColor& iCo
 
     AddAndApplyMutation(mutation);
 }
+
+struct FSetKeysContrastData
+{
+    float mNewContrast;
+    float mOldContrast;
+};
+
+void
+FOdysseyAnimationLightTableMutator::SetNextKeysContrast(float iContrast)
+{
+    TSharedRef<FSetKeysContrastData> data = MakeShared<FSetKeysContrastData>();
+    data->mNewContrast = iContrast;
+    data->mOldContrast = mLightTable->mNextKeysContrast;
+
+    TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeysContrastData>>(
+        data,
+        FOdysseyMutation<FSetKeysContrastData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeysContrastData> iData) { lighttable->mNextKeysContrast = iData->mNewContrast; }),
+        FOdysseyMutation<FSetKeysContrastData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeysContrastData> iData) { lighttable->mNextKeysContrast = iData->mOldContrast; })
+    );
+
+    AddAndApplyMutation(mutation);
+}
+
+void
+FOdysseyAnimationLightTableMutator::SetPreviousKeysContrast(float iContrast)
+{
+    TSharedRef<FSetKeysContrastData> data = MakeShared<FSetKeysContrastData>();
+    data->mNewContrast = iContrast;
+    data->mOldContrast = mLightTable->mPreviousKeysContrast;
+
+    TSharedRef<IOdysseyMutation> mutation = MakeShared<FOdysseyMutation<FSetKeysContrastData>>(
+        data,
+        FOdysseyMutation<FSetKeysContrastData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeysContrastData> iData) { lighttable->mPreviousKeysContrast = iData->mNewContrast; }),
+        FOdysseyMutation<FSetKeysContrastData>::FMutationDelegate::CreateLambda([lighttable = mLightTable](TSharedPtr<FSetKeysContrastData> iData) { lighttable->mPreviousKeysContrast = iData->mOldContrast; })
+    );
+
+    AddAndApplyMutation(mutation);
+}

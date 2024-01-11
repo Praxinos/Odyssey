@@ -34,6 +34,8 @@ public:
     ::ULIS::FColor GetKeyColor(int iIndex) const;
     const FLinearColor& GetNextKeysColor() const;
     const FLinearColor& GetPreviousKeysColor() const;
+    float GetNextKeysContrast() const;
+    float GetPreviousKeysContrast() const;
 
     struct FKeyData
     {
@@ -59,6 +61,8 @@ private:
     EOdysseyLightTableDisplayPosition mDisplayPosition;
     FLinearColor mPreviousKeysColor;
     FLinearColor mNextKeysColor;
+    float mPreviousKeysContrast;
+    float mNextKeysContrast;
 
     TMap<int, FKeyData> mKeysData;
 };

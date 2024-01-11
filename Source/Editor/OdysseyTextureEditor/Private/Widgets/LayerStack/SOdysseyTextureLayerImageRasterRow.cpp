@@ -5,6 +5,9 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Math/UnitConversion.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -53,6 +56,7 @@ SOdysseyTextureLayerImageRasterRow::GenerateHeaderWidget()
             SNew(SNumericEntryBox<int>)
             .Visibility(this, &SOdysseyTextureLayerImageRasterRow::GetCollapsedOpacityVisibility)
             .Value_Lambda([this]() { return (int)(mTextureLayerImageRaster->Opacity * 100.f + 0.5f);})
+            .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
             .Delta(1)

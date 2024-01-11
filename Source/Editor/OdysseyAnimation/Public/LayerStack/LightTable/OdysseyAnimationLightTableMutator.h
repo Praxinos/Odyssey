@@ -22,6 +22,8 @@ public:
     void SetKeyOpacity(int iIndex, float iOpacity);
     void SetNextKeysColor(const FLinearColor& iColor);
     void SetPreviousKeysColor(const FLinearColor& iColor);
+    void SetNextKeysContrast(float iContrast);
+    void SetPreviousKeysContrast(float iContrast);
 
 private:
     TSharedPtr<FOdysseyAnimationLightTable> mLightTable;

@@ -8,6 +8,9 @@
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Math/UnitConversion.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -126,6 +129,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             [
                 SNew(SNumericEntryBox<int>)
                 .Value_Lambda([this]() { return (int)(mAnimationLayerImageVector->Opacity * 100.f + 0.5f);})
+                .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
                 .ShiftMouseMovePixelPerDelta(10)
                 .Delta(1)

@@ -11,6 +11,9 @@
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Math/UnitConversion.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -117,6 +120,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             [
                 SNew(SNumericEntryBox<int>)
                 .Value_Lambda([this]() { return (int)(mAnimationLayerImageRaster->Opacity * 100.f + 0.5f);})
+                .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
                 .ShiftMouseMovePixelPerDelta(10)
                 .Delta(1)

@@ -36,6 +36,7 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
         data.mOpacity = keysData[i].mOpacity;
         data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
         data.mColor = iLightTable->GetKeyColor(i);
+        data.mContrast = iLightTable->GetPreviousKeysContrast();
         mFramesData.Add(data);
     }
 
@@ -56,6 +57,7 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
         data.mOpacity = keysData[i].mOpacity;
         data.mRenderer = iLightTable->GetSourceLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
         data.mColor = iLightTable->GetKeyColor(i);
+        data.mContrast = iLightTable->GetNextKeysContrast();
         mFramesData.Add(data);
     }
 }
@@ -105,12 +107,9 @@ FOdysseyAnimationLightTableImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlo
             ::ULIS::FColor colorFull = frameData.mColor;
             colorFull.SetAlphaF(1.f);
 
-            ctx.Finish();
-            double start = FPlatformTime::Seconds();
-
-            ::ULIS::FEvent eventConvertGrey = FULISEventBuilder().RetainBlock(block).Build();
+            ::ULIS::FEvent eventConvertGrey = FULISEventBuilder().RetainBlock(block).RetainBlock(greyblock).Build();
             ctx.ConvertFormat(
-                    *block
+                  *block
                 , *greyblock
                 , ::ULIS::FRectI::Auto
                 , ::ULIS::FVec2I( 0 )
@@ -119,20 +118,15 @@ FOdysseyAnimationLightTableImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlo
                 , rendererBlendEvents.GetData()
                 , &eventConvertGrey
             );
-            ctx.Finish();
 
-            double end = FPlatformTime::Seconds();
-            UE_LOG(LogTemp, Warning, TEXT("ctx.ConvertFormat1 in %f seconds."), end-start);
-            start = FPlatformTime::Seconds();
-
-            ::ULIS::FEvent eventFilter = FULISEventBuilder().RetainBlock(block).Build();
+            ::ULIS::FEvent eventFilter = FULISEventBuilder().RetainBlock(greyblock).Build();
 
             ctx.FilterInPlace(
-                [contrast = 1.f - frameData.mColor.AlphaF()]( ::ULIS::FPixel& iPixel, uint64 iNumPixels )
+                [contrast = frameData.mContrast]( ::ULIS::FPixel& iPixel, uint64 iNumPixels )
                 {
                     for (int i = 0; i < iNumPixels; i++, iPixel.Next())
                     {
-                        float value = iPixel.GreyF() * contrast;
+                        float value = FMath::Clamp(iPixel.GreyF() * contrast * contrast * 4, 0.f, 1.0f); //contrast * contrast * 4 to make a progressively more powerful contrast (slider goes from 0-100, but effective contrast goes from 0-400 approx)
                         iPixel.SetGreyF(value);
                     }
                 }
@@ -144,15 +138,9 @@ FOdysseyAnimationLightTableImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlo
                 , &eventFilter
             );
 
-            ctx.Finish();
-            
-            end = FPlatformTime::Seconds();
-            UE_LOG(LogTemp, Warning, TEXT("ctx.FilterInto in %f seconds."), end-start);
-            start = FPlatformTime::Seconds();
-
-            ::ULIS::FEvent eventConvert2 = FULISEventBuilder().RetainBlock(block).Build();
+            ::ULIS::FEvent eventConvert2 = FULISEventBuilder().RetainBlock(greyblock).RetainBlock(block).Build();
             ctx.ConvertFormat(
-                    *greyblock
+                  *greyblock
                 , *block
                 , ::ULIS::FRectI::Auto
                 , ::ULIS::FVec2I( 0 )
@@ -161,11 +149,6 @@ FOdysseyAnimationLightTableImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlo
                 , &eventFilter
                 , &eventConvert2
             );
-            ctx.Finish();
-
-            end = FPlatformTime::Seconds();
-            UE_LOG(LogTemp, Warning, TEXT("ctx.ConvertFormat2 in %f seconds."), end-start);
-            start = FPlatformTime::Seconds();
 
             ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(block).Build();
             ctx.BlendColor(
