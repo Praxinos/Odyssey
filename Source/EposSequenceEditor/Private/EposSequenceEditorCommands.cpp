@@ -53,6 +53,10 @@ FEposSequenceEditorCommands::RegisterCommands()
 
     //---
 
+    UI_COMMAND( FixActorReferences,                 "Fix Actor References", "Try to automatically fix up broken actor bindings", EUserInterfaceActionType::Button, FInputChord());
+
+    //---
+
     UI_COMMAND( StepToPreviousShot,                 "Step to Previous Shot", "Step to previous shot", EUserInterfaceActionType::Button, FInputChord( EKeys::Y ) );
     UI_COMMAND( StepToNextShot,                     "Step to Next Shot", "Step to next shot", EUserInterfaceActionType::Button, FInputChord( EKeys::U ) );
 

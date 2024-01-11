@@ -29,6 +29,10 @@ public:
 
     //---
 
+    TSharedPtr<FUICommandInfo> FixActorReferences;
+
+    //---
+
     TSharedPtr<FUICommandInfo> StepToPreviousShot;
     TSharedPtr<FUICommandInfo> StepToNextShot;
 
