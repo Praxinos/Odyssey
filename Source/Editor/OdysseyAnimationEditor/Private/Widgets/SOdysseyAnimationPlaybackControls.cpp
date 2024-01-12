@@ -170,6 +170,15 @@ SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
+	FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
+	if (selectedFrames.IsEmpty())
+	{
+		mExtension->Player()->SetFrameRange(TOptional<FInt32Range>());
+	}
+	else
+	{
+		mExtension->Player()->SetFrameRange(selectedFrames);
+	}
 	mExtension->Player()->Play(false);
     return FReply::Handled();
 }
@@ -177,6 +186,15 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
+	FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
+	if (selectedFrames.IsEmpty())
+	{
+		mExtension->Player()->SetFrameRange(TOptional<FInt32Range>());
+	}
+	else
+	{
+		mExtension->Player()->SetFrameRange(selectedFrames);
+	}
 	mExtension->Player()->Play(true);
     return FReply::Handled();
 }

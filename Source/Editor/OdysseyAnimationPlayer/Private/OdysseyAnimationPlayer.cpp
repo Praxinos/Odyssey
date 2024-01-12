@@ -104,10 +104,35 @@ UOdysseyAnimationPlayer::GetTexture() const
 }
 
 void
+UOdysseyAnimationPlayer::SetRange(const TOptional<TRange<FTimespan>>& iRange)
+{
+	mRange = iRange;	
+}
+
+void
+UOdysseyAnimationPlayer::SetFrameRange(const TOptional<FInt32Range>& iRange)
+{
+	if (iRange.IsSet())
+	{
+		mRange = TRange<FTimespan>::Inclusive(
+			FTimespan::FromSeconds(iRange->GetLowerBoundValue() / Animation->GetFramesPerSecond()),
+			FTimespan::FromSeconds((iRange->GetUpperBoundValue() + 1)  / Animation->GetFramesPerSecond())
+		);
+	}
+	else
+	{
+		mRange = TOptional<TRange<FTimespan>>();
+	}
+}
+
+void
 UOdysseyAnimationPlayer::Play(bool iBackward)
 {
 	mIsBackward = iBackward;
 	Status = EOdysseyAnimationPlayerStatus::Playing;
+
+	if (mRange.IsSet())
+		mCurrentTime = FMath::Clamp(mCurrentTime, mRange->GetLowerBoundValue(), mRange->GetUpperBoundValue());
 
 	mOnPlay.Broadcast();
 }
@@ -204,23 +229,26 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 
 	if (Status == EOdysseyAnimationPlayerStatus::Playing)
 	{
+		FTimespan lowerLimit = mRange.IsSet() ? mRange->GetLowerBoundValue() : FTimespan::Zero();
+		FTimespan upperLimit = mRange.IsSet() ? mRange->GetUpperBoundValue() : Animation->GetDuration();
+
 		bool bStop = false;
 		FTimespan newTime = mCurrentTime;
 		if ( mIsBackward )
 		{
 			newTime -= FTimespan::FromSeconds(iDeltaTime * FramesPerSecond / Animation->GetFramesPerSecond());
-			if ( newTime < FTimespan::Zero() )
+			if ( newTime < lowerLimit )
 			{
 				if ( IsLooping )
 				{
-					while ( newTime < FTimespan::Zero() )
+					while ( newTime < lowerLimit )
 					{
-						newTime += Animation->GetDuration();
+						newTime += (upperLimit - lowerLimit);
 					}
 				}
 				else
 				{
-					newTime = FTimespan::Zero();
+					newTime = lowerLimit;
 					bStop = true;
 				}
 			}
@@ -228,19 +256,18 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 		else
 		{
 			newTime += FTimespan::FromSeconds(iDeltaTime * FramesPerSecond / Animation->GetFramesPerSecond());
-			FTimespan duration = Animation->GetDuration();
-			if ( newTime > Animation->GetDuration() )
+			if ( newTime > upperLimit )
 			{
 				if ( IsLooping )
 				{
-					while ( newTime > Animation->GetDuration() )
+					while ( newTime > upperLimit )
 					{
-						newTime -= Animation->GetDuration();
+						newTime -= (upperLimit - lowerLimit);
 					}
 				}
 				else
 				{
-					newTime = Animation->GetDuration();
+					newTime = upperLimit;
 					bStop = true;
 				}
 			}

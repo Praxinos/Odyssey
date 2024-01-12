@@ -71,6 +71,10 @@ public:
 	void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
 	IOdysseyImageRenderer::eRenderType GetRenderType() const;
 
+	void SetRange(const TOptional<TRange<FTimespan>>& iRange);
+
+	void SetFrameRange(const TOptional<FInt32Range>& iRange);
+
 protected:
 	// FTickableEditorObject implementation
 	virtual void Tick(float DeltaTime) override;
@@ -101,6 +105,7 @@ private:
 private:
 	bool mIsBackward = false;
 	FTimespan mCurrentTime; 
+	TOptional<TRange<FTimespan>> mRange;
 	TArray<FGuid>   mImageRenderingComposition;
 	FULISInvalidTileMap mInvalidTileMap;
 
