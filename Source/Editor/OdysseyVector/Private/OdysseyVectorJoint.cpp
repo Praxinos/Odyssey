@@ -176,36 +176,36 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iVector0 // previous segment in 
                 // first triangle
                 mPolygonCache[0].point[0].x = origin.x;
                 mPolygonCache[0].point[0].y = origin.y;
-                mPolygonCache[0].U[0] = 0.0f;
+                mPolygonCache[0].U[0] = 0.5f;
                 mPolygonCache[0].V[0] = 0.5f;
 
                 mPolygonCache[0].point[1].x = edge0Point.x;
                 mPolygonCache[0].point[1].y = edge0Point.y;
                 mPolygonCache[0].U[1] = 0.0f;
-                mPolygonCache[0].V[1] = side == 1.0f ? 1.0f : 0.0f;
+                mPolygonCache[0].V[1] = side == 1.0f ? 0.0f : 1.0f;
 
                 mPolygonCache[0].point[2].x = intersectionPoint.x;
                 mPolygonCache[0].point[2].y = intersectionPoint.y;
                 mPolygonCache[0].U[2] = 0.5f;
-                mPolygonCache[0].V[2] = side == 1.0f ? 1.0f : 0.0f;
+                mPolygonCache[0].V[2] = side == 1.0f ? 0.0f : 1.0f;
 
                 //mPolygonCache[0].pointCount = 3;
 
                 // second triangle
                 mPolygonCache[1].point[0].x = origin.x;
                 mPolygonCache[1].point[0].y = origin.y;
-                mPolygonCache[1].U[0] = 0.0f;
+                mPolygonCache[1].U[0] = 0.5f;
                 mPolygonCache[1].V[0] = 0.5f;
 
                 mPolygonCache[1].point[1].x = intersectionPoint.x;
                 mPolygonCache[1].point[1].y = intersectionPoint.y;
                 mPolygonCache[1].U[1] = 0.5f;
-                mPolygonCache[1].V[1] = side == 1.0f ? 1.0f : 0.0f;
+                mPolygonCache[1].V[1] = side == 1.0f ? 0.0f : 1.0f;
 
                 mPolygonCache[1].point[2].x = edge1Point.x;
                 mPolygonCache[1].point[2].y = edge1Point.y;
                 mPolygonCache[1].U[2] = 1.0f;
-                mPolygonCache[1].V[2] = side == 1.0f ? 1.0f : 0.0f;
+                mPolygonCache[1].V[2] = side == 1.0f ? 0.0f : 1.0f;
 
                 //mPolygonCache[1].pointCount = 3;
             }
@@ -217,39 +217,39 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iVector0 // previous segment in 
                 // first triangle
                 mPolygonCache[0].point[0].x = origin.x;
                 mPolygonCache[0].point[0].y = origin.y;
-                mPolygonCache[0].U[0] = 0.0f;
+                mPolygonCache[0].U[0] = 0.5f;
                 mPolygonCache[0].V[0] = 0.5f;
 
                 mPolygonCache[0].point[1].x = edge0Point.x;
                 mPolygonCache[0].point[1].y = edge0Point.y;
                 mPolygonCache[0].U[1] = 0.0f;
-                mPolygonCache[0].V[1] = side == 1.0f ? 1.0f : 0.0f;
+                mPolygonCache[0].V[1] = side == 1.0f ? 0.0f : 1.0f;
 
                 mPolygonCache[0].point[2].x = edge0Point.x - ( parallelVec0.x * miterLimit * radius );
                 mPolygonCache[0].point[2].y = edge0Point.y - ( parallelVec0.y * miterLimit * radius );
                 mPolygonCache[0].U[2] = 0.33f;
-                mPolygonCache[0].V[2] = side == 1.0f ? 1.0f : 0.0f;
+                mPolygonCache[0].V[2] = side == 1.0f ? 0.0f : 1.0f;
 
                 // third triangle
                 mPolygonCache[2].point[0].x = origin.x;
                 mPolygonCache[2].point[0].y = origin.y;
-                mPolygonCache[2].U[0] = 0.0f;
+                mPolygonCache[2].U[0] = 0.5f;
                 mPolygonCache[2].V[0] = 0.5f;
 
                 mPolygonCache[2].point[1].x = edge1Point.x - ( parallelVec1.x * miterLimit * radius );
                 mPolygonCache[2].point[1].y = edge1Point.y - ( parallelVec1.y * miterLimit * radius );
                 mPolygonCache[2].U[1] = 0.66f;
-                mPolygonCache[2].V[1] = side == 1.0f ? 1.0f : 0.0f;
+                mPolygonCache[2].V[1] = side == 1.0f ? 0.0f : 1.0f;
 
                 mPolygonCache[2].point[2].x = edge1Point.x;
                 mPolygonCache[2].point[2].y = edge1Point.y;
                 mPolygonCache[2].U[2] = 1.0f;
-                mPolygonCache[2].V[2] = side == 1.0f ? 1.0f : 0.0f;
+                mPolygonCache[2].V[2] = side == 1.0f ? 0.0f : 1.0f;
 
                 // middle triangle
                 mPolygonCache[1].point[0].x = origin.x;
                 mPolygonCache[1].point[0].y = origin.y;
-                mPolygonCache[1].U[0] = 0.0f;
+                mPolygonCache[1].U[0] = 0.5f;
                 mPolygonCache[1].V[0] = 0.5f;
 
                 mPolygonCache[1].point[1].x = mPolygonCache[0].point[2].x;
@@ -320,18 +320,18 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iVector0 // previous segment in
         // start drawing triangles at origin
         mPolygonCache[i].point[0].x = ( origin.x );
         mPolygonCache[i].point[0].y = ( origin.y );
-        mPolygonCache[i].U[0] = 0.0f;
+        mPolygonCache[i].U[0] = 0.5f;
         mPolygonCache[i].V[0] = 0.5f;
 
         mPolygonCache[i].point[1].x = mPolygonCache[i].point[0].x + ( perpendicularVec0.x * radius );
         mPolygonCache[i].point[1].y = mPolygonCache[i].point[0].y + ( perpendicularVec0.y * radius );
         mPolygonCache[i].U[1] = U;
-        mPolygonCache[i].V[1] = side == 1.0f ? 1.0f : 0.0f;
+        mPolygonCache[i].V[1] = side == 1.0f ? 0.0f : 1.0f;
 
         mPolygonCache[i].point[2].x = mPolygonCache[i].point[0].x + ( interpolatedVector.x * radius );
         mPolygonCache[i].point[2].y = mPolygonCache[i].point[0].y + ( interpolatedVector.y * radius );
         mPolygonCache[i].U[2] = U + stepU;
-        mPolygonCache[i].V[2] = side == 1.0f ? 1.0f : 0.0f;
+        mPolygonCache[i].V[2] = side == 1.0f ? 0.0f : 1.0f;
 
         // default pointCount for joint's polygons is 5. Set it to 3.
         //mPolygonCache[i].pointCount = 3;
@@ -377,18 +377,18 @@ FOdysseyVectorJoint::MakeLinear( ::ULIS::FVec2D& iVector0 // previous segment in
 
     mPolygonCache[0].point[0].x = ( origin.x );
     mPolygonCache[0].point[0].y = ( origin.y );
-    mPolygonCache[0].U[0] = 0.0f;
+    mPolygonCache[0].U[0] = 0.5f;
     mPolygonCache[0].V[0] = 0.5f;
 
     mPolygonCache[0].point[1].x = mPolygonCache[0].point[0].x + ( perpendicularVec0.x * radius );
     mPolygonCache[0].point[1].y = mPolygonCache[0].point[0].y + ( perpendicularVec0.y * radius );
     mPolygonCache[0].U[1] = 0.0f;
-    mPolygonCache[0].V[1] = side == 1.0f ? 1.0f : 0.0f;
+    mPolygonCache[0].V[1] = side == 1.0f ? 0.0f : 1.0f;
 
     mPolygonCache[0].point[2].x = mPolygonCache[0].point[0].x + ( perpendicularVec1.x * radius );
     mPolygonCache[0].point[2].y = mPolygonCache[0].point[0].y + ( perpendicularVec1.y * radius );
     mPolygonCache[0].U[2] = 1.0f;
-    mPolygonCache[0].V[2] = side == 1.0f ? 1.0f : 0.0f;
+    mPolygonCache[0].V[2] = side == 1.0f ? 0.0f : 1.0f;
 
     // default pointCount for joint's polygons is 5. Set it to 3.
     //mPolygonCache[0].pointCount = 3;

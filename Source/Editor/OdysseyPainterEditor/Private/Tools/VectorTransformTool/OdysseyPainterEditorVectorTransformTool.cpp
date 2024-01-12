@@ -833,7 +833,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                 GEditor->BeginTransaction(LOCTEXT("vector-transform-tool.transaction.transform","Vector Transform Tool"));
                 if( GUndo )
                 {
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
                 }
                 GEditor->EndTransaction();
             }

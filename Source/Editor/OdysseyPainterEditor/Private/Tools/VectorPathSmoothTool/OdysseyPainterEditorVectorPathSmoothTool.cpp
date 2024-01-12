@@ -89,7 +89,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
         {
             mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>( mUndoSegmentReshape ) );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>( mUndoSegmentReshape ) );
         }
         GEditor->EndTransaction();
     }

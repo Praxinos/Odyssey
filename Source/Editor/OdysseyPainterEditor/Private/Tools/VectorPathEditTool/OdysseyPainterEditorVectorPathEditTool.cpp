@@ -228,7 +228,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
                                                                       , addedVertexArray
                                                                       , addedSegmentArray );
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
         GEditor->EndTransaction();
     }
@@ -364,7 +364,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                         undo = new FOdysseyVectorUndoVertexRadius( iScene, mPickedVertexArray );
                     }
 
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
             break;
@@ -400,7 +400,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                                              , mPickedVertexArray
                                                                              , alteredSegmentArray );
 
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
                 //---------- end of undo
@@ -425,7 +425,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                                              , mPickedVertexArray // empty
                                                                              , alteredSegmentArray );
 
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
                 //---------- end of undo

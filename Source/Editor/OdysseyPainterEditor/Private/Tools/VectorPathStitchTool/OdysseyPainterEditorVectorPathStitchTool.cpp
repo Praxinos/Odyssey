@@ -138,7 +138,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                                                 , mergedVertexArray
                                                                                 , mergedSegmentArray );
 
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
             }

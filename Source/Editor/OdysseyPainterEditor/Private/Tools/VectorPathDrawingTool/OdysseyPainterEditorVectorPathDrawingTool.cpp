@@ -5,8 +5,10 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
+#include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
+
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -410,9 +412,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FSinglePropertyParams defaultPropertyParams;
     const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
+//    const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
+    const TSharedPtr<ISinglePropertyView> fidelityPropertyView = propertyEditorModule.CreateSingleProperty(this, "TracingFidelity", defaultPropertyParams);
     TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
+//    TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> fidelityHandle = fidelityPropertyView->GetPropertyHandle();
 
     // we create the topTab widget only once, or else it creates a sizing issue in the top tab
     if( mTopTabWidget.Get() == nullptr )
@@ -431,7 +435,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
                        ]
                        + SUniformWrapPanel::Slot()
                        [
-                           CreatePropertyWidget(opacityHandle, opacityPropertyView).ToSharedRef()
+                           CreatePropertyWidget(fidelityHandle, fidelityPropertyView).ToSharedRef()
                        ];
     }
 

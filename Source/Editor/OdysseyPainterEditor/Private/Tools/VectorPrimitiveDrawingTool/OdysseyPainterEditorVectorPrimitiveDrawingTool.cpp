@@ -7,6 +7,7 @@
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
+#include "ISinglePropertyView.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -281,6 +282,40 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
          | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::CreateTopTabWidget()
+{
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> strokeWidthPropertyView = propertyEditorModule.CreateSingleProperty(this, "StrokeWidth", defaultPropertyParams);
+    const TSharedPtr<ISinglePropertyView> primitiveTypePropertyView = propertyEditorModule.CreateSingleProperty(this, "PrimitiveType", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> strokeWidthHandle = strokeWidthPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> primitiveTypeHandle = primitiveTypePropertyView->GetPropertyHandle();
+
+    // we create the topTab widget only once, or else it creates a sizing issue in the top tab
+    if( mTopTabWidget.Get() == nullptr )
+    {
+        mTopTabWidget = SNew(SUniformWrapPanel)
+                       .SlotPadding(FVector2D(3.f, 0.f))
+                       .EvenRowDistribution(true)
+                       .HAlign(HAlign_Left)
+                       + SUniformWrapPanel::Slot()
+                       [
+                           SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(strokeWidthHandle, strokeWidthPropertyView).ToSharedRef()
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(primitiveTypeHandle, primitiveTypePropertyView).ToSharedRef()
+                       ];
+    }
+
+    return mTopTabWidget.ToSharedRef();
 }
 
 #undef LOCTEXT_NAMESPACE

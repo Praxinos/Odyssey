@@ -39,6 +39,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
 
         virtual bool IsActivable() const override;
 
+        TSharedRef<SWidget> CreateTopTabWidget() override;
+
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
@@ -69,7 +71,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
         eBaseToolColorSource ColorSource;
 
-        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        //UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 
         UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )

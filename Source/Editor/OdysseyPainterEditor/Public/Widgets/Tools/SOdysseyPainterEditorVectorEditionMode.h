@@ -20,6 +20,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorEditionMode : public S
 
     private:
         void SetVectorEditionFlags( ECheckBoxState iNewState, uint64 iViewMode );
+        ECheckBoxState GetObjectModeState() const;
+        ECheckBoxState GetVertexModeState() const;
 
     private:
         FOdysseyPainterEditor* mEditor;

@@ -145,7 +145,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                         {
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedBucket );
 
-                            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                         }
                         GEditor->EndTransaction();
 
@@ -160,7 +160,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                         {
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, mPickedBucket );
 
-                            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                         }
                         GEditor->EndTransaction();
 
@@ -176,7 +176,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                         {
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, mPickedBucket );
 
-                            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                         }
                         GEditor->EndTransaction();
                     }
@@ -436,7 +436,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
                                                                     , addedBucketArray
                                                                     , paramBucketArray );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
@@ -465,7 +465,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorRemoveBucket( FOdysse
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, iBucket );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 }
@@ -481,7 +481,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorPropagateBucket( FOdy
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
@@ -498,7 +498,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorColorBucket( FOdyssey
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
@@ -515,7 +515,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorClearBucket( FOdyssey
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
