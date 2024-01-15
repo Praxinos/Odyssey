@@ -155,6 +155,36 @@ TSharedRef< SWidget >
 SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
 {
     FMenuBuilder menuBuilder(true, nullptr);
+	menuBuilder.BeginSection("Display Position", LOCTEXT("lighttable.timeline-header.options-menu.display-position-section.name", "Display Position"));
+    {
+		menuBuilder.AddMenuEntry(
+			LOCTEXT("lighttable.timeline-header.options-menu.display-position-above-layer.name", "Above Layer")
+			, LOCTEXT("lighttable.timeline-header.options-menu.display-position-above-layer.tooltip", "Displays the lightTable frames above Layer")
+			, FSlateIcon("OdysseyStyle", "Animation.LightTable.Options.DisplayPosition.AboveLayer")
+			, FUIAction(
+				FExecuteAction::CreateRaw( this, &SOdysseyAnimationTimelineLightTableHeader::SetDisplayPosition, EOdysseyLightTableDisplayPosition::AboveLayer )
+				, FCanExecuteAction::CreateLambda([](){return true;})
+				, FIsActionChecked::CreateRaw(this, &SOdysseyAnimationTimelineLightTableHeader::IsDisplayPositionSet, EOdysseyLightTableDisplayPosition::AboveLayer )
+			)
+			, NAME_None
+			, EUserInterfaceActionType::RadioButton
+		);
+
+		menuBuilder.AddMenuEntry(
+			LOCTEXT("lighttable.timeline-header.options-menu.display-position-under-layer.name", "Under Layer")
+			, LOCTEXT("lighttable.timeline-header.options-menu.display-position-under-layer.tooltip", "Displays the lightTable frames under Layer")
+			, FSlateIcon("OdysseyStyle", "Animation.LightTable.Options.DisplayPosition.UnderLayer")
+			, FUIAction(
+				FExecuteAction::CreateRaw( this, &SOdysseyAnimationTimelineLightTableHeader::SetDisplayPosition, EOdysseyLightTableDisplayPosition::UnderLayer )
+				, FCanExecuteAction::CreateLambda([](){return true;})
+				, FIsActionChecked::CreateRaw(this, &SOdysseyAnimationTimelineLightTableHeader::IsDisplayPositionSet, EOdysseyLightTableDisplayPosition::UnderLayer )
+			)
+			, NAME_None
+			, EUserInterfaceActionType::RadioButton
+		);
+	}
+    menuBuilder.EndSection();
+
     menuBuilder.BeginSection("Options", LOCTEXT("lighttable.timeline-header.options-menu.options-section.name", "Options"));
     {
 		menuBuilder.AddWidget(
@@ -213,13 +243,6 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
 				)
 				.TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
 				.AllowSpin(true)
-				/*.ShiftMouseMovePixelPerDelta(10)
-				.LinearDeltaSensitivity(10)
-				.Delta(1)*/
-				/* .MinValue(0)
-				.MinSliderValue(0)
-				.MaxValue(100)
-				.MaxSliderValue(100) */
 				.MinDesiredValueWidth(50)
 				.Justification(ETextJustify::Type::Right)
 				.OnValueChanged(this, &SOdysseyAnimationTimelineLightTableHeader::OnNextKeysContrastValueChanged)
@@ -227,7 +250,6 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
 			]
 			, LOCTEXT("lighttable.timeline-header.options-menu.next-keys-contrast.name", "Next Keys Contrast")
 			, true
-			//bool bNoIndent = false, bool bSearchable = true, const TAttribute<FText>& InToolTipText = FText());
 		);
     }
     menuBuilder.EndSection();
@@ -277,6 +299,27 @@ SOdysseyAnimationTimelineLightTableHeader::OnNextKeysContrastValueChanged(int iV
 	 
 	FOdysseyAnimationLightTableMutator mutator(lightTable);
 	mutator.SetNextKeysContrast(iValue / 100.f);
+}
+
+void
+SOdysseyAnimationTimelineLightTableHeader::SetDisplayPosition(EOdysseyLightTableDisplayPosition iPosition)
+{
+	TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
+	if (!lightTable)
+		return;
+
+	FOdysseyAnimationLightTableMutator mutator(lightTable);
+	mutator.SetDisplayPosition(iPosition);
+}
+
+bool
+SOdysseyAnimationTimelineLightTableHeader::IsDisplayPositionSet(EOdysseyLightTableDisplayPosition iPosition) const
+{
+	TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
+	if (!lightTable)
+		return false;
+
+	return lightTable->GetDisplayPosition() == iPosition;
 }
 
 #undef LOCTEXT_NAMESPACE

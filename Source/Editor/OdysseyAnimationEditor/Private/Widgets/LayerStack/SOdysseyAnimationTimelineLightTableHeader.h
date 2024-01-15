@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineLightTableHeader
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableHeader : public SCompoundWidget
@@ -35,6 +37,9 @@ private:
 
     void OnNextKeysContrastValueCommitted(int iValue, ETextCommit::Type iType);
     void OnNextKeysContrastValueChanged(int iValue);
+
+    void SetDisplayPosition(EOdysseyLightTableDisplayPosition iPosition);
+    bool IsDisplayPositionSet(EOdysseyLightTableDisplayPosition iPosition) const;
 
 private:
 	TWeakPtr<FOdysseyAnimationLightTable> mLightTable;

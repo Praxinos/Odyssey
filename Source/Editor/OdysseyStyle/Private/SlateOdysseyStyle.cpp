@@ -715,7 +715,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
             .SetHovered(IMAGE_BRUSH_SVG("OdysseyFlipbook/LightTable_Options_OFF", mIcon16x16))
             .SetPressed(IMAGE_BRUSH_SVG("OdysseyFlipbook/LightTable_Options_ON", mIcon16x16))
         )
-	);    
+	);
+
+    Set("Animation.LightTable.Options.DisplayPosition.AboveLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_DisplayPosition_AboveLayer", mIcon16x16));
+    Set("Animation.LightTable.Options.DisplayPosition.UnderLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_DisplayPosition_UnderLayer", mIcon16x16));
+    
 
     Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleRight_16", mIcon16x16));
     Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
