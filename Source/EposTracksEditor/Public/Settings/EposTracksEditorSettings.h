@@ -28,16 +28,16 @@ public:
 
     /** Current focal length of the camera (i.e. controls FoV, zoom) */
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category = Camera )
-    float CurrentFocalLength;
+    float CurrentFocalLength = -1; // Compute and set in UpdateValues()
 
     /** Current aperture, in terms of f-stop (e.g. 2.8 for f/2.8) */
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category = Camera )
-    float CurrentAperture;
+    float CurrentAperture = -1; // Compute and set in UpdateValues()
 
 #if WITH_EDITORONLY_DATA
     /** Read-only. Control this value with CurrentFocalLength (and filmback settings). */
     UPROPERTY( config, VisibleAnywhere, Category = Camera )
-    float CurrentHorizontalFOV;
+    float CurrentHorizontalFOV = -1; // Compute and set in UpdateValues()
 #endif
 };
 
