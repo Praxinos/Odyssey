@@ -13,7 +13,7 @@ FOdysseyAnimationLightTable::FOdysseyAnimationLightTable(UOdysseyAnimationLayer*
     : mLayer(iLayer)
     , mDisplayPosition(EOdysseyLightTableDisplayPosition::UnderLayer)
     , mPreviousKeysColor(FColor::Orange)
-    , mNextKeysColor(FColor::Cyan) 
+    , mNextKeysColor(FColor(0, 128, 255)) 
     , mPreviousKeysContrast(0.f)
     , mNextKeysContrast(0.f)
 {
