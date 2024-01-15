@@ -224,6 +224,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         bool IsVisited();
 
+        bool HasSegment( FOdysseyVectorSegment* iSegment );
+
         ::ULIS::FVec2D GetNearestSegmentIntersectionCoords();
         double GetNearestSegmentT();
         double GetDistanceToNearestSegment();

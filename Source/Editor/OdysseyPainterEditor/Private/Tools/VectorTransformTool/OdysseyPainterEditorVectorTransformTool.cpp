@@ -714,7 +714,8 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
 
                           // Apply the local transformations
                           object->Translate( translationX, translationY );
-                          object->Rotate( rotation / M_PI * 180 );
+                          // for some reasons this affects the rotation, so we ignore it.
+                          object->Rotate( /*rotation / M_PI * 180*/object->GetRotation() );
                           object->Scale( scalingX, scalingY );
 
                           object->UpdateMatrix();

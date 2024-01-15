@@ -20,6 +20,20 @@ FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius
 {
 }
 
+bool
+FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment* iSegment )
+{
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        if( segment == iSegment )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetWorldCoords()
 {

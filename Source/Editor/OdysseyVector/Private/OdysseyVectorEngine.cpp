@@ -659,8 +659,8 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
         screenx  = dx - clippingW;
     }
 
-    // Commented out: we don't drow from edge-to-edge, we stop 1 pixel before to prevent overlapping,
-    // which would lead to double stroke and would produce artefact when alpha is semi-transparent.
+    // Replace "<=" with "<" if you don't want to draw from edge-to-edge and stop 1 pixel before to prevent overlapping,
+    // which leads to double stroke and would produce artefact when alpha is semi-transparent.
     //for( int i = 0; i <= ddx; i++ )
     for( int i = 0; ( i <= screenx ) && ( x < (int)iImageWidth /* clipping */ ); i++ )
     {

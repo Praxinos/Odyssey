@@ -411,6 +411,12 @@ FOdysseyVectorGroupPaint::IntersectVertex( FOdysseyVectorVertex* iVertex0
     {
         if( iVertex0->GetSegmentCount() == 1 )
         {
+            FOdysseyVectorSegment* segment = iVertex0->GetFirstSegment();
+
+            if(   ( iVertex1->GetSegmentCount() == 1 )
+             // we exclude vertices sharing a common segment. This creates issues
+             // like intersection with gap segments and other stuff.
+             || ( ( iVertex1->GetSegmentCount() == 2 ) && ( iVertex1->HasSegment( segment ) == false ) ) )
             if( mGapTolerance )
             {
                 ::ULIS::FVec2D dif = ::ULIS::FVec2D( iPoint1InParent - iPoint0InParent );
