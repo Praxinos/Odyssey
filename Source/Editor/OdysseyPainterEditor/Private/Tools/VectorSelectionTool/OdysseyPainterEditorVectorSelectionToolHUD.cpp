@@ -4,7 +4,6 @@
 
 FOdysseyPainterEditorVectorSelectionToolHUD::~FOdysseyPainterEditorVectorSelectionToolHUD()
 {
-
 }
 
 FOdysseyPainterEditorVectorSelectionToolHUD::FOdysseyPainterEditorVectorSelectionToolHUD( UOdysseyPainterEditorVectorSelectionTool* iSelectionTool )

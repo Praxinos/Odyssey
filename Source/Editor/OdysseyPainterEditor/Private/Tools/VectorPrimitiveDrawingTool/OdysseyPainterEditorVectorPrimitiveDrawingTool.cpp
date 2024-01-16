@@ -28,6 +28,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
     , Opacity( 1.0f )
     , StrokeWidth( 4.0f )
     , Uniform( false )
+    , mRectangleNumber ( 0 )
+    , mLineNumber ( 0 )
+    , mEllipseNumber ( 0 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle64");
 }
@@ -99,15 +102,15 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
         switch( PrimitiveType )
         {
             case EOdysseyVectorPrimitiveType::Rectangle:
-                primitive = new FOdysseyVectorRectangle( FString("Rectangle"), 0.0f, 0.0f, width.Distance() );
+                primitive = new FOdysseyVectorRectangle( FString("Rectangle_") + FString::FromInt( mRectangleNumber++ ), 0.0f, 0.0f, width.Distance() );
             break;
 
             case EOdysseyVectorPrimitiveType::Line:
-                primitive = new FOdysseyVectorLine( FString("Line"), 0.0f, 0.0f, width.Distance() );
+                primitive = new FOdysseyVectorLine( FString("Line_") + FString::FromInt( mLineNumber++ ), 0.0f, 0.0f, width.Distance() );
             break;
 
             default:
-                primitive = new FOdysseyVectorEllipse( FString("Circle"), 0.0f, 0.0f, width.Distance() );
+                primitive = new FOdysseyVectorEllipse( FString("Ellipse_" + FString::FromInt( mEllipseNumber++ )), 0.0f, 0.0f, width.Distance() );
             break;
         }
 

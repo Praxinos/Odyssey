@@ -3,7 +3,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorEngine.h"
-
+#include "OdysseyVector.h"
 
 FOdysseyVectorJoint::~FOdysseyVectorJoint()
 {
@@ -121,38 +121,34 @@ FOdysseyVectorJoint::MakeNone()
 }
 
 void
-FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iVector0 // previous segment in chain
-                              , ::ULIS::FVec2D& iVector1 ) // next segment in chain
+FOdysseyVectorJoint::MakeMiter( FOdysseyVectorSegment* iPrevSegment
+                               , FOdysseyVectorSegment* iNextSegment ) // next segment in chain
 {
     ::ULIS::FVec2D& origin = mVertex->GetCoords();
     double radius = mVertex->GetRadius();
-    double miterLimit = mVertex->GetPath()->GetMiterLimit();
-    ::ULIS::FVec2D parallelVec0 = iVector0;
-    ::ULIS::FVec2D parallelVec1 = iVector1;
-    ::ULIS::FVec2D perpendicularVec0 = { - parallelVec0.y,   parallelVec0.x };
-    ::ULIS::FVec2D perpendicularVec1 = {   parallelVec1.y, - parallelVec1.x };
-    ::ULIS::FVec2D edge0Point = origin + ( perpendicularVec0 * radius );
-    ::ULIS::FVec2D edge1Point = origin + ( perpendicularVec1 * radius );
-    ::ULIS::FVec2D shortestTest = edge1Point - edge0Point;
+    // needs to be normalized for reuse in the intersectLine function call
+    ::ULIS::FVec2D parallelVec0 = mVertex->GetVectorOnSegment( iPrevSegment, true );
+    ::ULIS::FVec2D parallelVec1 = mVertex->GetVectorOnSegment( iNextSegment, true );
     // have to clamp due to imprecision of the dot product
-    double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec1 ), -1.0f, 1.0f );
+    double cross = FOdysseyVector::Cross2D( -parallelVec0, parallelVec1 );
+    uint32 side = cross < 0.0f ? 0 : 1;
+    double prevSegmentT = mVertex->GetT( iPrevSegment );
+    double nextSegmentT = mVertex->GetT( iNextSegment );
+    ::ULIS::FVec2D edge0Point = iPrevSegment->GetOffsetPoint( prevSegmentT == 1.0f ? 0 : 1, prevSegmentT );
+    ::ULIS::FVec2D edge1Point = iNextSegment->GetOffsetPoint( nextSegmentT == 0.0f ? 0 : 1, nextSegmentT );
+    ::ULIS::FVec2D perpendicularVec0 = edge0Point - origin;
+    ::ULIS::FVec2D perpendicularVec1 = edge1Point - origin;
+    double miterLimit = mVertex->GetPath()->GetMiterLimit();
     ::ULIS::FVec2D intersectionPoint;
-    double side = 1.0f;
 
-    // Find on which side should the joint be drawn by comparing the directions of our vectors
-    if ( dot < 0 )
+    if( perpendicularVec0.DistanceSquared() )
     {
-        ::ULIS::FVec2D tmp = perpendicularVec0;
-        perpendicularVec0 = -tmp;
+        perpendicularVec0.Normalize();
+    }
 
-                       tmp = perpendicularVec1;
-        perpendicularVec1 = -tmp;
-
-        // Update
-        edge0Point = origin + ( perpendicularVec0 * radius );
-        edge1Point = origin + ( perpendicularVec1 * radius );
-
-        side = -1.0f;
+    if( perpendicularVec1.DistanceSquared() )
+    {
+        perpendicularVec1.Normalize();
     }
 
     if( radius )
@@ -182,12 +178,12 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iVector0 // previous segment in 
                 mPolygonCache[0].point[1].x = edge0Point.x;
                 mPolygonCache[0].point[1].y = edge0Point.y;
                 mPolygonCache[0].U[1] = 0.0f;
-                mPolygonCache[0].V[1] = side == 1.0f ? 0.0f : 1.0f;
+                mPolygonCache[0].V[1] = (double) side;
 
                 mPolygonCache[0].point[2].x = intersectionPoint.x;
                 mPolygonCache[0].point[2].y = intersectionPoint.y;
                 mPolygonCache[0].U[2] = 0.5f;
-                mPolygonCache[0].V[2] = side == 1.0f ? 0.0f : 1.0f;
+                mPolygonCache[0].V[2] = (double) side;
 
                 //mPolygonCache[0].pointCount = 3;
 
@@ -200,12 +196,12 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iVector0 // previous segment in 
                 mPolygonCache[1].point[1].x = intersectionPoint.x;
                 mPolygonCache[1].point[1].y = intersectionPoint.y;
                 mPolygonCache[1].U[1] = 0.5f;
-                mPolygonCache[1].V[1] = side == 1.0f ? 0.0f : 1.0f;
+                mPolygonCache[1].V[1] = (double) side;
 
                 mPolygonCache[1].point[2].x = edge1Point.x;
                 mPolygonCache[1].point[2].y = edge1Point.y;
                 mPolygonCache[1].U[2] = 1.0f;
-                mPolygonCache[1].V[2] = side == 1.0f ? 0.0f : 1.0f;
+                mPolygonCache[1].V[2] = (double) side;
 
                 //mPolygonCache[1].pointCount = 3;
             }
@@ -223,12 +219,12 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iVector0 // previous segment in 
                 mPolygonCache[0].point[1].x = edge0Point.x;
                 mPolygonCache[0].point[1].y = edge0Point.y;
                 mPolygonCache[0].U[1] = 0.0f;
-                mPolygonCache[0].V[1] = side == 1.0f ? 0.0f : 1.0f;
+                mPolygonCache[0].V[1] = (double) side;
 
                 mPolygonCache[0].point[2].x = edge0Point.x - ( parallelVec0.x * miterLimit * radius );
                 mPolygonCache[0].point[2].y = edge0Point.y - ( parallelVec0.y * miterLimit * radius );
                 mPolygonCache[0].U[2] = 0.33f;
-                mPolygonCache[0].V[2] = side == 1.0f ? 0.0f : 1.0f;
+                mPolygonCache[0].V[2] = (double) side;
 
                 // third triangle
                 mPolygonCache[2].point[0].x = origin.x;
@@ -239,12 +235,12 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iVector0 // previous segment in 
                 mPolygonCache[2].point[1].x = edge1Point.x - ( parallelVec1.x * miterLimit * radius );
                 mPolygonCache[2].point[1].y = edge1Point.y - ( parallelVec1.y * miterLimit * radius );
                 mPolygonCache[2].U[1] = 0.66f;
-                mPolygonCache[2].V[1] = side == 1.0f ? 0.0f : 1.0f;
+                mPolygonCache[2].V[1] = (double) side;
 
                 mPolygonCache[2].point[2].x = edge1Point.x;
                 mPolygonCache[2].point[2].y = edge1Point.y;
                 mPolygonCache[2].U[2] = 1.0f;
-                mPolygonCache[2].V[2] = side == 1.0f ? 0.0f : 1.0f;
+                mPolygonCache[2].V[2] = (double) side;
 
                 // middle triangle
                 mPolygonCache[1].point[0].x = origin.x;
@@ -268,44 +264,31 @@ FOdysseyVectorJoint::MakeMiter( ::ULIS::FVec2D& iVector0 // previous segment in 
         }
     }
 
-    mLength = shortestTest.Distance();
+    mLength = ::ULIS::FVec2D( edge1Point - edge0Point ).Distance();
 }
 
 void
-FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iVector0 // previous segment in chain
-                               , ::ULIS::FVec2D& iVector1 ) // next segment in chain
+FOdysseyVectorJoint::MakeRadial( FOdysseyVectorSegment* iPrevSegment
+                               , FOdysseyVectorSegment* iNextSegment ) // next segment in chain
 {
     ::ULIS::FVec2D& origin = mVertex->GetCoords();
     double radius = mVertex->GetRadius();
-    ::ULIS::FVec2D parallelVec0 = iVector0;
-    ::ULIS::FVec2D parallelVec1 = iVector1;
-    ::ULIS::FVec2D perpendicularVec0 = { - parallelVec0.y,   parallelVec0.x };
-    ::ULIS::FVec2D perpendicularVec1 = {   parallelVec1.y, - parallelVec1.x };
-    ::ULIS::FVec2D edge0Point = origin + ( perpendicularVec0 * radius );
-    ::ULIS::FVec2D edge1Point = origin + ( perpendicularVec1 * radius );
-    ::ULIS::FVec2D shortestTest = edge1Point - edge0Point;
+    ::ULIS::FVec2D parallelVec0 = mVertex->GetVectorOnSegment( iPrevSegment, false );
+    ::ULIS::FVec2D parallelVec1 = mVertex->GetVectorOnSegment( iNextSegment, false );
     // have to clamp due to imprecision of the dot product
-    double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec1 ), -1.0f, 1.0f );
+    double cross = FOdysseyVector::Cross2D( -parallelVec0, parallelVec1 );
+    uint32 side = cross < 0.0f ? 0 : 1;
+    ::ULIS::FVec2D edge0Point = iPrevSegment->GetOffsetPoint( side, mVertex->GetT( iPrevSegment ) );
+    ::ULIS::FVec2D edge1Point = iNextSegment->GetOffsetPoint( side, mVertex->GetT( iNextSegment ) );
+    ::ULIS::FVec2D perpVec0 = edge0Point - origin;
+    ::ULIS::FVec2D perpVec1 = edge1Point - origin;
+    ::ULIS::FVec2D perpendicularVec0 = perpVec0.DistanceSquared() ? perpVec0.Normalize() : perpVec0;
+    ::ULIS::FVec2D perpendicularVec1 = perpVec1.DistanceSquared() ? perpVec1.Normalize() : perpVec1;
     double angle = acos( std::clamp<double>( perpendicularVec0.DotProduct( perpendicularVec1 ), -1.0f, 1.0f ) );
     static const int steps = 24;
     double a = angle / steps;
-    double side = 1.0f;
     double stepU = 1.0f / steps;
     double U = 0.0f;
-
-    // Find on which side should the joint be drawn by comparing the directions of our vectors
-    if ( dot < 0 )
-    {
-        ::ULIS::FVec2D tmp = perpendicularVec0;
-
-        perpendicularVec0 = -tmp;
-
-                tmp = perpendicularVec1;
-        perpendicularVec1 = -tmp;
-
-        side = -1.0f;
-    }
-
     double cosa = cos(a);
     double sina = sin(a);
 
@@ -313,9 +296,14 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iVector0 // previous segment in
 
     for ( uint32 i = 0; i < steps; i++ )
     {
+        // https://matthew-brett.github.io/teaching/rotation_2d.html
         // https://stackoverflow.com/questions/11773889/how-to-calculate-a-vector-from-an-angle-with-another-vector-in-2d
-        ::ULIS::FVec2D interpolatedVector = { (  perpendicularVec0.x * cosa ) - ( perpendicularVec0.y * sina ) * side,
-                                       side * (  perpendicularVec0.x * sina ) + ( perpendicularVec0.y * cosa ) };
+                                                 // counterclockwise
+        ::ULIS::FVec2D interpolatedVector = side ? ::ULIS::FVec2D( (  perpendicularVec0.x * cosa ) - ( perpendicularVec0.y * sina )
+                                                                 , (  perpendicularVec0.x * sina ) + ( perpendicularVec0.y * cosa ) )
+                                                 // clockwise
+                                                 : ::ULIS::FVec2D( (  perpendicularVec0.x * cosa ) + ( perpendicularVec0.y * sina )
+                                                                 , ( -perpendicularVec0.x * sina ) + ( perpendicularVec0.y * cosa ) );
 
         // start drawing triangles at origin
         mPolygonCache[i].point[0].x = ( origin.x );
@@ -326,12 +314,12 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iVector0 // previous segment in
         mPolygonCache[i].point[1].x = mPolygonCache[i].point[0].x + ( perpendicularVec0.x * radius );
         mPolygonCache[i].point[1].y = mPolygonCache[i].point[0].y + ( perpendicularVec0.y * radius );
         mPolygonCache[i].U[1] = U;
-        mPolygonCache[i].V[1] = side == 1.0f ? 0.0f : 1.0f;
+        mPolygonCache[i].V[1] = (double) side;
 
         mPolygonCache[i].point[2].x = mPolygonCache[i].point[0].x + ( interpolatedVector.x * radius );
         mPolygonCache[i].point[2].y = mPolygonCache[i].point[0].y + ( interpolatedVector.y * radius );
         mPolygonCache[i].U[2] = U + stepU;
-        mPolygonCache[i].V[2] = side == 1.0f ? 0.0f : 1.0f;
+        mPolygonCache[i].V[2] = (double) side;
 
         // default pointCount for joint's polygons is 5. Set it to 3.
         //mPolygonCache[i].pointCount = 3;
@@ -345,32 +333,29 @@ FOdysseyVectorJoint::MakeRadial( ::ULIS::FVec2D& iVector0 // previous segment in
 }
 
 void
-FOdysseyVectorJoint::MakeLinear( ::ULIS::FVec2D& iVector0 // previous segment in chain
-                               , ::ULIS::FVec2D& iVector1 ) // next segment in chain
+FOdysseyVectorJoint::MakeLinear( FOdysseyVectorSegment* iPrevSegment
+                               , FOdysseyVectorSegment* iNextSegment ) // next segment in chain
 {
     ::ULIS::FVec2D& origin = mVertex->GetCoords();
     double radius = mVertex->GetRadius();
-    ::ULIS::FVec2D parallelVec0 = iVector0;
-    ::ULIS::FVec2D parallelVec1 = iVector1;
-    ::ULIS::FVec2D perpendicularVec0 = { - parallelVec0.y,   parallelVec0.x };
-    ::ULIS::FVec2D perpendicularVec1 = {   parallelVec1.y, - parallelVec1.x };
-    ::ULIS::FVec2D edge0Point = origin + ( perpendicularVec0 * radius );
-    ::ULIS::FVec2D edge1Point = origin + ( perpendicularVec1 * radius );
-    ::ULIS::FVec2D shortestTest = edge1Point - edge0Point;
+    ::ULIS::FVec2D parallelVec0 = mVertex->GetVectorOnSegment( iPrevSegment, false );
+    ::ULIS::FVec2D parallelVec1 = mVertex->GetVectorOnSegment( iNextSegment, false );
     // have to clamp due to imprecision of the dot product
-    double dot = std::clamp<double>( shortestTest.DotProduct( parallelVec1 ), -1.0f, 1.0f );
-    double side = 1.0f;
+    double cross = FOdysseyVector::Cross2D( -parallelVec0, parallelVec1 );
+    uint32 side = cross < 0.0f ? 0 : 1;
+    ::ULIS::FVec2D edge0Point = iPrevSegment->GetOffsetPoint( side, mVertex->GetT( iPrevSegment ) );
+    ::ULIS::FVec2D edge1Point = iNextSegment->GetOffsetPoint( side, mVertex->GetT( iNextSegment ) );
+    ::ULIS::FVec2D perpendicularVec0 = edge0Point - origin;
+    ::ULIS::FVec2D perpendicularVec1 = edge1Point - origin;
 
-    if ( dot < 0 )
+    if( perpendicularVec0.DistanceSquared() )
     {
-        ::ULIS::FVec2D tmp = perpendicularVec0;
+        perpendicularVec0.Normalize();
+    }
 
-        perpendicularVec0 = -tmp;
-
-                tmp = perpendicularVec1;
-        perpendicularVec1 = -tmp;
-
-        side = -1.0f;
+    if( perpendicularVec1.DistanceSquared() )
+    {
+        perpendicularVec1.Normalize();
     }
 
     mPolygonCache.resize(1);
@@ -383,17 +368,17 @@ FOdysseyVectorJoint::MakeLinear( ::ULIS::FVec2D& iVector0 // previous segment in
     mPolygonCache[0].point[1].x = mPolygonCache[0].point[0].x + ( perpendicularVec0.x * radius );
     mPolygonCache[0].point[1].y = mPolygonCache[0].point[0].y + ( perpendicularVec0.y * radius );
     mPolygonCache[0].U[1] = 0.0f;
-    mPolygonCache[0].V[1] = side == 1.0f ? 0.0f : 1.0f;
+    mPolygonCache[0].V[1] = (double) side;
 
     mPolygonCache[0].point[2].x = mPolygonCache[0].point[0].x + ( perpendicularVec1.x * radius );
     mPolygonCache[0].point[2].y = mPolygonCache[0].point[0].y + ( perpendicularVec1.y * radius );
     mPolygonCache[0].U[2] = 1.0f;
-    mPolygonCache[0].V[2] = side == 1.0f ? 0.0f : 1.0f;
+    mPolygonCache[0].V[2] = (double) side;
 
     // default pointCount for joint's polygons is 5. Set it to 3.
     //mPolygonCache[0].pointCount = 3;
 
-    mLength = shortestTest.Distance();
+    mLength = ::ULIS::FVec2D( edge1Point - edge0Point ).Distance();
 }
 
 std::vector<FOdysseyVectorPolygon3>&
@@ -403,49 +388,32 @@ FOdysseyVectorJoint::GetPolygonCache()
 }
 
 void
-FOdysseyVectorJoint::Make( FOdysseyVectorSegment* iCurrentSegment )
+FOdysseyVectorJoint::Make( FOdysseyVectorSegment* iPrevSegment
+                         , FOdysseyVectorSegment* iNextSegment )
 {
     FOdysseyVectorPath* path = mVertex->GetPath();
 
     // reset polygon array
     MakeNone();
 
-    if( iCurrentSegment )
+    if( iPrevSegment && iNextSegment )
     {
-        FOdysseyVectorSegment* prevSegment = mVertex->GetOtherSegment( iCurrentSegment );
-
-        if( iCurrentSegment && prevSegment )
+        switch( path->GetJointType() )
         {
-            ::ULIS::FVec2D segment0Vector = mVertex->GetVectorOnSegment( iCurrentSegment, false );
-            ::ULIS::FVec2D segment1Vector = mVertex->GetVectorOnSegment( prevSegment    , false );
+            case eJointType::Linear :
+                MakeLinear( iPrevSegment, iNextSegment );
+            break;
 
-            if( segment0Vector.DistanceSquared() )
-            {
-                segment0Vector.Normalize();
-            }
+            case eJointType::Miter :
+                MakeMiter( iPrevSegment, iNextSegment );
+            break;
 
-            if( segment1Vector.DistanceSquared() )
-            {
-                segment1Vector.Normalize();
-            }
+            case eJointType::Radial :
+                MakeRadial( iPrevSegment, iNextSegment );
+            break;
 
-            switch( path->GetJointType() )
-            {
-                case eJointType::Linear :
-                    MakeLinear( segment0Vector, segment1Vector );
-                break;
-
-                case eJointType::Miter :
-                    MakeMiter( segment0Vector, segment1Vector );
-                break;
-
-                case eJointType::Radial :
-                    MakeRadial( segment0Vector, segment1Vector );
-                break;
-
-                default:
-                break;
-            }
+            default:
+            break;
         }
     }
 

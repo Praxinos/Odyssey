@@ -18,6 +18,7 @@ FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )
 {
+    mJoint.ResetBBox();
 }
 
 bool
@@ -811,7 +812,8 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
 }
 
 void
-FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iCurrentSegment )
+FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iPrevSegment
+                               , FOdysseyVectorSegment* iNextSegment )
 {
-    mJoint.Make( iCurrentSegment );
+    mJoint.Make( iPrevSegment, iNextSegment );
 }

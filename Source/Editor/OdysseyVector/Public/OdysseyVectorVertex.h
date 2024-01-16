@@ -302,7 +302,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorHandleSegment* GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment );
         void SetChained( bool iChained );
         bool IsChained();
-        void MakeJoint( FOdysseyVectorSegment* iPreviousSegment );
+        void MakeJoint( FOdysseyVectorSegment* iPrevSegment
+                      , FOdysseyVectorSegment* iNextSegment );
         void DrawJoint( BLContext* iBLContext
                       , double iStartU
                       , double iEndU

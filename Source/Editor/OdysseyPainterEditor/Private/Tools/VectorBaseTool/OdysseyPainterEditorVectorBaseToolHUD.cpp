@@ -14,7 +14,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
 void 
 FOdysseyPainterEditorVectorBaseToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
-//    Reset();
 }
 
 void

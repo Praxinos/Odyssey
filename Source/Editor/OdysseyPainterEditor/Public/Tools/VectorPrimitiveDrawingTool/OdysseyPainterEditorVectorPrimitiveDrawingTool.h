@@ -84,5 +84,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         bool Uniform;
         bool UniformAtKeyDown;
 
-       ::ULIS::FVec2D mMouseDown;
+        ::ULIS::FVec2D mMouseDown;
+        uint32 mRectangleNumber;
+        uint32 mLineNumber;
+        uint32 mEllipseNumber;
 };

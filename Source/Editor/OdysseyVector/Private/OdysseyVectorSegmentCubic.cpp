@@ -1202,3 +1202,9 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                               , 0 );
     }
 }
+
+::ULIS::FVec2D
+FOdysseyVectorSegmentCubic::GetOffsetPoint( uint32 iSide, double iT )
+{
+    return mOffsetCurve[iSide].GetPointAt( iT );
+}

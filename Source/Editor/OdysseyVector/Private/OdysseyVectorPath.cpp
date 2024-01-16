@@ -1846,6 +1846,8 @@ FOdysseyVectorPath::DrawStructure( BLContext* iBLContext
                                  , double iStrokeWidth
                                  , bool iWorld )
 {
+    static BLRgba32 blackColor = BLRgba32( 0, 0, 0, 255 );
+
     iBLContext->save();
 
     if( iWorld )
@@ -1858,6 +1860,11 @@ FOdysseyVectorPath::DrawStructure( BLContext* iBLContext
 
     for( FOdysseyVectorSegment* segment : mSegmentList )
     {
+        //iBLContext->setStrokeWidth( iStrokeWidth + 1.0f );
+        //iBLContext->setStrokeStyle( blackColor );
+        //segment->DrawStructure( iBLContext, this, iWorld );
+        //iBLContext->setStrokeWidth( iStrokeWidth );
+        //iBLContext->setStrokeStyle( iStrokeColor );
         segment->DrawStructure( iBLContext, this, iWorld );
     }
 
@@ -2282,6 +2289,7 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
                              , &ymax
                              , &hasBBox ] ( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
     {
+        FOdysseyVectorSegment* prevSegment = vertex->GetOtherSegment( segment );
         FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( vertex );
         ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
         double rx1 = segmentBBox.x
@@ -2297,7 +2305,7 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
         if ( ry2 > ymax ) ymax = ry2;
 
         // update joint
-        vertex->MakeJoint( segment );
+        vertex->MakeJoint( prevSegment, segment );
 
         iChain->mLength += segment->GetLength() + vertex->GetJointLength();
 

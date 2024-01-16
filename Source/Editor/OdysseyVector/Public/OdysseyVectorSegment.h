@@ -188,6 +188,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         ::ULIS::FRectD& GetBBoxInParent();
         void SetBBoxInParent( const ::ULIS::FRectD& iBBoxInParent );
+        virtual ::ULIS::FVec2D GetOffsetPoint( uint32 iSide, double iT );
 
     protected:
         void DrawFractionCache( BLContext* iBLContext );

@@ -577,6 +577,68 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     }
 }
 
+// bilinear interpolation version of GETPIXEL. currently unused
+// Macro for faster execution. Indeed, an inline function is not guaranteed to be inlined.
+#define GETPIXELBF(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,ALPHAONLY,U,V,R,G,B,A)                                                 \
+    switch ( BITSPERPIXEL )                                                                                                \
+    {                                                                                                                      \
+        case 32 :                                                                                                          \
+        {                                                                                                                  \
+            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4]) PIXELS;                                                 \
+            double TEXUF = U * ( WIDTH  - 1 );                                                                             \
+            double TEXVF = V * ( HEIGHT - 1 );                                                                             \
+            int32  TEXUI = TEXUF;                                                                                          \
+            int32  TEXVI = TEXVF;                                                                                          \
+            double  WEIGHTU = TEXUF - TEXUI;                                                                               \
+            double  WEIGHTV = TEXVF - TEXVI;                                                                               \
+            double  INVWEIGHTU = 1.0f - WEIGHTU;                                                                           \
+            double  INVWEIGHTV = 1.0f - WEIGHTV;                                                                           \
+            uint32 OFFSETTOPLEFT     = ( TEXVI * WIDTH ) + TEXUI                                                           \
+                 , OFFSETTOPRIGHT    = OFFSETTOPLEFT + 1                                                                   \
+                 , OFFSETBOTTOMRIGHT = OFFSETTOPLEFT + 1 + WIDTH                                                           \
+                 , OFFSETBOTTOMLEFT  = OFFSETTOPLEFT + WIDTH;                                                              \
+            uint8 UPOL0, UPOL1;                                                                                            \
+            uint8 VPOL0, VPOL1;                                                                                            \
+                                                                                                                           \
+            if( ALPHAONLY == false )                                                                                       \
+            {                                                                                                              \
+                /* bilinear interpolations */                                                                              \
+                UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][0] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][0] * WEIGHTU ); \
+                UPOL1 = ( PIXELS32[OFFSETBOTTOMLEFT][0] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][0] * WEIGHTU ); \
+                VPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][0] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMLEFT ][0] * WEIGHTV ); \
+                VPOL1 = ( PIXELS32[OFFSETTOPRIGHT  ][0] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][0] * WEIGHTV ); \
+                B = ( ( UPOL0 * ( INVWEIGHTV ) ) + ( UPOL1 * WEIGHTV )                                                     \
+                    + ( VPOL0 * ( INVWEIGHTU ) ) + ( VPOL1 * WEIGHTU ) ) * 0.5f;                                           \
+                /* bilinear interpolations */                                                                              \
+                UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][1] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][1] * WEIGHTU ); \
+                UPOL1 = ( PIXELS32[OFFSETBOTTOMLEFT][1] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][1] * WEIGHTU ); \
+                VPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][1] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMLEFT ][1] * WEIGHTV ); \
+                VPOL1 = ( PIXELS32[OFFSETTOPRIGHT  ][1] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][1] * WEIGHTV ); \
+                G = ( ( UPOL0 * ( INVWEIGHTV ) ) + ( UPOL1 * WEIGHTV )                                                     \
+                    + ( VPOL0 * ( INVWEIGHTU ) ) + ( VPOL1 * WEIGHTU ) ) * 0.5f;                                           \
+                /* bilinear interpolations */                                                                              \
+                UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][2] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][2] * WEIGHTU ); \
+                UPOL1 = ( PIXELS32[OFFSETBOTTOMLEFT][2] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][2] * WEIGHTU ); \
+                VPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][2] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMLEFT ][2] * WEIGHTV ); \
+                VPOL1 = ( PIXELS32[OFFSETTOPRIGHT  ][2] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][2] * WEIGHTV ); \
+                R = ( ( UPOL0 * ( INVWEIGHTV ) ) + ( UPOL1 * WEIGHTV )                                                     \
+                    + ( VPOL0 * ( INVWEIGHTU ) ) + ( VPOL1 * WEIGHTU ) ) * 0.5f;                                           \
+            }                                                                                                              \
+                                                                                                                           \
+            /* bilinear interpolations */                                                                                  \
+            UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][3] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][3] * WEIGHTU );     \
+            UPOL1 = ( PIXELS32[OFFSETBOTTOMLEFT][3] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][3] * WEIGHTU );     \
+            VPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][3] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMLEFT ][3] * WEIGHTV );     \
+            VPOL1 = ( PIXELS32[OFFSETTOPRIGHT  ][3] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][3] * WEIGHTV );     \
+            A = ( ( UPOL0 * ( INVWEIGHTV ) ) + ( UPOL1 * WEIGHTV )                                                         \
+                + ( VPOL0 * ( INVWEIGHTU ) ) + ( VPOL1 * WEIGHTU ) ) * 0.5f;                                               \
+        }                                                                                                                  \
+        break;                                                                                                             \
+                                                                                                                           \
+        default :                                                                                                          \
+        break;                                                                                                             \
+    }                                                                                                                      \
+
 // Macro for faster execution. Indeed, an inline function is not guaranteed to be inlined.
 #define GETPIXEL(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,ALPHAONLY,U,V,R,G,B,A)   \
     switch ( BITSPERPIXEL )                                                \
@@ -662,7 +724,7 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
     // Replace "<=" with "<" if you don't want to draw from edge-to-edge and stop 1 pixel before to prevent overlapping,
     // which leads to double stroke and would produce artefact when alpha is semi-transparent.
     //for( int i = 0; i <= ddx; i++ )
-    for( int i = 0; ( i <= screenx ) && ( x < (int)iImageWidth /* clipping */ ); i++ )
+    for( int i = 0; ( i < screenx ) && ( x < (int)iImageWidth /* clipping */ ); i++ )
     {
         if( ( x >= 0 ) && ( x < (int32) iImageWidth ) )
         {

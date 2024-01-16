@@ -312,6 +312,12 @@ FOdysseyVectorSegment::IsPaintingReady()
 }
 
 ::ULIS::FVec2D
+FOdysseyVectorSegment::GetOffsetPoint( uint32 iSide, double iT )
+{
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
+::ULIS::FVec2D
 FOdysseyVectorSegment::GetHandleVector( uint32 iHandleID, bool iNormalize )
 {
     return ::ULIS::FVec2D( 0.0f, 0.0f );

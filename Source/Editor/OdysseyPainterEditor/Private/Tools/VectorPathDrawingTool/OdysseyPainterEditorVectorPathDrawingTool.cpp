@@ -6,6 +6,7 @@
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
 
@@ -33,6 +34,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , StitchingRadius( 10 )
     , Debug( false )
     , mStitchedVertex( nullptr )
+    , mPathNumber( 0 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
 
@@ -195,7 +197,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
         if( path == nullptr )
         {
-            path = new FOdysseyVectorPath( "Path" );
+            path = new FOdysseyVectorPath( FString( "Path_" ) + FString::FromInt( mPathNumber++ ) );
 
             iScene->AppendChild( path );
             path->UpdateMatrix();

@@ -133,4 +133,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         FOdysseyPainterEditorVectorPathDrawingToolHUD* mPathDrawingHUD;
         FOdysseyVectorPathTracer mPathTracer;
         FOdysseyVectorVertex* mStitchedVertex;
+        uint32 mPathNumber;
 };
