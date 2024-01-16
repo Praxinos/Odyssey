@@ -454,12 +454,12 @@ void SOdysseyLayerStackTreeView::CreateContextMenu()
 
     UToolMenu* Menu = ToolMenus->RegisterMenu(contextMenuName);
     
-    FToolMenuSection& selectionSection = Menu->AddSection("Selection", LOCTEXT("context-menu.selection-section", "Selection"));
+    FToolMenuSection& selectionSection = Menu->AddSection("SelectionSection", LOCTEXT("context-menu.selection-section", "Selection"));
     {
         selectionSection.AddMenuEntry(FGenericCommands::Get().SelectAll);
     }
 
-    FToolMenuSection& commonSection = Menu->AddSection("Common", LOCTEXT("context-menu.common-section", "Common"));
+    FToolMenuSection& commonSection = Menu->AddSection("CommonSection", LOCTEXT("context-menu.common-section", "Common"));
     {
         commonSection.AddMenuEntry(FGenericCommands::Get().Duplicate);
         commonSection.AddMenuEntry(FGenericCommands::Get().Rename);
@@ -471,7 +471,7 @@ void SOdysseyLayerStackTreeView::CreateContextMenu()
         commonSection.AddMenuEntry(FGenericCommands::Get().Delete);
     }
 
-    FToolMenuSection& layerSection = Menu->AddSection("Layer", LOCTEXT("context-menu.layer-section", "Layer"));
+    FToolMenuSection& layerSection = Menu->AddSection("LayerSection", LOCTEXT("context-menu.layer-section", "Layer"));
     {
         layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().MergeSelectedLayers);
         layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers);

@@ -5,6 +5,8 @@
 
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineShortcuts.h"
 
+#define LOCTEXT_NAMESPACE "AnimationEditor"
+
 SOdysseyAnimationLayerStackTreeView::SOdysseyAnimationLayerStackTreeView()
     : mTimelineShortcuts(nullptr)
     , mExtension(nullptr)
@@ -47,3 +49,93 @@ SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry
     mExtension->Timeline()->SetSelectedFrames(FInt32Range::Empty());
     return SOdysseyLayerStackTreeView::OnFocusReceived(MyGeometry, InFocusEvent);
 }
+
+TArray<TSharedPtr<FExtender>>
+SOdysseyAnimationLayerStackTreeView::ExtendContextMenu()
+{
+    //TODO:
+    // Create a Seperated File to manage Vector Specific options
+    // Include it here and call the extension
+
+    TSharedPtr<FExtender> extender = MakeShared<FExtender>();
+    extender->AddMenuExtension(
+        "LayerSection"
+        , EExtensionHook::Position::After
+        , nullptr
+        , FMenuExtensionDelegate::CreateRaw(this, &SOdysseyAnimationLayerStackTreeView::ExtendContextMenuLayerSection)
+    );
+
+    return { extender };
+}
+
+void
+SOdysseyAnimationLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder)
+{
+    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    if ( !layerStack )
+        return;
+    
+    TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
+    if (selectedLayers.Num() <= 0)
+        return;
+
+    bool allLayersAreVectors = !selectedLayers.ContainsByPredicate(
+        [](UOdysseyLayer* iLayer) -> bool
+        {
+            return iLayer->GetClass() != UOdysseyAnimationLayerImageVector::StaticClass();
+        }
+    );
+
+    if (!allLayersAreVectors)
+        return;
+
+    iMenuBuilder.BeginSection("VectorLayer", LOCTEXT("animation.layerstack.context-menu.vector-layer-section", "Vector Layer"));
+    {
+        iMenuBuilder.AddMenuEntry(
+            LOCTEXT("animation.layerstack.context-menu.convert-vector-layer-to-raster-layer.name", "Convert to Raster")
+            , LOCTEXT("animation.layerstack.context-menu.convert-vector-layer-to-raster-layer.tooltip", "Converts the selected layers to raster layers")
+            , FSlateIcon()
+            , FUIAction(
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerStackTreeView::Action_ConvertVectorLayerToRasterLayer)
+            )
+        );
+    }
+}
+
+void
+SOdysseyAnimationLayerStackTreeView::Action_ConvertVectorLayerToRasterLayer()
+{
+    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    if ( !layerStack )
+        return;
+    
+    TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
+    if (selectedLayers.Num() <= 0)
+        return;
+
+    bool allLayersAreVectors = !selectedLayers.ContainsByPredicate(
+        [](UOdysseyLayer* iLayer) -> bool
+        {
+            return iLayer->GetClass() != UOdysseyAnimationLayerImageVector::StaticClass();
+        }
+    );
+
+    if (!allLayersAreVectors)
+        return;
+    
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("animation.layer-image-vector.transaction.convert-to-raster", "Convert Vector Layer To Raster Layer"));
+#endif
+
+    for (UOdysseyLayer* layerVector : selectedLayers)
+    {
+        UOdysseyLayer* parent = layerVector->GetParent();
+        int indexInParent = layerVector->GetIndexInParent();
+
+        UOdysseyLayer* layerRaster = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), parent, indexInParent);
+        layerRaster->Merge({layerVector});
+        layerStack->RemoveLayer(layerVector);
+    }
+}
+
+#undef LOCTEXT_NAMESPACE

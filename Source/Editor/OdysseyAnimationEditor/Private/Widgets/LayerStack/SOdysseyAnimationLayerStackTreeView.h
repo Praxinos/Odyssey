@@ -21,6 +21,12 @@ private:
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
     virtual FReply OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent) override;
     virtual void Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo);
+    
+    virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
+
+private:
+    void ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder);
+    void Action_ConvertVectorLayerToRasterLayer();
 
 private:
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
