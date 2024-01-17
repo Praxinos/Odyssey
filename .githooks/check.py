@@ -95,10 +95,11 @@ def CheckIDDN( iLines ):
     if len( iLines ) == 1:
         return False
     
-    py_file_ok  = iLines[0].startswith( '#!/usr/bin/env py' ) and iLines[1].startswith(  '# IDDN.FR.' ) and ( iLines[2].startswith(  '# ' ) and 'copyright' in iLines[2] and 'Praxinos' in iLines[2] and 'publishing' in iLines[2] )
+    py_file_ok_2= iLines[0].startswith( '#!/usr/bin/env py' ) and iLines[1].startswith(  '# IDDN.FR.' ) and ( iLines[2].startswith(  '# ' ) and 'copyright' in iLines[2] and 'Praxinos' in iLines[2] and 'publishing' in iLines[2] )
+    py_file_ok  =                                                 iLines[0].startswith(  '# IDDN.FR.' ) and ( iLines[1].startswith(  '# ' ) and 'copyright' in iLines[1] and 'Praxinos' in iLines[1] and 'publishing' in iLines[1] )
     cpp_file_ok =                                                 iLines[0].startswith( '// IDDN.FR.' ) and ( iLines[1].startswith( '// ' ) and 'copyright' in iLines[1] and 'Praxinos' in iLines[1] and 'publishing' in iLines[1] )
 
-    return py_file_ok or cpp_file_ok
+    return py_file_ok_2 or py_file_ok or cpp_file_ok
 
 #---
 

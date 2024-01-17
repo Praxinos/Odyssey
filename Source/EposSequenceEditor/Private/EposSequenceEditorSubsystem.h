@@ -1,5 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
+// IDDN.FR.001.220036.002.S.P.2021.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2024
 
 #pragma once
 
@@ -77,18 +77,18 @@ public:
     //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
     //FMovieSceneBindingProxy ConvertToPossessable(const FMovieSceneBindingProxy& ObjectBinding);
 
-    ///** 
-    // * Copy folders 
-    // * The copied folders will be saved to the clipboard as well as assigned to the ExportedText string. 
-    // * The ExportedTest string can be used in conjunction with PasteFolders if, for example, pasting copy/pasting multiple 
-    // * folders without relying on a single clipboard. 
+    ///**
+    // * Copy folders
+    // * The copied folders will be saved to the clipboard as well as assigned to the ExportedText string.
+    // * The ExportedTest string can be used in conjunction with PasteFolders if, for example, pasting copy/pasting multiple
+    // * folders without relying on a single clipboard.
     // */
     //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
     //void CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
 
-    ///** 
-    // * Paste folders 
-    // * Paste folders from the given TextToImport string (used in conjunction with CopyFolders). 
+    ///**
+    // * Paste folders
+    // * Paste folders from the given TextToImport string (used in conjunction with CopyFolders).
     // * If TextToImport is empty, the contents of the clipboard will be used.
     // */
     //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
@@ -204,7 +204,7 @@ public:
 private:
 
     TSharedPtr<ISequencer> GetActiveSequencer();
-    
+
     //void SnapSectionsToTimelineUsingSourceTimecodeInternal();
     //void SyncSectionsUsingSourceTimecodeInternal();
     //void BakeTransformInternal();

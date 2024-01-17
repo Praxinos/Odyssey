@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN.FR.001.220036.002.S.P.2021.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2024
 
 #include "EposSequenceEditorSubsystem.h"
 //#include "MVVM/ViewModels/SequencerEditorViewModel.h"
@@ -69,7 +70,7 @@ void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 
     //auto AreActorsSelected = [this]{
     //    TArray<AActor*> SelectedActors;
-    //    GEditor->GetSelectedActors()->GetSelectedObjects<AActor>(SelectedActors); 
+    //    GEditor->GetSelectedActors()->GetSelectedObjects<AActor>(SelectedActors);
     //    return SelectedActors.Num() > 0;
     //};
 
@@ -132,7 +133,7 @@ void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
     //    {
     //        return;
     //    }
-    //    
+    //
     //    MenuBuilder.AddMenuEntry(FEposSequenceEditorCommands::Get().SnapSectionsToTimelineUsingSourceTimecode);
     //    MenuBuilder.AddMenuEntry(FEposSequenceEditorCommands::Get().SyncSectionsUsingSourceTimecode);
     //    MenuBuilder.AddMenuEntry(FEposSequenceEditorCommands::Get().BakeTransform);
@@ -147,7 +148,7 @@ void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
         {
             return;
         }
-        
+
         MenuBuilder.AddMenuEntry(FEposSequenceEditorCommands::Get().FixActorReferences);
         }));
 
@@ -160,7 +161,7 @@ void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
     //    {
     //        return;
     //    }
-    //    
+    //
     //    FFormatNamedArguments Args;
     //    MenuBuilder.AddSubMenu(
     //        FText::Format(LOCTEXT("AssignActor", "Assign Actor"), Args),
@@ -177,7 +178,7 @@ void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
     //    {
     //        return;
     //    }
-    //    
+    //
     //    TArray<FName> ComponentNames;
     //    GetRebindComponentNames(ComponentNames);
     //    if (ComponentNames.Num() > 0)
@@ -262,7 +263,7 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 //    }
 //
 //    TArray<FGuid> Guids = FSequencerUtilities::AddActors(Sequencer.ToSharedRef(), Actors);
-//    
+//
 //    for (const FGuid& Guid : Guids)
 //    {
 //        BindingProxies.Add(FMovieSceneBindingProxy(Guid, Sequence));
@@ -731,7 +732,7 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 //        [
 //            SNew(SVerticalBox)
 //
-//            
+//
 //            + SVerticalBox::Slot()
 //                .AutoHeight()
 //                .Padding(0.f, 0.f, 0.f, 0.f)
@@ -1024,7 +1025,7 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 //    FFrameRate DisplayRate = FocusedMovieScene->GetDisplayRate();
 //
 //    FBakingAnimationKeySettings SettingsInTick = InSettings;
-//    
+//
 //    if (Params.TimeUnit == ESequenceTimeUnit::DisplayRate)
 //    {
 //        SettingsInTick.StartFrame = ConvertFrameTime(SettingsInTick.StartFrame, DisplayRate, TickResolution).GetFrame();
@@ -1040,7 +1041,7 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 //    CalculateFramesPerGuid(Sequencer, SettingsInTick, BakeDataMap, TotalFrameMap);
 //
 //    FMovieSceneSequenceTransform RootToLocalTransform = Sequencer->GetFocusedMovieSceneSequenceTransform();
-//    
+//
 //    TArray<FFrameNumber> AllFrames;
 //    TotalFrameMap.GenerateKeyArray(AllFrames);
 //
@@ -1083,12 +1084,12 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 //                if (CameraComponent)
 //                {
 //                    Parent = CameraComponent->GetAttachParent();
-//                } 
+//                }
 //                else if (Actor->GetRootComponent())
 //                {
 //                    Parent = Actor->GetRootComponent()->GetAttachParent();
 //                }
-//                
+//
 //                // The CameraRig_rail updates the spline position tick, so it needs to be ticked manually while baking the frames
 //                while (Parent && Parent->GetOwner())
 //                {
@@ -1243,7 +1244,7 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 //            // Always detach from any existing parent
 //            Actor->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 //        }
-//            
+//
 //        // Create new transform track and section
 //        UMovieScene3DTransformTrack* TransformTrack = Cast<UMovieScene3DTransformTrack>(FocusedMovieScene->AddTrack(UMovieScene3DTransformTrack::StaticClass(), Guid));
 //
@@ -1300,7 +1301,7 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 //            {
 //                FMath::WindRelativeAnglesDegrees(LocalRotations[Counter].X, LocalRotations[Counter + 1].X);
 //                FMath::WindRelativeAnglesDegrees(LocalRotations[Counter].Y, LocalRotations[Counter + 1].Y);
-//                FMath::WindRelativeAnglesDegrees(LocalRotations[Counter].Z, LocalRotations[Counter + 1].Z);							
+//                FMath::WindRelativeAnglesDegrees(LocalRotations[Counter].Z, LocalRotations[Counter + 1].Z);
 //            }
 //            if (SettingsInTick.BakingKeySettings == EBakingKeySettings::KeysOnly)
 //            {
@@ -1376,7 +1377,7 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 //            }
 //        }
 //    }
-//    
+//
 //    Sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 //    return true;
 //}
@@ -1443,8 +1444,8 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
         {
             FGuid OldGuid = ActorPossessableToFix.GetGuid();
 
-            // The actor might have an existing guid while the possessable with the same name might not. 
-            // In that case, make sure we also replace the existing guid with the new guid 
+            // The actor might have an existing guid while the possessable with the same name might not.
+            // In that case, make sure we also replace the existing guid with the new guid
             FGuid ExistingGuid = Sequencer->FindObjectId(*ActorPtr, Sequencer->GetFocusedTemplateID());
 
             FGuid NewGuid = FSequencerUtilities::AssignActor(Sequencer.ToSharedRef(), ActorPtr, ActorPossessableToFix.GetGuid());
@@ -1482,7 +1483,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //    FMovieSceneBindingProxy BindingProxy(ObjectBindings[0], Sequencer->GetFocusedMovieSceneSequence());
 //
 //    TArray<AActor*> SelectedActors;
-//    GEditor->GetSelectedActors()->GetSelectedObjects<AActor>(SelectedActors); 
+//    GEditor->GetSelectedActors()->GetSelectedObjects<AActor>(SelectedActors);
 //    AddActorsToBinding(SelectedActors, BindingProxy);
 //}
 //
@@ -1515,7 +1516,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //    FMovieSceneBindingProxy BindingProxy(ObjectBindings[0], Sequencer->GetFocusedMovieSceneSequence());
 //
 //    TArray<AActor*> SelectedActors;
-//    GEditor->GetSelectedActors()->GetSelectedObjects<AActor>(SelectedActors); 
+//    GEditor->GetSelectedActors()->GetSelectedObjects<AActor>(SelectedActors);
 //    ReplaceBindingWithActors(SelectedActors, BindingProxy);
 //}
 //
@@ -1548,7 +1549,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //    FMovieSceneBindingProxy BindingProxy(ObjectBindings[0], Sequencer->GetFocusedMovieSceneSequence());
 //
 //    TArray<AActor*> SelectedActors;
-//    GEditor->GetSelectedActors()->GetSelectedObjects<AActor>(SelectedActors); 
+//    GEditor->GetSelectedActors()->GetSelectedObjects<AActor>(SelectedActors);
 //    RemoveActorsFromBinding(SelectedActors, BindingProxy);
 //}
 //
@@ -1656,7 +1657,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //    {
 //        return;
 //    }
-//    
+//
 //    FScopedTransaction RemoveInvalidBindings(LOCTEXT("RemoveMissing", "Remove Missing Objects"));
 //
 //    Sequence->Modify();
@@ -1747,7 +1748,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //        InitOptions.bFocusSearchBoxWhenOpened = true;
 //        // Only want the actor label column
 //        InitOptions.ColumnMap.Add(FSceneOutlinerBuiltInColumnTypes::Label(), FSceneOutlinerColumnInfo(ESceneOutlinerColumnVisibility::Visible, 0));
-//        
+//
 //        // Only display actors that are not possessed already
 //        InitOptions.Filters->AddFilterPredicate<FActorTreeItem>(FActorTreeItem::FFilterPredicate::CreateLambda( IsActorValidForAssignment ) );
 //    }
@@ -1824,7 +1825,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //    {
 //        return;
 //    }
-//        
+//
 //    FClassViewerModule& ClassViewerModule = FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
 //    const TSharedPtr<IClassViewerFilter>& GlobalClassFilter = ClassViewerModule.GetGlobalClassViewerFilter();
 //    TSharedRef<FClassViewerFilterFuncs> ClassFilterFuncs = ClassViewerModule.CreateFilterFuncs();
@@ -1868,9 +1869,9 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //    {
 //        FText RebindComponentLabel = FText::FromName(ComponentName);
 //        MenuBuilder.AddMenuEntry(
-//            RebindComponentLabel, 
-//            FText(), 
-//            FSlateIcon(), 
+//            RebindComponentLabel,
+//            FText(),
+//            FSlateIcon(),
 //            FUIAction(FExecuteAction::CreateLambda([this, ComponentName]() { RebindComponentInternal(ComponentName); } ) ) );
 //    }
 //}
@@ -1943,7 +1944,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //                    if (Component->GetFName() == ComponentName)
 //                    {
 //                        FGuid ComponentBinding = Sequence->CreatePossessable(Component);
-//                        
+//
 //                        if (PossessableBinding.BindingID.IsValid() && ComponentBinding.IsValid())
 //                        {
 //                            MovieScene->MoveBindingContents(PossessableBinding.BindingID, ComponentBinding);
@@ -1963,4 +1964,3 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //}
 
 #undef LOCTEXT_NAMESPACE
-

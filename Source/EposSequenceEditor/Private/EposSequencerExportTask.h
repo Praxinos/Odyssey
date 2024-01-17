@@ -11,7 +11,7 @@
 
 /**
  * Contains data for a group of assets to import
- */ 
+ */
 UCLASS(Transient, BlueprintType)
 class UEposSequencerExportTask : public UAssetExportTask
 {

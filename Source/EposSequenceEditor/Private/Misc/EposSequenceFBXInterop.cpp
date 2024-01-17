@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN.FR.001.220036.002.S.P.2021.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2024
 
 #include "Misc/EposSequenceFBXInterop.h"
 
@@ -131,7 +132,7 @@ void FEposSequenceFBXInterop::ExportFBX()
 
         // Make sure external selection is up to date since export could happen on tracks that have been right clicked but not have their underlying bound objects selected yet since that happens on mouse up.
         FSequencerUtilities::SynchronizeExternalSelectionWithSequencerSelection(Sequencer.ToSharedRef());
-        
+
         // Select selected nodes if there are selected nodes
         TArray<FGuid> Bindings;
         TArray<UMovieSceneTrack*> Tracks;
