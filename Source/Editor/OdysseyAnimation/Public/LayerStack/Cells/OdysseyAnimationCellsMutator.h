@@ -6,6 +6,8 @@
 #include "Mutations/OdysseyMutator.h"
 
 class UObject;
+class FOdysseySetCellsOffsetMutation;
+class FOdysseySetCellLengthMutation;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellsMutator
     : public FOdysseyMutator
