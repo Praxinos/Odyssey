@@ -3,7 +3,7 @@
 #include "OdysseyFile.h"
 
 bool
-FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTable::FKey* iKey
+FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
                                             , FArchive &Ar )
 {
     uint64 start = Ar.Tell();
@@ -33,7 +33,7 @@ FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTable::FKey* i
 }
 
 void
-FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTable::FKey* iKey
+FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {

@@ -20,7 +20,7 @@ FOdysseyAnimationLightTable::FOdysseyAnimationLightTable(UOdysseyAnimationLayer*
     //assume 10 frames on the left + 10 frames on the left + 1 current frame
     for (int i = -1; i >= -GetRange(); i--)
     {
-        FKey key;
+        FOdysseyAnimationLightTableKey key;
         key.mIsActivated = (i == -1);
         key.mOpacity = 0.5f;
         mKeys.Add(key);
@@ -28,7 +28,7 @@ FOdysseyAnimationLightTable::FOdysseyAnimationLightTable(UOdysseyAnimationLayer*
 
     for (int i = 1; i <= GetRange(); i++)
     {
-        FKey key;
+        FOdysseyAnimationLightTableKey key;
         key.mIsActivated = (i == 1);
         key.mOpacity = 0.5f;
         mKeys.Add(key);
@@ -47,7 +47,7 @@ FOdysseyAnimationLightTable::GetDisplayPosition() const
     return mDisplayPosition;
 }
 
-const FOdysseyAnimationLightTable::FKey*
+const FOdysseyAnimationLightTableKey*
 FOdysseyAnimationLightTable::GetKey(int iIndex) const
 {
     if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
@@ -58,7 +58,7 @@ FOdysseyAnimationLightTable::GetKey(int iIndex) const
     return &mKeys[index];
 }
 
-FOdysseyAnimationLightTable::FKey*
+FOdysseyAnimationLightTableKey*
 FOdysseyAnimationLightTable::GetKey(int iIndex)
 {
     if (iIndex == 0 || iIndex > GetRange() || iIndex < -GetRange() )
@@ -72,7 +72,7 @@ FOdysseyAnimationLightTable::GetKey(int iIndex)
 bool
 FOdysseyAnimationLightTable::GetKeyIsActivated(int iIndex) const
 {
-    const FKey* key = GetKey(iIndex);
+    const FOdysseyAnimationLightTableKey* key = GetKey(iIndex);
     if (!key)
         return false;
 
@@ -82,7 +82,7 @@ FOdysseyAnimationLightTable::GetKeyIsActivated(int iIndex) const
 float
 FOdysseyAnimationLightTable::GetKeyOpacity(int iIndex) const
 {
-    const FKey* key = GetKey(iIndex);
+    const FOdysseyAnimationLightTableKey* key = GetKey(iIndex);
     if (!key)
         return 0.f;
 

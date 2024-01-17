@@ -3,15 +3,15 @@
 #include "CoreMinimal.h"
 
 class FOdysseyAnimationLightTable;
-struct FOdysseyAnimationLightTable::FKey;
+struct FOdysseyAnimationLightTableKey;
 
 class FOdysseyAnimationLightTableKeyExport
 {
 public:
-    static void ODYSSEYANIMATION_API Write( FOdysseyAnimationLightTable::FKey* iKey, FArchive &Ar );
+    static void ODYSSEYANIMATION_API Write( FOdysseyAnimationLightTableKey* iKey, FArchive &Ar );
 
 private:
     ////////////////////////////////////
-    static void WriteIsActivated( FOdysseyAnimationLightTable::FKey* iKey, FArchive &Ar );
-    static void WriteOpacity( FOdysseyAnimationLightTable::FKey* iKey, FArchive &Ar );
+    static void WriteIsActivated( FOdysseyAnimationLightTableKey* iKey, FArchive &Ar );
+    static void WriteOpacity( FOdysseyAnimationLightTableKey* iKey, FArchive &Ar );
 };

@@ -67,7 +67,7 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEYS:
                 {
-                    for ( FOdysseyAnimationLightTable::FKey& key : iAnimationLightTable->mKeys )
+                    for ( FOdysseyAnimationLightTableKey& key : iAnimationLightTable->mKeys )
                     {
                         FOdysseyAnimationLightTableKeyExport::Write( &key, Ar );
                     }

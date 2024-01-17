@@ -7,6 +7,15 @@
 
 #include "OdysseyAnimationLightTable.generated.h"
 
+struct FOdysseyAnimationLightTableKey
+{
+    friend class FOdysseyAnimationLightTableKeyImport;
+    friend class FOdysseyAnimationLightTableKeyExport;
+
+    bool mIsActivated;
+    float mOpacity;
+};
+
 UENUM()
 enum class EOdysseyLightTableDisplayPosition
 {
@@ -36,16 +45,7 @@ public:
     float GetNextKeysContrast() const;
     float GetPreviousKeysContrast() const;
 
-    struct FKey
-    {
-        friend class FOdysseyAnimationLightTableKeyImport;
-        friend class FOdysseyAnimationLightTableKeyExport;
-
-        bool mIsActivated;
-        float mOpacity;
-    };
-
-    const FKey* GetKey(int iIndex) const;
+    const FOdysseyAnimationLightTableKey* GetKey(int iIndex) const;
     int GetRange() const;
 
 public:
@@ -57,7 +57,7 @@ public:
     void Serialize(FArchive& Ar);
 
 private:
-    FKey* GetKey(int iIndex);
+    FOdysseyAnimationLightTableKey* GetKey(int iIndex);
 
 private:
     friend class FOdysseyAnimationLightTableMutator;
@@ -71,5 +71,5 @@ private:
     float mPreviousKeysContrast;
     float mNextKeysContrast;
 
-    TArray<FKey> mKeys;
+    TArray<FOdysseyAnimationLightTableKey> mKeys;
 };

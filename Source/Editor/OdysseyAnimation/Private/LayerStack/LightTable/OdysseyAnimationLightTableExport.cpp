@@ -45,7 +45,7 @@ FOdysseyAnimationLightTableExport::WriteKeys( FOdysseyAnimationLightTable* iAnim
                             , Ar
                             , [iAnimationLightTable](FArchive &Ar) -> void
     {
-        for ( FOdysseyAnimationLightTable::FKey& key : iAnimationLightTable->mKeys )
+        for ( FOdysseyAnimationLightTableKey& key : iAnimationLightTable->mKeys )
         {
             FOdysseyAnimationLightTableKeyExport::Write( &key, Ar );
         }

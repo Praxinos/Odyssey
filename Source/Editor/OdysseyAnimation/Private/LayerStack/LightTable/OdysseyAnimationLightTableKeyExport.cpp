@@ -3,7 +3,7 @@
 #include "OdysseyFile.h"
 
 void
-FOdysseyAnimationLightTableKeyExport::WriteIsActivated( FOdysseyAnimationLightTable::FKey* iKey, FArchive &Ar )
+FOdysseyAnimationLightTableKeyExport::WriteIsActivated( FOdysseyAnimationLightTableKey* iKey, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_ISACTIVATED
                             , Ar
@@ -14,7 +14,7 @@ FOdysseyAnimationLightTableKeyExport::WriteIsActivated( FOdysseyAnimationLightTa
 }
 
 void
-FOdysseyAnimationLightTableKeyExport::WriteOpacity( FOdysseyAnimationLightTable::FKey* iKey, FArchive &Ar )
+FOdysseyAnimationLightTableKeyExport::WriteOpacity( FOdysseyAnimationLightTableKey* iKey, FArchive &Ar )
 {
     
     FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_OPACITY
@@ -27,7 +27,7 @@ FOdysseyAnimationLightTableKeyExport::WriteOpacity( FOdysseyAnimationLightTable:
 
 
 void
-FOdysseyAnimationLightTableKeyExport::Write( FOdysseyAnimationLightTable::FKey* iKey
+FOdysseyAnimationLightTableKeyExport::Write( FOdysseyAnimationLightTableKey* iKey
                                              , FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY

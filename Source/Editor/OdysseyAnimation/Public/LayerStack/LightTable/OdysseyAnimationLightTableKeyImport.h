@@ -3,7 +3,7 @@
 #include <Core/Core.h>
 
 class FOdysseyAnimationLightTable;
-struct FOdysseyAnimationLightTable::FKey;
+struct FOdysseyAnimationLightTableKey;
 
 class FOdysseyAnimationLightTableKeyImport
 {
@@ -14,7 +14,7 @@ public:
      * @param iAnimationCell 
      * @param Ar 
      */
-    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationLightTable::FKey* iKey
+    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationLightTableKey* iKey
                                   , FArchive &Ar );
 
 private:
@@ -22,7 +22,7 @@ private:
      * Private import functions
      */
 
-    static void Read( FOdysseyAnimationLightTable::FKey* iKey
+    static void Read( FOdysseyAnimationLightTableKey* iKey
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };
