@@ -266,7 +266,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         FOdysseyVectorOffsetCurveCubic mOffsetCurve[2];
         ::ULIS::FVec2D mBezier[4];
         bool mNeedWidth;
-        ::ULIS::FVec2D mOffsetBezier[2][4];
         FOdysseyVectorHandleSegment mCtrlPoint[2];
 
         BLPath mBLPath;

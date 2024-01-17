@@ -579,7 +579,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
 
 // bilinear interpolation version of GETPIXEL. currently unused
 // Macro for faster execution. Indeed, an inline function is not guaranteed to be inlined.
-#define GETPIXELBF(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,ALPHAONLY,U,V,R,G,B,A)                                                 \
+#define GETPIXELBF(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,FLAGS,U,V,R,G,B,A)                                                     \
     switch ( BITSPERPIXEL )                                                                                                \
     {                                                                                                                      \
         case 32 :                                                                                                          \
@@ -600,7 +600,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
             uint8 UPOL0, UPOL1;                                                                                            \
             uint8 VPOL0, VPOL1;                                                                                            \
                                                                                                                            \
-            if( ALPHAONLY == false )                                                                                       \
+            if( ( FLAGS & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )                                                    \
             {                                                                                                              \
                 /* bilinear interpolations */                                                                              \
                 UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][0] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][0] * WEIGHTU ); \
@@ -640,7 +640,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     }                                                                                                                      \
 
 // Macro for faster execution. Indeed, an inline function is not guaranteed to be inlined.
-#define GETPIXEL(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,ALPHAONLY,U,V,R,G,B,A)   \
+#define GETPIXEL(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,FLAGS,U,V,R,G,B,A)       \
     switch ( BITSPERPIXEL )                                                \
     {                                                                      \
         case 32 :                                                          \
@@ -650,7 +650,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
             int32 TEXV = V * ( HEIGHT - 1 );                               \
             uint32 TEXOFFSET = ( TEXV * WIDTH ) + TEXU;                    \
                                                                            \
-            if( ALPHAONLY == false )                                       \
+            if( ( FLAGS & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )    \
             {                                                              \
                 B = PIXELS32[TEXOFFSET][0];                                \
                 G = PIXELS32[TEXOFFSET][1];                                \
@@ -692,7 +692,7 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
                                        , uint32 iBrushWidth
                                        , uint32 iBrushHeight
                                        , int32  iBrushBitsPerPixel
-                                       , bool   iBrushAlphaOnly )
+                                       , uint64 iPolygonDrawingFlags  )
 {
     int32 x0 = hline->x0,
           x1 = hline->x1;
@@ -732,17 +732,36 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
 
             if( iBrushPixelData && iBrushWidth && iBrushHeight )
             {
-                GETPIXEL( iBrushPixelData
-                        , iBrushWidth
-                        , iBrushHeight
-                        , iBrushBitsPerPixel
-                        , iBrushAlphaOnly
-                        , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
-                        , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
-                        , BR
-                        , BG
-                        , BB
-                        , BA );
+                if( ( iPolygonDrawingFlags & FPolygonDrawingFlags::BILINEARFILTERING )
+                 && (        x < (int32)(iImageWidth  - 1) )   // prevent overflow
+                 && ( hline->y < (int32)(iImageHeight - 1) ) ) // prevent overflow
+                {
+                    GETPIXELBF( iBrushPixelData
+                              , iBrushWidth
+                              , iBrushHeight
+                              , iBrushBitsPerPixel
+                              , iPolygonDrawingFlags
+                              , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
+                              , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
+                              , BR
+                              , BG
+                              , BB
+                              , BA );
+                }
+                else
+                {
+                    GETPIXEL( iBrushPixelData
+                            , iBrushWidth
+                            , iBrushHeight
+                            , iBrushBitsPerPixel
+                            , iPolygonDrawingFlags
+                            , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
+                            , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
+                            , BR
+                            , BG
+                            , BB
+                            , BA );
+                }
             }
 
             switch ( iImageBitsPerPixel )
@@ -951,7 +970,7 @@ FOdysseyVectorEngine::FillPolygon( const ::ULIS::FVec2I* iPoint
                                        , iBrushWidth
                                        , iBrushHeight
                                        , iBrushBitsPerPixel
-                                       , (bool) ( iPolygonDrawingFlags & FPolygonDrawingFlags::BRUSHALPHAONLY ) );
+                                       , iPolygonDrawingFlags );
                 }
             }
         }

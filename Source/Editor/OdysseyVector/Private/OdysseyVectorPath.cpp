@@ -1607,7 +1607,8 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
                               , iStartU + ( fraction->polygon.U[3] * difU ) };
             uint64 polygonDrawingFlags = 0;
 
-            polygonDrawingFlags |= mBrush.ColorFromBrush ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
+            polygonDrawingFlags |= mBrush.ColorFromBrush    ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
+            polygonDrawingFlags |= mBrush.BilinearFiltering ? FPolygonDrawingFlags::BILINEARFILTERING : 0;
 
             // should be a static function
             vectorEngine->FillQuad( iBLContext

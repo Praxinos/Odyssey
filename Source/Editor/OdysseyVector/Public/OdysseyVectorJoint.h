@@ -35,14 +35,28 @@ class ODYSSEYVECTOR_API FOdysseyVectorJoint
                  , FOdysseyVectorSegment* iNextSegment );
         void ResetBBox();
 
+
     private:
         void MakeNone();
         void MakeMiter( FOdysseyVectorSegment* iPrevSegment
-                      , FOdysseyVectorSegment* iNextSegment );
+                      , FOdysseyVectorSegment* iNextSegment
+                      , const ::ULIS::FVec2D& iPrevEdgePoint
+                      , const ::ULIS::FVec2D& iNextEdgePoint
+                      , uint32 iSide );
         void MakeLinear( FOdysseyVectorSegment* iPrevSegment
-                       , FOdysseyVectorSegment* iNextSegment );
+                       , FOdysseyVectorSegment* iNextSegment
+                       , const ::ULIS::FVec2D& iPrevEdgePoint
+                       , const ::ULIS::FVec2D& iNextEdgePoint
+                       , uint32 iSide );
         void MakeRadial( FOdysseyVectorSegment* iPrevSegment
-                       , FOdysseyVectorSegment* iNextSegment );
+                       , FOdysseyVectorSegment* iNextSegment
+                       , const ::ULIS::FVec2D& iPrevEdgePoint
+                       , const ::ULIS::FVec2D& iNextEdgePoint
+                       , uint32 iSide );
+        uint32 GetEdgePoints( FOdysseyVectorSegment* iPrevSegment
+                            , FOdysseyVectorSegment* iNextSegment
+                            , ::ULIS::FVec2D& iPrevEdgePoint
+                            , ::ULIS::FVec2D& iNextEdgePoint );
 
     protected:
         std::vector<FOdysseyVectorPolygon3> mPolygonCache;
