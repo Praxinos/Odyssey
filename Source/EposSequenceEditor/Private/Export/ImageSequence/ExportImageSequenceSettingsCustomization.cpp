@@ -27,30 +27,7 @@ FExportImageSequenceOptionsCustomization::MakeInstance()
 FText
 FExportImageSequenceOptionsCustomization::GetTooltipText() const
 {
-    return FText::Format( LOCTEXT( "export-image-sequence-file-pattern-tooltip",
-R"(Each keywords will be replaced by its corresponding value.
-
-- {0}-{1}-seq{2}-sh{3}---{4}
-    1-MyStoryboard-seq10-sh10---0000
-    2-MyStoryboard-seq10-sh10---0100
-    3-MyStoryboard-seq10-sh20---0175
-    4-MyStoryboard-seq10-sh20---0200
-    5-MyStoryboard-seq20-sh30---0250
-    6-MyStoryboard-seq20-sh40---0400
-    ...
-- {1}-pf{4}
-    MyStoryboard-pf0000
-    MyStoryboard-pf0100
-    MyStoryboard-pf0175
-    MyStoryboard-pf0200
-    MyStoryboard-pf0250
-    MyStoryboard-pf0400
-    ...
-
-The extension will be automatically set according to the file format.
-
-(Click on a keyword to Copy it)
-)" )
+    return FText::Format( LOCTEXT( "export-image-sequence-file-pattern-tooltip", "Each keywords will be replaced by its corresponding value.\n\n- {0}-{1}-seq{2}-sh{3}---{4}\n    1-MyStoryboard-seq10-sh10---0000\n    2-MyStoryboard-seq10-sh10---0100\n    3-MyStoryboard-seq10-sh20---0175\n    4-MyStoryboard-seq10-sh20---0200\n    5-MyStoryboard-seq20-sh30---0250\n    6-MyStoryboard-seq20-sh40---0400\n    ...\n- {1}-pf{4}\n    MyStoryboard-pf0000\n    MyStoryboard-pf0100\n    MyStoryboard-pf0175\n    MyStoryboard-pf0200\n    MyStoryboard-pf0250\n    MyStoryboard-pf0400\n    ...\n\nThe extension will be automatically set according to the file format.\n\n(Click on a keyword to Copy it)" )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::PanelIndex ).mKeywordWithBraces )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EExportImageSequencePatternKeyword::StoryboardName ).mKeywordWithBraces )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( ENamingConventionBoardPatternKeyword::BoardIndex ).mKeywordWithBraces )

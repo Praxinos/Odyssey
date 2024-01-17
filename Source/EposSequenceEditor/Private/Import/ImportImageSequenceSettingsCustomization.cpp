@@ -25,39 +25,7 @@ FImportImageSequenceOptionsCustomization::MakeInstance()
 FText
 FImportImageSequenceOptionsCustomization::GetTooltipText() const
 {
-    return FText::Format( LOCTEXT( "import-image-sequence-file-pattern-tooltip",
-R"(Each keywords will be replaced by its corresponding value.
-
-For files like:
-- wonder-1-000.png
-- wonder-1-001.png
-- wonder-1-002.png
-- wonder-2-000.png
-- wonder-2-001.png
-- wonder-3-000.png
-- wonder-3-001.png
-- wonder-3-002.png
-- wonder-3-003.png
-If the first number corresponds to the shot, and the second to each panel,
-the pattern will look like:
-- wonder-{1}-{2}.png
-
-For files like:
-- ful-bA-s01-00.png
-- ful-bA-s01-01.png
-- ful-bA-s01-02.png
-- ful-bA-s02-00.png
-- ful-bA-s02-01.png
-- ful-bB-s03-00.png
-- ful-bB-s03-01.png
-- ful-bB-s03-02.png
-- ful-bB-s03-03.png
-If the first character (A or B) corresponds to the board, the next number to the shot, and the last to each panel,
-the pattern will look like:
-- ful-b{0}-s{1}-{2}.png
-
-(Click on a keyword to Copy it)
-)" )
+    return FText::Format( LOCTEXT( "import-image-sequence-file-pattern-tooltip", "Each keywords will be replaced by its corresponding value.\n\nFor files like:\n- wonder-1-000.png\n- wonder-1-001.png\n- wonder-1-002.png\n- wonder-2-000.png\n- wonder-2-001.png\n- wonder-3-000.png\n- wonder-3-001.png\n- wonder-3-002.png\n- wonder-3-003.png\nIf the first number corresponds to the shot, and the second to each panel,\nthe pattern will look like:\n- wonder-{1}-{2}.png\n\nFor files like:\n- ful-bA-s01-00.png\n- ful-bA-s01-01.png\n- ful-bA-s01-02.png\n- ful-bA-s02-00.png\n- ful-bA-s02-01.png\n- ful-bB-s03-00.png\n- ful-bB-s03-01.png\n- ful-bB-s03-02.png\n- ful-bB-s03-03.png\nIf the first character (A or B) corresponds to the board, the next number to the shot, and the last to each panel,\nthe pattern will look like:\n- ful-b{0}-s{1}-{2}.png\n\n(Click on a keyword to Copy it)" )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::BoardId ).mKeywordWithBraces )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::ShotId ).mKeywordWithBraces )
                           , FText::FromString( mOptions->mPatternKeywordLists.GetKeyword( EImportImageSequencePatternKeyword::PanelId ).mKeywordWithBraces )

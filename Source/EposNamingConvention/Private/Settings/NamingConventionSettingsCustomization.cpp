@@ -26,17 +26,8 @@ FNamingConventionPlaneCustomization::MakeInstance()
 FText
 FNamingConventionPlaneCustomization::GetTooltipText() const
 {
-    return FText::Format( LOCTEXT( "plane-pattern-tooltip",
-R"(Some examples:
-
-- plane_{0} ->
-    plane_10
-    plane_20
-    plane_30
-    ...
-
-(Click on a keyword to Copy it))" )
-                                   , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionPlanePatternKeyword::PlaneIndex ).mKeywordWithBraces )
+    return FText::Format( LOCTEXT( "plane-pattern-tooltip", "Some examples:\n\n- plane_{0} ->\n    plane_10\n    plane_20\n    plane_30\n    ...\n\n(Click on a keyword to Copy it)")
+        , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionPlanePatternKeyword::PlaneIndex ).mKeywordWithBraces )
     );
 }
 
@@ -146,16 +137,7 @@ FNamingConventionCameraCustomization::MakeInstance()
 FText
 FNamingConventionCameraCustomization::GetTooltipText() const
 {
-    return FText::Format( LOCTEXT( "camera-pattern-tooltip",
-R"(Some examples:
-
-- camera_{0} ->
-    camera_10
-    camera_20
-    camera_30
-    ...
-
-(Click on a keyword to Copy it))" )
+    return FText::Format( LOCTEXT( "camera-pattern-tooltip", "Some examples:\n\n- camera_{0} ->\n    camera_10\n    camera_20\n    camera_30\n    ...\n\n(Click on a keyword to Copy it)" )
                                    , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCameraPatternKeyword::CameraIndex ).mKeywordWithBraces )
     );
 }
@@ -267,21 +249,7 @@ FNamingConventionShotCustomization::MakeInstance()
 FText
 FNamingConventionShotCustomization::GetTooltipText() const
 {
-    return FText::Format( LOCTEXT( "shot-pattern-tooltip",
-R"(Some examples:
-
-- shot_{0} ->
-    shot_10
-    shot_20
-    shot_30
-    ...
-- {3}_shot_{0}_{11} ->
-    MS_shot_0010_xy
-    MS_shot_0020_xy
-    MS_shot_0030_xy
-    ...
-
-(Click on a keyword to Copy it))" )
+    return FText::Format( LOCTEXT( "shot-pattern-tooltip", "Some examples:\n\n- shot_{0} ->\n    shot_10\n    shot_20\n    shot_30\n    ...\n- {3}_shot_{0}_{11} ->\n    MS_shot_0010_xy\n    MS_shot_0020_xy\n    MS_shot_0030_xy\n    ...\n\n(Click on a keyword to Copy it)" )
                           , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::ShotIndex ).mKeywordWithBraces )
                           , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionShotPatternKeyword::TakeIndex ).mKeywordWithBraces )
 
@@ -404,21 +372,7 @@ FNamingConventionBoardCustomization::MakeInstance()
 FText
 FNamingConventionBoardCustomization::GetTooltipText() const
 {
-    return FText::Format( LOCTEXT( "board-pattern-tooltip",
-R"(Some examples:
-
-- board_{0} ->
-    board_10
-    board_20
-    board_30
-    ...
-- {2}_board_{0}_{10} ->
-    MS_board_0010_xy
-    MS_board_0020_xy
-    MS_board_0030_xy
-    ...
-
-(Click on a keyword to Copy it))" )
+    return FText::Format( LOCTEXT( "board-pattern-tooltip", "Some examples:\n\n- board_{0} ->\n    board_10\n    board_20\n    board_30\n    ...\n- {2}_board_{0}_{10} ->\n    MS_board_0010_xy\n    MS_board_0020_xy\n    MS_board_0030_xy\n    ...\n\n(Click on a keyword to Copy it)" )
                           , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionBoardPatternKeyword::BoardIndex ).mKeywordWithBraces )
 
                           , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionCommonPatternKeyword::StudioName ).mKeywordWithBraces )
