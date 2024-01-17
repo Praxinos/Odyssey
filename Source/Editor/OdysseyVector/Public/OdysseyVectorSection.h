@@ -101,6 +101,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         ::ULIS::FVec2D& GetVertexCoords( FOdysseyVectorVertex* iVertex );
         void SetErased( bool iErased );
         bool IsErased();
+        double GetLength();
 
     protected:
         FOdysseyVectorSegment* mSegment;
@@ -109,6 +110,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         uint32 mCycleCount;
         FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
         ::ULIS::FVec2D mBezier[4];
+        double mLength;
 
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );

@@ -18,3 +18,4 @@ struct FOdysseyVectorPolygon {
 typedef FOdysseyVectorPolygon<3> FOdysseyVectorPolygon3;
 typedef FOdysseyVectorPolygon<4> FOdysseyVectorPolygon4;
 typedef FOdysseyVectorPolygon<5> FOdysseyVectorPolygon5;
+typedef FOdysseyVectorPolygon<6> FOdysseyVectorPolygon6;

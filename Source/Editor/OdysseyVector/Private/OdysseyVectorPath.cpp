@@ -1601,27 +1601,29 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
         for( int i = 0; i < fractionCache.size(); i++ )
         {
             FOdysseyVectorFraction* fraction = &fractionCache[i];
-            double quadU[4] = { iStartU + ( fraction->polygon.U[0] * difU )
+            double hexaU[6] = { iStartU + ( fraction->polygon.U[0] * difU )
                               , iStartU + ( fraction->polygon.U[1] * difU )
                               , iStartU + ( fraction->polygon.U[2] * difU )
-                              , iStartU + ( fraction->polygon.U[3] * difU ) };
+                              , iStartU + ( fraction->polygon.U[3] * difU )
+                              , iStartU + ( fraction->polygon.U[4] * difU )
+                              , iStartU + ( fraction->polygon.U[5] * difU ) };
             uint64 polygonDrawingFlags = 0;
 
             polygonDrawingFlags |= mBrush.ColorFromBrush    ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
             polygonDrawingFlags |= mBrush.BilinearFiltering ? FPolygonDrawingFlags::BILINEARFILTERING : 0;
 
             // should be a static function
-            vectorEngine->FillQuad( iBLContext
-                                  , fraction->polygon.point
-                                  , quadU
-                                  , fraction->polygon.V
-                                  , iCombinedOpacity
-                                  , foregroundColor
-                                  , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
-                                  , mBrush.width
-                                  , mBrush.height
-                                  , mBrush.bitsPerPixel
-                                  , polygonDrawingFlags );
+            vectorEngine->FillHexagon( iBLContext
+                                     , fraction->polygon.point
+                                     , hexaU
+                                     , fraction->polygon.V
+                                     , iCombinedOpacity
+                                     , foregroundColor
+                                     , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                     , mBrush.width
+                                     , mBrush.height
+                                     , mBrush.bitsPerPixel
+                                     , polygonDrawingFlags );
         }
     }
     else // otherwise use Blend2D's

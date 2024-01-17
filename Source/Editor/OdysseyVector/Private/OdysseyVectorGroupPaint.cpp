@@ -1273,7 +1273,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
         if( normalVector > 0.0f )
         {
 //UE_LOG(LogTemp, Warning, TEXT("Cycle committed") ); 
-            mCycleList.push_back( new FOdysseyVectorCycle( this, iVertexArray, iSectionArray, normalVector ) );
+            mCycleList.push_back( new FOdysseyVectorCycle( this, iVertexArray, iSectionArray ) );
         }
 
         ret = FOdysseyVectorGroupPaint::HASCYCLE;
@@ -1502,6 +1502,17 @@ FOdysseyVectorGroupPaint::FindCycles()
             vertex1->BuildExplorationPairs( explorationPairsBuffer );
     }
 
+    // sort exploration pairs in order to always have a propagation that starts from
+    // the same vertex/section between sessions. This is needed in monothread and 
+    // multihread modes because the exploration pairs won't be in the same order 
+    // and we may switch from one to the other.
+    std::sort( explorationPairsBuffer.begin()
+             , explorationPairsBuffer.end()
+             , []( FExplorationPair& iPairA, FExplorationPair& iPairB )
+               {
+                 return iPairA.mSectionLength > iPairB.mSectionLength;
+               } );
+
     SimplifyGraph();
 
     // explore the graph from intersections
@@ -1509,13 +1520,6 @@ FOdysseyVectorGroupPaint::FindCycles()
     {
         Explore( &explorationPairsBuffer[i] );
     }
-
-    // sort cycles in order to always have a propagation that starts from the same cycles.
-    // This is only required when using multithreading.
-    mCycleList.sort( []( FOdysseyVectorCycle* iCycleA, FOdysseyVectorCycle* iCycleB )
-                     {
-                         return iCycleA->mNormal > iCycleB->mNormal;
-                     } );
 
     OrderCycles();
 
@@ -1923,7 +1927,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
                 if( vertexArray.size() )
                 {
-                    mCycleList.push_back( new FOdysseyVectorCycle( this, vertexArray, sectionArray, 0.0f ) );
+                    mCycleList.push_back( new FOdysseyVectorCycle( this, vertexArray, sectionArray ) );
                 }
             }
 

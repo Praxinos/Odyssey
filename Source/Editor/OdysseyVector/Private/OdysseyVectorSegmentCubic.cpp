@@ -709,8 +709,10 @@ FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext )
 void
 FOdysseyVectorSegmentCubic::ThickenFraction( FOdysseyVectorFraction* iFraction )
 {
-    ::ULIS::FVec2D point[4] = { mOffsetCurve[0].GetPointAt( iFraction->fromT )
+    ::ULIS::FVec2D point[6] = { GetPointAt( iFraction->fromT )
+                              , mOffsetCurve[0].GetPointAt( iFraction->fromT )
                               , mOffsetCurve[0].GetPointAt( iFraction->toT   )
+                              , GetPointAt( iFraction->toT )
                               , mOffsetCurve[1].GetPointAt( iFraction->toT   )
                               , mOffsetCurve[1].GetPointAt( iFraction->fromT ) };
 
@@ -726,17 +728,29 @@ FOdysseyVectorSegmentCubic::ThickenFraction( FOdysseyVectorFraction* iFraction )
     iFraction->polygon.point[3].x = point[3].x;
     iFraction->polygon.point[3].y = point[3].y;
 
-    iFraction->polygon.U[0] = iFraction->fromT;
-    iFraction->polygon.V[0] = 0.0f;
+    iFraction->polygon.point[4].x = point[4].x;
+    iFraction->polygon.point[4].y = point[4].y;
 
-    iFraction->polygon.U[1] = iFraction->toT;
+    iFraction->polygon.point[5].x = point[5].x;
+    iFraction->polygon.point[5].y = point[5].y;
+
+    iFraction->polygon.U[0] = iFraction->fromT;
+    iFraction->polygon.V[0] = 0.5f;
+
+    iFraction->polygon.U[1] = iFraction->fromT;
     iFraction->polygon.V[1] = 0.0f;
 
     iFraction->polygon.U[2] = iFraction->toT;
-    iFraction->polygon.V[2] = 1.0f;
+    iFraction->polygon.V[2] = 0.0f;
 
-    iFraction->polygon.U[3] = iFraction->fromT;
-    iFraction->polygon.V[3] = 1.0f;
+    iFraction->polygon.U[3] = iFraction->toT;
+    iFraction->polygon.V[3] = 0.5f;
+
+    iFraction->polygon.U[4] = iFraction->toT;
+    iFraction->polygon.V[4] = 1.0f;
+
+    iFraction->polygon.U[5] = iFraction->fromT;
+    iFraction->polygon.V[5] = 1.0f;
 }
 
 // De Casteljau algorithm. Stopping condition : dot product between p0p3-p0p1 is bigger than some limit value. Same for p3p0-p3p2.

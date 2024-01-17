@@ -19,8 +19,7 @@ FOdysseyVectorCycle::~FOdysseyVectorCycle()
 //static
 FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
                                         , const std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                        , const std::vector<FOdysseyVectorSection*>& iSectionArray
-                                        , double iNormal )
+                                        , const std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mOwner( iOwner )
     , mBucket( nullptr )
     , mPropagatedBucket( nullptr )
@@ -28,7 +27,6 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
     , mSectionArray (iSectionArray)
     , mParentCycle( nullptr )
     , mPropagated( false )
-    , mNormal( iNormal )
 {
     Build( );
 }

@@ -281,7 +281,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                        , double iV1
                        , uint32 iImageWidth
                        , uint32 iImageHeight );
-
+        void FillHexagon( BLContext* iBLContext
+                        , const ::ULIS::FVec2D* iPoint
+                        , const double* iU
+                        , const double* iV
+                        , double iOpacity
+                        //
+                        , const FColor& iColor
+                        //
+                        , const int8*  iBrushPixelData
+                        , uint32 iBrushWidth
+                        , uint32 iBrushHeight
+                        , int32  iBrushBitsPerPixel
+                        , uint64 iPolygonDrawingFlags );
         void FillQuad( BLContext* iBLContext
                      , const ::ULIS::FVec2D* iPoint
                      , const double* iU
@@ -414,18 +426,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static void GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
                                                , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
 
-        void FillPolygon( const  ::ULIS::FVec2I* iPoint
-                        , const  double* iU
-                        , const  double* iV
-                        , uint32 pointCount
-                        , double iOpacity
-                        , const  FColor& iColor
-                        // temp
-                        , const  int8* iBrushPixelData
-                        , uint32 iBrushWidth
-                        , uint32 iBrushHeight
-                        , int32  iBrushBitsPerPixel
-                        , uint64 iPolygonDrawingFlags );
+        void TracePolygon( const  ::ULIS::FVec2I* iPoint
+                         , const  double* iU
+                         , const  double* iV
+                         , uint32 pointCount
+                         , double iOpacity
+                         , const  FColor& iColor
+                         // temp
+                         , const  int8* iBrushPixelData
+                         , uint32 iBrushWidth
+                         , uint32 iBrushHeight
+                         , int32  iBrushBitsPerPixel
+                         , uint64 iPolygonDrawingFlags );
 
     protected:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;

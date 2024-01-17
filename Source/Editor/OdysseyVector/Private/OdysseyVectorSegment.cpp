@@ -66,10 +66,12 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
 
     for ( int i = 0; i < mFractionCache.size(); i++ )
     {
-        BLPoint pt[4] = { { mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y }
+        BLPoint pt[6] = { { mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y }
                         , { mFractionCache[i].polygon.point[1].x, mFractionCache[i].polygon.point[1].y }
                         , { mFractionCache[i].polygon.point[2].x, mFractionCache[i].polygon.point[2].y }
-                        , { mFractionCache[i].polygon.point[3].x, mFractionCache[i].polygon.point[3].y } };
+                        , { mFractionCache[i].polygon.point[3].x, mFractionCache[i].polygon.point[3].y }
+                        , { mFractionCache[i].polygon.point[4].x, mFractionCache[i].polygon.point[4].y }
+                        , { mFractionCache[i].polygon.point[5].x, mFractionCache[i].polygon.point[5].y } };
 
 
         // the stroke thing is very slow and slows the all thing, we have to find something better
@@ -80,7 +82,7 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
                         , { mFractionCache[i].polygon.point[2].x, mFractionCache[i].polygon.point[2].y }
                         , { mFractionCache[i].polygon.point[3].x, mFractionCache[i].polygon.point[3].y } };
 */
-        iBLContext->fillPolygon( pt, 4 );
+        iBLContext->fillPolygon( pt, 6 );
     }
 
     // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
@@ -91,7 +93,9 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
     for ( int i = 1; i < mFractionCache.size(); i++ )
     {
         iBLContext->strokeLine( worldMatrix.mapPoint( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y )
-                              , worldMatrix.mapPoint( mFractionCache[i].polygon.point[3].x, mFractionCache[i].polygon.point[3].y ) );
+                              , worldMatrix.mapPoint( mFractionCache[i].polygon.point[1].x, mFractionCache[i].polygon.point[1].y ) );
+        iBLContext->strokeLine( worldMatrix.mapPoint( mFractionCache[i].polygon.point[5].x, mFractionCache[i].polygon.point[5].y )
+                              , worldMatrix.mapPoint( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y ) );
     }
     iBLContext->restore();
 }

@@ -13,7 +13,7 @@ class FOdysseyVectorObject;
 class FOdysseyVectorPath;
 
 typedef struct _FOdysseyVectorFraction {
-    FOdysseyVectorPolygon4 polygon;
+    FOdysseyVectorPolygon6 polygon; // hexagons to prevent thin gap with joints
     ::ULIS::FVec2D lineVertex[2];
     ::ULIS::FVec2D lineVertexInParent[2];
     double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;

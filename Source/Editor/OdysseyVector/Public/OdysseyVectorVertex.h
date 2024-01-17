@@ -6,9 +6,9 @@
 
 #include "OdysseyVectorJoint.h"
 #include "OdysseyVectorPoint.h"
+#include "OdysseyVectorSection.h"
 
 class FOdysseyVectorSegment;
-class FOdysseyVectorSection;
 class FOdysseyVectorPath;
 class FOdysseyVectorVertex;
 class FOdysseyVectorHandleSegment;
@@ -18,12 +18,15 @@ struct FExplorationPair
     FOdysseyVectorSection* returnSection;
     FOdysseyVectorVertex*  departVertex;
     FOdysseyVectorSection* departSection;
+    double mSectionLength;
 
     FExplorationPair()
     {
         returnSection = nullptr;
         departVertex = nullptr;
         departSection = nullptr;
+
+        mSectionLength = 0.0f;
     };
 
     FExplorationPair( FOdysseyVectorSection* iReturnSection
@@ -33,6 +36,8 @@ struct FExplorationPair
         returnSection = iReturnSection;
         departVertex = iDepartVertex;
         departSection = iDepartSection;
+        // used for sorting exploration pairs
+        mSectionLength = returnSection->GetLength() + departSection->GetLength();
     }
 };
 

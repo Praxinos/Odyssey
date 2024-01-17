@@ -22,6 +22,12 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
     Init( iSegment, iConversionMatrix, iVertex0, iVertex1 );
 }
 
+double
+FOdysseyVectorSection::GetLength()
+{
+    return mLength;
+}
+
 void
 FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
                            , BLMatrix2D* iConversionMatrix
@@ -32,6 +38,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
     double t0 = iVertex0->GetT( iSegment );
     double t1 = iVertex1->GetT( iSegment );
 
+    mLength = fabs ( t1 - t0 ) * iSegment->GetLength();
     mSegment = iSegment;
     mVertex[0] = iVertex0;
     mVertex[1] = iVertex1;
