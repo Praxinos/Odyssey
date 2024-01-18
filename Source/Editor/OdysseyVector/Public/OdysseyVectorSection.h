@@ -102,6 +102,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         void SetErased( bool iErased );
         bool IsErased();
         double GetLength();
+        bool IsValid();
 
     protected:
         FOdysseyVectorSegment* mSegment;

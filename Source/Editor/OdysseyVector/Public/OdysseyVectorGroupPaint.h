@@ -242,6 +242,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                            , BLMatrix2D& iConversionMatrix );
         bool IntersectGapSection( FOdysseyVectorSection* iGapSection
                                 , FOdysseyVectorSegmentCubic* iSegment );
+        FOdysseyVectorVertex* CreateNearIntersection( FOdysseyVectorVertex *iVertex
+                                                    , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
 
     protected:
         static const uint32 NOCYCLE  = 0;

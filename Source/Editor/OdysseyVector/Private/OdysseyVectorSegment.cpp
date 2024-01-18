@@ -57,6 +57,18 @@ FOdysseyVectorSegment::GetFractionCacheEndPointInParent()
     return ::ULIS::FVec2D( 0.0f, 0.0f );
 }
 
+FOdysseyVectorVertexIntersection*
+FOdysseyVectorSegment::GetClosestIntersectionVertex( FOdysseyVectorVertex* iVertex )
+{
+    if( mIntersectionVertexList.size() )
+    {
+        return ( mPoint[0] == iVertex ) ? mIntersectionVertexList.front()
+                                        : mIntersectionVertexList.back();
+    }
+
+    return nullptr;
+}
+
 void
 FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
 {

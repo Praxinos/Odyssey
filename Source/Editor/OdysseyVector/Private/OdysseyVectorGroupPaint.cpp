@@ -1199,14 +1199,15 @@ PrintVertex( FOdysseyVectorVertex* iVertex )
 static void
 PrintSection( FOdysseyVectorSection* iSection)
 {
-    FOdysseyVectorPath* path = iSection->GetVertex(0)->GetPath();
+    FOdysseyVectorPath* path0 = iSection->GetVertex(0)->GetPath();
+    FOdysseyVectorPath* path1 = iSection->GetVertex(1)->GetPath();
     FOdysseyVectorSegment* segment = iSection->GetSegment();
-    BLPoint pt0 = path->GetWorldMatrix().mapPoint( iSection->GetVertex(0)->GetCoords().x, iSection->GetVertex(0)->GetCoords().y );
-    BLPoint pt1 = path->GetWorldMatrix().mapPoint( iSection->GetVertex(1)->GetCoords().x, iSection->GetVertex(1)->GetCoords().y );
-    BLPoint segpt0 = path->GetWorldMatrix().mapPoint( segment->GetVertex(0)->GetCoords().x, segment->GetVertex(0)->GetCoords().y );
-    BLPoint segpt1 = path->GetWorldMatrix().mapPoint( segment->GetVertex(1)->GetCoords().x, segment->GetVertex(1)->GetCoords().y );
+    BLPoint pt0 = path0->GetWorldMatrix().mapPoint( iSection->GetVertex(0)->GetCoords().x, iSection->GetVertex(0)->GetCoords().y );
+    BLPoint pt1 = path1->GetWorldMatrix().mapPoint( iSection->GetVertex(1)->GetCoords().x, iSection->GetVertex(1)->GetCoords().y );
+    BLPoint segpt0 = path0->GetWorldMatrix().mapPoint( segment->GetVertex(0)->GetCoords().x, segment->GetVertex(0)->GetCoords().y );
+    BLPoint segpt1 = path1->GetWorldMatrix().mapPoint( segment->GetVertex(1)->GetCoords().x, segment->GetVertex(1)->GetCoords().y );
 
-    UE_LOG(LogTemp,Warning,TEXT("Section: [x:%f y:%f] -- [x:%f y:%f]/segment[x:%f y:%f] -- [x:%f y:%f] - flags : %d"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y, iSection->GetFlags() );
+    UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]/segment[x:%f y:%f] -- [x:%f y:%f] - flags : %d"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y, iSection->GetFlags() );
 }
 
 static void
@@ -1552,19 +1553,25 @@ FOdysseyVectorGroupPaint::FindCycles()
     //UE_LOG(LogTemp, Warning, TEXT("FindCycles Exec time %llu"), durationTotal.count() );
 }
 
-static FOdysseyVectorVertex*
-CreateNearIntersection( FOdysseyVectorVertex *iVertex
-                      , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray )
+FOdysseyVectorVertex*
+FOdysseyVectorGroupPaint::CreateNearIntersection( FOdysseyVectorVertex *iVertex
+                                                , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray )
 {
     FOdysseyVectorSegment *nearestSegment = iVertex->GetNearestSegment();
     FOdysseyVectorVertex* nearestVertex = iVertex->GetNearestVertex();
+    double distanceToNearestSegment = iVertex->GetDistanceToNearestSegment();
+    double distanceToNearestVertex = iVertex->GetDistanceToNearestVertex();
 
-    if ( ( iVertex->GetDistanceToNearestSegment() < iVertex->GetDistanceToNearestVertex() ) && nearestSegment )
+    if ( nearestSegment && ( distanceToNearestSegment < distanceToNearestVertex ) )
     {
         double nearestSegmentT = iVertex->GetNearestSegmentT();
-
-        if( ( nearestSegmentT > 0.0f ) && ( nearestSegmentT < 1.0f ) )
+        bool nearsetVertexIsOnNearestSegment = nearestVertex && nearestVertex->HasSegment( nearestSegment ) ? true : false;
+ 
+        if( ( ( nearestSegmentT > 0.0001f ) && ( nearestSegmentT < 0.9999f ) && ( nearsetVertexIsOnNearestSegment == true  ) )
+         || ( ( nearestSegmentT > 0.0f    ) && ( nearestSegmentT < 1.0f    ) && ( nearsetVertexIsOnNearestSegment == false ) ) )
         {
+        //if( ( nearestSegmentT > 0.0f ) && ( nearestSegmentT < 1.0f ) )
+        //{
             //::ULIS::FVec2D nearestVertexAt = nearestSegment->GetPointAt( nearestSegmentT );
             ::ULIS::FVec2D nearestVertexAt = iVertex->GetNearestSegmentIntersectionCoords();
             FOdysseyVectorIntersection* intersection = new FOdysseyVectorIntersection( false
@@ -1797,9 +1804,9 @@ FOdysseyVectorGroupPaint::BuildGraph()
             {
                 for( FOdysseyVectorPath *intersectedPath : mPathList )
                 {
-                    /*intersectionCount += */IntersectSegmentWithList ( segment
-                                                                      , intersectedPath->GetSegmentList()
-                                                                      , mIntersectionArray );
+                    IntersectSegmentWithList ( segment
+                                             , intersectedPath->GetSegmentList()
+                                             , mIntersectionArray );
                 }
             } );
         } );
@@ -1813,9 +1820,9 @@ FOdysseyVectorGroupPaint::BuildGraph()
             {
                 for( FOdysseyVectorPath *intersectedPath : mPathList )
                 {
-                    /*intersectionCount += */IntersectSegmentWithList ( segment
-                                                                      , intersectedPath->GetSegmentList()
-                                                                      , mIntersectionArray );
+                    IntersectSegmentWithList ( segment
+                                             , intersectedPath->GetSegmentList()
+                                             , mIntersectionArray );
                 }
             }
         }
@@ -1865,6 +1872,10 @@ FOdysseyVectorGroupPaint::BuildGraph()
             {
                 FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
                 FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+
+//vertex0->SetNearestVertex(nullptr, DBL_MAX);
+//vertex1->SetNearestVertex(nullptr, DBL_MAX);
+
                 FOdysseyVectorVertex* nearestVertex0 = vertex0->GetNearestVertex();
                 FOdysseyVectorVertex* nearestVertex1 = vertex1->GetNearestVertex();
 
@@ -1889,6 +1900,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
                         //totalSectionCount++;
                     }
                 }
+
             }
         }
     }
@@ -2086,7 +2098,10 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
                 //if( section->GetSegment() )
                 {
                     if( ( section->GetVertex(0)->GetSectionCount() == 1 )
-                    ||  ( section->GetVertex(1)->GetSectionCount() == 1 ) )
+                    ||  ( section->GetVertex(1)->GetSectionCount() == 1 )
+                    // filter invalid section with length 0. Yes, this can happend due to floating point imprecision
+                    // when an intersection is very very close to the end vertex.
+                    ||  ( section->IsValid() == false ) )
                     {
                         keepSimplifying = true;
 
@@ -2143,22 +2158,13 @@ FOdysseyVectorGroupPaint::Clear()
                      , mPathList.end()
                      , [ this ]( FOdysseyVectorPath *path )
         {
-            std::list<FOdysseyVectorSegment*>& segmentList = path->GetSegmentList();
+            std::list<FOdysseyVectorVertex*>& vertexList = path->GetVertexList();
 
-            std::for_each( std::execution::par_unseq
-                         , segmentList.begin()
-                         , segmentList.end()
-                         , []( FOdysseyVectorSegment *segment )
+            for( FOdysseyVectorVertex* vertex : vertexList )
             {
-                FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-                FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
-
-                // reset nearest segment
-                vertex0->ResetNearestSegment();
-                vertex1->ResetNearestSegment();
-                vertex0->ResetNearestVertex();
-                vertex1->ResetNearestVertex();
-            } );
+                vertex->ResetNearestSegment();
+                vertex->ResetNearestVertex();
+            }
         } );
     }
     else
