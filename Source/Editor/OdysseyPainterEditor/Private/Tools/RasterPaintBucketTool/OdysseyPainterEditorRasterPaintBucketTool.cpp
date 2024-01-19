@@ -77,11 +77,15 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
-    
-
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
     ::ULIS::eFormat format = paintBlock->Format();
     if (!paintBlock)
+        return false;
+
+    if (iPointInTexture.x < 0 || iPointInTexture.y < 0)
+        return false;
+
+    if (iPointInTexture.x >= paintBlock->Width() || iPointInTexture.y >= paintBlock->Height())
         return false;
     
     //TODO: define SourceBlock from the mSource value
