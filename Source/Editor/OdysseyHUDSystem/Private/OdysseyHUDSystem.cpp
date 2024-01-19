@@ -11,7 +11,8 @@ FOdysseyHUDSystem::~FOdysseyHUDSystem()
 }
 
 FOdysseyHUDSystem::FOdysseyHUDSystem()
-    : mHUDSurface(nullptr)
+    : mHUDBlock(nullptr)
+    , mHUDSurface(nullptr)
 {
 }
 
@@ -58,12 +59,12 @@ void FOdysseyHUDSystem::RebuildHUDSurface(FVector2D iSize)
 
 void FOdysseyHUDSystem::ClearHUDSurface()
 {
-    if( !mHUDSurface )
-        return;
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-    ctx.Clear(*mHUDBlock);
-    ctx.Finish();
+    if( mHUDBlock )
+    {
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
+        ctx.Clear(*mHUDBlock);
+        ctx.Finish();
+    }
 
     if( mHUDSurface )
         mHUDSurface->Invalidate();
