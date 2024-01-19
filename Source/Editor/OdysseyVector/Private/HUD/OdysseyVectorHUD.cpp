@@ -564,8 +564,7 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
     ::ULIS::FVec2D bucketWorldCoords = GetBucketPosition( iBucket, true );
     FColor bucketColor = iBucket->GetColor();
     BLRgba32 fillColor = BLRgba32( bucketColor.R, bucketColor.G, bucketColor.B, bucketColor.A );
-    BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF )
-                                                 : BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+    BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF ) : fgColor;
     static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
     static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
@@ -658,7 +657,7 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
 
     if( iBucket->IsPropagated() )
     {
-        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->setStrokeWidth( 3.0f );
         iBLContext->setStrokeStyle( blackColor );
         iBLContext->strokeArc( bucketWorldCoords.x
                              , bucketWorldCoords.y
@@ -676,8 +675,8 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
                              , 4.1888f
                              , 1.0472f );
 
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->setStrokeStyle( propColor ); // green if propagated, white otherwise
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->setStrokeStyle( propColor ); // green if propagated, fg otherwise
         iBLContext->strokeArc( bucketWorldCoords.x
                              , bucketWorldCoords.y
                              , PELLET_RADIUS + 3.0f

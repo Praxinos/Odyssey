@@ -101,7 +101,7 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
     // line stroking is done in world coordinates because we need a 1 pixel width
     iBLContext->save();
     iBLContext->resetMatrix();
-    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeWidth( 2.0f );
     for ( int i = 1; i < mFractionCache.size(); i++ )
     {
         iBLContext->strokeLine( worldMatrix.mapPoint( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y )

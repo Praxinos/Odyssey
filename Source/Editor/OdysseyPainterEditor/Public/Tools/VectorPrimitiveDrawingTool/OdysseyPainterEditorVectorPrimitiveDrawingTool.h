@@ -61,6 +61,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         //virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
         //                                    , const FName& iPropertyName ) override;
 
+        FOdysseyVectorObject* GetParentObject( FOdysseyVectorGroupPaint* iScene );
+
     private:
         double GetLineRotationAngle( FOdysseyVectorLine* iLine, const FOdysseyPoint& iPointInTexture );
 
@@ -84,6 +86,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         bool Uniform;
         bool UniformAtKeyDown;
 
+        FOdysseyVectorPrimitive* mPrimitive;
         ::ULIS::FVec2D mMouseDown;
         uint32 mRectangleNumber;
         uint32 mLineNumber;

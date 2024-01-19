@@ -249,7 +249,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
-        std::list<FOdysseyVectorPath*> mSectionLessPathList;
         std::list<FOdysseyVectorPath*> mPathList;
         std::list<FOdysseyVectorBucket*> mSelectedBucketList;
         std::list<FOdysseyVectorBucket*> mBucketList;

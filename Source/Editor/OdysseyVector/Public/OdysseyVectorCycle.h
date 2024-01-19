@@ -105,7 +105,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @brief Gets a propagated bucket from any neighbour cycle
          * @return true if it got any, false otherwise
          */
-        bool PropagateBucket();
+        void PropagateBucket( std::vector<FOdysseyVectorCycle*>& oNextCycleArray );
 
         /**
          * @brief Attach a bucket. Can be nullptr.
@@ -132,7 +132,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         void StrokePath( BLContext* iBLContext, bool iWorld );
 
     private :
-        bool PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray );
+        void PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray
+                            , std::vector<FOdysseyVectorCycle*>& oNextCycleArray );
 
     protected :
         BLPath mContourPath;
@@ -140,8 +141,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         FOdysseyVectorObject* mOwner;
         FOdysseyVectorBucket* mBucket;
         FOdysseyVectorBucket* mPropagatedBucket;
-        std::vector<FOdysseyVectorVertex*> mVertexArray;
-        std::vector<FOdysseyVectorSection*> mSectionArray;
+        std::vector<FOdysseyVectorVertex*> mContourVertexArray;
+        std::vector<FOdysseyVectorSection*> mContourSectionArray;
         std::vector<FOdysseyVectorSection*> mInnerSectionArray;
         std::list<FOdysseyVectorCycle*> mChildrenList;
         FOdysseyVectorCycle* mParentCycle;

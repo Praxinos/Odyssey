@@ -53,13 +53,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorJoint
                        , const ::ULIS::FVec2D& iPrevEdgePoint
                        , const ::ULIS::FVec2D& iNextEdgePoint
                        , uint32 iSide );
-        uint32 GetEdgePoints( FOdysseyVectorSegment* iPrevSegment
+        double GetEdgePoints( FOdysseyVectorSegment* iPrevSegment
                             , FOdysseyVectorSegment* iNextSegment
-                            , ::ULIS::FVec2D& iPrevEdgePoint
-                            , ::ULIS::FVec2D& iNextEdgePoint );
+                            , ::ULIS::FVec2D iPrevEdgePoint[2]
+                            , ::ULIS::FVec2D iNextEdgePoint[2] );
 
     protected:
         std::vector<FOdysseyVectorPolygon3> mPolygonCache;
+        ::ULIS::FVec2D mPrevEdgePoint[2];
+        ::ULIS::FVec2D mNextEdgePoint[2];
         FOdysseyVectorVertex* mVertex;
         ::ULIS::FRectD mBBox;
         double mLength;

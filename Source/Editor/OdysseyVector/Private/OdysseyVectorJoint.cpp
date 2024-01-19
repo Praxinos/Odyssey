@@ -90,28 +90,47 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
     }
     else //otherwise use Blend2D's
     {
-        for( int i = 0; i < mPolygonCache.size(); i++ )
+        if( mPolygonCache.size() == 0 )
         {
-            BLPoint pt[3] = { { mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y }
-                            , { mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y }
-                            , { mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y } };
+            ::ULIS::FVec2D& vertexCoords =  mVertex->GetCoords();
+            BLPoint vertexWorldCoords = worldMatrix.mapPoint( vertexCoords.x, vertexCoords.y );
 
-            iBLContext->fillPolygon( pt, mPolygonCache[i].pointCount );
+            // this is to prevent a thin line between polygons because BLend2D draw them at sub-pixel level and this
+            // might create a thin line between the polygons. So we draw a one-pixel line at the edges.
+            iBLContext->save();
+            iBLContext->resetMatrix();
+            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
+                                  , worldMatrix.mapPoint( mNextEdgePoint[0].x, mNextEdgePoint[0].y ) );
+            iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
+                                  , worldMatrix.mapPoint( mNextEdgePoint[1].x, mNextEdgePoint[1].y ) );
+            iBLContext->restore();
         }
-
-        // this is to prevent a thin line between polygons because BLend2D draw them at sub-pixel level and this
-        // might create a thin line between the polygons. So we draw a one-pixel line at the edges.
-        iBLContext->save();
-        iBLContext->resetMatrix();
-        iBLContext->setStrokeWidth( 1.0f );
-        for ( int i = 0; i < mPolygonCache.size(); i++ )
+        else
         {
-            iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y )
-                                  , worldMatrix.mapPoint( mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y ) );
-            iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y )
-                                  , worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y ) );
+            for( int i = 0; i < mPolygonCache.size(); i++ )
+            {
+                BLPoint pt[3] = { { mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y }
+                                , { mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y }
+                                , { mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y } };
+
+                iBLContext->fillPolygon( pt, mPolygonCache[i].pointCount );
+            }
+
+            // this is to prevent a thin line between polygons because BLend2D draw them at sub-pixel level and this
+            // might create a thin line between the polygons. So we draw a one-pixel line at the edges.
+            iBLContext->save();
+            iBLContext->resetMatrix();
+            iBLContext->setStrokeWidth( 2.0f );
+            for ( int i = 0; i < mPolygonCache.size(); i++ )
+            {
+                iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y )
+                                        , worldMatrix.mapPoint( mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y ) );
+                iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y )
+                                        , worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y ) );
+            }
+            iBLContext->restore();
         }
-        iBLContext->restore();
     }
 }
 
@@ -158,17 +177,18 @@ and this is performed by this part of the code :
     ::ULIS::FVec2D edge0Point = iPrevSegment->GetOffsetPoint( edge0Side[side], prevSegmentT );
     ::ULIS::FVec2D edge1Point = iNextSegment->GetOffsetPoint( edge1Side[side], nextSegmentT );
 */
-uint32
+double
 FOdysseyVectorJoint::GetEdgePoints( FOdysseyVectorSegment* iPrevSegment
                                   , FOdysseyVectorSegment* iNextSegment
-                                  , ::ULIS::FVec2D& iPrevEdgePoint
-                                  , ::ULIS::FVec2D& iNextEdgePoint )
+                                  , ::ULIS::FVec2D iPrevEdgePoint[2]
+                                  , ::ULIS::FVec2D iNextEdgePoint[2] )
 {
-    ::ULIS::FVec2D parallelVec0 = mVertex->GetVectorOnSegment( iPrevSegment, false );
-    ::ULIS::FVec2D parallelVec1 = mVertex->GetVectorOnSegment( iNextSegment, false );
+    ::ULIS::FVec2D parallelVec0 = mVertex->GetVectorOnSegment( iPrevSegment, true );
+    ::ULIS::FVec2D parallelVec1 = mVertex->GetVectorOnSegment( iNextSegment, true );
     // check on which sie should the joint be
     double cross = FOdysseyVector::Cross2D( parallelVec0, parallelVec1 );
-    uint32 side = cross > 0.0f ? 0 : 1;
+    uint32 positiveSide = cross > 0.0f ? 0 : 1;
+    uint32 negativeSide = cross > 0.0f ? 1 : 0;
     double prevSegmentT = mVertex->GetT( iPrevSegment );
     double nextSegmentT = mVertex->GetT( iNextSegment );
     static uint32 rightOrientation[2] = { 0, 1 };
@@ -176,10 +196,12 @@ FOdysseyVectorJoint::GetEdgePoints( FOdysseyVectorSegment* iPrevSegment
     uint32 *prevEdgePointSide = prevSegmentT == 1.0f ? rightOrientation : wrongOrientation;
     uint32 *nextEdgePointSide = nextSegmentT == 0.0f ? rightOrientation : wrongOrientation;
 
-    iPrevEdgePoint = iPrevSegment->GetOffsetPoint( prevEdgePointSide[side], prevSegmentT );
-    iNextEdgePoint = iNextSegment->GetOffsetPoint( nextEdgePointSide[side], nextSegmentT );
+    iPrevEdgePoint[0] = iPrevSegment->GetOffsetPoint( prevEdgePointSide[positiveSide], prevSegmentT );
+    iNextEdgePoint[0] = iNextSegment->GetOffsetPoint( nextEdgePointSide[positiveSide], nextSegmentT );
+    iPrevEdgePoint[1] = iPrevSegment->GetOffsetPoint( prevEdgePointSide[negativeSide], prevSegmentT );
+    iNextEdgePoint[1] = iNextSegment->GetOffsetPoint( nextEdgePointSide[negativeSide], nextSegmentT );
 
-    return side;
+    return cross;
 }
 
 void
@@ -451,41 +473,42 @@ FOdysseyVectorJoint::Make( FOdysseyVectorSegment* iPrevSegment
 
     if( iPrevSegment && iNextSegment )
     {
-        ::ULIS::FVec2D prevEdgePoint;
-        ::ULIS::FVec2D nextEdgePoint;
-        uint32 side = GetEdgePoints( iPrevSegment
-                                   , iNextSegment
-                                   , prevEdgePoint
-                                   , nextEdgePoint );
+        double cross = GetEdgePoints( iPrevSegment
+                                    , iNextSegment
+                                    , mPrevEdgePoint
+                                    , mNextEdgePoint );
 
-        switch( path->GetJointType() )
+        if( fabs( cross ) > 0.00001f )
         {
-            case eJointType::Linear :
-                MakeLinear( iPrevSegment
-                          , iNextSegment
-                          , prevEdgePoint
-                          , nextEdgePoint
-                          , side );
-            break;
+            switch( path->GetJointType() )
+            {
+                case eJointType::Linear :
+                    MakeLinear( iPrevSegment
+                              , iNextSegment
+                              , mPrevEdgePoint[0]
+                              , mNextEdgePoint[0]
+                              , cross > 0.0f ? 0 : 1 );
+                break;
 
-            case eJointType::Miter :
-                MakeMiter( iPrevSegment
-                         , iNextSegment
-                         , prevEdgePoint
-                         , nextEdgePoint
-                         , side );
-            break;
+                case eJointType::Miter :
+                    MakeMiter( iPrevSegment
+                             , iNextSegment
+                             , mPrevEdgePoint[0]
+                             , mNextEdgePoint[0]
+                             , cross > 0.0f ? 0 : 1 );
+                break;
 
-            case eJointType::Radial :
-                MakeRadial( iPrevSegment
-                          , iNextSegment
-                          , prevEdgePoint
-                          , nextEdgePoint
-                          , side );
-            break;
+                case eJointType::Radial :
+                    MakeRadial( iPrevSegment
+                              , iNextSegment
+                              , mPrevEdgePoint[0]
+                              , mNextEdgePoint[0]
+                              , cross > 0.0f ? 0 : 1 );
+                break;
 
-            default:
-            break;
+                default:
+                break;
+            }
         }
     }
 

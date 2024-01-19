@@ -15,8 +15,12 @@ FOdysseyPainterEditorVectorPathEditToolHUD::FOdysseyPainterEditorVectorPathEditT
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
+
     // Updates the selection box
-    UpdateSelectionBox( iScene, false, mPathEditTool->GetEditor()->GetVectorHUDFlags() );
+    UpdateSelectionBox( iScene, false, hudFlags );
+
+    //MakePointQuadTree( iScene, hudFlags );
 }
 
 void

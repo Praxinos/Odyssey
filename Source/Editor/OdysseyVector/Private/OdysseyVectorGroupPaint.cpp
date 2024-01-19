@@ -263,6 +263,7 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     bWireframe = false;
     mWireframeColor = FColor( 255, 255, 255, 255 );
     bMultithreaded = true; 
+    mPaintingCode = 0;
 
     mBackgroundBucket.SetSolidColor( 160, 160, 160, 0 );
 
@@ -413,10 +414,6 @@ FOdysseyVectorGroupPaint::IntersectVertex( FOdysseyVectorVertex* iVertex0
         {
             FOdysseyVectorSegment* segment = iVertex0->GetFirstSegment();
 
-            if(   ( iVertex1->GetSegmentCount() == 1 )
-             // we exclude vertices sharing a common segment. This creates issues
-             // like intersection with gap segments and other stuff.
-             || ( ( iVertex1->GetSegmentCount() == 2 ) && ( iVertex1->HasSegment( segment ) == false ) ) )
             if( mGapTolerance )
             {
                 ::ULIS::FVec2D dif = ::ULIS::FVec2D( iPoint1InParent - iPoint0InParent );
@@ -449,8 +446,8 @@ IntersectGapSection( FOdysseyVectorSection* iGapSection
         double gapSectionT, segmentPolySubT;
 
         // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
-        //if( ( segment0Poly->xMaxInParent > segmentPoly->xMinInParent ) && ( segment0Poly->xMinInParent < segmentPoly->xMaxInParent )
-        // && ( segment0Poly->yMaxInParent > segmentPoly->yMinInParent ) && ( segment0Poly->yMinInParent < segmentPoly->yMaxInParent ) )
+        //if( ( gapSectionPoint0.x > segmentPoly->xMinInParent ) && ( segment0Poly->xMinInParent < segmentPoly->xMaxInParent )
+        // && ( gapSectionPoint1.x > segmentPoly->yMinInParent ) && ( segment0Poly->yMinInParent < segmentPoly->yMaxInParent ) )
         //{
             // Test intersections in PaintGroup's coordinates system (struct member lineVertexInParent).
             if ( FOdysseyVector::IntersectSegment ( gapSectionPoint0
@@ -764,22 +761,32 @@ FOdysseyVectorGroupPaint::ApplyTransformations()
 void
 FOdysseyVectorGroupPaint::PropagateBuckets()
 {
-    bool doPropagate = true;
+    std::vector<FOdysseyVectorCycle*> cycleStack;
+    std::vector<FOdysseyVectorCycle*> nextCycleStack;
+    uint32 cycleCount = mCycleList.size();
 
-    while( doPropagate )
+    cycleStack.reserve( cycleCount );
+
+    // populate with cycles that have a bucket
+    for( FOdysseyVectorCycle *cycle : mCycleList )
     {
-        doPropagate = false;
-
-        for( FOdysseyVectorCycle *cycle : mCycleList )
+        if( cycle->GetBucket() )
         {
-            if( ( cycle->GetBucket() == nullptr ) && ( cycle->GetPropagatedBucket() == nullptr ) )
-            {
-                if( cycle->PropagateBucket() == true )
-                {
-                    doPropagate = true;
-                }
-            }
+            cycleStack.push_back( cycle );
         }
+    }
+
+    while( cycleStack.size() )
+    {
+        nextCycleStack.clear();
+        nextCycleStack.reserve( cycleCount );
+
+        for( FOdysseyVectorCycle *cycle : cycleStack )
+        {
+            cycle->PropagateBucket( nextCycleStack );
+        }
+
+        cycleStack = nextCycleStack;
     }
 }
 
@@ -1567,6 +1574,8 @@ FOdysseyVectorGroupPaint::CreateNearIntersection( FOdysseyVectorVertex *iVertex
         double nearestSegmentT = iVertex->GetNearestSegmentT();
         bool nearsetVertexIsOnNearestSegment = nearestVertex && nearestVertex->HasSegment( nearestSegment ) ? true : false;
  
+        // when the nearest intersection is too close from the segment endpoint, it can create
+        // issues with the geometry so we need to do this check.
         if( ( ( nearestSegmentT > 0.0001f ) && ( nearestSegmentT < 0.9999f ) && ( nearsetVertexIsOnNearestSegment == true  ) )
          || ( ( nearestSegmentT > 0.0f    ) && ( nearestSegmentT < 1.0f    ) && ( nearsetVertexIsOnNearestSegment == false ) ) )
         {
@@ -1763,10 +1772,9 @@ FOdysseyVectorGroupPaint::BuildGraph()
     //std::list<FOdysseyVectorPath*> intersectedPathList = mPathList; // copy
     uint32 totalGapSegmentCount = 0;
     uint32 totalSectionCount = 0;
-    // act as boolean without the need to reinitialize its value
-    static uint32 paintingCode;
 
-    mPaintingCode = ++paintingCode;
+    // act as boolean without the need to reinitialize its value
+    ++mPaintingCode;
 
     if( bMultithreaded )
     {
@@ -1961,10 +1969,6 @@ FOdysseyVectorGroupPaint::BuildGraph()
                     segment->ClearIntersections();
                 }
             }
-        }
-        else
-        {
-            mSectionLessPathList.push_back( path );
         }
     }
 }
@@ -2197,8 +2201,6 @@ FOdysseyVectorGroupPaint::Clear()
     }
 
     mIntersectionArray.clear();
-
-    mSectionLessPathList.clear();
 }
 
 void
@@ -2440,39 +2442,42 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
 //    }
 
     // also check paths that were not intersected. If they hit, delete the whole thing.
-    for( FOdysseyVectorPath* path : mSectionLessPathList )
+    for( FOdysseyVectorPath* path : mPathList )
     {
-        for( FOdysseyVectorChain& chain : path->GetChainArray() )
+        if( path->GetPaintingCode() != mPaintingCode )
         {
-            std::vector<FWayFragment> wayFragmentArray;
-            std::vector<FWayPoint> wayPointArray;
-
-            wayPointArray.reserve( 10 );
-            wayFragmentArray.reserve( 10 );
-
-            if( chain.EraseSegments( &imageData
-                                   , wayPointArray
-                                   , wayFragmentArray ) )
+            for( FOdysseyVectorChain& chain : path->GetChainArray() )
             {
-                for( FOdysseyVectorVertex* vertex : chain.GetVertexArray() )
+                std::vector<FWayFragment> wayFragmentArray;
+                std::vector<FWayPoint> wayPointArray;
+
+                wayPointArray.reserve( 10 );
+                wayFragmentArray.reserve( 10 );
+
+                if( chain.EraseSegments( &imageData
+                                       , wayPointArray
+                                       , wayFragmentArray ) )
                 {
-                    path->RemoveVertex( vertex );
+                    for( FOdysseyVectorVertex* vertex : chain.GetVertexArray() )
+                    {
+                        path->RemoveVertex( vertex );
 
-                   oRemovedVertexArray.push_back( vertex );
-                }
+                       oRemovedVertexArray.push_back( vertex );
+                    }
 
-                for( FOdysseyVectorSegment* segment : chain.GetSegmentArray() )
-                {
-                    path->RemoveSegment( segment );
+                    for( FOdysseyVectorSegment* segment : chain.GetSegmentArray() )
+                    {
+                        path->RemoveSegment( segment );
 
-                    oRemovedSegmentArray.push_back( segment );
+                        oRemovedSegmentArray.push_back( segment );
+                    }
                 }
             }
-        }
 
-        if( path->GetSegmentList().size() == 0 )
-        {
-            oRemovedPathArray.push_back( path );
+            if( path->GetSegmentList().size() == 0 )
+            {
+                oRemovedPathArray.push_back( path );
+            }
         }
     }
 }
@@ -2486,17 +2491,17 @@ FOdysseyVectorGroupPaint::GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oP
     }
 }
 
-// Section-less paths are listed at PaintGroup updates. They allow us to quickly determine
-// whther or no a path has section and thus we can delete it completely when using the eraser
-// on it for example, instead of trying to find which sections were erased or so. 
 void
 FOdysseyVectorGroupPaint::PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray )
 {
-    for( FOdysseyVectorPath* path : mSectionLessPathList )
+    for( FOdysseyVectorPath* path : mPathList )
     {
-        if( path->Pick( this, ::ULIS::FRectD( 0, 0, 0, 0 ), FOdysseyVectorObject::PICK_MASK_BASED ) )
+        if( path->GetPaintingCode() != mPaintingCode )
         {
-            oObjectArray.push_back( path );
+            if( path->Pick( this, ::ULIS::FRectD( 0, 0, 0, 0 ), FOdysseyVectorObject::PICK_MASK_BASED ) )
+            {
+                oObjectArray.push_back( path );
+            }
         }
     }
 }

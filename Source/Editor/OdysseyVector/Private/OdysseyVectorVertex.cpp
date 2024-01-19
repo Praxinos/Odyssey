@@ -600,6 +600,8 @@ FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
     {
         mFlags &= (~HANDLE_ALIGNED);
     }
+
+    InvalidateSegments();
 }
 
 // TODO: rename as IsSegmentAligned

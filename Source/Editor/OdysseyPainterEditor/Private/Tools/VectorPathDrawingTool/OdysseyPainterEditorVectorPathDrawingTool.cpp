@@ -166,6 +166,26 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPa
     return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey );
 }
 
+FOdysseyVectorObject*
+UOdysseyPainterEditorVectorPathDrawingTool::GetParentObject( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorObject* parentObject = iScene;
+
+    // Add the path to the current unique selected group
+    if( vectorEngine->GetSelectedObjectList().size() == 1 )
+    {
+        FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
+
+        if(  selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+        {
+            parentObject = selectedObject;
+        }
+    }
+
+    return parentObject;
+}
+
 uint64
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
@@ -197,9 +217,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
         if( path == nullptr )
         {
+            FOdysseyVectorObject* parentObject = GetParentObject( iScene );
+
             path = new FOdysseyVectorPath( FString( "Path_" ) + FString::FromInt( mPathNumber++ ) );
 
-            iScene->AppendChild( path );
+            parentObject->AppendChild( path );
             path->UpdateMatrix();
 
             SetPathColor( path, ColorSource );

@@ -31,6 +31,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
     , mRectangleNumber ( 0 )
     , mLineNumber ( 0 )
     , mEllipseNumber ( 0 )
+    , mPrimitive( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle64");
 }
@@ -82,6 +83,26 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorGr
     return 0;
 }
 
+FOdysseyVectorObject*
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetParentObject( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorObject* parentObject = iScene;
+
+    // Add the path to the current unique selected group
+    if( vectorEngine->GetSelectedObjectList().size() == 1 )
+    {
+        FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
+
+        if(  selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+        {
+            parentObject = selectedObject;
+        }
+    }
+
+    return parentObject;
+}
+
 uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                                   , const FOdysseyPoint& iPointInTexture
@@ -90,41 +111,45 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
-        FOdysseyVectorPrimitive* primitive;
+        FOdysseyVectorObject* parentObject = GetParentObject( iScene );
+        BLPoint localCoords = parentObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x
+                                                                            , iPointInTexture.y );
         UOdysseyPaletteEntry* entry = nullptr;
-        BLPoint widthVector = iScene->GetInverseWorldMatrix().mapVector( 0.7071f * StrokeWidth, 0.7071f * StrokeWidth );
+        BLPoint widthVector = parentObject->GetInverseWorldMatrix().mapVector( 0.7071f * StrokeWidth
+                                                                             , 0.7071f * StrokeWidth );
         ::ULIS::FVec2D width = ::ULIS::FVec2D( widthVector.x, widthVector.y );
 
         mMouseDown.x = iPointInTexture.x;
         mMouseDown.y = iPointInTexture.y;
 
+        mPrimitive = nullptr;
+
         switch( PrimitiveType )
         {
             case EOdysseyVectorPrimitiveType::Rectangle:
-                primitive = new FOdysseyVectorRectangle( FString("Rectangle_") + FString::FromInt( mRectangleNumber++ ), 0.0f, 0.0f, width.Distance() );
+                mPrimitive = new FOdysseyVectorRectangle( FString("Rectangle_") + FString::FromInt( mRectangleNumber++ ), 0.0f, 0.0f, width.Distance() );
             break;
 
             case EOdysseyVectorPrimitiveType::Line:
-                primitive = new FOdysseyVectorLine( FString("Line_") + FString::FromInt( mLineNumber++ ), 0.0f, 0.0f, width.Distance() );
+                mPrimitive = new FOdysseyVectorLine( FString("Line_") + FString::FromInt( mLineNumber++ ), 0.0f, 0.0f, width.Distance() );
             break;
 
             default:
-                primitive = new FOdysseyVectorEllipse( FString("Ellipse_" + FString::FromInt( mEllipseNumber++ )), 0.0f, 0.0f, width.Distance() );
+                mPrimitive = new FOdysseyVectorEllipse( FString("Ellipse_" + FString::FromInt( mEllipseNumber++ )), 0.0f, 0.0f, width.Distance() );
             break;
         }
 
-        iScene->AppendChild( primitive );
+        parentObject->AppendChild( mPrimitive );
 
-        SetPathColor( primitive, ColorSource );
-        primitive->SetOpacity( Opacity );
-        primitive->SetBrush( Brush );
-        //primitive->SetForegroundColor( ueColor );
-        primitive->Translate( localCoords.x, localCoords.y );
-        primitive->UpdateMatrix();
+        SetPathColor( mPrimitive, ColorSource );
+        mPrimitive->SetOpacity( Opacity );
+        mPrimitive->SetBrush( Brush );
+        //mPrimitive->SetForegroundColor( ueColor );
+        mPrimitive->Translate( localCoords.x, localCoords.y );
+        mPrimitive->UpdateMatrix();
 
-        iScene->GetEngine()->ClearObjectSelection();
-        iScene->GetEngine()->SelectObject( primitive );
+        //iScene->GetEngine()->ClearObjectSelection();
+        //iScene->GetEngine()->SelectObject( mPrimitive );
 
         //mSelectionChanged.Broadcast(iScene);
 
@@ -164,19 +189,17 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetEngine()->GetLastSelectedObject() );
-
-        if( primitive )
+        if( mPrimitive )
         {
-            BLPoint bldif = primitive->GetInverseWorldMatrix().mapVector( iPointInTexture.x - mMouseDown.x
-                                                                        , iPointInTexture.y - mMouseDown.y );
+            BLPoint bldif = mPrimitive->GetInverseWorldMatrix().mapVector( iPointInTexture.x - mMouseDown.x
+                                                                         , iPointInTexture.y - mMouseDown.y );
             ::ULIS::FVec2D size = ::ULIS::FVec2D( bldif.x, bldif.y );
 
             switch( PrimitiveType )
             {
                 case EOdysseyVectorPrimitiveType::Ellipse:
                 {
-                    FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>(primitive);
+                    FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>(mPrimitive);
 
                     if( Uniform )
                     {
@@ -190,7 +213,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
 
                 case EOdysseyVectorPrimitiveType::Rectangle:
                 {
-                    FOdysseyVectorRectangle* rectangle = static_cast<FOdysseyVectorRectangle*>(primitive);
+                    FOdysseyVectorRectangle* rectangle = static_cast<FOdysseyVectorRectangle*>(mPrimitive);
 
                     if( Uniform )
                     {
@@ -204,7 +227,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
 
                 case EOdysseyVectorPrimitiveType::Line:
                 {
-                    FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(primitive);
+                    FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(mPrimitive);
 
                     if( Uniform )
                     {
@@ -248,13 +271,23 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        FOdysseyVectorPrimitive* primitive = static_cast<FOdysseyVectorPrimitive*>( iScene->GetEngine()->GetLastSelectedObject() );
-
-        if( primitive )
+        if( mPrimitive )
         {
-            FOdysseyVectorPath* path = primitive->Convert();
+            FOdysseyVectorPath* path = mPrimitive->Convert();
+            FOdysseyVectorObject* parentObject = mPrimitive->GetParent();
 
-            // Undo must be called before association with parent object
+            //iScene->GetEngine()->ClearObjectSelection();
+            parentObject->RemoveChild( mPrimitive );
+
+            delete mPrimitive;
+            mPrimitive = nullptr;
+
+            parentObject->AppendChild( path );
+            //path->InvalidateAllSegments();
+            path->UpdateMatrix();
+
+            //iScene->GetEngine()->SelectObject( path );
+
             // needed for valid GUndo pointer
             GEditor->BeginTransaction(LOCTEXT("vector-primitive-drawing-tool.transaction.draw-primitive","Vector Primitive Drawing Tool"));
             if( GUndo )
@@ -264,17 +297,6 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
             }
             GEditor->EndTransaction();
-
-            iScene->GetEngine()->ClearObjectSelection();
-            iScene->RemoveChild( primitive );
-
-            delete primitive;
-
-            iScene->AppendChild( path );
-            //path->InvalidateAllSegments();
-            path->UpdateMatrix();
-
-            iScene->GetEngine()->SelectObject( path );
         }
 
         iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidate objects

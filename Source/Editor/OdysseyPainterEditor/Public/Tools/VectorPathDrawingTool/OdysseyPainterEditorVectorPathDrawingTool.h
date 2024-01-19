@@ -70,6 +70,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
 
+        FOdysseyVectorObject* GetParentObject( FOdysseyVectorGroupPaint* iScene );
+
     private:
         FOdysseyVectorVertex* PickVertex( FOdysseyVectorGroupPaint* iScene
                                         , double iWorldX
