@@ -69,7 +69,7 @@ FWintabTabletContextInfo::Tick()
         state.TangentPressure = packet_description_tpressure ? Normalize( packet.pkTangentPressure, *packet_description_tpressure ) : 0.0;
 
         state.Twist = packet_description_twist ? 360.f * Normalize( packet.pkOrientation.orTwist, *packet_description_twist ) : 0.0;
-        state.Azimuth = packet_description_azimuth ? 360.f * Normalize( packet.pkOrientation.orAzimuth, *packet_description_azimuth ) - 90.f : 0.0;
+        state.Azimuth = packet_description_azimuth ? 360.f * Normalize( packet.pkOrientation.orAzimuth, *packet_description_azimuth ) : 0.0;
         state.Altitude = packet_description_altitude ? FMath::Abs( FMath::Sin( PI * (Normalize( packet.pkOrientation.orAltitude, *packet_description_altitude ) - 0.5f) ) ) : 0.0;
 
         //---

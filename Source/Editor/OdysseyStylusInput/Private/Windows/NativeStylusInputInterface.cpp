@@ -74,6 +74,7 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
             if (!GetPointerPenInfo(pointerId, &penInfo))
                 return false;
 
+            mDevice.SetPenMask(penInfo.penMask);
             mDevice.OnPointerUpdate(penInfo);
         }
         break;

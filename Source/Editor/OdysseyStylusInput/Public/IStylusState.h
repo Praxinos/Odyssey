@@ -50,7 +50,14 @@ public:
         double sin_tilty = FMath::Sin(tilty_rad);
 		
 		double azimuth_rad = FMath::Atan2(sin_tilty, sin_tiltx);
-		Azimuth = FMath::RadiansToDegrees(azimuth_rad);
+		if (azimuth_rad < -PI / 2)
+		{
+			Azimuth = FMath::RadiansToDegrees(azimuth_rad + 5 * PI / 2);
+		}
+		else
+		{
+			Azimuth = FMath::RadiansToDegrees(azimuth_rad + PI / 2);
+		}
 
 		double dist = FVector2D::Distance({0, 0}, {sin_tiltx, sin_tilty});
 		double ratiox = FMath::Abs(FMath::Cos(azimuth_rad));
@@ -75,16 +82,6 @@ public:
 
 		double dist = FMath::Sin(tilt_rad);
 		double azimuth_rad = FMath::DegreesToRadians(Azimuth);
-		/*double ratiox = FMath::Abs(FMath::Cos(azimuth_rad));
-		double ratioy = FMath::Abs(FMath::Sin(azimuth_rad));
-		double ratio = ratiox > ratioy ? ratiox : ratioy;
-		if (ratio > DBL_EPSILON)
-		{
-			dist /= ratio;
-			UE_LOG(LogTemp, Warning, TEXT("Altitude : %.2f"), Altitude);
-		}*/
-
-		//Atan2(, Altitude);
 
 		double cosx = FMath::Cos(azimuth_rad) * dist;
 		double siny = FMath::Sin(azimuth_rad) * dist;
@@ -156,15 +153,16 @@ public:
 	/**
 	 * The current altitude of the stylus eraser (if drawing with the tip) or the stylus tip (if drawing with the eraser), normalized to the range of [0, 1].
 	 * Defaults to 0 if EStylusInputType::Tilt is not supported.
-	 * A value of 0 means the stylus is perfectly horizontal
 	 * A value of 1 means the stylus is perfectly vertical
+	 * A value of 0 means the stylus is perfectly horizontal
 	 */
 	float GetAltitude() const { return Altitude; }
 
 	/**
 	 * The current twist amount around the stylus' own axis in degrees, normalized to the range of [0, 360).
 	 * Defaults to 0 if EStylusInputType::Twist is not supported.
-	 * A value of 1 represents a full rotation clockwise.
+	 * A value of 360 represents a full rotation clockwise.
+	 * TODO: define where is the 0 point (same as azimuth ?)
 	 */
 	float GetTwist() const { return Twist; }
 
