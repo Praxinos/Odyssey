@@ -303,8 +303,10 @@ bool
 FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
     //Here you receive Mouse Buttons and Keyboard keys events
+    UE_LOG(LogTemp, Warning, TEXT("UE InputKey %s %s"), *iKey.ToString(), iEvent == EInputEvent::IE_Pressed ? TEXT("PRESSED") : iEvent == EInputEvent::IE_Released ? TEXT("RELEASED") : TEXT("OTHER"));
 
-    UE_LOG(LogTemp, Warning, TEXT("InputKey %s"), *iKey.ToString());
+    //Manage Mouse Buttons only if Stylus is not being used
+    //if ()
 
     //Cleanup PressedKeys
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
@@ -346,7 +348,6 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
-    UE_LOG(LogTemp, Warning, TEXT("InputKey"));
     //This is called when the mouse is down and moving in the viewport
     //The viewport has already captured the mouse
 
@@ -475,11 +476,13 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
     
     if( isDownEvent )
     {
+        UE_LOG(LogTemp, Warning, TEXT("Stylus Pressed %s"), *GetPointingDevicePressedKey().ToString());
         InputKeyWithStrokePoint( stroke_point, 0, GetPointingDevicePressedKey(), EInputEvent::IE_Pressed );
         mIsCapturedByStylus = true;
     }
     else if( isUpEvent )
     {
+        UE_LOG(LogTemp, Warning, TEXT("Stylus Released %s"), *GetPointingDevicePressedKey().ToString());
         InputKeyWithStrokePoint( stroke_point, 0, GetPointingDevicePressedKey(), EInputEvent::IE_Released );
         mIsCapturedByStylus = false;
     }

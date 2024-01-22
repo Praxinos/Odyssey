@@ -68,9 +68,9 @@ FWintabTabletContextInfo::Tick()
         state.NormalPressure = packet_description_npressure ? Normalize( packet.pkNormalPressure, *packet_description_npressure ) : 0.0;
         state.TangentPressure = packet_description_tpressure ? Normalize( packet.pkTangentPressure, *packet_description_tpressure ) : 0.0;
 
-        state.Twist = packet_description_twist ? ToDegrees( packet.pkOrientation.orTwist, *packet_description_twist ) : 0.0;
-        state.Azimuth = packet_description_azimuth ? ToDegrees( packet.pkOrientation.orAzimuth, *packet_description_azimuth ) : 0.0;
-        state.Altitude = packet_description_altitude ? ToDegrees( packet.pkOrientation.orAltitude, *packet_description_altitude ) : 0.0;
+        state.Twist = packet_description_twist ? 360.f * Normalize( packet.pkOrientation.orTwist, *packet_description_twist ) : 0.0;
+        state.Azimuth = packet_description_azimuth ? 360.f * Normalize( packet.pkOrientation.orAzimuth, *packet_description_azimuth ) - 90.f : 0.0;
+        state.Altitude = packet_description_altitude ? FMath::Abs( FMath::Sin( PI * (Normalize( packet.pkOrientation.orAltitude, *packet_description_altitude ) - 0.5f) ) ) : 0.0;
 
         //---
 
@@ -343,15 +343,12 @@ SetupTabletSupportedPackets( FWintabTabletContextInfo* ioTabletContext )
         ioTabletContext->AddSupportedInput( EStylusInputType::TangentPressure );
     }
 
-    if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Azimuth ) )
+    if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Azimuth )
+        && PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Altitude))
     {
         ioTabletContext->SupportedPackets.Add( EWintabPacketType::Azimuth );
-        ioTabletContext->AddSupportedInput( EStylusInputType::Azimuth );
-    }
-    if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Altitude ) )
-    {
         ioTabletContext->SupportedPackets.Add( EWintabPacketType::Altitude );
-        ioTabletContext->AddSupportedInput( EStylusInputType::Altitude );
+        ioTabletContext->AddSupportedInput( EStylusInputType::Tilt );
     }
     if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Twist ) )
     {

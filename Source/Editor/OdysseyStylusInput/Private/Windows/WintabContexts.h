@@ -43,31 +43,10 @@ struct FWintabStylusState
     {
     }
 
-    /** Convert altitude/azimuth values to tilt value
-     *  Wintab doesn't have native tilt value, it must be computed from altitude/azimuth
-     *  This will be more convenient to the end developer to not have to manage this computation in its window/widget/...
-     * 
-     *  TODO: To make it clean:
-     *  - Tilt enum must be added in EWintabPacketType
-     *  - Tilt enum must be added in FWintabTabletContextInfo::SupportedPackets AND FWintabTabletContextInfo::AddSupportedInput() inside SetupTabletSupportedPackets() in .cpp
-     *  - Then, once the wintab state is converted to the generic state in the FWintabTabletContextInfo::Tick() through FWintabStylusState::ToPublicState(), the conversion from altitude/azimuth to tilt is done here
-     * 
-     *  For the moment, it's not managed, but here is some links to make the computation:
-     *  - https://gist.github.com/telegraphic/841212e8ab3252f5cffe
-     *  - https://www.mathworks.com/help/phased/ref/azel2phitheta.html
-     *  - https://code.woboq.org/qt5/qtbase/src/plugins/platforms/windows/qwindowstabletsupport.cpp.html#590
-     *  Don't forget that the result must feet the requirements inside FStylusState::GetTilt() comment.
-     * 
-     */
-    FVector2D OrientationToTilt() const
-    {
-        return FVector2D( 0, 0 );
-    }
-
     /** Convert this wintab specialized state to the generic one */
     FStylusState ToPublicState() const
     {
-        return FStylusState( Position, Z, Timer, OrientationToTilt(), Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted );
+        return FStylusState( Position, Z, Timer, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted );
     }
 };
 

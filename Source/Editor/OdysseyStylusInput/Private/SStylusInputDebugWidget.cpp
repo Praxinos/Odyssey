@@ -193,6 +193,42 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsTiltXAvailable )
+			+SHorizontalBox::Slot()
+			.FillWidth(1)
+			[
+				SNew(STextBlock)
+				.Text(LOCTEXT("debug-tab.tilt-x", "Tilt X"))
+			]
+			+SHorizontalBox::Slot()
+			.FillWidth(1)
+			[
+				SNew(STextBlock)
+				.Text(this, &SStylusInputDebugWidget::GetTiltXText)
+			]
+		]
+		+SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsTiltYAvailable )
+			+SHorizontalBox::Slot()
+			.FillWidth(1)
+			[
+				SNew(STextBlock)
+				.Text(LOCTEXT("debug-tab.tilt-y", "Tilt Y"))
+			]
+			+SHorizontalBox::Slot()
+			.FillWidth(1)
+			[
+				SNew(STextBlock)
+				.Text(this, &SStylusInputDebugWidget::GetTiltYText)
+			]
+		]
+		+SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SHorizontalBox)
 			.IsEnabled( this, &SStylusInputDebugWidget::IsSizeAvailable )
 			+ SHorizontalBox::Slot()
 			.FillWidth(1)

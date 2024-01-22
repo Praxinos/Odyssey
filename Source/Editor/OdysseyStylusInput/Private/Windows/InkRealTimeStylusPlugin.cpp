@@ -224,7 +224,7 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
 		TabletContext.AddSupportedInput(EStylusInputType::ButtonPressure);
 	}
 
-	SysFreeString(GuidBSTR);
+	/*SysFreeString(GuidBSTR);
 	GuidBSTR = SysAllocString(STR_GUID_AZIMUTHORIENTATION);
 
 	InkTablet->IsPacketPropertySupported(GuidBSTR, &Supported);
@@ -242,7 +242,7 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
 	{
 		TabletContext.SupportedPackets.Add( EInkPacketType::Altitude);
         TabletContext.AddSupportedInput(EStylusInputType::Altitude);
-	}
+	}*/
 
 	SysFreeString(GuidBSTR);
 	GuidBSTR = SysAllocString(STR_GUID_XTILTORIENTATION);
@@ -436,11 +436,6 @@ static float Normalize(int Value, const FInkPacketDescription& Desc)
 	return (float) (Value - Desc.Minimum) / (float) (Desc.Maximum - Desc.Minimum);
 }
 
-static float ToDegrees(int Value, const FInkPacketDescription& Desc)
-{
-	return Value / Desc.Resolution;
-}
-
 static void GetDPI( IRealTimeStylus* RealTimeStylus, int& oDPIX, int& oDPIY, POINT& oClientUL, POINT& oClientLR )
 {
 	HANDLE_PTR HCurrentWnd;
@@ -533,19 +528,19 @@ void FInkRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus, con
 					ink_state.TangentPressure = Normalized;
 					break;
 				case EInkPacketType::Twist:
-					ink_state.Twist = ToDegrees(Packets[i], PacketDescription);
+					ink_state.Twist = Normalized * 360.f;
 					break;
 				case EInkPacketType::XTilt:
-					ink_state.Tilt.X = ToDegrees(Packets[i], PacketDescription);
+					ink_state.Tilt.X = (Normalized - 0.5f) * 180.f;
 					break;
 				case EInkPacketType::YTilt:
-					ink_state.Tilt.Y = ToDegrees(Packets[i], PacketDescription);
+					ink_state.Tilt.Y = (Normalized - 0.5f) * 180.f;
 					break;
 				case EInkPacketType::Azimuth:
-					ink_state.Azimuth = ToDegrees(Packets[i], PacketDescription);
+					ink_state.Azimuth = Normalized * 360.f;
 					break;
 				case EInkPacketType::Altitude:
-					ink_state.Altitude = ToDegrees(Packets[i], PacketDescription);
+					ink_state.Altitude = Normalized * 90.f;
 					break;
 				case EInkPacketType::Width:
 					ink_state.Size.X = Normalized;

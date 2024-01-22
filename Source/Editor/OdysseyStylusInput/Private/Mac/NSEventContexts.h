@@ -32,7 +32,7 @@ struct FNSEventStylusState
     }
 
     //Set the Altitude and Azimuth fields based on the Tilt field
-    void TiltToOrientation()
+    /* void TiltToOrientation()
     {
         Azimuth = 0;
         if( Tilt.X != 0 )
@@ -46,7 +46,7 @@ struct FNSEventStylusState
         
         Altitude = FMath::RadiansToDegrees( Altitude );
         Azimuth = FMath::RadiansToDegrees( Azimuth );
-    }
+    } */
 
     FStylusState ToPublicState() const
     {

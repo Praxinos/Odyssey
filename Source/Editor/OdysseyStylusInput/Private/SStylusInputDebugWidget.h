@@ -41,12 +41,16 @@ private:
 	FText GetZText() const { return GetFloatText(State.GetZ()); }
 	bool IsZAvailable() const { return IsAvailable( EStylusInputType::Z ); }
 
-	FText GetTiltText() const { return GetVector2Text(State.GetTilt()); }
+	FText GetTiltText() const { return GetFloatText(State.GetTilt()); }
 	bool IsTiltAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
+	FText GetTiltXText() const { return GetFloatText(State.GetTiltX()); }
+	bool IsTiltXAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
+	FText GetTiltYText() const { return GetFloatText(State.GetTiltY()); }
+	bool IsTiltYAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
 	FText GetAzimuthText() const { return GetFloatText(State.GetAzimuth()); }
-	bool IsAzimuthAvailable() const { return IsAvailable( EStylusInputType::Azimuth ); }
+	bool IsAzimuthAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
 	FText GetAltitudeText() const { return GetFloatText(State.GetAltitude()); }
-	bool IsAltitudeAvailable() const { return IsAvailable( EStylusInputType::Altitude ); }
+	bool IsAltitudeAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
 	FText GetTwistText() const { return GetFloatText(State.GetTwist()); }
 	bool IsTwistAvailable() const { return IsAvailable( EStylusInputType::Twist ); }
 

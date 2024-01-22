@@ -13,8 +13,9 @@
 UENUM()
 enum EOdysseyStylusInputDriver
 {
-    OdysseyStylusInputDriver_None       UMETA( DisplayName = "None" ),
-    OdysseyStylusInputDriver_Ink        UMETA( DisplayName = "Ink (Windows)" ),
-    OdysseyStylusInputDriver_Wintab     UMETA( DisplayName = "Wintab (Windows)" ),
-    OdysseyStylusInputDriver_NSEvent    UMETA( DisplayName = "NSEvent (MacOS)" ),
+    OdysseyStylusInputDriver_None               UMETA( DisplayName = "None" ),
+    OdysseyStylusInputDriver_Ink                UMETA( DisplayName = "Ink (Windows)" ),
+    OdysseyStylusInputDriver_Wintab             UMETA( DisplayName = "Wintab (Windows)" ),
+    OdysseyStylusInputDriver_NativeWindows      UMETA( DisplayName = "Native (Windows)" ),
+    OdysseyStylusInputDriver_NSEvent            UMETA( DisplayName = "NSEvent (MacOS)" ),
 };

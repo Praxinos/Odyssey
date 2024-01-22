@@ -18,6 +18,7 @@
 #if PLATFORM_WINDOWS
 	#include "Windows/WintabStylusInputInterface.h"
 	#include "Windows/InkStylusInputInterface.h"
+	#include "Windows/NativeStylusInputInterface.h"
 #elif PLATFORM_MAC
 	#include "Mac/NSEventStylusInputInterface.h"
 #endif
@@ -73,7 +74,7 @@ void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 	// Create the StylusInputInterface corresponding to the wanted StylusInputDriver
 	SetStylusInputDriver(settings.GetStylusDriver());
 
-	if (!InputInterface.IsValid())
+	if (!InputInterface)
 	{
 		UE_LOG(LogStylusInput, Log, TEXT("StylusInput not supported on this platform."));
 		return;
@@ -122,6 +123,9 @@ void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDrive
 		case OdysseyStylusInputDriver_Wintab:
 			InputInterface = CreateStylusInputInterfaceWintab();
 			break;
+		case OdysseyStylusInputDriver_NativeWindows:
+			InputInterface = CreateStylusInputInterfaceNative();
+			break;
 #elif PLATFORM_MAC
 		case OdysseyStylusInputDriver_NSEvent:
 			InputInterface = CreateStylusInputInterfaceNSEvent();
@@ -150,7 +154,7 @@ void UOdysseyStylusInputSubsystem::RemoveMessageHandler(IStylusMessageHandler& I
 
 int32 UOdysseyStylusInputSubsystem::NumInputDevices() const
 {
-	if (InputInterface.IsValid())
+	if (InputInterface)
 	{
 		return InputInterface->NumInputDevices();
 	}
@@ -159,7 +163,7 @@ int32 UOdysseyStylusInputSubsystem::NumInputDevices() const
 
 const IStylusInputDevice* UOdysseyStylusInputSubsystem::GetInputDevice(int32 Index) const
 {
-	if (InputInterface.IsValid())
+	if (InputInterface)
 	{
 		return InputInterface->GetInputDevice(Index);
 	}
@@ -168,7 +172,7 @@ const IStylusInputDevice* UOdysseyStylusInputSubsystem::GetInputDevice(int32 Ind
 
 void UOdysseyStylusInputSubsystem::Tick(float DeltaTime)
 {
-	if (InputInterface.IsValid())
+	if (InputInterface)
 	{
 		InputInterface->Tick();
 

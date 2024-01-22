@@ -64,6 +64,7 @@ UOdysseyStylusInputSettings::GetFormatText( TSharedPtr<EOdysseyStylusInputDriver
 #if PLATFORM_WINDOWS
         case OdysseyStylusInputDriver_Ink:      return LOCTEXT( "settings.driver.ink", "Ink" );
         case OdysseyStylusInputDriver_Wintab:   return LOCTEXT( "settings.driver.wintab", "Wintab" );
+        case OdysseyStylusInputDriver_NativeWindows:      return LOCTEXT( "settings.driver.native", "Native" );
 #elif PLATFORM_MAC
         case OdysseyStylusInputDriver_NSEvent:  return LOCTEXT( "settings.driver.nsevent", "NSEvent" );
 #endif

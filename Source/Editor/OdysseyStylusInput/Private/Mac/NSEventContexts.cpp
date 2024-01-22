@@ -141,7 +141,7 @@ NSEvent* FNSEventContext::HandleNSEvent(NSEvent* Event)
             NSPoint tilt = Event.tilt;
             state.Tilt = FVector2D( tilt.x, tilt.y );
             //Set Azimuth and Altitude with the content of Tilt
-            state.TiltToOrientation();
+            //state.TiltToOrientation();
             
             state.Z = Event.absoluteZ;
             state.Twist = Event.rotation;

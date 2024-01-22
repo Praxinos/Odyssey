@@ -15,8 +15,6 @@ enum class ODYSSEYSTYLUSINPUT_API EStylusInputType
 	Timer,
 	Pressure,
 	Tilt,
-	Azimuth,
-	Altitude,
 	TangentPressure,
 	ButtonPressure,
 	Twist,
@@ -32,23 +30,70 @@ class ODYSSEYSTYLUSINPUT_API FStylusState
 {
 public:
 	FStylusState()
-		: Position(0, 0), Z(0), Timer(0), Tilt(0, 0), Azimuth(0), Altitude(0), Twist(0)
+		: Position(0, 0), Z(0), Timer(0), Tilt(0), TiltX(0), TiltY(0), Azimuth(0), Altitude(0), Twist(0)
 		, Pressure(0), TangentPressure(0), Size(0, 0)
 		, IsDown(false), IsInverted(false)
 	{
 	}
 
-	FStylusState(FVector2D InPosition, float InZ, unsigned int InTimer, FVector2D InTilt, float InAzimuth, float InAltitude, float InTwist,
+	FStylusState(FVector2D InPosition, float InZ, unsigned int InTimer, const FVector2D& InTilt, float InTwist,
 		float InPressure, float InTanPressure, FVector2D InSize, 
 		bool InDown, bool InInverted)
-		: Position(InPosition), Z(InZ), Timer(InTimer), Tilt(InTilt), Azimuth(InAzimuth), Altitude(InAltitude), Twist(InTwist)
+		: Position(InPosition), Z(InZ), Timer(InTimer), TiltX(InTilt.X), TiltY(InTilt.Y), Twist(InTwist)
 		, Pressure(InPressure), TangentPressure(InTanPressure), Size(InSize)
 		, IsDown(InDown), IsInverted(InInverted)
 	{
+		double tiltx_rad = FMath::DegreesToRadians(TiltX);
+		double tilty_rad = FMath::DegreesToRadians(TiltY);
+        
+		double sin_tiltx = FMath::Sin(tiltx_rad);
+        double sin_tilty = FMath::Sin(tilty_rad);
+		
+		double azimuth_rad = FMath::Atan2(sin_tilty, sin_tiltx);
+		Azimuth = FMath::RadiansToDegrees(azimuth_rad);
+
+		double dist = FVector2D::Distance({0, 0}, {sin_tiltx, sin_tilty});
+		double ratiox = FMath::Abs(FMath::Cos(azimuth_rad));
+		double ratioy = FMath::Abs(FMath::Sin(azimuth_rad));
+		double ratio = ratiox > ratioy ? ratiox : ratioy;
+		dist *= ratio;
+		double tilt_rad = FMath::Asin(dist);
+        Tilt = FMath::RadiansToDegrees(tilt_rad);
+        
+		Altitude = FMath::Cos(tilt_rad);
+	}
+
+	FStylusState(FVector2D InPosition, float InZ, unsigned int InTimer, double InAzimuth, double InAltitude, float InTwist,
+		float InPressure, float InTanPressure, FVector2D InSize, 
+		bool InDown, bool InInverted)
+		: Position(InPosition), Z(InZ), Timer(InTimer), Azimuth(InAzimuth), Altitude(InAltitude), Twist(InTwist)
+		, Pressure(InPressure), TangentPressure(InTanPressure), Size(InSize)
+		, IsDown(InDown), IsInverted(InInverted)
+	{
+		double tilt_rad = FMath::Acos(Altitude);
+		Tilt = FMath::RadiansToDegrees(tilt_rad);
+
+		double dist = FMath::Sin(tilt_rad);
+		double azimuth_rad = FMath::DegreesToRadians(Azimuth);
+		/*double ratiox = FMath::Abs(FMath::Cos(azimuth_rad));
+		double ratioy = FMath::Abs(FMath::Sin(azimuth_rad));
+		double ratio = ratiox > ratioy ? ratiox : ratioy;
+		if (ratio > DBL_EPSILON)
+		{
+			dist /= ratio;
+			UE_LOG(LogTemp, Warning, TEXT("Altitude : %.2f"), Altitude);
+		}*/
+
+		//Atan2(, Altitude);
+
+		double cosx = FMath::Cos(azimuth_rad) * dist;
+		double siny = FMath::Sin(azimuth_rad) * dist;
+		TiltX = FMath::RadiansToDegrees(FMath::Asin(cosx));
+		TiltY = FMath::RadiansToDegrees(FMath::Asin(siny));
 	}
 
 	FStylusState(const FStylusState& Other)
-		: Position(Other.Position), Z(Other.Z), Timer(Other.Timer), Tilt(Other.Tilt), Azimuth(Other.Azimuth), Altitude(Other.Altitude), Twist(Other.Twist)
+		: Position(Other.Position), Z(Other.Z), Timer(Other.Timer), Tilt(Other.Tilt), TiltX(Other.TiltX), TiltY(Other.TiltY), Azimuth(Other.Azimuth), Altitude(Other.Altitude), Twist(Other.Twist)
 		, Pressure(Other.Pressure), TangentPressure(Other.TangentPressure), Size(Other.Size)
 		, IsDown(Other.IsDown), IsInverted(Other.IsInverted)
 	{
@@ -75,27 +120,44 @@ public:
 	unsigned int GetTimer() const { return Timer; }
 
 	/** 
-	 * The current tilt along the X axis in degrees, normalized to the range of [-90, 90]. 
-	 * Defaults to (0,0) if EStylusInputType::Tilt is not supported.
-	 * A value of (0,0) means that the stylus is perfectly vertical.
-	 * A positive X value means that the stylus is tilted to the right. 
-	 * A positive Y value means that the stylus is tilted forwards, away from the user.
-	 * A value of -90 or 90 means that the pen is lying on the tablet, though in practice this isn't widely supported.
+	 * The current tilt along the Z axis in degrees, normalized to the range of [0, 90]
+	 * Defaults to 0 if EStylusInputType::Tilt is not supported.
+	 * A value of 0 means that the stylus is perfectly vertical.
+	 * A value of 90 means that the stylus is perfectly horizontal.
 	 */
-	FVector2D GetTilt() const { return Tilt; }
+	double GetTilt() const { return Tilt; }
+
+	/** 
+	 * The current tilt along the X axis in degrees, normalized to the range of [-90, 90]. 
+	 * Defaults to 0 if EStylusInputType::Tilt is not supported.
+	 * A value of 0 means that the stylus is perfectly vertical.
+	 * A value of -90 means that the stylus is perfectly horizontal and tilted to the left.
+	 * A value of 90 means that the stylus is perfectly horizontal and tilted to the right.
+	 */
+	double GetTiltX() const { return TiltX; }
+
+	/** 
+	 * The current tilt along the Y axis in degrees, normalized to the range of [-90, 90]. 
+	 * Defaults to 0 if EStylusInputType::Tilt is not supported.
+	 * A value of 0 means that the stylus is perfectly vertical.
+	 * A value of -90 means that the stylus is perfectly horizontal and tilted away from the user.
+	 * A value of 90 means that the stylus is perfectly horizontal and tilted towards the user.
+	 */
+	double GetTiltY() const { return TiltY; }
 
 	/**
 	 * The current azimuth, normalized to the range of [0, 360].
+	 * Defaults to 0 if EStylusInputType::Tilt is not supported.
 	 * A value of 0 means that the stylus is tilted forwards, away from the user.
 	 * A value of 90 means that the stylus is tilted to the right direction, and so on in clockwise.
 	 */
 	float GetAzimuth() const { return Azimuth; }
 
 	/**
-	 * The current altitude, normalized to the range of [90, 0].
-	 * Defaults to (0,0) if EStylusInputType::Orientation is not supported.
-	 * A value of 90 means that the stylus is perfectly vertical.
-	 * Defaults to 0 if EStylusInputType::Altitude is not supported.
+	 * The current altitude of the stylus eraser (if drawing with the tip) or the stylus tip (if drawing with the eraser), normalized to the range of [0, 1].
+	 * Defaults to 0 if EStylusInputType::Tilt is not supported.
+	 * A value of 0 means the stylus is perfectly horizontal
+	 * A value of 1 means the stylus is perfectly vertical
 	 */
 	float GetAltitude() const { return Altitude; }
 
@@ -139,7 +201,9 @@ private:
 	FVector2D	Position;
 	float		Z;
     unsigned int Timer;
-	FVector2D	Tilt;
+	double	Tilt;
+	double	TiltX;
+	double	TiltY;
 	float		Azimuth;
 	float		Altitude;
 	float		Twist;

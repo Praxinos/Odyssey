@@ -47,7 +47,7 @@ struct FInkStylusState
 	/** Convert this ink specialized state to the generic one */
 	FStylusState ToPublicState() const
 	{
-		return FStylusState(Position, Z, Timer, Tilt, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
+		return FStylusState(Position, Z, Timer, FVector2D(Tilt.X, Tilt.Y), /* Azimuth, Altitude, */Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
 	}
 };
 
