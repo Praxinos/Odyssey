@@ -8,6 +8,8 @@
 #include "Windows/WindowsApplication.h"
 #include "Windows/NativeStylusInputDevice.h"
 
+#include <chrono>
+
 //---
 
 // An implementation which represents the Native driver
@@ -58,6 +60,10 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
 {
     switch(msg)
     {
+        case WM_POINTERENTER:
+        case WM_POINTERLEAVE:
+        case WM_POINTERDOWN:
+        case WM_POINTERUP:
         case WM_POINTERUPDATE:
         {
             UINT32 pointerId = GET_POINTERID_WPARAM(wParam);
@@ -68,14 +74,26 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
             
             if (pointerType != PT_PEN)
                 return false;
-
-            // Retrieve pen information
-            POINTER_PEN_INFO penInfo;
-            if (!GetPointerPenInfo(pointerId, &penInfo))
+    
+            //GetPointerInfoHistory allows us to get all subpointer messages (coalesced messages)
+            uint32 entries_count = 0;
+            if (!GetPointerInfoHistory(pointerId, &entries_count, nullptr))
                 return false;
 
-            mDevice.SetPenMask(penInfo.penMask);
-            mDevice.OnPointerUpdate(penInfo);
+            if (entries_count == 0)
+                return true;
+
+            TArray<POINTER_PEN_INFO> pen_infos;
+            pen_infos.AddUninitialized(entries_count);
+            if (!GetPointerPenInfoHistory(pointerId, &entries_count, pen_infos.GetData()))
+                return false;
+
+            for (int i = pen_infos.Num() - 1; i >= 0; i--)
+            {
+                POINTER_PEN_INFO& penInfo = pen_infos[i];
+                mDevice.SetPenMask(penInfo.penMask);
+                mDevice.OnPointerUpdate(penInfo);
+            }
         }
         break;
         

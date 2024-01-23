@@ -57,30 +57,19 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
                                                                           TWeakPtr< SOdysseyViewport >              iOdysseyPainterEditorViewport,
                                                                           FOdysseyMeshSelector*                     iMeshSelector)
     : InputSubsystem( nullptr )
-    , mLastKey( EKeys::Invalid )
-    , mLastEvent( EInputEvent::IE_MAX )
     , mOdysseyPainterEditor(iOdysseyPainterEditor)
     , mOdysseyPainterEditorViewportPtr( iOdysseyPainterEditorViewport )
     , mMeshSelector( iMeshSelector )
     , mCheckerboardTexture( NULL )
     , mCurrentMouseCursor( EMouseCursor::Default )
-    , mPivotPointRatio( FVector2D( 0.5, 0.5 ) )
     , mCurrentToolState( eState::kIdle )
-    , mIsCapturedByStylus(false)
     , mNearestNeighbourTexture()
     , mBilinearTexture()
     , mIsCurrentModeActive(false)
-    , mIsReadyToCreateTool(false)
 {
     check( mOdysseyPainterEditorViewportPtr.IsValid() );
 
     InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-
-    //PATCH: as I don't know how to initialize usubsystem inside settings ctor (as usubsystem are called after)
-	//UOdysseyStylusInputSettings* settings = GetMutableDefault< UOdysseyStylusInputSettings >();
-    //settings->RefreshStylusInputDriver();
-    //PATCH
-
     InputSubsystem->AddMessageHandler( *this );
 
     ENQUEUE_RENDER_COMMAND(InitOdysseyPainterEditorViewportClientTextures)(
@@ -303,10 +292,26 @@ bool
 FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
     //Here you receive Mouse Buttons and Keyboard keys events
-    UE_LOG(LogTemp, Warning, TEXT("UE InputKey %s %s"), *iKey.ToString(), iEvent == EInputEvent::IE_Pressed ? TEXT("PRESSED") : iEvent == EInputEvent::IE_Released ? TEXT("RELEASED") : TEXT("OTHER"));
+    //UE_LOG(LogTemp, Warning, TEXT("UE InputKey %s %s"), *iKey.ToString(), iEvent == EInputEvent::IE_Pressed ? TEXT("PRESSED") : iEvent == EInputEvent::IE_Released ? TEXT("RELEASED") : TEXT("OTHER"));
 
-    //Manage Mouse Buttons only if Stylus is not being used
-    //if ()
+    if( iEvent == EInputEvent::IE_Pressed )
+    {
+        //key already pressed, don't send a KeyDown or MouseDown twice
+        //Can happen on windows with some touch options
+        if (mKeysPressed.Contains(iKey))
+            return true;
+            
+        mKeysPressed.Add( iKey );
+    }
+    else if( iEvent == EInputEvent::IE_Released )
+    {
+        //key already released, don't send a KeyUp or MouseUp twice
+        //Can happen on windows with some touch options
+        if (!mKeysPressed.Contains(iKey)) 
+            return true;
+
+        mKeysPressed.Remove(iKey);
+    }
 
     //Cleanup PressedKeys
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
@@ -318,30 +323,22 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
         }
     }
 
-    if( iEvent == EInputEvent::IE_Pressed )
-    {
-        if (!mKeysPressed.Contains(iKey))
-            mKeysPressed.Add( iKey );
-    }
-    else if( iEvent == EInputEvent::IE_Released )
-    {
-        mKeysPressed.Remove(iKey);
-    }
-
-    mLastKey = iKey;
-    mLastEvent = iEvent;
+    //---
+    
+    InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    InputSubsystem->Flush();
 
     //---
-
-    auto end_time = std::chrono::steady_clock::now();
-    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
-
-    if( (mIsCapturedByStylus || delta < 500) && ( iKey == EKeys::LeftMouseButton ) )
-        return true;
 
     FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
     point_in_viewport.x = iViewport->GetMouseX();
     point_in_viewport.y = iViewport->GetMouseY();
+    
+    auto end_time = std::chrono::steady_clock::now();
+    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
+    if(delta < 500 )
+        point_in_viewport = mStylusLastPoint;
+    
     return InputKeyWithStrokePoint( point_in_viewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad );
 }
 
@@ -353,9 +350,8 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
 
     auto end_time = std::chrono::steady_clock::now();
     auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
-
-    if (mIsCapturedByStylus || delta < 500)
-        return;
+    if (delta < 500)
+        return; //Mouse Move will be sent by OnStylusStateChanged to avoid using outdated values
 
     FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
     point_in_viewport.x = iX;
@@ -463,60 +459,17 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
     pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
     stroke_point.keysDown = pressedKeys;
   //---
+    mStylusLastPoint = stroke_point;
 
-    static TQueue< FOdysseyPoint > queue;
-    static bool stylusWasDown = false;
-    static bool is_dragging = false;
-
-    bool isDownEvent = !stylusWasDown && iState.IsStylusDown();
-    bool isUpEvent = stylusWasDown && !iState.IsStylusDown();
-    bool isMoveEvent = stylusWasDown == iState.IsStylusDown();
-
-    stylusWasDown = iState.IsStylusDown();
-    
-    if( isDownEvent )
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Stylus Pressed %s"), *GetPointingDevicePressedKey().ToString());
-        InputKeyWithStrokePoint( stroke_point, 0, GetPointingDevicePressedKey(), EInputEvent::IE_Pressed );
-        mIsCapturedByStylus = true;
-    }
-    else if( isUpEvent )
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Stylus Released %s"), *GetPointingDevicePressedKey().ToString());
-        InputKeyWithStrokePoint( stroke_point, 0, GetPointingDevicePressedKey(), EInputEvent::IE_Released );
-        mIsCapturedByStylus = false;
-    }
-    else if( iState.IsStylusDown() ) // MUSTY BE the last, or at least after "is_dragging = false;"
+    if( mIsCurrentModeActive )
     {
         CapturedMouseMoveWithStrokePoint( stroke_point );
     }
-    else
-    {
-		// Register the point in texture when hovering the canvas
-        //Point In Viewport
-        mCurrentPointInViewport = stroke_point;
-        //Point In Texture
-		mCurrentPointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
-    }
-
     mStylusLastEventTime = std::chrono::steady_clock::now();
-    mLastKey = EKeys::Invalid;
-    mLastEvent = EInputEvent::IE_MAX;
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ Internal Input Functions
-
-FKey
-FOdysseyPainterEditorViewportClient::GetPointingDevicePressedKey()
-{
-    if( mLastKey == EKeys::RightMouseButton )
-    {
-        return EKeys::RightMouseButton;
-    }
-
-    return EKeys::LeftMouseButton;
-}
 
 FOdysseyPainterEditorViewportClient::eState
 FOdysseyPainterEditorViewportClient::InputChordToState()
@@ -697,7 +650,6 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
 
             double zoom = mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
             mZoomReference = ::FMath::Loge(zoom);
-            mZoomSizeReference = width;
             mZoomViewportPointReference = FVector2D(iPointInViewport.x, iPointInViewport.y);
             return true;
         }

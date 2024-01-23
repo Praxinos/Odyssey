@@ -172,6 +172,12 @@ const IStylusInputDevice* UOdysseyStylusInputSubsystem::GetInputDevice(int32 Ind
 
 void UOdysseyStylusInputSubsystem::Tick(float DeltaTime)
 {
+	Flush();
+}
+
+void
+UOdysseyStylusInputSubsystem::Flush()
+{
 	if (InputInterface)
 	{
 		InputInterface->Tick();

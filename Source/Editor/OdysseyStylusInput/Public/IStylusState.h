@@ -97,11 +97,8 @@ public:
 	}
 
 	/**
-	 * The current position of the stylus on (or above) the tablet. Always valid.
-	 * This value is in logical coordinates, not pixels.
-	 * The mouse position can be used to retrieve the screenspace value.
-	 * A value of (0,0) is in the top-left of the tablet.
-	 */ 
+	 * The current position of the stylus on screen in pixels (floating point in screenspace coordinates).
+	 */
 	FVector2D GetPosition() const { return Position; }
 
 	/**

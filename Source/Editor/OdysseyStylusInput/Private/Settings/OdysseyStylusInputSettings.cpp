@@ -12,7 +12,7 @@
 
 // The better default value for each OS
 #if PLATFORM_WINDOWS
-    const EOdysseyStylusInputDriver OdysseyStylusInputDriver_Default = OdysseyStylusInputDriver_Wintab;
+    const EOdysseyStylusInputDriver OdysseyStylusInputDriver_Default = OdysseyStylusInputDriver_NativeWindows;
 #elif PLATFORM_MAC
     const EOdysseyStylusInputDriver OdysseyStylusInputDriver_Default = OdysseyStylusInputDriver_NSEvent;
 #else

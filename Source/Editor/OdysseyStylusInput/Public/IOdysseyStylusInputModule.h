@@ -102,6 +102,9 @@ public:
 	/** Return the number of active input devices. */
 	int32 NumInputDevices() const; 
 
+	/** Flushes the queue, calling all message handlers for all message in the queue */
+	void Flush();
+
 private:
 	TSharedRef<SDockTab> OnSpawnPluginTab(const FSpawnTabArgs& Args);
 

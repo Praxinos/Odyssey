@@ -127,7 +127,6 @@ private:
     FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport ) const;
     FOdysseyPoint   GetLocalMousePosition( const FOdysseyPoint& iPointInViewport ) const;
     void        DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices );
-    FKey        GetPointingDevicePressedKey();
     eState      InputChordToState();
     bool        InputKeyWithStrokePoint( const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
     bool        OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
@@ -143,8 +142,6 @@ private:
 private:
     // Private Data Members
     UOdysseyStylusInputSubsystem*           InputSubsystem;
-    FKey                                    mLastKey;
-    EInputEvent                             mLastEvent;
     FOdysseyPainterEditor*		            mOdysseyPainterEditor;
     TWeakPtr<SOdysseyViewport>              mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
@@ -153,10 +150,7 @@ private:
     float                                   mRotationReference; // The reference from which we determine the new rotation
     FVector2D                               mPanReference; //Where did we begin the pan ?
     float                                   mZoomReference;
-    float                                   mZoomSizeReference;
     FVector2D                               mZoomViewportPointReference; //Where did we begin the zoom ?
-    //FVector2D                               mZoomTexturePointReference; //Where did we begin the zoom ?
-    FVector2D                               mPivotPointRatio; //Where is the center of the viewport from the center of the texture as a ratio, rotation independant
 
 
     eState                                  mCurrentToolState;
@@ -169,9 +163,9 @@ private:
     FOnKeyDown                              mOnKeyDown;
     FOnKeyUp                                mOnKeyUp;
 
-    bool                                    mIsCapturedByStylus;
 	FOdysseyPoint						    mCurrentPointInViewport;
     FOdysseyPoint						    mCurrentPointInTexture;
+    FOdysseyPoint                           mStylusLastPoint;
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     TArray<FKey>                            mKeysPressed;
@@ -180,9 +174,4 @@ private:
     FTexture                                mBilinearTexture;
 
     bool                                    mIsCurrentModeActive;
-
-    //Useful variable to handle both tool manipulation in the viewport at the creation:
-    //Case 1: user down and up mouse at same position, then moves mouse to define the tool shape, and then down and up mouse to validate it
-    //Case 2: user down mouse, moves mouse to define the tool shape, and then up mouse to validate it
-    bool mIsReadyToCreateTool;
 };
