@@ -33,7 +33,7 @@ UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(const UOdysseyLayer* iLayer)
 	if ( !iLayer )
 		return true;
 
-	if ( iLayer->IsLocked )
+	if ( iLayer->GetIsLocked() )
 		return true;
 
 	UOdysseyLayerStack* layerStack = iLayer->GetLayerStack();
@@ -43,7 +43,7 @@ UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(const UOdysseyLayer* iLayer)
 	TArray<UOdysseyLayer*> parents = iLayer->GetParents();
 	for ( UOdysseyLayer* parent : parents )
 	{
-		if ( parent->IsLocked )
+		if ( parent->GetIsLocked() )
 			return true;
 	}
 

@@ -17,7 +17,7 @@ FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(FOdysseyAnima
 FReply
 FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iParams)
 {
-    if (iParams.mLayer->IsLocked)
+    if (iParams.mLayer->GetIsLocked())
         return FReply::Unhandled();
 
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)

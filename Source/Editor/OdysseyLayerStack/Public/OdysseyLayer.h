@@ -162,6 +162,9 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "LayerStack")
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers);
+    
+    UFUNCTION(BlueprintCallable, Category="LayerStack")
+    void SetIsLocked(bool Value);
 
 public:
     // Getters
@@ -171,6 +174,9 @@ public:
 	 */
     UFUNCTION(BlueprintPure, Category="LayerStack")
     UOdysseyLayerStack* GetLayerStack() const;
+
+    UFUNCTION(BlueprintPure, Category="LayerStack")
+    bool GetIsLocked(bool IgnoreParentState = false) const;
 
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
@@ -192,7 +198,6 @@ public:
 
 public:
     //Default properties
-
     UPROPERTY(EditDefaultsOnly, Category="Layer")
     FText LayerTypeName = FText::FromString(TEXT("Unnamed Layer Type"));
 
@@ -212,17 +217,18 @@ public:
     UPROPERTY(EditDefaultsOnly, Category="Layer")
 	bool CanHaveChildren = false;
 
+protected:
+    //Instance properties (protected)
+    UPROPERTY(EditInstanceOnly, Category="LayerStack|Layer")
+    bool IsLocked = false;
+
 public:
     //Instance properties
-
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
     FText Name;
 
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
     bool IsActivated = true;
-
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
-    bool IsLocked = false;
 
     UPROPERTY(config, BlueprintReadWrite, Category="LayerStack|Layer", NonTransactional)
     bool IsExpanded = true;

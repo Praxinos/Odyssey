@@ -189,13 +189,13 @@ void
 SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged(ECheckBoxState iState)
 {
 	FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-locked", "Change Layer Lock"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "IsLocked", iState == ECheckBoxState::Checked);
+	mLayer->SetIsLocked(iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyLayerRow::GetIsLockedCheckBoxState() const
 {
-	return mLayer->IsLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mLayer->GetIsLocked(true) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 FText

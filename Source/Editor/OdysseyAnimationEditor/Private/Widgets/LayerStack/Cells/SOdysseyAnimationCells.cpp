@@ -445,7 +445,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorOffset(TSharedPtr<FOdysseyAnimation
 EVisibility
 SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const
 {
-    if (mAnimationLayer->IsLocked)
+    if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
         
     if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Cut)
@@ -469,7 +469,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(TSharedPtr<FOdysseyAnima
 EVisibility
 SOdysseyAnimationCells::GetTimingHandleVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const
 {
-    if (mAnimationLayer->IsLocked)
+    if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
 
     if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Selection)
@@ -484,7 +484,7 @@ SOdysseyAnimationCells::GetTimingHandleVisibility(TSharedPtr<FOdysseyAnimationCe
 EVisibility
 SOdysseyAnimationCells::GetLengthHandleVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const
 {
-    if (mAnimationLayer->IsLocked)
+    if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
         
     if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Selection)
@@ -654,7 +654,7 @@ SOdysseyAnimationCells::OnTimingHandleDragStopped(const FGeometry& iGeometry, co
 EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleRightVisibility() const
 {
-    if (mAnimationLayer->IsLocked)
+    if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
 
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleRightBrush->ImageSize.X;
@@ -664,7 +664,7 @@ SOdysseyAnimationCells::GetAddCellsHandleRightVisibility() const
 EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility() const
 {
-    if (mAnimationLayer->IsLocked)
+    if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
         
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleLeftBrush->ImageSize.X;

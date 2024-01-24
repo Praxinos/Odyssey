@@ -54,7 +54,7 @@ SOdysseyAnimationLayerImageTimeline::Construct(
                 .Padding(cellsPadding)
                 [
                     SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
-                    .IsEnabled_Lambda([this](){ return !mLayer->IsLocked;})
+                    .IsEnabled_Lambda([this](){ return !mLayer->GetIsLocked();})
                     .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
                     .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
                     .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
@@ -371,7 +371,7 @@ SOdysseyAnimationLayerImageTimeline::PasteFrames()
 void
 SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames()
 {
-    if (mLayer->IsLocked)
+    if (mLayer->GetIsLocked())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
@@ -407,7 +407,7 @@ SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames()
 void
 SOdysseyAnimationLayerImageTimeline::StaggerCell( int iFrame )
 {
-    if (mLayer->IsLocked)
+    if (mLayer->GetIsLocked())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
@@ -729,7 +729,7 @@ SOdysseyAnimationLayerImageTimeline::IsPostBehaviour(EOdysseyAnimationLayerImage
 bool
 SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour() const
 {
-    return !mLayer->IsLocked;
+    return !mLayer->GetIsLocked();
 }
 
 void
@@ -750,7 +750,7 @@ SOdysseyAnimationLayerImageTimeline::IsPreBehaviour(EOdysseyAnimationLayerImageP
 bool
 SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour() const
 {
-    return !mLayer->IsLocked;
+    return !mLayer->GetIsLocked();
 }
 
 void

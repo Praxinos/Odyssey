@@ -254,7 +254,7 @@ FOdysseyAnimationEditorTimelineTab::ChangeLayerOpacity( float iOpacity )
     if ( !layerStack->CurrentLayer )
         return;
 
-    if ( layerStack->CurrentLayer->IsLocked )
+    if ( layerStack->CurrentLayer->GetIsLocked() )
         return;
 
     if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )

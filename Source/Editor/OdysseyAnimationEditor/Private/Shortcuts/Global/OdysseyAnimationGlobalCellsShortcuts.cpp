@@ -39,7 +39,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
     if (!currentLayer)
         return;
 
-    if (currentLayer->IsLocked)
+    if (currentLayer->GetIsLocked())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();

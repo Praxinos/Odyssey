@@ -65,7 +65,7 @@ SOdysseyAnimationLayerImageVectorTimeline::OnPreviewMouseButtonDown(const FGeome
 bool
 SOdysseyAnimationLayerImageVectorTimeline::GetShowStaggerCellContent() const
 {
-    if (mLayer->IsLocked)
+    if (mLayer->GetIsLocked())
         return false;
         
     return !IsCollapsed();

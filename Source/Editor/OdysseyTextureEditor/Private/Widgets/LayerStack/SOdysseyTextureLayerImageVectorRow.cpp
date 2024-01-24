@@ -109,7 +109,7 @@ SOdysseyTextureLayerImageVectorRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
-                .IsEnabled_Lambda([this](){ return !mTextureLayerImageVector->IsLocked;})
+                .IsEnabled_Lambda([this](){ return !mTextureLayerImageVector->GetIsLocked();})
                 .Value_Lambda([this]() { return (int)(mTextureLayerImageVector->Opacity * 100.f + 0.5f);})
                 .AllowSpin(true)
                 .ShiftMouseMovePixelPerDelta(10)
@@ -129,7 +129,7 @@ SOdysseyTextureLayerImageVectorRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-                .IsEnabled_Lambda([this](){ return !mTextureLayerImageVector->IsLocked;})
+                .IsEnabled_Lambda([this](){ return !mTextureLayerImageVector->GetIsLocked();})
                 .CurrentValue_Lambda([this](){ return (int32)mTextureLayerImageVector->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyTextureLayerImageVectorRow::OnBlendModeComboBoxChanged)
@@ -154,7 +154,7 @@ SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState
 void
 SOdysseyTextureLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mTextureLayerImageVector->IsLocked )
+    if ( mTextureLayerImageVector->GetIsLocked() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -165,7 +165,7 @@ SOdysseyTextureLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCom
 void
 SOdysseyTextureLayerImageVectorRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mTextureLayerImageVector->IsLocked )
+    if ( mTextureLayerImageVector->GetIsLocked() )
         return;
 
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
@@ -199,7 +199,7 @@ SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked() const
 void
 SOdysseyTextureLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mTextureLayerImageVector->IsLocked )
+    if ( mTextureLayerImageVector->GetIsLocked() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard

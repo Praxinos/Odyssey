@@ -239,3 +239,26 @@ UOdysseyLayer::GetMediaProvider(uint32 iFrameIndex) const
 {
     return FOdysseyMediaProvider();
 }
+
+bool
+UOdysseyLayer::GetIsLocked(bool iIgnoreParentState) const
+{
+    if (iIgnoreParentState)
+        return IsLocked;
+
+    const UOdysseyLayer* layer = this;
+    while(layer)
+    {
+        if (layer->IsLocked)
+            return true;
+        layer = layer->Parent;
+    }
+
+    return false;
+}
+
+void
+UOdysseyLayer::SetIsLocked(bool Value)
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "IsLocked", Value);
+}

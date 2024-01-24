@@ -96,7 +96,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
     if (!layer)
         return;
 
-    if (layer->IsLocked)
+    if (layer->GetIsLocked())
     {
         Action_Copy();
         return;
@@ -129,7 +129,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     if (!layer)
         return;
 
-    if (layer->IsLocked)
+    if (layer->GetIsLocked())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -184,7 +184,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (!layer)
         return;
 
-    if (layer->IsLocked)
+    if (layer->GetIsLocked())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -234,7 +234,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_StaggerCell()
     if (!layer)
         return;
 
-    if (layer->IsLocked)
+    if (layer->GetIsLocked())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -307,7 +307,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
     if (!layer)
         return false;
 
-    if (layer->IsLocked)
+    if (layer->GetIsLocked())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -336,7 +336,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Paste()
     if (!layer)
         return false;
 
-    if (layer->IsLocked)
+    if (layer->GetIsLocked())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyAnimationCellClipboardData>();
@@ -383,7 +383,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
     if (!layer)
         return false;
 
-    if (layer->IsLocked)
+    if (layer->GetIsLocked())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -412,7 +412,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_StaggerCell()
     if (!layer)
         return false;
 
-    if (layer->IsLocked)
+    if (layer->GetIsLocked())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
