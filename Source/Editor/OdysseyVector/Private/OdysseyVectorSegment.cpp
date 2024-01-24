@@ -99,9 +99,10 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
 
     // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
     // line stroking is done in world coordinates because we need a 1 pixel width
+
     iBLContext->save();
     iBLContext->resetMatrix();
-    iBLContext->setStrokeWidth( 2.0f );
+    iBLContext->setStrokeWidth( 1.2f );
     for ( int i = 1; i < mFractionCache.size(); i++ )
     {
         iBLContext->strokeLine( worldMatrix.mapPoint( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y )
@@ -110,6 +111,7 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
                               , worldMatrix.mapPoint( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y ) );
     }
     iBLContext->restore();
+
 }
 
 FOdysseyVectorHandleSegment*

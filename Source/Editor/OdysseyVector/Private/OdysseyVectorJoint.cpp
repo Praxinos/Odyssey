@@ -99,7 +99,7 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
             // might create a thin line between the polygons. So we draw a one-pixel line at the edges.
             iBLContext->save();
             iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeWidth( 1.2f );
             iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
                                   , worldMatrix.mapPoint( mNextEdgePoint[0].x, mNextEdgePoint[0].y ) );
             iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
@@ -121,13 +121,13 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
             // might create a thin line between the polygons. So we draw a one-pixel line at the edges.
             iBLContext->save();
             iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 2.0f );
+            iBLContext->setStrokeWidth( 1.2f );
             for ( int i = 0; i < mPolygonCache.size(); i++ )
             {
                 iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y )
-                                        , worldMatrix.mapPoint( mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y ) );
+                                      , worldMatrix.mapPoint( mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y ) );
                 iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y )
-                                        , worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y ) );
+                                      , worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y ) );
             }
             iBLContext->restore();
         }
