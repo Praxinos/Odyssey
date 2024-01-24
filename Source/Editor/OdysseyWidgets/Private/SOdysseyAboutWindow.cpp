@@ -73,19 +73,17 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
 
     //---
 
-    mLogos.Add( ELogo::kPraxinos,    { TEXT( "about-window.praxinos.name" ),    LOCTEXT( "about-window.praxinos.tooltip", "Go to Praxinos website" ),                LOCTEXT( "about-window.praxinos.url", "https://praxinos.coop/" ) } );
-    mLogos.Add( ELogo::kIliad,        { TEXT( "about-window.iliad.name" ),        LOCTEXT( "about-window.iliad.tooltip", "Go to Iliad webpage" ),                        LOCTEXT( "about-window.iliad.url", "https://praxinos.coop/iliad.php" ) } );
-    //mLogos.Add( ELogo::kForum,       { TEXT( "about-window.forum.name" ),       LOCTEXT( "about-window.forum.tooltip", "Go to Praxinos forum" ),                     LOCTEXT( "about-window.forum.url", "https://praxinos.coop/forum/" ) } );
-    //mLogos.Add( ELogo::kContactUs,   { TEXT( "about-window.contact-us.name" ),   LOCTEXT( "about-window.contact-us.tooltip", "Go to contact-us form" ),               LOCTEXT( "about-window.contact-us.url", "https://praxinos.coop/contact.php" ) } );
+    mLogos.Add( ELogo::kPraxinos,    { TEXT( "About.Praxinos" ),    LOCTEXT( "about-window.praxinos.tooltip", "Go to Praxinos website" ),                LOCTEXT( "about-window.praxinos.url", "https://praxinos.coop/" ) } );
+    mLogos.Add( ELogo::kIliad,        { TEXT( "About.Iliad" ),        LOCTEXT( "about-window.iliad.tooltip", "Go to Iliad webpage" ),                        LOCTEXT( "about-window.iliad.url", "https://praxinos.coop/iliad.php" ) } );
 
-    mLogos.Add( ELogo::kTwitter,     { TEXT( "about-window.twitter.name" ),     LOCTEXT( "about-window.twitter.tooltip", "Praxinos on Twitter" ),             LOCTEXT( "about-window.twitter.url", "https://twitter.com/praxinos" ) } );
-    mLogos.Add( ELogo::kFacebook,    { TEXT( "about-window.facebook.name" ),    LOCTEXT( "about-window.facebook.tooltip", "Praxinos on Facebook" ),           LOCTEXT( "about-window.facebook.url", "https://www.facebook.com/Praxinos" ) } );
-    mLogos.Add( ELogo::kLinkedin,    { TEXT( "about-window.linkedIn.name" ),    LOCTEXT( "about-window.linkedin.tooltip", "Praxinos on LinkedIn" ),           LOCTEXT( "about-window.linkedin.url", "https://www.linkedin.com/company/praxinos" ) } );
-    mLogos.Add( ELogo::kInstagram,   { TEXT( "about-window.instagram.name" ),   LOCTEXT( "about-window.instagram.tooltip", "Praxinos on Instagram" ),         LOCTEXT( "about-window.instagram.url", "https://www.instagram.com/praxinos/" ) } );
-    mLogos.Add( ELogo::kYoutube,     { TEXT( "about-window.youtube.name" ),     LOCTEXT( "about-window.youtube.tooltip", "Praxinos on Youtube" ),             LOCTEXT( "about-window.youtube.url", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) } );
-    mLogos.Add( ELogo::kDiscord,     { TEXT( "about-window.discord.name" ),     LOCTEXT( "about-window.discord.tooltip", "Praxinos on Discord" ),             LOCTEXT( "about-window.discord.url", "https://discord.gg/gEd6pj7" ) } );
-    mLogos.Add( ELogo::kIliadUserDoc, { TEXT( "about-window.userDoc.name" ),     LOCTEXT( "about-window.userDoc.tooltip", "Go to Iliad User Documentation" ),   LOCTEXT( "about-window.userDoc.url", "https://praxinos.coop/Documentation/Iliad/User/html/" ) } );
-    mLogos.Add( ELogo::kIliadGit,     { TEXT( "about-window.git.name" ),         LOCTEXT( "about-window.git.tooltip", "Praxinos on Git" ),                     LOCTEXT( "about-window.git.url", "https://github.com/Praxinos/Iliad" ) } );
+    mLogos.Add( ELogo::kTwitter,     { TEXT( "About.Twitter" ),     LOCTEXT( "about-window.twitter.tooltip", "Praxinos on Twitter" ),             LOCTEXT( "about-window.twitter.url", "https://twitter.com/praxinos" ) } );
+    mLogos.Add( ELogo::kFacebook,    { TEXT( "About.Facebook" ),    LOCTEXT( "about-window.facebook.tooltip", "Praxinos on Facebook" ),           LOCTEXT( "about-window.facebook.url", "https://www.facebook.com/Praxinos" ) } );
+    mLogos.Add( ELogo::kLinkedin,    { TEXT( "About.LinkedIn" ),    LOCTEXT( "about-window.linkedin.tooltip", "Praxinos on LinkedIn" ),           LOCTEXT( "about-window.linkedin.url", "https://www.linkedin.com/company/praxinos" ) } );
+    mLogos.Add( ELogo::kInstagram,   { TEXT( "About.Instagram" ),   LOCTEXT( "about-window.instagram.tooltip", "Praxinos on Instagram" ),         LOCTEXT( "about-window.instagram.url", "https://www.instagram.com/praxinos/" ) } );
+    mLogos.Add( ELogo::kYoutube,     { TEXT( "About.Youtube" ),     LOCTEXT( "about-window.youtube.tooltip", "Praxinos on Youtube" ),             LOCTEXT( "about-window.youtube.url", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) } );
+    mLogos.Add( ELogo::kDiscord,     { TEXT( "About.Discord" ),     LOCTEXT( "about-window.discord.tooltip", "Praxinos on Discord" ),             LOCTEXT( "about-window.discord.url", "https://discord.gg/gEd6pj7" ) } );
+    mLogos.Add( ELogo::kIliadUserDoc, { TEXT( "About.UserDoc" ),     LOCTEXT( "about-window.userDoc.tooltip", "Go to Iliad User Documentation" ),   LOCTEXT( "about-window.userDoc.url", "https://praxinos.coop/Documentation/Iliad/User/html/" ) } );
+    mLogos.Add( ELogo::kIliadGit,     { TEXT( "About.Git" ),         LOCTEXT( "about-window.git.tooltip", "Praxinos on Git" ),                     LOCTEXT( "about-window.git.url", "https://github.com/Praxinos/Iliad" ) } );
 
     ChildSlot
     [
