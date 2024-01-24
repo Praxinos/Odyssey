@@ -8,6 +8,7 @@
 #include "OdysseyAnimationEditorTimeline.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
+#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "Framework/Commands/GenericCommands.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -95,6 +96,12 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
     if (!layer)
         return;
 
+    if (layer->IsLocked)
+    {
+        Action_Copy();
+        return;
+    }
+
     FInt32Range selectedFrames = treeView->GetAnimationEditorExtension()->Timeline()->GetSelectedFrames();
     if (selectedFrames.IsEmpty())
         return;
@@ -120,6 +127,9 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
 
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
     if (!layer)
+        return;
+
+    if (layer->IsLocked)
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -174,6 +184,9 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (!layer)
         return;
 
+    if (layer->IsLocked)
+        return;
+
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
     if (!cellsContainer)
         return;
@@ -209,6 +222,48 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
 void
 FOdysseyAnimationTimelineCellsShortcuts::Action_StaggerCell()
 {
+    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
+    if (!treeView)
+        return;
+
+    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
+    if(!layerstack)
+        return;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    if (!layer)
+        return;
+
+    if (layer->IsLocked)
+        return;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+    if (!cellsContainer)
+        return;
+
+    int cellFrame = cellsContainer->GetCellFrameAtFrame(layer->GetAnimation()->CurrentFrame);
+    if (cellFrame == INDEX_NONE || cellFrame == 0)
+        return;
+
+    int cellIndex = cellsContainer->GetCellIndexAtFrame(layer->GetAnimation()->CurrentFrame);
+    if (cellIndex == INDEX_NONE)
+        return;
+
+    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
+    if (!cell || cell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
+        return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.create-stagger-cell", "Stagger Cell"));
+#endif
+    
+    int cellStaggerLength = cell->GetLength() - cellFrame;
+    TSharedPtr<FOdysseyAnimationCellImageStagger> cellStagger = FOdysseyAnimationCellImageStagger::Create(layer, cellStaggerLength);
+    
+    FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
+    mutator.SetLength( cellIndex, cellFrame );
+    mutator.Add({cellStagger}, cellIndex + 1);
+    mutator.Commit();
 }
 
 bool
@@ -252,6 +307,9 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
     if (!layer)
         return false;
 
+    if (layer->IsLocked)
+        return false;
+
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
     if (!cellsContainer)
         return false;
@@ -276,6 +334,9 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Paste()
 
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
     if (!layer)
+        return false;
+
+    if (layer->IsLocked)
         return false;
 
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyAnimationCellClipboardData>();
@@ -322,6 +383,9 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
     if (!layer)
         return false;
 
+    if (layer->IsLocked)
+        return false;
+
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
     if (!cellsContainer)
         return false;
@@ -336,6 +400,37 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
 bool
 FOdysseyAnimationTimelineCellsShortcuts::CanAction_StaggerCell()
 {
+    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
+    if (!treeView)
+        return false;
+
+    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
+    if(!layerstack)
+        return false;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    if (!layer)
+        return false;
+
+    if (layer->IsLocked)
+        return false;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+    if (!cellsContainer)
+        return false;
+
+    int cellFrame = cellsContainer->GetCellFrameAtFrame(layer->GetAnimation()->CurrentFrame);
+    if (cellFrame == INDEX_NONE || cellFrame == 0)
+        return false;
+
+    int cellIndex = cellsContainer->GetCellIndexAtFrame(layer->GetAnimation()->CurrentFrame);
+    if (cellIndex == INDEX_NONE)
+        return false;
+
+    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
+    if (!cell || cell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
+        return false;
+
     return true;
 }
 

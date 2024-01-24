@@ -18,6 +18,9 @@ FOdysseyAnimationTimelineMoveTool::FOdysseyAnimationTimelineMoveTool(FOdysseyAni
 FReply
 FOdysseyAnimationTimelineMoveTool::OnMouseButtonDown(const FMouseEventParams& iParams)
 {
+    if (iParams.mLayer->IsLocked)
+        return FReply::Unhandled();
+
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
@@ -38,6 +41,9 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonDown(const FMouseEventParams& iP
 FReply
 FOdysseyAnimationTimelineMoveTool::OnDragDetected(const FMouseEventParams& iParams)
 {
+    if (iParams.mLayer->IsLocked)
+        return FReply::Unhandled();
+
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
@@ -53,6 +59,9 @@ FOdysseyAnimationTimelineMoveTool::OnDragDetected(const FMouseEventParams& iPara
 FReply
 FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
 {
+    if (iParams.mLayer->IsLocked)
+        return FReply::Unhandled();
+
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 		
@@ -75,6 +84,9 @@ FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
 FReply
 FOdysseyAnimationTimelineMoveTool::OnMouseButtonUp(const FMouseEventParams& iParams)
 {
+    if (iParams.mLayer->IsLocked)
+        return FReply::Unhandled();
+
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
