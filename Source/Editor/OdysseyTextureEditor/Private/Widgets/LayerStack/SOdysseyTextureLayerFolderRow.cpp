@@ -78,6 +78,7 @@ SOdysseyTextureLayerFolderRow::GenerateOptionsWidget()
         .Padding(FMargin(0, 0, 1.f, 0))
         [
             SNew(SNumericEntryBox<int>)
+            .IsEnabled_Lambda([this](){ return !mTextureLayerFolder->IsLocked;})
             .Value_Lambda([this]() { return (int)(mTextureLayerFolder->Opacity * 100.f + 0.5f);})
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
@@ -97,6 +98,7 @@ SOdysseyTextureLayerFolderRow::GenerateOptionsWidget()
         .VAlign(VAlign_Center)
         [
             SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+            .IsEnabled_Lambda([this](){ return !mTextureLayerFolder->IsLocked;})
             .CurrentValue_Lambda([this](){ return (int32)mTextureLayerFolder->BlendMode;})
             .ContentPadding(FMargin(0))
             .OnEnumSelectionChanged(this, &SOdysseyTextureLayerFolderRow::OnBlendModeComboBoxChanged)
@@ -106,13 +108,19 @@ SOdysseyTextureLayerFolderRow::GenerateOptionsWidget()
 void
 SOdysseyTextureLayerFolderRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
+    if ( mTextureLayerFolder->IsLocked )
+        return;
+
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-folder.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, "BlendMode", iValue, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, "BlendMode", EOdysseyBlendingMode(iValue), EPropertyChangeType::ValueSet);
 }
 
 void
 SOdysseyTextureLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
+    if ( mTextureLayerFolder->IsLocked )
+        return;
+
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
@@ -121,6 +129,9 @@ SOdysseyTextureLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit::
 void
 SOdysseyTextureLayerFolderRow::OnOpacityValueChanged(int iValue)
 {
+    if ( mTextureLayerFolder->IsLocked )
+        return;
+
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
 }
 

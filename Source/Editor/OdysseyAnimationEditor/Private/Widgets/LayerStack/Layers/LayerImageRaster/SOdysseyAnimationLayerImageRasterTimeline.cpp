@@ -66,5 +66,8 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
 bool
 SOdysseyAnimationLayerImageRasterTimeline::GetShowStaggerCellContent() const
 {
+    if (mLayer->IsLocked)
+        return false;
+
     return !IsCollapsed();
 }

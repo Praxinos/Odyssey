@@ -86,6 +86,7 @@ SOdysseyAnimationLayerFolderRow::GenerateOptionsWidget()
         .Padding(FMargin(0, 0, 1.f, 0))
         [
             SNew(SNumericEntryBox<int>)
+            .IsEnabled_Lambda([this](){ return !mAnimationLayerFolder->IsLocked;})
             .Value_Lambda([this]() { return (int)(mAnimationLayerFolder->Opacity * 100.f + 0.5f);})
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
@@ -105,6 +106,7 @@ SOdysseyAnimationLayerFolderRow::GenerateOptionsWidget()
         .VAlign(VAlign_Center)
         [
             SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+            .IsEnabled_Lambda([this](){ return !mAnimationLayerFolder->IsLocked;})
             .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerFolder->BlendMode;})
             .ContentPadding(FMargin(0))
             .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerFolderRow::OnBlendModeComboBoxChanged)
@@ -114,13 +116,19 @@ SOdysseyAnimationLayerFolderRow::GenerateOptionsWidget()
 void
 SOdysseyAnimationLayerFolderRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
+    if ( mAnimationLayerFolder->IsLocked )
+        return;
+        
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-folder.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, "BlendMode", iValue, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, "BlendMode", EOdysseyBlendingMode(iValue), EPropertyChangeType::ValueSet);
 }
 
 void
 SOdysseyAnimationLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
+    if ( mAnimationLayerFolder->IsLocked )
+        return;
+
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
@@ -129,6 +137,9 @@ SOdysseyAnimationLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit
 void
 SOdysseyAnimationLayerFolderRow::OnOpacityValueChanged(int iValue)
 {
+    if ( mAnimationLayerFolder->IsLocked )
+        return;
+
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
 }
 

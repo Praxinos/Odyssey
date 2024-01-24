@@ -54,6 +54,7 @@ SOdysseyAnimationLayerImageTimeline::Construct(
                 .Padding(cellsPadding)
                 [
                     SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
+                    .IsEnabled_Lambda([this](){ return !mLayer->IsLocked;})
                     .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
                     .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
                     .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
@@ -370,6 +371,9 @@ SOdysseyAnimationLayerImageTimeline::PasteFrames()
 void
 SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames()
 {
+    if (mLayer->IsLocked)
+        return;
+
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
     if (!cellsContainer)
         return;
@@ -403,6 +407,9 @@ SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames()
 void
 SOdysseyAnimationLayerImageTimeline::StaggerCell( int iFrame )
 {
+    if (mLayer->IsLocked)
+        return;
+
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
     if (!cellsContainer)
         return;

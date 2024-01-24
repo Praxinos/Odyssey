@@ -178,6 +178,9 @@ UOdysseyAnimationLayerImageRaster::GetCellAtFrame(int iFrameIndex, int& oCelFram
 void
 UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
+    if (IsLocked)
+        return;
+
     UOdysseyAnimation* animation = GetAnimation();
     if ( !animation )
         return;
@@ -505,6 +508,9 @@ UOdysseyAnimationLayerImageRaster::CreateMediaRaster(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
 {
+    if (IsLocked)
+        return;
+
     FScopedTransaction transaction(LOCTEXT("layer-image-raster.create-cell-transaction", "Create Cell"));
 
     UOdysseyAnimation* animation = GetAnimation();

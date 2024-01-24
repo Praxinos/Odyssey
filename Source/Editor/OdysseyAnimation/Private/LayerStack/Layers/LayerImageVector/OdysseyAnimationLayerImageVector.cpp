@@ -331,6 +331,9 @@ UOdysseyAnimationLayerImageVector::CreateMediaVector(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 {
+    if (IsLocked)
+        return;
+
     FScopedTransaction transaction(LOCTEXT("layer-image-vector.create-cell-transaction", "Create Cell"));
     UOdysseyAnimation* animation = GetAnimation();
     //Check if iFrameIndex is Out Of Range
@@ -374,6 +377,9 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
+    if (IsLocked)
+        return;
+
     UOdysseyAnimation* animation = GetAnimation();
     if ( !animation )
         return;

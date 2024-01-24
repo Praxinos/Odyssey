@@ -128,6 +128,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->IsLocked;})
                 .Value_Lambda([this]() { return (int)(mAnimationLayerImageVector->Opacity * 100.f + 0.5f);})
                 .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
@@ -148,6 +149,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->IsLocked;})
                 .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageVector->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged)
@@ -192,6 +194,9 @@ SOdysseyAnimationLayerImageVectorRow::OnLightTableCheckStateChanged(ECheckBoxSta
 void
 SOdysseyAnimationLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
+    if ( mAnimationLayerImageVector->IsLocked )
+        return;
+
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
@@ -200,6 +205,9 @@ SOdysseyAnimationLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextC
 void
 SOdysseyAnimationLayerImageVectorRow::OnOpacityValueChanged(int iValue)
 {
+    if ( mAnimationLayerImageVector->IsLocked )
+        return;
+
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
@@ -237,9 +245,12 @@ SOdysseyAnimationLayerImageVectorRow::GetLightTableIsChecked() const
 void
 SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
+    if ( mAnimationLayerImageVector->IsLocked )
+        return;
+
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "BlendMode", iValue);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "BlendMode", EOdysseyBlendingMode(iValue));
 }
 
 EVisibility

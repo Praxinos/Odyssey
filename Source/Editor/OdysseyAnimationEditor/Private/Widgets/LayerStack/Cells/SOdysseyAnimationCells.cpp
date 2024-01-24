@@ -445,6 +445,9 @@ SOdysseyAnimationCells::GetCellBreakIndicatorOffset(TSharedPtr<FOdysseyAnimation
 EVisibility
 SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const
 {
+    if (mAnimationLayer->IsLocked)
+        return EVisibility::Hidden;
+        
     if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Cut)
         return EVisibility::Hidden;
 
@@ -466,6 +469,9 @@ SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(TSharedPtr<FOdysseyAnima
 EVisibility
 SOdysseyAnimationCells::GetTimingHandleVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const
 {
+    if (mAnimationLayer->IsLocked)
+        return EVisibility::Hidden;
+
     if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Selection)
         return EVisibility::Hidden;
 
@@ -478,6 +484,9 @@ SOdysseyAnimationCells::GetTimingHandleVisibility(TSharedPtr<FOdysseyAnimationCe
 EVisibility
 SOdysseyAnimationCells::GetLengthHandleVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const
 {
+    if (mAnimationLayer->IsLocked)
+        return EVisibility::Hidden;
+        
     if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Selection)
         return EVisibility::Hidden;
 
@@ -645,6 +654,9 @@ SOdysseyAnimationCells::OnTimingHandleDragStopped(const FGeometry& iGeometry, co
 EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleRightVisibility() const
 {
+    if (mAnimationLayer->IsLocked)
+        return EVisibility::Hidden;
+
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleRightBrush->ImageSize.X;
     return (mShowHandles.Get() && isZoomedEnough) ? EVisibility::Visible : EVisibility::Hidden;
 }
@@ -652,6 +664,9 @@ SOdysseyAnimationCells::GetAddCellsHandleRightVisibility() const
 EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility() const
 {
+    if (mAnimationLayer->IsLocked)
+        return EVisibility::Hidden;
+        
     bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleLeftBrush->ImageSize.X;
     return (mShowHandles.Get() && isZoomedEnough && GetOffset() > 0) ? EVisibility::Visible : EVisibility::Hidden;
 }

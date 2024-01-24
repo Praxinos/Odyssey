@@ -119,6 +119,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->IsLocked;})
                 .Value_Lambda([this]() { return (int)(mAnimationLayerImageRaster->Opacity * 100.f + 0.5f);})
                 .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
@@ -139,6 +140,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->IsLocked;})
                 .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageRaster->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged)
@@ -175,6 +177,9 @@ SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBox
 void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
+    if ( mAnimationLayerImageRaster->IsLocked )
+        return;
+
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
@@ -183,6 +188,9 @@ SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextC
 void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityValueChanged(int iValue)
 {
+    if ( mAnimationLayerImageRaster->IsLocked )
+        return;
+
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
@@ -214,9 +222,12 @@ SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 void
 SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
+    if ( mAnimationLayerImageRaster->IsLocked )
+        return;
+
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-raster.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "BlendMode", iValue);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "BlendMode", EOdysseyBlendingMode(iValue));
 }
 
 EVisibility
