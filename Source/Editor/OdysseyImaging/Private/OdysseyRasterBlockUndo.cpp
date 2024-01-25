@@ -47,13 +47,14 @@ FOdysseyRasterBlockUndoBuilder::BuildRedoData(const FOdysseyRasterBlockMutator& 
     int tileSize = invalidTileMap.TileSize();
     int dataStart = oData.Num();//Do this before AddUninitialized() to keep track of where to write the block in memory
     oData.AddUninitialized(tileSize * tileSize * numTiles * iBlock->BytesPerPixel());
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(oData.GetData() + dataStart, tileSize, tileSize * numTiles, iRasterBlockMutator.GetRasterBlock()->GetFormat());
     for (int i = 0; i < tileIndexes.Num(); i++)
     {
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(oData.GetData() + dataStart, tileSize, tileSize, iRasterBlockMutator.GetRasterBlock()->GetFormat());
         ::ULIS::FRectI rect = invalidTileMap.GetTileRect(tileIndexes[i]);
-        ctx.Copy(*iBlock, *blockToSave, rect, ::ULIS::FVec2I(0, tileSize * i), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        ctx.Copy(*iBlock, *blockToSave, rect, ::ULIS::FVec2I(0, 0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        dataStart += tileSize * tileSize * iBlock->BytesPerPixel();
+        ctx.Finish();
     }
-    ctx.Finish();
 }
 
 void
@@ -85,13 +86,14 @@ FOdysseyRasterBlockUndoBuilder::BuildUndoData(const FOdysseyRasterBlockMutator& 
     int tileSize = invalidTileMap.TileSize();
     int dataStart = oData.Num();//Do this before AddUninitialized() to keep track of where to write the block in memory
     oData.AddUninitialized(tileSize * tileSize * numTiles * iBlock->BytesPerPixel());
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(oData.GetData() + dataStart, tileSize, tileSize * numTiles, iRasterBlockMutator.GetRasterBlock()->GetFormat());
     for (int i = 0; i < tileIndexes.Num(); i++)
     {
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(oData.GetData() + dataStart, tileSize, tileSize, iRasterBlockMutator.GetRasterBlock()->GetFormat());
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> tileBlock = originalTileBlocks[tileIndexes[i]];
-        ctx.Copy(*tileBlock, *blockToSave, tileBlock->Rect(), ::ULIS::FVec2I(0, tileSize * i), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        ctx.Copy(*tileBlock, *blockToSave, tileBlock->Rect(), ::ULIS::FVec2I(0, 0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+        dataStart+= tileSize * tileSize * iBlock->BytesPerPixel();
+        ctx.Finish();
     }
-    ctx.Finish();
 }
 
 void
@@ -197,8 +199,6 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
     if ( !block )
         return;
 
-    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> undoableBlock = rasterBlock->mUndoableBlock.Pin();
-
     TArray<::ULIS::FRectI> rects;
 
     //Load Block from DDC
@@ -228,6 +228,7 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
                 return;
 
             FSharedBuffer rawData = iResponse.Value.GetData().Decompress();
+
             void* dataPtr = const_cast<void*>(rawData.GetData());
 
             FBufferReader reader(dataPtr, rawData.GetSize(), false, false);
@@ -242,27 +243,21 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
                 reader << rect.y;
                 reader << rect.w;
                 reader << rect.h;
+
             }
 
             int tileSize = 64;
-            TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToLoad = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(dataPtr) + reader.Tell(), tileSize, tileSize * numTiles, rasterBlock->GetFormat());
+
+            uint8* dataStart = static_cast<uint8*>(dataPtr) + reader.Tell();
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
             for (int i = 0; i < numTiles; i++)
             {   
+                TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToLoad = MakeShared<::ULIS::FBlock>( dataStart, tileSize, tileSize, rasterBlock->GetFormat());
                 const ::ULIS::FRectI& rect = rects[i];
-                ctx.Copy(*blockToLoad, *block, ::ULIS::FRectI::FromXYWH(0, i * tileSize, tileSize, tileSize), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+                ctx.Copy(*blockToLoad, *block, blockToLoad->Rect(), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
+                dataStart += tileSize * tileSize * blockToLoad->BytesPerPixel();
+                ctx.Finish();
             }
-
-            /* if ( undoableBlock )
-            {
-                for ( int i = 0; i < numTiles; i++ )
-                {
-                    const ::ULIS::FRectI& rect = rects[i];
-                    ctx.Copy(*blockToLoad, *undoableBlock, ::ULIS::FRectI::FromXYWH(0, i * tileSize, tileSize, tileSize), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-                }
-            } */
-
-            ctx.Finish();
         }
     );
     getOwner.Wait();
@@ -270,8 +265,6 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
     rasterBlock->InvalidateCache();
     rasterBlock->OnBlockChanged().Broadcast(rects);
     rasterBlock->OnBlockCommited().Broadcast(rects);
-    /* if ( undoableBlock )
-        rasterBlock->mOnUndoableBlockChanged.Broadcast(rects); */
 }
 
 void

@@ -139,7 +139,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
 
     //Apply the color to the paintblock
     
-    GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("raster-paint-bucket-tool.transaction.paint-stroke", "FloodFill"), nullptr);
+    GEditor->BeginTransaction(LOCTEXT("raster-paint-bucket-tool.transaction.paint-stroke", "FloodFill"));
     ConvertMaskBlockToColorBlock(maskBlock, paintBlock, dstColor);
     
 	paintBlock->Dirty();
