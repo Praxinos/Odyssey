@@ -219,6 +219,21 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Draw HUD Surface
     if( HUDTexture && HUDTexture->GetResource() )
     {
+        //HUD needs its own way to be displayed, otherwise it will inherit the way the canvas texture is drawn, which is not always what we want
+        TRefCountPtr<FBatchedElementParameters> HUDbatchedElementParameters;
+        if( GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM5 )
+        {
+            UTexture2D* HUDtexture2D = Cast<UTexture2D>(HUDTexture);
+
+            bool isNormalMap = HUDTexture->IsNormalMap();
+            bool isSingleChannel = HUDTexture->CompressionSettings == TC_Grayscale || HUDTexture->CompressionSettings == TC_Alpha;
+            bool isVirtual = HUDTexture->IsCurrentlyVirtualTextured();
+            bool isVTSPS = HUDtexture2D ? HUDtexture2D->IsVirtualTexturedWithSinglePhysicalSpace() : false;
+            bool isTextureArray = false;
+            float layerIndex = 0.f;
+            HUDbatchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, layerIndex, isNormalMap, isSingleChannel, isVTSPS, isVirtual, isTextureArray, false );
+        }
+
         FTransform2D transformMinusCenter = FTransform2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter() * -1);
         FTransform2D transformAddHalfTexture = FTransform2D( FVector2D(texture->GetSurfaceWidth(), texture->GetSurfaceHeight()) / 2.f );
         FTransform2D transformViewport = mOdysseyPainterEditorViewportPtr.Pin()->GetTransform();
@@ -230,7 +245,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
             mOdysseyPainterEditor->GetSelectedTool()->GetHUD()->Draw( HUDSurface->Block().Get(), transform );
         
         FCanvasTileItem tileItem(FVector2D(0, 0), HUDTexture->GetResource(), FVector2D(iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y), FLinearColor::White);
-        tileItem.BatchedElementParameters = batchedElementParameters;
+        tileItem.BatchedElementParameters = HUDbatchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
         result += ( 1 << 0 );
         result += ( 1 << 1 );
