@@ -100,7 +100,11 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
     TSharedPtr<::ULIS::FBlock> sourceMaskBlock = CreateSourceMaskBlock(sourceBlock, sourceColor);
     TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<::ULIS::FBlock>(iBlock->Width(), iBlock->Height(), ::ULIS::Format_G8);
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_G8);
+
+    ctx.Clear(*maskBlock);
+	ctx.Finish();
 
     if (GapTolerance > 0)
     {
