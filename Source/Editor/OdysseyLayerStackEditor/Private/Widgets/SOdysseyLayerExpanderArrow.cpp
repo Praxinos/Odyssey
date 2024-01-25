@@ -32,21 +32,20 @@ SOdysseyLayerExpanderArrow::Construct( const FArguments& InArgs, const TSharedPt
 	//Copied from SOdysseyLayerExpanderArrow (we only change VAlign to put the button at the top of the widget
 	this->ChildSlot
 	.Padding(TAttribute<FMargin>(this, &SOdysseyLayerExpanderArrow::GetExpanderPadding))
+	.VAlign(VAlign_Top)
 	[
 		SAssignNew(ExpanderArrow, SButton)
-		.ButtonStyle(FCoreStyle::Get(), "NoBorder")
+		.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding"))
 		.VAlign(VAlign_Top)
 		.HAlign(HAlign_Center)
-		//.Visibility(this, &SOdysseyLayerExpanderArrow::GetExpanderVisibility)
-		.ClickMethod(EButtonClickMethod::MouseDown)
+		//.ClickMethod(EButtonClickMethod::MouseDown)
 		.OnClicked(this, &SOdysseyLayerExpanderArrow::OnArrowClicked)
 		.ContentPadding(0.f)
-		.ForegroundColor(FSlateColor::UseForeground())
 		.IsFocusable(false)
 		[
 			SNew(SImage)
 			.Image(this, &SOdysseyLayerExpanderArrow::GetExpanderImage)
-			.ColorAndOpacity(FSlateColor::UseSubduedForeground())
+			.ColorAndOpacity(FSlateColor::UseForeground())
 		]
 	];
 }
@@ -83,8 +82,8 @@ SOdysseyLayerExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& All
 	if (ShouldDrawWires.Get() == true && VerticalBarBrush != nullptr)
 	{
 		const TSharedPtr<ITableRow> OwnerRow = mLayerRow.Pin();
-		FLinearColor WireTint = InWidgetStyle.GetForegroundColor();
-		WireTint.A = 0.15f;
+		FLinearColor WireTint = FSlateColor::UseForeground().GetColor(InWidgetStyle);
+		//WireTint.A = 1.f;
 
 		FMargin arrowPadding = GetExpanderPadding();
 		
@@ -163,7 +162,8 @@ SOdysseyLayerExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& All
 			float posX = PreviousIndent + arrowSize.X  * 0.5f + wireThickness  * 0.5f;
 			float posY = arrowPos.Y + arrowSize.Y * 0.5f - wireThickness  * 0.5f;
 			//FVector2D boxSize(AllottedGeometry.Size.X - posX - arrowSize.X - distanceFromArrow, wireThickness);
-			FVector2D boxSize(posX + Indent - arrowSize.X - distanceFromArrow, wireThickness);
+			//FVector2D boxSize(posX + Indent - arrowSize.X - distanceFromArrow, wireThickness);
+			FVector2D boxSize(arrowPos.X - posX - distanceFromArrow, wireThickness);
 			FVector2D boxPos(posX, posY);
 
 			FSlateDrawElement::MakeBox(
