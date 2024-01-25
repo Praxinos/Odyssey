@@ -112,6 +112,18 @@ UOdysseyBrushAssetBase::PostLoad()
 
         Overrides_DEPRECATED.Empty();
     }
+
+
+
+    //PATCH: Sometimes EditorOverrides Keys are nullptr after load
+    //This is certainly because we should not use UClass pointers as TMap Keys (I Guess)
+    //So here is a patch to fix those brushes, but we should definitly find a better way to handle overrides
+    TMap<TObjectPtr<UClass>, TObjectPtr<UObject>> overrides;
+    for (auto& element : EditorOverrides)
+    {
+        overrides.Add(element.Value->GetClass(), element.Value);
+    }
+    EditorOverrides = overrides;
 }
 
 //--------------------------------------------------------------------------------------
