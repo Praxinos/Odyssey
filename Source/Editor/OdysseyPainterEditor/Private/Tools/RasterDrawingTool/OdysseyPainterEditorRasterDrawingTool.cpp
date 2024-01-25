@@ -5,7 +5,7 @@
 #include "OdysseyMediaRaster.h"
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
-#include "Tools/RasterDrawingTool/SOdysseyPainterEditorRasterDrawingToolTopTab.h"
+#include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolTopTab.h"
 
 #include "FreehandShape/OdysseyFreehandShape.h"
 #include "LineShape/OdysseyLineShape.h"

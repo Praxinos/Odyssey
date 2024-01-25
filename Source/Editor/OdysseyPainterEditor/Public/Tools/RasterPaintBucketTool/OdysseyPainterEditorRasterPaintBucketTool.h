@@ -59,9 +59,11 @@ public:
     bool OnMouseDownRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
     virtual void Commit() override;
+    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
 public:
     void SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider);
+    FOdysseyBlendParameters GetBlendParameters() const;
 
 private:
     TSharedPtr<::ULIS::FBlock> CreateSourceMaskBlock(TSharedPtr<::ULIS::FBlock> iBlock, const ::ULIS::ISample& iColor) const;
@@ -81,6 +83,9 @@ public:
     float Expansion; //pixels positive and negative
     UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool, meta=(ClampMin=0, UIMin=0, LinearDeltaSensitivity=1) )
     float GapTolerance; //pixels positive only
+    
+    UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
+    FOdysseyBlendParameters BlendParameters;
 
 private:
     TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> mSourceProvider;

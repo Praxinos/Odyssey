@@ -7,6 +7,7 @@
 #include "OdysseyRasterBlock.h"
 #include "OdysseyMediaRaster.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
+#include "Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -95,6 +96,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
 
     ::ULIS::FPixel sourceColor = sourceBlock->Pixel(iPointInTexture.x, iPointInTexture.y);
     ::ULIS::FColor dstColor = GetEditor()->PaintColor().GetValue();
+    dstColor.SetAlphaF(BlendParameters.Opacity / 100.f);
     TSharedPtr<::ULIS::FBlock> sourceMaskBlock = CreateSourceMaskBlock(sourceBlock, sourceColor);
     TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<::ULIS::FBlock>(iBlock->Width(), iBlock->Height(), ::ULIS::Format_G8);
 
@@ -139,7 +141,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
     
     GEditor->BeginTransaction(TEXT("PaintEngine"), LOCTEXT("raster-paint-bucket-tool.transaction.paint-stroke", "FloodFill"), nullptr);
     ConvertMaskBlockToColorBlock(maskBlock, paintBlock, dstColor);
-    //ConvertMaskBlockToColorBlock(sourceMaskBlock, paintBlock, dstColor);
     
 	paintBlock->Dirty();
     Commit();
@@ -192,7 +193,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
 void
 UOdysseyPainterEditorRasterPaintBucketTool::Commit()
 {
-	mPaintEngine.Commit(FOdysseyBlendParameters());
+	mPaintEngine.Commit(BlendParameters);
 }
 
 void
@@ -327,6 +328,19 @@ void
 UOdysseyPainterEditorRasterPaintBucketTool::SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider)
 {
     mSourceProvider = iProvider;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorRasterPaintBucketTool::CreateTopTabWidget()
+{
+    return SNew(SOdysseyPainterEditorRasterPaintBucketToolTopTab, this);
+}
+
+// Returns the BlendParameters
+FOdysseyBlendParameters
+UOdysseyPainterEditorRasterPaintBucketTool::GetBlendParameters() const
+{
+    return BlendParameters;
 }
 
 #undef LOCTEXT_NAMESPACE

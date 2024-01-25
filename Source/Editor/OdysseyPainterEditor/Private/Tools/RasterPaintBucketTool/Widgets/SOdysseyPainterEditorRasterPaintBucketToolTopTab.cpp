@@ -1,40 +1,27 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/RasterDrawingTool/SOdysseyPainterEditorRasterDrawingToolTopTab.h"
+#include "Tools/RasterPaintBucketTool/Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.h"
 #include "ISinglePropertyView.h"
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 #include "Widgets/Layout/SUniformWrapPanel.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 /////////////////////////////////////////////////////
-// SOdysseyPainterEditorRasterDrawingToolTopTab
+// SOdysseyPainterEditorRasterPaintBucketToolTopTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
 
 TSharedPtr<SWidget>
-SOdysseyPainterEditorRasterDrawingToolTopTab::CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle)
+SOdysseyPainterEditorRasterPaintBucketToolTopTab::CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle)
 {
     if (!iPropertyHandle)
         return nullptr;
 
     TSharedRef<SWidget> nameWidget = iPropertyHandle->CreatePropertyNameWidget();
     TSharedRef<SWidget> valueWidget = iPropertyHandle->CreatePropertyValueWidget(false);
-
-    /* return SNew(SVerticalBox)
-    + SVerticalBox::Slot()
-    .AutoHeight()
-    //.Padding(0.f, 0.f, 3.f, 0.f)
-    [
-        nameWidget
-    ]
-    + SVerticalBox::Slot()
-    .AutoHeight()
-    [
-        valueWidget
-    ]; */
 
     return SNew(SHorizontalBox)
     + SHorizontalBox::Slot()
@@ -50,20 +37,16 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::CreatePropertyWidget(TSharedPtr<cl
 }
 
 void
-SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArgs, UOdysseyPainterEditorRasterDrawingTool* iTool )
+SOdysseyPainterEditorRasterPaintBucketToolTopTab::Construct( const FArguments& InArgs, UOdysseyPainterEditorRasterPaintBucketTool* iTool )
 {
     mTool = iTool;
 
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
     FSinglePropertyParams defaultPropertyParams;
-    mSizePropertyView = propertyEditorModule.CreateSingleProperty(mTool->GetBrushOptions(), "Size", defaultPropertyParams);
-    mFlowPropertyView = propertyEditorModule.CreateSingleProperty(mTool->GetBrushOptions(), "Flow", defaultPropertyParams);
     mBlendParametersPropertyView = propertyEditorModule.CreateSingleProperty(mTool, "BlendParameters", defaultPropertyParams);
 
     TSharedPtr<class IPropertyHandle> blendParametersHandle = mBlendParametersPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> sizeHandle = mSizePropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> flowHandle = mFlowPropertyView->GetPropertyHandle();
     TSharedPtr<class IPropertyHandle> opacityHandle = blendParametersHandle->GetChildHandle("Opacity");
     TSharedPtr<class IPropertyHandle> blendModeHandle = blendParametersHandle->GetChildHandle("BlendingMode");
 
@@ -77,15 +60,7 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArg
         .HAlign(HAlign_Fill)
         + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(sizeHandle).ToSharedRef()
-        ]
-        + SUniformWrapPanel::Slot()
-        [
             CreatePropertyWidget(opacityHandle).ToSharedRef()
-        ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(flowHandle).ToSharedRef()
         ]
         + SUniformWrapPanel::Slot()
         [
@@ -102,11 +77,11 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArg
                 .ToolTipText( LOCTEXT("raster-drawing-tool.top-tab.eraser", "Switch the current tool to Eraser mode.") )
                 .VAlign( VAlign_Center )
                 .ContentPadding( FMargin( 0.0, 0.0 ) )
-                .OnClicked( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::OnEraserButtonClicked )
+                .OnClicked( this, &SOdysseyPainterEditorRasterPaintBucketToolTopTab::OnEraserButtonClicked )
                 [
                     SNew( SImage )
                     .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Eraser32" ) )
-                    .ColorAndOpacity( this, &SOdysseyPainterEditorRasterDrawingToolTopTab::GetEraserButtonColorAndOpacity )
+                    .ColorAndOpacity( this, &SOdysseyPainterEditorRasterPaintBucketToolTopTab::GetEraserButtonColorAndOpacity )
                 ]
             ]
         ]
@@ -114,7 +89,7 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::Construct( const FArguments& InArg
 }
 
 FReply
-SOdysseyPainterEditorRasterDrawingToolTopTab::OnEraserButtonClicked()
+SOdysseyPainterEditorRasterPaintBucketToolTopTab::OnEraserButtonClicked()
 {
     FOdysseyBlendParameters blendParameters = mTool->GetBlendParameters();
     blendParameters.bEraserMode = !blendParameters.bEraserMode;
@@ -123,7 +98,7 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::OnEraserButtonClicked()
 }
 
 FSlateColor
-SOdysseyPainterEditorRasterDrawingToolTopTab::GetEraserButtonColorAndOpacity() const
+SOdysseyPainterEditorRasterPaintBucketToolTopTab::GetEraserButtonColorAndOpacity() const
 {
     return ( mTool->GetBlendParameters().bEraserMode ? FSlateColor( FLinearColor( 1.0f, 0.5f, 0.0f, 1.0f ) ) : FSlateColor( FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f ) ) );
 }

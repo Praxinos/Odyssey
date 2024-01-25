@@ -3,6 +3,9 @@
 
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterSelection.h"
 #include "GeomTools.h"
+#include "OdysseyHUDPolygon.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyHUDSystem.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
