@@ -47,10 +47,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         static bool DoubleClicked();
 
-        static bool DisplayObjectHUD( FOdysseyVectorGroupPaint* iScene
-                                    , FOdysseyVectorObject* iObject
-                                    , uint64 iTraversalFlags );
-
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
         TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
                                                 , const TSharedPtr<ISinglePropertyView> iView );
@@ -105,19 +101,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
 
     private:
-        void OnKeyDownCommon( FOdysseyVectorGroupPaint* iScene, const FKey& iKey );
-        void OnKeyUpCommon( FOdysseyVectorGroupPaint* iScene, const FKey& iKey );
-        void PropertyChangedCommon(  FOdysseyVectorGroupPaint* iScene, const FName& iPropertyName );
-
         void Copy();
         void Paste();
         void SelectAll();
         void Delete();
 
     protected:
-        void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
-        void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
-
         void GetSelectedVertices( FOdysseyVectorGroupPaint* iScene
                                 , std::vector<FOdysseyVectorVertex*>& oSelectedVertexArray );
         // static
@@ -125,23 +114,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
                                           , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray );
         void SetPathColor( FOdysseyVectorPath* iPath
                          , eBaseToolColorSource iColorSource );
+        void MakeTest( FOdysseyVectorGroupPaint* iScene );
 
     private:
         void ExtendContextMenuObject( FMenuBuilder& menu );
         void ExtendContextMenuVertex( FMenuBuilder& menu );
 
-        // this method are needed because we retrieve the object list as a local variable which
-        // must exist when a menu action is run
-        void ApplyTransformations( FOdysseyVectorGroupPaint* iScene );
-        void ClearColoring( FOdysseyVectorGroupPaint* iScene );
-        void FlipVertical( FOdysseyVectorGroupPaint* iScene );
-        void FlipHorizontal( FOdysseyVectorGroupPaint* iScene  );
-        void DeletePointSelection( FOdysseyVectorGroupPaint* iScene  );
-        void AlignPointSelection( FOdysseyVectorGroupPaint* iScene  );
-        void UnalignPointSelection( FOdysseyVectorGroupPaint* iScene  );
-        void Group( FOdysseyVectorGroupPaint* iScene );
-        void Ungroup( FOdysseyVectorGroupPaint* iScene );
-        void MakePaintGroup( FOdysseyVectorGroupPaint* iScene );
 
     protected:
         // to store the top tab widget in order to create it only once. this will prevent sizing 

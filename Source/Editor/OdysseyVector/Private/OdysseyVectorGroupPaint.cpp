@@ -306,6 +306,12 @@ DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
     return t;
 }
 
+std::vector<FOdysseyVectorIntersection*>&
+FOdysseyVectorGroupPaint::GetIntersectionArray()
+{
+    return mIntersectionArray;
+}
+
 void
 FOdysseyVectorGroupPaint::SetRealtime( bool iRealtime )
 {
@@ -510,10 +516,10 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
 
         if( iSegment0 >= iSegment1 )
         {
-            if( ( segment0Poly->xMinInParent < iSegment1MaxInParentWithTolerance.x )
-             && ( segment0Poly->xMaxInParent > iSegment1MinInParentWithTolerance.x )
-             && ( segment0Poly->yMinInParent < iSegment1MaxInParentWithTolerance.y )
-             && ( segment0Poly->yMaxInParent > iSegment1MinInParentWithTolerance.y ) )
+            if( ( segment0Poly->xMinInParent <= iSegment1MaxInParentWithTolerance.x )
+             && ( segment0Poly->xMaxInParent >= iSegment1MinInParentWithTolerance.x )
+             && ( segment0Poly->yMinInParent <= iSegment1MaxInParentWithTolerance.y )
+             && ( segment0Poly->yMaxInParent >= iSegment1MinInParentWithTolerance.y ) )
             {
                 for( int j = 0; j < segment1FractionCache.size(); j++ )
                 {
@@ -521,8 +527,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                     double segment0PolySubT, segment1PolySubT;
 
                     // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
-                    if( ( segment0Poly->xMaxInParent > segment1Poly->xMinInParent ) && ( segment0Poly->xMinInParent < segment1Poly->xMaxInParent )
-                     && ( segment0Poly->yMaxInParent > segment1Poly->yMinInParent ) && ( segment0Poly->yMinInParent < segment1Poly->yMaxInParent ) )
+                    if( ( segment0Poly->xMaxInParent >= segment1Poly->xMinInParent ) && ( segment0Poly->xMinInParent <= segment1Poly->xMaxInParent )
+                     && ( segment0Poly->yMaxInParent >= segment1Poly->yMinInParent ) && ( segment0Poly->yMinInParent <= segment1Poly->yMaxInParent ) )
                     {
                         ::ULIS::FVec2D segment1PolyVector = ( segment1Poly->lineVertex[1] - segment1Poly->lineVertex[0] );
 
@@ -551,8 +557,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                                 double segment0T = segment0Poly->fromT + ( segment0PolySubT * ( segment0Poly->toT - segment0Poly->fromT ) );
                                 double segment1T = segment1Poly->fromT + ( segment1PolySubT * ( segment1Poly->toT - segment1Poly->fromT ) );
 
-                                if( ( segment0T > 0.0f && segment0T < 1.0f )
-                                 && ( segment1T > 0.0f && segment1T < 1.0f ) )
+                                if( ( segment0T >= 0.0f && segment0T < 1.0f )
+                                 && ( segment1T >= 0.0f && segment1T < 1.0f ) )
                                 {
                                     bool selfIntersects = ( iSegment0 == iSegment1 );
                                     FOdysseyVectorIntersection* intersection = new FOdysseyVectorIntersection( selfIntersects
@@ -588,8 +594,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
             if( segment1Vertex0->GetSegmentCount() == 1 )
             {
                 // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
-                if ( ( segment1Point0InParent.x > ( segment0Poly->xMinInParent - mGapTolerance ) ) && ( segment1Point0InParent.x < ( segment0Poly->xMaxInParent + mGapTolerance ) )
-                  && ( segment1Point0InParent.y > ( segment0Poly->yMinInParent - mGapTolerance ) ) && ( segment1Point0InParent.y < ( segment0Poly->yMaxInParent + mGapTolerance ) ) )
+                if ( ( segment1Point0InParent.x >= ( segment0Poly->xMinInParent - mGapTolerance ) ) && ( segment1Point0InParent.x <= ( segment0Poly->xMaxInParent + mGapTolerance ) )
+                  && ( segment1Point0InParent.y >= ( segment0Poly->yMinInParent - mGapTolerance ) ) && ( segment1Point0InParent.y <= ( segment0Poly->yMaxInParent + mGapTolerance ) ) )
                 {
                     // check distance at endpoints
                     double distance;
@@ -622,8 +628,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
             if( segment1Vertex1->GetSegmentCount() == 1 )
             {
                 // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
-                if ( ( segment1Point1InParent.x > ( segment0Poly->xMinInParent - mGapTolerance ) ) && ( segment1Point1InParent.x < ( segment0Poly->xMaxInParent + mGapTolerance ) )
-                  && ( segment1Point1InParent.y > ( segment0Poly->yMinInParent - mGapTolerance ) ) && ( segment1Point1InParent.y < ( segment0Poly->yMaxInParent + mGapTolerance ) ) )
+                if ( ( segment1Point1InParent.x >= ( segment0Poly->xMinInParent - mGapTolerance ) ) && ( segment1Point1InParent.x <= ( segment0Poly->xMaxInParent + mGapTolerance ) )
+                  && ( segment1Point1InParent.y >= ( segment0Poly->yMinInParent - mGapTolerance ) ) && ( segment1Point1InParent.y <= ( segment0Poly->yMaxInParent + mGapTolerance ) ) )
                 {
                     double distance;
                     double t = DistanceToSegmentConstrained( segment1Point1InParent

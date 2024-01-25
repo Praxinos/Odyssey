@@ -20,11 +20,13 @@ FPointQuadTree::~FPointQuadTree()
 
 FPointQuadTree::FPointQuadTree( const ::ULIS::FRectD& iRect
                               , uint32 iMaxPointsPerQuad
-                              , std::vector<FPointQuadTreeEntry>& iPointQuadTreeEntryArray )
+                              , std::vector<FPointQuadTreeEntry>& iPointQuadTreeEntryArray
+                              , uint32 iDepth
+                              , uint32 iMaxDepth )
     : mChildren { nullptr, nullptr, nullptr, nullptr }
     , mRect( iRect )
 {
-    Build( iMaxPointsPerQuad, iPointQuadTreeEntryArray );
+    Build( iMaxPointsPerQuad, iPointQuadTreeEntryArray, iDepth, iMaxDepth );
 }
 
 FOdysseyVectorHUD::~FOdysseyVectorHUD()
@@ -60,7 +62,10 @@ FPointQuadTree::Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, u
 }
 
 void
-FPointQuadTree::Build( uint32 iMaxPointsPerQuad, std::vector<FPointQuadTreeEntry>& iParentPointQuadTreeEntryArray )
+FPointQuadTree::Build( uint32 iMaxPointsPerQuad
+                     , std::vector<FPointQuadTreeEntry>& iParentPointQuadTreeEntryArray
+                     , uint32 iDepth
+                     , uint32 iMaxDepth )
 {
     mPointQuadTreeEntryArray.reserve( iParentPointQuadTreeEntryArray.size() );
 
@@ -72,7 +77,7 @@ FPointQuadTree::Build( uint32 iMaxPointsPerQuad, std::vector<FPointQuadTreeEntry
         }
     }
 
-    if( mPointQuadTreeEntryArray.size() > iMaxPointsPerQuad )
+    if( ( mPointQuadTreeEntryArray.size() > iMaxPointsPerQuad ) && ( iDepth < iMaxDepth ) )
     {
         uint32 minX =   mRect.x;
         uint32 minY =   mRect.y;
@@ -81,10 +86,10 @@ FPointQuadTree::Build( uint32 iMaxPointsPerQuad, std::vector<FPointQuadTreeEntry
         uint32 avgX =   mRect.x + ( mRect.w * 0.5f );
         uint32 avgY =   mRect.y + ( mRect.h * 0.5f );
 
-        mChildren[0] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( minX, minY, avgX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray );
-        mChildren[1] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( avgX, minY, maxX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray );
-        mChildren[2] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( avgX, avgY, maxX, maxY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray );
-        mChildren[3] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( minX, avgY, avgX, maxY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray );
+        mChildren[0] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( minX, minY, avgX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
+        mChildren[1] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( avgX, minY, maxX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
+        mChildren[2] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( avgX, avgY, maxX, maxY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
+        mChildren[3] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( minX, avgY, avgX, maxY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
 
         mPointQuadTreeEntryArray.clear();
     }
@@ -187,7 +192,7 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene, uint64 i
         delete mPointQuadTree;
     }
 
-    mPointQuadTree = new FPointQuadTree( screenRect, 20, pointQuadTreeEntryArray );
+    mPointQuadTree = new FPointQuadTree( screenRect, 20, pointQuadTreeEntryArray, 0, 8 );
 }
 
 void

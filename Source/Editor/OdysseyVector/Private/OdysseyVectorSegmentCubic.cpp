@@ -951,7 +951,10 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurvesRecursive( ::ULIS::FVec2D iBezier[4
     }
     else
     {
-        oBezierFragmentArray.emplace_back( iBezier, iFromT, iToT );
+        FOdysseyVectorBezierFragment& fragment = oBezierFragmentArray.emplace_back( iBezier, iFromT, iToT );
+
+        fragment.straightVector = ::ULIS::FVec2D( iBezier[3] - iBezier[0] );
+        fragment.straightLength = fragment.straightVector.Distance();
     }
 }
 
@@ -964,7 +967,7 @@ FOdysseyVectorSegmentCubic::GetOffsetCurve( uint32 iID )
 void
 FOdysseyVectorSegmentCubic::PrepareOffsetBeziers( double iSegmentStartRadius
                                                 , double iSegmentEndRadius
-                                                , const FOdysseyVectorBezierFragment& iGuideFragment
+                                                , FOdysseyVectorBezierFragment& iGuideFragment
                                                 , FOdysseyVectorBezierFragment& oFragment0
                                                 , FOdysseyVectorBezierFragment& oFragment1 )
 {
@@ -1055,7 +1058,7 @@ FOdysseyVectorSegmentCubic::PrepareOffsetBeziers( double iSegmentStartRadius
 }
 
 void
-FOdysseyVectorSegmentCubic::SmoothOffsetCurves( const std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray )
+FOdysseyVectorSegmentCubic::SmoothOffsetCurves( std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray )
 {
     std::vector<FOdysseyVectorBezierFragment>& offsetCurve0BezierFragmentArray = mOffsetCurve[0].GetBezierFragmentArray();
     std::vector<FOdysseyVectorBezierFragment>& offsetCurve1BezierFragmentArray = mOffsetCurve[1].GetBezierFragmentArray();
@@ -1077,11 +1080,12 @@ FOdysseyVectorSegmentCubic::SmoothOffsetCurves( const std::vector<FOdysseyVector
     // because they have the same number of fragments, but for consistency we iterate using iGuideBezierFragmentArray
     for( int i = 0; i < guideBezierFragmentCount; i++ )
     {
+        FOdysseyVectorBezierFragment* guideFragment = &iGuideBezierFragmentArray[i];
         int p = i - 1;
 
         PrepareOffsetBeziers( segmentStartRadius
                             , segmentEndRadius
-                            , iGuideBezierFragmentArray[i]
+                            , *guideFragment
                             , offsetCurve0BezierFragmentArray[i]
                             , offsetCurve1BezierFragmentArray[i] );
 
@@ -1097,15 +1101,30 @@ FOdysseyVectorSegmentCubic::SmoothOffsetCurves( const std::vector<FOdysseyVector
                                             , &offsetCurve1BezierFragmentArray[i].straightVector };
             ::ULIS::FVec2D tangent[2] = { *prevVector[0] + *currVector[0]
                                         , *prevVector[1] + *currVector[1] };
+            //::ULIS::FVec2D tangent[2] = { currFragment[0]->bezier[3] - prevFragment[0]->bezier[0]
+            //                            , currFragment[1]->bezier[3] - prevFragment[1]->bezier[0] };
+
+             //double dot[2] = { prevFragment[0]->straightVector.DotProduct( currFragment[0]->straightVector )
+             //                , prevFragment[1]->straightVector.DotProduct( currFragment[1]->straightVector ) };
+             //double dotFactor[2] = { ( 1.0f - dot[0] ) + 0.55f
+             //                      , ( 1.0f - dot[1] ) + 0.55f };
 
             if( tangent[0].DistanceSquared() ) tangent[0].Normalize();
             if( tangent[1].DistanceSquared() ) tangent[1].Normalize();
 
-            currFragment[0]->bezier[1] = currFragment[0]->bezier[0] + ( tangent[0] * currFragment[0]->straightLength * 0.35f );
-            prevFragment[0]->bezier[2] = prevFragment[0]->bezier[3] - ( tangent[0] * prevFragment[0]->straightLength * 0.35f );
+            //if( ( guideFragment->straightVector.DotProduct( *prevVector[0] ) > 0.0f )
+            // && ( guideFragment->straightVector.DotProduct( *currVector[0] ) > 0.0f ) )
+            {
+                currFragment[0]->bezier[1] = currFragment[0]->bezier[0] + ( tangent[0] * currFragment[0]->straightLength * 0.33f );
+                prevFragment[0]->bezier[2] = prevFragment[0]->bezier[3] - ( tangent[0] * prevFragment[0]->straightLength * 0.33f );
+            }
 
-            currFragment[1]->bezier[1] = currFragment[1]->bezier[0] + ( tangent[1] * currFragment[1]->straightLength * 0.35f );
-            prevFragment[1]->bezier[2] = prevFragment[1]->bezier[3] - ( tangent[1] * prevFragment[1]->straightLength * 0.35f );
+            //if( ( guideFragment->straightVector.DotProduct( *prevVector[1] ) > 0.0f )
+            // && ( guideFragment->straightVector.DotProduct( *currVector[1] ) > 0.0f ) )
+            {
+                currFragment[1]->bezier[1] = currFragment[1]->bezier[0] + ( tangent[1] * currFragment[1]->straightLength * 0.33f );
+                prevFragment[1]->bezier[2] = prevFragment[1]->bezier[3] - ( tangent[1] * prevFragment[1]->straightLength * 0.33f );
+            }
         }
     }
 }

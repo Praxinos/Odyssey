@@ -31,9 +31,14 @@ class ODYSSEYVECTOR_API FPointQuadTree
        ~FPointQuadTree();
        FPointQuadTree( const ::ULIS::FRectD& iRect
                      , uint32 iMaxPointsPerQuad
-                     , std::vector<FPointQuadTreeEntry>& iPointQuadTreeEntryArray );
+                     , std::vector<FPointQuadTreeEntry>& iPointQuadTreeEntryArray
+                     , uint32 iDepth
+                     , uint32 iMaxDepth );
 
-        void Build( uint32 iMaxPointsPerQuad, std::vector<FPointQuadTreeEntry>& iParentPointQuadTreeEntryArray );
+        void Build( uint32 iMaxPointsPerQuad
+                     , std::vector<FPointQuadTreeEntry>& iParentPointQuadTreeEntryArray
+                     , uint32 iDepth
+                     , uint32 iMaxDepth );
         void Draw( BLContext* iBLContext
                  , FOdysseyVectorGroupPaint* iScene
                  , uint64 iFlags );

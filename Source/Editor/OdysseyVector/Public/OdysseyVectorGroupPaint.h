@@ -148,6 +148,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void SetMultithreaded( bool iMultithreaded );
         bool IsMultithreaded();
+        std::vector<FOdysseyVectorIntersection*>& GetIntersectionArray();
 
     protected:
         /**
@@ -229,13 +230,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         FOdysseyVectorVertex* ReachVertexFromSection( FOdysseyVectorVertex* iVertex
                                                     , FOdysseyVectorSection* iFromSection
                                                     , FOdysseyVectorSegment* iOwnerSegment );
-        void GetSectionsForSegment( FOdysseyVectorSegment* iSegment
-                                  , std::vector<FOdysseyVectorSection*>& oSectionArray );
-        bool PickSection( FOdysseyVectorSection* iSection
-                        , const ::ULIS::FRectD& iMaskRect
-                        , const uint8* iMaskPixelData );
-        bool PickSections( std::vector<FOdysseyVectorSection*>& iSectionArray
-                        ,  std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
         bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
 
         void SetSegmentBBox( FOdysseyVectorSegment* iSegment

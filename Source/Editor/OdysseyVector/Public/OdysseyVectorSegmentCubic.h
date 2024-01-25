@@ -242,7 +242,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , int32   iMaxRecurseDepth );
         void PrepareOffsetBeziers( double iSegmentStartRadius
                                  , double iSegmentEndRadius
-                                 , const FOdysseyVectorBezierFragment& iFragment
+                                 , FOdysseyVectorBezierFragment& iFragment
                                  , FOdysseyVectorBezierFragment& oFragment0
                                  , FOdysseyVectorBezierFragment& oFragment1 );
         void BuildOffsetCurves();
@@ -255,7 +255,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                        , uint32 iCurrentRecurse
                                        , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray );
         void ThickenFraction( FOdysseyVectorFraction* iFraction );
-        void SmoothOffsetCurves( const std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray );
+        void SmoothOffsetCurves( std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray );
         static void SmoothOffsetCurvesFragments( FOdysseyVectorVertex* iVertex
                                                , FOdysseyVectorSegmentCubic* iPrevSegment
                                                , FOdysseyVectorSegmentCubic* iCurrSegment
