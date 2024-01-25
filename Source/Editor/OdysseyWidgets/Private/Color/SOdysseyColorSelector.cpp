@@ -11,13 +11,6 @@
 
 #define LOCTEXT_NAMESPACE "Widgets"
 
-
-/////////////////////////////////////////////////////
-// Cosmetic
-static FSlateColorBrush selector_header_brush = FSlateColorBrush( FLinearColor( FColor( 70, 70, 70 ) ) );
-static FSlateColor hex_box_bg_brush = FSlateColor( FLinearColor( FColor( 50, 50, 50 ) ) );
-static FSlateColor hex_box_fg_brush = FSlateColor( FLinearColor( FColor( 127, 127, 127 ) ) );
-
 /////////////////////////////////////////////////////
 // Utility
 FString
@@ -75,77 +68,38 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
 {
     mColor = InArgs._Color;
     mOnColorChangeCallback = InArgs._OnColorChange;
-    options.Add(MakeShareable(new FString("Color Wheel")));
-    CurrentItem = options[0];
-
+    
     ChildSlot
     [
-        SNew( SVerticalBox )
-        +SVerticalBox::Slot()
-        .AutoHeight()
+        SNew( SOverlay )
+        +SOverlay::Slot()
         [
-            SNew( SHorizontalBox )
-            +SHorizontalBox::Slot()
-            [
-                SNew( SBorder )
-                .BorderImage( &selector_header_brush )
-                .HAlign( HAlign_Center )
-                .VAlign( VAlign_Center )
-                [
-                    SNew( STextBlock )
-                    .Text( LOCTEXT( "color-selector.selector", "Selector" ) )
-                ]
-            ]
-            +SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SNew( SComboBox< FComboItemType > )
-                .OptionsSource(&options)
-                .OnSelectionChanged(this, &SOdysseyColorSelector::OnSelectionChanged)
-                .OnGenerateWidget(this, &SOdysseyColorSelector::MakeWidgetForOption)
-                .InitiallySelectedItem(CurrentItem)
-                [
-                    SNew(STextBlock)
-                    .Text(this, &SOdysseyColorSelector::GetCurrentItemLabel)
-                ]
-            ]
+            SAssignNew( mAdvancedColorWheel, SOdysseyAdvancedColorWheel )
+            .MinDesiredWidth(   150 )
+            .MinDesiredHeight(  150 )
+            .MaxDesiredWidth(   800 )
+            .MaxDesiredHeight(  800 )
+            .Color(mColor)
+            .OnColorChange( mOnColorChangeCallback )
         ]
-        +SVerticalBox::Slot()
+        +SOverlay::Slot()
+        .HAlign( HAlign_Right )
+        .VAlign( VAlign_Bottom )
         [
-            SNew( SOverlay )
-            +SOverlay::Slot()
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
             [
-                SAssignNew( adv_color_wheel, SOdysseyAdvancedColorWheel )
-                .MinDesiredWidth(   150 )
-                .MinDesiredHeight(  150 )
-                .MaxDesiredWidth(   800 )
-                .MaxDesiredHeight(  800 )
-                .Color(mColor)
-                .OnColorChange( mOnColorChangeCallback )
+                SNullWidget::NullWidget //spacer
             ]
-            +SOverlay::Slot()
-            .HAlign( HAlign_Left )
-            .VAlign( VAlign_Top )
-            .Padding( TAttribute< FMargin >( this, &SOdysseyColorSelector::GetHexBoxPosition ) )
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .MaxWidth(90.0f)
             [
-                SNew( SBox )
-                .WidthOverride( this, &SOdysseyColorSelector::GetHexBoxWidth )
-                .HeightOverride( this, &SOdysseyColorSelector::GetHexBoxHeight )
-                .Visibility( this, &SOdysseyColorSelector::GetHexBoxVisibility )
-                [
-                    SAssignNew( hex_editable_text_box, SEditableTextBox )
-                    .Text( this, &SOdysseyColorSelector::GetColorHex )
-                    .IsReadOnly(true)
-                    .BackgroundColor( hex_box_bg_brush )
-                    .ForegroundColor( hex_box_fg_brush )
-                    .Justification( ETextJustify::Center )
-                    .Font( this, &SOdysseyColorSelector::GetHexFont )
-                    .SelectAllTextWhenFocused( true )
-                    .RevertTextOnEscape( true )
-                    .OnKeyCharHandler( this, &SOdysseyColorSelector::HexBoxOnKeyChar )
-                    .OnTextChanged( this, &SOdysseyColorSelector::HexBoxOnTextChanged )
-                    .OnTextCommitted( this, &SOdysseyColorSelector::HexBoxOnTextCommited )
-                ]
+                SNew(SEditableTextBox)
+                .MinDesiredWidth(90.0f)
+                .Text(this, &SOdysseyColorSelector::GetHexText)
+                .OnTextChanged( this, &SOdysseyColorSelector::OnHexTextChanged )
+                .OnTextCommitted( this, &SOdysseyColorSelector::OnHexTextCommitted )
             ]
         ]
     ];
@@ -154,72 +108,6 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Private Callbacks
-TSharedRef<SWidget>
-SOdysseyColorSelector::MakeWidgetForOption( FComboItemType InOption )
-{
-    return SNew(STextBlock).Text(FText::FromString(*InOption));
-}
-
-
-void
-SOdysseyColorSelector::OnSelectionChanged(FComboItemType NewValue, ESelectInfo::Type)
-{
-    CurrentItem = NewValue;
-}
-
-
-FText
-SOdysseyColorSelector::GetCurrentItemLabel() const
-{
-    if (CurrentItem.IsValid())
-    {
-        return FText::FromString(*CurrentItem);
-    }
-
-    return LOCTEXT("color-selector.invalid-selected-item", "<<Invalid option>>");
-}
-
-
-FMargin
-SOdysseyColorSelector::GetHexBoxPosition() const
-{
-    FVector2D temp = adv_color_wheel->GetInternalPadding() + adv_color_wheel->GetInternalSize() * FVector2D( 0.898, 0.957 );
-    return FMargin( temp.X - GetHexBoxWidth().Get()
-                  , temp.Y - GetHexBoxHeight().Get()
-                  , 0
-                  , 0
-    );
-}
-
-
-FOptionalSize
-SOdysseyColorSelector::GetHexBoxWidth() const
-{
-    return  adv_color_wheel->GetInternalSize().X * 0.25;
-}
-
-
-FOptionalSize
-SOdysseyColorSelector::GetHexBoxHeight() const
-{
-    return  adv_color_wheel->GetInternalSize().Y * 0.075;
-}
-
-
-EVisibility
-SOdysseyColorSelector::GetHexBoxVisibility() const
-{
-    return  adv_color_wheel->IsFullyVisible() ? EVisibility::Visible : EVisibility::Hidden;
-}
-
-FSlateFontInfo
-SOdysseyColorSelector::GetHexFont() const
-{
-    FSlateFontInfo nfo = FCoreStyle::Get().GetWidgetStyle< FEditableTextBoxStyle >("NormalEditableTextBox").TextStyle.Font;
-    nfo.Size *= adv_color_wheel->GetDrawRatio() * 3;
-    return  nfo;
-}
-
 
 bool
 SOdysseyColorSelector::HexBoxIsValidChar( TCHAR iChar ) const
@@ -232,10 +120,10 @@ FReply
 SOdysseyColorSelector::HexBoxOnKeyChar( const FGeometry&, const FCharacterEvent& iEvent ) const
 {
     TCHAR mchar = iEvent.GetCharacter();
-    int len = hex_editable_text_box->GetText().ToString().Len();
+    int len = mHexTextBox->GetText().ToString().Len();
     bool forward = HexBoxIsValidChar( mchar ) && len < 6;
     if( forward == false && mchar == '\b' ) forward = true;
-    if( forward == false && hex_editable_text_box->AnyTextSelected() ) forward = true;
+    if( forward == false && mHexTextBox->AnyTextSelected() ) forward = true;
     return forward ? FReply::Unhandled() : FReply::Handled();
 }
 
@@ -252,7 +140,7 @@ SOdysseyColorSelector::HexBoxOnTextChanged( const FText& iText )
     }
 
     /* if( !res.Equals( str ) )
-        hex_editable_text_box->SetText( FText::FromString( res ) ); */
+        mHexTextBox->SetText( FText::FromString( res ) ); */
 
     //Adjust
 }
@@ -269,7 +157,7 @@ SOdysseyColorSelector::HexBoxOnTextCommited( const FText& iText, ETextCommit::Ty
         res.Append( &filler, 1 );
     }
 
-    // hex_editable_text_box->SetText( FText::FromString( res ) );
+    // mHexTextBox->SetText( FText::FromString( res ) );
     FString str_r = res.Mid( 0, 2 );
     FString str_g = res.Mid( 2, 2 );
     FString str_b = res.Mid( 4, 2 );
@@ -278,7 +166,7 @@ SOdysseyColorSelector::HexBoxOnTextCommited( const FText& iText, ETextCommit::Ty
     int b = HexStringToDecimal( str_b );
     ::ULIS::FColor newColor = ::ULIS::FColor::FromRGBA8( r, g, b );
 
-    //adv_color_wheel->SetColor( newColor );
+    //mAdvancedColorWheel->SetColor( newColor );
 
     //Set or Abort + start / adjust if needed
 }
@@ -297,12 +185,40 @@ SOdysseyColorSelector::GetColorHex() const
     FString str_b = DecimalToHexString( b );
     FString cat = str_r + str_g + str_b;
 
-    // hex_editable_text_box->SetText( FText::FromString( cat ) );
+    // mHexTextBox->SetText( FText::FromString( cat ) );
     // OnColorChangedCallback.ExecuteIfBound( iColor );
 
     return FText::FromString( cat );
 }
 
+
+FText SOdysseyColorSelector::GetHexText() const
+{
+    ::ULIS::FColor ulisColor = mColor.Get().ToFormat( ::ULIS::Format_RGBA8 );
+    uint8 r = ulisColor.Red8();
+    uint8 g = ulisColor.Green8();
+    uint8 b = ulisColor.Blue8();
+    FColor color(r, g, b, 255);
+	return FText::FromString(color.ToHex());
+}
+
+void
+SOdysseyColorSelector::OnHexTextChanged( const FText& iText )
+{
+    FColor color = FColor::FromHex(iText.ToString());
+    ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.G, color.B, color.A);
+    mOnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kAdjust, ulisColor );
+}
+
+void SOdysseyColorSelector::OnHexTextCommitted(const FText& Text, ETextCommit::Type CommitType)
+{
+	if (!Text.IsEmpty() && ((CommitType == ETextCommit::OnEnter) || (CommitType == ETextCommit::OnUserMovedFocus)))
+	{
+		FColor color = FColor::FromHex(Text.ToString());
+        ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.G, color.B, color.A);
+        mOnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kSet, ulisColor );
+	}	
+}
 
 #undef LOCTEXT_NAMESPACE
 

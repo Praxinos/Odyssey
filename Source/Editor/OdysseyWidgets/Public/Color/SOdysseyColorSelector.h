@@ -23,47 +23,36 @@
 
 class ODYSSEYWIDGETS_API SOdysseyColorSelector : public SCompoundWidget
 {
-
     typedef SCompoundWidget tSuperClass;
-    typedef TSharedPtr<FString> FComboItemType;
 
 public:
     SLATE_BEGIN_ARGS( SOdysseyColorSelector )
-        {}
-    SLATE_ATTRIBUTE( ::ULIS::FColor, Color )
-    SLATE_EVENT( FOnColorChange, OnColorChange )
+    {}
+        SLATE_ATTRIBUTE( ::ULIS::FColor, Color )
+        SLATE_EVENT( FOnColorChange, OnColorChange )
     SLATE_END_ARGS()
 
 public:
     // Construction / Destruction
     void Construct(const FArguments& InArgs);
 
-public:
-    // Public Callbacks
-    //void SetColor( const ::ULIS::FColor& iColor );
-
 private:
     // Private Callbacks
-    TSharedRef<SWidget> MakeWidgetForOption( FComboItemType InOption );
-    void OnSelectionChanged(FComboItemType NewValue, ESelectInfo::Type);
-    FText GetCurrentItemLabel() const;
-    FMargin GetHexBoxPosition() const;
-    FOptionalSize GetHexBoxWidth() const;
-    FOptionalSize GetHexBoxHeight() const;
-    EVisibility GetHexBoxVisibility() const;
-    FSlateFontInfo GetHexFont() const;
     bool HexBoxIsValidChar( TCHAR iChar ) const;
     FReply HexBoxOnKeyChar( const FGeometry&, const FCharacterEvent& iEvent ) const;
     void HexBoxOnTextChanged( const FText& iText );
     void HexBoxOnTextCommited( const FText&, ETextCommit::Type );
     FText GetColorHex() const;
 
+    
+    FText GetHexText() const;
+    void OnHexTextChanged( const FText& iText );
+    void OnHexTextCommitted(const FText& Text, ETextCommit::Type CommitType);
+
 private:
     // Private data members
-    TSharedPtr< SOdysseyAdvancedColorWheel > adv_color_wheel;
-    TArray< FComboItemType > options;
-    FComboItemType CurrentItem;
-    TSharedPtr< SEditableTextBox > hex_editable_text_box;
+    TSharedPtr< SOdysseyAdvancedColorWheel > mAdvancedColorWheel;
+    TSharedPtr< SEditableTextBox > mHexTextBox;
 
     TAttribute<::ULIS::FColor> mColor;
     FOnColorChange mOnColorChangeCallback;
