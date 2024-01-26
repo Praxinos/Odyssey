@@ -31,11 +31,12 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ImportTextureSequence, ImportExportShortcuts, "Import Texture Sequence", "Import several textures from the content-browser in a new layer",                                               EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::P));
 
 // LayerStack Shortcuts Category
+    UI_BUNDLE_COMMAND( NavigateToNextFrame, TimelineShortcuts, "Navigate to next Frame", "Change the current frame to be the next frame in the animation timeline",                                                            EUserInterfaceActionType::Button, FInputChord(EKeys::Semicolon));
+    UI_BUNDLE_COMMAND( NavigateToPreviousFrame, TimelineShortcuts, "Navigate to previous Frame", "Change the current frame to be the previous frame in the animation timeline",                                                EUserInterfaceActionType::Button, FInputChord(EKeys::Comma));
+    UI_BUNDLE_COMMAND( NavigateToNextCell, TimelineShortcuts, "Navigate to next Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",                    EUserInterfaceActionType::Button, FInputChord(EKeys::G));
+    UI_BUNDLE_COMMAND( NavigateToPreviousCell, TimelineShortcuts, "Navigate to previous Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",            EUserInterfaceActionType::Button, FInputChord(EKeys::F));
 
-    UI_BUNDLE_COMMAND( StepForward, TimelineShortcuts, "Step Forward", "Change the current frame to be the next frame in the animation timeline",                                                            EUserInterfaceActionType::Button, FInputChord(EKeys::O));
-    UI_BUNDLE_COMMAND( StepBackward, TimelineShortcuts, "Step Backward", "Change the current frame to be the previous frame in the animation timeline",                                                      EUserInterfaceActionType::Button, FInputChord(EKeys::U));
-
-    UI_BUNDLE_COMMAND( CreateNewAnimationLayerImageRaster, LayersShortcuts, "Create New Aniamtion Layer Image Raster", "Create New Aniamtion Layer Image Raster", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
+    UI_BUNDLE_COMMAND( CreateNewAnimationLayerImageRaster, LayersShortcuts, "Create New Animation Layer Image Raster", "Create New Animation Layer Image Raster", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
 
     UI_BUNDLE_COMMAND( ChangeLayerOpacity10, LayersShortcuts, "Change current Layer Opacity to 10%", "Change current Layer Opacity to 10%",                                                                EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ChangeLayerOpacity20, LayersShortcuts, "Change current Layer Opacity to 20%", "Change current Layer Opacity to 20%",                                                                EUserInterfaceActionType::Button, FInputChord());

@@ -10,13 +10,14 @@ public:
 
 public:
     //Common Shortcuts
-    void Action_ActivateSelectionTool();
-    void Action_ActivateMoveTool();
-    void Action_ActivateCutTool();
-    
-    bool CanAction_ActivateSelectionTool();
-    bool CanAction_ActivateMoveTool();
-    bool CanAction_ActivateCutTool();
+    void Action_ActivateTimelineSelectionTool();
+    void Action_ActivateTimelineMoveTool();
+    void Action_ActivateTimelineCutTool();
+
+    void Action_NavigateToNextFrame();
+    void Action_NavigateToPreviousFrame();
+    void Action_NavigateToNextCell();
+    void Action_NavigateToPreviousCell();
 
 public:
     //Shortcuts

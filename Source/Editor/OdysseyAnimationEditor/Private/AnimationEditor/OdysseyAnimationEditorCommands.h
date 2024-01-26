@@ -34,12 +34,6 @@ public:
     /** Action for creating a new animation layer image raster */
     TSharedPtr<FUICommandInfo> CreateNewAnimationLayerImageRaster;
 
-    /** Action for Step Forward in animation timeline */
-    TSharedPtr<FUICommandInfo> StepForward;
-
-    /** Action for Step Backward in animation timeline */
-    TSharedPtr<FUICommandInfo> StepBackward;
-
     /** Action for deleting the current layer */
     TSharedPtr<FUICommandInfo> ChangeLayerOpacity10;
 
@@ -91,4 +85,10 @@ public:
     TSharedPtr<FUICommandInfo> HoldActivateTimelineMoveTool;
     TSharedPtr<FUICommandInfo> HoldActivateTimelineCutTool;
     TSharedPtr<FUICommandInfo> BreakCell;
+
+    //Timeline Navigation Commands
+    TSharedPtr<FUICommandInfo> NavigateToNextCell;
+    TSharedPtr<FUICommandInfo> NavigateToPreviousCell;
+    TSharedPtr<FUICommandInfo> NavigateToNextFrame;
+    TSharedPtr<FUICommandInfo> NavigateToPreviousFrame;
 };
