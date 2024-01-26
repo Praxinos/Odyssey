@@ -259,6 +259,8 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
     if ( assetsData.Num() > 0 )
         layerStack->Modify();
 
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+
     for( int i = 0; i < assetsData.Num(); i++ )
     {
         UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
@@ -268,7 +270,21 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
 
         UTexture2D* openedTexture = static_cast<UTexture2D*>(assetsData[i].GetAsset());
         ::ULIS::FBlock* textureBlock = NewBlockFromUTextureData(openedTexture, format);
-        layerImageRaster->GetRasterBlock()->SetBlock(MakeShareable(textureBlock));
+
+        FOdysseyRasterBlockMutator rasterBlockMutator(layerImageRaster->GetRasterBlock(), false);
+        rasterBlockMutator.EditTilesFromRects(
+            { textureBlock->Rect() },
+            FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+                {
+                    ctx.Copy(*textureBlock, *iBlock);
+                    ctx.Finish();
+                    return {};
+                }
+            )
+        );
+        rasterBlockMutator.Commit();
+        
     }
 }
 
