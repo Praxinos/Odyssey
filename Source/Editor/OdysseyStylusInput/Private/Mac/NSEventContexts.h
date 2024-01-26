@@ -50,7 +50,7 @@ struct FNSEventStylusState
 
     FStylusState ToPublicState() const
     {
-        return FStylusState( Position, Z, Timer, Tilt, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted );
+        return FStylusState( Position, Z, Timer, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted );
     }
 };
 
