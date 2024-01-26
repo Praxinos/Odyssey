@@ -152,17 +152,6 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
 
             section->AddCycle( this );
 
-            if( vertexn->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
-            {
-                FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
-
-                if( ( mContourSectionArray[i]->GetSegment() != mContourSectionArray[n]->GetSegment() )
-                 || ( intersectionVertex->GetIntersection()->SelfIntersects() == true ) )
-                {
-                    vertexn = intersectionVertex->GetPartner();
-                }
-            }
-
             // check if we need to revert the bezier. Indeed, a cycle is a combination of sections
             // that may not go the same way. We have to run through them the same way.
             if( vertexi == sectionVertex0 )
@@ -319,9 +308,9 @@ ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
         FOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
         FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
         FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
-        FOdysseyVectorPath* path = vertex0->GetPath();
-        BLPoint pt0 = path->GetWorldMatrix().mapPoint( vertex0->GetCoords().x, vertex0->GetCoords().y );
-        BLPoint pt1 = path->GetWorldMatrix().mapPoint( vertex1->GetCoords().x, vertex1->GetCoords().y );
+        FOdysseyVectorObject* owner = vertex0->GetOwner();
+        BLPoint pt0 = owner->GetWorldMatrix().mapPoint( vertex0->GetCoords().x, vertex0->GetCoords().y );
+        BLPoint pt1 = owner->GetWorldMatrix().mapPoint( vertex1->GetCoords().x, vertex1->GetCoords().y );
 
         UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
     }

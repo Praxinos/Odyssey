@@ -995,20 +995,12 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
         }
 
         // check intersection
-        for( FOdysseyVectorIntersection* intersection : iScene->GetIntersectionArray() )
+        for( FOdysseyVectorVertexIntersection& intersectionVertex : iScene->GetIntersectionVertexArray() )
         {
-            FOdysseyVectorVertexIntersection* vertex0 = intersection->GetVertex(0);
-            FOdysseyVectorVertexIntersection* vertex1 = intersection->GetVertex(1);
-
             // check number of sections.
-            if( vertex0->GetSectionCount() != 3 )
+            if( intersectionVertex.GetSectionCount() != 3 )
             {
-                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at paintgroup/vertex0 : %d"), vertex0->GetSectionCount());
-            }
-
-            if( vertex1->GetSectionCount() != 3 )
-            {
-                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at paintgroup/vertex1 : %d"), vertex1->GetSectionCount());
+                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at paintgroup/vertex0 : %d"), intersectionVertex.GetSectionCount());
             }
         }
 

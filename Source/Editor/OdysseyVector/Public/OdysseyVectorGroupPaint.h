@@ -119,7 +119,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                              , FOdysseyVectorSegmentCubic* iSegment1
                              , const ::ULIS::FVec2D& iSegment1MinInParentWithTolerance
                              , const ::ULIS::FVec2D& iSegment1MaxInParentWithTolerance
-                             , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
+                             , std::vector<FOdysseyVectorVertexIntersection>& iIntersectionVertexArray );
         void IntersectVertex( FOdysseyVectorVertex* iVertex0
                             , const ::ULIS::FVec2D& iPoint0InParent
                             , FOdysseyVectorVertex* iVertex1
@@ -148,7 +148,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void SetMultithreaded( bool iMultithreaded );
         bool IsMultithreaded();
-        std::vector<FOdysseyVectorIntersection*>& GetIntersectionArray();
+        std::vector<FOdysseyVectorVertexIntersection>& GetIntersectionVertexArray();
 
     protected:
         /**
@@ -159,8 +159,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @return the number of intersections
          */
         void IntersectSegmentWithList( FOdysseyVectorSegment* iSegment
-                                       , const std::list<FOdysseyVectorSegment*>& iSegmenList
-                                       , std::vector<FOdysseyVectorIntersection*>& oIntersectionList );
+                                     , const std::list<FOdysseyVectorSegment*>& iSegmenList
+                                     , std::vector<FOdysseyVectorVertexIntersection>& oIntersectionList );
 
         /**
          * @brief Build the graph that allows to detect the cycles. It basically checks intersections
@@ -222,7 +222,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                    , std::vector<FOdysseyVectorSection>& iSectionBuffer
                                    , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer );
         void CreateSegmentSections( FOdysseyVectorSegment* iSegment
-                                  , BLMatrix2D* iConversionMatrix
                                   , std::vector<FOdysseyVectorSection>& iSectionBuffer );
         void CreatePathSections( FOdysseyVectorPath* iPath
                                , BLMatrix2D* iConversionMatrix );
@@ -237,7 +236,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool IntersectGapSection( FOdysseyVectorSection* iGapSection
                                 , FOdysseyVectorSegmentCubic* iSegment );
         FOdysseyVectorVertex* CreateNearIntersection( FOdysseyVectorVertex *iVertex
-                                                    , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
+                                                    , std::vector<FOdysseyVectorVertexIntersection>& iIntersectionVertexArray );
 
     protected:
         static const uint32 NOCYCLE  = 0;
@@ -247,7 +246,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::list<FOdysseyVectorBucket*> mSelectedBucketList;
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::list<FOdysseyVectorCycle*> mCycleList;
-        std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
+        std::vector<FOdysseyVectorVertexIntersection> mIntersectionVertexArray;
         uint32 mPaintingCode;
         std::mutex mMutex;
 

@@ -282,7 +282,7 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
 {
     if( ( iVertexA->GetSegmentCount() == 1 )
      && ( iVertexB->GetSegmentCount() == 1 )
-     && ( iVertexA->GetPath() == iVertexB->GetPath() ) )
+     && ( iVertexA->GetOwnerAsPath() == iVertexB->GetOwnerAsPath() ) )
     {
         ::ULIS::FVec2D& vertexACoords = iVertexA->GetCoords();
         ::ULIS::FVec2D& vertexBCoords = iVertexB->GetCoords();
@@ -290,7 +290,7 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
         double vertexARadius = iVertexA->GetRadius();
         double vertexBRadius = iVertexB->GetRadius();
         double averageRadius = ( vertexARadius + vertexBRadius ) * 0.5f;
-        FOdysseyVectorPath* path = iVertexA->GetPath();
+        FOdysseyVectorPath* path = iVertexA->GetOwnerAsPath();
 
         if( path->GetClass() == FOdysseyVectorPath::StaticClass() )
         {

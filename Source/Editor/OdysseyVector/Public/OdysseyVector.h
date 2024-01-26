@@ -28,10 +28,10 @@ namespace FOdysseyVector
                                               , const ::ULIS::FVec2D& iSegmentP1
                                               , double& oDistance );
 
-    void ODYSSEYVECTOR_API BezierExtract( ::ULIS::FVec2D& iP0
-                                        , ::ULIS::FVec2D& iP1
-                                        , ::ULIS::FVec2D& iP2
-                                        , ::ULIS::FVec2D& iP3
+    void ODYSSEYVECTOR_API BezierExtract( const ::ULIS::FVec2D& iP0
+                                        , const ::ULIS::FVec2D& iP1
+                                        , const ::ULIS::FVec2D& iP2
+                                        , const ::ULIS::FVec2D& iP3
                                         , double fromT
                                         , double toT
                                         , ::ULIS::FVec2D& oP0

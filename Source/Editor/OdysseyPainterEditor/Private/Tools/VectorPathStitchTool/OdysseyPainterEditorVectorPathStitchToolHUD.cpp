@@ -133,8 +133,8 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
     {
         BLRgba32 orange = BLRgba32( 255, 127, 0, 255 );
 
-        DrawPath( iBLContext, mStitchableVertex[0]->GetPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
-        DrawPath( iBLContext, mStitchableVertex[1]->GetPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
+        DrawPath( iBLContext, mStitchableVertex[0]->GetOwnerAsPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
+        DrawPath( iBLContext, mStitchableVertex[1]->GetOwnerAsPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
 
         DrawVertex( iBLContext, mStitchableVertex[0], orange, bgColor, hcColor, true, 0 );
         DrawVertex( iBLContext, mStitchableVertex[1], orange, bgColor, hcColor, true, 0 );

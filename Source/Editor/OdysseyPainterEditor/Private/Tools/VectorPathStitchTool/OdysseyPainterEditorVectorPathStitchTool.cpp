@@ -95,12 +95,12 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
             FOdysseyVectorPath* mergedPath = nullptr;
 
             // TODO: remove vertexB->GetPath() from selected objects.
-            if( vertexA->GetPath() != vertexB->GetPath() )
+            if( vertexA->GetOwnerAsPath() != vertexB->GetOwnerAsPath() )
             {
-                mergedPath = vertexB->GetPath();
+                mergedPath = vertexB->GetOwnerAsPath();
 
-                vertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
-                vertexA->GetPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
+                vertexB->GetOwnerAsPath()->GetParent()->RemoveChild( mergedPath );
+                vertexA->GetOwnerAsPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
 
 
                 // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
@@ -110,7 +110,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                 {
                     iEngine->UnselectObject( mergedPath );
 
-                    iEngine->SelectObject( vertexA->GetPath() );
+                    iEngine->SelectObject( vertexA->GetOwnerAsPath() );
                 }
 
                 removedPathArray.push_back( mergedPath );

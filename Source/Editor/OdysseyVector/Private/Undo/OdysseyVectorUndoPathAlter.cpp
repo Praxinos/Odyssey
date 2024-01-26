@@ -110,7 +110,7 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mRemovedVertexArray.size(); i++ )
     {
-        mRemovedVertexArray[i]->GetPath()->RemoveVertex( mRemovedVertexArray[i] );
+        mRemovedVertexArray[i]->GetOwnerAsPath()->RemoveVertex( mRemovedVertexArray[i] );
     }
 
     for( int i = 0; i < mRemovedPathArray.size(); i++ )
@@ -126,7 +126,7 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mAddedVertexArray.size(); i++ )
     {
-        mAddedVertexArray[i]->GetPath()->AddVertex( mAddedVertexArray[i] );
+        mAddedVertexArray[i]->GetOwnerAsPath()->AddVertex( mAddedVertexArray[i] );
     }
 
     for( int i = 0; i < mAddedSegmentArray.size(); i++ )
@@ -157,7 +157,7 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mRemovedVertexArray.size(); i++ )
     {
-        mRemovedVertexArray[i]->GetPath()->AddVertex( mRemovedVertexArray[i] );
+        mRemovedVertexArray[i]->GetOwnerAsPath()->AddVertex( mRemovedVertexArray[i] );
     }
 
     for( int i = 0; i < mRemovedSegmentArray.size(); i++ )
@@ -173,7 +173,7 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mAddedVertexArray.size(); i++ )
     {
-        mAddedVertexArray[i]->GetPath()->RemoveVertex( mAddedVertexArray[i] );
+        mAddedVertexArray[i]->GetOwnerAsPath()->RemoveVertex( mAddedVertexArray[i] );
     }
 
     for( int i = 0; i < mAddedPathArray.size(); i++ )

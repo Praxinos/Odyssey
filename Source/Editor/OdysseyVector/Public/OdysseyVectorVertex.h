@@ -10,6 +10,7 @@
 
 class FOdysseyVectorSegment;
 class FOdysseyVectorPath;
+class FOdysseyVectorObject;
 class FOdysseyVectorVertex;
 class FOdysseyVectorHandleSegment;
 
@@ -18,7 +19,8 @@ struct FExplorationPair
     FOdysseyVectorSection* returnSection;
     FOdysseyVectorVertex*  departVertex;
     FOdysseyVectorSection* departSection;
-    double mSectionLength;
+    double sectionLength;
+    double departVertexT;
 
     FExplorationPair()
     {
@@ -26,18 +28,36 @@ struct FExplorationPair
         departVertex = nullptr;
         departSection = nullptr;
 
-        mSectionLength = 0.0f;
+        sectionLength = 0.0f;
     };
 
     FExplorationPair( FOdysseyVectorSection* iReturnSection
                     , FOdysseyVectorVertex*  iDepartVertex
+                    , double iDepartVertexT
                     , FOdysseyVectorSection* iDepartSection )
     {
         returnSection = iReturnSection;
-        departVertex = iDepartVertex;
+        departVertex  = iDepartVertex;
+        departVertexT = iDepartVertexT;
         departSection = iDepartSection;
         // used for sorting exploration pairs
-        mSectionLength = returnSection->GetLength() + departSection->GetLength();
+        sectionLength = returnSection->GetLength() + departSection->GetLength();
+    }
+};
+
+struct FExplorationWayPoint
+{
+    FOdysseyVectorVertex* vertex;
+    FOdysseyVectorSection* section;
+    double sectionT;
+
+    FExplorationWayPoint( FOdysseyVectorVertex* iVertex
+                        , FOdysseyVectorSection* iSection
+                        , double iSectionT )
+    {
+        vertex = iVertex;
+        section = iSection;
+        sectionT = iSectionT;
     }
 };
 
@@ -134,7 +154,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get a pointer to the path this vertex belongs to.
          * @return a pointer to the path this vertex belongs to.
          */
-        FOdysseyVectorPath* GetPath();
+        FOdysseyVectorPath* GetOwnerAsPath();
 
         /**
          * @brief Get a pointer to the section connecting this vertex and another vertex passed as argument.
@@ -251,7 +271,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          *        a leaving section, and a vertex in between.
          * @param oExplorationPairsArray the output pairs.
          */
-        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& oExplorationPairsArray );
+        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& oExplorationPairsArray
+                                          , double iSegmentT );
 
 
         /**
@@ -265,12 +286,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iSegment the segment to remove.
          */
         void RemoveSegment( FOdysseyVectorSegment* iSegment );
-
-        /**
-         * @brief Set the path this vertex belongs to.
-         * @param iPath the path this vertex belongs to;
-         */
-        void SetPath( FOdysseyVectorPath* iPath );
 
         /**
          * @brief Set the vertex as SELECTED.
@@ -319,6 +334,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         uint32 GetFlags();
         void GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] );
         bool HasErasedSectionsOnly();
+        void SetOwner( FOdysseyVectorObject* iOwner );
+        FOdysseyVectorObject* GetOwner();
 
     protected:
         /**
@@ -333,7 +350,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         //eJointType mJointType;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
-        FOdysseyVectorPath* mPath;
+        FOdysseyVectorObject* mOwner;
         uint32 mFlags;
        
 

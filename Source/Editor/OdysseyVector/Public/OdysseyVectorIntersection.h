@@ -6,7 +6,8 @@
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorVertex.h"
-#include "OdysseyVectorVertexIntersection.h"
+
+class FOdysseyVectorGroupPaint;
 
 class ODYSSEYVECTOR_API FOdysseyVectorIntersection
 {
@@ -19,36 +20,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorIntersection
        /**
          * @brief
          */
-       FOdysseyVectorIntersection( bool iSelfIntersects
-                                 , FOdysseyVectorPath* iVertex0Path
-                                 , double iVertex0X
-                                 , double iVertex0Y
-                                 , double iVertex0T
-                                 , FOdysseyVectorPath* iVertex1Path
-                                 , double iVertex1X
-                                 , double iVertex1Y
-                                 , double iVertex1T );
-
-       /**
-         * @brief Get the vertex at the other end.
-         * @param iVertex vertex at this end.
-         * return a pointer to the vertex at the other end.
-         */
-        FOdysseyVectorVertexIntersection* GetOtherVertex( FOdysseyVectorVertexIntersection* iVertex );
+       FOdysseyVectorIntersection( FOdysseyVectorVertex* iVertex
+                                 , double iSegmentT );
 
        /**
          * @brief Get a vertex belonging to this intersection
-         * @param the vertex index
          * return a pointer to the vertex
          */
-        FOdysseyVectorVertexIntersection* GetVertex( int iNum );
-
-       /**
-         * @brief Checks whether or not a vertex belongs to this intersection
-         * @param a pointer to the tested vertex
-         * return true or false
-         */
-        bool HasVertex( FOdysseyVectorVertexIntersection* iVertex );
+        FOdysseyVectorVertex* GetVertex();
 
        /**
          * @brief Build the exploration pair needed to find cycles in a paint group.
@@ -58,9 +37,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorIntersection
          */
         void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
 
-        bool SelfIntersects();
+        double GetSegmentT();
 
     protected:
-        FOdysseyVectorVertexIntersection mVertex[2];
-        bool mSelfIntersects;
+        FOdysseyVectorVertex* mVertex;
+        double mSegmentT;
 };

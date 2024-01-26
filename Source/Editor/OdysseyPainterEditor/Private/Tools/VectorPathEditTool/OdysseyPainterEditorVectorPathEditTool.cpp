@@ -527,7 +527,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragVertex( FOdysseyVectorVertex *iVert
                                                    , double iDeltaY
                                                    , bool iWidenAllAlong )
 {
-    FOdysseyVectorPath* path = iVertex->GetPath();
+    FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
     BLPoint localCoords = path->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
     BLPoint localVector = path->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
 

@@ -355,7 +355,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     {
         if( vertex->IsSelected() == false )
         {
-            vertex->GetPath()->SelectVertex( vertex );
+            vertex->GetOwnerAsPath()->SelectVertex( vertex );
         }
     }
 

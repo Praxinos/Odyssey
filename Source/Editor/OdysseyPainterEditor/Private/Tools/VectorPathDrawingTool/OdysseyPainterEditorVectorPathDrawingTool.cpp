@@ -211,7 +211,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
                                         , StitchingRadius );
             if( mStitchedVertex )
             {
-                path = mStitchedVertex->GetPath();
+                path = mStitchedVertex->GetOwnerAsPath();
             }
         }
 
@@ -343,7 +343,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , StitchingRadius );
 
             // stitching to another path at MouseUp is CURRENTLY not supported
-            if( endingVertex && ( endingVertex->GetPath() != path ) )
+            if( endingVertex && ( endingVertex->GetOwnerAsPath() != path ) )
             {
                 endingVertex = nullptr;
             }

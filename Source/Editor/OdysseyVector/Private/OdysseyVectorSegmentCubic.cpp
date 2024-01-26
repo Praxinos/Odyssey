@@ -7,6 +7,10 @@
 #define MINRECURSE 1
 #define MAXRECURSE 7
 
+#ifndef M_PI
+#define M_PI 3.141592f
+#endif
+
 static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
                             , const ::ULIS::FVec2D& iLine0p1
                             , const ::ULIS::FVec2D& iLine1p0
@@ -1104,10 +1108,10 @@ FOdysseyVectorSegmentCubic::SmoothOffsetCurves( std::vector<FOdysseyVectorBezier
             //::ULIS::FVec2D tangent[2] = { currFragment[0]->bezier[3] - prevFragment[0]->bezier[0]
             //                            , currFragment[1]->bezier[3] - prevFragment[1]->bezier[0] };
 
-             //double dot[2] = { prevFragment[0]->straightVector.DotProduct( currFragment[0]->straightVector )
-             //                , prevFragment[1]->straightVector.DotProduct( currFragment[1]->straightVector ) };
-             //double dotFactor[2] = { ( 1.0f - dot[0] ) + 0.55f
-             //                      , ( 1.0f - dot[1] ) + 0.55f };
+            //double dot[2] = { prevFragment[0]->straightVector.DotProduct( currFragment[0]->straightVector )
+            //                , prevFragment[1]->straightVector.DotProduct( currFragment[1]->straightVector ) };
+            //double dotFactor[2] = { acos( dot[0] ) / M_PI * 0.55191502449f
+            //                      , acos( dot[1] ) / M_PI * 0.55191502449f };
 
             if( tangent[0].DistanceSquared() ) tangent[0].Normalize();
             if( tangent[1].DistanceSquared() ) tangent[1].Normalize();

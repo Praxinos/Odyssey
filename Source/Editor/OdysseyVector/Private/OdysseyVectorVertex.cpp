@@ -12,7 +12,7 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 
 FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint( iX, iY, iRadius )
-   , mPath ( nullptr )
+   , mOwner ( nullptr )
    , mJoint( this )
    , mFlags( 0 )
    , mNearestSegment( nullptr )
@@ -38,7 +38,7 @@ FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment* iSegment )
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetWorldCoords()
 {
-    BLPoint worldPoint = GetPath()->GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+    BLPoint worldPoint = mOwner->GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
 
     return ::ULIS::FVec2D( worldPoint.x, worldPoint.y );
 }
@@ -75,10 +75,16 @@ FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVert
     return false;
 }
 
-FOdysseyVectorPath* 
-FOdysseyVectorVertex::GetPath()
+FOdysseyVectorObject* 
+FOdysseyVectorVertex::GetOwner()
 {
-    return mPath;
+    return mOwner;
+}
+
+FOdysseyVectorPath* 
+FOdysseyVectorVertex::GetOwnerAsPath()
+{
+    return static_cast<FOdysseyVectorPath*>(mOwner);
 }
 
 FOdysseyVectorSection*
@@ -108,16 +114,32 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
 
         for( FOdysseyVectorSection* section : mSectionList )
         {
-            ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( this, false, true );
+            ::ULIS::FVec2D sectionVector;
+            // special treatment for self-intersections. Test both endpoints. smallest dot wins
+            if( ( section->GetVertex(0) == this ) && ( Section->GetVertex(1) == this ) )
+            {
+                ::ULIS::FVec2D sectionVectorAt0 = section->GetVectorFromVertex( 0, false, true );
+                ::ULIS::FVec2D sectionVectorAt1 = section->GetVectorFromVertex( 1, false, true );
+                double dotAt0 = lastSectionVector.DotProduct( sectionVectorAt0 );
+                double dotAt1 = lastSectionVector.DotProduct( sectionVectorAt1 );
+
+                sectionVector = ( dotAt0 > dotAt1 ) ? sectionVectorAt0 : sectionVectorAt1;
+            }
+            else
+            {
+                uint32 index = ( section->GetVertex(0) == this ) ? 0 : 1;
+
+                sectionVector = section->GetVectorFromVertex( index, false, true );
+            }
 
             if( section != iLastSection )
             {
-                if( ( FOdysseyVector::Cross2D( -lastSectionVector, sectionVector ) * iOrientation >= 0.0f ) )
+                if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation >= 0.0f ) )
                 {
                     rightSideSection.push_back( section );
                 }
 
-                if( ( FOdysseyVector::Cross2D( -lastSectionVector, sectionVector ) * iOrientation <= 0.0f ) )
+                if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation <= 0.0f ) )
                 {
                     wrongSideSection.push_back( section );
                 }
@@ -167,13 +189,19 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
 }
 
 void
-FOdysseyVectorVertex::BuildExplorationPairs( std::vector<FExplorationPair>& oExplorationPairsArray )
+FOdysseyVectorVertex::BuildExplorationPairs( std::vector<FExplorationPair>& oExplorationPairsArray
+                                           , double iSegmentT )
 {
     for( FOdysseyVectorSection* returnSection : mSectionList )
     {
-        FOdysseyVectorSection* departSection = GetCycleNextSection( returnSection, 1.0f );
+         // only consider return sections that have this vertes as their second endpoint.
+         // This allows handling self-intersecting segments as well as regular ones.
+        if( returnSection->GetT(1) == iSegmentT )
+        {
+            FOdysseyVectorSection* departSection = GetCycleNextSection( returnSection, 1.0f );
 
-        oExplorationPairsArray.push_back( FExplorationPair( returnSection, this, departSection ) );
+            oExplorationPairsArray.push_back( FExplorationPair( returnSection, this, iSegmentT, departSection ) );
+        }
     }
 }
 
@@ -417,9 +445,9 @@ FOdysseyVectorVertex::SetCoords( double iX, double iY, double iRadius )
 }
 
 void
-FOdysseyVectorVertex::SetPath( FOdysseyVectorPath* iPath )
+FOdysseyVectorVertex::SetOwner( FOdysseyVectorObject* iOwner )
 {
-    mPath = iPath;
+    mOwner = iOwner;
 }
 
 void
@@ -655,7 +683,7 @@ FOdysseyVectorVertex::GetBoundingBox( bool iWorld )
 
     if( iWorld )
     {
-        BLPoint pt = GetPath()->GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+        BLPoint pt = mOwner->GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
 
         bbox.x = pt.x;
         bbox.y = pt.y;
@@ -792,7 +820,7 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
     {
         if( IsHandleAligned() == true )
         {
-            BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+            BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
             ::ULIS::FVec2D localHandlePosition[2];
             BLPoint worldHandlePosition[2];
 

@@ -283,7 +283,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
                              , bool iWorld
                              , uint64 iHUDFlags )
 {
-    FOdysseyVectorPath* path = iVertex->GetPath();
+    FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
     BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
     // TODO: compute that once and pass it as parameter for all vertices
     BLPoint point = HUDMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );

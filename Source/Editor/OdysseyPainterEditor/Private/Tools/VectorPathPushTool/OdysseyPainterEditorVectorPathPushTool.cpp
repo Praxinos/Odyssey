@@ -242,7 +242,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
             {
                 FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
 
-                path = vertex->GetPath();
+                path = vertex->GetOwnerAsPath();
             }
 
             BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X

@@ -9,6 +9,7 @@
 class FOdysseyVectorSegment;
 class FOdysseyVectorVertex;
 class FOdysseyVectorCycle;
+class FOdysseyVectorObject;
 
 // TODO: inherit from FOdysseyVectorLink ? answer : no, because links should not have
 // intersection vertices as endpoints as there is no way to know which segments they are on
@@ -24,19 +25,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
        /**
          * @brief constructor
          * @param iSegment the segment it belongs to
-         * @param iConversionMatrix
          * @param iVertex0 end point 0
          * @param iVertex1 end point 1
          */
-        FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
-                             , BLMatrix2D* iConversionMatrix
+        FOdysseyVectorSection( FOdysseyVectorObject* iOwner
+                             , FOdysseyVectorSegment* iSegment
                              , FOdysseyVectorVertex* iVertex0
-                             , FOdysseyVectorVertex* iVertex1 );
+                             , FOdysseyVectorVertex* iVertex1
+                             , double iSectionT0
+                             , double iSectionT1 );
 
-        void Init( FOdysseyVectorSegment* iSegment
-                 , BLMatrix2D* iConversionMatrix
+        void Init( FOdysseyVectorObject* iOwner
+                 , FOdysseyVectorSegment* iSegment
                  , FOdysseyVectorVertex* iVertex0
-                 , FOdysseyVectorVertex* iVertex1 );
+                 , FOdysseyVectorVertex* iVertex1
+                 , double iSectionT0
+                 , double iSectionT1 );
 
        /**
          * @brief Get the segment it lies on.
@@ -103,8 +107,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         bool IsErased();
         double GetLength();
         bool IsValid();
+        FOdysseyVectorObject* GetOwner();
+        double GetT( uint32 iIndex );
 
     protected:
+        FOdysseyVectorObject* mOwner;
         FOdysseyVectorSegment* mSegment;
         FOdysseyVectorVertex* mVertex[2];
         uint32 mFlags;
@@ -112,6 +119,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
         ::ULIS::FVec2D mBezier[4];
         double mLength;
+        double mT0;
+        double mT1;
 
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );

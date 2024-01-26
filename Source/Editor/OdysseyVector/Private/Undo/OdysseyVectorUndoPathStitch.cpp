@@ -1,4 +1,5 @@
 #include "Undo/OdysseyVectorUndoPathStitch.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoPathStitch::~FOdysseyVectorUndoPathStitch()
 {
@@ -50,7 +51,7 @@ FOdysseyVectorUndoPathStitch::Apply( UObject* iIgnored )
 {
     for( int i = 0; i < mMergedVertexArray.size(); i++ )
     {
-        mMergedVertexArray[i]->GetPath()->AddVertex( mMergedVertexArray[i] );
+        mMergedVertexArray[i]->GetOwnerAsPath()->AddVertex( mMergedVertexArray[i] );
     }
 
     for( int i = 0; i < mMergedSegmentArray.size(); i++ )
@@ -85,7 +86,7 @@ FOdysseyVectorUndoPathStitch::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mMergedVertexArray.size(); i++ )
     {
-        mMergedVertexArray[i]->GetPath()->RemoveVertex( mMergedVertexArray[i] );
+        mMergedVertexArray[i]->GetOwnerAsPath()->RemoveVertex( mMergedVertexArray[i] );
     }
 
     // Update the bbox

@@ -148,7 +148,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
 
                 if( vertex->GetSegmentCount() == 1 )
                 {
-                    FOdysseyVectorPath* stitchedPath = vertex->GetPath();
+                    FOdysseyVectorPath* stitchedPath = vertex->GetOwnerAsPath();
 
                     DrawPath( iBLContext
                             , stitchedPath

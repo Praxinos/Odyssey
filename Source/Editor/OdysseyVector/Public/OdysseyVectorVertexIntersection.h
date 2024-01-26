@@ -6,7 +6,6 @@
 
 #include "OdysseyVectorVertex.h"
 
-class FOdysseyVectorSegment;
 class FOdysseyVectorIntersection;
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
@@ -25,32 +24,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         /**
          * @brief Constructor.
          */
-        FOdysseyVectorVertexIntersection( FOdysseyVectorIntersection* iIntersection
-                                        , FOdysseyVectorPath* iPath
+        FOdysseyVectorVertexIntersection( FOdysseyVectorGroupPaint* iOwner
                                         , double iX
-                                        , double iY
-                                        , double iT );
+                                        , double iY );
 
-        /**
-         * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.
-         * @param iLastSection the last visited section.
-         * @param iOrientation ignored.
-         * @return a pointer to the next section to explore in cycle.
-         */
-        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection
-                                                          , double iOrientation ) override;
+        void SetIntersection( FOdysseyVectorIntersection* iIntersection0
+                            , FOdysseyVectorIntersection* iIntersection1 );
 
-        virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
-        virtual double GetT( FOdysseyVectorSection* iSection ) override;
+        FOdysseyVectorIntersection* GetIntersection( uint32 iIndex );
 
-        FOdysseyVectorIntersection* GetIntersection();
-        FOdysseyVectorVertexIntersection* GetPartner();
-
-        virtual uint32 GetSectionCount() override;
-
-        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray ) override;
-
-private:
-        FOdysseyVectorIntersection* mIntersection;
-        double mT;
+    protected:
+        FOdysseyVectorIntersection* mIntersection[2];
 };

@@ -5,8 +5,8 @@
 #include <Image/Block.h>
 
 #include "OdysseyVectorPolygon.h"
-#include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorLink.h"
 
 class FOdysseyVectorObject;
@@ -63,7 +63,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         virtual void DrawStructure( BLContext* iBLContext, FOdysseyVectorObject* iParentObject, bool iWorld ){};
 
-        uint32 GetIntersectionVertexCount();
+        uint32 GetIntersectionCount();
 
         void GetIntersectionVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
         void GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
@@ -83,11 +83,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                                   , double iDistanceTolerance
                                   , double &oSmallestDistance ){ return false; };
 
-       /**
-         * @brief Get the list of intersection vertices
-         * @return A reference to the list of intersection vertices
-         */
-        std::list<FOdysseyVectorVertexIntersection*>& GetIntersectionVertexList();
+        std::list<FOdysseyVectorIntersection>& GetIntersectionList();
 
        /**
          * @brief Get a pointer to the path this segment belongs to
@@ -128,11 +124,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          */
         void ClearIntersections();
 
-       /**
-         * @brief Add an intersection point. This automatically creates the attached sections.
-         * @param iIntersectionVertex the intersection vertex
-         */
-        void AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex );
+
+        FOdysseyVectorIntersection* AddIntersection ( FOdysseyVectorVertex* iVertex
+                                                    , double iSegmentT );
 
        /**
          * @brief Get the number of polygons in cache.
@@ -189,14 +183,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         ::ULIS::FRectD& GetBBoxInParent();
         void SetBBoxInParent( const ::ULIS::FRectD& iBBoxInParent );
         virtual ::ULIS::FVec2D GetOffsetPoint( uint32 iSide, double iT );
-        FOdysseyVectorVertexIntersection* GetClosestIntersectionVertex( FOdysseyVectorVertex* iVertex );
+        FOdysseyVectorIntersection* GetClosestIntersection( FOdysseyVectorVertex* iVertex );
 
     protected:
         void DrawFractionCache( BLContext* iBLContext );
 
     protected:
         std::vector<FOdysseyVectorFraction> mFractionCache;
-        std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
+        std::list<FOdysseyVectorIntersection> mIntersectionList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
         ::ULIS::FRectD mBBoxInParent;
