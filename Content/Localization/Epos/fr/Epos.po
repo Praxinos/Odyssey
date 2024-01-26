@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2023-12-01 11:00\n"
-"PO-Revision-Date: 2023-12-01 11:00\n"
+"POT-Creation-Date: 2024-01-26 09:41\n"
+"PO-Revision-Date: 2024-01-26 09:41\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -119,36 +119,36 @@ msgid "an incremental index for take"
 msgstr ""
 
 #. Key:	camera-pattern-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(149)
-#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(149)
+#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(140)
+#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(140)
 msgctxt "NamingConventionSettingsCustomization,camera-pattern-tooltip"
-msgid "R\"(Some examples:- camera_{0} ->camera_10camera_20camera_30...(Click on a keyword to Copy it))"
+msgid "Some examples:\n\n- camera_{0} ->\n    camera_10\n    camera_20\n    camera_30\n    ...\n\n(Click on a keyword to Copy it)"
 msgstr ""
 
 #. Key:	shot-pattern-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(270)
-#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(270)
+#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(252)
+#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(252)
 msgctxt "NamingConventionSettingsCustomization,shot-pattern-tooltip"
-msgid "R\"(Some examples:- shot_{0} ->shot_10shot_20shot_30...- {3}_shot_{0}_{11} ->MS_shot_0010_xyMS_shot_0020_xyMS_shot_0030_xy...(Click on a keyword to Copy it))"
+msgid "Some examples:\n\n- shot_{0} ->\n    shot_10\n    shot_20\n    shot_30\n    ...\n- {3}_shot_{0}_{11} ->\n    MS_shot_0010_xy\n    MS_shot_0020_xy\n    MS_shot_0030_xy\n    ...\n\n(Click on a keyword to Copy it)"
 msgstr ""
 
 #. Key:	plane-pattern-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(29)
 #: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(29)
 msgctxt "NamingConventionSettingsCustomization,plane-pattern-tooltip"
-msgid "R\"(Some examples:- plane_{0} ->plane_10plane_20plane_30...(Click on a keyword to Copy it))"
+msgid "Some examples:\n\n- plane_{0} ->\n    plane_10\n    plane_20\n    plane_30\n    ...\n\n(Click on a keyword to Copy it)"
 msgstr ""
 
 #. Key:	board-pattern-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(407)
-#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(407)
+#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(375)
+#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(375)
 msgctxt "NamingConventionSettingsCustomization,board-pattern-tooltip"
-msgid "R\"(Some examples:- board_{0} ->board_10board_20board_30...- {2}_board_{0}_{10} ->MS_board_0010_xyMS_board_0020_xyMS_board_0030_xy...(Click on a keyword to Copy it))"
+msgid "Some examples:\n\n- board_{0} ->\n    board_10\n    board_20\n    board_30\n    ...\n- {2}_board_{0}_{10} ->\n    MS_board_0010_xy\n    MS_board_0020_xy\n    MS_board_0030_xy\n    ...\n\n(Click on a keyword to Copy it)"
 msgstr ""
 
 #. Key:	Pattern
-#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(89)
-#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(89)
+#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
+#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
 msgctxt "NamingConventionSettingsCustomization,Pattern"
 msgid "Pattern"
 msgstr ""
@@ -182,45 +182,80 @@ msgid "EPOS"
 msgstr ""
 
 #. Key:	multiple-planes
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(204)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(204)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(209)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(209)
 msgctxt "BoardSequenceCustomization,multiple-planes"
 msgid "There are multiple planes. Select one of them."
 msgstr ""
 
 #. Key:	Settings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(469)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(469)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(474)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(474)
 msgctxt "BoardSequenceCustomization,Settings"
 msgid "Settings"
 msgstr ""
 
 #. Key:	SettingsToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(470)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(470)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(475)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(475)
 msgctxt "BoardSequenceCustomization,SettingsToolTip"
 msgid "Set settings"
 msgstr ""
 
 #. Key:	Help
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(478)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(478)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(483)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(483)
 msgctxt "BoardSequenceCustomization,Help"
 msgid "Help"
 msgstr ""
 
 #. Key:	HelpToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(479)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(479)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(484)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(484)
 msgctxt "BoardSequenceCustomization,HelpToolTip"
 msgid "Help"
 msgstr ""
 
 #. Key:	infobar-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(487)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(487)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(492)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(492)
 msgctxt "BoardSequenceCustomization,infobar-tooltip"
 msgid "Double-click on the infobar to open its pattern settings"
+msgstr ""
+
+#. Key:	ImportExportMenuSectionName
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(567)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(567)
+msgctxt "BoardSequenceCustomization,ImportExportMenuSectionName"
+msgid "Import/Export"
+msgstr ""
+
+#. Key:	ImportFBX
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(570)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(570)
+msgctxt "BoardSequenceCustomization,ImportFBX"
+msgid "Import..."
+msgstr ""
+
+#. Key:	ImportFBXTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(571)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(571)
+msgctxt "BoardSequenceCustomization,ImportFBXTooltip"
+msgid "Import FBX animation to this object"
+msgstr ""
+
+#. Key:	ExportFBX
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(581)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(581)
+msgctxt "BoardSequenceCustomization,ExportFBX"
+msgid "Export..."
+msgstr ""
+
+#. Key:	ExportFBXTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(582)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(582)
+msgctxt "BoardSequenceCustomization,ExportFBXTooltip"
+msgid "Export FBX animation from this object"
 msgstr ""
 
 #. Key:	EposSequenceEditorStyle
@@ -321,310 +356,324 @@ msgctxt "EposSequenceEditorCommands,storyboard-viewport-rotation-tooltip"
 msgid "Set the viewport rotation to {0}°"
 msgstr ""
 
-#. Key:	StepToPreviousShot
+#. Key:	FixActorReferences
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
+msgctxt "UICommands.EposSequenceEditorCommands,FixActorReferences"
+msgid "Fix Actor References"
+msgstr ""
+
+#. Key:	FixActorReferences_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
+msgctxt "UICommands.EposSequenceEditorCommands,FixActorReferences_ToolTip"
+msgid "Try to automatically fix up broken actor bindings"
+msgstr ""
+
+#. Key:	StepToPreviousShot
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(60)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(60)
 msgctxt "UICommands.EposSequenceEditorCommands,StepToPreviousShot"
 msgid "Step to Previous Shot"
 msgstr ""
 
 #. Key:	StepToPreviousShot_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(60)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(60)
 msgctxt "UICommands.EposSequenceEditorCommands,StepToPreviousShot_ToolTip"
 msgid "Step to previous shot"
 msgstr ""
 
 #. Key:	StepToNextShot
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(57)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(57)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
 msgctxt "UICommands.EposSequenceEditorCommands,StepToNextShot"
 msgid "Step to Next Shot"
 msgstr ""
 
 #. Key:	StepToNextShot_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(57)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(57)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
 msgctxt "UICommands.EposSequenceEditorCommands,StepToNextShot_ToolTip"
 msgid "Step to next shot"
 msgstr ""
 
 #. Key:	CreateCameraAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
 msgctxt "UICommands.EposSequenceEditorCommands,CreateCameraAtCurrentTime"
 msgid "Create Camera"
 msgstr ""
 
 #. Key:	CreateCameraAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
 msgctxt "UICommands.EposSequenceEditorCommands,CreateCameraAtCurrentTime_ToolTip"
 msgid "Create a new camera and set it as the current camera cut"
 msgstr ""
 
 #. Key:	SnapCameraToViewportAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(62)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(62)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
 msgctxt "UICommands.EposSequenceEditorCommands,SnapCameraToViewportAtCurrentTime"
 msgid "Snap Camera to Viewport"
 msgstr ""
 
 #. Key:	SnapCameraToViewportAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(62)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(62)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
 msgctxt "UICommands.EposSequenceEditorCommands,SnapCameraToViewportAtCurrentTime_ToolTip"
 msgid "Snap the existing camera to the viewport"
 msgstr ""
 
 #. Key:	PilotCameraAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(63)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(63)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(67)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(67)
 msgctxt "UICommands.EposSequenceEditorCommands,PilotCameraAtCurrentTime"
 msgid "Pilot Camera"
 msgstr ""
 
 #. Key:	PilotCameraAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(63)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(63)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(67)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(67)
 msgctxt "UICommands.EposSequenceEditorCommands,PilotCameraAtCurrentTime_ToolTip"
 msgid "Pilot the existing camera"
 msgstr ""
 
 #. Key:	EjectCameraAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(64)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(64)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
 msgctxt "UICommands.EposSequenceEditorCommands,EjectCameraAtCurrentTime"
 msgid "Eject Camera"
 msgstr ""
 
 #. Key:	EjectCameraAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(64)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(64)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
 msgctxt "UICommands.EposSequenceEditorCommands,EjectCameraAtCurrentTime_ToolTip"
 msgid "Eject the existing camera"
 msgstr ""
 
 #. Key:	GotoPreviousCameraPosition
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousCameraPosition"
 msgid "Go to Previous Camera Position"
 msgstr ""
 
 #. Key:	GotoPreviousCameraPosition_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousCameraPosition_ToolTip"
 msgid "Go to the previous camera position"
 msgstr ""
 
 #. Key:	GotoNextCameraPosition
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(70)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(70)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoNextCameraPosition"
 msgid "Go to Next Camera Position"
 msgstr ""
 
 #. Key:	GotoNextCameraPosition_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(70)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(70)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoNextCameraPosition_ToolTip"
 msgid "Go to the next camera position"
 msgstr ""
 
 #. Key:	CreatePlaneAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
 msgctxt "UICommands.EposSequenceEditorCommands,CreatePlaneAtCurrentTime"
 msgid "Create Plane"
 msgstr ""
 
 #. Key:	CreatePlaneAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
 msgctxt "UICommands.EposSequenceEditorCommands,CreatePlaneAtCurrentTime_ToolTip"
 msgid "Create a new plane in front of the current camera"
 msgstr ""
 
 #. Key:	DetachPlaneAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
 msgctxt "UICommands.EposSequenceEditorCommands,DetachPlaneAtCurrentTime"
 msgid "Detach Plane"
 msgstr ""
 
 #. Key:	DetachPlaneAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
 msgctxt "UICommands.EposSequenceEditorCommands,DetachPlaneAtCurrentTime_ToolTip"
 msgid "Detach the plane of the current camera"
 msgstr ""
 
 #. Key:	CreateDrawingAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(71)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(71)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(75)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(75)
 msgctxt "UICommands.EposSequenceEditorCommands,CreateDrawingAtCurrentTime"
 msgid "Create Drawing"
 msgstr ""
 
 #. Key:	CreateDrawingAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(71)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(71)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(75)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(75)
 msgctxt "UICommands.EposSequenceEditorCommands,CreateDrawingAtCurrentTime_ToolTip"
 msgid "Create a new drawing"
 msgstr ""
 
 #. Key:	GotoPreviousDrawing
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(76)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(76)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousDrawing"
 msgid "Go to Previous Drawing"
 msgstr ""
 
 #. Key:	GotoPreviousDrawing_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(76)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(76)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousDrawing_ToolTip"
 msgid "Go to the previous drawing"
 msgstr ""
 
 #. Key:	GotoNextDrawing
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoNextDrawing"
 msgid "Go to Next Drawing"
 msgstr ""
 
 #. Key:	GotoNextDrawing_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoNextDrawing_ToolTip"
 msgid "Go to the next drawing"
 msgstr ""
 
 #. Key:	OpenSequenceEditorSettings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenSequenceEditorSettings"
 msgid "Sequence Settings..."
 msgstr ""
 
 #. Key:	OpenSequenceEditorSettings_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenSequenceEditorSettings_ToolTip"
 msgid "Open sequence settings"
 msgstr ""
 
 #. Key:	OpenTrackEditorSettings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(78)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(78)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenTrackEditorSettings"
 msgid "Track Settings..."
 msgstr ""
 
 #. Key:	OpenTrackEditorSettings_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(78)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(78)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenTrackEditorSettings_ToolTip"
 msgid "Open track settings"
 msgstr ""
 
 #. Key:	OpenNamingConventionEditorSettings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenNamingConventionEditorSettings"
 msgid "Naming Convention Settings..."
 msgstr ""
 
 #. Key:	OpenNamingConventionEditorSettings_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenNamingConventionEditorSettings_ToolTip"
 msgid "Open naming convention settings"
 msgstr ""
 
 #. Key:	GotoPraxinos
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPraxinos"
 msgid "Praxinos website..."
 msgstr ""
 
 #. Key:	GotoPraxinos_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPraxinos_ToolTip"
 msgid "Go to Praxinos website"
 msgstr ""
 
 #. Key:	GotoForum
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(86)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(86)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoForum"
 msgid "Praxinos forum..."
 msgstr ""
 
 #. Key:	GotoForum_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(86)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(86)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoForum_ToolTip"
 msgid "Go to Praxinos forum"
 msgstr ""
 
 #. Key:	GotoDiscord
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoDiscord"
 msgid "Praxinos discord..."
 msgstr ""
 
 #. Key:	GotoDiscord_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoDiscord_ToolTip"
 msgid "Go to Praxinos discord"
 msgstr ""
 
 #. Key:	GotoUserDocumentation
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(84)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(84)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoUserDocumentation"
 msgid "Epos User Documentation..."
 msgstr ""
 
 #. Key:	GotoUserDocumentation_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(84)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(84)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoUserDocumentation_ToolTip"
 msgid "Go to User Documentation"
 msgstr ""
 
 #. Key:	GotoProjects
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoProjects"
 msgid "Epos Samples..."
 msgstr ""
 
 #. Key:	GotoProjects_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoProjects_ToolTip"
 msgid "Download projects made by Epos"
 msgstr ""
 
 #. Key:	OpenAboutWindow
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(91)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(91)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenAboutWindow"
 msgid "About Epos..."
 msgstr ""
 
 #. Key:	OpenAboutWindow_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(91)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(91)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenAboutWindow_ToolTip"
 msgid "Open the About window"
 msgstr ""
@@ -648,6 +697,13 @@ msgstr ""
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorModule.cpp(194)
 msgctxt "FEposEditorModule,EposSequencerEditorSettingsDescription"
 msgid "Configure the look and feel of the Epos Sequencer Editor."
+msgstr ""
+
+#. Key:	FixActorReferences
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorSubsystem.cpp(1412)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorSubsystem.cpp(1412)
+msgctxt "EposSequenceEditor,FixActorReferences"
+msgid "Fix Actor References"
 msgstr ""
 
 #. Key:	AppLabel
@@ -874,16 +930,9 @@ msgctxt "ExportImageSequenceSettings,export-image-sequence-pattern-keyword.root-
 msgid "the root board name"
 msgstr ""
 
-#. Key:	Pattern
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(118)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(118)
-msgctxt "ExportImageSequenceSettingsCustomization,Pattern"
-msgid "Pattern"
-msgstr ""
-
 #. Key:	advanced
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(160)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(160)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(137)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(137)
 msgctxt "ExportImageSequenceSettingsCustomization,advanced"
 msgid "Advanced"
 msgstr ""
@@ -892,7 +941,14 @@ msgstr ""
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(30)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(30)
 msgctxt "ExportImageSequenceSettingsCustomization,export-image-sequence-file-pattern-tooltip"
-msgid "R\"(Each keywords will be replaced by its corresponding value.- {0}-{1}-seq{2}-sh{3}---{4}1-MyStoryboard-seq10-sh10---00002-MyStoryboard-seq10-sh10---01003-MyStoryboard-seq10-sh20---01754-MyStoryboard-seq10-sh20---02005-MyStoryboard-seq20-sh30---02506-MyStoryboard-seq20-sh40---0400...- {1}-pf{4}MyStoryboard-pf0000MyStoryboard-pf0100MyStoryboard-pf0175MyStoryboard-pf0200MyStoryboard-pf0250MyStoryboard-pf0400...The extension will be automatically set according to the file format.(Click on a keyword to Copy it))"
+msgid "Each keywords will be replaced by its corresponding value.\n\n- {0}-{1}-seq{2}-sh{3}---{4}\n    1-MyStoryboard-seq10-sh10---0000\n    2-MyStoryboard-seq10-sh10---0100\n    3-MyStoryboard-seq10-sh20---0175\n    4-MyStoryboard-seq10-sh20---0200\n    5-MyStoryboard-seq20-sh30---0250\n    6-MyStoryboard-seq20-sh40---0400\n    ...\n- {1}-pf{4}\n    MyStoryboard-pf0000\n    MyStoryboard-pf0100\n    MyStoryboard-pf0175\n    MyStoryboard-pf0200\n    MyStoryboard-pf0250\n    MyStoryboard-pf0400\n    ...\n\nThe extension will be automatically set according to the file format.\n\n(Click on a keyword to Copy it)"
+msgstr ""
+
+#. Key:	Pattern
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(95)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(95)
+msgctxt "ExportImageSequenceSettingsCustomization,Pattern"
+msgid "Pattern"
 msgstr ""
 
 #. Key:	export-panel.tooltip
@@ -1049,18 +1105,18 @@ msgctxt "ImportImageSequenceSettings,image-sequence-pattern-keyword.duration"
 msgid "the duration of the panel"
 msgstr ""
 
-#. Key:	Pattern
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Import/ImportImageSequenceSettingsCustomization.cpp(114)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Import/ImportImageSequenceSettingsCustomization.cpp(114)
-msgctxt "ImportImageSequenceSettingsCustomization,Pattern"
-msgid "Pattern"
-msgstr ""
-
 #. Key:	import-image-sequence-file-pattern-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Import/ImportImageSequenceSettingsCustomization.cpp(28)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Import/ImportImageSequenceSettingsCustomization.cpp(28)
 msgctxt "ImportImageSequenceSettingsCustomization,import-image-sequence-file-pattern-tooltip"
-msgid "R\"(Each keywords will be replaced by its corresponding value.For files like:- wonder-1-000.png- wonder-1-001.png- wonder-1-002.png- wonder-2-000.png- wonder-2-001.png- wonder-3-000.png- wonder-3-001.png- wonder-3-002.png- wonder-3-003.pngIf the first number corresponds to the shot, and the second to each panel,the pattern will look like:- wonder-{1}-{2}.pngFor files like:- ful-bA-s01-00.png- ful-bA-s01-01.png- ful-bA-s01-02.png- ful-bA-s02-00.png- ful-bA-s02-01.png- ful-bB-s03-00.png- ful-bB-s03-01.png- ful-bB-s03-02.png- ful-bB-s03-03.pngIf the first character (A or B) corresponds to the board, the next number to the shot, and the last to each panel,the pattern will look like:- ful-b{0}-s{1}-{2}.png(Click on a keyword to Copy it))"
+msgid "Each keywords will be replaced by its corresponding value.\n\nFor files like:\n- wonder-1-000.png\n- wonder-1-001.png\n- wonder-1-002.png\n- wonder-2-000.png\n- wonder-2-001.png\n- wonder-3-000.png\n- wonder-3-001.png\n- wonder-3-002.png\n- wonder-3-003.png\nIf the first number corresponds to the shot, and the second to each panel,\nthe pattern will look like:\n- wonder-{1}-{2}.png\n\nFor files like:\n- ful-bA-s01-00.png\n- ful-bA-s01-01.png\n- ful-bA-s01-02.png\n- ful-bA-s02-00.png\n- ful-bA-s02-01.png\n- ful-bB-s03-00.png\n- ful-bB-s03-01.png\n- ful-bB-s03-02.png\n- ful-bB-s03-03.png\nIf the first character (A or B) corresponds to the board, the next number to the shot, and the last to each panel,\nthe pattern will look like:\n- ful-b{0}-s{1}-{2}.png\n\n(Click on a keyword to Copy it)"
+msgstr ""
+
+#. Key:	Pattern
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Import/ImportImageSequenceSettingsCustomization.cpp(82)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Import/ImportImageSequenceSettingsCustomization.cpp(82)
+msgctxt "ImportImageSequenceSettingsCustomization,Pattern"
+msgid "Pattern"
 msgstr ""
 
 #. Key:	item-label.shot-id
@@ -1124,6 +1180,27 @@ msgstr ""
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Import/SImportPanelTileView.cpp(97)
 msgctxt "ImageSequenceImportPanelTile,item-label.board-id"
 msgid "Board: {0}"
+msgstr ""
+
+#. Key:	ExportEposSequence
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(120)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(120)
+msgctxt "EposSequenceFBXInterop,ExportEposSequence"
+msgid "Export Epos Sequence"
+msgstr ""
+
+#. Key:	ExportFBXSucceeded
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(230)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(230)
+msgctxt "Sequencer,ExportFBXSucceeded"
+msgid "FBX Export Succeeded."
+msgstr ""
+
+#. Key:	ExportFBXFailed
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(238)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(238)
+msgctxt "Sequencer,ExportFBXFailed"
+msgid "FBX Export Failed."
 msgstr ""
 
 #. Key:	ModifyJob_Transaction
@@ -1340,7 +1417,7 @@ msgstr ""
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(28)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(28)
 msgctxt "NamingConventionSettingsCustomization,infobar-pattern-tooltip"
-msgid "R\"(Each keywords will be replaced by its corresponding value.The separator will be used to join each line of the pattern field.(Click on a keyword to Copy it))"
+msgid "Each keywords will be replaced by its corresponding value.\nThe separator will be used to join each line of the pattern field.\n\n(Click on a keyword to Copy it)"
 msgstr ""
 
 #. Key:	AssetTypeActions_ShotSequence
@@ -1358,80 +1435,115 @@ msgid "EPOS"
 msgstr ""
 
 #. Key:	CameraOptions
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(250)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(250)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(255)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(255)
 msgctxt "ShotSequenceCustomization,CameraOptions"
 msgid "Options"
 msgstr ""
 
 #. Key:	CameraOptionsToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(251)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(251)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(256)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(256)
 msgctxt "ShotSequenceCustomization,CameraOptionsToolTip"
 msgid "Camera Options"
 msgstr ""
 
 #. Key:	TextureOptions
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(262)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(262)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(267)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(267)
 msgctxt "ShotSequenceCustomization,TextureOptions"
 msgid "Options"
 msgstr ""
 
 #. Key:	TextureOptionsToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(263)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(263)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(268)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(268)
 msgctxt "ShotSequenceCustomization,TextureOptionsToolTip"
 msgid "Texture Options"
 msgstr ""
 
 #. Key:	enable-lighttable-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(288)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(288)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(293)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(293)
 msgctxt "ShotSequenceCustomization,enable-lighttable-tooltip"
 msgid "Enable the lighttable"
 msgstr ""
 
 #. Key:	disable-lighttable-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(291)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(291)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(296)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(296)
 msgctxt "ShotSequenceCustomization,disable-lighttable-tooltip"
 msgid "Disable the lighttable"
 msgstr ""
 
 #. Key:	LighttableOptionsTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(343)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(343)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(348)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(348)
 msgctxt "ShotSequenceCustomization,LighttableOptionsTooltip"
 msgid "Activate/Deactivate lighttable on planes"
 msgstr ""
 
 #. Key:	Settings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(374)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(374)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(379)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(379)
 msgctxt "ShotSequenceCustomization,Settings"
 msgid "Settings"
 msgstr ""
 
 #. Key:	SettingsToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(375)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(375)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(380)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(380)
 msgctxt "ShotSequenceCustomization,SettingsToolTip"
 msgid "Set sequence settings"
 msgstr ""
 
 #. Key:	Help
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(383)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(383)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(388)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(388)
 msgctxt "ShotSequenceCustomization,Help"
 msgid "Help"
 msgstr ""
 
 #. Key:	HelpToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(384)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(384)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(389)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(389)
 msgctxt "ShotSequenceCustomization,HelpToolTip"
 msgid "Help"
+msgstr ""
+
+#. Key:	ImportExportMenuSectionName
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(593)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(593)
+msgctxt "ShotSequenceCustomization,ImportExportMenuSectionName"
+msgid "Import/Export"
+msgstr ""
+
+#. Key:	ImportFBX
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(596)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(596)
+msgctxt "ShotSequenceCustomization,ImportFBX"
+msgid "Import..."
+msgstr ""
+
+#. Key:	ImportFBXTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(597)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(597)
+msgctxt "ShotSequenceCustomization,ImportFBXTooltip"
+msgid "Import FBX animation to this object"
+msgstr ""
+
+#. Key:	ExportFBX
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(607)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(607)
+msgctxt "ShotSequenceCustomization,ExportFBX"
+msgid "Export..."
+msgstr ""
+
+#. Key:	ExportFBXTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(608)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(608)
+msgctxt "ShotSequenceCustomization,ExportFBXTooltip"
+msgid "Export FBX animation from this object"
 msgstr ""
 
 #. Key:	new-storyboard.tabs.import-image-sequence
@@ -1935,7 +2047,7 @@ msgstr ""
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(154)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(154)
 msgctxt "AboutWindowEpos,copyright.iddn"
-msgid "IDDN.FR.001.220036.001.S.P.2021.000.00000"
+msgid "IDDN.FR.001.220036.002.S.P.2021.000.00000"
 msgstr ""
 
 #. Key:	copyright.team-label
