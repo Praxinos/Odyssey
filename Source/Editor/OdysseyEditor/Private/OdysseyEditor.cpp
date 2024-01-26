@@ -50,9 +50,19 @@ FOdysseyEditor::GetAdditionalEditedObjects()
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Listeners
 
+FOdysseyEditorShortcuts&
+FOdysseyEditor::GetShortcuts()
+{
+    return mShortcuts;
+}
+
 void
 FOdysseyEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
+    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+	mShortcuts.MapActionsToCommandList(toolkitCommands);
+
+    //TODO: Use only mShortcuts instead of BindShortcuts (better coding style)
     for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
     {
         tab->BindShortcuts(iToolkit);

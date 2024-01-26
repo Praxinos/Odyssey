@@ -87,7 +87,6 @@ public:
     virtual UOdysseyPainterEditorVectorPathStitchTool*               GetVectorPathStitchTool() const;
     virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
-
     
     TArray<FOdysseyBrushContext*>& GetBrushContexts();
 

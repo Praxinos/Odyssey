@@ -3,21 +3,14 @@
 
 #pragma once
 
-class SOdysseyAnimationLayerStackTreeView;
+#include "OdysseyEditorShortcuts.h"
+
 class FUICommandList;
-class FOdysseyAnimationGlobalCellsShortcuts;
-class FOdysseyAnimationGlobalTimelineShortcuts;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationGlobalShortcuts
+    : public FOdysseyEditorShortcuts
 {
 public:
+    virtual ~FOdysseyAnimationGlobalShortcuts() {};
     FOdysseyAnimationGlobalShortcuts(TSharedPtr<FOdysseyAnimationEditorExtension> iExtension);
-
-public:
-    //Shortcuts
-    void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList);
-
-private:
-    TSharedRef<FOdysseyAnimationGlobalCellsShortcuts> mCellsShortcuts;
-    TSharedRef<FOdysseyAnimationGlobalTimelineShortcuts> mTimelineShortcuts;
 };

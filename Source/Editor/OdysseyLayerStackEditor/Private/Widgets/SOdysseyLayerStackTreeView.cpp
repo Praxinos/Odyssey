@@ -7,7 +7,7 @@
 #include "ToolMenus.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Commands/OdysseyLayerStackEditorCommands.h"
-#include "Commands/OdysseyLayerStackShortcuts.h"
+#include "Shortcuts/OdysseyLayerStackShortcuts.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
