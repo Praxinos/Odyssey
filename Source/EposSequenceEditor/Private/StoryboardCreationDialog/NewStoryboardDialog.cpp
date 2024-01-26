@@ -25,6 +25,8 @@
 #include "Widgets/SWindow.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Views/STileView.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "SPrimaryButton.h"
 
 #include "Board/BoardSequence.h"
