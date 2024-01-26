@@ -28,10 +28,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
     , Opacity( 1.0f )
     , StrokeWidth( 4.0f )
     , Uniform( false )
+    , mPrimitive( nullptr )
     , mRectangleNumber ( 0 )
     , mLineNumber ( 0 )
     , mEllipseNumber ( 0 )
-    , mPrimitive( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle64");
 }
