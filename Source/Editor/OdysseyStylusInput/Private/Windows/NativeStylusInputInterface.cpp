@@ -45,14 +45,24 @@ public:
 
 FNativeStylusInputInterfaceImpl::~FNativeStylusInputInterfaceImpl()
 {
-    FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
-    WindowsApplication->RemoveMessageHandler(*this);
+	//needed because slate is not present in some phases of Odyssey DDC building process
+	//while we are building a new release version through Odyssey's scripts
+	if ( FSlateApplication::IsInitialized() )
+	{
+		FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
+		WindowsApplication->RemoveMessageHandler(*this);
+	}
 }
 
 FNativeStylusInputInterfaceImpl::FNativeStylusInputInterfaceImpl()
 {
-    FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
-    WindowsApplication->AddMessageHandler(*this);
+	//needed because slate is not present in some phases of Odyssey DDC building process
+	//while we are building a new release version through Odyssey's scripts
+	if ( FSlateApplication::IsInitialized() )
+	{
+		FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
+		WindowsApplication->AddMessageHandler(*this);
+	}
 }
 
 bool
