@@ -3,9 +3,13 @@
 
 #pragma once
 
+#include "OdysseyEditorShortcuts.h"
+
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationGlobalTimelineShortcuts
+    : public IOdysseyEditorShortcuts
 {
 public:
+    virtual ~FOdysseyAnimationGlobalTimelineShortcuts() {};
     FOdysseyAnimationGlobalTimelineShortcuts(TSharedPtr<FOdysseyAnimationEditorExtension> iExtension);
 
 public:
@@ -21,7 +25,7 @@ public:
 
 public:
     //Shortcuts
-    void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList); 
+    virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
 
 private:
     TWeakPtr<FOdysseyAnimationEditorExtension> mExtension;

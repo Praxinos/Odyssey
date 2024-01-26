@@ -28,4 +28,9 @@ public:
     TSharedPtr<FUICommandInfo> MergeSelectedLayers;
     /** Action flatten the selected layers */
     TSharedPtr<FUICommandInfo> FlattenSelectedLayers;
+
+    TSharedPtr<FUICommandInfo> NavigateToNextLayer;
+    TSharedPtr<FUICommandInfo> NavigateToPreviousLayer;
+    TSharedPtr<FUICommandInfo> OpenFolderLayer;
+    TSharedPtr<FUICommandInfo> CloseFolderLayer;
 };

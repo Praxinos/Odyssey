@@ -30,7 +30,6 @@ public:
     virtual void Initialize() override;
     virtual void Finalize() override;
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
     UOdysseyAnimation*				    Animation() const;
@@ -56,6 +55,4 @@ public:
     float mPlaybackFramesPerSecond;
     TArray<FGuid> mImageRenderingComposition;
     TSharedPtr<FOdysseyLayerStackEditorBrushContext> mLayerStackBrushEditorContext;
-
-    TSharedPtr<FOdysseyAnimationGlobalShortcuts> mGlobalShortcuts;
 };

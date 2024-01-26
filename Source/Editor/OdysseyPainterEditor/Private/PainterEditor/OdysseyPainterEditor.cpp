@@ -53,6 +53,8 @@
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 
+#include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 /////////////////////////////////////////////////////
@@ -104,6 +106,9 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
 void
 FOdysseyPainterEditor::Initialize()
 {
+    TAttribute<UOdysseyLayerStack*> layerStackAttr = TAttribute<UOdysseyLayerStack*>::CreateRaw(this, &FOdysseyPainterEditor::LayerStack);
+    GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStackAttr));
+
     //Init Tools
 	InitTools();
     

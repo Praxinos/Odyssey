@@ -5,6 +5,7 @@
 
 #include "ToolMenuOwner.h"
 #include "OdysseyEditorTab.h"
+#include "OdysseyEditorShortcuts.h"
 
 class FOdysseyEditorGUI;
 class FTabManager;
@@ -45,6 +46,8 @@ public:
     FOnAddEditedObject& OnAddEditedObjectDelegate();
     FOnRemoveEditedObject& OnRemoveEditedObjectDelegate();
 
+    FOdysseyEditorShortcuts& GetShortcuts();
+
 public:
     // Interface
     virtual void Initialize() = 0;
@@ -78,6 +81,8 @@ public:
 
     FOnAddEditedObject mOnAddEditedObject;
     FOnRemoveEditedObject mOnRemoveEditedObject;
+
+    FOdysseyEditorShortcuts mShortcuts;
 };
 
 template<class T>
