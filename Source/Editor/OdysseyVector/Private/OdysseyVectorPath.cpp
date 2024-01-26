@@ -253,6 +253,25 @@ FOdysseyVectorPath::UpdateBBox()
         if ( ry2 > ymax ) ymax = ry2;
     }
 
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        if( vertex->GetSegmentCount() )
+        {
+            ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( false );
+            double rx1 = jointBBox.x
+                 , ry1 = jointBBox.y
+                 , rx2 = jointBBox.x + jointBBox.w
+                 , ry2 = jointBBox.y + jointBBox.h;
+
+            hasBBox = true;
+
+            if ( rx1 < xmin ) xmin = rx1;
+            if ( ry1 < ymin ) ymin = ry1;
+            if ( rx2 > xmax ) xmax = rx2;
+            if ( ry2 > ymax ) ymax = ry2;
+        }
+    }
+
     mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
@@ -1068,8 +1087,7 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
 }
 
 bool
-FOdysseyVectorPath::Erase( const ::ULIS::FRectD &iRoi
-                         , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
@@ -1565,153 +1583,99 @@ FOdysseyVectorPath::AlterRadius( double iDeltaRadius )
 }
 
 void
-FOdysseyVectorPath::DrawTexturedJoint( FOdysseyVectorJoint* iJoint
-                                     , int8*  iScreenPixels
-                                     , uint32 iScreenWidth
-                                     , uint32 iScreenHeight
-                                     , uint32 iScreenBitsPerPixel
-                                     , int8*  iTexturePixels
-                                     , uint32 iTextureWidth
-                                     , uint32 iTextureHeight
-                                     , uint32 iTextureBitsPerPixel
-                                     , double iStartU
-                                     , double iEndU
-                                     , double iCombinedOpacity
-                                     , uint64 iDrawingFlags )
+FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
+                               , FOdysseyVectorSegment* iSegment
+                               , double iStartU
+                               , double iEndU
+                               , double iCombinedOpacity
+                               , uint64 iDrawingFlags )
 {
-    // TODO: transform this to an argument to avoid repetitive calls. I guess.
-    FOdysseyVectorEngine* vectorEngine = GetEngine();
-    std::vector<FOdysseyVectorPolygon5>& polygonCache = iJoint->GetPolygonCache();
-    FColor foregroundColor = GetForegroundColor();
-    double difU = iEndU - iStartU;
-
-    for( int i = 0; i < polygonCache.size(); i++ )
+    // if the segment is textured, use our own routines.
+    if( mBrush.pixels )
     {
-        FOdysseyVectorPolygon5* polygon = &polygonCache[i];
-        BLPoint worldPoint[5];
-        ::ULIS::FVec2I int32Point[5];
-        double polyU[5];
+        std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
+        FColor foregroundColor = GetForegroundColor();
+        FOdysseyVectorEngine* vectorEngine = GetEngine();
+        double difU = iEndU - iStartU;
 
-        for( uint32 j = 0; j < polygon->pointCount; j++ )
+        for( int i = 0; i < fractionCache.size(); i++ )
         {
-           worldPoint[j] = mWorldMatrix.mapPoint( polygon->point[j].x, polygon->point[j].y );
-           int32Point[j].x = (int32) worldPoint[j].x;
-           int32Point[j].y = (int32) worldPoint[j].y;
-           polyU[j] = iStartU + ( polygon->U[j] * difU );
-        }
-
-        // TODO : check for in-screen visibility
-            vectorEngine->DrawPolygon( int32Point
-                                     , polyU
-                                     , polygon->V
-                                     , polygon->pointCount
-                                     , iCombinedOpacity
-                                     , iScreenPixels
-                                     , iScreenWidth
-                                     , iScreenHeight
-                                     , iScreenBitsPerPixel
-                                     , foregroundColor
-                                     , iTexturePixels
-                                     , iTextureWidth
-                                     , iTextureHeight
-                                     , iTextureBitsPerPixel
-                                     , mBrush.ColorFromBrush ? false : true );
-    }
-}
-
-void
-FOdysseyVectorPath::DrawTexturedSegment( FOdysseyVectorSegment* iSegment
-                                       , int8*  iScreenPixels
-                                       , uint32 iScreenWidth
-                                       , uint32 iScreenHeight
-                                       , uint32 iScreenBitsPerPixel
-                                       , int8*  iTexturePixels
-                                       , uint32 iTextureWidth
-                                       , uint32 iTextureHeight
-                                       , uint32 iTextureBitsPerPixel
-                                       , double iStartU
-                                       , double iEndU
-                                       , double iCombinedOpacity
-                                       , uint64 iDrawingFlags )
-{
-    FOdysseyVectorEngine* vectorEngine = GetEngine();
-    std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
-    FColor foregroundColor = GetForegroundColor();
-    double difU = iEndU - iStartU;
-
-    for( int i = 0; i < fractionCache.size(); i++ )
-    {
-        FOdysseyVectorFraction* fraction = &fractionCache[i];
-        BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( fraction->polygon.point[0].x, fraction->polygon.point[0].y )
-                                , mWorldMatrix.mapPoint( fraction->polygon.point[1].x, fraction->polygon.point[1].y ) 
-                                , mWorldMatrix.mapPoint( fraction->polygon.point[2].x, fraction->polygon.point[2].y ) 
-                                , mWorldMatrix.mapPoint( fraction->polygon.point[3].x, fraction->polygon.point[3].y ) };
-        ::ULIS::FVec2I intPt[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
-                                  , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
-                                  , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
-                                  , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
-        int32 xmin = ::ULIS::FMath::Min4( intPt[0].x, intPt[1].x, intPt[2].x, intPt[3].x );
-        int32 xmax = ::ULIS::FMath::Max4( intPt[0].x, intPt[1].x, intPt[2].x, intPt[3].x );
-        int32 ymin = ::ULIS::FMath::Min4( intPt[0].y, intPt[1].y, intPt[2].y, intPt[3].y );
-        int32 ymax = ::ULIS::FMath::Max4( intPt[0].y, intPt[1].y, intPt[2].y, intPt[3].y );
-
-        // don't draw if quad is outside the screen
-        if( ( ( xmin ) < (int32)iScreenWidth  )
-         && ( ( xmax ) > 0                    )
-         && ( ( ymin ) < (int32)iScreenHeight )
-         && ( ( ymax ) > 0                    ) )
-        {
-            double quadU[4] = { iStartU + ( fraction->polygon.U[0] * difU )
+            FOdysseyVectorFraction* fraction = &fractionCache[i];
+            double hexaU[6] = { iStartU + ( fraction->polygon.U[0] * difU )
                               , iStartU + ( fraction->polygon.U[1] * difU )
                               , iStartU + ( fraction->polygon.U[2] * difU )
-                              , iStartU + ( fraction->polygon.U[3] * difU ) };
+                              , iStartU + ( fraction->polygon.U[3] * difU )
+                              , iStartU + ( fraction->polygon.U[4] * difU )
+                              , iStartU + ( fraction->polygon.U[5] * difU ) };
+            uint64 polygonDrawingFlags = 0;
+
+            polygonDrawingFlags |= mBrush.ColorFromBrush    ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
+            polygonDrawingFlags |= mBrush.BilinearFiltering ? FPolygonDrawingFlags::BILINEARFILTERING : 0;
 
             // should be a static function
-            vectorEngine->DrawPolygon( intPt
-                                     , quadU
+            vectorEngine->FillHexagon( iBLContext
+                                     , fraction->polygon.point
+                                     , hexaU
                                      , fraction->polygon.V
-                                     , 4
                                      , iCombinedOpacity
-                                     , iScreenPixels
-                                     , iScreenWidth
-                                     , iScreenHeight
-                                     , iScreenBitsPerPixel
                                      , foregroundColor
-                                     , iTexturePixels
-                                     , iTextureWidth
-                                     , iTextureHeight
-                                     , iTextureBitsPerPixel
-                                     , mBrush.ColorFromBrush ? false : true );
+                                     , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                     , mBrush.width
+                                     , mBrush.height
+                                     , mBrush.bitsPerPixel
+                                     , polygonDrawingFlags );
         }
+    }
+    else // otherwise use Blend2D's
+    {
+        iSegment->Draw( iBLContext );
     }
 }
 
 void
 FOdysseyVectorPath::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iDrawingFlags )
 {
-    for( FOdysseyVectorChain& chain : mChainArray )
+    FOdysseyVectorEngine* vectorEngine = GetEngine();
+    ::ULIS::FRectD worldBBox = GetBBox( true );
+    BLImageData& imageData = vectorEngine->GetRenderData();
+    ::ULIS::FRectD screen;
+
+    screen.x = 0;
+    screen.y = 0;
+    screen.w = imageData.size.w;
+    screen.h = imageData.size.h;
+
+    if( worldBBox.Area() > 1.0f ) // do not draw if < 1 pixel
     {
-        DrawChain( iBLContext, iCombinedOpacity, chain, iDrawingFlags );
+        // do not draw if outside screen
+        if( ( ( worldBBox.x               ) < screen.w )
+         && ( ( worldBBox.x + worldBBox.w ) > 0        )
+         && ( ( worldBBox.y               ) < screen.h )
+         && ( ( worldBBox.y + worldBBox.h ) > 0        ) )
+        {
+            for( FOdysseyVectorChain& chain : mChainArray )
+            {
+                DrawChain( iBLContext, vectorEngine, iCombinedOpacity, chain, iDrawingFlags );
+            }
+        }
     }
 }
 
 void
 FOdysseyVectorPath::DrawChain( BLContext* iBLContext
+                             , FOdysseyVectorEngine* iVectorEngine
                              , double iCombinedOpacity
                              , FOdysseyVectorChain& iChain
                              , uint64 iDrawingFlags )
 {
-    FOdysseyVectorEngine* vectorEngine = GetEngine();
     FColor color = mForegroundBucket.GetColor();
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 ) 
-                                                                                         : BLRgba32( color.R, color.G, color.B, color.A * iCombinedOpacity );
+                                                                                         : BLRgba32( color.R, color.G, color.B, 255 * iCombinedOpacity /*color.A * iCombinedOpacity*/ );
 
     UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();
-    BLImageData imageData;
+    BLImageData& imageData = iVectorEngine->GetRenderData();
     ::ULIS::FRectD screen;
-
-    image->makeMutable( &imageData );
 
     screen.x = 0;
     screen.y = 0;
@@ -1724,22 +1688,23 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     }
     else
     {
-        if( texture )
+        if( mBrush.GetTexture() )
         {
-            const FColor* brushData = static_cast<const FColor*>(texture->GetPlatformData()->Mips[0].BulkData.LockReadOnly());
             double startU = mBrush.Revert ? 1.0f : 0.0f;
+
+            mBrush.Lock();
 
             iChain.IterateSegments( [ this
                                     , texture
-                                    , brushData
-                                    , &imageData
+                                    , iBLContext
                                     , &iCombinedOpacity
                                     , &iDrawingFlags
                                     , &startU
                                     , &screen
                                     , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
             {
-                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
+                ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( true );
+                ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( true );
                 FOdysseyVectorJoint& joint = vertex->GetJoint();
                 double segmentLength = segment->GetLength();
                 double jointLength = joint.GetLength();
@@ -1795,41 +1760,32 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                         if ( jointStartU < 0.0f ) jointStartU = 0.0f;
                         if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
 
-                        // TODO : check for in-screen visibility
-                        DrawTexturedJoint( &joint
-                                            , (int8*)imageData.pixelData
-                                            , imageData.size.w
-                                            , imageData.size.h
-                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                            , (int8*) brushData
-                                            , texture->GetSurfaceWidth()
-                                            , texture->GetSurfaceHeight()
-                                            , 32
-                                            , jointStartU
-                                            , jointEndU
-                                            , iCombinedOpacity
-                                            , iDrawingFlags );
+                        // don't draw if joint is outside the screen
+                        if( ( ( jointBBox.x               ) < screen.w )
+                         && ( ( jointBBox.x + jointBBox.w ) > 0        )
+                         && ( ( jointBBox.y               ) < screen.h )
+                         && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
+                        {
+                            vertex->DrawJoint( iBLContext
+                                             , jointStartU
+                                             , jointEndU
+                                             , iCombinedOpacity
+                                             , iDrawingFlags );
+                        }
                     }
 
                     // don't draw if segment is outside the screen
-                    if( ( ( bbox.x          ) < screen.w )
-                        && ( ( bbox.x + bbox.w ) > 0        )
-                        && ( ( bbox.y          ) < screen.h )
-                        && ( ( bbox.y + bbox.h ) > 0        ) )
+                    if( ( ( segmentBBox.x                 ) < screen.w )
+                     && ( ( segmentBBox.x + segmentBBox.w ) > 0        )
+                     && ( ( segmentBBox.y                 ) < screen.h )
+                     && ( ( segmentBBox.y + segmentBBox.h ) > 0        ) )
                     {
-                        DrawTexturedSegment( segment
-                                            , (int8*)imageData.pixelData
-                                            , imageData.size.w
-                                            , imageData.size.h
-                                            , ( imageData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
-                                            , (int8*) brushData
-                                            , texture->GetSurfaceWidth()
-                                            , texture->GetSurfaceHeight()
-                                            , 32
-                                            , segmentStartU
-                                            , segmentEndU
-                                            , iCombinedOpacity
-                                            , iDrawingFlags );
+                        DrawSegment( iBLContext
+                                   , segment
+                                   , segmentStartU
+                                   , segmentEndU
+                                   , iCombinedOpacity
+                                   , iDrawingFlags );
                     }
                 }
 
@@ -1839,7 +1795,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 return false; // keep iterating
             } );
 
-            texture->GetPlatformData()->Mips[0].BulkData.Unlock();
+            mBrush.Unlock();
         }
         else
         {
@@ -1851,25 +1807,35 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
 
             iChain.IterateSegments( [ this
                                     , iBLContext
+                                    , &iCombinedOpacity
                                     , &iDrawingFlags
                                     , &screen ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
             {
-                ::ULIS::FRectD bbox = segment->GetBoundingBox( true );
+                ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( true );
+                ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( true );
 
                 // don't draw if segment is outside the screen
-                if( ( ( bbox.x          ) < screen.w )
-                 && ( ( bbox.x + bbox.w ) > 0        )
-                 && ( ( bbox.y          ) < screen.h )
-                 && ( ( bbox.y + bbox.h ) > 0        ) )
+                if( ( ( segmentBBox.x                 ) < screen.w )
+                 && ( ( segmentBBox.x + segmentBBox.w ) > 0        )
+                 && ( ( segmentBBox.y                 ) < screen.h )
+                 && ( ( segmentBBox.y + segmentBBox.h ) > 0        ) )
                 {
-                    segment->Draw( iBLContext );
+                    DrawSegment( iBLContext
+                               , segment
+                               , 0.0f
+                               , 0.0f
+                               , iCombinedOpacity
+                               , iDrawingFlags );
                 }
 
-            // TODO : check for in-screen visibility
-                /*if( currentVertex->GetSegmentCount() == 2 )
-                {*/
-                    vertex->DrawJoint( iBLContext, iDrawingFlags );
-                /*}*/
+                // don't draw if joint is outside the screen
+                if( ( ( jointBBox.x               ) < screen.w )
+                 && ( ( jointBBox.x + jointBBox.w ) > 0        )
+                 && ( ( jointBBox.y               ) < screen.h )
+                 && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
+                {
+                    vertex->DrawJoint( iBLContext, 0.0f, 0.0f, iCombinedOpacity, iDrawingFlags );
+                }
 
                 return false; // keep iterating
             } );
@@ -1883,6 +1849,8 @@ FOdysseyVectorPath::DrawStructure( BLContext* iBLContext
                                  , double iStrokeWidth
                                  , bool iWorld )
 {
+    static BLRgba32 blackColor = BLRgba32( 0, 0, 0, 255 );
+
     iBLContext->save();
 
     if( iWorld )
@@ -1895,6 +1863,11 @@ FOdysseyVectorPath::DrawStructure( BLContext* iBLContext
 
     for( FOdysseyVectorSegment* segment : mSegmentList )
     {
+        //iBLContext->setStrokeWidth( iStrokeWidth + 1.0f );
+        //iBLContext->setStrokeStyle( blackColor );
+        //segment->DrawStructure( iBLContext, this, iWorld );
+        //iBLContext->setStrokeWidth( iStrokeWidth );
+        //iBLContext->setStrokeStyle( iStrokeColor );
         segment->DrawStructure( iBLContext, this, iWorld );
     }
 
@@ -2319,6 +2292,8 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
                              , &ymax
                              , &hasBBox ] ( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
     {
+        FOdysseyVectorSegment* prevSegment = vertex->GetOtherSegment( segment );
+        FOdysseyVectorVertex* nextVertex = segment->GetOtherVertex( vertex );
         ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( false );
         double rx1 = segmentBBox.x
              , ry1 = segmentBBox.y
@@ -2333,7 +2308,7 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
         if ( ry2 > ymax ) ymax = ry2;
 
         // update joint
-        vertex->MakeJoint( segment );
+        vertex->MakeJoint( prevSegment, segment );
 
         iChain->mLength += segment->GetLength() + vertex->GetJointLength();
 

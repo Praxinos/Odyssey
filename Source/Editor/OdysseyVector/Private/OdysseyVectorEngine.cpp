@@ -1,6 +1,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorPath.h"
-//#include <future>
+#include <future>
+#include <execution>
 
 FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
@@ -73,6 +74,12 @@ uint32
 FOdysseyVectorEngine::GetPreferredHeight()
 {
     return mPreferredHeight;
+}
+
+BLImageData&
+FOdysseyVectorEngine::GetRenderData()
+{
+    return mRenderData;
 }
 
 void
@@ -188,8 +195,6 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
 
-    //UseImage( iBLImage );
-
     iBLContext->save();
     iBLContext->resetMatrix();
     //mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
@@ -204,39 +209,8 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
     iBLContext->restore();
 
     iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
-
-    //UseImage( &mDefaultBLImage );
-}
-/*
-// static
-void
-FOdysseyVectorEngine::GetVertexSelection( std::list<FOdysseyVectorObject*>& iVectorObjectList
-                                        , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray )
-{
-    for( FOdysseyVectorObject* vectorObject : iVectorObjectList )
-    {
-        GetVertexSelectionRecursive( vectorObject, iSelectedPointArray );
-    }
 }
 
-// static
-void
-FOdysseyVectorEngine::GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
-                                                 , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray )
-{
-    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-    {
-        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
-
-        path->GetSelectedPoints( iSelectedPointArray, ePointSelectionFlags::Vertex );
-    }
-
-    for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
-    {
-        GetVertexSelectionRecursive( childObject, iSelectedPointArray );
-    }
-}
-*/
 void
 FOdysseyVectorEngine::SelectAllInSelectionSpace()
 {
@@ -250,32 +224,20 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
         mScene->GetEngine()->SelectObject( child );
     }
 }
-/*
-uint64
-FOdysseyVectorEngine::GetDrawingFlags()
-{
-    return mDrawingFlags;
-}
 
-void
-FOdysseyVectorEngine::SetDrawingFlags( uint64 iDrawingFlags )
-{
-    mDrawingFlags = iDrawingFlags;
-}
-*/
 void
 FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
     BLImage* image = iBLContext->targetImage();
-    BLImageData imageData;
 
-    image->getData( &imageData );
+    // retrieves uffer specs and allows us to draw directly in the buffer
+    image->makeMutable( &mRenderData );
 
     // for drawing polygones (textured)
-    if( mHorizontalLineBuffer.size() != imageData.size.h )
+    if( mHorizontalLineBuffer.size() != mRenderData.size.h )
     {
-        mHorizontalLineBuffer.resize( imageData.size.h );
+        mHorizontalLineBuffer.resize( mRenderData.size.h );
     }
 
     if( mInvalidationFlags )
@@ -306,7 +268,9 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
     mInvalidationFlags = 0;
 
-    mInvalidatedRect = ::ULIS::FRectI( 0, 0, imageData.size.w, imageData.size.h );
+    mInvalidatedRect = ::ULIS::FRectI( 0, 0, mRenderData.size.w, mRenderData.size.h );
+
+    mRenderData.reset();
 }
 
 FOdysseyVectorVertex*
@@ -514,7 +478,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
                     if( mHorizontalLineBuffer[y].inited == 0 )
                     {
                         mHorizontalLineBuffer[y].inited = 1;
-
+                        mHorizontalLineBuffer[y].y  = y;
                         mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
                         mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
                         mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
@@ -569,7 +533,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
                     if( mHorizontalLineBuffer[y].inited == 0 )
                     {
                          mHorizontalLineBuffer[y].inited = 1;
-
+                         mHorizontalLineBuffer[y].y  = y;
                          mHorizontalLineBuffer[y].x0 = mHorizontalLineBuffer[y].x1 = x;
                          mHorizontalLineBuffer[y].u0 = mHorizontalLineBuffer[y].u1 = u;
                          mHorizontalLineBuffer[y].v0 = mHorizontalLineBuffer[y].v1 = v;
@@ -613,8 +577,70 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     }
 }
 
+// bilinear interpolation version of GETPIXEL. currently unused
 // Macro for faster execution. Indeed, an inline function is not guaranteed to be inlined.
-#define GETPIXEL(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,ALPHAONLY,U,V,R,G,B,A)   \
+#define GETPIXELBF(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,FLAGS,U,V,R,G,B,A)                                                     \
+    switch ( BITSPERPIXEL )                                                                                                \
+    {                                                                                                                      \
+        case 32 :                                                                                                          \
+        {                                                                                                                  \
+            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4]) PIXELS;                                                 \
+            double TEXUF = U * ( WIDTH  - 1 );                                                                             \
+            double TEXVF = V * ( HEIGHT - 1 );                                                                             \
+            int32  TEXUI = TEXUF;                                                                                          \
+            int32  TEXVI = TEXVF;                                                                                          \
+            double  WEIGHTU = TEXUF - TEXUI;                                                                               \
+            double  WEIGHTV = TEXVF - TEXVI;                                                                               \
+            double  INVWEIGHTU = 1.0f - WEIGHTU;                                                                           \
+            double  INVWEIGHTV = 1.0f - WEIGHTV;                                                                           \
+            uint32 OFFSETTOPLEFT     = ( TEXVI * WIDTH ) + TEXUI                                                           \
+                 , OFFSETTOPRIGHT    = OFFSETTOPLEFT + 1                                                                   \
+                 , OFFSETBOTTOMRIGHT = OFFSETTOPLEFT + 1 + WIDTH                                                           \
+                 , OFFSETBOTTOMLEFT  = OFFSETTOPLEFT + WIDTH;                                                              \
+            uint8 UPOL0, UPOL1;                                                                                            \
+            uint8 VPOL0, VPOL1;                                                                                            \
+                                                                                                                           \
+            if( ( FLAGS & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )                                                    \
+            {                                                                                                              \
+                /* bilinear interpolations */                                                                              \
+                UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][0] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][0] * WEIGHTU ); \
+                UPOL1 = ( PIXELS32[OFFSETBOTTOMLEFT][0] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][0] * WEIGHTU ); \
+                VPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][0] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMLEFT ][0] * WEIGHTV ); \
+                VPOL1 = ( PIXELS32[OFFSETTOPRIGHT  ][0] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][0] * WEIGHTV ); \
+                B = ( ( UPOL0 * ( INVWEIGHTV ) ) + ( UPOL1 * WEIGHTV )                                                     \
+                    + ( VPOL0 * ( INVWEIGHTU ) ) + ( VPOL1 * WEIGHTU ) ) * 0.5f;                                           \
+                /* bilinear interpolations */                                                                              \
+                UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][1] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][1] * WEIGHTU ); \
+                UPOL1 = ( PIXELS32[OFFSETBOTTOMLEFT][1] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][1] * WEIGHTU ); \
+                VPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][1] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMLEFT ][1] * WEIGHTV ); \
+                VPOL1 = ( PIXELS32[OFFSETTOPRIGHT  ][1] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][1] * WEIGHTV ); \
+                G = ( ( UPOL0 * ( INVWEIGHTV ) ) + ( UPOL1 * WEIGHTV )                                                     \
+                    + ( VPOL0 * ( INVWEIGHTU ) ) + ( VPOL1 * WEIGHTU ) ) * 0.5f;                                           \
+                /* bilinear interpolations */                                                                              \
+                UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][2] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][2] * WEIGHTU ); \
+                UPOL1 = ( PIXELS32[OFFSETBOTTOMLEFT][2] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][2] * WEIGHTU ); \
+                VPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][2] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMLEFT ][2] * WEIGHTV ); \
+                VPOL1 = ( PIXELS32[OFFSETTOPRIGHT  ][2] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][2] * WEIGHTV ); \
+                R = ( ( UPOL0 * ( INVWEIGHTV ) ) + ( UPOL1 * WEIGHTV )                                                     \
+                    + ( VPOL0 * ( INVWEIGHTU ) ) + ( VPOL1 * WEIGHTU ) ) * 0.5f;                                           \
+            }                                                                                                              \
+                                                                                                                           \
+            /* bilinear interpolations */                                                                                  \
+            UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][3] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][3] * WEIGHTU );     \
+            UPOL1 = ( PIXELS32[OFFSETBOTTOMLEFT][3] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][3] * WEIGHTU );     \
+            VPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][3] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMLEFT ][3] * WEIGHTV );     \
+            VPOL1 = ( PIXELS32[OFFSETTOPRIGHT  ][3] * ( INVWEIGHTV ) ) + ( PIXELS32[OFFSETBOTTOMRIGHT][3] * WEIGHTV );     \
+            A = ( ( UPOL0 * ( INVWEIGHTV ) ) + ( UPOL1 * WEIGHTV )                                                         \
+                + ( VPOL0 * ( INVWEIGHTU ) ) + ( VPOL1 * WEIGHTU ) ) * 0.5f;                                               \
+        }                                                                                                                  \
+        break;                                                                                                             \
+                                                                                                                           \
+        default :                                                                                                          \
+        break;                                                                                                             \
+    }                                                                                                                      \
+
+// Macro for faster execution. Indeed, an inline function is not guaranteed to be inlined.
+#define GETPIXEL(PIXELS,WIDTH,HEIGHT,BITSPERPIXEL,FLAGS,U,V,R,G,B,A)       \
     switch ( BITSPERPIXEL )                                                \
     {                                                                      \
         case 32 :                                                          \
@@ -624,7 +650,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
             int32 TEXV = V * ( HEIGHT - 1 );                               \
             uint32 TEXOFFSET = ( TEXV * WIDTH ) + TEXU;                    \
                                                                            \
-            if( ALPHAONLY == false )                                       \
+            if( ( FLAGS & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )    \
             {                                                              \
                 B = PIXELS32[TEXOFFSET][0];                                \
                 G = PIXELS32[TEXOFFSET][1];                                \
@@ -654,22 +680,20 @@ struct _EngineTexture
 };
 */
 
-void
-FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
-                                          , double iOpacity
-                                          , int8*  iImagePixelData
-                                          , uint32 iImageWidth
-                                          , uint32 iImageHeight
-                                          , int32  iImageBitsPerPixel
-                                          , const  FColor& iColor
-                                          // Temp
-                                          , int8*  iBrushPixelData
-                                          , uint32 iBrushWidth
-                                          , uint32 iBrushHeight
-                                          , int32  iBrushBitsPerPixel
-                                          , bool   iBrushAlphaOnly )
+static inline void TraceHorizontalLine ( const FHorizontalLine *hline
+                                       , double iOpacity
+                                       , const int8*  iImagePixelData
+                                       , uint32 iImageWidth
+                                       , uint32 iImageHeight
+                                       , int32  iImageBitsPerPixel
+                                       , const  FColor& iColor
+                                       // 
+                                       , const int8*  iBrushPixelData
+                                       , uint32 iBrushWidth
+                                       , uint32 iBrushHeight
+                                       , int32  iBrushBitsPerPixel
+                                       , uint64 iPolygonDrawingFlags  )
 {
-    FHorizontalLine *hline = &mHorizontalLineBuffer[iLineNumber];
     int32 x0 = hline->x0,
           x1 = hline->x1;
     double u0 = hline->u0;
@@ -681,7 +705,7 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
     double u = u0;
     double v = v0;
     double opacityFactor = iOpacity / 255.0f;
-    uint32 offset = ( iLineNumber * iImageWidth );
+    uint32 offset = ( hline->y * iImageWidth );
     int32 screenx = dx;
     unsigned char BR = iColor.R, BG = iColor.G, BB = iColor.B, BA = iColor.A;
 
@@ -697,8 +721,8 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
         screenx  = dx - clippingW;
     }
 
-    // Commented out: we don't drow from edge-to-edge, we stop 1 pixel before to prevent overlapping,
-    // which would lead to double stroke and would produce artefact when alpha is semi-transparent.
+    // Replace "<=" with "<" if you don't want to draw from edge-to-edge and stop 1 pixel before to prevent overlapping,
+    // which leads to double stroke and would produce artefact when alpha is semi-transparent.
     //for( int i = 0; i <= ddx; i++ )
     for( int i = 0; ( i < screenx ) && ( x < (int)iImageWidth /* clipping */ ); i++ )
     {
@@ -708,17 +732,36 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
 
             if( iBrushPixelData && iBrushWidth && iBrushHeight )
             {
-                GETPIXEL( iBrushPixelData
-                        , iBrushWidth
-                        , iBrushHeight
-                        , iBrushBitsPerPixel
-                        , iBrushAlphaOnly
-                        , fmod(u,1.0f) // function call might slow things (maybe not that much, as fmod is declared inline)
-                        , fmod(v,1.0f) // function call might slow things (maybe not that much, as fmod is declared inline)
-                        , BR
-                        , BG
-                        , BB
-                        , BA );
+                if( ( iPolygonDrawingFlags & FPolygonDrawingFlags::BILINEARFILTERING )
+                 && (        x < (int32)(iImageWidth  - 1) )   // prevent overflow
+                 && ( hline->y < (int32)(iImageHeight - 1) ) ) // prevent overflow
+                {
+                    GETPIXELBF( iBrushPixelData
+                              , iBrushWidth
+                              , iBrushHeight
+                              , iBrushBitsPerPixel
+                              , iPolygonDrawingFlags
+                              , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
+                              , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
+                              , BR
+                              , BG
+                              , BB
+                              , BA );
+                }
+                else
+                {
+                    GETPIXEL( iBrushPixelData
+                            , iBrushWidth
+                            , iBrushHeight
+                            , iBrushBitsPerPixel
+                            , iPolygonDrawingFlags
+                            , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
+                            , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
+                            , BR
+                            , BG
+                            , BB
+                            , BA );
+                }
             }
 
             switch ( iImageBitsPerPixel )
@@ -751,57 +794,195 @@ FOdysseyVectorEngine::TraceHorizontalLine ( int32  iLineNumber
         v += pv;
     }
 }
-/*
-void
-FOdysseyVectorEngine::DrawQuadThread( uint32 iProcessorID
-                                    , uint32 iProcessorCount
-                                    , int32  iFirstLine
-                                    , int32  iLastLine
-                                    , double iOpacity
-                                    , int8*  iPixelData
-                                    , int32  iBitsPerPixel
-                                    // Temp
-                                    , int8*  iBrushPixelData
-                                    , uint32 iBrushWidth
-                                    , uint32 iBrushHeight
-                                    , int32  iBrushBitsPerPixel )
-{
-    for( int i = iFirstLine + iProcessorID; i <= iLastLine ; i += iProcessorCount )
-    {
-        if( mHorizontalLineBuffer[i].inited == 2 )
-        {
-            TraceHorizontalLine( i
-                               , iOpacity
-                               , iPixelData
-                               , iBitsPerPixel
-                               , iBrushPixelData
-                               , iBrushWidth
-                               , iBrushHeight
-                               , iBrushBitsPerPixel );
-        }
-
-        mHorizontalLineBuffer[i].inited = 0;
-    }
-}
-*/
 
 void
-FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
-                                 , double* iU
-                                 , double* iV
-                                 , uint32 pointCount
+FOdysseyVectorEngine::FillHexagon( BLContext* iBLContext
+                                 , const ::ULIS::FVec2D* iPoint
+                                 , const double* iU
+                                 , const double* iV
                                  , double iOpacity
-                                 , int8*  iImagePixelData
-                                 , uint32 iImageWidth
-                                 , uint32 iImageHeight
-                                 , int32  iImageBitsPerPixel
+                                 //
                                  , const FColor& iColor
-                                 // temp
-                                 , int8*  iBrushPixelData
+                                 //
+                                 , const int8*  iBrushPixelData
                                  , uint32 iBrushWidth
                                  , uint32 iBrushHeight
                                  , int32  iBrushBitsPerPixel
-                                 , bool   iBrushAlphaOnly )
+                                 , uint64 iPolygonDrawingFlags )
+{
+    const BLMatrix2D& userMatrix = iBLContext->userMatrix();
+    BLPoint worldPoint[6] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
+                            , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
+                            , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y )
+                            , userMatrix.mapPoint( iPoint[3].x, iPoint[3].y )
+                            , userMatrix.mapPoint( iPoint[4].x, iPoint[4].y )
+                            , userMatrix.mapPoint( iPoint[5].x, iPoint[5].y ) };
+    ::ULIS::FVec2I intPt[6] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                              , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                              , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
+                              , { (int32)worldPoint[3].x, (int32)worldPoint[3].y }
+                              , { (int32)worldPoint[4].x, (int32)worldPoint[4].y }
+                              , { (int32)worldPoint[5].x, (int32)worldPoint[5].y } };
+
+    int32 xmin = intPt[0].x;
+    int32 xmax = intPt[0].x;
+    int32 ymin = intPt[0].y;
+    int32 ymax = intPt[0].y;
+
+    for( int i = 1; i < 6; i++ )
+    {
+        if( intPt[i].x < xmin ) xmin = intPt[i].x;
+        if( intPt[i].x > xmax ) xmax = intPt[i].x;
+        if( intPt[i].y < ymin ) ymin = intPt[i].y;
+        if( intPt[i].y > ymax ) ymax = intPt[i].y;
+    }
+
+    // don't draw if quad is outside the screen
+    if( ( ( xmin ) < (int32) mRenderData.size.w )
+     && ( ( xmax ) > 0                          )
+     && ( ( ymin ) < (int32) mRenderData.size.h )
+     && ( ( ymax ) > 0                          ) )
+    {
+        TracePolygon( intPt
+                    , iU
+                    , iV
+                    , 6
+                    , iOpacity
+                    , iColor
+                    , iBrushPixelData
+                    , iBrushWidth
+                    , iBrushHeight
+                    , iBrushBitsPerPixel
+                    , iPolygonDrawingFlags );
+    }
+}
+
+void
+FOdysseyVectorEngine::FillQuad( BLContext* iBLContext
+                              , const ::ULIS::FVec2D* iPoint
+                              , const double* iU
+                              , const double* iV
+                              , double iOpacity
+                              //
+                              , const FColor& iColor
+                              //
+                              , const int8*  iBrushPixelData
+                              , uint32 iBrushWidth
+                              , uint32 iBrushHeight
+                              , int32  iBrushBitsPerPixel
+                              , uint64 iPolygonDrawingFlags )
+{
+    const BLMatrix2D& userMatrix = iBLContext->userMatrix();
+    BLPoint worldPoint[4] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
+                            , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
+                            , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y )
+                            , userMatrix.mapPoint( iPoint[3].x, iPoint[3].y ) };
+    ::ULIS::FVec2I intPt[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                              , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                              , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
+                              , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
+    int32 xmin = intPt[0].x;
+    int32 xmax = intPt[0].x;
+    int32 ymin = intPt[0].y;
+    int32 ymax = intPt[0].y;
+
+    for( int i = 1; i < 4; i++ )
+    {
+        if( intPt[i].x < xmin ) xmin = intPt[i].x;
+        if( intPt[i].x > xmax ) xmax = intPt[i].x;
+        if( intPt[i].y < ymin ) ymin = intPt[i].y;
+        if( intPt[i].y > ymax ) ymax = intPt[i].y;
+    }
+
+    // don't draw if quad is outside the screen
+    if( ( ( xmin ) < (int32) mRenderData.size.w )
+     && ( ( xmax ) > 0                          )
+     && ( ( ymin ) < (int32) mRenderData.size.h )
+     && ( ( ymax ) > 0                          ) )
+    {
+        TracePolygon( intPt
+                    , iU
+                    , iV
+                    , 4
+                    , iOpacity
+                    , iColor
+                    , iBrushPixelData
+                    , iBrushWidth
+                    , iBrushHeight
+                    , iBrushBitsPerPixel
+                    , iPolygonDrawingFlags );
+    }
+}
+
+void
+FOdysseyVectorEngine::FillTriangle( BLContext* iBLContext
+                                  , const ::ULIS::FVec2D* iPoint
+                                  , const double* iU
+                                  , const double* iV
+                                  , double iOpacity
+                                  //
+                                  , const FColor& iColor
+                                  //
+                                  , const int8*  iBrushPixelData
+                                  , uint32 iBrushWidth
+                                  , uint32 iBrushHeight
+                                  , int32  iBrushBitsPerPixel
+                                  , uint64 iPolygonDrawingFlags )
+{
+    const BLMatrix2D& userMatrix = iBLContext->userMatrix();
+    BLPoint worldPoint[3] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
+                            , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
+                            , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y ) };
+    ::ULIS::FVec2I intPt[3] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                              , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                              , { (int32)worldPoint[2].x, (int32)worldPoint[2].y } };
+    int32 xmin = intPt[0].x;
+    int32 xmax = intPt[0].x;
+    int32 ymin = intPt[0].y;
+    int32 ymax = intPt[0].y;
+
+    for( int i = 1; i < 3; i++ )
+    {
+        if( intPt[i].x < xmin ) xmin = intPt[i].x;
+        if( intPt[i].x > xmax ) xmax = intPt[i].x;
+        if( intPt[i].y < ymin ) ymin = intPt[i].y;
+        if( intPt[i].y > ymax ) ymax = intPt[i].y;
+    }
+
+    // don't draw if quad is outside the screen
+    if( ( ( xmin ) < (int32) mRenderData.size.w )
+     && ( ( xmax ) > 0                          )
+     && ( ( ymin ) < (int32) mRenderData.size.h )
+     && ( ( ymax ) > 0                          ) )
+    {
+        TracePolygon( intPt
+                    , iU
+                    , iV
+                    , 3
+                    , iOpacity
+                    , iColor
+                    , iBrushPixelData
+                    , iBrushWidth
+                    , iBrushHeight
+                    , iBrushBitsPerPixel
+                    , iPolygonDrawingFlags );
+    }
+}
+
+void
+FOdysseyVectorEngine::TracePolygon( const ::ULIS::FVec2I* iPoint
+                                  , const double* iU
+                                  , const double* iV
+                                  , uint32 pointCount
+                                  , double iOpacity
+                                  //
+                                  , const FColor& iColor
+                                  //
+                                  , const int8*  iBrushPixelData
+                                  , uint32 iBrushWidth
+                                  , uint32 iBrushHeight
+                                  , int32  iBrushBitsPerPixel
+                                  , uint64 iPolygonDrawingFlags )
 {
     int32 ymin = iPoint[0].y,
           ymax = ymin;
@@ -809,6 +990,10 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
     for( uint32 i = 0; i < pointCount; i++ )
     {
         uint32 n = ( i + 1 ) % pointCount;
+        double ui = iU ? iU[i] : 0.0f;
+        double un = iU ? iU[n] : 0.0f;
+        double vi = iV ? iV[i] : 0.0f;
+        double vn = iV ? iV[n] : 0.0f;
 
         if ( iPoint[i].y < ymin ) ymin = iPoint[i].y;
         if ( iPoint[i].y > ymax ) ymax = iPoint[i].y;
@@ -816,180 +1001,250 @@ FOdysseyVectorEngine::DrawPolygon( ::ULIS::FVec2I* iPoint
         // always draw in the same direction (left to right ) to avoid bad overlapping
         if( iPoint[i].x < iPoint[n].x )
         {
-            TraceLine ( iPoint[i].x, iPoint[i].y, iU[i], iV[i]
-                      , iPoint[n].x, iPoint[n].y, iU[n], iV[n], iImageWidth, iImageHeight );
+            TraceLine ( iPoint[i].x, iPoint[i].y, ui, vi
+                      , iPoint[n].x, iPoint[n].y, un, vn, mRenderData.size.w, mRenderData.size.h );
         }
         else
         {
-            TraceLine ( iPoint[n].x, iPoint[n].y, iU[n], iV[n]
-                      , iPoint[i].x, iPoint[i].y, iU[i], iV[i], iImageWidth, iImageHeight );
+            TraceLine ( iPoint[n].x, iPoint[n].y, un, vn
+                      , iPoint[i].x, iPoint[i].y, ui, vi, mRenderData.size.w, mRenderData.size.h );
         }
     }
 
-    if ( ymin <  0                    ) ymin = 0;
-    if ( ymin >= (int32) iImageHeight ) ymin = (int32) iImageHeight - 1;
-    if ( ymax <  0                    ) ymax = 0;
-    if ( ymax >= (int32) iImageHeight ) ymax = (int32) iImageHeight - 1;
+    if ( ymin <  0                            ) ymin = 0;
+    if ( ymin >= (int32) mRenderData.size.h   ) ymin = (int32) mRenderData.size.h - 1;
+    if ( ymax <  0                            ) ymax = 0;
+    if ( ymax >= (int32) mRenderData.size.h   ) ymax = (int32) mRenderData.size.h - 1;
 
     if ( ymin <= ymax )
     {
-/*
-        FOdysseyVectorComputer& mainComputer = FOdysseyVectorComputer::GetMainComputer();
-
-
-        mainComputer.Run( [ this
-                          , &ymin
-                          , &ymax
-                          , &iOpacity
-                          , &iImagePixelData
-                          , &iImageWidth
-                          , &iImageHeight
-                          , &iImageBitsPerPixel
-                          , &iColor
-                          , &iBrushPixelData
-                          , &iBrushWidth
-                          , &iBrushHeight
-                          , &iBrushBitsPerPixel
-                          , &iBrushAlphaOnly ]( uint32 iProcessorID, uint32 iProcessorCount ) -> bool
-                          {
-                              for( int i = ymin + iProcessorID; i <= ymax ; i += iProcessorCount )
-                              {
-                                  if( mHorizontalLineBuffer[i].inited == 2 )
-                                  {
-                                      TraceHorizontalLine( i
-                                                         , iOpacity
-                                                         , iImagePixelData
-                                                         , iImageWidth
-                                                         , iImageHeight
-                                                         , iImageBitsPerPixel
-                                                         , iColor
-                                                         , iBrushPixelData
-                                                         , iBrushWidth
-                                                         , iBrushHeight
-                                                         , iBrushBitsPerPixel
-                                                         , iBrushAlphaOnly );
-                                  }
-
-                                  mHorizontalLineBuffer[i].inited = 0;
-
-                                  if( i == ymax )
-                                  {
-                                      return true;
-                                  }
-                              }
-
-                              return false;
-                          } );
-*/
-/*
-        std::vector<std::future<void>> threads;
-
-//mProcessorCount = 2;
-
-        threads.resize( mProcessorCount );
-
-        int totalThreads = ( ymax - ymin  + 1 ) < (int) mProcessorCount ? ( ymax - ymin  + 1 ) :  (int)mProcessorCount;
-
-        for( int32 i = 0; i < totalThreads; i++ )
-        //for( uint32 i = 0; i < threads.size(); i++ )
-        {
-            threads[i] = std::async( std::launch::async
-                                    , [ this
-                                      , &ymin
-                                      , &ymax
-                                      , &iOpacity
-                                      , &iPixelData
-                                      , &iBitsPerPixel
-                                      , &iBrushPixelData
-                                      , &iBrushWidth
-                                      , &iBrushHeight
-                                      , &iBrushBitsPerPixel]( uint32 iProcessorID, uint32 iProcessorCount )
-                                      {
-
-                                          FGenericPlatformProcess::SetThreadAffinityMask( (uint64) 1 << iProcessorID );
-
-                                          for( int i = ymin + iProcessorID; i <= ymax ; i += iProcessorCount )
-                                          {
-                                              if( mHorizontalLineBuffer[i].inited == 2 )
-                                              {
-                                                    TraceHorizontalLine( i
-                                                                     , iOpacity
-                                                                     , iPixelData
-                                                                     , iBitsPerPixel
-                                                                     , iBrushPixelData
-                                                                     , iBrushWidth
-                                                                     , iBrushHeight
-                                                                     , iBrushBitsPerPixel );
-                                              }
-
-                                              mHorizontalLineBuffer[i].inited = 0;
-                                          }
-                                      }
-                                  , i
-                                  , mProcessorCount );
-        }
-
-        for( uint32 i = 0; i < (uint32)totalThreads; i++ )
-        {
-            threads[i].wait();
-        }
-*/
-/*
-        int32 lineCount = ( ymax - ymin ) + 1;
-
-        ParallelFor( lineCount
-                  , [ this
-                    , &ymin
-                    , &iOpacity
-                    , iPixelData
-                    , &iBitsPerPixel
-                    , iBrushPixelData
-                    , &iBrushWidth
-                    , &iBrushHeight
-                    , &iBrushBitsPerPixel ]( int32 iIndex )
-                      {
-                          int32 lineID = iIndex + ymin;
-
-                          if( mHorizontalLineBuffer[lineID].inited == 2 )
-                          {
-                              TraceHorizontalLine( lineID
-                                                 , iOpacity
-                                                 , iPixelData
-                                                 , iBitsPerPixel
-                                                 , iBrushPixelData
-                                                 , iBrushWidth
-                                                 , iBrushHeight
-                                                 , iBrushBitsPerPixel );
-                          }
-
-                          mHorizontalLineBuffer[lineID].inited = 0;
-                      } );
-*/
-
-    // Single CPU version. The one that actually works.
-
+        // Single CPU version. The one that actually works.
         for ( int i = ymin; i <= ymax; i++ )
         {
             if( mHorizontalLineBuffer[i].inited == 2 )
             {
-                if( mHorizontalLineBuffer[i].x1 >= 0 )
+                mHorizontalLineBuffer[i].inited = 0;
+
+                if( ( mHorizontalLineBuffer[i].x1 >= 0 )
+                 && ( mHorizontalLineBuffer[i].x0 < (int32) mRenderData.size.w ) )
                 {
-                    TraceHorizontalLine( i
+                    // this is to prevent overlapping in semi-transparent drawings.
+                    // Note: this could be made useless by using a Z-buffer, but we'll save this option for later.
+                    //if( ( i == iPoint[0].y )
+                    // && ( i == iPoint[3].y )
+                    // && ( iPolygonDrawingFlags & FPolygonDrawingFlags::SKIPFIRSTHLINE ) )
+                    //{
+                    //    continue;
+                    //}
+
+                    TraceHorizontalLine( &mHorizontalLineBuffer[i]
                                        , iOpacity
-                                       , iImagePixelData
-                                       , iImageWidth
-                                       , iImageHeight
-                                       , iImageBitsPerPixel
+                                       , (int8*)mRenderData.pixelData
+                                       , mRenderData.size.w
+                                       , mRenderData.size.h
+                                       , ( mRenderData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
                                        , iColor
                                        , iBrushPixelData
                                        , iBrushWidth
                                        , iBrushHeight
                                        , iBrushBitsPerPixel
-                                       , iBrushAlphaOnly );
+                                       , iPolygonDrawingFlags );
                 }
             }
+        }
+    }
+}
 
-            mHorizontalLineBuffer[i].inited = 0;
+// swaps two numbers 
+static inline void swap(int* a , int*b) 
+{ 
+    int temp = *a; 
+    *a = *b; 
+    *b = temp; 
+}
+
+//returns integer part of a floating point number 
+static inline int iPartOfNumber(float x) 
+{ 
+    return (int)x; 
+}
+  
+//rounds off a number 
+static inline int roundNumber(float x)
+{ 
+    return iPartOfNumber(x + 0.5) ; 
+}
+  
+//returns fractional part of a number 
+static inline float fPartOfNumber(float x)
+{ 
+    if (x>0) return x - iPartOfNumber(x); 
+    else return x - (iPartOfNumber(x)+1); 
+}
+  
+//returns 1 - fractional part of number 
+static inline float rfPartOfNumber(float x) 
+{
+    return 1.0f - fPartOfNumber(x); 
+}
+
+// draws a pixel on screen of given brightness 
+// 0<=brightness<=1. We can use your own library 
+// to draw on screen 
+static inline void PlotPixel( int32 x
+                            , int32 y
+                            , double brightness
+                            , const int8* iImagePixelData
+                            , uint32 iImageWidth
+                            , uint32 iImageHeight
+                            , int32  iImageBitsPerPixel
+                            , const FColor& iColor )
+{
+    double invBrightness = 1.0f - brightness;
+
+    switch ( iImageBitsPerPixel )
+    {
+        case 32 :
+        {
+            unsigned char (*pixels32)[4] = ( unsigned char (*)[4] ) iImagePixelData;
+            uint32 offset = ( y * iImageWidth ) + x;
+            uint8 R, G, B;
+
+            B = pixels32[offset][0];
+            G = pixels32[offset][1];
+            R = pixels32[offset][2];
+
+            pixels32[offset][0] = ( B * invBrightness ) + ( iColor.B * brightness );
+            pixels32[offset][1] = ( G * invBrightness ) + ( iColor.G * brightness );
+            pixels32[offset][2] = ( R * invBrightness ) + ( iColor.R * brightness );
+        }
+        break;
+
+        default :
+        break;
+    }
+} 
+
+// https://www.geeksforgeeks.org/anti-aliased-line-xiaolin-wus-algorithm/
+void
+FOdysseyVectorEngine::DrawLineAA( int32 x0
+                                , int32 y0
+                                , int32 x1
+                                , int32 y1
+                                , const int8* iImagePixelData
+                                , uint32 iImageWidth
+                                , uint32 iImageHeight
+                                , int32  iImageBitsPerPixel
+                                , const FColor& iColor )
+{ 
+    int steep = fabs( y1 - y0 ) > fabs( x1 - x0 );
+  
+    // swap the co-ordinates if slope > 1 or we 
+    // draw backwards 
+    if ( steep )
+    { 
+        swap( &x0, &y0 );
+        swap( &x1, &y1 );
+    } 
+    if ( x0 > x1 )
+    { 
+        swap( &x0, &x1 );
+        swap( &y0, &y1 );
+    } 
+  
+    //compute the slope 
+    float dx = x1 - x0;
+    float dy = y1 - y0;
+    float gradient = ( dx == 0.0 ) ? 1.0f : ( dy / dx );
+    int xpxl1 = x0; 
+    int xpxl2 = x1; 
+    float intersectY = y0; 
+
+    // main loop 
+    if ( steep )
+    {
+        int x;
+        for ( x = xpxl1; x <= xpxl2 ; x++ )
+        {
+            int32 p0x = iPartOfNumber( intersectY );
+            int32 p0y = x;
+            // there seemed to be a mistake here in the algo borrowed from the mentionned website.
+            // Replaced - 1 with + 1, as described in wikipedia
+            int32 p1x = p0x + 1;
+            int32 p1y = x;
+
+            // pixel coverage is determined by fractional
+            // part of y co-ordinate
+            if( ( p0x >= 0 ) && ( p0x < (int32) iImageWidth  )
+             && ( p0y >= 0 ) && ( p0y < (int32) iImageHeight ) )
+            {
+                PlotPixel( p0x
+                         , p0y
+                         , rfPartOfNumber( intersectY )
+                         , iImagePixelData
+                         , iImageWidth
+                         , iImageHeight
+                         , iImageBitsPerPixel
+                         , iColor );
+            }
+
+            if( ( p1x >= 0 ) && ( p1x < (int32) iImageWidth  )
+             && ( p1y >= 0 ) && ( p1y < (int32) iImageHeight ) )
+            {
+                PlotPixel( p1x
+                         , p1y
+                         , fPartOfNumber ( intersectY )
+                         , iImagePixelData
+                         , iImageWidth
+                         , iImageHeight
+                         , iImageBitsPerPixel
+                         , iColor );
+            }
+
+            intersectY += gradient;
+        }
+    }
+    else
+    {
+        int x;
+        for ( x = xpxl1 ; x <= xpxl2; x++ )
+        {
+            int32 p0x = x;
+            int32 p0y = iPartOfNumber( intersectY );
+            int32 p1x = x;
+            // there seemed to be a mistake here in the algo borrowed from the mentionned website.
+            // Replaced - 1 with + 1, as described in wikipedia
+            int32 p1y = p0y + 1;
+
+            // pixel coverage is determined by fractional
+            // part of y co-ordinate
+            if( ( p0x >= 0 ) && ( p0x < (int32) iImageWidth  )
+             && ( p0y >= 0 ) && ( p0y < (int32) iImageHeight ) )
+            {
+                PlotPixel( p0x
+                         , p0y
+                         , rfPartOfNumber( intersectY )
+                         , iImagePixelData
+                         , iImageWidth
+                         , iImageHeight
+                         , iImageBitsPerPixel
+                         , iColor );
+            }
+
+            if( ( p1x >= 0 ) && ( p1x < (int32) iImageWidth  )
+             && ( p1y >= 0 ) && ( p1y < (int32) iImageHeight ) )
+            {
+                PlotPixel( p1x
+                         , p1y
+                         , fPartOfNumber ( intersectY )
+                         , iImagePixelData
+                         , iImageWidth
+                         , iImageHeight
+                         , iImageBitsPerPixel
+                         , iColor );
+            }
+
+            intersectY += gradient;
         }
     }
 }
@@ -1052,7 +1307,7 @@ FOdysseyVectorEngine::ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
         return true;
     }
 
-    if( iTraversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED )
+    if( iTraversalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS )
     {
         return true;
     }
@@ -1076,7 +1331,7 @@ FOdysseyVectorEngine::Traverse( FOdysseyVectorGroupPaint* iScene
 
     if( objectTraversalFlags & TRAVERSE_OBJECT_ACCEPTED )
     {
-        iTraversalFlags |= TRAVERSE_PARENT_ACCEPTED;
+        iTraversalFlags |= TRAVERSE_PARENT_HASFOCUS;
     }
 
     if( ( objectTraversalFlags & TRAVERSE_OBJECT_IGNORE_CHILDREN ) == 0 )

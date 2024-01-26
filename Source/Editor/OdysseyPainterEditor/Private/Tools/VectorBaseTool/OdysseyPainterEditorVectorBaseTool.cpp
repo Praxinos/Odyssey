@@ -3,7 +3,7 @@
 
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
-#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
+//#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyMediaVector.h"
@@ -28,12 +28,6 @@ UOdysseyPainterEditorVectorBaseTool::~UOdysseyPainterEditorVectorBaseTool()
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
     : mBaseHUD( nullptr )
     , mHasContextMenu( true )
-    // to prevent a double mouse down bug detected in
-    // FOdysseyPainterEditorViewportClient::InputKey
-    // FOdysseyPainterEditorViewportClient::OnStylusStateChanged
-    // they sometimes are both called and both trigger 
-    // FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint
-    , mDoubleMouseDown_WorkAround( false )
 {
 }
 
@@ -191,6 +185,8 @@ UOdysseyPainterEditorVectorBaseTool::Load()
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
     mViewportWidget = viewportTab->GetViewport()->GetViewportWidget();
+
+    mPreviousMouseEvent = eMouseEventName::MouseHover;
 
     if( hasVector )
     {
@@ -377,9 +373,9 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 
     mDragging = false;
 
-  if( mDoubleMouseDown_WorkAround == false ) // workaround
-  {                                          // workaround
-    mDoubleMouseDown_WorkAround = true;      // workaround
+    // workaround for buggy stylus drivers
+    if( FilterMouseEvent( eMouseEventName::MouseDown ) == false ) 
+        return false;
 
     if( hasVector )
     {
@@ -399,7 +395,6 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 
        return true;
     }
-  }  // workaround
 
     return false;
 }
@@ -408,6 +403,10 @@ void
 UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    // workaround for buggy stylus drivers
+    if( FilterMouseEvent( eMouseEventName::MouseHover ) == false )
+        return;
 
     // we need the focus on the viewport for keyboard 
     //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget );
@@ -429,10 +428,56 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
     }
 }
 
+// WorkAround for faulty stylus drivers
+bool // true = allow, false = reject
+UOdysseyPainterEditorVectorBaseTool::FilterMouseEvent( eMouseEventName iCurrentMouseEvent )
+{
+    bool ret = false;
+
+//UE_LOG(LogTemp, Warning, TEXT("%d : %d"), mPreviousMouseEvent, iCurrentMouseEvent );
+
+    switch( iCurrentMouseEvent )
+    {
+        case eMouseEventName::MouseDown :
+            ret = ( ( mPreviousMouseEvent == eMouseEventName::MouseUp    )
+                 || ( mPreviousMouseEvent == eMouseEventName::MouseHover ) ) ? true : false;
+        break;
+
+        case eMouseEventName::MouseUp :
+            ret = ( ( mPreviousMouseEvent == eMouseEventName::MouseDown  )
+                 || ( mPreviousMouseEvent == eMouseEventName::MouseDrag  ) ) ? true : false;
+        break;
+
+        case eMouseEventName::MouseDrag :
+            ret = ( ( mPreviousMouseEvent == eMouseEventName::MouseDown  )
+                 || ( mPreviousMouseEvent == eMouseEventName::MouseDrag  ) ) ? true : false;
+        break;
+
+        case eMouseEventName::MouseHover :
+            ret = ( ( mPreviousMouseEvent == eMouseEventName::MouseHover )
+                 || ( mPreviousMouseEvent == eMouseEventName::MouseUp    ) ) ? true : false;
+        break;
+
+        default :
+        break;
+    }
+
+    if( ret == true )
+    {
+        mPreviousMouseEvent = iCurrentMouseEvent;
+    }
+
+    return ret;
+}
+
 void
 UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    // workaround for buggy stylus drivers
+    if( FilterMouseEvent( eMouseEventName::MouseDrag ) == false )
+        return;
 
     mDragging = true;
 
@@ -460,7 +505,9 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
     bool ret = false;
 
-    mDoubleMouseDown_WorkAround = false; // workaround
+    // workaround for buggy stylus drivers
+    if( FilterMouseEvent( eMouseEventName::MouseUp ) == false )
+        return false;
 
     mDragging = false;
 
@@ -664,15 +711,45 @@ UOdysseyPainterEditorVectorBaseTool::Delete()
     }
 }
 
+TSharedPtr<SWidget>
+UOdysseyPainterEditorVectorBaseTool::CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
+                                                         , const TSharedPtr<ISinglePropertyView> iView )
+{
+    if (!iPropertyHandle)
+        return nullptr;
+
+    TSharedRef<SWidget> nameWidget = iPropertyHandle->CreatePropertyNameWidget();
+    TSharedRef<SWidget> valueWidget = iPropertyHandle->CreatePropertyValueWidget(false);
+
+    iView->SetVisibility(EVisibility::Collapsed);
+
+    return SNew(SHorizontalBox)
+    + SHorizontalBox::Slot()
+    .AutoWidth()
+    [
+        //PATCH:
+        iView.ToSharedRef()
+    ]
+    + SHorizontalBox::Slot()
+    .AutoWidth()
+    .Padding(0.f, 0.f, 3.f, 0.f)
+    [
+        nameWidget
+    ]
+    + SHorizontalBox::Slot()
+    [
+        valueWidget
+    ];
+}
+
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
 {
-    return SNew(SWrapBox)
-           .InnerSlotPadding(FVector2D(10.f, 3.f))
-           .UseAllottedSize(true)
-           .HAlign(HAlign_Fill)
-           + SWrapBox::Slot()
-           .HAlign(HAlign_Fill)
+    return SNew(SUniformWrapPanel)
+           .SlotPadding(FVector2D(3.f, 0.f))
+           .EvenRowDistribution(true)
+           .HAlign(HAlign_Left)
+           + SUniformWrapPanel::Slot()
            [
                SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
            ];
@@ -842,6 +919,104 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu
     }
 
     //return menu.MakeWidget();
+}
+
+#ifndef M_PI
+#define M_PI 3.14159265359f
+#endif
+
+void
+UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene )
+{
+    uint32 rayCount = 100;
+    double width = 4.0f;
+    double radius = 250;
+    double angleStep = 2.0f * M_PI / rayCount;
+    double angle = angleStep / 2.0f;
+    FOdysseyVectorEllipse* ellipse = new FOdysseyVectorEllipse( "ellipse"
+                                                              , 60.0f
+                                                              , 60.0f
+                                                              , width );
+    std::vector<FOdysseyVectorPath*> raysArray;
+
+    raysArray.reserve( rayCount );
+
+    for( uint32 i = 0; i < rayCount; i++ )
+    {
+        FOdysseyVectorPath* path = new FOdysseyVectorPath( "test" );
+        FOdysseyVectorVertex* vertex0 = new FOdysseyVectorVertex( 0.0f, 0.0f, width );
+        FOdysseyVectorVertex* vertex1 = new FOdysseyVectorVertex( cos( angle ) * radius
+                                                                , sin( angle ) * radius
+                                                                , width );
+        FOdysseyVectorSegmentCubic* cubicSegment = new FOdysseyVectorSegmentCubic( path
+                                                                                 , vertex0
+                                                                                 , vertex1
+                                                                                 , true );
+        path->AddVertex( vertex0 );
+        path->AddVertex( vertex1 );
+        path->AddSegment( cubicSegment );
+
+        iScene->AppendChild( path );
+
+        raysArray.push_back( path );
+
+        angle += angleStep;
+    }
+
+    iScene->AppendChild( ellipse->Convert() );
+
+    iScene->UpdateMatrix();
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    // checks multiple times
+    for( int i = 0; i < 2; i++ )
+    {
+        UE_LOG(LogTemp, Error, TEXT("Check: %d"), i );
+
+        // each vertex should have 64 sections.
+        for( FOdysseyVectorPath* ray : raysArray )
+        {
+            FOdysseyVectorSegment* segment = ray->GetFirstSegment();
+            FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+            FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+
+            // check number of sections.
+            if( vertex0->GetSectionCount() != rayCount )
+            {
+                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at ray/vertex0 : real:%d - exp:%d"), vertex0->GetSectionCount(), rayCount);
+            }
+
+            // at vertex 1 section are simplified, hence 0
+            if( vertex1->GetSectionCount() != 0 )
+            {
+                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at ray/vertex1 : real:%d - exp:%d"), vertex1->GetSectionCount(), rayCount);
+            }
+        }
+
+        // check intersection
+        for( FOdysseyVectorIntersection* intersection : iScene->GetIntersectionArray() )
+        {
+            FOdysseyVectorVertexIntersection* vertex0 = intersection->GetVertex(0);
+            FOdysseyVectorVertexIntersection* vertex1 = intersection->GetVertex(1);
+
+            // check number of sections.
+            if( vertex0->GetSectionCount() != 3 )
+            {
+                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at paintgroup/vertex0 : %d"), vertex0->GetSectionCount());
+            }
+
+            if( vertex1->GetSectionCount() != 3 )
+            {
+                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at paintgroup/vertex1 : %d"), vertex1->GetSectionCount());
+            }
+        }
+
+        // force finding cycles again
+        iScene->SetPainted( false );
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        iScene->SetPainted( true );
+        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

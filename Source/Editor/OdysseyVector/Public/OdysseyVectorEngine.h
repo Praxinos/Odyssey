@@ -14,14 +14,28 @@
 
 //#include "OdysseyVectorGroupPaint.generated.h"
 
+// I use namespaces and not ENUM_CLASS_FLAGS because I can't use them as bool without a cast, which is idiotic.
+namespace FPolygonDrawingFlags
+{
+	static const uint64 NONE	          = 0;
+	static const uint64 STROKE0           = 1ULL << 0;
+	static const uint64 STROKE1           = 1ULL << 1;
+	static const uint64 STROKE2           = 1ULL << 2;
+	static const uint64 STROKE3           = 1ULL << 3;
+	static const uint64 STROKEALL         = STROKE0 | STROKE1 | STROKE2 | STROKE3;
+	static const uint64 FILL              = 1ULL << 4;
+	static const uint64 NOOVERLAP         = 1ULL << 5;
+	static const uint64 BRUSHALPHAONLY    = 1ULL << 6;
+	static const uint64 BILINEARFILTERING = 1ULL << 7;
+};
+
 typedef struct _FHorizontalLine
 {
+    int32 y;
     int32 x0;
-    int32 y0;
     double u0;
     double v0;
     int32 x1;
-    int32 y1;
     double u1;
     double v1;
     int inited;
@@ -267,56 +281,56 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                        , double iV1
                        , uint32 iImageWidth
                        , uint32 iImageHeight );
-
-        void TraceHorizontalLine ( int32 iLineNumber
-                                 , double iOpacity
-                                 , int8*  iPixelData
-                                 , uint32 iImageWidth
-                                 , uint32 iImageHeight
-                                 , int32  iBitsPerPixel
-                                 , const FColor& iColor
-                                 , int8*  iBrushPixelData
-                                 , uint32 iBrushWidth
-                                 , uint32 iBrushHeight
-                                 , int32  iBrushBitsPerPixel
-                                 , bool   iBrushAlphaOnly );
-        void DrawPolygon( ::ULIS::FVec2I* iPoint
-                        , double* iU
-                        , double* iV
-                        , uint32 pointCount
+        void FillHexagon( BLContext* iBLContext
+                        , const ::ULIS::FVec2D* iPoint
+                        , const double* iU
+                        , const double* iV
                         , double iOpacity
-                        , int8*  iImagePixelData
-                        , uint32 iImageWidth
-                        , uint32 iImageHeight
-                        , int32  iImageBitsPerPixel
+                        //
                         , const FColor& iColor
-                        // temp
-                        , int8*  iBrushPixelData
+                        //
+                        , const int8*  iBrushPixelData
                         , uint32 iBrushWidth
                         , uint32 iBrushHeight
                         , int32  iBrushBitsPerPixel
-                        , bool   iBrushAlphaOnly );
+                        , uint64 iPolygonDrawingFlags );
+        void FillQuad( BLContext* iBLContext
+                     , const ::ULIS::FVec2D* iPoint
+                     , const double* iU
+                     , const double* iV
+                     , double iOpacity
+                     //
+                     , const FColor& iColor
+                     //
+                     , const int8*  iBrushPixelData
+                     , uint32 iBrushWidth
+                     , uint32 iBrushHeight
+                     , int32  iBrushBitsPerPixel
+                     , uint64 iPolygonDrawingFlags );
 
-        void DrawQuadThread( uint32 iProcessorID
-                           , uint32 iProcessorCount
-                           , int32  iFirstLine
-                           , int32  iLastLine
-                           , double iOpacity
-                           , int8*  iPixelData
-                           , int32  iBitsPerPixel
-                           // Temp
-                           , int8*  iBrushPixelData
-                           , uint32 iBrushWidth
-                           , uint32 iBrushHeight
-                           , int32  iBrushBitsPerPixel );
+        void FillTriangle( BLContext* iBLContext
+                         , const ::ULIS::FVec2D* iPoint
+                         , const double* iU
+                         , const double* iV
+                         , double iOpacity
+                         //
+                         , const FColor& iColor
+                         //
+                         , const int8*  iBrushPixelData
+                         , uint32 iBrushWidth
+                         , uint32 iBrushHeight
+                         , int32  iBrushBitsPerPixel
+                         , uint64 iPolygonDrawingFlags );
 
         void SetBLMask( BLImage* iBLMask );
+
+        BLImageData& GetRenderData();
 
 
 
         static const uint64 TRAVERSE_STOP                   = ( 1 << 0 );
         static const uint64 TRAVERSE_OBJECT_ACCEPTED        = ( 1 << 1 );
-        static const uint64 TRAVERSE_PARENT_ACCEPTED        = ( 1 << 2 );
+        static const uint64 TRAVERSE_PARENT_HASFOCUS        = ( 1 << 2 );
         static const uint64 TRAVERSE_OBJECT_IGNORE_CHILDREN = ( 1 << 3 );
 
         bool ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
@@ -369,6 +383,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         virtual uint32 RemoveChild ( FOdysseyVectorObject* iChild ) override;
         virtual uint32 AddChild( FOdysseyVectorObject* iChild
                                , FOdysseyVectorObject* iInsertAfter ) override;
+
+        void DrawLineAA( int32 x0
+                       , int32 y0
+                       , int32 x1
+                       , int32 y1
+                       , const int8* iImagePixelData
+                       , uint32 iImageWidth
+                       , uint32 iImageHeight
+                       , int32  iImageBitsPerPixel
+                       , const FColor& iColor );
+
 /*
        uint64 GetDrawingFlags();
        void SetDrawingFlags( uint64 iDrawingFlags );
@@ -401,6 +426,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static void GetVertexSelectionRecursive( FOdysseyVectorObject* iObject
                                                , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
 
+        void TracePolygon( const  ::ULIS::FVec2I* iPoint
+                         , const  double* iU
+                         , const  double* iV
+                         , uint32 pointCount
+                         , double iOpacity
+                         , const  FColor& iColor
+                         // temp
+                         , const  int8* iBrushPixelData
+                         , uint32 iBrushWidth
+                         , uint32 iBrushHeight
+                         , int32  iBrushBitsPerPixel
+                         , uint64 iPolygonDrawingFlags );
+
     protected:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
         BLContextCreateInfo mCreateInfo;
@@ -414,5 +452,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         std::vector<FHorizontalLine> mHorizontalLineBuffer;
         uint32 mProcessorCount;
         ::ULIS::FRectI mInvalidatedRect;
+        BLImageData mRenderData; // for direct drawing via our own drawing routines.
         //uint64 mDrawingFlags; // temporary, until we find a way to pass the drawing flags as arg
 };

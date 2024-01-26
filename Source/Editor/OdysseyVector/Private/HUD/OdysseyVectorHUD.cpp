@@ -20,11 +20,13 @@ FPointQuadTree::~FPointQuadTree()
 
 FPointQuadTree::FPointQuadTree( const ::ULIS::FRectD& iRect
                               , uint32 iMaxPointsPerQuad
-                              , std::vector<FPointQuadTreeEntry>& iPointQuadTreeEntryArray )
+                              , std::vector<FPointQuadTreeEntry>& iPointQuadTreeEntryArray
+                              , uint32 iDepth
+                              , uint32 iMaxDepth )
     : mChildren { nullptr, nullptr, nullptr, nullptr }
     , mRect( iRect )
 {
-    Build( iMaxPointsPerQuad, iPointQuadTreeEntryArray );
+    Build( iMaxPointsPerQuad, iPointQuadTreeEntryArray, iDepth, iMaxDepth );
 }
 
 FOdysseyVectorHUD::~FOdysseyVectorHUD()
@@ -60,7 +62,10 @@ FPointQuadTree::Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, u
 }
 
 void
-FPointQuadTree::Build( uint32 iMaxPointsPerQuad, std::vector<FPointQuadTreeEntry>& iParentPointQuadTreeEntryArray )
+FPointQuadTree::Build( uint32 iMaxPointsPerQuad
+                     , std::vector<FPointQuadTreeEntry>& iParentPointQuadTreeEntryArray
+                     , uint32 iDepth
+                     , uint32 iMaxDepth )
 {
     mPointQuadTreeEntryArray.reserve( iParentPointQuadTreeEntryArray.size() );
 
@@ -72,7 +77,7 @@ FPointQuadTree::Build( uint32 iMaxPointsPerQuad, std::vector<FPointQuadTreeEntry
         }
     }
 
-    if( mPointQuadTreeEntryArray.size() > iMaxPointsPerQuad )
+    if( ( mPointQuadTreeEntryArray.size() > iMaxPointsPerQuad ) && ( iDepth < iMaxDepth ) )
     {
         uint32 minX =   mRect.x;
         uint32 minY =   mRect.y;
@@ -81,10 +86,10 @@ FPointQuadTree::Build( uint32 iMaxPointsPerQuad, std::vector<FPointQuadTreeEntry
         uint32 avgX =   mRect.x + ( mRect.w * 0.5f );
         uint32 avgY =   mRect.y + ( mRect.h * 0.5f );
 
-        mChildren[0] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( minX, minY, avgX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray );
-        mChildren[1] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( avgX, minY, maxX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray );
-        mChildren[2] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( avgX, avgY, maxX, maxY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray );
-        mChildren[3] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( minX, avgY, avgX, maxY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray );
+        mChildren[0] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( minX, minY, avgX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
+        mChildren[1] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( avgX, minY, maxX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
+        mChildren[2] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( avgX, avgY, maxX, maxY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
+        mChildren[3] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( minX, avgY, avgX, maxY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
 
         mPointQuadTreeEntryArray.clear();
     }
@@ -187,7 +192,7 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene, uint64 i
         delete mPointQuadTree;
     }
 
-    mPointQuadTree = new FPointQuadTree( screenRect, 20, pointQuadTreeEntryArray );
+    mPointQuadTree = new FPointQuadTree( screenRect, 20, pointQuadTreeEntryArray, 0, 8 );
 }
 
 void
@@ -564,16 +569,15 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
     ::ULIS::FVec2D bucketWorldCoords = GetBucketPosition( iBucket, true );
     FColor bucketColor = iBucket->GetColor();
     BLRgba32 fillColor = BLRgba32( bucketColor.R, bucketColor.G, bucketColor.B, bucketColor.A );
-    BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF )
-                                                 : BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+    BLRgba32 propColor = iBucket->IsPropagated() ? BLRgba32( 0x00, 0xFF, 0x00, 0xFF ) : fgColor;
+    static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+    static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
     if( iHUDFlags & HUD_GROUPPAINT_BUCKET_HANDLE )
     {
         if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
         {
             ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetBucketHandleVector( iBucket, true ) * HANDLE_DISTANCE );
-            BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
-            BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
             // Bucket-to-handle line
             iBLContext->setStrokeWidth( 2.0f );
@@ -598,9 +602,6 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
             ::ULIS::FVec2D radialWorldCoords = GetBucketRadialPosition( iBucket, true );
             ::ULIS::FVec2D radialHandleWorldCoords = GetBucketRadialHandlePosition( iBucket, true );
             double radialRadius = ( radialHandleWorldCoords - radialWorldCoords ).Distance();
-
-            BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
-            BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
 
             // Bucket-to-radial line
             iBLContext->setStrokeWidth( 2.0f );
@@ -652,11 +653,51 @@ FOdysseyVectorHUD::DrawBucket( BLContext* iBLContext
     iBLContext->fillCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
 
     iBLContext->setStrokeWidth( 2.0f );
-    iBLContext->setStrokeStyle( BLRgba32( 0x00, 0x00, 0x00, 0xFF ) );
+    iBLContext->setStrokeStyle( blackColor );
     iBLContext->strokeCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
+
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->setStrokeStyle( propColor ); // green if propagated, white otherwise
     iBLContext->strokeCircle( bucketWorldCoords.x, bucketWorldCoords.y, PELLET_RADIUS );
+
+    if( iBucket->IsPropagated() )
+    {
+        iBLContext->setStrokeWidth( 3.0f );
+        iBLContext->setStrokeStyle( blackColor );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 0.0f
+                             , 1.0472f );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 2.0944f
+                             , 1.0472f );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 4.1888f
+                             , 1.0472f );
+
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->setStrokeStyle( propColor ); // green if propagated, fg otherwise
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 0.0f
+                             , 1.0472f );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 2.0944f
+                             , 1.0472f );
+        iBLContext->strokeArc( bucketWorldCoords.x
+                             , bucketWorldCoords.y
+                             , PELLET_RADIUS + 3.0f
+                             , 4.1888f
+                             , 1.0472f );
+    }
 }
 
 // static

@@ -1,4 +1,8 @@
 #include "OdysseyVectorSection.h"
+#include "OdysseyVector.h"
+#include "OdysseyVectorSegmentCubic.h"
+
+
 
 FOdysseyVectorSection::~FOdysseyVectorSection()
 {
@@ -18,6 +22,25 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
     Init( iSegment, iConversionMatrix, iVertex0, iVertex1 );
 }
 
+double
+FOdysseyVectorSection::GetLength()
+{
+    return mLength;
+}
+
+bool
+FOdysseyVectorSection::IsValid()
+{
+    if( ( mLength == 0.0f )
+     && ( ( mVertex[0]->GetSectionCount() > 2 )
+       || ( mVertex[1]->GetSectionCount() > 2 ) ) )
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void
 FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
                            , BLMatrix2D* iConversionMatrix
@@ -28,6 +51,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
     double t0 = iVertex0->GetT( iSegment );
     double t1 = iVertex1->GetT( iSegment );
 
+    mLength = fabs ( t1 - t0 ) * iSegment->GetLength();
     mSegment = iSegment;
     mVertex[0] = iVertex0;
     mVertex[1] = iVertex1;
@@ -43,13 +67,24 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
         ::ULIS::FVec2D* segmentBezier = cubicSegment->GetBezier();
+        ::ULIS::FVec2D subBezier[4];
         BLPoint convertedPoint[4];
 
         if( fabs( t0 - t1 ) < 1.0f )
         {
             FOdysseyVector::BezierExtract( segmentBezier[0], segmentBezier[1], segmentBezier[2], segmentBezier[3]
                                          , t0, t1
-                                         , mBezier[0], mBezier[1], mBezier[2], mBezier[3] );
+                                         , subBezier[0], subBezier[1], subBezier[2], subBezier[3] );
+            // here we take the vertex coords and not the one we could retrieve from the 
+            // subBezier because it might be inconsistent due to the value at T found from
+            // performing linear intersection and not from a bezier-bezier intersection.
+            // for this reason T might no be reliable to find the endpoints of our bezier.
+            // we only use it for the handles. 
+            mBezier[0] = iVertex0->GetCoords();
+            mBezier[3] = iVertex1->GetCoords();
+
+            mBezier[1] = mBezier[0] + ( subBezier[1] - subBezier[0] );
+            mBezier[2] = mBezier[3] + ( subBezier[2] - subBezier[3] );
         }
         else
         {
@@ -80,6 +115,16 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
             mBezier[3].x = convertedPoint[3].x;
             mBezier[3].y = convertedPoint[3].y;
         }
+    }
+
+    // check bezier validity. It can happen at very very small values
+    // of T that the bezier has the same values at all controllers. We get rid of those
+    // sections in FOdysseyVectorGroupPaint::SimplifyGraph()
+    if( ( mBezier[0] == mBezier[1] )
+     && ( mBezier[0] == mBezier[2] )
+     && ( mBezier[0] == mBezier[3] ) )
+    {
+        mLength = 0.0f;
     }
 }
 
@@ -121,7 +166,7 @@ FOdysseyVectorSection::GetTangentAt( double t, bool iNormalize )
     {
         tangent = mBezier[1] - mBezier[0];
 
-        if( tangent.Distance() == 0.0f ) 
+        if( tangent.DistanceSquared() == 0.0f ) 
         {
             tangent = mBezier[2] - mBezier[0];
         }
@@ -131,7 +176,7 @@ FOdysseyVectorSection::GetTangentAt( double t, bool iNormalize )
     {
         tangent =  mBezier[3] - mBezier[2];
 
-        if( tangent.Distance() == 0.0f )
+        if( tangent.DistanceSquared() == 0.0f )
         {
             tangent = mBezier[3] - mBezier[1];
         }

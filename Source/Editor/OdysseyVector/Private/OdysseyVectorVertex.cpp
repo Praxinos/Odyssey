@@ -3,6 +3,8 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorIntersection.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVector.h"
 
 FOdysseyVectorVertex::~FOdysseyVectorVertex()
 {
@@ -11,10 +13,26 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint( iX, iY, iRadius )
    , mPath ( nullptr )
+   , mJoint( this )
    , mFlags( 0 )
    , mNearestSegment( nullptr )
    , mNearestVertex( nullptr )
 {
+    mJoint.ResetBBox();
+}
+
+bool
+FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment* iSegment )
+{
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        if( segment == iSegment )
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 ::ULIS::FVec2D
@@ -55,18 +73,6 @@ FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVert
     }
 
     return false;
-}
-
-void
-FOdysseyVectorVertex::SetNearestVertex( FOdysseyVectorVertex* iNearestVertex )
-{
-    mNearestVertex = iNearestVertex;
-}
-
-FOdysseyVectorVertex*
-FOdysseyVectorVertex::GetNearestVertex()
-{
-    return mNearestVertex;
 }
 
 FOdysseyVectorPath* 
@@ -110,7 +116,8 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection, 
                 {
                     rightSideSection.push_back( section );
                 }
-                else
+
+                if( ( FOdysseyVector::Cross2D( -lastSectionVector, sectionVector ) * iOrientation <= 0.0f ) )
                 {
                     wrongSideSection.push_back( section );
                 }
@@ -317,6 +324,12 @@ FOdysseyVectorVertex::GetNearestSegment()
     return mNearestSegment;
 }
 
+::ULIS::FVec2D
+FOdysseyVectorVertex::GetNearestSegmentIntersectionCoords()
+{
+    return mNearestSegmentIntersectionCoords;
+}
+
 double
 FOdysseyVectorVertex::GetDistanceToNearestSegment()
 {
@@ -330,14 +343,53 @@ FOdysseyVectorVertex::GetNearestSegmentT()
 }
 
 void
+FOdysseyVectorVertex::ResetNearestSegment()
+{
+    mNearestSegment = nullptr;
+    mDistanceToNearestSegment = DBL_MAX;
+    mNearestSegmentT = 0.0f;
+    mNearestSegmentIntersectionCoords = 0.0f;
+    //mNearestVertex = nullptr;
+}
+
+void
 FOdysseyVectorVertex::SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
                                        , double iDistanceToNearestSegment
-                                       , double iNearestSegmentT )
+                                       , double iNearestSegmentT
+                                       , const ::ULIS::FVec2D& iNearestSegmentIntersectionCoords )
 {
     mNearestSegment = iNearestSegment;
     mDistanceToNearestSegment = iDistanceToNearestSegment;
     mNearestSegmentT = iNearestSegmentT;
+    mNearestSegmentIntersectionCoords = iNearestSegmentIntersectionCoords;
+    //mNearestVertex = nullptr;
+}
+
+void
+FOdysseyVectorVertex::ResetNearestVertex()
+{
+    mDistanceToNearestVertex = DBL_MAX;
     mNearestVertex = nullptr;
+}
+
+void
+FOdysseyVectorVertex::SetNearestVertex( FOdysseyVectorVertex* iNearestVertex
+                                      , double iDistanceToNearestVertex )
+{
+    mDistanceToNearestVertex = iDistanceToNearestVertex;
+    mNearestVertex = iNearestVertex;
+}
+
+FOdysseyVectorVertex*
+FOdysseyVectorVertex::GetNearestVertex()
+{
+    return mNearestVertex;
+}
+
+double
+FOdysseyVectorVertex::GetDistanceToNearestVertex()
+{
+    return mDistanceToNearestVertex;
 }
 
 void
@@ -358,6 +410,8 @@ FOdysseyVectorVertex::SetCoords( double iX, double iY, double iRadius )
     }
 
     FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
+
+    mJoint.ResetBBox();
 
     InvalidateSegments();
 }
@@ -401,13 +455,13 @@ FOdysseyVectorVertex::GetSegmentList()
 FOdysseyVectorSegment*
 FOdysseyVectorVertex::GetLastSegment()
 {
-    return mSegmentList.back();
+    return mSegmentList.size() ? mSegmentList.back() : nullptr;
 }
 
 FOdysseyVectorSegment*
 FOdysseyVectorVertex::GetFirstSegment()
 {
-    return mSegmentList.front();
+    return mSegmentList.size() ? mSegmentList.front() : nullptr;
 }
 /*
 ::ULIS::FVec2D
@@ -546,6 +600,8 @@ FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
     {
         mFlags &= (~HANDLE_ALIGNED);
     }
+
+    InvalidateSegments();
 }
 
 // TODO: rename as IsSegmentAligned
@@ -726,7 +782,11 @@ FOdysseyVectorVertex::GetJointLength()
 }
 
 void
-FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags )
+FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
+                               , double iStartU
+                               , double iEndU
+                               , double iCombinedOpacity
+                               , uint64 iDrawingFlags )
 {
     if( mSegmentList.size() == 2 )
     {
@@ -748,65 +808,14 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags )
         }
         else
         {
-            mJoint.Draw( iBLContext, iDrawingFlags );
+            mJoint.Draw( iBLContext, iStartU, iEndU, iCombinedOpacity, iDrawingFlags );
         }
     }
 }
 
 void
-FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iCurrentSegment )
+FOdysseyVectorVertex::MakeJoint( FOdysseyVectorSegment* iPrevSegment
+                               , FOdysseyVectorSegment* iNextSegment )
 {
-    if( iCurrentSegment )
-    {
-        FOdysseyVectorSegment* prevSegment = GetOtherSegment( iCurrentSegment );
-
-        if( iCurrentSegment && prevSegment )
-        {
-            ::ULIS::FVec2D segment0Vector = GetVectorOnSegment( iCurrentSegment, false );
-            ::ULIS::FVec2D segment1Vector = GetVectorOnSegment( prevSegment    , false );
-
-            if( segment0Vector.DistanceSquared() )
-            {
-                segment0Vector.Normalize();
-            }
-
-            if( segment1Vector.DistanceSquared() )
-            {
-                segment1Vector.Normalize();
-            }
-
-            switch( mPath->GetJointType() )
-            {
-                case eJointType::Linear :
-                    mJoint.MakeLinear( mCoords
-                                     , segment0Vector
-                                     , segment1Vector
-                                     , mRadius );
-                break;
-
-                case eJointType::Miter :
-                    mJoint.MakeMiter( mCoords
-                                    , segment0Vector
-                                    , segment1Vector
-                                    , mRadius
-                                    , mPath->GetMiterLimit() );
-                break;
-
-                case eJointType::Radial :
-                    mJoint.MakeRadial( mCoords
-                                     , segment0Vector
-                                     , segment1Vector
-                                     , mRadius );
-                break;
-
-                default:
-                    mJoint.MakeNone();
-                break;
-            }
-
-            return;
-        }
-    }
-
-    mJoint.MakeNone();
+    mJoint.Make( iPrevSegment, iNextSegment );
 }

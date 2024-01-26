@@ -9,39 +9,60 @@
 #include <blend2d.h>
 #include "OdysseyVectorPolygon.h"
 
+class FOdysseyVectorVertex;
+class FOdysseyVectorSegment;
+
 class ODYSSEYVECTOR_API FOdysseyVectorJoint
 {
     public:
         ~FOdysseyVectorJoint();
-        FOdysseyVectorJoint();
+        FOdysseyVectorJoint( FOdysseyVectorVertex* iVertex );
 
         double
         GetLength();
 
         void
-        Draw( BLContext* iBLContext, uint64 iDrawingFlags );
+        Draw( BLContext* iBLContext
+            , double iStartU
+            , double iEndU
+            , double iCombinedOpacity
+            , uint64 iDrawingFlags );
 
+        std::vector<FOdysseyVectorPolygon3>& GetPolygonCache();
+        void UpdateBBox();
+        ::ULIS::FRectD GetBBox( bool iWorld );
+        void Make( FOdysseyVectorSegment* iPrevSegment
+                 , FOdysseyVectorSegment* iNextSegment );
+        void ResetBBox();
+
+
+    private:
         void MakeNone();
-
-        void MakeMiter( ::ULIS::FVec2D& iOrigin
-                      , ::ULIS::FVec2D& iVector0
-                      , ::ULIS::FVec2D& iVector1
-                      , double iRadius
-                      , double iMiterLimit );
-
-        void MakeLinear( ::ULIS::FVec2D& iOrigin
-                       , ::ULIS::FVec2D& iVector0
-                       , ::ULIS::FVec2D& iVector1
-                       , double iRadius );
-
-        void MakeRadial( ::ULIS::FVec2D& iOrigin
-                       , ::ULIS::FVec2D& iVector0
-                       , ::ULIS::FVec2D& iVector1
-                       , double iRadius );
-
-        std::vector<FOdysseyVectorPolygon5>& GetPolygonCache();
+        void MakeMiter( FOdysseyVectorSegment* iPrevSegment
+                      , FOdysseyVectorSegment* iNextSegment
+                      , const ::ULIS::FVec2D& iPrevEdgePoint
+                      , const ::ULIS::FVec2D& iNextEdgePoint
+                      , uint32 iSide );
+        void MakeLinear( FOdysseyVectorSegment* iPrevSegment
+                       , FOdysseyVectorSegment* iNextSegment
+                       , const ::ULIS::FVec2D& iPrevEdgePoint
+                       , const ::ULIS::FVec2D& iNextEdgePoint
+                       , uint32 iSide );
+        void MakeRadial( FOdysseyVectorSegment* iPrevSegment
+                       , FOdysseyVectorSegment* iNextSegment
+                       , const ::ULIS::FVec2D& iPrevEdgePoint
+                       , const ::ULIS::FVec2D& iNextEdgePoint
+                       , uint32 iSide );
+        double GetEdgePoints( FOdysseyVectorSegment* iPrevSegment
+                            , FOdysseyVectorSegment* iNextSegment
+                            , ::ULIS::FVec2D iPrevEdgePoint[2]
+                            , ::ULIS::FVec2D iNextEdgePoint[2] );
 
     protected:
-        std::vector<FOdysseyVectorPolygon5> mPolygonCache;
+        std::vector<FOdysseyVectorPolygon3> mPolygonCache;
+        ::ULIS::FVec2D mPrevEdgePoint[2];
+        ::ULIS::FVec2D mNextEdgePoint[2];
+        FOdysseyVectorVertex* mVertex;
+        ::ULIS::FRectD mBBox;
         double mLength;
 };

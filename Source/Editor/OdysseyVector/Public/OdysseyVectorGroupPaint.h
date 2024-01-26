@@ -115,10 +115,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool IsPainted();
         void SetPainted( bool iPainted );
 
-        uint32 IntersectSegment( FOdysseyVectorSegmentCubic* iSegment0
-                               , FOdysseyVectorSegmentCubic* iSegment1
-                               , double iTolerance
-                               , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
+        void IntersectSegment( FOdysseyVectorSegmentCubic* iSegment0
+                             , FOdysseyVectorSegmentCubic* iSegment1
+                             , const ::ULIS::FVec2D& iSegment1MinInParentWithTolerance
+                             , const ::ULIS::FVec2D& iSegment1MaxInParentWithTolerance
+                             , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
+        void IntersectVertex( FOdysseyVectorVertex* iVertex0
+                            , const ::ULIS::FVec2D& iPoint0InParent
+                            , FOdysseyVectorVertex* iVertex1
+                            , const ::ULIS::FVec2D& iPoint1InParent );
         virtual void ApplyTransformations() override;
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
 
@@ -131,8 +136,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void SetMonochromeColor( const FColor& iMonochromeColor );
         void GetSectionsFromPath( FOdysseyVectorPath* iPath
                                 , std::vector<FOdysseyVectorSection*>& oSectionArray );
-        void EraseSections( const ::ULIS::FRectD &iRoi
-                          , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+        void EraseSections( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                           , std::vector<FOdysseyVectorObject*>& oRemovedPathArray
@@ -142,6 +146,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void GetSectionsFromSegment( FOdysseyVectorSegment* iSegment
                                    , std::vector<FOdysseyVectorSection*>& oSectionArray );
 
+        void SetMultithreaded( bool iMultithreaded );
+        bool IsMultithreaded();
+        std::vector<FOdysseyVectorIntersection*>& GetIntersectionArray();
+
     protected:
         /**
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).
@@ -150,7 +158,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param oIntersectionList list populated by the pointers to the intersection that will be created.
          * @return the number of intersections
          */
-        uint32 IntersectSegmentWithList( FOdysseyVectorSegment* iSegment
+        void IntersectSegmentWithList( FOdysseyVectorSegment* iSegment
                                        , const std::list<FOdysseyVectorSegment*>& iSegmenList
                                        , std::vector<FOdysseyVectorIntersection*>& oIntersectionList );
 
@@ -217,37 +225,37 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                   , BLMatrix2D* iConversionMatrix
                                   , std::vector<FOdysseyVectorSection>& iSectionBuffer );
         void CreatePathSections( FOdysseyVectorPath* iPath
-                               , BLMatrix2D* iConversionMatrix
-                               , std::vector<FOdysseyVectorSection>& iSectionBuffer
-                               , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer );
+                               , BLMatrix2D* iConversionMatrix );
 
         FOdysseyVectorVertex* ReachVertexFromSection( FOdysseyVectorVertex* iVertex
                                                     , FOdysseyVectorSection* iFromSection
                                                     , FOdysseyVectorSegment* iOwnerSegment );
-        void GetSectionsForSegment( FOdysseyVectorSegment* iSegment
-                                  , std::vector<FOdysseyVectorSection*>& oSectionArray );
-        bool PickSection( FOdysseyVectorSection* iSection
-                        , const ::ULIS::FRectD& iMaskRect
-                        , const uint8* iMaskPixelData );
-        bool PickSections( std::vector<FOdysseyVectorSection*>& iSectionArray
-                        ,  std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
         bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
+
+        void SetSegmentBBox( FOdysseyVectorSegment* iSegment
+                           , BLMatrix2D& iConversionMatrix );
+        bool IntersectGapSection( FOdysseyVectorSection* iGapSection
+                                , FOdysseyVectorSegmentCubic* iSegment );
+        FOdysseyVectorVertex* CreateNearIntersection( FOdysseyVectorVertex *iVertex
+                                                    , std::vector<FOdysseyVectorIntersection*>& iIntersectionArray );
 
     protected:
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
-        std::list<FOdysseyVectorPath*> mSectionLessPathList;
         std::list<FOdysseyVectorPath*> mPathList;
         std::list<FOdysseyVectorBucket*> mSelectedBucketList;
         std::list<FOdysseyVectorBucket*> mBucketList;
         std::list<FOdysseyVectorCycle*> mCycleList;
         std::vector<FOdysseyVectorIntersection*> mIntersectionArray;
         uint32 mPaintingCode;
+        std::mutex mMutex;
 
         std::vector<FOdysseyVectorSection> mSectionBuffer;
+        std::vector<FOdysseyVectorSection> mGapSectionBuffer;
         std::vector<FOdysseyVectorSegmentCubicGap> mGapSegmentBuffer;
 
+        bool bMultithreaded;
         bool bPainted;
         bool bMonochrome;
         FColor mMonochromeColor;

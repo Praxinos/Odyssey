@@ -21,6 +21,7 @@ namespace FOdysseyVectorExportV2
     void WriteDefineObjectID( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectChunks( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectOpacity( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectExpansion( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectBackgroundColor( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectBackgroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar );

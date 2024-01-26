@@ -1,5 +1,6 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyPainterEditor.h"
 
 FOdysseyPainterEditorVectorPathDrawingToolHUD::~FOdysseyPainterEditorVectorPathDrawingToolHUD()
 {
@@ -123,6 +124,8 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
     }
 
     //DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+
+    //mPointQuadTree->Draw( iBLContext, iScene, 0 );
 
     if( mPathDrawingTool->Stitch )
     {

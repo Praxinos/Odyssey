@@ -1,5 +1,60 @@
 #include "OdysseyVector.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
+/* works too
+// https://stackoverflow.com/questions/4361242/extract-rotation-scale-values-from-2d-transformation-matrix
+// https://frederic-wang.fr/decomposition-of-2d-transform-matrices.html
+void
+FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
+                                      , double* oTranslationX
+                                      , double* oTranslationY
+                                      , double* oRotation
+                                      , double* oScalingX
+                                      , double* oScalingY )
+{
+    double a = iMatrix.m00;
+    double b = iMatrix.m01;
+    double c = iMatrix.m10;
+    double d = iMatrix.m11;
+    double e = iMatrix.m20;
+    double f = iMatrix.m21;
+    double delta = a * d - b * c;
+
+    if( oTranslationX ) *oTranslationX = iMatrix.m20;
+    if( oTranslationY ) *oTranslationY = iMatrix.m21;
+
+    // Apply the QR-like decomposition.
+    if ( ( a != 0 ) || ( b != 0 ) )
+    {
+        double r = sqrt( ( a * a ) + ( b * b ) );
+
+        if( oRotation ) *oRotation = b > 0 ? acos( a / r ) : -acos( a / r );
+        if( oScalingX ) *oScalingX = r;
+        if( oScalingY ) *oScalingY = delta / r;
+
+        //result.skew = [Math.atan((a * c + b * d) / (r * r)), 0];
+
+
+    }
+    else
+    {
+        if ( c != 0 || d != 0 )
+        {
+            double s = sqrt( c * c + d * d );
+
+            if( oRotation ) *oRotation = M_PI / 2.0f - ( d > 0.0f ? acos( -c / s ) : -acos( c / s ) );
+            if( oScalingX ) *oScalingX = delta / s;
+            if( oScalingY ) *oScalingY = s;
+
+            //result.skew = [0, Math.atan((a * c + b * d) / (s * s))];
+        }
+    }
+}
+*/
+
 // https://drafts.csswg.org/css-transforms/#decomposing-a-2d-matrix
 void
 FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix

@@ -7,6 +7,8 @@
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
+#include "ISinglePropertyView.h"
+#include "Widgets/Layout/SWrapBox.h"
 
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
@@ -223,7 +225,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
         GEditor->EndTransaction();
 
@@ -318,7 +320,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList );
 
-        GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
@@ -426,6 +428,34 @@ EOdysseyVectorSelectionShape
 UOdysseyPainterEditorVectorSelectionTool::GetSelectionShape()
 {
     return SelectionShape;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorSelectionTool::CreateTopTabWidget()
+{
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> selectionShapePropertyView = propertyEditorModule.CreateSingleProperty(this, "SelectionShape", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> selectionShapeHandle = selectionShapePropertyView->GetPropertyHandle();
+
+    // we create the topTab widget only once, or else it creates a sizing issue in the top tab
+    if( mTopTabWidget.Get() == nullptr )
+    {
+        mTopTabWidget = SNew(SUniformWrapPanel)
+                       .SlotPadding(FVector2D(3.f, 0.f))
+                       .EvenRowDistribution(true)
+                       .HAlign(HAlign_Left)
+                       + SUniformWrapPanel::Slot()
+                       [
+                           SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(selectionShapeHandle, selectionShapePropertyView).ToSharedRef()
+                       ];
+    }
+
+    return mTopTabWidget.ToSharedRef();
 }
 
 #undef LOCTEXT_NAMESPACE

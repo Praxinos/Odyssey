@@ -36,9 +36,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
         UPROPERTY( EditAnywhere, Category = PaintGroup )
         FColor MonochromeColor;
 
-        UPROPERTY( EditAnywhere, Category = PaintGroup )
-        bool Realtime; // relatime updates
-
         UPROPERTY( EditAnywhere, Category = PaintGroup , meta = (ClampMin = "0.0", UIMin = "0.0"))
         double GapTolerance;
 
@@ -48,4 +45,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
 
         UPROPERTY( EditAnywhere, Category = PaintGroup )
         FColor WireframeColor;
+
+        UPROPERTY( EditAnywhere, Category = Advanced )
+        bool Realtime; // relatime updates
+
+        UPROPERTY( EditAnywhere, Category = Advanced )
+        bool Multithreaded;
 };

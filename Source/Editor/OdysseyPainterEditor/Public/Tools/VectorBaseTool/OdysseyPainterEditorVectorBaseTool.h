@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyVector.h"
-
+#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "OdysseyPainterEditorVectorBaseTool.generated.h"
 
 class FOdysseyPainterEditorVectorBaseToolHUD;
@@ -16,6 +16,14 @@ enum class eBaseToolColorSource : uint8
 {
     ColorWheel = uint8(eBucketColorMode::SolidColor),
     Palette  = uint8(eBucketColorMode::Palette)
+};
+
+enum class eMouseEventName : uint8
+{
+    MouseHover = 0,
+    MouseDown  = 1,
+    MouseDrag  = 2,
+    MouseUp    = 3
 };
 
 UCLASS(Abstract)
@@ -39,11 +47,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         static bool DoubleClicked();
 
-        static bool DisplayObjectHUD( FOdysseyVectorGroupPaint* iScene
-                                    , FOdysseyVectorObject* iObject
-                                    , uint64 iTraversalFlags );
-
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
+        TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
+                                                , const TSharedPtr<ISinglePropertyView> iView );
 
 	    //virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 	    //virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
@@ -88,25 +94,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
                                       , const FKey& iKey ){ return false; };
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName );
+        bool FilterMouseEvent( eMouseEventName iCurrentMouseEvent );
 
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
 
 
     private:
-        void OnKeyDownCommon( FOdysseyVectorGroupPaint* iScene, const FKey& iKey );
-        void OnKeyUpCommon( FOdysseyVectorGroupPaint* iScene, const FKey& iKey );
-        void PropertyChangedCommon(  FOdysseyVectorGroupPaint* iScene, const FName& iPropertyName );
-
         void Copy();
         void Paste();
         void SelectAll();
         void Delete();
 
     protected:
-        void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
-        void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
-
         void GetSelectedVertices( FOdysseyVectorGroupPaint* iScene
                                 , std::vector<FOdysseyVectorVertex*>& oSelectedVertexArray );
         // static
@@ -114,33 +114,30 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
                                           , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray );
         void SetPathColor( FOdysseyVectorPath* iPath
                          , eBaseToolColorSource iColorSource );
+        void MakeTest( FOdysseyVectorGroupPaint* iScene );
 
     private:
         void ExtendContextMenuObject( FMenuBuilder& menu );
         void ExtendContextMenuVertex( FMenuBuilder& menu );
 
-        // this method are needed because we retrieve the object list as a local variable which
-        // must exist when a menu action is run
-        void ApplyTransformations( FOdysseyVectorGroupPaint* iScene );
-        void ClearColoring( FOdysseyVectorGroupPaint* iScene );
-        void FlipVertical( FOdysseyVectorGroupPaint* iScene );
-        void FlipHorizontal( FOdysseyVectorGroupPaint* iScene  );
-        void DeletePointSelection( FOdysseyVectorGroupPaint* iScene  );
-        void AlignPointSelection( FOdysseyVectorGroupPaint* iScene  );
-        void UnalignPointSelection( FOdysseyVectorGroupPaint* iScene  );
-        void Group( FOdysseyVectorGroupPaint* iScene );
-        void Ungroup( FOdysseyVectorGroupPaint* iScene );
-        void MakePaintGroup( FOdysseyVectorGroupPaint* iScene );
 
     protected:
+        // to store the top tab widget in order to create it only once. this will prevent sizing 
+        // issues in the top bar.
+        TSharedPtr<SUniformWrapPanel> mTopTabWidget;
         // to force keyboard focus on mouse hover.
         // Prevents the user from having to click at least once in the viewport.
         TSharedPtr< SViewport > mViewportWidget;
         FOdysseyPainterEditorVectorBaseToolHUD* mBaseHUD;
         bool mHasContextMenu;
-        bool mDoubleMouseDown_WorkAround;
         bool mDragging;
         bool mAutoCreateMedia;
+        // to prevent a double mouse down bug detected in
+        // FOdysseyPainterEditorViewportClient::InputKey
+        // FOdysseyPainterEditorViewportClient::OnStylusStateChanged
+        // they sometimes are both called and both trigger 
+        // FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint
+        eMouseEventName mPreviousMouseEvent; // filter faulty stylus events
 
     public:
         //UPROPERTY( EditAnywhere, Category = Behavior )

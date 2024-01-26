@@ -9,6 +9,7 @@
 #include "Framework/Docking/LayoutExtender.h"
 #include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
@@ -19,6 +20,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 {
+	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
 	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll( this );
 	FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
 }
@@ -26,6 +28,8 @@ FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension)
 	: mExtension(iExtension)
 {
+	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentLayerChanged );
+
     UOdysseyAnimation::OnCurrentFrameChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentFrameChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyAnimationEditorGUI::OnVectorSceneSignal );
@@ -112,6 +116,21 @@ FOdysseyAnimationEditorGUI::GetLightTableTab()
 }
 
 void
+FOdysseyAnimationEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+{
+    UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        OnSourceChanged();
+    }
+    else
+    {
+        ParseVectorSignal( nullptr, 0 );
+    }
+}
+
+void
 FOdysseyAnimationEditorGUI::OnSourceChanged()
 {
     if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
@@ -143,6 +162,10 @@ FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation
             ParseVectorSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
         }
     }
+    else
+    {
+        ParseVectorSignal( nullptr, 0 );
+    }
 }
 
 void
@@ -151,16 +174,24 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
 {
     TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
-    if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
+    if( iScene )
     {
-        vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
-    }
+        if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
+        {
+            vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
+        }
 
-    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
-     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
-     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
+        if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
+         || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
+         || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
+        {
+            vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
+        }
+    }
+    else
     {
-        vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
+        vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( nullptr );
+        vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( nullptr );
     }
 }
 

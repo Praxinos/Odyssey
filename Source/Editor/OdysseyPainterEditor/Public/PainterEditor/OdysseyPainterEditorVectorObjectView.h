@@ -51,8 +51,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         UPROPERTY( EditAnywhere, Category= Transform )
         double ScalingY;
 
-        UPROPERTY( EditAnywhere, Category = Appearance , meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        // unused for now
+        //UPROPERTY( EditAnywhere, Category = Appearance , meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
+
+        UPROPERTY( EditAnywhere, Category = Appearance )
+        bool Visible;
 
         UPROPERTY( EditAnywhere, Category = Appearance )
         FColor ForegroundColor;

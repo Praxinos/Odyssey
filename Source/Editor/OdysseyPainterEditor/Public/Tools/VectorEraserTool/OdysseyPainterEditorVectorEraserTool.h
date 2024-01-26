@@ -27,6 +27,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
 
         virtual bool IsActivable() const override;
 
+        TSharedRef<SWidget> CreateTopTabWidget() override;
+
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
@@ -47,7 +49,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
         //virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
         //                                 , const FName& iPropertyName ) override;
 
+
         void ErasePaths( FOdysseyVectorGroupPaint* iScene
+                       , const ::ULIS::FRectD& iErasureArea
                        , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                        , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                        , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
@@ -55,6 +59,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
                        , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                        , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray );
         void EraseSections( FOdysseyVectorGroupPaint* iScene
+                          , const ::ULIS::FRectD& iErasureArea
                           , std::vector<FOdysseyVectorObject*>& oAddedObjectArray
                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
@@ -63,13 +68,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
 
     public:
+        UPROPERTY( EditAnywhere, Category = EraserTool )
+        bool SplitPath;
+
         UPROPERTY( EditAnywhere, Category = EraserTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
         double Radius;
 
-        UPROPERTY( EditAnywhere, Category = EraserTool )
-        bool Split;
-
     private:
         FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;
-
+        ::ULIS::FVec2D mMin;
+        ::ULIS::FVec2D mMax;
 };

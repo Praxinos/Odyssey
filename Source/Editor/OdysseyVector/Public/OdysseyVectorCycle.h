@@ -10,16 +10,18 @@ class FOdysseyVectorBucket;
 
 class ODYSSEYVECTOR_API FOdysseyVectorCycle
 {
-    private:
+    public:
+        friend class FOdysseyVectorGroupPaint;
+
         /**
          * @brief build the cycle from vertices/sections passed as parameter. Sections can belong to different paths.
          * @param iVertexArray
          * @param iSectionArray drawing flags.
          */
-        void Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
-                  , std::vector<FOdysseyVectorSection*>& iSectionArray );
+        void Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
+                  , std::vector<FOdysseyVectorSection*>& iSectionArray*/ );
 
-    public:
+
         void ToBucketArray( std::vector<FOdysseyVectorCycle*>& iCyleArray
                           , std::vector<FOdysseyVectorBucket*>& oBucketArray );
 
@@ -36,14 +38,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @param iSectionArray the section array.
          */
          FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
-                            , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                            , std::vector<FOdysseyVectorSection*>& iSectionArray );
+                            , const std::vector<FOdysseyVectorVertex*>& iVertexArray
+                            , const std::vector<FOdysseyVectorSection*>& iSectionArray );
 
         /**
          * @brief draw the cycle (in parent coordinates system).
          * @param iFlags drawing flags.
          */
-        void Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor );
+        void Draw( BLContext* iBLContext
+                 , double iOpacity
+                 , uint64 iFlags
+                 , bool iMonochrome
+                 , FColor iMonochromeColor );
 
         /**
          * @brief Test whether or not this cycle fits entirely within the cycle passed as parameter.
@@ -55,7 +61,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @brief Gets this cycle's bounding box
          * @return the bounding box as a rectangle
          */
-        ::ULIS::FRectD GetBBox();
+        ::ULIS::FRectD GetBBox( bool iWorld );
 
         /**
          * @brief Get the attached bucket, if any.
@@ -99,7 +105,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
          * @brief Gets a propagated bucket from any neighbour cycle
          * @return true if it got any, false otherwise
          */
-        bool PropagateBucket();
+        void PropagateBucket( std::vector<FOdysseyVectorCycle*>& oNextCycleArray );
 
         /**
          * @brief Attach a bucket. Can be nullptr.
@@ -126,7 +132,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         void StrokePath( BLContext* iBLContext, bool iWorld );
 
     private :
-        bool PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray );
+        void PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray
+                            , std::vector<FOdysseyVectorCycle*>& oNextCycleArray );
 
     protected :
         BLPath mContourPath;
@@ -134,10 +141,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         FOdysseyVectorObject* mOwner;
         FOdysseyVectorBucket* mBucket;
         FOdysseyVectorBucket* mPropagatedBucket;
-        std::vector<FOdysseyVectorVertex*> mVertexArray;
-        std::vector<FOdysseyVectorSection*> mSectionArray;
+        std::vector<FOdysseyVectorVertex*> mContourVertexArray;
+        std::vector<FOdysseyVectorSection*> mContourSectionArray;
         std::vector<FOdysseyVectorSection*> mInnerSectionArray;
         std::list<FOdysseyVectorCycle*> mChildrenList;
         FOdysseyVectorCycle* mParentCycle;
+        ::ULIS::FRectD mBBox;
         bool mPropagated;
 };

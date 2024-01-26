@@ -139,7 +139,7 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
       , &oObjectList ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
           // transform is recursive per se, do not recurse if the parent was transformed already
-          if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
+          if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS ) == 0 )
           {
               if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
               {
@@ -333,7 +333,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
           , &translateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
           {
               // transform is recursive per se, do not recurse if the parent was transformed already
-              if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
+              if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS ) == 0 )
               {
                   if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
                   {
@@ -435,7 +435,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
                                                                , const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-    BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
+    BLMatrix2D spaceMatrix/* = selectionBox.worldMatrix*/;
     BLMatrix2D inverseSpaceMatrix;
     ::ULIS::FVec2D& pivot = mTransformHUD->GetGizmo();
     BLMatrix2D rotateMatrix;
@@ -444,7 +444,8 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
 
     rotateMatrix.resetToRotation( rotationAngle ); // Radians
 
-    spaceMatrix.translate( pivot.x, pivot.y );
+    spaceMatrix.reset();
+    spaceMatrix.translate( worldPivot.x, worldPivot.y );
 
     BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );
 
@@ -481,7 +482,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
           , &rotateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
           {
               // transform is recursive per se, do not recurse if the parent was transformed already
-              if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
+              if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS ) == 0 )
               {
                   if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
                   {
@@ -676,7 +677,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
              , &scalingMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
              {
                   // transform is recursive per se, do not recurse if the parent was transformed already
-                  if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_ACCEPTED ) == 0 )
+                  if( ( travesalFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS ) == 0 )
                   {
                       if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
                       {
@@ -713,7 +714,8 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
 
                           // Apply the local transformations
                           object->Translate( translationX, translationY );
-                          object->Rotate( rotation / M_PI * 180 );
+                          // for some reasons this affects the rotation, so we ignore it.
+                          object->Rotate( /*rotation / M_PI * 180*/object->GetRotation() );
                           object->Scale( scalingX, scalingY );
 
                           object->UpdateMatrix();
@@ -832,7 +834,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                 GEditor->BeginTransaction(LOCTEXT("vector-transform-tool.transaction.transform","Vector Transform Tool"));
                 if( GUndo )
                 {
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
                 }
                 GEditor->EndTransaction();
             }
@@ -879,6 +881,13 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorG
 
     return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName )
          | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
+{
+    // return the BaseTool top tab instead the SelectionTool top tab (which is the base class for this class).
+    return UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget();
 }
 
 #undef LOCTEXT_NAMESPACE

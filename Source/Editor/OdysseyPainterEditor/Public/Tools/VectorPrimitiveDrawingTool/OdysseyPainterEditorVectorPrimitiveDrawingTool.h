@@ -39,6 +39,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
 
         virtual bool IsActivable() const override;
 
+        TSharedRef<SWidget> CreateTopTabWidget() override;
+
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
@@ -59,6 +61,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         //virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
         //                                    , const FName& iPropertyName ) override;
 
+        FOdysseyVectorObject* GetParentObject( FOdysseyVectorGroupPaint* iScene );
+
     private:
         double GetLineRotationAngle( FOdysseyVectorLine* iLine, const FOdysseyPoint& iPointInTexture );
 
@@ -69,7 +73,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
         eBaseToolColorSource ColorSource;
 
-        UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        //UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 
         UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool )
@@ -82,5 +86,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         bool Uniform;
         bool UniformAtKeyDown;
 
-       ::ULIS::FVec2D mMouseDown;
+        FOdysseyVectorPrimitive* mPrimitive;
+        ::ULIS::FVec2D mMouseDown;
+        uint32 mRectangleNumber;
+        uint32 mLineNumber;
+        uint32 mEllipseNumber;
 };

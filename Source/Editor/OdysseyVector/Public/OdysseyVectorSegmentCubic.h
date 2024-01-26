@@ -218,6 +218,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
 
 
         FOdysseyVectorOffsetCurveCubic* GetOffsetCurve( uint32 iID );
+        virtual ::ULIS::FVec2D GetOffsetPoint( uint32 iSide, double iT ) override;
 
     private:
         // static
@@ -241,7 +242,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , int32   iMaxRecurseDepth );
         void PrepareOffsetBeziers( double iSegmentStartRadius
                                  , double iSegmentEndRadius
-                                 , const FOdysseyVectorBezierFragment& iFragment
+                                 , FOdysseyVectorBezierFragment& iFragment
                                  , FOdysseyVectorBezierFragment& oFragment0
                                  , FOdysseyVectorBezierFragment& oFragment1 );
         void BuildOffsetCurves();
@@ -254,7 +255,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                        , uint32 iCurrentRecurse
                                        , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray );
         void ThickenFraction( FOdysseyVectorFraction* iFraction );
-        void SmoothOffsetCurves( const std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray );
+        void SmoothOffsetCurves( std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray );
         static void SmoothOffsetCurvesFragments( FOdysseyVectorVertex* iVertex
                                                , FOdysseyVectorSegmentCubic* iPrevSegment
                                                , FOdysseyVectorSegmentCubic* iCurrSegment
@@ -265,7 +266,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         FOdysseyVectorOffsetCurveCubic mOffsetCurve[2];
         ::ULIS::FVec2D mBezier[4];
         bool mNeedWidth;
-        ::ULIS::FVec2D mOffsetBezier[2][4];
         FOdysseyVectorHandleSegment mCtrlPoint[2];
 
         BLPath mBLPath;

@@ -46,40 +46,43 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::GetId() const
 void
 FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdysseyVectorGroupPaint* iScene )
 {
-    // defaults to scene
-    std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetEngine()->GetChildrenList();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
-    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
-                                                                                    : sceneAsList;
-    uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );
-
-    if( objectClass )
+    if( iScene )
     {
-        if( objectClass == FOdysseyVectorPath::StaticClass() )
-        {
-            mPathView->Update( iScene, focusedObjectList );
-            mDetailsView->SetObject( mPathView );
-        }
+        // defaults to scene
+        std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetEngine()->GetChildrenList();
+        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
+        std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
+                                                                                        : sceneAsList;
+        uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );
 
-        if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
-         || ( objectClass == FOdysseyVectorGroupPaint::StaticClass() ) )
+        if( objectClass )
         {
-            mGroupPaintView->Update( iScene, focusedObjectList );
-            mDetailsView->SetObject( mGroupPaintView );
-        }
+            if( objectClass == FOdysseyVectorPath::StaticClass() )
+            {
+                mPathView->Update( iScene, focusedObjectList );
+                mDetailsView->SetObject( mPathView );
+            }
 
-        if( ( objectClass == FOdysseyVectorObject::StaticClass() )
-         || ( objectClass == FOdysseyVectorGroup::StaticClass() ) )
-        {
-            // default
-            mObjectView->Update( iScene, focusedObjectList );
-            mDetailsView->SetObject( mObjectView );
+            if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
+             || ( objectClass == FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                mGroupPaintView->Update( iScene, focusedObjectList );
+                mDetailsView->SetObject( mGroupPaintView );
+            }
+
+            if( ( objectClass == FOdysseyVectorObject::StaticClass() )
+             || ( objectClass == FOdysseyVectorGroup::StaticClass() ) )
+            {
+                // default
+                mObjectView->Update( iScene, focusedObjectList );
+                mDetailsView->SetObject( mObjectView );
+            }
+
+            return;
         }
     }
-    else
-    {
-        mDetailsView->SetObject( nullptr );
-    }
+
+    mDetailsView->SetObject( nullptr );
 }
 
 TSharedPtr<IDetailsView>

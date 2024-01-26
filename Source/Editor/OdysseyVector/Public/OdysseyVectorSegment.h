@@ -13,7 +13,7 @@ class FOdysseyVectorObject;
 class FOdysseyVectorPath;
 
 typedef struct _FOdysseyVectorFraction {
-    FOdysseyVectorPolygon4 polygon;
+    FOdysseyVectorPolygon6 polygon; // hexagons to prevent thin gap with joints
     ::ULIS::FVec2D lineVertex[2];
     ::ULIS::FVec2D lineVertexInParent[2];
     double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;
@@ -186,6 +186,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                                              , double iToT
                                              , std::vector<FOdysseyVectorVertex*>& oNewVertexArray ){ return nullptr; };
 
+        ::ULIS::FRectD& GetBBoxInParent();
+        void SetBBoxInParent( const ::ULIS::FRectD& iBBoxInParent );
+        virtual ::ULIS::FVec2D GetOffsetPoint( uint32 iSide, double iT );
+        FOdysseyVectorVertexIntersection* GetClosestIntersectionVertex( FOdysseyVectorVertex* iVertex );
+
     protected:
         void DrawFractionCache( BLContext* iBLContext );
 
@@ -194,6 +199,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
         FOdysseyVectorPath* mPath;
         ::ULIS::FRectD mBBox;
+        ::ULIS::FRectD mBBoxInParent;
         bool mIsInvalidated;
         bool mIsPaintingReady;
         uint32 mID;

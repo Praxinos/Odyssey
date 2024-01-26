@@ -9,6 +9,8 @@
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "Undo/OdysseyVectorUndoPathEdit.h"
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
+#include "ISinglePropertyView.h"
+#include "Widgets/Layout/SWrapBox.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -226,7 +228,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
                                                                       , addedVertexArray
                                                                       , addedSegmentArray );
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
         GEditor->EndTransaction();
     }
@@ -362,7 +364,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                         undo = new FOdysseyVectorUndoVertexRadius( iScene, mPickedVertexArray );
                     }
 
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
             break;
@@ -398,7 +400,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                                              , mPickedVertexArray
                                                                              , alteredSegmentArray );
 
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
                 //---------- end of undo
@@ -423,7 +425,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                                              , mPickedVertexArray // empty
                                                                              , alteredSegmentArray );
 
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
                 //---------- end of undo
@@ -565,6 +567,8 @@ uint64
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
+    double pointInTextureX = iPointInTexture.x;
+    double pointInTextureY = iPointInTexture.y;
 /*
     static ::ULIS::FRectI oldInvalidatedArea = { 0, 0, 0, 0 };
     ::ULIS::FRectD localInvalidatedArea = { 0, 0, 0, 0 };
@@ -579,7 +583,28 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
+        std::vector<FOdysseyVectorPoint*> snappedPointArray;
+
         mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
+        /*
+        // snapping
+        mPathEditHUD->PickPoints( iPointInTexture.x
+                                , iPointInTexture.y
+                                , PickingRadius
+                                , snappedPointArray );
+        if( snappedPointArray.size() )
+        {
+            if( snappedPointArray[0]->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            {
+                FOdysseyVectorVertex* snappedVertex = static_cast<FOdysseyVectorVertex*>(snappedPointArray[0]);
+                ::ULIS::FVec2D snappedVertexWorldCoords = snappedVertex->GetWorldCoords();
+
+                pointInTextureX = snappedVertexWorldCoords.x;
+                pointInTextureY = snappedVertexWorldCoords.y;
+            }
+        }
+        */
 
         for( int i = 0; i < mPickedVertexArray.size(); i++ )
         {
@@ -587,12 +612,12 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
             ::ULIS::FRectD rect;
 
             rect = DragVertex( vertex
-                             , iPointInTexture.x
-                             , iPointInTexture.y
+                             , pointInTextureX
+                             , pointInTextureY
                              // we don't use iPointInTexture.deltaPosition because for some reason,
                              // the readings are not good when a key is pressed.
-                             , iPointInTexture.x - mOldPointInTexture.x
-                             , iPointInTexture.y - mOldPointInTexture.y
+                             , pointInTextureX - mOldPointInTexture.x
+                             , pointInTextureY - mOldPointInTexture.y
                              , WidenAllAlong && ( mPickedVertexArray.size() == 1 ) );
 
             //localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
@@ -606,12 +631,12 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
             ::ULIS::FRectD rect;
 
             rect = DragSegmentHandle( handle
-                                    , iPointInTexture.x
-                                    , iPointInTexture.y
+                                    , pointInTextureX
+                                    , pointInTextureY
                                     // we don't use iPointInTexture.deltaPosition because for some reason,
                                     // the readings are not good when a key is pressed.
-                                    , iPointInTexture.x - mOldPointInTexture.x
-                                    , iPointInTexture.y - mOldPointInTexture.y
+                                    , pointInTextureX - mOldPointInTexture.x
+                                    , pointInTextureY - mOldPointInTexture.y
                                     , ( mPickingMode == ePathPickingMode::SegmentHandle ) ? true : false );
 
             //localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
@@ -642,7 +667,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
 
         oldInvalidatedArea = invalidatedArea;
     */
-        mOldPointInTexture = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
+        mOldPointInTexture = ::ULIS::FVec2D( pointInTextureX, pointInTextureY );
 
         iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
     }
@@ -687,6 +712,40 @@ uint64
 UOdysseyPainterEditorVectorPathEditTool::GetPickingFlags()
 {
     return mPickingFlags;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPathEditTool::CreateTopTabWidget()
+{
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
+    const TSharedPtr<ISinglePropertyView> widenPropertyView = propertyEditorModule.CreateSingleProperty(this, "WidenAllAlong", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> widenHandle = widenPropertyView->GetPropertyHandle();
+
+    // we create the topTab widget only once, or else it creates a sizing issue in the top tab
+    if( mTopTabWidget.Get() == nullptr )
+    {
+        mTopTabWidget = SNew(SUniformWrapPanel)
+                       .SlotPadding(FVector2D(3.f, 0.f))
+                       .EvenRowDistribution(true)
+                       .HAlign(HAlign_Left)
+                       + SUniformWrapPanel::Slot()
+                       [
+                           SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(widenHandle, widenPropertyView).ToSharedRef()
+                       ];
+    }
+
+    return mTopTabWidget.ToSharedRef();
 }
 
 #undef LOCTEXT_NAMESPACE

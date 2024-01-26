@@ -5,6 +5,7 @@
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridToolHUD.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "ISinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -53,6 +54,8 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorGroupPaint* iScen
 
     mGridHUD->Export( mPointArray );
 
+    //MakeTest( iScene );
+
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
@@ -75,7 +78,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
 
-            GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         }
         GEditor->EndTransaction();
 
@@ -188,6 +191,40 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorGroupP
 
     return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName )
          | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorGridTool::CreateTopTabWidget()
+{
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> XDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsX", defaultPropertyParams);
+    const TSharedPtr<ISinglePropertyView> YDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsY", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> XDivHandle = XDivPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> YDivHandle = YDivPropertyView->GetPropertyHandle();
+
+    // we create the topTab widget only once, or else it creates a sizing issue in the top tab
+    if( mTopTabWidget.Get() == nullptr )
+    {
+        mTopTabWidget = SNew(SUniformWrapPanel)
+                       .SlotPadding(FVector2D(3.f, 0.f))
+                       .EvenRowDistribution(true)
+                       .HAlign(HAlign_Left)
+                       + SUniformWrapPanel::Slot()
+                       [
+                           SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(XDivHandle, XDivPropertyView).ToSharedRef()
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(YDivHandle, YDivPropertyView).ToSharedRef()
+                       ];
+    }
+
+    return mTopTabWidget.ToSharedRef();
 }
 
 #undef LOCTEXT_NAMESPACE

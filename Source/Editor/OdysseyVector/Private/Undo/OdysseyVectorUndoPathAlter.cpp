@@ -1,4 +1,5 @@
 #include "Undo/OdysseyVectorUndoPathAlter.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoPathAlter::~FOdysseyVectorUndoPathAlter()
 {

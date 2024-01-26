@@ -41,9 +41,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSegmentReshape : public FOdysseyVector
         FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
                                         , const std::vector<FOdysseyVectorSegment*>& iSegmentArray );
 
+        void RecordVertex( FOdysseyVectorVertex* iVertex );
         void RecordSegment( const std::vector<FOdysseyVectorSegment*>& iSegmentArray );
         void RecordSegment( FOdysseyVectorSegment* iSegment );
         bool HasSegment( FOdysseyVectorSegment* iSegment );
+        bool HasVertex( FOdysseyVectorVertex* iVertex );
 
         void SwapArray();
 

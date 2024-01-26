@@ -18,6 +18,9 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
     bool ColorFromBrush;
 
     UPROPERTY( EditAnywhere, Category = "Default" )
+    bool BilinearFiltering;
+
+    UPROPERTY( EditAnywhere, Category = "Default" )
     bool ExtendOverPath;
 
     UPROPERTY( EditAnywhere, Category = "Default" )
@@ -25,22 +28,40 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 
     FOdysseyVectorBrush()
     {
+        width  = 0;
+        height = 0;
+        bitsPerPixel = 0;
+        pixels = nullptr;
         texture = nullptr;
         ColorFromBrush = false;
         ExtendOverPath = true;
         Revert = false;
+        BilinearFiltering = false;
     }
 
     FOdysseyVectorBrush( UTexture2D* iTexture )
     {
-        texture = iTexture;
+        width  = 0;
+        height = 0;
+        bitsPerPixel = 0;
+        pixels = nullptr;
         ColorFromBrush = false;
         ExtendOverPath = true;
         Revert = false;
+        BilinearFiltering = false;
+
+        SetTexture( iTexture );
     }
 
     void SetTexture( UTexture2D* iTexture );
     UTexture2D* GetTexture() const;
+    void Lock();
+    void Unlock();
+
+    FColor* pixels;
+    uint32  width;
+    uint32  height;
+    uint32  bitsPerPixel;
 
     private:
         UTexture2D* texture;

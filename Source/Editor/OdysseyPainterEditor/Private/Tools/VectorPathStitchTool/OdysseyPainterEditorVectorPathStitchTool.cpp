@@ -5,9 +5,9 @@
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchToolHUD.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
-
-#include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "ISinglePropertyView.h"
+#include "Widgets/Layout/SWrapBox.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -138,7 +138,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                                                 , mergedVertexArray
                                                                                 , mergedSegmentArray );
 
-                    GUndo->StoreUndo( this, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 }
                 GEditor->EndTransaction();
             }
@@ -216,6 +216,34 @@ UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVector
 
     return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName )
          | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPathStitchTool::CreateTopTabWidget()
+{
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+
+    // we create the topTab widget only once, or else it creates a sizing issue in the top tab
+    if( mTopTabWidget.Get() == nullptr )
+    {
+        mTopTabWidget = SNew(SUniformWrapPanel)
+                       .SlotPadding(FVector2D(3.f, 0.f))
+                       .EvenRowDistribution(true)
+                       .HAlign(HAlign_Left)
+                       + SUniformWrapPanel::Slot()
+                       [
+                           SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
+                       ];
+    }
+
+    return mTopTabWidget.ToSharedRef();
 }
 
 #undef LOCTEXT_NAMESPACE

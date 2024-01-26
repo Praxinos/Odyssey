@@ -78,7 +78,7 @@ namespace FOdysseyFile
         namespace ObjectType
         {
             // DO NOT CHANGE ! These values are saved in the save file.
-            static const uint32 ROOT       = 0;
+            static const uint32 ROOT       = 0; // deprecated
             static const uint32 NONE       = 1;
             static const uint32 GROUP      = 2;
             static const uint32 ELLIPSE    = 3;
@@ -106,6 +106,7 @@ namespace FOdysseyFile
                             static const uint32 CHUNK_OBJECT_TRANSFORM_ROTATION = 0xbf4d725c; // double(A)
                             static const uint32 CHUNK_OBJECT_TRANSFORM_SCALING = 0x4cc21f6d; // double(X)-double(Y)
                         static const uint32 CHUNK_OBJECT_OPACITY =  0x93792183; // double(opacity)
+                        static const uint32 CHUNK_OBJECT_EXPANSION = 0x02e0858e; // uint32(bool)
                         static const uint32 CHUNK_OBJECT_FOREGROUNDCOLOR = 0xd490269b; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                         static const uint32 CHUNK_OBJECT_BACKGROUNDCOLOR = 0xd9c2a698; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
 

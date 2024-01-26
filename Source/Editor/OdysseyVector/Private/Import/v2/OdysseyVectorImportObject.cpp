@@ -192,13 +192,23 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
             ReadObjectTransform( iObject, Ar.Tell() + iChunkLen, Ar );
         break;
 
+        case FOdysseyFile::VectorV2::CHUNK_OBJECT_EXPANSION:
+        {
+            uint32 expanded;
+
+            Ar << expanded;
+
+            iObject.SetExpanded( expanded ? true : false );
+        }
+        break;
+
         case FOdysseyFile::VectorV2::CHUNK_OBJECT_OPACITY:
         {
             double opacity;
 
             Ar << opacity;
 
-            iObject.SetOpacity( opacity );
+            iObject.SetOpacity( opacity ? 1.0f : 0.0f );
         }
         break;
 

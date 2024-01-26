@@ -1,8 +1,12 @@
 #include "OdysseyVectorCycle.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorBucket.h"
+#include "OdysseyVectorEngine.h"
+// for measurements
+#include <chrono>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -14,23 +18,23 @@ FOdysseyVectorCycle::~FOdysseyVectorCycle()
 
 //static
 FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
-                                        , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                        , std::vector<FOdysseyVectorSection*>& iSectionArray )
+                                        , const std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                        , const std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mOwner( iOwner )
     , mBucket( nullptr )
     , mPropagatedBucket( nullptr )
-    , mVertexArray (iVertexArray)
-    , mSectionArray (iSectionArray)
+    , mContourVertexArray (iVertexArray)
+    , mContourSectionArray (iSectionArray)
     , mParentCycle( nullptr )
     , mPropagated( false )
 {
-    Build( mVertexArray, mSectionArray );
+    Build( );
 }
 
 void
 FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
 {
-    for( int i = 0; i < iMergeCycle->mSectionArray.size(); i++ )
+    for( int i = 0; i < iMergeCycle->mContourSectionArray.size(); i++ )
     {
         // This will add the cycle C to the section ONLY if the section does not already
         // belongs to 2 cycles. Indeed, in the case described below, some sections may
@@ -46,11 +50,11 @@ FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
         //
         // note: we use mCombinedPath only for the filling part.
         //
-        if( iMergeCycle->mSectionArray[i]->GetCycleCount() < 2 )
+        if( iMergeCycle->mContourSectionArray[i]->GetCycleCount() < 2 )
         {
-            iMergeCycle->mSectionArray[i]->AddCycle( this );
+            iMergeCycle->mContourSectionArray[i]->AddCycle( this );
 
-            mInnerSectionArray.push_back( iMergeCycle->mSectionArray[i] );
+            mInnerSectionArray.push_back( iMergeCycle->mContourSectionArray[i] );
         }
     }
 
@@ -97,18 +101,18 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
 {
     // First test : get sure they don't share a common section
     // which would in that case mean that we do not fit in the parent cycle
-    for( int i = 0; i < mSectionArray.size(); i++ )
+    for( int i = 0; i < mContourSectionArray.size(); i++ )
     {
-        if( mSectionArray[i]->GetOtherCycle( this ) == iParentCandidate )
+        if( mContourSectionArray[i]->GetOtherCycle( this ) == iParentCandidate )
         {
             return false;
         }
     }
 
     // Then check if all vertices lies within the parent candidate
-    for( int i = 0; i < mSectionArray.size(); i++ )
+    for( int i = 0; i < mContourSectionArray.size(); i++ )
     {
-        ::ULIS::FVec2D vCoords = mSectionArray[i]->GetVertexCoords( mVertexArray[i] );
+        ::ULIS::FVec2D vCoords = mContourSectionArray[i]->GetVertexCoords( mContourVertexArray[i] );
         BLPoint pt = BLPoint( vCoords.x, vCoords.y );
         uint32 ret = iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
@@ -122,28 +126,29 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
 }
 
 void
-FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
-                          , std::vector<FOdysseyVectorSection*>& iSectionArray )
+FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
+                          , std::vector<FOdysseyVectorSection*>& iSectionArray*/ )
 {
-    int32 arraySize = iSectionArray.size();
+    int32 arraySize = mContourSectionArray.size();
     int seg = 0;
+    BLBox bbox;
 
-    if ( iSectionArray.size() ) 
+    if ( mContourSectionArray.size() ) 
     {
         // Note: section::GetVertexCoords() return the coords in paintgroup's coordinates
-        ::ULIS::FVec2D originAt = iSectionArray[0]->GetVertexCoords( iVertexArray[0] );
+        ::ULIS::FVec2D originAt = mContourSectionArray[0]->GetVertexCoords( mContourVertexArray[0] );
 
         mContourPath.moveTo( originAt.x, originAt.y );
 
         for( int i = 0; i < arraySize; i++ )
         {
             int n = ( i + 1 ) % arraySize;
-            FOdysseyVectorSection* section = iSectionArray[i];
+            FOdysseyVectorSection* section = mContourSectionArray[i];
             FOdysseyVectorVertex* sectionVertex0 = section->GetVertex(0);
             FOdysseyVectorVertex* sectionVertex1 = section->GetVertex(1);
             ::ULIS::FVec2D* sectionBezier = section->GetBezier();
-            FOdysseyVectorVertex* vertexi = iVertexArray[i];
-            FOdysseyVectorVertex* vertexn = iVertexArray[n];
+            FOdysseyVectorVertex* vertexi = mContourVertexArray[i];
+            FOdysseyVectorVertex* vertexn = mContourVertexArray[n];
 
             section->AddCycle( this );
 
@@ -151,7 +156,7 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
             {
                 FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
 
-                if( ( iSectionArray[i]->GetSegment() != iSectionArray[n]->GetSegment() )
+                if( ( mContourSectionArray[i]->GetSegment() != mContourSectionArray[n]->GetSegment() )
                  || ( intersectionVertex->GetIntersection()->SelfIntersects() == true ) )
                 {
                     vertexn = intersectionVertex->GetPartner();
@@ -178,21 +183,16 @@ FOdysseyVectorCycle::Build( std::vector<FOdysseyVectorVertex*>& iVertexArray
     }
 
     mCombinedPath = mContourPath;
+
+    mContourPath.getBoundingBox( &bbox );
+
+    mBBox = ::ULIS::FRectD::FromMinMax( bbox.x0, bbox.y0, bbox.x1, bbox.y1 );
 }
 
 void
 FOdysseyVectorCycle::SetBucket( FOdysseyVectorBucket* iBucket )
 {
-    mBucket = iBucket;
-
-    if( mBucket )
-    {
-        mPropagatedBucket = mBucket->IsPropagated() ? mBucket : nullptr;
-    }
-    else
-    {
-        mPropagatedBucket = nullptr;
-    }
+    mBucket = mPropagatedBucket = iBucket;
 }
 
 FOdysseyVectorBucket*
@@ -213,8 +213,9 @@ FOdysseyVectorCycle::GetPropagatedBucket()
     return mPropagatedBucket;
 }
 
-bool
-FOdysseyVectorCycle::PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray )
+void
+FOdysseyVectorCycle::PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray
+                                    , std::vector<FOdysseyVectorCycle*>& oNextCycleArray )
 {
     // test outer sections
     for( int i = 0; i < iSectionArray.size(); i++ )
@@ -225,34 +226,26 @@ FOdysseyVectorCycle::PropagateBucket( std::vector<FOdysseyVectorSection*> iSecti
         {
             FOdysseyVectorBucket* neighbourPropagatedBucket = neighbourCycle->GetPropagatedBucket();
 
-            if( neighbourPropagatedBucket )
+            if( neighbourPropagatedBucket == nullptr )
             {
-                this->SetPropagatedBucket( neighbourPropagatedBucket );
+                neighbourCycle->SetPropagatedBucket( this->GetPropagatedBucket() );
 
-                return true;
+                oNextCycleArray.push_back( neighbourCycle );
             }
         }
     }
-
-    return false;
 }
 
-bool
-FOdysseyVectorCycle::PropagateBucket()
+void
+FOdysseyVectorCycle::PropagateBucket( std::vector<FOdysseyVectorCycle*>& oNextCycleArray )
 {
-    // check outer sections for a propagated bucket
-    if( PropagateBucket( mSectionArray ) == false )
+    FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
+
+    if( bucket && bucket->IsPropagated() )
     {
-        // check inner sections for a propagated bucket
-        if( PropagateBucket( mInnerSectionArray ) )
-        {
-            return true;
-        }
-
-        return false;
+        PropagateBucket( mContourSectionArray, oNextCycleArray );
+        PropagateBucket( mInnerSectionArray  , oNextCycleArray );
     }
-
-    return true;
 }
 
 bool
@@ -335,17 +328,32 @@ ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
 }
 
 ::ULIS::FRectD
-FOdysseyVectorCycle::GetBBox()
+FOdysseyVectorCycle::GetBBox( bool iWorld )
 {
-    BLBox bbox;
+    if( iWorld )
+    {
+        BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
+        BLPoint pt[4] = { worldMatrix.mapPoint( mBBox.x          , mBBox.y           )
+                        , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           )
+                        , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h )
+                        , worldMatrix.mapPoint( mBBox.x          , mBBox.y + mBBox.h ) };
+        double xmin = ::ULIS::FMath::Min4( pt[0].x, pt[1].x, pt[2].x, pt[3].x )
+             , ymin = ::ULIS::FMath::Min4( pt[0].y, pt[1].y, pt[2].y, pt[3].y )
+             , xmax = ::ULIS::FMath::Max4( pt[0].x, pt[1].x, pt[2].x, pt[3].x )
+             , ymax = ::ULIS::FMath::Max4( pt[0].y, pt[1].y, pt[2].y, pt[3].y );
 
-    mContourPath.getBoundingBox( &bbox );
+        return ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+    }
 
-    return ::ULIS::FRectD::FromMinMax( bbox.x0, bbox.y0, bbox.x1, bbox.y1 );
+    return mBBox;
 }
 
 void
-FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags, bool iMonochrome, FColor iMonochromeColor )
+FOdysseyVectorCycle::Draw( BLContext* iBLContext
+                         , double iOpacity
+                         , uint64 iFlags
+                         , bool iMonochrome
+                         , FColor iMonochromeColor )
 {
     FOdysseyVectorBucket* bucket = mBucket ? mBucket : mPropagatedBucket;
     BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
@@ -353,9 +361,9 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
     if( iMonochrome || ( iFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) )
     {
         BLRgba32 BLColor = BLRgba32( iMonochromeColor.R
-                                   , iMonochromeColor.G
-                                   , iMonochromeColor.B
-                                   , iMonochromeColor.A );
+                                    , iMonochromeColor.G
+                                    , iMonochromeColor.B
+                                    , iMonochromeColor.A );
 
         iBLContext->setStrokeStyle( BLColor );
         iBLContext->setFillStyle( BLColor );
@@ -369,7 +377,7 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
                 case eBucketColorMode::LinearGradient :
                 {
                     eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
+                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox( false );
                     double linearMinX = /*bbox.x0*/bbox.x;
                     double linearMinY = /*bbox.y0*/bbox.y;
                     double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
@@ -414,14 +422,14 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
                 case eBucketColorMode::RadialGradient :
                 {
                     eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox();
+                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox( false );
                     ::ULIS::FVec2D& radialOffset = bucket->GetRadialOffset();
                     ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
                     BLGradient radial( BLRadialGradientValues( bucketCoords.x + radialOffset.x
-                                                             , bucketCoords.y + radialOffset.y
-                                                             , bucketCoords.x + radialOffset.x
-                                                             , bucketCoords.y + radialOffset.y
-                                                             , bucket->GetRadialRadius() ) );
+                                                                , bucketCoords.y + radialOffset.y
+                                                                , bucketCoords.x + radialOffset.x
+                                                                , bucketCoords.y + radialOffset.y
+                                                                , bucket->GetRadialRadius() ) );
                     FColor& gradientColor0 = bucket->GetGradientColor0();
                     FColor& gradientColor1 = bucket->GetGradientColor1();
                     BLRgba32 BLColor0;
@@ -449,9 +457,9 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
                 {
                     FColor color = bucket->GetColor();
                     BLRgba32 BLColor = BLRgba32( color.R
-                                               , color.G
-                                               , color.B
-                                               , color.A * iOpacity );
+                                                , color.G
+                                                , color.B
+                                                , color.A * iOpacity );
 
                     iBLContext->setStrokeStyle( BLColor );
                     iBLContext->setFillStyle( BLColor );
@@ -463,12 +471,12 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
         {
             FColor& color = mOwner->GetBackgroundBucket().GetSolidColor();
             BLRgba32 BLColor = BLRgba32( color.R
-                                       , color.G
-                                       , color.B
-                                       , color.A * iOpacity );
+                                        , color.G
+                                        , color.B
+                                        , color.A * iOpacity );
 
-           iBLContext->setStrokeStyle( BLColor );
-           iBLContext->setFillStyle( BLColor );
+            iBLContext->setStrokeStyle( BLColor );
+            iBLContext->setFillStyle( BLColor );
         }
     }
 
@@ -483,9 +491,9 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext, double iOpacity, uint64 iFlags
     // section is the cycle that was first attached to the section. That way we don't draw it twice. The paint group could be
     // responsible for drawing the sections as well, but then we have to retrieve the bucket color, if any. this would be to
     // complicated. We draw in world coordinates to be sure to get 1 pixel-width strokes.
-    for( int i = 0; i < mSectionArray.size(); i++ )
+    for( int i = 0; i < mContourSectionArray.size(); i++ )
     {
-        FOdysseyVectorSection* section = mSectionArray[i];
+        FOdysseyVectorSection* section = mContourSectionArray[i];
 
         if( section->GetCycle(0) == this )
         {

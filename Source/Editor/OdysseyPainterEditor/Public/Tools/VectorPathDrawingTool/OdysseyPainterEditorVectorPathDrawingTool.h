@@ -49,8 +49,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         FOdysseyVectorPathTracer& GetPathTracer();
 
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
-        TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
-                                                , const TSharedPtr<ISinglePropertyView> iView );
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
@@ -72,6 +70,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
 
+        FOdysseyVectorObject* GetParentObject( FOdysseyVectorGroupPaint* iScene );
+
     private:
         FOdysseyVectorVertex* PickVertex( FOdysseyVectorGroupPaint* iScene
                                         , double iWorldX
@@ -83,7 +83,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                      , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                      , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
         static void RecordUndoPathAlter( FOdysseyVectorGroupPaint* iScene
-                                       , FOdysseyVectorPath* iPath
                                        , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                        , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 
@@ -91,7 +90,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )
         eBaseToolColorSource ColorSource;
 
-        UPROPERTY( EditAnywhere, Category = PathDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        //UPROPERTY( EditAnywhere, Category = PathDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 
         UPROPERTY( EditAnywhere, Category = PathDrawingTool )
@@ -136,4 +135,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         FOdysseyPainterEditorVectorPathDrawingToolHUD* mPathDrawingHUD;
         FOdysseyVectorPathTracer mPathTracer;
         FOdysseyVectorVertex* mStitchedVertex;
+        uint32 mPathNumber;
 };

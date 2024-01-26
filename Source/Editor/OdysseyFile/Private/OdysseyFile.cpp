@@ -29,7 +29,7 @@ FOdysseyFile::WriteChunk( uint32 iChunkID, FArchive &Ar, std::function<void(FArc
 void
 FOdysseyFile::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
 {
-    UE_LOG( LogTemp, Warning, TEXT("ReadChunks") );
+    //UE_LOG( LogTemp, Warning, TEXT("ReadChunks") );
 
     while( Ar.Tell() != iChunkEnd )
     {
@@ -39,7 +39,7 @@ FOdysseyFile::ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uin
         Ar << chunkID;
         Ar << chunkLen;
 
-        UE_LOG( LogTemp, Warning, TEXT("Reading Chunk %X %d"), chunkID, chunkLen );
+        //UE_LOG( LogTemp, Warning, TEXT("Reading Chunk %X %d"), chunkID, chunkLen );
 
         /*if ( chunkLen )
         {*/

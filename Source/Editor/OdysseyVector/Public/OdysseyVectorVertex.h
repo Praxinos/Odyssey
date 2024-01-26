@@ -6,9 +6,9 @@
 
 #include "OdysseyVectorJoint.h"
 #include "OdysseyVectorPoint.h"
+#include "OdysseyVectorSection.h"
 
 class FOdysseyVectorSegment;
-class FOdysseyVectorSection;
 class FOdysseyVectorPath;
 class FOdysseyVectorVertex;
 class FOdysseyVectorHandleSegment;
@@ -18,12 +18,15 @@ struct FExplorationPair
     FOdysseyVectorSection* returnSection;
     FOdysseyVectorVertex*  departVertex;
     FOdysseyVectorSection* departSection;
+    double mSectionLength;
 
     FExplorationPair()
     {
         returnSection = nullptr;
         departVertex = nullptr;
         departSection = nullptr;
+
+        mSectionLength = 0.0f;
     };
 
     FExplorationPair( FOdysseyVectorSection* iReturnSection
@@ -33,6 +36,8 @@ struct FExplorationPair
         returnSection = iReturnSection;
         departVertex = iDepartVertex;
         departSection = iDepartSection;
+        // used for sorting exploration pairs
+        mSectionLength = returnSection->GetLength() + departSection->GetLength();
     }
 };
 
@@ -192,7 +197,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iOrientation the orientation for the desired next section (1.0f or -1.0f).
          * @return a pointer to the next section to go trough.
          */
-        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation );
+        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection
+                                                          , double iOrientation );
 
         /**
          * @brief Mark all connected segments for update.
@@ -223,16 +229,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         bool IsVisited();
 
+        bool HasSegment( FOdysseyVectorSegment* iSegment );
+
+        ::ULIS::FVec2D GetNearestSegmentIntersectionCoords();
         double GetNearestSegmentT();
         double GetDistanceToNearestSegment();
         FOdysseyVectorSegment* GetNearestSegment();
         void SetNearestSegment( FOdysseyVectorSegment* iNearestSegment
                               , double iDistanceToNearestSegment
-                              , double iNearestSegmentT );
-        void SetNearestVertex( FOdysseyVectorVertex* iNearestVertex );
+                              , double iNearestSegmentT
+                              , const ::ULIS::FVec2D& iNearestSegmentIntersectionCoords );
+        void ResetNearestSegment();
+
         FOdysseyVectorVertex* GetNearestVertex();
-
-
+        void SetNearestVertex( FOdysseyVectorVertex* iNearestVertex, double iDistanceToNearestVertex );
+        void ResetNearestVertex();
+        double GetDistanceToNearestVertex();
 
         /**
          * @brief Build exploration pairs. an exploration pair is composed of an entry section,
@@ -295,8 +307,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorHandleSegment* GetOtherSegmentHandle( FOdysseyVectorSegment* iSegment );
         void SetChained( bool iChained );
         bool IsChained();
-        void MakeJoint( FOdysseyVectorSegment* iPreviousSegment );
-        void DrawJoint( BLContext* iBLContext, uint64 iDrawingFlags );
+        void MakeJoint( FOdysseyVectorSegment* iPrevSegment
+                      , FOdysseyVectorSegment* iNextSegment );
+        void DrawJoint( BLContext* iBLContext
+                      , double iStartU
+                      , double iEndU
+                      , double iCombinedOpacity
+                      , uint64 iDrawingFlags );
         FOdysseyVectorJoint& GetJoint();
         double GetJointLength();
         uint32 GetFlags();
@@ -322,7 +339,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         double mDistanceToNearestSegment;
         double mNearestSegmentT;
+        ::ULIS::FVec2D mNearestSegmentIntersectionCoords;
         FOdysseyVectorSegment* mNearestSegment;
+
+        double mDistanceToNearestVertex;
         FOdysseyVectorVertex* mNearestVertex;
 
     public :

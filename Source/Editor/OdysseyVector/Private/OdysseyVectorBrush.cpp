@@ -22,3 +22,31 @@ FOdysseyVectorBrush::GetTexture() const
 {
     return texture;
 }
+
+void
+FOdysseyVectorBrush::Lock()
+{
+    if( texture )
+    {
+        const FColor* colors = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
+
+        pixels = const_cast<FColor*>(colors);
+        width  = texture->GetSurfaceWidth();
+        height = texture->GetSurfaceHeight();
+        bitsPerPixel = 32;
+    }
+}
+
+void
+FOdysseyVectorBrush::Unlock()
+{
+    if( texture )
+    {
+        texture->PlatformData->Mips[0].BulkData.Unlock();
+    }
+
+    width  = 0;
+    height = 0;
+    pixels = nullptr;
+    bitsPerPixel = 0;
+}

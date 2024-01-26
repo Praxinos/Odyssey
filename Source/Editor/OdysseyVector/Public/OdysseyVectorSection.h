@@ -12,7 +12,7 @@ class FOdysseyVectorCycle;
 
 // TODO: inherit from FOdysseyVectorLink ? answer : no, because links should not have
 // intersection vertices as endpoints as there is no way to know which segments they are on
-class FOdysseyVectorSection
+class ODYSSEYVECTOR_API FOdysseyVectorSection
 {
     public:
        /**
@@ -101,6 +101,8 @@ class FOdysseyVectorSection
         ::ULIS::FVec2D& GetVertexCoords( FOdysseyVectorVertex* iVertex );
         void SetErased( bool iErased );
         bool IsErased();
+        double GetLength();
+        bool IsValid();
 
     protected:
         FOdysseyVectorSegment* mSegment;
@@ -109,6 +111,7 @@ class FOdysseyVectorSection
         uint32 mCycleCount;
         FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
         ::ULIS::FVec2D mBezier[4];
+        double mLength;
 
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );

@@ -43,6 +43,27 @@ FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVect
     RecordSegment( iSegmentArray );
 }
 
+
+void
+FOdysseyVectorUndoSegmentReshape::RecordVertex( FOdysseyVectorVertex* iVertex )
+{
+    FOdysseyVectorSegment* segment[2] = { iVertex->GetFirstSegment()
+                                        , iVertex->GetLastSegment() };
+
+    mVertexSnapshotArray.push_back( FSnapshotVertex( iVertex, FSnapshotFlags::ALL ) );
+
+    // record segment for undos first
+    if( segment[0] && HasSegment( segment[0] ) == false )
+    {
+        RecordSegment( segment[0] );
+    }
+
+    if( segment[1] && HasSegment( segment[1] ) == false )
+    {
+        RecordSegment( segment[1] );
+    }
+}
+
 void
 FOdysseyVectorUndoSegmentReshape::RecordSegment( const std::vector<FOdysseyVectorSegment*>& iSegmentArray )
 {
@@ -68,6 +89,20 @@ FOdysseyVectorUndoSegmentReshape::RecordSegment( FOdysseyVectorSegment* iSegment
 
         mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::ALL ));
     }
+}
+
+bool
+FOdysseyVectorUndoSegmentReshape::HasVertex( FOdysseyVectorVertex* iVertex )
+{
+    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    {
+        if( mVertexSnapshotArray[i].GetVertex() == iVertex )
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool

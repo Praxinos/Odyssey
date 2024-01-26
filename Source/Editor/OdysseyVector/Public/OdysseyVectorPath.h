@@ -152,7 +152,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         /**
          * @brief Erase path according to the mask image.
-         * @param iRoi region of interest for faster discarding.
          * @param iSplit
          * @param oAddedPathArray array of pointers to added split paths.
          * @param oAddedVertexArray array of pointers to added vertices.
@@ -161,8 +160,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param oRemovedSegmentArray array of pointers to removed segments.
          * @return true if the path is empty, false otherwise.
          */
-        bool Erase( const ::ULIS::FRectD &iRoi
-                  , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+        bool Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                   , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
@@ -458,31 +456,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void UpdateChain( FOdysseyVectorChain* iChain );
         void FindChains();
         void DrawChain( BLContext* iBLContext
+                      , FOdysseyVectorEngine* iVectorEngine
                       , double iCombinedOpacity
                       , FOdysseyVectorChain& iChain
                       , uint64 iDrawingFlags );
-        void DrawTexturedSegment( FOdysseyVectorSegment* iSegment
-                                , int8*  iScreenPixels
-                                , uint32 iScreenWidth
-                                , uint32 iScreenHeight
-                                , uint32 iScreenBitsPerPixel
-                                , int8*  iTexturePixels
-                                , uint32 iTextureWidth
-                                , uint32 iTextureHeight
-                                , uint32 iTextureBitsPerPixel
-                                , double iStartU
-                                , double iEndU
-                                , double iCombinedOpacity
-                                , uint64 iDrawingFlags );
+        void DrawSegment( BLContext* iBLContext
+                        , FOdysseyVectorSegment* iSegment
+                        , double iStartU
+                        , double iEndU
+                        , double iCombinedOpacity
+                        , uint64 iDrawingFlags );
         void DrawTexturedJoint( FOdysseyVectorJoint* iJoint
-                              , int8*  iScreenPixels
-                              , uint32 iScreenWidth
-                              , uint32 iScreenHeight
-                              , uint32 iScreenBitsPerPixel
-                              , int8*  iTexturePixels
-                              , uint32 iTextureWidth
-                              , uint32 iTextureHeight
-                              , uint32 iTextureBitsPerPixel
                               , double iStartU
                               , double iEndU
                               , double iCombinedOpacity

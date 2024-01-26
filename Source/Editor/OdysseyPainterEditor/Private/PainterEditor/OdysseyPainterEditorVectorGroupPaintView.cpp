@@ -28,6 +28,7 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
             GapTolerance    = selectedPaintGroup->GetGapTolerance();
             //Wireframe       = selectedPaintGroup->IsWireframe();
             WireframeColor  = selectedPaintGroup->GetWireframeColor();
+            Multithreaded   = selectedPaintGroup->IsMultithreaded();
 
             break; // only one for now
         }
@@ -69,6 +70,10 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
 
             if( iPropertyName == "WireframeColor" )
                 selectedPaintGroup->SetWireframeColor( WireframeColor );
+
+            if( iPropertyName == "Multithreaded" )
+                selectedPaintGroup->SetMultithreaded( Multithreaded );
+
         }
     }
 

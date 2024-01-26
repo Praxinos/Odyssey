@@ -21,7 +21,7 @@ FOdysseyAnimationLayerImageRasterImport::Read( UOdysseyAnimationLayerImageRaster
     switch( chunkID )
     {
         case FOdysseyFile::Animation::CHUNK_LAYERIMAGERASTER :
-            UE_LOG(LogTemp, Warning, TEXT("CHUNK_LAYERIMAGERASTER") );
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_LAYERIMAGERASTER") );
 
             FOdysseyAnimationLayerImageRasterImport::Read( iAnimationLayerImageRaster, Ar, chunkEnd );
         break;

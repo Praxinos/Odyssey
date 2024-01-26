@@ -5,8 +5,11 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
+
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -31,6 +34,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , StitchingRadius( 10 )
     , Debug( false )
     , mStitchedVertex( nullptr )
+    , mPathNumber( 0 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
 
@@ -101,13 +105,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorGroupPaint
 // static
 void
 UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorGroupPaint* iScene
-                                                               , FOdysseyVectorPath* iPath
                                                                , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                                , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
 {
+    // stays empty
     std::vector<FOdysseyVectorPath*> addedObjectArray;
-
-    addedObjectArray.push_back( iPath );
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-drawing-tool.transaction.draw-path-and-stitch","Vector Path Drawing Tool"));
@@ -164,6 +166,26 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPa
     return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey );
 }
 
+FOdysseyVectorObject*
+UOdysseyPainterEditorVectorPathDrawingTool::GetParentObject( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorObject* parentObject = iScene;
+
+    // Add the path to the current unique selected group
+    if( vectorEngine->GetSelectedObjectList().size() == 1 )
+    {
+        FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
+
+        if(  selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+        {
+            parentObject = selectedObject;
+        }
+    }
+
+    return parentObject;
+}
+
 uint64
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
@@ -195,9 +217,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
         if( path == nullptr )
         {
-            path = new FOdysseyVectorPath( "Path" );
+            FOdysseyVectorObject* parentObject = GetParentObject( iScene );
 
-            iScene->AppendChild( path );
+            path = new FOdysseyVectorPath( FString( "Path_" ) + FString::FromInt( mPathNumber++ ) );
+
+            parentObject->AppendChild( path );
             path->UpdateMatrix();
 
             SetPathColor( path, ColorSource );
@@ -338,7 +362,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 if( mStitchedVertex )
                 {
                     RecordUndoPathAlter( iScene
-                                       , path
                                        , mAddedVertexArray
                                        , mAddedSegmentArray );
                 }
@@ -407,63 +430,40 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
          | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-TSharedPtr<SWidget>
-UOdysseyPainterEditorVectorPathDrawingTool::CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
-                                                                , const TSharedPtr<ISinglePropertyView> iView )
-{
-    if (!iPropertyHandle)
-        return nullptr;
-
-    TSharedRef<SWidget> nameWidget = iPropertyHandle->CreatePropertyNameWidget();
-    TSharedRef<SWidget> valueWidget = iPropertyHandle->CreatePropertyValueWidget(false);
-
-    iView->SetVisibility(EVisibility::Collapsed);
-
-    return SNew(SHorizontalBox)
-    + SHorizontalBox::Slot()
-    .AutoWidth()
-    [
-        //PATCH:
-        iView.ToSharedRef()
-    ]
-    + SHorizontalBox::Slot()
-    .AutoWidth()
-    .Padding(0.f, 0.f, 3.f, 0.f)
-    [
-        nameWidget
-    ]
-    + SHorizontalBox::Slot()
-    [
-        valueWidget
-    ];
-}
-
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FSinglePropertyParams defaultPropertyParams;
     const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
+//    const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
+    const TSharedPtr<ISinglePropertyView> fidelityPropertyView = propertyEditorModule.CreateSingleProperty(this, "TracingFidelity", defaultPropertyParams);
     TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
+//    TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> fidelityHandle = fidelityPropertyView->GetPropertyHandle();
 
-    return SNew(SUniformWrapPanel)
-           .SlotPadding(FVector2D(3.f, 3.f))
-           .EvenRowDistribution(true)
-           .HAlign(HAlign_Fill)
-           + SUniformWrapPanel::Slot()
-           [
-               UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
-           ]
-           + SUniformWrapPanel::Slot()
-           [
-               CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
-           ]
-           + SUniformWrapPanel::Slot()
-           [
-               CreatePropertyWidget(opacityHandle, opacityPropertyView).ToSharedRef()
-           ];
+    // we create the topTab widget only once, or else it creates a sizing issue in the top tab
+    if( mTopTabWidget.Get() == nullptr )
+    {
+        mTopTabWidget = SNew(SUniformWrapPanel)
+                       .SlotPadding(FVector2D(3.f, 0.f))
+                       .EvenRowDistribution(true)
+                       .HAlign(HAlign_Left)
+                       + SUniformWrapPanel::Slot()
+                       [
+                           SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(fidelityHandle, fidelityPropertyView).ToSharedRef()
+                       ];
+    }
+
+    return mTopTabWidget.ToSharedRef();
 }
 
 #undef LOCTEXT_NAMESPACE

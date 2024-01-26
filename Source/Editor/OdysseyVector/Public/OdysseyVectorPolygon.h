@@ -9,7 +9,7 @@
 
 template<int size>
 struct FOdysseyVectorPolygon {
-    BLPoint point[size];
+    ::ULIS::FVec2D point[size];
     double U[size];
     double V[size];
     uint32 pointCount = size;
@@ -18,3 +18,4 @@ struct FOdysseyVectorPolygon {
 typedef FOdysseyVectorPolygon<3> FOdysseyVectorPolygon3;
 typedef FOdysseyVectorPolygon<4> FOdysseyVectorPolygon4;
 typedef FOdysseyVectorPolygon<5> FOdysseyVectorPolygon5;
+typedef FOdysseyVectorPolygon<6> FOdysseyVectorPolygon6;

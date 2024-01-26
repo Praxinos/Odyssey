@@ -1,6 +1,7 @@
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVector.h"
 
 FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 {
@@ -69,7 +70,8 @@ FOdysseyVectorVertexIntersection::BuildExplorationPairs( std::vector<FExploratio
 }
 
 FOdysseyVectorSection*
-FOdysseyVectorVertexIntersection::GetCycleNextSection( FOdysseyVectorSection* iLastSection, double iOrientation )
+FOdysseyVectorVertexIntersection::GetCycleNextSection( FOdysseyVectorSection* iLastSection
+                                                     , double iOrientation )
 {
     ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this, false, false );
     FOdysseyVectorVertexIntersection* partnerVertex = GetPartner();

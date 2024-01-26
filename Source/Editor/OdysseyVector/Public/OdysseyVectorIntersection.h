@@ -19,15 +19,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorIntersection
        /**
          * @brief
          */
-        FOdysseyVectorIntersection( bool iSelfIntersects
-                                  , FOdysseyVectorPath* iVertex0Path
-                                  , double iVertex0X
-                                  , double iVertex0Y
-                                  , double iVertex0T
-                                  , FOdysseyVectorPath* iVertex1Path
-                                  , double iVertex1X
-                                  , double iVertex1Y
-                                  , double iVertex1T );
+       FOdysseyVectorIntersection( bool iSelfIntersects
+                                 , FOdysseyVectorPath* iVertex0Path
+                                 , double iVertex0X
+                                 , double iVertex0Y
+                                 , double iVertex0T
+                                 , FOdysseyVectorPath* iVertex1Path
+                                 , double iVertex1X
+                                 , double iVertex1Y
+                                 , double iVertex1T );
 
        /**
          * @brief Get the vertex at the other end.

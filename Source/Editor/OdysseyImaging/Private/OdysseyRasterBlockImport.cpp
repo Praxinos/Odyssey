@@ -21,7 +21,7 @@ FOdysseyRasterBlockImport::Read( FOdysseyRasterBlock* iRasterBlock
     switch( chunkID )
     {
         case FOdysseyFile::RasterBlock::CHUNK_RASTERBLOCK :
-            UE_LOG(LogTemp, Warning, TEXT("CHUNK_RASTERBLOCK") );
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_RASTERBLOCK") );
 
             FOdysseyRasterBlockImport::Read( iRasterBlock, Ar, chunkEnd );
         break;
