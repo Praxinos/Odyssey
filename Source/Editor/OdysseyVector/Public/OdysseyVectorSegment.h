@@ -38,7 +38,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        FOdysseyVectorSegment( FOdysseyVectorPath* iPath
+        FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1 );
 
@@ -83,19 +83,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                                   , double iDistanceTolerance
                                   , double &oSmallestDistance ){ return false; };
 
-        std::list<FOdysseyVectorIntersection>& GetIntersectionList();
+        std::list<FOdysseyVectorIntersection*>& GetIntersectionList();
 
        /**
          * @brief Get a pointer to the path this segment belongs to
          * @return a pointer to the path this segment belongs to
          */
-        FOdysseyVectorPath* GetPath();
+        FOdysseyVectorPath* GetOwnerAsPath();
+        FOdysseyVectorObject* GetOwner();
 
        /**
          * @brief Set the path this segment belongs to. This is called by the path itself when the segment is added.
          * @param a pointer to the path this segment belongs to
          */
-        void SetPath( FOdysseyVectorPath* iPath );
+        void SetOwner( FOdysseyVectorObject* iOwner );
 
        /**
          * @brief Update cached data for this segment.
@@ -125,8 +126,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         void ClearIntersections();
 
 
-        FOdysseyVectorIntersection* AddIntersection ( FOdysseyVectorVertex* iVertex
-                                                    , double iSegmentT );
+        FOdysseyVectorIntersection* AddIntersection ( double iSegmentT );
 
        /**
          * @brief Get the number of polygons in cache.
@@ -190,8 +190,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
     protected:
         std::vector<FOdysseyVectorFraction> mFractionCache;
-        std::list<FOdysseyVectorIntersection> mIntersectionList;
-        FOdysseyVectorPath* mPath;
+        std::list<FOdysseyVectorIntersection*> mIntersectionList; // malloc because refered as ptr in VertexIntersection
+        FOdysseyVectorObject* mOwner;
         ::ULIS::FRectD mBBox;
         ::ULIS::FRectD mBBoxInParent;
         bool mIsInvalidated;

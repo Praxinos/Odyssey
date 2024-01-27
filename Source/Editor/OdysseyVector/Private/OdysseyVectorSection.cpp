@@ -7,20 +7,13 @@ FOdysseyVectorSection::~FOdysseyVectorSection()
 {
 }
 
-FOdysseyVectorSection::FOdysseyVectorSection()
-{
-    //Init( nullptr, nullptr, nullptr );
-}
-
-FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner
-                                            , FOdysseyVectorSegment* iSegment
+FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1
                                             , double iSectionT0
                                             , double iSectionT1 )
-    : FOdysseyVectorSection()
 {
-    Init( iOwner, iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1 );
+    Init( iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1 );
 }
 
 double
@@ -42,30 +35,15 @@ FOdysseyVectorSection::IsValid()
     return true;
 }
 
-FOdysseyVectorObject* 
-FOdysseyVectorSection::GetOwner()
-{
-    return mOwner;
-}
-
-double
-FOdysseyVectorSection::GetT( uint32 iIndex )
-{
-    return ( iIndex == 0 ) ? mT0 : mT1;
-}
-
 void
-FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner
-                           , FOdysseyVectorSegment* iSegment
+FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
                            , FOdysseyVectorVertex* iVertex0
                            , FOdysseyVectorVertex* iVertex1
-                           , double iSectionT0
-                           , double iSectionT1  )
+                           , double iT0
+                           , double iT1  )
 {
-    BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
-    mT0 = iSectionT0;
-    mT1 = iSectionT1;
-    mLength = fabs ( mT1 - mT0 ) * iSegment->GetLength();
+    BLMatrix2D& ownerInverseWorldMatrix = iSegment->GetOwner()->GetInverseWorldMatrix();
+    mLength = fabs ( iT1 - iT0 ) * iSegment->GetLength();
     mSegment = iSegment;
     mVertex[0] = iVertex0;
     mVertex[1] = iVertex1;
@@ -83,7 +61,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
         ::ULIS::FVec2D* segmentBezier = cubicSegment->GetBezier();
-        FOdysseyVectorObject* segmentOwner = iSegment->GetPath();
+        FOdysseyVectorObject* segmentOwner = iSegment->GetOwner();
         BLMatrix2D& segmentOwnerWorldMatrix = segmentOwner->GetWorldMatrix();
         BLPoint worldSegmentBezier[4] = { segmentOwnerWorldMatrix.mapPoint( segmentBezier[0].x, segmentBezier[0].y )
                                         , segmentOwnerWorldMatrix.mapPoint( segmentBezier[1].x, segmentBezier[1].y )
@@ -92,7 +70,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner
 
         BLPoint convertedPoint[4];
 
-        if( fabs( mT0 - mT1 ) < 1.0f )
+        if( fabs( iT0 - iT1 ) < 1.0f )
         {
             ::ULIS::FVec2D vertex0Worldcoords = iVertex0->GetWorldCoords();
             ::ULIS::FVec2D vertex1Worldcoords = iVertex1->GetWorldCoords();
@@ -102,8 +80,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner
                                          , ::ULIS::FVec2D( worldSegmentBezier[1].x, worldSegmentBezier[1].y )
                                          , ::ULIS::FVec2D( worldSegmentBezier[2].x, worldSegmentBezier[2].y )
                                          , ::ULIS::FVec2D( worldSegmentBezier[3].x, worldSegmentBezier[3].y )
-                                         , mT0
-                                         , mT1
+                                         , iT0
+                                         , iT1
                                          , subBezier[0]
                                          , subBezier[1]
                                          , subBezier[2]
@@ -263,15 +241,15 @@ FOdysseyVectorSection::GetVectorFromVertex( uint32 iVertexIndex
 
     if( /*( mSegment == nullptr ) || */ iStraight == true )
     {
-        tangent =  ( iVertex == mVertex[0] ) ? mBezier[3] - mBezier[0]
-                                             : mBezier[0] - mBezier[3];
+        tangent =  ( iVertexIndex == 0 ) ? mBezier[3] - mBezier[0]
+                                         : mBezier[0] - mBezier[3];
     }
     else
     {
         if( mSegment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
         {
-             tangent = ( iVertex == mVertex[0] ) ?  GetTangentAt( 0.0f, false )
-                                                 : -GetTangentAt( 1.0f, false );
+             tangent = ( iVertexIndex == 0 ) ?  GetTangentAt( 0.0f, false )
+                                             : -GetTangentAt( 1.0f, false );
         }
     }
 
@@ -360,8 +338,15 @@ FOdysseyVectorSection::HasCycle( FOdysseyVectorCycle* iCycle )
 void
 FOdysseyVectorSection::Link()
 {
-    mVertex[0]->AddSection( this );
-    mVertex[1]->AddSection( this );
+    if( mVertex[0] != mVertex[1] )
+    {
+        mVertex[0]->AddSection( this );
+        mVertex[1]->AddSection( this );
+    }
+    else
+    {
+        mVertex[0]->AddSection( this );
+    }
 
     mFlags |= LINKED;
 }

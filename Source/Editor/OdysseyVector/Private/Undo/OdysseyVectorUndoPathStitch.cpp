@@ -56,7 +56,7 @@ FOdysseyVectorUndoPathStitch::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mMergedSegmentArray.size(); i++ )
     {
-        mMergedSegmentArray[i]->GetPath()->AddSegment( mMergedSegmentArray[i] );
+        mMergedSegmentArray[i]->GetOwnerAsPath()->AddSegment( mMergedSegmentArray[i] );
 
         //mMergedSegmentArray[i]->Invalidate();
     }
@@ -81,7 +81,7 @@ FOdysseyVectorUndoPathStitch::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mMergedSegmentArray.size(); i++ )
     {
-        mMergedSegmentArray[i]->GetPath()->RemoveSegment( mMergedSegmentArray[i] );
+        mMergedSegmentArray[i]->GetOwnerAsPath()->RemoveSegment( mMergedSegmentArray[i] );
     }
 
     for( int i = 0; i < mMergedVertexArray.size(); i++ )

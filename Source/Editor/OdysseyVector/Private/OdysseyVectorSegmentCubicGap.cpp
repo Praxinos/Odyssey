@@ -11,7 +11,7 @@ FOdysseyVectorSegmentCubicGap::~FOdysseyVectorSegmentCubicGap()
 FOdysseyVectorSegmentCubicGap::FOdysseyVectorSegmentCubicGap( FOdysseyVectorGroupPaint* iPaintgroup
                                                             , FOdysseyVectorVertex* iPoint0
                                                             , FOdysseyVectorVertex* iPoint1 )
-    : FOdysseyVectorSegmentCubic( nullptr, iPoint0, iPoint1, false )
+    : FOdysseyVectorSegmentCubic( iPaintgroup, iPoint0, iPoint1, false )
     , mPaintgroup( iPaintgroup )
 {
 }

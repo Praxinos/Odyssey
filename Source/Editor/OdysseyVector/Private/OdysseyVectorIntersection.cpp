@@ -4,23 +4,21 @@ FOdysseyVectorIntersection::~FOdysseyVectorIntersection()
 {
 }
 
-FOdysseyVectorIntersection::FOdysseyVectorIntersection( FOdysseyVectorVertex* iVertex
-                                                      , double iSegmentT )
-    : mVertex ( iVertex )
-    , mSegmentT( iSegmentT )
+FOdysseyVectorIntersection::FOdysseyVectorIntersection( double iSegmentT )
+    : mSegmentT( iSegmentT )
 {
 }
 
 void
-FOdysseyVectorIntersection::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )
+FOdysseyVectorIntersection::SetIntersectionVertexID( uint32 iIntersectionVertexID )
 {
-    mVertex->BuildExplorationPairs( iExplorationPairsArray, mSegmentT );
+    mIntersectionVertexID = iIntersectionVertexID;
 }
 
-FOdysseyVectorVertex*
-FOdysseyVectorIntersection::GetVertex()
+uint32
+FOdysseyVectorIntersection::GetIntersectionVertexID()
 {
-    return mVertex;
+    return mIntersectionVertexID;
 }
 
 double

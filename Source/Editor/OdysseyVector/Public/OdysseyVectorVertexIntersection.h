@@ -7,6 +7,7 @@
 #include "OdysseyVectorVertex.h"
 
 class FOdysseyVectorIntersection;
+class FOdysseyVectorObject;
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
 {
@@ -24,9 +25,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         /**
          * @brief Constructor.
          */
-        FOdysseyVectorVertexIntersection( FOdysseyVectorGroupPaint* iOwner
+        FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
+                                        , uint32 iID
                                         , double iX
-                                        , double iY );
+                                        , double iY
+                                        , FOdysseyVectorIntersection* iIntersection0
+                                        , FOdysseyVectorIntersection* iIntersection1 );
 
         void SetIntersection( FOdysseyVectorIntersection* iIntersection0
                             , FOdysseyVectorIntersection* iIntersection1 );

@@ -6,6 +6,7 @@
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorVertexIntersection.h"
 
 class FOdysseyVectorGroupPaint;
 
@@ -20,26 +21,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorIntersection
        /**
          * @brief
          */
-       FOdysseyVectorIntersection( FOdysseyVectorVertex* iVertex
-                                 , double iSegmentT );
+       FOdysseyVectorIntersection( double iSegmentT );
 
-       /**
-         * @brief Get a vertex belonging to this intersection
-         * return a pointer to the vertex
-         */
-        FOdysseyVectorVertex* GetVertex();
 
-       /**
-         * @brief Build the exploration pair needed to find cycles in a paint group.
-         *        An exploration pair is made of a entry section, a leaving section
-         *        and an intersection (this)
-         * return true or false
-         */
-        void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray );
+        uint32 GetIntersectionVertexID();
+        void SetIntersectionVertexID( uint32 iIntersectionVertexID );
 
         double GetSegmentT();
 
     protected:
-        FOdysseyVectorVertex* mVertex;
+        uint32 mIntersectionVertexID;
         double mSegmentT;
 };

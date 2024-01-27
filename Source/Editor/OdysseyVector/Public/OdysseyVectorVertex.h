@@ -19,8 +19,8 @@ struct FExplorationPair
     FOdysseyVectorSection* returnSection;
     FOdysseyVectorVertex*  departVertex;
     FOdysseyVectorSection* departSection;
+    uint32 departVertexIndex;
     double sectionLength;
-    double departVertexT;
 
     FExplorationPair()
     {
@@ -33,13 +33,13 @@ struct FExplorationPair
 
     FExplorationPair( FOdysseyVectorSection* iReturnSection
                     , FOdysseyVectorVertex*  iDepartVertex
-                    , double iDepartVertexT
+                    , uint32                 iDepartVertexIndex
                     , FOdysseyVectorSection* iDepartSection )
     {
-        returnSection = iReturnSection;
-        departVertex  = iDepartVertex;
-        departVertexT = iDepartVertexT;
-        departSection = iDepartSection;
+        returnSection     = iReturnSection;
+        departVertex      = iDepartVertex;
+        departVertexIndex = iDepartVertexIndex;
+        departSection     = iDepartSection;
         // used for sorting exploration pairs
         sectionLength = returnSection->GetLength() + departSection->GetLength();
     }
@@ -214,10 +214,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get the next section to go through. Used by OdysseyGroupPaint for finding cycles.
          *        The next section is determined by its orientation (right or left).
          * @param iLastSection the section we are coming from.
+         * @param iVertexIndex vertex index in the last section (0 or 1). This is necessary to handle looping sections
          * @param iOrientation the orientation for the desired next section (1.0f or -1.0f).
          * @return a pointer to the next section to go trough.
          */
         virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection
+                                                          , uint32 iLastSectioniVertexIndex
                                                           , double iOrientation );
 
         /**
@@ -271,8 +273,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          *        a leaving section, and a vertex in between.
          * @param oExplorationPairsArray the output pairs.
          */
-        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& oExplorationPairsArray
-                                          , double iSegmentT );
+        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& oExplorationPairsArray );
 
 
         /**

@@ -38,11 +38,11 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPat
     Init ( iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
 }
 
-FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
+FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iOwner
                                                       , FOdysseyVectorVertex* iPoint0
                                                       , FOdysseyVectorVertex* iPoint1
                                                       , bool iNeedWidth )
-    : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
+    : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1 )
     , mNeedWidth( iNeedWidth )
     , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0, 0.0f, 0.0f )
                  , FOdysseyVectorHandleSegment( this, 1, 0.0f, 0.0f ) }
@@ -274,7 +274,7 @@ FOdysseyVectorSegmentCubic::ResetPolygonCache( )
 bool
 FOdysseyVectorSegmentCubic::Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData )
 {
-    BLMatrix2D& worldMatrix = GetPath()->GetWorldMatrix();
+    BLMatrix2D& worldMatrix = GetOwner()->GetWorldMatrix();
     BLPoint pt[4] = { worldMatrix.mapPoint( mBezier[0].x, mBezier[0].y )
                     , worldMatrix.mapPoint( mBezier[1].x, mBezier[1].y )
                     , worldMatrix.mapPoint( mBezier[2].x, mBezier[2].y )
@@ -456,7 +456,7 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     double toRadius = radius0 + ( deltaRadius * iToT );
     FOdysseyVectorVertex* vertex0 = ( iFromT == 0.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[0]) : new FOdysseyVectorVertex( pointAt0.x, pointAt0.y, fromRadius );
     FOdysseyVectorVertex* vertex1 = ( iToT   == 1.0f ) ? static_cast<FOdysseyVectorVertex*>(mPoint[1]) : new FOdysseyVectorVertex( pointAt1.x, pointAt1.y, toRadius   );
-    FOdysseyVectorSegmentCubic* sampleSegment = new FOdysseyVectorSegmentCubic( mPath, vertex0, vertex1, true );
+    FOdysseyVectorSegmentCubic* sampleSegment = new FOdysseyVectorSegmentCubic( mOwner, vertex0, vertex1, true );
     ::ULIS::FVec2D& sampleCtrlPoint0 = sampleSegment->GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& sampleCtrlPoint1 = sampleSegment->GetHandle(1)->GetCoords();
     ::ULIS::FVec2D& samplePoint0 = sampleSegment->GetVertex(0)->GetCoords();
@@ -520,7 +520,7 @@ FOdysseyVectorSegmentCubic::GetBoundingBox( bool iWorld )
 {
     if( iWorld == true )
     {
-        BLMatrix2D& worldMatrix = GetPath()->GetWorldMatrix();
+        BLMatrix2D& worldMatrix = GetOwner()->GetWorldMatrix();
         BLPoint p0 = worldMatrix.mapPoint( mBBox.x          , mBBox.y           );
         BLPoint p1 = worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           );
         BLPoint p2 = worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h );
@@ -596,7 +596,7 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
         for( uint32 i = 0; i < pointCount; i++ )
         {
             uint32 n = i + 1;
-            FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( mPath
+            FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( mOwner
                                                                                    , static_cast<FOdysseyVectorVertex*>(pointChain[i])
                                                                                    , static_cast<FOdysseyVectorVertex*>(pointChain[n])
                                                                                    , true );

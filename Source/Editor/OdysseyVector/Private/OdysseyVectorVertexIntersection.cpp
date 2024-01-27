@@ -7,13 +7,22 @@ FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 {
 }
 
-FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorGroupPaint* iOwner
+FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
+                                                                  , uint32 iID
                                                                   , double iX
-                                                                  , double iY )
+                                                                  , double iY
+                                                                  , FOdysseyVectorIntersection* iIntersection0
+                                                                  , FOdysseyVectorIntersection* iIntersection1 )
     : FOdysseyVectorVertex ( iX, iY, 0.0f )
-    , mIntersection { nullptr, nullptr }
+    , mIntersection { iIntersection0, iIntersection1 }
 {
     SetOwner( iOwner );
+
+    if( mIntersection[0] )
+        mIntersection[0]->SetIntersectionVertexID( iID );
+
+    if( mIntersection[1] )
+        mIntersection[1]->SetIntersectionVertexID( iID );
 }
 
 void

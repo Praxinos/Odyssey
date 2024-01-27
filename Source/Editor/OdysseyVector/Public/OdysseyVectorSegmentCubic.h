@@ -32,7 +32,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        FOdysseyVectorSegmentCubic ( FOdysseyVectorPath* iPath
+        FOdysseyVectorSegmentCubic ( FOdysseyVectorObject* iOwner
                                    , FOdysseyVectorVertex* iVertex0
                                    , FOdysseyVectorVertex* iVertex1
                                    , bool iNeedWidth );

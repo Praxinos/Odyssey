@@ -500,7 +500,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragSegmentHandle( FOdysseyVectorHandle
                                                           , bool iRealign )
 {
     FOdysseyVectorSegment* segment = iHandle->GetOwner();
-    FOdysseyVectorPath* path = segment->GetPath();
+    FOdysseyVectorPath* path = segment->GetOwnerAsPath();
     FOdysseyVectorVertex* vertex = segment->GetVertex( iHandle->GetHandleID() );
     BLPoint localCoords = path->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
     BLPoint localVector = path->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );

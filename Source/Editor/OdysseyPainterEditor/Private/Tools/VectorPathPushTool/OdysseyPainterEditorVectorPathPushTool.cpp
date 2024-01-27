@@ -119,7 +119,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         for( int i = 0; i < mSegmentArray.size(); i++ )
         {
             FOdysseyVectorSegment* segment = mSegmentArray[i];
-            FOdysseyVectorPath* path = segment->GetPath();
+            FOdysseyVectorPath* path = segment->GetOwnerAsPath();
             BLMatrix2D& pathWorldMatrix = path->GetWorldMatrix();
 
             if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
@@ -236,7 +236,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
             {
                 FOdysseyVectorHandleSegment* handleSegment = static_cast<FOdysseyVectorHandleSegment*>(point);
 
-                path = handleSegment->GetOwner()->GetPath();
+                path = handleSegment->GetOwner()->GetOwnerAsPath();
             }
             else
             {

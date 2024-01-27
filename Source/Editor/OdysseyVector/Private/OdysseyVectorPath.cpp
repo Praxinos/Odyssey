@@ -510,7 +510,7 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.push_back( iSegment );
 
-    iSegment->SetPath( this );
+    iSegment->SetOwner( this );
 
     iSegment->GetVertex(0)->AddSegment( iSegment );
     iSegment->GetVertex(1)->AddSegment( iSegment );
@@ -1046,7 +1046,7 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
             for( int i = addedSegmentCountBeforeAlter; i < oAddedSegmentArray.size(); i++ )
             {
                 FOdysseyVectorSegment* segment = oAddedSegmentArray[i];
-                FOdysseyVectorPath* segmentPath = segment->GetPath();
+                FOdysseyVectorPath* segmentPath = segment->GetOwnerAsPath();
 
                 if( segmentPath == nullptr )
                 {
@@ -1080,7 +1080,7 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
                     // store ptr now for later use with path->AddVertex() / path->AddSegment()
                     vertex0->SetOwner( segmentPath );
                     vertex1->SetOwner( segmentPath );
-                    segment->SetPath( segmentPath );
+                    segment->SetOwner( segmentPath );
                 }
             }
         }
@@ -1150,7 +1150,7 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
 
         for( int i = removedSegmentCountBeforeAlter; i < oRemovedSegmentArray.size(); i++ )
         {
-            oRemovedSegmentArray[i]->GetPath()->RemoveSegment( oRemovedSegmentArray[i] );
+            oRemovedSegmentArray[i]->GetOwnerAsPath()->RemoveSegment( oRemovedSegmentArray[i] );
         }
 
         for( int i = removedVertexCountBeforeAlter; i < oRemovedVertexArray.size(); i++ )
@@ -1165,7 +1165,7 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
 
         for( int i = addedSegmentCountBeforeAlter; i < oAddedSegmentArray.size(); i++ )
         {
-            oAddedSegmentArray[i]->GetPath()->AddSegment( oAddedSegmentArray[i] );
+            oAddedSegmentArray[i]->GetOwnerAsPath()->AddSegment( oAddedSegmentArray[i] );
         }
     }
 

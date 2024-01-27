@@ -6,11 +6,11 @@ FOdysseyVectorSegment::~FOdysseyVectorSegment()
 {
 }
 
-FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
+FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1 )
     : FOdysseyVectorLink( iVertex0, iVertex1 )
-    , mPath( iPath )
+    , mOwner( iOwner )
     , mIsInvalidated( false )
     , mIsPaintingReady( false )
     , mPaintingCode( 0 )
@@ -63,8 +63,8 @@ FOdysseyVectorSegment::GetClosestIntersection( FOdysseyVectorVertex* iVertex )
 {
     if( mIntersectionList.size() )
     {
-        return ( mPoint[0] == iVertex ) ? &mIntersectionList.front()
-                                        : &mIntersectionList.back();
+        return ( mPoint[0] == iVertex ) ? mIntersectionList.front()
+                                        : mIntersectionList.back();
     }
 
     return nullptr;
@@ -73,7 +73,7 @@ FOdysseyVectorSegment::GetClosestIntersection( FOdysseyVectorVertex* iVertex )
 void
 FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
 {
-    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+    BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
 
     iBLContext->setStrokeWidth( 1.0f );
 
@@ -213,32 +213,40 @@ FOdysseyVectorSegment::GetVertex( uint32 iVertexID )
 }
 
 void
-FOdysseyVectorSegment::SetPath( FOdysseyVectorPath* iPath )
+FOdysseyVectorSegment::SetOwner( FOdysseyVectorObject* iOwner )
 {
-    mPath = iPath;
+    mOwner = iOwner;
 }
 
 FOdysseyVectorPath*
-FOdysseyVectorSegment::GetPath()
+FOdysseyVectorSegment::GetOwnerAsPath()
 {
-    return mPath;
+    return static_cast<FOdysseyVectorPath*>(mOwner);
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorSegment::GetOwner()
+{
+    return mOwner;
 }
 
 FOdysseyVectorIntersection*
-FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertex* iVertex, double iSegmentT )
+FOdysseyVectorSegment::AddIntersection ( double iSegmentT )
 {
-    std::list<FOdysseyVectorIntersection>::iterator newItem;
-    std::list<FOdysseyVectorIntersection>::iterator it = std::find_if ( mIntersectionList.begin()
-                                                                      , mIntersectionList.end()
-                                                                      , [&iSegmentT, this]( FOdysseyVectorIntersection& iIntersection )
+    FOdysseyVectorIntersection* intersection = new FOdysseyVectorIntersection( iSegmentT );
+
+    std::list<FOdysseyVectorIntersection*>::iterator newItem;
+    std::list<FOdysseyVectorIntersection*>::iterator it = std::find_if ( mIntersectionList.begin()
+                                                                       , mIntersectionList.end()
+                                                                       , [&iSegmentT, this]( FOdysseyVectorIntersection* iIntersection )
                                                                         {
 
-                                                                            return ( iIntersection.GetSegmentT() > iSegmentT );
+                                                                            return ( iIntersection->GetSegmentT() > iSegmentT );
                                                                         } );
 
-    newItem = mIntersectionList.insert( it, FOdysseyVectorIntersection( iVertex, iSegmentT ) );
+    mIntersectionList.insert( it, intersection );
 
-    return &(*newItem);
+    return intersection;
 }
 
 // MUST be called only on segments belonging to this path (because of the section)
@@ -247,7 +255,12 @@ FOdysseyVectorSegment::ClearIntersections()
 {
     // do not free the intersection vertex here
     // Leave it to the paintgroup.
-    mIntersectionList.clear();
+    mIntersectionList.remove_if( [](FOdysseyVectorIntersection* intersection)
+                                 {
+                                     delete intersection;
+
+                                     return true;
+                                 } );
 }
 
 bool
@@ -259,9 +272,14 @@ FOdysseyVectorSegment::IsInvalidated()
 void
 FOdysseyVectorSegment::Invalidate()
 {
-    if( mPath ) // Note: GroupPaint "gap segments" can be orphan
+    if( mOwner )
     {
-        mPath->InvalidateSegment( this );
+        if( mOwner->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = GetOwnerAsPath();
+
+            path->InvalidateSegment( this );
+        }
 
         mIsInvalidated = true;
 
@@ -275,7 +293,7 @@ FOdysseyVectorSegment::Update()
     mIsInvalidated = false;
 }
 
-std::list<FOdysseyVectorIntersection>&
+std::list<FOdysseyVectorIntersection*>&
 FOdysseyVectorSegment::GetIntersectionList()
 {
     return mIntersectionList;

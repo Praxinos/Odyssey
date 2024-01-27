@@ -28,15 +28,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
          * @param iVertex0 end point 0
          * @param iVertex1 end point 1
          */
-        FOdysseyVectorSection( FOdysseyVectorObject* iOwner
-                             , FOdysseyVectorSegment* iSegment
+        FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1
                              , double iSectionT0
                              , double iSectionT1 );
 
-        void Init( FOdysseyVectorObject* iOwner
-                 , FOdysseyVectorSegment* iSegment
+        void Init( FOdysseyVectorSegment* iSegment
                  , FOdysseyVectorVertex* iVertex0
                  , FOdysseyVectorVertex* iVertex1
                  , double iSectionT0
@@ -64,12 +62,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
 
        /**
          * @brief Get a vector tangent to this section, starting at this vertex.
-         * @param iVertex the vertex
+         * @param iVertexIndex index the vertex (0 or 1)
          * @param iStraight
          * @param iNormalize normalize the vector or not
          * return a vector tangent to this section, starting at this vertex. 
          */
-        ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iStraight, bool iNormalize );
+        ::ULIS::FVec2D GetVectorFromVertex( uint32 iVertexIndex
+                                          , bool iStraight
+                                          , bool iNormalize );
 
        /**
          * @brief Block the section for traversal from the vertex passed as parameter. Used by the GroupPaint class.
@@ -107,11 +107,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         bool IsErased();
         double GetLength();
         bool IsValid();
-        FOdysseyVectorObject* GetOwner();
         double GetT( uint32 iIndex );
 
     protected:
-        FOdysseyVectorObject* mOwner;
         FOdysseyVectorSegment* mSegment;
         FOdysseyVectorVertex* mVertex[2];
         uint32 mFlags;
@@ -119,8 +117,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
         ::ULIS::FVec2D mBezier[4];
         double mLength;
-        double mT0;
-        double mT1;
 
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );
