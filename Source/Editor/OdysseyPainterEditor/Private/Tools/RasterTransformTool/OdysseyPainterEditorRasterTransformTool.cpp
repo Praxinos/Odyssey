@@ -464,25 +464,24 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromSelection
     basePoints.Add(FVector2D(mSelection->GetSelectionBlock()->Width(), mSelection->GetSelectionBlock()->Height()));
     basePoints.Add(FVector2D(0, mSelection->GetSelectionBlock()->Height()));
 
-    TArray<FVector2D> sortedVertices;
-    FGeomTools2D::CorrectPolygonWinding( sortedVertices, mTransformArea->GetPoints(), false );
-    for( int i = 0; i < sortedVertices.Num(); i++ )
+    TArray<FVector2D> shiftedVertices = mTransformArea->GetPoints();
+    for( int i = 0; i < shiftedVertices.Num(); i++ )
     {
-        sortedVertices[i] -= FVector2D( boundingBox.x, boundingBox.y );
+        shiftedVertices[i] -= FVector2D( boundingBox.x, boundingBox.y );
     }
 
-    //If not convex, return;
-    //::IsConvex()
+    if( !IsPolygonConvex(shiftedVertices) )
+        return;
 
     FOdysseyMatrix transformation = UOdysseyTransformProxyLibrary::MakePerspectiveMatrix(
         basePoints[0],
         basePoints[1],
         basePoints[2],
         basePoints[3],
-        sortedVertices[0],
-        sortedVertices[1],
-        sortedVertices[2],
-        sortedVertices[3]
+        shiftedVertices[0],
+        shiftedVertices[1],
+        shiftedVertices[2],
+        shiftedVertices[3]
     );
     
     ctx.TransformPerspective(
@@ -621,6 +620,34 @@ void UOdysseyPainterEditorRasterTransformTool::ClearBlock(TSharedPtr<::ULIS::FBl
         &clearEvent);
 
     ctx.Finish();
+}
+
+
+bool UOdysseyPainterEditorRasterTransformTool::IsPolygonConvex(const TArray<FVector2D>& Points)
+{
+    const int PointCount = Points.Num();
+    float Sign = 0;
+    for (int32 PointIndex = 0; PointIndex < PointCount; ++PointIndex)
+    {
+        const FVector2D& A = Points[PointIndex];
+        const FVector2D& B = Points[(PointIndex + 1) % PointCount];
+        const FVector2D& C = Points[(PointIndex + 2) % PointCount];
+        float Det = (B.X - A.X) * (C.Y - B.Y) - (B.Y - A.Y) * (C.X - B.X);
+        float DetSign = FMath::Sign(Det);
+        if (DetSign != 0)
+        {
+            if (Sign == 0)
+            {
+                Sign = DetSign;
+            }
+            else if (Sign != DetSign)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 #undef LOCTEXT_NAMESPACE

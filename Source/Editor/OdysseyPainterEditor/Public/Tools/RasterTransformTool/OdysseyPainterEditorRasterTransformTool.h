@@ -83,6 +83,8 @@ private:
     void ClearTransform();
     void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
+    //Copy from GeomTools.cpp
+    bool IsPolygonConvex(const TArray<FVector2D>& Points);
 public:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     EOdysseySelectionShape SelectionShape;
