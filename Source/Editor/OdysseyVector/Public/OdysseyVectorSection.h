@@ -28,13 +28,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
          * @param iVertex0 end point 0
          * @param iVertex1 end point 1
          */
-        FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
+        FOdysseyVectorSection( FOdysseyVectorObject* iOwner
+                             , FOdysseyVectorSegment* iSegment
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1
                              , double iSectionT0
                              , double iSectionT1 );
 
-        void Init( FOdysseyVectorSegment* iSegment
+        void Init( FOdysseyVectorObject* iOwner
+                 , FOdysseyVectorSegment* iSegment
                  , FOdysseyVectorVertex* iVertex0
                  , FOdysseyVectorVertex* iVertex1
                  , double iSectionT0
@@ -75,20 +77,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
          * @brief Block the section for traversal from the vertex passed as parameter. Used by the GroupPaint class.
          * @param iVertex
          */
-        void UnBlock( FOdysseyVectorVertex* iVertex );
+        void UnBlock( uint32 iVertexIndex );
 
        /**
          * @brief Unblock the section for traversal from the vertex passed as parameter. Used by the GroupPaint class.
          * @param iVertex
          */
-        void Block( FOdysseyVectorVertex* iVertex );
+        void Block( uint32 iVertexIndex );
 
        /**
          * @brief Check the blocking status of this section from the vertex passed as parameter. Used by the GroupPaint class.
          * @param iVertex
          * @return true or false
          */
-        bool IsBlocked( FOdysseyVectorVertex* iVertex );
+        bool IsBlocked( uint32 iVertexIndex );
 
         bool IsLinked();
         void Link();

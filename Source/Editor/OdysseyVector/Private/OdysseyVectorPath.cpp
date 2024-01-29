@@ -53,8 +53,8 @@ FOdysseyVectorPath::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>& oVertexArray
-                                           , std::vector<FOdysseyVectorSection*>& oSectionArray )
+FOdysseyVectorPath::ToVertexIndexAndSectionArray( std::vector<uint32>& oVertexIndexArray
+                                                , std::vector<FOdysseyVectorSection*>& oSectionArray )
 {
     if( mSegmentList.size() )
     {
@@ -68,7 +68,7 @@ FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>&
             FOdysseyVectorSection* section = vertex->GetSection( segment );
             FOdysseyVectorSegment *nextSegment = nextVertex->GetOtherSegment( segment );
 
-            oVertexArray.push_back( vertex );
+            oVertexIndexArray.push_back( vertex->GetIndex( segment ) );
             oSectionArray.push_back( section );
 
             vertex = nextVertex;

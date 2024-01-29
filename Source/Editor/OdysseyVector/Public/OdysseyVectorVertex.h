@@ -61,6 +61,22 @@ struct FExplorationWayPoint
     }
 };
 
+struct FCycleSectionInfo
+{
+    FOdysseyVectorSection* section;
+    ::ULIS::FVec2D sectionVector;
+    uint32 sectionVertexIndex;
+
+    FCycleSectionInfo( FOdysseyVectorSection* iSection
+                     , const ::ULIS::FVec2D& iSectionVector
+                     , uint32 iSectionVertexIndex )
+    {
+        section = iSection;
+        sectionVector = iSectionVector;
+        sectionVertexIndex = iSectionVertexIndex;
+    }
+};
+
 class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 {
     private:
@@ -195,18 +211,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         std::list<FOdysseyVectorSegment*>& GetSegmentList();
 
         /**
-         * @brief Get the position of the vertex on the segment passed as parameter, in a range from 0.0 to 1.0.
+         * @brief Get the position of the vertex on the segment passed as parameter.
          * @param iSegment the section the vertex lies on.
-         * @return a range from 0.0 to 1.0.
+         * @return 0 or 1.
          */
-        virtual double GetT( FOdysseyVectorSegment* iSegment );
+        virtual uint32 GetIndex( FOdysseyVectorSegment* iSegment );
 
         /**
-         * @brief Get the position of the vertex on the section passed as parameter, in a range from 0.0 to 1.0.
+         * @brief Get the position of the vertex on the section passed as parameter.
          * @param iSection the section the vertex lies on.
-         * @return a range from 0.0 to 1.0.
+         * @return 0 or 1.
          */
-        virtual double GetT( FOdysseyVectorSection* iSection );
+        virtual uint32 GetIndex( FOdysseyVectorSection* iSection );
 
         virtual ::ULIS::FVec2D GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize );
 
@@ -218,9 +234,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iOrientation the orientation for the desired next section (1.0f or -1.0f).
          * @return a pointer to the next section to go trough.
          */
-        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection
-                                                          , uint32 iLastSectioniVertexIndex
-                                                          , double iOrientation );
+        FCycleSectionInfo GetCycleNextSection( FOdysseyVectorSection* iLastSection
+                                             , uint32 iLastSectionVertexIndex
+                                             , double iOrientation );
 
         /**
          * @brief Mark all connected segments for update.

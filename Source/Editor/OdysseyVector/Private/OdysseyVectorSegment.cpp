@@ -15,6 +15,7 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
     , mIsPaintingReady( false )
     , mPaintingCode( 0 )
     , mLength( 0.0f )
+    , mIntersectionSlotCount( 0 )
 {
 }
 
@@ -230,37 +231,40 @@ FOdysseyVectorSegment::GetOwner()
     return mOwner;
 }
 
-FOdysseyVectorIntersection*
-FOdysseyVectorSegment::AddIntersection ( double iSegmentT )
+void
+FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorIntersection* iIntersection )
 {
-    FOdysseyVectorIntersection* intersection = new FOdysseyVectorIntersection( iSegmentT );
-
-    std::list<FOdysseyVectorIntersection*>::iterator newItem;
     std::list<FOdysseyVectorIntersection*>::iterator it = std::find_if ( mIntersectionList.begin()
                                                                        , mIntersectionList.end()
-                                                                       , [&iSegmentT, this]( FOdysseyVectorIntersection* iIntersection )
+                                                                       , [ this
+                                                                         , iIntersection ]( FOdysseyVectorIntersection* intersection )
                                                                         {
 
-                                                                            return ( iIntersection->GetSegmentT() > iSegmentT );
+                                                                            return ( intersection->GetSegmentT() > iIntersection->GetSegmentT() );
                                                                         } );
 
-    mIntersectionList.insert( it, intersection );
+    mIntersectionList.insert( it, iIntersection );
+}
 
-    return intersection;
+void
+FOdysseyVectorSegment::AddIntersectionSlot()
+{
+    mIntersectionSlotCount++;
+}
+
+uint32
+FOdysseyVectorSegment::GetIntersectionSlotCount()
+{
+    return mIntersectionSlotCount;
 }
 
 // MUST be called only on segments belonging to this path (because of the section)
 void
 FOdysseyVectorSegment::ClearIntersections()
 {
-    // do not free the intersection vertex here
-    // Leave it to the paintgroup.
-    mIntersectionList.remove_if( [](FOdysseyVectorIntersection* intersection)
-                                 {
-                                     delete intersection;
+    mIntersectionList.clear();
 
-                                     return true;
-                                 } );
+    mIntersectionSlotCount = 0;
 }
 
 bool
@@ -298,23 +302,6 @@ FOdysseyVectorSegment::GetIntersectionList()
 {
     return mIntersectionList;
 }
-
-uint32
-FOdysseyVectorSegment::GetIntersectionCount()
-{
-    return mIntersectionList.size();
-}
-
-/*
-void
-FOdysseyVectorSegment::GetIntersection( std::vector<FOdysseyVectorVertex*>& oVertexArray )
-{
-    for( FOdysseyVectorIntersection* intersectionVertex : mIntersectionList )
-    {
-        oVertexArray.push_back( intersectionVertex );
-    }
-}
-*/
 
 bool
 FOdysseyVectorSegment::HasBaseClass( uint32 iBaseClassID )

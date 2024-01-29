@@ -22,40 +22,57 @@ class FOdysseyVectorBucket;
 class FOdysseyVectorCycle;
 
 // small temporary structure will allow us to alloc the intersection vertices in one go.
-struct FIntersectionRecord
+// for X-Junction
+struct FXIntersectionRecord
 {
-    uint32 ID;
-    FOdysseyVectorIntersection* intersection[2];
+    FOdysseyVectorSegment* segment0;
+    FOdysseyVectorSegment* segment1;
+    double segment0T;
+    double segment1T;
     double x;
     double y;
-    FOdysseyVectorVertex* gapVertex;
 
-    FIntersectionRecord( uint32 iID
-                       , double iX
-                       , double iY
-                       , FOdysseyVectorIntersection* iIntersection0
-                       , FOdysseyVectorIntersection* iIntersection1
-                       , FOdysseyVectorVertex* iGapVertex )
-        : ID( iID )
-        , intersection{ iIntersection0, iIntersection1 }
+    FXIntersectionRecord( double iX
+                        , double iY
+                        , FOdysseyVectorSegment* iSegment0
+                        , double iSegment0T
+                        , FOdysseyVectorSegment* iSegment1
+                        , double iSegment1T )
+        : segment0 ( iSegment0 )
+        , segment1 ( iSegment1 )
+        , segment0T( iSegment0T )
+        , segment1T( iSegment1T )
         , x( iX )
         , y( iY )
-        , gapVertex( iGapVertex )
     {
+        iSegment0->AddIntersectionSlot();
+        iSegment1->AddIntersectionSlot();
     }
+};
+
+// small temporary structure will allow us to alloc the intersection vertices in one go.
+// for T-Junction
+struct FTIntersectionRecord
+{
+    FOdysseyVectorSegment* segment;
+    double segmentT;
+    double x;
+    double y;
+    FOdysseyVectorVertex* vertex;
 
     // for T-Junction Gaps
-    FIntersectionRecord( uint32 iID
-                       , double iX
-                       , double iY
-                       , FOdysseyVectorIntersection* iIntersection0
-                       , FOdysseyVectorVertex* iGapVertex )
-        : ID( iID )
-        , intersection{ iIntersection0, nullptr }
+    FTIntersectionRecord( double iX
+                        , double iY
+                        , FOdysseyVectorSegment* iSegment
+                        , double iSegmentT
+                        , FOdysseyVectorVertex* iVertex )
+        : segment( iSegment )
+        , segmentT( iSegmentT )
         , x( iX )
         , y( iY )
-        , gapVertex( iGapVertex )
+        , vertex( iVertex )
     {
+        iSegment->AddIntersectionSlot();
     }
 };
 
@@ -157,7 +174,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                              , FOdysseyVectorSegmentCubic* iSegment1
                              , const ::ULIS::FVec2D& iSegment1MinInParentWithTolerance
                              , const ::ULIS::FVec2D& iSegment1MaxInParentWithTolerance
-                             , std::vector<FIntersectionRecord>& iIntersectionRecordArray );
+                             , std::vector<FXIntersectionRecord>& iIntersectionRecordArray );
         void IntersectVertex( FOdysseyVectorVertex* iVertex0
                             , const ::ULIS::FVec2D& iPoint0InParent
                             , FOdysseyVectorVertex* iVertex1
@@ -198,7 +215,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         void IntersectSegmentWithList( FOdysseyVectorSegment* iSegment
                                      , const std::list<FOdysseyVectorSegment*>& iSegmenList
-                                     , std::vector<FIntersectionRecord>& oIntersectionRecordArray );
+                                     , std::vector<FXIntersectionRecord>& oIntersectionRecordArray );
 
         /**
          * @brief Build the graph that allows to detect the cycles. It basically checks intersections
@@ -222,9 +239,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
          // TODO: rename "Path" to something else, it is confusing with FOdysseyVectorPath
         uint32 FindPath( FOdysseyVectorSection* iReturnSection
-                       , FOdysseyVectorVertex* iVertex
+                       , uint32 iSectionVertexIndex
                        , FOdysseyVectorSection* iSection
-                       , std::vector<FOdysseyVectorVertex*>& oVertexArray
+                       , std::vector<uint32>& oVertexIndexArray
                        , std::vector<FOdysseyVectorSection*>& oSectionArray
                        , double iOrientation
                        , uint32 iDepth );
@@ -274,7 +291,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool IntersectGapSection( FOdysseyVectorSection* iGapSection
                                 , FOdysseyVectorSegmentCubic* iSegment );
         void CreateNearIntersection( FOdysseyVectorVertex *iVertex
-                                   , std::vector<FIntersectionRecord>& oIntersectionRecordArray );
+                                   , std::vector<FTIntersectionRecord>& oTIntersectionRecordArray );
 
     protected:
         static const uint32 NOCYCLE  = 0;
@@ -287,7 +304,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::vector<FOdysseyVectorVertexIntersection> mIntersectionVertexArray;
         uint32 mPaintingCode;
         std::mutex mMutex;
-
+        // temporarily store intersection info before creating them
+        std::vector<FXIntersectionRecord> mXIntersectionRecordArray;
+        std::vector<FTIntersectionRecord> mTIntersectionRecordArray;
+        // allocated in one go after all intersection info have been gathered.
         std::vector<FOdysseyVectorSection> mSectionBuffer;
         std::vector<FOdysseyVectorSection> mGapSectionBuffer;
         std::vector<FOdysseyVectorSegmentCubicGap> mGapSegmentBuffer;

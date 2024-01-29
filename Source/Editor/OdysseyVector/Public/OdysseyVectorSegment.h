@@ -126,7 +126,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         void ClearIntersections();
 
 
-        FOdysseyVectorIntersection* AddIntersection ( double iSegmentT );
+        void AddIntersection ( FOdysseyVectorIntersection* iIntersection );
 
        /**
          * @brief Get the number of polygons in cache.
@@ -185,12 +185,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         virtual ::ULIS::FVec2D GetOffsetPoint( uint32 iSide, double iT );
         FOdysseyVectorIntersection* GetClosestIntersection( FOdysseyVectorVertex* iVertex );
 
+        void AddIntersectionSlot();
+        uint32 GetIntersectionSlotCount();
+
     protected:
         void DrawFractionCache( BLContext* iBLContext );
 
     protected:
         std::vector<FOdysseyVectorFraction> mFractionCache;
-        std::list<FOdysseyVectorIntersection*> mIntersectionList; // malloc because refered as ptr in VertexIntersection
+        std::list<FOdysseyVectorIntersection*> mIntersectionList;
         FOdysseyVectorObject* mOwner;
         ::ULIS::FRectD mBBox;
         ::ULIS::FRectD mBBoxInParent;
@@ -199,4 +202,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         uint32 mID;
         uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
         double mLength;
+        uint32 mIntersectionSlotCount;
 };

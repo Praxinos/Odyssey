@@ -6,30 +6,31 @@
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorVertex.h"
-#include "OdysseyVectorVertexIntersection.h"
 
 class FOdysseyVectorGroupPaint;
+class FOdysseyVectorVertexIntersection;
 
 class ODYSSEYVECTOR_API FOdysseyVectorIntersection
 {
     public:
-       /**
-         * @brief default destructor
-         */
+        /**
+          * @brief default destructor
+          */
         ~FOdysseyVectorIntersection();
 
-       /**
-         * @brief
-         */
-       FOdysseyVectorIntersection( double iSegmentT );
+        FOdysseyVectorIntersection();
 
+        /**
+          * @brief
+          */
+        FOdysseyVectorIntersection( FOdysseyVectorVertexIntersection* iIntersectionVertex
+                                  , double iSegmentT );
 
-        uint32 GetIntersectionVertexID();
-        void SetIntersectionVertexID( uint32 iIntersectionVertexID );
+        FOdysseyVectorVertexIntersection* GetIntersectionVertex();
 
         double GetSegmentT();
 
     protected:
-        uint32 mIntersectionVertexID;
+        FOdysseyVectorVertexIntersection* mIntersectionVertex;
         double mSegmentT;
 };

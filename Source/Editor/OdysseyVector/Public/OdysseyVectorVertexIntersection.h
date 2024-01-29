@@ -5,9 +5,10 @@
 #include <Image/Block.h>
 
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorIntersection.h"
 
-class FOdysseyVectorIntersection;
 class FOdysseyVectorObject;
+class FOdysseyVectorSegment;
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
 {
@@ -23,20 +24,33 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         ~FOdysseyVectorVertexIntersection();
 
         /**
-         * @brief Constructor.
+         * @brief Constructor for X-Junction
          */
         FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
-                                        , uint32 iID
                                         , double iX
                                         , double iY
-                                        , FOdysseyVectorIntersection* iIntersection0
-                                        , FOdysseyVectorIntersection* iIntersection1 );
+                                        , FOdysseyVectorSegment* iSegment0
+                                        , double iSegment0T
+                                        , FOdysseyVectorSegment* iSegment1
+                                        , double iSegment1T );
+
+        /**
+         * @brief Constructor for T-Junction
+         */
+         FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
+                                         , double iX
+                                         , double iY
+                                         , FOdysseyVectorSegment* iSegment
+                                         , double iSegmentT
+                                         , FOdysseyVectorVertex* iVertex );
 
         void SetIntersection( FOdysseyVectorIntersection* iIntersection0
                             , FOdysseyVectorIntersection* iIntersection1 );
 
         FOdysseyVectorIntersection* GetIntersection( uint32 iIndex );
+        double GetT( FOdysseyVectorSegment* iSegment );
 
     protected:
-        FOdysseyVectorIntersection* mIntersection[2];
+        FOdysseyVectorIntersection mIntersection[2];
+        FOdysseyVectorSegment* mSegment[2];
 };

@@ -21,7 +21,7 @@ FWayFragment::FWayFragment( FOdysseyVectorSegment* iSegment
 
     if( iWayPointArray[indexWayPoint0].flags & FWayPoint::Original )
     {
-        t0 = iWayPointArray[indexWayPoint0].vertex->GetT( iSegment );
+        t0 = iWayPointArray[indexWayPoint0].vertex->GetIndex( iSegment );
     }
     else
     {
@@ -30,7 +30,7 @@ FWayFragment::FWayFragment( FOdysseyVectorSegment* iSegment
 
     if( iWayPointArray[indexWayPoint1].flags & FWayPoint::Original )
     {
-        t1 = iWayPointArray[indexWayPoint1].vertex->GetT( iSegment );
+        t1 = iWayPointArray[indexWayPoint1].vertex->GetIndex( iSegment );
     }
     else
     {

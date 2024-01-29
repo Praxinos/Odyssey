@@ -1,5 +1,6 @@
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorIntersection.h"
+#include "OdysseyVectorSegment.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVector.h"
 
@@ -8,33 +9,44 @@ FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 }
 
 FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
-                                                                  , uint32 iID
                                                                   , double iX
                                                                   , double iY
-                                                                  , FOdysseyVectorIntersection* iIntersection0
-                                                                  , FOdysseyVectorIntersection* iIntersection1 )
+                                                                  , FOdysseyVectorSegment* iSegment0
+                                                                  , double iSegment0T
+                                                                  , FOdysseyVectorSegment* iSegment1
+                                                                  , double iSegment1T )
     : FOdysseyVectorVertex ( iX, iY, 0.0f )
-    , mIntersection { iIntersection0, iIntersection1 }
+    , mIntersection { FOdysseyVectorIntersection( this, iSegment0T )
+                    , FOdysseyVectorIntersection( this, iSegment1T ) }
+    , mSegment { iSegment0,  iSegment1 }
 {
     SetOwner( iOwner );
 
-    if( mIntersection[0] )
-        mIntersection[0]->SetIntersectionVertexID( iID );
-
-    if( mIntersection[1] )
-        mIntersection[1]->SetIntersectionVertexID( iID );
+    iSegment0->AddIntersection( &mIntersection[0] );
+    iSegment1->AddIntersection( &mIntersection[1] );
 }
 
-void
-FOdysseyVectorVertexIntersection::SetIntersection( FOdysseyVectorIntersection* iIntersection0
-                                                 , FOdysseyVectorIntersection* iIntersection1 )
+FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
+                                                                  , double iX
+                                                                  , double iY
+                                                                  , FOdysseyVectorSegment* iSegment
+                                                                  , double iSegmentT
+                                                                  , FOdysseyVectorVertex* iVertex )
+    : FOdysseyVectorVertex ( iX, iY, 0.0f )
+    , mIntersection { FOdysseyVectorIntersection( this, iSegmentT  )
+                    , FOdysseyVectorIntersection( /* empty ctor */ ) }
+    , mSegment { iSegment, nullptr }
 {
-    mIntersection[0] = iIntersection0;
-    mIntersection[1] = iIntersection1;
+    SetOwner( iOwner );
+    // T-Junction, one segment only.
+    iSegment->AddIntersection( &mIntersection[0] );
+
+    iVertex->SetNearestVertex( this, 0.0f );
 }
 
-FOdysseyVectorIntersection*
-FOdysseyVectorVertexIntersection::GetIntersection( uint32 iIndex )
+double
+FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSegment* iSegment )
 {
-    return mIntersection[iIndex];
+    return ( mSegment[0] == iSegment ) ? mIntersection[0].GetSegmentT()
+                                       : mIntersection[1].GetSegmentT();
 }

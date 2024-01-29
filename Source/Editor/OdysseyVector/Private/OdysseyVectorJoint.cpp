@@ -189,8 +189,8 @@ FOdysseyVectorJoint::GetEdgePoints( FOdysseyVectorSegment* iPrevSegment
     double cross = FOdysseyVector::Cross2D( parallelVec0, parallelVec1 );
     uint32 positiveSide = cross > 0.0f ? 0 : 1;
     uint32 negativeSide = cross > 0.0f ? 1 : 0;
-    double prevSegmentT = mVertex->GetT( iPrevSegment );
-    double nextSegmentT = mVertex->GetT( iNextSegment );
+    double prevSegmentT = mVertex->GetIndex( iPrevSegment );
+    double nextSegmentT = mVertex->GetIndex( iNextSegment );
     static uint32 rightOrientation[2] = { 0, 1 };
     static uint32 wrongOrientation[2] = { 1, 0 };
     uint32 *prevEdgePointSide = prevSegmentT == 1.0f ? rightOrientation : wrongOrientation;

@@ -7,13 +7,14 @@ FOdysseyVectorSection::~FOdysseyVectorSection()
 {
 }
 
-FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
+FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner // paintgroup
+                                            , FOdysseyVectorSegment* iSegment
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1
                                             , double iSectionT0
                                             , double iSectionT1 )
 {
-    Init( iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1 );
+    Init( iOwner, iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1 );
 }
 
 double
@@ -36,13 +37,14 @@ FOdysseyVectorSection::IsValid()
 }
 
 void
-FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
+FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgroup
+                           , FOdysseyVectorSegment* iSegment
                            , FOdysseyVectorVertex* iVertex0
                            , FOdysseyVectorVertex* iVertex1
                            , double iT0
                            , double iT1  )
 {
-    BLMatrix2D& ownerInverseWorldMatrix = iSegment->GetOwner()->GetInverseWorldMatrix();
+    BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
     mLength = fabs ( iT1 - iT0 ) * iSegment->GetLength();
     mSegment = iSegment;
     mVertex[0] = iVertex0;
@@ -265,28 +267,28 @@ FOdysseyVectorSection::GetVectorFromVertex( uint32 iVertexIndex
 }
 
 void 
-FOdysseyVectorSection::UnBlock( FOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::UnBlock( uint32 iVertexIndex )
 {
-    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
-                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+    uint32 blocked = ( iVertexIndex == 0 ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                           : FOdysseyVectorSection::BLOCKVERTEX1;
 
     mFlags &= (~blocked);
 }
 
 void 
-FOdysseyVectorSection::Block( FOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::Block( uint32 iVertexIndex )
 {
-    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
-                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+    uint32 blocked = ( iVertexIndex == 0 ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                           : FOdysseyVectorSection::BLOCKVERTEX1;
 
     mFlags |= blocked;
 }
 
 bool 
-FOdysseyVectorSection::IsBlocked( FOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::IsBlocked( uint32 iVertexIndex )
 {
-    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
-                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+    uint32 blocked = ( iVertexIndex == 0 ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                           : FOdysseyVectorSection::BLOCKVERTEX1;
 
     return ( mFlags & blocked ) ? true : false;
 }

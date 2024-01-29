@@ -4,21 +4,21 @@ FOdysseyVectorIntersection::~FOdysseyVectorIntersection()
 {
 }
 
-FOdysseyVectorIntersection::FOdysseyVectorIntersection( double iSegmentT )
-    : mSegmentT( iSegmentT )
+FOdysseyVectorIntersection::FOdysseyVectorIntersection()
 {
 }
 
-void
-FOdysseyVectorIntersection::SetIntersectionVertexID( uint32 iIntersectionVertexID )
+FOdysseyVectorIntersection::FOdysseyVectorIntersection( FOdysseyVectorVertexIntersection* iIntersectionVertex
+                                                      , double iSegmentT )
+    : mIntersectionVertex( iIntersectionVertex )
+    , mSegmentT( iSegmentT )
 {
-    mIntersectionVertexID = iIntersectionVertexID;
 }
 
-uint32
-FOdysseyVectorIntersection::GetIntersectionVertexID()
+FOdysseyVectorVertexIntersection*
+FOdysseyVectorIntersection::GetIntersectionVertex()
 {
-    return mIntersectionVertexID;
+    return mIntersectionVertex;
 }
 
 double
