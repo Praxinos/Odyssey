@@ -33,14 +33,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1
                              , double iSectionT0
-                             , double iSectionT1 );
+                             , double iSectionT1
+                             , std::vector<FOdysseyVectorSection*>& oShortSectionArray );
 
         void Init( FOdysseyVectorObject* iOwner
                  , FOdysseyVectorSegment* iSegment
                  , FOdysseyVectorVertex* iVertex0
                  , FOdysseyVectorVertex* iVertex1
                  , double iSectionT0
-                 , double iSectionT1 );
+                 , double iSectionT1
+                 , std::vector<FOdysseyVectorSection*>& oShortSectionArray );
 
        /**
          * @brief Get the segment it lies on.
@@ -110,8 +112,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         double GetLength();
         bool IsValid();
         double GetT( uint32 iIndex );
+        FOdysseyVectorObject* GetOwner();
 
     protected:
+        FOdysseyVectorObject* mOwner;
         FOdysseyVectorSegment* mSegment;
         FOdysseyVectorVertex* mVertex[2];
         uint32 mFlags;

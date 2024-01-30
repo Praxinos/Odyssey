@@ -12,9 +12,11 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner // pa
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1
                                             , double iSectionT0
-                                            , double iSectionT1 )
+                                            , double iSectionT1
+                                            , std::vector<FOdysseyVectorSection*>& oShortSectionArray
+ )
 {
-    Init( iOwner, iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1 );
+    Init( iOwner, iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1, oShortSectionArray );
 }
 
 double
@@ -22,6 +24,14 @@ FOdysseyVectorSection::GetLength()
 {
     return mLength;
 }
+
+/*
+void
+FOdysseyVectorSection::Merge()
+{
+
+}
+*/
 
 bool
 FOdysseyVectorSection::IsValid()
@@ -36,13 +46,20 @@ FOdysseyVectorSection::IsValid()
     return true;
 }
 
+FOdysseyVectorObject*
+FOdysseyVectorSection::GetOwner()
+{
+    return mOwner;
+}
+
 void
 FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgroup
                            , FOdysseyVectorSegment* iSegment
                            , FOdysseyVectorVertex* iVertex0
                            , FOdysseyVectorVertex* iVertex1
                            , double iT0
-                           , double iT1  )
+                           , double iT1
+                           , std::vector<FOdysseyVectorSection*>& oShortSectionArray )
 {
     BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
     mLength = fabs ( iT1 - iT0 ) * iSegment->GetLength();
@@ -53,6 +70,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
     mCycle[1] = nullptr;
     mCycleCount = 0;
     mFlags = 0;
+    mOwner = iOwner;
 
     Link();
 
@@ -142,6 +160,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
      && ( mBezier[0] == mBezier[3] ) )
     {
         mLength = 0.0f;
+
+        oShortSectionArray.push_back( this );
     }
 }
 

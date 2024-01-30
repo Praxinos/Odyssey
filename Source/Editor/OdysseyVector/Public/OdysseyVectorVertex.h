@@ -353,6 +353,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         bool HasErasedSectionsOnly();
         void SetOwner( FOdysseyVectorObject* iOwner );
         FOdysseyVectorObject* GetOwner();
+        bool HasLengthySection();
 
     protected:
         /**

@@ -251,6 +251,7 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
 
     mXIntersectionRecordArray.reserve( 100 );
     mTIntersectionRecordArray.reserve( 100 );
+    mShortSectionArray.reserve( 100 );
 
     bPainted = true;
     bMonochrome = false;
@@ -1069,9 +1070,7 @@ FOdysseyVectorGroupPaint::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelecti
 }
 
 void
-FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex
-                                                , std::vector<FOdysseyVectorSection>& iSectionBuffer
-                                                , std::vector<FOdysseyVectorSegmentCubicGap>& iGapSegmentBuffer )
+FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex )
 {
     FOdysseyVectorVertex* nearestVertex = iVertex->GetNearestVertex();
 
@@ -1083,19 +1082,18 @@ FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex
         // or if the nearest vertex is an intersection vertex.
         ||    ( nearestVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() ) )
         {
-            FOdysseyVectorSegmentCubicGap& newGapSegment = iGapSegmentBuffer.emplace_back( this, nearestVertex, iVertex );
+            FOdysseyVectorSegmentCubicGap& newGapSegment = mGapSegmentBuffer.emplace_back( this, nearestVertex, iVertex );
             //iGapSegmentBuffer[gapCount].Link(); // not necessary. saves us some cpu cycles
             newGapSegment.Update();
 
-            FOdysseyVectorSection& newGapSection = iSectionBuffer.emplace_back( this, &newGapSegment, nearestVertex, iVertex, 0.0f, 1.0f );
+            FOdysseyVectorSection& newGapSection = mGapSectionBuffer.emplace_back( this, &newGapSegment, nearestVertex, iVertex, 0.0f, 1.0f, mShortSectionArray );
             //newGapSection.Link();
         }
     }
 }
 
 void
-FOdysseyVectorGroupPaint::CreateSegmentSections( FOdysseyVectorSegment* iSegment
-                                               , std::vector<FOdysseyVectorSection>& iSectionBuffer )
+FOdysseyVectorGroupPaint::CreateSegmentSections( FOdysseyVectorSegment* iSegment )
 {
     std::list<FOdysseyVectorIntersection*>& intersectionList = iSegment->GetIntersectionList();
     FOdysseyVectorVertex* segmentVertex0 = iSegment->GetVertex(0);
@@ -1111,24 +1109,26 @@ FOdysseyVectorGroupPaint::CreateSegmentSections( FOdysseyVectorSegment* iSegment
             double sectionVertex1T = intersection->GetSegmentT();
             // constructor also links sections to the vertex
 
-            iSectionBuffer.emplace_back( this
+            mSectionBuffer.emplace_back( this
                                        , iSegment
                                        , sectionVertex0
                                        , sectionVertex1
                                        , sectionVertex0T
-                                       , sectionVertex1T );
+                                       , sectionVertex1T
+                                       , mShortSectionArray );
 
             sectionVertex0 = sectionVertex1;
             sectionVertex0T = sectionVertex1T;
         }
     }
 
-    iSectionBuffer.emplace_back( this
+    mSectionBuffer.emplace_back( this
                                , iSegment
                                , sectionVertex0
                                , segmentVertex1 // segment's second end point
                                , sectionVertex0T
-                               , 1.0f );
+                               , 1.0f
+                               , mShortSectionArray );
 
     iSegment->ClearIntersections();
 }
@@ -1142,18 +1142,17 @@ FOdysseyVectorGroupPaint::CreatePathSections( FOdysseyVectorPath* iPath
         FOdysseyVectorVertex* vertex0 = segment->GetVertex( 0 );
         FOdysseyVectorVertex* vertex1 = segment->GetVertex( 1 );
 
-        CreateSegmentSections( segment, mSectionBuffer );
+        CreateSegmentSections( segment );
 
         //TODO::Possible optimization: call only if nearestVertex exists
-        CreateVertexGapSegment( vertex0, mGapSectionBuffer, mGapSegmentBuffer );
-        CreateVertexGapSegment( vertex1, mGapSectionBuffer, mGapSegmentBuffer );
+        CreateVertexGapSegment( vertex0 );
+        CreateVertexGapSegment( vertex1 );
     }
 }
 
 void
 FOdysseyVectorGroupPaint::IntersectSegmentWithList( FOdysseyVectorSegment* iSegment
-                                                  , const std::list<FOdysseyVectorSegment*>& iSegmenList
-                                                  , std::vector<FXIntersectionRecord>& oIntersectionRecordArray )
+                                                  , const std::list<FOdysseyVectorSegment*>& iSegmenList )
 {
     ::ULIS::FRectD& segmentBBoxInParent = iSegment->GetBBoxInParent();
     ::ULIS::FVec2D segmentMinInParentWithTolerance( segmentBBoxInParent.x - mGapTolerance
@@ -1178,7 +1177,7 @@ FOdysseyVectorGroupPaint::IntersectSegmentWithList( FOdysseyVectorSegment* iSegm
                             , static_cast<FOdysseyVectorSegmentCubic*>(intersectSegment)
                             , intersectSegmentMinInParentWithTolerance
                             , intersectSegmentMaxInParentWithTolerance
-                            , oIntersectionRecordArray );
+                            , mXIntersectionRecordArray );
         }
     }
 
@@ -1439,6 +1438,8 @@ FOdysseyVectorGroupPaint::FindCycles()
     explorationPairsBuffer.reserve( 100 );
 
     BuildGraph();
+    // remove sections of length 0 
+    SanitizeGraph();
 
     // Build exploration pair before simplification
     for( FOdysseyVectorVertexIntersection& intersectionVertex : mIntersectionVertexArray )
@@ -1447,16 +1448,20 @@ FOdysseyVectorGroupPaint::FindCycles()
     }
 
     // Build exploration pair before simplification
-    for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
+    for( int i = 0; i < mGapSectionBuffer.size(); i++ )
     {
-        FOdysseyVectorVertex* vertex0 = mGapSegmentBuffer[i].GetVertex(0);
-        FOdysseyVectorVertex* vertex1 = mGapSegmentBuffer[i].GetVertex(1);
+        // gap sections of length 0 were unlinked in SanitizeGraph(). check that first.
+        if( mGapSectionBuffer[i].IsLinked() )
+        {
+            FOdysseyVectorVertex* vertex0 = mGapSectionBuffer[i].GetVertex(0);
+            FOdysseyVectorVertex* vertex1 = mGapSectionBuffer[i].GetVertex(1);
 
-        if( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
-            vertex0->BuildExplorationPairs( explorationPairsBuffer);
+            if( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
+                vertex0->BuildExplorationPairs( explorationPairsBuffer);
 
-        if( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() )
-            vertex1->BuildExplorationPairs( explorationPairsBuffer );
+            if( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() )
+                vertex1->BuildExplorationPairs( explorationPairsBuffer );
+        }
     }
 
     // sort exploration pairs in order to always have a propagation that starts from
@@ -1509,8 +1514,7 @@ FOdysseyVectorGroupPaint::FindCycles()
 }
 
 void
-FOdysseyVectorGroupPaint::CreateNearIntersection( FOdysseyVectorVertex *iVertex
-                                                , std::vector<FTIntersectionRecord>& oTIntersectionRecordArray )
+FOdysseyVectorGroupPaint::CreateNearIntersection( FOdysseyVectorVertex *iVertex )
 {
     FOdysseyVectorSegment *nearestSegment = iVertex->GetNearestSegment();
     FOdysseyVectorVertex* nearestVertex = iVertex->GetNearestVertex();
@@ -1532,7 +1536,7 @@ FOdysseyVectorGroupPaint::CreateNearIntersection( FOdysseyVectorVertex *iVertex
             //::ULIS::FVec2D nearestVertexAt = nearestSegment->GetPointAt( nearestSegmentT );
             ::ULIS::FVec2D nearestVertexAt = iVertex->GetNearestSegmentIntersectionCoords();
 
-            oTIntersectionRecordArray.emplace_back( nearestVertexAt.x
+            mTIntersectionRecordArray.emplace_back( nearestVertexAt.x
                                                   , nearestVertexAt.y
                                                   , nearestSegment
                                                   , nearestSegmentT
@@ -1728,9 +1732,9 @@ FOdysseyVectorGroupPaint::BuildGraph()
             {
                 for( FOdysseyVectorPath *intersectedPath : mPathList )
                 {
+                    // populate mXIntersectionRecordArray
                     /*intersectionCount += */IntersectSegmentWithList ( segment
-                                                                      , intersectedPath->GetSegmentList()
-                                                                      , mIntersectionArray );
+                                                                      , intersectedPath->GetSegmentList() );
                 }
             }
         } );
@@ -1752,9 +1756,9 @@ FOdysseyVectorGroupPaint::BuildGraph()
             {
                 for( FOdysseyVectorPath *intersectedPath : mPathList )
                 {
+                    // populate mXIntersectionRecordArray
                     IntersectSegmentWithList ( segment
-                                             , intersectedPath->GetSegmentList()
-                                             , mXIntersectionRecordArray );
+                                             , intersectedPath->GetSegmentList() );
                 }
             } );
         } );
@@ -1768,9 +1772,9 @@ FOdysseyVectorGroupPaint::BuildGraph()
             {
                 for( FOdysseyVectorPath *intersectedPath : mPathList )
                 {
+                    // populate mXIntersectionRecordArray
                     IntersectSegmentWithList ( segment
-                                             , intersectedPath->GetSegmentList()
-                                             , mXIntersectionRecordArray );
+                                             , intersectedPath->GetSegmentList() );
                 }
             }
         }
@@ -1793,7 +1797,8 @@ FOdysseyVectorGroupPaint::BuildGraph()
         {
             if( vertex->GetNearestSegment() )
             {
-                CreateNearIntersection( vertex, mTIntersectionRecordArray );
+                // populate mTIntersectionRecordArray
+                CreateNearIntersection( vertex );
 
                 vertex->GetNearestSegment()->GetOwnerAsPath()->SetPaintingCode( mPaintingCode );
                 vertex->GetOwnerAsPath()->SetPaintingCode( mPaintingCode );
@@ -2028,6 +2033,26 @@ GapSectionIntersects( FOdysseyVectorSection& iSection
     }
 
     return false;
+}
+
+void
+FOdysseyVectorGroupPaint::SanitizeGraph()
+{
+    // unlink sections that are of length 0 and whose 
+    // at least one vertex doesn't link with valid sections.
+    // They put a mess in the grap because of their length, making
+    // impossible the calculation of a cross or a dot product.
+    for( FOdysseyVectorSection* section : mShortSectionArray )
+    {
+        if( section->GetLength() == 0.0f )
+        {
+            //if( ( section->GetVertex(0)->HasLengthySection() == false )
+            // || ( section->GetVertex(1)->HasLengthySection() == false ) )
+            {
+                section->Unlink();
+            }
+        }
+    }
 }
 
 void

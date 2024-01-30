@@ -75,6 +75,20 @@ FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVert
     return false;
 }
 
+bool
+FOdysseyVectorVertex::HasLengthySection()
+{
+    for( FOdysseyVectorSection* section : mSectionList )
+    {
+        if( section->GetLength() )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 FOdysseyVectorObject* 
 FOdysseyVectorVertex::GetOwner()
 {

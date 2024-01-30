@@ -228,7 +228,7 @@ FOdysseyVectorChain::PickSection( FOdysseyVectorSection* iSection
 {
     ::ULIS::FVec2D* bezier = iSection->GetBezier();
     // Note, section are in paingroup coordinates (path's parent), not in path coordinates.
-    BLMatrix2D& worldMatrix = mPath->GetParent()->GetWorldMatrix();
+    BLMatrix2D& worldMatrix = iSection->GetOwner()->GetWorldMatrix();
     BLPoint pt[4] = { worldMatrix.mapPoint( bezier[0].x, bezier[0].y )
                     , worldMatrix.mapPoint( bezier[1].x, bezier[1].y )
                     , worldMatrix.mapPoint( bezier[2].x, bezier[2].y )
@@ -316,7 +316,7 @@ FOdysseyVectorChain::EraseSections( BLImageData* iImageData
                                   , std::vector<FWayPoint>& oWayPointArray
                                   , std::vector<FWayFragment>& oWayFragmentArray )
 {
-    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+    BLMatrix2D& pathInverseWorldMatrix = mPath->GetInverseWorldMatrix();
     std::vector<FOdysseyVectorSection*> pickedSectionArray;
     bool hasHit = false;
 
@@ -367,6 +367,7 @@ FOdysseyVectorChain::EraseSections( BLImageData* iImageData
         }
 
         IterateSegments( [ this
+                         , &pathInverseWorldMatrix
                          , &oWayPointArray
                          , &oWayFragmentArray
                          , &hasHit ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
@@ -401,9 +402,15 @@ FOdysseyVectorChain::EraseSections( BLImageData* iImageData
                         double radius = ( t * vertex1Radius ) + ( ( 1.0f - t ) * vertex0Radius );
                         uint32 wayPointCount = oWayPointArray.size();
 
-                        ::ULIS::FVec2D& coords = intersectionVertex->GetCoords();
-                        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( coords.x
-                                                                                  , coords.y
+                        ::ULIS::FVec2D& vertexCoords = currentSection->GetVertexCoords( intersectionVertex );
+                        // owner is the paintgroup
+                        BLMatrix2D& ownerWorldMatrix = currentSection->GetOwner()->GetWorldMatrix();
+                        BLPoint vertexWorldCoords = ownerWorldMatrix.mapPoint( vertexCoords.x
+                                                                             , vertexCoords.y );
+                        BLPoint vertexPathCoords  = pathInverseWorldMatrix.mapPoint( vertexWorldCoords.x
+                                                                                   , vertexWorldCoords.y );
+                        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( vertexPathCoords.x
+                                                                                  , vertexPathCoords.y
                                                                                   , radius );
 
                         oWayPointArray.emplace_back( newVertex, erasureFlag, t );
