@@ -36,6 +36,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
                              , double iSectionT1
                              , std::vector<FOdysseyVectorSection*>& oShortSectionArray );
 
+        
+        static void ListToArray( const std::list<FOdysseyVectorSection*>& iSectionList
+                               , std::vector<FOdysseyVectorSection*>& oSectionArray );
+
         void Init( FOdysseyVectorObject* iOwner
                  , FOdysseyVectorSegment* iSegment
                  , FOdysseyVectorVertex* iVertex0
@@ -113,6 +117,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         bool IsValid();
         double GetT( uint32 iIndex );
         FOdysseyVectorObject* GetOwner();
+        void Merge( uint32 iPartnerID );
 
     protected:
         FOdysseyVectorObject* mOwner;

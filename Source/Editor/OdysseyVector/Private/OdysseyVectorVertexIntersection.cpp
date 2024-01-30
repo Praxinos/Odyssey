@@ -24,6 +24,9 @@ FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVect
 
     iSegment0->AddIntersection( &mIntersection[0] );
     iSegment1->AddIntersection( &mIntersection[1] );
+
+    // get ready for partnerization
+    SetID( 0xFFFFFFFF );
 }
 
 FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
@@ -42,6 +45,9 @@ FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVect
     iSegment->AddIntersection( &mIntersection[0] );
 
     iVertex->SetNearestVertex( this, 0.0f );
+
+    // get ready for partnerization
+    SetID( 0xFFFFFFFF );
 }
 
 double

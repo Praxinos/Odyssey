@@ -67,6 +67,13 @@ struct FCycleSectionInfo
     ::ULIS::FVec2D sectionVector;
     uint32 sectionVertexIndex;
 
+    FCycleSectionInfo( const FCycleSectionInfo& iCycleSectionInfo )
+    {
+        this->section            = iCycleSectionInfo.section;
+        this->sectionVector      = iCycleSectionInfo.sectionVector;
+        this->sectionVertexIndex = iCycleSectionInfo.sectionVertexIndex;
+    }
+
     FCycleSectionInfo( FOdysseyVectorSection* iSection
                      , const ::ULIS::FVec2D& iSectionVector
                      , uint32 iSectionVertexIndex )
@@ -354,6 +361,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void SetOwner( FOdysseyVectorObject* iOwner );
         FOdysseyVectorObject* GetOwner();
         bool HasLengthySection();
+        void GetCandidateSections( FOdysseyVectorSection* iLastSection
+                                 , uint32 iLastSectionVertexIndex
+                                 , std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
+                                 , std::vector<FCycleSectionInfo>& oCandidateSectionArray );
 
     protected:
         /**
@@ -368,6 +379,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         //eJointType mJointType;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
+        std::list<FOdysseyVectorVertex*> mPartnerList;
         FOdysseyVectorObject* mOwner;
         uint32 mFlags;
        
@@ -379,6 +391,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         double mDistanceToNearestVertex;
         FOdysseyVectorVertex* mNearestVertex;
+
 
     public :
         static const uint32 CHAINED        = ( 1 << 1 );

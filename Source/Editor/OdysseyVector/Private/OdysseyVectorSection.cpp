@@ -25,14 +25,6 @@ FOdysseyVectorSection::GetLength()
     return mLength;
 }
 
-/*
-void
-FOdysseyVectorSection::Merge()
-{
-
-}
-*/
-
 bool
 FOdysseyVectorSection::IsValid()
 {
@@ -397,4 +389,17 @@ FOdysseyVectorVertex*
 FOdysseyVectorSection::GetVertex( int iNum )
 {
     return mVertex[iNum];
+}
+
+// static
+void
+FOdysseyVectorSection::ListToArray( const std::list<FOdysseyVectorSection*>& iSectionList
+                                  , std::vector<FOdysseyVectorSection*>& oSectionArray )
+{
+    oSectionArray.reserve( iSectionList.size() );
+
+    for( FOdysseyVectorSection* section : iSectionList )
+    {
+        oSectionArray.push_back( section );
+    }
 }

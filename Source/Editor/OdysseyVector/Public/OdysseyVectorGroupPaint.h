@@ -298,7 +298,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::vector<FOdysseyVectorSection> mSectionBuffer;
         std::vector<FOdysseyVectorSection> mGapSectionBuffer;
         std::vector<FOdysseyVectorSegmentCubicGap> mGapSegmentBuffer;
-
+        uint32 mPartnerCount;
         bool bMultithreaded;
         bool bPainted;
         bool bMonochrome;
@@ -307,4 +307,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         double mGapTolerance;
         bool bWireframe;
         FColor mWireframeColor;
+
 };

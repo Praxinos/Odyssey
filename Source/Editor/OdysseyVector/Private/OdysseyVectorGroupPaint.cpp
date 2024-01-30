@@ -1223,7 +1223,8 @@ PrintSection( FOdysseyVectorSection* iSection)
     BLPoint segpt0 = owner0->GetWorldMatrix().mapPoint( segment->GetVertex(0)->GetCoords().x, segment->GetVertex(0)->GetCoords().y );
     BLPoint segpt1 = owner1->GetWorldMatrix().mapPoint( segment->GetVertex(1)->GetCoords().x, segment->GetVertex(1)->GetCoords().y );
 
-    UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]/segment[x:%f y:%f] -- [x:%f y:%f] - flags : %d"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y, iSection->GetFlags() );
+    //UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]/segment[x:%f y:%f] -- [x:%f y:%f] - flags : %d"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y, iSection->GetFlags() );
+    UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]"), pt0.x, pt0.y, pt1.x, pt1.y );
 }
 
 static void
@@ -1263,7 +1264,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
 
 //PrintSection( iSection );
 //UE_LOG(LogTemp, Warning, TEXT("vertices %x %x"), sectionNextVertex, oSectionArray[0]->GetVertex(oVertexIndexArray[0]) );
-    isLoop = ( oSectionArray[0]->GetVertex(oVertexIndexArray[0]) == sectionNextVertex );
+    isLoop = ( oSectionArray[0]->GetVertex(oVertexIndexArray[0])->GetID() == sectionNextVertex->GetID() );
 
     if( ( isLoop == true )// cycle detected
     && ( ( ( iReturnSection->IsLinked() == true ) && ( iReturnSection == iSection ) ) // 1 return path accepted
@@ -1271,7 +1272,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     {
         double normalVector = GetCycleNormalVector( oVertexIndexArray, oSectionArray );
 
-//UE_LOG(LogTemp, Warning, TEXT("Cycle detected %f"), GetCycleNormalVector( oVertexIndexArray, oSectionArray ) ); 
+//UE_LOG(LogTemp, Warning, TEXT("Cycle detected %f size %d"), GetCycleNormalVector( oVertexIndexArray, oSectionArray ), oSectionArray.size() ); 
         if (normalVector > 0.0f)
         {
 //UE_LOG(LogTemp, Warning, TEXT("Cycle committed") ); 
@@ -1291,11 +1292,9 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
         {
             if( nextSection->IsBlocked( nextCycleSectionInfo.sectionVertexIndex ) == false )
             {
-                uint32 nextSectionVertexIndex = sectionNextVertex->GetIndex( nextSection );
-
                 ret = FindPath( iReturnSection
-                              , nextSectionVertexIndex
-                              , nextSection
+                              , nextCycleSectionInfo.sectionVertexIndex
+                              , nextCycleSectionInfo.section
                               , oVertexIndexArray
                               , oSectionArray
                               , iOrientation
@@ -1431,7 +1430,7 @@ FOdysseyVectorGroupPaint::FindCycles()
 {
     std::vector<FExplorationPair> explorationPairsBuffer;
 
-    //auto startTotal = std::chrono::high_resolution_clock::now();
+    auto startTotal = std::chrono::high_resolution_clock::now();
 
     Clear(); // also build segments bounding boxes in parent
 
@@ -1439,11 +1438,13 @@ FOdysseyVectorGroupPaint::FindCycles()
 
     BuildGraph();
     // remove sections of length 0 
-    SanitizeGraph();
+    //SanitizeGraph();
 
     // Build exploration pair before simplification
     for( FOdysseyVectorVertexIntersection& intersectionVertex : mIntersectionVertexArray )
     {
+        intersectionVertex.SetID( mPartnerCount++ );
+
         intersectionVertex.BuildExplorationPairs( explorationPairsBuffer );
     }
 
@@ -1457,10 +1458,18 @@ FOdysseyVectorGroupPaint::FindCycles()
             FOdysseyVectorVertex* vertex1 = mGapSectionBuffer[i].GetVertex(1);
 
             if( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            {
+                vertex0->SetID( mPartnerCount++ );
+
                 vertex0->BuildExplorationPairs( explorationPairsBuffer);
+            }
 
             if( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            {
+                vertex1->SetID( mPartnerCount++ );
+
                 vertex1->BuildExplorationPairs( explorationPairsBuffer );
+            }
         }
     }
 
@@ -1508,9 +1517,9 @@ FOdysseyVectorGroupPaint::FindCycles()
         }
     }
 
-    //auto stopTotal = std::chrono::high_resolution_clock::now();
-    //auto durationTotal = std::chrono::duration_cast<std::chrono::microseconds>(stopTotal - startTotal);
-    //UE_LOG(LogTemp, Warning, TEXT("FindCycles Exec time %llu"), durationTotal.count() );
+    auto stopTotal = std::chrono::high_resolution_clock::now();
+    auto durationTotal = std::chrono::duration_cast<std::chrono::microseconds>(stopTotal - startTotal);
+    UE_LOG(LogTemp, Warning, TEXT("FindCycles Exec time %llu"), durationTotal.count() );
 }
 
 void
@@ -2085,7 +2094,7 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
                     ||  ( section->GetVertex(1)->GetSectionCount() == 1 )
                     // filter invalid section with length 0. Yes, this can happend due to floating point imprecision
                     // when an intersection is very very close to the end vertex.
-                    ||  ( section->IsValid() == false ) )
+                    /*||  ( section->IsValid() == false )*/ )
                     {
                         keepSimplifying = true;
 
@@ -2134,6 +2143,8 @@ FOdysseyVectorGroupPaint::Clear()
     // clean section topology (unlinking has been moved after the cycle detection).
     mSectionBuffer.clear();
 
+    mPartnerCount = 0;
+
     // <TODO:MULTITHREADABLE>
     if( bMultithreaded )
     {
@@ -2159,6 +2170,8 @@ FOdysseyVectorGroupPaint::Clear()
             {
                 vertex->ResetNearestSegment();
                 vertex->ResetNearestVertex();
+                // reset vertex ID to get ready for partnerization
+                vertex->SetID( 0xFFFFFFFF );
             }
         } );
     }
@@ -2183,6 +2196,8 @@ FOdysseyVectorGroupPaint::Clear()
             {
                 vertex->ResetNearestSegment();
                 vertex->ResetNearestVertex();
+                // reset vertex ID to get ready for partnerization
+                vertex->SetID( 0xFFFFFFFF );
             }
         }
     }
