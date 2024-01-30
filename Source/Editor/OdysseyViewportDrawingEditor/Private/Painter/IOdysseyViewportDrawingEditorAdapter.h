@@ -58,14 +58,16 @@ public:
     virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y);
 
     virtual bool InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent);
-    virtual bool InputKeyWithStrokeRay(const FOdysseyRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent);
 
     virtual bool CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY);
-    virtual bool CapturedMouseMoveWithStrokeRay(const FOdysseyRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY);
 
 private:
     /** IStylusMessageHandler Overrides */
     virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex) override;
+    void StartStylusInputRecord();
+    void StopStylusInputRecord();
+    FOdysseyRay StylusStateToRay(const FStylusState& iState);
+    void ReadStylusInput();
 
 protected: 
     virtual ::ULIS::FEvent StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams) = 0;
@@ -75,6 +77,14 @@ protected:
 
     virtual void UnbindStampBrushInstance(UOdysseyBrushAssetBase* iUnbindBrush);
     virtual void BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush);
+
+private:
+    //New API to manage events
+    void MouseDown(const FOdysseyRay& iRay);
+    void MouseUp(const FOdysseyRay& iRay);
+    void MouseDrag(const FOdysseyRay& iRay);
+    bool KeyDown(FKey iKey);
+    bool KeyUp(FKey iKey);
 
 protected:
     UTexture* mTexture;
@@ -99,8 +109,25 @@ protected:
 
     /** Patch (kinda): Stylus state and time of last event, so that we can have a little control for differentiating mouse and stylus events */
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
-    bool mIsCapturedByStylus;
 
     /** Current or previous selected tool which still has delegates on this adapter, we keep it here so that we can handle said delegates */
     TStrongObjectPtr<UOdysseyPainterEditorTool> mTool;
+
+    /** True if a mouse button is considered as down (set just before calling the tool OnMouseButtonDown event)*/
+    bool mIsMouseDown = false;
+
+    /** Contains the MouseButton considered as the one currently used*/
+    FKey mMouseButton;
+
+    /** Contains all the last styluses states */
+    TArray<FStylusState> mStylusStates;
+
+    /** Are we using the stylus or not */
+    bool mIsRecordingStylus = false;
+
+    /** Indicates the next stylus state to read in mStylusStates */
+    int mLastStylusEventIndex = 0;
+
+    /** Indicates if the stylus is considered as touching the tablet or not */
+    bool mStylusIsDown = false;
 };

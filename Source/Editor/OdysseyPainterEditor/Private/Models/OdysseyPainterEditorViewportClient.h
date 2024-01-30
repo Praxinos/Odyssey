@@ -100,7 +100,6 @@ public:
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply ) override;
 
     virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex ) override;
-    bool FindStylusStateDown();
     void StartStylusInputRecord();
     void StopStylusInputRecord();
     FOdysseyPoint StylusStateToPoint(const FStylusState& iState);
@@ -135,11 +134,6 @@ private:
     FOdysseyPoint   GetLocalMousePosition( const FOdysseyPoint& iPointInViewport ) const;
     void        DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices );
     eState      InputChordToState();
-    //bool        InputKeyWithStrokePoint( const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
-    //bool        OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
-    //bool        OnInputEventWithState(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
-
-    //void        CapturedMouseMoveWithStrokePoint( const FOdysseyPoint& iPointInViewport ) ;
 
     void        OnViewportPropertyWillChange();
     void        OnViewportPropertyChanged();
@@ -181,7 +175,6 @@ private:
 
 	FOdysseyPoint						    mCurrentPointInViewport;
     FOdysseyPoint						    mCurrentPointInTexture;
-    //FOdysseyPoint                           mStylusLastPoint;
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     TArray<FKey>                            mKeysPressed;
@@ -189,8 +182,7 @@ private:
     FTexture                                mNearestNeighbourTexture;
     FTexture                                mBilinearTexture;
 
-    //bool                                    mIsCurrentModeActive;
-    bool                                    mIsMouseDown;
+    bool                                    mIsMouseDown = false;
     FKey                                    mMouseButton;
 
     

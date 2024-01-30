@@ -25,7 +25,6 @@ IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(FOdys
     mExtension(iExtension),
     mState( eState::kIdle ),
     mLastKnownViewport(nullptr),
-    mIsCapturedByStylus(false),
     mTool(nullptr)
 {
 }
@@ -205,7 +204,7 @@ bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw()
         return false;
     }
 
-    return !(mState == eState::kIdle);
+    return mState != eState::kIdle;
 }
 
 bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iX, int32 iY)
@@ -258,7 +257,41 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         mLastKnownViewport->SetViewportClient(viewportClient);
     }
 #endif
+    if( iEvent == EInputEvent::IE_Pressed )
+    {
+        //key already pressed, don't send a KeyDown or MouseDown twice
+        //Can happen on windows with some touch options
+        if (mKeysPressed.Contains(iKey))
+            return true;
+            
+        mKeysPressed.Add( iKey );
+    }
+    else if( iEvent == EInputEvent::IE_Released ) 
+    {
+        //key already released, don't send a KeyUp or MouseUp twice
+        //Can happen on windows with some touch options
+        if (!mKeysPressed.Contains(iKey)) 
+            return true;
 
+        mKeysPressed.Remove(iKey);
+    }
+    else if( iEvent == EInputEvent::IE_DoubleClick )
+    {
+        UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetSelectedTool();
+        if (!selectedTool)
+            return true;
+
+        bool ignoreDown = selectedTool->OnMouseDoubleClick(mCurrentStrokeRay.mPoint, iKey);
+        if (ignoreDown)
+            return true;
+        
+        if (mKeysPressed.Contains(iKey))
+            return true;
+        
+        mKeysPressed.Add( iKey );
+    }
+
+    //Cleanup PressedKeys
     for (int i = mKeysPressed.Num() - 1; i >= 0; i--)
     {
         if (!iViewport->KeyState(mKeysPressed[i]))
@@ -267,36 +300,16 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         }
     }
 
-    if(iEvent == EInputEvent::IE_Pressed)
-    {
-        if (!mKeysPressed.Contains(iKey))
-            mKeysPressed.Add(iKey);
-    } 
-    else if(iEvent == EInputEvent::IE_Released)
-    {
-        mKeysPressed.Remove(iKey);
-    }
+    //---
 
     const bool bIsAltDown =  mKeysPressed.Contains( EKeys::LeftAlt ) || mKeysPressed.Contains( EKeys::RightAlt );
     const bool bIsCtrlDown = mKeysPressed.Contains( EKeys::LeftControl ) || mKeysPressed.Contains( EKeys::RightControl );
     
     //Dolly the camera, we're not painting
     if ( bIsAltDown ) 
-    {
         return false;
-    }
-    // Allow Ctrl+B to pass through so we can support the finding of a selected static mesh in the content browser.
-    else if ( bIsCtrlDown && iKey == EKeys::B && iEvent == IE_Pressed )
-    {
-        return false;
-    }
 
-    auto end_time = std::chrono::steady_clock::now();
-    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - mStylusLastEventTime).count();
-   
-    //Stylus will handle the event
-    if ((mIsCapturedByStylus || delta < 500) && (iKey == EKeys::LeftMouseButton))
-        return true;
+    //---
 
     // Compute a world space ray from the screen space mouse coordinates
     FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
@@ -319,54 +332,52 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     strokeRay.mPoint.keysDown = mKeysPressed;
     strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
 
-    return InputKeyWithStrokeRay(strokeRay, iViewportClient, iViewport, iKey, iEvent);
-}
+    if (!mIsMouseDown && (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton))
+        mMouseButton = iKey;
 
-bool IOdysseyViewportDrawingEditorAdapter::InputKeyWithStrokeRay(const FOdysseyRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent)
-{
-    if(!IsReadyToDraw())
-        return false;
-
-    mLastStrokeRay = mCurrentStrokeRay;
-    mCurrentStrokeRay = iRay;
-
-    if (mState == eState::kIdleReady)
+    if (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton)
     {
-        if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed)
+        if (iEvent == EInputEvent::IE_Pressed || iEvent == EInputEvent::IE_DoubleClick)
         {
-            mState = eState::kDrawing;
-            StartPainting();
-            return true;
+            StartStylusInputRecord();
+            if (!mIsRecordingStylus)
+            {
+                MouseDown(strokeRay);
+            }
+        }
+        else if(iEvent == EInputEvent::IE_Released)
+        {
+            if (mIsRecordingStylus)
+            {
+                StopStylusInputRecord();
+            }
+            else
+            {
+                MouseUp(strokeRay);
+            }
+            
+            if (mIsMouseDown && !mKeysPressed.Contains(mMouseButton))
+                mMouseButton = FKey();
         }
     }
-    else if (mState == eState::kDrawing)
-    {
-        if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
-        {
-            FinishPainting();
-            mState = eState::kIdleReady;
-            return true;
-        }
-    }
-
-    if (mExtension->GetEditor()->GetSelectedTool())
+    else
     {
         if (iEvent == EInputEvent::IE_Pressed)
-            return mExtension->GetEditor()->GetSelectedTool()->OnKeyDown(iKey);
-        else if (iEvent == EInputEvent::IE_Released)
-            return mExtension->GetEditor()->GetSelectedTool()->OnKeyUp(iKey);
+        {
+            return KeyDown(iKey);
+        }
+        else if(iEvent == EInputEvent::IE_Released)
+        {
+            return KeyUp(iKey);
+        }
     }
 
-    return false;
+    return true;
 }
 
 bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
 {
-    auto end_time = std::chrono::steady_clock::now();
-    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - mStylusLastEventTime).count();
-
-    //Stylus will handle the event
-    if (mIsCapturedByStylus || delta < 500)
+    if (mIsRecordingStylus)
         return true;
 
     // Compute a world space ray from the screen space mouse coordinates
@@ -390,43 +401,150 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     strokeRay.mPoint.keysDown = mKeysPressed;
     strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
 
-
-    return CapturedMouseMoveWithStrokeRay(strokeRay, iViewportClient, iViewport, iMouseX, iMouseY);
+    MouseDrag(strokeRay);
+    return true;
 }
 
-bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMoveWithStrokeRay(const FOdysseyRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------ Input Functions----
+
+void
+IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay)
 {
-    if (!IsReadyToDraw())
-        return false;
+    if(!IsReadyToDraw())
+        return;
+
+    if (mIsMouseDown)
+        return;
+        
+    mIsMouseDown = true;
 
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
+    if (mState == eState::kIdleReady && mMouseButton == EKeys::LeftMouseButton)
+    {
+        mState = eState::kDrawing;
+        StartPainting();
+        return;
+    }
+}
+
+void
+IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay)
+{
+    if(!IsReadyToDraw())
+        return;
+
+    if (!mIsMouseDown)
+        return;
+
+    mLastStrokeRay = mCurrentStrokeRay;
+    mCurrentStrokeRay = iRay;
+
+    mIsMouseDown = false;
+
+    if (mState == eState::kDrawing && mMouseButton == EKeys::LeftMouseButton)
+    {
+        FinishPainting();
+        mState = eState::kIdleReady;
+    }
+}
+
+void
+IOdysseyViewportDrawingEditorAdapter::MouseDrag(const FOdysseyRay& iRay)
+{
+    if(!IsReadyToDraw())
+        return;
+
+    if (!mIsMouseDown)
+        return;
+
+    mLastStrokeRay = mCurrentStrokeRay;
+    mCurrentStrokeRay = iRay;
+
+    bool hasMoved = long(mCurrentStrokeRay.mPoint.x) != long(mLastStrokeRay.mPoint.x) || long(mCurrentStrokeRay.mPoint.y) != long(mLastStrokeRay.mPoint.y);
+
     if (mState == eState::kDrawing)
     {
-        if (long(mCurrentStrokeRay.mPoint.x) == long(mLastStrokeRay.mPoint.x) && long(mCurrentStrokeRay.mPoint.y) == long(mLastStrokeRay.mPoint.y))
-            return true;
+        if (!hasMoved)
+            return;
 
         Paint();
     }
-
-    return true;
 }
 
-void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex)
+bool
+IOdysseyViewportDrawingEditorAdapter::KeyDown(FKey iKey)
 {
-    /* if ( !IsReadyToDraw() || !mLastKnownViewport || !iWidget.IsValid() )
+    if(!IsReadyToDraw())
+        return false;
+
+    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetSelectedTool();
+    if (selectedTool)
+        return selectedTool->OnKeyDown(iKey);
+
+    return false;
+}
+
+bool
+IOdysseyViewportDrawingEditorAdapter::KeyUp(FKey iKey)
+{
+    if(!IsReadyToDraw())
+        return false;
+
+    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetSelectedTool();
+    if (selectedTool)
+        return selectedTool->OnKeyUp(iKey);
+
+    return false;
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------ Stylus Functions
+
+void
+IOdysseyViewportDrawingEditorAdapter::StartStylusInputRecord()
+{
+    if (mIsRecordingStylus)
         return;
 
-    //We only treat events on the main level Viewport
-    if( GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin().Get() != iWidget.Pin().Get() )
+    auto end_time = std::chrono::steady_clock::now();
+    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
+    if(delta > 500 )
         return;
 
+    //Down
+    ReadStylusInput();
+    mIsRecordingStylus = true;
+}
+
+void
+IOdysseyViewportDrawingEditorAdapter::StopStylusInputRecord()
+{
+    if (!mIsRecordingStylus)
+        return;
+
+    ReadStylusInput();
+
+    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    inputSubsystem->Flush(); //Get late stylus events
+
+    //UP
+    mIsRecordingStylus = false;
+}
+
+FOdysseyRay
+IOdysseyViewportDrawingEditorAdapter::StylusStateToRay(const FStylusState& iState)
+{
     FEditorViewportClient* viewportClient = (FEditorViewportClient*)mLastKnownViewport->GetClient();
-
     if( !viewportClient )
-        return;
-    
+        return FOdysseyRay();
+
+    TSharedPtr< SViewport > viewportWidget = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
+    if (!viewportWidget)
+        return FOdysseyRay();
+
     // Compute a world space ray from the screen space mouse coordinates
     FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
         viewportClient->Viewport,
@@ -437,8 +555,8 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
     const FViewportCursorLocation mouseViewportRay(view, viewportClient, mLastKnownViewport->GetMouseX(), mLastKnownViewport->GetMouseY());
 
     //Init our StrokeRay, having all the basic info to draw 
-    float scaleDPI = iWidget.Pin().Get()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
-    FVector2D positionInViewport = iWidget.Pin().Get()->GetCachedGeometry().AbsoluteToLocal(iState.GetPosition()) * scaleDPI;
+    float scaleDPI = viewportWidget->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
+    FVector2D positionInViewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal(iState.GetPosition()) * scaleDPI;
 
     FVector2D pointPos = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased ? ViewportCoordinatesToTextureCoordinates(positionInViewport, viewportClient) : positionInViewport;
 
@@ -460,34 +578,65 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
     strokeRay.mPoint.keysDown = mKeysPressed;
     strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
 
-    static bool stylusWasDown = false;
-    static bool is_dragging = false;
+    return strokeRay;
+}
 
-    bool isDownEvent = !stylusWasDown && iState.IsStylusDown();
-    bool isUpEvent = stylusWasDown && !iState.IsStylusDown();
-    bool isMoveEvent = stylusWasDown == iState.IsStylusDown();
+void
+IOdysseyViewportDrawingEditorAdapter::ReadStylusInput()
+{
+    if (!mIsRecordingStylus)
+        return;
 
-    stylusWasDown = iState.IsStylusDown();
+    for (int i = mLastStylusEventIndex; i < mStylusStates.Num(); i++ )
+    {
+        const FStylusState& state = mStylusStates[i];
 
-    if (isDownEvent)
-    {
-        InputKeyWithStrokeRay( strokeRay, viewportClient, mLastKnownViewport, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
-        mIsCapturedByStylus = true;
+        FOdysseyRay ray = StylusStateToRay(state);
+        
+        //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
+        if (!mStylusIsDown && (state.IsStylusDown() || mMouseButton == EKeys::RightMouseButton ))
+        {
+            //MouseDown
+            MouseDown(ray);
+            mStylusIsDown = true;
+            mLastStylusEventIndex = i;
+        }
+        else if (mStylusIsDown && !state.IsStylusDown() && !mKeysPressed.Contains(mMouseButton))
+        {
+            //MouseUp
+            MouseUp(ray);
+            mStylusIsDown = false;
+            mLastStylusEventIndex = i;
+        }
+        else if (mStylusIsDown)
+        {
+            //MouseMove
+            MouseDrag(ray);
+            mLastStylusEventIndex = i;
+        }
     }
-    else if (isUpEvent)
-    {
-        InputKeyWithStrokeRay( strokeRay, viewportClient, mLastKnownViewport, EKeys::LeftMouseButton, EInputEvent::IE_Released );
-        mIsCapturedByStylus = false;
-    }
-    else if( iState.IsStylusDown() )
-    {
-        CapturedMouseMoveWithStrokeRay( strokeRay, viewportClient, mLastKnownViewport, mLastKnownViewport->GetMouseX(), mLastKnownViewport->GetMouseY() );
-    }
-    else
-    {
-        mLastStrokeRay = mCurrentStrokeRay;
-        mCurrentStrokeRay = strokeRay;
-    }
+}
 
-    mStylusLastEventTime = std::chrono::steady_clock::now(); */
+void
+IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex )
+{
+    mStylusLastEventTime = std::chrono::steady_clock::now();
+
+    if ( !IsReadyToDraw() || !mLastKnownViewport )
+        return;
+
+    TSharedPtr<SWidget> inWidget = iWidget.Pin();
+    if( !inWidget)
+        return;
+
+    TSharedPtr< SViewport > viewport = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
+    if( inWidget != viewport )
+        return;
+
+    //---
+
+    mStylusStates = iStates;
+    mLastStylusEventIndex = 0;
+
+    ReadStylusInput();
 }
