@@ -125,9 +125,6 @@ public:
     bool IsTouching;
 
 public:
-	/** To know when the InkStates must be processed by the subsystem tick */
-	void SetDirty() { Dirty = true; }
-
 	/** Called by the subsystem tick.
 	 *  This will manage states in the super class:
 	 *  - move the CurrentState inside the PreviousState

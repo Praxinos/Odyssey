@@ -117,11 +117,6 @@ public:
     bool IsTouching;
 
 public:
-    /** To know when the WintabStates must be processed by the subsystem tick
-     *  For wintab, this must always be the case, because the wintab packets are directly processed inside the subsystem tick
-     */
-	void SetDirty() { Dirty = true; }
-
     /** Called by the subsystem tick.
      *  This will manage states in the super class:
      *  - get new packets from wintab driver

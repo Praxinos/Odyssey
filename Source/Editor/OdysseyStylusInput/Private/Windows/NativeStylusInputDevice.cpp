@@ -127,8 +127,6 @@ FNativeStylusInputDevice::Tick()
     
     CurrentState = mNativeState;
     mNativeState.Empty();
-
-    Dirty = false;
 }
 
 void

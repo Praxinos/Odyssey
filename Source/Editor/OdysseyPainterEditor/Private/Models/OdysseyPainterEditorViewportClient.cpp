@@ -65,7 +65,7 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
     , mCurrentToolState( eState::kIdle )
     , mNearestNeighbourTexture()
     , mBilinearTexture()
-    , mIsCurrentModeActive(false)
+    , mIsMouseDown(false)
 {
     check( mOdysseyPainterEditorViewportPtr.IsValid() );
 
@@ -318,7 +318,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
             
         mKeysPressed.Add( iKey );
     }
-    else if( iEvent == EInputEvent::IE_Released )
+    else if( iEvent == EInputEvent::IE_Released ) 
     {
         //key already released, don't send a KeyUp or MouseUp twice
         //Can happen on windows with some touch options
@@ -326,6 +326,17 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
             return true;
 
         mKeysPressed.Remove(iKey);
+    }
+    else if( iEvent == EInputEvent::IE_DoubleClick )
+    {
+        bool ignoreDown = mOnMouseDoubleClick.IsBound() && mOnMouseDoubleClick.Execute(mCurrentPointInViewport, iKey);
+        if (ignoreDown)
+            return true;
+        
+        if (mKeysPressed.Contains(iKey))
+            return true;
+        
+        mKeysPressed.Add( iKey );
     }
 
     //Cleanup PressedKeys
@@ -340,21 +351,87 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 
     //---
     
-    InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    InputSubsystem->Flush();
+    //InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    //InputSubsystem->Flush();
 
     //---
+
+    
+
+    //If we don't have a surface, then we don't interact with anything
+    /* UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
+    if (!texture)
+        return false;
+    
+    TArray<FKey> pressedKeys = mKeysPressed;
+    if (FOdysseyKeyState::GetLastKey() != FKey())
+        pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+
+    //Point In Viewport
+    FOdysseyPoint pointInViewport = iPointInViewport;
+    pointInViewport.keysDown = pressedKeys;
+    pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
+    mCurrentPointInViewport = pointInViewport;
+    */
 
     FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
     point_in_viewport.x = iViewport->GetMouseX();
     point_in_viewport.y = iViewport->GetMouseY();
+
+    if (!mIsMouseDown || mCurrentToolState != eState::kIdle)
+        mCurrentToolState = InputChordToState();
+
+    if (!mIsMouseDown && (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton))
+        mMouseButton = iKey;
+
+    if (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton)
+    {
+        if (iEvent == EInputEvent::IE_Pressed || iEvent == EInputEvent::IE_DoubleClick)
+        {
+            StartStylusInputRecord();
+            if (!mIsRecordingStylus)
+            {
+                MouseDown(point_in_viewport);
+            }
+        }
+        else if(iEvent == EInputEvent::IE_Released)
+        {
+            if (mIsRecordingStylus)
+            {
+                StopStylusInputRecord();
+            }
+            else
+            {
+                MouseUp(point_in_viewport);
+            }
+            
+            if (mIsMouseDown && !mKeysPressed.Contains(mMouseButton))
+                mMouseButton = FKey();
+        }
+    }
+    else
+    {
+        if (iEvent == EInputEvent::IE_Pressed)
+        {
+            return KeyDown(iKey);
+        }
+        else if(iEvent == EInputEvent::IE_Released)
+        {
+            return KeyUp(iKey);
+        }
+    }
+
+    /*FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
+    point_in_viewport.x = iViewport->GetMouseX();
+    point_in_viewport.y = iViewport->GetMouseY();
     
     auto end_time = std::chrono::steady_clock::now();
-    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
-    if(delta < 500 )
-        point_in_viewport = mStylusLastPoint;
+    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();*/
+    /* if(delta < 500 )
+        point_in_viewport = mStylusLastPoint; */ //TODO:
     
-    return InputKeyWithStrokePoint( point_in_viewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad );
+    //return InputKeyWithStrokePoint( point_in_viewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad );
+    return true;
 }
 
 void
@@ -363,21 +440,24 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     //This is called when the mouse is down and moving in the viewport
     //The viewport has already captured the mouse
 
-    auto end_time = std::chrono::steady_clock::now();
+    /* auto end_time = std::chrono::steady_clock::now();
     auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
     if (delta < 500)
-        return; //Mouse Move will be sent by OnStylusStateChanged to avoid using outdated values
+        return; //Mouse Move will be sent by OnStylusStateChanged to avoid using outdated values */
+
+    if (mIsRecordingStylus)
+        return;
 
     FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
     point_in_viewport.x = iX;
     point_in_viewport.y = iY;
-    CapturedMouseMoveWithStrokePoint( point_in_viewport );
+    MouseDrag( point_in_viewport );
 }
 
 void
 FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* iViewport, int32 iX, int32 iY )
 {
-    if( mIsCurrentModeActive )
+    if( mIsMouseDown )
         return;
 
     mCurrentToolState = eState::kIdle;
@@ -386,7 +466,7 @@ FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* iViewport, int32 iX,
 void
 FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
 {
-    if( mIsCurrentModeActive )
+    if( mIsMouseDown )
         return;
 
     mCurrentToolState = eState::kIdle;
@@ -432,9 +512,404 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
 }
 
 //--------------------------------------------------------------------------------------
-//------------------------------------------------------------------ Stylus Functions
+//------------------------------------------------------------------ Input Functions----
 
 void
+FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
+{
+    if (mIsMouseDown)
+        return;
+        
+    mIsMouseDown = true;
+
+    //If we don't have a surface, then we don't interact with anything
+    UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
+    if (!texture)
+        return;
+
+    TArray<FKey> pressedKeys = mKeysPressed;
+    if (FOdysseyKeyState::GetLastKey() != FKey())
+        pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+
+    //Point In Viewport
+    FOdysseyPoint pointInViewport = iPoint;
+    pointInViewport.keysDown = pressedKeys;
+    pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
+    mCurrentPointInViewport = pointInViewport;
+
+    //Point In Texture
+    FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
+    pointInTexture.keysDown = pressedKeys;
+    pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
+    bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
+    mCurrentPointInTexture = pointInTexture;
+
+    if( mCurrentToolState == eState::kIdle )
+    {
+        if (mOnMouseDown.IsBound())
+            mOnMouseDown.Execute(mCurrentPointInTexture, mMouseButton);
+    }
+    else if( mCurrentToolState == eState::kRotate && mMouseButton == EKeys::LeftMouseButton )
+    {
+        FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
+        FVector2D center = FVector2D( size.X / 2, size.Y / 2 );
+        FVector2D position_in_viewport( iPoint.x, iPoint.y );
+        FVector2D deltaCenter = position_in_viewport - center;
+        mRotationReference = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
+    }
+    else if( mCurrentToolState == eState::kPan && mMouseButton == EKeys::LeftMouseButton )
+    {
+        mPanReference = FVector2D( iPoint.x, iPoint.y );
+    }
+    else if (mCurrentToolState == eState::kZoom && mMouseButton == EKeys::LeftMouseButton)
+    {
+        uint32 width;
+        uint32 height;
+        mOdysseyPainterEditorViewportPtr.Pin()->ComputeTextureDisplayDimensions(width, height);
+
+        double zoom = mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
+        mZoomReference = ::FMath::Loge(zoom);
+        mZoomViewportPointReference = FVector2D(iPoint.x, iPoint.y);
+    }
+    else if( mCurrentToolState == eState::kPick && mMouseButton == EKeys::LeftMouseButton )
+    {
+        FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPoint);
+        FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y );
+        mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
+    }
+}
+
+void
+FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
+{
+    if (!mIsMouseDown)
+        return;
+
+    mIsMouseDown = false;
+
+    //If we don't have a surface, then we don't interact with anything
+    UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
+    if (!texture)
+        return;
+
+    TArray<FKey> pressedKeys = mKeysPressed;
+    if (FOdysseyKeyState::GetLastKey() != FKey())
+        pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+
+    //Point In Viewport
+    FOdysseyPoint pointInViewport = iPoint;
+    pointInViewport.keysDown = pressedKeys;
+    pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
+    mCurrentPointInViewport = pointInViewport;
+
+    //Point In Texture
+    FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
+    pointInTexture.keysDown = pressedKeys;
+    pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
+    bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
+    mCurrentPointInTexture = pointInTexture;
+
+    if( mCurrentToolState == eState::kIdle)
+    {    
+        if (mOnMouseUp.IsBound())
+            mOnMouseUp.Execute(mCurrentPointInTexture, mMouseButton);
+    }
+    else if( mCurrentToolState == eState::kRotate && mMouseButton == EKeys::LeftMouseButton )
+    {
+    }
+    else if( mCurrentToolState == eState::kPan && mMouseButton == EKeys::LeftMouseButton )
+    {
+    }
+    else if (mCurrentToolState == eState::kZoom && mMouseButton == EKeys::LeftMouseButton)
+    {
+    }
+    else if( mCurrentToolState == eState::kPick && mMouseButton == EKeys::LeftMouseButton )
+    {
+        FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPoint);
+        FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
+        mOnPickColor.ExecuteIfBound(eOdysseyEventState::kSet, position_in_texture);
+    }
+}
+
+void
+FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
+{
+    if (!mIsMouseDown)
+        return;
+
+    //If we don't have a surface, then we don't interact with anything
+    UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
+    if (!texture)
+        return;
+
+    TArray<FKey> pressedKeys = mKeysPressed;
+    if (FOdysseyKeyState::GetLastKey() != FKey())
+        pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+
+    //Point In Viewport
+    FOdysseyPoint pointInViewport = iPoint;
+    pointInViewport.keysDown = pressedKeys;
+    pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
+    mCurrentPointInViewport = pointInViewport;
+
+    //Point In Texture
+    FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
+    pointInTexture.keysDown = pressedKeys;
+    pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
+    bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
+    mCurrentPointInTexture = pointInTexture;
+
+    if( mCurrentToolState == eState::kIdle )
+    {
+		if (!hasMoved)
+			return;
+
+        mOnMouseDrag.ExecuteIfBound(mCurrentPointInTexture);
+        //mOdysseyPainterEditor->StrokeEngine()->To( mCurrentPointInTexture );
+    }
+    else if( mCurrentToolState == eState::kPan)
+    {
+        FVector2D deltaReference( iPoint.x - mPanReference.X, iPoint.y - mPanReference.Y );
+
+        mOdysseyPainterEditorViewportPtr.Pin()->AddPan( deltaReference );
+        mPanReference = FVector2D( iPoint.x, iPoint.y );
+    }
+    else if( mCurrentToolState == eState::kRotate)
+    {
+        FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
+
+        FVector2D center = FVector2D( size.X / 2, size.Y / 2 );
+        FVector2D position_in_viewport( iPoint.x, iPoint.y );
+        FVector2D deltaCenter = position_in_viewport - center;
+        float newRotation = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
+        float deltaRotation = mRotationReference - newRotation;
+
+        mOdysseyPainterEditorViewportPtr.Pin()->SetRotation( mOdysseyPainterEditorViewportPtr.Pin()->GetRotation() + deltaRotation );
+
+        mRotationReference = newRotation;
+    }
+    else if (mCurrentToolState == eState::kZoom)
+    {   
+        TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+
+        FVector2D viewportMousePosition(iPoint.x, iPoint.y);
+        float dist = viewportMousePosition.X - mZoomViewportPointReference.X;
+        float smoothness = 200.f; //TODO: do a Setting to let the user change it at will
+
+        if (dist > KINDA_SMALL_NUMBER || dist < KINDA_SMALL_NUMBER)
+        {
+            float newDist = mZoomReference + (dist / smoothness);
+            float zoom = ::FMath::Exp(newDist);
+            viewportWidget->SetZoom(zoom, mZoomViewportPointReference - mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter());
+        }
+    }
+    else if( mCurrentToolState == eState::kPick)
+    {
+        FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPoint);
+        FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
+    
+        uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
+        uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
+
+        if( position_in_texture.X >= 0 && position_in_texture.X < textureFullWidth &&
+            position_in_texture.Y >= 0 && position_in_texture.Y < textureFullHeight)
+        {
+			mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
+        }
+    }
+}
+
+bool
+FOdysseyPainterEditorViewportClient::KeyDown(FKey iKey)
+{
+    //KeyDown
+    if (mOnKeyDown.IsBound() && mOnKeyDown.Execute(iKey))
+        return true;
+
+    if (iKey == EKeys::MouseScrollUp)
+    {
+        //ZoomIn
+        FVector2D position_in_viewport(mCurrentPointInViewport.x, mCurrentPointInViewport.y);
+        ZoomInInViewport(position_in_viewport);
+    }
+    else if (iKey == EKeys::MouseScrollDown)
+    {
+        //ZoomOut
+        FVector2D position_in_viewport(mCurrentPointInViewport.x, mCurrentPointInViewport.y);
+        ZoomOutInViewport(position_in_viewport);
+    }
+
+    return false;
+}
+
+bool
+FOdysseyPainterEditorViewportClient::KeyUp(FKey iKey)
+{
+    return mOnKeyUp.IsBound() && mOnKeyUp.Execute(iKey);
+}
+
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------ Stylus Functions
+
+bool
+FOdysseyPainterEditorViewportClient::FindStylusStateDown()
+{
+    for (int i = mLastStylusEventIndex; i < mStylusStates.Num(); i++ )
+    {
+        const FStylusState& state = mStylusStates[i];
+        if (state.IsStylusDown())
+        {
+            mLastStylusEventIndex = i;
+            return true;
+        }
+    }
+
+    mLastStylusEventIndex = 0;
+    return false;
+}
+
+void
+FOdysseyPainterEditorViewportClient::StartStylusInputRecord()
+{
+    if (mIsRecordingStylus)
+        return;
+
+    auto end_time = std::chrono::steady_clock::now();
+    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
+    if(delta > 500 )
+        return;
+
+    /* if (!FindStylusStateDown())
+    {
+        InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+        InputSubsystem->Flush(); //Get late stylus events
+        
+        if (!FindStylusStateDown()) //Try again after flushing
+            return;
+    } */
+
+    //Down
+    ReadStylusInput();
+    mIsRecordingStylus = true;
+}
+
+void
+FOdysseyPainterEditorViewportClient::StopStylusInputRecord()
+{
+    if (!mIsRecordingStylus)
+        return;
+
+    ReadStylusInput();
+
+    InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    InputSubsystem->Flush(); //Get late stylus events
+
+    //UP
+    mIsRecordingStylus = false;
+}
+
+FOdysseyPoint
+FOdysseyPainterEditorViewportClient::StylusStateToPoint(const FStylusState& iState)
+{
+    TSharedPtr<SOdysseyViewport> odysseyViewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+    if (!odysseyViewportWidget)
+        return FOdysseyPoint();
+
+    TSharedPtr< SViewport > viewportWidget = odysseyViewportWidget->GetViewportWidget();
+    TSharedPtr<FOdysseySceneViewport> viewport = odysseyViewportWidget->GetViewport();
+    
+    float scale_dpi = viewport->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
+    FVector2D position_in_viewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() ) * scale_dpi;
+
+    FOdysseyPoint point( position_in_viewport.X
+                                        , position_in_viewport.Y
+                                        , iState.GetZ()
+                                        , iState.GetPressure()
+                                        , iState.GetTimer()
+                                        , iState.GetAltitude()
+                                        , iState.GetAzimuth()
+                                        , iState.GetTwist()
+                                        , 0 //iState.GetPitch()
+                                        , 0 // iState.GetRoll()
+                                        , 0 ); // iState.GetYaw() );
+
+    TArray<FKey> pressedKeys = mKeysPressed;
+    pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+    point.keysDown = pressedKeys;
+
+    return point;
+}
+
+void
+FOdysseyPainterEditorViewportClient::ReadStylusInput()
+{
+    if (!mIsRecordingStylus)
+        return;
+
+    for (int i = mLastStylusEventIndex; i < mStylusStates.Num(); i++ )
+    {
+        const FStylusState& state = mStylusStates[i];
+
+        FOdysseyPoint point = StylusStateToPoint(state);
+        
+        //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
+        if (!mStylusIsDown && (state.IsStylusDown() || mMouseButton == EKeys::RightMouseButton ))
+        {
+            //MouseDown
+            MouseDown(point);
+            mStylusIsDown = true;
+            mLastStylusEventIndex = i;
+        }
+        else if (mStylusIsDown && !state.IsStylusDown() && !mKeysPressed.Contains(mMouseButton))
+        {
+            //MouseUp
+            MouseUp(point);
+            mStylusIsDown = false;
+            mLastStylusEventIndex = i;
+        }
+        else if (mStylusIsDown)
+        {
+            //MouseMove
+            MouseDrag(point);
+            mLastStylusEventIndex = i;
+            //CapturedMouseMoveWithStrokePoint( point );
+        }
+    }
+}
+
+void
+FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex )
+{
+    TSharedPtr<SOdysseyViewport> odysseyViewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+    if (!odysseyViewportWidget)
+        return;
+
+    //If we don't have a surface, then we don't interact with anything
+    UTexture* texture = odysseyViewportWidget->GetTexture();
+    if (!texture)
+        return;
+
+    TSharedPtr< SViewport > viewportWidget = odysseyViewportWidget->GetViewportWidget();
+    TSharedPtr<SWidget> inWidget = iWidget.Pin();
+    if( !inWidget)
+        return;
+
+    TSharedPtr< SViewport > viewport = odysseyViewportWidget->GetViewportWidget();
+    if( inWidget != viewport )
+        return;
+
+    //---
+
+    mStylusStates = iStates;
+    mLastStylusEventIndex = 0;
+
+    ReadStylusInput();
+
+    mStylusLastEventTime = std::chrono::steady_clock::now();
+}
+
+/* void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
     //If we don't have a surface, then we don't interact with anything
@@ -476,12 +951,13 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
   //---
     mStylusLastPoint = stroke_point;
 
-    if( mIsCurrentModeActive )
+    if( mIsMouseDown )
     {
         CapturedMouseMoveWithStrokePoint( stroke_point );
     }
     mStylusLastEventTime = std::chrono::steady_clock::now();
 }
+*/
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ Internal Input Functions
@@ -523,7 +999,7 @@ FOdysseyPainterEditorViewportClient::InputChordToState()
 
 // - OnInputEvent
 
-bool
+/*bool
 FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint(const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad)
 {
 
@@ -542,35 +1018,29 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint(const FOdysseyPoint
     pointInViewport.ComputeRelativeParameters(mCurrentPointInViewport);
     mCurrentPointInViewport = pointInViewport;
 
-    //Point In Texture
-    FOdysseyPoint pointInTexture = GetLocalMousePosition(iPointInViewport);
-    pointInTexture.keysDown = pressedKeys;
-    pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
-    mCurrentPointInTexture = pointInTexture;
-
     if (mCurrentToolState == eState::kIdle)
     {
-        if (mIsCurrentModeActive)
-            return OnInputEventRaw(iPointInViewport, iKey, iEvent);
+        if (mIsMouseDown)
+            return OnInputEventRaw(pointInViewport, iKey, iEvent); //MouseDown | MouseUp
         
         mCurrentToolState = InputChordToState();
 
         //If no state becomes active
         if (mCurrentToolState == eState::kIdle)
-            return OnInputEventRaw(iPointInViewport, iKey, iEvent);
+            return OnInputEventRaw(pointInViewport, iKey, iEvent); //MouseDown | MouseUp
         
-        return OnInputEventWithState(iPointInViewport, iKey, iEvent);
+        return OnInputEventWithState(pointInViewport, iKey, iEvent); //MouseDown | MouseUp
     }
 
     //If mCurrentToolState has an active state (pan, rotate, etc...)
     mCurrentToolState = InputChordToState();
     if (mCurrentToolState != eState::kIdle)
-        return OnInputEventWithState(iPointInViewport, iKey, iEvent);
+        return OnInputEventWithState(pointInViewport, iKey, iEvent);
 
-    return OnInputEventRaw(iPointInViewport, iKey, iEvent);
-}
+    return OnInputEventRaw(pointInViewport, iKey, iEvent);
+}*/
 
-bool
+/* bool
 FOdysseyPainterEditorViewportClient::OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent)
 {
     if ((iKey == EKeys::LeftMouseButton)||(iKey == EKeys::RightMouseButton))
@@ -578,12 +1048,12 @@ FOdysseyPainterEditorViewportClient::OnInputEventRaw(const FOdysseyPoint& iPoint
         if (iEvent == EInputEvent::IE_Pressed)
         {
             //LeftMouse Down
-            mIsCurrentModeActive = true;
+            mIsMouseDown = true;
             return mOnMouseDown.IsBound() && mOnMouseDown.Execute(mCurrentPointInTexture, iKey);
         }
         else if (iEvent == EInputEvent::IE_Released)
         {
-            mIsCurrentModeActive = false;
+            mIsMouseDown = false;
             return mOnMouseUp.IsBound() && mOnMouseUp.Execute(mCurrentPointInTexture, iKey);
         }
     }
@@ -614,16 +1084,16 @@ FOdysseyPainterEditorViewportClient::OnInputEventRaw(const FOdysseyPoint& iPoint
         return mOnKeyUp.IsBound() && mOnKeyUp.Execute(iKey);
     }
     return false;
-}
+} */
 
-bool
+/* bool
 FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent)
 {
     if( mCurrentToolState == eState::kRotate )
     {
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
-            mIsCurrentModeActive = true;
+            mIsMouseDown = true;
 
             FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
             FVector2D center = FVector2D( size.X / 2, size.Y / 2 );
@@ -634,7 +1104,7 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
         }
         else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
         {
-            mIsCurrentModeActive = false;
+            mIsMouseDown = false;
             return true;
         }
     }
@@ -642,14 +1112,14 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
     {
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
-            mIsCurrentModeActive = true;
+            mIsMouseDown = true;
 
             mPanReference = FVector2D( iPointInViewport.x, iPointInViewport.y );
             return true;
         }
         else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
         {
-            mIsCurrentModeActive = false;
+            mIsMouseDown = false;
             return true;
         }
     }
@@ -657,7 +1127,7 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
     {
         if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed)
         {
-            mIsCurrentModeActive = true;
+            mIsMouseDown = true;
 
             uint32 width;
             uint32 height;
@@ -670,7 +1140,7 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
         }
         else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
         {
-            mIsCurrentModeActive = false;
+            mIsMouseDown = false;
             return true;
         }
     }
@@ -678,7 +1148,7 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
     {
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
-            mIsCurrentModeActive = true;
+            mIsMouseDown = true;
 
             FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
             FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y );
@@ -691,14 +1161,14 @@ FOdysseyPainterEditorViewportClient::OnInputEventWithState(const FOdysseyPoint& 
             FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
             mOnPickColor.ExecuteIfBound(eOdysseyEventState::kSet, position_in_texture);
             
-            mIsCurrentModeActive = false;
+            mIsMouseDown = false;
             return true;
         }
     }
     return false;
-}
+} */
 
-void
+/* void
 FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOdysseyPoint& iPointInViewport )
 {
 
@@ -724,7 +1194,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
     mCurrentPointInTexture = pointInTexture;
 
-    if( mCurrentToolState == eState::kIdle && mIsCurrentModeActive )
+    if( mCurrentToolState == eState::kIdle )
     {
 		if (!hasMoved)
 			return;
@@ -732,14 +1202,14 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         mOnMouseDrag.ExecuteIfBound(mCurrentPointInTexture);
         //mOdysseyPainterEditor->StrokeEngine()->To( mCurrentPointInTexture );
     }
-    else if( mCurrentToolState == eState::kPan && mIsCurrentModeActive)
+    else if( mCurrentToolState == eState::kPan)
     {
         FVector2D deltaReference( iPointInViewport.x - mPanReference.X, iPointInViewport.y - mPanReference.Y );
 
         mOdysseyPainterEditorViewportPtr.Pin()->AddPan( deltaReference );
         mPanReference = FVector2D( iPointInViewport.x, iPointInViewport.y );
     }
-    else if( mCurrentToolState == eState::kRotate && mIsCurrentModeActive)
+    else if( mCurrentToolState == eState::kRotate)
     {
         FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
 
@@ -753,7 +1223,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
 
         mRotationReference = newRotation;
     }
-    else if (mCurrentToolState == eState::kZoom && mIsCurrentModeActive)
+    else if (mCurrentToolState == eState::kZoom)
     {   
         TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
 
@@ -768,7 +1238,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
             viewportWidget->SetZoom(zoom, mZoomViewportPointReference - mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter());
         }
     }
-    else if( mCurrentToolState == eState::kPick && mIsCurrentModeActive)
+    else if( mCurrentToolState == eState::kPick)
     {
         FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
         FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
@@ -782,7 +1252,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
 			mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
         }
     }
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------ FGCObject API

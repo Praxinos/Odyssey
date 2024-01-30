@@ -185,17 +185,14 @@ UOdysseyStylusInputSubsystem::Flush()
 		for (int32 DeviceIdx = 0; DeviceIdx < NumInputDevices(); ++DeviceIdx)
 		{
 			IStylusInputDevice* InputDevice = InputInterface->GetInputDevice(DeviceIdx);
+			InputDevice->Tick();
 			if (InputDevice->IsDirty())
 			{
-				InputDevice->Tick();
 				TArray<FStylusState> tmp( InputDevice->GetCurrentState() );
 
 				for (IStylusMessageHandler* Handler : MessageHandlers)
 				{
-					for( const FStylusState& stylus_state : tmp )
-					{
-						Handler->OnStylusStateChanged( InputInterface->Widget(), stylus_state, DeviceIdx );
-					}
+					Handler->OnStylusStateChanged( InputInterface->Widget(), tmp, DeviceIdx );
 				}
 			}
 		}

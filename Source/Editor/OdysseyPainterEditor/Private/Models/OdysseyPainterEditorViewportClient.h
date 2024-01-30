@@ -65,6 +65,7 @@ public:
 	DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDown, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseUp, const FOdysseyPoint&, const FKey&)
+    DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDoubleClick, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_OneParam(FOnMouseHover, const FOdysseyPoint&)
     DECLARE_DELEGATE_OneParam(FOnMouseDrag, const FOdysseyPoint&)
     DECLARE_DELEGATE_RetVal_OneParam(bool, FOnKeyDown, const FKey&)
@@ -98,8 +99,13 @@ public:
     virtual EMouseCursor::Type                  GetCursor( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply ) override;
 
-    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex ) override;
-	
+    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex ) override;
+    bool FindStylusStateDown();
+    void StartStylusInputRecord();
+    void StopStylusInputRecord();
+    FOdysseyPoint StylusStateToPoint(const FStylusState& iState);
+    void ReadStylusInput();
+
     virtual EMouseCaptureMode GetMouseCaptureMode() const override;
     
 public:
@@ -111,6 +117,7 @@ public:
     // Public API
 	FOnPickColor&	OnPickColor() { return mOnPickColor; }
     FOnMouseDown&   OnMouseDown()   { return mOnMouseDown; }
+    FOnMouseDoubleClick&   OnMouseDoubleClick()   { return mOnMouseDoubleClick; }
     FOnMouseUp&     OnMouseUp()     { return mOnMouseUp; }
     FOnMouseHover&  OnMouseHover()  { return mOnMouseHover; }
     FOnMouseDrag&   OnMouseDrag()   { return mOnMouseDrag; }
@@ -128,16 +135,24 @@ private:
     FOdysseyPoint   GetLocalMousePosition( const FOdysseyPoint& iPointInViewport ) const;
     void        DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices );
     eState      InputChordToState();
-    bool        InputKeyWithStrokePoint( const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
-    bool        OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
-    bool        OnInputEventWithState(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
+    //bool        InputKeyWithStrokePoint( const FOdysseyPoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
+    //bool        OnInputEventRaw(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
+    //bool        OnInputEventWithState(const FOdysseyPoint& iPointInViewport, FKey iKey, EInputEvent iEvent);
 
-    void        CapturedMouseMoveWithStrokePoint( const FOdysseyPoint& iPointInViewport ) ;
+    //void        CapturedMouseMoveWithStrokePoint( const FOdysseyPoint& iPointInViewport ) ;
 
     void        OnViewportPropertyWillChange();
     void        OnViewportPropertyChanged();
 
     FTransform2D GetTransform() const;
+
+private:
+    //New API to manage events
+    void MouseDown(const FOdysseyPoint& iPoint);
+    void MouseUp(const FOdysseyPoint& iPoint);
+    void MouseDrag(const FOdysseyPoint& iPoint);
+    bool KeyDown(FKey iKey);
+    bool KeyUp(FKey iKey);
 
 private:
     // Private Data Members
@@ -158,6 +173,7 @@ private:
 	FOnPickColor							mOnPickColor;
     FOnMouseDown                            mOnMouseDown;
     FOnMouseUp                              mOnMouseUp;
+    FOnMouseDoubleClick                     mOnMouseDoubleClick;
     FOnMouseHover                           mOnMouseHover;
     FOnMouseDrag                            mOnMouseDrag;
     FOnKeyDown                              mOnKeyDown;
@@ -165,7 +181,7 @@ private:
 
 	FOdysseyPoint						    mCurrentPointInViewport;
     FOdysseyPoint						    mCurrentPointInTexture;
-    FOdysseyPoint                           mStylusLastPoint;
+    //FOdysseyPoint                           mStylusLastPoint;
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     TArray<FKey>                            mKeysPressed;
@@ -173,5 +189,13 @@ private:
     FTexture                                mNearestNeighbourTexture;
     FTexture                                mBilinearTexture;
 
-    bool                                    mIsCurrentModeActive;
+    //bool                                    mIsCurrentModeActive;
+    bool                                    mIsMouseDown;
+    FKey                                    mMouseButton;
+
+    
+    TArray<FStylusState> mStylusStates;
+    bool mIsRecordingStylus = false;
+    int mLastStylusEventIndex = 0;
+    bool mStylusIsDown = false;
 };

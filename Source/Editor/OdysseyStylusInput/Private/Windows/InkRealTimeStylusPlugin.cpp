@@ -424,9 +424,6 @@ FInkTabletContextInfo::Tick()
     {
         CurrentState.Push( ink_state.ToPublicState() );
     }
-
-	// Everything is clean now
-    Dirty = false;
 }
 
 //---
@@ -563,7 +560,6 @@ void FInkRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus, con
 
 	// Add the new states to the list of all states between 2 subsystem ticks
 	sgMutex.Lock();
-	TabletContext->SetDirty();
 	TabletContext->InkStates.Append(states);
 	sgMutex.Unlock();
 }

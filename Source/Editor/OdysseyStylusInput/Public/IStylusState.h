@@ -240,7 +240,7 @@ public:
 	virtual void Tick() = 0;
 
 	/** Does the input device need to be ticked? */
-	bool IsDirty() const { return Dirty; }
+	bool IsDirty() const { return !CurrentState.IsEmpty(); }
 
 protected:
 	TArray<FStylusState>		CurrentState;
@@ -259,5 +259,5 @@ protected:
 class IStylusMessageHandler
 {
 public:
-	virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const FStylusState& NewState, int32 StylusIndex) = 0;
+	virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& NewStates, int32 StylusIndex) = 0;
 };

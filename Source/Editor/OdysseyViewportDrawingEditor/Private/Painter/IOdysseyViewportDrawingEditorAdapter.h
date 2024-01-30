@@ -65,7 +65,7 @@ public:
 
 private:
     /** IStylusMessageHandler Overrides */
-    virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex) override;
+    virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex) override;
 
 protected: 
     virtual ::ULIS::FEvent StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams) = 0;

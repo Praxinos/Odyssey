@@ -413,9 +413,9 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMoveWithStrokeRay(const 
     return true;
 }
 
-void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex)
+void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex)
 {
-    if ( !IsReadyToDraw() || !mLastKnownViewport || !iWidget.IsValid() )
+    /* if ( !IsReadyToDraw() || !mLastKnownViewport || !iWidget.IsValid() )
         return;
 
     //We only treat events on the main level Viewport
@@ -489,5 +489,5 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
         mCurrentStrokeRay = strokeRay;
     }
 
-    mStylusLastEventTime = std::chrono::steady_clock::now();
+    mStylusLastEventTime = std::chrono::steady_clock::now(); */
 }

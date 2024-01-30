@@ -418,7 +418,6 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
 
             FWintabTabletContextInfo tablet_context_info;
             tablet_context_info.IsTouching = false;
-            tablet_context_info.SetDirty(); // Mandatory! Sometimes may be 0 -_- ?!
 
             if( !SetupPacketDescriptions( ctxIndex, &tablet_context_info ) )
             {

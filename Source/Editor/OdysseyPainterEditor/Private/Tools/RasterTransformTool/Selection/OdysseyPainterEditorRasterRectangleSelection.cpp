@@ -3,6 +3,8 @@
 
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterRectangleSelection.h"
 #include "OdysseyHUDPolygon.h"
+#include "OdysseyMediaRaster.h"
+#include "OdysseyPainterEditor.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

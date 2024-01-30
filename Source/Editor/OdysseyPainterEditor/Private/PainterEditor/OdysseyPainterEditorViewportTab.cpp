@@ -58,6 +58,7 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
     //TODO: manage colorpicking here, viewportClient itself should not know the action to pick a color
     mViewportClient->OnPickColor().BindRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
     mViewportClient->OnMouseDown().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDown);
+    mViewportClient->OnMouseDoubleClick().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDoubleClick);
     mViewportClient->OnMouseUp().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseUp);
     mViewportClient->OnMouseHover().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseHover);
     mViewportClient->OnMouseDrag().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDrag);
@@ -175,6 +176,17 @@ FOdysseyPainterEditorViewportTab::OnViewportMouseDown(const FOdysseyPoint& iPoin
         return false;
 
     return tool->OnMouseDown(iPointInTexture, iKey);
+}
+
+bool
+FOdysseyPainterEditorViewportTab::OnViewportMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    //mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    UOdysseyPainterEditorTool* tool = mEditor->GetSelectedTool();
+    if (!tool)
+        return false;
+
+    return tool->OnMouseDoubleClick(iPointInTexture, iKey);
 }
 
 bool

@@ -22,9 +22,9 @@ public:
 	SLATE_END_ARGS();
 
 	void Construct(const FArguments& InArgs, UOdysseyStylusInputSubsystem& InSubsystem);
-	void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const FStylusState& InState, int32 InIndex)
+	void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& InStates, int32 InIndex)
 	{
-		State = InState;
+		State = InStates.Last();
 		LastIndex = InIndex;
 	}
 
