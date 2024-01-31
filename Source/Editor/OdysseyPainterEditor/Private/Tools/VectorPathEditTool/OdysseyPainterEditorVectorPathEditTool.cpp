@@ -717,16 +717,16 @@ UOdysseyPainterEditorVectorPathEditTool::GetPickingFlags()
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPathEditTool::CreateTopTabWidget()
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> widenPropertyView = propertyEditorModule.CreateSingleProperty(this, "WidenAllAlong", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> widenHandle = widenPropertyView->GetPropertyHandle();
-
     // we create the topTab widget only once, or else it creates a sizing issue in the top tab
     if( mTopTabWidget.Get() == nullptr )
     {
+        FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+        FSinglePropertyParams defaultPropertyParams;
+        const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
+        const TSharedPtr<ISinglePropertyView> widenPropertyView = propertyEditorModule.CreateSingleProperty(this, "WidenAllAlong", defaultPropertyParams);
+        TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+        TSharedPtr<class IPropertyHandle> widenHandle = widenPropertyView->GetPropertyHandle();
+
         mTopTabWidget = SNew(SUniformWrapPanel)
                        .SlotPadding(FVector2D(3.f, 0.f))
                        .EvenRowDistribution(true)

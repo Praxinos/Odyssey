@@ -505,14 +505,34 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
 
     //uint32 intersectionCount = 0;
 
+    // TODO: compare beziers. If they are the same (two segments one over the other), don't intersect
+/*
+    if( ( iSegment0 != iSegment1 )
+      &&( iSegment0->CompareBezier( iSegment1 ) == 0 ) )
+    {
+        return;
+    }
+*/
     for ( int i = 0; i < segment0FractionCache.size(); i++ )
     {
         FOdysseyVectorFraction* segment0Poly = &segment0FractionCache[i];
         ::ULIS::FVec2D segment0PolyVector = ( segment0Poly->lineVertex[1] - segment0Poly->lineVertex[0] );
         ::ULIS::FVec2D segment0PolyVectorInParent = ( segment0Poly->lineVertexInParent[1] - segment0Poly->lineVertexInParent[0] );
+        //FOdysseyVectorVertex* segment0PolyVertex0 = nullptr;
+        //FOdysseyVectorVertex* segment0PolyVertex1 = nullptr;
         int p = i - 1;
         int n = i + 1;
+/*
+        if( segment0Poly == &segment0FractionCache.front() )
+        {
+            segment0PolyVertex0 = segment0Vertex0;
+        }
 
+        if( segment0Poly == &segment0FractionCache.back() )
+        {
+            segment0PolyVertex1 = segment0Vertex1;
+        }
+*/
         if( iSegment0 >= iSegment1 )
         {
             if( ( segment0Poly->xMinInParent <= iSegment1MaxInParentWithTolerance.x )
@@ -523,8 +543,20 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                 for( int j = 0; j < segment1FractionCache.size(); j++ )
                 {
                     FOdysseyVectorFraction* segment1Poly = &segment1FractionCache[j];
+                    //FOdysseyVectorVertex* segment1PolyVertex0 = nullptr;
+                    //FOdysseyVectorVertex* segment1PolyVertex1 = nullptr;
                     double segment0PolySubT, segment1PolySubT;
+/*
+                    if( segment1Poly == &segment1FractionCache.front() )
+                    {
+                        segment1PolyVertex0 = segment1Vertex0;
+                    }
 
+                    if( segment1Poly == &segment1FractionCache.back() )
+                    {
+                        segment1PolyVertex1 = segment1Vertex1;
+                    }
+*/
                     // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
                     if( ( segment0Poly->xMaxInParent >= segment1Poly->xMinInParent ) && ( segment0Poly->xMinInParent <= segment1Poly->xMaxInParent )
                      && ( segment0Poly->yMaxInParent >= segment1Poly->yMinInParent ) && ( segment0Poly->yMinInParent <= segment1Poly->yMaxInParent ) )
@@ -560,9 +592,25 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                                 if( ( segment0T > 0.0f && segment0T < 1.0f )
                                  && ( segment1T > 0.0f && segment1T < 1.0f ) )
                                 {
+/*
                                     //FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection( segment0ISXCoords.x
                                     //                                                                                           , segment0ISXCoords.y );
+                                    // don't intersect adjacent fraction from contiguous segments.
+                                    // as they would always intersect
+                                    if( ( segment0PolyVertex1 && segment1PolyVertex0 )
+                                     && ( segment0PolyVertex1 == segment1PolyVertex0 ) )
+                                    {
+                                        continue;
+                                    }
 
+                                    // don't intersect adjacent fraction from contiguous segments.
+                                    // as they would always intersect
+                                    if( ( segment0PolyVertex0 && segment1PolyVertex1 )
+                                     && ( segment0PolyVertex0 == segment1PolyVertex1 ) )
+                                    {
+                                        continue;
+                                    }
+*/
                                     // save in temporary struct array will allow to alloc vertices in one go.
                                     mMutex.lock();
                                     oIntersectionRecordArray.emplace_back( segment0ISXCoords.x
@@ -607,8 +655,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                             // Note: we cannot use segment->GetPointAt() to determine the position
                             // of the intersection because it will not match the intersection that
                             // we detect via linear means. Cubic segments are not linear.
-                            ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->lineVertexInParent[0].x + ( segment0PolyVector.x * t )
-                                                               , segment0Poly->lineVertexInParent[0].y + ( segment0PolyVector.y * t ) };
+                            ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->lineVertexInParent[0].x + ( segment0PolyVectorInParent.x * t )
+                                                               , segment0Poly->lineVertexInParent[0].y + ( segment0PolyVectorInParent.y * t ) };
 
                             segment1Vertex0->SetNearestSegment( iSegment0, distance, segmentT, segment0ISXCoords );
 
@@ -640,8 +688,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                             // Note: we cannot use segment->GetPointAt() to determine the position
                             // of the intersection because it will not match the intersection that
                             // we detect via linear means. Cubic segments are not linear.
-                            ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->lineVertexInParent[0].x + ( segment0PolyVector.x * t )
-                                                               , segment0Poly->lineVertexInParent[0].y + ( segment0PolyVector.y * t ) };
+                            ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->lineVertexInParent[0].x + ( segment0PolyVectorInParent.x * t )
+                                                               , segment0Poly->lineVertexInParent[0].y + ( segment0PolyVectorInParent.y * t ) };
 
                             segment1Vertex1->SetNearestSegment( iSegment0, distance, segmentT, segment0ISXCoords );
                         }
@@ -1430,7 +1478,7 @@ FOdysseyVectorGroupPaint::FindCycles()
 {
     std::vector<FExplorationPair> explorationPairsBuffer;
 
-    auto startTotal = std::chrono::high_resolution_clock::now();
+    //auto startTotal = std::chrono::high_resolution_clock::now();
 
     Clear(); // also build segments bounding boxes in parent
 
@@ -1443,7 +1491,7 @@ FOdysseyVectorGroupPaint::FindCycles()
     // Build exploration pair before simplification
     for( FOdysseyVectorVertexIntersection& intersectionVertex : mIntersectionVertexArray )
     {
-        intersectionVertex.SetID( mPartnerCount++ );
+        intersectionVertex.SetID( mVertexID++ );
 
         intersectionVertex.BuildExplorationPairs( explorationPairsBuffer );
     }
@@ -1459,15 +1507,11 @@ FOdysseyVectorGroupPaint::FindCycles()
 
             if( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
             {
-                vertex0->SetID( mPartnerCount++ );
-
                 vertex0->BuildExplorationPairs( explorationPairsBuffer);
             }
 
             if( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() )
             {
-                vertex1->SetID( mPartnerCount++ );
-
                 vertex1->BuildExplorationPairs( explorationPairsBuffer );
             }
         }
@@ -1517,9 +1561,9 @@ FOdysseyVectorGroupPaint::FindCycles()
         }
     }
 
-    auto stopTotal = std::chrono::high_resolution_clock::now();
-    auto durationTotal = std::chrono::duration_cast<std::chrono::microseconds>(stopTotal - startTotal);
-    UE_LOG(LogTemp, Warning, TEXT("FindCycles Exec time %llu"), durationTotal.count() );
+    //auto stopTotal = std::chrono::high_resolution_clock::now();
+    //auto durationTotal = std::chrono::duration_cast<std::chrono::microseconds>(stopTotal - startTotal);
+    //UE_LOG(LogTemp, Warning, TEXT("FindCycles Exec time %llu"), durationTotal.count() );
 }
 
 void
@@ -2143,7 +2187,7 @@ FOdysseyVectorGroupPaint::Clear()
     // clean section topology (unlinking has been moved after the cycle detection).
     mSectionBuffer.clear();
 
-    mPartnerCount = 0;
+    mVertexID = 0;
 
     // <TODO:MULTITHREADABLE>
     if( bMultithreaded )
@@ -2171,7 +2215,7 @@ FOdysseyVectorGroupPaint::Clear()
                 vertex->ResetNearestSegment();
                 vertex->ResetNearestVertex();
                 // reset vertex ID to get ready for partnerization
-                vertex->SetID( 0xFFFFFFFF );
+                vertex->SetID( mVertexID++ );
             }
         } );
     }
@@ -2197,7 +2241,7 @@ FOdysseyVectorGroupPaint::Clear()
                 vertex->ResetNearestSegment();
                 vertex->ResetNearestVertex();
                 // reset vertex ID to get ready for partnerization
-                vertex->SetID( 0xFFFFFFFF );
+                vertex->SetID( mVertexID++ );
             }
         }
     }

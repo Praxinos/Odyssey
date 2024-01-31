@@ -328,6 +328,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    uint32 imgW = vectorEngine->GetPreferredWidth(),
+           imgH = vectorEngine->GetPreferredHeight();
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton)
     {
@@ -335,7 +339,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
         if( mPathTracer.GetPath() )
         {
             FOdysseyVectorPath* path = mPathTracer.GetPath();
-            FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
             FOdysseyVectorSegment* newSegment;
             FOdysseyVectorVertex* endingVertex = PickVertex( iScene
                                                            , iPointInTexture.x
@@ -391,6 +394,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
         }
     }
 
+    // in OnMouseDragVector() we are not guaranteed to get a viewport redraw from what I understand.
+    // this means the Invalidation Rectangle is not resetted, so we force it.
+    vectorEngine->SetInvalidatedRect( ::ULIS::FRectI( 0, 0, imgW, imgH ) );
+
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY // important to remove the path builder from the hierarchy widget
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
@@ -433,18 +440,18 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
-//    const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> fidelityPropertyView = propertyEditorModule.CreateSingleProperty(this, "TracingFidelity", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
-//    TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> fidelityHandle = fidelityPropertyView->GetPropertyHandle();
-
     // we create the topTab widget only once, or else it creates a sizing issue in the top tab
     if( mTopTabWidget.Get() == nullptr )
     {
+        FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+        FSinglePropertyParams defaultPropertyParams;
+        const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
+    //    const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
+        const TSharedPtr<ISinglePropertyView> fidelityPropertyView = propertyEditorModule.CreateSingleProperty(this, "TracingFidelity", defaultPropertyParams);
+        TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+    //    TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
+        TSharedPtr<class IPropertyHandle> fidelityHandle = fidelityPropertyView->GetPropertyHandle();
+
         mTopTabWidget = SNew(SUniformWrapPanel)
                        .SlotPadding(FVector2D(3.f, 0.f))
                        .EvenRowDistribution(true)

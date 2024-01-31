@@ -298,7 +298,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::vector<FOdysseyVectorSection> mSectionBuffer;
         std::vector<FOdysseyVectorSection> mGapSectionBuffer;
         std::vector<FOdysseyVectorSegmentCubicGap> mGapSegmentBuffer;
-        uint32 mPartnerCount;
+        uint32 mVertexID;
         bool bMultithreaded;
         bool bPainted;
         bool bMonochrome;

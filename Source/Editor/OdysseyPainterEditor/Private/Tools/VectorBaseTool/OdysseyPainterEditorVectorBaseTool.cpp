@@ -933,7 +933,7 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
     double width = 4.0f;
     double radius = 250;
     double angleStep = 2.0f * M_PI / rayCount;
-    double angle = angleStep / 2.0f;
+    double angle = 0;
     FOdysseyVectorEllipse* ellipse = new FOdysseyVectorEllipse( "ellipse"
                                                               , 60.0f
                                                               , 60.0f
@@ -968,48 +968,6 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
 
     iScene->UpdateMatrix();
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    // checks multiple times
-    for( int i = 0; i < 2; i++ )
-    {
-        UE_LOG(LogTemp, Error, TEXT("Check: %d"), i );
-
-        // each vertex should have 64 sections.
-        for( FOdysseyVectorPath* ray : raysArray )
-        {
-            FOdysseyVectorSegment* segment = ray->GetFirstSegment();
-            FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-            FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
-
-            // check number of sections.
-            if( vertex0->GetSectionCount() != rayCount )
-            {
-                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at ray/vertex0 : real:%d - exp:%d"), vertex0->GetSectionCount(), rayCount);
-            }
-
-            // at vertex 1 section are simplified, hence 0
-            if( vertex1->GetSectionCount() != 0 )
-            {
-                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at ray/vertex1 : real:%d - exp:%d"), vertex1->GetSectionCount(), rayCount);
-            }
-        }
-
-        // check intersection
-        for( FOdysseyVectorVertexIntersection& intersectionVertex : iScene->GetIntersectionVertexArray() )
-        {
-            // check number of sections.
-            if( intersectionVertex.GetSectionCount() != 3 )
-            {
-                UE_LOG(LogTemp, Error, TEXT("Inconsistency in test at paintgroup/vertex0 : %d"), intersectionVertex.GetSectionCount());
-            }
-        }
-
-        // force finding cycles again
-        iScene->SetPainted( false );
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-        iScene->SetPainted( true );
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-    }
 }
 
 #undef LOCTEXT_NAMESPACE

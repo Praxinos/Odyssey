@@ -58,6 +58,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
                                       , const FKey& iKey ) override;
         //virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
         //                                  , const FName& iPropertyName ) override;
+        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
     protected:
         virtual void ExtendContextMenu( FMenuBuilder& menu );
@@ -90,6 +91,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
 
         UPROPERTY( EditAnywhere, Category = PaintBucketTool )
         eBucketColorMode ColorMode;
+
+        UPROPERTY( EditAnywhere, Category = PaintBucketTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        double Opacity;
 
         UPROPERTY( EditAnywhere, Category = PaintBucketTool )
         FColor Color1;

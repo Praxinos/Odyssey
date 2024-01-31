@@ -433,14 +433,14 @@ UOdysseyPainterEditorVectorSelectionTool::GetSelectionShape()
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorSelectionTool::CreateTopTabWidget()
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> selectionShapePropertyView = propertyEditorModule.CreateSingleProperty(this, "SelectionShape", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> selectionShapeHandle = selectionShapePropertyView->GetPropertyHandle();
-
     // we create the topTab widget only once, or else it creates a sizing issue in the top tab
     if( mTopTabWidget.Get() == nullptr )
     {
+        FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+        FSinglePropertyParams defaultPropertyParams;
+        const TSharedPtr<ISinglePropertyView> selectionShapePropertyView = propertyEditorModule.CreateSingleProperty(this, "SelectionShape", defaultPropertyParams);
+        TSharedPtr<class IPropertyHandle> selectionShapeHandle = selectionShapePropertyView->GetPropertyHandle();
+
         mTopTabWidget = SNew(SUniformWrapPanel)
                        .SlotPadding(FVector2D(3.f, 0.f))
                        .EvenRowDistribution(true)
@@ -454,6 +454,8 @@ UOdysseyPainterEditorVectorSelectionTool::CreateTopTabWidget()
                            CreatePropertyWidget(selectionShapeHandle, selectionShapePropertyView).ToSharedRef()
                        ];
     }
+
+    //mTopTabWidget.Get()->Invalidate( EInvalidateWidgetReason::ChildOrder );
 
     return mTopTabWidget.ToSharedRef();
 }

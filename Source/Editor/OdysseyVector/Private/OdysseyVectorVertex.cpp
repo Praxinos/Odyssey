@@ -107,6 +107,8 @@ FOdysseyVectorVertex::GetCandidateSections( FOdysseyVectorSection* iLastSection
                                           , std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
                                           , std::vector<FCycleSectionInfo>& oCandidateSectionArray )
 {
+    oPartnerVertexArray.push_back( this );
+
     for( FOdysseyVectorSection* section : mSectionList )
     {
         if( section->GetLength() )
@@ -185,8 +187,6 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection
     partnerVertexArray.reserve( 4 );
     candidateSectionArray.reserve( 4 );
 
-    partnerVertexArray.push_back( this );
-
     GetCandidateSections( iLastSection
                         , iLastSectionVertexIndex
                         , partnerVertexArray
@@ -202,7 +202,7 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection
         return FCycleSectionInfo( nextSection, ::ULIS::FVec2D( 0.0f, 0.0f ), nextSectionVertexIndex );
     }
 */
-
+//UE_LOG(LogTemp, Warning, TEXT("Hello World %d"), candidateSectionArray.size() );
     //if( candidateSectionArray.size() > 2 )
     if( candidateSectionArray.size() )
     {

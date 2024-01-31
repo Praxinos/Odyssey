@@ -49,6 +49,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
         UPROPERTY( EditAnywhere, Category = Advanced )
         bool Realtime; // relatime updates
 
-        UPROPERTY( EditAnywhere, Category = Advanced )
+        //UPROPERTY( EditAnywhere, Category = Advanced )
         bool Multithreaded;
 };

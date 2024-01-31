@@ -219,6 +219,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
 
         FOdysseyVectorOffsetCurveCubic* GetOffsetCurve( uint32 iID );
         virtual ::ULIS::FVec2D GetOffsetPoint( uint32 iSide, double iT ) override;
+        uint32 CompareBezier( FOdysseyVectorSegmentCubic* iOtherCubicSegment );
 
     private:
         // static

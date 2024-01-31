@@ -1245,3 +1245,19 @@ FOdysseyVectorSegmentCubic::GetOffsetPoint( uint32 iSide, double iT )
 {
     return mOffsetCurve[iSide].GetPointAt( iT );
 }
+
+uint32
+FOdysseyVectorSegmentCubic::CompareBezier( FOdysseyVectorSegmentCubic* iOtherCubicSegment )
+{
+    ::ULIS::FVec2D* otherBezier = iOtherCubicSegment->GetBezier();
+
+    if( ( otherBezier[0] == mBezier[0] )
+      &&( otherBezier[1] == mBezier[1] )
+      &&( otherBezier[2] == mBezier[2] )
+      &&( otherBezier[3] == mBezier[3] ) )
+    {
+        return 0;
+    }
+
+    return 1;
+}
