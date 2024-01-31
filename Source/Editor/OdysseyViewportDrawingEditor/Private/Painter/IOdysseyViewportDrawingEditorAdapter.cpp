@@ -165,19 +165,23 @@ IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FV
     TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
 
     // Compute a world space ray from the screen space mouse coordinates
-    FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
+    /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
         iViewportClient->Viewport,
         iViewportClient->GetScene(),
         iViewportClient->EngineShowFlags)
         .SetRealtimeUpdate(iViewportClient->IsRealtime()));
     FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
 
-    const FViewportCursorLocation mouseViewportRay(view, iViewportClient, iPositionInViewport.X, iPositionInViewport.Y);
+    const FViewportCursorLocation mouseViewportRay(view, iViewportClient, iPositionInViewport.X, iPositionInViewport.Y); */
+
+    FVector rayOrigin;
+    FVector rayDirection;
+    GetRayParamsFromViewportPosition(iViewportClient, iPositionInViewport.X, iPositionInViewport.Y, &rayOrigin, &rayDirection);
 
     FHitResult traceHitResult(1.0f);
-    const FVector rayEnd(mouseViewportRay.GetOrigin() + mouseViewportRay.GetDirection() * HALF_WORLD_MAX);
+    const FVector rayEnd(rayOrigin + rayDirection * HALF_WORLD_MAX);
 
-    meshAdapter->LineTraceComponent(traceHitResult, mouseViewportRay.GetOrigin(), rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+    meshAdapter->LineTraceComponent(traceHitResult, rayOrigin, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
 
     // Convert trace to UV position
     FVector2D coord;
@@ -211,13 +215,13 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
         return false;
 
     // Compute a world space ray from the screen space mouse coordinates
-    FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
+    /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
         iViewportClient->Viewport,
         iViewportClient->GetScene(),
         iViewportClient->EngineShowFlags)
         .SetRealtimeUpdate(iViewportClient->IsRealtime()));
     FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
-    const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY());
+    const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY()); */
 
     FVector2D pointPos(iViewport->GetMouseX(), iViewport->GetMouseY());
     bool isTextureBased = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;
@@ -226,8 +230,7 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
 
     mLastStrokeRay = mCurrentStrokeRay;
     
-    mCurrentStrokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
-    mCurrentStrokeRay.mRayDirection = mouseViewportRay.GetDirection();
+    GetRayParamsFromViewportPosition(iViewportClient, iViewport->GetMouseX(), iViewport->GetMouseY(), &mCurrentStrokeRay.mRayOrigin, &mCurrentStrokeRay.mRayDirection);
     mCurrentStrokeRay.mPoint = FOdysseyPoint::DefaultPoint();
     mCurrentStrokeRay.mPoint.x = pointPos.X;
     mCurrentStrokeRay.mPoint.y = pointPos.Y;
@@ -313,13 +316,13 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     //---
 
     // Compute a world space ray from the screen space mouse coordinates
-    FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
+    /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
         iViewportClient->Viewport,
         iViewportClient->GetScene(),
         iViewportClient->EngineShowFlags)
         .SetRealtimeUpdate(iViewportClient->IsRealtime()));
     FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
-    const FViewportCursorLocation mouseViewportRay(view,(FEditorViewportClient*)iViewport->GetClient(),iViewport->GetMouseX(),iViewport->GetMouseY());
+    const FViewportCursorLocation mouseViewportRay(view,(FEditorViewportClient*)iViewport->GetClient(),iViewport->GetMouseX(),iViewport->GetMouseY()); */
 
     FVector2D pointPos(iViewport->GetMouseX(), iViewport->GetMouseY());
     bool isTextureBased = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;
@@ -345,8 +348,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 
     //Init our StrokeRay, having all the basic info to draw 
     FOdysseyRay strokeRay;
-    strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
-    strokeRay.mRayDirection = mouseViewportRay.GetDirection();
+    GetRayParamsFromViewportPosition(iViewportClient, iViewport->GetMouseX(), iViewport->GetMouseY(), &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
     strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
     strokeRay.mPoint.x = pointPos.X;
     strokeRay.mPoint.y = pointPos.Y;
@@ -402,13 +404,13 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
         return true;
 
     // Compute a world space ray from the screen space mouse coordinates
-    FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
+    /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
         iViewportClient->Viewport,
         iViewportClient->GetScene(),
         iViewportClient->EngineShowFlags)
         .SetRealtimeUpdate(iViewportClient->IsRealtime()));
     FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
-    const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY());
+    const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY()); */
 
     FVector2D pointPos(iViewport->GetMouseX(), iViewport->GetMouseY());
     bool isTextureBased = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;
@@ -425,8 +427,7 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
 
     //Init our StrokeRay, having all the basic info to draw 
     FOdysseyRay strokeRay;
-    strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
-    strokeRay.mRayDirection = mouseViewportRay.GetDirection();
+    GetRayParamsFromViewportPosition(iViewportClient, iViewport->GetMouseX(), iViewport->GetMouseY(), &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
     strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
     strokeRay.mPoint.x = pointPos.X;
     strokeRay.mPoint.y = pointPos.Y;
@@ -566,6 +567,37 @@ IOdysseyViewportDrawingEditorAdapter::StopStylusInputRecord()
     mIsRecordingStylus = false;
 }
 
+void
+IOdysseyViewportDrawingEditorAdapter::GetRayParamsFromViewportPosition(FEditorViewportClient* iViewportClient, float iX, float iY, FVector* oOrigin, FVector* oDirection)
+{
+    // Compute a world space ray from the screen space mouse coordinates
+    FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
+        iViewportClient->Viewport,
+        iViewportClient->GetScene(),
+        iViewportClient->EngineShowFlags)
+        .SetRealtimeUpdate(iViewportClient->IsRealtime()));
+    FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
+
+    FVector4 ScreenPos = view->CursorToScreen(iX, iY, 0);
+
+    const FMatrix InvViewMatrix = view->ViewMatrices.GetInvViewMatrix();
+    const FMatrix InvProjMatrix = view->ViewMatrices.GetInvProjectionMatrix();
+
+    const double ScreenX = ScreenPos.X;
+    const double ScreenY = ScreenPos.Y;
+
+    if (iViewportClient->IsPerspective())
+    {
+        *oOrigin = view->ViewMatrices.GetViewOrigin();
+        *oDirection = InvViewMatrix.TransformVector(FVector(InvProjMatrix.TransformFVector4(FVector4(ScreenX * GNearClippingPlane, ScreenY * GNearClippingPlane, 0.0f, GNearClippingPlane)))).GetSafeNormal();
+    }
+    else
+    {
+        *oOrigin = InvViewMatrix.TransformFVector4(InvProjMatrix.TransformFVector4(FVector4(ScreenX, ScreenY, 0.5f, 1.0f)));
+        *oDirection = InvViewMatrix.TransformVector(FVector(0, 0, 1)).GetSafeNormal();
+    }
+}
+
 FOdysseyRay
 IOdysseyViewportDrawingEditorAdapter::StylusStateToRay(const FStylusState& iState)
 {
@@ -576,15 +608,6 @@ IOdysseyViewportDrawingEditorAdapter::StylusStateToRay(const FStylusState& iStat
     TSharedPtr< SViewport > viewportWidget = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
     if (!viewportWidget)
         return FOdysseyRay();
-
-    // Compute a world space ray from the screen space mouse coordinates
-    FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
-        viewportClient->Viewport,
-        viewportClient->GetScene(),
-        viewportClient->EngineShowFlags)
-        .SetRealtimeUpdate(viewportClient->IsRealtime()));
-    FSceneView* view = viewportClient->CalcSceneView(&viewFamily);
-    const FViewportCursorLocation mouseViewportRay(view, viewportClient, mLastKnownViewport->GetMouseX(), mLastKnownViewport->GetMouseY());
 
     //Init our StrokeRay, having all the basic info to draw 
     float scaleDPI = viewportWidget->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
@@ -602,8 +625,7 @@ IOdysseyViewportDrawingEditorAdapter::StylusStateToRay(const FStylusState& iStat
         return FOdysseyRay();
 
     FOdysseyRay strokeRay;
-    strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
-    strokeRay.mRayDirection = mouseViewportRay.GetDirection();
+    GetRayParamsFromViewportPosition(viewportClient, positionInViewport.X, positionInViewport.Y, &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
     strokeRay.mPoint = FOdysseyPoint(             pointPos.X
                                                 , pointPos.Y
                                                 , iState.GetZ()

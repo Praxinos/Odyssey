@@ -68,6 +68,7 @@ private:
     void StopStylusInputRecord();
     FOdysseyRay StylusStateToRay(const FStylusState& iState);
     void ReadStylusInput();
+    void GetRayParamsFromViewportPosition(FEditorViewportClient* iViewportClient, float iX, float iY, FVector* oOrigin, FVector* oDirection);
 
 protected: 
     virtual ::ULIS::FEvent StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams) = 0;
