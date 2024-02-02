@@ -13,6 +13,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorBucketView.h"
 #include "OdysseyPainterEditor.h"
+#include "ISinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -28,6 +29,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
     , ColorMode ( eBucketColorMode::SolidColor )
     , Color1( 255, 255, 255, 255 )
     , Color2( 255, 255, 255, 255 )
+    , Opacity( 1.0f )
     , PickingRadius( 10.0f )
     , mPickedBucket( nullptr )
     , mShowControls( false )
@@ -315,7 +317,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket
             uint8 R = rgba8.R8();
             uint8 G = rgba8.G8();
             uint8 B = rgba8.B8();
-            uint8 A = rgba8.A8();
+            uint8 A = Opacity * 255/*rgba8.A8()*/;
 
             iBucket->SetSolidColor( R, G, B, A );
         }
@@ -580,32 +582,32 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.name", "Delete Bucket")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.tooltip", "Delete Bucket")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.name", "Propagate Bucket")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip", "Propagate Bucket")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.name", "Unpropagate Bucket")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip", "Unpropagate Bucket")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.name", "Copy Bucket Param")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.tooltip", "Copy Bucket Param")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::CopyBucketParam, mPickedBucket )));
             iMenu.AddMenuEntry(
               LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.name", "Paste Bucket Param")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.tooltip", "Paste Bucket Param")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam, mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.name", "Bucket properties")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.tooltip", "Bucket Properties")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties, GetEditor(), mPickedBucket )));
         }
         iMenu.EndSection();
@@ -709,6 +711,34 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
     iDestinationBucket->SetCoords( destinationBucketCoords.x, destinationBucketCoords.y, 0.0f );
 
     iDestinationBucket->Invalidate();
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPaintBucketTool::CreateTopTabWidget()
+{
+    // we create the topTab widget only once, or else it creates a sizing issue in the top tab
+    if( mTopTabWidget.Get() == nullptr )
+    {
+        FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+        FSinglePropertyParams defaultPropertyParams;
+        const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
+        TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
+
+        mTopTabWidget = SNew(SUniformWrapPanel)
+                       .SlotPadding(FVector2D(3.f, 0.f))
+                       .EvenRowDistribution(true)
+                       .HAlign(HAlign_Left)
+                       + SUniformWrapPanel::Slot()
+                       [
+                           SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+                       ]
+                       + SUniformWrapPanel::Slot()
+                       [
+                           CreatePropertyWidget(opacityHandle, opacityPropertyView).ToSharedRef()
+                       ];
+    }
+
+    return mTopTabWidget.ToSharedRef();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -261,10 +261,10 @@ FOdysseyVector::PrintMatrix( char* name, BLMatrix2D& matrix )
 }
 
 void
-FOdysseyVector::BezierExtract( ::ULIS::FVec2D& iP0
-                             , ::ULIS::FVec2D& iP1
-                             , ::ULIS::FVec2D& iP2
-                             , ::ULIS::FVec2D& iP3
+FOdysseyVector::BezierExtract( const ::ULIS::FVec2D& iP0
+                             , const ::ULIS::FVec2D& iP1
+                             , const ::ULIS::FVec2D& iP2
+                             , const ::ULIS::FVec2D& iP3
                              , double fromT
                              , double toT
                              , ::ULIS::FVec2D& oP0

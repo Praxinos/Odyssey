@@ -1607,13 +1607,13 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyVectorGroupPaint* iScene
 
     if( ( iVertexA->GetSegmentCount() == 1 ) && ( iVertexB->GetSegmentCount() == 1 ) )
     {
-        if( iVertexA->GetPath() != iVertexB->GetPath() )
+        if( iVertexA->GetOwnerAsPath() != iVertexB->GetOwnerAsPath() )
         {
             // TODO: remove vertexB->GetPath() from selected objects.
-            mergedPath = iVertexB->GetPath();
+            mergedPath = iVertexB->GetOwnerAsPath();
 
-            iVertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
-            iVertexA->GetPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
+            iVertexB->GetOwnerAsPath()->GetParent()->RemoveChild( mergedPath );
+            iVertexA->GetOwnerAsPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
             // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
             iVertexB = mergedVertexArray[iVertexB->GetID()];
 

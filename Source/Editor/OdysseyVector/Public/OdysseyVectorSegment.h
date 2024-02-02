@@ -5,8 +5,8 @@
 #include <Image/Block.h>
 
 #include "OdysseyVectorPolygon.h"
-#include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
+#include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorLink.h"
 
 class FOdysseyVectorObject;
@@ -38,7 +38,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        FOdysseyVectorSegment( FOdysseyVectorPath* iPath
+        FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
                              , FOdysseyVectorVertex* iVertex0
                              , FOdysseyVectorVertex* iVertex1 );
 
@@ -63,7 +63,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         virtual void DrawStructure( BLContext* iBLContext, FOdysseyVectorObject* iParentObject, bool iWorld ){};
 
-        uint32 GetIntersectionVertexCount();
+        uint32 GetIntersectionCount();
 
         void GetIntersectionVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
         void GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray );
@@ -83,23 +83,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                                   , double iDistanceTolerance
                                   , double &oSmallestDistance ){ return false; };
 
-       /**
-         * @brief Get the list of intersection vertices
-         * @return A reference to the list of intersection vertices
-         */
-        std::list<FOdysseyVectorVertexIntersection*>& GetIntersectionVertexList();
+        std::list<FOdysseyVectorIntersection*>& GetIntersectionList();
 
        /**
          * @brief Get a pointer to the path this segment belongs to
          * @return a pointer to the path this segment belongs to
          */
-        FOdysseyVectorPath* GetPath();
+        FOdysseyVectorPath* GetOwnerAsPath();
+        FOdysseyVectorObject* GetOwner();
 
        /**
          * @brief Set the path this segment belongs to. This is called by the path itself when the segment is added.
          * @param a pointer to the path this segment belongs to
          */
-        void SetPath( FOdysseyVectorPath* iPath );
+        void SetOwner( FOdysseyVectorObject* iOwner );
 
        /**
          * @brief Update cached data for this segment.
@@ -128,11 +125,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          */
         void ClearIntersections();
 
-       /**
-         * @brief Add an intersection point. This automatically creates the attached sections.
-         * @param iIntersectionVertex the intersection vertex
-         */
-        void AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex );
+
+        void AddIntersection ( FOdysseyVectorIntersection* iIntersection );
 
        /**
          * @brief Get the number of polygons in cache.
@@ -189,15 +183,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         ::ULIS::FRectD& GetBBoxInParent();
         void SetBBoxInParent( const ::ULIS::FRectD& iBBoxInParent );
         virtual ::ULIS::FVec2D GetOffsetPoint( uint32 iSide, double iT );
-        FOdysseyVectorVertexIntersection* GetClosestIntersectionVertex( FOdysseyVectorVertex* iVertex );
+        FOdysseyVectorIntersection* GetClosestIntersection( FOdysseyVectorVertex* iVertex );
+
+        void AddIntersectionSlot();
+        uint32 GetIntersectionSlotCount();
 
     protected:
         void DrawFractionCache( BLContext* iBLContext );
 
     protected:
         std::vector<FOdysseyVectorFraction> mFractionCache;
-        std::list<FOdysseyVectorVertexIntersection*> mIntersectionVertexList;
-        FOdysseyVectorPath* mPath;
+        std::list<FOdysseyVectorIntersection*> mIntersectionList;
+        FOdysseyVectorObject* mOwner;
         ::ULIS::FRectD mBBox;
         ::ULIS::FRectD mBBoxInParent;
         bool mIsInvalidated;
@@ -205,4 +202,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         uint32 mID;
         uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
         double mLength;
+        uint32 mIntersectionSlotCount;
 };

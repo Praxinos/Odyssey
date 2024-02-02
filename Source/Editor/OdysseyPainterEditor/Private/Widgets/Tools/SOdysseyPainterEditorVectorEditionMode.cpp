@@ -86,18 +86,6 @@ SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags( ECheckBoxState iN
 
     mEditor->SetVectorHUDFlags( ( mEditor->GetVectorHUDFlags() & (~FOdysseyVectorHUD::HUD_MODE_ALL) ) | iViewMode );
 
-    if( iViewMode & FOdysseyVectorHUD::HUD_MODE_OBJECT )
-    {
-        mObjectModeCheckbox.Get()->SetIsChecked( ECheckBoxState::Checked );
-        mVertexModeCheckbox.Get()->SetIsChecked( ECheckBoxState::Unchecked );
-    }
-
-    if( iViewMode & FOdysseyVectorHUD::HUD_MODE_VERTEX )
-    {
-        mObjectModeCheckbox.Get()->SetIsChecked(ECheckBoxState::Unchecked);
-        mVertexModeCheckbox.Get()->SetIsChecked( ECheckBoxState::Checked );
-    }
-
     if( mediaVectors.Num() )
     {
         FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();

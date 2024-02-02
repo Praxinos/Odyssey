@@ -431,11 +431,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         /**
          * @brief Get all vertices and sections as arrays. For use by the GroupPaint class
-         * @param oVertexArray
+         * @param oVertexIndexArray
          * @param oSectionArray
          */
-        void ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>& oVertexArray
-                                    , std::vector<FOdysseyVectorSection*>& oSectionArray );
+        void ToVertexIndexAndSectionArray( std::vector<uint32>& oVertexIndexArray
+                                         , std::vector<FOdysseyVectorSection*>& oSectionArray );
 
         /**
          * @brief Unselect all vertices.

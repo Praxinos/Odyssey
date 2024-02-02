@@ -18,12 +18,12 @@ FOdysseyVectorCycle::~FOdysseyVectorCycle()
 
 //static
 FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
-                                        , const std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                        , const std::vector<uint32>& iVertexIndexArray
                                         , const std::vector<FOdysseyVectorSection*>& iSectionArray )
     : mOwner( iOwner )
     , mBucket( nullptr )
     , mPropagatedBucket( nullptr )
-    , mContourVertexArray (iVertexArray)
+    , mContourVertexIndexArray (iVertexIndexArray)
     , mContourSectionArray (iSectionArray)
     , mParentCycle( nullptr )
     , mPropagated( false )
@@ -112,7 +112,10 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
     // Then check if all vertices lies within the parent candidate
     for( int i = 0; i < mContourSectionArray.size(); i++ )
     {
-        ::ULIS::FVec2D vCoords = mContourSectionArray[i]->GetVertexCoords( mContourVertexArray[i] );
+        FOdysseyVectorSection* section = mContourSectionArray[i];
+        uint32 contourVertexIndex = mContourVertexIndexArray[i];
+        FOdysseyVectorVertex* contourVertex = section->GetVertex( contourVertexIndex );
+        ::ULIS::FVec2D vCoords = section->GetVertexCoords( contourVertex );
         BLPoint pt = BLPoint( vCoords.x, vCoords.y );
         uint32 ret = iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
 
@@ -135,8 +138,10 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
 
     if ( mContourSectionArray.size() ) 
     {
+        FOdysseyVectorSection* firstSection = mContourSectionArray[0];
+        FOdysseyVectorVertex* firstVertex = firstSection->GetVertex( mContourVertexIndexArray[0] );
         // Note: section::GetVertexCoords() return the coords in paintgroup's coordinates
-        ::ULIS::FVec2D originAt = mContourSectionArray[0]->GetVertexCoords( mContourVertexArray[0] );
+        ::ULIS::FVec2D originAt = mContourSectionArray[0]->GetVertexCoords( firstVertex );
 
         mContourPath.moveTo( originAt.x, originAt.y );
 
@@ -144,28 +149,15 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
         {
             int n = ( i + 1 ) % arraySize;
             FOdysseyVectorSection* section = mContourSectionArray[i];
-            FOdysseyVectorVertex* sectionVertex0 = section->GetVertex(0);
-            FOdysseyVectorVertex* sectionVertex1 = section->GetVertex(1);
+            uint32 sectionVertexIndex = mContourVertexIndexArray[i];
+            uint32 sectionNextVertexIndex = ( sectionVertexIndex == 0 ) ? 1 : 0;
             ::ULIS::FVec2D* sectionBezier = section->GetBezier();
-            FOdysseyVectorVertex* vertexi = mContourVertexArray[i];
-            FOdysseyVectorVertex* vertexn = mContourVertexArray[n];
 
             section->AddCycle( this );
 
-            if( vertexn->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
-            {
-                FOdysseyVectorVertexIntersection* intersectionVertex = static_cast<FOdysseyVectorVertexIntersection*>(vertexn);
-
-                if( ( mContourSectionArray[i]->GetSegment() != mContourSectionArray[n]->GetSegment() )
-                 || ( intersectionVertex->GetIntersection()->SelfIntersects() == true ) )
-                {
-                    vertexn = intersectionVertex->GetPartner();
-                }
-            }
-
             // check if we need to revert the bezier. Indeed, a cycle is a combination of sections
             // that may not go the same way. We have to run through them the same way.
-            if( vertexi == sectionVertex0 )
+            if ( sectionVertexIndex < sectionNextVertexIndex )
             {
                 mContourPath.cubicTo( sectionBezier[1].x, sectionBezier[1].y
                                     , sectionBezier[2].x, sectionBezier[2].y
@@ -319,9 +311,9 @@ ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
         FOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
         FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
         FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
-        FOdysseyVectorPath* path = vertex0->GetPath();
-        BLPoint pt0 = path->GetWorldMatrix().mapPoint( vertex0->GetCoords().x, vertex0->GetCoords().y );
-        BLPoint pt1 = path->GetWorldMatrix().mapPoint( vertex1->GetCoords().x, vertex1->GetCoords().y );
+        FOdysseyVectorObject* owner = vertex0->GetOwner();
+        BLPoint pt0 = owner->GetWorldMatrix().mapPoint( vertex0->GetCoords().x, vertex0->GetCoords().y );
+        BLPoint pt1 = owner->GetWorldMatrix().mapPoint( vertex1->GetCoords().x, vertex1->GetCoords().y );
 
         UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
     }

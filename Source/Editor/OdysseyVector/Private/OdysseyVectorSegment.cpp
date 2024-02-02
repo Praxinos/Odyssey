@@ -1,19 +1,21 @@
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorIntersection.h"
 
 FOdysseyVectorSegment::~FOdysseyVectorSegment()
 {
 }
 
-FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorPath* iPath
+FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1 )
     : FOdysseyVectorLink( iVertex0, iVertex1 )
-    , mPath( iPath )
+    , mOwner( iOwner )
     , mIsInvalidated( false )
     , mIsPaintingReady( false )
     , mPaintingCode( 0 )
     , mLength( 0.0f )
+    , mIntersectionSlotCount( 0 )
 {
 }
 
@@ -57,13 +59,13 @@ FOdysseyVectorSegment::GetFractionCacheEndPointInParent()
     return ::ULIS::FVec2D( 0.0f, 0.0f );
 }
 
-FOdysseyVectorVertexIntersection*
-FOdysseyVectorSegment::GetClosestIntersectionVertex( FOdysseyVectorVertex* iVertex )
+FOdysseyVectorIntersection*
+FOdysseyVectorSegment::GetClosestIntersection( FOdysseyVectorVertex* iVertex )
 {
-    if( mIntersectionVertexList.size() )
+    if( mIntersectionList.size() )
     {
-        return ( mPoint[0] == iVertex ) ? mIntersectionVertexList.front()
-                                        : mIntersectionVertexList.back();
+        return ( mPoint[0] == iVertex ) ? mIntersectionList.front()
+                                        : mIntersectionList.back();
     }
 
     return nullptr;
@@ -72,7 +74,7 @@ FOdysseyVectorSegment::GetClosestIntersectionVertex( FOdysseyVectorVertex* iVert
 void
 FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
 {
-    BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
+    BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
 
     iBLContext->setStrokeWidth( 1.0f );
 
@@ -212,52 +214,57 @@ FOdysseyVectorSegment::GetVertex( uint32 iVertexID )
 }
 
 void
-FOdysseyVectorSegment::SetPath( FOdysseyVectorPath* iPath )
+FOdysseyVectorSegment::SetOwner( FOdysseyVectorObject* iOwner )
 {
-    mPath = iPath;
+    mOwner = iOwner;
 }
 
 FOdysseyVectorPath*
-FOdysseyVectorSegment::GetPath()
+FOdysseyVectorSegment::GetOwnerAsPath()
 {
-    return mPath;
+    return static_cast<FOdysseyVectorPath*>(mOwner);
 }
 
-// MUST be called only on segments belonging to this path (because of the section)
-void
-FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorVertexIntersection* iIntersectionVertex )
+FOdysseyVectorObject*
+FOdysseyVectorSegment::GetOwner()
 {
-    double t = iIntersectionVertex->GetT( this );
-    std::list<FOdysseyVectorVertexIntersection*>::iterator it = std::find_if ( mIntersectionVertexList.begin()
-                                                                             , mIntersectionVertexList.end()
-                                                                             , [&t,this]( FOdysseyVectorVertexIntersection* iVertex )
-                                                                               {
+    return mOwner;
+}
 
-                                                                                   return ( iVertex->GetT( this ) > t );
-                                                                               } );
+void
+FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorIntersection* iIntersection )
+{
+    std::list<FOdysseyVectorIntersection*>::iterator it = std::find_if ( mIntersectionList.begin()
+                                                                       , mIntersectionList.end()
+                                                                       , [ this
+                                                                         , iIntersection ]( FOdysseyVectorIntersection* intersection )
+                                                                        {
 
-    mIntersectionVertexList.insert( it, iIntersectionVertex );
+                                                                            return ( intersection->GetSegmentT() > iIntersection->GetSegmentT() );
+                                                                        } );
 
-/*
-    FOdysseyVectorSection* section = GetSection ( iIntersectionVertex->GetT( this ) );
-    FOdysseyVectorVertex* vertex0 = section->GetVertex(0);
-    FOdysseyVectorVertex* vertex1 = section->GetVertex(1);
-    FOdysseyVectorSection* subSection[2] = { new FOdysseyVectorSection ( this, vertex0            , iIntersectionVertex )
-                                           , new FOdysseyVectorSection ( this, iIntersectionVertex, vertex1             ) };
-*/
-    //if( t )
-    
+    mIntersectionList.insert( it, iIntersection );
+}
 
-   // mIntersectionVertexList.push_back( iIntersectionVertex );
+void
+FOdysseyVectorSegment::AddIntersectionSlot()
+{
+    mIntersectionSlotCount++;
+}
+
+uint32
+FOdysseyVectorSegment::GetIntersectionSlotCount()
+{
+    return mIntersectionSlotCount;
 }
 
 // MUST be called only on segments belonging to this path (because of the section)
 void
 FOdysseyVectorSegment::ClearIntersections()
 {
-    // do not free the intersection vertex here
-    // Leave it to the paintgroup.
-    mIntersectionVertexList.clear();
+    mIntersectionList.clear();
+
+    mIntersectionSlotCount = 0;
 }
 
 bool
@@ -269,9 +276,14 @@ FOdysseyVectorSegment::IsInvalidated()
 void
 FOdysseyVectorSegment::Invalidate()
 {
-    if( mPath ) // Note: GroupPaint "gap segments" can be orphan
+    if( mOwner )
     {
-        mPath->InvalidateSegment( this );
+        if( mOwner->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = GetOwnerAsPath();
+
+            path->InvalidateSegment( this );
+        }
 
         mIsInvalidated = true;
 
@@ -285,25 +297,10 @@ FOdysseyVectorSegment::Update()
     mIsInvalidated = false;
 }
 
-std::list<FOdysseyVectorVertexIntersection*>&
-FOdysseyVectorSegment::GetIntersectionVertexList()
+std::list<FOdysseyVectorIntersection*>&
+FOdysseyVectorSegment::GetIntersectionList()
 {
-    return mIntersectionVertexList;
-}
-
-uint32
-FOdysseyVectorSegment::GetIntersectionVertexCount()
-{
-    return mIntersectionVertexList.size();
-}
-
-void
-FOdysseyVectorSegment::GetIntersectionVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray )
-{
-    for( FOdysseyVectorVertexIntersection* intersectionVertex : mIntersectionVertexList )
-    {
-        oVertexArray.push_back( intersectionVertex );
-    }
+    return mIntersectionList;
 }
 
 bool
@@ -345,14 +342,6 @@ FOdysseyVectorSegment::GetHandleVector( uint32 iHandleID, bool iNormalize )
 FOdysseyVectorSegment::GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize )
 {
     return ::ULIS::FVec2D( 0.0f, 0.0f );
-}
-
-void
-FOdysseyVectorSegment::GetAllVertices( std::vector<FOdysseyVectorVertex*>& oVertexArray )
-{
-    oVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(mPoint[0]) );
-    GetIntersectionVertices( oVertexArray );
-    oVertexArray.push_back( static_cast<FOdysseyVectorVertex*>(mPoint[1]) );
 }
 
 void

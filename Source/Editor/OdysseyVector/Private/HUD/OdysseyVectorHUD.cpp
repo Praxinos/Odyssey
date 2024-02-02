@@ -283,7 +283,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
                              , bool iWorld
                              , uint64 iHUDFlags )
 {
-    FOdysseyVectorPath* path = iVertex->GetPath();
+    FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
     BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
     // TODO: compute that once and pass it as parameter for all vertices
     BLPoint point = HUDMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );
@@ -367,8 +367,8 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
                                    , bool iWorld
                                    , uint64 iHUDFlags )
 {
-    FOdysseyVectorPath* path = iCubicSegment->GetPath();
-    BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
+    FOdysseyVectorObject* owner = iCubicSegment->GetOwner();
+    BLMatrix2D& HUDMatrix = iWorld ? owner->GetWorldMatrix() : owner->GetLocalMatrix();
     FOdysseyVectorVertex* vertex[2] = { iCubicSegment->GetVertex(0)
                                       , iCubicSegment->GetVertex(1) };
     FOdysseyVectorHandleSegment* handle[2] = { iCubicSegment->GetHandle(0)

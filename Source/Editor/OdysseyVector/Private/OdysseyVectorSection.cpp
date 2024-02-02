@@ -1,25 +1,22 @@
 #include "OdysseyVectorSection.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorSegmentCubic.h"
-
-
+#include "OdysseyVectorObject.h"
 
 FOdysseyVectorSection::~FOdysseyVectorSection()
 {
 }
 
-FOdysseyVectorSection::FOdysseyVectorSection()
-{
-    //Init( nullptr, nullptr, nullptr );
-}
-
-FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
-                                            , BLMatrix2D* iConversionMatrix
+FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner // paintgroup
+                                            , FOdysseyVectorSegment* iSegment
                                             , FOdysseyVectorVertex* iVertex0
-                                            , FOdysseyVectorVertex* iVertex1 )
-    : FOdysseyVectorSection()
+                                            , FOdysseyVectorVertex* iVertex1
+                                            , double iSectionT0
+                                            , double iSectionT1
+                                            , std::vector<FOdysseyVectorSection*>& oShortSectionArray
+ )
 {
-    Init( iSegment, iConversionMatrix, iVertex0, iVertex1 );
+    Init( iOwner, iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1, oShortSectionArray );
 }
 
 double
@@ -41,17 +38,23 @@ FOdysseyVectorSection::IsValid()
     return true;
 }
 
-void
-FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
-                           , BLMatrix2D* iConversionMatrix
-                           , FOdysseyVectorVertex* iVertex0
-                           , FOdysseyVectorVertex* iVertex1 )
+FOdysseyVectorObject*
+FOdysseyVectorSection::GetOwner()
 {
+    return mOwner;
+}
 
-    double t0 = iVertex0->GetT( iSegment );
-    double t1 = iVertex1->GetT( iSegment );
-
-    mLength = fabs ( t1 - t0 ) * iSegment->GetLength();
+void
+FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgroup
+                           , FOdysseyVectorSegment* iSegment
+                           , FOdysseyVectorVertex* iVertex0
+                           , FOdysseyVectorVertex* iVertex1
+                           , double iT0
+                           , double iT1
+                           , std::vector<FOdysseyVectorSection*>& oShortSectionArray )
+{
+    BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
+    mLength = fabs ( iT1 - iT0 ) * iSegment->GetLength();
     mSegment = iSegment;
     mVertex[0] = iVertex0;
     mVertex[1] = iVertex1;
@@ -59,6 +62,9 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
     mCycle[1] = nullptr;
     mCycleCount = 0;
     mFlags = 0;
+    mOwner = iOwner;
+
+    Link();
 
     // Get "sub-bezier" from t values. Will help us building the adjacent cycle and draw the section.
     // We indeed have to draw the section or else you can expect a small 1-pixel gap between cycles,
@@ -67,54 +73,75 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
         ::ULIS::FVec2D* segmentBezier = cubicSegment->GetBezier();
-        ::ULIS::FVec2D subBezier[4];
+        FOdysseyVectorObject* segmentOwner = iSegment->GetOwner();
+        BLMatrix2D& segmentOwnerWorldMatrix = segmentOwner->GetWorldMatrix();
+        BLPoint worldSegmentBezier[4] = { segmentOwnerWorldMatrix.mapPoint( segmentBezier[0].x, segmentBezier[0].y )
+                                        , segmentOwnerWorldMatrix.mapPoint( segmentBezier[1].x, segmentBezier[1].y )
+                                        , segmentOwnerWorldMatrix.mapPoint( segmentBezier[2].x, segmentBezier[2].y )
+                                        , segmentOwnerWorldMatrix.mapPoint( segmentBezier[3].x, segmentBezier[3].y ) };
+
         BLPoint convertedPoint[4];
 
-        if( fabs( t0 - t1 ) < 1.0f )
+        if( fabs( iT0 - iT1 ) < 1.0f )
         {
-            FOdysseyVector::BezierExtract( segmentBezier[0], segmentBezier[1], segmentBezier[2], segmentBezier[3]
-                                         , t0, t1
-                                         , subBezier[0], subBezier[1], subBezier[2], subBezier[3] );
+            ::ULIS::FVec2D vertex0Worldcoords = iVertex0->GetWorldCoords();
+            ::ULIS::FVec2D vertex1Worldcoords = iVertex1->GetWorldCoords();
+            ::ULIS::FVec2D subBezier[4];
+
+            FOdysseyVector::BezierExtract( ::ULIS::FVec2D( worldSegmentBezier[0].x, worldSegmentBezier[0].y )
+                                         , ::ULIS::FVec2D( worldSegmentBezier[1].x, worldSegmentBezier[1].y )
+                                         , ::ULIS::FVec2D( worldSegmentBezier[2].x, worldSegmentBezier[2].y )
+                                         , ::ULIS::FVec2D( worldSegmentBezier[3].x, worldSegmentBezier[3].y )
+                                         , iT0
+                                         , iT1
+                                         , subBezier[0]
+                                         , subBezier[1]
+                                         , subBezier[2]
+                                         , subBezier[3] );
             // here we take the vertex coords and not the one we could retrieve from the 
             // subBezier because it might be inconsistent due to the value at T found from
             // performing linear intersection and not from a bezier-bezier intersection.
             // for this reason T might no be reliable to find the endpoints of our bezier.
             // we only use it for the handles. 
-            mBezier[0] = iVertex0->GetCoords();
-            mBezier[3] = iVertex1->GetCoords();
+            mBezier[0] = vertex0Worldcoords;
+            mBezier[3] = vertex1Worldcoords;
 
             mBezier[1] = mBezier[0] + ( subBezier[1] - subBezier[0] );
             mBezier[2] = mBezier[3] + ( subBezier[2] - subBezier[3] );
         }
         else
         {
-            mBezier[0] = segmentBezier[0];
-            mBezier[1] = segmentBezier[1];
-            mBezier[2] = segmentBezier[2];
-            mBezier[3] = segmentBezier[3];
+            mBezier[0].x = worldSegmentBezier[0].x;
+            mBezier[0].y = worldSegmentBezier[0].y;
+
+            mBezier[1].x = worldSegmentBezier[1].x;
+            mBezier[1].y = worldSegmentBezier[1].y;
+
+            mBezier[2].x = worldSegmentBezier[2].x;
+            mBezier[2].y = worldSegmentBezier[2].y;
+
+            mBezier[3].x = worldSegmentBezier[3].x;
+            mBezier[3].y = worldSegmentBezier[3].y;
         }
 
-        if( iConversionMatrix )
-        {
-            // convert to desired space (the paintgroup, normally)
-            convertedPoint[0] = iConversionMatrix->mapPoint( mBezier[0].x, mBezier[0].y );
-            convertedPoint[1] = iConversionMatrix->mapPoint( mBezier[1].x, mBezier[1].y );
-            convertedPoint[2] = iConversionMatrix->mapPoint( mBezier[2].x, mBezier[2].y );
-            convertedPoint[3] = iConversionMatrix->mapPoint( mBezier[3].x, mBezier[3].y );
+        // convert to desired space (the paintgroup, normally)
+        convertedPoint[0] = ownerInverseWorldMatrix.mapPoint( mBezier[0].x, mBezier[0].y );
+        convertedPoint[1] = ownerInverseWorldMatrix.mapPoint( mBezier[1].x, mBezier[1].y );
+        convertedPoint[2] = ownerInverseWorldMatrix.mapPoint( mBezier[2].x, mBezier[2].y );
+        convertedPoint[3] = ownerInverseWorldMatrix.mapPoint( mBezier[3].x, mBezier[3].y );
 
-            // copy values directly (we don't use ::ULIS::FVec2D constructor, to save some speed).
-            mBezier[0].x = convertedPoint[0].x;
-            mBezier[0].y = convertedPoint[0].y;
+        // copy values directly (we don't use ::ULIS::FVec2D constructor, to save some speed).
+        mBezier[0].x = convertedPoint[0].x;
+        mBezier[0].y = convertedPoint[0].y;
 
-            mBezier[1].x = convertedPoint[1].x;
-            mBezier[1].y = convertedPoint[1].y;
+        mBezier[1].x = convertedPoint[1].x;
+        mBezier[1].y = convertedPoint[1].y;
 
-            mBezier[2].x = convertedPoint[2].x;
-            mBezier[2].y = convertedPoint[2].y;
+        mBezier[2].x = convertedPoint[2].x;
+        mBezier[2].y = convertedPoint[2].y;
 
-            mBezier[3].x = convertedPoint[3].x;
-            mBezier[3].y = convertedPoint[3].y;
-        }
+        mBezier[3].x = convertedPoint[3].x;
+        mBezier[3].y = convertedPoint[3].y;
     }
 
     // check bezier validity. It can happen at very very small values
@@ -125,6 +152,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorSegment* iSegment
      && ( mBezier[0] == mBezier[3] ) )
     {
         mLength = 0.0f;
+
+        oShortSectionArray.push_back( this );
     }
 }
 
@@ -218,21 +247,23 @@ FOdysseyVectorSection::GetCycleCount()
 }
 
 ::ULIS::FVec2D
-FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iStraight, bool iNormalize )
+FOdysseyVectorSection::GetVectorFromVertex( uint32 iVertexIndex
+                                          , bool iStraight
+                                          , bool iNormalize )
 {
     ::ULIS::FVec2D tangent = { 0.0f, 0.0f };
 
     if( /*( mSegment == nullptr ) || */ iStraight == true )
     {
-        tangent =  ( iVertex == mVertex[0] ) ? mBezier[3] - mBezier[0]
-                                             : mBezier[0] - mBezier[3];
+        tangent =  ( iVertexIndex == 0 ) ? mBezier[3] - mBezier[0]
+                                         : mBezier[0] - mBezier[3];
     }
     else
     {
         if( mSegment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
         {
-             tangent = ( iVertex == mVertex[0] ) ?  GetTangentAt( 0.0f, false )
-                                                 : -GetTangentAt( 1.0f, false );
+             tangent = ( iVertexIndex == 0 ) ?  GetTangentAt( 0.0f, false )
+                                             : -GetTangentAt( 1.0f, false );
         }
     }
 
@@ -248,28 +279,28 @@ FOdysseyVectorSection::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
 }
 
 void 
-FOdysseyVectorSection::UnBlock( FOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::UnBlock( uint32 iVertexIndex )
 {
-    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
-                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+    uint32 blocked = ( iVertexIndex == 0 ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                           : FOdysseyVectorSection::BLOCKVERTEX1;
 
     mFlags &= (~blocked);
 }
 
 void 
-FOdysseyVectorSection::Block( FOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::Block( uint32 iVertexIndex )
 {
-    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
-                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+    uint32 blocked = ( iVertexIndex == 0 ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                           : FOdysseyVectorSection::BLOCKVERTEX1;
 
     mFlags |= blocked;
 }
 
 bool 
-FOdysseyVectorSection::IsBlocked( FOdysseyVectorVertex* iVertex )
+FOdysseyVectorSection::IsBlocked( uint32 iVertexIndex )
 {
-    uint32 blocked = ( iVertex == mVertex[0] ) ? FOdysseyVectorSection::BLOCKVERTEX0
-                                               : FOdysseyVectorSection::BLOCKVERTEX1;
+    uint32 blocked = ( iVertexIndex == 0 ) ? FOdysseyVectorSection::BLOCKVERTEX0
+                                           : FOdysseyVectorSection::BLOCKVERTEX1;
 
     return ( mFlags & blocked ) ? true : false;
 }
@@ -317,11 +348,19 @@ FOdysseyVectorSection::HasCycle( FOdysseyVectorCycle* iCycle )
     return ( ( mCycle[0] == iCycle ) || ( mCycle[1] == iCycle ) );
 }
 
+
 void
 FOdysseyVectorSection::Link()
 {
-    mVertex[0]->AddSection( this );
-    mVertex[1]->AddSection( this );
+    if( mVertex[0] != mVertex[1] )
+    {
+        mVertex[0]->AddSection( this );
+        mVertex[1]->AddSection( this );
+    }
+    else
+    {
+        mVertex[0]->AddSection( this );
+    }
 
     mFlags |= LINKED;
 }
@@ -350,4 +389,17 @@ FOdysseyVectorVertex*
 FOdysseyVectorSection::GetVertex( int iNum )
 {
     return mVertex[iNum];
+}
+
+// static
+void
+FOdysseyVectorSection::ListToArray( const std::list<FOdysseyVectorSection*>& iSectionList
+                                  , std::vector<FOdysseyVectorSection*>& oSectionArray )
+{
+    oSectionArray.reserve( iSectionList.size() );
+
+    for( FOdysseyVectorSection* section : iSectionList )
+    {
+        oSectionArray.push_back( section );
+    }
 }

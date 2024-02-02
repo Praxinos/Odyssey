@@ -49,7 +49,7 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
                          , double iCombinedOpacity
                          , uint64 iDrawingFlags )
 {
-    FOdysseyVectorPath* path = mVertex->GetPath();
+    FOdysseyVectorPath* path = mVertex->GetOwnerAsPath();
     BLMatrix2D& worldMatrix = path->GetWorldMatrix();
     FOdysseyVectorEngine* vectorEngine = path->GetEngine();
     FOdysseyVectorBrush& brush = path->GetBrush();
@@ -189,8 +189,8 @@ FOdysseyVectorJoint::GetEdgePoints( FOdysseyVectorSegment* iPrevSegment
     double cross = FOdysseyVector::Cross2D( parallelVec0, parallelVec1 );
     uint32 positiveSide = cross > 0.0f ? 0 : 1;
     uint32 negativeSide = cross > 0.0f ? 1 : 0;
-    double prevSegmentT = mVertex->GetT( iPrevSegment );
-    double nextSegmentT = mVertex->GetT( iNextSegment );
+    double prevSegmentT = mVertex->GetIndex( iPrevSegment );
+    double nextSegmentT = mVertex->GetIndex( iNextSegment );
     static uint32 rightOrientation[2] = { 0, 1 };
     static uint32 wrongOrientation[2] = { 1, 0 };
     uint32 *prevEdgePointSide = prevSegmentT == 1.0f ? rightOrientation : wrongOrientation;
@@ -213,7 +213,7 @@ FOdysseyVectorJoint::MakeMiter( FOdysseyVectorSegment* iPrevSegment
 {
     ::ULIS::FVec2D& origin = mVertex->GetCoords();
     double radius = mVertex->GetRadius();
-    double miterLimit = mVertex->GetPath()->GetMiterLimit();
+    double miterLimit = mVertex->GetOwnerAsPath()->GetMiterLimit();
     // needs to be normalized for use in the intersectLine function call
     ::ULIS::FVec2D parallelVec0 = mVertex->GetVectorOnSegment( iPrevSegment, true );
     ::ULIS::FVec2D parallelVec1 = mVertex->GetVectorOnSegment( iNextSegment, true );
@@ -466,7 +466,7 @@ void
 FOdysseyVectorJoint::Make( FOdysseyVectorSegment* iPrevSegment
                          , FOdysseyVectorSegment* iNextSegment )
 {
-    FOdysseyVectorPath* path = mVertex->GetPath();
+    FOdysseyVectorPath* path = mVertex->GetOwnerAsPath();
 
     // reset polygon array
     MakeNone();
@@ -532,7 +532,7 @@ void
 FOdysseyVectorJoint::UpdateBBox()
 {
     ::ULIS::FVec2D& vertexCoords = mVertex->GetCoords();
-    FOdysseyVectorPath* path = mVertex->GetPath();
+    FOdysseyVectorPath* path = mVertex->GetOwnerAsPath();
     double radius = mVertex->GetRadius();
     double xmin = vertexCoords.x - radius
          , ymin = vertexCoords.y - radius
@@ -568,7 +568,7 @@ FOdysseyVectorJoint::GetBBox( bool iWorld )
 {
     if( iWorld )
     {
-        BLMatrix2D& worldMatrix = mVertex->GetPath()->GetWorldMatrix();
+        BLMatrix2D& worldMatrix = mVertex->GetOwner()->GetWorldMatrix();
         BLPoint pt[4] = { worldMatrix.mapPoint( mBBox.x          , mBBox.y           )
                         , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           )
                         , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h )

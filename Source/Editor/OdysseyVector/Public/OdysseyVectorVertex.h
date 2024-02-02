@@ -10,6 +10,7 @@
 
 class FOdysseyVectorSegment;
 class FOdysseyVectorPath;
+class FOdysseyVectorObject;
 class FOdysseyVectorVertex;
 class FOdysseyVectorHandleSegment;
 
@@ -18,7 +19,8 @@ struct FExplorationPair
     FOdysseyVectorSection* returnSection;
     FOdysseyVectorVertex*  departVertex;
     FOdysseyVectorSection* departSection;
-    double mSectionLength;
+    uint32 departVertexIndex;
+    double sectionLength;
 
     FExplorationPair()
     {
@@ -26,18 +28,59 @@ struct FExplorationPair
         departVertex = nullptr;
         departSection = nullptr;
 
-        mSectionLength = 0.0f;
+        sectionLength = 0.0f;
     };
 
     FExplorationPair( FOdysseyVectorSection* iReturnSection
                     , FOdysseyVectorVertex*  iDepartVertex
+                    , uint32                 iDepartVertexIndex
                     , FOdysseyVectorSection* iDepartSection )
     {
-        returnSection = iReturnSection;
-        departVertex = iDepartVertex;
-        departSection = iDepartSection;
+        returnSection     = iReturnSection;
+        departVertex      = iDepartVertex;
+        departVertexIndex = iDepartVertexIndex;
+        departSection     = iDepartSection;
         // used for sorting exploration pairs
-        mSectionLength = returnSection->GetLength() + departSection->GetLength();
+        sectionLength = returnSection->GetLength() + departSection->GetLength();
+    }
+};
+
+struct FExplorationWayPoint
+{
+    FOdysseyVectorVertex* vertex;
+    FOdysseyVectorSection* section;
+    double sectionT;
+
+    FExplorationWayPoint( FOdysseyVectorVertex* iVertex
+                        , FOdysseyVectorSection* iSection
+                        , double iSectionT )
+    {
+        vertex = iVertex;
+        section = iSection;
+        sectionT = iSectionT;
+    }
+};
+
+struct FCycleSectionInfo
+{
+    FOdysseyVectorSection* section;
+    ::ULIS::FVec2D sectionVector;
+    uint32 sectionVertexIndex;
+
+    FCycleSectionInfo( const FCycleSectionInfo& iCycleSectionInfo )
+    {
+        this->section            = iCycleSectionInfo.section;
+        this->sectionVector      = iCycleSectionInfo.sectionVector;
+        this->sectionVertexIndex = iCycleSectionInfo.sectionVertexIndex;
+    }
+
+    FCycleSectionInfo( FOdysseyVectorSection* iSection
+                     , const ::ULIS::FVec2D& iSectionVector
+                     , uint32 iSectionVertexIndex )
+    {
+        section = iSection;
+        sectionVector = iSectionVector;
+        sectionVertexIndex = iSectionVertexIndex;
     }
 };
 
@@ -134,7 +177,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get a pointer to the path this vertex belongs to.
          * @return a pointer to the path this vertex belongs to.
          */
-        FOdysseyVectorPath* GetPath();
+        FOdysseyVectorPath* GetOwnerAsPath();
 
         /**
          * @brief Get a pointer to the section connecting this vertex and another vertex passed as argument.
@@ -175,18 +218,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         std::list<FOdysseyVectorSegment*>& GetSegmentList();
 
         /**
-         * @brief Get the position of the vertex on the segment passed as parameter, in a range from 0.0 to 1.0.
+         * @brief Get the position of the vertex on the segment passed as parameter.
          * @param iSegment the section the vertex lies on.
-         * @return a range from 0.0 to 1.0.
+         * @return 0 or 1.
          */
-        virtual double GetT( FOdysseyVectorSegment* iSegment );
+        virtual uint32 GetIndex( FOdysseyVectorSegment* iSegment );
 
         /**
-         * @brief Get the position of the vertex on the section passed as parameter, in a range from 0.0 to 1.0.
+         * @brief Get the position of the vertex on the section passed as parameter.
          * @param iSection the section the vertex lies on.
-         * @return a range from 0.0 to 1.0.
+         * @return 0 or 1.
          */
-        virtual double GetT( FOdysseyVectorSection* iSection );
+        virtual uint32 GetIndex( FOdysseyVectorSection* iSection );
 
         virtual ::ULIS::FVec2D GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize );
 
@@ -194,11 +237,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get the next section to go through. Used by OdysseyGroupPaint for finding cycles.
          *        The next section is determined by its orientation (right or left).
          * @param iLastSection the section we are coming from.
+         * @param iVertexIndex vertex index in the last section (0 or 1). This is necessary to handle looping sections
          * @param iOrientation the orientation for the desired next section (1.0f or -1.0f).
          * @return a pointer to the next section to go trough.
          */
-        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection
-                                                          , double iOrientation );
+        FCycleSectionInfo GetCycleNextSection( FOdysseyVectorSection* iLastSection
+                                             , uint32 iLastSectionVertexIndex
+                                             , double iOrientation );
 
         /**
          * @brief Mark all connected segments for update.
@@ -267,12 +312,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void RemoveSegment( FOdysseyVectorSegment* iSegment );
 
         /**
-         * @brief Set the path this vertex belongs to.
-         * @param iPath the path this vertex belongs to;
-         */
-        void SetPath( FOdysseyVectorPath* iPath );
-
-        /**
          * @brief Set the vertex as SELECTED.
          * @param iSelected
          */
@@ -319,6 +358,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         uint32 GetFlags();
         void GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] );
         bool HasErasedSectionsOnly();
+        void SetOwner( FOdysseyVectorObject* iOwner );
+        FOdysseyVectorObject* GetOwner();
+        bool HasLengthySection();
+        void GetCandidateSections( FOdysseyVectorSection* iLastSection
+                                 , uint32 iLastSectionVertexIndex
+                                 , std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
+                                 , std::vector<FCycleSectionInfo>& oCandidateSectionArray );
 
     protected:
         /**
@@ -333,7 +379,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         //eJointType mJointType;
         std::list<FOdysseyVectorSegment*> mSegmentList;
         std::list<FOdysseyVectorSection*> mSectionList;
-        FOdysseyVectorPath* mPath;
+        std::list<FOdysseyVectorVertex*> mPartnerList;
+        FOdysseyVectorObject* mOwner;
         uint32 mFlags;
        
 
@@ -344,6 +391,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         double mDistanceToNearestVertex;
         FOdysseyVectorVertex* mNearestVertex;
+
 
     public :
         static const uint32 CHAINED        = ( 1 << 1 );

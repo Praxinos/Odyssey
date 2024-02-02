@@ -9,6 +9,7 @@
 class FOdysseyVectorSegment;
 class FOdysseyVectorVertex;
 class FOdysseyVectorCycle;
+class FOdysseyVectorObject;
 
 // TODO: inherit from FOdysseyVectorLink ? answer : no, because links should not have
 // intersection vertices as endpoints as there is no way to know which segments they are on
@@ -24,19 +25,28 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
        /**
          * @brief constructor
          * @param iSegment the segment it belongs to
-         * @param iConversionMatrix
          * @param iVertex0 end point 0
          * @param iVertex1 end point 1
          */
-        FOdysseyVectorSection( FOdysseyVectorSegment* iSegment
-                             , BLMatrix2D* iConversionMatrix
+        FOdysseyVectorSection( FOdysseyVectorObject* iOwner
+                             , FOdysseyVectorSegment* iSegment
                              , FOdysseyVectorVertex* iVertex0
-                             , FOdysseyVectorVertex* iVertex1 );
+                             , FOdysseyVectorVertex* iVertex1
+                             , double iSectionT0
+                             , double iSectionT1
+                             , std::vector<FOdysseyVectorSection*>& oShortSectionArray );
 
-        void Init( FOdysseyVectorSegment* iSegment
-                 , BLMatrix2D* iConversionMatrix
+        
+        static void ListToArray( const std::list<FOdysseyVectorSection*>& iSectionList
+                               , std::vector<FOdysseyVectorSection*>& oSectionArray );
+
+        void Init( FOdysseyVectorObject* iOwner
+                 , FOdysseyVectorSegment* iSegment
                  , FOdysseyVectorVertex* iVertex0
-                 , FOdysseyVectorVertex* iVertex1 );
+                 , FOdysseyVectorVertex* iVertex1
+                 , double iSectionT0
+                 , double iSectionT1
+                 , std::vector<FOdysseyVectorSection*>& oShortSectionArray );
 
        /**
          * @brief Get the segment it lies on.
@@ -60,31 +70,33 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
 
        /**
          * @brief Get a vector tangent to this section, starting at this vertex.
-         * @param iVertex the vertex
+         * @param iVertexIndex index the vertex (0 or 1)
          * @param iStraight
          * @param iNormalize normalize the vector or not
          * return a vector tangent to this section, starting at this vertex. 
          */
-        ::ULIS::FVec2D GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool iStraight, bool iNormalize );
+        ::ULIS::FVec2D GetVectorFromVertex( uint32 iVertexIndex
+                                          , bool iStraight
+                                          , bool iNormalize );
 
        /**
          * @brief Block the section for traversal from the vertex passed as parameter. Used by the GroupPaint class.
          * @param iVertex
          */
-        void UnBlock( FOdysseyVectorVertex* iVertex );
+        void UnBlock( uint32 iVertexIndex );
 
        /**
          * @brief Unblock the section for traversal from the vertex passed as parameter. Used by the GroupPaint class.
          * @param iVertex
          */
-        void Block( FOdysseyVectorVertex* iVertex );
+        void Block( uint32 iVertexIndex );
 
        /**
          * @brief Check the blocking status of this section from the vertex passed as parameter. Used by the GroupPaint class.
          * @param iVertex
          * @return true or false
          */
-        bool IsBlocked( FOdysseyVectorVertex* iVertex );
+        bool IsBlocked( uint32 iVertexIndex );
 
         bool IsLinked();
         void Link();
@@ -103,8 +115,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         bool IsErased();
         double GetLength();
         bool IsValid();
+        double GetT( uint32 iIndex );
+        FOdysseyVectorObject* GetOwner();
+        void Merge( uint32 iPartnerID );
 
     protected:
+        FOdysseyVectorObject* mOwner;
         FOdysseyVectorSegment* mSegment;
         FOdysseyVectorVertex* mVertex[2];
         uint32 mFlags;

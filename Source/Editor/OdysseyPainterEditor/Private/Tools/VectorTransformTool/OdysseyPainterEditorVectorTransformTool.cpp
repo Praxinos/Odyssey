@@ -221,14 +221,14 @@ TransformPoint( FOdysseyVectorPoint* iPoint
     {
         FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(iPoint);
 
-        ownerObject = vertex->GetPath();
+        ownerObject = vertex->GetOwner();
     }
 
     if( pointClass == FOdysseyVectorHandleSegment::StaticClass() )
     {
         FOdysseyVectorHandleSegment* segmentHandle = static_cast<FOdysseyVectorHandleSegment*>(iPoint);
 
-        ownerObject = segmentHandle->GetOwner()->GetPath();
+        ownerObject = segmentHandle->GetOwner()->GetOwnerAsPath();
     }
 
     if( pointClass == FOdysseyVectorBucket::StaticClass() )

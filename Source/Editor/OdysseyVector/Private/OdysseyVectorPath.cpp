@@ -53,8 +53,8 @@ FOdysseyVectorPath::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>& oVertexArray
-                                           , std::vector<FOdysseyVectorSection*>& oSectionArray )
+FOdysseyVectorPath::ToVertexIndexAndSectionArray( std::vector<uint32>& oVertexIndexArray
+                                                , std::vector<FOdysseyVectorSection*>& oSectionArray )
 {
     if( mSegmentList.size() )
     {
@@ -68,7 +68,7 @@ FOdysseyVectorPath::ToVertexAndSectionArray( std::vector<FOdysseyVectorVertex*>&
             FOdysseyVectorSection* section = vertex->GetSection( segment );
             FOdysseyVectorSegment *nextSegment = nextVertex->GetOtherSegment( segment );
 
-            oVertexArray.push_back( vertex );
+            oVertexIndexArray.push_back( vertex->GetIndex( segment ) );
             oSectionArray.push_back( section );
 
             vertex = nextVertex;
@@ -83,7 +83,7 @@ FOdysseyVectorPath::HasIntersections()
 {
     for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        if( segment->GetIntersectionVertexList().size() )
+        if( segment->GetIntersectionList().size() )
         {
             return true;
         }
@@ -465,7 +465,7 @@ FOdysseyVectorPath::AddVertex( FOdysseyVectorVertex* iVertex )
 {
     mVertexList.push_back( iVertex );
 
-    iVertex->SetPath( this );
+    iVertex->SetOwner( this );
 }
 
 void
@@ -510,7 +510,7 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 {
     mSegmentList.push_back( iSegment );
 
-    iSegment->SetPath( this );
+    iSegment->SetOwner( this );
 
     iSegment->GetVertex(0)->AddSegment( iSegment );
     iSegment->GetVertex(1)->AddSegment( iSegment );
@@ -1014,8 +1014,8 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
 
                 // store path here even if technically the vertex does not belong to the path yet.
                 // it will once we call path->AddVertex() in the FOdysseyVectorPath::Erase() func.
-                wayPoint0->vertex->SetPath( currentPath );
-                wayPoint1->vertex->SetPath( currentPath );
+                wayPoint0->vertex->SetOwner( currentPath );
+                wayPoint1->vertex->SetOwner( currentPath );
 
                 if( ( wayPoint0->flags & FWayPoint::EntersErasureArea )
                  || ( wayPoint0->flags & FWayPoint::LeavesErasureArea ) )
@@ -1046,21 +1046,21 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
             for( int i = addedSegmentCountBeforeAlter; i < oAddedSegmentArray.size(); i++ )
             {
                 FOdysseyVectorSegment* segment = oAddedSegmentArray[i];
-                FOdysseyVectorPath* segmentPath = segment->GetPath();
+                FOdysseyVectorPath* segmentPath = segment->GetOwnerAsPath();
 
                 if( segmentPath == nullptr )
                 {
                     FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
                     FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
 
-                    if( vertex0->GetPath() )
+                    if( vertex0->GetOwner() )
                     {
-                        segmentPath = vertex0->GetPath();
+                        segmentPath = vertex0->GetOwnerAsPath();
                     }
 
-                    if( vertex1->GetPath() )
+                    if( vertex1->GetOwner() )
                     {
-                        segmentPath = vertex1->GetPath();
+                        segmentPath = vertex1->GetOwnerAsPath();
                     }
 
                     // if segmentPath is still null, it means segment vertices were 
@@ -1077,9 +1077,10 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
                         oAddedPathArray.push_back( segmentPath );
                     }
 
-                    vertex0->SetPath( segmentPath );
-                    vertex1->SetPath( segmentPath );
-                    segment->SetPath( segmentPath );
+                    // store ptr now for later use with path->AddVertex() / path->AddSegment()
+                    vertex0->SetOwner( segmentPath );
+                    vertex1->SetOwner( segmentPath );
+                    segment->SetOwner( segmentPath );
                 }
             }
         }
@@ -1149,22 +1150,22 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
 
         for( int i = removedSegmentCountBeforeAlter; i < oRemovedSegmentArray.size(); i++ )
         {
-            oRemovedSegmentArray[i]->GetPath()->RemoveSegment( oRemovedSegmentArray[i] );
+            oRemovedSegmentArray[i]->GetOwnerAsPath()->RemoveSegment( oRemovedSegmentArray[i] );
         }
 
         for( int i = removedVertexCountBeforeAlter; i < oRemovedVertexArray.size(); i++ )
         {
-            oRemovedVertexArray[i]->GetPath()->RemoveVertex( oRemovedVertexArray[i] );
+            oRemovedVertexArray[i]->GetOwnerAsPath()->RemoveVertex( oRemovedVertexArray[i] );
         }
 
         for( int i = addedVertexCountBeforeAlter; i < oAddedVertexArray.size(); i++ )
         {
-            oAddedVertexArray[i]->GetPath()->AddVertex( oAddedVertexArray[i] );
+            oAddedVertexArray[i]->GetOwnerAsPath()->AddVertex( oAddedVertexArray[i] );
         }
 
         for( int i = addedSegmentCountBeforeAlter; i < oAddedSegmentArray.size(); i++ )
         {
-            oAddedSegmentArray[i]->GetPath()->AddSegment( oAddedSegmentArray[i] );
+            oAddedSegmentArray[i]->GetOwnerAsPath()->AddSegment( oAddedSegmentArray[i] );
         }
     }
 

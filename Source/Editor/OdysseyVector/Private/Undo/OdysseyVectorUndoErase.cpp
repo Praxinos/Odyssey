@@ -1,4 +1,5 @@
 #include "Undo/OdysseyVectorUndoErase.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoErase::~FOdysseyVectorUndoErase()
 {
@@ -77,13 +78,13 @@ FOdysseyVectorUndoErase::Apply( UObject* iIgnored )
     for( int i = 0; i < mRemovedSegmentArray.size(); i++ )
     {
         mRemovedSegmentArray[i]->Invalidate();
-        mRemovedSegmentArray[i]->GetPath()->RemoveSegment( mRemovedSegmentArray[i] );
+        mRemovedSegmentArray[i]->GetOwnerAsPath()->RemoveSegment( mRemovedSegmentArray[i] );
     }
 
     for( int i = 0; i < mRemovedVertexArray.size(); i++ )
     {
         mRemovedVertexArray[i]->InvalidateSegments();
-        mRemovedVertexArray[i]->GetPath()->RemoveVertex( mRemovedVertexArray[i] );
+        mRemovedVertexArray[i]->GetOwnerAsPath()->RemoveVertex( mRemovedVertexArray[i] );
     }
 
     for( int i = 0; i < mRemovedObjectArray.size(); i++ )
@@ -102,13 +103,13 @@ FOdysseyVectorUndoErase::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mAddedVertexArray.size(); i++ )
     {
-        mAddedVertexArray[i]->GetPath()->AddVertex( mAddedVertexArray[i] );
+        mAddedVertexArray[i]->GetOwnerAsPath()->AddVertex( mAddedVertexArray[i] );
         mAddedVertexArray[i]->InvalidateSegments();
     }
 
     for( int i = 0; i < mAddedSegmentArray.size(); i++ )
     {
-        mAddedSegmentArray[i]->GetPath()->AddSegment( mAddedSegmentArray[i] );
+        mAddedSegmentArray[i]->GetOwnerAsPath()->AddSegment( mAddedSegmentArray[i] );
         mAddedSegmentArray[i]->Invalidate();
     }
 
@@ -132,13 +133,13 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
     for( int i = 0; i < mAddedSegmentArray.size(); i++ )
     {
         mAddedSegmentArray[i]->Invalidate();
-        mAddedSegmentArray[i]->GetPath()->RemoveSegment( mAddedSegmentArray[i] );
+        mAddedSegmentArray[i]->GetOwnerAsPath()->RemoveSegment( mAddedSegmentArray[i] );
     }
 
     for( int i = 0; i < mAddedVertexArray.size(); i++ )
     {
         mAddedVertexArray[i]->InvalidateSegments();
-        mAddedVertexArray[i]->GetPath()->RemoveVertex( mAddedVertexArray[i] );
+        mAddedVertexArray[i]->GetOwnerAsPath()->RemoveVertex( mAddedVertexArray[i] );
     }
 
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
@@ -157,13 +158,13 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mRemovedVertexArray.size(); i++ )
     {
-        mRemovedVertexArray[i]->GetPath()->AddVertex( mRemovedVertexArray[i] );
+        mRemovedVertexArray[i]->GetOwnerAsPath()->AddVertex( mRemovedVertexArray[i] );
         mRemovedVertexArray[i]->InvalidateSegments();
     }
 
     for( int i = 0; i < mRemovedSegmentArray.size(); i++ )
     {
-        mRemovedSegmentArray[i]->GetPath()->AddSegment( mRemovedSegmentArray[i] );
+        mRemovedSegmentArray[i]->GetOwnerAsPath()->AddSegment( mRemovedSegmentArray[i] );
         mRemovedSegmentArray[i]->Invalidate();
     }
 

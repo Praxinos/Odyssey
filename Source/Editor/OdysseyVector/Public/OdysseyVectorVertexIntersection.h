@@ -5,9 +5,10 @@
 #include <Image/Block.h>
 
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorIntersection.h"
 
+class FOdysseyVectorObject;
 class FOdysseyVectorSegment;
-class FOdysseyVectorIntersection;
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVectorVertex
 {
@@ -23,34 +24,33 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
         ~FOdysseyVectorVertexIntersection();
 
         /**
-         * @brief Constructor.
+         * @brief Constructor for X-Junction
          */
-        FOdysseyVectorVertexIntersection( FOdysseyVectorIntersection* iIntersection
-                                        , FOdysseyVectorPath* iPath
+        FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
                                         , double iX
                                         , double iY
-                                        , double iT );
+                                        , FOdysseyVectorSegment* iSegment0
+                                        , double iSegment0T
+                                        , FOdysseyVectorSegment* iSegment1
+                                        , double iSegment1T );
 
         /**
-         * @brief Get a pointer to the next section to explore in cycle depending on the last visited section.
-         * @param iLastSection the last visited section.
-         * @param iOrientation ignored.
-         * @return a pointer to the next section to explore in cycle.
+         * @brief Constructor for T-Junction
          */
-        virtual FOdysseyVectorSection* GetCycleNextSection( FOdysseyVectorSection* iLastSection
-                                                          , double iOrientation ) override;
+         FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
+                                         , double iX
+                                         , double iY
+                                         , FOdysseyVectorSegment* iSegment
+                                         , double iSegmentT
+                                         , FOdysseyVectorVertex* iVertex );
 
-        virtual double GetT( FOdysseyVectorSegment* iSegment ) override;
-        virtual double GetT( FOdysseyVectorSection* iSection ) override;
+        void SetIntersection( FOdysseyVectorIntersection* iIntersection0
+                            , FOdysseyVectorIntersection* iIntersection1 );
 
-        FOdysseyVectorIntersection* GetIntersection();
-        FOdysseyVectorVertexIntersection* GetPartner();
+        FOdysseyVectorIntersection* GetIntersection( uint32 iIndex );
+        double GetT( FOdysseyVectorSegment* iSegment );
 
-        virtual uint32 GetSectionCount() override;
-
-        virtual void BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray ) override;
-
-private:
-        FOdysseyVectorIntersection* mIntersection;
-        double mT;
+    protected:
+        FOdysseyVectorIntersection mIntersection[2];
+        FOdysseyVectorSegment* mSegment[2];
 };

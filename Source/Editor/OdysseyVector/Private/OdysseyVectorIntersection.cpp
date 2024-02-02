@@ -4,56 +4,25 @@ FOdysseyVectorIntersection::~FOdysseyVectorIntersection()
 {
 }
 
-FOdysseyVectorIntersection::FOdysseyVectorIntersection( bool iSelfIntersects
-                                                      , FOdysseyVectorPath* iVertex0Path
-                                                      , double iVertex0X
-                                                      , double iVertex0Y
-                                                      , double iVertex0T
-                                                      , FOdysseyVectorPath* iVertex1Path
-                                                      , double iVertex1X
-                                                      , double iVertex1Y
-                                                      , double iVertex1T )
-    : mVertex { FOdysseyVectorVertexIntersection( this
-                                                , iVertex0Path
-                                                , iVertex0X
-                                                , iVertex0Y
-                                                , iVertex0T )
-              , FOdysseyVectorVertexIntersection( this
-                                                , iVertex1Path
-                                                , iVertex1X
-                                                , iVertex1Y
-                                                , iVertex1T ) }
-    , mSelfIntersects ( iSelfIntersects )
+FOdysseyVectorIntersection::FOdysseyVectorIntersection()
 {
 }
 
-bool
-FOdysseyVectorIntersection::HasVertex( FOdysseyVectorVertexIntersection* iVertex )
+FOdysseyVectorIntersection::FOdysseyVectorIntersection( FOdysseyVectorVertexIntersection* iIntersectionVertex
+                                                      , double iSegmentT )
+    : mIntersectionVertex( iIntersectionVertex )
+    , mSegmentT( iSegmentT )
 {
-    return ( ( &mVertex[0] == iVertex ) || ( &mVertex[1] == iVertex ) );
 }
 
 FOdysseyVectorVertexIntersection*
-FOdysseyVectorIntersection::GetOtherVertex( FOdysseyVectorVertexIntersection* iVertex )
+FOdysseyVectorIntersection::GetIntersectionVertex()
 {
-    return ( iVertex == &mVertex[0] ) ? &mVertex[1] : &mVertex[0];
+    return mIntersectionVertex;
 }
 
-FOdysseyVectorVertexIntersection*
-FOdysseyVectorIntersection::GetVertex( int iNum )
+double
+FOdysseyVectorIntersection::GetSegmentT()
 {
-    return &mVertex[iNum];
-}
-
-void
-FOdysseyVectorIntersection::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )
-{
-    mVertex[0].BuildExplorationPairs( iExplorationPairsArray );
-    mVertex[1].BuildExplorationPairs( iExplorationPairsArray );
-}
-
-bool 
-FOdysseyVectorIntersection::SelfIntersects()
-{
-    return mSelfIntersects;
+    return mSegmentT;
 }

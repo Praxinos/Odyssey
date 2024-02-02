@@ -95,12 +95,12 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
             FOdysseyVectorPath* mergedPath = nullptr;
 
             // TODO: remove vertexB->GetPath() from selected objects.
-            if( vertexA->GetPath() != vertexB->GetPath() )
+            if( vertexA->GetOwnerAsPath() != vertexB->GetOwnerAsPath() )
             {
-                mergedPath = vertexB->GetPath();
+                mergedPath = vertexB->GetOwnerAsPath();
 
-                vertexB->GetPath()->GetParent()->RemoveChild( mergedPath );
-                vertexA->GetPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
+                vertexB->GetOwnerAsPath()->GetParent()->RemoveChild( mergedPath );
+                vertexA->GetOwnerAsPath()->Merge( mergedPath, mergedVertexArray, mergedSegmentArray );
 
 
                 // update the pointer with the newly created vertex's. Note, Merge alters the original vertex's ID.
@@ -110,7 +110,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                 {
                     iEngine->UnselectObject( mergedPath );
 
-                    iEngine->SelectObject( vertexA->GetPath() );
+                    iEngine->SelectObject( vertexA->GetOwnerAsPath() );
                 }
 
                 removedPathArray.push_back( mergedPath );
@@ -221,14 +221,14 @@ UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVector
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPathStitchTool::CreateTopTabWidget()
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
-
     // we create the topTab widget only once, or else it creates a sizing issue in the top tab
     if( mTopTabWidget.Get() == nullptr )
     {
+        FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+        FSinglePropertyParams defaultPropertyParams;
+        const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
+        TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+
         mTopTabWidget = SNew(SUniformWrapPanel)
                        .SlotPadding(FVector2D(3.f, 0.f))
                        .EvenRowDistribution(true)

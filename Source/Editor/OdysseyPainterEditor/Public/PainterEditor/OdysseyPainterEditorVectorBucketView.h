@@ -37,7 +37,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
         UPROPERTY(EditAnywhere,Category="Bucket")
         eBucketSpreadingPolicy SpreadingPolicy;
 
-        UPROPERTY(EditAnywhere,Category="Bucket")
+        UPROPERTY(EditAnywhere,Category="Bucket", meta = (EditCondition = "(ColorMode == eBucketColorMode::SolidColor)", EditConditionHides))
         FColor SolidColor;
 
         UPROPERTY(EditAnywhere,Category="Bucket")
@@ -46,10 +46,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
         UPROPERTY(EditAnywhere,Category="Bucket")
         bool Propagated;
 
-        UPROPERTY(EditAnywhere,Category="Bucket")
+        UPROPERTY(EditAnywhere,Category="Bucket", meta = (EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)", EditConditionHides))
         FColor GradientColor0;
 
-        UPROPERTY(EditAnywhere,Category="Bucket")
+        UPROPERTY(EditAnywhere,Category="Bucket", meta = (EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)", EditConditionHides))
         FColor GradientColor1;
 
         UPROPERTY(EditAnywhere,Category="Bucket")

@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoUngroup.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoUngroup::~FOdysseyVectorUndoUngroup()
 {

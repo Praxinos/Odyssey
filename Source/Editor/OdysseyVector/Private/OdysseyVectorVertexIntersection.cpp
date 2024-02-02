@@ -1,5 +1,6 @@
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorIntersection.h"
+#include "OdysseyVectorSegment.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVector.h"
 
@@ -7,88 +8,51 @@ FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 {
 }
 
-FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorIntersection* iIntersection
-                                                                  , FOdysseyVectorPath* iPath
+FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
                                                                   , double iX
                                                                   , double iY
-                                                                  , double iT )
+                                                                  , FOdysseyVectorSegment* iSegment0
+                                                                  , double iSegment0T
+                                                                  , FOdysseyVectorSegment* iSegment1
+                                                                  , double iSegment1T )
     : FOdysseyVectorVertex ( iX, iY, 0.0f )
-    , mIntersection( iIntersection )
-    , mT( iT )
+    , mIntersection { FOdysseyVectorIntersection( this, iSegment0T )
+                    , FOdysseyVectorIntersection( this, iSegment1T ) }
+    , mSegment { iSegment0,  iSegment1 }
 {
-    SetPath( iPath );
+    SetOwner( iOwner );
+
+    iSegment0->AddIntersection( &mIntersection[0] );
+    iSegment1->AddIntersection( &mIntersection[1] );
+
+    // get ready for partnerization
+    SetID( 0xFFFFFFFF );
 }
 
-uint32
-FOdysseyVectorVertexIntersection::GetSectionCount()
+FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
+                                                                  , double iX
+                                                                  , double iY
+                                                                  , FOdysseyVectorSegment* iSegment
+                                                                  , double iSegmentT
+                                                                  , FOdysseyVectorVertex* iVertex )
+    : FOdysseyVectorVertex ( iX, iY, 0.0f )
+    , mIntersection { FOdysseyVectorIntersection( this, iSegmentT  )
+                    , FOdysseyVectorIntersection( /* empty ctor */ ) }
+    , mSegment { iSegment, nullptr }
 {
-    return GetSectionList().size() + GetPartner()->GetSectionList().size();
-}
+    SetOwner( iOwner );
+    // T-Junction, one segment only.
+    iSegment->AddIntersection( &mIntersection[0] );
 
-FOdysseyVectorIntersection*
-FOdysseyVectorVertexIntersection::GetIntersection()
-{
-    return mIntersection;
+    iVertex->SetNearestVertex( this, 0.0f );
+
+    // get ready for partnerization
+    SetID( 0xFFFFFFFF );
 }
 
 double
 FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSegment* iSegment )
 {
-    return mT;
-}
-
-double
-FOdysseyVectorVertexIntersection::GetT( FOdysseyVectorSection* iSection )
-{
-    return ( this == iSection->GetVertex(0) ) ? 0.0f : 1.0f;
-}
-
-FOdysseyVectorVertexIntersection*
-FOdysseyVectorVertexIntersection::GetPartner()
-{
-    return mIntersection->GetOtherVertex( this );
-}
-
-void
-FOdysseyVectorVertexIntersection::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )
-{
-    for( FOdysseyVectorSection* returnSection : mSectionList )
-    {
-        FOdysseyVectorVertexIntersection* partnerVertex = GetPartner();
-        FOdysseyVectorSection* departSection = GetCycleNextSection( returnSection, 1.0f );
-
-        iExplorationPairsArray.push_back( departSection ? FExplorationPair( returnSection, partnerVertex, departSection )
-        // Note: here we also handle the case where we have a T junction, which happens when dealing
-        // with gaps. In that case, we have to chose a depart section on the same segment, because
-        // there might be no depart section on the other segment. That's a good place to handle that
-        // because we also need to know the depart vertex, which may differ for intersection vertices
-        // according to the situation. It's the partner vertex when we have a X junction but it is
-        // this vertex when we have a T junction.
-                                                        : FExplorationPair( returnSection, this         , GetOtherSection( returnSection, true ) ) );
-
-    }
-}
-
-FOdysseyVectorSection*
-FOdysseyVectorVertexIntersection::GetCycleNextSection( FOdysseyVectorSection* iLastSection
-                                                     , double iOrientation )
-{
-    ::ULIS::FVec2D lastSectionVector = -iLastSection->GetVectorFromVertex( this, false, false );
-    FOdysseyVectorVertexIntersection* partnerVertex = GetPartner();
-    std::list<FOdysseyVectorSection*>& sectionList = partnerVertex->GetSectionList();
-
-    for( FOdysseyVectorSection* section : sectionList )
-    {
-        ::ULIS::FVec2D sectionVector = section->GetVectorFromVertex( partnerVertex, false, false );
-
-        if( ( FOdysseyVector::Cross2D( lastSectionVector, sectionVector ) * iOrientation >= 0.0f ) )
-        {
-            return section;
-        }
-    }
-
-    // we return nullptr and not the other section on the same segment because there is no way here to
-    // also return the leaving vertex, which in that case should be THIS vertex and not the partner vertex.
-    // That's why we do this in the above BuildExplorationPairs() function.
-    return nullptr;
+    return ( mSegment[0] == iSegment ) ? mIntersection[0].GetSegmentT()
+                                       : mIntersection[1].GetSegmentT();
 }

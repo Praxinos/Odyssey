@@ -11,7 +11,7 @@ FOdysseyVectorSegmentCubicGap::~FOdysseyVectorSegmentCubicGap()
 FOdysseyVectorSegmentCubicGap::FOdysseyVectorSegmentCubicGap( FOdysseyVectorGroupPaint* iPaintgroup
                                                             , FOdysseyVectorVertex* iPoint0
                                                             , FOdysseyVectorVertex* iPoint1 )
-    : FOdysseyVectorSegmentCubic( nullptr, iPoint0, iPoint1, false )
+    : FOdysseyVectorSegmentCubic( iPaintgroup, iPoint0, iPoint1, false )
     , mPaintgroup( iPaintgroup )
 {
 }
@@ -30,8 +30,8 @@ FOdysseyVectorSegmentCubicGap::HasBaseClass( uint32 iBaseClassID )
 void
 FOdysseyVectorSegmentCubicGap::Update()
 {
-    FOdysseyVectorPath* vertex0Path = static_cast<FOdysseyVectorVertex*>(mPoint[0])->GetPath();
-    FOdysseyVectorPath* vertex1Path = static_cast<FOdysseyVectorVertex*>(mPoint[1])->GetPath();
+    FOdysseyVectorPath* vertex0Path = static_cast<FOdysseyVectorVertex*>(mPoint[0])->GetOwnerAsPath();
+    FOdysseyVectorPath* vertex1Path = static_cast<FOdysseyVectorVertex*>(mPoint[1])->GetOwnerAsPath();
     BLMatrix2D& vertex0PathWorldMatrix = vertex0Path->GetWorldMatrix();
     BLMatrix2D& vertex1PathWorldMatrix = vertex1Path->GetWorldMatrix();
     BLMatrix2D& paingroupInverseworldMatrix = mPaintgroup->GetInverseWorldMatrix();
