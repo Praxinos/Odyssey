@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoVertexAlignment::~FOdysseyVectorUndoVertexAlignment()
 {
