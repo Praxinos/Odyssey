@@ -815,12 +815,12 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.reset-view.name", "Reset View")
                     , LOCTEXT("vector-tool.object-context-menu.reset-view.tooltip", "Reset View")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ResetView, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.group-paint.name", "Make Paint Group")
                     , LOCTEXT("vector-tool.object-context-menu.group-paint.tooltip", "Make Paint Group")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::MakePaintGroup, vectorScene )));
                 /*menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.trim.name", "Trim")
@@ -830,47 +830,47 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.group.name", "Group")
                     , LOCTEXT("vector-tool.object-context-menu.group.tooltip", "Group")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Group, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.ungroup.name", "Ungroup")
                     , LOCTEXT("vector-tool.object-context-menu.ungroup.tooltip", "Ungroup")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.bring-forward.name", "Bring forward")
                     , LOCTEXT("vector-tool.object-context-menu.bring-forward.tooltip", "Bring forward")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::BringForward, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.send-backward.name", "Send backward")
                     , LOCTEXT("vector-tool.object-context-menu.send-backward.tooltip", "Send backward")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::SendBackward, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.delete-selection.name","Delete Selection")
                     , LOCTEXT("vector-tool.object-context-menu.delete-selection.tooltip","Delete Selection")
-                    , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.flip-horizontal.name","Flip Horizontal")
                     , LOCTEXT("vector-tool.object-context-menu.flip-horizontal.tooltip","Flip Horizontal")
-                    , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::FlipHorizontal, vectorScene )));
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.flip-vertical.name","Flip Vertical")
                     , LOCTEXT("vector-tool.object-context-menu.flip-vertical.tooltip","Flip Vertical")
-                    , FSlateIcon("OdysseyStyle","OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::FlipVertical, vectorScene )));
                 menu.AddMenuEntry(
                     LOCTEXT("vector-tool.object-context-menu.clear-coloring.name", "Clear Coloring")
                     , LOCTEXT("vector-tool.object-context-menu.clear-coloring.tooltip", "Clear Coloring")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ClearColoring, vectorScene )));
                 menu.AddMenuEntry(
                     LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Apply Transformations")
                     , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ApplyTransformations, vectorScene )));
         //    }
         //    menu.EndSection();
@@ -902,17 +902,17 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu
             menu.AddMenuEntry(
                   LOCTEXT("vector-tool.vertex-context-menu.delete-selection.name", "Delete Selection")
                 , LOCTEXT("vector-tool.vertex-context-menu.delete-selection.tooltip", "Delete Selection")
-                , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                , FSlateIcon()
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::DeletePointSelection, vectorScene )));
             menu.AddMenuEntry(
                   LOCTEXT("vector-tool.vertex-context-menu.align-point-selection.name", "Align Point Selection")
                 , LOCTEXT("vector-tool.vertex-context-menu.align-point-selection.tooltip", "Align Point Selection")
-                , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                , FSlateIcon()
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AlignPointSelection, vectorScene )));
             menu.AddMenuEntry(
                   LOCTEXT("vector-tool.vertex-context-menu.unalign-point-selection.name", "Unalign Point Selection")
                 , LOCTEXT("vector-tool.vertex-context-menu.unalign-point-selection.tooltip", "Unalign Point Selection")
-                , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                , FSlateIcon()
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::UnalignPointSelection, vectorScene )));
         //    }
         //    menu.EndSection();

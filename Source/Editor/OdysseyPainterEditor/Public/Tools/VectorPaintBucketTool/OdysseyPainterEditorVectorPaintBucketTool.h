@@ -95,11 +95,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         UPROPERTY( EditAnywhere, Category = PaintBucketTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 
-        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
-        FColor Color1;
+        UPROPERTY( EditAnywhere, Category = PaintBucketTool, meta = (EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)", EditConditionHides) )
+        FColor GradientColor1;
 
-        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
-        FColor Color2;
+        UPROPERTY( EditAnywhere, Category = PaintBucketTool, meta = (EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)", EditConditionHides) )
+        FColor GradientColor2;
 
         UPROPERTY( EditAnywhere, Category = PaintBucketTool )
         double PickingRadius;

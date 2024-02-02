@@ -27,8 +27,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPaintBucketToolHUD( this ), false )
     , Propagate( true )
     , ColorMode ( eBucketColorMode::SolidColor )
-    , Color1( 255, 255, 255, 255 )
-    , Color2( 255, 255, 255, 255 )
+    , GradientColor1( 255, 255, 255, 255 )
+    , GradientColor2( 255, 255, 255, 255 )
     , Opacity( 1.0f )
     , PickingRadius( 10.0f )
     , mPickedBucket( nullptr )
@@ -306,8 +306,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket
     {
         case eBucketColorMode::LinearGradient:
         case eBucketColorMode::RadialGradient:
-            iBucket->SetGradientColor0( Color1.R, Color1.G, Color1.B, Color1.A );
-            iBucket->SetGradientColor1( Color2.R, Color2.G, Color2.B, Color2.A );
+            iBucket->SetGradientColor0( GradientColor1.R, GradientColor1.G, GradientColor1.B, GradientColor1.A );
+            iBucket->SetGradientColor1( GradientColor2.R, GradientColor2.G, GradientColor2.B, GradientColor2.A );
         break;
 
         case eBucketColorMode::SolidColor:
@@ -582,32 +582,32 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.name", "Delete Bucket")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.tooltip", "Delete Bucket")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.name", "Propagate Bucket")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip", "Propagate Bucket")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.name", "Unpropagate Bucket")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip", "Unpropagate Bucket")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.name", "Copy Bucket Param")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.tooltip", "Copy Bucket Param")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::CopyBucketParam, mPickedBucket )));
             iMenu.AddMenuEntry(
               LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.name", "Paste Bucket Param")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.tooltip", "Paste Bucket Param")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam, mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.name", "Bucket properties")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.tooltip", "Bucket Properties")
-              , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+              , FSlateIcon()
               , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties, GetEditor(), mPickedBucket )));
         }
         iMenu.EndSection();
