@@ -70,12 +70,23 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
 {
     switch(msg)
     {
+        case WM_TABLET_QUERYSYSTEMGESTURESTATUS:
+        {   
+            OutResult = TABLET_DISABLE_FLICKS //remove lag between stylus down and WM_LMOUSEBUTTONDOWN (was a 500ms lag)
+                | TABLET_DISABLE_PENTAPFEEDBACK //remove Windows circle around the pen when right click button is down
+                | TABLET_DISABLE_PENBARRELFEEDBACK;  //remove Windows waves when clicking with the stylus
+
+            return true;
+        }
+
         case WM_POINTERENTER:
         case WM_POINTERLEAVE:
         case WM_POINTERDOWN:
         case WM_POINTERUP:
         case WM_POINTERUPDATE:
         {
+            //OutResult = 0;
+
             UINT32 pointerId = GET_POINTERID_WPARAM(wParam);
 
             POINTER_INPUT_TYPE pointerType = PT_POINTER;
@@ -104,11 +115,13 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
                 mDevice.SetPenMask(penInfo.penMask);
                 mDevice.OnPointerUpdate(penInfo);
             }
+
+            //return true;
         }
         break;
         
         default:
-        break;
+            return false;
     }
 
     return false;
