@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Iliad\n"
-"POT-Creation-Date: 2024-01-26 14:06\n"
-"PO-Revision-Date: 2024-01-26 14:06\n"
+"POT-Creation-Date: 2024-02-02 16:14\n"
+"PO-Revision-Date: 2024-02-02 16:14\n"
 "Language-Team: \n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -1162,148 +1162,148 @@ msgid "Pick Vector Brush"
 msgstr ""
 
 #. Key:	vector-scene.transaction.unalign-point-selection
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1038)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1038)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1043)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1043)
 msgctxt "PainterEditor,vector-scene.transaction.unalign-point-selection"
 msgid "Unalign Point Selection"
 msgstr ""
 
 #. Key:	vector-scene.transaction.align-point-selection
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1103)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1103)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1108)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1108)
 msgctxt "PainterEditor,vector-scene.transaction.align-point-selection"
 msgid "Align Point Selection"
 msgstr ""
 
 #. Key:	vector-scene.transaction.delete-point-selection
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1182)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1182)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1187)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1187)
 msgctxt "PainterEditor,vector-scene.transaction.delete-point-selection"
 msgid "Delete Point Selection"
 msgstr ""
 
 #. Key:	vector-scene.transaction.delete-objects
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1218)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1218)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1223)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1223)
 msgctxt "PainterEditor,vector-scene.transaction.delete-objects"
 msgid "Delete Objects"
 msgstr ""
 
 #. Key:	vector-scene.transaction.flip-horizontal
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1248)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1248)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1253)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1253)
 msgctxt "PainterEditor,vector-scene.transaction.flip-horizontal"
 msgid "Flip Horizontal"
 msgstr ""
 
 #. Key:	vector-scene.transaction.flip-vertical
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1278)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1278)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1283)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1283)
 msgctxt "PainterEditor,vector-scene.transaction.flip-vertical"
 msgid "Flip Vertical"
 msgstr ""
 
 #. Key:	vector-scene.transaction.clear-coloring
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1337)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1337)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1342)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1342)
 msgctxt "PainterEditor,vector-scene.transaction.clear-coloring"
 msgid "Clear Coloring"
 msgstr ""
 
 #. Key:	vector-scene.transaction.delete-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1369)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1369)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1374)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1374)
 msgctxt "PainterEditor,vector-scene.transaction.delete-bucket"
 msgid "Delete Bucket"
 msgstr ""
 
 #. Key:	vector-scene.transaction.propagate-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1392)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1392)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1397)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1397)
 msgctxt "PainterEditor,vector-scene.transaction.propagate-bucket"
 msgid "Propagate Bucket"
 msgstr ""
 
 #. Key:	PasteTransformation
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1464)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1464)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1469)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1469)
 msgctxt "PainterEditor,PasteTransformation"
 msgid "Paste Transformation"
 msgstr ""
 
 #. Key:	vector-scene.transaction.paste-objects
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1527)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1527)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1532)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1532)
 msgctxt "PainterEditor,vector-scene.transaction.paste-objects"
 msgid "Paste"
 msgstr ""
 
 #. Key:	vector-scene.transaction.stitch-vertices
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1629)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1629)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1634)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1634)
 msgctxt "PainterEditor,vector-scene.transaction.stitch-vertices"
 msgid "Vector Path Stitch Tool"
 msgstr ""
 
 #. Key:	vector-scene.transaction.bring-forward
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(678)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(678)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(683)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(683)
 msgctxt "PainterEditor,vector-scene.transaction.bring-forward"
 msgid "Bring forward"
 msgstr ""
 
 #. Key:	vector-scene.transaction.send-backward
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(708)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(708)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(713)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(713)
 msgctxt "PainterEditor,vector-scene.transaction.send-backward"
 msgid "Send backward"
 msgstr ""
 
 #. Key:	vector-scene.transaction.apply-transformations
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(740)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(740)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(745)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(745)
 msgctxt "PainterEditor,vector-scene.transaction.apply-transformations"
 msgid "Apply Transformations"
 msgstr ""
 
 #. Key:	vector-scene.transaction.make-group-paint
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(786)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(786)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(791)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(791)
 msgctxt "PainterEditor,vector-scene.transaction.make-group-paint"
 msgid "Group Paint"
 msgstr ""
 
 #. Key:	vector-scene.transaction.ungroup
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(829)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(829)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(834)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(834)
 msgctxt "PainterEditor,vector-scene.transaction.ungroup"
 msgid "Ungroup"
 msgstr ""
 
 #. Key:	vector-scene.transaction.group
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(876)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(876)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(881)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(881)
 msgctxt "PainterEditor,vector-scene.transaction.group"
 msgid "Group"
 msgstr ""
 
 #. Key:	vector-scene.transaction.select-all-points
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(913)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(913)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(918)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(918)
 msgctxt "PainterEditor,vector-scene.transaction.select-all-points"
 msgid "Select All Points"
 msgstr ""
 
 #. Key:	vector-scene.transaction.select-all-objects
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(954)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(954)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(959)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(959)
 msgctxt "PainterEditor,vector-scene.transaction.select-all-objects"
 msgid "Select All"
 msgstr ""
 
 #. Key:	vector-scene.transaction.reset-view
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(979)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(979)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(984)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(984)
 msgctxt "PainterEditor,vector-scene.transaction.reset-view"
 msgid "Reset view"
 msgstr ""
@@ -1547,8 +1547,8 @@ msgid "Draw Primitive Shape"
 msgstr ""
 
 #. Key:	raster-transform-tool.transaction.transform
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(573)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(573)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(572)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(572)
 msgctxt "PainterEditor,raster-transform-tool.transaction.transform"
 msgid "Transform"
 msgstr ""
@@ -1764,141 +1764,141 @@ msgid "Vector Grid Tool"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.transaction.move-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(143)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(143)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(145)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(145)
 msgctxt "PainterEditor,vector-paint-bucket-tool.transaction.move-bucket"
 msgid "Paint Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.transaction.rotate-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(158)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(158)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(160)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(160)
 msgctxt "PainterEditor,vector-paint-bucket-tool.transaction.rotate-bucket"
 msgid "Paint Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.transaction.alter-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(174)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(174)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(176)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(176)
 msgctxt "PainterEditor,vector-paint-bucket-tool.transaction.alter-bucket"
 msgid "Paint Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.transaction.create-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(432)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(432)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(434)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(434)
 msgctxt "PainterEditor,vector-paint-bucket-tool.transaction.create-bucket"
 msgid "Paint Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.transaction.remove-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(463)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(463)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(465)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(465)
 msgctxt "PainterEditor,vector-paint-bucket-tool.transaction.remove-bucket"
 msgid "Paint Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.transaction.propagate-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(479)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(479)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(481)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(481)
 msgctxt "PainterEditor,vector-paint-bucket-tool.transaction.propagate-bucket"
 msgid "Paint Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.transaction.color-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(496)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(496)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(498)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(498)
 msgctxt "PainterEditor,vector-paint-bucket-tool.transaction.color-bucket"
 msgid "Paint Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.transaction.clear-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(513)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(513)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(515)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(515)
 msgctxt "PainterEditor,vector-paint-bucket-tool.transaction.clear-bucket"
 msgid "Paint Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.delete-bucket.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(581)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(581)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(583)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(583)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.delete-bucket.name"
 msgid "Delete Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.delete-bucket.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(582)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(582)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(584)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(584)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.delete-bucket.tooltip"
 msgid "Delete Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.propagate-bucket.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(586)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(586)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(588)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(588)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.propagate-bucket.name"
 msgid "Propagate Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(587)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(587)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(589)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(589)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip"
 msgid "Propagate Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.unpropagate-bucket.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(591)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(591)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(593)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(593)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.unpropagate-bucket.name"
 msgid "Unpropagate Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(592)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(592)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(594)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(594)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip"
 msgid "Unpropagate Bucket"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.copy-bucket-param.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(596)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(596)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(598)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(598)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.copy-bucket-param.name"
 msgid "Copy Bucket Param"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.copy-bucket-param.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(597)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(597)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(599)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(599)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.copy-bucket-param.tooltip"
 msgid "Copy Bucket Param"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.paste-bucket-param.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(601)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(601)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(603)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(603)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.paste-bucket-param.name"
 msgid "Paste Bucket Param"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.paste-bucket-param.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(602)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(602)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(604)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(604)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.paste-bucket-param.tooltip"
 msgid "Paste Bucket Param"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.bucket-properties.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(606)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(606)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(608)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(608)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.bucket-properties.name"
 msgid "Bucket properties"
 msgstr ""
 
 #. Key:	vector-paint-bucket-tool.context-menu.bucket-properties.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(607)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(607)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(609)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(609)
 msgctxt "PainterEditor,vector-paint-bucket-tool.context-menu.bucket-properties.tooltip"
 msgid "Bucket Properties"
 msgstr ""
