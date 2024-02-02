@@ -16,10 +16,7 @@ UOdysseyLayerStack::PostInitProperties()
         return;
 
     if ( LayerRootClass )
-    {
         LayerRoot = NewObject<UOdysseyLayer>(this, LayerRootClass, NAME_None, RF_Public | RF_Transactional);
-        LayerRoot->OnCreated();
-    }
 }
 
 //--- Delegates
