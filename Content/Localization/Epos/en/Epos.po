@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2024-01-26 09:41\n"
-"PO-Revision-Date: 2024-01-26 09:41\n"
+"POT-Creation-Date: 2024-02-02 16:13\n"
+"PO-Revision-Date: 2024-02-02 16:13\n"
 "Language-Team: \n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
@@ -1547,99 +1547,99 @@ msgid "Export FBX animation from this object"
 msgstr "Export FBX animation from this object"
 
 #. Key:	new-storyboard.tabs.import-image-sequence
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(264)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(264)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(266)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(266)
 msgctxt "NewStoryboardDialog,new-storyboard.tabs.import-image-sequence"
 msgid "Images"
 msgstr "Images"
 
 #. Key:	new-storyboard.tabs.naming
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(281)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(281)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(283)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(283)
 msgctxt "NewStoryboardDialog,new-storyboard.tabs.naming"
 msgid "Naming Convention"
 msgstr "Naming Convention"
 
 #. Key:	new-storyboard.tabs.sequence
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(297)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(297)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(299)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(299)
 msgctxt "NewStoryboardDialog,new-storyboard.tabs.sequence"
 msgid "Sequence"
 msgstr "Sequence"
 
 #. Key:	new-storyboard.tabs.sequencer
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(313)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(313)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(315)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(315)
 msgctxt "NewStoryboardDialog,new-storyboard.tabs.sequencer"
 msgid "Sequencer"
 msgstr "Sequencer"
 
 #. Key:	thumbnail-scale-mulitplier.tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(344)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(344)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(346)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(346)
 msgctxt "NewStoryboardDialog,thumbnail-scale-mulitplier.tooltip"
 msgid "Change the size of the thumbnails."
 msgstr "Change the size of the thumbnails."
 
 #. Key:	CreateStoryboard
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(411)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(411)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(413)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(413)
 msgctxt "NewStoryboardDialog,CreateStoryboard"
 msgid "Create Storyboard"
 msgstr "Create Storyboard"
 
 #. Key:	StoryboardExists
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(666)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(666)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(668)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(668)
 msgctxt "NewStoryboardDialog,StoryboardExists"
 msgid "Error: Storyboard Exists"
 msgstr "Error: Storyboard Exists"
 
 #. Key:	StoryboardEmptyName
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(669)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(669)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(671)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(671)
 msgctxt "NewStoryboardDialog,StoryboardEmptyName"
 msgid "Error: Empty Storyboard Name"
 msgstr "Error: Empty Storyboard Name"
 
 #. Key:	StoryboardEmptyPath
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(672)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(672)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(674)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(674)
 msgctxt "NewStoryboardDialog,StoryboardEmptyPath"
 msgid "Error: Empty Storyboard Path"
 msgstr "Error: Empty Storyboard Path"
 
 #. Key:	StoryboardEmptyStudioName
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(675)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(675)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(677)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(677)
 msgctxt "NewStoryboardDialog,StoryboardEmptyStudioName"
 msgid "Error: Empty Studio Name or Acronym"
 msgstr "Error: Empty Studio Name or Acronym"
 
 #. Key:	StoryboardEmptyProductionName
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(678)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(678)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(680)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(680)
 msgctxt "NewStoryboardDialog,StoryboardEmptyProductionName"
 msgid "Error: Empty Production Name or Acronym"
 msgstr "Error: Empty Production Name or Acronym"
 
 #. Key:	ImageSequenceWrongPattern
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(683)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(683)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(685)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(685)
 msgctxt "NewStoryboardDialog,ImageSequenceWrongPattern"
 msgid "Error: Wrong Pattern"
 msgstr "Error: Wrong Pattern"
 
 #. Key:	SequenceTickFramerateTooLow
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(697)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(697)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(699)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(699)
 msgctxt "NewStoryboardDialog,SequenceTickFramerateTooLow"
 msgid "Warning: 'Default Tick Framerate' seems to be too low.\n'Default Tick Framerate' should be 'Default Display Framerate' * 1000\ne.g. 'Default Display Framerate' = 12fps -> 'Default Tick Framerate' = 12000fps"
 msgstr "Warning: 'Default Tick Framerate' seems to be too low.\n'Default Tick Framerate' should be 'Default Display Framerate' * 1000\ne.g. 'Default Display Framerate' = 12fps -> 'Default Tick Framerate' = 12000fps"
 
 #. Key:	NewStoryboardDialogTitle
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(753)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(753)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(755)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(755)
 msgctxt "NewStoryboardDialog,NewStoryboardDialogTitle"
 msgid "New Storyboard Settings"
 msgstr "New Storyboard Settings"
