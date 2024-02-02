@@ -27,8 +27,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPaintBucketToolHUD( this ), false )
     , Propagate( true )
     , ColorMode ( eBucketColorMode::SolidColor )
-    , GradientColor1( 255, 255, 255, 255 )
-    , GradientColor2( 255, 255, 255, 255 )
+    , Color1( 255, 255, 255, 255 )
+    , Color2( 255, 255, 255, 255 )
     , Opacity( 1.0f )
     , PickingRadius( 10.0f )
     , mPickedBucket( nullptr )
@@ -306,8 +306,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket
     {
         case eBucketColorMode::LinearGradient:
         case eBucketColorMode::RadialGradient:
-            iBucket->SetGradientColor0( GradientColor1.R, GradientColor1.G, GradientColor1.B, GradientColor1.A );
-            iBucket->SetGradientColor1( GradientColor2.R, GradientColor2.G, GradientColor2.B, GradientColor2.A );
+            iBucket->SetGradientColor0( Color1.R, Color1.G, Color1.B, Color1.A );
+            iBucket->SetGradientColor1( Color2.R, Color2.G, Color2.B, Color2.A );
         break;
 
         case eBucketColorMode::SolidColor:
