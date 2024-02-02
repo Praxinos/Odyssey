@@ -46,7 +46,7 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
     menu.AddMenuEntry(
           LOCTEXT("vector-scene-tree-view.context-menu.paste.name", "Paste")
         , LOCTEXT("vector-scene-tree-view.context-menu.paste.tooltip", "Paste")
-        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+        , FSlateIcon()
         , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteObjects, vectorScene)));
     menu.AddMenuEntry(
           LOCTEXT("vector-scene-tree-view.context-menu.copy-transformation.name", "Copy Transformation")
