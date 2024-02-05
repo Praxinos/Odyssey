@@ -100,11 +100,34 @@ bool UOdysseyPainterEditorRasterRectangleSelection::OnKeyUp(const FKey& iKey)
 
 void UOdysseyPainterEditorRasterRectangleSelection::ConstrainSelectionToRectangle(FVector2D iPosition)
 {
-    if( mSelectionArea->GetPoints().Num() != 0)
+    TArray<FVector2D>& points = mSelectionArea->GetPoints();
+
+    if (mSelectionArea->GetPoints().Num() == 0)
+        return;
+
+    if (Uniform)
     {
-        TArray<FVector2D>& points = mSelectionArea->GetPoints();
-        points[2] = iPosition;
-        points[1] = FVector2D(iPosition.X, points[0].Y);
-        points[3] = FVector2D(points[0].X, iPosition.Y);
+        int shiftX = iPosition.X - points[0].X;
+        int shiftY = iPosition.Y - points[0].Y;
+
+        int signX = shiftX < 0 ? -1 : 1;
+        int signY = shiftY < 0 ? -1 : 1;
+
+        int mult = signX == signY ? 1 : -1;
+
+        if (FMath::Abs(shiftX) > FMath::Abs(shiftY))
+        {
+            iPosition.X = points[0].X + shiftX;
+            iPosition.Y = points[0].Y + shiftX * mult;
+        }
+        else
+        {
+            iPosition.X = points[0].X + shiftY * mult;
+            iPosition.Y = points[0].Y + shiftY;
+        }
     }
+
+    points[2] = iPosition;
+    points[1] = FVector2D(iPosition.X, points[0].Y);
+    points[3] = FVector2D(points[0].X, iPosition.Y);
 }

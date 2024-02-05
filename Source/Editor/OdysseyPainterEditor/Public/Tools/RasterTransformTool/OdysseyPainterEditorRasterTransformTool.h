@@ -110,7 +110,6 @@ private:
 
     int mLastReferenceRotation;
     FVector2D mMouseLastReferencePoint;
-    ::ULIS::FRectI mInitialSelectionBoundingBox;
 
     int mRotation;
 };

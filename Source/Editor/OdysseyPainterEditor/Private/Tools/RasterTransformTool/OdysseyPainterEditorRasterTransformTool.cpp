@@ -174,6 +174,8 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
 
 bool UOdysseyPainterEditorRasterTransformTool::OnKeyDown(const FKey& iKey)
 {
+    mSelection->OnKeyDown( iKey );
+
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
         Uniform = !Uniform;
@@ -184,6 +186,8 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyDown(const FKey& iKey)
 
 bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
 {
+    mSelection->OnKeyUp(iKey);
+
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
         Uniform = !Uniform;
@@ -404,6 +408,36 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
     if( !mTransformArea )
         return;
 
+    if (Uniform)
+    {
+        int opposite = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            if (mHandles[i]->IsCaptured())
+            {
+                opposite = (i + 2) % 4;
+            }
+        }
+        int shiftX = iPosition.X - mHandles[opposite]->GetPosition().X;
+        int shiftY = iPosition.Y - mHandles[opposite]->GetPosition().Y;
+
+        int signX = shiftX < 0 ? -1 : 1;
+        int signY = shiftY < 0 ? -1 : 1;
+
+        int mult = signX == signY ? 1 : -1;
+
+        if (FMath::Abs(shiftX) > FMath::Abs(shiftY))
+        {
+            iPosition.X = mHandles[opposite]->GetPosition().X + shiftX;
+            iPosition.Y = mHandles[opposite]->GetPosition().Y + shiftX * mult;
+        }
+        else
+        {
+            iPosition.X = mHandles[opposite]->GetPosition().X + shiftY * mult;
+            iPosition.Y = mHandles[opposite]->GetPosition().Y + shiftY;
+        }
+    }
+
     int next;
     int opposite;
     int previous;
@@ -441,7 +475,7 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToParallelogram(FVector2
 
 void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromSelectionBlock()
 {
-    if( !mSelection->GetSelectionBlock() )
+    if( !mSelection->GetSelectionBlock() || !mTransformArea )
         return;
 
     ::ULIS::eFormat format = mSelection->GetSelectionBlock()->Format();
