@@ -15,7 +15,7 @@ UENUM()
 enum class EOdysseySelectionShape : uint8
 {
     Rectangle,
-    FreeHand,
+    Freehand,
     Ellipse
 };
 

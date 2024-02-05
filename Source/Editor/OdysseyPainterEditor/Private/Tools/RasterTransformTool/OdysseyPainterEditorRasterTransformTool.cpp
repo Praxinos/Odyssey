@@ -26,8 +26,8 @@ UOdysseyPainterEditorRasterTransformTool::~UOdysseyPainterEditorRasterTransformT
 }
 
 UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTool() :
-    SelectionShape(EOdysseySelectionShape::Rectangle),
-    mSelection(NewObject<UOdysseyPainterEditorRasterRectangleSelection>()),
+    SelectionShape(EOdysseySelectionShape::Freehand),
+    mSelection(NewObject<UOdysseyPainterEditorRasterFreehandSelection>()),
     mPaintEngine(),
     mTransformedBlock(nullptr),
     mRasterMutator(true),
@@ -244,7 +244,7 @@ void UOdysseyPainterEditorRasterTransformTool::PostEditChangeProperty(FPropertyC
                 mSelection->AddToRoot();
                 mSelection->Init(mHUD, mEditor, Uniform);
                 break;
-            case EOdysseySelectionShape::FreeHand:
+            case EOdysseySelectionShape::Freehand:
                 mSelection = NewObject<UOdysseyPainterEditorRasterFreehandSelection>();
                 mSelection->AddToRoot();
                 mSelection->Init(mHUD, mEditor, Uniform);

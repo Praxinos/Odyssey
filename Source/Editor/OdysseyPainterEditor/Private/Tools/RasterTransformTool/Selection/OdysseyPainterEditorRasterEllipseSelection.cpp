@@ -41,6 +41,30 @@ void UOdysseyPainterEditorRasterEllipseSelection::OnMouseDrag(const FOdysseyPoin
         mSelectionArea->GetPoints().Empty();
         FVector2D referencePoint = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y));
         FVector2D center = (mDownReference + referencePoint) / 2;
+
+        FOdysseyPoint point = iPointInTexture;
+        if (Uniform)
+        {
+            int shiftX = referencePoint.X - mDownReference.X;
+            int shiftY = referencePoint.Y - mDownReference.Y;
+
+            int signX = shiftX < 0 ? -1 : 1;
+            int signY = shiftY < 0 ? -1 : 1;
+
+            int mult = signX == signY ? 1 : -1;
+
+            if (FMath::Abs(shiftX) > FMath::Abs(shiftY))
+            {
+                referencePoint.X = mDownReference.X + shiftX;
+                referencePoint.Y = mDownReference.Y + shiftX * mult;
+            }
+            else
+            {
+                referencePoint.X = mDownReference.X + shiftY * mult;
+                referencePoint.Y = mDownReference.Y + shiftY;
+            }
+        }
+
         int a = FMath::Abs( mDownReference.X - referencePoint.X ) / 2;
         int b = FMath::Abs( mDownReference.Y - referencePoint.Y ) / 2;
         UOdysseyBrushShape::GenerateEllipsePoints( center, a, b, 0, mSelectionArea->GetPoints() );
