@@ -24,6 +24,11 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrim
     AvailableShapes.Add(EOdysseyPrimitiveShape::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::EllipseShape"));
     AvailableShapes.Add(EOdysseyPrimitiveShape::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::BezierShape"));
 
+    for (const auto& Shape : AvailableShapes)
+    {
+        Shape.Value->IsPrimitive = true;
+    }
+
     SelectedShapeInstance = AvailableShapes[SelectedShape];
 }
 
