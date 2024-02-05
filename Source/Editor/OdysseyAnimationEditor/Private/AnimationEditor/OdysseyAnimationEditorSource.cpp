@@ -4,11 +4,16 @@
 #pragma once
 
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
+#include "OdysseyAnimation.h"
 #include "OdysseyAnimationTexture.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "OdysseyRasterBlockMutator.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyMediaVector.h"
 #include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoEngineClear.h"
+#include "OdysseyVectorEngine.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -222,7 +227,7 @@ FOdysseyAnimationEditorSource::Clear()
 				GEditor->EndTransaction();
 
 				vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));
-				vectorEngine->Signal(FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW);
+				vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
 			}
 		}
 	}
