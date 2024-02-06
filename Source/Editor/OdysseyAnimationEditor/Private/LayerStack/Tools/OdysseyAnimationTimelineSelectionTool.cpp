@@ -120,8 +120,14 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseButtonUp(const FMouseEventParams&
 
 		if (!mSelectionData.mIsDragDetected)
 		{
-            mTimelineParams->SetSelectedFrames(FInt32Range::Empty());
-			//mOnSelectionChanged.ExecuteIfBound(mSelectionData.mSelectedFrames);
+			FInt32Range selectedFrames = FInt32Range::Empty();
+			if (mTimelineParams->GetSelectedFrames().IsEmpty())
+			{
+				selectedFrames = FInt32Range::Inclusive(mSelectionData.mCursorFrame, mSelectionData.mCursorFrame);
+				selectedFrames = FInt32Range::Intersection(selectedFrames, mTimelineParams->GetSelectableFrames());	
+			}
+			
+			mTimelineParams->SetSelectedFrames(selectedFrames);
 		}
 
 		float timelineOffset = mTimelineParams->GetOffset();
