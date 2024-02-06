@@ -16,7 +16,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrim
     mPaintEngine(),
     SelectedShape(EOdysseyPrimitiveShape::kLine)
 {
-    Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Circle64");
+    Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Shapes64");
 
     AvailableShapes.Add(EOdysseyPrimitiveShape::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::LineShape"));
     AvailableShapes.Add(EOdysseyPrimitiveShape::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::RectangleShape"));

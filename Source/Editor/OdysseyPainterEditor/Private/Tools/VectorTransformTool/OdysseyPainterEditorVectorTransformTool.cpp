@@ -5,6 +5,7 @@
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -26,7 +27,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     , Uniform( true )
     , World( false )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.TransformTool32");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
 
     mTransformHUD = static_cast<FOdysseyPainterEditorVectorTransformToolHUD*>( mBaseHUD );
 }

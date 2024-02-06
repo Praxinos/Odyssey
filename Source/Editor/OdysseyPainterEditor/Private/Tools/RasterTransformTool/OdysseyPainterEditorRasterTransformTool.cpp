@@ -6,6 +6,7 @@
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterEllipseSelection.h"
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterFreehandSelection.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyMediaRaster.h"
 #include "OdysseyHUDPolygon.h"
 #include "OdysseyBrushTransform.h"
 #include "GeomTools.h"
@@ -34,7 +35,7 @@ UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTo
     mTransformCaptureMode(EOdysseyTransformCapture::NoCapture),
     mTransformArea(nullptr)
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.TransformTool32");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
     mSelection->AddToRoot();
 }
 

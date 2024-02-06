@@ -33,7 +33,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
     , mLineNumber ( 0 )
     , mEllipseNumber ( 0 )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Shapes64");
 }
 
 //--------------------------------------------------------------------------------------

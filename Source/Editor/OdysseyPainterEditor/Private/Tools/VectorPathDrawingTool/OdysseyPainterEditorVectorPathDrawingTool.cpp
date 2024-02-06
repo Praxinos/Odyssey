@@ -36,7 +36,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , mStitchedVertex( nullptr )
     , mPathNumber( 0 )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoPen64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
 
     mPathDrawingHUD = static_cast<FOdysseyPainterEditorVectorPathDrawingToolHUD*>( mBaseHUD );
 }
@@ -194,6 +194,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
     mPathTracer.Reset();
+    mStitchedVertex = nullptr;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -365,28 +366,31 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 if( mStitchedVertex )
                 {
                     RecordUndoPathAlter( iScene
-                                       , mAddedVertexArray
-                                       , mAddedSegmentArray );
+                                        , mAddedVertexArray
+                                        , mAddedSegmentArray );
+                }
+            }
+
+            if( mStitchedVertex == nullptr )
+            {
+                // TODO: this is only for NEW path
+                if ( path->GetVertexList().size() <= 1 )
+                {
+                    // delete any new path with single vertex that was create at mouse down
+                    path->GetParent()->RemoveChild( path );
+                    vectorEngine->UnselectObject( path );
+                    delete path;
                 }
                 else
                 {
+                    // Note, newSegment can be NULL and we still have a valid path if the last vertex
+                    // was create precisely at last drag before mouseup.
                     RecordUndoPathAdd( iScene
                                      , path
                                      , mAddedVertexArray
                                      , mAddedSegmentArray );
                 }
             }
-            else // delete any path with single vertex that was create at mouse down
-            {
-                // TODO: this is only for NEW path
-                if (path->GetVertexList().size() <= 1)
-                {
-                    path->GetParent()->RemoveChild( path );
-                    vectorEngine->UnselectObject( path );
-                    delete path;
-                }
-            }
-
 
             iScene->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATEPAINTGROUPS : 0 ); // update invalidated objects
 
