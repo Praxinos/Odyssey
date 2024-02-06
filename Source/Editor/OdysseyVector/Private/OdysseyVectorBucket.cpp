@@ -39,7 +39,7 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
     , bSelected( false )
     , mPaletteEntry( nullptr )
 {
-    SetSolidColor( 128, 128, 128, 255 );
+    SetSolidColor( 160, 160, 160, 255 );
 
     SetRotation( 0.0f );
     SetPropagated( false );

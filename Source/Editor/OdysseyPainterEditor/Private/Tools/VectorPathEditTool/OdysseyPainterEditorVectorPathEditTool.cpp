@@ -27,7 +27,7 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
     , PickingRadius(10.0f)
     , WidenAllAlong( true )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.VectoEdit64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit64");
 
     mPathEditHUD = static_cast<FOdysseyPainterEditorVectorPathEditToolHUD*>( mBaseHUD );
 }

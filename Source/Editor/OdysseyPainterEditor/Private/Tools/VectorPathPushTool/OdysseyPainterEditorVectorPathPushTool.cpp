@@ -21,7 +21,7 @@ UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool
     , Radius( 20.0f )
     , RestrictToSelectedObjects( false )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPushTool64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPush64");
 
     mPathPushHUD = static_cast<FOdysseyPainterEditorVectorPathPushToolHUD*>( mBaseHUD );
 }

@@ -4,6 +4,12 @@
 #pragma once
 
 #include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayerStackUserData.h"
+#include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"

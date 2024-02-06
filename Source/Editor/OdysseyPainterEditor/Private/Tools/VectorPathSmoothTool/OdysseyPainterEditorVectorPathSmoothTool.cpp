@@ -22,7 +22,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmooth
     , PreserveHandleLength( false )
     , RestrictToSelectedObjects( false )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathSmoothTool64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathSmooth64");
 
     mPathSmoothHUD = static_cast<FOdysseyPainterEditorVectorPathSmoothToolHUD*>( mBaseHUD );
 }

@@ -17,7 +17,7 @@ UOdysseyPainterEditorVectorPathCutTool::~UOdysseyPainterEditorVectorPathCutTool(
 UOdysseyPainterEditorVectorPathCutTool::UOdysseyPainterEditorVectorPathCutTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathCutToolHUD( this ), false )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCutTool64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCut64");
 
     mPathCutHUD = static_cast<FOdysseyPainterEditorVectorPathCutToolHUD*>( mBaseHUD );
 }

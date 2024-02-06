@@ -717,6 +717,7 @@ uint32
 FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
     FOdysseyVectorObject* lastItem = GetLastChild();
+    uint32 ret = HIERARCHY_CHANGE_ERROR;
 
     if( HasAncestor( iChild ) == false )
     {
@@ -725,11 +726,15 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
         if( iInsertAfter == nullptr )
         {
             mChildrenList.push_front( iChild );
+
+            ret = HIERARCHY_CHANGE_SUCCESS;
         }
         else
         if( iInsertAfter == lastItem )
         {
             mChildrenList.push_back( iChild );
+
+            ret = HIERARCHY_CHANGE_SUCCESS;
         }
         else
         {
@@ -743,17 +748,17 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
                 {
                     mChildrenList.insert( ++it, iChild );
 
+                    ret = HIERARCHY_CHANGE_SUCCESS;
+
                     break;
                 }
             }
         }
 
         iChild->Invalidate();
-
-        return 0; // adding succeeded
     }
 
-    return HIERARCHY_CHANGE_ERROR;
+    return ret;
 }
 
 uint32
@@ -778,42 +783,47 @@ uint32
 FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild
                                    , FOdysseyVectorObject* iInsertAfter )
 {
-    FOdysseyVectorObject* formerParent = iFosterChild->GetParent();
-    FOdysseyVectorObject* previousChild = formerParent->GetPreviousChild( iFosterChild );
-
-    uint32 removalFlags = iFosterChild->GetParent()->RemoveChild( iFosterChild );
-
-    // removal succeeded
-    if( removalFlags == HIERARCHY_CHANGE_SUCCESS )
+    if( ( iFosterChild != this ) && ( iFosterChild != iInsertAfter ) )
     {
-        BLMatrix2D childFormerWorldMatrix = iFosterChild->mWorldMatrix;
-        uint32 additionFlags = AddChild( iFosterChild, iInsertAfter );
+        FOdysseyVectorObject* formerParent = iFosterChild->GetParent();
+        FOdysseyVectorObject* previousChild = formerParent->GetPreviousChild( iFosterChild );
 
-        if( additionFlags == HIERARCHY_CHANGE_SUCCESS )
+        uint32 removalFlags = iFosterChild->GetParent()->RemoveChild( iFosterChild );
+
+        // removal succeeded
+        if( removalFlags == HIERARCHY_CHANGE_SUCCESS )
         {
-            double translationX, translationY, rotation, scalingX, scalingY;
-            BLMatrix2D localMatrix;
+            BLMatrix2D childFormerWorldMatrix = iFosterChild->mWorldMatrix;
+            uint32 additionFlags = AddChild( iFosterChild, iInsertAfter );
 
-            FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, childFormerWorldMatrix, localMatrix );
-            FOdysseyVector::ExtractTransformations( localMatrix, &translationX, &translationY, &rotation, &scalingX, &scalingY );
+            if( additionFlags == HIERARCHY_CHANGE_SUCCESS )
+            {
+                double translationX, translationY, rotation, scalingX, scalingY;
+                BLMatrix2D localMatrix;
 
-            iFosterChild->SetTransform( translationX
-                                      , translationY
-                                      , rotation / M_PI * 180.0f
-                                      , scalingX
-                                      , scalingY );
+                FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, childFormerWorldMatrix, localMatrix );
+                FOdysseyVector::ExtractTransformations( localMatrix, &translationX, &translationY, &rotation, &scalingX, &scalingY );
 
-            iFosterChild->UpdateMatrix();
+                iFosterChild->SetTransform( translationX
+                                          , translationY
+                                          , rotation / M_PI * 180.0f
+                                          , scalingX
+                                          , scalingY );
+
+                iFosterChild->UpdateMatrix();
+            }
+            else // add back
+            {
+                formerParent->AddChild( iFosterChild, previousChild );
+            }
+
+            return additionFlags; // transfer succeeded
         }
-        else // add back
-        {
-            formerParent->AddChild( iFosterChild, previousChild );
-        }
 
-        return additionFlags; // transfer succeeded
+        return removalFlags;
     }
 
-    return removalFlags;
+    return HIERARCHY_CHANGE_ERROR;
 }
 
 bool

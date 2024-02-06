@@ -114,54 +114,60 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     //FVector2D position = iGeometry.GetAbsolutePosition();
     FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = itemScene->GetEngine()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> focusedObjectList;
     FOdysseyVectorObject* insertObject = itemObject;
+
+    itemScene->GetEngine()->GetFocusedAncestorList( focusedObjectList );
 
     GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.drag-drop-object", "Drop Objects"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene, selectedObjectList ) );
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene, focusedObjectList ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
-    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
     {
         switch( mDropZone )
         {
-            case DROPZONE_ABOVE:
+            //case DROPZONE_ABOVE:
+            // reverse order in order to get the most forward objet on top of the hierarchy 
+            case DROPZONE_BELOW:
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
                 // don't drop onto the same object or else expect some infinite loop
-                if( parentObject != selectedObject )
+                if( parentObject != focusedObject )
                 {
-                    parentObject->TransferChild( selectedObject, parentObject->GetPreviousChild( insertObject ) );
+                    parentObject->TransferChild( focusedObject, parentObject->GetPreviousChild( insertObject ) );
 
-                    insertObject = selectedObject;
+                    insertObject = focusedObject;
                 }
             }
             break;
 
             case DROPZONE_ONTO:
                 // don't drop onto the same object or else expect some infinite loop
-                if( itemObject != selectedObject )
+                if( itemObject != focusedObject )
                 {
-                    itemObject->TransferChild( selectedObject, nullptr );
+                    itemObject->TransferChild( focusedObject, nullptr );
                 }
             break;
 
-            case DROPZONE_BELOW:
+            // case DROPZONE_BELOW:
+            // reverse order in order to get the most forward objet on top of the hierarchy 
+            case DROPZONE_ABOVE:
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
                 // don't drop onto the same object or else expect some infinite loop
-                if( parentObject != selectedObject )
+                if( parentObject != focusedObject )
                 {
-                    parentObject->TransferChild( selectedObject, insertObject );
+                    parentObject->TransferChild( focusedObject, insertObject );
 
-                    insertObject = selectedObject;
+                    insertObject = focusedObject;
                 }
             }
             break;
