@@ -89,8 +89,9 @@ SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSce
     {
         TSharedPtr<FVectorSceneTreeViewItem> childItem = MakeShareable(new FVectorSceneTreeViewItem(child));
 
-        iItem.Get()->mChildren.Add( childItem );
-        //iItem.Get()->mChildren.Insert( childItem, 0 );
+        //iItem.Get()->mChildren.Add( childItem );
+        // reverse order in order to get the most forward objet on top of the hierarchy 
+        iItem.Get()->mChildren.Insert( childItem, 0 );
 
         BuildTree( childItem );
     }

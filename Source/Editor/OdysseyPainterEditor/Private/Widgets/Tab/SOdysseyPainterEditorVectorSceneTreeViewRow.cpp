@@ -130,7 +130,9 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     {
         switch( mDropZone )
         {
-            case DROPZONE_ABOVE:
+            //case DROPZONE_ABOVE:
+            // reverse order in order to get the most forward objet on top of the hierarchy 
+            case DROPZONE_BELOW:
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
@@ -152,7 +154,9 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                 }
             break;
 
-            case DROPZONE_BELOW:
+            // case DROPZONE_BELOW:
+            // reverse order in order to get the most forward objet on top of the hierarchy 
+            case DROPZONE_ABOVE:
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
