@@ -35,6 +35,13 @@ UOdysseyLayer::OnIsExpandedChanged()
     return onIsExpandedChanged;
 }
 
+UOdysseyLayer::FOnIsCollapsedChanged&
+UOdysseyLayer::OnIsCollapsedChanged()
+{
+    static FOnIsCollapsedChanged onIsCollapsedChanged;
+    return onIsCollapsedChanged;
+}
+
 UOdysseyLayer::FOnParentChanged&
 UOdysseyLayer::OnParentChanged()
 {
@@ -169,6 +176,12 @@ UOdysseyLayer::IsExpandedChanged()
 }
 
 void
+UOdysseyLayer::IsCollapsedChanged()
+{
+    OnIsCollapsedChanged().Broadcast(this);
+}
+
+void
 UOdysseyLayer::ParentChanged()
 {
     UOdysseyLayerStack* layerStack = GetLayerStack();
@@ -202,6 +215,8 @@ UOdysseyLayer::PropertyChanged(const FName& iPropertyName)
         IsLockedChanged();
     if ( iPropertyName == "IsExpanded" )
         IsExpandedChanged();
+    if ( iPropertyName == "IsCollapsed" )
+        IsCollapsedChanged();
     if ( iPropertyName == "Parent" )
         ParentChanged();
     if ( iPropertyName == "Children" )

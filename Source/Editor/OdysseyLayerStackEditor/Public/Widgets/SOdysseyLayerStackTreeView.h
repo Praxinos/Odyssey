@@ -117,12 +117,18 @@ protected:
     void OnExpansionChanged(UOdysseyLayer* iLayer, bool iIsExpanded);
 
     /**
-     * @brief Called when the Layer changed the expansion state it stores
-     * Allows synchronization between treeview expansion state and layer expansion state
+     * @brief The layer's IsExpanded property changes
      * 
      * @param iLayer 
      */
     void OnLayerIsExpandedChanged(UOdysseyLayer* iLayer);
+
+    /**
+     * @brief The layer's IsCollapsed property changes
+     * 
+     * @param iLayer 
+     */
+    void OnLayerIsCollapsedChanged(UOdysseyLayer* iLayer);
 
     /**
      * @brief Called when the layerstack's currentLayer changed to another layer

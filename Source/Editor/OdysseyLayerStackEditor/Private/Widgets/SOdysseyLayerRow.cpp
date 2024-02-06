@@ -131,7 +131,7 @@ SOdysseyLayerRow::GenerateOptionsWidget()
 EVisibility
 SOdysseyLayerRow::OptionsWidgetVisibility() const
 {
-	return mIsCollapsed ? EVisibility::Collapsed : EVisibility::Visible;
+	return mLayer->IsCollapsed ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 TSharedPtr<SOdysseyLayerStackTreeView>
@@ -234,7 +234,7 @@ SOdysseyLayerRow::GetLayerNameFont() const
 bool
 SOdysseyLayerRow::IsCollapsed() const
 {
-	return mIsCollapsed;
+	return mLayer->IsCollapsed;
 }
 
 void
@@ -479,13 +479,13 @@ SOdysseyLayerRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEv
 void
 SOdysseyLayerRow::OnIsCollapsedCheckBoxStateChanged(ECheckBoxState iState)
 {
-	mIsCollapsed = (iState != ECheckBoxState::Checked);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "IsCollapsed", iState != ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyLayerRow::GetIsCollapsedCheckBoxState() const
 {
-	return mIsCollapsed ? ECheckBoxState::Unchecked : ECheckBoxState::Checked;
+	return mLayer->IsCollapsed ? ECheckBoxState::Unchecked : ECheckBoxState::Checked;
 }
 
 #undef LOCTEXT_NAMESPACE

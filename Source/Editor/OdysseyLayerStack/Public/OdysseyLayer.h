@@ -49,6 +49,11 @@ public:
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsExpandedChanged, UOdysseyLayer*);
 
+    /* IsCollapsedChanged
+     * - concerned Child 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsCollapsedChanged, UOdysseyLayer*);
+
     /* ParentChanged
      * - concerned Child
      */
@@ -65,6 +70,7 @@ public:
     static FOnIsActivatedChanged& OnIsActivatedChanged();
     static FOnIsLockedChanged& OnIsLockedChanged();
     static FOnIsExpandedChanged& OnIsExpandedChanged();
+    static FOnIsCollapsedChanged& OnIsCollapsedChanged();
     static FOnParentChanged& OnParentChanged();
     static FOnChildrenChanged& OnChildrenChanged();
     static FSimpleMulticastDelegate& OnMediaChanged();
@@ -186,6 +192,7 @@ protected:
     virtual void IsActivatedChanged();
     virtual void IsLockedChanged();
     virtual void IsExpandedChanged();
+    virtual void IsCollapsedChanged();
     virtual void ParentChanged();
     virtual void ChildrenChanged();
 
@@ -231,7 +238,10 @@ public:
     bool IsActivated = true;
 
     UPROPERTY(config, BlueprintReadWrite, Category="LayerStack|Layer", NonTransactional)
-    bool IsExpanded = true;
+    bool IsExpanded = true; //Displays children or not
+
+    UPROPERTY(config, BlueprintReadWrite, Category="LayerStack|Layer", NonTransactional)
+    bool IsCollapsed = false; //Is it in "small" mode (hiding some options)
 
     UPROPERTY()
     UOdysseyLayer* Parent;

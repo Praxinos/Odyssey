@@ -19,6 +19,7 @@ SOdysseyLayerStackTreeView::~SOdysseyLayerStackTreeView()
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     UOdysseyLayerStack::OnHierarchyChanged().RemoveAll(this);
 	UOdysseyLayer::OnIsExpandedChanged().RemoveAll(this);
+    UOdysseyLayer::OnIsCollapsedChanged().RemoveAll(this);
 }
 
 SOdysseyLayerStackTreeView::SOdysseyLayerStackTreeView()
@@ -29,6 +30,7 @@ SOdysseyLayerStackTreeView::SOdysseyLayerStackTreeView()
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnCurrentLayerChanged);
     UOdysseyLayerStack::OnHierarchyChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerStackHierarchyChanged);
 	UOdysseyLayer::OnIsExpandedChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerIsExpandedChanged);
+    UOdysseyLayer::OnIsCollapsedChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerIsCollapsedChanged);
 }
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
@@ -497,6 +499,18 @@ SOdysseyLayerStackTreeView::OnLayerIsExpandedChanged(UOdysseyLayer* iLayerNode)
         return;
 
     SetItemExpansion(Cast<UOdysseyLayer>(iLayerNode), iLayerNode->IsExpanded);
+}
+
+void
+SOdysseyLayerStackTreeView::OnLayerIsCollapsedChanged(UOdysseyLayer* iLayerNode)
+{   
+    if ( !mLayerStack )
+        return;
+    
+    if (iLayerNode->GetLayerStack() != mLayerStack )
+        return;
+    
+    RequestTreeRefresh();
 }
 
 void

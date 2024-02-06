@@ -102,6 +102,5 @@ private:
 private:
     UOdysseyLayer* mLayer = nullptr;
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
-    bool mIsCollapsed = false;
     TWeakPtr<SOdysseyLayerStackTreeView> mTreeView;
 };

@@ -166,6 +166,7 @@ void
 SOdysseyAnimationLayerImageRasterRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "bIsLightTableActivated", iState == ECheckBoxState::Checked);
+    GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
 
 void
