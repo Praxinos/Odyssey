@@ -263,7 +263,7 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
     if (!operation->GetData().CanPaste(mLayer))
         return FReply::Unhandled();
 
-    int timelineOffset = mExtension->Timeline()->GetOffset();
+    float timelineOffset = mExtension->Timeline()->GetOffset();
     float posX = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X;
     float frameWidth = mExtension->Timeline()->GetFrameWidth();
     float frame = (int)(posX / frameWidth + timelineOffset + 0.5f);

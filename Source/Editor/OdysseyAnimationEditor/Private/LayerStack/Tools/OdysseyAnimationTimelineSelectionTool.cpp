@@ -23,7 +23,7 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseButtonDown(const FMouseEventParam
         //startDragDetection
         mIsSelecting = true;
 
-		int timelineOffset = mTimelineParams->GetOffset();
+		float timelineOffset = mTimelineParams->GetOffset();
 		float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
 		float frameWidth = mTimelineParams->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
@@ -45,7 +45,7 @@ FOdysseyAnimationTimelineSelectionTool::OnDragDetected(const FMouseEventParams& 
   	{
 		mSelectionData.mIsDragDetected = true;
 
-		int timelineOffset = mTimelineParams->GetOffset();
+		float timelineOffset = mTimelineParams->GetOffset();
 		float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
 		float frameWidth = mTimelineParams->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
@@ -81,7 +81,7 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseMove(const FMouseEventParams& iPa
 		if (!mSelectionData.mIsDragDetected)
 			return FReply::Unhandled();
 
-		int timelineOffset = mTimelineParams->GetOffset();
+		float timelineOffset = mTimelineParams->GetOffset();
 		float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
 		float frameWidth = mTimelineParams->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
@@ -124,7 +124,7 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseButtonUp(const FMouseEventParams&
 			//mOnSelectionChanged.ExecuteIfBound(mSelectionData.mSelectedFrames);
 		}
 
-		int timelineOffset = mTimelineParams->GetOffset();
+		float timelineOffset = mTimelineParams->GetOffset();
 		float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
 		float frameWidth = mTimelineParams->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);

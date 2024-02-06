@@ -353,7 +353,7 @@ SOdysseyAnimationCells::UpdateHandlesVisibility()
     mTimingHandleCells.Empty();
 
     //Find frame
-    int timelineOffset = mExtension->Timeline()->GetOffset();
+    float timelineOffset = mExtension->Timeline()->GetOffset();
     float frameWidth = mExtension->Timeline()->GetFrameWidth();
     float frame = mMousePosition.X / frameWidth + timelineOffset;
 
@@ -433,7 +433,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorOffset(TSharedPtr<FOdysseyAnimation
         return 0.f;
     
     //Find frame
-    int timelineOffset = mExtension->Timeline()->GetOffset();
+    float timelineOffset = mExtension->Timeline()->GetOffset();
     float frameWidth = mExtension->Timeline()->GetFrameWidth();
     float frame = mMousePosition.X / frameWidth + timelineOffset + 0.5f;
 
@@ -455,7 +455,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(TSharedPtr<FOdysseyAnima
         return EVisibility::Hidden;
 
     //Find frame
-    int timelineOffset = mExtension->Timeline()->GetOffset();
+    float timelineOffset = mExtension->Timeline()->GetOffset();
     float frameWidth = mExtension->Timeline()->GetFrameWidth();
     float frame = mMousePosition.X / frameWidth + timelineOffset + 0.5f;
 

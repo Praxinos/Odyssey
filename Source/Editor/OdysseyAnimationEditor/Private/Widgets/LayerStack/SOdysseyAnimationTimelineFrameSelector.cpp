@@ -29,7 +29,7 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseButtonDown(const FGeometry& MyGeo
 	{
 		mIsSelecting = true;
 
-		int timelineOffset = mExtension->Timeline()->GetOffset();
+		float timelineOffset = mExtension->Timeline()->GetOffset();
 		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
 		float frameWidth = mExtension->Timeline()->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
@@ -52,7 +52,7 @@ SOdysseyAnimationTimelineFrameSelector::OnDragDetected(const FGeometry& iGeometr
   	{
 		mSelectionData.mIsDragDetected = true;
 
-		int timelineOffset = mExtension->Timeline()->GetOffset();
+		float timelineOffset = mExtension->Timeline()->GetOffset();
 		float posX = iGeometry.AbsoluteToLocal(iMouseEvent.GetScreenSpacePosition()).X;
 		float frameWidth = mExtension->Timeline()->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
@@ -82,7 +82,7 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseMove(const FGeometry& MyGeometry,
 		if (!mSelectionData.mIsDragDetected)
 			return FReply::Unhandled();
 
-		int timelineOffset = mExtension->Timeline()->GetOffset();
+		float timelineOffset = mExtension->Timeline()->GetOffset();
 		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
 		float frameWidth = mExtension->Timeline()->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
@@ -118,7 +118,7 @@ SOdysseyAnimationTimelineFrameSelector::OnMouseButtonUp(const FGeometry& iGeomet
 			mOnSelectionChanged.ExecuteIfBound(mSelectionData.mSelectedFrames);
 		}
 
-		int timelineOffset = mExtension->Timeline()->GetOffset();
+		float timelineOffset = mExtension->Timeline()->GetOffset();
 		float posX = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X;
 		float frameWidth = mExtension->Timeline()->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
@@ -246,7 +246,7 @@ SOdysseyAnimationTimelineFrameSelection::OnPreviewMouseButtonDown(const FGeometr
 		if (selectedFrames.IsEmpty())
 			return SCompoundWidget::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
-		int timelineOffset = mExtension->Timeline()->GetOffset();
+		float timelineOffset = mExtension->Timeline()->GetOffset();
 		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
 		float frameWidth = mExtension->Timeline()->GetFrameWidth();
 		float frame = (int)(posX / frameWidth + timelineOffset);
