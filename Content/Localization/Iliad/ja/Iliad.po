@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Iliad\n"
-"POT-Creation-Date: 2024-02-02 16:14\n"
-"PO-Revision-Date: 2024-02-02 16:14\n"
+"POT-Creation-Date: 2024-02-06 16:57\n"
+"PO-Revision-Date: 2024-02-06 16:57\n"
 "Language-Team: \n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -147,8 +147,8 @@ msgid "LightTable"
 msgstr ""
 
 #. Key:	actions.clear
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(171)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(171)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(176)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(176)
 msgctxt "AnimationEditor,actions.clear"
 msgid "Clear"
 msgstr ""
@@ -279,18 +279,18 @@ msgctxt "AnimationEditor,layer-folder.transaction.set-opacity"
 msgid "Change Layer Opacity"
 msgstr ""
 
-#. Key:	layer-image-raster.transaction.set-blend-mode
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(229)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(229)
-msgctxt "AnimationEditor,layer-image-raster.transaction.set-blend-mode"
-msgid "Change Layer BlendMode"
-msgstr ""
-
 #. Key:	layer-image-raster.transaction.set-opacity
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(23)
 #: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(23)
 msgctxt "AnimationEditor,layer-image-raster.transaction.set-opacity"
 msgid "Change Layer Opacity"
+msgstr ""
+
+#. Key:	layer-image-raster.transaction.set-blend-mode
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(230)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(230)
+msgctxt "AnimationEditor,layer-image-raster.transaction.set-blend-mode"
+msgid "Change Layer BlendMode"
 msgstr ""
 
 #. Key:	layer-image-vector.transaction.set-wireframe
@@ -315,8 +315,8 @@ msgid "Change Layer Opacity"
 msgstr ""
 
 #. Key:	layer-image-vector.transaction.set-blend-mode
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(252)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(252)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(253)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(253)
 msgctxt "AnimationEditor,layer-image-vector.transaction.set-blend-mode"
 msgid "Change Layer BlendMode"
 msgstr ""
@@ -1049,44 +1049,44 @@ msgctxt "LayerStackEditor,add-layer-button.add-layer"
 msgid "Add"
 msgstr ""
 
-#. Key:	header-row.is-layer-activated.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(44)
-#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(44)
-msgctxt "LayerStackEditor,header-row.is-layer-activated.tooltip"
-msgid "Toggle Layer Activation"
-msgstr ""
-
 #. Key:	context-menu.selection-section
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(457)
-#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(457)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(459)
+#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(459)
 msgctxt "LayerStackEditor,context-menu.selection-section"
 msgid "Selection"
 msgstr ""
 
+#. Key:	header-row.is-layer-activated.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(46)
+#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(46)
+msgctxt "LayerStackEditor,header-row.is-layer-activated.tooltip"
+msgid "Toggle Layer Activation"
+msgstr ""
+
 #. Key:	context-menu.common-section
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(462)
-#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(462)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(464)
+#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(464)
 msgctxt "LayerStackEditor,context-menu.common-section"
 msgid "Common"
 msgstr ""
 
 #. Key:	context-menu.layer-section
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(474)
-#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(474)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(476)
+#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(476)
 msgctxt "LayerStackEditor,context-menu.layer-section"
 msgid "Layer"
 msgstr ""
 
 #. Key:	header-row.is-layer-locked.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(58)
-#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(58)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(60)
+#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(60)
 msgctxt "LayerStackEditor,header-row.is-layer-locked.tooltip"
 msgid "Toggle Layer Locked State"
 msgstr ""
 
 #. Key:	header-row.is-layer-collapsed.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(72)
-#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(72)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(74)
+#: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(74)
 msgctxt "LayerStackEditor,header-row.is-layer-collapsed.tooltip"
 msgid "Collapse / Uncollapse Layer"
 msgstr ""
@@ -1540,15 +1540,15 @@ msgid "FloodFill"
 msgstr ""
 
 #. Key:	raster-primitive-drawing-tool.transaction.draw-shape
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(181)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(181)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(186)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(186)
 msgctxt "PainterEditor,raster-primitive-drawing-tool.transaction.draw-shape"
 msgid "Draw Primitive Shape"
 msgstr ""
 
 #. Key:	raster-transform-tool.transaction.transform
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(572)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(572)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(596)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(596)
 msgctxt "PainterEditor,raster-transform-tool.transaction.transform"
 msgid "Transform"
 msgstr ""
@@ -2009,15 +2009,15 @@ msgid "Vector Vertex Pick Tool"
 msgstr ""
 
 #. Key:	vector-transform-tool.transaction.transform
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(834)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(834)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(835)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(835)
 msgctxt "PainterEditor,vector-transform-tool.transaction.transform"
 msgid "Vector Transform Tool"
 msgstr ""
 
 #. Key:	vector-scene-tree-view.transaction.selection-changed
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.cpp(192)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.cpp(192)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.cpp(194)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.cpp(194)
 msgctxt "PainterEditor,vector-scene-tree-view.transaction.selection-changed"
 msgid "Selection Changed"
 msgstr ""
@@ -2149,8 +2149,8 @@ msgid "Delete Selection"
 msgstr ""
 
 #. Key:	vector-scene-tree-view.transaction.drag-drop-object
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(120)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(120)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(122)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(122)
 msgctxt "PainterEditor,vector-scene-tree-view.transaction.drag-drop-object"
 msgid "Drop Objects"
 msgstr ""
