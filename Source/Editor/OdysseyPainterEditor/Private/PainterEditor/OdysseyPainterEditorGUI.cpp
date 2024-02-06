@@ -116,7 +116,6 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorGUI::__VA_ARGS__ ), FCanExecuteAction() );
 
-    MAP_ACTION(painterEditorCommands.AboutIliad, AboutIliad )
     MAP_ACTION(painterEditorCommands.VisitPraxinosWebsite, VisitPraxinosWebsite )
     MAP_ACTION(painterEditorCommands.ManualAndReleaseNotes, ManualAndReleaseNotes )
     MAP_ACTION(painterEditorCommands.GetBrushPack, GetBrushPack )
