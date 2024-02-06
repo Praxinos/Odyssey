@@ -133,7 +133,7 @@ FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
 TSharedPtr<::ULIS::FBlock>
 FOdysseyVectorBlock::Render( uint64 iDrawingFlags )
 {
-    TSharedPtr<::ULIS::FBlock> block = GetBlock( iDrawingFlags );
+     TSharedPtr<::ULIS::FBlock> block = GetBlock( iDrawingFlags );
     if ( !block )
         return nullptr;
 
@@ -146,6 +146,7 @@ FOdysseyVectorBlock::Render( uint64 iDrawingFlags )
             RenderHUD(*hudBlock);
 
         mNeedsRender = false;
+        mBlockData->mNeedsCache = true;
     }
 
     return block;
@@ -161,7 +162,7 @@ FOdysseyVectorBlock::CleanupBlock(uint8* iData, void* iInfo)
 
     if ( blockData->mNeedsCache )
     {
-        FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
+        FOdysseyDiskCache cache(FOdysseyVectorBlock_CACHE_NAME, FOdysseyVectorBlock_CACHE_VERSION);
         FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(blockData->mBuffer.GetView());
         cache.Save(blockData->mId.ToString(), sharedBuffer);
     }
@@ -251,7 +252,7 @@ FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
     mBlockData->mBLContext.Get()->begin(*mBlockData->mBLImage.Get(), createInfo);
 
     //FUniqueBuffer buffer;
-    FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
+    FOdysseyDiskCache cache(FOdysseyVectorBlock_CACHE_NAME, FOdysseyVectorBlock_CACHE_VERSION);
     if ( cache.Load(mId.ToString(), mBlockData->mBuffer) )
     {
         //ULIS Block : Used externally to read/blend the pixels in Unreal
@@ -305,13 +306,9 @@ FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
     if (!mNeedsRender)
     {
         //Remove block from cache and invalidate cache
-        FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
+        FOdysseyDiskCache cache(FOdysseyVectorBlock_CACHE_NAME, FOdysseyVectorBlock_CACHE_VERSION);
         cache.Remove(mId.ToString());
         mNeedsRender = true;
-        
-        TSharedPtr<::ULIS::FBlock> block = mBlock.Pin();
-        if (block)
-            mBlockData->mNeedsCache = true;
     }
 
     mEngine->Invalidate();
