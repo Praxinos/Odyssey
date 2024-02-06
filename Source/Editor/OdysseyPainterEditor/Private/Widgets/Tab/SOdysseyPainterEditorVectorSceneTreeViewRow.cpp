@@ -114,19 +114,21 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     //FVector2D position = iGeometry.GetAbsolutePosition();
     FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = itemScene->GetEngine()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> focusedObjectList;
     FOdysseyVectorObject* insertObject = itemObject;
+
+    itemScene->GetEngine()->GetFocusedAncestorList( focusedObjectList );
 
     GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.drag-drop-object", "Drop Objects"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene, selectedObjectList ) );
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene, focusedObjectList ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
     }
     GEditor->EndTransaction();
 
-    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
     {
         switch( mDropZone )
         {
@@ -137,20 +139,20 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
                 // don't drop onto the same object or else expect some infinite loop
-                if( parentObject != selectedObject )
+                if( parentObject != focusedObject )
                 {
-                    parentObject->TransferChild( selectedObject, parentObject->GetPreviousChild( insertObject ) );
+                    parentObject->TransferChild( focusedObject, parentObject->GetPreviousChild( insertObject ) );
 
-                    insertObject = selectedObject;
+                    insertObject = focusedObject;
                 }
             }
             break;
 
             case DROPZONE_ONTO:
                 // don't drop onto the same object or else expect some infinite loop
-                if( itemObject != selectedObject )
+                if( itemObject != focusedObject )
                 {
-                    itemObject->TransferChild( selectedObject, nullptr );
+                    itemObject->TransferChild( focusedObject, nullptr );
                 }
             break;
 
@@ -161,11 +163,11 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
                 // don't drop onto the same object or else expect some infinite loop
-                if( parentObject != selectedObject )
+                if( parentObject != focusedObject )
                 {
-                    parentObject->TransferChild( selectedObject, insertObject );
+                    parentObject->TransferChild( focusedObject, insertObject );
 
-                    insertObject = selectedObject;
+                    insertObject = focusedObject;
                 }
             }
             break;
