@@ -32,7 +32,7 @@ void
 FOdysseyPainterEditorCommands::RegisterCommands()
 {
 // Help Shortcuts Category
-    UI_BUNDLE_COMMAND( AboutIliad, HelpShortcuts, "About ILIAD", "About ILIAD",                                                                             EUserInterfaceActionType::Button, FInputChord( EKeys::F2 ) );
+    UI_BUNDLE_COMMAND( AboutIliad, HelpShortcuts, "About ILIAD", "About ILIAD",                                                                             EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( VisitPraxinosWebsite, HelpShortcuts, "Praxinos Website...", "Praxinos Website...",                                                   EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ManualAndReleaseNotes, HelpShortcuts, "Manual and Release Notes ...", "Manual and Release Notes ...",                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( Discord, HelpShortcuts, "Talk with the developpers ...", "Talk with the developpers ...",                                            EUserInterfaceActionType::Button, FInputChord() );
