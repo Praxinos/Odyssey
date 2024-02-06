@@ -137,19 +137,8 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
         }
     }
 
-    switch (Constrain)
-    {
-    case EOdysseyTransformConstrain::Rectangle:
+    if( !Perspective )
         ConstrainToRectangle(FVector2D(point.x, point.y));
-        break;
-    /*case EOdysseyTransformConstrain::Parallelogram:
-        ConstrainToParallelogram(FVector2D(point.x, point.y));
-        break;*/
-    case EOdysseyTransformConstrain::NoConstrain:
-        break;
-    default:
-        break;
-    }
 
     CreateTransformBlockFromSelectionBlock();
     //BlendTransformAreaToPaintBlock();
@@ -630,7 +619,6 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
     mHandles.Empty();
     mHUD->EmptyHUDElements();
     mTransformArea = nullptr;
-    Constrain = EOdysseyTransformConstrain::Rectangle;
     mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
     mEditor->HUDSystem()->ClearHUDSurface();
     mSelection->ClearSelection();

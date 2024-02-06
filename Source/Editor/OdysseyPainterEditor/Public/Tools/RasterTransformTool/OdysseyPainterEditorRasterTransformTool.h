@@ -19,13 +19,6 @@ enum class EOdysseySelectionShape : uint8
     Ellipse
 };
 
-UENUM()
-enum class EOdysseyTransformConstrain : uint8
-{
-    Rectangle,
-    NoConstrain,
-};
-
 enum class EOdysseyTransformCapture
 {
     NoCapture,
@@ -89,9 +82,8 @@ public:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     EOdysseySelectionShape SelectionShape;
 
-
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
-    EOdysseyTransformConstrain Constrain = EOdysseyTransformConstrain::Rectangle;
+    bool Perspective = false;
 
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     bool Uniform = false;
