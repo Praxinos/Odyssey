@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2024-02-06 16:57\n"
-"PO-Revision-Date: 2024-02-06 16:57\n"
+"POT-Creation-Date: 2024-02-07 16:08\n"
+"PO-Revision-Date: 2024-02-07 16:08\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -144,13 +144,6 @@ msgstr ""
 #: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(375)
 msgctxt "NamingConventionSettingsCustomization,board-pattern-tooltip"
 msgid "Some examples:\n\n- board_{0} ->\n    board_10\n    board_20\n    board_30\n    ...\n- {2}_board_{0}_{10} ->\n    MS_board_0010_xy\n    MS_board_0020_xy\n    MS_board_0030_xy\n    ...\n\n(Click on a keyword to Copy it)"
-msgstr ""
-
-#. Key:	Pattern
-#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
-#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
-msgctxt "NamingConventionSettingsCustomization,Pattern"
-msgid "Pattern"
 msgstr ""
 
 #. Key:	wrong-pattern
@@ -1418,6 +1411,13 @@ msgstr ""
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(28)
 msgctxt "NamingConventionSettingsCustomization,infobar-pattern-tooltip"
 msgid "Each keywords will be replaced by its corresponding value.\nThe separator will be used to join each line of the pattern field.\n\n(Click on a keyword to Copy it)"
+msgstr ""
+
+#. Key:	Pattern
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
+msgctxt "NamingConventionSettingsCustomization,Pattern"
+msgid "Pattern"
 msgstr ""
 
 #. Key:	AssetTypeActions_ShotSequence
