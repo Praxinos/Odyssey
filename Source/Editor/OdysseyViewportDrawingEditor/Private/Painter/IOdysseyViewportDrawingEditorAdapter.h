@@ -131,4 +131,6 @@ protected:
 
     /** Indicates if the stylus is considered as touching the tablet or not */
     bool mStylusIsDown = false;
+
+    bool mCapturedByEditor = false;
 };

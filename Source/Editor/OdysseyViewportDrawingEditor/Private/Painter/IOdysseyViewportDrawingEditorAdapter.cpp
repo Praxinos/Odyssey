@@ -125,7 +125,7 @@ void IOdysseyViewportDrawingEditorAdapter::StartPainting()
     }
 
     if (mTool)
-        mTool->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
+        mCapturedByEditor = mTool->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
 }
 
 void IOdysseyViewportDrawingEditorAdapter::Paint()
@@ -142,6 +142,7 @@ void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
         return;
     
     mTool->OnMouseUp(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
+    mCapturedByEditor = false;
 
     UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
     if (rasterDrawingTool)
@@ -248,6 +249,15 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     if (mLastKnownViewport != iViewport)
         mLastKnownViewport = iViewport;
 
+    /* FString eventStr = TEXT("");
+    if (iEvent == IE_Repeat)
+        eventStr = TEXT("REPEAT");
+    if (iEvent == IE_Pressed)
+        eventStr = TEXT("PRESSED");
+    if (iEvent == IE_Released)
+        eventStr = TEXT("RELEASED");
+    UE_LOG(LogTemp, Warning, TEXT("Input Key : %s %s"), *iKey.ToString(), *eventStr); */
+
 #if PLATFORM_MAC
     if (iEvent == EInputEvent::IE_Pressed && iKey == EKeys::LeftMouseButton)
     {
@@ -306,12 +316,13 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 
     //---
 
-    const bool bIsAltDown =  mKeysPressed.Contains( EKeys::LeftAlt ) || mKeysPressed.Contains( EKeys::RightAlt );
+    /* const bool bIsAltDown =  mKeysPressed.Contains( EKeys::LeftAlt ) || mKeysPressed.Contains( EKeys::RightAlt );
     const bool bIsCtrlDown = mKeysPressed.Contains( EKeys::LeftControl ) || mKeysPressed.Contains( EKeys::RightControl );
     
+    UE_LOG(LogTemp, Warning, TEXT("bIsAltDown : %s"), bIsAltDown ? TEXT("TRUE") : TEXT("FALSE"));
     //Dolly the camera, we're not painting
     if ( bIsAltDown ) 
-        return false;
+        return false; */
 
     //---
 
@@ -339,11 +350,18 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     // - right click camera movement
     //and disallow (return true) left click camera movement
     bool isMouseEvent = iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton;
-    if (!mIsMouseDown && isMouseEvent) 
+    if (!mIsMouseDown && isMouseEvent && (isOutsideTexture || iEvent == IE_Released)) 
     {
-        bool isEventIntercepted = iEvent != EInputEvent::IE_DoubleClick && iKey != EKeys::RightMouseButton;
-        if (isOutsideTexture || (iEvent == IE_Released && !mIsMouseDown))
-            return isEventIntercepted;
+        if (iEvent == EInputEvent::IE_DoubleClick)
+            return false;
+
+        if (iKey == EKeys::RightMouseButton)
+            return false;
+
+        if (iKey == EKeys::LeftMouseButton)
+            return false;
+
+        return false;
     }
 
     //Init our StrokeRay, having all the basic info to draw 
@@ -395,13 +413,13 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         }
     }
 
-    return true;
+    return mCapturedByEditor;
 }
 
 bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
 {
     if (mIsRecordingStylus)
-        return true;
+        return mCapturedByEditor;
 
     // Compute a world space ray from the screen space mouse coordinates
     /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
@@ -435,7 +453,7 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
 
     MouseDrag(strokeRay);
-    return true;
+    return mCapturedByEditor;
 }
 
 //--------------------------------------------------------------------------------------
@@ -546,10 +564,14 @@ IOdysseyViewportDrawingEditorAdapter::StartStylusInputRecord()
     auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
     if(delta > 500 )
         return;
+        
+    mIsRecordingStylus = true;
 
     //Down
     ReadStylusInput();
-    mIsRecordingStylus = true;
+
+    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    inputSubsystem->Flush(); //Get late stylus events
 }
 
 void
