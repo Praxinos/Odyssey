@@ -370,14 +370,14 @@ FBlockData::PostChange(const FGuid& iId)
     FScopeLock Lock(&mEditMutex);
     mInvalidIds.Remove(iId);
 
-    mIsInvalid = mInvalidIds.IsEmpty() && !mInvalidTileMap.InvalidTiles().IsEmpty();
-    if (mIsInvalid)
+    if (mInvalidIds.IsEmpty() && !mInvalidTileMap.InvalidTiles().IsEmpty())
     {
         TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
         mRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0], IOdysseyImageRenderer::eRenderType::Render, rects );
-    }    
-
-    return mIsInvalid;
+        return true;
+    }
+        
+    return false;
 }
 
 const TSet<int>&
