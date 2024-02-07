@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Iliad\n"
-"POT-Creation-Date: 2024-02-06 16:57\n"
-"PO-Revision-Date: 2024-02-06 16:57\n"
+"POT-Creation-Date: 2024-02-07 16:08\n"
+"PO-Revision-Date: 2024-02-07 16:08\n"
 "Language-Team: \n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -1525,18 +1525,18 @@ msgctxt "PainterEditor,raster-drawing-tool.transaction.paint-stroke"
 msgid "Paint Stroke"
 msgstr ""
 
-#. Key:	raster-drawing-tool.top-tab.eraser
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolTopTab.cpp(102)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolTopTab.cpp(102)
-msgctxt "PainterEditor,raster-drawing-tool.top-tab.eraser"
-msgid "Switch the current tool to Eraser mode."
-msgstr ""
-
 #. Key:	raster-paint-bucket-tool.transaction.paint-stroke
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(146)
 #: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(146)
 msgctxt "PainterEditor,raster-paint-bucket-tool.transaction.paint-stroke"
 msgid "FloodFill"
+msgstr ""
+
+#. Key:	raster-drawing-tool.top-tab.eraser
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.cpp(77)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.cpp(77)
+msgctxt "PainterEditor,raster-drawing-tool.top-tab.eraser"
+msgid "Switch the current tool to Eraser mode."
 msgstr ""
 
 #. Key:	raster-primitive-drawing-tool.transaction.draw-shape
