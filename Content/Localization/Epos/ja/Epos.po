@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2024-02-07 16:08\n"
-"PO-Revision-Date: 2024-02-07 16:08\n"
+"POT-Creation-Date: 2024-02-08 10:59\n"
+"PO-Revision-Date: 2024-02-08 10:59\n"
 "Language-Team: \n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -146,6 +146,13 @@ msgctxt "NamingConventionSettingsCustomization,board-pattern-tooltip"
 msgid "Some examples:\n\n- board_{0} ->\n    board_10\n    board_20\n    board_30\n    ...\n- {2}_board_{0}_{10} ->\n    MS_board_0010_xy\n    MS_board_0020_xy\n    MS_board_0030_xy\n    ...\n\n(Click on a keyword to Copy it)"
 msgstr "実例：\n\n- board_{0} ->\n  board_10\n  board_20\n  board_30\n  ...\n- {2}_board_{0}_{10} ->\n  MS_board_0010_xy\n  MS_board_0020_xy\n  MS_board_0030_xy\n  ...\n\n(キーワードをクリックしてコピーする)"
 
+#. Key:	Pattern
+#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
+#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
+msgctxt "NamingConventionSettingsCustomization,Pattern"
+msgid "Pattern"
+msgstr "パターン"
+
 #. Key:	wrong-pattern
 #. SourceLocation:	Plugins/Epos/Source/EposPattern/Private/SPatternTextBox.cpp(164)
 #: Plugins/Epos/Source/EposPattern/Private/SPatternTextBox.cpp(164)
@@ -221,35 +228,35 @@ msgstr "情報バーをダブルクリックするとパターンの設定が開
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(567)
 msgctxt "BoardSequenceCustomization,ImportExportMenuSectionName"
 msgid "Import/Export"
-msgstr ""
+msgstr "インポート／エクスポート"
 
 #. Key:	ImportFBX
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(570)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(570)
 msgctxt "BoardSequenceCustomization,ImportFBX"
 msgid "Import..."
-msgstr ""
+msgstr "インポートする..."
 
 #. Key:	ImportFBXTooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(571)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(571)
 msgctxt "BoardSequenceCustomization,ImportFBXTooltip"
 msgid "Import FBX animation to this object"
-msgstr ""
+msgstr "このオブジェクトに FBX アニメーションをインポートする"
 
 #. Key:	ExportFBX
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(581)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(581)
 msgctxt "BoardSequenceCustomization,ExportFBX"
 msgid "Export..."
-msgstr ""
+msgstr "エクスポートする..."
 
 #. Key:	ExportFBXTooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(582)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(582)
 msgctxt "BoardSequenceCustomization,ExportFBXTooltip"
 msgid "Export FBX animation from this object"
-msgstr ""
+msgstr "このオブジェクトから FBX アニメーションをエクスポートする"
 
 #. Key:	EposSequenceEditorStyle
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(19)
@@ -354,14 +361,14 @@ msgstr "ビューポートの回転を {0}° に設定する"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
 msgctxt "UICommands.EposSequenceEditorCommands,FixActorReferences"
 msgid "Fix Actor References"
-msgstr ""
+msgstr "アクタのリファレンスを修復する"
 
 #. Key:	FixActorReferences_ToolTip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
 msgctxt "UICommands.EposSequenceEditorCommands,FixActorReferences_ToolTip"
 msgid "Try to automatically fix up broken actor bindings"
-msgstr ""
+msgstr "壊れたアクタのバインディングを自動的に修復してみる"
 
 #. Key:	StepToPreviousShot
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(60)
@@ -697,7 +704,7 @@ msgstr "Epos のシーケンス エディタのルックとフィールのコン
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorSubsystem.cpp(1412)
 msgctxt "EposSequenceEditor,FixActorReferences"
 msgid "Fix Actor References"
-msgstr ""
+msgstr "アクタのリファレンスを修復する"
 
 #. Key:	AppLabel
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(296)
@@ -935,7 +942,7 @@ msgstr "アドバンス"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(30)
 msgctxt "ExportImageSequenceSettingsCustomization,export-image-sequence-file-pattern-tooltip"
 msgid "Each keywords will be replaced by its corresponding value.\n\n- {0}-{1}-seq{2}-sh{3}---{4}\n    1-MyStoryboard-seq10-sh10---0000\n    2-MyStoryboard-seq10-sh10---0100\n    3-MyStoryboard-seq10-sh20---0175\n    4-MyStoryboard-seq10-sh20---0200\n    5-MyStoryboard-seq20-sh30---0250\n    6-MyStoryboard-seq20-sh40---0400\n    ...\n- {1}-pf{4}\n    MyStoryboard-pf0000\n    MyStoryboard-pf0100\n    MyStoryboard-pf0175\n    MyStoryboard-pf0200\n    MyStoryboard-pf0250\n    MyStoryboard-pf0400\n    ...\n\nThe extension will be automatically set according to the file format.\n\n(Click on a keyword to Copy it)"
-msgstr ""
+msgstr "それぞれのキーワードは、対応する値によって置き換えられます。\n\n- {0}-{1}-seq{2}-sh{3}---{4}\n    1-MyStoryboard-seq10-sh10---0000\n    2-MyStoryboard-seq10-sh10---0100\n    3-MyStoryboard-seq10-sh20---0175\n    4-MyStoryboard-seq10-sh20---0200\n    5-MyStoryboard-seq20-sh30---0250\n    6-MyStoryboard-seq20-sh40---0400\n    ...\n- {1}-pf{4}\n    MyStoryboard-pf0000\n    MyStoryboard-pf0100\n    MyStoryboard-pf0175\n    MyStoryboard-pf0200\n    MyStoryboard-pf0250\n    MyStoryboard-pf0400\n    ...\n\n拡張子はファイル形式に応じて自動で設定されます。\n\n(キーワードをコピーするにはクリックしてください)"
 
 #. Key:	Pattern
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Export/ImageSequence/ExportImageSequenceSettingsCustomization.cpp(95)
@@ -1103,7 +1110,7 @@ msgstr "パネルの長さ（尺）"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Import/ImportImageSequenceSettingsCustomization.cpp(28)
 msgctxt "ImportImageSequenceSettingsCustomization,import-image-sequence-file-pattern-tooltip"
 msgid "Each keywords will be replaced by its corresponding value.\n\nFor files like:\n- wonder-1-000.png\n- wonder-1-001.png\n- wonder-1-002.png\n- wonder-2-000.png\n- wonder-2-001.png\n- wonder-3-000.png\n- wonder-3-001.png\n- wonder-3-002.png\n- wonder-3-003.png\nIf the first number corresponds to the shot, and the second to each panel,\nthe pattern will look like:\n- wonder-{1}-{2}.png\n\nFor files like:\n- ful-bA-s01-00.png\n- ful-bA-s01-01.png\n- ful-bA-s01-02.png\n- ful-bA-s02-00.png\n- ful-bA-s02-01.png\n- ful-bB-s03-00.png\n- ful-bB-s03-01.png\n- ful-bB-s03-02.png\n- ful-bB-s03-03.png\nIf the first character (A or B) corresponds to the board, the next number to the shot, and the last to each panel,\nthe pattern will look like:\n- ful-b{0}-s{1}-{2}.png\n\n(Click on a keyword to Copy it)"
-msgstr ""
+msgstr "それぞれのキーワードは、対応する値によって置き換えられます。\n\n以下の様なファイルの場合：\n- wonder-1-000.png\n- wonder-1-001.png\n- wonder-1-002.png\n- wonder-2-000.png\n- wonder-2-001.png\n- wonder-3-000.png\n- wonder-3-001.png\n- wonder-3-002.png\n- wonder-3-003.png\nIf the first number corresponds to the shot, and the second to each panel,\nthe pattern will look like:\n- wonder-{1}-{2}.png\n\n以下の様なファイルの場合：\n- ful-bA-s01-00.png\n- ful-bA-s01-01.png\n- ful-bA-s01-02.png\n- ful-bA-s02-00.png\n- ful-bA-s02-01.png\n- ful-bB-s03-00.png\n- ful-bB-s03-01.png\n- ful-bB-s03-02.png\n- ful-bB-s03-03.png\n最初の文字 (A または B) がボードに対応し、次の番号がショットに対応し、最後の文字が各パネルに対応する場合、\n表示パターンは以下の様になります：\n- ful-b{0}-s{1}-{2}.png\n\n(キーワードをコピーするにはクリックしてください)"
 
 #. Key:	Pattern
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Import/ImportImageSequenceSettingsCustomization.cpp(82)
@@ -1180,21 +1187,21 @@ msgstr "ボード：{0}"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(120)
 msgctxt "EposSequenceFBXInterop,ExportEposSequence"
 msgid "Export Epos Sequence"
-msgstr ""
+msgstr "Epos シーケンスをエクスポートする"
 
 #. Key:	ExportFBXSucceeded
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(230)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(230)
 msgctxt "Sequencer,ExportFBXSucceeded"
 msgid "FBX Export Succeeded."
-msgstr ""
+msgstr "FBX のエクスポートが問題なく実行されました。"
 
 #. Key:	ExportFBXFailed
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(238)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Misc/EposSequenceFBXInterop.cpp(238)
 msgctxt "Sequencer,ExportFBXFailed"
 msgid "FBX Export Failed."
-msgstr ""
+msgstr "FBX のエクスポートに失敗しました。"
 
 #. Key:	ModifyJob_Transaction
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Render/EposSequencePipelineRenderer.cpp(115)
@@ -1222,7 +1229,7 @@ msgstr "ストーリーボードのレンダリングオプション"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Render/EposSequencePipelineRenderer.cpp(87)
 msgctxt "EposSequencePipelineRenderer,CreateJob_Transaction"
 msgid "Add {0}|plural(one=Job, other=Jobs)"
-msgstr "{0}|plural(other=ジョブ) を追加する"
+msgstr "{0}|plural(other=複数ジョブ) を追加する"
 
 #. Key:	CodecPresets
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Render/SRenderOptions.cpp(388)
@@ -1411,14 +1418,7 @@ msgstr "現在のサブシーケンスの名称"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(28)
 msgctxt "NamingConventionSettingsCustomization,infobar-pattern-tooltip"
 msgid "Each keywords will be replaced by its corresponding value.\nThe separator will be used to join each line of the pattern field.\n\n(Click on a keyword to Copy it)"
-msgstr ""
-
-#. Key:	Pattern
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
-msgctxt "NamingConventionSettingsCustomization,Pattern"
-msgid "Pattern"
-msgstr "パターン"
+msgstr "それぞれのキーワードは、対応する値によって置き換えられます。\nセパレータは、パターン フィールドの各行を結合するために使用されます。\n\n(キーワードをコピーするにはクリックしてください)"
 
 #. Key:	AssetTypeActions_ShotSequence
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/AssetDefinition_ShotSequence.cpp(18)
@@ -1516,35 +1516,35 @@ msgstr "ヘルプ"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(593)
 msgctxt "ShotSequenceCustomization,ImportExportMenuSectionName"
 msgid "Import/Export"
-msgstr ""
+msgstr "インポート／エクスポート"
 
 #. Key:	ImportFBX
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(596)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(596)
 msgctxt "ShotSequenceCustomization,ImportFBX"
 msgid "Import..."
-msgstr ""
+msgstr "インポートする..."
 
 #. Key:	ImportFBXTooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(597)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(597)
 msgctxt "ShotSequenceCustomization,ImportFBXTooltip"
 msgid "Import FBX animation to this object"
-msgstr ""
+msgstr "このオブジェクトに FBX アニメーションをインポートする"
 
 #. Key:	ExportFBX
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(607)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(607)
 msgctxt "ShotSequenceCustomization,ExportFBX"
 msgid "Export..."
-msgstr ""
+msgstr "エクスポートする..."
 
 #. Key:	ExportFBXTooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(608)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(608)
 msgctxt "ShotSequenceCustomization,ExportFBXTooltip"
 msgid "Export FBX animation from this object"
-msgstr ""
+msgstr "このオブジェクトから FBX アニメーションをエクスポートする"
 
 #. Key:	new-storyboard.tabs.import-image-sequence
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(266)
@@ -1621,7 +1621,7 @@ msgstr "エラー：スタジオ名あるいは略称が空です"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(680)
 msgctxt "NewStoryboardDialog,StoryboardEmptyProductionName"
 msgid "Error: Empty Production Name or Acronym"
-msgstr "エラー：プロダクション名や略称が空です"
+msgstr "エラー：作品名の略称が空です"
 
 #. Key:	ImageSequenceWrongPattern
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(685)
@@ -2286,7 +2286,7 @@ msgstr "版権元：{0} | {1}"
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(254)
 msgctxt "FCinematicBoardSection,ToolTipContentNameElements.Production"
 msgid "Production: {0} | {1}"
-msgstr "プロダクション：{0} | {1}"
+msgstr "作品：{0} | {1}"
 
 #. Key:	ToolTipContentNameElements.Season
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(257)
@@ -2923,7 +2923,7 @@ msgstr "描画の不透明度を {0}で作成する"
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(1877)
 msgctxt "SCinematicBoardSectionPlanes,create-drawing-opacity-label"
 msgid "Create {0}|plural(one=opacity,other=opacities) at {1}"
-msgstr "{1}で{0}|plural(other=不透明度)を作成する"
+msgstr "{1}で{0}|plural(other=複数不透明度)を作成する"
 
 #. Key:	create-drawing-opacity-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionPlanes.cpp(1878)
@@ -3077,7 +3077,7 @@ msgstr "{0}に新規テイクを作成する"
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(359)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-before-label"
 msgid "New {0}|plural(one=Shot,other=Shots)"
-msgstr "新規 {0}|plural(other=ショット)"
+msgstr "新規 {0}|plural(other=複数ショット)"
 
 #. Key:	section.create-shot-before-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(361)
@@ -3091,7 +3091,7 @@ msgstr "このセクションの前に現在のセクションと同じ長さの
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(378)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-before-with-duration-label"
 msgid "New {0}|plural(one=Shot,other=Shots)"
-msgstr "新規 {0}|plural(other=ショット)"
+msgstr "新規 {0}|plural(other=複数ショット)"
 
 #. Key:	section.create-shot-before-with-duration-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(380)
@@ -3105,7 +3105,7 @@ msgstr "このセクションの前に、指定された長さの新規ショッ
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(399)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-before-label"
 msgid "New {0}|plural(one=Board,other=Boards)"
-msgstr "新規 {0}|plural(other=ボード)"
+msgstr "新規 {0}|plural(other=複数ボード)"
 
 #. Key:	AddBoardBefore
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(40)
@@ -3126,7 +3126,7 @@ msgstr "このセクションの前に、現在のセクションと同じ長さ
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(418)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-before-with-duration-label"
 msgid "New {0}|plural(one=Board,other=Boards)"
-msgstr "新規 {0}|plural(other=ボード)"
+msgstr "新規 {0}|plural(other=複数ボード)"
 
 #. Key:	section.create-board-before-with-duration-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(420)
@@ -3168,7 +3168,7 @@ msgstr "このショットを、前に複製する (アクタと空の描画ア�
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(479)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-after-label"
 msgid "New {0}|plural(one=Shot,other=Shots)"
-msgstr "新規 {0}|plural(other=ショット)"
+msgstr "新規 {0}|plural(other=複数ショット)"
 
 #. Key:	section.create-shot-after-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(481)
@@ -3182,7 +3182,7 @@ msgstr "このセクションの後に、現在のセクションと同じ長さ
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(498)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-shot-after-with-duration-label"
 msgid "New {0}|plural(one=Shot,other=Shots)"
-msgstr "新規 {0}|plural(other=ショット)"
+msgstr "新規 {0}|plural(other=複数ショット)"
 
 #. Key:	section.create-shot-after-with-duration-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(500)
@@ -3196,7 +3196,7 @@ msgstr "このセクションの後に、指定された長さの新規ショッ
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(519)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-after-label"
 msgid "New {0}|plural(one=Board,other=Boards)"
-msgstr "新規 {0}|plural(other=ボード)"
+msgstr "新規 {0}|plural(other=複数ボード)"
 
 #. Key:	section.create-board-after-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(521)
@@ -3217,7 +3217,7 @@ msgstr "テイクをスイッチする"
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(538)
 msgctxt "SCinematicBoardSectionThumbnails,section.create-board-after-with-duration-label"
 msgid "New {0}|plural(one=Board,other=Boards)"
-msgstr "新規 {0}|plural(other=ボード)"
+msgstr "新規 {0}|plural(other=複数ボード)"
 
 #. Key:	section.create-board-after-with-duration-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(540)
@@ -3252,14 +3252,14 @@ msgstr "このショットを、後で複製します（アクタと描画アセ
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(572)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-after-and-empty-drawings-label"
 msgid "Clone Shot (with empty drawings)"
-msgstr "Clone Shot (with empty drawings)"
+msgstr "ショットを複製する（描画は複製されません）"
 
 #. Key:	section.clone-section-after-and-empty-drawings-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(573)
 #: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(573)
 msgctxt "SCinematicBoardSectionThumbnails,section.clone-section-after-and-empty-drawings-tooltip"
 msgid "Clone this shot after (actors and empty drawing assets will be cloned as well)"
-msgstr "ショットを複製する（描画は複製されません）"
+msgstr "このショットを、後で複製する（アクタと描画アセットは同様に複製されます）"
 
 #. Key:	create-camera-and-settings-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardWidgets/SCinematicBoardSectionThumbnails.cpp(90)
