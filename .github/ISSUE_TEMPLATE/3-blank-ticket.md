@@ -1,5 +1,5 @@
 ---
-name: 3-Blank Ticket
+name: 📄Blank Ticket
 about: A blank ticket
 title: ''
 labels: ''
