@@ -457,9 +457,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Curve64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/curve_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.Curve32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/curve_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.Curve16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/curve_16", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.ColorPicker64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/color_picker_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.ColorPicker32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/color_picker_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.ColorPicker16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/color_picker_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.Polygon32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/polygon_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.FreeHand32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/freehand_32", mIcon32x32 ) );
 
