@@ -1136,6 +1136,10 @@ FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex 
 
             FOdysseyVectorSection& newGapSection = mGapSectionBuffer.emplace_back( this, &newGapSegment, nearestVertex, iVertex, 0.0f, 1.0f, mShortSectionArray );
             //newGapSection.Link();
+
+            // unlink now if gap section is colinear with vertex segment. It creates a mess in
+            // case there are multiple gap sections.
+            //newGapSection.GetVectorFromVertex( iVertex )
         }
     }
 }

@@ -211,7 +211,8 @@ FOdysseyVectorHUD::PickPoints( double iWorldX
 FColor&
 FOdysseyVectorHUD::GetForegroundColor()
 {
-    static FColor fg = FColor( 0x40, 0xE0, 0xD0, 0xFF ); // teal
+    //static FColor fg = FColor( 0x40, 0xE0, 0xD0, 0xFF ); // teal
+    static FColor fg = FColor( 0, 169, 157, 255 ); // Odyssey's teal
 
     return fg;
 }
