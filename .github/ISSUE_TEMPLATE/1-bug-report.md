@@ -1,5 +1,5 @@
 ---
-name: 1-Bug report
+name: 🪲Bug report
 about: Creates a bug ticket
 title: ''
 labels: Bug
