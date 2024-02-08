@@ -32,6 +32,7 @@ SOdysseyPainterEditorToolsTileView::Construct(const FArguments& InArgs)
             .OnCheckStateChanged(this, &SOdysseyPainterEditorToolsTileView::OnToolCheckStateChanged, tool)
             .IsChecked(this, &SOdysseyPainterEditorToolsTileView::IsToolChecked, tool)
             .Visibility(this, &SOdysseyPainterEditorToolsTileView::ToolVisibility, tool)
+            .Padding(FMargin(2.f))
             [
                 SNew(SImage)
                 .Image(&tool->Icon)
