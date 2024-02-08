@@ -1,5 +1,5 @@
 ---
-name: "\U0001FAB2Bug report"
+name: 1-Bug report
 about: Creates a bug ticket
 title: ''
 labels: Bug

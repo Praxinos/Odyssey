@@ -1,5 +1,5 @@
 ---
-name: "\U0001F4C4Blank Ticket"
+name: 3-Blank Ticket
 about: A blank ticket
 title: ''
 labels: ''

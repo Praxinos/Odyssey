@@ -1,5 +1,5 @@
 ---
-name: "✨Feature request"
+name: 2-Feature request
 about: Creates a detailed feature ticket
 title: ''
 labels: Feature
