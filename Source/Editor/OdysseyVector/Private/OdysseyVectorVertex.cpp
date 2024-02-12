@@ -12,11 +12,11 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 
 FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
     : FOdysseyVectorPoint( iX, iY, iRadius )
-   , mOwner ( nullptr )
-   , mJoint( this )
-   , mFlags( 0 )
-   , mNearestSegment( nullptr )
-   , mNearestVertex( nullptr )
+    , mJoint( this )
+    , mOwner ( nullptr )
+    , mFlags( 0 )
+    , mNearestSegment( nullptr )
+    , mNearestVertex( nullptr )
 {
     mJoint.ResetBBox();
 }

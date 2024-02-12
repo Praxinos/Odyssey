@@ -260,7 +260,11 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     bRealtime = false;
     bWireframe = false;
     mWireframeColor = FColor( 255, 255, 255, 255 );
-    bMultithreaded = true; 
+#if PLATFORM_MAC
+    bMultithreaded = false;
+#else
+    bMultithreaded = true;
+#endif
     mPaintingCode = 0;
 
     mBackgroundBucket.SetSolidColor( 160, 160, 160, 0 );
@@ -1775,6 +1779,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
     if( bMultithreaded )
     {
+#if !PLATFORM_MAC
 #ifdef perpath
         std::for_each( std::execution::par_unseq
                      , mPathList.begin()
@@ -1815,6 +1820,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
                 }
             } );
         } );
+#endif
 #endif
     }
     else
@@ -2192,6 +2198,7 @@ FOdysseyVectorGroupPaint::Clear()
     // <TODO:MULTITHREADABLE>
     if( bMultithreaded )
     {
+#if !PLATFORM_MAC
         std::for_each( std::execution::par_unseq
                      , mPathList.begin()
                      , mPathList.end()
@@ -2218,6 +2225,7 @@ FOdysseyVectorGroupPaint::Clear()
                 vertex->SetID( mVertexID++ );
             }
         } );
+#endif
     }
     else
     {
