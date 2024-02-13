@@ -23,7 +23,7 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
-    int timelineOffset = mTimelineParams->GetOffset();
+    float timelineOffset = mTimelineParams->GetOffset();
     float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
     float frameWidth = mTimelineParams->GetFrameWidth();
     float frame = (int)(posX / frameWidth + timelineOffset + 0.5f);
