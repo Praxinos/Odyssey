@@ -299,4 +299,23 @@ public:
     /** Action to switch tablet API */
     TSharedPtr<FUICommandInfo> SwitchTabletAPI; 
 
+    // Tools
+    TSharedPtr<FUICommandInfo> ActivateColorPickerTool; 
+    TSharedPtr<FUICommandInfo> ActivateRasterDrawingTool;
+    TSharedPtr<FUICommandInfo> ActivateRasterPaintBucketTool;
+    TSharedPtr<FUICommandInfo> ActivateRasterPrimitiveDrawingTool;
+    TSharedPtr<FUICommandInfo> ActivateRasterTransformTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorEraserTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorGridTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorPaintBucketTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorPathCutTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorPathDrawingTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorPathEditTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorPathPushTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorPathSmoothTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorPathStitchTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorPrimitiveDrawingTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorScenePanTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorSelectionTool;
+    TSharedPtr<FUICommandInfo> ActivateVectorTransformTool;
 };
