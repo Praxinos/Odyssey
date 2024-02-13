@@ -15,7 +15,7 @@
 /**
  * Implements the StylusInput settings.
  */
-UCLASS(config=EditorPerProjectUserSettings)
+UCLASS(config=EditorSettings)
 class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSettings
     : public UObject
 {
