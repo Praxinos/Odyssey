@@ -54,6 +54,7 @@
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
+#include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -106,8 +107,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
 void
 FOdysseyPainterEditor::Initialize()
 {
-    TAttribute<UOdysseyLayerStack*> layerStackAttr = TAttribute<UOdysseyLayerStack*>::CreateRaw(this, &FOdysseyPainterEditor::LayerStack);
-    GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStackAttr));
 
     //Init Tools
 	InitTools();
@@ -115,6 +114,11 @@ FOdysseyPainterEditor::Initialize()
     //Init the GUI
     mGUI = MakeShareable(new FOdysseyPainterEditorGUI(this));
     mGUI->Initialize();
+
+    //Init the shortcuts
+    TAttribute<UOdysseyLayerStack*> layerStackAttr = TAttribute<UOdysseyLayerStack*>::CreateRaw(this, &FOdysseyPainterEditor::LayerStack);
+    GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStackAttr));
+    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(SharedThis(this)));
     
     //Init the extensions
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)

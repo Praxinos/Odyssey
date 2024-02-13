@@ -16,6 +16,7 @@ class FTabManager;
 class ODYSSEYEDITOR_API FOdysseyEditor
     : public FGCObject //Allows us to register External UObject in Garbage Collector
     , public FTickableEditorObject //Allows us to react to Tick events
+    , public TSharedFromThis<FOdysseyEditor>
 {
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddEditedObject, UObject*);
