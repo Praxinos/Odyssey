@@ -72,9 +72,11 @@ public:
     // Interface
     virtual void BindShortcuts(class FBaseToolkit* iToolkit);
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
-    virtual TSharedRef<SWidget> CreateTopTabWidget();
     virtual FOdysseyHUDElement* GetHUD();
     virtual EMouseCursor::Type GetMouseCursor();
+
+protected:
+    virtual TSharedRef<SWidget> CreateTopTabWidget();
 
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);
@@ -83,10 +85,12 @@ protected:
     // UObject overrides
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+    virtual void PostInitProperties() override;
 
 public:
     void SetEditor(class FOdysseyPainterEditor* iEditor);
     FOdysseyPainterEditor* GetEditor() const;
+    TSharedRef<SWidget> GetTopTabWidget() const;
     //template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
 
 protected:
@@ -94,6 +98,7 @@ protected:
     FOdysseyPainterEditor*              mEditor;
     FOdysseyHUDElement*                 mHUD;
     EMouseCursor::Type                  mMouseCursor; //If the cursor should be changed while using this tool
+    TSharedPtr<SWidget>                 mTopTabWidget;
 
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")

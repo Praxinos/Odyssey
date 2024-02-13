@@ -247,7 +247,7 @@ FOdysseyPainterEditorTopTab::UpdateToolWidget()
         return;
     }
 
-    mToolWidgetSlot->AttachWidget(mCurrentTool->CreateTopTabWidget());
+    mToolWidgetSlot->AttachWidget(mCurrentTool->GetTopTabWidget());
 }
 
 void

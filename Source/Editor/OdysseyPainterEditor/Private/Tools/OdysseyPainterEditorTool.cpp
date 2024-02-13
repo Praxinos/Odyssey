@@ -19,7 +19,6 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     , mIsActivated(false)
 {
     mHUD = new FOdysseyHUDElement( FName("RootHUD") );
-
     mInputProcessor = MakeShared<FOdysseyPainterEditorToolInputProcessor>(this);
 }
 
@@ -27,12 +26,27 @@ void
 UOdysseyPainterEditorTool::SetEditor(FOdysseyPainterEditor* iEditor)
 {
     mEditor = iEditor;
+
+    //Once the editor is set, we can create the toptab widget
+    mTopTabWidget = CreateTopTabWidget();
 }
 
 FOdysseyPainterEditor*
 UOdysseyPainterEditorTool::GetEditor() const
 {
     return mEditor;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorTool::GetTopTabWidget() const
+{       
+    return mTopTabWidget.ToSharedRef();
+}
+
+void
+UOdysseyPainterEditorTool::PostInitProperties()
+{
+    Super::PostInitProperties();
 }
 
 /* void

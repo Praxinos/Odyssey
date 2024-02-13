@@ -406,35 +406,29 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorEraserTool::CreateTopTabWidget()
 {
-    // we create the topTab widget only once, or else it creates a sizing issue in the top tab
-    if( mTopTabWidget.Get() == nullptr )
-    {
-        FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-        FSinglePropertyParams defaultPropertyParams;
-        const TSharedPtr<ISinglePropertyView> splitPathPropertyView = propertyEditorModule.CreateSingleProperty(this, "SplitPath", defaultPropertyParams);
-        const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
-        TSharedPtr<class IPropertyHandle> splitPathHandle = splitPathPropertyView->GetPropertyHandle();
-        TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> splitPathPropertyView = propertyEditorModule.CreateSingleProperty(this, "SplitPath", defaultPropertyParams);
+    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> splitPathHandle = splitPathPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
 
-        mTopTabWidget = SNew(SUniformWrapPanel)
-                       .SlotPadding(FVector2D(3.f, 0.f))
-                       .EvenRowDistribution(true)
-                       .HAlign(HAlign_Left)
-                       + SUniformWrapPanel::Slot()
-                       [
-                           SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
-                       ]
-                       + SUniformWrapPanel::Slot()
-                       [
-                           CreatePropertyWidget(splitPathHandle, splitPathPropertyView).ToSharedRef()
-                       ]
-                       + SUniformWrapPanel::Slot()
-                       [
-                           CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
-                       ];
-    }
-
-    return mTopTabWidget.ToSharedRef();
+    return SNew(SUniformWrapPanel)
+        .SlotPadding(FVector2D(3.f, 0.f))
+        .EvenRowDistribution(true)
+        .HAlign(HAlign_Left)
+        + SUniformWrapPanel::Slot()
+        [
+            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+        ]
+        + SUniformWrapPanel::Slot()
+        [
+            CreatePropertyWidget(splitPathHandle, splitPathPropertyView).ToSharedRef()
+        ]
+        + SUniformWrapPanel::Slot()
+        [
+            CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
+        ];
 }
 
 #undef LOCTEXT_NAMESPACE
