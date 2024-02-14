@@ -204,13 +204,13 @@ namespace FOdysseyFile
             static const uint32 CHUNK_LAYERIMAGEVECTOR_LIGHTTABLE = 0x484ee3b4; //FOdysseyAnimationLightTable(LightTable)
 
         static const uint32 CHUNK_LIGHTTABLE = 0x5240eec2; //container
-            static const uint32 CHUNK_LIGHTTABLE_DISPLAY_POSITION = 0x472555c;
-            static const uint32 CHUNK_LIGHTTABLE_COLORS = 0x854e88aa;
-            static const uint32 CHUNK_LIGHTTABLE_CONTRAST = 0x4e98233c;
-            static const uint32 CHUNK_LIGHTTABLE_KEYS = 0x825ce6e5;
-                static const uint32 CHUNK_LIGHTTABLE_KEY = 0x5b785423;
-                    static const uint32 CHUNK_LIGHTTABLE_KEY_ISACTIVATED = 0xea8a5d86;
-                    static const uint32 CHUNK_LIGHTTABLE_KEY_OPACITY = 0x21ab66;
+            static const uint32 CHUNK_LIGHTTABLE_DISPLAY_POSITION = 0x472555c; //EOdysseyLightTableDisplayPosition
+            static const uint32 CHUNK_LIGHTTABLE_COLORS = 0x854e88aa; //EOdysseyLightTableDisplayPosition
+            static const uint32 CHUNK_LIGHTTABLE_CONTRAST = 0x4e98233c; //FLinearColor(PreviousKeysColor) + FLinearColor(NextKeysColor)
+            static const uint32 CHUNK_LIGHTTABLE_KEYS = 0x825ce6e5; //20x FOdysseyAnimationLightTableKey
+                static const uint32 CHUNK_LIGHTTABLE_KEY = 0x5b785423; //FOdysseyAnimationLightTableKey
+                    static const uint32 CHUNK_LIGHTTABLE_KEY_ISACTIVATED = 0xea8a5d86; //bool
+                    static const uint32 CHUNK_LIGHTTABLE_KEY_OPACITY = 0x21ab66; //float
 
     }
 
