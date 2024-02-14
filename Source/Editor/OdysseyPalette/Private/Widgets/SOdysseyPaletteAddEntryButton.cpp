@@ -7,6 +7,7 @@
 #include "OdysseyPaletteEntryMaterial.h"
 #include "OdysseyPaletteEntryFolder.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "SPositiveActionButton.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
@@ -20,36 +21,14 @@ SOdysseyPaletteAddEntryButton::~SOdysseyPaletteAddEntryButton()
 void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
 {
     mPalette = InArgs._Palette;
+    mOnAdded = InArgs._OnAdded;
 
-    SComboButton::FArguments args;
-    args.OnGetMenuContent(this, &SOdysseyPaletteAddEntryButton::MakeMenu)
-        .ButtonStyle(FAppStyle::Get(), "FlatButton.Success")
-        .ContentPadding(FMargin(0.0f, 5.0f))
-        .HasDownArrow(true)
-        .ButtonContent()
-        [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .VAlign(VAlign_Bottom)
-            .AutoWidth()
-            [
-                SNew(STextBlock)
-                .TextStyle(FAppStyle::Get(), "NormalText.Important")
-                .Font(FAppStyle::Get().GetFontStyle("FontAwesome.10"))
-                .Text(FEditorFontGlyphs::Plus)
-            ]
-
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .Padding(4, 0, 0, 0)
-            [
-                SNew(STextBlock)
-                .TextStyle(FAppStyle::Get(), "NormalText.Important")
-                .Text(LOCTEXT("add-entry-button.add-entry", "Add Entry"))
-            ]
-        ];
-
-    SComboButton::Construct(args);
+    ChildSlot
+    [
+        SNew(SPositiveActionButton)
+        .Text(LOCTEXT("add-entry-button.add-color", "Add"))
+        .OnGetMenuContent(this, &SOdysseyPaletteAddEntryButton::MakeMenu)
+    ];
 }
 
 //--------------------------------------------------------------------------------------
@@ -141,6 +120,7 @@ SOdysseyPaletteAddEntryButton::AddEntryFromClass(FAssetData iAssetData)
 		currentEntry = palette->AddEntry(entryClass);
     }
 
+    mOnAdded.ExecuteIfBound(currentEntry);
     FOdysseyObjectEditorUtils::SetPropertyValue(palette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(currentEntry));
 }
 

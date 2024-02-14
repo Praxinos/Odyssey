@@ -2,6 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterFreehandSelection.h"
+#include "OdysseyHUDPolygon.h"
+#include "OdysseyHUDElement.h"
+#include "OdysseyMediaRaster.h"
+#include "OdysseyPainterEditor.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

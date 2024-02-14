@@ -347,7 +347,7 @@ TSharedRef<SWidget> SOdysseyPaletteTreeView::CreateSetWidget()
         .VAlign(VAlign_Top)
         [
             SNew(SButton)
-            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.PreviousKey"))
+            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("OdysseyPalette.AddSet"))
             .HAlign(HAlign_Center)
             .VAlign(VAlign_Center)
             .OnClicked(this, &SOdysseyPaletteTreeView::AddSetToPalette)

@@ -96,22 +96,21 @@ FString SOdysseyPalette::ObjectPath() const
 TSharedRef<SWidget> SOdysseyPalette::CreateColorPaletteWidget()
 {
     return
-    
         SNew(SVerticalBox)
         + SVerticalBox::Slot()
-        .Padding(5)
-        .AutoHeight()
-        [
-            SNew(SOdysseyPaletteAddEntryButton)
-            .Palette(mColorPalette->GetPalette())
-        ]
-        + SVerticalBox::Slot()
-        .Padding(5)
         .AutoHeight()
         [
             SAssignNew(mPaletteTreeView, SOdysseyPaletteTreeView)
             .Palette(mColorPalette->GetPalette())
             .OnGenerateRow(this, &SOdysseyPalette::OnGenerateRow)
+        ]
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0, 5, 0, 0))
+        .HAlign(HAlign_Left)
+        .AutoHeight()
+        [
+            SNew(SOdysseyPaletteAddEntryButton)
+            .Palette(mColorPalette->GetPalette())
         ];
 }
 

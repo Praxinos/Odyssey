@@ -53,6 +53,7 @@ namespace UnrealBuildTool.Rules
                     "UnrealEd",
                     "OdysseyStyle",
                     "PropertyEditor",
+                    "ToolWidgets",
 					// ... add private dependencies that you statically link with here ...
 				}
                 );

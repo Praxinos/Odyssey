@@ -7,7 +7,7 @@
 
 UOdysseyPaletteEntryFolder::UOdysseyPaletteEntryFolder()
 {
-    EntryTypeName = LOCTEXT("entry-folder.type", "Folder Entry");
+    EntryTypeName = LOCTEXT("entry-folder.type", "Folder");
     DefaultName = LOCTEXT("entry-folder.default-name", "Folder");
     Icon = *FAppStyle::GetBrush("ContentBrowser.AssetTreeFolderClosed");
     IconExpanded = *FAppStyle::GetBrush("ContentBrowser.AssetTreeFolderOpen");
