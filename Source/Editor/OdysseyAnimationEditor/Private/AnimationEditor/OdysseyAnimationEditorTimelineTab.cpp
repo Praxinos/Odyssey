@@ -14,6 +14,7 @@
 #include "Misc/ScopedSlowTask.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
+#include "DesktopPlatformModule.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -89,6 +90,8 @@ FOdysseyAnimationEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyAnimationEditorTimelineTab::__VA_ARGS__ ), FCanExecuteAction() );
 
     MAP_ACTION(AnimationEditorCommands.ImportTextureSequence, ImportTextureSequence )
+    MAP_ACTION(AnimationEditorCommands.ImportImageSequence, ImportImageSequence )
+    MAP_ACTION(AnimationEditorCommands.ExportImageSequence, ExportImageSequence )
     MAP_ACTION(AnimationEditorCommands.CreateNewAnimationLayerImageRaster, CreateNewLayer )
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
@@ -148,10 +151,51 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
 {
     UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
 
-    FToolMenuSection& section = menu->AddSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.animation-section.name", "Odyssey Animation"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
+    FToolMenuSection& section = menu->AddSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.import-export-section.name", "Import / Export"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
     {
-        section.AddMenuEntry( FOdysseyAnimationEditorCommands::Get().ImportTextureSequence );
+        section.AddSubMenu(
+            TEXT("Import"),
+            LOCTEXT("timeline-tab.file-menu.import-submenu.name", "Import"),
+            LOCTEXT("timeline-tab.file-menu.import-submenu.tooltip", "Contains Import actions"),
+            FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildImportMenu),
+            false,
+            FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Import" )
+        );
+
+        section.AddSubMenu(
+            TEXT("Export"),
+            LOCTEXT("timeline-tab.file-menu.export-submenu.name", "Export"),
+            LOCTEXT("timeline-tab.file-menu.export-submenu.tooltip", "Contains Export actions"),
+            FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildExportMenu),
+            false,
+            FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Export" )
+        );
     }
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::BuildImportMenu(FMenuBuilder& iMenuBuilder)
+{
+    iMenuBuilder.AddMenuEntry(
+        FOdysseyAnimationEditorCommands::Get().ImportTextureSequence,
+        NAME_None,
+        LOCTEXT("timeline-tab.file-menu.import-texture-sequence.name", "Texture Sequence...")
+    );
+    iMenuBuilder.AddMenuEntry(
+        FOdysseyAnimationEditorCommands::Get().ImportImageSequence,
+        NAME_None,
+        LOCTEXT("timeline-tab.file-menu.import-image-sequence.name", "Image Sequence...")
+    );
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::BuildExportMenu(FMenuBuilder& iMenuBuilder)
+{
+    iMenuBuilder.AddMenuEntry(
+        FOdysseyAnimationEditorCommands::Get().ExportImageSequence,
+        NAME_None,
+        LOCTEXT("timeline-tab.file-menu.export-image-sequence.name", "Image Sequence...")
+    );
 }
 
 void           
@@ -228,6 +272,129 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     mutator.Commit();
 }
 
+void           
+FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
+{
+    //TODO:
+}
+
+void           
+FOdysseyAnimationEditorTimelineTab::ExportImageSequence()
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(source);
+
+    UOdysseyAnimation* animation = animationSource->GetAnimation();
+    IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
+    TArray< FString > filenames;
+    bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
+        FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
+        , LOCTEXT("animation.export-image-sequence.save-dialog.title", "Select Export Path & Name").ToString()
+        , FPaths::ProjectDir()
+        , animation->GetName()
+        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
+        , EFileDialogFlags::None
+        , filenames
+    );
+
+    if( filenames.Num() <= 0 )
+        return;
+
+    FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
+    FString folder = FPaths::GetPath(path);
+    FString filename = FPaths::GetBaseFilename(path);
+    FString extension = FPaths::GetExtension(path, false);
+    //std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
+    ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
+    bool extensionFound = false;
+    for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
+    {
+        if( extension == ::ULIS::kwImageFormat[i] )
+        {
+            exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
+            extensionFound = true;
+            break;
+        }
+    }
+
+    if( !extensionFound )
+    {
+        FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("animation.export-image-sequence.invalid-extension-dialog.message", "The file extension or the file format is not supported"), LOCTEXT("animation.export-image-sequence.invalid-extension-dialog.title", "Invalid extension"));
+        return;
+    }
+
+    FInt32Range frameRange = animation->GetFrameRange();
+    int startFrame = frameRange.GetLowerBoundValue();
+	int endFrame = frameRange.GetUpperBoundValue();
+
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( animation->Format() );
+
+    FScopedSlowTask progressBar(endFrame - startFrame + 1, LOCTEXT("timeline-tab.export-image-sequence.progress-bar.title", "Exporting Image Sequence"));
+    progressBar.MakeDialog();
+
+    for (int i = startFrame; i <= endFrame; i++)
+    {
+        progressBar.EnterProgressFrame();
+        TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
+        renderer->Init();
+        renderer->Copy(block, {});
+
+        ctx.Finish();
+
+        //Path
+        FString imagePath = folder / filename + FString::Printf(TEXT("_%d."), i + 1) + extension;
+        std::string str = std::string( TCHAR_TO_UTF8( *imagePath ) );
+
+        bool canSaveDirectly = false;
+        ::ULIS::FContext::SaveBlockToDiskMetrics( *block, exportImageFormat, &canSaveDirectly );
+        if (canSaveDirectly)
+        {
+            ctx.SaveBlockToDisk(
+                *block
+                , str
+                , exportImageFormat
+                , 100
+            );
+
+            ctx.Finish();
+        }
+        else
+        {
+            ::ULIS::eFormat format = block->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
+            if (exportImageFormat == ::ULIS::FileFormat_hdr)
+            {
+                format = ::ULIS::Format_RGBAF;
+            }
+
+            ::ULIS::FBlock blockProxy(block->Width(), block->Height(), format);
+
+            ::ULIS::FEvent eventConvert;
+            ctx.ConvertFormat(
+                *block
+                , blockProxy
+                , ::ULIS::FRectI::Auto
+                , ::ULIS::FVec2I( 0 )
+                , ULIS::FSchedulePolicy::CacheEfficient
+                , 0
+                , nullptr
+                , &eventConvert
+            );
+
+            ctx.SaveBlockToDisk(
+                blockProxy
+                , str
+                , exportImageFormat
+                , 100
+            );
+
+            ctx.Finish();
+        }
+    }
+}
 
 void
 FOdysseyAnimationEditorTimelineTab::CreateNewLayer()

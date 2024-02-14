@@ -48,7 +48,12 @@ private:
     //Methods
     virtual void ExtendMenuFile(FToolMenuOwner iOwner, FName iMenuName);
 
+    void BuildImportMenu(FMenuBuilder& iMenuBuilder);
+    void BuildExportMenu(FMenuBuilder& iMenuBuilder);
+
     virtual void ImportTextureSequence();
+    void ImportImageSequence();
+    void ExportImageSequence();
     virtual void CreateNewLayer();
     virtual void ChangeLayerOpacity(float iOpacity);
 

@@ -29,6 +29,12 @@ public:
     /** Action used to import Textures as Layers */
     TSharedPtr<FUICommandInfo> ImportTextureSequence;
 
+    /** Action used to import Images as Layers */
+    TSharedPtr<FUICommandInfo> ImportImageSequence;
+
+    /** Action used to export the animation as an image sequence */
+    TSharedPtr<FUICommandInfo> ExportImageSequence;
+
     //Layers Actions
 
     /** Action for creating a new animation layer image raster */
