@@ -136,7 +136,6 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ this
       , iScene
@@ -253,7 +252,6 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , GetEditor()->GetVectorHUDFlags()
     , [ this
       , iScene

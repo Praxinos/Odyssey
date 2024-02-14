@@ -81,6 +81,7 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsColoredChanged );
+    UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsWireframeChanged );
 
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mEngine, iWidth, iHeight, animation->Format());
@@ -170,11 +171,16 @@ FOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImage
     if (iLayer != GetLayer())
         return;
 
-    mEngine->Invalidate();
+    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+}
+
+void
+FOdysseyAnimationCellImageVector::OnIsWireframeChanged(UOdysseyAnimationLayerImageVector* iLayer)
+{
+    if (iLayer != GetLayer())
+        return;
 
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-
-    ImageRenderingChanged();
 }
 
 bool

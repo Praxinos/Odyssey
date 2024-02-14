@@ -172,26 +172,21 @@ void
 FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
                                              , uint64 iSignalFlags )
 {
-    TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
-
-    if( iScene )
+    if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
     {
-        if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
-        {
-            vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
-        }
+        TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
-        if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
-         || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
-         || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
-        {
-            vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
-        }
+        vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
+            
     }
-    else
+
+    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
+     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
+     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
     {
-        vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( nullptr );
-        vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( nullptr );
+        TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
+
+        vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
     }
 }
 

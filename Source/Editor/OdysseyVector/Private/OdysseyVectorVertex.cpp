@@ -554,19 +554,41 @@ FOdysseyVectorVertex::InvalidateSegments()
     }
 }
 
+bool 
+FOdysseyVectorVertex::IsLocked()
+{
+    return ( mFlags & LOCKED ) ? true : false;
+}
+
+void 
+FOdysseyVectorVertex::SetLocked( bool iIsLocked )
+{
+    if( iIsLocked == true )
+    {
+        mFlags |= LOCKED;
+    }
+    else
+    {
+        mFlags &= (~LOCKED);
+    }
+}
+
 void 
 FOdysseyVectorVertex::SetCoords( double iX, double iY, double iRadius )
 {
-    if( iRadius < 0.0f )
+    if( ( mFlags & LOCKED ) == 0 )
     {
-        iRadius = 0.0f;
+        if( iRadius < 0.0f )
+        {
+            iRadius = 0.0f;
+        }
+
+        FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
+
+        mJoint.ResetBBox();
+
+        InvalidateSegments();
     }
-
-    FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
-
-    mJoint.ResetBBox();
-
-    InvalidateSegments();
 }
 
 void

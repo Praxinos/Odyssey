@@ -326,6 +326,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         BLImageData& GetRenderData();
 
+        void GetSelectedVerticesFromFocusedObjects( std::vector<FOdysseyVectorVertex*>& oVertexArray );
 
 
         static const uint64 TRAVERSE_STOP                   = ( 1 << 0 );
@@ -337,8 +338,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                            , FOdysseyVectorObject* iObject
                            , uint64 iTraversalFlags );
 
-        uint64 Traverse( FOdysseyVectorGroupPaint* iScene
-                       , FOdysseyVectorObject* iObject
+        uint64 Traverse( FOdysseyVectorObject* iObject
                        , uint64 iTraversalFlags
                        , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
 

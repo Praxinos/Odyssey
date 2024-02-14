@@ -5,6 +5,9 @@
 
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImageRenderer.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorBlock.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"

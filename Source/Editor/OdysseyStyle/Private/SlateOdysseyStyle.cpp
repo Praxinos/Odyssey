@@ -380,13 +380,13 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.VectorSceneTreeView.Group16", new IMAGE_BRUSH( "PainterEditor/VectorSceneTreeView/group_16", mIcon16x16 ) );
 
     //PainterEditor - Top Bar
-    Set( "PainterEditor.TopBar.Undo32", new IMAGE_BRUSH( "PainterEditor/undo_32", mIcon32x32 ) );
-    Set( "PainterEditor.TopBar.Redo32", new IMAGE_BRUSH( "PainterEditor/redo_32", mIcon32x32 ) );
+    Set( "PainterEditor.TopBar.Undo32", new IMAGE_BRUSH_SVG( "PainterEditor/undo", mIcon32x32 ) );
+    Set( "PainterEditor.TopBar.Redo32", new IMAGE_BRUSH_SVG( "PainterEditor/redo", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Save32", new IMAGE_BRUSH( "PainterEditor/save_32", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Eraser32", new IMAGE_BRUSH( "PainterEditor/eraser_32", mIcon32x32 ) );
-    Set( "PainterEditor.TopBar.Clear32", new IMAGE_BRUSH( "PainterEditor/clear_32", mIcon32x32 ) );
-    Set( "PainterEditor.TopBar.VectorModeVertex32",new IMAGE_BRUSH("PainterEditor/vector_mode_vertex_32",mIcon32x32));
-    Set( "PainterEditor.TopBar.VectorModeObject32",new IMAGE_BRUSH("PainterEditor/vector_mode_object_32",mIcon32x32));
+    Set( "PainterEditor.TopBar.Clear32", new IMAGE_BRUSH_SVG( "PainterEditor/trash", mIcon32x32 ) );
+    Set( "PainterEditor.TopBar.VectorModeVertex32",new IMAGE_BRUSH_SVG("PainterEditor/vector_mode_vertex",mIcon32x32));
+    Set( "PainterEditor.TopBar.VectorModeObject32",new IMAGE_BRUSH_SVG("PainterEditor/vector_mode_object",mIcon32x32));
 
     //PainterEditor - ToolsTab
     Set( "PainterEditor.ToolsTab.Transform64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon64x64 ) );

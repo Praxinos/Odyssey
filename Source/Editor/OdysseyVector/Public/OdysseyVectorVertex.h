@@ -365,6 +365,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                                  , uint32 iLastSectionVertexIndex
                                  , std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
                                  , std::vector<FCycleSectionInfo>& oCandidateSectionArray );
+        void SetLocked( bool iIsLocked );
+        bool IsLocked();
 
     protected:
         /**
@@ -398,4 +400,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         static const uint32 VISITED        = ( 1 << 2 );
         static const uint32 SELECTED       = ( 1 << 3 );
         static const uint32 HANDLE_ALIGNED = ( 1 << 4 );
+        static const uint32 LOCKED         = ( 1 << 5 );
 };

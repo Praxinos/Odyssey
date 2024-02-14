@@ -133,7 +133,6 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ iScene
       , vectorEngine
@@ -325,7 +324,6 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         // run lambda recursively on altered objects
         iEngine->Traverse
         ( iScene
-        , iScene
         , 0
         , [ iScene
           , iEngine
@@ -474,7 +472,6 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
         // run lambda recursively on altered objects
         iEngine->Traverse
         ( iScene
-        , iScene
         , 0
         ,[ iScene
           , iEngine
@@ -669,7 +666,6 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
             // run lambda recursively on altered objects
             iEngine->Traverse
             ( iScene
-            , iScene
             , 0
             ,[ iScene
              , iEngine

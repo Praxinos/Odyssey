@@ -396,7 +396,6 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     {
         vectorEngine->Traverse
         ( iScene
-        , iScene
         , 0
         , [ this
           , iScene

@@ -44,6 +44,8 @@ public:
     // Event Listeners
     void OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnIsColoredChanged(UOdysseyAnimationLayerImageVector* iLayer);
+    void OnIsWireframeChanged(UOdysseyAnimationLayerImageVector* iLayer);
+
 
 public:
 	//FOdysseyImageRenderingAbility overrides

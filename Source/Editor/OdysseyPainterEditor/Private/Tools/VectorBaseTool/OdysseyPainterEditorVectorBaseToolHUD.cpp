@@ -47,7 +47,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
     // call lambda on each object of the tree
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ this
       , vectorEngine
@@ -118,7 +117,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
         // call lambda on each object of the tree
         vectorEngine->Traverse
         ( iScene
-        , iScene
         , 0
         , [ this
           , iScene
@@ -234,7 +232,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
     // Run lambda
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ this
       , iScene

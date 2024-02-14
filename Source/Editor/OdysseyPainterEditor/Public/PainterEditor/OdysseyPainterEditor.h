@@ -106,6 +106,8 @@ public:
     static void SelectAllPoints( FOdysseyVectorGroupPaint* iScene );
     static void SelectAllObjects( FOdysseyVectorGroupPaint* iScene );
     static void ResetView( FOdysseyVectorGroupPaint* iScene );
+    static void LockPointSelection( FOdysseyVectorGroupPaint* iScene );
+    static void UnlockPointSelection( FOdysseyVectorGroupPaint* iScene );
     static void UnalignPointSelection( FOdysseyVectorGroupPaint* iScene );
     static void AlignPointSelection( FOdysseyVectorGroupPaint* iScene );
     static void DeletePointSelectionRecursive( FOdysseyVectorObject* iVectorObject

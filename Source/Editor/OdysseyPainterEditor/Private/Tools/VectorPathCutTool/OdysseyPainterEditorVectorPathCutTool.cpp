@@ -162,7 +162,6 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorGroupPain
         // traverse recursively on objects determined by the HUD
         vectorEngine->Traverse
         ( iScene
-        , iScene
         , 0
         , [ this
           , iScene

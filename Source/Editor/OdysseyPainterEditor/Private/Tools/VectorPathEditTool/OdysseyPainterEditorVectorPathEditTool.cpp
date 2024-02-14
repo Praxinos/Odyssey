@@ -155,7 +155,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ this
       , iScene
@@ -242,7 +241,6 @@ UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorGr
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ iScene
       , vectorEngine
@@ -291,7 +289,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ this
       , iScene

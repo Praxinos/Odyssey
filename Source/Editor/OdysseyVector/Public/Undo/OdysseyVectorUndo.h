@@ -30,6 +30,7 @@ namespace FSnapshotFlags
         namespace Vertex
         {
             static const uint64 ALIGNMENT       = ( 1ULL <<  2 );
+            static const uint64 LOCK            = ( 1ULL <<  3 );
             static const uint64 PARAM           = ( ALIGNMENT );
         }
 
@@ -142,6 +143,7 @@ class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
 
     protected:
         bool mAlignment;
+        bool mLocked;
 };
 
 class ODYSSEYVECTOR_API FSnapshotBucket : public FSnapshotPoint

@@ -226,6 +226,34 @@ FOdysseyVectorEngine::SelectAllInSelectionSpace()
 }
 
 void
+FOdysseyVectorEngine::GetSelectedVerticesFromFocusedObjects( std::vector<FOdysseyVectorVertex*>& oVertexArray )
+{
+    Traverse(
+        mScene
+      , 0
+      , [ this
+        , &oVertexArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+        {
+            if( ObjectHasFocus( mScene, object, traversalFlags ) )
+            {
+                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                {
+                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                    for( FOdysseyVectorVertex* vertex : path->GetSelectedVertexList() )
+                    {
+                        oVertexArray.push_back( vertex );
+                    }
+                }
+
+                return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+            }
+
+            return 0;
+        } );
+}
+
+void
 FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
@@ -1254,7 +1282,6 @@ FOdysseyVectorEngine::GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& 
 {
     Traverse
     ( mScene
-    , mScene
     , 0
     , [ this
       , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
@@ -1275,7 +1302,6 @@ FOdysseyVectorEngine::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oO
 {
     Traverse
     ( mScene
-    , mScene
     , 0
     , [ this
       , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
@@ -1317,8 +1343,7 @@ FOdysseyVectorEngine::ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
 
 // Execute callback on object tree
 uint64
-FOdysseyVectorEngine::Traverse( FOdysseyVectorGroupPaint* iScene
-                              , FOdysseyVectorObject* iObject
+FOdysseyVectorEngine::Traverse( FOdysseyVectorObject* iObject
                               , uint64 iTraversalFlags
                               , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback )
 {
@@ -1338,7 +1363,7 @@ FOdysseyVectorEngine::Traverse( FOdysseyVectorGroupPaint* iScene
     {
         for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
         {
-            uint64 childTraversalFlags = Traverse( iScene, childObject, iTraversalFlags, iCallback );
+            uint64 childTraversalFlags = Traverse( childObject, iTraversalFlags, iCallback );
 
             if( childTraversalFlags & TRAVERSE_STOP )
             {

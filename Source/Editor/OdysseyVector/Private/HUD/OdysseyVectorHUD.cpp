@@ -176,7 +176,6 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene, uint64 i
     pointQuadTreeEntryArray.reserve( 200 );
 
     vectorEngine->Traverse( iScene
-                          , iScene
                           , iHUDFlags
                           , [ &iScene
                           , &screenRect
@@ -289,6 +288,7 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
     // TODO: compute that once and pass it as parameter for all vertices
     BLPoint point = HUDMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );
     static BLRgba32 greenColor = BLRgba32( 0, 255, 0, 255 );
+    static BLRgba32 redColor   = BLRgba32( 255, 0, 0, 255 );
     double vertexRadius = ( iHUDFlags & HUD_SIZE_SMALL ) ? VERTEXRADIUS_SMALL : VERTEXRADIUS;
     double handleRadius = ( iHUDFlags & HUD_SIZE_SMALL ) ? HANDLERADIUS_SMALL : HANDLERADIUS;
 
@@ -343,8 +343,8 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
                                  , point.x
                                  , point.y
                                  , vertexRadius
-                                 , iVertex->IsSelected() && ( iHUDFlags & HUD_MODE_VERTEX ) ? hcColor : fgColor
-                                 , bgColor );
+                                 , iVertex->IsSelected() && ( iHUDFlags & HUD_MODE_VERTEX ) ? hcColor  : fgColor
+                                 , iVertex->IsLocked()   && ( iHUDFlags & HUD_MODE_VERTEX ) ? redColor : bgColor );
 /*
     if ( iHUDFlags & HUD_PATH_VERTEX_ALIGNMENT )
     {
