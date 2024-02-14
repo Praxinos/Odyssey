@@ -84,7 +84,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
                                                                                                                                                 
                                                                                                                                                 
 // Brush Alpha Mode Shortcuts Category                                                                                                          
-    UI_BUNDLE_COMMAND( SetAlphaModeNormal, BrushAlphaModeShortcuts, "Normal", "Set Alpha Mode to Normal",                                                   EUserInterfaceActionType::Button, FInputChord( EKeys::B ) );
+    UI_BUNDLE_COMMAND( SetAlphaModeNormal, BrushAlphaModeShortcuts, "Normal", "Set Alpha Mode to Normal",                                                   EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetAlphaModeErase, BrushAlphaModeShortcuts, "Erase", "Set Brush Alpha Mode to Erase",                                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetAlphaModeTop, BrushAlphaModeShortcuts, "Top", "Set Brush Alpha Mode to Top",                                                      EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetAlphaModeBack, BrushAlphaModeShortcuts, "Back", "Set Brush Alpha Mode to Back",                                                   EUserInterfaceActionType::Button, FInputChord() );
@@ -136,7 +136,15 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( SetBlendModeWhiteOut, BrushBlendingModeShortcuts, "Whiteout", "Set Brush Blend Mode to Whiteout",                                    EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetBlendModeAngleCorrected, BrushBlendingModeShortcuts, "AngleCorrected", "Set Brush Blend Mode to AngleCorrected",                  EUserInterfaceActionType::Button, FInputChord() );
 
-    UI_BUNDLE_COMMAND( ActivateColorPickerTool, ToolsShortcuts, "Activate Color Picker Tool", "Activates the editor Color Picker tool", EUserInterfaceActionType::Button, FInputChord() ); 
+    UI_BUNDLE_COMMAND( ActivateColorPickerTool, ToolsShortcuts, "Activate Color Picker Tool", "Activates the Color Picker Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::I));
+    UI_BUNDLE_COMMAND( ActivateDrawingTool, ToolsShortcuts, "Activate Drawing Tool", "Activates the Drawing Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::B));
+    UI_BUNDLE_COMMAND( ActivateSelectionTool, ToolsShortcuts, "Activate Selection Tool", "Activates the Selection Tool", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Shift, EKeys::L));
+    UI_BUNDLE_COMMAND( ActivatePaintBucketTool, ToolsShortcuts, "Activate PaintBucket Tool", "Activates the Paint Bucket Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::G));
+    UI_BUNDLE_COMMAND( ActivateTransformTool, ToolsShortcuts, "Activate Transform Tool", "Activates the Transform Tool", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::T));
+    UI_BUNDLE_COMMAND( ActivatePrimitiveDrawingTool, ToolsShortcuts, "Activate Primitive Drawing Tool", "Activates the Primitive Drawing Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::U));
+    UI_BUNDLE_COMMAND( ActivateEraserTool, ToolsShortcuts, "Activate Eraser Tool", "Activates the Eraser Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::E));
+    UI_BUNDLE_COMMAND( ActivateWarpTool, ToolsShortcuts, "Activate Warp Tool", "Activates the Warp Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::W));
+
     UI_BUNDLE_COMMAND( ActivateRasterDrawingTool, ToolsShortcuts, "Activate Raster Drawing Tool", "Activates the editor Raster Drawing tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateRasterPaintBucketTool, ToolsShortcuts, "Activate Raster Paint Bucket Tool", "Activates the editor Raster Paint Bucket tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateRasterPrimitiveDrawingTool, ToolsShortcuts, "Activate Raster Primitive Drawing Tool", "Activates the editor Raster Primitive Drawing tool", EUserInterfaceActionType::Button, FInputChord() );
@@ -146,12 +154,12 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ActivateVectorPaintBucketTool, ToolsShortcuts, "Activate Vector Paint Bucket Tool", "Activates the editor Vector Paint Bucket tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateVectorPathCutTool, ToolsShortcuts, "Activate Vector Path Cut Tool", "Activates the editor Vector Path Cut tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateVectorPathDrawingTool, ToolsShortcuts, "Activate Vector Path Drawing Tool", "Activates the editor Vector Path Drawing tool", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( ActivateVectorPathEditTool, ToolsShortcuts, "Activate Vector Path Edit Tool", "Activates the editor Vector Path Edit tool", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( ActivateVectorPathPushTool, ToolsShortcuts, "Activate Vector Path Push Tool", "Activates the editor Vector Path Push tool", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( ActivateVectorPathEditTool, ToolsShortcuts, "Activate Vector Path Edit Tool", "Activates the editor Vector Path Edit tool", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Shift, EKeys::D) );
+    UI_BUNDLE_COMMAND( ActivateVectorPathPushTool, ToolsShortcuts, "Activate Vector Path Push Tool", "Activates the editor Vector Path Push tool", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Shift, EKeys::P) );
     UI_BUNDLE_COMMAND( ActivateVectorPathSmoothTool, ToolsShortcuts, "Activate Vector Path Smooth Tool", "Activates the editor Vector Path Smooth tool", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( ActivateVectorPathStitchTool, ToolsShortcuts, "Activate Vector Path Stitch Tool", "Activates the editor Vector Path Stitch tool", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( ActivateVectorPathStitchTool, ToolsShortcuts, "Activate Vector Path Stitch Tool", "Activates the editor Vector Path Stitch tool", EUserInterfaceActionType::Button, FInputChord(EKeys::Equals) );
     UI_BUNDLE_COMMAND( ActivateVectorPrimitiveDrawingTool, ToolsShortcuts, "Activate Vector Primitive Drawing Tool", "Activates the editor Vector Primitive Drawing tool", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( ActivateVectorScenePanTool, ToolsShortcuts, "Activate Vector Scene Pan Tool", "Activates the editor Vector Scene Pan tool", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( ActivateVectorScenePanTool, ToolsShortcuts, "Activate Vector Scene Pan Tool", "Activates the editor Vector Scene Pan tool", EUserInterfaceActionType::Button, FInputChord(EKeys::H) );
     UI_BUNDLE_COMMAND( ActivateVectorSelectionTool, ToolsShortcuts, "Activate Vector Selection Tool", "Activates the editor Vector Selection tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateVectorTransformTool, ToolsShortcuts, "Activate Vector Transform Tool", "Activates the editor Vector Transform tool", EUserInterfaceActionType::Button, FInputChord() );
 }

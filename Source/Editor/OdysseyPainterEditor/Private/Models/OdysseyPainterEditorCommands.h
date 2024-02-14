@@ -300,7 +300,17 @@ public:
     TSharedPtr<FUICommandInfo> SwitchTabletAPI; 
 
     // Tools
+    // Generic Tools commands
     TSharedPtr<FUICommandInfo> ActivateColorPickerTool; 
+    TSharedPtr<FUICommandInfo> ActivateDrawingTool;
+    TSharedPtr<FUICommandInfo> ActivateSelectionTool;
+    TSharedPtr<FUICommandInfo> ActivatePaintBucketTool;
+    TSharedPtr<FUICommandInfo> ActivateTransformTool;
+    TSharedPtr<FUICommandInfo> ActivatePrimitiveDrawingTool;
+    TSharedPtr<FUICommandInfo> ActivateEraserTool;
+    TSharedPtr<FUICommandInfo> ActivateWarpTool;
+
+    // Specific Tools commands
     TSharedPtr<FUICommandInfo> ActivateRasterDrawingTool;
     TSharedPtr<FUICommandInfo> ActivateRasterPaintBucketTool;
     TSharedPtr<FUICommandInfo> ActivateRasterPrimitiveDrawingTool;

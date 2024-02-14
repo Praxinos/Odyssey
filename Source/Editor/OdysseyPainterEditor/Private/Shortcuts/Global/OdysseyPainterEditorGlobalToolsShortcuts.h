@@ -15,7 +15,24 @@ public:
 public:
     //Common Shortcuts
     void Action_ActivateTool(UOdysseyPainterEditorTool* iTool);
+    void Action_ActivateColorPickerTool();
+    void Action_ActivateDrawingTool();
+    void Action_ActivateSelectionTool();
+    void Action_ActivatePaintBucketTool();
+    void Action_ActivateTransformTool();
+    void Action_ActivatePrimitiveDrawingTool();
+    void Action_ActivateEraserTool();
+    void Action_ActivateWarpTool();
+
     bool CanAction_ActivateTool(UOdysseyPainterEditorTool* iTool);
+    bool CanAction_ActivateColorPickerTool();
+    bool CanAction_ActivateDrawingTool();
+    bool CanAction_ActivateSelectionTool();
+    bool CanAction_ActivatePaintBucketTool();
+    bool CanAction_ActivateTransformTool();
+    bool CanAction_ActivatePrimitiveDrawingTool();
+    bool CanAction_ActivateEraserTool();
+    bool CanAction_ActivateWarpTool();
 
 public:
     //Shortcuts

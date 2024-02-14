@@ -16,7 +16,7 @@ namespace
 }
 
 FOdysseyAnimationEditorCommands::FOdysseyAnimationEditorCommands()
-    : TCommands<FOdysseyAnimationEditorCommands>( "OdysseyAnimationEditorCommands", LOCTEXT( "editor-commands.name", "Iliad Texture Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
+    : TCommands<FOdysseyAnimationEditorCommands>( "OdysseyAnimationEditorCommands", LOCTEXT( "editor-commands.name", "Iliad Animation Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
     AddBundle(ImportExportShortcuts, LOCTEXT("editor-commands.category.import-export-shortcuts", "Import & Export Shortcuts"));
     AddBundle(TimelineShortcuts, LOCTEXT("editor-commands.category.timeline-shortcuts", "Timeline Shortcuts"));
@@ -33,8 +33,8 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
 // LayerStack Shortcuts Category
     UI_BUNDLE_COMMAND( NavigateToNextFrame, TimelineShortcuts, "Navigate to next Frame", "Change the current frame to be the next frame in the animation timeline",                                                            EUserInterfaceActionType::Button, FInputChord(EKeys::Semicolon));
     UI_BUNDLE_COMMAND( NavigateToPreviousFrame, TimelineShortcuts, "Navigate to previous Frame", "Change the current frame to be the previous frame in the animation timeline",                                                EUserInterfaceActionType::Button, FInputChord(EKeys::Comma));
-    UI_BUNDLE_COMMAND( NavigateToNextCell, TimelineShortcuts, "Navigate to next Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",                    EUserInterfaceActionType::Button, FInputChord(EKeys::G));
-    UI_BUNDLE_COMMAND( NavigateToPreviousCell, TimelineShortcuts, "Navigate to previous Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",            EUserInterfaceActionType::Button, FInputChord(EKeys::F));
+    UI_BUNDLE_COMMAND( NavigateToNextCell, TimelineShortcuts, "Navigate to next Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",                    EUserInterfaceActionType::Button, FInputChord(EKeys::T));
+    UI_BUNDLE_COMMAND( NavigateToPreviousCell, TimelineShortcuts, "Navigate to previous Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",            EUserInterfaceActionType::Button, FInputChord(EKeys::R));
 
     UI_BUNDLE_COMMAND( CreateNewAnimationLayerImageRaster, LayersShortcuts, "Create New Animation Layer Image Raster", "Create New Animation Layer Image Raster", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
 
