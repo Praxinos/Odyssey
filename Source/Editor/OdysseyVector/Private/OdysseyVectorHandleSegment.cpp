@@ -46,7 +46,7 @@ FOdysseyVectorHandleSegment::GetOwner()
 void 
 FOdysseyVectorHandleSegment::SetCoords( double iX, double iY, double iRadius )
 {
-    //if( mOwnerSegment->GetVertex( mHandleID )->IsLocked() == false )
+    if( mOwnerSegment->GetVertex( mHandleID )->IsLocked() == false )
     {
         FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
 

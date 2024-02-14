@@ -45,6 +45,17 @@ FOdysseyVectorImportV2::ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
 }
 
 void
+FOdysseyVectorImportV2::ReadPathGeometryVertexLock( FOdysseyVectorVertex& iVertex
+                                                  , FArchive &Ar )
+{
+    uint32 lock;
+
+    Ar << lock;
+
+    iVertex.SetLocked( lock ? true : false );
+}
+
+void
 FOdysseyVectorImportV2::ReadPathGeometryVertexHandleAlignment( FOdysseyVectorVertex& iVertex
                                                              , FArchive &Ar )
 {
@@ -163,6 +174,10 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
 
                 case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT:
                     ReadPathGeometryVertexHandleAlignment( *currentVertex, Ar );
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX_LOCK:
+                    ReadPathGeometryVertexLock( *currentVertex, Ar );
                 break;
 
                 case FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTICES:

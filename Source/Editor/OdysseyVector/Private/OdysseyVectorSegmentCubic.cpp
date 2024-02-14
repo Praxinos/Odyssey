@@ -80,11 +80,21 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorVertex* iPoint0
                                 , double iCtrlPoint1y
                                 , FOdysseyVectorVertex* iPoint1 )
 {
+    bool lockStatus[2] = { iPoint0->IsLocked(), iPoint1->IsLocked() };
+
     mPoint[0] = iPoint0;
     mPoint[1] = iPoint1;
 
+    // bypass lock to be able to set up handle position at file load
+    iPoint0->SetLocked( false );
+    iPoint1->SetLocked( false );
+
     mCtrlPoint[0].Set( iCtrlPoint0x, iCtrlPoint0y );
     mCtrlPoint[1].Set( iCtrlPoint1x, iCtrlPoint1y );
+
+    // restore lock status
+    iPoint0->SetLocked( lockStatus[0] );
+    iPoint1->SetLocked( lockStatus[1] );
 
     Invalidate();
 }

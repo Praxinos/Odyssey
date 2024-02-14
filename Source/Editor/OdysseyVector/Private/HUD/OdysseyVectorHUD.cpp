@@ -258,6 +258,26 @@ FOdysseyVectorHUD::DrawLine( BLContext* iBLContext
 
 // static
 void
+FOdysseyVectorHUD::DrawCenteredSquare( BLContext* iBLContext
+                                     , double iWorldx
+                                     , double iWorldY
+                                     , double iRadius
+                                     , const BLRgba32& fgColor
+                                     , const BLRgba32& bgColor )
+{
+    double width = iRadius * 2;
+    BLRect rect( iWorldx - iRadius, iWorldY - iRadius, width, width );
+
+    // inner
+    iBLContext->setFillStyle( fgColor );
+    iBLContext->fillRect( rect );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeStyle( bgColor );
+    iBLContext->strokeRect( rect );
+}
+
+// static
+void
 FOdysseyVectorHUD::DrawCircle( BLContext* iBLContext
                              , double iWorldx
                              , double iWorldY
@@ -287,8 +307,10 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
     BLMatrix2D& HUDMatrix = iWorld ? path->GetWorldMatrix() : path->GetLocalMatrix();
     // TODO: compute that once and pass it as parameter for all vertices
     BLPoint point = HUDMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );
-    static BLRgba32 greenColor = BLRgba32( 0, 255, 0, 255 );
-    static BLRgba32 redColor   = BLRgba32( 255, 0, 0, 255 );
+    static BLRgba32 greenColor  = BLRgba32(   0, 255,   0, 255 );
+    static BLRgba32 ltgrayColor = BLRgba32( 128, 128, 128, 255 );
+    static BLRgba32 dkgrayColor = BLRgba32(  64,  64,  64, 255 );
+    static BLRgba32 redColor    = BLRgba32( 255,   0,   0, 255 );
     double vertexRadius = ( iHUDFlags & HUD_SIZE_SMALL ) ? VERTEXRADIUS_SMALL : VERTEXRADIUS;
     double handleRadius = ( iHUDFlags & HUD_SIZE_SMALL ) ? HANDLERADIUS_SMALL : HANDLERADIUS;
 
@@ -339,12 +361,24 @@ FOdysseyVectorHUD::DrawVertex( BLContext* iBLContext
                                      , blackColor );
     }
 
-    FOdysseyVectorHUD::DrawCircle( iBLContext
-                                 , point.x
-                                 , point.y
-                                 , vertexRadius
-                                 , iVertex->IsSelected() && ( iHUDFlags & HUD_MODE_VERTEX ) ? hcColor  : fgColor
-                                 , iVertex->IsLocked()   && ( iHUDFlags & HUD_MODE_VERTEX ) ? redColor : bgColor );
+    if( iVertex->IsLocked() == false )
+    {
+        FOdysseyVectorHUD::DrawCircle( iBLContext
+                                     , point.x
+                                     , point.y
+                                     , vertexRadius
+                                     , iVertex->IsSelected() && ( iHUDFlags & HUD_MODE_VERTEX ) ? hcColor  : fgColor
+                                     , bgColor );
+    }
+    else
+    {
+        FOdysseyVectorHUD::DrawCircle( iBLContext
+                                     , point.x
+                                     , point.y
+                                     , vertexRadius
+                                     , iVertex->IsSelected() && ( iHUDFlags & HUD_MODE_VERTEX ) ? hcColor  : ltgrayColor
+                                     , dkgrayColor );
+    }
 /*
     if ( iHUDFlags & HUD_PATH_VERTEX_ALIGNMENT )
     {

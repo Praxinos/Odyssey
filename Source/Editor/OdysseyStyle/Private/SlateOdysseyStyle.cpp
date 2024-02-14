@@ -382,7 +382,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     //PainterEditor - Top Bar
     Set( "PainterEditor.TopBar.Undo32", new IMAGE_BRUSH_SVG( "PainterEditor/undo", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Redo32", new IMAGE_BRUSH_SVG( "PainterEditor/redo", mIcon32x32 ) );
-    Set( "PainterEditor.TopBar.Save32", new IMAGE_BRUSH( "PainterEditor/save_32", mIcon32x32 ) );
+    Set( "PainterEditor.TopBar.Save32", new IMAGE_BRUSH_SVG( "PainterEditor/save", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Eraser32", new IMAGE_BRUSH( "PainterEditor/eraser_32", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Clear32", new IMAGE_BRUSH_SVG( "PainterEditor/trash", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.VectorModeVertex32",new IMAGE_BRUSH_SVG("PainterEditor/vector_mode_vertex",mIcon32x32));
@@ -422,8 +422,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.PathDrawing64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.PathDrawing32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.PathDrawing16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.DrawingTool64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.DrawingTool16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/drawing_tool_16", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.DrawingTool64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/raster_drawing_tool", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.DrawingTool16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/raster_drawing_tool", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_16", mIcon16x16 ) );
