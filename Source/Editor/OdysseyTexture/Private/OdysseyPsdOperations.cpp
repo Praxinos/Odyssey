@@ -347,6 +347,29 @@ bool FOdysseyPsdOperations::ReadLayers()
                 FOdysseyMathUtils::ByteSwap(&mLayersInfo[currLayer].mDividerType,4);
                 //UE_LOG(LogTemp,Display,TEXT("mDividerType: %d"),mLayersInfo[currLayer].mDividerType);
             }
+            else if (strcmp(lsctKey,"luni") == 0)
+            {
+                //Size in number of characters, not in number of bytes
+                mFileHandle->Read( (uint8*) &mLayersInfo[currLayer].mUnicodeNameSize, 4);
+                FOdysseyMathUtils::ByteSwap(&mLayersInfo[currLayer].mUnicodeNameSize, 4);
+
+                if (mLayersInfo[currLayer].mUnicodeNameSize > 0)
+                {
+                    uint8_t* unicodeName = new uint8_t[mLayersInfo[currLayer].mUnicodeNameSize * 2 + 2]; //2 bytes per character
+                    unicodeName[mLayersInfo[currLayer].mUnicodeNameSize * 2] = 0;
+                    unicodeName[mLayersInfo[currLayer].mUnicodeNameSize * 2 + 1] = 0;
+                    mFileHandle->Read( unicodeName, mLayersInfo[currLayer].mUnicodeNameSize * 2);
+
+                    for (uint8_t i = 0; i < mLayersInfo[currLayer].mUnicodeNameSize; i++)
+                    {
+                        FOdysseyMathUtils::ByteSwap(&unicodeName[i * 2], 2);
+                    }
+                    
+                    mLayersInfo[currLayer].mUnicodeName = FName(TCHAR_TO_UTF16(unicodeName));
+                    
+                    delete[] unicodeName;
+                }
+            }
             mFileHandle->Seek( position + len );
         }
         mFileHandle->Seek( mLayersInfo[currLayer].mExtraPosition + mLayersInfo[currLayer].mExtraSize );
@@ -880,7 +903,10 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
     {
         if( mLayersInfo[i].mDividerType == 0 ) //Rasterizable layer
         {
-            FName layerName = FName(mLayersInfo[i].mName);
+            FName layerName = mLayersInfo[i].mUnicodeName;
+            if (mLayersInfo[i].mUnicodeNameSize == 0)
+                layerName = FName(mLayersInfo[i].mName);
+
             uint32_t w = mLayersInfo[i].mRight - mLayersInfo[i].mLeft;
             uint32_t h = mLayersInfo[i].mBottom - mLayersInfo[i].mTop;
 
@@ -1056,7 +1082,9 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
         }
         else if( mLayersInfo[i].mDividerType == 1 || mLayersInfo[i].mDividerType == 2 ) //Open folder / Closed Folder
         {
-            FName layerName = FName(mLayersInfo[i].mName);
+            FName layerName = mLayersInfo[i].mUnicodeName;
+            if (mLayersInfo[i].mUnicodeNameSize == 0)
+                layerName = FName(mLayersInfo[i].mName);
 
             UOdysseyTextureLayerFolder* folderLayer = Cast<UOdysseyTextureLayerFolder>(mLayerStack->AddLayer(UOdysseyTextureLayerFolder::StaticClass(), currentRoot, currentRoot->GetChildren().Num()));
             folderLayer->Name = FText::FromName(layerName);

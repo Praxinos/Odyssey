@@ -38,6 +38,9 @@ struct FPsdLayerInfo
     uint8_t mNameSize;
     char mName[257];
 
+    uint32_t mUnicodeNameSize;
+    FName mUnicodeName;
+
     uint32_t mSizeLayerImage = 0;
     uint8_t* mLayerImageDst = nullptr;
     uint16_t* mLayerImageDst16 = nullptr;
