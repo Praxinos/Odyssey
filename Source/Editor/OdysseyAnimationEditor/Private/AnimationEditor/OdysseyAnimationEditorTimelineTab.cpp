@@ -275,7 +275,112 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
 void           
 FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
 {
-    //TODO:
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(source);
+
+    UOdysseyAnimation* animation = animationSource->GetAnimation();
+    UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
+    IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
+    TArray< FString > filenames;
+    bool dialogValidated = desktopPlatformHandle->OpenFileDialog(
+        FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
+        , LOCTEXT("animation.import-image-sequence.dialog.title", "Select Images to import").ToString()
+        , FPaths::ProjectDir()
+        , animation->GetName()
+        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
+        , EFileDialogFlags::Multiple
+        , filenames
+    );
+
+    if (!dialogValidated || filenames.Num() <= 0)
+        return;
+
+    FScopedSlowTask progressBar(filenames.Num(), LOCTEXT("timeline-tab.import-image-sequence.progress-bar.title", "Importing Image Sequence"));
+    progressBar.MakeDialog();
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( animation->Format() );
+    TArray<TSharedPtr<::ULIS::FBlock>> blocks;
+    for (const FString& filename : filenames)
+    {
+        progressBar.EnterProgressFrame();
+        FString path( FPaths::ConvertRelativePathToFull( filename ) );
+        FString extension = FPaths::GetExtension(path, false);
+        ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
+        bool extensionFound = false;
+        for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
+        {
+            if( extension == ::ULIS::kwImageFormat[i] )
+            {
+                exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
+                extensionFound = true;
+                break;
+            }
+        }
+
+        if( !extensionFound )
+            continue;
+
+        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>();
+        std::string stdPath( TCHAR_TO_UTF8(*path) );
+        ::ULIS::ulError error = ctx.XLoadBlockFromDisk(
+              *block
+            , stdPath
+        );
+
+        if (error != ULIS_NO_ERROR)
+            continue;
+
+        ctx.Finish();
+
+        if (block->IsHollow())
+            continue;
+
+        if (block->Width() == animation->Width() && block->Height() == animation->Height() && block->Format() == animation->Format())
+        {
+            blocks.Add(block);
+            continue;
+        }
+        
+        //Need to convert the block before adding it to the layer
+        TSharedPtr<::ULIS::FBlock> blockProxy = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+
+        ::ULIS::FEvent eventConvert;
+        ctx.ConvertFormat(
+            *block
+            , *blockProxy
+            , ::ULIS::FRectI::Auto
+            , ::ULIS::FVec2I( 0 )
+            , ULIS::FSchedulePolicy::CacheEfficient
+            , 0
+            , nullptr
+            , &eventConvert
+        );
+
+        ctx.Finish();
+        
+        blocks.Add(blockProxy);
+    }
+
+    if (blocks.IsEmpty())
+        return;
+
+    #ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.import-image-sequence", "Import Image Sequence"));
+    #endif
+    UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
+    for (TSharedPtr<::ULIS::FBlock> block : blocks)
+    {
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, block);
+        cells.Add(cell);
+    }
+    
+    FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
+    mutator.Add(cells);
+    mutator.Commit();
 }
 
 void           
@@ -300,7 +405,7 @@ FOdysseyAnimationEditorTimelineTab::ExportImageSequence()
         , filenames
     );
 
-    if( filenames.Num() <= 0 )
+    if( !saveSuccess || filenames.Num() <= 0 )
         return;
 
     FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
