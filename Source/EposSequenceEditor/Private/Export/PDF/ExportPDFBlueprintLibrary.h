@@ -66,7 +66,17 @@ public:
      */
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
     static FFrameNumber GetPanelFrame( const FExportStruct& ExportStruct, int32 PanelIndex );
-    
+
+    /**
+     * Get the frame number of a panel
+     * 
+     * @param The list of panels
+     * @param The index of the desired panel
+     * @return The frame number (in tick resolution)
+     */
+    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    static int32 GetPanelDuration( const FExportStruct& ExportStruct, int32 PanelIndex );
+
     /**
      * Get the shot name of a panel
      * 
