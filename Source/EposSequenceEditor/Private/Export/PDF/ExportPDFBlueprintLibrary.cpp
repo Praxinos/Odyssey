@@ -100,7 +100,6 @@ UExportPDFBlueprintLibrary::GetPanelDuration( const FExportStruct& iExportStruct
 {
     if( !iExportStruct.Panels.IsValidIndex( iPanelIndex ) )
         return 0;
-        //return FFrameNumber();
 
     TRange<FFrameNumber> range;
 
@@ -109,6 +108,9 @@ UExportPDFBlueprintLibrary::GetPanelDuration( const FExportStruct& iExportStruct
         UMovieSceneSequence* sequence = iExportStruct.mSequencer.Pin()->GetRootMovieSceneSequence();
         UMovieScene* moviescene = sequence->GetMovieScene();
         TRange<FFrameNumber> total_range = moviescene->GetPlaybackRange();
+
+        if( !total_range.Contains( iExportStruct.Panels[iPanelIndex].GlobalFrame ) )
+            return 0;
 
         range = UE::MovieScene::MakeDiscreteRange( iExportStruct.Panels[iPanelIndex].GlobalFrame, UE::MovieScene::DiscreteExclusiveUpper( total_range ) );
     }
