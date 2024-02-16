@@ -5,6 +5,7 @@
 #include "ISinglePropertyView.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 #include "Widgets/Layout/SUniformWrapPanel.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

@@ -16,7 +16,7 @@ UOdysseyFreehandShape::~UOdysseyFreehandShape()
 UOdysseyFreehandShape::UOdysseyFreehandShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
     //Properties
-    , SmoothingEnabled(true)
+    , SmoothingEnabled(false)
     , SmoothingOptions()
 
     //Internal

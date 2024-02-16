@@ -312,6 +312,7 @@ public:
 
     // Specific Tools commands
     TSharedPtr<FUICommandInfo> ActivateRasterDrawingTool;
+    TSharedPtr<FUICommandInfo> ActivateRasterEraserTool;
     TSharedPtr<FUICommandInfo> ActivateRasterPaintBucketTool;
     TSharedPtr<FUICommandInfo> ActivateRasterPrimitiveDrawingTool;
     TSharedPtr<FUICommandInfo> ActivateRasterTransformTool;

@@ -4,6 +4,17 @@
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
 #include "OdysseyPainterEditor.h"
 
+#include "LineShape/OdysseyLineShape.h"
+#include "RectangleShape/OdysseyRectangleShape.h"
+#include "PolygonShape/OdysseyPolygonShape.h"
+#include "EllipseShape/OdysseyEllipseShape.h"
+#include "BezierShape/OdysseyBezierShape.h"
+
+#include "OdysseyMediaRaster.h"
+#include "OdysseyHUDElement.h"
+#include "OdysseyHUDSystem.h"
+#include "OdysseyHUDHandle.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------

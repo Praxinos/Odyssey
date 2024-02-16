@@ -6,6 +6,7 @@
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
@@ -70,6 +71,7 @@ public:
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
     
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
+    virtual UOdysseyPainterEditorRasterEraserTool*                   GetRasterEraserTool() const;
     virtual UOdysseyPainterEditorRasterTransformTool*                GetRasterTransformTool() const;
     virtual UOdysseyPainterEditorRasterPrimitiveDrawingTool*         GetRasterPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorRasterPaintBucketTool*              GetRasterPaintBucketTool() const;
@@ -183,6 +185,7 @@ protected:
     FSimpleMulticastDelegate        mOnSourceChanged;
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
+    UOdysseyPainterEditorRasterEraserTool* mRasterEraserTool;
     UOdysseyPainterEditorRasterTransformTool* mRasterTransformTool;
     UOdysseyPainterEditorRasterPrimitiveDrawingTool* mRasterPrimitiveDrawingTool;
     UOdysseyPainterEditorRasterPaintBucketTool* mRasterPaintBucketTool;

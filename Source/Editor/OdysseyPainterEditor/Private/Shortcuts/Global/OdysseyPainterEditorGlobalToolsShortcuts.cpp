@@ -67,6 +67,11 @@ FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FU
         FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterDrawingTool()))
     );
     iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().ActivateRasterEraserTool,
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterEraserTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterEraserTool()))
+    );
+    iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateRasterPaintBucketTool,
         FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterPaintBucketTool())),
         FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterPaintBucketTool()))
@@ -284,13 +289,11 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateEraserTool()
     if (!editor)
         return;
 
-    /* TODO:
     if (CanAction_ActivateTool(editor->GetRasterEraserTool()))
     {
         Action_ActivateTool(editor->GetRasterEraserTool());
         return;
     }
-    */
 
     if (CanAction_ActivateTool(editor->GetVectorEraserTool()))
     {

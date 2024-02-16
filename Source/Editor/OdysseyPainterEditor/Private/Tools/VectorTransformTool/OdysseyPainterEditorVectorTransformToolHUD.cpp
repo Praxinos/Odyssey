@@ -1,5 +1,6 @@
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyPainterEditor.h"
 
 FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransformToolHUD()
 {

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyShape.h"
 #include "OdysseyPainterEditorRasterPrimitiveDrawingTool.generated.h"
 
 UENUM()
