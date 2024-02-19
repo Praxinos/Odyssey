@@ -8,6 +8,7 @@
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/STreeView.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
+#include "OdysseyVectorGroupPaint.h"
 
 class FOdysseyPainterEditor;
 

@@ -28,7 +28,7 @@ FOdysseyVectorBrush::Lock()
 {
     if( texture )
     {
-        const FColor* colors = static_cast<const FColor*>(texture->PlatformData->Mips[0].BulkData.LockReadOnly());
+        const FColor* colors = static_cast<const FColor*>(texture->GetPlatformData()->Mips[0].BulkData.LockReadOnly());
 
         pixels = const_cast<FColor*>(colors);
         width  = texture->GetSurfaceWidth();
@@ -42,7 +42,7 @@ FOdysseyVectorBrush::Unlock()
 {
     if( texture )
     {
-        texture->PlatformData->Mips[0].BulkData.Unlock();
+        texture->GetPlatformData()->Mips[0].BulkData.Unlock();
     }
 
     width  = 0;
