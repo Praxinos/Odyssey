@@ -509,6 +509,7 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
         if( mPreviousVertex->IsHandleAligned() )
         {
             mPreviousVertex->AlignHandles();
+            mPreviousVertex->SetHandleAligned( true );
         }
 
         mPreviousVertex = iEndVertex;
