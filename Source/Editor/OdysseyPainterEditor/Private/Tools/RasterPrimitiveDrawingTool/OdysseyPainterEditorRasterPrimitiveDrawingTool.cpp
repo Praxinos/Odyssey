@@ -3,6 +3,7 @@
 
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
 #include "OdysseyPainterEditor.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #include "LineShape/OdysseyLineShape.h"
 #include "RectangleShape/OdysseyRectangleShape.h"
