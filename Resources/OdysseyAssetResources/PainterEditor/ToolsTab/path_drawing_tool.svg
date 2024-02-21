@@ -3,13 +3,14 @@
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 64 64" style="enable-background:new 0 0 64 64;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
-	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:none;stroke:#FFFFFF;stroke-width:4;stroke-miterlimit:10;}
+	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#D0D0D0;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:none;stroke:#D0D0D0;stroke-width:4;stroke-miterlimit:10;}
+	.st2{fill-rule:evenodd;clip-rule:evenodd;fill:#00A998;}
 </style>
-<path class="st0" d="M25.7,17l13.9-5.8L51.7,23l-5.4,13.6c-9.5,2.7-18.3,6.5-26.6,11.3l-1.7-2l16.4-16.2c3.8,1.6,5.1-4.8,1-4.8
-	c-1.9,0-3.2,2.2-2.2,3.8L16.9,44.7l-2.3-2C19.5,34.7,23.3,26.1,25.7,17L25.7,17z"/>
-<path class="st0" d="M12.3,56c0.1,5.9-9.5,5.9-9.4,0C2.8,50,12.4,50,12.3,56z"/>
-<path class="st0" d="M61.1,50.5c0.1,5.9-9.5,5.9-9.4,0C51.6,44.6,61.2,44.6,61.1,50.5z"/>
-<path class="st1" d="M7.6,55.3C32.4,68.6,30.8,38.8,56.4,51"/>
-<polygon class="st0" points="53.3,21.5 41.4,9.9 49.3,2 61.2,13.6 "/>
+<path class="st0" d="M24.3,16.5l15.5-6.4l13.6,13.1l-6.1,15c-10.6,3-20.4,7.2-29.7,12.4l-1.9-2.2L34,30.5c4.2,1.7,5.7-5.3,1.1-5.3
+	c-2.2,0-3.6,2.4-2.5,4.2L14.6,47L12,44.8C17.5,36,21.6,26.6,24.3,16.5L24.3,16.5z"/>
+<path class="st1" d="M7.6,57.3C32.4,70.6,30.8,40.8,56.4,53"/>
+<polygon class="st0" points="55.2,21.5 41.9,8.7 50.7,0 64,12.8 "/>
+<path class="st2" d="M12.6,58c0.1,6.3-10.1,6.3-10,0C2.5,51.7,12.7,51.7,12.6,58z"/>
+<path class="st2" d="M61.4,52.5c0.1,6.3-10.1,6.3-10,0C51.3,46.2,61.5,46.2,61.4,52.5z"/>
 </svg>

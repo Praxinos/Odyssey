@@ -369,7 +369,6 @@ FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorGroupPaint* iScene )
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ this
       , iScene

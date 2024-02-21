@@ -38,11 +38,14 @@ public:
      * 
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsColoredChanged, UOdysseyAnimationLayerImageVector*)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsWireframeChanged, UOdysseyAnimationLayerImageVector*)
+
 
 public:
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
     static FOnIsColoredChanged& OnIsColoredChanged();
+    static FOnIsColoredChanged& OnIsWireframeChanged();
 
 public:
     ~UOdysseyAnimationLayerImageVector();
@@ -83,6 +86,7 @@ public:
 
 protected:
     void IsColoredChanged();
+    void IsWireframeChanged();
     void IsLightTableActivatedChanged();
     void OpacityChanged();
     void BlendModeChanged();

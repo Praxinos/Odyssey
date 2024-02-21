@@ -440,10 +440,8 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateEraserTool()
     if (!editor)
         return false;
 
-    /* TODO:
     if (CanAction_ActivateTool(editor->GetRasterEraserTool()))
         return true;
-    */
 
     if (CanAction_ActivateTool(editor->GetVectorEraserTool()))
         return true;

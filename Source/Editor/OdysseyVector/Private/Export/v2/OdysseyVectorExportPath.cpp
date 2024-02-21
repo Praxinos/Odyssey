@@ -57,6 +57,20 @@ FOdysseyVectorExportV2::WritePathGeometrySegments( FOdysseyVectorPath& iPath, FA
 
 //static
 void
+FOdysseyVectorExportV2::WritePathGeometryVertexLock( FOdysseyVectorVertex& iVertex, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX_LOCK
+                            , Ar
+                            , [&iVertex](FArchive &Ar) -> void
+    {
+        uint32 isLocked = static_cast<uint32>(iVertex.IsLocked());
+
+        Ar << isLocked;
+    } );
+}
+
+//static
+void
 FOdysseyVectorExportV2::WritePathGeometryVertexHandleAlignment( FOdysseyVectorVertex& iVertex, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT
@@ -97,6 +111,7 @@ FOdysseyVectorExportV2::WritePathGeometryVertex( FOdysseyVectorVertex& iVertex, 
     {
         WritePathGeometryVertexPosition( iVertex, Ar );
         WritePathGeometryVertexHandleAlignment( iVertex, Ar );
+        WritePathGeometryVertexLock( iVertex, Ar );
     } );
 }
 

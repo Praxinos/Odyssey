@@ -362,16 +362,18 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 }
 
                 mAddedSegmentArray.push_back( newSegment );
+            }
 
-                if( mStitchedVertex )
+            if( mStitchedVertex )
+            {
+                if( mAddedSegmentArray.size() )
                 {
                     RecordUndoPathAlter( iScene
                                         , mAddedVertexArray
                                         , mAddedSegmentArray );
                 }
             }
-
-            if( mStitchedVertex == nullptr )
+            else // mStitchedVertex = nullptr
             {
                 // TODO: this is only for NEW path
                 if ( path->GetVertexList().size() <= 1 )

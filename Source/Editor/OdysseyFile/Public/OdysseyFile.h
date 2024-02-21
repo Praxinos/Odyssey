@@ -126,6 +126,7 @@ namespace FOdysseyFile
                             static const uint32 CHUNK_PATH_GEOMETRY_VERTEX =  0x1f128031; // container
                                 static const uint32 CHUNK_PATH_GEOMETRY_VERTEX_POSITION = 0xc66f513b; // double(X)-double(Y)-double(Radius)
                                 static const uint32 CHUNK_PATH_GEOMETRY_VERTEX_HANDLEALIGNMENT = 0x285aa8d4; // uint32(bool)
+                                static const uint32 CHUNK_PATH_GEOMETRY_VERTEX_LOCK =  0x4fdf582c; // uint32(bool)
 
                             static const uint32 CHUNK_PATH_GEOMETRY_CUBICSEGMENTS = 0x76cacf19; // uint32(count), array[uint32(P0ID)-uint32(P1ID)-double(CX0)-double(CY0)-double(CX1)-double(CY1)]
                         static const uint32 CHUNK_PATH_BRUSH =  0x4b77b632; // container

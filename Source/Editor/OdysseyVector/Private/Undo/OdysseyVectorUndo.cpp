@@ -229,9 +229,12 @@ FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex, uint64 iSnapsho
 {
     if( iSnapshotFlags & FSnapshotFlags::Point::Vertex::ALIGNMENT )
     {
-        // note: we only save the flags that are "manually" set by the user,
-        // i am unsure about the consistency of other flags
         mAlignment = iVertex->IsHandleAligned();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Vertex::LOCK )
+    {
+        mLocked = iVertex->IsLocked();
     }
 }
 
@@ -256,6 +259,16 @@ FSnapshotVertex::Restore()
 
         // swap for redo
         mAlignment = alignment;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::LOCK )
+    {
+        bool locked = vertex->IsLocked();
+
+        vertex->SetLocked( mLocked );
+
+        // swap for redo
+        mLocked = locked;
     }
 }
 

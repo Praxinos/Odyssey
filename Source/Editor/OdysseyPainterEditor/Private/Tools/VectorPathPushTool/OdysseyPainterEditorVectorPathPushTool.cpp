@@ -86,7 +86,6 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
 
         iEngine->Traverse
         ( iScene
-        , iScene
         , 0
         , [ this
           , iScene

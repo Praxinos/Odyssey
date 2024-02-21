@@ -119,7 +119,6 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorGroupPa
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ this
       , iScene
@@ -158,7 +157,6 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorGroupPa
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , mPaintBucketTool->GetEditor()->GetVectorHUDFlags()
     , [ this
       , iScene

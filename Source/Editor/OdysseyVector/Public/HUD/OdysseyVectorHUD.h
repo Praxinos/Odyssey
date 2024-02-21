@@ -68,6 +68,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                             , const BLRgba32& fgColor
                             , const BLRgba32& bgColor );
 
+        static void DrawCenteredSquare( BLContext* iBLContext
+                                      , double iWorldx
+                                      , double iWorldY
+                                      , double iRadius
+                                      , const BLRgba32& fgColor
+                                      , const BLRgba32& bgColor );
+
         static void DrawCircle( BLContext* iBLContext
                               , double iWorldx
                               , double iWorldY

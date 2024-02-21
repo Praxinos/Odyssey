@@ -94,6 +94,7 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
     if( mEdgeArray.size() )
     {
         MakeBezier( true );
+        // newSegment will be nullptr if iEndVertex == mPreviousVertex
         newSegment = CommitSegment( iEndVertex ? iEndVertex : CommitVertex( false ) );
     }
 
@@ -480,47 +481,53 @@ FOdysseyVectorPathTracer::CommitVertex( bool iIsHandleAligned )
 FOdysseyVectorSegment*
 FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
 {
-    BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
-    BLPoint localHandlePoint[2] = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[1].x
-                                                                        , mBestBezier.pt[1].y )
-                                  , cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[2].x
-                                                                        , mBestBezier.pt[2].y ) };
-    FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath
-                                                                                , mPreviousVertex
-                                                                                , localHandlePoint[0].x
-                                                                                , localHandlePoint[0].y
-                                                                                , localHandlePoint[1].x
-                                                                                , localHandlePoint[1].y
-                                                                                , iEndVertex
-                                                                                , true );
-
-
-    mCubicPath->AddSegment( newCubicSegment );
-
-    newCubicSegment->Update();
-
-    ClearTo( mBestBezier.lastRecordID, mBestBezier.lastEdgeID );
-
-    // must be done after segments are added to the path
-    // so that the topology exists
-    if( mPreviousVertex->IsHandleAligned() )
+    if( iEndVertex != mPreviousVertex )
     {
-        mPreviousVertex->AlignHandles();
+        BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
+        BLPoint localHandlePoint[2] = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[1].x
+                                                                            , mBestBezier.pt[1].y )
+                                      , cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[2].x
+                                                                            , mBestBezier.pt[2].y ) };
+        FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath
+                                                                                    , mPreviousVertex
+                                                                                    , localHandlePoint[0].x
+                                                                                    , localHandlePoint[0].y
+                                                                                    , localHandlePoint[1].x
+                                                                                    , localHandlePoint[1].y
+                                                                                    , iEndVertex
+                                                                                    , true );
+
+
+        mCubicPath->AddSegment( newCubicSegment );
+
+        newCubicSegment->Update();
+
+        ClearTo( mBestBezier.lastRecordID, mBestBezier.lastEdgeID );
+
+        // must be done after segments are added to the path
+        // so that the topology exists
+        if( mPreviousVertex->IsHandleAligned() )
+        {
+            mPreviousVertex->AlignHandles();
+            mPreviousVertex->SetHandleAligned( true );
+        }
+
+        mPreviousVertex = iEndVertex;
+
+        mSmoothVector = mBestBezier.pt[3] - mBestBezier.pt[2];
+
+        if( mSmoothVector.Distance() )
+        {
+            mSmoothVector.Normalize();
+        }
+
+        // very important. there is no best bezier anymore.
+        mBestBezier.inited = false;
+
+        return newCubicSegment;
     }
 
-    mPreviousVertex = iEndVertex;
-
-    mSmoothVector = mBestBezier.pt[3] - mBestBezier.pt[2];
-
-    if( mSmoothVector.Distance() )
-    {
-        mSmoothVector.Normalize();
-    }
-
-    // very important. there is no best bezier anymore.
-    mBestBezier.inited = false;
-
-    return newCubicSegment;
+    return  nullptr;
 }
 
 ::ULIS::FRectD

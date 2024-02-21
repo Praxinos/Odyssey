@@ -3,10 +3,14 @@
 <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 64 64" style="enable-background:new 0 0 64 64;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#FFFFFF;}
+	.st0{fill:none;stroke:#00AA99;stroke-width:5;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#D0D0D0;stroke-width:5;stroke-miterlimit:10;}
 </style>
-<path class="st0" d="M3.6,2c0,0,56.8,0,56.8,0C61.3,2,62,2.7,62,3.6c0,0,0,56.7,0,56.7c0,0.9-0.7,1.6-1.6,1.6c0,0-56.8,0-56.8,0
-	C2.7,62,2,61.3,2,60.4c0,0,0-56.7,0-56.7C2,2.7,2.7,2,3.6,2z M58.8,43.1H43.1v15.6h15.7V43.1z M58.8,24.2H43.1v15.6h15.7V24.2
-	L58.8,24.2z M43.1,5.3v15.6h15.7V5.3H43.1z M39.9,43.1H24.1v15.6h15.7V43.1z M39.9,24.2H24.1v15.6h15.7V24.2L39.9,24.2z M24.1,5.3
-	v15.6h15.7V5.3H24.1z M20.9,43.1H5.2v15.6h15.7V43.1z M20.9,24.2H5.2v15.6h15.7V24.2L20.9,24.2z M20.9,5.3H5.2v15.6h15.7V5.3z"/>
+<g>
+	<line class="st0" x1="2.5" y1="41.8" x2="61.5" y2="41.8"/>
+	<line class="st0" x1="2.5" y1="22.2" x2="61.5" y2="22.2"/>
+	<line class="st0" x1="41.8" y1="2.5" x2="41.8" y2="61.5"/>
+	<line class="st0" x1="22.2" y1="2.5" x2="22.2" y2="61.5"/>
+	<rect x="2.5" y="2.5" class="st1" width="59" height="59"/>
+</g>
 </svg>

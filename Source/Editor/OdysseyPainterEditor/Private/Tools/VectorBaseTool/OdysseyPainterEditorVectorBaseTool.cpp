@@ -102,7 +102,6 @@ UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorGroupPai
 
     vectorEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ this
       , iScene
@@ -914,6 +913,16 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu
                 , LOCTEXT("vector-tool.vertex-context-menu.unalign-point-selection.tooltip", "Unalign Point Selection")
                 , FSlateIcon()
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::UnalignPointSelection, vectorScene )));
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.vertex-context-menu.lock-point-selection.name", "Lock Point Selection")
+                , LOCTEXT("vector-tool.vertex-context-menu.lock-point-selection.tooltip", "Lock Point Selection")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::LockPointSelection, vectorScene )));
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.vertex-context-menu.unlock-point-selection.name", "Unlock Point Selection")
+                , LOCTEXT("vector-tool.vertex-context-menu.unlock-point-selection.tooltip", "Unlock Point Selection")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::UnlockPointSelection, vectorScene )));
         //    }
         //    menu.EndSection();
         }

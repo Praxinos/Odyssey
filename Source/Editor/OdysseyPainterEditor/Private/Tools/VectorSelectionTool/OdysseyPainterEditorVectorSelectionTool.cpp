@@ -279,7 +279,6 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     // run lambda on object tree
     iEngine->Traverse
     ( iScene
-    , iScene
     , 0
     , [ this
       , iEngine
