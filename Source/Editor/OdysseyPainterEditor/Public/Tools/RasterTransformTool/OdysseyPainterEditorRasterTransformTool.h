@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyPainterEditorTool.h"
+#include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorRasterTransformTool.generated.h"
 
 class FOdysseyHUDPolygon;

@@ -7,7 +7,9 @@
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterFreehandSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyHUDSystem.h"
 #include "OdysseyHUDPolygon.h"
+#include "OdysseyHUDHandle.h"
 #include "OdysseyBrushTransform.h"
 #include "GeomTools.h"
 
