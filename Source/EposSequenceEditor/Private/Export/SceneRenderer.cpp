@@ -12,6 +12,7 @@
 #include "Evaluation/MovieSceneSequenceHierarchy.h"
 #include "ISequencer.h"
 #include "LegacyScreenPercentageDriver.h"
+#include "LevelEditorViewport.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSequence.h"
 #include "SceneViewExtension.h"
@@ -274,6 +275,12 @@ FSceneRenderer::RenderToTexture( TArray<FColor>& oSamples, FTextureRenderTargetR
     //ViewFamily.EngineShowFlags.SetTonemapper( true );
     //ViewFamily.EngineShowFlags.SetMotionBlur( false );
     ViewFamily.EngineShowFlags.SetScreenPercentage( false );
+
+    //TODO: certainly move it as a parameter from the export panel (?)
+    //ViewFamily.ViewMode = VMI_Wireframe;
+    //ViewFamily.ViewMode = GCurrentLevelEditingViewportClient->GetViewMode();
+
+    //EngineShowFlagOverride( ESFIM_Game, ViewFamily.ViewMode, ViewFamily.EngineShowFlags, false );
 
     FSceneViewStateReference viewState;
     viewState.Allocate( World->Scene->GetFeatureLevel() );
