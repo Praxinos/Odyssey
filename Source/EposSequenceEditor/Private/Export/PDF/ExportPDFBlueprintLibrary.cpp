@@ -8,6 +8,7 @@
 //#include "ImageWriteTask.h"
 #include "ISequencer.h"
 #include "MovieSceneSequence.h"
+#include "MovieSceneTimeHelpers.h"
 
 #include "Board/BoardSequence.h"
 #include "Export/PDF/ExportPDFSettings.h"
@@ -91,6 +92,34 @@ UExportPDFBlueprintLibrary::GetPanelFrame( const FExportStruct& iExportStruct, i
         return FFrameNumber();
 
     return iExportStruct.Panels[iPanelIndex].GlobalFrame;
+}
+
+//static
+int32
+UExportPDFBlueprintLibrary::GetPanelDuration( const FExportStruct& iExportStruct, int32 iPanelIndex )
+{
+    if( !iExportStruct.Panels.IsValidIndex( iPanelIndex ) )
+        return 0;
+
+    TRange<FFrameNumber> range;
+
+    if( iPanelIndex == iExportStruct.Panels.Num() - 1 )
+    {
+        UMovieSceneSequence* sequence = iExportStruct.mSequencer.Pin()->GetRootMovieSceneSequence();
+        UMovieScene* moviescene = sequence->GetMovieScene();
+        TRange<FFrameNumber> total_range = moviescene->GetPlaybackRange();
+
+        if( !total_range.Contains( iExportStruct.Panels[iPanelIndex].GlobalFrame ) )
+            return 0;
+
+        range = UE::MovieScene::MakeDiscreteRange( iExportStruct.Panels[iPanelIndex].GlobalFrame, UE::MovieScene::DiscreteExclusiveUpper( total_range ) );
+    }
+    else
+    {
+        range = UE::MovieScene::MakeDiscreteRange( iExportStruct.Panels[iPanelIndex].GlobalFrame, iExportStruct.Panels[iPanelIndex + 1].GlobalFrame );
+    }
+
+    return UE::MovieScene::DiscreteSize( range );
 }
 
 //static
