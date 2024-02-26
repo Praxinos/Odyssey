@@ -504,14 +504,31 @@ FOdysseyAnimationEditorTimelineTab::ExportImageSequence()
 void
 FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
 {
+    UOdysseyAnimation* animation = Animation();
+    if (!animation)
+        return;
+
     UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.create-new-layer", "Add Layer"));
-#endif
-    layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
+    UOdysseyLayer* layer = nullptr;
+    {
+    #ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.create-new-layer", "Add Layer"));
+    #endif
+        layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
+        UOdysseyAnimationLayerImageRaster* animLayer = Cast<UOdysseyAnimationLayerImageRaster>(layer);
+        if (!animLayer)
+            return;
+
+        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(animLayer, 1, animation->Width(), animation->Height(), animation->Format());
+        FOdysseyAnimationCellsMutator mutator(animLayer, animLayer->GetCellsContainer());
+        mutator.Add({ cell });
+        mutator.Commit();
+    }
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));
 }
 
 void

@@ -418,11 +418,18 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
     if ( !layerStack )
         return;
 
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.create-new-layer", "Add Layer"));
-#endif
+    UOdysseyLayer* layer = nullptr;
+    {
+    #ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.create-new-layer", "Add Layer"));
+    #endif
 
-    layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
+        layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
+        if (!layer)
+            return;
+    }
+            
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));
 }
 
 void
