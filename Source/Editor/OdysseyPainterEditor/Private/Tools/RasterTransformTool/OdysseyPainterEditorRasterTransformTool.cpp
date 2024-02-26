@@ -413,19 +413,21 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
         int shiftX = iPosition.X - mHandles[opposite]->GetPosition().X;
         int shiftY = iPosition.Y - mHandles[opposite]->GetPosition().Y;
 
+        float ratio = FMath::Abs(float(mSelection->GetSelectionBlock()->Height()) / float(mSelection->GetSelectionBlock()->Width()));
+
         int signX = shiftX < 0 ? -1 : 1;
         int signY = shiftY < 0 ? -1 : 1;
 
         int mult = signX == signY ? 1 : -1;
 
-        if (FMath::Abs(shiftX) > FMath::Abs(shiftY))
+        if (FMath::Abs(shiftX * ratio) > FMath::Abs(shiftY))
         {
             iPosition.X = mHandles[opposite]->GetPosition().X + shiftX;
-            iPosition.Y = mHandles[opposite]->GetPosition().Y + shiftX * mult;
+            iPosition.Y = mHandles[opposite]->GetPosition().Y + shiftX * mult * ratio;
         }
         else
         {
-            iPosition.X = mHandles[opposite]->GetPosition().X + shiftY * mult;
+            iPosition.X = mHandles[opposite]->GetPosition().X + shiftY * mult * (1.0 / ratio);
             iPosition.Y = mHandles[opposite]->GetPosition().Y + shiftY;
         }
     }
