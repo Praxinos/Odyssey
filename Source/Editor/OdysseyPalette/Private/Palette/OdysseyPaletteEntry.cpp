@@ -43,8 +43,8 @@ UOdysseyPaletteEntry::OnChildrenChanged()
 void UOdysseyPaletteEntry::OnCreated_Implementation()
 {
     //newName works like a unique ID for this entry
-    FName newName = FName( GetPackage()->GetPersistentGuid().ToString() + GetFName().ToString() );
-    LowLevelRename(newName);
+    //FName newName = FName( GetPackage()->GetPersistentGuid().ToString() + GetFName().ToString() );
+    //LowLevelRename(newName);
 }
 
 UOdysseyPalette* UOdysseyPaletteEntry::GetPalette() const
