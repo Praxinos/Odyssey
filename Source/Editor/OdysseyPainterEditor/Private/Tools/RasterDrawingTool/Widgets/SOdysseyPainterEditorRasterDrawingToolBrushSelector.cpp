@@ -36,15 +36,23 @@ SOdysseyPainterEditorRasterDrawingToolBrushSelector::Construct( const FArguments
 
     mDetailsView->SetObject(mTool->GetBrushInstance());
 
+    
+
+    FSinglePropertyParams brushPropertyParams;
+    brushPropertyParams.NamePlacement = EPropertyNamePlacement::Hidden;
+
     this->ChildSlot
     [
         SNew(SVerticalBox)
         +SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SOdysseyBrushSelector)
+            /* SNew(SOdysseyBrushSelector)
             .Brush_UObject(mTool, &UOdysseyPainterEditorRasterDrawingTool::GetBrush)
-            .OnBrushChanged(this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnBrushSelected)
+            .OnBrushChanged(this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnBrushSelected) */
+
+            PropertyEditorModule.CreateSingleProperty(mTool, "Brush", brushPropertyParams).ToSharedRef()
+
         ]
         + SVerticalBox::Slot()
         [

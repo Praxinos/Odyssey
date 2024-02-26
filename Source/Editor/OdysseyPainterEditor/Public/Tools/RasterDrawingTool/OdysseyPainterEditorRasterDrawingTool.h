@@ -187,7 +187,7 @@ protected:
 
     //Visible properties
 
-    UPROPERTY()
+    UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
     UOdysseyBrush* Brush;
 
     UPROPERTY()
