@@ -18,16 +18,4 @@ public:
 	virtual void RegisterCommands() override;
 
 public:
-    TSharedPtr<FUICommandInfo> NextTexture;
-    TSharedPtr<FUICommandInfo> PreviousTexture;
-	TSharedPtr<FUICommandInfo> SaveTexturePaint;
-
-	/** Commands for the tools toolbar. */
-	TSharedPtr< FUICommandInfo > SetOdysseyBrushSettingsView;
-	TSharedPtr< FUICommandInfo > SetOdysseyPainterEditorToolOptionsView;
-	TSharedPtr< FUICommandInfo > SetOdysseyLayerStackView;
-    TSharedPtr< FUICommandInfo > SetOdysseyPainterEditorToolsView;
-
-
-	TArray<TSharedPtr<FUICommandInfo>> Commands;
 };
