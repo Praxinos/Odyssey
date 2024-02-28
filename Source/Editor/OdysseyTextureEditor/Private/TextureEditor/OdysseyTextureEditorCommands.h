@@ -43,12 +43,6 @@ public:
     /** Action for creating a new layer */
     TSharedPtr<FUICommandInfo> CreateNewLayer;
 
-    /** Action for duplicating the current layer */
-    TSharedPtr<FUICommandInfo> DuplicateCurrentLayer;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> DeleteCurrentLayer;
-
     /** Action for deleting the current layer */
     TSharedPtr<FUICommandInfo> ChangeLayerOpacity10;
 
@@ -78,36 +72,4 @@ public:
 
     /** Action for deleting the current layer */
     TSharedPtr<FUICommandInfo> ChangeLayerOpacity100;
-
-
-    //About actions
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> ResetView;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> GroupPaint;
-
-    /** Action to make a group from selected vector objects*/
-    TSharedPtr<FUICommandInfo> Group;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> Ungroup;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> BringForward;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> SendBackward;
-
-    /** Action to make a paintable shape from a set of cubic bezier*/
-    TSharedPtr<FUICommandInfo> ConvertToPath;
-
-    /** Action to remove selected vector objects */
-    TSharedPtr<FUICommandInfo> DeleteSelection;
-
-    /** Action to remove selected vector objects */
-    TSharedPtr<FUICommandInfo> FlipHorizontal;
-
-    /** Action to remove selected vector objects */
-    TSharedPtr<FUICommandInfo> FlipVertical;
 };

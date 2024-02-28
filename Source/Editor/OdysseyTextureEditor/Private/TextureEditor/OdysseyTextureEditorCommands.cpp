@@ -29,22 +29,8 @@ FOdysseyTextureEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ExportCurrentLayerAsTexture, ImportExportShortcuts, "Export Current Layer As Texture", "Export current layers as texture within the content-browser",                                   EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ExportTextureToOperatingSystem, ImportExportShortcuts, "Export Texture To Operating System", "Export current texture to your operating system, several file format are available",      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::F));
 
-// Help Shortcuts Category
-    UI_BUNDLE_COMMAND( ResetView, HelpShortcuts, "ResetView", "ResetView",                                                                                  EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( GroupPaint, HelpShortcuts, "GroupPaint", "GroupPaint",                                                                               EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( Group, HelpShortcuts, "Group", "Group",                                                                                              EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( Ungroup, HelpShortcuts, "Ungroup", "Ungroup",                                                                                        EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( SendBackward, HelpShortcuts, "SendBackward", "SendBackward",                                                                         EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( BringForward, HelpShortcuts, "BringForward", "BringForward",                                                                         EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( ConvertToPath, HelpShortcuts, "ConvertToPath", "ConvertToPath",                                                                      EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( DeleteSelection, HelpShortcuts, "DeleteSelection", "DeleteSelection",                                              EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( FlipHorizontal, HelpShortcuts, "FlipHorizontal", "FlipHorizontal",                                                                   EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( FlipVertical, HelpShortcuts, "FlipVertical", "FlipVertical",                                                                         EUserInterfaceActionType::Button, FInputChord() );
-
 // LayerStack Shortcuts Category
     UI_BUNDLE_COMMAND( CreateNewLayer, LayerStackShortcuts, "Create New Layer", "Create new image layer",                                                                                                      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
-    UI_BUNDLE_COMMAND( DuplicateCurrentLayer, LayerStackShortcuts, "Duplicate Current Layer", "Duplicate current layer",                                                                                       EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::D));
-    UI_BUNDLE_COMMAND( DeleteCurrentLayer, LayerStackShortcuts, "Delete Current Layer", "Delete current layer",                                                                                                EUserInterfaceActionType::Button, FInputChord(EModifierKey::Shift, EKeys::Delete));
     UI_BUNDLE_COMMAND( ChangeLayerOpacity10, LayerStackShortcuts, "Change current Layer Opacity to 10%", "Change current Layer Opacity to 10%",                                                                EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ChangeLayerOpacity20, LayerStackShortcuts, "Change current Layer Opacity to 20%", "Change current Layer Opacity to 20%",                                                                EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ChangeLayerOpacity30, LayerStackShortcuts, "Change current Layer Opacity to 30%", "Change current Layer Opacity to 30%",                                                                EUserInterfaceActionType::Button, FInputChord());

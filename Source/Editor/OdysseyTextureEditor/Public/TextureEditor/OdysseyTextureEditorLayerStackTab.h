@@ -41,8 +41,6 @@ private:
     virtual void ExportLayersAsTextures();
     virtual void ExportCurrentLayerAsTexture();
     virtual void CreateNewLayer();
-    //virtual void DuplicateCurrentLayer();
-    //virtual void DeleteCurrentLayer();
     virtual void ChangeLayerOpacity(float iOpacity);
 
 private:

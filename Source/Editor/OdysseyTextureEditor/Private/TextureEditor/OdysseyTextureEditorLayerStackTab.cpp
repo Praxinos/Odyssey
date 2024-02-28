@@ -82,8 +82,6 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(textureEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
     MAP_ACTION(textureEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
     MAP_ACTION(textureEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
-    //MAP_ACTION(layerStackEditorCommands.DuplicateCurrentLayer, DuplicateCurrentLayer )
-    //MAP_ACTION(layerStackEditorCommands.DeleteCurrentLayer, DeleteCurrentLayer )
 
     #undef MAP_ACTION
 }

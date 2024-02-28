@@ -41,7 +41,6 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( SwitchTabletAPI, HelpShortcuts, "Change Tablet API", "Switch between Ink and Wintab on Windows, use NSevent on Mac",                 EUserInterfaceActionType::Button, FInputChord( EKeys::F8 ) );
 
 // Uncategorized Yet Shortcuts
-    UI_BUNDLE_COMMAND( FillCurrentLayer, UncategorizedYetShortcuts, "Fill Current Layer", "Fill current layer",                                             EUserInterfaceActionType::Button, FInputChord( EKeys::F ) );
     UI_BUNDLE_COMMAND( ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer",                                          EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) );
 
 // Viewport Shortcuts Category
@@ -73,14 +72,6 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ToggleEraserButton, BrushStrokesShortcuts, "Toggle current Brush to Eraser", "Toggle current Brush to Eraser",                       EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( GetBrushPack, BrushStrokesShortcuts, "Get more brushes ...", "Get more brushes ...",                                                 EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( PickColorInViewport, BrushStrokesShortcuts, "Color Picker", "Hold the key to Pick a color in the viewport",                          EUserInterfaceActionType::None, FInputChord(EKeys::I));
-#if PLATFORM_MAC                                                                                                                                
-    UI_BUNDLE_COMMAND( Undo, BrushStrokesShortcuts, "Undo Brush Stroke", "Undo Brush Stroke in Iliad",                                                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::Z ) );
-    UI_BUNDLE_COMMAND( Redo, BrushStrokesShortcuts, "Redo Brush Stroke", "Redo Brush Stroke in Iliad",                                                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::Y ) );
-#else                                                                                                                                           
-    UI_BUNDLE_COMMAND( Undo, BrushStrokesShortcuts, "Undo Brush Stroke", "Undo Brush Stroke in Iliad",                                                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Z ) );
-    UI_BUNDLE_COMMAND( Redo, BrushStrokesShortcuts, "Redo Brush Stroke", "Redo Brush Stroke in Iliad",                                                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Y ) );
-#endif                                                                                                                                          
-    UI_BUNDLE_COMMAND( ClearUndo, BrushStrokesShortcuts, "Clear Brush Stroke History", "Clears the Brush Stroke History in Iliad",                          EUserInterfaceActionType::Button, FInputChord() );
                                                                                                                                                 
                                                                                                                                                 
 // Brush Alpha Mode Shortcuts Category                                                                                                          

@@ -140,6 +140,11 @@ private:
     //Destroy the BrushInstance
     void DestroyBrushInstance();
 
+    //Adds some amound to the brush size
+    void AddSize(int iAmount);
+    void SetAlphaMode(::ULIS::eAlphaMode iAlphaMode);
+    void SetBlendMode(::ULIS::eBlendMode iBlendMode);
+
     //Creates the Brush Instance and applies brush overrides if asked
     void CreateBrushInstance(bool iApplyOverrides);
 

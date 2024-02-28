@@ -42,22 +42,7 @@ public:
     TSharedPtr<FUICommandInfo> Discord;
 
 
-    //Undo Redo
-
-    /** Action for undoing a stroke in ILIAD*/
-    TSharedPtr<FUICommandInfo> Undo;
-    
-    /** Action for redoing a stroke in ILIAD*/
-    TSharedPtr<FUICommandInfo> Redo;
-    
-    /** Action for redoing a stroke in ILIAD*/
-    TSharedPtr<FUICommandInfo> ClearUndo;
-
-
     //Tools Actions
-
-    /** Action for filling the current layer with the current color */
-    TSharedPtr<FUICommandInfo> FillCurrentLayer;
 
     /** Action for clearing the current layer */
     TSharedPtr<FUICommandInfo> ClearCurrentLayer;
