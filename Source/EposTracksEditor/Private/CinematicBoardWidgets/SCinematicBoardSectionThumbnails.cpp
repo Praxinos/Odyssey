@@ -308,8 +308,8 @@ SCinematicBoardSectionThumbnails::MakeTakeMenu()
 
     for( auto take : board_section->GetTakes() )
     {
-        TWeakObjectPtr<UMovieSceneSequence> take_sequence = take.GetSequence();
-        if( !take_sequence.IsValid() )
+        const UMovieSceneSequence* take_sequence = take.GetSequence();
+        if( !take_sequence )
             continue;
 
         MenuBuilder.AddMenuEntry(

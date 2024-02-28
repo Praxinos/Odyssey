@@ -112,7 +112,7 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( &iSubSection );
     FBoardSectionTake* old_take = board_section->FindTake( board_section->GetSequence() );
 
-    if( !iTake || !iTake->GetSequence().IsValid() )
+    if( !iTake || !iTake->GetSequence() )
         return nullptr;
 
     if( !board_section->FindTake( *iTake ) )
@@ -138,7 +138,7 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     FProperty* ChangedProperty = FindFProperty<FProperty>( UMovieSceneCinematicBoardSection::StaticClass(), "SubSequence" );
     board_section->PreEditChange( ChangedProperty );
 
-    board_section->SetSequence( iTake->GetSequence().Get() );
+    board_section->SetSequence( iTake->GetSequence() );
 
     FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
     //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );

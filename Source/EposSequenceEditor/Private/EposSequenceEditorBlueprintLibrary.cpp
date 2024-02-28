@@ -413,14 +413,14 @@ UBoardSequenceEditorBlueprintLibrary::GetCurrentTake( UMovieSceneSubSection* iSu
 bool
 UBoardSequenceEditorBlueprintLibrary::IsValid( FBoardSectionTake iTake )
 {
-    return iTake.GetSequence().IsValid();
+    return !!iTake.GetSequence();
 }
 
 //static
 FText
 UBoardSequenceEditorBlueprintLibrary::GetDisplayName( FBoardSectionTake iTake )
 {
-    return iTake.GetSequence().IsValid() ? iTake.GetSequence()->GetDisplayName() : FText::GetEmpty();
+    return iTake.GetSequence() ? iTake.GetSequence()->GetDisplayName() : FText::GetEmpty();
 }
 
 //static
