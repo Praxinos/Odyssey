@@ -142,6 +142,7 @@ namespace FOdysseyFile
                     static const uint32 CHUNK_GROUPPAINT = 0xac92b85d; // container
                         // ... +inherited chunks.
                         static const uint32 CHUNK_GROUPPAINT_PAINTED = 0x89854E17; // uint32(bool)
+                        static const uint32 CHUNK_GROUPPAINT_INTERSECTSCANEVAS = 0x8c0632f2; // uint32(bool)
                         static const uint32 CHUNK_GROUPPAINT_MONOCHROME = 0x8278C142; // uint32(bool)
                         static const uint32 CHUNK_GROUPPAINT_MONOCHROMECOLOR = 0x2E97CB32; //uint8(R)-uint8(G)-uint8(B)-uint8(A)
                         static const uint32 CHUNK_GROUPPAINT_WIREFRAME =  0x54F22893; // uint32(bool)

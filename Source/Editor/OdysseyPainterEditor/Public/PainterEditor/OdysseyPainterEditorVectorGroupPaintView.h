@@ -39,6 +39,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
         UPROPERTY( EditAnywhere, Category = PaintGroup , meta = (ClampMin = "0.0", UIMin = "0.0"))
         double GapTolerance;
 
+        UPROPERTY( EditAnywhere, Category = PaintGroup )
+        bool IntersectsCanevas;
+
         // commented out: now handled at layer level
         //UPROPERTY( EditAnywhere, Category = PaintGroup )
         //bool Wireframe;

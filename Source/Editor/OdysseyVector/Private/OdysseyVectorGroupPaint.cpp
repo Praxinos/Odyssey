@@ -246,6 +246,28 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 
 FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     : FOdysseyVectorGroup( iName )
+    , mCanevasPath ( "CanevasPath" )
+    , mCanevasVertex { FOdysseyVectorVertex( 0, 0, 0 )
+                     , FOdysseyVectorVertex( 0, 0, 0 )
+                     , FOdysseyVectorVertex( 0, 0, 0 )
+                     , FOdysseyVectorVertex( 0, 0, 0 ) }
+    , mCanevasSegment { FOdysseyVectorSegmentCubic( &mCanevasPath
+                                                  , &mCanevasVertex[0]
+                                                  , &mCanevasVertex[1]
+                                                  , true )
+                      , FOdysseyVectorSegmentCubic( &mCanevasPath
+                                                  , &mCanevasVertex[1]
+                                                  , &mCanevasVertex[2]
+                                                  , true )
+                      , FOdysseyVectorSegmentCubic( &mCanevasPath
+                                                  , &mCanevasVertex[2]
+                                                  , &mCanevasVertex[3]
+                                                  , true )
+                      , FOdysseyVectorSegmentCubic( &mCanevasPath
+                                                  , &mCanevasVertex[3]
+                                                  , &mCanevasVertex[0]
+                                                  , true ) }
+
 {
     SetName( iName );
 
@@ -271,6 +293,18 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
 
     //mGapSegmentBuffer.reserve( 200 );
     //mSectionBuffer.reserve( 200 );
+
+    SetIntersectsCanevas( false ); // also sets hierarchy invalidation flag
+
+    mCanevasPath.AddVertex( &mCanevasVertex[0] );
+    mCanevasPath.AddVertex( &mCanevasVertex[1] );
+    mCanevasPath.AddVertex( &mCanevasVertex[2] );
+    mCanevasPath.AddVertex( &mCanevasVertex[3] );
+
+    mCanevasPath.AddSegment( &mCanevasSegment[0] );
+    mCanevasPath.AddSegment( &mCanevasSegment[1] );
+    mCanevasPath.AddSegment( &mCanevasSegment[2] );
+    mCanevasPath.AddSegment( &mCanevasSegment[3] );
 }
 
 // This is a constrained version of a segment-to-point proximity test.
@@ -318,6 +352,67 @@ void
 FOdysseyVectorGroupPaint::SetRealtime( bool iRealtime )
 {
     bRealtime = iRealtime;
+}
+
+void
+FOdysseyVectorGroupPaint::SetIntersectsCanevas( bool iIntersectsCanevas )
+{
+    bIntersectsCanevas = iIntersectsCanevas;
+
+    Invalidate( INVALIDATE_SHAPE | INVALIDATE_HIERARCHY );
+}
+
+bool
+FOdysseyVectorGroupPaint::IntersectsCanevas()
+{
+    return bIntersectsCanevas;
+}
+
+void
+FOdysseyVectorGroupPaint::MakeCanevasPath()
+{
+    FOdysseyVectorGroupPaint* vectorScene = GetScene();
+
+    // vectorScene can be null when the object is copied
+    if( vectorScene )
+    {
+        FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+        uint32 width  = vectorEngine->GetPreferredWidth();
+        uint32 height = vectorEngine->GetPreferredHeight();
+        // Note: mCanevasPath has identity matrix
+        BLPoint pt[4] = { BLPoint( 0    , 0      )
+                        , BLPoint( width, 0      )
+                        , BLPoint( width, height )
+                        , BLPoint( 0    , height ) };
+
+        mCanevasVertex[0].Set( pt[0].x, pt[0].y );
+        mCanevasVertex[1].Set( pt[1].x, pt[1].y );
+        mCanevasVertex[2].Set( pt[2].x, pt[2].y );
+        mCanevasVertex[3].Set( pt[3].x, pt[3].y );
+
+        mCanevasSegment[0].GetHandle(0)->Set( pt[0].x, pt[0].y );
+        mCanevasSegment[0].GetHandle(1)->Set( pt[1].x, pt[1].y );
+
+        mCanevasSegment[1].GetHandle(0)->Set( pt[1].x, pt[1].y );
+        mCanevasSegment[1].GetHandle(1)->Set( pt[2].x, pt[2].y );
+
+        mCanevasSegment[2].GetHandle(0)->Set( pt[2].x, pt[2].y );
+        mCanevasSegment[2].GetHandle(1)->Set( pt[3].x, pt[3].y );
+
+        mCanevasSegment[3].GetHandle(0)->Set( pt[3].x, pt[3].y );
+        mCanevasSegment[3].GetHandle(1)->Set( pt[0].x, pt[0].y );
+    }
+}
+
+void
+FOdysseyVectorGroupPaint::UpdateMatrix()
+{
+    FOdysseyVectorObject::UpdateMatrix();
+
+    if( bIntersectsCanevas )
+    {
+        Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+    }
 }
 
 bool
@@ -880,8 +975,23 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
     BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
 
+    if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY )
+    {
+        UpdatePathList();
+    }
+
+    if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
+    {
+        if( bIntersectsCanevas )
+        {
+            MakeCanevasPath();
+        }
+    }
+
     if( bPainted )
     {
+        mCanevasPath.Update( 0 );
+
         if( ( bRealtime == true  )
        || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
         {
@@ -960,12 +1070,15 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
         if( ( bRealtime == true  )
        || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
         {
-            if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
-             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD ) )
+            if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE       )
+             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE )
+             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY   ) )
             {
                 FindCycles(); // also calls Clear()
             }
 
+            Colorize();
+/*
             if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
             {
                 if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
@@ -982,17 +1095,21 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
                 }
             }
 
-            Colorize();
-
             if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
             {
                 mInvalidationFlags &= (~INVALIDATE_COLOR);
             }
+*/
         }
     }
     else
     {
         Clear();
+    }
+
+    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+    {
+        mInvalidationFlags = 0;
     }
 }
 
@@ -1035,7 +1152,9 @@ FOdysseyVectorGroupPaint::RemoveAllBuckets()
 }
 
 void
-FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
+FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
+                                   , double iCombinedOpacity
+                                   , uint64 iFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetEngine();
     BLImageData& imageData = vectorEngine->GetRenderData();
@@ -1047,22 +1166,25 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext, double iCombinedOpac
     screen.w = imageData.size.w;
     screen.h = imageData.size.h;
 
-    for( FOdysseyVectorCycle *cycle : mCycleList )
+    if( ( iFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) == 0 )
     {
-        ::ULIS::FRectD cycleWorldBBox = cycle->GetBBox( true );
-
-        if( cycleWorldBBox.Area() > 1.0f )
+        for( FOdysseyVectorCycle *cycle : mCycleList )
         {
-            if( ( ( cycleWorldBBox.x                    ) < screen.w )
-             && ( ( cycleWorldBBox.x + cycleWorldBBox.w ) > 0        )
-             && ( ( cycleWorldBBox.y                    ) < screen.h )
-             && ( ( cycleWorldBBox.y + cycleWorldBBox.h ) > 0        ) )
+            ::ULIS::FRectD cycleWorldBBox = cycle->GetBBox( true );
+
+            if( cycleWorldBBox.Area() > 1.0f )
             {
-                cycle->Draw( iBLContext
-                           , iCombinedOpacity
-                           , iFlags
-                           , bMonochrome
-                           , mMonochromeColor );
+                if( ( ( cycleWorldBBox.x                    ) < screen.w )
+                 && ( ( cycleWorldBBox.x + cycleWorldBBox.w ) > 0        )
+                 && ( ( cycleWorldBBox.y                    ) < screen.h )
+                 && ( ( cycleWorldBBox.y + cycleWorldBBox.h ) > 0        ) )
+                {
+                    cycle->Draw( iBLContext
+                               , iCombinedOpacity
+                               , iFlags
+                               , bMonochrome
+                               , mMonochromeColor );
+                }
             }
         }
     }
@@ -1735,40 +1857,25 @@ FOdysseyVectorGroupPaint::SetMultithreaded( bool iMultithreaded )
     bMultithreaded = iMultithreaded;
 }
 
-uint32
-FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
+void
+FOdysseyVectorGroupPaint::UpdatePathList()
 {
-    uint32 additionRetval = FOdysseyVectorObject::AddChild( iChild, iInsertAfter );
+    mPathList.clear();
 
-    if( additionRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
+    if( bIntersectsCanevas )
     {
-        if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
+        mPathList.push_back( &mCanevasPath );
+    }
+
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
 
             mPathList.push_back( path );
         }
     }
-
-    return additionRetval;
-}
-
-uint32
-FOdysseyVectorGroupPaint::RemoveChild( FOdysseyVectorObject* iChild )
-{
-    uint32 removalRetval = FOdysseyVectorObject::RemoveChild( iChild );
-
-    if( removalRetval == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
-    {
-        if( iChild->GetClass() == FOdysseyVectorPath::StaticClass() )
-        {
-            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iChild);
-
-            mPathList.remove( path );
-        }
-    }
-
-    return removalRetval;
 }
 
 void
@@ -2480,17 +2587,23 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
 //        mGapSectionBuffer[i].Link();
 //    }
 
-    for( FOdysseyVectorPath* path : mPathList )
+    // do not use mPathList because it may contains the canevas path
+    for( FOdysseyVectorObject* child : mChildrenList )
     {
-        if( path->Erase( oAddedPathArray
-                       , oAddedVertexArray
-                       , oAddedSegmentArray
-                       , oRemovedVertexArray
-                       , oRemovedSegmentArray
-                       , true
-                       , iSplit ) )
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            oRemovedPathArray.push_back( path );
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( child );
+
+            if( path->Erase( oAddedPathArray
+                           , oAddedVertexArray
+                           , oAddedSegmentArray
+                           , oRemovedVertexArray
+                           , oRemovedSegmentArray
+                           , true
+                           , iSplit ) )
+            {
+                oRemovedPathArray.push_back( path );
+            }
         }
     }
 
@@ -2506,41 +2619,47 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
 //    }
 
     // also check paths that were not intersected. If they hit, delete the whole thing.
-    for( FOdysseyVectorPath* path : mPathList )
+    // do not use mPathList because it may contains the canevas path
+    for( FOdysseyVectorObject* child : mChildrenList )
     {
-        if( path->GetPaintingCode() != mPaintingCode )
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            for( FOdysseyVectorChain& chain : path->GetChainArray() )
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( child );
+
+            if( path->GetPaintingCode() != mPaintingCode )
             {
-                std::vector<FWayFragment> wayFragmentArray;
-                std::vector<FWayPoint> wayPointArray;
-
-                wayPointArray.reserve( 10 );
-                wayFragmentArray.reserve( 10 );
-
-                if( chain.EraseSegments( &imageData
-                                       , wayPointArray
-                                       , wayFragmentArray ) )
+                for( FOdysseyVectorChain& chain : path->GetChainArray() )
                 {
-                    for( FOdysseyVectorVertex* vertex : chain.GetVertexArray() )
+                    std::vector<FWayFragment> wayFragmentArray;
+                    std::vector<FWayPoint> wayPointArray;
+
+                    wayPointArray.reserve( 10 );
+                    wayFragmentArray.reserve( 10 );
+
+                    if( chain.EraseSegments( &imageData
+                                           , wayPointArray
+                                           , wayFragmentArray ) )
                     {
-                        path->RemoveVertex( vertex );
+                        for( FOdysseyVectorVertex* vertex : chain.GetVertexArray() )
+                        {
+                            path->RemoveVertex( vertex );
 
-                       oRemovedVertexArray.push_back( vertex );
-                    }
+                           oRemovedVertexArray.push_back( vertex );
+                        }
 
-                    for( FOdysseyVectorSegment* segment : chain.GetSegmentArray() )
-                    {
-                        path->RemoveSegment( segment );
+                        for( FOdysseyVectorSegment* segment : chain.GetSegmentArray() )
+                        {
+                            path->RemoveSegment( segment );
 
-                        oRemovedSegmentArray.push_back( segment );
+                            oRemovedSegmentArray.push_back( segment );
+                        }
                     }
                 }
-            }
 
-            if( path->GetSegmentList().size() == 0 )
-            {
-                oRemovedPathArray.push_back( path );
+                if( path->GetSegmentList().size() == 0 )
+                {
+                    oRemovedPathArray.push_back( path );
+                }
             }
         }
     }
@@ -2549,22 +2668,34 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
 void
 FOdysseyVectorGroupPaint::GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oPathArray )
 {
-    for( FOdysseyVectorPath* path : mPathList )
+    // do not use mPathList because it may contains the canevas path
+    for( FOdysseyVectorObject* child : mChildrenList )
     {
-        oPathArray.push_back( path );
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( child );
+
+            oPathArray.push_back( path );
+        }
     }
 }
 
 void
 FOdysseyVectorGroupPaint::PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray )
 {
-    for( FOdysseyVectorPath* path : mPathList )
+    // do not use mPathList because it may contains the canevas path
+    for( FOdysseyVectorObject* child : mChildrenList )
     {
-        if( path->GetPaintingCode() != mPaintingCode )
+        if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            if( path->Pick( this, ::ULIS::FRectD( 0, 0, 0, 0 ), FOdysseyVectorObject::PICK_MASK_BASED ) )
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( child );
+
+            if( path->GetPaintingCode() != mPaintingCode )
             {
-                oObjectArray.push_back( path );
+                if( path->Pick( this, ::ULIS::FRectD( 0, 0, 0, 0 ), FOdysseyVectorObject::PICK_MASK_BASED ) )
+                {
+                    oObjectArray.push_back( path );
+                }
             }
         }
     }
