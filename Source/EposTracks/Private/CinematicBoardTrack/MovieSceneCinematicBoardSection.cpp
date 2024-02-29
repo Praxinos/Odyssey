@@ -94,10 +94,20 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
 void
 UMovieSceneCinematicBoardSection::PostLoad()
 {
+    // compatibility2 in 5.3 when changing TWeakObjectPtr by TObjectPtr because during saving, non current take are GC'd so TWeakObjectPtr will be nullptr (it seems)
+    // this removes all nullptr take and add the current one later (like compatibility1) to always have at least one entry
+    Takes.RemoveAll( []( const FBoardSectionTake& iTake )
+                     {
+                         return !iTake.GetSequence();
+                     } );
+
+    //---
+
     UMovieSceneSequence* subsequence = GetSequence();
 
-    // compatibility for section created before adding takes, so add the current sequence as the first take
-    if( !GetTakes().Num() && subsequence )
+    // compatibility1 for section created before adding takes, so add the current sequence as the first take
+    // + compatibility2
+    if( !Takes.Num() && subsequence )
     {
         FString class_name = subsequence->GetClass()->GetName();
         // As it is for compatibility only, it's certainly ok to do like that
@@ -120,20 +130,20 @@ FBoardSectionTake::FBoardSectionTake()
 {
 }
 
-FBoardSectionTake::FBoardSectionTake( TWeakObjectPtr<UMovieSceneSequence> iSequence )
+FBoardSectionTake::FBoardSectionTake( UMovieSceneSequence* iSequence )
     : Sequence( iSequence )
 {
 }
 
-TWeakObjectPtr<UMovieSceneSequence>
+UMovieSceneSequence*
 FBoardSectionTake::GetSequence()
 {
-    return Sequence;
+    return GetValid( Sequence );
 }
-TWeakObjectPtr<UMovieSceneSequence>
+UMovieSceneSequence*
 FBoardSectionTake::GetSequence() const
 {
-    return Sequence;
+    return GetValid( Sequence );
 }
 
 bool
@@ -153,7 +163,7 @@ UMovieSceneCinematicBoardSection::GetTakes() const
 void
 UMovieSceneCinematicBoardSection::AddTake( const FBoardSectionTake& iTake )
 {
-    if( !iTake.GetSequence().IsValid() )
+    if( !iTake.GetSequence() )
         return;
 
     Takes.AddUnique( iTake );

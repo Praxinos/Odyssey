@@ -1009,8 +1009,8 @@ FCinematicBoardSection::AddTakesMenu( FMenuBuilder& MenuBuilder )
 
     for( auto take : sectionObject.GetTakes() )
     {
-        TWeakObjectPtr<UMovieSceneSequence> take_sequence = take.GetSequence();
-        if( !take_sequence.IsValid() )
+        const UMovieSceneSequence* take_sequence = take.GetSequence();
+        if( !take_sequence )
             continue;
 
         MenuBuilder.AddMenuEntry(

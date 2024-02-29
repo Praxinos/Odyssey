@@ -18,18 +18,18 @@ struct EPOSTRACKS_API FBoardSectionTake
 
 public:
     FBoardSectionTake();
-    FBoardSectionTake( TWeakObjectPtr<UMovieSceneSequence> iSequence );
+    FBoardSectionTake( UMovieSceneSequence* iSequence );
 
-    TWeakObjectPtr<UMovieSceneSequence> GetSequence();
-    TWeakObjectPtr<UMovieSceneSequence> GetSequence() const;
+    UMovieSceneSequence* GetSequence();
+    UMovieSceneSequence* GetSequence() const;
 
 public:
     EPOSTRACKS_API friend bool operator==( const FBoardSectionTake& iA, const FBoardSectionTake& iB );
 
 private:
-    UPROPERTY()
     //UPROPERTY( VisibleAnywhere, Category="Take" )
-    TWeakObjectPtr<UMovieSceneSequence> Sequence;
+    UPROPERTY()
+    TObjectPtr<UMovieSceneSequence> Sequence;
 };
 
 /**
