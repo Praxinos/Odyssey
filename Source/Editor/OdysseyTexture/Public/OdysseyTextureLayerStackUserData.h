@@ -22,6 +22,8 @@ public:
     void InitWithEmptyLayerStack();
     void InitWithDefaultLayerStack();
     void InitWithDuplicateLayerStack(UOdysseyTextureLayerStack* iLayerStack);
+    void InitWithEmptyVectorLayer();
+    
 
     /**
      * @brief Get the Layer Stack object

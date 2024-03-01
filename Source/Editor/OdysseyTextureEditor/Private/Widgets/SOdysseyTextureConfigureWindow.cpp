@@ -23,14 +23,15 @@
 ETextureSourceFormat
 FOdysseyTextureConfiguration::TextureSourceFormat() const
 {
-    switch(Format.GetValue())
+    switch(Format)
     {
-        case kG8: return TSF_G8;
-        case kG16: return TSF_G16;
-        case kBGRA8: return TSF_BGRA8;
-        case kBGRE8: return TSF_BGRE8;
-        case kRGBA16: return TSF_RGBA16;
-        case kRGBA16F: return TSF_RGBA16F;
+        case EOdysseyTextureSourceFormat::kG8: return TSF_G8;
+        case EOdysseyTextureSourceFormat::kG16: return TSF_G16;
+        case EOdysseyTextureSourceFormat::kBGRA8: return TSF_BGRA8;
+        case EOdysseyTextureSourceFormat::kBGRE8: return TSF_BGRE8;
+        case EOdysseyTextureSourceFormat::kRGBA16: return TSF_RGBA16;
+        case EOdysseyTextureSourceFormat::kRGBA16F: return TSF_RGBA16F;
+        case EOdysseyTextureSourceFormat::kCustom: return CustomFormat;
     }
 
     check(false); //should not be called
@@ -43,13 +44,76 @@ FOdysseyTextureConfiguration::GetBackgroundColor() const
     switch(BackgroundColor)
     {
         default:
-        case kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
-        case kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
-        case kNormal:       return FLinearColor( .5f, .5f, 1.f );
+        case EOdysseyTextureBackgroundColor::kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
+        case EOdysseyTextureBackgroundColor::kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
+        case EOdysseyTextureBackgroundColor::kNormal:       return FLinearColor( .5f, .5f, 1.f );
     }
 
     check(false); //should not be called
     return FLinearColor();
+}
+
+UTexture2D*
+FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObjectFlags iFlags) const
+{
+    int textureWidth = Width;
+    int textureHeight = Height;
+    ETextureSourceFormat textureFormat = TextureSourceFormat();
+    FString defaultName = Name.ToString();
+    FLinearColor backgroundColor = GetBackgroundColor();
+    EOdysseyTextureDefaultLayerType defaultLayerType = DefaultLayerType;
+
+    // Init internal data
+    ::ULIS::FBlock block( textureWidth, textureHeight, ULISFormatForTextureSourceFormat(textureFormat) );
+    ::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgroundColor.R, backgroundColor.G, backgroundColor.B, backgroundColor.A ) );
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
+    ctx.Fill(block, color );
+    ctx.Finish();
+    
+    UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags );
+    InitTextureWithBlockData(&block, texture, textureFormat);
+
+    if (defaultLayerType != EOdysseyTextureDefaultLayerType::kRaster) //Raster is heavy and will be automatically created on Texture Editor first launch
+    {
+        //Init user data
+        UOdysseyTextureLayerStackUserData* userData = NewObject<UOdysseyTextureLayerStackUserData>(texture, NAME_None, RF_Public);
+        userData->InitWithEmptyVectorLayer();
+
+        if (BackgroundColor != EOdysseyTextureBackgroundColor::kTransparent)
+        {
+            UOdysseyLayerStack* layerStack = userData->GetLayerStack();
+            
+            //Add first layer image
+            
+
+            //Set the layer as Current Layer
+            UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, 1));
+            layer->Name = LOCTEXT("texture.default-background-layer.name", "Background");
+
+            //Fill LayerImage with content of Texture
+            TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
+            FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+            rasterBlockMutator.EditTilesFromRects(
+                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+                    {
+                        FillOdysseyBlockFromUTextureData(iBlock.Get(), texture, iBlock->Format());
+                        return {};
+                    }
+                )
+            );
+            rasterBlockMutator.Commit();
+        }
+
+        // Notify for changes
+        texture->AddAssetUserData( userData );
+    }
+
+    texture->PostEditChange();
+
+    return texture;
 }
 
 void

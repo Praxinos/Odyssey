@@ -70,23 +70,22 @@ FOdysseyFlipbookWrapper::CreateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPa
         return false;
 
     mTextureConfiguration = textureConfigurationWindow->GetConfiguration();
-
-    int32 width = mTextureConfiguration.Width;
-    int32 height = mTextureConfiguration.Height;
-    ETextureSourceFormat textureFormat = mTextureConfiguration.TextureSourceFormat();
-    FString defaultName = mTextureConfiguration.Name.ToString();
-    FLinearColor backgroundColor = mTextureConfiguration.GetBackgroundColor();
+    
+    FOdysseyTextureConfiguration textureConfiguration = mTextureConfiguration;
+    FString textureName = textureConfiguration.Name.ToString() + TEXT("_Texture");
+    FString spriteName = textureConfiguration.Name.ToString() + TEXT("_Texture");
+    textureConfiguration.Name = FName(*textureName);
     
     //Create the keyframe
     CreateEmptyKeyFrame(iIndex);
 
     //Create the sprite and add it to the keyframe
-    UPaperSprite* sprite = *oSprite = CreateSprite(defaultName + "_Sprite");
+    UPaperSprite* sprite = *oSprite = CreateSprite(spriteName);
     if (!sprite)
         return false;
 
     //Create the texture and add it to the keyframe
-    UTexture2D* texture = *oTexture = CreateTexture(width, height, textureFormat, defaultName + "_Texture", backgroundColor);
+    UTexture2D* texture = *oTexture = CreateTexture(textureConfiguration);
     if (!texture)
         return false;
 
@@ -120,7 +119,15 @@ FOdysseyFlipbookWrapper::DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, 
         UTexture2D* srcTexture = GetKeyframeTexture(iIndex);
         if (sprite && srcTexture)
         {
-            UTexture2D* texture = *oTexture = CreateTexture(srcTexture->Source.GetSizeX(), srcTexture->Source.GetSizeY(), srcTexture->Source.GetFormat(), mFlipbook->GetName() + "_Texture", FLinearColor(0.f, 0.f, 0.f, 0.f));
+            FOdysseyTextureConfiguration textureConfiguration;
+            textureConfiguration.Width = srcTexture->Source.GetSizeX();
+            textureConfiguration.Height = srcTexture->Source.GetSizeX();
+            textureConfiguration.Format = EOdysseyTextureSourceFormat::kCustom;
+            textureConfiguration.CustomFormat = srcTexture->Source.GetFormat();
+            FString textureName = mFlipbook->GetName() + TEXT("_Texture");
+            textureConfiguration.Name = FName(*textureName);
+
+            UTexture2D* texture = *oTexture = CreateTexture(textureConfiguration);
             if (!texture)
                 return false;
 
@@ -166,22 +173,20 @@ FOdysseyFlipbookWrapper::FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaper
     if(!textureConfigurationWindow->GetWindowAnswer())
         return false;
 
-    const FOdysseyTextureConfiguration& textureConfiguration = textureConfigurationWindow->GetConfiguration();
-    int32 width = textureConfiguration.Width;
-    int32 height = textureConfiguration.Height;
-    ETextureSourceFormat textureFormat = textureConfiguration.TextureSourceFormat();
-    FString defaultName = textureConfiguration.Name.ToString();
-    FLinearColor backgroundColor = textureConfiguration.GetBackgroundColor();
+    FOdysseyTextureConfiguration textureConfiguration = textureConfigurationWindow->GetConfiguration();
+    FString textureName = textureConfiguration.Name.ToString() + TEXT("_Texture");
+    FString spriteName = textureConfiguration.Name.ToString() + TEXT("_Texture");
+    textureConfiguration.Name = FName(*textureName);
 
     UPaperSprite* sprite = GetKeyframeSprite(iIndex);
 	if (!sprite)
 	{
-        sprite = *oSprite = CreateSprite(defaultName + "_Sprite");
+        sprite = *oSprite = CreateSprite(spriteName);
 		if (!sprite)
 			return false;        
 	}
 
-	texture = *oTexture = CreateTexture(width, height, textureFormat, defaultName + "_Texture", backgroundColor);
+	texture = *oTexture = CreateTexture(textureConfiguration);
 	if (!texture)
 		return false;
 
@@ -248,29 +253,16 @@ FOdysseyFlipbookWrapper::SetKeyFrameLength(int32 iIndex, int32 iLength)
 }
 
 UTexture2D*
-FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSourceFormat iFormat, FString iName, FLinearColor iBackgroundColor)
+FOdysseyFlipbookWrapper::CreateTexture(FOdysseyTextureConfiguration iTextureConfiguration)
 {
-	//Create Block
-    ::ULIS::FBlock* blockPtr = new ::ULIS::FBlock( iWidth, iHeight, ULISFormatForTextureSourceFormat(iFormat), nullptr, ::ULIS::FOnInvalidBlock() );
-	::ULIS::FColor color(::ULIS::FColor::FromRGBAF(iBackgroundColor.R, iBackgroundColor.G, iBackgroundColor.B, iBackgroundColor.A));
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( blockPtr->Format());
-    ctx.Fill(*blockPtr, color);
-    ctx.Finish();
-
 	//Create Asset for Texture
     IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
     FString PackageName = FPaths::GetPath( mFlipbook->GetPathName() ) + "/";
-    FString AssetName = iName; //mFlipbook->GetName() + "_Texture";
+    FString AssetName = iTextureConfiguration.Name.ToString();
     AssetTools.CreateUniqueAssetName(PackageName,AssetName,PackageName,AssetName);
     UPackage* package = CreatePackage( *PackageName );
-    
-    //Create Texture
-    UTexture2D* texture2D = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
-    InitTextureWithBlockData(blockPtr, texture2D, iFormat);
 
-    //Init is done
-    texture2D->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
-    texture2D->UpdateResource();
+    UTexture2D* texture2D = iTextureConfiguration.CreateTexture(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional);
 
 	FAssetRegistryModule::AssetCreated(texture2D);
     

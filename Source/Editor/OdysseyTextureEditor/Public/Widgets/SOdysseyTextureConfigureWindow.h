@@ -10,7 +10,7 @@
 #include "SOdysseyTextureConfigureWindow.generated.h"
 
 UENUM()
-enum EOdysseyTextureBackgroundColor
+enum class EOdysseyTextureBackgroundColor : uint8
 {
 	kTransparent UMETA(DisplayName = "Transparent"),
 	kWhite UMETA(DisplayName = "White"),
@@ -18,14 +18,22 @@ enum EOdysseyTextureBackgroundColor
 };
 
 UENUM()
-enum EOdysseyTextureSourceFormat
+enum class EOdysseyTextureSourceFormat : uint8
 {
     kG8 UMETA(DisplayName = "Grey 8"),
     kG16 UMETA(DisplayName = "Grey 16"),
 	kBGRA8 UMETA(DisplayName = "BGRA 8"),
     kBGRE8 UMETA(DisplayName = "BGRE 8"),
 	kRGBA16 UMETA(DisplayName = "RGBA 16"),
-    kRGBA16F UMETA(DisplayName = "RGBA 16 F")
+    kRGBA16F UMETA(DisplayName = "RGBA 16 F"),
+    kCustom UMETA(Hidden)
+};
+
+UENUM()
+enum class EOdysseyTextureDefaultLayerType : uint8
+{
+	kRaster UMETA(DisplayName = "Raster"),
+	kVector UMETA(DisplayName = "Vector")
 };
 
 USTRUCT()
@@ -36,6 +44,8 @@ struct ODYSSEYTEXTUREEDITOR_API FOdysseyTextureConfiguration
 public:
     ETextureSourceFormat TextureSourceFormat() const;
     FLinearColor GetBackgroundColor() const;
+
+    UTexture2D* CreateTexture(UObject* iParent, FName iName, EObjectFlags iFlags) const;
 
 public:
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
@@ -48,10 +58,16 @@ public:
     uint32                  Height = 1024;
 
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
-    TEnumAsByte<EOdysseyTextureSourceFormat>   Format = kBGRA8;
+    EOdysseyTextureSourceFormat Format = EOdysseyTextureSourceFormat::kBGRA8;
+
+    UPROPERTY()
+    TEnumAsByte<ETextureSourceFormat> CustomFormat = ETextureSourceFormat::TSF_BGRA8;
 
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
-	TEnumAsByte<EOdysseyTextureBackgroundColor> BackgroundColor = kTransparent;
+	EOdysseyTextureBackgroundColor BackgroundColor = EOdysseyTextureBackgroundColor::kTransparent;
+
+    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
+    EOdysseyTextureDefaultLayerType DefaultLayerType = EOdysseyTextureDefaultLayerType::kRaster;
 };
 
 class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureConfigureWindow

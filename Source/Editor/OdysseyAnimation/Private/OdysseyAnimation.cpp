@@ -37,16 +37,38 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 
 	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
 
-	UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-	mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+	switch (iConfiguration.DefaultLayerType)
+	{
+		case EOdysseyAnimationDefaultLayerType::kRaster:
+		{
+			UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+			mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
 
-	TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, mWidth, mHeight, Format());
-	FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-	mutator.Add({ cell });
-	mutator.Commit();
+			TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, mWidth, mHeight, Format());
+			FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
+			mutator.Add({ cell });
+			mutator.Commit();
+		}
+		break;
+
+		case EOdysseyAnimationDefaultLayerType::kVector:
+		{
+			UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
+			mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+
+			TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(layer, 1, mWidth, mHeight);
+			FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
+			mutator.Add({ cell });
+			mutator.Commit();
+		}
+		break;
+
+		default:
+			check(false); //should not be called
+	}
 
 	//Background Layer
-	if (iConfiguration.BackgroundColor != EBackgroundColor::kTransparent)
+	if (iConfiguration.BackgroundColor != EOdysseyAnimationBackgroundColor::kTransparent)
 	{	
 		UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
 		backgroundLayer->PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::Hold;

@@ -30,12 +30,7 @@ bool UOdysseyTextureFactory::ConfigureProperties()
 
     GEditor->EditorAddModalWindow( textureConfigurationWindow.ToSharedRef() );
 
-    const FOdysseyTextureConfiguration& textureConfiguration = textureConfigurationWindow->GetConfiguration();
-    mTextureWidth = textureConfiguration.Width;
-    mTextureHeight = textureConfiguration.Height;
-    mTextureFormat = textureConfiguration.TextureSourceFormat();
-    mDefaultName = textureConfiguration.Name.ToString();
-    mBackgroundColor = textureConfiguration.GetBackgroundColor();
+    mTextureConfiguration = textureConfigurationWindow->GetConfiguration();
 
     return textureConfigurationWindow->GetWindowAnswer();
 }
@@ -43,7 +38,7 @@ bool UOdysseyTextureFactory::ConfigureProperties()
 FString
 UOdysseyTextureFactory::GetDefaultNewAssetName() const
 {
-    return !mDefaultName.IsEmpty() ? mDefaultName : Super::GetDefaultNewAssetName();
+    return !mTextureConfiguration.Name.ToString().IsEmpty() ? mTextureConfiguration.Name.ToString() : Super::GetDefaultNewAssetName();
 }
 
 FName
@@ -57,20 +52,5 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
 {
     check(iClass->IsChildOf(UTexture2D::StaticClass()));
 
-    // Init internal data
-    ::ULIS::FBlock block( mTextureWidth, mTextureHeight, ULISFormatForTextureSourceFormat(mTextureFormat) );
-    ::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( mBackgroundColor.R, mBackgroundColor.G, mBackgroundColor.B, mBackgroundColor.A ) );
-
-    //TODO: should fill the default native texture for the thumbnail
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
-    ctx.Fill(block, color );
-    ctx.Finish();
-    
-    UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
-    InitTextureWithBlockData(&block, texture, mTextureFormat);
-
-    texture->PostEditChange();
-
-    return texture;
+    return mTextureConfiguration.CreateTexture(iParent, iName, iFlags | RF_Transactional);
 }

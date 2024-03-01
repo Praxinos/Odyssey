@@ -50,6 +50,22 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     return layerStack;
 }
 
+UOdysseyTextureLayerStack*
+UOdysseyTextureLayerStack::CreateWithEmptyVectorLayer(UTexture2D* iTexture, UObject* iOuter)
+{
+    UOdysseyTextureLayerStack* layerStack = NewObject<UOdysseyTextureLayerStack>(iOuter, "LayerStack", RF_Public | RF_Transactional);
+    layerStack->mInvalidTileMap = FULISInvalidTileMap(64, iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY());
+
+    //Add first layer image
+    UOdysseyTextureLayerImageVector* layer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CreateLayer(UOdysseyTextureLayerImageVector::StaticClass()));
+
+    //Set the layer as Current Layer
+    layerStack->AddLayersToHierarchy({ layer }, layerStack->LayerRoot, 0);
+    layerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+
+    return layerStack;
+}
+
 UOdysseyTextureLayerStack::~UOdysseyTextureLayerStack()
 {
     FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);

@@ -7,6 +7,7 @@
 #include "Factories/Factory.h"
 #include "Templates/SubclassOf.h"
 #include "UObject/ObjectMacros.h"
+#include "Widgets/SOdysseyTextureConfigureWindow.h"
 
 #include "OdysseyTextureFactory.generated.h"
 
@@ -26,9 +27,5 @@ private:
     virtual FName GetNewAssetThumbnailOverride() const override;
 
 private:
-    int                  mTextureWidth;
-    int                  mTextureHeight;
-    ETextureSourceFormat mTextureFormat;
-    FString              mDefaultName;
-    FLinearColor         mBackgroundColor;
+    FOdysseyTextureConfiguration mTextureConfiguration;
 };

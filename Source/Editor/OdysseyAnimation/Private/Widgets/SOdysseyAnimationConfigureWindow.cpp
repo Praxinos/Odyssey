@@ -1,13 +1,14 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "SOdysseyAnimationConfigureWindow.h"
+#include "Widgets/SOdysseyAnimationConfigureWindow.h"
 
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Layout/SSeparator.h"
+#include "SEnumCombo.h"
 
 #include "IStructureDetailsView.h"
 
@@ -17,6 +18,43 @@
 
 #define MAX_CANVAS_SIZE 8192
 #define MIN_CANVAS_SIZE 1
+
+::ULIS::eFormat
+FOdysseyAnimationConfiguration::ULISFormat() const
+{
+    switch(Format)
+    {
+        case EOdysseyAnimationFormat::kBGRA8:
+        {
+            return ::ULIS::Format_BGRA8;
+        }
+        break;
+
+        case EOdysseyAnimationFormat::kRGBAF:
+        {
+            return ::ULIS::Format_RGBAF;
+        }
+        break;
+    }
+
+    check(false); //should not be called
+    return ::ULIS::Format_BGRA8;
+}
+
+FLinearColor
+FOdysseyAnimationConfiguration::GetBackgroundColor() const
+{
+    switch(BackgroundColor)
+    {
+        default:
+        case EOdysseyAnimationBackgroundColor::kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
+        case EOdysseyAnimationBackgroundColor::kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
+        case EOdysseyAnimationBackgroundColor::kNormal:       return FLinearColor( .5f, .5f, 1.f );
+    }
+
+    check(false); //should not be called
+    return FLinearColor();
+}
 
 //---
 

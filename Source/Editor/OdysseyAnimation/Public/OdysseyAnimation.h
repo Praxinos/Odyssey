@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#include "OdysseyAnimationConfiguration.h"
+#include "Widgets/SOdysseyAnimationConfigureWindow.h"
 #include "OdysseyRasterBlock.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"

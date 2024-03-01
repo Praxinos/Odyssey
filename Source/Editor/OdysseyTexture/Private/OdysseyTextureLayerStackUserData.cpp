@@ -26,6 +26,15 @@ UOdysseyTextureLayerStackUserData::InitWithDefaultLayerStack()
 }
 
 void
+UOdysseyTextureLayerStackUserData::InitWithEmptyVectorLayer()
+{
+    if (LayerStack)
+        return;
+
+    LayerStack = UOdysseyTextureLayerStack::CreateWithEmptyVectorLayer(GetTexture(), this);
+}
+
+void
 UOdysseyTextureLayerStackUserData::InitWithDuplicateLayerStack(UOdysseyTextureLayerStack* iLayerStack)
 {
     if ( LayerStack )
