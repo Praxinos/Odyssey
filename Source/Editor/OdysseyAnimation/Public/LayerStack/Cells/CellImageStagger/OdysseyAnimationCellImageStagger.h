@@ -11,8 +11,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageStagger
 public:
     enum class eBehaviour
     {
-        Hold,
-        Loop,
+        Loop = 1, //needs to be 1 for compatibility reasons when Hold was an option
         PingPong
     };
 

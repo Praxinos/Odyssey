@@ -30,7 +30,7 @@ FOdysseyAnimationCellImageStagger::~FOdysseyAnimationCellImageStagger()
 
 FOdysseyAnimationCellImageStagger::FOdysseyAnimationCellImageStagger(UOdysseyAnimationLayer* iLayer, int iLength)
     : FOdysseyAnimationCell(iLength, iLayer)
-    , mBehaviour(eBehaviour::Hold)
+    , mBehaviour(eBehaviour::Loop)
     , mReach(0) // <= 0 is Infinite reach
 {
 }
@@ -99,12 +99,6 @@ FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
     int frame = INDEX_NONE;
     switch(mBehaviour)
     {
-        case eBehaviour::Hold:
-        {
-            frame = cellStartFrame - 1;
-        }
-        break;
-
         case eBehaviour::Loop:
         {
             int layerStartFrame = frameRange.GetLowerBoundValue();

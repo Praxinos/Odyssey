@@ -141,10 +141,6 @@ SOdysseyAnimationCellImageStagger::GetBehaviourBrush() const
 {
     switch(mCell->GetBehaviour())
     {
-        case FOdysseyAnimationCellImageStagger::eBehaviour::Hold:
-            return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.Hold");
-        break;
-
         case FOdysseyAnimationCellImageStagger::eBehaviour::Loop:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.Loop");
         break;
@@ -214,12 +210,6 @@ void
 SOdysseyAnimationCellImageStagger::MapActions(TSharedPtr<FUICommandList> iCommandList)
 {
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourHold,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Hold),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Hold)
-    );
-
-    iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourLoop,
         FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop),
         FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop)
@@ -236,7 +226,6 @@ void
 SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 {  
     iMenuBuilder.BeginSection("Behaviour", LOCTEXT("cell-image-stagger.behaviour-menu.behaviour-section.name", "Behaviour"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourHold, NAME_None, LOCTEXT("cell-image-stagger.behaviour-menu.hold", "Hold"));
         iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourLoop, NAME_None, LOCTEXT("cell-image-stagger.behaviour-menu.loop", "Loop"));
         iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourPingPong, NAME_None, LOCTEXT("cell-image-stagger.behaviour-menu.pingpong", "PingPong"));
     iMenuBuilder.EndSection();
@@ -277,10 +266,6 @@ SOdysseyAnimationCellImageStagger::GetStaggerLength() const
 {
     switch(mCell->GetBehaviour())
     {
-        case FOdysseyAnimationCellImageStagger::eBehaviour::Hold:
-            return INDEX_NONE;
-        break;
-
         case FOdysseyAnimationCellImageStagger::eBehaviour::Loop:
             return GetClampedReach();
         break;
