@@ -97,4 +97,13 @@ public:
     TSharedPtr<FUICommandInfo> NavigateToPreviousCell;
     TSharedPtr<FUICommandInfo> NavigateToNextFrame;
     TSharedPtr<FUICommandInfo> NavigateToPreviousFrame;
+    TSharedPtr<FUICommandInfo> NavigateToAnimationFirstFrame;
+    TSharedPtr<FUICommandInfo> NavigateToAnimationLastFrame;
+    TSharedPtr<FUICommandInfo> Play;
+    TSharedPtr<FUICommandInfo> PlayStop;
+    TSharedPtr<FUICommandInfo> PlayReversed;
+    TSharedPtr<FUICommandInfo> Stop;
+    TSharedPtr<FUICommandInfo> ActivateLooping;
+    TSharedPtr<FUICommandInfo> InactivateLooping;
+    TSharedPtr<FUICommandInfo> ToggleLooping;
 };

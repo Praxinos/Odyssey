@@ -22,6 +22,15 @@ public:
     void Action_NavigateToPreviousFrame();
     void Action_NavigateToNextCell();
     void Action_NavigateToPreviousCell();
+    void Action_NavigateToAnimationFirstFrame();
+    void Action_NavigateToAnimationLastFrame();
+    void Action_Play();
+    void Action_PlayStop();
+    void Action_PlayReversed();
+    void Action_Stop();
+    void Action_ActivateLooping();
+    void Action_InactivateLooping();
+    void Action_ToggleLooping();
 
 public:
     //Shortcuts

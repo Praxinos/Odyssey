@@ -13,6 +13,7 @@ namespace
     const FName TimelineShortcuts = "Timeline Shortcuts";
     const FName LayersShortcuts = "Layers Shortcuts";
     const FName CellsShortcuts = "Cells Shortcuts";
+    const FName NavigationShortcuts = "Navigation Shortcuts";
 }
 
 FOdysseyAnimationEditorCommands::FOdysseyAnimationEditorCommands()
@@ -22,6 +23,7 @@ FOdysseyAnimationEditorCommands::FOdysseyAnimationEditorCommands()
     AddBundle(TimelineShortcuts, LOCTEXT("editor-commands.category.timeline-shortcuts", "Timeline Shortcuts"));
     AddBundle(LayersShortcuts, LOCTEXT("editor-commands.category.layers-shortcuts", "Layers Shortcuts"));
     AddBundle(CellsShortcuts, LOCTEXT("editor-commands.category.cells-shortcuts", "Cells Shortcuts"));
+    AddBundle(NavigationShortcuts, LOCTEXT("editor-commands.category.navigation-shortcuts", "Navigation Shortcuts"));
 }
 
 void
@@ -33,10 +35,19 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ExportImageSequence, ImportExportShortcuts, "Export Image Sequence", "Export the animation as an image sequence on your operating system",                                               EUserInterfaceActionType::Button, FInputChord());
 
 // LayerStack Shortcuts Category
-    UI_BUNDLE_COMMAND( NavigateToNextFrame, TimelineShortcuts, "Navigate to next Frame", "Change the current frame to be the next frame in the animation timeline",                                                            EUserInterfaceActionType::Button, FInputChord(EKeys::Semicolon));
-    UI_BUNDLE_COMMAND( NavigateToPreviousFrame, TimelineShortcuts, "Navigate to previous Frame", "Change the current frame to be the previous frame in the animation timeline",                                                EUserInterfaceActionType::Button, FInputChord(EKeys::Comma));
-    UI_BUNDLE_COMMAND( NavigateToNextCell, TimelineShortcuts, "Navigate to next Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",                    EUserInterfaceActionType::Button, FInputChord(EKeys::T));
-    UI_BUNDLE_COMMAND( NavigateToPreviousCell, TimelineShortcuts, "Navigate to previous Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",            EUserInterfaceActionType::Button, FInputChord(EKeys::R));
+    UI_BUNDLE_COMMAND( NavigateToNextFrame, NavigationShortcuts, "Navigate to next Frame", "Change the current frame to be the next frame in the animation timeline",                                                            EUserInterfaceActionType::Button, FInputChord(EKeys::Semicolon));
+    UI_BUNDLE_COMMAND( NavigateToPreviousFrame, NavigationShortcuts, "Navigate to previous Frame", "Change the current frame to be the previous frame in the animation timeline",                                                EUserInterfaceActionType::Button, FInputChord(EKeys::Comma));
+    UI_BUNDLE_COMMAND( NavigateToNextCell, NavigationShortcuts, "Navigate to next Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",                    EUserInterfaceActionType::Button, FInputChord(EKeys::T));
+    UI_BUNDLE_COMMAND( NavigateToPreviousCell, NavigationShortcuts, "Navigate to previous Cell", "Change the current frame to be on the first frame of the next cell of the current layer in the animation timeline",            EUserInterfaceActionType::Button, FInputChord(EKeys::R));
+    UI_BUNDLE_COMMAND( NavigateToAnimationFirstFrame, NavigationShortcuts, "Navigate To Animation First Frame", "Change the current frame to be on the first frame of the animation", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( NavigateToAnimationLastFrame, NavigationShortcuts, "Navigate To Animation Last Frame", "Change the current frame to be on the last frame of the animation", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( Play, NavigationShortcuts, "Play", "Play the animation", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( PlayStop, NavigationShortcuts, "Play/Stop", "Play or Stop the animation", EUserInterfaceActionType::Button, FInputChord(EKeys::SpaceBar));
+    UI_BUNDLE_COMMAND( PlayReversed, NavigationShortcuts, "Play Reversed", "Play the animation in reverse", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( Stop, NavigationShortcuts, "Stop", "Stop the animation", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ActivateLooping, NavigationShortcuts, "Activate Looping", "Activate looping when playing the animation", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( InactivateLooping, NavigationShortcuts, "Inactivate Looping", "Inactivate looping when playing the animation", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ToggleLooping, NavigationShortcuts, "Toggle Looping", "Toggle looping when playing the animation", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( CreateNewAnimationLayerImageRaster, LayersShortcuts, "Create New Animation Layer Image Raster", "Create New Animation Layer Image Raster", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
 
