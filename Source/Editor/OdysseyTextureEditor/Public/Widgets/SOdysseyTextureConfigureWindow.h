@@ -67,7 +67,7 @@ public:
 	EOdysseyTextureBackgroundColor BackgroundColor = EOdysseyTextureBackgroundColor::kTransparent;
 
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
-    EOdysseyTextureDefaultLayerType DefaultLayerType = EOdysseyTextureDefaultLayerType::kRaster;
+    EOdysseyTextureDefaultLayerType LayerType = EOdysseyTextureDefaultLayerType::kRaster;
 };
 
 class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureConfigureWindow

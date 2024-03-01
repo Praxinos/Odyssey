@@ -62,7 +62,7 @@ public:
 	EOdysseyAnimationBackgroundColor BackgroundColor = EOdysseyAnimationBackgroundColor::kTransparent;
 
     UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-	EOdysseyAnimationDefaultLayerType DefaultLayerType = EOdysseyAnimationDefaultLayerType::kRaster;
+	EOdysseyAnimationDefaultLayerType LayerType = EOdysseyAnimationDefaultLayerType::kRaster;
 };
 
 class ODYSSEYANIMATION_API SOdysseyAnimationConfigureWindow

@@ -61,7 +61,7 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
     ETextureSourceFormat textureFormat = TextureSourceFormat();
     FString defaultName = Name.ToString();
     FLinearColor backgroundColor = GetBackgroundColor();
-    EOdysseyTextureDefaultLayerType defaultLayerType = DefaultLayerType;
+    EOdysseyTextureDefaultLayerType defaultLayerType = LayerType;
 
     // Init internal data
     ::ULIS::FBlock block( textureWidth, textureHeight, ULISFormatForTextureSourceFormat(textureFormat) );

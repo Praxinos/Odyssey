@@ -37,7 +37,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 
 	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
 
-	switch (iConfiguration.DefaultLayerType)
+	switch (iConfiguration.LayerType)
 	{
 		case EOdysseyAnimationDefaultLayerType::kRaster:
 		{
