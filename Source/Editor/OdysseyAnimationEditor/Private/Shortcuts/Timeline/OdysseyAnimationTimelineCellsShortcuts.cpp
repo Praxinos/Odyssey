@@ -10,6 +10,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "Framework/Commands/GenericCommands.h"
+#include "OdysseyEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -77,8 +78,10 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Copy()
     if (selectedFrames.IsEmpty())
         return;
 
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(layer, selectedFrames);
-    FOdysseyClipboard::Get().SetData(clipboardData);
+    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
 }
 
 void
@@ -109,8 +112,10 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.cut-frame", "Cut Frames"));
 #endif
+    
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(layer, selectedFrames);
-    FOdysseyClipboard::Get().SetData(clipboardData);
+    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
     Action_Delete();
 }
 
@@ -136,7 +141,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     if (!cellsContainer)
         return;
 
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyAnimationCellClipboardData>();
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyAnimationCellClipboardData>();
     if (!clipboardData)
         return;
     
@@ -339,7 +345,8 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Paste()
     if (layer->GetIsLocked())
         return false;
 
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyAnimationCellClipboardData>();
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyAnimationCellClipboardData>();
     if (!clipboardData)
         return false;
 

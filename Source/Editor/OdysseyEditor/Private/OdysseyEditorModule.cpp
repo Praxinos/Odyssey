@@ -7,13 +7,36 @@
 IMPLEMENT_MODULE(FOdysseyEditorModule, OdysseyEditor );
 
 void
+FOdysseyEditorModule::StartupModule()
+{
+    mClipboard = MakeShared<FOdysseyClipboard>();
+    FCoreDelegates::OnEnginePreExit.AddRaw(this, &FOdysseyEditorModule::OnEnginePreExit);
+}
+
+void
+FOdysseyEditorModule::OnEnginePreExit()
+{
+    //Clearing the clipboard in OnEnginePreExit instead of ShutdownModule()
+    //Avoids a crash caused by IBulkDataRegistry::Shutdown() being called before ShutdownModule()
+    //Which leads to rasterblocks contained in the clipboard to not being able to retrieve IBulkDataRegistry on destruction
+    mClipboard = nullptr;
+}
+
+void
 FOdysseyEditorModule::ShutdownModule()
 {
+    FCoreDelegates::OnEnginePreExit.RemoveAll(this);
 	for (const auto& element : mOpenedTabIds)
     {
         const FName& editorName = element.Key;
         SaveOpenedTabIds(editorName);
     }
+}
+
+TSharedPtr<FOdysseyClipboard>
+FOdysseyEditorModule::GetClipboard() const
+{
+    return mClipboard;
 }
 
 void

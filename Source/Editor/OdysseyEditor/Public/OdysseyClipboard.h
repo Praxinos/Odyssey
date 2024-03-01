@@ -22,9 +22,6 @@ private:
 class ODYSSEYEDITOR_API FOdysseyClipboard
 {
 public:
-    static FOdysseyClipboard& Get();
-
-private:
     FOdysseyClipboard()
         : mData(nullptr)
     {

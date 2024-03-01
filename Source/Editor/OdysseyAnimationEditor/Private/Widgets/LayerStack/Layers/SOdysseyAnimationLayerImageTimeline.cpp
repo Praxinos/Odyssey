@@ -336,8 +336,9 @@ SOdysseyAnimationLayerImageTimeline::SelectAllFrames()
 void
 SOdysseyAnimationLayerImageTimeline::CopyFrames()
 {
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(mLayer, mExtension->Timeline()->GetSelectedFrames());
-    FOdysseyClipboard::Get().SetData(clipboardData);
+    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
 }
 
 void
@@ -346,15 +347,17 @@ SOdysseyAnimationLayerImageTimeline::CutFrames()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.cut", "Cut Frames"));
 #endif
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(mLayer, mExtension->Timeline()->GetSelectedFrames());
-    FOdysseyClipboard::Get().SetData(clipboardData);
+    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
     DeleteSelectedFrames();
 }
 
 void
 SOdysseyAnimationLayerImageTimeline::PasteFrames()
 {
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyAnimationCellClipboardData>();
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyAnimationCellClipboardData>();
     if (!clipboardData)
         return;
 
@@ -488,7 +491,8 @@ SOdysseyAnimationLayerImageTimeline::CanCutFrames() const
 bool
 SOdysseyAnimationLayerImageTimeline::CanPasteFrames() const
 {
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyAnimationCellClipboardData>();
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyAnimationCellClipboardData>();
     if (!clipboardData)
         return false;
 

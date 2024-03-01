@@ -8,6 +8,7 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackClipboardData.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 
@@ -108,8 +109,9 @@ FOdysseyLayerStackShortcuts::Action_Copy()
     if (!treeView)
         return;
 
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
     TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = MakeShared<FOdysseyLayerStackClipboardData>(treeView->GetSelectedItems());
-    FOdysseyClipboard::Get().SetData(clipboardData);
+    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
 }
 
 void
@@ -119,8 +121,9 @@ FOdysseyLayerStackShortcuts::Action_Cut()
     if (!treeView)
         return;
 
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
     TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = MakeShared<FOdysseyLayerStackClipboardData>(treeView->GetSelectedItems());
-    FOdysseyClipboard::Get().SetData(clipboardData);
+    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.cut-layers", "Cut Layers"));
@@ -131,7 +134,8 @@ FOdysseyLayerStackShortcuts::Action_Cut()
 void
 FOdysseyLayerStackShortcuts::Action_Paste()
 {
-    TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyLayerStackClipboardData>();
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyLayerStackClipboardData>();
     if (!clipboardData)
         return;
 
@@ -225,7 +229,8 @@ bool
 FOdysseyLayerStackShortcuts::CanAction_Paste()
 {
     //First check if the copied layers can be pasted in this layerstack
-    TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = FOdysseyClipboard::Get().GetData<FOdysseyLayerStackClipboardData>();
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyLayerStackClipboardData>();
     if (!clipboardData)
         return false;
 
