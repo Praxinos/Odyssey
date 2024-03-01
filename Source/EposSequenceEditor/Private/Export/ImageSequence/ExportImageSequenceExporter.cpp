@@ -37,6 +37,8 @@ FExportImageSequenceExporter::Export()
         if( !is_formatted )
             continue;
 
+        name = FPaths::MakeValidFileName( name, TEXT( '+' ) ); // Mainly to replace '*' (when there are subframes) by '+'
+
         FString pathfile = mImageSequenceOptions->ExportPath.Path / name;
 
         FSceneRenderer renderer( mSequencer, &mStruct->Panels[i], mImageSequenceOptions->ImageSize, mImageSequenceOptions->ViewMode );
