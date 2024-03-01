@@ -14,7 +14,7 @@ struct FExportPanel;
 class FSceneRenderer
 {
 public:
-    FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, const FIntPoint& iSize );
+    FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, const FIntPoint& iSize, EViewModeIndex iViewMode );
 
     bool RenderPlane( TArray<FColor>& oSamples );
     bool RenderPlane( FTextureRenderTargetResource* oRenderTarget );
@@ -28,9 +28,10 @@ private:
 
 private:
     TWeakPtr<ISequencer>                mSequencer;
-    const FExportPanel*                 mCurrentPanel { nullptr };
+    const FExportPanel*                 mCurrentPanel = nullptr;
     FIntPoint                           mSize;
+    EViewModeIndex                      mViewMode;
 
 private:
-    UCameraComponent*                   mCameraComponent { nullptr };
+    UCameraComponent*                   mCameraComponent = nullptr;
 };

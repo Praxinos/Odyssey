@@ -12,7 +12,6 @@
 #include "Evaluation/MovieSceneSequenceHierarchy.h"
 #include "ISequencer.h"
 #include "LegacyScreenPercentageDriver.h"
-#include "LevelEditorViewport.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSequence.h"
 #include "SceneViewExtension.h"
@@ -29,10 +28,11 @@
 
 //---
 
-FSceneRenderer::FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, const FIntPoint& iSize )
+FSceneRenderer::FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, const FIntPoint& iSize, EViewModeIndex iViewMode )
     : mSequencer( iSequencer )
     , mCurrentPanel( iPanel )
     , mSize( iSize )
+    , mViewMode( iViewMode )
 {
 }
 
@@ -276,11 +276,9 @@ FSceneRenderer::RenderToTexture( TArray<FColor>& oSamples, FTextureRenderTargetR
     //ViewFamily.EngineShowFlags.SetMotionBlur( false );
     ViewFamily.EngineShowFlags.SetScreenPercentage( false );
 
-    //TODO: certainly move it as a parameter from the export panel (?)
-    //ViewFamily.ViewMode = VMI_Wireframe;
-    //ViewFamily.ViewMode = GCurrentLevelEditingViewportClient->GetViewMode();
+    ViewFamily.ViewMode = mViewMode;
 
-    //EngineShowFlagOverride( ESFIM_Game, ViewFamily.ViewMode, ViewFamily.EngineShowFlags, false );
+    EngineShowFlagOverride( ESFIM_Game, ViewFamily.ViewMode, ViewFamily.EngineShowFlags, false );
 
     FSceneViewStateReference viewState;
     viewState.Allocate( World->Scene->GetFeatureLevel() );

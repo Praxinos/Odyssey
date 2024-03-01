@@ -170,7 +170,9 @@ SExportImageSequenceSettings::GlobalSettingsChanged( const FPropertyChangedEvent
     // Update panel list only for relevent options (inside marks for the moment)
     // Other settings won't change the panel list
     if( iEvent.Property->GetOwnerStruct()
-        && iEvent.Property->GetOwnerStruct()->GetFName() == FExportMarkSettings::StaticStruct()->GetFName() )
+        && iEvent.Property->GetOwnerStruct()->GetFName() == FExportMarkSettings::StaticStruct()->GetFName()
+        ||
+        iEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED( FExportImageSequenceOptions, ViewMode ) )
     {
         if( mPanelListView )
         {

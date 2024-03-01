@@ -104,7 +104,7 @@ public:
      * @return The texture containing the scene
      */
     UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
-    static const UTexture2D* GetPanelTexture2D( const FExportStruct& ExportStruct, int32 PanelIndex, int32 Height );
+    static const UTexture2D* GetPanelTexture2D( const FExportStruct& ExportStruct, int32 PanelIndex, int32 Height, EViewModeIndex ViewMode = EViewModeIndex::VMI_Lit );
 
     /**
      * Get the notes of a panel
