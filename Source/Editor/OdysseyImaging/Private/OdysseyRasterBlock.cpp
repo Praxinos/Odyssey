@@ -104,6 +104,12 @@ FOdysseyRasterBlock::GetHeight() const
     return Height;
 }
 
+::ULIS::FRectI
+FOdysseyRasterBlock::GetRect() const
+{
+    return ::ULIS::FRectI::FromXYWH(0, 0, Width, Height);
+}
+
 ::ULIS::eFormat
 FOdysseyRasterBlock::GetFormat() const
 {

@@ -51,6 +51,20 @@ public:
         return ::ULIS::Format_BGRA8;
     }
 
+    FLinearColor GetBackgroundColor() const
+    {
+        switch(BackgroundColor)
+        {
+            default:
+            case kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
+            case kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
+            case kNormal:       return FLinearColor( .5f, .5f, 1.f );
+        }
+
+        check(false); //should not be called
+        return FLinearColor();
+    }
+
 public:
     UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
     FName                   Name = "Animation";

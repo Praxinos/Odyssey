@@ -30,13 +30,6 @@ SOdysseyAnimationConfigureWindow::Construct(const FArguments& iArgs, const FOdys
 void
 SOdysseyAnimationConfigureWindow::Construct( const FArguments& iArgs)
 {
-    /* mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_G8 ) );
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_BGRA8 ) );
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_BGRE8 ) );
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_RGBA16 ) );
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_RGBA16F ) ); */
-    //mAllFormats.Add( MakeShared< TPair<ETextureSourceFormat, FText> >( TSF_G16, FText::FromString( "Grey 16 (unsued?)" ) ) );
-
     mWindowAnswer = false;
 
     FStructureDetailsViewArgs structureDetailsViewArgs;
@@ -51,7 +44,7 @@ SOdysseyAnimationConfigureWindow::Construct( const FArguments& iArgs)
     //---
 
     SWindow::Construct( SWindow::FArguments()
-        .Title( LOCTEXT( "configure-window.title", "Create Texture Asset" ) )
+        .Title( LOCTEXT( "configure-window.title", "Create Animation Asset" ) )
         // Remove the empty space at the bottom but doesn't scale anymore
         //.SizingRule( ESizingRule::FixedSize )
         //.ClientSize( FVector2D( 300, 180 ) )
@@ -109,18 +102,6 @@ SOdysseyAnimationConfigureWindow::GetConfiguration() const
 {
     return mConfiguration;
 }
-
-/* FLinearColor
-SOdysseyAnimationConfigureWindow::GetBackgroundColor() const
-{
-    switch(mProperties.mBackgroundColor )
-    {
-        default:
-        case kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
-        case kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
-        case kNormal:       return FLinearColor( .5f, .5f, 1.f );
-    }
-} */
 
 //---
 

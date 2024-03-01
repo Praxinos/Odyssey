@@ -94,7 +94,7 @@ private:
 
     UTexture2D* mSpritePreviousTexture; //
 
-    SOdysseyTextureConfigureWindow::FProperties mTextureWindowProperties;
+    FOdysseyTextureConfiguration mTextureConfiguration;
 
     //FOnKeyFrameAdded mOnKeyFrameAdded;
     //FOnKeyFrameChanged mOnKeyFrameChanged;

@@ -101,6 +101,8 @@ public:
      * @return int 
      */
     int GetHeight() const;
+
+    ::ULIS::FRectI GetRect() const;
     
     /**
      * @brief Get the block Format

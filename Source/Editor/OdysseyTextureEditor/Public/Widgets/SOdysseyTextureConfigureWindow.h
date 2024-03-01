@@ -1,82 +1,87 @@
-// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "Widgets/SWindow.h"
+#include "SEnumCombo.h"
 
+#include "SOdysseyTextureConfigureWindow.generated.h"
+
+UENUM()
+enum EOdysseyTextureBackgroundColor
+{
+	kTransparent UMETA(DisplayName = "Transparent"),
+	kWhite UMETA(DisplayName = "White"),
+	kNormal UMETA(DisplayName = "Purple (127, 127, 255)")
+};
+
+UENUM()
+enum EOdysseyTextureSourceFormat
+{
+    kG8 UMETA(DisplayName = "Grey 8"),
+    kG16 UMETA(DisplayName = "Grey 16"),
+	kBGRA8 UMETA(DisplayName = "BGRA 8"),
+    kBGRE8 UMETA(DisplayName = "BGRE 8"),
+	kRGBA16 UMETA(DisplayName = "RGBA 16"),
+    kRGBA16F UMETA(DisplayName = "RGBA 16 F")
+};
+
+USTRUCT()
+struct ODYSSEYTEXTUREEDITOR_API FOdysseyTextureConfiguration
+{
+	GENERATED_BODY()
+
+public:
+    ETextureSourceFormat TextureSourceFormat() const;
+    FLinearColor GetBackgroundColor() const;
+
+public:
+    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
+    FName                   Name = "T_Drawing";
+
+    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration", meta = (ClampMin = 1, ClampMax = 8192, UIMin = 1, UIMax = 8192))
+    uint32                  Width = 1024;
+
+    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration", meta=(ClampMin=1, ClampMax=8192, UIMin=1, UIMax=8192) )
+    uint32                  Height = 1024;
+
+    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
+    TEnumAsByte<EOdysseyTextureSourceFormat>   Format = kBGRA8;
+
+    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
+	TEnumAsByte<EOdysseyTextureBackgroundColor> BackgroundColor = kTransparent;
+};
 
 class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureConfigureWindow
     : public SWindow
 {
 public:
-    enum EBackgroundColor
-    {
-        kTransparent,
-        kWhite,
-        kNormal,
-    };
+	SLATE_BEGIN_ARGS(SOdysseyTextureConfigureWindow)
+	{
 
-public:
-    struct ODYSSEYTEXTUREEDITOR_API FProperties
-    {
-        FProperties();
-        int                     mWidth;
-        int                     mHeight;
-        ETextureSourceFormat    mFormat;
-        FText                   mName;
-        EBackgroundColor        mBackgroundColor;
-    };
+	}
+	SLATE_END_ARGS()
 
 public:
     void Construct(const FArguments& iArgs);
-    void Construct( const FArguments& iArgs, const FProperties& iProperties);
+    void Construct( const FArguments& iArgs, const FOdysseyTextureConfiguration& iDefaultConfiguration);
 
     bool GetWindowAnswer();
 
 public:
-    void SetProperties(const FProperties& iProperties);
+    //Getters
+    const FOdysseyTextureConfiguration& GetConfiguration() const;
 
-    const FProperties& GetProperties() const;
-    int32 GetWidth() const;
-    int32 GetHeight() const;
-    ETextureSourceFormat GetFormat() const;
-    FText GetDefaultName() const;
-    FLinearColor GetBackgroundColor() const;
-
-    void OnSetWidth( int32 iNewWidthValue, ETextCommit::Type iCommitInfo );
-    void OnChangeWidth( int32 iNewWidthValue );
-    void OnSetHeight( int32 iNewHeightValue, ETextCommit::Type iCommitInfo );
-    void OnChangeHeight( int32 iNewHeightValue );
-    void OnSetName( const FText& iNewWidthName, ETextCommit::Type iCommitInfo );
-    void OnChangeName( const FText& iNewWidthName );
-
-    FText               GetFormatText() const;
-    FText               GetFormatText( TSharedPtr<ETextureSourceFormat> iFormat ) const;
-    TSharedRef<SWidget> GenerateFormatComboBoxItem( TSharedPtr<ETextureSourceFormat> InItem );
-    void                HandleOnFormatChanged( TSharedPtr<ETextureSourceFormat> NewSelection, ESelectInfo::Type SelectInfo );
-
-    FText               GetBackgroundColorText( EBackgroundColor iFormat ) const;
-
-    ECheckBoxState      IsBackgroundColorRadioChecked( EBackgroundColor iBackgroundColor ) const;
-    void                OnBackgroundColorRadioChanged( ECheckBoxState iCheckType, EBackgroundColor iBackgroundColor );
-
-    //FReply              OnColorClick( const FGeometry& iGeometry, const FPointerEvent& iEvent );
+private:
+    //Internal
 
     FReply OnAccept();
     FReply OnCancel();
 
 private:
-    FProperties             mProperties;
-    /* int                     mWidth;
-    int                     mHeight;
-    ETextureSourceFormat    mFormat;
-    FText                   mName;
-    EBackgroundColor        mBackgroundColor; */
-
-    bool                    mWindowAnswer;
-    TArray< TSharedPtr<ETextureSourceFormat> >                  mAllFormats;
-    TSharedPtr<SComboBox<TSharedPtr<ETextureSourceFormat> > >   mFormatComboBox;
+    FOdysseyTextureConfiguration  mConfiguration;
+    bool                            mWindowAnswer;
+    TSharedPtr< SEnumComboBox >     mFormatComboBox;
 };

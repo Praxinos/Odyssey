@@ -12,6 +12,8 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
+#define LOCTEXT_NAMESPACE "Animation"
+
 UOdysseyAnimation::FOnCurrentFrameChanged&
 UOdysseyAnimation::OnCurrentFrameChanged()
 {
@@ -34,13 +36,45 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 	FramesPerSecond = iConfiguration.FramesPerSecond;
 
 	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
-	UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass())); //Move in OdysseyAnimationFactor
+
+	UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
 	mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
 
 	TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, mWidth, mHeight, Format());
 	FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
 	mutator.Add({ cell });
 	mutator.Commit();
+
+	//Background Layer
+	if (iConfiguration.BackgroundColor != EBackgroundColor::kTransparent)
+	{	
+		UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
+		backgroundLayer->PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::Hold;
+		backgroundLayer->Name = LOCTEXT("animation.default-background-layer.name", "Background");
+
+		TSharedPtr<FOdysseyAnimationCellImageRaster> backgroundCell = FOdysseyAnimationCellImageRaster::Create(backgroundLayer, 1, mWidth, mHeight, Format());
+		TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();
+
+		FLinearColor backgorundColor = iConfiguration.GetBackgroundColor();
+
+		FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
+		rasterBlockMutator.EditTilesFromRects({backgroundRasterBlock->GetRect()},
+			FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+				[backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FULISInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
+				{
+					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
+					::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgorundColor.R, backgorundColor.G, backgorundColor.B, backgorundColor.A ) );
+					ctx.Fill(*ioBlock, color);
+					ctx.Finish();
+					return {};
+				}
+			)
+		);
+
+		FOdysseyAnimationCellsMutator cellsMutator(backgroundLayer, backgroundLayer->GetCellsContainer());
+		cellsMutator.Add({ backgroundCell });
+		cellsMutator.Commit();
+	}
 }
 
 uint32

@@ -4,12 +4,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Tools/OdysseyPainterEditorTool.h"
+#include "OdysseyShape.h"
+#include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorRasterEraserTool.generated.h"
 
 class FOdysseyPaintEngine;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterEraserTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterEraserTool :
+    public UOdysseyPainterEditorTool
 {
     GENERATED_BODY()
 

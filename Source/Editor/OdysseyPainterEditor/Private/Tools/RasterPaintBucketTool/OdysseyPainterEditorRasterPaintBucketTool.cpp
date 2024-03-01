@@ -6,7 +6,8 @@
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyMediaRaster.h"
-#include "Palette/OdysseyPaletteEntryColor.h"
+#include "OdysseyPainterEditor.h"
+#include "Palette/OdysseyPaletteEntryColor.h" 
 #include "Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

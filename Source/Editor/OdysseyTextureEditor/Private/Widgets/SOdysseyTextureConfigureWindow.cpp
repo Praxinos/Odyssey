@@ -1,4 +1,4 @@
-// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/SOdysseyTextureConfigureWindow.h"
@@ -9,43 +9,69 @@
 #include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Layout/SSeparator.h"
 
+#include "IStructureDetailsView.h"
+
 /////////////////////////////////////////////////////
 // Defines
-#define LOCTEXT_NAMESPACE "TextureEditor"
+#define LOCTEXT_NAMESPACE "Texture"
 
 #define MAX_CANVAS_SIZE 8192
 #define MIN_CANVAS_SIZE 1
 
-SOdysseyTextureConfigureWindow::FProperties::FProperties()
-{
-    mWidth = 1024;
-    mHeight = 1024;
-    mFormat = TSF_BGRA8;
-    mName = LOCTEXT("configure-window.default-texture-name", "T_Drawing");
-    mBackgroundColor = kTransparent;
-}
-
 //---
 
-void
-SOdysseyTextureConfigureWindow::Construct(const FArguments& iArgs, const FProperties& iProperties)
+ETextureSourceFormat
+FOdysseyTextureConfiguration::TextureSourceFormat() const
 {
-    mProperties = iProperties;
+    switch(Format.GetValue())
+    {
+        case kG8: return TSF_G8;
+        case kG16: return TSF_G16;
+        case kBGRA8: return TSF_BGRA8;
+        case kBGRE8: return TSF_BGRE8;
+        case kRGBA16: return TSF_RGBA16;
+        case kRGBA16F: return TSF_RGBA16F;
+    }
+
+    check(false); //should not be called
+    return TSF_BGRA8;
+}
+
+FLinearColor
+FOdysseyTextureConfiguration::GetBackgroundColor() const
+{
+    switch(BackgroundColor)
+    {
+        default:
+        case kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
+        case kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
+        case kNormal:       return FLinearColor( .5f, .5f, 1.f );
+    }
+
+    check(false); //should not be called
+    return FLinearColor();
+}
+
+void
+SOdysseyTextureConfigureWindow::Construct(const FArguments& iArgs, const FOdysseyTextureConfiguration& iDefaultConfiguration)
+{
+    mConfiguration = iDefaultConfiguration;
     Construct(iArgs);
 }
 
 void
 SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
 {
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_G8 ) );
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_G16 ) );
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_BGRA8 ) );
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_BGRE8 ) );
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_RGBA16 ) );
-    mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_RGBA16F ) );
-    //mAllFormats.Add( MakeShared< TPair<ETextureSourceFormat, FText> >( TSF_G16, FText::FromString( "Grey 16 (unsued?)" ) ) );
-
     mWindowAnswer = false;
+
+    FStructureDetailsViewArgs structureDetailsViewArgs;
+    FDetailsViewArgs detailsViewArgs;
+	detailsViewArgs.bAllowSearch = false;
+	detailsViewArgs.bShowScrollBar = false;
+
+    FPropertyEditorModule& propertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
+    TSharedRef<FStructOnScope> structOnScope = MakeShared<FStructOnScope>(FOdysseyTextureConfiguration::StaticStruct(), reinterpret_cast<uint8*>(&mConfiguration));
+    TSharedPtr<IStructureDetailsView> configurationDetailsView = propertyEditor.CreateStructureDetailView(detailsViewArgs, structureDetailsViewArgs, structOnScope);
 
     //---
 
@@ -58,215 +84,41 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
         .SupportsMinimize( false )
         .SupportsMaximize( false )
         [
-            SNew( SBorder )
-            .BorderImage( FAppStyle::GetBrush( "Menu.Background" ) )
+            SNew(SVerticalBox)
+            +SVerticalBox::Slot()
             [
-                SNew( SVerticalBox )
+                configurationDetailsView->GetWidget().ToSharedRef()
+            ]
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign( HAlign_Center )
+            .VAlign( VAlign_Center )
+            [
+                SNew( SUniformGridPanel )
+                .MinDesiredSlotHeight( FCoreStyle::Get().GetFloat( "StandardDialog.MinDesiredSlotHeight" ) )
+                .MinDesiredSlotWidth( FCoreStyle::Get().GetFloat( "StandardDialog.MinDesiredSlotWidth" ) )
+                .SlotPadding( FCoreStyle::Get().GetMargin( "StandardDialog.SlotPadding" ) )
 
-                +SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding( 2, 2 )
+                +SUniformGridPanel::Slot( 0, 0 )
                 [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    [
-                        SNew( STextBlock )
-                        .Text( LOCTEXT( "configure-window.name", "Name" ) )
-                    ]
-                    +SHorizontalBox::Slot()
-                    .FillWidth( 2 )
-                    [
-                        SNew( SEditableTextBox )
-                        .Text( this, &SOdysseyTextureConfigureWindow::GetDefaultName )
-                        .OnTextCommitted( this, &SOdysseyTextureConfigureWindow::OnSetName )
-                        .OnTextChanged( this, &SOdysseyTextureConfigureWindow::OnChangeName )
-                    ]
+                    SNew( SButton )
+                    .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
+                    .HAlign( HAlign_Center )
+                    .Text( LOCTEXT( "configure-window.create-asset", "Create Asset" ) )
+                    .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnAccept )
                 ]
 
-                +SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding( 2, 2 )
+                +SUniformGridPanel::Slot( 1, 0 )
                 [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    [
-                        SNew( STextBlock )
-                        .Text( LOCTEXT( "configure-window.width", "Width" ) )
-                    ]
-                    +SHorizontalBox::Slot()
-                    .FillWidth( 2 )
-                    .HAlign( EHorizontalAlignment::HAlign_Left )
-                    [
-                        SNew( SSpinBox<int32> )
-                        .MinDesiredWidth( 50.f )
-                        .Value( this, &SOdysseyTextureConfigureWindow::GetWidth )
-                        .MinValue( MIN_CANVAS_SIZE )
-                        .MaxValue( MAX_CANVAS_SIZE )
-                        .OnValueCommitted( this, &SOdysseyTextureConfigureWindow::OnSetWidth )
-                        .OnValueChanged( this, &SOdysseyTextureConfigureWindow::OnChangeWidth )
-                    ]
-                ]
-
-                +SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding( 2, 2 )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    [
-                        SNew( STextBlock )
-                        .Text( LOCTEXT( "configure-window.height", "Height" ) )
-                    ]
-                    +SHorizontalBox::Slot()
-                    .FillWidth( 2 )
-                    .HAlign( EHorizontalAlignment::HAlign_Left )
-                    [
-                        SNew( SSpinBox<int32> )
-                        .MinDesiredWidth( 50.f )
-                        .Value( this, &SOdysseyTextureConfigureWindow::GetHeight )
-                        .MinValue( MIN_CANVAS_SIZE )
-                        .MaxValue( MAX_CANVAS_SIZE )
-                        .OnValueCommitted( this, &SOdysseyTextureConfigureWindow::OnSetHeight )
-                        .OnValueChanged( this, &SOdysseyTextureConfigureWindow::OnChangeHeight )
-                    ]
-                ]
-
-                +SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding( 2, 2 )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    [
-                        SNew( STextBlock )
-                        .Text( LOCTEXT( "configure-window.format", "Format" ) )
-                    ]
-                    +SHorizontalBox::Slot()
-                    .FillWidth( 2 )
-                    [
-                        SAssignNew( mFormatComboBox, SComboBox<TSharedPtr<ETextureSourceFormat>> )
-                        .OptionsSource( &mAllFormats )
-                        .OnGenerateWidget( this, &SOdysseyTextureConfigureWindow::GenerateFormatComboBoxItem )
-                        .OnSelectionChanged( this, &SOdysseyTextureConfigureWindow::HandleOnFormatChanged )
-                        [
-                            SNew( STextBlock )
-                            .Text( this, &SOdysseyTextureConfigureWindow::GetFormatText )
-                        ]
-                    ]
-                ]
-
-                +SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding( 2, 2 )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    [
-                        SNew( STextBlock )
-                        .Text( LOCTEXT( "configure-window.background", "Color" ) )
-                    ]
-                    +SHorizontalBox::Slot()
-                    .FillWidth( 2 )
-                    [
-                        SNew( SVerticalBox )
-
-                        +SVerticalBox::Slot()
-                        .AutoHeight()
-                        [
-                            SNew( SCheckBox )
-                            .Style( FAppStyle::Get(), "RadioButton" )
-                            .IsChecked( this, &SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked, EBackgroundColor::kTransparent )
-                            .OnCheckStateChanged( this, &SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged, EBackgroundColor::kTransparent )
-                            [
-                                SNew(STextBlock)
-                                .Text( GetBackgroundColorText( EBackgroundColor::kTransparent ) )
-                            ]
-                        ]
-
-                        +SVerticalBox::Slot()
-                        .AutoHeight()
-                        [
-                            SNew( SCheckBox )
-                            .Style( FAppStyle::Get(), "RadioButton" )
-                            .IsChecked( this, &SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked, EBackgroundColor::kWhite )
-                            .OnCheckStateChanged( this, &SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged, EBackgroundColor::kWhite )
-                            [
-                                SNew(STextBlock)
-                                .Text( GetBackgroundColorText( EBackgroundColor::kWhite ) )
-                            ]
-                        ]
-
-                        +SVerticalBox::Slot()
-                        .AutoHeight()
-                        [
-                            SNew( SCheckBox )
-                            .Style( FAppStyle::Get(), "RadioButton" )
-                            .IsChecked( this, &SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked, EBackgroundColor::kNormal )
-                            .OnCheckStateChanged( this, &SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged, EBackgroundColor::kNormal )
-                            [
-                                SNew(STextBlock)
-                                .Text( GetBackgroundColorText( EBackgroundColor::kNormal ) )
-                            ]
-                        ]
-                    ]
-
-                    // Maybe add it to have a custom background color through a 'custom' entry in the previous popup
-
-                    //+SHorizontalBox::Slot()
-                    //[
-                    //    SNew( SColorBlock )
-                    //    .Color( mColor )
-                    //    .OnMouseButtonDown( this, &SOdysseyTextureConfigureWindow::OnColorClick )
-                    //]
-                ]
-
-                +SVerticalBox::Slot()
-                .AutoHeight()
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    [
-                        SNew( SSeparator )
-                    ]
-                ]
-
-                // From SColorPicker.cpp [OK] [Cancel]
-                +SVerticalBox::Slot()
-                .AutoHeight()
-                .HAlign( HAlign_Center )
-                .VAlign( VAlign_Center )
-                [
-                    SNew( SUniformGridPanel )
-                    .MinDesiredSlotHeight( FCoreStyle::Get().GetFloat( "StandardDialog.MinDesiredSlotHeight" ) )
-                    .MinDesiredSlotWidth( FCoreStyle::Get().GetFloat( "StandardDialog.MinDesiredSlotWidth" ) )
-                    .SlotPadding( FCoreStyle::Get().GetMargin( "StandardDialog.SlotPadding" ) )
-
-                    +SUniformGridPanel::Slot( 0, 0 )
-                    [
-                        SNew( SButton )
-                        .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
-                        .HAlign( HAlign_Center )
-                        .Text( LOCTEXT( "configure-window.create-asset", "Create Asset" ) )
-                        .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnAccept )
-                    ]
-
-                    +SUniformGridPanel::Slot( 1, 0 )
-                    [
-                        SNew( SButton )
-                        .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
-                        .HAlign( HAlign_Center )
-                        .Text( LOCTEXT( "configure-window.cancel", "Cancel" ) )
-                        .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnCancel )
-                    ]
+                    SNew( SButton )
+                    .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
+                    .HAlign( HAlign_Center )
+                    .Text( LOCTEXT( "configure-window.cancel", "Cancel" ) )
+                    .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnCancel )
                 ]
             ]
         ]
     );
-
-    mFormatComboBox->SetSelectedItem( *mAllFormats.FindByPredicate( [this]( const TSharedPtr<ETextureSourceFormat> iFormat )
-    {
-        return mProperties.mFormat == *iFormat;
-    } ) );
 }
 
 //---
@@ -277,181 +129,10 @@ SOdysseyTextureConfigureWindow::GetWindowAnswer()
     return mWindowAnswer;
 }
 
-void
-SOdysseyTextureConfigureWindow::SetProperties(const FProperties& iProperties)
+const FOdysseyTextureConfiguration&
+SOdysseyTextureConfigureWindow::GetConfiguration() const
 {
-    mProperties = iProperties;
-}
-
-const SOdysseyTextureConfigureWindow::FProperties&
-SOdysseyTextureConfigureWindow::GetProperties() const
-{
-    return mProperties;
-}
-
-int32
-SOdysseyTextureConfigureWindow::GetWidth() const
-{
-    return mProperties.mWidth;
-}
-
-int32
-SOdysseyTextureConfigureWindow::GetHeight() const
-{
-    return mProperties.mHeight;
-}
-
-ETextureSourceFormat
-SOdysseyTextureConfigureWindow::GetFormat() const
-{
-    return mProperties.mFormat;
-}
-
-FText
-SOdysseyTextureConfigureWindow::GetDefaultName() const
-{
-    return mProperties.mName;
-}
-
-FLinearColor
-SOdysseyTextureConfigureWindow::GetBackgroundColor() const
-{
-    switch(mProperties.mBackgroundColor )
-    {
-        default:
-        case kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
-        case kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
-        case kNormal:       return FLinearColor( .5f, .5f, 1.f );
-    }
-}
-
-//---
-
-void
-SOdysseyTextureConfigureWindow::OnSetWidth( int32 iNewWidthValue, ETextCommit::Type iCommitInfo )
-{
-    mProperties.mWidth = iNewWidthValue;
-
-    if(mProperties.mWidth > MAX_CANVAS_SIZE )
-        mProperties.mWidth = MAX_CANVAS_SIZE;
-    if(mProperties.mWidth < MIN_CANVAS_SIZE )
-        mProperties.mWidth = MIN_CANVAS_SIZE;
-}
-void
-SOdysseyTextureConfigureWindow::OnChangeWidth( int32 iNewWidthValue )
-{
-    mProperties.mWidth = iNewWidthValue;
-
-    if(mProperties.mWidth > MAX_CANVAS_SIZE )
-        mProperties.mWidth = MAX_CANVAS_SIZE;
-    if(mProperties.mWidth < MIN_CANVAS_SIZE )
-        mProperties.mWidth = MIN_CANVAS_SIZE;
-}
-
-void
-SOdysseyTextureConfigureWindow::OnSetHeight( int32 iNewHeightValue, ETextCommit::Type iCommitInfo)
-{
-    mProperties.mHeight = iNewHeightValue;
-
-    if(mProperties.mHeight > MAX_CANVAS_SIZE )
-        mProperties.mHeight = MAX_CANVAS_SIZE;
-    if(mProperties.mHeight < MIN_CANVAS_SIZE )
-        mProperties.mHeight = MIN_CANVAS_SIZE;
-}
-void
-SOdysseyTextureConfigureWindow::OnChangeHeight( int32 iNewHeightValue )
-{
-    mProperties.mHeight = iNewHeightValue;
-
-    if(mProperties.mHeight > MAX_CANVAS_SIZE )
-        mProperties.mHeight = MAX_CANVAS_SIZE;
-    if(mProperties.mHeight < MIN_CANVAS_SIZE )
-        mProperties.mHeight = MIN_CANVAS_SIZE;
-}
-
-void
-SOdysseyTextureConfigureWindow::OnSetName( const FText& iNewNameValue, ETextCommit::Type iCommitInfo )
-{
-    mProperties.mName = iNewNameValue;
-}
-void
-SOdysseyTextureConfigureWindow::OnChangeName( const FText& iNewNameValue )
-{
-    mProperties.mName = iNewNameValue;
-}
-
-//---
-
-FText
-SOdysseyTextureConfigureWindow::GetFormatText() const
-{
-    return GetFormatText( mFormatComboBox->GetSelectedItem() );
-}
-
-FText
-SOdysseyTextureConfigureWindow::GetFormatText( TSharedPtr<ETextureSourceFormat> iFormat ) const
-{
-    switch( *iFormat )
-    {
-        case TSF_G8:        return LOCTEXT( "configure-window.format.g8", "Grey 8" );
-        case TSF_G16:       return LOCTEXT( "configure-window.format.g16", "Grey 16" );
-        default:
-        case TSF_BGRA8:     return LOCTEXT( "configure-window.format.bgra8", "BGRA 8" );
-        case TSF_BGRE8:     return LOCTEXT( "configure-window.format.bgre8", "BGRE 8" );
-        case TSF_RGBA16:    return LOCTEXT( "configure-window.format.rgba16", "RGBA 16" );
-        case TSF_RGBA16F:   return LOCTEXT( "configure-window.format.rgba16f", "RGBA 16 F" );
-    }
-}
-
-TSharedRef<SWidget>
-SOdysseyTextureConfigureWindow::GenerateFormatComboBoxItem( TSharedPtr<ETextureSourceFormat> InItem )
-{
-	return  SNew(STextBlock)
-            .Text( GetFormatText( InItem ) );
-}
-
-void
-SOdysseyTextureConfigureWindow::HandleOnFormatChanged( TSharedPtr<ETextureSourceFormat> NewSelection, ESelectInfo::Type SelectInfo )
-{
-    mProperties.mFormat = *NewSelection;
-}
-
-//---
-
-FText
-SOdysseyTextureConfigureWindow::GetBackgroundColorText( EBackgroundColor iBackgroundColor ) const
-{
-    switch( iBackgroundColor )
-    {
-        default:
-        case kTransparent:  return LOCTEXT( "configure-window.background-color.transparent", "Transparent" );
-        case kWhite:        return LOCTEXT( "configure-window.background-color.white", "White" );
-        case kNormal:       return LOCTEXT( "configure-window.background-color.normal", "Purple (127, 127, 255)" );
-    }
-}
-
-//FReply
-//SOdysseyTextureConfigureWindow::OnColorClick( const FGeometry& iGeometry, const FPointerEvent& iEvent )
-//{
-//    FColorPickerArgs args;
-//    args.bIsModal = true;
-//    args.OnColorCommitted.BindLambda( []( const FLinearColor& iColor ) {} );
-//
-//    OpenColorPicker( args );
-//
-//    return FReply::Handled();
-//}
-
-ECheckBoxState
-SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked( EBackgroundColor iBackgroundColor ) const
-{
-    return (mProperties.mBackgroundColor == iBackgroundColor ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-}
-
-void
-SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged( ECheckBoxState iCheckType, EBackgroundColor iBackgroundColor )
-{
-    mProperties.mBackgroundColor = iBackgroundColor;
+    return mConfiguration;
 }
 
 //---

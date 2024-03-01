@@ -62,20 +62,20 @@ FOdysseyFlipbookWrapper::CreateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPa
 {
     // Displays a modal window asking for Width and Height of the new texture to draw in
 	// If validated, it creates a new sprite and a new texture using the same name and path as the flipbook but adding some suffixes
-    TSharedPtr<SOdysseyTextureConfigureWindow> textureConfigurationWindow = SNew( SOdysseyTextureConfigureWindow, mTextureWindowProperties);
+    TSharedPtr<SOdysseyTextureConfigureWindow> textureConfigurationWindow = SNew( SOdysseyTextureConfigureWindow, mTextureConfiguration);
     GEditor->EditorAddModalWindow( textureConfigurationWindow.ToSharedRef() );
 
     //If cancel is clicked, we do nothing
     if(!textureConfigurationWindow->GetWindowAnswer())
         return false;
 
-    mTextureWindowProperties = textureConfigurationWindow->GetProperties();
+    mTextureConfiguration = textureConfigurationWindow->GetConfiguration();
 
-    int32 width = textureConfigurationWindow->GetWidth();
-    int32 height = textureConfigurationWindow->GetHeight();
-    ETextureSourceFormat textureFormat = textureConfigurationWindow->GetFormat();
-    FString defaultName = textureConfigurationWindow->GetDefaultName().ToString();
-    FLinearColor backgroundColor = textureConfigurationWindow->GetBackgroundColor();
+    int32 width = mTextureConfiguration.Width;
+    int32 height = mTextureConfiguration.Height;
+    ETextureSourceFormat textureFormat = mTextureConfiguration.TextureSourceFormat();
+    FString defaultName = mTextureConfiguration.Name.ToString();
+    FLinearColor backgroundColor = mTextureConfiguration.GetBackgroundColor();
     
     //Create the keyframe
     CreateEmptyKeyFrame(iIndex);
@@ -166,11 +166,12 @@ FOdysseyFlipbookWrapper::FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaper
     if(!textureConfigurationWindow->GetWindowAnswer())
         return false;
 
-    int32 width = textureConfigurationWindow->GetWidth();
-    int32 height = textureConfigurationWindow->GetHeight();
-    ETextureSourceFormat textureFormat = textureConfigurationWindow->GetFormat();
-    FString defaultName = textureConfigurationWindow->GetDefaultName().ToString();
-    FLinearColor backgroundColor = textureConfigurationWindow->GetBackgroundColor();
+    const FOdysseyTextureConfiguration& textureConfiguration = textureConfigurationWindow->GetConfiguration();
+    int32 width = textureConfiguration.Width;
+    int32 height = textureConfiguration.Height;
+    ETextureSourceFormat textureFormat = textureConfiguration.TextureSourceFormat();
+    FString defaultName = textureConfiguration.Name.ToString();
+    FLinearColor backgroundColor = textureConfiguration.GetBackgroundColor();
 
     UPaperSprite* sprite = GetKeyframeSprite(iIndex);
 	if (!sprite)
