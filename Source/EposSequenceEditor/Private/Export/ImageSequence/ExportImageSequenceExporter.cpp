@@ -39,7 +39,7 @@ FExportImageSequenceExporter::Export()
 
         FString pathfile = mImageSequenceOptions->ExportPath.Path / name;
 
-        FSceneRenderer renderer( mSequencer, &mStruct->Panels[i], mImageSequenceOptions->ImageSize );
+        FSceneRenderer renderer( mSequencer, &mStruct->Panels[i], mImageSequenceOptions->ImageSize, mImageSequenceOptions->ViewMode );
         bool rendering = renderer.RenderPlane( samples );
         if( !rendering )
             continue;

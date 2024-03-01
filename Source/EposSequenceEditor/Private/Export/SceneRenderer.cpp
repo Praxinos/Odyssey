@@ -28,10 +28,11 @@
 
 //---
 
-FSceneRenderer::FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, const FIntPoint& iSize )
+FSceneRenderer::FSceneRenderer( TWeakPtr<ISequencer> iSequencer, const FExportPanel* iPanel, const FIntPoint& iSize, EViewModeIndex iViewMode )
     : mSequencer( iSequencer )
     , mCurrentPanel( iPanel )
     , mSize( iSize )
+    , mViewMode( iViewMode )
 {
 }
 
@@ -274,6 +275,10 @@ FSceneRenderer::RenderToTexture( TArray<FColor>& oSamples, FTextureRenderTargetR
     //ViewFamily.EngineShowFlags.SetTonemapper( true );
     //ViewFamily.EngineShowFlags.SetMotionBlur( false );
     ViewFamily.EngineShowFlags.SetScreenPercentage( false );
+
+    ViewFamily.ViewMode = mViewMode;
+
+    EngineShowFlagOverride( ESFIM_Game, ViewFamily.ViewMode, ViewFamily.EngineShowFlags, false );
 
     FSceneViewStateReference viewState;
     viewState.Allocate( World->Scene->GetFeatureLevel() );

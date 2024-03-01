@@ -65,9 +65,13 @@ public:
     UPROPERTY( VisibleAnywhere, Category=ExportImageSequence, Transient )
     float AspectRatio { 1920.f / 1080.f };
 
-    /** Storyboard path. */
+    /** Image size. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     FIntPoint ImageSize { 1920, 1080 };
+    
+    /** Image viewmode. */
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence, meta=(ValidEnumValues="VMI_Lit, VMI_Unlit, VMI_BrushWireframe, VMI_Wireframe, VMI_LightingOnly") )
+    TEnumAsByte<EViewModeIndex> ViewMode = EViewModeIndex::VMI_Lit;
 
     /** File format. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )

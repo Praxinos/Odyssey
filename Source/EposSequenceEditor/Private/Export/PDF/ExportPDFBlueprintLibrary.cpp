@@ -146,7 +146,7 @@ UExportPDFBlueprintLibrary::GetPanelShotName( const FExportStruct& iExportStruct
 
 //static
 const UTexture2D*
-UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruct, int32 iPanelIndex, int32 iHeight )
+UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruct, int32 iPanelIndex, int32 iHeight, EViewModeIndex iViewMode )
 {
     if( !iExportStruct.Panels.IsValidIndex( iPanelIndex ) )
         return nullptr;
@@ -159,7 +159,7 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
     iHeight = ( iHeight <= 0 ) ? 512 : iHeight;
     FIntPoint image_size( iHeight * aspect_ratio, iHeight );
 
-    FSceneRenderer thumbnail_renderer( iExportStruct.mSequencer, &iExportStruct.Panels[iPanelIndex], image_size );
+    FSceneRenderer thumbnail_renderer( iExportStruct.mSequencer, &iExportStruct.Panels[iPanelIndex], image_size, iViewMode );
     TArray<FColor> samples;
     thumbnail_renderer.RenderPlane( samples );
 

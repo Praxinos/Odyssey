@@ -31,7 +31,7 @@ FPanelItem::CreateThumbnail()
     mThumbnail = MakeShareable( new FPanelThumbnail() );
     mThumbnail->ResizeRenderTarget( FIntPoint( 256 * ratio, 256 ) );
 
-    FSceneRenderer thumbnail_renderer( mSequencer, &mPanel, mThumbnail->GetSize() );
+    FSceneRenderer thumbnail_renderer( mSequencer, &mPanel, mThumbnail->GetSize(), mOptions->ViewMode );
     thumbnail_renderer.RenderPlane( mThumbnail->GetRenderTarget() );
 }
 
