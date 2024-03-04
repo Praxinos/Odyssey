@@ -1070,9 +1070,11 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
         if( ( bRealtime == true  )
        || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
         {
-            if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE       )
-             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE )
-             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY   ) )
+            if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
+             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   )
+             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
+             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          ) )
             {
                 FindCycles(); // also calls Clear()
             }

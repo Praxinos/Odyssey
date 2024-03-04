@@ -555,9 +555,11 @@ FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
               | ( ( iChildInvalidationFlags & INVALIDATE_SHAPE     ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_COLOR     ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_TOPOLOGY  ) << INVALIDATE_CHILD_SHIFT )
+              | ( ( iChildInvalidationFlags & INVALIDATE_MATRIX    ) << INVALIDATE_CHILD_SHIFT )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_SHAPE    )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_COLOR    )
-              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TOPOLOGY ) );
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TOPOLOGY )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_MATRIX   ) );
 }
 
 void
@@ -762,7 +764,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
             }
         }
 
-        Invalidate( INVALIDATE_HIERARCHY );
+        iChild->Invalidate( INVALIDATE_HIERARCHY );
     }
 
     return ret;
