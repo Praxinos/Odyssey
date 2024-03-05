@@ -236,6 +236,18 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 {
     Clear();
 
+    // remove because segmrnts will be freed by path's dtor
+    mCanevasPath.RemoveSegment( &mCanevasSegment[0] );
+    mCanevasPath.RemoveSegment( &mCanevasSegment[1] );
+    mCanevasPath.RemoveSegment( &mCanevasSegment[2] );
+    mCanevasPath.RemoveSegment( &mCanevasSegment[3] );
+
+    // remove because vertices will be freed by path's dtor
+    mCanevasPath.RemoveVertex( &mCanevasVertex[0] );
+    mCanevasPath.RemoveVertex( &mCanevasVertex[1] );
+    mCanevasPath.RemoveVertex( &mCanevasVertex[2] );
+    mCanevasPath.RemoveVertex( &mCanevasVertex[3] );
+
     for( FOdysseyVectorBucket* bucket : mBucketList )
     {
         delete bucket;
