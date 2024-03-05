@@ -36,8 +36,9 @@ public:
 	//Events
 	FSimpleMulticastDelegate& OnAnimationChanged();
 	FSimpleMulticastDelegate& OnTextureChanged();
+	FSimpleMulticastDelegate& OnStatusChanged();
+	FSimpleMulticastDelegate& OnFrameRateChanged();
 	FSimpleMulticastDelegate& OnTextureUpdated();
-	FSimpleMulticastDelegate& OnFramesPerSecondChanged();
 	FSimpleMulticastDelegate& OnIsLoopingChanged();
 	FSimpleMulticastDelegate& OnCurrentTimeChanged();
 	FSimpleMulticastDelegate& OnPlay();
@@ -45,11 +46,16 @@ public:
 	FSimpleMulticastDelegate& OnStop();
 
 public:
-	void SetAnimation(UOdysseyAnimation* iAnimation);
-	UOdysseyAnimation* GetAnimation() const;
+	virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+	void PropertyChanged(const FName& iPropertyName);
 
-	UTexture2D* GetTexture() const;
+	void AnimationChanged();
+	void TextureChanged();
+	void StatusChanged();
+	void FrameRateChanged();
+	void IsLoopingChanged();
 
+public:
 	void Play(bool iBackward = false);
 	void Pause();
 	void Stop();
@@ -57,13 +63,7 @@ public:
 	void SeekToTime(FTimespan iTime);
 	void SeekToFrame(int iFrameIndex);
 
-	void SetFramesPerSecond(double iFramesPerSecond);
-	double GetFramesPerSecond() const;
-
-	void SetIsLooping(bool iIsLooping);
-	bool GetIsLooping() const;
-
-	EOdysseyAnimationPlayerStatus GetStatus() const;
+	UTexture2D* GetTexture() const;
 
 	FTimespan GetCurrentTime() const;
 	bool IsBackward() const;
@@ -71,8 +71,7 @@ public:
 	void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
 	IOdysseyImageRenderer::eRenderType GetRenderType() const;
 
-	void SetRange(const TOptional<TRange<FTimespan>>& iRange);
-
+	void SetTimeRange(const TOptional<TRange<FTimespan>>& iRange);
 	void SetFrameRange(const TOptional<FInt32Range>& iRange);
 
 protected:
@@ -85,22 +84,22 @@ private:
 	void CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBlock>>& iBlocks, const TArray<::ULIS::FRectI>& iRects);
 	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 
-private:
+public:
 	UPROPERTY()
 	UOdysseyAnimation* 	Animation = nullptr;
-
-	UPROPERTY()
-	UTexture2D*	Texture = nullptr;
 
 	UPROPERTY()
 	EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
 
 	UPROPERTY()
-	double FramesPerSecond = 0.0f;
+	double FrameRate = 1.0f; //1.0f means 100% of the animation framepersecond
 
 	UPROPERTY()
 	bool IsLooping = true;
 
+private:
+	UPROPERTY()
+	UTexture2D*	Texture = nullptr;
 
 private:
 	bool mIsBackward = false;
@@ -120,7 +119,8 @@ private:
 	FSimpleMulticastDelegate mOnAnimationChanged;
 	FSimpleMulticastDelegate mOnTextureChanged;
 	FSimpleMulticastDelegate mOnTextureUpdated;
-	FSimpleMulticastDelegate mOnFramesPerSecondChanged;
+	FSimpleMulticastDelegate mOnStatusChanged;
+	FSimpleMulticastDelegate mOnFrameRateChanged;
 	FSimpleMulticastDelegate mOnIsLoopingChanged;
 	FSimpleMulticastDelegate mOnCurrentTimeChanged;
 	FSimpleMulticastDelegate mOnPlay;

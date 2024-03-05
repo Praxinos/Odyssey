@@ -34,18 +34,6 @@ protected:
     //Init
 	void CreateTabs();
 
-public:
-    // GettersFName
-    TSharedPtr<FOdysseyAnimationEditorTimelineTab>& GetTimelineTab();
-    TSharedPtr<FOdysseyAnimationEditorLightTableTab>& GetLightTableTab();
-
-protected:
-	//virtual TSharedRef<FTabManager::FSplitter>	CreateBottomSection() override;
-
 private:
     FOdysseyAnimationEditorExtension* mExtension;
-
-    //Tabs
-    TSharedPtr<FOdysseyAnimationEditorTimelineTab> mTimelineTab;
-    TSharedPtr<FOdysseyAnimationEditorLightTableTab> mLightTableTab;
 };

@@ -15,7 +15,7 @@
 
 #include "OdysseyAnimation.generated.h"
 
-UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig)
+UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig, HideCategories=(Platforms))
 class ODYSSEYANIMATION_API UOdysseyAnimation
 	: public UBaseMediaSource
     , public FOdysseyAnimationImageRenderingAbility
@@ -106,14 +106,14 @@ public:
 	UPROPERTY(config, DuplicateTransient)
 	int CurrentFrame = 0;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, meta=(ClampMin=1, UIMin=1))
 	float FramesPerSecond = 24.0f;
 
 private:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, meta=(DisplayName="Width"))
 	uint32 mWidth = -1;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, meta=(DisplayName="Height"))
 	uint32 mHeight = -1;
 
 	UPROPERTY()

@@ -124,7 +124,7 @@ SOdysseyAnimationPlaybackControls::IsPlayingForward() const
 	if (!mExtension->Player())
 		return false;
 
-    return mExtension->Player()->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && !mExtension->Player()->IsBackward();
+    return mExtension->Player()->Status == EOdysseyAnimationPlayerStatus::Playing && !mExtension->Player()->IsBackward();
 }
 
 bool
@@ -133,7 +133,7 @@ SOdysseyAnimationPlaybackControls::IsPlayingBackward() const
 	if (!mExtension->Player())
 		return false;
 		
-	return mExtension->Player()->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && mExtension->Player()->IsBackward();
+	return mExtension->Player()->Status == EOdysseyAnimationPlayerStatus::Playing && mExtension->Player()->IsBackward();
 }
 
 
@@ -155,7 +155,7 @@ SOdysseyAnimationPlaybackControls::GetLoopingButtonVisibility() const
 	if (!mExtension->Player())
 		return EVisibility::Collapsed;
 
-	return mExtension->Player()->GetIsLooping() ? EVisibility::Visible : EVisibility::Collapsed;
+	return mExtension->Player()->IsLooping ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
@@ -164,7 +164,7 @@ SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 	if (!mExtension->Player())
 		return EVisibility::Collapsed;
 
-	return mExtension->Player()->GetIsLooping() ? EVisibility::Collapsed : EVisibility::Visible;
+	return mExtension->Player()->IsLooping ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 FReply
@@ -252,7 +252,7 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
 
 FReply
 SOdysseyAnimationPlaybackControls::OnLoopClicked()
-{
-    mExtension->Player()->SetIsLooping(!mExtension->Player()->GetIsLooping());
+{	
+    FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Player(), "IsLooping", !mExtension->Player()->IsLooping);
     return FReply::Handled();
 }

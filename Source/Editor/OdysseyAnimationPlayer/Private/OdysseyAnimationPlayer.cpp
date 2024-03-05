@@ -27,12 +27,6 @@ UOdysseyAnimationPlayer::OnTextureUpdated()
 }
 
 FSimpleMulticastDelegate&
-UOdysseyAnimationPlayer::OnFramesPerSecondChanged()
-{
-	return mOnFramesPerSecondChanged;
-}
-
-FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnIsLoopingChanged()
 {
 	return mOnIsLoopingChanged;
@@ -62,49 +56,8 @@ UOdysseyAnimationPlayer::OnStop()
 	return mOnStop;
 }
 
-
 void
-UOdysseyAnimationPlayer::SetAnimation(UOdysseyAnimation* iAnimation)
-{
-	if (!iAnimation)
-	{
-		Animation = nullptr;
-		Texture = nullptr;
-
-		UOdysseyAnimation::OnImageRenderingChangedDelegate().RemoveAll(this);
-
-		mOnAnimationChanged.Broadcast();
-		mOnTextureChanged.Broadcast();
-		return;
-	}
-
-	Animation = iAnimation;
-	Texture = UTexture2D::CreateTransient(Animation->Width(), Animation->Height(), PF_B8G8R8A8);
-	Texture->UpdateResource();
-	FramesPerSecond = Animation->GetFramesPerSecond();
-	mInvalidTileMap = FULISInvalidTileMap(64, Animation->Width(), Animation->Height());
-
-	UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
-
-	mOnAnimationChanged.Broadcast();
-	mOnTextureChanged.Broadcast();
-	mOnFramesPerSecondChanged.Broadcast();
-}
-
-UOdysseyAnimation*
-UOdysseyAnimationPlayer::GetAnimation() const
-{
-	return Animation;
-}
-
-UTexture2D*
-UOdysseyAnimationPlayer::GetTexture() const
-{
-	return Texture;
-}
-
-void
-UOdysseyAnimationPlayer::SetRange(const TOptional<TRange<FTimespan>>& iRange)
+UOdysseyAnimationPlayer::SetTimeRange(const TOptional<TRange<FTimespan>>& iRange)
 {
 	mRange = iRange;	
 }
@@ -165,36 +118,10 @@ UOdysseyAnimationPlayer::SeekToFrame(int iFrameIndex)
 	mOnCurrentTimeChanged.Broadcast();
 }
 
-void
-UOdysseyAnimationPlayer::SetFramesPerSecond(double iFramesPerSecond)
+UTexture2D*
+UOdysseyAnimationPlayer::GetTexture() const
 {
-	FramesPerSecond = iFramesPerSecond;
-	mOnFramesPerSecondChanged.Broadcast();
-}
-
-double
-UOdysseyAnimationPlayer::GetFramesPerSecond() const
-{
-	return FramesPerSecond;
-}
-
-void
-UOdysseyAnimationPlayer::SetIsLooping(bool iIsLooping)
-{
-	IsLooping = iIsLooping;
-	mOnIsLoopingChanged.Broadcast();
-}
-
-bool
-UOdysseyAnimationPlayer::GetIsLooping() const
-{
-	return IsLooping;
-}
-
-EOdysseyAnimationPlayerStatus
-UOdysseyAnimationPlayer::GetStatus() const
-{
-	return Status;
+	return Texture;
 }
 
 FTimespan
@@ -236,7 +163,7 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 		FTimespan newTime = mCurrentTime;
 		if ( mIsBackward )
 		{
-			newTime -= FTimespan::FromSeconds(iDeltaTime * FramesPerSecond / Animation->GetFramesPerSecond());
+			newTime -= FTimespan::FromSeconds(iDeltaTime * FrameRate);
 			if ( newTime < lowerLimit )
 			{
 				if ( IsLooping )
@@ -255,7 +182,7 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 		}
 		else
 		{
-			newTime += FTimespan::FromSeconds(iDeltaTime * FramesPerSecond / Animation->GetFramesPerSecond());
+			newTime += FTimespan::FromSeconds(iDeltaTime * FrameRate);
 			if ( newTime > upperLimit )
 			{
 				if ( IsLooping )
@@ -442,4 +369,81 @@ UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBl
 	FRenderCommandFence fence;
 	fence.BeginFence();
 	fence.Wait();
+}
+
+void
+UOdysseyAnimationPlayer::AnimationChanged()
+{
+	UOdysseyAnimation::OnImageRenderingChangedDelegate().RemoveAll(this);
+	if (!Animation)
+	{
+		Texture = nullptr;
+		mOnAnimationChanged.Broadcast();
+		mOnTextureChanged.Broadcast();
+		return;
+	}
+
+	Texture = UTexture2D::CreateTransient(Animation->Width(), Animation->Height(), PF_B8G8R8A8);
+	Texture->UpdateResource();
+	mInvalidTileMap = FULISInvalidTileMap(64, Animation->Width(), Animation->Height());
+
+	UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
+
+	mOnAnimationChanged.Broadcast();
+	mOnTextureChanged.Broadcast();
+}
+
+void
+UOdysseyAnimationPlayer::TextureChanged()
+{
+	mOnTextureChanged.Broadcast();
+}
+
+void
+UOdysseyAnimationPlayer::StatusChanged()
+{
+	mOnStatusChanged.Broadcast();
+}
+
+void
+UOdysseyAnimationPlayer::FrameRateChanged()
+{
+	mOnFrameRateChanged.Broadcast();
+}
+
+void
+UOdysseyAnimationPlayer::IsLoopingChanged()
+{
+	mOnIsLoopingChanged.Broadcast();
+}
+
+
+void
+UOdysseyAnimationPlayer::PropertyChanged(const FName& iPropertyName)
+{
+    if ( iPropertyName == "Animation" )
+		AnimationChanged();
+
+	if ( iPropertyName == "Texture" )
+		TextureChanged();
+
+	if ( iPropertyName == "Status" )
+		StatusChanged();
+
+	if ( iPropertyName == "FrameRate" )
+		FrameRateChanged();
+
+	if ( iPropertyName == "IsLooping" )
+		IsLoopingChanged();
+}
+
+void
+UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+        return;
+
+    PropertyChanged(PropertyChangedEvent.GetPropertyName());
 }

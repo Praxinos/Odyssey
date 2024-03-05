@@ -302,7 +302,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayStop()
         return;
 
     UOdysseyAnimationPlayer* player = extension->Player();
-    if (player->GetStatus() == EOdysseyAnimationPlayerStatus::Playing )
+    if (player->Status == EOdysseyAnimationPlayerStatus::Playing )
         player->Stop();
     else
         player->Play();
@@ -338,7 +338,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateLooping()
         return;
 
     UOdysseyAnimationPlayer* player = extension->Player();
-    player->SetIsLooping(true);
+    FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", true);
 }
 
 void
@@ -349,7 +349,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_InactivateLooping()
         return;
 
     UOdysseyAnimationPlayer* player = extension->Player();
-    player->SetIsLooping(false);
+    FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", false);
 }
 
 void
@@ -360,7 +360,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping()
         return;
 
     UOdysseyAnimationPlayer* player = extension->Player();
-    player->SetIsLooping(!player->GetIsLooping());
+    FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", !player->IsLooping);
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -6,6 +6,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "AnimationEditor/OdysseyAnimationEditorLightTableTab.h"
 #include "AnimationEditor/OdysseyAnimationEditorTimelineTab.h"
+#include "AnimationEditor/OdysseyAnimationEditorAnimationDetailsTab.h"
 #include "Framework/Docking/LayoutExtender.h"
 #include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
@@ -79,11 +80,13 @@ FOdysseyAnimationEditorGUI::CreateTabs()
 	//ADD NEW TABS
 	TSharedRef<FOdysseyAnimationEditorTimelineTab> layerStackTab = MakeShared<FOdysseyAnimationEditorTimelineTab>(mExtension);
 	TSharedRef<FOdysseyAnimationEditorLightTableTab> lightTableTab = MakeShared<FOdysseyAnimationEditorLightTableTab>(mExtension);
+    TSharedRef<FOdysseyAnimationEditorAnimationDetailsTab> animationDetailsTab = MakeShared<FOdysseyAnimationEditorAnimationDetailsTab>(mExtension);
 
 	layerStackTab->ShouldOpenByDefault(true);
 
 	mExtension->GetEditor()->AddTab(layerStackTab);
 	mExtension->GetEditor()->AddTab(lightTableTab);
+    mExtension->GetEditor()->AddTab(animationDetailsTab);
 }
 
 /* TSharedRef<FTabManager::FSplitter>
@@ -102,18 +105,6 @@ FOdysseyAnimationEditorGUI::CreateBottomSection()
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
-
-TSharedPtr<FOdysseyAnimationEditorTimelineTab>&
-FOdysseyAnimationEditorGUI::GetTimelineTab()
-{
-	return mTimelineTab;
-}
-
-TSharedPtr<FOdysseyAnimationEditorLightTableTab>&
-FOdysseyAnimationEditorGUI::GetLightTableTab()
-{
-	return mLightTableTab;
-}
 
 void
 FOdysseyAnimationEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
