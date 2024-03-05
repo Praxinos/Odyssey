@@ -31,7 +31,7 @@ public:
 
 public:
     // Widget Getters
-    virtual FOdysseyFlipbookWrapper* FlipbookWrapper() const;
+    virtual TSharedPtr<FOdysseyFlipbookWrapper> FlipbookWrapper() const;
 
 protected:
     // Event Listeners    

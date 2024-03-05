@@ -140,7 +140,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
             .OnScrubStopped(InArgs._OnScrubStopped)
             [
                 SAssignNew(mTimelineTrackWidget, SOdysseyFlipbookTimelineTrack)
-				.FlipbookWrapper(mFlipbookWrapper)
+				.FlipbookWrapper(mFlipbookWrapper.Pin())
 				.FrameSize(this, &SOdysseyFlipbookTimelineView::FrameSize)
                 .OnFlipbookChanged(mOnFlipbookChanged)
                 .OnKeyframeRemoved(InArgs._OnKeyframeRemoved)
@@ -236,7 +236,11 @@ SOdysseyFlipbookTimelineView::GetScrubPosition() const
 int
 SOdysseyFlipbookTimelineView::GetCurrentKeyframeIndex() const
 {
-    return mFlipbookWrapper->GetKeyframeIndexAtPosition(GetScrubPosition());
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return INDEX_NONE;
+
+    return wrapper->GetKeyframeIndexAtPosition(GetScrubPosition());
 }
 
 void
@@ -247,7 +251,11 @@ SOdysseyFlipbookTimelineView::Tick(const FGeometry& AllottedGeometry, const doub
     if (!mIsPlaying)
         return;
 
-    UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
+    UPaperFlipbook* flipbook = wrapper->GetFlipbook();
     if (!flipbook)
         return;
     
@@ -306,7 +314,11 @@ SOdysseyFlipbookTimelineView::OnScrubPositionChanged(float iOldPosition)
 {
     mOnScrubPositionChanged.ExecuteIfBound(iOldPosition);
 
-    int32 previousFrame = mFlipbookWrapper->GetKeyframeIndexAtPosition(iOldPosition);
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
+    int32 previousFrame = wrapper->GetKeyframeIndexAtPosition(iOldPosition);
     int32 nextFrame = GetCurrentKeyframeIndex();
 
     //if both frame are out of range we do nothing
@@ -433,7 +445,11 @@ SOdysseyFlipbookTimelineView::OnKeyframeAdded(FPaperFlipbookKeyFrame& iKeyFrame)
 void
 SOdysseyFlipbookTimelineView::OnFrameRateChanged(float iFrameRate)
 {
-	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
+	UPaperFlipbook* flipbook = wrapper->GetFlipbook();
 	if (!flipbook)
 		return;
 
@@ -554,9 +570,13 @@ SOdysseyFlipbookTimelineView::ZoomSliderValue() const
 bool
 SOdysseyFlipbookTimelineView::FixFrame(int32 iIndex)
 {
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return false;
+
     UTexture2D* createdTexture = NULL;
     UPaperSprite* createdSprite = NULL;
-    if (!mFlipbookWrapper->FixKeyFrame(iIndex, &createdTexture, &createdSprite))
+    if (!wrapper->FixKeyFrame(iIndex, &createdTexture, &createdSprite))
         return false;
     
     if (createdSprite)
@@ -576,9 +596,13 @@ SOdysseyFlipbookTimelineView::FixFrame(int32 iIndex)
 void
 SOdysseyFlipbookTimelineView::AddFrame(int32 iIndex)
 {
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
     UTexture2D* createdTexture = NULL;
     UPaperSprite* createdSprite = NULL;
-    if (!mFlipbookWrapper->CreateKeyFrame(iIndex, &createdTexture, &createdSprite))
+    if (!wrapper->CreateKeyFrame(iIndex, &createdTexture, &createdSprite))
         return;
 
 	mTimelineTrackWidget->InsertFrame(iIndex, createdTexture, 1);
@@ -587,13 +611,17 @@ SOdysseyFlipbookTimelineView::AddFrame(int32 iIndex)
     mOnTextureCreated.ExecuteIfBound(createdTexture);
 	mOnFlipbookChanged.ExecuteIfBound();
 
-	mTimelineWidget->ScrubPosition(mFlipbookWrapper->GetKeyframeStartPosition(iIndex) + 0.5f);
+	mTimelineWidget->ScrubPosition(wrapper->GetKeyframeStartPosition(iIndex) + 0.5f);
 }
 
 void
 SOdysseyFlipbookTimelineView::AddFrame()
 {
-	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
+	UPaperFlipbook* flipbook = wrapper->GetFlipbook();
 	if (!flipbook)
 		return;
 
@@ -603,7 +631,11 @@ SOdysseyFlipbookTimelineView::AddFrame()
 void
 SOdysseyFlipbookTimelineView::AddFrameAfter()
 {
-	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
+	UPaperFlipbook* flipbook = wrapper->GetFlipbook();
 	if (!flipbook)
 		return;
 
@@ -627,7 +659,11 @@ SOdysseyFlipbookTimelineView::AddFrameAfter()
 void
 SOdysseyFlipbookTimelineView::AddFrameBefore()
 {
-	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
+	UPaperFlipbook* flipbook = wrapper->GetFlipbook();
 	if (!flipbook)
 		return;
 
@@ -656,7 +692,11 @@ SOdysseyFlipbookTimelineView::ScrubToFirstFrame()
 void
 SOdysseyFlipbookTimelineView::ScrubToLastFrame()
 {
-	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
+	UPaperFlipbook* flipbook = wrapper->GetFlipbook();
 	if (!flipbook)
 		return;
 
@@ -687,11 +727,15 @@ SOdysseyFlipbookTimelineView::ScrubToPreviousFrame()
 void
 SOdysseyFlipbookTimelineView::ScrubToNextKeyFrame()
 {
-	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
+	UPaperFlipbook* flipbook = wrapper->GetFlipbook();
 	if (!flipbook)
 		return;
 
-    int32 index = mFlipbookWrapper->GetKeyframeIndexAtPosition(mTimelineWidget->ScrubPosition());
+    int32 index = wrapper->GetKeyframeIndexAtPosition(mTimelineWidget->ScrubPosition());
     if (index >= flipbook->GetNumKeyFrames() - 1)
         return;
 
@@ -699,29 +743,33 @@ SOdysseyFlipbookTimelineView::ScrubToNextKeyFrame()
     {
         if (mTimelineWidget->ScrubPosition() >= flipbook->GetNumFrames())
         {
-            float position = mFlipbookWrapper->GetKeyframeStartPosition(flipbook->GetNumKeyFrames() - 1);
+            float position = wrapper->GetKeyframeStartPosition(flipbook->GetNumKeyFrames() - 1);
             mTimelineWidget->ScrubPosition(position + 0.5f);
         }
         else
         {
-            float position = mFlipbookWrapper->GetKeyframeStartPosition(0);
+            float position = wrapper->GetKeyframeStartPosition(0);
             mTimelineWidget->ScrubPosition(position + 0.5f);
         }
         return;
     }
 
-    float position = mFlipbookWrapper->GetKeyframeStartPosition(index + 1);
+    float position = wrapper->GetKeyframeStartPosition(index + 1);
     mTimelineWidget->ScrubPosition(position + 0.5f);
 }
 
 void
 SOdysseyFlipbookTimelineView::ScrubToPreviousKeyFrame()
 {
-	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return;
+
+	UPaperFlipbook* flipbook = wrapper->GetFlipbook();
 	if (!flipbook)
 		return;
 
-    int32 index = mFlipbookWrapper->GetKeyframeIndexAtPosition(mTimelineWidget->ScrubPosition());
+    int32 index = wrapper->GetKeyframeIndexAtPosition(mTimelineWidget->ScrubPosition());
     if (index == 0)
         return;
         
@@ -729,18 +777,18 @@ SOdysseyFlipbookTimelineView::ScrubToPreviousKeyFrame()
     {
         if (mTimelineWidget->ScrubPosition() >= flipbook->GetNumFrames())
         {
-            float position = mFlipbookWrapper->GetKeyframeStartPosition(flipbook->GetNumKeyFrames() - 1);
+            float position = wrapper->GetKeyframeStartPosition(flipbook->GetNumKeyFrames() - 1);
             mTimelineWidget->ScrubPosition(position + 0.5f);
         }
         else
         {
-            float position = mFlipbookWrapper->GetKeyframeStartPosition(0);
+            float position = wrapper->GetKeyframeStartPosition(0);
             mTimelineWidget->ScrubPosition(position + 0.5f);
         }
         return;
     }
 
-    float position = mFlipbookWrapper->GetKeyframeStartPosition(index - 1);
+    float position = wrapper->GetKeyframeStartPosition(index - 1);
     mTimelineWidget->ScrubPosition(position + 0.5f);
 }
 
@@ -755,7 +803,11 @@ SOdysseyFlipbookTimelineView::ToggleLooping()
 EVisibility
 SOdysseyFlipbookTimelineView::FixCurrentFrameVisibility() const
 {
-	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return EVisibility::Collapsed;
+
+	UPaperFlipbook* flipbook = wrapper->GetFlipbook();
 	if (!flipbook)
 		return EVisibility::Collapsed;
 
@@ -763,7 +815,7 @@ SOdysseyFlipbookTimelineView::FixCurrentFrameVisibility() const
     if (index < 0 || index >= flipbook->GetNumKeyFrames())
         return EVisibility::Collapsed;
 
-    return mFlipbookWrapper->GetKeyframeTexture(index) ? EVisibility::Collapsed : EVisibility::Visible;
+    return wrapper->GetKeyframeTexture(index) ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 TArray<SNumericDropDown<float>::FNamedValue>
@@ -791,7 +843,11 @@ SOdysseyFlipbookTimelineView::FrameRateDropDownValues() const
 float
 SOdysseyFlipbookTimelineView::GetFrameRate() const
 {
-	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+	if (!wrapper)
+		return 0.f;
+
+	UPaperFlipbook* flipbook = wrapper->GetFlipbook();
 	if (!flipbook)
 		return 0.f;
 

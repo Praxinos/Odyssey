@@ -55,6 +55,7 @@ void
 FOdysseyFlipbookWrapper::SetFlipbook(UPaperFlipbook* iFlipbook)
 {
     mFlipbook = iFlipbook;
+    mOnFlipbookChanged.Broadcast();
 }
 
 bool
@@ -438,6 +439,12 @@ FOnSpriteTextureChanged&
 FOdysseyFlipbookWrapper::OnSpriteTextureChanged()
 {
     return mOnSpriteTextureChanged;
+}
+
+FSimpleMulticastDelegate&
+FOdysseyFlipbookWrapper::OnFlipbookChanged()
+{
+    return mOnFlipbookChanged;
 }
 
 void

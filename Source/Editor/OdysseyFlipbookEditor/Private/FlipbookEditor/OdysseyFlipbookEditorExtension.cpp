@@ -18,6 +18,7 @@ FOdysseyFlipbookEditorExtension::~FOdysseyFlipbookEditorExtension()
 
 FOdysseyFlipbookEditorExtension::FOdysseyFlipbookEditorExtension(FOdysseyPainterEditor* iEditor)
 	: FOdysseyPainterEditorExtension(iEditor)
+	, mFlipbookWrapper(MakeShared<FOdysseyFlipbookWrapper>())
 	, mPreviewSurface(nullptr)
 	, mGUI(nullptr)
 {
@@ -57,13 +58,13 @@ FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
 			//Remove all additional Edited Objects (Sprites and Textures)
 			for (int32 index = 0; index < flipbook->GetNumKeyFrames(); ++index)
 			{
-				UPaperSprite* sprite = mFlipbookWrapper.GetKeyframeSprite(index);
+				UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(index);
 				if (!sprite)
 					continue;
 
 				GetEditor()->RemoveEditedObject(sprite);
 
-				UTexture2D* texture = mFlipbookWrapper.GetKeyframeTexture(index);
+				UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(index);
 				if (!texture)
 					continue;
 					
@@ -72,24 +73,24 @@ FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
 		}
 
 		GetEditor()->SetSource(nullptr);
-		mFlipbookWrapper.SetFlipbook(nullptr);
-		mFlipbookWrapper.OnSpriteTextureChanged().RemoveAll(this);
+		mFlipbookWrapper->SetFlipbook(nullptr);
+		mFlipbookWrapper->OnSpriteTextureChanged().RemoveAll(this);
 		mGUI->OnFlipbookChanged();
 		return;
 	}
 	
-	mFlipbookWrapper.SetFlipbook(iFlipbook);
+	mFlipbookWrapper->SetFlipbook(iFlipbook);
 
 	//Find all additional Edited Objects (Sprites and Textures)
 	for (int32 index = 0; index < iFlipbook->GetNumKeyFrames(); ++index)
 	{
-		UPaperSprite* sprite = mFlipbookWrapper.GetKeyframeSprite(index);
+		UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(index);
         if (!sprite)
             continue;
 
 		GetEditor()->AddEditedObject(sprite);
 
-		UTexture2D* texture = mFlipbookWrapper.GetKeyframeTexture(index);
+		UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(index);
         if (!texture)
             continue;
             
@@ -97,14 +98,14 @@ FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
 	}
 
 	// Set Sprite Changed Callback
-	mFlipbookWrapper.OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditorExtension::OnSpriteTextureChanged);
+	mFlipbookWrapper->OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditorExtension::OnSpriteTextureChanged);
 
 	//TODO: Activate GUI
 
 	//Set Texture Source if needed
 	if (iFlipbook->GetNumKeyFrames() > 0)
 	{
-		UTexture2D* texture = mFlipbookWrapper.GetKeyframeTexture(0);
+		UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(0);
 		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
 		GetEditor()->SetSource(source);
 	}
@@ -115,13 +116,13 @@ FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
 UPaperFlipbook*
 FOdysseyFlipbookEditorExtension::GetFlipbook()
 {
-	return mFlipbookWrapper.GetFlipbook();
+	return mFlipbookWrapper->GetFlipbook();
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-FOdysseyFlipbookWrapper&
+TSharedPtr<FOdysseyFlipbookWrapper>
 FOdysseyFlipbookEditorExtension::FlipbookWrapper()
 {
 	return mFlipbookWrapper;
@@ -147,7 +148,7 @@ FOdysseyFlipbookEditorExtension::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 {
 	TSharedPtr<FOdysseyFlipbookEditorTimelineTab> timelineTab = GetEditor()->FindTab<FOdysseyFlipbookEditorTimelineTab>();
 	
-	UTexture2D* texture = mFlipbookWrapper.GetKeyframeTexture(iKeyframeIndex);
+	UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(iKeyframeIndex);
 	if (timelineTab->Timeline()->IsScrubbing())
 	{
 		mPreviewSurface.Texture(texture);
@@ -162,10 +163,10 @@ void
 FOdysseyFlipbookEditorExtension::OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture)
 {
     UTexture2D* texture = iSprite->GetSourceTexture();
-	UPaperFlipbook* flipbook = mFlipbookWrapper.GetFlipbook();
+	UPaperFlipbook* flipbook = mFlipbookWrapper->GetFlipbook();
 	for (int i = 0; i < flipbook->GetNumKeyFrames(); i++)
 	{
-		UPaperSprite* sprite = mFlipbookWrapper.GetKeyframeSprite(i);
+		UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(i);
 		if (sprite == iSprite)
 		{
 			if (iOldTexture)
@@ -179,7 +180,7 @@ FOdysseyFlipbookEditorExtension::OnSpriteTextureChanged(UPaperSprite* iSprite, U
 	TSharedPtr<FOdysseyFlipbookEditorTimelineTab> timelineTab = GetEditor()->FindTab<FOdysseyFlipbookEditorTimelineTab>();
 	int32 index = timelineTab->Timeline()->GetCurrentKeyframeIndex();
 
-	UPaperSprite* sprite = mFlipbookWrapper.GetKeyframeSprite(index);
+	UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(index);
 	if (sprite != iSprite)
 		return;
 

@@ -87,10 +87,10 @@ FOdysseyFlipbookEditorTimelineTab::Timeline()
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-FOdysseyFlipbookWrapper*
+TSharedPtr<FOdysseyFlipbookWrapper>
 FOdysseyFlipbookEditorTimelineTab::FlipbookWrapper() const
 {
-    return &mExtension->FlipbookWrapper();
+    return mExtension->FlipbookWrapper();
 }
 
 //--------------------------------------------------------------------------------------

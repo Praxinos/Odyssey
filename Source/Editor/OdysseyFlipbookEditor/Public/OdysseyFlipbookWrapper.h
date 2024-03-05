@@ -71,6 +71,7 @@ public:
     //FOnKeyFrameRemoved& OnKeyFrameRemoved();
     //FOnKeyFrameSpriteChanged& OnKeyFrameSpriteChanged();
     FOnSpriteTextureChanged& OnSpriteTextureChanged();
+    FSimpleMulticastDelegate& OnFlipbookChanged();
 
 public:
     UPaperFlipbook* GetFlipbook() const;
@@ -101,6 +102,7 @@ private:
     //FOnKeyFrameRemoved mOnKeyFrameRemoved;
     //FOnKeyFrameSpriteChanged mOnKeyFrameSpriteChanged;
     FOnSpriteTextureChanged mOnSpriteTextureChanged;
+    FSimpleMulticastDelegate mOnFlipbookChanged;
 
 	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
     FDelegateHandle mOnPropertyChangedDelegateHandle;

@@ -29,7 +29,7 @@ public:
     UPaperFlipbook* GetFlipbook();
 
 public:
-    FOdysseyFlipbookWrapper&    FlipbookWrapper();
+    TSharedPtr<FOdysseyFlipbookWrapper>    FlipbookWrapper();
     UTexture*			        PreviewTexture();
     void                        PreviewTexture(UTexture2D* iTexture);
 
@@ -38,7 +38,7 @@ protected:
     virtual void SetTextureAtKeyframeIndex(int32 iKeyframeIndex);
 
 private:
-    FOdysseyFlipbookWrapper mFlipbookWrapper;
+    TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
 	FOdysseySurfaceTexture2D mPreviewSurface;
 
 	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
