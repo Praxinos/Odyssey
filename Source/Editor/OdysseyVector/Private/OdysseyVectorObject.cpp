@@ -541,7 +541,8 @@ FOdysseyVectorObject::IsSelected()
 }
 
 void
-FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild )
+FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
+                                     , uint32 iChildInvalidationFlags )
 {
     // this is temporary and should be optimized somehow
     if( std::find( mInvalidatedChildrenList.begin(), mInvalidatedChildrenList.end(), iChild ) == mInvalidatedChildrenList.end() )
@@ -550,7 +551,15 @@ FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild )
         mInvalidatedChildrenList.push_back( iChild );
     }
 
-    Invalidate( INVALIDATE_CHILD );
+    Invalidate(   ( iChildInvalidationFlags & INVALIDATE_HIERARCHY )
+              | ( ( iChildInvalidationFlags & INVALIDATE_SHAPE     ) << INVALIDATE_CHILD_SHIFT )
+              | ( ( iChildInvalidationFlags & INVALIDATE_COLOR     ) << INVALIDATE_CHILD_SHIFT )
+              | ( ( iChildInvalidationFlags & INVALIDATE_TOPOLOGY  ) << INVALIDATE_CHILD_SHIFT )
+              | ( ( iChildInvalidationFlags & INVALIDATE_MATRIX    ) << INVALIDATE_CHILD_SHIFT )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_SHAPE    )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_COLOR    )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TOPOLOGY )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_MATRIX   ) );
 }
 
 void
@@ -564,7 +573,7 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
 {
     if ( mParent )
     {
-        mParent->InvalidateChild( this );
+        mParent->InvalidateChild( this, iInvalidationFlags );
     }
 
     mInvalidationFlags |= iInvalidationFlags;
@@ -755,7 +764,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
             }
         }
 
-        iChild->Invalidate();
+        iChild->Invalidate( INVALIDATE_HIERARCHY );
     }
 
     return ret;
@@ -771,7 +780,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         mChildrenList.remove( iChild );
         mInvalidatedChildrenList.remove( iChild );
 
-        Invalidate();
+        Invalidate( INVALIDATE_HIERARCHY );
 
         return HIERARCHY_CHANGE_SUCCESS; // removal succeeded
     }

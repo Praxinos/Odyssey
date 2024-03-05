@@ -163,6 +163,8 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 

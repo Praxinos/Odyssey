@@ -13,6 +13,7 @@
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorSegmentCubicGap.h"
+#include "OdysseyVectorPath.h"
 
 class FOdysseyVectorVertex;
 class FOdysseyVectorVertexIntersection;
@@ -156,8 +157,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
         void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
-        virtual uint32 AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter ) override;
-        virtual uint32 RemoveChild( FOdysseyVectorObject* iChild ) override;
         FOdysseyVectorCycle* PickCycle( double iWorldX, double iWorldY );
         FOdysseyVectorBucket* PickBucket( double iWorldX, double iWorldY );
         bool IsMonochrome();
@@ -184,6 +183,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oPathArray );
         void PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray );
         void SetRealtime( bool iRealtime );
+        void SetIntersectsCanevas( bool iIntersectCanevas );
+        bool IntersectsCanevas();
 
         bool IsRealtime();
         void SetWireframeColor( const FColor& iWireframeColor );
@@ -199,6 +200,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void SetMultithreaded( bool iMultithreaded );
         bool IsMultithreaded();
         std::vector<FOdysseyVectorVertexIntersection>& GetIntersectionVertexArray();
+
+        virtual void UpdateMatrix() override; // updates the canevas path
 
     protected:
         /**
@@ -278,10 +281,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                 , FOdysseyVectorSegmentCubic* iSegment );
         void CreateNearIntersection( FOdysseyVectorVertex *iVertex );
 
+        void MakeCanevasPath();
+        void UpdatePathList();
+
     protected:
         static const uint32 NOCYCLE  = 0;
         static const uint32 BLOCKED  = 1;
         static const uint32 HASCYCLE = 2;
+        // TODO: transform mPathList to mPathArray
         std::list<FOdysseyVectorPath*> mPathList;
         std::list<FOdysseyVectorBucket*> mSelectedBucketList;
         std::list<FOdysseyVectorBucket*> mBucketList;
@@ -306,6 +313,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool bRealtime; // relatime updates
         double mGapTolerance;
         bool bWireframe;
+        bool bIntersectsCanevas;
         FColor mWireframeColor;
-
+        // the frame canevas path intersects with the canvas
+        FOdysseyVectorPath mCanevasPath;
+        FOdysseyVectorVertex mCanevasVertex[4];
+        FOdysseyVectorSegmentCubic mCanevasSegment[4];
 };

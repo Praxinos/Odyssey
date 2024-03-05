@@ -11,6 +11,8 @@
 #include "EllipseShape/OdysseyEllipseShape.h"
 #include "BezierShape/OdysseyBezierShape.h"
 
+#include "UObject/OdysseyObjectEditorUtils.h"
+
 #include "OdysseyMediaRaster.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"

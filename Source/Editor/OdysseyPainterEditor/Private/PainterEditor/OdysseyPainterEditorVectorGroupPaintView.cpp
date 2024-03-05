@@ -21,14 +21,15 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
             // Category "PaintGroup"
-            Painted         = selectedPaintGroup->IsPainted();
-            Monochrome      = selectedPaintGroup->IsMonochrome();
-            MonochromeColor = selectedPaintGroup->GetMonochromeColor();
-            Realtime        = selectedPaintGroup->IsRealtime();
-            GapTolerance    = selectedPaintGroup->GetGapTolerance();
+            Painted           = selectedPaintGroup->IsPainted();
+            Monochrome        = selectedPaintGroup->IsMonochrome();
+            MonochromeColor   = selectedPaintGroup->GetMonochromeColor();
+            Realtime          = selectedPaintGroup->IsRealtime();
+            GapTolerance      = selectedPaintGroup->GetGapTolerance();
             //Wireframe       = selectedPaintGroup->IsWireframe();
-            WireframeColor  = selectedPaintGroup->GetWireframeColor();
-            Multithreaded   = selectedPaintGroup->IsMultithreaded();
+            WireframeColor    = selectedPaintGroup->GetWireframeColor();
+            Multithreaded     = selectedPaintGroup->IsMultithreaded();
+            IntersectsCanevas = selectedPaintGroup->IntersectsCanevas();
 
             break; // only one for now
         }
@@ -64,6 +65,9 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
 
             if( iPropertyName == "GapTolerance" )
                 selectedPaintGroup->SetGapTolerance( GapTolerance );
+
+            if( iPropertyName == "IntersectsCanevas" )
+                selectedPaintGroup->SetIntersectsCanevas( IntersectsCanevas );
 
             //if( iPropertyName == "Wireframe" )
             //    selectedPaintGroup->SetWireframe( Wireframe );

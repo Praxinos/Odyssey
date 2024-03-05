@@ -118,6 +118,19 @@ FOdysseyVectorExportV2::WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaint
     } );
 }
 
+void
+FOdysseyVectorExportV2::WriteGroupPaintIntersectsCanevas( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_INTERSECTSCANEVAS
+                            , Ar
+                            , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint32 intersectsCanevas = static_cast<uint32>(iPaintGroup.IntersectsCanevas());
+
+        Ar << intersectsCanevas;
+    } );
+}
+
 // Write chunks without encapsulation within the GroupPaint chunk header
 void
 FOdysseyVectorExportV2::WriteGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
@@ -126,6 +139,7 @@ FOdysseyVectorExportV2::WriteGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintG
     WriteGroupChunks( iPaintGroup, Ar );
     // own chunks
     WriteGroupPaintPainted( iPaintGroup, Ar );
+    WriteGroupPaintIntersectsCanevas( iPaintGroup, Ar );
     WriteGroupPaintMonochrome( iPaintGroup, Ar );
     WriteGroupPaintMonochromeColor( iPaintGroup, Ar );
     WriteGroupPaintWireframe( iPaintGroup, Ar );

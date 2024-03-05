@@ -13,12 +13,15 @@ class FOdysseyVectorObject;
 class FOdysseyVectorPath;
 
 typedef struct _FOdysseyVectorFraction {
+    // TODO : use FOdysseyVectorPolygon4 reduce memory footprint and then convert to
+    // FOdysseyVectorPolygon6 using data stored in lineVertex(2] when drawn ?
     FOdysseyVectorPolygon6 polygon; // hexagons to prevent thin gap with joints
     ::ULIS::FVec2D lineVertex[2];
     ::ULIS::FVec2D lineVertexInParent[2];
+    // TODO : compute on the fly to reduce memory footprint ?
     double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;
-    double fromT;
-    double toT;
+    double fromT; // TODO : convert to float to reduce memory footprint
+    double toT; // TODO : convert to float to reduce memory footprint
 } FOdysseyVectorFraction;
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink

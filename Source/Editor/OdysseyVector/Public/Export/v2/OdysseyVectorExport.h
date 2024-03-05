@@ -86,4 +86,5 @@ namespace FOdysseyVectorExportV2
     void WriteGroupPaintWireframeColor( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
     void WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
     void WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintIntersectsCanevas( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
 }
