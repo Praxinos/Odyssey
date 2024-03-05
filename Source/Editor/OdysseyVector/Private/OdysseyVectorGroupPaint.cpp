@@ -367,6 +367,7 @@ FOdysseyVectorGroupPaint::SetRealtime( bool iRealtime )
 }
 
 void
+<<<<<<< Updated upstream
 FOdysseyVectorGroupPaint::SetIntersectsCanevas( bool iIntersectsCanevas )
 {
     bIntersectsCanevas = iIntersectsCanevas;
@@ -381,6 +382,8 @@ FOdysseyVectorGroupPaint::IntersectsCanevas()
 }
 
 void
+=======
+>>>>>>> Stashed changes
 FOdysseyVectorGroupPaint::MakeCanevasPath()
 {
     FOdysseyVectorGroupPaint* vectorScene = GetScene();
@@ -419,12 +422,18 @@ FOdysseyVectorGroupPaint::MakeCanevasPath()
 void
 FOdysseyVectorGroupPaint::UpdateMatrix()
 {
+<<<<<<< Updated upstream
     FOdysseyVectorObject::UpdateMatrix();
 
     if( bIntersectsCanevas )
     {
         Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
     }
+=======
+    MakeCanevasPath();
+
+    FOdysseyVectorObject::UpdateMatrix();
+>>>>>>> Stashed changes
 }
 
 bool
