@@ -216,3 +216,13 @@ UOdysseyAnimationLayer::GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBeh
 
     return frame;
 }
+
+void
+UOdysseyAnimationLayer::PostLoad()
+{
+    Super::PostLoad();
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = GetCellsContainer();
+    if (cellsContainer)
+        cellsContainer->PostLoad();
+}

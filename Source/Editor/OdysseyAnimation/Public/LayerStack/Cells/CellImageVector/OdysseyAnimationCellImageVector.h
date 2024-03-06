@@ -29,7 +29,8 @@ public:
 
 public:
     virtual const FName& GetType() const override;
-    virtual void Serialize(FArchive& Ar);
+    virtual void Serialize(FArchive& Ar) override;
+    virtual void PostLoad() override;
         
     FOdysseyVectorEngine* GetEngine() const;
     TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;

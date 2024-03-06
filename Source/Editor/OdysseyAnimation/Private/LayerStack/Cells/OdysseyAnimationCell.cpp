@@ -58,6 +58,12 @@ FOdysseyAnimationCell::Serialize(FArchive& Ar)
     }
 }
 
+void
+FOdysseyAnimationCell::PostLoad()
+{
+
+}
+
 FOdysseyMediaProvider
 FOdysseyAnimationCell::GetMediaProvider(uint32 iFrameIndex) const
 {

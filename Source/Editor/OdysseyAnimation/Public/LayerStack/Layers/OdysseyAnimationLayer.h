@@ -58,6 +58,10 @@ public:
     virtual bool GetIsLightTableActivated() const;
 
 public:
+    //UObject overrides
+    virtual void PostLoad() override;
+
+public:
     UPROPERTY()
     EOdysseyAnimationLayerImagePostBehaviour PreBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 

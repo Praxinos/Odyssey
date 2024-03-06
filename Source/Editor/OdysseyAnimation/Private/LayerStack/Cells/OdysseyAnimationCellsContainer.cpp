@@ -226,3 +226,13 @@ FOdysseyAnimationCellsContainer::Serialize(FArchive& Ar)
 
     
 }
+
+void
+FOdysseyAnimationCellsContainer::PostLoad()
+{
+    for ( int i = 0; i < mCells.Num(); i++ )
+    {
+        TSharedPtr<FOdysseyAnimationCell> cell = mCells[i];
+        cell->PostLoad();
+    }
+}

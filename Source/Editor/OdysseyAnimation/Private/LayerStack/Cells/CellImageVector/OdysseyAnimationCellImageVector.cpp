@@ -159,10 +159,13 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
             //Old Style No Chunk Loading
             checkf(false, TEXT("Failed to read chunks"));
         }
-
-        mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                       | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
     }
+}
+
+void
+FOdysseyAnimationCellImageVector::PostLoad()
+{
+    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
 }
 
 void

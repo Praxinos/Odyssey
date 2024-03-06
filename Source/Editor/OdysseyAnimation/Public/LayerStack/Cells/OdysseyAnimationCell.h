@@ -29,6 +29,7 @@ public:
 
 public:
     virtual void PostDuplicate();
+    virtual void PostLoad();
     virtual void Serialize(FArchive& Ar);
 
 private:

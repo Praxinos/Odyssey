@@ -138,6 +138,13 @@ public:
      */
     void Serialize(FArchive& Ar);
 
+    /**
+     * @brief PostLoad
+     *
+     * @param Ar
+     */
+    void PostLoad();
+
 private:
     TArray<TSharedPtr<FOdysseyAnimationCell>> mCells;
     int mOffset;
