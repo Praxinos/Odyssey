@@ -35,6 +35,7 @@ FOdysseyAnimationCellImageVector::~FOdysseyAnimationCellImageVector()
         mVectorBlock->OnInvalidated().RemoveAll( this );
 
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().RemoveAll( this );
+    UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().RemoveAll( this );
     delete mEngine;
     mEngine = nullptr;
 }

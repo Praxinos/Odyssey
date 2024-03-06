@@ -282,6 +282,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void CreateNearIntersection( FOdysseyVectorVertex *iVertex );
 
         void MakeCanevasPath();
+
         void UpdatePathList();
 
     protected:
