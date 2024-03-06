@@ -106,14 +106,14 @@ public:
 	UPROPERTY(config, DuplicateTransient)
 	int CurrentFrame = 0;
 
-	UPROPERTY(EditAnywhere, meta=(ClampMin=1, UIMin=1))
+	UPROPERTY(EditAnywhere, meta=(ClampMin=1, UIMin=1), Category="Animation")
 	float FramesPerSecond = 24.0f;
 
 private:
-	UPROPERTY(VisibleAnywhere, meta=(DisplayName="Width"))
+	UPROPERTY(VisibleAnywhere, meta=(DisplayName="Width"), Category = "Animation")
 	uint32 mWidth = -1;
 
-	UPROPERTY(VisibleAnywhere, meta=(DisplayName="Height"))
+	UPROPERTY(VisibleAnywhere, meta=(DisplayName="Height"), Category = "Animation")
 	uint32 mHeight = -1;
 
 	UPROPERTY()
