@@ -117,7 +117,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 FReply 
 SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {	
-	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	if (!mIsScrubbing && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
 		mIsScrubbing = true;
 
