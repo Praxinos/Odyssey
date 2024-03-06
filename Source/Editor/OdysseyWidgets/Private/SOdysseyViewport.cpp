@@ -608,7 +608,7 @@ SOdysseyViewport::FitToViewport()
 
     FBox2D bbox(points);
 
-    float viewportRatio = mViewport->GetSizeXY().X / mViewport->GetSizeXY().Y;
+    float viewportRatio = (float)mViewport->GetSizeXY().X / (float)mViewport->GetSizeXY().Y;
     float textureRatio = bbox.GetSize().X / bbox.GetSize().Y;
 
     float zoom = GetZoom();
