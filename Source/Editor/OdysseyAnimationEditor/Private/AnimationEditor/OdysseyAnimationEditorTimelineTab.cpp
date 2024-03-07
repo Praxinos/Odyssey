@@ -564,7 +564,7 @@ FOdysseyAnimationEditorTimelineTab::ExportAsFlipbook()
     FSaveAssetDialogConfig saveAssetDialogConfig;
     saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "export-layers-as-textures.save-asset-dialog.title", "Export Layers As Texture" );
     saveAssetDialogConfig.DefaultPath = FPaths::GetPath(animation->GetPathName() );
-    saveAssetDialogConfig.DefaultAssetName = animation->GetName();
+    saveAssetDialogConfig.DefaultAssetName = animation->GetName() + TEXT("_Flipbook");
     saveAssetDialogConfig.AssetClassNames.Add( UPaperFlipbook::StaticClass()->GetClassPathName() );
     saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
 
