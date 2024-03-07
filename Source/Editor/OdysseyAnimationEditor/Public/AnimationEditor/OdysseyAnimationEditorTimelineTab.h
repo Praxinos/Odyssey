@@ -54,6 +54,7 @@ private:
     virtual void ImportTextureSequence();
     void ImportImageSequence();
     void ExportImageSequence();
+    void ExportAsFlipbook();
     virtual void CreateNewLayer();
     virtual void ChangeLayerOpacity(float iOpacity);
 

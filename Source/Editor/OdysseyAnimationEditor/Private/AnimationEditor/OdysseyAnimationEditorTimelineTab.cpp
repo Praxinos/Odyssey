@@ -16,6 +16,12 @@
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "DesktopPlatformModule.h"
 
+#include "PaperFlipbook.h"
+#include "OdysseyPixelFormat.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "UObject/SavePackage.h"
+#include "OdysseyFlipbookWrapper.h"
+
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 const FName&
@@ -92,6 +98,7 @@ FOdysseyAnimationEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(AnimationEditorCommands.ImportTextureSequence, ImportTextureSequence )
     MAP_ACTION(AnimationEditorCommands.ImportImageSequence, ImportImageSequence )
     MAP_ACTION(AnimationEditorCommands.ExportImageSequence, ExportImageSequence )
+    MAP_ACTION(AnimationEditorCommands.ExportAsFlipbook, ExportAsFlipbook )
     MAP_ACTION(AnimationEditorCommands.CreateNewAnimationLayerImageRaster, CreateNewLayer )
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
     MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
@@ -195,6 +202,11 @@ FOdysseyAnimationEditorTimelineTab::BuildExportMenu(FMenuBuilder& iMenuBuilder)
         FOdysseyAnimationEditorCommands::Get().ExportImageSequence,
         NAME_None,
         LOCTEXT("timeline-tab.file-menu.export-image-sequence.name", "Image Sequence...")
+    );
+    iMenuBuilder.AddMenuEntry(
+        FOdysseyAnimationEditorCommands::Get().ExportAsFlipbook,
+        NAME_None,
+        LOCTEXT("timeline-tab.file-menu.export-as-flipbook.name", "Flipbook...")
     );
 }
 
@@ -499,6 +511,173 @@ FOdysseyAnimationEditorTimelineTab::ExportImageSequence()
             ctx.Finish();
         }
     }
+}
+
+/*
+UPaperSprite*
+FOdysseyAnimationEditorTimelineTab::CreateSprite(FString iPath, FString iAssetName)
+{
+    
+}
+
+UTexture2D*
+FOdysseyAnimationEditorTimelineTab::CreateTextureFromBlock(TSharedPtr<::ULIS::FBlock> iBlock, ETextureSourceFormat iTextureSourceFormat, FString iPath, FString iAssetName)
+{
+    // Create texture asset
+    FString packagePath = iPath + iAssetName;
+    UPackage* package = CreatePackage(*packagePath);
+
+    FName textureName(*assetName);
+    UTexture2D* outTexture = NewObject<UTexture2D>(package, UTexture2D::StaticClass(), textureName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+    outTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+    outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+
+    //can be false on a FX Layer for example
+    InitTextureWithBlockData(iBlock.Get(), outTexture, iTextureSourceFormat);
+
+    outTexture->PostEditChange();
+    outTexture->UpdateResource();
+
+    FAssetRegistryModule::AssetCreated(outTexture);
+
+    FSavePackageArgs packageArgs;
+    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+    UPackage::SavePackage( package, outTexture, *iAssetName, packageArgs );
+        
+    package->MarkAsFullyLoaded();
+    outTexture->MarkPackageDirty();
+
+    return outTexture;
+} */
+
+void
+FOdysseyAnimationEditorTimelineTab::ExportAsFlipbook()
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
+        return;
+
+    TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(source);
+    UOdysseyAnimation* animation = animationSource->GetAnimation();
+
+    FSaveAssetDialogConfig saveAssetDialogConfig;
+    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "export-layers-as-textures.save-asset-dialog.title", "Export Layers As Texture" );
+    saveAssetDialogConfig.DefaultPath = FPaths::GetPath(animation->GetPathName() );
+    saveAssetDialogConfig.DefaultAssetName = animation->GetName();
+    saveAssetDialogConfig.AssetClassNames.Add( UPaperFlipbook::StaticClass()->GetClassPathName() );
+    saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
+
+    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
+    FString saveObjectPath = contentBrowserModule.Get().CreateModalSaveAssetDialog( saveAssetDialogConfig );
+
+    if ( saveObjectPath == "" )
+        return;
+
+    FInt32Range frameRange = animation->GetFrameRange();
+    int startFrame = frameRange.GetLowerBoundValue();
+    int endFrame = frameRange.GetUpperBoundValue();
+
+    FScopedSlowTask progressBar(endFrame - startFrame + 1, LOCTEXT("timeline-tab.export-as-flipbook.progress-bar.title", "Export As Flipbook"));
+    progressBar.MakeDialog();
+
+    // Create flipbook asset
+    FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
+    FString flipbookAssetName = FPaths::GetBaseFilename(saveObjectPath);
+    FString flipbookPackagePath = assetPath + flipbookAssetName;
+    UPackage* flipbookPackage = CreatePackage(*flipbookPackagePath);
+    UPaperFlipbook* flipbook = NewObject<UPaperFlipbook>(flipbookPackage, UPaperFlipbook::StaticClass(), FName(*flipbookAssetName), EObjectFlags::RF_Public | EObjectFlags::RF_Standalone | RF_Transactional);
+
+    ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(animation->Format());    
+
+    ::ULIS::eFormat blockFormat = ULISFormatForTextureSourceFormat(textureSourceFormat);
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), blockFormat);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(blockFormat);
+    TArray<FGuid> lastRenderingComposition;
+
+    FOdysseyFlipbookWrapper flipbookWrapper;
+    flipbookWrapper.SetFlipbook(flipbook);
+
+    int lastKeyFrameIndex = -1;
+    int lastKeyFrameFirstFrame = -1;
+    for (int i = startFrame; i <= endFrame; i++)
+    {
+        progressBar.EnterProgressFrame();
+
+        TArray<FGuid> renderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, i);
+        if (renderingComposition == lastRenderingComposition)
+            continue;
+
+        lastRenderingComposition = renderingComposition;
+
+        if (lastKeyFrameIndex >= 0)
+            flipbookWrapper.SetKeyFrameLength(lastKeyFrameIndex, i - lastKeyFrameFirstFrame);
+        
+        //Render frame block
+        TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
+        renderer->Init();
+        renderer->Copy(block, {});
+        ctx.Finish();
+
+        //FString assetName = FPaths::GetBaseFilename(saveObjectPath) + FString::Format(TEXT("_{0}"), { i });
+        //UTexture2D* texture = CreateTextureFromBlock(block, textureSourceFormat, assetPath, FString assetName);
+
+        int keyFrameIndex = flipbook->GetNumKeyFrames();
+
+        FString textureName = flipbookAssetName + TEXT("_Texture_") + FString::Format(TEXT("{0}"), { i });
+        FString spriteName = flipbookAssetName + TEXT("_Sprite_") + FString::Format(TEXT("{0}"), { i });
+
+        FOdysseyTextureConfiguration textureConfiguration;
+        textureConfiguration.Width = animation->Width();
+        textureConfiguration.Height = animation->Height();
+        textureConfiguration.Format = EOdysseyTextureSourceFormat::kCustom;
+        textureConfiguration.CustomFormat = textureSourceFormat;
+        textureConfiguration.Name = FName(*textureName);
+        
+        //Create the keyframe
+        flipbookWrapper.CreateEmptyKeyFrame(keyFrameIndex);
+        lastKeyFrameIndex = keyFrameIndex;
+        lastKeyFrameFirstFrame = i;
+
+        //Create the sprite and add it to the keyframe
+        UPaperSprite* sprite = flipbookWrapper.CreateSprite(spriteName);
+        if (!sprite)
+            continue;
+
+        //Create the texture and add it to the keyframe
+        UTexture2D* texture = flipbookWrapper.CreateTexture(textureConfiguration);
+        if (!texture)
+            continue;
+
+        flipbookWrapper.SetSpriteTexture(sprite, texture); //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
+        flipbookWrapper.SetKeyframeSprite(keyFrameIndex, sprite);
+
+        //can be false on a FX Layer for example
+        InitTextureWithBlockData(block.Get(), texture, textureSourceFormat);
+
+        texture->PostEditChange();
+        texture->UpdateResource();
+    }
+
+    if (lastKeyFrameIndex >= 0)
+        flipbookWrapper.SetKeyFrameLength(lastKeyFrameIndex, endFrame - lastKeyFrameFirstFrame + 1);
+
+    //Configure flipbook asset
+    UClass* flipbookClass = flipbook->StaticClass();
+    FObjectProperty* defaultMaterialProperty = FindFProperty<FObjectProperty>(flipbookClass, "DefaultMaterial");
+    defaultMaterialProperty->SetObjectPropertyValue(defaultMaterialProperty->ContainerPtrToValuePtr<UPaperFlipbook>(flipbook), LoadObject<UMaterialInterface>(nullptr, TEXT("/Iliad/Animation2D/DefaultFlipbookMaterialInstance.DefaultFlipbookMaterialInstance")));
+
+    FScopedFlipbookMutator mutator(flipbook);
+	mutator.FramesPerSecond = animation->FramesPerSecond;
+
+    FAssetRegistryModule::AssetCreated(flipbook);
+
+    FSavePackageArgs packageArgs;
+    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+    UPackage::SavePackage( flipbookPackage, flipbook, *flipbookAssetName, packageArgs );
+        
+    flipbookPackage->MarkAsFullyLoaded();
+    flipbook->MarkPackageDirty();
 }
 
 void

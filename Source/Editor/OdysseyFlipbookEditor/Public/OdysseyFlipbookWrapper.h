@@ -77,18 +77,18 @@ public:
     UPaperFlipbook* GetFlipbook() const;
     void SetFlipbook(UPaperFlipbook* iFlipbook);
 
-private:
+public:
     void CreateEmptyKeyFrame(int32 iIndex);
     UTexture2D* CreateTexture(FOdysseyTextureConfiguration iTextureConfiguration);
-    //void CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D* iDstTexture);
-
     UPaperSprite* CreateSprite(FString iName);
+    void SetSpriteTexture(UPaperSprite* iSprite, UTexture2D* iTexture);
+
+private:
     void OnGlobalObjectPropertyChanged(UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent);
     void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
     void OnPreSpriteTextureChanged(UPaperSprite* iSprite, const FEditPropertyChain& iEditPropertyChain);
     void OnSpriteTextureChanged(UPaperSprite* iSprite, FPropertyChangedEvent& iPropertyChangedEvent);
 
-    void SetSpriteTexture(UPaperSprite* iSprite, UTexture2D* iTexture);
 
 private:
 	UPaperFlipbook* mFlipbook;

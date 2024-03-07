@@ -74,7 +74,7 @@ FOdysseyFlipbookWrapper::CreateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPa
     
     FOdysseyTextureConfiguration textureConfiguration = mTextureConfiguration;
     FString textureName = textureConfiguration.Name.ToString() + TEXT("_Texture");
-    FString spriteName = textureConfiguration.Name.ToString() + TEXT("_Texture");
+    FString spriteName = textureConfiguration.Name.ToString() + TEXT("_Sprite");
     textureConfiguration.Name = FName(*textureName);
     
     //Create the keyframe
@@ -176,7 +176,7 @@ FOdysseyFlipbookWrapper::FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaper
 
     FOdysseyTextureConfiguration textureConfiguration = textureConfigurationWindow->GetConfiguration();
     FString textureName = textureConfiguration.Name.ToString() + TEXT("_Texture");
-    FString spriteName = textureConfiguration.Name.ToString() + TEXT("_Texture");
+    FString spriteName = textureConfiguration.Name.ToString() + TEXT("_Sprite");
     textureConfiguration.Name = FName(*textureName);
 
     UPaperSprite* sprite = GetKeyframeSprite(iIndex);
