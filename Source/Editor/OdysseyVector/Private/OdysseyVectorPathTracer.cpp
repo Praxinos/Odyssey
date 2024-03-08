@@ -96,6 +96,12 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
         MakeBezier( true );
         // newSegment will be nullptr if iEndVertex == mPreviousVertex
         newSegment = CommitSegment( iEndVertex ? iEndVertex : CommitVertex( false ) );
+
+        // relocate the last vertex at the last entry
+        if( ( iEndVertex == nullptr ) && mPointArray.size() )
+        {
+            newSegment->GetVertex(1)->Set( mPointArray.back().coords );
+        }
     }
 
     Reset();
