@@ -69,6 +69,7 @@ namespace UnrealBuildTool.Rules
 					"Paper2DEditor",
                 	"Slate",
 					"SlateCore",
+					"ToolWidgets",
 					"UnrealEd",
 				}
 				);

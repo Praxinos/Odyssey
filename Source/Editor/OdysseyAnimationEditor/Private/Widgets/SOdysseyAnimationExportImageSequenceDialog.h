@@ -1,0 +1,83 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include <ULIS>
+
+#include "SOdysseyAnimationExportImageSequenceDialog.generated.h"
+
+class UOdysseyAnimation;
+class FOdysseyAnimationImageRenderingAbility;
+
+UENUM()
+enum class EOdysseyAnimationExportImageSequenceFormat : uint8
+{
+	PNG,
+	BMP,
+	TGA,
+	Jpeg
+};
+
+UENUM()
+enum class EOdysseyAnimationExportImageSequenceSource : uint8
+{
+	Animation,
+	AllLayers,
+	CurrentLayer,
+	//SelectedLayers //TODO:
+};
+
+UENUM()
+enum class EOdysseyAnimationExportImageSequenceRange : uint8
+{
+	AllFrames,
+	AllCells,
+	Custom
+};
+
+class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationExportImageSequenceDialog : public SCompoundWidget
+{
+public:
+	/**
+	 * @brief Opens the Export Image Sequence Dialog for the given animation
+	 * And Exports the animation according to the selected options if user clicks OK
+	 * 
+	 * @param iAnimation 
+	 * @return true If user clicked on OK
+	 * @return false If user Cancelled
+	 */
+	static bool Open(UOdysseyAnimation* iAnimation);
+
+public:
+    SLATE_BEGIN_ARGS(SOdysseyAnimationExportImageSequenceDialog)
+	{}
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs, UOdysseyAnimation* iAnimation);
+
+private:
+	FString GetSaveFileDialogExtension();
+	::ULIS::eFileFormat GetFileFormat();
+
+	struct FSource
+	{
+		FOdysseyAnimationImageRenderingAbility* mImageRenderingAbility;
+		FString mFilename;
+		FInt32Range mRange;
+	};
+	TArray<FSource> GetSources();
+	FInt32Range GetSourceRange(const FSource& iSource);
+
+	void Export();
+	void ExportSource(const FSource& iSource, const FString& iFilename);
+
+private:
+    UOdysseyAnimation* mAnimation;
+	EOdysseyAnimationExportImageSequenceFormat mFormat;
+	EOdysseyAnimationExportImageSequenceSource mSource;
+	EOdysseyAnimationExportImageSequenceRange mRange;
+	FInt32Range mCustomRange;
+	bool mUniqueFramesOnly;
+};

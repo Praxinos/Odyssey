@@ -21,6 +21,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "UObject/SavePackage.h"
 #include "OdysseyFlipbookWrapper.h"
+#include "Widgets/SOdysseyAnimationExportImageSequenceDialog.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -405,6 +406,10 @@ FOdysseyAnimationEditorTimelineTab::ExportImageSequence()
     TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(source);
 
     UOdysseyAnimation* animation = animationSource->GetAnimation();
+
+    SOdysseyAnimationExportImageSequenceDialog::Open(animation);
+
+    /* 
     IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
     TArray< FString > filenames;
     bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
@@ -510,46 +515,8 @@ FOdysseyAnimationEditorTimelineTab::ExportImageSequence()
 
             ctx.Finish();
         }
-    }
+    } */
 }
-
-/*
-UPaperSprite*
-FOdysseyAnimationEditorTimelineTab::CreateSprite(FString iPath, FString iAssetName)
-{
-    
-}
-
-UTexture2D*
-FOdysseyAnimationEditorTimelineTab::CreateTextureFromBlock(TSharedPtr<::ULIS::FBlock> iBlock, ETextureSourceFormat iTextureSourceFormat, FString iPath, FString iAssetName)
-{
-    // Create texture asset
-    FString packagePath = iPath + iAssetName;
-    UPackage* package = CreatePackage(*packagePath);
-
-    FName textureName(*assetName);
-    UTexture2D* outTexture = NewObject<UTexture2D>(package, UTexture2D::StaticClass(), textureName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
-    outTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-
-    //can be false on a FX Layer for example
-    InitTextureWithBlockData(iBlock.Get(), outTexture, iTextureSourceFormat);
-
-    outTexture->PostEditChange();
-    outTexture->UpdateResource();
-
-    FAssetRegistryModule::AssetCreated(outTexture);
-
-    FSavePackageArgs packageArgs;
-    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-    UPackage::SavePackage( package, outTexture, *iAssetName, packageArgs );
-        
-    package->MarkAsFullyLoaded();
-    outTexture->MarkPackageDirty();
-
-    return outTexture;
-} */
 
 void
 FOdysseyAnimationEditorTimelineTab::ExportAsFlipbook()
