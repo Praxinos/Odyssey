@@ -133,6 +133,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                                                     , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::vector<FOdysseyVectorGroupPaint*> oPaintGroupArray;
 
     vectorEngine->Traverse
     ( iScene
@@ -141,36 +142,21 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
       , iScene
       , vectorEngine
       , &iErasureArea
-      , &oAddedObjectArray
-      , &oAddedVertexArray
-      , &oAddedSegmentArray
-      , &oRemovedObjectArray
-      , &oRemovedVertexArray
-      , &oRemovedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      , &oPaintGroupArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
+          // build the list of impacted paintgroups, no duplicates
           if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) ) 
               {
                   FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
-                  ::ULIS::FRectD paintGroupWorldBBox = paintGroup->GetBBox( true );
 
-                  if( FOdysseyVector::IntersectRegions<double>( paintGroupWorldBBox
-                                                              , iErasureArea
-                                                              , nullptr ) )
+                  if( std::find ( oPaintGroupArray.begin()
+                                , oPaintGroupArray.end()
+                                , paintGroup ) == oPaintGroupArray.end() )
                   {
-                      paintGroup->EraseSections( oAddedObjectArray
-                                               , oAddedVertexArray
-                                               , oAddedSegmentArray
-                                               , oRemovedObjectArray
-                                               , oRemovedVertexArray
-                                               , oRemovedSegmentArray
-                                               , SplitPath );
+                      oPaintGroupArray.push_back( paintGroup );
                   }
-
-                  // do not erase children. this is useless and would cause a crash because the paintgroup
-                  // is not updated yet.
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
               }
 
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
@@ -181,23 +167,13 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                   if( parent->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                   {
                       FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(parent);
-                      ::ULIS::FRectD paintGroupWorldBBox = paintGroup->GetBBox( true );
 
-                      if( FOdysseyVector::IntersectRegions<double>( paintGroupWorldBBox
-                                                                  , iErasureArea
-                                                                  , nullptr ) )
+                      if( std::find ( oPaintGroupArray.begin()
+                                    , oPaintGroupArray.end()
+                                    , paintGroup ) == oPaintGroupArray.end() )
                       {
-                          paintGroup->EraseSections( oAddedObjectArray
-                                                   , oAddedVertexArray
-                                                   , oAddedSegmentArray
-                                                   , oRemovedObjectArray
-                                                   , oRemovedVertexArray
-                                                   , oRemovedSegmentArray
-                                                   , SplitPath );
+                          oPaintGroupArray.push_back( paintGroup );
                       }
-                      // do not erase children. this is useless and would cause a crash because the paintgroup
-                      // is not updated yet.
-                      return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
                   }
               }
 
@@ -206,6 +182,25 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
 
           return 0;
       } );
+
+    // proceed
+    for( FOdysseyVectorGroupPaint* paintGroup : oPaintGroupArray )
+    {
+        ::ULIS::FRectD paintGroupWorldBBox = paintGroup->GetBBox( true );
+
+        if( FOdysseyVector::IntersectRegions<double>( paintGroupWorldBBox
+                                                    , iErasureArea
+                                                    , nullptr ) )
+        {
+            paintGroup->EraseSections( oAddedObjectArray
+                                     , oAddedVertexArray
+                                     , oAddedSegmentArray
+                                     , oRemovedObjectArray
+                                     , oRemovedVertexArray
+                                     , oRemovedSegmentArray
+                                     , SplitPath );
+        }
+    }
 
     for( int i = 0; i < oAddedObjectArray.size(); i++ )
     {
