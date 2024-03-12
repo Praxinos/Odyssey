@@ -271,8 +271,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
         redrawRegion = imageRegion; // needs full redraw
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    if( Stitch )
+    {
+        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+             | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    }
+
+    return 0;
 }
 
 uint64

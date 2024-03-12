@@ -163,7 +163,9 @@ MapPoints( FOdysseyVectorObject* iObject
 }
 
 void
-FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene, uint64 iHUDFlags )
+FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene
+                                    , bool iFocusedObjectsOnly
+                                    , uint64 iHUDFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
@@ -177,13 +179,20 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene, uint64 i
 
     vectorEngine->Traverse( iScene
                           , iHUDFlags
-                          , [ &iScene
-                          , &screenRect
-                          , &pointQuadTreeEntryArray ]( FOdysseyVectorObject* object, uint64 traverseFlags ) -> uint64
+                          , [ vectorEngine
+                          ,   iScene
+                          ,   iFocusedObjectsOnly
+                          ,   &screenRect
+                          ,   &pointQuadTreeEntryArray ]( FOdysseyVectorObject* object, uint64 traverseFlags ) -> uint64
                             {
-                                MapPoints( object, screenRect, pointQuadTreeEntryArray );
+                                if( ( iFocusedObjectsOnly == false ) || vectorEngine->ObjectHasFocus( iScene, object, traverseFlags ) )
+                                {
+                                    MapPoints( object, screenRect, pointQuadTreeEntryArray );
 
-                                return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                                    return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                                }
+
+                                return 0;
                             } );
 
     if( mPointQuadTree )

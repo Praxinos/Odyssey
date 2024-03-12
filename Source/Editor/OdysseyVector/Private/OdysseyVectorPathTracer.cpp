@@ -100,7 +100,12 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
         // relocate the last vertex at the last entry
         if( ( iEndVertex == nullptr ) && mPointArray.size() )
         {
-            newSegment->GetVertex(1)->Set( mPointArray.back().coords );
+            BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
+            ::ULIS::FVec2D lastPointCoords = mPointArray.back().coords;
+            BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( lastPointCoords.x
+                                                                       , lastPointCoords.y ) };
+
+            newSegment->GetVertex(1)->Set( localPoint.x, localPoint.y );
         }
     }
 

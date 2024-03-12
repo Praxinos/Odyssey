@@ -499,16 +499,22 @@ FOdysseyVectorObject::GetLastChild()
 }
 
 void
-FOdysseyVectorObject::DrawChildren( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
+FOdysseyVectorObject::DrawChildren( BLContext* iBLContext
+                                  , const ::ULIS::FRectD& iInvalidationArea
+                                  , double iCombinedOpacity
+                                  , uint64 iFlags )
 {
     for( FOdysseyVectorObject *child : mChildrenList )
     {
-        child->Draw( iBLContext, iCombinedOpacity, iFlags );
+        child->Draw( iBLContext, iInvalidationArea, iCombinedOpacity, iFlags );
     }
 }
 
 void
-FOdysseyVectorObject::Draw( BLContext* iBLContext, double iAncestorsOpacity, uint64 iFlags )
+FOdysseyVectorObject::Draw( BLContext* iBLContext
+                          , const ::ULIS::FRectD& iInvalidationArea
+                          , double iAncestorsOpacity
+                          , uint64 iFlags )
 {
     double combinedOpacity = iAncestorsOpacity *= mOpacity;
 
@@ -519,11 +525,11 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext, double iAncestorsOpacity, uin
     //Get sure everything is drawn before we draw in the BLend2D buffer.
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
-    DrawShape( iBLContext, combinedOpacity, iFlags );
+    DrawShape( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
     // get sure the parent has finished drawing before drawing its children
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
-    DrawChildren( iBLContext, combinedOpacity, iFlags );
+    DrawChildren( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
 
     iBLContext->restore();
 }

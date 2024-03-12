@@ -22,7 +22,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorGroupPaint* i
     mStitchableVertex[0] = nullptr;
     mStitchableVertex[1] = nullptr;
 
-    MakePointQuadTree( iScene, hudFlags );
+    MakePointQuadTree( iScene, true, hudFlags );
 
     UpdateSelectionBox( iScene, false, hudFlags );
 }

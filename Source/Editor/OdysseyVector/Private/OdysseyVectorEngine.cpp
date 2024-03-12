@@ -152,15 +152,7 @@ FOdysseyVectorEngine::SelectObject( FOdysseyVectorObject* iVecObj )
 void
 FOdysseyVectorEngine::SetInvalidatedRect( const ::ULIS::FRectD& iRect )
 {
-    ::ULIS::FRectI rect = ::ULIS::FRectI( iRect.x, iRect.y, iRect.w, iRect.h );
-
-    SetInvalidatedRect( rect );
-}
-
-void
-FOdysseyVectorEngine::SetInvalidatedRect( const ::ULIS::FRectI& iRect )
-{
-    if( mInvalidationFlags == 0 )
+    if( mInvalidatedRect.Area() == 0.0f )
     {
         mInvalidatedRect.x = iRect.x;
         mInvalidatedRect.y = iRect.y;
@@ -184,7 +176,7 @@ FOdysseyVectorEngine::SetInvalidatedRect( const ::ULIS::FRectI& iRect )
     }
 }
 
-::ULIS::FRectI&
+::ULIS::FRectD&
 FOdysseyVectorEngine::GetInvalidatedRect()
 {
     return mInvalidatedRect;
@@ -258,14 +250,23 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
     BLImage* image = iBLContext->targetImage();
-
-    // retrieves uffer specs and allows us to draw directly in the buffer
+    ::ULIS::FRectD screen;
+  
+    // retrieves buffer specs and allows us to draw directly in the buffer
     image->makeMutable( &mRenderData );
+
+    screen = ::ULIS::FRectD( 0, 0, mRenderData.size.w, mRenderData.size.h );
 
     // for drawing polygones (textured)
     if( mHorizontalLineBuffer.size() != mRenderData.size.h )
     {
         mHorizontalLineBuffer.resize( mRenderData.size.h );
+    }
+
+    // request refresh for the whole screen if the invalidation region is 0
+    if( mInvalidatedRect.Area() == 0.0f )
+    {
+        mInvalidatedRect = screen;
     }
 
     if( mInvalidationFlags )
@@ -287,7 +288,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
         iBLContext->fillAll();
 
-        mScene->Draw( iBLContext, 1.0f, iDrawingFlags );
+        mScene->Draw( iBLContext, mInvalidatedRect, 1.0f, iDrawingFlags );
 
         iBLContext->restore();
 
@@ -296,7 +297,10 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
     mInvalidationFlags = 0;
 
-    mInvalidatedRect = ::ULIS::FRectI( 0, 0, mRenderData.size.w, mRenderData.size.h );
+    // reset invalidation region
+    // ( refresh the whole screen at next iteration unless this is set
+    // to some value ).
+    mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 
     mRenderData.reset();
 }
@@ -336,10 +340,12 @@ FOdysseyVectorEngine::Stitch( FOdysseyVectorVertex* iVertexA
                                                                                             ,  knotVertex
                                                                                             ,  nextVertex
                                                                                             ,  true ) };
+            ::ULIS::FVec2D vertexAToHandle = vertexASegment->GetHandle( iVertexA  )->GetCoords() - iVertexA->GetCoords();
+            ::ULIS::FVec2D vertexBToHandle = vertexBSegment->GetHandle( iVertexB  )->GetCoords() - iVertexB->GetCoords();
 
             newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertex)->GetCoords() );
-            newCubicSegment[0]->GetHandle(1)->Set( vertexASegment->GetHandle(iVertexA  )->GetCoords() );
-            newCubicSegment[1]->GetHandle(0)->Set( vertexBSegment->GetHandle(iVertexB  )->GetCoords() );
+            newCubicSegment[0]->GetHandle(1)->Set( knotVertex->GetCoords() + vertexAToHandle );
+            newCubicSegment[1]->GetHandle(0)->Set( knotVertex->GetCoords() + vertexBToHandle );
             newCubicSegment[1]->GetHandle(1)->Set( vertexBSegment->GetHandle(nextVertex)->GetCoords() );
 
             path->RemoveSegment( vertexASegment );
@@ -454,6 +460,12 @@ void
 FOdysseyVectorEngine::Signal( uint64 iSignalFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Signal);
+
+    if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_CLEAR_ALL )
+    {
+        mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+    }
+
     // Force invalidation when we need redrawing
     // This should be removed once we have per-rectangle invalidation
     if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )

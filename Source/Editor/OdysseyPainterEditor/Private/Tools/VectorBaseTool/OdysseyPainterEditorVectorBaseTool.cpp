@@ -220,6 +220,20 @@ uint64
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FKey& iKey )
 {
+    if( iKey == EKeys::Add )
+    {
+        IncreaseContourWidth();
+
+        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    }
+
+    if( iKey == EKeys::Subtract )
+    {
+        DecreaseContourWidth();
+
+        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    }
+
     return 0;
 }
 
@@ -603,6 +617,11 @@ UOdysseyPainterEditorVectorBaseTool::BindShortcuts(FBaseToolkit* iToolkit)
     );
 
     toolkitCommands->MapAction(
+        FGenericCommands::Get().Cut,
+        FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Cut )
+    );
+
+    toolkitCommands->MapAction(
         FGenericCommands::Get().Copy,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Copy )
     );
@@ -682,6 +701,51 @@ UOdysseyPainterEditorVectorBaseTool::SelectAll()
             }
         }
     }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::IncreaseContourWidth()
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() > 0 )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+            FOdysseyPainterEditor::AlterContourWidth( vectorScene, 1.1f, false );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::DecreaseContourWidth()
+{
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() > 0 )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+            FOdysseyPainterEditor::AlterContourWidth( vectorScene, 0.9f, false );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::Cut()
+{
+    UOdysseyPainterEditorVectorBaseTool::Copy();
+    UOdysseyPainterEditorVectorBaseTool::Delete();
 }
 
 void

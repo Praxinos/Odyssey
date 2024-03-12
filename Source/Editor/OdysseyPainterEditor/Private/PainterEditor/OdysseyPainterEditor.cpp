@@ -1425,6 +1425,44 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyVectorBucket* iBucket )
     scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
 
+void
+FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
+                                        , double iValue
+                                        , bool   iAbsolute )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    //std::list<FOdysseyVectorGroupPaint*> paintgroupList;
+
+    vectorEngine->Traverse
+    ( iScene
+    , 0
+    , [ iScene
+      , vectorEngine
+      //, &paintgroupList
+      , iValue
+      , iAbsolute ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+              {
+                  FOdysseyVectorGroupPaint* paintgroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+ 
+                  //paintgroupList.push_back( paintgroup );
+
+                  paintgroup->AlterContourWidth( iValue, iAbsolute );
+              }
+              // do not recurse
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+          }
+
+          return 0;
+      } );
+
+    //for( )
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+}
 
 static void
 SetBucketPropagation( FOdysseyVectorBucket* iBucket, bool iPropagate )

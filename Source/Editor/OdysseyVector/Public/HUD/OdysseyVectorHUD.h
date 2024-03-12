@@ -184,7 +184,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                        , double iSelectionRadius
                        , std::vector<FOdysseyVectorPoint*>& oPickedPointArray );
 
-        void MakePointQuadTree( FOdysseyVectorGroupPaint *iScene,uint64 iHUDFlags );
+        void MakePointQuadTree( FOdysseyVectorGroupPaint *iScene
+                              , bool iFocusedObjectsOnly
+                              , uint64 iHUDFlags );
 
     protected:
         FPointQuadTree* mPointQuadTree;

@@ -1167,74 +1167,91 @@ FOdysseyVectorGroupPaint::RemoveAllBuckets()
 
 void
 FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
+                                   , const ::ULIS::FRectD& iInvalidationArea
                                    , double iCombinedOpacity
                                    , uint64 iFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetEngine();
-    BLImageData& imageData = vectorEngine->GetRenderData();
+    ::ULIS::FRectD worldBBox = GetBBox( true );
+    ::ULIS::FVec2D worldBBoxMin;
+    ::ULIS::FVec2D worldBBoxMax;
+    ::ULIS::FVec2D invalidationAreaMin;
+    ::ULIS::FVec2D invalidationAreaMax;
 
-    ::ULIS::FRectD screen;
+    FOdysseyVector::GetRectMinMax<double>( worldBBox, worldBBoxMin, worldBBoxMax );
 
-    screen.x = 0;
-    screen.y = 0;
-    screen.w = imageData.size.w;
-    screen.h = imageData.size.h;
+    FOdysseyVector::GetRectMinMax<double>( iInvalidationArea
+                                         , invalidationAreaMin
+                                         , invalidationAreaMax );
 
-    if( ( iFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) == 0 )
+    // do not draw if outside screen
+    if( ( ( worldBBoxMin.x ) < invalidationAreaMax.x )
+     && ( ( worldBBoxMax.x ) > invalidationAreaMin.x )
+     && ( ( worldBBoxMin.y ) < invalidationAreaMax.y )
+     && ( ( worldBBoxMax.y ) > invalidationAreaMin.y ) )
     {
-        for( FOdysseyVectorCycle *cycle : mCycleList )
+        if( ( iFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) == 0 )
         {
-            ::ULIS::FRectD cycleWorldBBox = cycle->GetBBox( true );
-
-            if( cycleWorldBBox.Area() > 1.0f )
+            for( FOdysseyVectorCycle *cycle : mCycleList )
             {
-                if( ( ( cycleWorldBBox.x                    ) < screen.w )
-                 && ( ( cycleWorldBBox.x + cycleWorldBBox.w ) > 0        )
-                 && ( ( cycleWorldBBox.y                    ) < screen.h )
-                 && ( ( cycleWorldBBox.y + cycleWorldBBox.h ) > 0        ) )
+                ::ULIS::FRectD cycleWorldBBox = cycle->GetBBox( true );
+                ::ULIS::FVec2D cycleWorldBBoxMin;
+                ::ULIS::FVec2D cycleWorldBBoxMax;
+
+                FOdysseyVector::GetRectMinMax<double>( cycleWorldBBox
+                                                     , cycleWorldBBoxMin
+                                                     , cycleWorldBBoxMax );
+
+                if( cycleWorldBBox.Area() > 1.0f )
                 {
-                    cycle->Draw( iBLContext
-                               , iCombinedOpacity
-                               , iFlags
-                               , bMonochrome
-                               , mMonochromeColor );
+                    if( ( ( cycleWorldBBoxMin.x ) < invalidationAreaMax.x )
+                     && ( ( cycleWorldBBoxMax.x ) > invalidationAreaMin.x )
+                     && ( ( cycleWorldBBoxMin.y ) < invalidationAreaMax.y )
+                     && ( ( cycleWorldBBoxMax.y ) > invalidationAreaMin.y ) )
+                    {
+                        cycle->Draw( iBLContext
+                                   , iCombinedOpacity
+                                   , iFlags
+                                   , bMonochrome
+                                   , mMonochromeColor );
+                    }
                 }
             }
         }
-    }
 
-    if( iFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME/* mWireframe*/ )
-    {
-        iBLContext->save();
-        iBLContext->resetMatrix();
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
-
-        for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
+        if( iFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME/* mWireframe*/ )
         {
-            mGapSegmentBuffer[i].DrawStructure( iBLContext, this, true );
+            iBLContext->save();
+            iBLContext->resetMatrix();
+            iBLContext->setStrokeWidth( 1.0f );
+            iBLContext->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
+
+            for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
+            {
+                mGapSegmentBuffer[i].DrawStructure( iBLContext, this, true );
+            }
+
+    /* Works too
+            for( int i = 0; i < mSectionBuffer.size(); i++ )
+            {
+                ::ULIS::FVec2D* sectionBezier = mSectionBuffer[i].GetBezier();
+                BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( sectionBezier[0].x, sectionBezier[0].y )
+                                        , mWorldMatrix.mapPoint( sectionBezier[1].x, sectionBezier[1].y )
+                                        , mWorldMatrix.mapPoint( sectionBezier[2].x, sectionBezier[2].y )
+                                        , mWorldMatrix.mapPoint( sectionBezier[3].x, sectionBezier[3].y ) };
+                BLPath path;
+
+                path.moveTo( worldPoint[0].x, worldPoint[0].y );
+                path.cubicTo( worldPoint[1].x, worldPoint[1].y
+                            , worldPoint[2].x, worldPoint[2].y
+                            , worldPoint[3].x, worldPoint[3].y );
+
+                blctx->strokePath( path );
+            }
+    */
+
+            iBLContext->restore();
         }
-
-/* Works too
-        for( int i = 0; i < mSectionBuffer.size(); i++ )
-        {
-            ::ULIS::FVec2D* sectionBezier = mSectionBuffer[i].GetBezier();
-            BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( sectionBezier[0].x, sectionBezier[0].y )
-                                    , mWorldMatrix.mapPoint( sectionBezier[1].x, sectionBezier[1].y )
-                                    , mWorldMatrix.mapPoint( sectionBezier[2].x, sectionBezier[2].y )
-                                    , mWorldMatrix.mapPoint( sectionBezier[3].x, sectionBezier[3].y ) };
-            BLPath path;
-
-            path.moveTo( worldPoint[0].x, worldPoint[0].y );
-            path.cubicTo( worldPoint[1].x, worldPoint[1].y
-                        , worldPoint[2].x, worldPoint[2].y
-                        , worldPoint[3].x, worldPoint[3].y );
-
-            blctx->strokePath( path );
-        }
-*/
-
-        iBLContext->restore();
     }
 }
 
@@ -2434,6 +2451,67 @@ FOdysseyVectorGroupPaint::CopyShape()
     CopyBuckets( groupPaintCopy, false );
 
     return groupPaintCopy;
+}
+
+void
+FOdysseyVectorGroupPaint::AlterContourWidth( double iValue, bool iAbsolute )
+{
+    std::vector<FOdysseyVectorVertex*> vertexArray;
+    uint32_t vertexCount = 0;
+    bool intersectsCanevas = IntersectsCanevas();
+
+    // rebuild without intersecting the canevas if necessary
+    if( intersectsCanevas == true )
+    {
+        SetIntersectsCanevas( false );
+
+        Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    }
+
+    // set indexes for later fill the array
+    for( FOdysseyVectorPath* path : mPathList )
+    {
+        for( FOdysseyVectorVertex* vertex : path->GetVertexList() )
+        {
+            vertex->SetID( vertexCount++ );
+        }
+    }
+
+    vertexArray.resize( vertexCount );
+
+    for( FOdysseyVectorSection& section : mSectionBuffer )
+    {
+        if( section.GetCycleCount() == 1 )
+        {
+            FOdysseyVectorVertex* sectionVertex0 = section.GetVertex(0);
+            FOdysseyVectorVertex* sectionVertex1 = section.GetVertex(1);
+
+            if( sectionVertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            {
+                vertexArray[sectionVertex0->GetID()] = sectionVertex0;
+            }
+
+            if( sectionVertex1->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            {
+                vertexArray[sectionVertex1->GetID()] = sectionVertex1;
+            }
+        }
+    }
+
+    for( FOdysseyVectorVertex* vertex : vertexArray )
+    {
+        if( vertex )
+        {
+            vertex->SetRadius( iAbsolute ? iValue : vertex->GetRadius() * iValue );
+        }
+    }
+
+    if( intersectsCanevas == true )
+    {
+        SetIntersectsCanevas( true );
+
+        Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    }
 }
 
 bool

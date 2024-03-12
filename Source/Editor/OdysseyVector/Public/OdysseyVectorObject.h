@@ -98,20 +98,24 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         /**
          * @brief Draw the object to the Blend2D context passed as parameter
          * @param iBLContext The Blend2D context to draw to
+         * @param iInvalidationArea
          * @param iAncestorsOpacity The cumulated opacity from parent objects
          * @param iDrawingFlags drawing flags
          */
         virtual void Draw( BLContext* iBLContext
+                         , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags );
 
         /**
          * @brief Draw children objects
          * @param iBLContext The Blend2D context to draw to
+         * @param iInvalidationArea
          * @param iCombinedOpacity The cumulated opacity from parent objects
          * @param iDrawingFlags drawing flags
          */
         virtual void DrawChildren( BLContext* iBLContext
+                                 , const ::ULIS::FRectD& iInvalidationArea
                                  , double iCombinedOpacity
                                  , uint64 iDrawingFlags );
 
@@ -500,7 +504,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
-        virtual void DrawShape ( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ){};
+        virtual void DrawShape ( BLContext* iBLContext
+                               , const ::ULIS::FRectD& iInvalidationArea
+                               , double iCombinedOpacity
+                               , uint64 iFlags ){};
         virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
         virtual void InvalidateChild( FOdysseyVectorObject* iChild
                                     , uint32 iChildInvalidationFlags );

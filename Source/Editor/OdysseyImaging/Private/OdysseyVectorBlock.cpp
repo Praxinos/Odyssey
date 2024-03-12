@@ -75,14 +75,21 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
     ::ULIS::FRectI invalidatedRect = mEngine->GetInvalidatedRect();
     ::ULIS::FRectI screen = ::ULIS::FRectI( 0, 0, mWidth, mHeight );
-    ::ULIS::FRectI santitizedRect;
+    ::ULIS::FRectI sanitizedRect;
 
-    FOdysseyVector::IntersectRegions( invalidatedRect
-                                    , screen
-                                    , &santitizedRect );
+    if( invalidatedRect.Area() == 0 )
+    {
+        sanitizedRect = screen;
+    }
+    else
+    {
+        FOdysseyVector::IntersectRegions( invalidatedRect
+                                        , screen
+                                        , &sanitizedRect );
+    }
 
 
-    if( santitizedRect.Area() )
+    if( sanitizedRect.Area() )
     {
         //Render in a BLImage (also resets the internal invalidation rectangle)
         mEngine->Render(mBlockData->mBLContext.Get(), iDrawingFlags);
@@ -96,11 +103,11 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 
             //Unpremultiply the render block
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-            ctx.Unpremultiply(renderBlock, santitizedRect );
+            ctx.Unpremultiply(renderBlock, sanitizedRect );
             ctx.Finish();
 
             //Convert the right ULIS block in the expected ULIS Format
-            ctx.ConvertFormat(renderBlock, ioBlock, santitizedRect, ::ULIS::FVec2I( santitizedRect.x, santitizedRect.y ) );
+            ctx.ConvertFormat(renderBlock, ioBlock, sanitizedRect, ::ULIS::FVec2I( sanitizedRect.x, sanitizedRect.y ) );
             ctx.Finish();
         }
     }

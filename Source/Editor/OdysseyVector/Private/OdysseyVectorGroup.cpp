@@ -23,7 +23,10 @@ FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorGroup::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
+FOdysseyVectorGroup::DrawShape( BLContext* iBLContext
+                              , const ::ULIS::FRectD& iInvalidationArea
+                              , double iCombinedOpacity
+                              , uint64 iFlags )
 {
 
 }

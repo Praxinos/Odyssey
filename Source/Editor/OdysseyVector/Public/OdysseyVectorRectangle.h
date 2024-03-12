@@ -47,7 +47,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPrimitive
         double GetHeight();
 
     private:
-        virtual void DrawShape( BLContext* iBLContext, double iHierarchyOpacity, uint64 iFlags ) override;
+        virtual void DrawShape( BLContext* iBLContext
+                              , const ::ULIS::FRectD& iInvalidationArea
+                              , double iHierarchyOpacity
+                              , uint64 iFlags ) override;
         virtual FOdysseyVectorObject* CopyShape() override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 

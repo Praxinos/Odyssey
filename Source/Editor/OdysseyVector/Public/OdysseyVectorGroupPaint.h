@@ -108,7 +108,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @param iRoi region of interest.
          * @param iFlags drawing flags.
          */
-        virtual void DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ) override;
+        virtual void DrawShape( BLContext* iBLContext
+                              , const ::ULIS::FRectD& iInvalidationArea
+                              , double iCombinedOpacity
+                              , uint64 iFlags ) override;
 
         /**
          * @brief Pick the shape.
@@ -203,6 +206,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         virtual void UpdateMatrix() override; // updates the canevas path
 
+        void AlterContourWidth( double iValue, bool iAbsolute );
+
     protected:
         /**
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).
@@ -284,6 +289,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void MakeCanevasPath();
 
         void UpdatePathList();
+
 
     protected:
         static const uint32 NOCYCLE  = 0;

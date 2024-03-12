@@ -67,7 +67,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
          * @brief Draw this ellipse.
          * @param iFlags drawing flags from the engine.
          */
-        virtual void DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ) override;
+        virtual void DrawShape( BLContext* iBLContext
+                              , const ::ULIS::FRectD& iInvalidationArea
+                              , double iCombinedOpacity
+                              , uint64 iFlags ) override;
 
        /**
          * @brief Update this ellipse (update cached data).

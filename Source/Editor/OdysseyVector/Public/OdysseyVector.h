@@ -85,6 +85,22 @@ namespace FOdysseyVector
         return resultRegion.Area() ? true : false;
     }
 
+    template< typename T >
+    void GetRectMinMax( const ::ULIS::TRectangle<T>& iRect
+                      , ::ULIS::TVector2<T>& oMin
+                      , ::ULIS::TVector2<T>& oMax )
+    {
+        T x1 = iRect.x;
+        T x2 = iRect.x + iRect.w;
+        T y1 = iRect.y;
+        T y2 = iRect.y + iRect.h;
+
+        oMin.x = ::ULIS::FMath::Min( x1, x2 );
+        oMax.x = ::ULIS::FMath::Max( x1, x2 );
+        oMin.y = ::ULIS::FMath::Min( y1, y2 );
+        oMax.y = ::ULIS::FMath::Max( y1, y2 );
+    }
+
     //bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
 }
 
