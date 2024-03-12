@@ -46,6 +46,6 @@ class UExportPDFSettings
     GENERATED_BODY()
 
 public:
-    UPROPERTY( config, EditAnywhere, Category=ExportPDF, meta=(ShowOnlyInnerProperties) )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ExportPDF, meta=(ShowOnlyInnerProperties) )
     FExportPDFOptions Options;
 };

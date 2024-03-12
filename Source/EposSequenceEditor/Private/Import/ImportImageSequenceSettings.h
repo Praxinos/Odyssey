@@ -53,7 +53,7 @@ class UImportImageSequenceSettings
     GENERATED_BODY()
 
 public:
-    UPROPERTY( config, EditAnywhere, Category=ImportImageSequence )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ImportImageSequence )
     FImportImageSequenceOptions Options;
 };
 

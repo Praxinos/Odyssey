@@ -101,7 +101,7 @@ class UExportImageSequenceSettings
     GENERATED_BODY()
 
 public:
-    UPROPERTY( config, EditAnywhere, Category=ExportImageSequence )
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     FExportImageSequenceOptions Options;
 };
 
