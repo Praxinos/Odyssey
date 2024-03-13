@@ -209,25 +209,36 @@ SOdysseyAnimationCellImageStagger::GetBehaviourMenuContent()
 void
 SOdysseyAnimationCellImageStagger::MapActions(TSharedPtr<FUICommandList> iCommandList)
 {
-    iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourLoop,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop)
-    );
-
-    iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourPingPong,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::PingPong),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::PingPong)
-    );
 }
 
 void
 SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 {  
     iMenuBuilder.BeginSection("Behaviour", LOCTEXT("cell-image-stagger.behaviour-menu.behaviour-section.name", "Behaviour"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourLoop, NAME_None, LOCTEXT("cell-image-stagger.behaviour-menu.loop", "Loop"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().SetStaggerCellBehaviourPingPong, NAME_None, LOCTEXT("cell-image-stagger.behaviour-menu.pingpong", "PingPong"));
+        iMenuBuilder.AddMenuEntry(
+            LOCTEXT("cell-image-stagger.behaviour-menu.loop", "Loop"),
+            TAttribute<FText>(),
+            FSlateIcon("OdysseyStyle", "Animation.CellImageStagger.Behaviour.Loop"),
+            FUIAction(
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop),
+                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop),
+                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop)
+            ),
+            NAME_None,
+            EUserInterfaceActionType::RadioButton
+        );
+        iMenuBuilder.AddMenuEntry(
+            LOCTEXT("cell-image-stagger.behaviour-menu.pingpong", "PingPong"),
+            TAttribute<FText>(),
+            FSlateIcon("OdysseyStyle", "Animation.CellImageStagger.Behaviour.PingPong"),
+            FUIAction(
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::PingPong),
+                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::PingPong),
+                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::PingPong)
+            ),
+            NAME_None,
+            EUserInterfaceActionType::RadioButton
+        );
     iMenuBuilder.EndSection();
 
     //TODO: Reach
@@ -248,6 +259,12 @@ SOdysseyAnimationCellImageStagger::CanSetBehaviour(FOdysseyAnimationCellImageSta
 {
     //TODO: check if layer is locked
     return true;
+}
+
+bool
+SOdysseyAnimationCellImageStagger::IsBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour) const
+{
+    return mCell->GetBehaviour() == iBehaviour;
 }
 
 int

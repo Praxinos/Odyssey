@@ -42,6 +42,7 @@ private:
 
     void SetBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour);
     bool CanSetBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour) const;
+    bool IsBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour) const;
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;

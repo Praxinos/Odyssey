@@ -63,20 +63,7 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ChangeLayerOpacity90, LayersShortcuts, "Change current Layer Opacity to 90%", "Change current Layer Opacity to 90%",                                                                EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ChangeLayerOpacity100, LayersShortcuts, "Change current Layer Opacity to 100%", "Change current Layer Opacity to 100%",                                                             EUserInterfaceActionType::Button, FInputChord());
 
-    UI_BUNDLE_COMMAND( SetPreBehaviourNone, LayersShortcuts, "Set Layer's Pre Behaviour to None", "Set Layer's Pre Behaviour to None", EUserInterfaceActionType::RadioButton, FInputChord());
-    UI_BUNDLE_COMMAND( SetPreBehaviourHold, LayersShortcuts, "Set Layer's Pre Behaviour to Hold", "Set Layer's Pre Behaviour to Hold", EUserInterfaceActionType::RadioButton, FInputChord());
-    UI_BUNDLE_COMMAND( SetPreBehaviourLoop, LayersShortcuts, "Set Layer's Pre Behaviour to Loop", "Set Layer's Pre Behaviour to Loop", EUserInterfaceActionType::RadioButton, FInputChord());
-    UI_BUNDLE_COMMAND( SetPreBehaviourPingPong, LayersShortcuts, "Set Layer's Pre Behaviour to PingPong", "Set Layer's Pre Behaviour to PingPong", EUserInterfaceActionType::RadioButton, FInputChord());
-    UI_BUNDLE_COMMAND( SetPostBehaviourNone, LayersShortcuts, "Set Layer's Post Behaviour to None", "Set Layer's Post Behaviour to None", EUserInterfaceActionType::RadioButton, FInputChord());
-    UI_BUNDLE_COMMAND( SetPostBehaviourHold, LayersShortcuts, "Set Layer's Post Behaviour to Hold", "Set Layer's Post Behaviour to Hold", EUserInterfaceActionType::RadioButton, FInputChord());
-    UI_BUNDLE_COMMAND( SetPostBehaviourLoop, LayersShortcuts, "Set Layer's Post Behaviour to Loop", "Set Layer's Post Behaviour to Loop", EUserInterfaceActionType::RadioButton, FInputChord());
-    UI_BUNDLE_COMMAND( SetPostBehaviourPingPong, LayersShortcuts, "Set Layer's Post Behaviour to PingPong", "Set Layer's Post Behaviour to PingPong", EUserInterfaceActionType::RadioButton, FInputChord());
-
     UI_BUNDLE_COMMAND( ConvertToStaggerCell, CellsShortcuts, "Convert To Stagger Cell", "Converts selected cells to Stagger Cells", EUserInterfaceActionType::Button, FInputChord());
-
-    UI_BUNDLE_COMMAND( SetStaggerCellBehaviourHold, CellsShortcuts, "Set Stagger Cell Behaviour to Hold", "Set Stagger Cell Behaviour to Hold", EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( SetStaggerCellBehaviourLoop, CellsShortcuts, "Set Stagger Cell Behaviour to Loop", "Set Stagger Cell Behaviour to Loop", EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( SetStaggerCellBehaviourPingPong, CellsShortcuts, "Set Stagger Cell Behaviour to PingPong", "Set Stagger Cell Behaviour to PingPong", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( ActivateTimelineSelectionTool, TimelineShortcuts, "Activate Timeline Selection Tool", "Activates the timeline Selection Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::C));
     UI_BUNDLE_COMMAND( ActivateTimelineMoveTool, TimelineShortcuts, "Activate Timeline Move Tool", "Activates the timeline Move Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::A));

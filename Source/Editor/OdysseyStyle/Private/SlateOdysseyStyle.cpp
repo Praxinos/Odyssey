@@ -772,9 +772,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     //Icons are used automatically
     //Just use the prefix "OdysseyAnimationEditorCommands.[CommandName]"
     {
-        Set("OdysseyAnimationEditorCommands.SetStaggerCellBehaviourHold", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourHold", mIcon16x16));
-        Set("OdysseyAnimationEditorCommands.SetStaggerCellBehaviourLoop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourLoop", mIcon16x16));
-        Set("OdysseyAnimationEditorCommands.SetStaggerCellBehaviourPingPong", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourPingPong", mIcon16x16));
+        
     }
     
 
