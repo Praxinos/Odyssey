@@ -51,7 +51,8 @@ FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
 
     // Update the bounding box
     if( ( mInvalidationFlags & INVALIDATE_CHILD_SHAPE )
-     || ( mInvalidationFlags & INVALIDATE_SHAPE ) )
+     || ( mInvalidationFlags & INVALIDATE_SHAPE       )
+     || ( mInvalidationFlags & INVALIDATE_HIERARCHY   ) )
     {
         for( FOdysseyVectorObject *child : mChildrenList )
         {
