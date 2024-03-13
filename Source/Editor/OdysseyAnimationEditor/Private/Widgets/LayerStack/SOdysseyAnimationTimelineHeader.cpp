@@ -123,7 +123,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
 
 		const float minScrub = 0.0f;
 		float frame = (MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mExtension->Timeline()->GetFrameWidth() + mExtension->Timeline()->GetOffset());
-		FTimespan time = FTimespan::FromSeconds(frame / mExtension->Animation()->GetFramesPerSecond());
+		FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mExtension->Animation()->GetFramesPerSecond());
 		mExtension->Player()->Stop();
 		mExtension->Player()->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
 		mExtension->Player()->SeekToTime(time);
@@ -142,7 +142,7 @@ SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const 
 	{
 		const float minScrub = 0.0f;
 		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mExtension->Timeline()->GetFrameWidth() + mExtension->Timeline()->GetOffset();
-		FTimespan time = FTimespan::FromSeconds(frame / mExtension->Animation()->GetFramesPerSecond());
+		FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mExtension->Animation()->GetFramesPerSecond());
 		mExtension->Player()->SeekToTime(time);
 		return FReply::Handled();
 	}
@@ -157,7 +157,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, co
 	{
 		const float minScrub = 0.0f;
 		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mExtension->Timeline()->GetFrameWidth() + mExtension->Timeline()->GetOffset();
-		FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", (int)frame);
+		FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", FMath::Max(0, (int)frame));
 		mExtension->Player()->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
 		mIsScrubbing = false;
 		return FReply::Handled().ReleaseMouseCapture();

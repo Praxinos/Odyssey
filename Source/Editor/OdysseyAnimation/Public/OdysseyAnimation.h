@@ -103,7 +103,7 @@ private:
 public:
 	//CurrentFrame is specific to the user, not to the animation itself
     //So we save it in user's config, instead of the animation
-	UPROPERTY(config, DuplicateTransient)
+	UPROPERTY(config, DuplicateTransient, meta=(ClampMin=0, UIMin=0))
 	int CurrentFrame = 0;
 
 	UPROPERTY(EditAnywhere, meta=(ClampMin=1, UIMin=1), Category="Animation")

@@ -262,6 +262,7 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 void
 UOdysseyAnimation::CurrentFrameChanged()
 {
+	CurrentFrame = FMath::Max(0, CurrentFrame);
 	OnCurrentFrameChanged().Broadcast(this);
 }
 

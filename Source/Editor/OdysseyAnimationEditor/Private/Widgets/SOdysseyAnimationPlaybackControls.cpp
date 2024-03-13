@@ -194,14 +194,20 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
 			return selectedCells.Contains(iPair.Key);
 		}
 	);
-
-	TArray<FInt32Range> ranges;
-	cellFrameRanges.GenerateValueArray(ranges);
-	FInt32Range range = FInt32Range::Hull(ranges);
-
-	mExtension->Player()->SetFrameRange(range); 
+	
+	if (cellFrameRanges.IsEmpty())
+	{
+		mExtension->Player()->SetFrameRange(TOptional<FInt32Range>());
+	}
+	else
+	{
+		TArray<FInt32Range> ranges;
+		cellFrameRanges.GenerateValueArray(ranges);
+		FInt32Range range = FInt32Range::Hull(ranges);
+		mExtension->Player()->SetFrameRange(range);
+	}
 	mExtension->Player()->Play(false);
-    return FReply::Handled();
+	return FReply::Handled();
 }
 
 FReply
@@ -232,11 +238,17 @@ SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 		}
 	);
 
-	TArray<FInt32Range> ranges;
-	cellFrameRanges.GenerateValueArray(ranges);
-	FInt32Range range = FInt32Range::Hull(ranges);
-
-	mExtension->Player()->SetFrameRange(range); 
+	if (cellFrameRanges.IsEmpty())
+	{
+		mExtension->Player()->SetFrameRange(TOptional<FInt32Range>());
+	}
+	else
+	{
+		TArray<FInt32Range> ranges;
+		cellFrameRanges.GenerateValueArray(ranges);
+		FInt32Range range = FInt32Range::Hull(ranges);
+		mExtension->Player()->SetFrameRange(range);
+	}
 	mExtension->Player()->Play(true);
     return FReply::Handled();
 }
