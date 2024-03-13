@@ -310,6 +310,21 @@ FOdysseyVectorBlock::SetState(eBlockState iState)
 void
 FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
 {
+    ::ULIS::FRectI invalidatedRect = mEngine->GetInvalidatedRect();
+    ::ULIS::FRectI screen = ::ULIS::FRectI( 0, 0, mWidth, mHeight );
+    ::ULIS::FRectI sanitizedRect;
+
+    if( invalidatedRect.Area() == 0 )
+    {
+        sanitizedRect = screen;
+    }
+    else
+    {
+        FOdysseyVector::IntersectRegions( invalidatedRect
+                                        , screen
+                                        , &sanitizedRect );
+    }
+
     if (!mNeedsRender)
     {
         //Remove block from cache and invalidate cache
@@ -320,5 +335,5 @@ FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
 
     mEngine->Invalidate();
     //SetState(kNeedsRender);
-    mOnInvalidated.Broadcast(iIsInteractive);
+    mOnInvalidated.Broadcast( { sanitizedRect }, iIsInteractive );
 }

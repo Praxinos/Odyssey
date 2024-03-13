@@ -4,6 +4,8 @@
 
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditToolHUD.h"
+#include "OdysseyPainterEditor.h"
+#include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoVertexRadius.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
@@ -673,11 +675,56 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
+void
+UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* iScene
+                                                    , double iX
+                                                    , double iY )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::vector<FOdysseyVectorObject*> pickedObjectArray;
+    ::ULIS::FRectD roi;
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.select-object","Vector Path Edit Tool"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+    }
+    GEditor->EndTransaction();
+
+          mPathEditHUD->ClearMask();
+    roi = mPathEditHUD->GenerateMask( iX, iY, PickingRadius );
+    // TODO: pass the mask image as arg to Pick function
+    vectorEngine->SetBLMask( mPathEditHUD->GetMask() );
+
+    // deselect all if control key is not pressed
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+    {
+        vectorEngine->ClearObjectSelection();
+    }
+
+    // dragging occured
+    vectorEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
+
+    // when dragging occured, we select all objects lying in the selection area.
+    for ( int i = 0; i < pickedObjectArray.size(); i++ )
+    {
+        vectorEngine->SelectObject( pickedObjectArray[i] );
+    }
+
+    vectorEngine->SetBLMask( nullptr );
+}
+
 uint64
 UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
+    uint64 ret = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -685,9 +732,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
 
         if( ( mPickedVertexArray.size() == 0 ) && ( mPickedHandleArray.size() == 0 ) )
         {
-            // use the pick tool if the Down and Up events were at the same position (no dragging )
-            GetEditor()->GetVectorSelectionTool()->OnMouseDown( iPointInTexture, iKey );
-            GetEditor()->GetVectorSelectionTool()->OnMouseUp( iPointInTexture, iKey );
+            PickObjects( iScene, iPointInTexture.x, iPointInTexture.y );
+
+            ret |= FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED;
         }
 
         iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
@@ -695,8 +742,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
         vectorEngine->ResetHUD();
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
+    return ret;
 }
 
 ePathPickingMode

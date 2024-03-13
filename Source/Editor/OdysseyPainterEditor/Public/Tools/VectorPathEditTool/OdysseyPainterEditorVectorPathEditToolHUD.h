@@ -7,11 +7,6 @@
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
-    private:
-        double mX;
-        double mY;
-        UOdysseyPainterEditorVectorPathEditTool* mPathEditTool;
-
     public:
         virtual ~FOdysseyPainterEditorVectorPathEditToolHUD(  );
         FOdysseyPainterEditorVectorPathEditToolHUD( UOdysseyPainterEditorVectorPathEditTool* iPathEditTool );
@@ -20,6 +15,19 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Load( FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Unload( FOdysseyVectorGroupPaint* iScene ) override;
+        void ClearMask();
+        ::ULIS::FRectD GenerateMask( double iX
+                                   , double iY
+                                   , double iRadius );
+        BLImage* GetMask();
 
         bool SetCursorPosition( double iX, double iY );
+
+    private:
+        double mX;
+        double mY;
+        UOdysseyPainterEditorVectorPathEditTool* mPathEditTool;
+        BLContext mBLSelectionContext;
+        BLImage mBLSelectionMask;
+
 };

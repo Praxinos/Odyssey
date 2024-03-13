@@ -88,7 +88,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         virtual float GetImageRenderingOpacity() const override;
 
     private:
-        void OnVectorBlockInvalidated(bool iIsInteractive);
+        void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
     private:
         //Import/Export

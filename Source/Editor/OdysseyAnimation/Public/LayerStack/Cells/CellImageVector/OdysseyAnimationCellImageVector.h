@@ -58,7 +58,7 @@ public:
     virtual UOdysseyAnimationLayerImageVector* GetLayer() const override;
 
 private:
-    void OnVectorBlockInvalidated(bool iIsInteractive);
+    void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
 private:
     //Import/Export

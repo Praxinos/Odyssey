@@ -249,7 +249,7 @@ FOdysseyAnimationCellImageVector::CreateCellFromFrame(uint32 iFrameIndex) const
 }
 
 void
-FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated(bool iIsInteractive)
+FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-    ImageRenderingChanged(iIsInteractive);
+    ImageRenderingChanged( iRects, iIsInteractive);
 }

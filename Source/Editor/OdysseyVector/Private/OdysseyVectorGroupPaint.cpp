@@ -1185,10 +1185,11 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
                                          , invalidationAreaMax );
 
     // do not draw if outside screen
-    if( ( ( worldBBoxMin.x ) < invalidationAreaMax.x )
-     && ( ( worldBBoxMax.x ) > invalidationAreaMin.x )
-     && ( ( worldBBoxMin.y ) < invalidationAreaMax.y )
-     && ( ( worldBBoxMax.y ) > invalidationAreaMin.y ) )
+    if( ( bIntersectsCanevas == true )  
+     || ( ( ( worldBBoxMin.x ) < invalidationAreaMax.x )
+       && ( ( worldBBoxMax.x ) > invalidationAreaMin.x )
+       && ( ( worldBBoxMin.y ) < invalidationAreaMax.y )
+       && ( ( worldBBoxMax.y ) > invalidationAreaMin.y ) ) )
     {
         if( ( iFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) == 0 )
         {
