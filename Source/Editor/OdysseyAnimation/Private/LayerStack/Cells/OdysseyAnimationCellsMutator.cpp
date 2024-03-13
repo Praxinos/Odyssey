@@ -172,6 +172,65 @@ FOdysseyAnimationCellsMutator::Remove(int iIndex, int iNumCells)
 }
 
 void
+FOdysseyAnimationCellsMutator::Remove(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells, bool iPreventEmptyLayer)
+{
+    struct FCellPosition
+    {
+        int mIndex;
+        TSharedPtr<FOdysseyAnimationCell> mCell;
+    };
+
+    TArray<FCellPosition> cellPositions;
+    for (TSharedPtr<FOdysseyAnimationCell> cell : iCells)
+    {
+        int index = mContainer->mCells.Find(cell);
+        if (index == INDEX_NONE)
+            continue;
+
+        cellPositions.Add({index, cell});
+    }
+
+    cellPositions.Sort(
+        [this](const FCellPosition& iCellA, const FCellPosition& iCellB)
+        {
+            return iCellA.mIndex > iCellB.mIndex; //In Reverse order
+        }
+    );
+
+    if (cellPositions.IsEmpty())
+        return;
+
+    if (iPreventEmptyLayer && cellPositions.Num() == mContainer->mCells.Num())
+        cellPositions.RemoveAt(cellPositions.Num() - 1); //reverse order : we actually remove the first cell from cellPositions here
+
+    int lastCellIndex = -1;
+    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
+    for (const FCellPosition& cellPosition : cellPositions)
+    {
+        if (cellPosition.mIndex == lastCellIndex - 1) //remember, we sorted the array in reverse order, so we use -1
+        {
+            lastCellIndex = cellPosition.mIndex;
+            cells.Add(cellPosition.mCell);
+            continue;
+        }
+
+        if (!cells.IsEmpty())
+        {
+            TSharedPtr<FOdysseyRemoveCellsMutation> mutation = MakeShared<FOdysseyRemoveCellsMutation>(mContainer, lastCellIndex, cells);
+            AddAndApplyMutation(mutation);
+        }
+
+        lastCellIndex = cellPosition.mIndex;
+        cells.Empty();
+        cells.Add(cellPosition.mCell);
+    }
+
+    //manage last cells
+    TSharedPtr<FOdysseyRemoveCellsMutation> mutation = MakeShared<FOdysseyRemoveCellsMutation>(mContainer, lastCellIndex, cells);
+    AddAndApplyMutation(mutation);
+}
+
+void
 FOdysseyAnimationCellsMutator::RemoveFrame(int iFrameIndex)
 {
     int cellIndex = mContainer->GetCellIndexAtFrame(iFrameIndex);

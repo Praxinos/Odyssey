@@ -56,7 +56,7 @@ SOdysseyAnimationTimelineControl::OnMouseWheel(const FGeometry& MyGeometry, cons
 FReply 
 SOdysseyAnimationTimelineControl::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 	{
 		if (MouseEvent.IsControlDown())
 		{

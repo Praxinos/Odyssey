@@ -8,7 +8,7 @@ class SOdysseyAnimationLayerStackTreeView;
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellsShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellsShortcuts(TSharedPtr<SOdysseyAnimationLayerStackTreeView> iTreeView);
+    FOdysseyAnimationTimelineCellsShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension);
 
 public:
     //Shortcuts
@@ -21,15 +21,16 @@ public:
     void Action_Paste();
     void Action_SelectAll();
     void Action_Delete();
-    void Action_StaggerCell();
+    void Action_ConvertToStaggerCell();
 
     bool CanAction_Copy();
     bool CanAction_Cut();
     bool CanAction_Paste();
     bool CanAction_SelectAll();
     bool CanAction_Delete();
-    bool CanAction_StaggerCell();
+    bool CanAction_ConvertToStaggerCell();
 
 private:
-    TWeakPtr<SOdysseyAnimationLayerStackTreeView> mTreeView;
+    UOdysseyLayerStack* mLayerStack;
+    FOdysseyAnimationEditorExtension* mAnimationExtension;
 };

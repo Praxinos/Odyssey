@@ -72,7 +72,7 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( SetPostBehaviourLoop, LayersShortcuts, "Set Layer's Post Behaviour to Loop", "Set Layer's Post Behaviour to Loop", EUserInterfaceActionType::RadioButton, FInputChord());
     UI_BUNDLE_COMMAND( SetPostBehaviourPingPong, LayersShortcuts, "Set Layer's Post Behaviour to PingPong", "Set Layer's Post Behaviour to PingPong", EUserInterfaceActionType::RadioButton, FInputChord());
 
-    UI_BUNDLE_COMMAND( StaggerCell, CellsShortcuts, "Stagger Cell", "Creates a Stagger Cell", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ConvertToStaggerCell, CellsShortcuts, "Convert To Stagger Cell", "Converts selected cells to Stagger Cells", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( SetStaggerCellBehaviourHold, CellsShortcuts, "Set Stagger Cell Behaviour to Hold", "Set Stagger Cell Behaviour to Hold", EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( SetStaggerCellBehaviourLoop, CellsShortcuts, "Set Stagger Cell Behaviour to Loop", "Set Stagger Cell Behaviour to Loop", EUserInterfaceActionType::Button, FInputChord());

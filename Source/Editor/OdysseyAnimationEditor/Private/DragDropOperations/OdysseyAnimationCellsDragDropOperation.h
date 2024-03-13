@@ -8,10 +8,10 @@
 class FOdysseyAnimationCellsDragDropOperation : public FDragDropOperation
 {
 public:
-    static TSharedRef<FOdysseyAnimationCellsDragDropOperation> Create(UOdysseyAnimationLayer* iLayer, const FInt32Range& iSelectedFrames);
+    static TSharedRef<FOdysseyAnimationCellsDragDropOperation> Create(UOdysseyAnimationLayer* iLayer, const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells);
 
 public:
-    FOdysseyAnimationCellsDragDropOperation(UOdysseyAnimationLayer* iLayer, const FInt32Range& iSelectedFrames);
+    FOdysseyAnimationCellsDragDropOperation(UOdysseyAnimationLayer* iLayer, const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells);
 
 public:
 	DRAG_DROP_OPERATOR_TYPE(FOdysseyAnimationCellsDragDropOperation, FDragDropOperation)

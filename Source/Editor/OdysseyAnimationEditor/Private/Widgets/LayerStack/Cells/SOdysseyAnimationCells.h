@@ -94,6 +94,8 @@ private:
     EVisibility GetCellBreakIndicatorVisibility(TSharedPtr<FOdysseyAnimationCell> iCell) const;
     float GetCellBreakIndicatorOffset(TSharedPtr<FOdysseyAnimationCell> iCell) const;
 
+    //FReply OnCellSelectionDragged();
+
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     class UOdysseyAnimationLayer* mAnimationLayer;

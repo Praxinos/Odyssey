@@ -7,10 +7,9 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(TSharedPtr<SOdysseyAnimationLayerStackTreeView> iTreeView)
+FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension)
     : mCommandList(MakeShared<FUICommandList>())
-    , mTreeView(iTreeView)
-    , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iTreeView))
+    , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iLayerStack, iAnimationExtension))
 {
     MapActionsToCommandList();
 }

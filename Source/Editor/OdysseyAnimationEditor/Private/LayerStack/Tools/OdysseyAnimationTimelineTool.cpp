@@ -31,3 +31,15 @@ FOdysseyAnimationTimelineTool::OnDragDetected(const FMouseEventParams& iParams)
 {
     return FReply::Unhandled();
 }
+
+FReply
+FOdysseyAnimationTimelineTool::OnKeyDown(const FKeyEvent& iKeyEvent)
+{
+    return FReply::Unhandled();
+}
+
+FReply
+FOdysseyAnimationTimelineTool::OnKeyUp(const FKeyEvent& iKeyEvent)
+{
+    return FReply::Unhandled();
+}

@@ -11,7 +11,7 @@ class FOdysseyAnimationCellClipboardData
 public:
     virtual ~FOdysseyAnimationCellClipboardData() {};
     FOdysseyAnimationCellClipboardData();
-    FOdysseyAnimationCellClipboardData(UOdysseyAnimationLayer* iLayer, const FInt32Range& iSelectedFrames);
+    FOdysseyAnimationCellClipboardData(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells);
 
 public:
     static const FGuid& StaticId();
@@ -21,12 +21,9 @@ public:
     void Paste(UOdysseyAnimationLayer* iLayer, int iFrame) const;
     void Move(UOdysseyAnimationLayer* iLayer, int iFrame) const;
     int GetCellCount() const;
-    UOdysseyAnimationLayer* GetLayer() const;
-    const FInt32Range& GetSelectedFrames() const;
 
 private:
-    void Copy();
-    void DeleteSelectedFrames() const; 
+    void Copy(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells);
 
 private:
     UOdysseyAnimationLayer* mLayer;
@@ -35,7 +32,5 @@ private:
         TSharedPtr<FOdysseyAnimationCell> mCell;
         int mLength;
     };
-
     TArray<FCellCopy> mCellCopies;
-    FInt32Range mSelectedFrames;
 };

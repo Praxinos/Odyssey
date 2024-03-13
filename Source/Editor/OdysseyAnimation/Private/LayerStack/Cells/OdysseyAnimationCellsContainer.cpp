@@ -125,6 +125,20 @@ FOdysseyAnimationCellsContainer::GetCellFrameRange(int iIndex) const
     return FInt32Range::Inclusive(startFrame, startFrame + mCells[iIndex]->GetLength() - 1);
 }
 
+TMap<TSharedPtr<FOdysseyAnimationCell>, FInt32Range>
+FOdysseyAnimationCellsContainer::GetCellsFrameRanges() const
+{
+    TMap<TSharedPtr<FOdysseyAnimationCell>, FInt32Range> ranges;
+    uint32 startFrame = mOffset;
+    for (TSharedPtr<FOdysseyAnimationCell> cell : mCells)
+    {
+        FInt32Range frameRange = FInt32Range::Inclusive(startFrame, startFrame + cell->GetLength() - 1);
+        ranges.Add(cell, frameRange);
+        startFrame += cell->GetLength();
+    }
+    return ranges;
+}
+
 bool
 FOdysseyAnimationCellsContainer::HasCellAtFrame(int iFrame) const
 {

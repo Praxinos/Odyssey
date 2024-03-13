@@ -2,8 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCells.h"
+#include "Widgets/LayerStack/Cells/SOdysseyAnimationCell.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineFrameSelector.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineCellSelection.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "Widgets/Layout/SMissingWidget.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
@@ -314,7 +315,15 @@ SOdysseyAnimationCells::CreateCellWidget(int iCellIndex)
         .BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
         .Visibility(this, &SOdysseyAnimationCells::GetCellVisibility, cell)
         [
-            cellWidget.ToSharedRef()
+            /* SNew(SOdysseyAnimationTimelineCellSelection, mExtension)
+            .Cell(cell)
+            .OnDragged(this, &SOdysseyAnimationCells::OnCellSelectionDragged)
+            [ */
+                SNew(SOdysseyAnimationCell, mExtension, mAnimationLayer, cell)
+                [
+                    cellWidget.ToSharedRef()
+                ]
+            //]
         ]
     ];
 }
@@ -803,5 +812,12 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, 
     mCellsMutator->Commit();
     mCellsMutator = nullptr;
 }
+
+/* FReply
+SOdysseyAnimationCells::OnCellSelectionDragged()
+{
+    TSharedRef<FOdysseyAnimationCellsDragDropOperation> operation = FOdysseyAnimationCellsDragDropOperation::Create(mAnimationLayer, mExtension->Timeline()->GetSelectedCells());
+    return FReply::Handled().BeginDragDrop(operation);
+} */
 
 #undef LOCTEXT_NAMESPACE

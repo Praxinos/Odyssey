@@ -11,12 +11,10 @@ FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData()
 
 }
 
-FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData(UOdysseyAnimationLayer* iLayer, const FInt32Range& iSelectedFrames)
+FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells)
     : IOdysseyClipboardData(StaticId())
-    , mLayer(iLayer)
-    , mSelectedFrames(iSelectedFrames)
 {
-    Copy();
+    Copy(iCells);
 }
 
 const FGuid&
@@ -27,39 +25,13 @@ FOdysseyAnimationCellClipboardData::StaticId()
 }
 
 void
-FOdysseyAnimationCellClipboardData::Copy()
+FOdysseyAnimationCellClipboardData::Copy(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells)
 {
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
     mCellCopies.Empty();
-
-    if (cellsContainer->GetCells().Num() == 0)
-        return;
-
-    const TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = cellsContainer->GetCells();
-    int startCellIndex = cellsContainer->GetCellIndexAtFrame(mSelectedFrames.GetLowerBoundValue());
-    int startCellFrameIndex = cellsContainer->GetCellFrameAtFrame(mSelectedFrames.GetLowerBoundValue());
-    int endCellIndex = cellsContainer->GetCellIndexAtFrame(mSelectedFrames.GetUpperBoundValue());
-    int endCellFrameIndex = cellsContainer->GetCellFrameAtFrame(mSelectedFrames.GetUpperBoundValue());
-
-    if (startCellIndex == INDEX_NONE)
-        startCellIndex = 0;
-
-    if (endCellIndex == INDEX_NONE)
-        endCellIndex = cellsContainer->GetCells().Num() - 1;
-
-    if (startCellIndex == endCellIndex)
+    for (TSharedPtr<FOdysseyAnimationCell> cell : iCells)
     {
-        mCellCopies.Add({cells[startCellIndex], endCellFrameIndex - startCellFrameIndex + 1});
-        return;
+        mCellCopies.Add({cell, cell->GetLength()});
     }
-
-    mCellCopies.Add({cells[startCellIndex], cells[startCellIndex]->GetLength() - startCellFrameIndex});
-    for (int i = startCellIndex + 1; i <= endCellIndex - 1; i++)
-    {
-        mCellCopies.Add({cells[i], cells[i]->GetLength()});
-    }
-
-    mCellCopies.Add({cells[endCellIndex], endCellFrameIndex + 1});
 }
 
 void
@@ -101,16 +73,4 @@ int
 FOdysseyAnimationCellClipboardData::GetCellCount() const
 {
     return mCellCopies.Num();
-}
-
-UOdysseyAnimationLayer*
-FOdysseyAnimationCellClipboardData::GetLayer() const
-{
-    return mLayer;
-}
-
-const FInt32Range&
-FOdysseyAnimationCellClipboardData::GetSelectedFrames() const
-{
-    return mSelectedFrames;
 }

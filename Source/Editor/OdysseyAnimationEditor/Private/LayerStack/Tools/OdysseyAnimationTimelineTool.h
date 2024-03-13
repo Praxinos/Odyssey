@@ -12,10 +12,10 @@ public:
     {
         Layer, //The whole layer timeline
         CellsTimeline, //the timeline section containing all the cells
-        Cell, //a single cell
 
         //As other examples, we could have
         //Or even other origins
+        //Cell, //a single cell
         //Lighttable, //the timeline section containing the lighttable keys
         //LighttableKey //a single lighttable key
     };
@@ -24,7 +24,6 @@ public:
     virtual ~FOdysseyAnimationTimelineTool();
 
 public:
-
     struct FMouseEventParams
     {
         const FGeometry mGeometry;
@@ -38,4 +37,7 @@ public:
     virtual FReply OnMouseButtonUp(const FMouseEventParams& iParams);
     virtual FReply OnMouseMove(const FMouseEventParams& iParams);
     virtual FReply OnDragDetected(const FMouseEventParams& iParams);
+
+    virtual FReply OnKeyDown(const FKeyEvent& iKeyEvent);
+    virtual FReply OnKeyUp(const FKeyEvent& iKeyEvent);
 };

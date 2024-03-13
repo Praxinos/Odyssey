@@ -123,6 +123,12 @@ public:
      */
     int GetCellFrame(TSharedPtr<const FOdysseyAnimationCell> iCell) const;
 
+    /**
+     * @brief Returns the frame ranges of all frames
+     * 
+     */
+    TMap<TSharedPtr<FOdysseyAnimationCell>, FInt32Range> GetCellsFrameRanges() const;
+
 public:
     /**
      * @brief PostDuplicate

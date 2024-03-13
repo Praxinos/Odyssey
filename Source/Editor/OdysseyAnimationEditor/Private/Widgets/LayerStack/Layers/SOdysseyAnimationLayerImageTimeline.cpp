@@ -15,8 +15,7 @@ SOdysseyAnimationLayerImageTimeline::SOdysseyAnimationLayerImageTimeline()
     : mIsDraggingOver(false)
     , mDragState(kDrag_None)
     , mDragPosition(0)
-    //, mIsSelectingFrames(false)
-	//, mInteractiveFrameSelection(FInt32Range::Empty())
+    , mAnimationTimelineCellsShortcuts(nullptr)
 {
 }
 
@@ -44,32 +43,13 @@ SOdysseyAnimationLayerImageTimeline::Construct(
     [
         SNew(SVerticalBox)
         + SVerticalBox::Slot()
+        .Padding(cellsPadding)
         [
-            SNew(SOdysseyAnimationTimelineFrameSelection, mExtension)
-            .SelectedFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectedFrames)
-            .OnSelectionDragged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged)
-            [
-                SNew(SVerticalBox)
-                + SVerticalBox::Slot()
-                .Padding(cellsPadding)
-                [
-                    SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
-                    .IsEnabled_Lambda([this](){ return !mLayer->GetIsLocked();})
-                    .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
-                    .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
-                    .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
-                ]
-                /* + SVerticalBox::Slot()
-                .AutoHeight()
-                [
-                    SNew(SOdysseyAnimationTimelineFrameSelector, mExtension)
-                    .Visibility(this, &SOdysseyAnimationLayerImageTimeline::GetFrameSelectorVisibility)
-                    .SelectableFrames(this, &SOdysseyAnimationLayerImageTimeline::GetSelectableFrames)
-                    .OnSelectionStarted(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionStarted)
-                    .OnSelectionEnded(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded)
-                    .OnSelectionChanged(this, &SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged)
-                ] */
-            ]
+            SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
+            .IsEnabled_Lambda([this](){ return !mLayer->GetIsLocked();})
+            .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
+            .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
+            .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
@@ -131,19 +111,18 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
         if (frame == INDEX_NONE)
             return FReply::Unhandled();
 
-        //On Right click, select frames if none are selected yet
-        FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
-        if (selectedFrames.IsEmpty() || frame < selectedFrames.GetLowerBoundValue() ||  frame > selectedFrames.GetUpperBoundValue())
-        {
-            mExtension->Timeline()->SetSelectedFrames(FInt32Range::Empty());
-            int cellIndex = mLayer->GetCellsContainer()->GetCellIndexAtFrame(frame);
-            if (cellIndex != INDEX_NONE)
-            {
-                int startFrame = mLayer->GetCellsContainer()->GetCellFrame(mLayer->GetCellsContainer()->GetCells()[cellIndex]);
-                int endFrame = startFrame + mLayer->GetCellsContainer()->GetCells()[cellIndex]->GetLength() - 1;
-                mExtension->Timeline()->SetSelectedFrames( FInt32Range::Inclusive(startFrame, endFrame) );
-            }
-        }
+        //On Right click, select cell if none are selected yet
+        TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+        if (!cellsContainer)
+            return FReply::Unhandled();
+
+        TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(frame);
+        if (!cell)
+            return FReply::Unhandled();
+
+        const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+        if (selectedCells.IsEmpty() || !selectedCells.Contains(cell))
+            mExtension->Timeline()->SetSelectedCells({cell});
 
         TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
         MapActions(commandList, frame);
@@ -166,6 +145,18 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
     };
     mExtension->Timeline()->GetTool()->OnMouseButtonUp(params);
 	return FReply::Unhandled();
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
+{
+    return mExtension->Timeline()->GetTool()->OnKeyDown(iKeyEvent);
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnKeyUp( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
+{
+    return mExtension->Timeline()->GetTool()->OnKeyUp(iKeyEvent);
 }
 
 int32
@@ -262,13 +253,30 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
 
     if (!operation->GetData().CanPaste(mLayer))
         return FReply::Unhandled();
+    
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return FReply::Unhandled();
 
     float timelineOffset = mExtension->Timeline()->GetOffset();
     float posX = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X;
     float frameWidth = mExtension->Timeline()->GetFrameWidth();
-    float frame = (int)(posX / frameWidth + timelineOffset + 0.5f);
+    float frame = (posX / frameWidth + timelineOffset);
 
-    mDragPosition = frame;
+    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame((int)frame);
+    if (!cell)
+        return FReply::Unhandled();
+
+    int cellStartFrame = cellsContainer->GetCellFrame(cell);
+    float position = (frame - cellStartFrame) / cell->GetLength();
+    if (position < 0.5f)
+    {
+        mDragPosition = cellStartFrame;
+    }
+    else
+    {
+        mDragPosition = cellStartFrame + cell->GetLength();
+    }
 
     /*
     if (FSlateApplication::Get().GetModifierKeys().IsControlDown())
@@ -276,23 +284,19 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
     else
         mDragState = kDrag_Move;
     */
-   mDragState = kDrag_Copy; //For now we can only copy frames, we will be able to move them when layers will have holes
+   mDragState = kDrag_Copy; //For now we can only copy cells, we will be able to move them when layers will have holes
 
     //Check if the copy or move is actually allowed
     UOdysseyAnimationLayer* layer = operation->GetLayer();
     if (layer == mLayer)
     {
-        FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
-        if (mDragState == kDrag_Copy && frame > selectedFrames.GetLowerBoundValue() && frame <= selectedFrames.GetUpperBoundValue())
+        const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+        TSharedPtr<FOdysseyAnimationCell> nextCell = cellsContainer->GetCellAtFrame(mDragPosition);
+        TSharedPtr<FOdysseyAnimationCell> previousCell = cellsContainer->GetCellAtFrame(mDragPosition - 1);
+
+        if ((!nextCell || selectedCells.Contains(nextCell)) && (!previousCell || selectedCells.Contains(previousCell)))
         {
             //Trying to copy cells inside the current layer selection
-            //This is not allowed
-            mDragState = kDrag_None;
-            return FReply::Handled();
-        }
-        else if (mDragState == kDrag_Move && frame >= selectedFrames.GetLowerBoundValue() && frame <= selectedFrames.GetUpperBoundValue() + 1)
-        {
-            //Trying to move cells inside the current layer selection
             //This is not allowed
             mDragState = kDrag_None;
             return FReply::Handled();
@@ -326,255 +330,6 @@ SOdysseyAnimationLayerImageTimeline::OnDrop(const FGeometry& iGeometry, const FD
     return FReply::Handled();
 }
 
-void
-SOdysseyAnimationLayerImageTimeline::SelectAllFrames()
-{
-    FInt32Range frameRange = mLayer->GetFrameRange();
-    mExtension->Timeline()->SetSelectedFrames(frameRange);
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::CopyFrames()
-{
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(mLayer, mExtension->Timeline()->GetSelectedFrames());
-    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::CutFrames()
-{
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.cut", "Cut Frames"));
-#endif
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(mLayer, mExtension->Timeline()->GetSelectedFrames());
-    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
-    DeleteSelectedFrames();
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::PasteFrames()
-{
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyAnimationCellClipboardData>();
-    if (!clipboardData)
-        return;
-
-    if (!clipboardData->CanPaste(mLayer))
-        return;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.paste", "Paste Frames"));
-#endif
-
-    clipboardData->Paste(mLayer, mExtension->Animation()->CurrentFrame);
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames()
-{
-    if (mLayer->GetIsLocked())
-        return;
-
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
-    FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
-        return;
-
-    bool isLowerClosed = selectedFrames.GetLowerBound().IsClosed();
-    bool isUpperClosed = selectedFrames.GetUpperBound().IsClosed();
-
-    if (!isLowerClosed || !isUpperClosed)
-        return;
-        
-    if (FInt32Range::Difference(cellsContainer->GetFrameRange(), selectedFrames).IsEmpty())
-    {
-        selectedFrames.SetLowerBoundValue(selectedFrames.GetLowerBoundValue() + 1);
-        if (selectedFrames.IsEmpty())
-            return;
-    }
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.delete", "Remove Frames"));
-#endif
-
-    FOdysseyAnimationCellsMutator mutator(mLayer, cellsContainer);
-    mutator.RemoveFrameRange(selectedFrames);
-    mutator.Commit();
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::StaggerCell( int iFrame )
-{
-    if (mLayer->GetIsLocked())
-        return;
-
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
-    int cellFrame = cellsContainer->GetCellFrameAtFrame(iFrame);
-    if (cellFrame == INDEX_NONE || cellFrame == 0)
-        return;
-
-    int cellIndex = cellsContainer->GetCellIndexAtFrame(iFrame);
-    if (cellIndex == INDEX_NONE)
-        return;
-
-    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
-    if (!cell || cell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
-        return;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.create-stagger-cell", "Stagger Cell"));
-#endif
-    
-    int cellStaggerLength = cell->GetLength() - cellFrame;
-    TSharedPtr<FOdysseyAnimationCellImageStagger> cellStagger = FOdysseyAnimationCellImageStagger::Create(mLayer, cellStaggerLength);
-    
-    FOdysseyAnimationCellsMutator mutator(mLayer, cellsContainer);
-    mutator.SetLength( cellIndex, cellFrame );
-    mutator.Add({cellStagger}, cellIndex + 1);
-    mutator.Commit();
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::CanDeleteSelectedFrames() const
-{
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return false;
-
-    FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
-        return false;
-
-    bool isLowerClosed = selectedFrames.GetLowerBound().IsClosed();
-    bool isUpperClosed = selectedFrames.GetUpperBound().IsClosed();
-
-    if (!isLowerClosed || !isUpperClosed)
-        return false;
-        
-    if (FInt32Range::Difference(cellsContainer->GetFrameRange(), selectedFrames).IsEmpty())
-    {
-        selectedFrames.SetLowerBoundValue(selectedFrames.GetLowerBoundValue() + 1);
-        if (selectedFrames.IsEmpty())
-            return false;
-    }
-
-    return true;
-}
-bool
-SOdysseyAnimationLayerImageTimeline::CanCopyFrames() const
-{
-    FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
-        return false;
-
-    return true;
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::CanCutFrames() const
-{
-    FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
-        return false;
-
-    return true;
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::CanPasteFrames() const
-{
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyAnimationCellClipboardData>();
-    if (!clipboardData)
-        return false;
-
-    if (!clipboardData->CanPaste(mLayer))
-        return false;
-
-    return true;
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::CanStaggerCell( int iFrame ) const
-{
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return false;
-
-    int cellFrame = cellsContainer->GetCellFrameAtFrame(iFrame);
-    if (cellFrame == INDEX_NONE || cellFrame == 0)
-        return false;
-
-    int cellIndex = cellsContainer->GetCellIndexAtFrame(iFrame);
-    if (cellIndex == INDEX_NONE)
-        return false;
-
-    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
-    if (!cell || cell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
-        return false;
-
-    return true;
-}
-
-/* FInt32Range
-SOdysseyAnimationLayerImageTimeline::GetSelectableFrames() const
-{
-    return mExtension->Timeline()->GetSelectableFrames();
-} */
-
-FInt32Range
-SOdysseyAnimationLayerImageTimeline::GetSelectedFrames() const
-{
-    /* if (mIsSelectingFrames)
-        return mInteractiveFrameSelection;*/
-
-    bool isCurrentLayer = mLayer->GetLayerStack()->CurrentLayer == mLayer;
-	return isCurrentLayer ? mExtension->Timeline()->GetSelectedFrames() : FInt32Range::Empty();
-}
-
-/* void
-SOdysseyAnimationLayerImageTimeline::OnFramesSelectionChanged(FInt32Range iSelectedFrames)
-{
-	mInteractiveFrameSelection = iSelectedFrames;
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::OnFramesSelectionStarted(int iFrame)
-{
-    mIsSelectingFrames = true;
-	mInteractiveFrameSelection = FInt32Range::Empty();
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::OnFramesSelectionEnded(int iFrame)
-{
-    mIsSelectingFrames = false;
-    mExtension->Timeline()->SetSelectedFrames(mInteractiveFrameSelection);
-
-    if (mExtension->Timeline()->GetSelectedFrames().IsEmpty())
-        return; //Only change currentframe if the selection has been set
-
-    FInt32Range frameRange = mLayer->GetFrameRange();
-    int frame = FMath::Clamp(iFrame, frameRange.GetLowerBoundValue(), frameRange.GetUpperBoundValue());
-
-    FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
-}
-*/
-
-FReply
-SOdysseyAnimationLayerImageTimeline::OnFramesSelectionDragged()
-{
-    TSharedRef<FOdysseyAnimationCellsDragDropOperation> operation = FOdysseyAnimationCellsDragDropOperation::Create(mLayer, mExtension->Timeline()->GetSelectedFrames());
-    return FReply::Handled().BeginDragDrop(operation);
-}
 
 void
 SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder)
@@ -592,7 +347,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
     iMenuBuilder.EndSection();
 
     iMenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().StaggerCell);
+        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell);
     iMenuBuilder.EndSection();
 
     iMenuBuilder.BeginSection("Layer", LOCTEXT("timeline-cells.context-menu.layer-section.name", "Layer"));
@@ -760,40 +515,8 @@ SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour() const
 void
 SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame)
 {
-	iCommandList->MapAction(
-        FGenericCommands::Get().SelectAll,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SelectAllFrames)
-    );
-
-    iCommandList->MapAction(
-        FGenericCommands::Get().Delete,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::DeleteSelectedFrames),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanDeleteSelectedFrames)
-    );
-
-	iCommandList->MapAction(
-        FGenericCommands::Get().Copy,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CopyFrames),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanCopyFrames)
-    );
-
-    iCommandList->MapAction(
-        FGenericCommands::Get().Cut,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CutFrames),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanCutFrames)
-    );
-
-    iCommandList->MapAction(
-        FGenericCommands::Get().Paste,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::PasteFrames),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanPasteFrames)
-    );
-
-    iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().StaggerCell,
-        FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::StaggerCell, iFrame),
-        FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanStaggerCell, iFrame)
-    );
+    mAnimationTimelineCellsShortcuts = MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(mLayer->GetLayerStack(), mExtension);
+    mAnimationTimelineCellsShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
 }
 
 EVisibility
@@ -807,12 +530,6 @@ SOdysseyAnimationLayerImageTimeline::IsCollapsed() const
 {
     return mIsCollapsed.Get();
 }
-
-/* EVisibility
-SOdysseyAnimationLayerImageTimeline::GetFrameSelectorVisibility() const
-{
-    return mIsCollapsed.Get() ? EVisibility::Collapsed : EVisibility::Visible;
-} */
 
 bool
 SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const

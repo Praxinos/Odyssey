@@ -14,8 +14,9 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineCellsShortcuts::FOdysseyAnimationTimelineCellsShortcuts(TSharedPtr<SOdysseyAnimationLayerStackTreeView> iTreeView)
-    : mTreeView(iTreeView)
+FOdysseyAnimationTimelineCellsShortcuts::FOdysseyAnimationTimelineCellsShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension)
+    : mLayerStack(iLayerStack)
+    , mAnimationExtension(iAnimationExtension)
 {
 }
 
@@ -53,49 +54,28 @@ FOdysseyAnimationTimelineCellsShortcuts::MapActionsToCommandList(TSharedRef<FUIC
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().StaggerCell,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_StaggerCell),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_StaggerCell)
+        FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell)
     );
 }
 
 void
 FOdysseyAnimationTimelineCellsShortcuts::Action_Copy()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
-    if (!layer)
-        return;
-
-    FInt32Range selectedFrames = treeView->GetAnimationEditorExtension()->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
+    const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
         return;
 
     FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
-
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(layer, selectedFrames);
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(selectedCells);
     odysseyEditorModule.GetClipboard()->SetData(clipboardData);
 }
 
 void
 FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return;
 
@@ -105,8 +85,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
         return;
     }
 
-    FInt32Range selectedFrames = treeView->GetAnimationEditorExtension()->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
+    const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
         return;
 
 #ifdef WITH_EDITOR
@@ -114,7 +94,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
 #endif
     
     FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
-    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(layer, selectedFrames);
+    TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(selectedCells);
     odysseyEditorModule.GetClipboard()->SetData(clipboardData);
     Action_Delete();
 }
@@ -122,15 +102,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
 void
 FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return;
 
@@ -159,34 +131,21 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
 void
 FOdysseyAnimationTimelineCellsShortcuts::Action_SelectAll()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return;
 
-    FInt32Range frameRange = layer->GetFrameRange();
-    treeView->GetAnimationEditorExtension()->Timeline()->SetSelectedFrames(frameRange);
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+    if (!cellsContainer)
+        return;
+
+    mAnimationExtension->Timeline()->SetSelectedCells(cellsContainer->GetCells());
 }
 
 void
 FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return;
 
@@ -197,46 +156,25 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (!cellsContainer)
         return;
 
-    FInt32Range selectedFrames = treeView->GetAnimationEditorExtension()->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
+    const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
         return;
-
-    bool isLowerClosed = selectedFrames.GetLowerBound().IsClosed();
-    bool isUpperClosed = selectedFrames.GetUpperBound().IsClosed();
-
-    if (!isLowerClosed || !isUpperClosed)
-        return;
-
-    if (FInt32Range::Difference(cellsContainer->GetFrameRange(), selectedFrames).IsEmpty())
-    {
-        selectedFrames.SetLowerBoundValue(selectedFrames.GetLowerBoundValue() + 1);
-        if (selectedFrames.IsEmpty())
-            return;
-    }
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.remove-frame", "Remove Frames"));
 #endif
 
     FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
-    mutator.RemoveFrameRange(selectedFrames);
+    mutator.Remove(selectedCells);
     mutator.Commit();
 }
 
 
 
 void
-FOdysseyAnimationTimelineCellsShortcuts::Action_StaggerCell()
+FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return;
 
@@ -247,43 +185,39 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_StaggerCell()
     if (!cellsContainer)
         return;
 
-    int cellFrame = cellsContainer->GetCellFrameAtFrame(layer->GetAnimation()->CurrentFrame);
-    if (cellFrame == INDEX_NONE || cellFrame == 0)
-        return;
+    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    selectedCells.FilterByPredicate(
+        [](TSharedPtr<FOdysseyAnimationCell> iCell)
+        {
+            return iCell->GetType() != FOdysseyAnimationCellImageStagger::StaticType();
+        }
+    );
 
-    int cellIndex = cellsContainer->GetCellIndexAtFrame(layer->GetAnimation()->CurrentFrame);
-    if (cellIndex == INDEX_NONE)
-        return;
-
-    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
-    if (!cell || cell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
+    if (selectedCells.IsEmpty())
         return;
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.create-stagger-cell", "Stagger Cell"));
 #endif
-    
-    int cellStaggerLength = cell->GetLength() - cellFrame;
-    TSharedPtr<FOdysseyAnimationCellImageStagger> cellStagger = FOdysseyAnimationCellImageStagger::Create(layer, cellStaggerLength);
-    
+
     FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
-    mutator.SetLength( cellIndex, cellFrame );
-    mutator.Add({cellStagger}, cellIndex + 1);
+    for (TSharedPtr<FOdysseyAnimationCell> cell : selectedCells)
+    {
+        int cellIndex = cellsContainer->GetCells().Find(cell);
+        if (cellIndex == INDEX_NONE)
+            continue;
+
+        TSharedPtr<FOdysseyAnimationCellImageStagger> cellStagger = FOdysseyAnimationCellImageStagger::Create(layer, cell->GetLength());
+        mutator.Remove(cellIndex);
+        mutator.Add({cellStagger}, cellIndex);
+    }
     mutator.Commit();
 }
 
 bool
 FOdysseyAnimationTimelineCellsShortcuts::CanAction_Copy()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return false;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return false;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
 
@@ -291,8 +225,8 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Copy()
     if (!cellsContainer)
         return false;
 
-    FInt32Range selectedFrames = treeView->GetAnimationEditorExtension()->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
+    const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
         return false;
 
     return true;
@@ -301,15 +235,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Copy()
 bool
 FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return false;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return false;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
 
@@ -320,8 +246,8 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
     if (!cellsContainer)
         return false;
 
-    FInt32Range selectedFrames = treeView->GetAnimationEditorExtension()->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
+    const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
         return false;
 
     return true;
@@ -330,15 +256,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
 bool
 FOdysseyAnimationTimelineCellsShortcuts::CanAction_Paste()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return false;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return false;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
 
@@ -356,20 +274,13 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Paste()
 bool
 FOdysseyAnimationTimelineCellsShortcuts::CanAction_SelectAll()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return false;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return false;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
         
     //Authorize SelectAll only if there is already an active selection
-    if (treeView->GetAnimationEditorExtension()->Timeline()->GetSelectedFrames().IsEmpty())
+    const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
         return false;
 
     return true;
@@ -378,15 +289,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SelectAll()
 bool
 FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return false;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return false;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
 
@@ -397,25 +300,18 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
     if (!cellsContainer)
         return false;
 
-    FInt32Range selectedFrames = treeView->GetAnimationEditorExtension()->Timeline()->GetSelectedFrames();
-    if (selectedFrames.IsEmpty())
+    const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
         return false;
 
     return true;
 }
 
 bool
-FOdysseyAnimationTimelineCellsShortcuts::CanAction_StaggerCell()
+FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
 {
-    TSharedPtr<SOdysseyAnimationLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return false;
-
-    UOdysseyLayerStack* layerstack = treeView->GetLayerStack();
-    if(!layerstack)
-        return false;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerstack->CurrentLayer.Get());
+    
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
 
@@ -426,16 +322,15 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_StaggerCell()
     if (!cellsContainer)
         return false;
 
-    int cellFrame = cellsContainer->GetCellFrameAtFrame(layer->GetAnimation()->CurrentFrame);
-    if (cellFrame == INDEX_NONE || cellFrame == 0)
-        return false;
+    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    selectedCells.FilterByPredicate(
+        [](TSharedPtr<FOdysseyAnimationCell> iCell)
+        {
+            return iCell->GetType() != FOdysseyAnimationCellImageStagger::StaticType();
+        }
+    );
 
-    int cellIndex = cellsContainer->GetCellIndexAtFrame(layer->GetAnimation()->CurrentFrame);
-    if (cellIndex == INDEX_NONE)
-        return false;
-
-    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
-    if (!cell || cell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
+    if (selectedCells.IsEmpty())
         return false;
 
     return true;

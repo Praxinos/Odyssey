@@ -3,14 +3,15 @@
 
 #pragma once
 
-class SOdysseyAnimationLayerStackTreeView;
+class FOdysseyAnimationEditorExtension;
+class UOdysseyLayerStack;
 class FUICommandList;
 class FOdysseyAnimationTimelineCellsShortcuts;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineShortcuts
 {
 public:
-    FOdysseyAnimationTimelineShortcuts(TSharedPtr<SOdysseyAnimationLayerStackTreeView> iTreeView);
+    FOdysseyAnimationTimelineShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension);
 
 public:
     TSharedRef<FUICommandList> GetCommandList() const;
@@ -21,7 +22,5 @@ private:
 
 private:
     TSharedRef<FUICommandList> mCommandList;
-    TWeakPtr<SOdysseyAnimationLayerStackTreeView> mTreeView;
-
     TSharedRef<FOdysseyAnimationTimelineCellsShortcuts> mCellsShortcuts;
 };

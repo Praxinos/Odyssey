@@ -24,7 +24,7 @@ SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs, FOdysse
 {
     SOdysseyLayerStackTreeView::Construct(InArgs);
     mExtension = iAnimationExtension;
-    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(SharedThis(this));
+    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(GetLayerStack(), iAnimationExtension);
 }
 
 FReply
@@ -39,14 +39,14 @@ SOdysseyAnimationLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, cons
 void
 SOdysseyAnimationLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
 {
-    mExtension->Timeline()->SetSelectedFrames(FInt32Range::Empty());
+    mExtension->Timeline()->SetSelectedCells({});
     SOdysseyLayerStackTreeView::Private_SignalSelectionChanged(SelectInfo);
 }
 
 FReply
 SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent)
 {
-    mExtension->Timeline()->SetSelectedFrames(FInt32Range::Empty());
+    mExtension->Timeline()->SetSelectedCells({});
     return SOdysseyLayerStackTreeView::OnFocusReceived(MyGeometry, InFocusEvent);
 }
 

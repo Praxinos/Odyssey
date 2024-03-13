@@ -170,15 +170,36 @@ SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
-	FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
-	if (selectedFrames.IsEmpty())
-	{
-		mExtension->Player()->SetFrameRange(TOptional<FInt32Range>());
-	}
-	else
-	{
-		mExtension->Player()->SetFrameRange(selectedFrames);
-	}
+	UOdysseyAnimation* animation = mExtension->Animation();
+	if (!animation)
+		return FReply::Unhandled();
+
+	UOdysseyLayerStack* layerStack = animation->GetLayerStack();
+	if (!layerStack)
+		return FReply::Unhandled();
+
+	UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!layer)
+		return FReply::Unhandled();
+
+	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+	if (!cellsContainer)
+		return FReply::Unhandled();
+
+	TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+	TMap<TSharedPtr<FOdysseyAnimationCell>, FInt32Range> cellFrameRanges = cellsContainer->GetCellsFrameRanges();
+	cellFrameRanges = cellFrameRanges.FilterByPredicate(
+		[&selectedCells](const TPair<TSharedPtr<FOdysseyAnimationCell>, FInt32Range>& iPair)
+		{
+			return selectedCells.Contains(iPair.Key);
+		}
+	);
+
+	TArray<FInt32Range> ranges;
+	cellFrameRanges.GenerateValueArray(ranges);
+	FInt32Range range = FInt32Range::Hull(ranges);
+
+	mExtension->Player()->SetFrameRange(range); 
 	mExtension->Player()->Play(false);
     return FReply::Handled();
 }
@@ -186,15 +207,36 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
-	FInt32Range selectedFrames = mExtension->Timeline()->GetSelectedFrames();
-	if (selectedFrames.IsEmpty())
-	{
-		mExtension->Player()->SetFrameRange(TOptional<FInt32Range>());
-	}
-	else
-	{
-		mExtension->Player()->SetFrameRange(selectedFrames);
-	}
+	UOdysseyAnimation* animation = mExtension->Animation();
+	if (!animation)
+		return FReply::Unhandled();
+
+	UOdysseyLayerStack* layerStack = animation->GetLayerStack();
+	if (!layerStack)
+		return FReply::Unhandled();
+
+	UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!layer)
+		return FReply::Unhandled();
+
+	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+	if (!cellsContainer)
+		return FReply::Unhandled();
+
+	TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+	TMap<TSharedPtr<FOdysseyAnimationCell>, FInt32Range> cellFrameRanges = cellsContainer->GetCellsFrameRanges();
+	cellFrameRanges = cellFrameRanges.FilterByPredicate(
+		[&selectedCells](const TPair<TSharedPtr<FOdysseyAnimationCell>, FInt32Range>& iPair)
+		{
+			return selectedCells.Contains(iPair.Key);
+		}
+	);
+
+	TArray<FInt32Range> ranges;
+	cellFrameRanges.GenerateValueArray(ranges);
+	FInt32Range range = FInt32Range::Hull(ranges);
+
+	mExtension->Player()->SetFrameRange(range); 
 	mExtension->Player()->Play(true);
     return FReply::Handled();
 }

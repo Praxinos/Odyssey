@@ -44,24 +44,22 @@ public:
     virtual FReply OnDragOver(const FGeometry& iGeometry, const FDragDropEvent& iEvent) override;
     virtual FReply OnDrop(const FGeometry& iGeometry, const FDragDropEvent& iEvent) override;
 
+    virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
+    virtual FReply OnKeyUp( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
+
 protected:
     virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() = 0;
     virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) = 0;
 
 protected:
-    //FInt32Range GetSelectableFrames() const;
-    FInt32Range GetSelectedFrames() const;
-    /*void OnFramesSelectionChanged(FInt32Range iSelectedFrames);
-    void OnFramesSelectionStarted(int iFrame);
-    void OnFramesSelectionEnded(int iFrame); */
-    FReply OnFramesSelectionDragged();
+    //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;
+    //FReply OnCellsSelectionDragged();
 
     EVisibility GetLightTableVisibility() const;
 
     FOptionalSize GetCellsHeight() const;
     FOptionalSize GetLightTableHeight() const;
     bool IsCollapsed() const;
-    //EVisibility GetFrameSelectorVisibility() const;
 
     bool GetShowCellsHandles() const;
 
@@ -71,19 +69,6 @@ private:
     void MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame);
     void BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
     void BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
-
-    void SelectAllFrames();
-    void DeleteSelectedFrames();
-    void CopyFrames();
-    void CutFrames();
-    void PasteFrames();
-    void StaggerCell(int iFrame);
-
-    bool CanDeleteSelectedFrames() const;
-    bool CanCopyFrames() const;
-    bool CanCutFrames() const;
-    bool CanPasteFrames() const;
-    bool CanStaggerCell(int iFrame) const;
 
     void SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
     bool IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
@@ -109,6 +94,5 @@ protected:
     int mDragPosition;
     TAttribute<bool> mIsCollapsed;
 
-    //bool mIsSelectingFrames;
-	//FInt32Range mInteractiveFrameSelection;
+    TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
 };
