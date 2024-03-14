@@ -2014,7 +2014,8 @@ FOdysseyVectorPath::ApplyMatrix( BLMatrix2D& iMatrix )
                                             , 0.70710678118f * vertex->GetRadius() );
         ::ULIS::FVec2D vec = { localVec.x, localVec.y };
 
-        vertex->Set( localPt.x, localPt.y, vec.Distance() );
+        vertex->Set( localPt.x, localPt.y );
+        vertex->SetRadius( vec.Distance() );
     }
 
     for( FOdysseyVectorSegment* segment : mSegmentList )

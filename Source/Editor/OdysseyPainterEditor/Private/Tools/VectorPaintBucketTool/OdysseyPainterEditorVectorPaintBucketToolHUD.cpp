@@ -50,16 +50,18 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
                                                              , double iWorldY )
 {
     ::ULIS::FVec2D bucketWorldCoords = GetBucketPosition( iBucket, true );
+    ::ULIS::FVec2D pickDif = ::ULIS::FVec2D( iWorldX - bucketWorldCoords.x
+                                           , iWorldY - bucketWorldCoords.y );
 
     if( mPaintBucketTool->GetShowControls() )
     {
         if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
         {
             ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetBucketHandleVector( iBucket, true ) * HANDLE_DISTANCE );
-            ::ULIS::FVec2D pickDif = ::ULIS::FVec2D( iWorldX - handleWorldCoords.x
-                                                   , iWorldY - handleWorldCoords.y );
+            ::ULIS::FVec2D handleDif = ::ULIS::FVec2D( iWorldX - handleWorldCoords.x
+                                                     , iWorldY - handleWorldCoords.y );
 
-            if ( pickDif.Distance() < mPaintBucketTool->PickingRadius )
+            if ( handleDif.Distance() < mPaintBucketTool->PickingRadius )
             {
                 return PICK_HANDLE;
             }
@@ -84,12 +86,14 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
                 return PICK_RADIAL_AREA;
             }
         }
+
+        if ( pickDif.Distance() < mPaintBucketTool->PickingRadius )
+        {
+            return PICK_PROPAGATE;
+        }
     }
     else
     {
-        ::ULIS::FVec2D pickDif = ::ULIS::FVec2D( iWorldX - bucketWorldCoords.x
-                                               , iWorldY - bucketWorldCoords.y );
-
         if ( pickDif.Distance() < mPaintBucketTool->PickingRadius )
         {
             return PICK_BUCKET;

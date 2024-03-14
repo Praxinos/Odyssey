@@ -34,7 +34,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          * @param iY coordinate on Y axis.
          * @param iRadius radius.
          */
-        FOdysseyVectorPoint( double iX, double iY, double iRadius );
+        FOdysseyVectorPoint( double iX, double iY );
 
         ::ULIS::FVec2D& GetCoords();
 
@@ -57,12 +57,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         double GetY();
 
         /**
-         * @brief Get the point's radius
-         * @return the point's radius
-         */
-        double GetRadius();
-
-        /**
          * @brief Set the point's coordinate on X & Y axis
          * @param iCoords the desired coordinates of type ::ULIS::FVec2D
          */
@@ -76,25 +70,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         void Set( double iX, double iY );
 
         /**
-         * @brief Set the point's coordinate on X & Y axis
-         * @param iX the desired coordinate on X axis
-         * @param iY the desired coordinate on Y axis
-         * @param iRadius the desired point's radius
-         */
-        void Set( double iX, double iY, double iRadius );
-
-        /**
          * @brief Set the point's ID. This is for the programmer to use e.g as an index of an array.
          * it should no be considered consistent through the whole execution of the program.
          * @param iID the desired point's ID
          */
         void SetID( uint32 iID );
-
-        /**
-         * @brief Set the point's radius
-         * @param iRadius the desired point's radius
-         */
-        void SetRadius( double iRadius );
 
         /**
          * @brief Set the point's coordinate on X axis
@@ -115,9 +95,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
                   invalidation is needed after positionning.
          * @param iX the desired coordinate on X axis.
          * @param iY the desired coordinate on Y axis.
-         * @param iRadius the desired radius.
          */
-        virtual void SetCoords( double iX, double iY, double iRadius );
+        virtual void SetCoords( double iX, double iY );
 
     protected:
         uint32 mID;

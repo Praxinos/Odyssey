@@ -11,7 +11,8 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 }
 
 FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
-    : FOdysseyVectorPoint( iX, iY, iRadius )
+    : FOdysseyVectorPoint( iX, iY )
+    , mRadius ( iRadius )
     , mJoint( this )
     , mOwner ( nullptr )
     , mFlags( 0 )
@@ -554,6 +555,23 @@ FOdysseyVectorVertex::InvalidateSegments()
     }
 }
 
+double
+FOdysseyVectorVertex::GetRadius()
+{
+    return mRadius;
+}
+
+void
+FOdysseyVectorVertex::SetRadius( double iRadius )
+{
+    if( ( mFlags & LOCKED ) == 0 )
+    {
+        mRadius = iRadius;
+
+        InvalidateSegments();
+    }
+}
+
 bool 
 FOdysseyVectorVertex::IsLocked()
 {
@@ -574,16 +592,11 @@ FOdysseyVectorVertex::SetLocked( bool iIsLocked )
 }
 
 void 
-FOdysseyVectorVertex::SetCoords( double iX, double iY, double iRadius )
+FOdysseyVectorVertex::SetCoords( double iX, double iY )
 {
     if( ( mFlags & LOCKED ) == 0 )
     {
-        if( iRadius < 0.0f )
-        {
-            iRadius = 0.0f;
-        }
-
-        FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
+        FOdysseyVectorPoint::SetCoords( iX, iY );
 
         mJoint.ResetBBox();
 

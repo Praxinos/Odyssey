@@ -25,10 +25,10 @@ namespace FSnapshotFlags
     namespace Point
     {
         static const uint64 POSITION = ( 1ULL <<  0 );
-        static const uint64 RADIUS   = ( 1ULL <<  1 );
 
         namespace Vertex
         {
+            static const uint64 RADIUS          = ( 1ULL <<  1 );
             static const uint64 ALIGNMENT       = ( 1ULL <<  2 );
             static const uint64 LOCK            = ( 1ULL <<  3 );
             static const uint64 PARAM           = ( ALIGNMENT );
@@ -36,16 +36,16 @@ namespace FSnapshotFlags
 
         namespace Bucket
         {
-            static const uint64 COLORMODE       = ( 1ULL <<  2 );
-            static const uint64 SPREADINGPOLICY = ( 1ULL <<  3 );
-            static const uint64 SOLIDCOLOR      = ( 1ULL <<  4 );
-            static const uint64 ROTATION        = ( 1ULL <<  5 );
-            static const uint64 PROPAGATION     = ( 1ULL <<  6 );
-            static const uint64 GRADIENTCOLOR0  = ( 1ULL <<  7 );
-            static const uint64 GRADIENTCOLOR1  = ( 1ULL <<  8 );
-            static const uint64 RADIALRADIUS    = ( 1ULL <<  9 );
-            static const uint64 RADIALOFFSET    = ( 1ULL << 10 );
-            static const uint64 PALETTEENTRY    = ( 1ULL << 11 );
+            static const uint64 COLORMODE       = ( 1ULL <<  1 );
+            static const uint64 SPREADINGPOLICY = ( 1ULL <<  2 );
+            static const uint64 SOLIDCOLOR      = ( 1ULL <<  3 );
+            static const uint64 ROTATION        = ( 1ULL <<  4 );
+            static const uint64 PROPAGATION     = ( 1ULL <<  5 );
+            static const uint64 GRADIENTCOLOR0  = ( 1ULL <<  6 );
+            static const uint64 GRADIENTCOLOR1  = ( 1ULL <<  7 );
+            static const uint64 RADIALRADIUS    = ( 1ULL <<  8 );
+            static const uint64 RADIALOFFSET    = ( 1ULL <<  9 );
+            static const uint64 PALETTEENTRY    = ( 1ULL << 10 );
             static const uint64 PARAM = ( COLORMODE
                                         | SPREADINGPOLICY
                                         | SOLIDCOLOR 

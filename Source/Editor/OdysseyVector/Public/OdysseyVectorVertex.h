@@ -180,6 +180,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorPath* GetOwnerAsPath();
 
         /**
+         * @brief Get the point's radius
+         * @return the point's radius
+         */
+        double GetRadius();
+
+        /**
          * @brief Get a pointer to the section connecting this vertex and another vertex passed as argument.
          * @param iSegment
          * @return
@@ -329,6 +335,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         void SetVisited( bool iVisited );
 
+        void SetRadius( double iRadius );
+
         static bool GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVertexList
                                      , double& oXMin
                                      , double& oYMin
@@ -374,7 +382,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iX the desired coordinate in the X-axis.
          * @param iY the desired coordinate in the Y-axis.
          */
-        virtual void SetCoords( double iX, double iY, double iRadius ) override;
+        virtual void SetCoords( double iX, double iY ) override;
 
     protected:
         FOdysseyVectorJoint mJoint;
@@ -384,6 +392,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         std::list<FOdysseyVectorVertex*> mPartnerList;
         FOdysseyVectorObject* mOwner;
         uint32 mFlags;
+        double mRadius;
        
 
         double mDistanceToNearestSegment;

@@ -459,8 +459,8 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
     ::ULIS::FVec2D pointAt0 = GetPointAt( iFromT );
     ::ULIS::FVec2D pointAt1 = GetPointAt( iToT );
-    double radius0 = mPoint[0]->GetRadius();
-    double radius1 = mPoint[1]->GetRadius();
+    double radius0 = GetVertex(0)->GetRadius();
+    double radius1 = GetVertex(1)->GetRadius();
     double deltaRadius = ( radius1 - radius0 );
     double fromRadius = radius0 + ( deltaRadius * iFromT );
     double toRadius = radius0 + ( deltaRadius * iToT );
@@ -492,25 +492,28 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
 void
 FOdysseyVectorSegmentCubic::UpdateBoundingBox ()
 {
-   mBBox.x = ULIS::FMath::Min4<double>( mPoint[0]->GetX() - mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetX()
-                                      , mPoint[1]->GetX() - mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetX() );
+    FOdysseyVectorVertex* vertex0 = GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = GetVertex(1);
 
-   mBBox.y = ULIS::FMath::Min4<double>( mPoint[0]->GetY() - mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetY()
-                                      , mPoint[1]->GetY() - mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetY() );
+    mBBox.x = ULIS::FMath::Min4<double>( mPoint[0]->GetX() - vertex0->GetRadius()
+                                       , mCtrlPoint[0].GetX()
+                                       , mPoint[1]->GetX() - vertex1->GetRadius()
+                                       , mCtrlPoint[1].GetX() );
 
-   mBBox.w = ULIS::FMath::Max4<double>( mPoint[0]->GetX() + mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetX()
-                                      , mPoint[1]->GetX() + mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetX() ) - mBBox.x;
+    mBBox.y = ULIS::FMath::Min4<double>( mPoint[0]->GetY() - vertex0->GetRadius()
+                                       , mCtrlPoint[0].GetY()
+                                       , mPoint[1]->GetY() - vertex1->GetRadius()
+                                       , mCtrlPoint[1].GetY() );
 
-   mBBox.h = ULIS::FMath::Max4<double>( mPoint[0]->GetY() + mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetY()
-                                      , mPoint[1]->GetY() + mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetY() ) - mBBox.y;
+    mBBox.w = ULIS::FMath::Max4<double>( mPoint[0]->GetX() + vertex0->GetRadius()
+                                       , mCtrlPoint[0].GetX()
+                                       , mPoint[1]->GetX() + vertex1->GetRadius()
+                                       , mCtrlPoint[1].GetX() ) - mBBox.x;
+
+    mBBox.h = ULIS::FMath::Max4<double>( mPoint[0]->GetY() + vertex0->GetRadius()
+                                       , mCtrlPoint[0].GetY()
+                                       , mPoint[1]->GetY() + vertex1->GetRadius()
+                                       , mCtrlPoint[1].GetY() ) - mBBox.y;
 }
 
 FOdysseyVectorHandleSegment*
@@ -552,17 +555,19 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
                                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray )
 {
+    FOdysseyVectorVertex* vertex0 = GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = GetVertex(1);
     ::ULIS::FVec2D& point0 = GetVertex(0)->GetCoords();
     ::ULIS::FVec2D& point1 = GetVertex(1)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint0 = GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = GetHandle(1)->GetCoords();
     // we'll have 3 intersections at most and 2 points at tips.
-    FOdysseyVectorVertex* pointChain[5] = { static_cast<FOdysseyVectorVertex*>(mPoint[0]), nullptr, nullptr, nullptr, nullptr };
+    FOdysseyVectorVertex* pointChain[5] = { vertex0, nullptr, nullptr, nullptr, nullptr };
     double tChain[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
     uint32 pointCount = 1;
     ::ULIS::FVec2D ctrlPoint0Vector = GetVectorAtStart( true );
     ::ULIS::FVec2D ctrlPoint1Vector = GetVectorAtEnd( true );
-    double difRadius = mPoint[1]->GetRadius() - mPoint[0]->GetRadius();
+    double difRadius = vertex1->GetRadius() - vertex0->GetRadius();
 
     for( int i = 0; i < mFractionCache.size(); i++ )
     {
@@ -584,7 +589,7 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
                                                                                         , segmentT );
             FOdysseyVectorVertex* newCubicPoint = new FOdysseyVectorVertex( pointAt.x, pointAt.y, 0.0f );
 
-            newCubicPoint->SetRadius( mPoint[0]->GetRadius() + ( difRadius * segmentT ) );
+            newCubicPoint->SetRadius( vertex0->GetRadius() + ( difRadius * segmentT ) );
 
             tChain[pointCount] = segmentT;
             pointChain[pointCount] = newCubicPoint;
@@ -1083,8 +1088,8 @@ FOdysseyVectorSegmentCubic::SmoothOffsetCurves( std::vector<FOdysseyVectorBezier
     // Note, it does note matter that firstOffsetPoint[2] is uninitialized, it will be afterwards
     //::ULIS::FVec2D* prevOffsetPoint[2] = { &firstOffsetPoint[0], &firstOffsetPoint[1] };
     //::ULIS::FVec2D* nextOffsetPoint[2] = { nullptr             , nullptr             };
-    double segmentStartRadius = mPoint[0]->GetRadius();
-    double segmentEndRadius = mPoint[1]->GetRadius();
+    double segmentStartRadius = GetVertex(0)->GetRadius();
+    double segmentEndRadius = GetVertex(1)->GetRadius();
     int guideBezierFragmentCount = iGuideBezierFragmentArray.size();
 
     mOffsetCurve[0].Resize( guideBezierFragmentCount );
