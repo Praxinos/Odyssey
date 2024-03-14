@@ -361,11 +361,18 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 }
 
 bool
-FOdysseyVectorPath::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld )
+FOdysseyVectorPath::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox
+                                                , bool iWithHandles
+                                                , bool iWorld )
 {
     double xmin, ymin, xmax, ymax;
 
-    if( FOdysseyVectorVertex::GetMinMaxFromList( mSelectedVertexList, xmin, ymin, xmax, ymax ) )
+    if( FOdysseyVectorVertex::GetMinMaxFromList( mSelectedVertexList
+                                               , iWithHandles
+                                               , xmin
+                                               , ymin
+                                               , xmax
+                                               , ymax ) )
     {
         if( iWorld )
         {

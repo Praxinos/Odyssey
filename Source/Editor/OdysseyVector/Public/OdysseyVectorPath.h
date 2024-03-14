@@ -174,7 +174,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param oBBox the rectangle where to store the result
          * @param iWorld whether or not the box should be in world coordinates.
          */
-        bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
+        bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox
+                                        , bool iWithHandles
+                                        , bool iWorld );
 
         /**
          * @brief Get the brush

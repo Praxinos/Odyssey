@@ -2514,7 +2514,7 @@ FOdysseyVectorGroupPaint::AlterContourWidth( double iValue, bool iAbsolute )
         Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
     }
 }
-
+/*
 bool
 FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld )
 {
@@ -2559,6 +2559,7 @@ FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bo
 
     return inited;
 }
+*/
 
 // Pick from mask image
 void

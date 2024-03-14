@@ -47,6 +47,7 @@ FOdysseyVectorVertex::GetWorldCoords()
 // static
 bool
 FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVertexList
+                                       , bool iWithHandles
                                        , double& oXMin
                                        , double& oYMin
                                        , double& oXMax
@@ -68,6 +69,20 @@ FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVert
             if( vertexCoords.y < oYMin ) oYMin = vertexCoords.y;
             if( vertexCoords.x > oXMax ) oXMax = vertexCoords.x;
             if( vertexCoords.y > oYMax ) oYMax = vertexCoords.y;
+
+            if( iWithHandles == true )
+            {
+                for( FOdysseyVectorSegment* segment : vertex->GetSegmentList() )
+                {
+                    FOdysseyVectorHandleSegment* handle = segment->GetHandle( vertex );
+                    ::ULIS::FVec2D& handleCoords = handle->GetCoords();
+
+                    if( handleCoords.x < oXMin ) oXMin = handleCoords.x;
+                    if( handleCoords.y < oYMin ) oYMin = handleCoords.y;
+                    if( handleCoords.x > oXMax ) oXMax = handleCoords.x;
+                    if( handleCoords.y > oYMax ) oYMax = handleCoords.y;
+                }
+            }
         }
 
         return true;

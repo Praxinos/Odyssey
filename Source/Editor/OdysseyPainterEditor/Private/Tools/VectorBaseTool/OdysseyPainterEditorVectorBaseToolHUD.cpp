@@ -59,7 +59,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
                   ::ULIS::FRectD pathBBox;
 
-                  if( path->GetBBoxFromSelectedVertices( pathBBox, true ) )
+                  if( path->GetBBoxFromSelectedVertices( pathBBox, true, true ) )
                   {
                       mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | pathBBox
                                                                 : pathBBox;

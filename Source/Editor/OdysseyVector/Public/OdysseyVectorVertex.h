@@ -338,6 +338,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void SetRadius( double iRadius );
 
         static bool GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVertexList
+                                     , bool iWithHandles
                                      , double& oXMin
                                      , double& oYMin
                                      , double& oXMax
