@@ -35,5 +35,4 @@ private:
 private:
     TSharedPtr<EOdysseyStylusInputDriver>       mTabletAPISelected;
     TArray<TSharedPtr<EOdysseyStylusInputDriver>> mOptions;
-
 };

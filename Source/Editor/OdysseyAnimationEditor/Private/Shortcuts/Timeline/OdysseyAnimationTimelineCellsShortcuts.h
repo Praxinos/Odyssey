@@ -22,6 +22,9 @@ public:
     void Action_SelectAll();
     void Action_Delete();
     void Action_ConvertToStaggerCell();
+    void Action_IncreaseSelectedCellsLength();
+    void Action_DecreaseSelectedCellsLength();
+    void Action_SetSelectedCellsLength();
 
     bool CanAction_Copy();
     bool CanAction_Cut();
@@ -29,6 +32,9 @@ public:
     bool CanAction_SelectAll();
     bool CanAction_Delete();
     bool CanAction_ConvertToStaggerCell();
+    bool CanAction_IncreaseSelectedCellsLength();
+    bool CanAction_DecreaseSelectedCellsLength();
+    bool CanAction_SetSelectedCellsLength();
 
 private:
     UOdysseyLayerStack* mLayerStack;

@@ -28,6 +28,7 @@ public:
     void Remove(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells, bool iPreventEmptyLayer = true);
     void RemoveFrame(int iFrameIndex);
     void RemoveFrameRange(const FInt32Range& iRange);
+    void SetLength(TSharedPtr<FOdysseyAnimationCell> iCell, int iLength);
     void SetLength(int iIndex, int iLength);
     void SetOffset(int iOffset);
 

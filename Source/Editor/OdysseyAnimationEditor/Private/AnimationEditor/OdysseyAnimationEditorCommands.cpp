@@ -74,6 +74,9 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( HoldActivateTimelineCutTool, TimelineShortcuts, "Activate Timeline Cut Tool (Hold)", "Hold the key to activate the timeline Cut Tool temporarily", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( BreakCell, TimelineShortcuts, "Break Cell", "Breaks Cell at Current Frame in Current Layer", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( IncreaseSelectedCellsLength, TimelineShortcuts, "Increase Selected Cells Length", "Increase Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Add));
+    UI_BUNDLE_COMMAND( DecreaseSelectedCellsLength, TimelineShortcuts, "Decrease Selected Cells Length", "Decrease Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Subtract));
+    UI_BUNDLE_COMMAND( SetSelectedCellsLength, TimelineShortcuts, "Set Selected Cells Length", "Set Selected Cells Length", EUserInterfaceActionType::Button, FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -97,4 +97,8 @@ public:
     TSharedPtr<FUICommandInfo> ActivateLooping;
     TSharedPtr<FUICommandInfo> InactivateLooping;
     TSharedPtr<FUICommandInfo> ToggleLooping;
+
+    TSharedPtr<FUICommandInfo> IncreaseSelectedCellsLength;
+    TSharedPtr<FUICommandInfo> DecreaseSelectedCellsLength;
+    TSharedPtr<FUICommandInfo> SetSelectedCellsLength;
 };

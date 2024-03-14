@@ -316,20 +316,29 @@ FOdysseyAnimationCellsMutator::RemoveFrameRange(const FInt32Range& iRange)
 }
 
 void
+FOdysseyAnimationCellsMutator::SetLength(TSharedPtr<FOdysseyAnimationCell> iCell, int iLength)
+{
+    if (!iCell)
+        return;
+
+    if (!mCellMutations.Contains(iCell))
+    {
+        TSharedPtr<FOdysseySetCellLengthMutation> mutation = MakeShared<FOdysseySetCellLengthMutation>(iCell, iLength, iCell->GetLength());
+        mCellMutations.Add(iCell, mutation);
+        AddMutation(mCellMutations[iCell]);
+    }
+    mCellMutations[iCell]->Set(iLength);
+    ApplyMutation(mCellMutations[iCell]);
+}
+
+void
 FOdysseyAnimationCellsMutator::SetLength(int iIndex, int iLength)
 {
     if (iIndex < 0 || iIndex >= mContainer->mCells.Num())
         return;
 
     TSharedPtr<FOdysseyAnimationCell> cell = mContainer->mCells[iIndex];
-    if (!mCellMutations.Contains(cell))
-    {
-        TSharedPtr<FOdysseySetCellLengthMutation> mutation = MakeShared<FOdysseySetCellLengthMutation>(cell, iLength, cell->GetLength());
-        mCellMutations.Add(cell, mutation);
-        AddMutation(mCellMutations[cell]);
-    }
-    mCellMutations[cell]->Set(iLength);
-    ApplyMutation(mCellMutations[cell]);
+    SetLength(cell, iLength);
 }
 
 void
