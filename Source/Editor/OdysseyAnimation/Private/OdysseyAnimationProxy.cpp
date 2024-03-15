@@ -131,6 +131,7 @@ FOdysseyAnimationProxy::Init()
 uint32
 FOdysseyAnimationProxy::Run()
 {
+    FOptionalTaskTagScope Scope(ETaskTag::EParallelGameThread);
     //While not told to stop this thread 
     while (mStopTaskCounter.GetValue() == 0)
     {
