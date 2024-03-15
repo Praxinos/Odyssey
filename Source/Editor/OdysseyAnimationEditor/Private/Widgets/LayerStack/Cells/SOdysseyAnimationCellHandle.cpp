@@ -52,3 +52,12 @@ SOdysseyAnimationCellHandle::OnMouseButtonUp(const FGeometry& iGeometry, const F
 	}
 	return FReply::Unhandled();
 }
+
+TOptional<EMouseCursor::Type>
+SOdysseyAnimationCellHandle::GetCursor() const
+{
+	if (!IsEnabled())
+		return TOptional<EMouseCursor::Type>();
+		
+	return EMouseCursor::ResizeLeftRight;
+}

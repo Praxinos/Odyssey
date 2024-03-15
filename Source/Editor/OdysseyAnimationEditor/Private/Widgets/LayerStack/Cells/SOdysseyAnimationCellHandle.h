@@ -29,6 +29,9 @@ public:
 	virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
 
+protected:
+	virtual TOptional<EMouseCursor::Type> GetCursor() const override;
+
 private:
 	bool mIsDragging;
 	FOnDragEvent mOnDragStarted;
