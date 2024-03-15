@@ -303,12 +303,14 @@ FOdysseyMediaProvider
 UOdysseyAnimationLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
 	FOdysseyMediaProvider provider;
+
+    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
+    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+    provider.IsLocked(!isActive || isLocked);
+
 	TSharedPtr<IOdysseyMedia> cellMediaVector = GetCellMediaVector(iFrameIndex);
 	if (cellMediaVector)
 	{
-		bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
-		bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
-		cellMediaVector->IsLocked(!isActive || isLocked);
 		provider.Add(cellMediaVector);
 	}
 	else
@@ -339,11 +341,6 @@ UOdysseyAnimationLayerImageVector::CreateMediaVector(int iFrameIndex)
         return nullptr;
 
     TSharedPtr<FOdysseyMediaVector> mediaVector = mediaVectorList[0];
-
-    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
-    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
-
-    mediaVector->IsLocked(!isActive || isLocked);
     return mediaVector;
 }
 

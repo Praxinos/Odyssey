@@ -216,11 +216,13 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 FOdysseyMediaProvider
 UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
 {
-    FOdysseyMediaProvider mediaProvider;
-    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(RasterBlock);
     bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
     bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
-    mediaRaster->IsLocked(!isActive || isLocked);
+
+    FOdysseyMediaProvider mediaProvider;
+    mediaProvider.IsLocked(!isActive || isLocked);
+
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(RasterBlock);
     mediaProvider.Add(mediaRaster);
     return mediaProvider;
 }

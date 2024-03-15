@@ -17,10 +17,13 @@ public:
 public:
     void Add(const FGuid& iMediaId, const FCreateMediaDelegate& iCreateMediaDelegate);
     void Add(TSharedPtr<IOdysseyMedia> iMedia);
+    bool IsLocked() const;
+    void IsLocked(bool iIsLocked);
 
 public:
     //IOdysseyMedia API
     template<class T> bool HasMedia() const;
+    template<class T> int GetMediaCount() const;
     template<class T> TArray<TSharedPtr<T>> GetMedias() const;
     template<class T> TArray<TSharedPtr<T>> GetOrCreateMedias() const;
 
@@ -30,6 +33,7 @@ private:
         FCreateMediaDelegate mCreateMediaDelegate;
     };
     TMap<FGuid, TArray<FMediaFactory>> mMediaFactories;
+    bool mIsLocked;
 };
 
 template<class T>
@@ -77,5 +81,17 @@ FOdysseyMediaProvider::GetOrCreateMedias() const
         medias.Add(StaticCastSharedPtr<T>(factory.mMedia));
     }
     return medias;
+}
+
+template<class T>
+int
+FOdysseyMediaProvider::GetMediaCount() const
+{
+    if (!mMediaFactories.Contains(T::StaticId()))
+        return 0;
+    
+
+    const TArray<FMediaFactory>& factories = mMediaFactories[T::StaticId()];
+    return factories.Num();
 }
 

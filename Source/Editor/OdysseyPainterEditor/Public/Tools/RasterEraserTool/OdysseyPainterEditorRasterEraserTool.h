@@ -42,6 +42,8 @@ public:
     virtual bool OnKeyDown(const FKey& iKey) override;
     virtual bool OnKeyUp(const FKey& iKey) override;
 
+    virtual EMouseCursor::Type GetMouseCursor() const override;
+
     virtual void Commit() override;
 
     virtual TSharedRef<SWidget> CreateTopTabWidget() override;

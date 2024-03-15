@@ -461,12 +461,14 @@ FOdysseyMediaProvider
 UOdysseyAnimationLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
 {
 	FOdysseyMediaProvider provider;
+
+    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
+    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+    provider.IsLocked(!isActive || isLocked);
+
 	TSharedPtr<IOdysseyMedia> cellMediaRaster = GetCellMediaRaster(iFrameIndex);
 	if (cellMediaRaster)
 	{
-		bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
-		bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
-		cellMediaRaster->IsLocked(!isActive || isLocked);
 		provider.Add(cellMediaRaster);
 	}
 	else
@@ -497,11 +499,6 @@ UOdysseyAnimationLayerImageRaster::CreateMediaRaster(int iFrameIndex)
         return nullptr;
 
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = mediaRasterList[0];
-
-    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
-    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
-
-    mediaRaster->IsLocked(!isActive || isLocked);
     return mediaRaster;
 }
 

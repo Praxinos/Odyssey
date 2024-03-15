@@ -73,13 +73,13 @@ UOdysseyTextureLayerImageVector::GetEngine()
 FOdysseyMediaProvider
 UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
-    FOdysseyMediaProvider mediaProvider;
-    TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mEngine->GetScene());
-
     bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
     bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
-    mediaVector->IsLocked(!isActive || isLocked);
 
+    FOdysseyMediaProvider mediaProvider;
+    mediaProvider.IsLocked(!isActive || isLocked);
+    
+    TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mEngine->GetScene());
     mediaProvider.Add(mediaVector);
     return mediaProvider;
 }

@@ -73,7 +73,7 @@ public:
     virtual void BindShortcuts(class FBaseToolkit* iToolkit);
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
     virtual FOdysseyHUDElement* GetHUD();
-    virtual EMouseCursor::Type GetMouseCursor();
+    virtual EMouseCursor::Type GetMouseCursor() const;
 
 protected:
     virtual TSharedRef<SWidget> CreateTopTabWidget();
@@ -97,7 +97,6 @@ protected:
     TSharedPtr<FOdysseyPainterEditorToolInputProcessor> mInputProcessor;
     FOdysseyPainterEditor*              mEditor;
     FOdysseyHUDElement*                 mHUD;
-    EMouseCursor::Type                  mMouseCursor; //If the cursor should be changed while using this tool
     TSharedPtr<SWidget>                 mTopTabWidget;
 
 public:

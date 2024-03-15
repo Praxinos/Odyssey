@@ -67,6 +67,8 @@ public:
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
     virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
+    virtual EMouseCursor::Type GetMouseCursor() const override;
+
 public:
     // Setters
     // Sets the BrushContexts to apply to brushInstance

@@ -7,7 +7,7 @@ IOdysseyMedia::~IOdysseyMedia()
 {
 }
 
-bool
+/* bool
 IOdysseyMedia::IsLocked() const
 {
     return mIsLocked;
@@ -17,4 +17,4 @@ void
 IOdysseyMedia::IsLocked(bool iIsLocked)
 {
     mIsLocked = iIsLocked;
-}
+} */

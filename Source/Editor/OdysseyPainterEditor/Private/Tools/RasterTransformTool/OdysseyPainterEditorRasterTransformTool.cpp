@@ -35,7 +35,8 @@ UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTo
     mTransformedBlock(nullptr),
     mRasterMutator(true),
     mTransformCaptureMode(EOdysseyTransformCapture::NoCapture),
-    mTransformArea(nullptr)
+    mTransformArea(nullptr),
+    mMouseCursor(EMouseCursor::Crosshairs)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
     mSelection->AddToRoot();
@@ -253,8 +254,12 @@ void UOdysseyPainterEditorRasterTransformTool::PostEditChangeProperty(FPropertyC
     }
 }
 
-EMouseCursor::Type UOdysseyPainterEditorRasterTransformTool::GetMouseCursor()
+EMouseCursor::Type UOdysseyPainterEditorRasterTransformTool::GetMouseCursor() const
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return EMouseCursor::SlashedCircle;
+
     if( mSelection && !mSelection->IsSelectionAreaSet() )
         return mSelection->GetMouseCursor();
     
@@ -281,11 +286,12 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
     if( !mSelection->IsSelectionAreaSet() )
         return;
 
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
         return;
 
-    if (mediaRasters[0]->IsLocked())
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
         return;
 
     ::ULIS::FRectI boundingBox = mSelection->GetSelectionAreaBoundingRect();

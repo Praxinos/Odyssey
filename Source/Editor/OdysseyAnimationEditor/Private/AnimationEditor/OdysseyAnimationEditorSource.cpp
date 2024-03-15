@@ -182,14 +182,11 @@ FOdysseyAnimationEditorSource::Clear()
 		FScopedTransaction ScopedTransaction(transactionName);
 	#endif
 		FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(mAnimation->CurrentFrame);
-		if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
+		if ( !mediaProvider.IsLocked() && mediaProvider.HasMedia<FOdysseyMediaRaster>() )
 		{
 			TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
 			for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
 			{
-				if (mediaRaster->IsLocked())
-					continue;
-
 				TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
 				if (!rasterBlock)
 					continue;

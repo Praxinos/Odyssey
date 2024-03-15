@@ -69,15 +69,16 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
+    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return false;
 
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
-        return false;
-
-    if (mediaRasters[0]->IsLocked())
         return false;
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
@@ -88,16 +89,17 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdyssey
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return;
+
+    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return;
 
     //ensure we can retrieve a media
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
-        return;
-
-    if (mediaRasters[0]->IsLocked())
         return;
 
     SelectedShapeInstance->OnMouseHover( iPointInTexture );
@@ -105,16 +107,17 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysse
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return;
+
+    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return;
 
     //ensure we can retrieve a media
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
-        return;
-
-    if (mediaRasters[0]->IsLocked())
         return;
 
     SelectedShapeInstance->OnMouseDrag(iPointInTexture);
@@ -122,16 +125,17 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdyssey
 
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
+    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return false;
 
     //ensure we can retrieve a media
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
-        return false;
-
-    if (mediaRasters[0]->IsLocked())
         return false;
 
     return SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
@@ -169,16 +173,17 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Commit()
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Tick(float iDeltaTime)
 {
-    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return;
+
+    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return;
 
     //ensure we can retrieve a media
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
-        return;
-
-    if (mediaRasters[0]->IsLocked())
         return;
 
     //Tick the shape
@@ -241,6 +246,16 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FNam
 FSimpleMulticastDelegate& UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeChanged()
 {
     return mOnShapeChanged;
+}
+
+EMouseCursor::Type
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetMouseCursor() const
+{
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return EMouseCursor::SlashedCircle;
+
+    return UOdysseyPainterEditorTool::GetMouseCursor();
 }
 
 #undef LOCTEXT_NAMESPACE

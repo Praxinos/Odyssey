@@ -4,6 +4,7 @@
 #include "OdysseyMediaProvider.h"
 
 FOdysseyMediaProvider::FOdysseyMediaProvider()
+    : mIsLocked(false)
 {
     
 }
@@ -32,4 +33,16 @@ FOdysseyMediaProvider::Add(TSharedPtr<IOdysseyMedia> iMedia)
     FMediaFactory mediaFactory;
     mediaFactory.mMedia = iMedia;
     mMediaFactories[id].Add(mediaFactory);
+}
+
+bool
+FOdysseyMediaProvider::IsLocked() const
+{
+    return mIsLocked;
+}
+
+void
+FOdysseyMediaProvider::IsLocked(bool iIsLocked)
+{
+    mIsLocked = iIsLocked;
 }

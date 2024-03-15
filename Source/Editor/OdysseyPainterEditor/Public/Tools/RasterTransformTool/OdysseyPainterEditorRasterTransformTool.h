@@ -56,7 +56,7 @@ public:
     virtual void Unload() override;
 
     virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
-    virtual EMouseCursor::Type GetMouseCursor() override;
+    virtual EMouseCursor::Type GetMouseCursor() const override;
 
 private:
     int GetRotationAngleFromLastReference(FVector2D iPointInTexture);
@@ -105,4 +105,6 @@ private:
     FVector2D mMouseLastReferencePoint;
 
     int mRotation;
+
+    EMouseCursor::Type mMouseCursor;
 };

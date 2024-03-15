@@ -25,9 +25,9 @@ public:
     //Must return a unique Id identifying the class
     virtual const FGuid& Id() = 0;
 
-    bool IsLocked() const;
-    void IsLocked(bool iIsLocked);
+    //bool IsLocked() const;
+    //void IsLocked(bool iIsLocked);
 
 private:
-    bool mIsLocked;
+    //bool mIsLocked;
 };

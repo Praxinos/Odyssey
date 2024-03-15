@@ -158,24 +158,22 @@ bool
 UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
-    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
-    bool ret = false;
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
 
-    if( hasRaster )
-    {
-        TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
-
-        if( mediaRasters.Num() && ( mediaRasters[0]->IsLocked() == false ) )
-        {
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-
-            mPaintEngine.RasterBlock(rasterBlock);
-
-            ret = OnMouseDownRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
-        }
-    }
-
-    return ret;
+    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
+    if( !hasRaster )
+        return false;
+    
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+    if( mediaRasters.IsEmpty() )
+        return false;
+    
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    mPaintEngine.RasterBlock(rasterBlock);
+    return OnMouseDownRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
+        
 }
 
 void
@@ -346,6 +344,16 @@ FOdysseyBlendParameters
 UOdysseyPainterEditorRasterPaintBucketTool::GetBlendParameters() const
 {
     return BlendParameters;
+}
+
+EMouseCursor::Type
+UOdysseyPainterEditorRasterPaintBucketTool::GetMouseCursor() const
+{
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return EMouseCursor::SlashedCircle;
+
+    return UOdysseyPainterEditorTool::GetMouseCursor();
 }
 
 #undef LOCTEXT_NAMESPACE

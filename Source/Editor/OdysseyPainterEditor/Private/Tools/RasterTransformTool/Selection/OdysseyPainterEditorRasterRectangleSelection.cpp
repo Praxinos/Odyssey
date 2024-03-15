@@ -34,9 +34,10 @@ bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseDown(const FOdysseyPo
     return false;
 }
 
-void UOdysseyPainterEditorRasterRectangleSelection::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+EMouseCursor::Type
+UOdysseyPainterEditorRasterRectangleSelection::GetMouseCursor() const
 {
-    mMouseCursor = EMouseCursor::Default;
+    return EMouseCursor::Default;
 }
 
 void UOdysseyPainterEditorRasterRectangleSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)

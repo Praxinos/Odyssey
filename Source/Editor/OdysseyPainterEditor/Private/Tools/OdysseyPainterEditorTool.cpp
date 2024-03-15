@@ -15,7 +15,6 @@ UOdysseyPainterEditorTool::~UOdysseyPainterEditorTool()
 
 UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
-    , mMouseCursor( EMouseCursor::Crosshairs )
     , mIsActivated(false)
 {
     mHUD = new FOdysseyHUDElement( FName("RootHUD") );
@@ -198,9 +197,9 @@ FOdysseyHUDElement* UOdysseyPainterEditorTool::GetHUD()
     return mHUD;
 }
 
-EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor()
+EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor() const
 {
-    return mMouseCursor;
+    return EMouseCursor::Crosshairs;
 }
 
 bool
