@@ -334,6 +334,37 @@ SOdysseyAnimationLayerImageTimeline::OnDrop(const FGeometry& iGeometry, const FD
 void
 SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 {   
+    //iMenuBuilder.BeginSection("Selection", LOCTEXT("timeline-cells.context-menu.selection-section.name", "Selection"));
+    iMenuBuilder.AddWidget(
+        SNew(SHorizontalBox)
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(4, 0, 2, 0))
+        [
+            SNew(SButton)
+            .OnClicked(this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuMinusButtonClicked)
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(TEXT("-")))
+                .Justification(ETextJustify::Center)
+            ]
+        ]
+        +SHorizontalBox::Slot()
+        .Padding(FMargin(2, 0, 4, 0))
+        [
+            SNew(SButton)
+            .OnClicked(this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuPlusButtonClicked)
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(TEXT("+")))
+                .Justification(ETextJustify::Center)
+            ]
+        ],
+        FText(),
+        true,
+        false
+    );
+    //iMenuBuilder.EndSection();
+
     iMenuBuilder.BeginSection("Selection", LOCTEXT("timeline-cells.context-menu.selection-section.name", "Selection"));
         iMenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
     iMenuBuilder.EndSection();
@@ -348,6 +379,11 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
 
     iMenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
         iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell);
+        iMenuBuilder.AddMenuEntry(
+            FOdysseyAnimationEditorCommands::Get().SetSelectedCellsLength,
+            NAME_None,
+            LOCTEXT("timeline-cells.context-menu.set-selected-cells-length.name", "Set Length")
+        );
     iMenuBuilder.EndSection();
 
     iMenuBuilder.BeginSection("Layer", LOCTEXT("timeline-cells.context-menu.layer-section.name", "Layer"));
@@ -535,6 +571,20 @@ bool
 SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const
 {
     return !mIsCollapsed.Get();
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnContextMenuMinusButtonClicked()
+{
+    mAnimationTimelineCellsShortcuts->Action_DecreaseSelectedCellsLength();
+    return FReply::Handled();
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnContextMenuPlusButtonClicked()
+{
+    mAnimationTimelineCellsShortcuts->Action_IncreaseSelectedCellsLength();
+    return FReply::Handled();
 }
 
 #undef LOCTEXT_NAMESPACE

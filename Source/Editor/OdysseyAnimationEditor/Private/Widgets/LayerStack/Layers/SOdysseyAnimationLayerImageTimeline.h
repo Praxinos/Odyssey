@@ -78,6 +78,9 @@ private:
     bool IsPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
     bool CanSetPreBehaviour() const;
 
+    FReply OnContextMenuMinusButtonClicked();
+    FReply OnContextMenuPlusButtonClicked();
+
 protected:
     FOdysseyAnimationEditorExtension* mExtension;
     UOdysseyAnimationLayer* mLayer;
