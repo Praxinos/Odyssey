@@ -324,9 +324,16 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetSelectedCellsLength()
         .MinSliderValue(1)
         .MaxSliderValue(TOptional<int>())
         .OnValueChanged_Lambda([&value](int iValue) { value = iValue; })
-        .OnValueCommitted_Lambda([&value](int iValue, ETextCommit::Type iType) { value = iValue; }),
+        .OnValueCommitted_Lambda([&value](int iValue, ETextCommit::Type iType) { value = iValue; })
+        .LabelVAlign(VAlign_Center)
+        .Label()
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("timeline-cells.dialog.set-selected-cells-length.label", "Length"))
+        ],
 
         SGenericDialogWidget::FArguments()
+        .UseScrollBox(false)
         .OnOkPressed_Lambda(
             [&value, &layer, &cellsContainer, &selectedCells]()
             {
