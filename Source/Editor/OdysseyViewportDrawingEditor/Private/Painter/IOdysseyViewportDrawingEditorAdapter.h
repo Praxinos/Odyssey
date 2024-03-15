@@ -61,6 +61,8 @@ public:
 
     virtual bool CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY);
 
+    virtual bool GetCursor(EMouseCursor::Type& OutCursor) const;
+
 private:
     /** IStylusMessageHandler Overrides */
     virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex) override;
@@ -133,4 +135,7 @@ protected:
     bool mStylusIsDown = false;
 
     bool mCapturedByEditor = false;
+
+    bool mOverrideMouseCursor = false;
+    EMouseCursor::Type mMouseCursor = EMouseCursor::Default;
 };

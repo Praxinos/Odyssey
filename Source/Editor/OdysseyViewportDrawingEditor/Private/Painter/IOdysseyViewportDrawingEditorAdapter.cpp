@@ -212,6 +212,8 @@ bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw()
 
 bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iX, int32 iY)
 {
+    mOverrideMouseCursor = false;
+
     if (!IsReadyToDraw())
         return false;
 
@@ -239,7 +241,12 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     mCurrentStrokeRay.mPoint.ComputeRelativeParameters(mLastStrokeRay.mPoint);
 
     if( mExtension->GetEditor()->GetSelectedTool() )
+    {
         mExtension->GetEditor()->GetSelectedTool()->OnMouseHover( mCurrentStrokeRay.mPoint );
+        
+        mMouseCursor = mExtension->GetEditor()->GetSelectedTool()->GetMouseCursor();
+        mOverrideMouseCursor = true;
+    }
 
     return true;
 }
@@ -724,4 +731,11 @@ IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged( const TWeakPtr<SWidg
     mLastStylusEventIndex = 0;
 
     ReadStylusInput();
+}
+
+bool
+IOdysseyViewportDrawingEditorAdapter::GetCursor(EMouseCursor::Type& OutCursor) const
+{
+    OutCursor = mMouseCursor;
+    return mOverrideMouseCursor;
 }

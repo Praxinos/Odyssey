@@ -109,6 +109,16 @@ bool FOdysseyViewportDrawingEditorEdMode::CapturedMouseMove(FEditorViewportClien
     return adapter->CapturedMouseMove(iViewportClient, iViewport, iMouseX, iMouseY);
 }
 
+bool
+FOdysseyViewportDrawingEditorEdMode::GetCursor(EMouseCursor::Type& OutCursor) const
+{
+    IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
+    if (!adapter)
+        return false;
+
+    return adapter->GetCursor(OutCursor);
+}
+
 bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 {
 	return GetWorld() ? GetWorld()->GetFeatureLevel() >= ERHIFeatureLevel::SM5 : false;

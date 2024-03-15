@@ -51,6 +51,8 @@ public:
 
 	bool IsEditingEnabled() const;
 
+	virtual bool GetCursor(EMouseCursor::Type& OutCursor) const override;
+
 private:
     void OnResetViewMode();
 
