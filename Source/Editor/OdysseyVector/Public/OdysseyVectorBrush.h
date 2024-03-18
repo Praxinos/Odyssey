@@ -15,6 +15,9 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
     GENERATED_BODY()
 
     UPROPERTY( EditAnywhere, Category = "Default" )
+    UTexture2D* Texture;
+
+    UPROPERTY( EditAnywhere, Category = "Default" )
     bool ColorFromBrush;
 
     UPROPERTY( EditAnywhere, Category = "Default" )
