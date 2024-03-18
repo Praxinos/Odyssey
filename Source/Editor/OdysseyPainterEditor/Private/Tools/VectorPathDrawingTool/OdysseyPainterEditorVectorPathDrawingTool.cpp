@@ -24,7 +24,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , ColorSource( eBaseToolColorSource::ColorWheel )
     , Opacity( 1.0f )
     , TracingType( eTracingType::Organic )
-    , TracingFidelity( eTracingFidelity::High )
+    , TracingFidelity( eTracingFidelity::Highest )
     , Radius( 5.0f )
     , PressureSensitive( true )
     //, Absolute( true )
