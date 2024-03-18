@@ -231,6 +231,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         virtual uint32 GetIndex( FOdysseyVectorSegment* iSegment );
 
         /**
+         * @brief Get the point's ID. This is for the programmer to use e.g as an index of an array.
+         * it should no be considered consistent through the whole execution of the program.
+         */
+        uint32 GetID();
+
+        /**
          * @brief Get the position of the vertex on the section passed as parameter.
          * @param iSection the section the vertex lies on.
          * @return 0 or 1.
@@ -377,6 +383,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void SetLocked( bool iIsLocked );
         bool IsLocked();
 
+        /**
+         * @brief Set the point's ID. This is for the programmer to use e.g as an index of an array.
+         * it should no be considered consistent through the whole execution of the program.
+         * @param iID the desired point's ID
+         */
+        void SetID( uint32 iID );
+
     protected:
         /**
          * @brief Set the vertex coordinate in the X-Axis and Y-axis. It invalidates the attached segments.
@@ -394,7 +407,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorObject* mOwner;
         uint32 mFlags;
         double mRadius;
-       
+        uint32 mID;
 
         double mDistanceToNearestSegment;
         double mNearestSegmentT;

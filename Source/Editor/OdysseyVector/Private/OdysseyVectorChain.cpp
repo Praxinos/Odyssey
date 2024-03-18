@@ -695,9 +695,11 @@ FOdysseyVectorChain::EraseSegments( BLImageData* iImageData
             for( auto it = fractionCache.begin(); it != fractionCache.end(); ++it )
             {
                 FOdysseyVectorFraction& fraction = *it;
+                ::ULIS::FVec2D& p0Coords = fraction.point[0]->GetCoords();
+                ::ULIS::FVec2D& p1Coords = fraction.point[1]->GetCoords();
 
-                BLPoint p0 = worldMatrix.mapPoint( fraction.lineVertex[0].x, fraction.lineVertex[0].y );
-                BLPoint p1 = worldMatrix.mapPoint( fraction.lineVertex[1].x, fraction.lineVertex[1].y );
+                BLPoint p0 = worldMatrix.mapPoint( p0Coords.x, p0Coords.y );
+                BLPoint p1 = worldMatrix.mapPoint( p1Coords.x, p1Coords.y );
 
                 chainedWayPoint = TraceLine( p0.x
                                            , p0.y
@@ -723,9 +725,11 @@ FOdysseyVectorChain::EraseSegments( BLImageData* iImageData
             for( auto it = fractionCache.rbegin(); it != fractionCache.rend(); ++it )
             {
                 FOdysseyVectorFraction& fraction = *it;
+                ::ULIS::FVec2D& p0Coords = fraction.point[0]->GetCoords();
+                ::ULIS::FVec2D& p1Coords = fraction.point[1]->GetCoords();
 
-                BLPoint p0 = worldMatrix.mapPoint( fraction.lineVertex[0].x, fraction.lineVertex[0].y );
-                BLPoint p1 = worldMatrix.mapPoint( fraction.lineVertex[1].x, fraction.lineVertex[1].y );
+                BLPoint p0 = worldMatrix.mapPoint( p0Coords.x, p0Coords.y );
+                BLPoint p1 = worldMatrix.mapPoint( p1Coords.x, p1Coords.y );
 
                 chainedWayPoint = TraceLine( p1.x
                                            , p1.y

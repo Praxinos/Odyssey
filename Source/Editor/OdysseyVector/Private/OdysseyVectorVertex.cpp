@@ -36,6 +36,18 @@ FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment* iSegment )
     return false;
 }
 
+void
+FOdysseyVectorVertex::SetID( uint32 iID )
+{
+    mID = iID;
+}
+
+uint32
+FOdysseyVectorVertex::GetID()
+{
+    return mID;
+}
+
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetWorldCoords()
 {

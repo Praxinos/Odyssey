@@ -562,6 +562,16 @@ FOdysseyVectorPathTracer::GetRedrawRect()
             if( mPointArray[i].radius > maxRadius ) maxRadius = mPointArray[i].radius;
         }
 
+        for( int i = 0; i < mRecordArray.size(); i++ )
+        {
+            if( mRecordArray[i].coords.x < xmin ) xmin = mRecordArray[i].coords.x;
+            if( mRecordArray[i].coords.x > xmax ) xmax = mRecordArray[i].coords.x;
+            if( mRecordArray[i].coords.y < ymin ) ymin = mRecordArray[i].coords.y;
+            if( mRecordArray[i].coords.y > ymax ) ymax = mRecordArray[i].coords.y;
+
+            if( mRecordArray[i].radius > maxRadius ) maxRadius = mRecordArray[i].radius;
+        }
+
         return ::ULIS::FRectD::FromMinMax( xmin - maxRadius
                                          , ymin - maxRadius
                                          , xmax + maxRadius

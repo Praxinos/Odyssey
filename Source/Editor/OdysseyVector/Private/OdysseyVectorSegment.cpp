@@ -38,8 +38,8 @@ FOdysseyVectorSegment::GetFractionCacheStartPointInParent()
     {
         uint32 index = 0;
 
-        return ::ULIS::FVec2D( mFractionCache[index].lineVertexInParent[0].x
-                             , mFractionCache[index].lineVertexInParent[0].y );
+        return ::ULIS::FVec2D( mFractionCache[index].pointCoordsInParent[0].x
+                             , mFractionCache[index].pointCoordsInParent[0].y );
     }
 
     return ::ULIS::FVec2D( 0.0f, 0.0f );
@@ -52,8 +52,8 @@ FOdysseyVectorSegment::GetFractionCacheEndPointInParent()
     {
         uint32 index = mFractionCache.size() - 1;
 
-        return ::ULIS::FVec2D( mFractionCache[index].lineVertexInParent[1].x
-                             , mFractionCache[index].lineVertexInParent[1].y );
+        return ::ULIS::FVec2D( mFractionCache[index].pointCoordsInParent[1].x
+                             , mFractionCache[index].pointCoordsInParent[1].y );
     }
 
     return ::ULIS::FVec2D( 0.0f, 0.0f );

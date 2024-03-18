@@ -220,19 +220,6 @@ uint64
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FKey& iKey )
 {
-    if( iKey == EKeys::Add )
-    {
-        IncreaseContourWidth();
-
-        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-    }
-
-    if( iKey == EKeys::Subtract )
-    {
-        DecreaseContourWidth();
-
-        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-    }
 
     return 0;
 }
@@ -270,6 +257,20 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
     if( iKey == EKeys::Delete )
     {
         Delete();
+
+        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    }
+
+    if( iKey == EKeys::Add )
+    {
+        IncreaseContourWidth();
+
+        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    }
+
+    if( iKey == EKeys::Subtract )
+    {
+        DecreaseContourWidth();
 
         return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }

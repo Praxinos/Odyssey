@@ -1221,8 +1221,10 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 
                 for( uint32 i = 0; i < fractionCache.size(); i++ )
                 {
-                    BLPoint p0 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[0].x, fractionCache[i].lineVertex[0].y );
-                    BLPoint p1 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[1].x, fractionCache[i].lineVertex[1].y );
+                    ::ULIS::FVec2D& p0Coords = fractionCache[i].point[0]->GetCoords();
+                    ::ULIS::FVec2D& p1Coords = fractionCache[i].point[1]->GetCoords();
+                    BLPoint p0 = mWorldMatrix.mapPoint( p0Coords.x, p0Coords.y );
+                    BLPoint p1 = mWorldMatrix.mapPoint( p1Coords.x, p1Coords.y  );
                     bool pointHitMask = TraceLine( p0.x, p0.y, 0.0f
                                                  , p1.x, p1.y, 0.0f
                                                  , [&imageData]( int32 iX, int32 iY, double iT)

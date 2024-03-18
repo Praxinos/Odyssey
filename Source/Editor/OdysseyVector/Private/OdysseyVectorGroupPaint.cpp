@@ -527,14 +527,13 @@ FOdysseyVectorGroupPaint::IntersectVertex( FOdysseyVectorVertex* iVertex0
     {
         if( iVertex0->GetSegmentCount() == 1 )
         {
-            FOdysseyVectorSegment* segment = iVertex0->GetFirstSegment();
-
             if( mGapTolerance )
             {
                 ::ULIS::FVec2D dif = ::ULIS::FVec2D( iPoint1InParent - iPoint0InParent );
                 double distance = dif.Distance();
 
-                if( distance < mGapTolerance )
+                if( ( distance > 0.0f ) // if distance equals 0 it will fully intersect
+                 && ( distance < mGapTolerance ) )
                 {
                     if( distance < iVertex0->GetDistanceToNearestVertex() )
                     {
@@ -567,8 +566,8 @@ IntersectGapSection( FOdysseyVectorSection* iGapSection
             // Test intersections in PaintGroup's coordinates system (struct member lineVertexInParent).
             if ( FOdysseyVector::IntersectSegment ( gapSectionPoint0
                                                   , gapSectionPoint1
-                                                  , segmentPoly->lineVertexInParent[0]
-                                                  , segmentPoly->lineVertexInParent[1]
+                                                  , segmentPoly->pointCoordsInParent[0]
+                                                  , segmentPoly->pointCoordsInParent[1]
                                                   , &gapSectionT
                                                   , &segmentPolySubT ) )
             {
@@ -627,8 +626,11 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
     for ( int i = 0; i < segment0FractionCache.size(); i++ )
     {
         FOdysseyVectorFraction* segment0Poly = &segment0FractionCache[i];
-        ::ULIS::FVec2D segment0PolyVector = ( segment0Poly->lineVertex[1] - segment0Poly->lineVertex[0] );
-        ::ULIS::FVec2D segment0PolyVectorInParent = ( segment0Poly->lineVertexInParent[1] - segment0Poly->lineVertexInParent[0] );
+        ::ULIS::FVec2D& segment0P0Coords = segment0Poly->point[0]->GetCoords();
+        ::ULIS::FVec2D& segment0P1Coords = segment0Poly->point[1]->GetCoords();
+
+        ::ULIS::FVec2D segment0PolyVector = ( segment0P1Coords - segment0P0Coords );
+        ::ULIS::FVec2D segment0PolyVectorInParent = ( segment0Poly->pointCoordsInParent[1] - segment0Poly->pointCoordsInParent[0] );
         //FOdysseyVectorVertex* segment0PolyVertex0 = nullptr;
         //FOdysseyVectorVertex* segment0PolyVertex1 = nullptr;
         int p = i - 1;
@@ -654,6 +656,9 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                 for( int j = 0; j < segment1FractionCache.size(); j++ )
                 {
                     FOdysseyVectorFraction* segment1Poly = &segment1FractionCache[j];
+                    ::ULIS::FVec2D& segment1P0Coords = segment1Poly->point[0]->GetCoords();
+                    ::ULIS::FVec2D& segment1P1Coords = segment1Poly->point[1]->GetCoords();
+
                     //FOdysseyVectorVertex* segment1PolyVertex0 = nullptr;
                     //FOdysseyVectorVertex* segment1PolyVertex1 = nullptr;
                     double segment0PolySubT, segment1PolySubT;
@@ -672,19 +677,23 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                     if( ( segment0Poly->xMaxInParent >= segment1Poly->xMinInParent ) && ( segment0Poly->xMinInParent <= segment1Poly->xMaxInParent )
                      && ( segment0Poly->yMaxInParent >= segment1Poly->yMinInParent ) && ( segment0Poly->yMinInParent <= segment1Poly->yMaxInParent ) )
                     {
-                        ::ULIS::FVec2D segment1PolyVector = ( segment1Poly->lineVertex[1] - segment1Poly->lineVertex[0] );
-                        ::ULIS::FVec2D segment1PolyVectorInParent = ( segment1Poly->lineVertexInParent[1] - segment1Poly->lineVertexInParent[0] );
+                        ::ULIS::FVec2D segment1PolyVector = ( segment1P1Coords - segment1P0Coords );
+                        ::ULIS::FVec2D segment1PolyVectorInParent = ( segment1Poly->pointCoordsInParent[1] - segment1Poly->pointCoordsInParent[0] );
 
-                        if(   ( iSegment0 != iSegment1 )
-                        // check this is not the same sub-segment or adjacent sub-segment, or else they would always intersect
-                         || ( ( iSegment0 == iSegment1 ) && ( ( i - j ) > 1 ) ) )
+                        // check this is not the same sub-segment or adjacent sub-segment,
+                        // i.e check they don't share a point in common
+                        // or else they would always intersect
+                        if( ( segment0Poly->point[0] != segment1Poly->point[1] )
+                         && ( segment0Poly->point[0] != segment1Poly->point[0] )
+                         && ( segment0Poly->point[1] != segment1Poly->point[0] )
+                         && ( segment0Poly->point[1] != segment1Poly->point[1] ) )
                         {
 
                             // Test intersections in PaintGroup's coordinates system (struct member lineVertexInParent).
-                            if ( FOdysseyVector::IntersectSegment ( segment0Poly->lineVertexInParent[0]
-                                                                  , segment0Poly->lineVertexInParent[1]
-                                                                  , segment1Poly->lineVertexInParent[0]
-                                                                  , segment1Poly->lineVertexInParent[1]
+                            if ( FOdysseyVector::IntersectSegment ( segment0Poly->pointCoordsInParent[0]
+                                                                  , segment0Poly->pointCoordsInParent[1]
+                                                                  , segment1Poly->pointCoordsInParent[0]
+                                                                  , segment1Poly->pointCoordsInParent[1]
                                                                   , &segment0PolySubT
                                                                   , &segment1PolySubT ) )
                             {
@@ -692,16 +701,16 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                                 // Note: we cannot use segment->GetPointAt() to determine the position
                                 // of the intersection because it will not match the intersection that
                                 // we detect via linear means. Cubic segments are not linear.
-                                ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->lineVertexInParent[0].x + ( segment0PolyVectorInParent.x * segment0PolySubT )
-                                                                   , segment0Poly->lineVertexInParent[0].y + ( segment0PolyVectorInParent.y * segment0PolySubT ) };
-                                ::ULIS::FVec2D segment1ISXCoords = { segment1Poly->lineVertexInParent[0].x + ( segment1PolyVectorInParent.x * segment1PolySubT )
-                                                                   , segment1Poly->lineVertexInParent[0].y + ( segment1PolyVectorInParent.y * segment1PolySubT ) };
+                                ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->pointCoordsInParent[0].x + ( segment0PolyVectorInParent.x * segment0PolySubT )
+                                                                   , segment0Poly->pointCoordsInParent[0].y + ( segment0PolyVectorInParent.y * segment0PolySubT ) };
+                                ::ULIS::FVec2D segment1ISXCoords = { segment1Poly->pointCoordsInParent[0].x + ( segment1PolyVectorInParent.x * segment1PolySubT )
+                                                                   , segment1Poly->pointCoordsInParent[0].y + ( segment1PolyVectorInParent.y * segment1PolySubT ) };
                                 // find value T at intersection. This is coordinates system-independent.
                                 double segment0T = segment0Poly->fromT + ( segment0PolySubT * ( segment0Poly->toT - segment0Poly->fromT ) );
                                 double segment1T = segment1Poly->fromT + ( segment1PolySubT * ( segment1Poly->toT - segment1Poly->fromT ) );
 
-                                if( ( segment0T > 0.0f && segment0T < 1.0f )
-                                 && ( segment1T > 0.0f && segment1T < 1.0f ) )
+                                if( ( segment0T >= 0.0f && segment0T <= 1.0f )
+                                 && ( segment1T >= 0.0f && segment1T <= 1.0f ) )
                                 {
 /*
                                     //FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection( segment0ISXCoords.x
@@ -752,22 +761,23 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                     // check distance at endpoints
                     double distance;
                     double t = DistanceToSegmentConstrained( segment1Point0InParent
-                                                           , segment0Poly->lineVertexInParent[0]
-                                                           , segment0Poly->lineVertexInParent[1]
+                                                           , segment0Poly->pointCoordsInParent[0]
+                                                           , segment0Poly->pointCoordsInParent[1]
                                                            , distance );
 
                     //if ( ( t > 0.0f ) && ( t < 1.0f ) )
                     {
                         mMutex.lock();
-                        if( ( distance < mGapTolerance )
+                        if( ( distance > 0.0f ) // if distance equals 0, it will fully intersect
+                         && ( distance < mGapTolerance )
                          && ( distance < segment1Vertex0->GetDistanceToNearestSegment() ) )
                         {
                             double segmentT = segment0Poly->fromT + ( ( segment0Poly->toT - segment0Poly->fromT ) * t );
                             // Note: we cannot use segment->GetPointAt() to determine the position
                             // of the intersection because it will not match the intersection that
                             // we detect via linear means. Cubic segments are not linear.
-                            ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->lineVertexInParent[0].x + ( segment0PolyVectorInParent.x * t )
-                                                               , segment0Poly->lineVertexInParent[0].y + ( segment0PolyVectorInParent.y * t ) };
+                            ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->pointCoordsInParent[0].x + ( segment0PolyVectorInParent.x * t )
+                                                               , segment0Poly->pointCoordsInParent[0].y + ( segment0PolyVectorInParent.y * t ) };
 
                             segment1Vertex0->SetNearestSegment( iSegment0, distance, segmentT, segment0ISXCoords );
 
@@ -785,22 +795,23 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
                 {
                     double distance;
                     double t = DistanceToSegmentConstrained( segment1Point1InParent
-                                                           , segment0Poly->lineVertexInParent[0]
-                                                           , segment0Poly->lineVertexInParent[1]
+                                                           , segment0Poly->pointCoordsInParent[0]
+                                                           , segment0Poly->pointCoordsInParent[1]
                                                            , distance );
 
                     //if ( ( t > 0.0f ) && ( t < 1.0f ) )
                     {
                         mMutex.lock();
-                        if( ( distance < mGapTolerance )
+                        if( ( distance > 0.0f ) // if distance equals 0, it will fully intersect
+                         && ( distance < mGapTolerance )
                          && ( distance < segment1Vertex1->GetDistanceToNearestSegment() ) )
                         {
                             double segmentT = segment0Poly->fromT + ( ( segment0Poly->toT - segment0Poly->fromT ) * t );
                             // Note: we cannot use segment->GetPointAt() to determine the position
                             // of the intersection because it will not match the intersection that
                             // we detect via linear means. Cubic segments are not linear.
-                            ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->lineVertexInParent[0].x + ( segment0PolyVectorInParent.x * t )
-                                                               , segment0Poly->lineVertexInParent[0].y + ( segment0PolyVectorInParent.y * t ) };
+                            ::ULIS::FVec2D segment0ISXCoords = { segment0Poly->pointCoordsInParent[0].x + ( segment0PolyVectorInParent.x * t )
+                                                               , segment0Poly->pointCoordsInParent[0].y + ( segment0PolyVectorInParent.y * t ) };
 
                             segment1Vertex1->SetNearestSegment( iSegment0, distance, segmentT, segment0ISXCoords );
                         }
@@ -1036,29 +1047,29 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
                             if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
                             {
                                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
-                                std::vector<FOdysseyVectorFraction>& polygonCache = cubicSegment->GetFractionCache();
+                                std::vector<FOdysseyVectorFraction>& fractionCache = cubicSegment->GetFractionCache();
 
                                 // convert polygon cache coordinates to paintgroup's coordinates
                                 // for faster intersection test
-                                for( int i = 0; i < polygonCache.size(); i++ )
+                                for( int i = 0; i < fractionCache.size(); i++ )
                                 {
-                                    FOdysseyVectorFraction* polygon = &polygonCache[i];
+                                    FOdysseyVectorFraction* fraction = &fractionCache[i];
+                                    ::ULIS::FVec2D& p0Coords = fraction->point[0]->GetCoords();
+                                    ::ULIS::FVec2D& p1Coords = fraction->point[1]->GetCoords();
 
-                                    BLPoint lineVertex0 = conversionMatrix.mapPoint( polygon->lineVertex[0].x
-                                                                                   , polygon->lineVertex[0].y );
-                                    polygon->lineVertexInParent[0].x = lineVertex0.x;
-                                    polygon->lineVertexInParent[0].y = lineVertex0.y;
+                                    BLPoint lineVertex0 = conversionMatrix.mapPoint( p0Coords.x, p0Coords.y );
+                                    fraction->pointCoordsInParent[0].x = lineVertex0.x;
+                                    fraction->pointCoordsInParent[0].y = lineVertex0.y;
 
-                                    BLPoint lineVertex1 = conversionMatrix.mapPoint( polygon->lineVertex[1].x
-                                                                                   , polygon->lineVertex[1].y );
-                                    polygon->lineVertexInParent[1].x = lineVertex1.x;
-                                    polygon->lineVertexInParent[1].y = lineVertex1.y;
+                                    BLPoint lineVertex1 = conversionMatrix.mapPoint( p1Coords.x, p1Coords.y );
+                                    fraction->pointCoordsInParent[1].x = lineVertex1.x;
+                                    fraction->pointCoordsInParent[1].y = lineVertex1.y;
 
                                     // this may be a bit too memory-consuming. Don't know. Keep it for now.
-                                    polygon->xMaxInParent = ::ULIS::FMath::Max( polygon->lineVertexInParent[0].x, polygon->lineVertexInParent[1].x );
-                                    polygon->yMaxInParent = ::ULIS::FMath::Max( polygon->lineVertexInParent[0].y, polygon->lineVertexInParent[1].y );
-                                    polygon->xMinInParent = ::ULIS::FMath::Min( polygon->lineVertexInParent[0].x, polygon->lineVertexInParent[1].x );
-                                    polygon->yMinInParent = ::ULIS::FMath::Min( polygon->lineVertexInParent[0].y, polygon->lineVertexInParent[1].y );
+                                    fraction->xMaxInParent = ::ULIS::FMath::Max( fraction->pointCoordsInParent[0].x, fraction->pointCoordsInParent[1].x );
+                                    fraction->yMaxInParent = ::ULIS::FMath::Max( fraction->pointCoordsInParent[0].y, fraction->pointCoordsInParent[1].y );
+                                    fraction->xMinInParent = ::ULIS::FMath::Min( fraction->pointCoordsInParent[0].x, fraction->pointCoordsInParent[1].x );
+                                    fraction->yMinInParent = ::ULIS::FMath::Min( fraction->pointCoordsInParent[0].y, fraction->pointCoordsInParent[1].y );
                                 }
 
                                 // take advantage of this loop to compute the box.

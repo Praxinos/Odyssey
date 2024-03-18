@@ -39,12 +39,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         ::ULIS::FVec2D& GetCoords();
 
         /**
-         * @brief Get the point's ID. This is for the programmer to use e.g as an index of an array.
-         * it should no be considered consistent through the whole execution of the program.
-         */
-        uint32 GetID();
-
-        /**
          * @brief Get the point's coordinate on X axis
          * @return the point's coordinates on X axis
          */
@@ -69,11 +63,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          */
         void Set( double iX, double iY );
 
-        /**
-         * @brief Set the point's ID. This is for the programmer to use e.g as an index of an array.
-         * it should no be considered consistent through the whole execution of the program.
-         * @param iID the desired point's ID
-         */
         void SetID( uint32 iID );
 
         /**
@@ -99,7 +88,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
         virtual void SetCoords( double iX, double iY );
 
     protected:
-        uint32 mID;
+        // DO NOT add other member variables. this class must remain small in footprint
         ::ULIS::FVec2D mCoords;
-        double mRadius;
 };

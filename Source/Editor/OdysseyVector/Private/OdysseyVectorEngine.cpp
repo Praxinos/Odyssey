@@ -1,3 +1,4 @@
+#include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorPath.h"
 #include <future>
@@ -149,37 +150,51 @@ FOdysseyVectorEngine::SelectObject( FOdysseyVectorObject* iVecObj )
     }
 }
 
+::ULIS::FRectD
+FOdysseyVectorEngine::GetInvalidatedRect( double iScreenWidth, double iScreenHeight )
+{
+    ::ULIS::FRectD screen = ::ULIS::FRectD( 0, 0, iScreenWidth, iScreenHeight );
+    ::ULIS::FRectD sanitizedRect;
+    ::ULIS::FRectD retRect;
+
+    FOdysseyVector::IntersectRegions( mInvalidatedRect
+                                    , screen
+                                    , &sanitizedRect );
+
+    // note: if the region is 0, we also redraw everything
+    retRect = ( mInvalidatedRect.Area() == 0.0f ) ? screen : sanitizedRect;
+
+    // sanitize
+    if( retRect.x < 0.0f )
+    {
+        retRect.x = 0.0f;
+    }
+
+    if( retRect.y < 0.0f )
+    {
+        retRect.y = 0.0f;
+    } 
+
+    return retRect;
+}
+
 void
-FOdysseyVectorEngine::SetInvalidatedRect( const ::ULIS::FRectD& iRect )
+FOdysseyVectorEngine::InvalidateRect()
+{
+    mInvalidatedRect = ::ULIS::FRectD( 0, 0, DBL_MAX, DBL_MAX );
+}
+
+void
+FOdysseyVectorEngine::InvalidateRect( const ::ULIS::FRectD& iRect )
 {
     if( mInvalidatedRect.Area() == 0.0f )
     {
-        mInvalidatedRect.x = iRect.x;
-        mInvalidatedRect.y = iRect.y;
-        mInvalidatedRect.w = iRect.w;
-        mInvalidatedRect.h = iRect.h;
+        mInvalidatedRect = iRect;
     }
-    else // if we haven' been redrawn yet, combine the rectangles
+    else // combine the rectangles
     {
         mInvalidatedRect = mInvalidatedRect | iRect;
     }
-
-    // sanitize
-    if( mInvalidatedRect.x < 0.0f )
-    {
-        mInvalidatedRect.x = 0.0f;
-    }
-
-    if( mInvalidatedRect.y < 0.0f )
-    {
-        mInvalidatedRect.y = 0.0f;
-    }
-}
-
-::ULIS::FRectD&
-FOdysseyVectorEngine::GetInvalidatedRect()
-{
-    return mInvalidatedRect;
 }
 
 void
@@ -245,28 +260,32 @@ FOdysseyVectorEngine::GetSelectedVerticesFromFocusedObjects( std::vector<FOdysse
         } );
 }
 
-void
+::ULIS::FRectD
 FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
     BLImage* image = iBLContext->targetImage();
+    ::ULIS::FRectD sanitizedRect;
     ::ULIS::FRectD screen;
-  
+
     // retrieves buffer specs and allows us to draw directly in the buffer
     image->makeMutable( &mRenderData );
 
-    screen = ::ULIS::FRectD( 0, 0, mRenderData.size.w, mRenderData.size.h );
+    // we need to get a sanitized version of the rendering region because when we tell the
+    //  engine to redraw the whole screen, the region W and H values are set to DBL_MAX
+    // via a call to FOdysseyVectorEngine::Invalidate(void). This is because in some 
+    // portion of the code (the mouse tools, namely) we can't really know the size of the
+    // recipient image because we deal with FOdysseyMediaVector which are not supposed to
+    // know the size of the recipient image. Only FOdysseyVectorEngine::Render() know that
+    // because it gets the BLContext as an argument.
+    // So we just set the rectangle to a huge value that basically says "redraw everything"
+    // and this is delt with by the Odyssey*ImageRenderers.
+    sanitizedRect = GetInvalidatedRect( mRenderData.size.w, mRenderData.size.h );
 
     // for drawing polygones (textured)
     if( mHorizontalLineBuffer.size() != mRenderData.size.h )
     {
         mHorizontalLineBuffer.resize( mRenderData.size.h );
-    }
-
-    // request refresh for the whole screen if the invalidation region is 0
-    if( mInvalidatedRect.Area() == 0.0f )
-    {
-        mInvalidatedRect = screen;
     }
 
     if( mInvalidationFlags )
@@ -286,9 +305,12 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
         iBLContext->setFillStyle( blFillColor );
 
-        iBLContext->fillAll();
+        iBLContext->fillRect( BLRect( sanitizedRect.x
+                                    , sanitizedRect.y
+                                    , sanitizedRect.w
+                                    , sanitizedRect.h ) );
 
-        mScene->Draw( iBLContext, mInvalidatedRect, 1.0f, iDrawingFlags );
+        mScene->Draw( iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
 
         iBLContext->restore();
 
@@ -300,9 +322,11 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
     // reset invalidation region
     // ( refresh the whole screen at next iteration unless this is set
     // to some value ).
-    mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+    mInvalidatedRect = ::ULIS::FRectD( 0, 0, 0, 0 );
 
     mRenderData.reset();
+
+    return sanitizedRect;
 }
 
 FOdysseyVectorVertex*

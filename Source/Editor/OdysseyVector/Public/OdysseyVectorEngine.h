@@ -261,7 +261,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static void GetVertexSelection( std::list<FOdysseyVectorObject*>& iVectorObjectList
                                       , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
 
-        void Render( BLContext* iBLContext, uint64 iDrawingFlags );
+        ::ULIS::FRectD Render( BLContext* iBLContext, uint64 iDrawingFlags );
 
         void EraseSections( FOdysseyVectorGroupPaint* iScene
                           , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
@@ -344,9 +344,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         uint64 Traverse( FOdysseyVectorObject* iObject
                        , uint64 iTraversalFlags
                        , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
-
-       void SetInvalidatedRect( const ::ULIS::FRectD& iRect );
-       ::ULIS::FRectD& GetInvalidatedRect();
+        void InvalidateRect( const ::ULIS::FRectD& iRect );
+        void InvalidateRect( );
+        ::ULIS::FRectD GetInvalidatedRect( double iScreenWidth, double iScreenHeight );
 
         void GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList );
         void GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& oObjectList );

@@ -63,18 +63,6 @@ FOdysseyVectorPoint::GetY()
     return mCoords.y;
 }
 
-void
-FOdysseyVectorPoint::SetID( uint32 iID )
-{
-    mID = iID;
-}
-
-uint32
-FOdysseyVectorPoint::GetID()
-{
-    return mID;
-}
-
 //static
 void
 FOdysseyVectorPoint::ArrayToVertexArray( std::vector<FOdysseyVectorPoint*>& iPointArray
