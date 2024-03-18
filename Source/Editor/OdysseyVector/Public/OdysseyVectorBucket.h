@@ -155,9 +155,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          * @brief Set this bucket's coordinates
          * @param iX x coordinate
          * @param iY y coordinate
-         * @param iRadius ignored - can be 0.0f
          */
-        virtual void SetCoords( double iX, double iY, double iRadius ) override;
+        virtual void SetCoords( double iX, double iY ) override;
 
         /**
          * @brief Set gradient color 0

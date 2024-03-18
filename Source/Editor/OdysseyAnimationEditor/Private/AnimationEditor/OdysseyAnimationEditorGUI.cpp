@@ -163,7 +163,8 @@ void
 FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
                                              , uint64 iSignalFlags )
 {
-    if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
+    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
+     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED ) )
     {
         TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 

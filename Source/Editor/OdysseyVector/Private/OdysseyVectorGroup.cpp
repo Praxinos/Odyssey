@@ -23,7 +23,10 @@ FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorGroup::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags )
+FOdysseyVectorGroup::DrawShape( BLContext* iBLContext
+                              , const ::ULIS::FRectD& iInvalidationArea
+                              , double iCombinedOpacity
+                              , uint64 iFlags )
 {
 
 }
@@ -47,8 +50,11 @@ FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
     int init = 0;
 
     // Update the bounding box
-    if( ( mInvalidationFlags & INVALIDATE_CHILD_SHAPE )
-     || ( mInvalidationFlags & INVALIDATE_SHAPE ) )
+    if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+     || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
+     || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   )
+     || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
+     || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          ) )
     {
         for( FOdysseyVectorObject *child : mChildrenList )
         {

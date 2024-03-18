@@ -73,20 +73,12 @@ void
 FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
-    ::ULIS::FRectI invalidatedRect = mEngine->GetInvalidatedRect();
-    ::ULIS::FRectI screen = ::ULIS::FRectI( 0, 0, mWidth, mHeight );
-    ::ULIS::FRectI santitizedRect;
+    //Render in a BLImage (also resets the internal invalidation rectangle)
+    ::ULIS::FRectD invalidatedRectD = mEngine->Render( mBlockData->mBLContext.Get(), iDrawingFlags );
+    ::ULIS::FRectI invalidatedRectI = invalidatedRectD;
 
-    FOdysseyVector::IntersectRegions( invalidatedRect
-                                    , screen
-                                    , &santitizedRect );
-
-
-    if( santitizedRect.Area() )
+    if( invalidatedRectD.Area() )
     {
-        //Render in a BLImage (also resets the internal invalidation rectangle)
-        mEngine->Render(mBlockData->mBLContext.Get(), iDrawingFlags);
-
         {
             TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
             //Get a ULIS block pointing to the BLImage
@@ -96,11 +88,11 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 
             //Unpremultiply the render block
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-            ctx.Unpremultiply(renderBlock, santitizedRect );
+            ctx.Unpremultiply(renderBlock, invalidatedRectI );
             ctx.Finish();
 
             //Convert the right ULIS block in the expected ULIS Format
-            ctx.ConvertFormat(renderBlock, ioBlock, santitizedRect, ::ULIS::FVec2I( santitizedRect.x, santitizedRect.y ) );
+            ctx.ConvertFormat(renderBlock, ioBlock, invalidatedRectI, ::ULIS::FVec2I( invalidatedRectI.x, invalidatedRectI.y ) );
             ctx.Finish();
         }
     }
@@ -303,6 +295,8 @@ FOdysseyVectorBlock::SetState(eBlockState iState)
 void
 FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
 {
+    ::ULIS::FRectI sanitizedRect = mEngine->GetInvalidatedRect( mWidth, mHeight );
+
     if (!mNeedsRender)
     {
         //Remove block from cache and invalidate cache
@@ -313,5 +307,5 @@ FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
 
     mEngine->Invalidate();
     //SetState(kNeedsRender);
-    mOnInvalidated.Broadcast(iIsInteractive);
+    mOnInvalidated.Broadcast( { sanitizedRect }, iIsInteractive );
 }

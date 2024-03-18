@@ -4,8 +4,9 @@
 
 #include <algorithm> // for std::clamp
 
-#define MINRECURSE 1
+#define MINRECURSE 0
 #define MAXRECURSE 7
+#define MAXSUBLINE ( 1 << MAXRECURSE )
 
 #ifndef M_PI
 #define M_PI 3.141592f
@@ -19,7 +20,10 @@ static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
 
 FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 {
-
+    if( mFractionPointBuffer )
+    {
+        free ( mFractionPointBuffer );
+    }
 }
 
 FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
@@ -31,6 +35,7 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPat
                                                       , FOdysseyVectorVertex* iPoint1
                                                       , bool iNeedWidth )
     : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
+    , mFractionPointBuffer ( nullptr )
     , mNeedWidth( iNeedWidth )
     , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0, 0.0f, 0.0f )
                  , FOdysseyVectorHandleSegment( this, 1, 0.0f, 0.0f ) }
@@ -43,6 +48,7 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iO
                                                       , FOdysseyVectorVertex* iPoint1
                                                       , bool iNeedWidth )
     : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1 )
+    , mFractionPointBuffer ( nullptr )
     , mNeedWidth( iNeedWidth )
     , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0, 0.0f, 0.0f )
                  , FOdysseyVectorHandleSegment( this, 1, 0.0f, 0.0f ) }
@@ -268,16 +274,9 @@ FOdysseyVectorSegmentCubic::GetTangentAt( double t, bool iNormalize )
 }
 
 void
-FOdysseyVectorSegmentCubic::IncreasePolygonCache( uint32 iSize )
-{
-     mFractionCache.resize( mFractionCache.size() + iSize );
-}
-
-void
 FOdysseyVectorSegmentCubic::ResetPolygonCache( )
 {
     mFractionCache.clear();
-    mFractionCache.reserve( 200 );
 }
 
 // mask-based version of the picking process
@@ -373,9 +372,9 @@ FOdysseyVectorSegmentCubic::ProximityTest( double iLocalX, double iLocalY, doubl
 
     for( uint32 i = 0; i < mFractionCache.size(); i++ )
     {
-        ::ULIS::FVec2D p0 = { mFractionCache[i].lineVertex[0].x, mFractionCache[i].lineVertex[0].y };
-        ::ULIS::FVec2D p1 = { mFractionCache[i].lineVertex[1].x, mFractionCache[i].lineVertex[1].y };
-        double t = FOdysseyVector::DistanceToSegment( pt, p0, p1, dist );
+        ::ULIS::FVec2D& p0Coords = mFractionCache[i].point[0]->GetCoords();
+        ::ULIS::FVec2D& p1Coords = mFractionCache[i].point[1]->GetCoords();
+        double t = FOdysseyVector::DistanceToSegment( pt, p0Coords, p1Coords, dist );
 
         if( ( t >= 0.0f ) && ( t <= 1.0f ) )
         {
@@ -459,8 +458,8 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     ::ULIS::FVec2D& ctrlPoint1 = mCtrlPoint[1].GetCoords();
     ::ULIS::FVec2D pointAt0 = GetPointAt( iFromT );
     ::ULIS::FVec2D pointAt1 = GetPointAt( iToT );
-    double radius0 = mPoint[0]->GetRadius();
-    double radius1 = mPoint[1]->GetRadius();
+    double radius0 = GetVertex(0)->GetRadius();
+    double radius1 = GetVertex(1)->GetRadius();
     double deltaRadius = ( radius1 - radius0 );
     double fromRadius = radius0 + ( deltaRadius * iFromT );
     double toRadius = radius0 + ( deltaRadius * iToT );
@@ -492,25 +491,28 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
 void
 FOdysseyVectorSegmentCubic::UpdateBoundingBox ()
 {
-   mBBox.x = ULIS::FMath::Min4<double>( mPoint[0]->GetX() - mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetX()
-                                      , mPoint[1]->GetX() - mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetX() );
+    FOdysseyVectorVertex* vertex0 = GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = GetVertex(1);
 
-   mBBox.y = ULIS::FMath::Min4<double>( mPoint[0]->GetY() - mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetY()
-                                      , mPoint[1]->GetY() - mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetY() );
+    mBBox.x = ULIS::FMath::Min4<double>( mPoint[0]->GetX() - vertex0->GetRadius()
+                                       , mCtrlPoint[0].GetX()
+                                       , mPoint[1]->GetX() - vertex1->GetRadius()
+                                       , mCtrlPoint[1].GetX() );
 
-   mBBox.w = ULIS::FMath::Max4<double>( mPoint[0]->GetX() + mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetX()
-                                      , mPoint[1]->GetX() + mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetX() ) - mBBox.x;
+    mBBox.y = ULIS::FMath::Min4<double>( mPoint[0]->GetY() - vertex0->GetRadius()
+                                       , mCtrlPoint[0].GetY()
+                                       , mPoint[1]->GetY() - vertex1->GetRadius()
+                                       , mCtrlPoint[1].GetY() );
 
-   mBBox.h = ULIS::FMath::Max4<double>( mPoint[0]->GetY() + mPoint[0]->GetRadius()
-                                      , mCtrlPoint[0].GetY()
-                                      , mPoint[1]->GetY() + mPoint[1]->GetRadius()
-                                      , mCtrlPoint[1].GetY() ) - mBBox.y;
+    mBBox.w = ULIS::FMath::Max4<double>( mPoint[0]->GetX() + vertex0->GetRadius()
+                                       , mCtrlPoint[0].GetX()
+                                       , mPoint[1]->GetX() + vertex1->GetRadius()
+                                       , mCtrlPoint[1].GetX() ) - mBBox.x;
+
+    mBBox.h = ULIS::FMath::Max4<double>( mPoint[0]->GetY() + vertex0->GetRadius()
+                                       , mCtrlPoint[0].GetY()
+                                       , mPoint[1]->GetY() + vertex1->GetRadius()
+                                       , mCtrlPoint[1].GetY() ) - mBBox.y;
 }
 
 FOdysseyVectorHandleSegment*
@@ -552,25 +554,29 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
                                , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                                , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray )
 {
+    FOdysseyVectorVertex* vertex0 = GetVertex(0);
+    FOdysseyVectorVertex* vertex1 = GetVertex(1);
     ::ULIS::FVec2D& point0 = GetVertex(0)->GetCoords();
     ::ULIS::FVec2D& point1 = GetVertex(1)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint0 = GetHandle(0)->GetCoords();
     ::ULIS::FVec2D& ctrlPoint1 = GetHandle(1)->GetCoords();
     // we'll have 3 intersections at most and 2 points at tips.
-    FOdysseyVectorVertex* pointChain[5] = { static_cast<FOdysseyVectorVertex*>(mPoint[0]), nullptr, nullptr, nullptr, nullptr };
+    FOdysseyVectorVertex* pointChain[5] = { vertex0, nullptr, nullptr, nullptr, nullptr };
     double tChain[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
     uint32 pointCount = 1;
     ::ULIS::FVec2D ctrlPoint0Vector = GetVectorAtStart( true );
     ::ULIS::FVec2D ctrlPoint1Vector = GetVectorAtEnd( true );
-    double difRadius = mPoint[1]->GetRadius() - mPoint[0]->GetRadius();
+    double difRadius = vertex1->GetRadius() - vertex0->GetRadius();
 
     for( int i = 0; i < mFractionCache.size(); i++ )
     {
         FOdysseyVectorFraction* fraction = &mFractionCache[i];
+        ::ULIS::FVec2D& p0Coords = fraction->point[0]->GetCoords();
+        ::ULIS::FVec2D& p1Coords = fraction->point[1]->GetCoords();
         double polySubT, interPolySubT;
 
-        if ( FOdysseyVector::IntersectSegment( fraction->lineVertex[0]
-                                             , fraction->lineVertex[1]
+        if ( FOdysseyVector::IntersectSegment( p0Coords
+                                             , p1Coords
                                              , linePoint0
                                              , linePoint1
                                              , &polySubT
@@ -584,7 +590,7 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
                                                                                         , segmentT );
             FOdysseyVectorVertex* newCubicPoint = new FOdysseyVectorVertex( pointAt.x, pointAt.y, 0.0f );
 
-            newCubicPoint->SetRadius( mPoint[0]->GetRadius() + ( difRadius * segmentT ) );
+            newCubicPoint->SetRadius( vertex0->GetRadius() + ( difRadius * segmentT ) );
 
             tChain[pointCount] = segmentT;
             pointChain[pointCount] = newCubicPoint;
@@ -769,14 +775,18 @@ FOdysseyVectorSegmentCubic::ThickenFraction( FOdysseyVectorFraction* iFraction )
 
 // De Casteljau algorithm. Stopping condition : dot product between p0p3-p0p1 is bigger than some limit value. Same for p3p0-p3p2.
 void
-FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
+FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoint
+                                                 , FOdysseyVectorPoint* iToPoint
+                                                 , double  iFromT
                                                  , double  iToT
                                                  , double  iRadiusFrom
                                                  , double  iRadiusTo
                                                  , ::ULIS::FVec2D iBezier[4]
                                                  , const ::ULIS::FVec2D& iNormalizedTangentFrom
                                                  , const ::ULIS::FVec2D& iNormalizedTangentTo
-                                                 , int32   iRecurseDepth )
+                                                 , int32   iRecurseDepth
+                                                 , std::vector<FOdysseyVectorPoint>& iSubPointBuffer
+                                                 , std::vector<FSegmentSubLine>& iSubLineBuffer )
 {
     ::ULIS::FVec2D childBezier[2][4];
     ::ULIS::FVec2D straightVector = iBezier[3] - iBezier[0];
@@ -793,18 +803,21 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
     {
         ctrlVector[0].Normalize();
     }
+    else
+    {
+        ctrlVector[0] = straightVector;
+    }
 
     if( ctrlVector[1].DistanceSquared() )
     {
         ctrlVector[1].Normalize();
     }
+    else
+    {
+        ctrlVector[1] = -straightVector;
+    }
 
-    if( ( iRecurseDepth < MINRECURSE  ) // <-- Force at least 4 subdivisions because the intersections for paint groups are tested 
-                                        // linearly and we need precision. If the cubic segment is made of few linear sub-segments, 
-                                        // then the T value at intersection does not match the T value we would get with mathematically
-                                        // accurate Bezier-Bezier intersection, but these are very complicated to implement so we just 
-                                        // stick with linear intersections. By dividing the bezier segment with smaller liner segments
-                                        // whose T values at end points are known, we get almost correct values for T at intersections.
+    if( ( iRecurseDepth < MINRECURSE  )
      || ( ( iRecurseDepth < MAXRECURSE ) // <--- do not subdivide forever though.
        && ( ( ctrlVector[0].DotProduct(  straightVector ) < dotLimit )
          || ( ctrlVector[1].DotProduct( -straightVector ) < dotLimit ) ) ) )
@@ -816,6 +829,7 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
                                                                                       , 0.5f );
         if( tangent.DistanceSquared() )
         {
+            FOdysseyVectorPoint* splitPoint;
             double radiusAt = ( iRadiusFrom + iRadiusTo ) * 0.5f;
             double splitsAt = ( iToT + iFromT ) * 0.5f;
 
@@ -831,14 +845,22 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
                                                                       , &childBezier[0][2]
                                                                       , &childBezier[0][3]
                                                                       , 0.5f );
-            BuildVariableAdaptive( iFromT  
+
+            splitPoint = &iSubPointBuffer.emplace_back( childBezier[0][3].x
+                                                      , childBezier[0][3].y );
+
+            BuildVariableAdaptive( iFromPoint
+                                 , splitPoint
+                                 , iFromT  
                                  , splitsAt
                                  , iRadiusFrom
                                  , radiusAt
                                  , childBezier[0]
                                  , iNormalizedTangentFrom
                                  , tangent
-                                 , iRecurseDepth + 1 );
+                                 , iRecurseDepth + 1
+                                 , iSubPointBuffer
+                                 , iSubLineBuffer );
 
             // Second sub-bezier from the divided parent bezier
             // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
@@ -847,31 +869,23 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( double  iFromT
                                                                       , &childBezier[1][2]
                                                                       , &childBezier[1][3]
                                                                       , 0.5f );
-            BuildVariableAdaptive( splitsAt
+            BuildVariableAdaptive( splitPoint
+                                 , iToPoint
+                                 , splitsAt
                                  , iToT
                                  , radiusAt
                                  , iRadiusTo
                                  , childBezier[1]
                                  , tangent
                                  , iNormalizedTangentTo
-                                 , iRecurseDepth + 1 );
+                                 , iRecurseDepth + 1
+                                 , iSubPointBuffer
+                                 , iSubLineBuffer );
         }
     }
     else
     {
-        uint32 polyCount = mFractionCache.size();
-        FOdysseyVectorFraction* fraction;
-
-        mFractionCache.emplace_back();
-
-        fraction = &mFractionCache[polyCount];
-
-        fraction->lineVertex[0] = iBezier[0];
-        fraction->lineVertex[1] = iBezier[3];
-        fraction->fromT = iFromT;
-        fraction->toT = iToT;
-
-        ThickenFraction( fraction );
+        iSubLineBuffer.emplace_back( iFromPoint, iFromT, iToPoint, iToT );
     }
 }
 
@@ -1083,8 +1097,8 @@ FOdysseyVectorSegmentCubic::SmoothOffsetCurves( std::vector<FOdysseyVectorBezier
     // Note, it does note matter that firstOffsetPoint[2] is uninitialized, it will be afterwards
     //::ULIS::FVec2D* prevOffsetPoint[2] = { &firstOffsetPoint[0], &firstOffsetPoint[1] };
     //::ULIS::FVec2D* nextOffsetPoint[2] = { nullptr             , nullptr             };
-    double segmentStartRadius = mPoint[0]->GetRadius();
-    double segmentEndRadius = mPoint[1]->GetRadius();
+    double segmentStartRadius = GetVertex(0)->GetRadius();
+    double segmentEndRadius = GetVertex(1)->GetRadius();
     int guideBezierFragmentCount = iGuideBezierFragmentArray.size();
 
     mOffsetCurve[0].Resize( guideBezierFragmentCount );
@@ -1206,6 +1220,14 @@ static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
 void
 FOdysseyVectorSegmentCubic::BuildVariable()
 {
+    std::vector<FOdysseyVectorPoint> subPointBuffer;
+    std::vector<FSegmentSubLine> subLineBuffer;
+    //static std::mutex mutex;
+
+    subLineBuffer.reserve( MAXSUBLINE );
+     // Note: segment end points don't belong to the buffer
+    subPointBuffer.reserve( MAXSUBLINE - 1 );
+
     mLength = FOdysseyVector::GetBezierApproximateLength( mBezier, 8 );
 
     ResetPolygonCache();
@@ -1239,14 +1261,61 @@ FOdysseyVectorSegmentCubic::BuildVariable()
         BuildOffsetCurves();
         // offset curves must be built before the polygon cache is built, as the builidng process
         // uses the offset curves to build the polygons.
-        BuildVariableAdaptive ( 0.0f
+
+        BuildVariableAdaptive ( mPoint[0]
+                              , mPoint[1]
+                              , 0.0f
                               , 1.0f
                               , segmentStartRadius
                               , segmentEndRadius
                               , mBezier
                               , tangent[0]
                               , tangent[1]
-                              , 0 );
+                              , 0
+                              , subPointBuffer
+                              , subLineBuffer );
+
+
+        if( subPointBuffer.size() )
+        {
+            mFractionPointBuffer = ( FOdysseyVectorPoint * ) realloc( mFractionPointBuffer
+                                                                    , subPointBuffer.size()
+                                                                    * sizeof FOdysseyVectorPoint );
+            memcpy( mFractionPointBuffer
+                 , &subPointBuffer[0]
+                 ,  subPointBuffer.size() * sizeof FOdysseyVectorPoint );
+        }
+
+        mFractionCache.reserve( subLineBuffer.size() );
+
+        for( FSegmentSubLine& subLine : subLineBuffer )
+        {
+            FOdysseyVectorPoint* point0 = subLine.point[0];
+            FOdysseyVectorPoint* point1 = subLine.point[1];
+
+            if( subLine.point[0]->GetClass() == FOdysseyVectorPoint::StaticClass() )
+            {
+                // pointer arithmetic gives us the index directly
+                uint32 index = ( subLine.point[0] - &subPointBuffer[0] );
+
+                point0 = &mFractionPointBuffer[index];
+            }
+
+            if( subLine.point[1]->GetClass() == FOdysseyVectorPoint::StaticClass() )
+            {
+                // pointer arithmetic gives us the index directly
+                uint32 index = ( subLine.point[1] - &subPointBuffer[0] );
+
+                point1 = &mFractionPointBuffer[index];
+            }
+
+            FOdysseyVectorFraction& fraction = mFractionCache.emplace_back( point0
+                                                                          , subLine.mT[0]
+                                                                          , point1
+                                                                          , subLine.mT[1] );
+
+            ThickenFraction( &fraction );
+        }
     }
 }
 

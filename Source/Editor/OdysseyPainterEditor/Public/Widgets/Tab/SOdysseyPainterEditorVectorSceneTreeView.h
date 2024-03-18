@@ -60,6 +60,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         void PasteObjects();
         void DeleteObjects();
         void SelectAll();
+        void CutObjects();
 
         FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent );
 

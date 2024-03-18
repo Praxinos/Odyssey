@@ -187,7 +187,8 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene,
 
         if( currentVectorLayer && ( currentVectorLayer->GetEngine()->GetScene() == iScene ) )
         {
-            if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
+            if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
+             || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED ) )
             {
                 vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
             }

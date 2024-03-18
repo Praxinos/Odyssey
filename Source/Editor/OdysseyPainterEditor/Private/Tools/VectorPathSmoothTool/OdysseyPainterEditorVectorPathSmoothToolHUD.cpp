@@ -21,7 +21,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorGroupPaint* i
     mPickedPointArray.clear();
     mPickedPointArray.reserve( 50 );
 
-    MakePointQuadTree( iScene, hudFlags );
+    MakePointQuadTree( iScene, false, hudFlags );
 
     UpdateSelectionBox( iScene, false, hudFlags );
 }

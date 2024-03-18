@@ -78,7 +78,8 @@ FOdysseyVectorImportV2::ReadPathGeometryVertexPosition( FOdysseyVectorVertex& iV
     Ar << y;
     Ar << radius;
 
-    iVertex.Set( x, y, radius );
+    iVertex.Set( x, y );
+    iVertex.SetRadius( radius );
 }
 
 void

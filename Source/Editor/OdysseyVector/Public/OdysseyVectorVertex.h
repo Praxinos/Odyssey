@@ -180,6 +180,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorPath* GetOwnerAsPath();
 
         /**
+         * @brief Get the point's radius
+         * @return the point's radius
+         */
+        double GetRadius();
+
+        /**
          * @brief Get a pointer to the section connecting this vertex and another vertex passed as argument.
          * @param iSegment
          * @return
@@ -223,6 +229,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @return 0 or 1.
          */
         virtual uint32 GetIndex( FOdysseyVectorSegment* iSegment );
+
+        /**
+         * @brief Get the point's ID. This is for the programmer to use e.g as an index of an array.
+         * it should no be considered consistent through the whole execution of the program.
+         */
+        uint32 GetID();
 
         /**
          * @brief Get the position of the vertex on the section passed as parameter.
@@ -329,7 +341,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          */
         void SetVisited( bool iVisited );
 
+        void SetRadius( double iRadius );
+
         static bool GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVertexList
+                                     , bool iWithHandles
                                      , double& oXMin
                                      , double& oYMin
                                      , double& oXMax
@@ -368,13 +383,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void SetLocked( bool iIsLocked );
         bool IsLocked();
 
+        /**
+         * @brief Set the point's ID. This is for the programmer to use e.g as an index of an array.
+         * it should no be considered consistent through the whole execution of the program.
+         * @param iID the desired point's ID
+         */
+        void SetID( uint32 iID );
+
     protected:
         /**
          * @brief Set the vertex coordinate in the X-Axis and Y-axis. It invalidates the attached segments.
          * @param iX the desired coordinate in the X-axis.
          * @param iY the desired coordinate in the Y-axis.
          */
-        virtual void SetCoords( double iX, double iY, double iRadius ) override;
+        virtual void SetCoords( double iX, double iY ) override;
 
     protected:
         FOdysseyVectorJoint mJoint;
@@ -384,7 +406,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         std::list<FOdysseyVectorVertex*> mPartnerList;
         FOdysseyVectorObject* mOwner;
         uint32 mFlags;
-       
+        double mRadius;
+        uint32 mID;
 
         double mDistanceToNearestSegment;
         double mNearestSegmentT;

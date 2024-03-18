@@ -146,6 +146,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint32 PICK_BUCKET        = 2;
         static const uint32 PICK_RADIAL_HANDLE = 3;
         static const uint32 PICK_RADIAL_AREA   = 4;
+        static const uint32 PICK_PROPAGATE     = 5;
 
         // HUD Drawing Flags
         static const uint64 HUD_MODE_OBJECT              = ( 1ULL <<  0 );
@@ -184,7 +185,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                        , double iSelectionRadius
                        , std::vector<FOdysseyVectorPoint*>& oPickedPointArray );
 
-        void MakePointQuadTree( FOdysseyVectorGroupPaint *iScene,uint64 iHUDFlags );
+        void MakePointQuadTree( FOdysseyVectorGroupPaint *iScene
+                              , bool iFocusedObjectsOnly
+                              , uint64 iHUDFlags );
 
     protected:
         FPointQuadTree* mPointQuadTree;

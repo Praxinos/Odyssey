@@ -33,8 +33,8 @@ FOdysseyVectorExportV2::WritePathGeometrySegments( FOdysseyVectorPath& iPath, FA
                 {
                     FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-                    uint32 p0ID = cubicSegment->GetPoint(0)->GetID();
-                    uint32 p1ID = cubicSegment->GetPoint(1)->GetID();
+                    uint32 p0ID = cubicSegment->GetVertex(0)->GetID();
+                    uint32 p1ID = cubicSegment->GetVertex(1)->GetID();
                     ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
                     ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
                     double ctrlPoint0X = ctrlPoint0.x;

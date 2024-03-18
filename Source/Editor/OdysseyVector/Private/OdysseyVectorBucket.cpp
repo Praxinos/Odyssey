@@ -34,7 +34,7 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
                                           , double iX
                                           , double iY
                                           , bool iPropagated )
-    : FOdysseyVectorPoint( iX, iY, 0.0f )
+    : FOdysseyVectorPoint( iX, iY )
     , mOwner ( iOwner )
     , bSelected( false )
     , mPaletteEntry( nullptr )
@@ -132,9 +132,9 @@ FOdysseyVectorBucket::SetSelected( bool iIsSelected )
 }
 
 void
-FOdysseyVectorBucket::SetCoords( double iX, double iY, double iRadius )
+FOdysseyVectorBucket::SetCoords( double iX, double iY )
 {
-    FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
+    FOdysseyVectorPoint::SetCoords( iX, iY );
 
     Invalidate();
 }

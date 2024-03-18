@@ -361,11 +361,18 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 }
 
 bool
-FOdysseyVectorPath::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld )
+FOdysseyVectorPath::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox
+                                                , bool iWithHandles
+                                                , bool iWorld )
 {
     double xmin, ymin, xmax, ymax;
 
-    if( FOdysseyVectorVertex::GetMinMaxFromList( mSelectedVertexList, xmin, ymin, xmax, ymax ) )
+    if( FOdysseyVectorVertex::GetMinMaxFromList( mSelectedVertexList
+                                               , iWithHandles
+                                               , xmin
+                                               , ymin
+                                               , xmax
+                                               , ymax ) )
     {
         if( iWorld )
         {
@@ -1214,8 +1221,10 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 
                 for( uint32 i = 0; i < fractionCache.size(); i++ )
                 {
-                    BLPoint p0 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[0].x, fractionCache[i].lineVertex[0].y );
-                    BLPoint p1 = mWorldMatrix.mapPoint( fractionCache[i].lineVertex[1].x, fractionCache[i].lineVertex[1].y );
+                    ::ULIS::FVec2D& p0Coords = fractionCache[i].point[0]->GetCoords();
+                    ::ULIS::FVec2D& p1Coords = fractionCache[i].point[1]->GetCoords();
+                    BLPoint p0 = mWorldMatrix.mapPoint( p0Coords.x, p0Coords.y );
+                    BLPoint p1 = mWorldMatrix.mapPoint( p1Coords.x, p1Coords.y  );
                     bool pointHitMask = TraceLine( p0.x, p0.y, 0.0f
                                                  , p1.x, p1.y, 0.0f
                                                  , [&imageData]( int32 iX, int32 iY, double iT)
@@ -1634,25 +1643,30 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
 }
 
 void
-FOdysseyVectorPath::DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iDrawingFlags )
+FOdysseyVectorPath::DrawShape( BLContext* iBLContext
+                             , const ::ULIS::FRectD& iInvalidationArea
+                             , double iCombinedOpacity
+                             , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetEngine();
     ::ULIS::FRectD worldBBox = GetBBox( true );
-    BLImageData& imageData = vectorEngine->GetRenderData();
-    ::ULIS::FRectD screen;
+    ::ULIS::FVec2D worldBBoxMin;
+    ::ULIS::FVec2D worldBBoxMax;
+    ::ULIS::FVec2D invalidationAreaMin;
+    ::ULIS::FVec2D invalidationAreaMax;
 
-    screen.x = 0;
-    screen.y = 0;
-    screen.w = imageData.size.w;
-    screen.h = imageData.size.h;
+    FOdysseyVector::GetRectMinMax<double>( worldBBox, worldBBoxMin, worldBBoxMax );
+    FOdysseyVector::GetRectMinMax<double>( iInvalidationArea
+                                         , invalidationAreaMin
+                                         , invalidationAreaMax );
 
     if( worldBBox.Area() > 1.0f ) // do not draw if < 1 pixel
     {
         // do not draw if outside screen
-        if( ( ( worldBBox.x               ) < screen.w )
-         && ( ( worldBBox.x + worldBBox.w ) > 0        )
-         && ( ( worldBBox.y               ) < screen.h )
-         && ( ( worldBBox.y + worldBBox.h ) > 0        ) )
+        if( ( ( worldBBoxMin.x ) < invalidationAreaMax.x )
+         && ( ( worldBBoxMax.x ) > invalidationAreaMin.x )
+         && ( ( worldBBoxMin.y ) < invalidationAreaMax.y )
+         && ( ( worldBBoxMax.y ) > invalidationAreaMin.y ) )
         {
             for( FOdysseyVectorChain& chain : mChainArray )
             {
@@ -2009,7 +2023,8 @@ FOdysseyVectorPath::ApplyMatrix( BLMatrix2D& iMatrix )
                                             , 0.70710678118f * vertex->GetRadius() );
         ::ULIS::FVec2D vec = { localVec.x, localVec.y };
 
-        vertex->Set( localPt.x, localPt.y, vec.Distance() );
+        vertex->Set( localPt.x, localPt.y );
+        vertex->SetRadius( vec.Distance() );
     }
 
     for( FOdysseyVectorSegment* segment : mSegmentList )

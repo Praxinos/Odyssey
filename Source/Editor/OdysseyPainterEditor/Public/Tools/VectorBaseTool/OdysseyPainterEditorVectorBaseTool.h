@@ -106,6 +106,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void Paste();
         void SelectAll();
         void Delete();
+        void IncreaseContourWidth();
+        void DecreaseContourWidth();
+        void Cut();
 
     protected:
         void GetSelectedVertices( FOdysseyVectorGroupPaint* iScene

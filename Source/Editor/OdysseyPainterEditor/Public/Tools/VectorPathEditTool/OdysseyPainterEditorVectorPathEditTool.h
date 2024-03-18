@@ -115,6 +115,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         void OnMouseDownPickPoint( FOdysseyVectorGroupPaint* iScene
                                  , const FOdysseyPoint& iPointInTexture
                                  , const FKey& iKey );
+        void PickObjects( FOdysseyVectorGroupPaint* iScene
+                        , double iX
+                        , double iY );
 /*
         void GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
                                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray

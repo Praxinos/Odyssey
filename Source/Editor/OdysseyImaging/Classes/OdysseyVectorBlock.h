@@ -15,7 +15,7 @@ class ODYSSEYIMAGING_API FOdysseyVectorBlock : public TSharedFromThis<FOdysseyVe
 {
 
 public:
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnInvalidated, bool /*iIsInteractive*/)
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInvalidated, const TArray<::ULIS::FRectI>& iRects, bool /*iIsInteractive*/)
     FOnInvalidated& OnInvalidated();
 
 public:

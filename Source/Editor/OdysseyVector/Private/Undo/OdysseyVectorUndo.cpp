@@ -191,11 +191,6 @@ FSnapshotPoint::FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint64 iSnapshotFla
     {
         mCoords = iPoint->GetCoords();
     }
-
-    if( iSnapshotFlags & FSnapshotFlags::Point::RADIUS )
-    {
-        mRadius = iPoint->GetRadius();
-    }
 }
 
 void
@@ -208,15 +203,6 @@ FSnapshotPoint::Restore()
         mPoint->Set( mCoords.x, mCoords.y );
 
         mCoords = swapCoords;
-    }
-
-    if( mSnapshotFlags & FSnapshotFlags::Point::RADIUS )
-    {
-        double swapRadius = mPoint->GetRadius();
-
-        mPoint->SetRadius( mRadius );
-
-        mRadius = swapRadius;
     }
 }
 
@@ -235,6 +221,11 @@ FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex, uint64 iSnapsho
     if( iSnapshotFlags & FSnapshotFlags::Point::Vertex::LOCK )
     {
         mLocked = iVertex->IsLocked();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Vertex::RADIUS )
+    {
+        mRadius = iVertex->GetRadius();
     }
 }
 
@@ -269,6 +260,15 @@ FSnapshotVertex::Restore()
 
         // swap for redo
         mLocked = locked;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::RADIUS )
+    {
+        double swapRadius = vertex->GetRadius();
+
+        vertex->SetRadius( mRadius );
+
+        mRadius = swapRadius;
     }
 }
 

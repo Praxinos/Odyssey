@@ -55,7 +55,7 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
     {
         mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
                                                         , FSnapshotFlags::Point::POSITION
-                                                        | FSnapshotFlags::Point::RADIUS
+                                                        | FSnapshotFlags::Point::Vertex::RADIUS
                                                         | FSnapshotFlags::Point::Vertex::ALIGNMENT ) );
     }
 

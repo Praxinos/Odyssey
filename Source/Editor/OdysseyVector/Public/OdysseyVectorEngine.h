@@ -71,7 +71,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1ULL << 3 );
         static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1ULL << 4 );
         static const uint64 SIGNAL_INTERACTIVE        = ( 1ULL << 5 );
+        static const uint64 SIGNAL_SCENE_CLEAR_ALL    = ( 1ULL << 6 );
         static const uint64 SIGNAL_ALL                = 0x0FFFFFFFFFFFFFFF & (~SIGNAL_INTERACTIVE);
+        static const uint64 SIGNAL_SCENE_FORCE_REDRAW = ( SIGNAL_SCENE_REDRAW
+                                                        | SIGNAL_SCENE_CLEAR_ALL );
 
         static const uint64 SIGNAL_USER0_RESERVED = ( 1ULL << 56 );
         static const uint64 SIGNAL_USER1_RESERVED = ( 1ULL << 57 );
@@ -258,7 +261,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         static void GetVertexSelection( std::list<FOdysseyVectorObject*>& iVectorObjectList
                                       , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
 
-        void Render( BLContext* iBLContext, uint64 iDrawingFlags );
+        ::ULIS::FRectD Render( BLContext* iBLContext, uint64 iDrawingFlags );
 
         void EraseSections( FOdysseyVectorGroupPaint* iScene
                           , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
@@ -341,10 +344,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         uint64 Traverse( FOdysseyVectorObject* iObject
                        , uint64 iTraversalFlags
                        , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
-
-       void SetInvalidatedRect( const ::ULIS::FRectD& iRect );
-       void SetInvalidatedRect( const ::ULIS::FRectI& iRect );
-       ::ULIS::FRectI& GetInvalidatedRect();
+        void InvalidateRect( const ::ULIS::FRectD& iRect );
+        void InvalidateRect( );
+        ::ULIS::FRectD GetInvalidatedRect( double iScreenWidth, double iScreenHeight );
 
         void GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList );
         void GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& oObjectList );
@@ -451,7 +453,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         uint32 mPreferredHeight;
         std::vector<FHorizontalLine> mHorizontalLineBuffer;
         uint32 mProcessorCount;
-        ::ULIS::FRectI mInvalidatedRect;
+        ::ULIS::FRectD mInvalidatedRect;
         BLImageData mRenderData; // for direct drawing via our own drawing routines.
         //uint64 mDrawingFlags; // temporary, until we find a way to pass the drawing flags as arg
 };

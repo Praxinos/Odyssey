@@ -24,7 +24,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , ColorSource( eBaseToolColorSource::ColorWheel )
     , Opacity( 1.0f )
     , TracingType( eTracingType::Organic )
-    , TracingFidelity( eTracingFidelity::Average )
+    , TracingFidelity( eTracingFidelity::Highest )
     , Radius( 5.0f )
     , PressureSensitive( true )
     //, Absolute( true )
@@ -271,8 +271,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
         redrawRegion = imageRegion; // needs full redraw
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    if( Stitch )
+    {
+        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+             | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    }
+
+    return 0;
 }
 
 uint64
@@ -307,14 +312,34 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         // dont redraw everything if no new segment was created
         if( newSegment == nullptr )
         {
-            vectorEngine->SetInvalidatedRect( mPathTracer.GetRedrawRect() );
+            static double oldMouseX;
+            static double oldMouseY;
+            double x1 = oldMouseX
+                 , y1 = oldMouseY
+                 , x2 = iPointInTexture.x
+                 , y2 = iPointInTexture.y;
+            double xmin = ::ULIS::FMath::Min( x1, x2 ) - pointRadius
+                 , ymin = ::ULIS::FMath::Min( y1, y2 ) - pointRadius
+                 , xmax = ::ULIS::FMath::Max( x1, x2 ) + pointRadius
+                 , ymax = ::ULIS::FMath::Max( y1, y2 ) + pointRadius;
+
+            //vectorEngine->SetInvalidatedRect( mPathTracer.GetRedrawRect() );
+
+            vectorEngine->InvalidateRect( ::ULIS::FRectD::FromMinMax( xmin
+                                                                    , ymin
+                                                                    , xmax
+                                                                    , ymax ) );
+
+            oldMouseX = iPointInTexture.x;
+            oldMouseY = iPointInTexture.y;
         }
         else
         {
-            uint32 imgW = vectorEngine->GetPreferredWidth(),
-                   imgH = vectorEngine->GetPreferredHeight();
+            //uint32 imgW = vectorEngine->GetPreferredWidth(),
+            //       imgH = vectorEngine->GetPreferredHeight();
 
-            vectorEngine->SetInvalidatedRect( ::ULIS::FRectI( 0, 0, imgW, imgH ) );
+            //vectorEngine->SetInvalidatedRect( ::ULIS::FRectI( 0, 0, imgW, imgH ) );
+            vectorEngine->InvalidateRect();
         }
 
         iScene->Update( 0 ); // update invalidated path after segment insertion
@@ -402,7 +427,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
 
     // in OnMouseDragVector() we are not guaranteed to get a viewport redraw from what I understand.
     // this means the Invalidation Rectangle is not resetted, so we force it.
-    vectorEngine->SetInvalidatedRect( ::ULIS::FRectI( 0, 0, imgW, imgH ) );
+    vectorEngine->InvalidateRect();
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY // important to remove the path builder from the hierarchy widget

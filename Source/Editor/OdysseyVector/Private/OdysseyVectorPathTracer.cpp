@@ -96,6 +96,17 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
         MakeBezier( true );
         // newSegment will be nullptr if iEndVertex == mPreviousVertex
         newSegment = CommitSegment( iEndVertex ? iEndVertex : CommitVertex( false ) );
+
+        // relocate the last vertex at the last entry
+        if( ( iEndVertex == nullptr ) && mPointArray.size() )
+        {
+            BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
+            ::ULIS::FVec2D lastPointCoords = mPointArray.back().coords;
+            BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( lastPointCoords.x
+                                                                       , lastPointCoords.y ) };
+
+            newSegment->GetVertex(1)->Set( localPoint.x, localPoint.y );
+        }
     }
 
     Reset();
@@ -549,6 +560,16 @@ FOdysseyVectorPathTracer::GetRedrawRect()
             if( mPointArray[i].coords.y > ymax ) ymax = mPointArray[i].coords.y;
 
             if( mPointArray[i].radius > maxRadius ) maxRadius = mPointArray[i].radius;
+        }
+
+        for( int i = 0; i < mRecordArray.size(); i++ )
+        {
+            if( mRecordArray[i].coords.x < xmin ) xmin = mRecordArray[i].coords.x;
+            if( mRecordArray[i].coords.x > xmax ) xmax = mRecordArray[i].coords.x;
+            if( mRecordArray[i].coords.y < ymin ) ymin = mRecordArray[i].coords.y;
+            if( mRecordArray[i].coords.y > ymax ) ymax = mRecordArray[i].coords.y;
+
+            if( mRecordArray[i].radius > maxRadius ) maxRadius = mRecordArray[i].radius;
         }
 
         return ::ULIS::FRectD::FromMinMax( xmin - maxRadius

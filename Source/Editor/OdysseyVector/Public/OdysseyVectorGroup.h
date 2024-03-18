@@ -41,7 +41,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
          * @brief Draw this group.
          * @param iFlags drawing flags from the engine.
          */
-        virtual void DrawShape( BLContext* iBLContext, double iCombinedOpacity, uint64 iFlags ) override;
+        virtual void DrawShape( BLContext* iBLContext
+                              , const ::ULIS::FRectD& iInvalidationArea
+                              , double iCombinedOpacity
+                              , uint64 iFlags ) override;
 
        /**
          * @brief Pick this shape.

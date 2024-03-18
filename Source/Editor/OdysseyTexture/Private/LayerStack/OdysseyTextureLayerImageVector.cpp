@@ -274,9 +274,9 @@ UOdysseyTextureLayerImageVector::GetImageRenderingOpacity() const
 }
 
 void
-UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated(bool iIsInteractive)
+UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-    ImageRenderingChanged(iIsInteractive);
+    ImageRenderingChanged(iRects, iIsInteractive);
 }
 
 void

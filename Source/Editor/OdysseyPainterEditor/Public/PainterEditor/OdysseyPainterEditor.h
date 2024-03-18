@@ -134,6 +134,9 @@ public:
     static void PasteTransformation( FOdysseyVectorGroupPaint* iScene );
     static void MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
                            , const TArray<FOdysseyVectorGroupPaint*>& iSourceSceneArray );
+    static void AlterContourWidth( FOdysseyVectorGroupPaint* iScene
+                                 , double iValue
+                                 , bool   iAbsolute );
 
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );

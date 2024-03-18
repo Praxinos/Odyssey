@@ -42,7 +42,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
         uint32 GetHandleID();
 
     protected:
-        virtual void SetCoords( double iX, double iY, double iRadius ) override;
+        virtual void SetCoords( double iX, double iY ) override;
 
     private:
         FOdysseyVectorSegment* mOwnerSegment;

@@ -26,11 +26,56 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorGroupPaint* iSc
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    uint32 width = vectorEngine->GetPreferredWidth();
+    uint32 height = vectorEngine->GetPreferredHeight();
+
+    mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
+
+    mBLSelectionContext.begin( mBLSelectionMask );
 }
 
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
 {
+    mBLSelectionContext.end();
+}
+
+BLImage*
+FOdysseyPainterEditorVectorPathEditToolHUD::GetMask()
+{
+    return &mBLSelectionMask;
+}
+
+void
+FOdysseyPainterEditorVectorPathEditToolHUD::ClearMask()
+{
+    mBLSelectionContext.save();
+
+    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.setFillAlpha( 0.0f );
+    mBLSelectionContext.clearAll();
+    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
+
+    mBLSelectionContext.restore();
+}
+
+::ULIS::FRectD
+FOdysseyPainterEditorVectorPathEditToolHUD::GenerateMask( double iX
+                                                        , double iY
+                                                        , double iRadius )
+{
+    mBLSelectionContext.save();
+
+    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.setFillAlpha( 1.0f );
+    mBLSelectionContext.fillCircle( iX, iY, iRadius );
+    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
+
+    mBLSelectionContext.restore();
+
+    return ::ULIS::FRectD::FromMinMax( iX - iRadius, iY - iRadius
+                                     , iX + iRadius, iY + iRadius );
 }
 
 void

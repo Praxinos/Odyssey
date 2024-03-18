@@ -547,6 +547,12 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
                     }*/
                 break;
 
+                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_PROPAGATE:
+                    OnMouseUpVectorPropagateBucket( iScene
+                                                  , mPickedBucket
+                                                  , mPickedBucket->IsPropagated() ? false : true );
+                break;
+
                 default:
                 break;
             }
@@ -707,7 +713,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
     sourceBucket.Copy( iDestinationBucket );
 
     // we only keep the coords
-    iDestinationBucket->SetCoords( destinationBucketCoords.x, destinationBucketCoords.y, 0.0f );
+    iDestinationBucket->SetCoords( destinationBucketCoords.x, destinationBucketCoords.y );
 
     iDestinationBucket->Invalidate();
 }

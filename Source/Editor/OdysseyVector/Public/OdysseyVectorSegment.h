@@ -12,16 +12,42 @@
 class FOdysseyVectorObject;
 class FOdysseyVectorPath;
 
+typedef struct _FSegmentSubLine
+{
+    FOdysseyVectorPoint* point[2];
+    double mT[2];
+
+   ~_FSegmentSubLine(){};
+    _FSegmentSubLine( FOdysseyVectorPoint* iPoint0
+                    , double iT0
+                    , FOdysseyVectorPoint* iPoint1
+                    , double iT1 )
+    : point { iPoint0, iPoint1 }
+    , mT { iT0, iT1 }
+    {
+    }
+} FSegmentSubLine;
+
 typedef struct _FOdysseyVectorFraction {
     // TODO : use FOdysseyVectorPolygon4 reduce memory footprint and then convert to
     // FOdysseyVectorPolygon6 using data stored in lineVertex(2] when drawn ?
     FOdysseyVectorPolygon6 polygon; // hexagons to prevent thin gap with joints
-    ::ULIS::FVec2D lineVertex[2];
-    ::ULIS::FVec2D lineVertexInParent[2];
+    FOdysseyVectorPoint* point[2];
+    ::ULIS::FVec2D pointCoordsInParent[2];
     // TODO : compute on the fly to reduce memory footprint ?
     double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;
     double fromT; // TODO : convert to float to reduce memory footprint
     double toT; // TODO : convert to float to reduce memory footprint
+
+    _FOdysseyVectorFraction( FOdysseyVectorPoint* iPoint0
+                           , double iFromT
+                           , FOdysseyVectorPoint* iPoint1
+                           , double iToT )
+    : point { iPoint0, iPoint1 }
+    , fromT( iFromT )
+    , toT( iToT )
+    {
+    }
 } FOdysseyVectorFraction;
 
 class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink

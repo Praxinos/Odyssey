@@ -87,6 +87,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
         virtual void DrawShape( BLContext* iBLContext
+                              , const ::ULIS::FRectD& iInvalidationArea
                               , double iCombinedOpacity
                               , uint64 iFlags ) override;
         virtual bool PickShape( const ::ULIS::FRectD &iRoi
@@ -173,7 +174,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param oBBox the rectangle where to store the result
          * @param iWorld whether or not the box should be in world coordinates.
          */
-        bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
+        bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox
+                                        , bool iWithHandles
+                                        , bool iWorld );
 
         /**
          * @brief Get the brush

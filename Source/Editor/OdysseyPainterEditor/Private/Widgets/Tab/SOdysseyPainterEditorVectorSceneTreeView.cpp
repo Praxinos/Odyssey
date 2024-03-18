@@ -251,6 +251,13 @@ SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects()
 }
 
 void
+SOdysseyPainterEditorVectorSceneTreeView::CutObjects()
+{
+    SOdysseyPainterEditorVectorSceneTreeView::CopyObjects();
+    SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects();
+}
+
+void
 SOdysseyPainterEditorVectorSceneTreeView::CopyObjects()
 {
     if( mRootItem )
@@ -283,6 +290,11 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
     mCommandList->MapAction(
         FGenericCommands::Get().Delete,
         FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects )
+    );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Cut,
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::CutObjects )
     );
 
     mCommandList->MapAction(

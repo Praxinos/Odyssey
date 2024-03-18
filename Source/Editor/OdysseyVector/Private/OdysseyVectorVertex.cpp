@@ -11,7 +11,8 @@ FOdysseyVectorVertex::~FOdysseyVectorVertex()
 }
 
 FOdysseyVectorVertex::FOdysseyVectorVertex( double iX, double iY, double iRadius )
-    : FOdysseyVectorPoint( iX, iY, iRadius )
+    : FOdysseyVectorPoint( iX, iY )
+    , mRadius ( iRadius )
     , mJoint( this )
     , mOwner ( nullptr )
     , mFlags( 0 )
@@ -35,6 +36,18 @@ FOdysseyVectorVertex::HasSegment( FOdysseyVectorSegment* iSegment )
     return false;
 }
 
+void
+FOdysseyVectorVertex::SetID( uint32 iID )
+{
+    mID = iID;
+}
+
+uint32
+FOdysseyVectorVertex::GetID()
+{
+    return mID;
+}
+
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetWorldCoords()
 {
@@ -46,6 +59,7 @@ FOdysseyVectorVertex::GetWorldCoords()
 // static
 bool
 FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVertexList
+                                       , bool iWithHandles
                                        , double& oXMin
                                        , double& oYMin
                                        , double& oXMax
@@ -67,6 +81,20 @@ FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVert
             if( vertexCoords.y < oYMin ) oYMin = vertexCoords.y;
             if( vertexCoords.x > oXMax ) oXMax = vertexCoords.x;
             if( vertexCoords.y > oYMax ) oYMax = vertexCoords.y;
+
+            if( iWithHandles == true )
+            {
+                for( FOdysseyVectorSegment* segment : vertex->GetSegmentList() )
+                {
+                    FOdysseyVectorHandleSegment* handle = segment->GetHandle( vertex );
+                    ::ULIS::FVec2D& handleCoords = handle->GetCoords();
+
+                    if( handleCoords.x < oXMin ) oXMin = handleCoords.x;
+                    if( handleCoords.y < oYMin ) oYMin = handleCoords.y;
+                    if( handleCoords.x > oXMax ) oXMax = handleCoords.x;
+                    if( handleCoords.y > oYMax ) oYMax = handleCoords.y;
+                }
+            }
         }
 
         return true;
@@ -554,6 +582,23 @@ FOdysseyVectorVertex::InvalidateSegments()
     }
 }
 
+double
+FOdysseyVectorVertex::GetRadius()
+{
+    return mRadius;
+}
+
+void
+FOdysseyVectorVertex::SetRadius( double iRadius )
+{
+    if( ( mFlags & LOCKED ) == 0 )
+    {
+        mRadius = iRadius;
+
+        InvalidateSegments();
+    }
+}
+
 bool 
 FOdysseyVectorVertex::IsLocked()
 {
@@ -574,16 +619,11 @@ FOdysseyVectorVertex::SetLocked( bool iIsLocked )
 }
 
 void 
-FOdysseyVectorVertex::SetCoords( double iX, double iY, double iRadius )
+FOdysseyVectorVertex::SetCoords( double iX, double iY )
 {
     if( ( mFlags & LOCKED ) == 0 )
     {
-        if( iRadius < 0.0f )
-        {
-            iRadius = 0.0f;
-        }
-
-        FOdysseyVectorPoint::SetCoords( iX, iY, iRadius );
+        FOdysseyVectorPoint::SetCoords( iX, iY );
 
         mJoint.ResetBBox();
 
