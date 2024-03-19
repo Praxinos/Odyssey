@@ -27,9 +27,12 @@
 			"Name": "EditorScriptingUtilities"
 		},
 		{
-			"Enabled": false,
-			"Name": "Paper2D",
-			"Optional": true
+			"Enabled": true,
+			"Name": "Paper2D"
+		},
+		{
+			"Enabled": true,
+			"Name": "MediaPlate"
 		}
 	],
 	"Modules": [

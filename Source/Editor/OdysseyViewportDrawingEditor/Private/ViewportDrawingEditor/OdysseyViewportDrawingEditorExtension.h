@@ -104,6 +104,9 @@ private:
 	void EnableDelegatesSequencer();
     void SetAllDelegatesSequencers();
 	void ClearAllDelegatesSequencers();
+    
+private:
+    void OnAnimationPlayerCurrentTimeChanged();
 
 private:
     // FGCObject implementation

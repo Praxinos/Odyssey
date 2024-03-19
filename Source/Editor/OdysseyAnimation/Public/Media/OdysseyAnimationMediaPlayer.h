@@ -15,7 +15,6 @@
 
 class ODYSSEYANIMATION_API FOdysseyAnimationMediaPlayer
 	: public IMediaPlayer
-	, public FTickableEditorObject //Allows us to react to Tick events
 	, public TSharedFromThis<FOdysseyAnimationMediaPlayer>
 {
 public:
@@ -42,6 +41,9 @@ public:
 
 	IOdysseyImageRenderer::eRenderType GetRenderType() const;
 	void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
+
+	void SetFrameToIncludeIntoDuration(int iFrame);
+	void UnsetFrameToIncludeIntoDuration();
 
 public:
 
@@ -70,10 +72,8 @@ public:
 	virtual bool FlushOnSeekCompleted() const override;
 	virtual bool GetPlayerFeatureFlag(EFeatureFlag flag) const override;
 
-protected:
-	// FTickableEditorObject implementation
-	virtual void Tick(float DeltaTime) override;
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyAnimationMediaPlayer, STATGROUP_Tickables); }
+public:
+	TSharedPtr<FOdysseyAnimationMediaControls> GetAnimationControls() const { return mControls; }
 
 private:
 	TStrongObjectPtr<UOdysseyAnimation> mAnimation;
@@ -85,6 +85,4 @@ private:
 	TSharedPtr<FOdysseyAnimationMediaSamples> mSamples;
 	TSharedPtr<FOdysseyAnimationMediaTracks> mTracks;
 	TSharedPtr<FOdysseyAnimationMediaView> mView;
-
-	FTimespan mCurrentDuration;
 };

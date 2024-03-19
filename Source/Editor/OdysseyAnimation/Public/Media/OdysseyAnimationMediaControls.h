@@ -39,6 +39,11 @@ public:
 public:
 	void SetState(EMediaState iState);
 	void SetTime(FTimespan iTime);
+	void SetFrameToIncludeIntoDuration(int iFrame);
+	void UnsetFrameToIncludeIntoDuration();
+
+	int GetFrameCount() const;
+	FInt32Range GetFrameRange() const;
 
 private:
 	UOdysseyAnimation* mAnimation; //held by the player
@@ -48,4 +53,5 @@ private:
 	bool mIsLooping;
 	float mRate;
 	FTimespan mTime;
+	TOptional<int> mFrameToIncludeIntoDuration;
 };
