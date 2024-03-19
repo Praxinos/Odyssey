@@ -420,19 +420,25 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
 		{
 			AMediaPlate* mediaPlate = Cast<AMediaPlate>(mActor);
 			UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
+			bool needsOpen = true;
 			if (mediaPlayer) //If the mediaplayer has been removed, remove the source
 			{
 				UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
 				int32 index = mediaPlayer->GetPlaylistIndex();
 				UMediaSource* mediaSource = playlist.Get(index);
-				if (!mediaSource || !mediaPlate->MediaPlateComponent->IsMediaPlatePlaying()) //Is the mediaplate closed ?
+				if (mediaSource && mediaPlate->MediaPlateComponent->IsMediaPlatePlaying()) //Is the mediaplate closed ?
 				{
-					bool bPlayOnOpen = mediaPlate->MediaPlateComponent->bPlayOnOpen;
-					mediaPlate->MediaPlateComponent->bPlayOnOpen = false;
-					mediaPlate->MediaPlateComponent->Open();
-					mediaPlate->MediaPlateComponent->Rewind();
-					mediaPlate->MediaPlateComponent->bPlayOnOpen = bPlayOnOpen;
+					needsOpen = false;
 				}
+			}
+			
+			if (needsOpen)
+			{
+				bool bPlayOnOpen = mediaPlate->MediaPlateComponent->bPlayOnOpen;
+				mediaPlate->MediaPlateComponent->bPlayOnOpen = false;
+				mediaPlate->MediaPlateComponent->Open();
+				mediaPlate->MediaPlateComponent->Rewind();
+				mediaPlate->MediaPlateComponent->bPlayOnOpen = bPlayOnOpen;
 			}
 		}
 
