@@ -1,5 +1,6 @@
-#include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
+
+#include "OdysseyVector.h"
 #include "OdysseyVectorPath.h"
 #include <future>
 #include <execution>
