@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Iliad\n"
-"POT-Creation-Date: 2024-03-18 16:59\n"
-"PO-Revision-Date: 2024-03-18 16:59\n"
+"POT-Creation-Date: 2024-03-20 11:19\n"
+"PO-Revision-Date: 2024-03-20 11:19\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -1743,10 +1743,17 @@ msgid "Viewport"
 msgstr ""
 
 #. Key:	raster-drawing-tool.transaction.paint-stroke
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.cpp(245)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.cpp(245)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(286)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(286)
 msgctxt "PainterEditor,raster-drawing-tool.transaction.paint-stroke"
 msgid "Paint Stroke"
+msgstr ""
+
+#. Key:	raster-drawing-tool.top-tab.eraser
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolTopTab.cpp(102)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolTopTab.cpp(102)
+msgctxt "PainterEditor,raster-drawing-tool.top-tab.eraser"
+msgid "Switch the current tool to Eraser mode."
 msgstr ""
 
 #. Key:	raster-paint-bucket-tool.transaction.paint-stroke
@@ -1754,13 +1761,6 @@ msgstr ""
 #: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(147)
 msgctxt "PainterEditor,raster-paint-bucket-tool.transaction.paint-stroke"
 msgid "FloodFill"
-msgstr ""
-
-#. Key:	raster-drawing-tool.top-tab.eraser
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.cpp(78)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.cpp(78)
-msgctxt "PainterEditor,raster-drawing-tool.top-tab.eraser"
-msgid "Switch the current tool to Eraser mode."
 msgstr ""
 
 #. Key:	raster-primitive-drawing-tool.transaction.draw-shape
@@ -2009,8 +2009,8 @@ msgid "Erase"
 msgstr ""
 
 #. Key:	vector-grid-tool.transaction.edit-grid
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.cpp(76)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.cpp(76)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.cpp(86)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.cpp(86)
 msgctxt "PainterEditor,vector-grid-tool.transaction.edit-grid"
 msgid "Vector Grid Tool"
 msgstr ""
@@ -3234,15 +3234,15 @@ msgid "Display {TabName}"
 msgstr ""
 
 #. Key:	painter-editor-extension.texture-already-opened-dialog.message
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(581)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(581)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(644)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(644)
 msgctxt "ViewportDrawingEditor,painter-editor-extension.texture-already-opened-dialog.message"
 msgid "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."
 msgstr ""
 
 #. Key:	painter-editor-extension.texture-already-opened-dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(581)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(581)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(644)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(644)
 msgctxt "ViewportDrawingEditor,painter-editor-extension.texture-already-opened-dialog.title"
 msgid "Selected Texture Already Opened"
 msgstr ""
