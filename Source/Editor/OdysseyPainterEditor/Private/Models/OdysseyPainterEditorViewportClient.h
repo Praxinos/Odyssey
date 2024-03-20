@@ -76,6 +76,7 @@ public:
     {
         kIdle,
         kRotate,
+        kPanZoom,
         kPan,
         kZoom,
         kPick

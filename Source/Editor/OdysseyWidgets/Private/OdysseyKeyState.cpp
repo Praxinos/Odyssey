@@ -31,6 +31,9 @@ FOdysseyKeyState::Tick(const float DeltaTime, FSlateApplication& SlateApp, TShar
 bool
 FOdysseyKeyState::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
+    if (InKeyEvent.GetKey().IsModifierKey())
+        return false;
+
     mLastKey = InKeyEvent.GetKey();
     return false; //false means Unreal will continue as if we did nothing
 }

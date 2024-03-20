@@ -8,6 +8,7 @@ SOdysseyAnimationTimelineControl::SOdysseyAnimationTimelineControl()
 	: mExtension(nullptr)
 	, mOffsetMousePosition(0)
 	, mIsOffsetting(false)
+	, mIsZooming(false)
 {
 }
 
@@ -56,16 +57,36 @@ SOdysseyAnimationTimelineControl::OnMouseWheel(const FGeometry& MyGeometry, cons
 FReply 
 SOdysseyAnimationTimelineControl::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
-	{
-		if (MouseEvent.IsControlDown())
+	if (FOdysseyKeyState::GetLastKey() == FKey())
+        return FReply::Unhandled();
+
+    FModifierKeysState modifierKeysState = FSlateApplication::Get().GetModifierKeys();
+    const FInputChord activeChord(FOdysseyKeyState::GetLastKey(),
+        EModifierKey::FromBools(
+            modifierKeysState.IsControlDown(),
+            modifierKeysState.IsAltDown(),
+            modifierKeysState.IsShiftDown(),
+            modifierKeysState.IsCommandDown()
+        )
+    );
+
+    if (FOdysseyAnimationEditorCommands::Get().PanZoomTimeline->HasActiveChord(activeChord))
+    {
+		if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 		{
 			mIsOffsetting = true;
 			mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
 			mOffsetMousePosition.Y = mExtension->Timeline()->GetOffset();
     		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
 		}
-	}
+		else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+		{
+			mIsZooming = true;
+			mZoomMousePosition = MouseEvent.GetScreenSpacePosition();
+			mZoomMousePosition.Y = mExtension->Timeline()->GetZoom();
+    		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
+		}
+    }
 
 	return FReply::Unhandled();
 }
@@ -88,6 +109,24 @@ SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const
 		mExtension->Timeline()->SetOffset(FMath::Max(minOffset, mOffsetMousePosition.Y - (mouseOffset / mExtension->Timeline()->GetFrameWidth())));
 		return FReply::Handled();
 	}
+
+	if (mIsZooming)
+	{
+		float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mZoomMousePosition.X;
+        //mOffsetMousePosition.Y contains the starting offset instead of the Y position
+		
+		//float minZoom = FMath::Loge(mExtension->Timeline()->GetMinZoom());
+		//float maxZoom = FMath::Loge(mExtension->Timeline()->GetMaxZoom());
+		//float zoom = FMath::Loge(mZoomMousePosition.Y) * (1.f + mouseOffset / 1000.f);
+		//mExtension->Timeline()->SetZoom(FMath::Exp(zoom));
+
+		double sliderPos = FMath::Loge(mZoomMousePosition.Y);
+		sliderPos += mouseOffset / 200.f;
+		double newZoom = FMath::Exp(sliderPos);
+		mExtension->Timeline()->SetZoom(newZoom);
+
+		return FReply::Handled();
+	}
 	return FReply::Unhandled();
 }
 
@@ -97,6 +136,12 @@ SOdysseyAnimationTimelineControl::OnMouseButtonUp(const FGeometry& MyGeometry, c
 	if (mIsOffsetting)
 	{
 		mIsOffsetting = false;
+    	return FReply::Handled().ReleaseMouseCapture();
+	}
+
+	if (mIsZooming)
+	{
+		mIsZooming = false;
     	return FReply::Handled().ReleaseMouseCapture();
 	}
     return FReply::Unhandled();

@@ -30,7 +30,7 @@ void
 FOdysseyAnimationEditorCommands::RegisterCommands()
 {
 // Import & Export Shortcuts Category
-    UI_BUNDLE_COMMAND( ImportTextureSequence, ImportExportShortcuts, "Import Texture Sequence", "Import several textures from the content-browser in a new layer",                                               EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::P));
+    UI_BUNDLE_COMMAND( ImportTextureSequence, ImportExportShortcuts, "Import Texture Sequence", "Import several textures from the content-browser in a new layer",                                               EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ImportImageSequence, ImportExportShortcuts, "Import Image Sequence", "Import several images from your operating system in a new layer",                                               EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ExportImageSequence, ImportExportShortcuts, "Export Image Sequence", "Export the animation as an image sequence on your operating system",                                               EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ExportAsFlipbook, ImportExportShortcuts, "Export As Flipbook", "Export the animation as a flipbook",                                               EUserInterfaceActionType::Button, FInputChord());
@@ -77,6 +77,8 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( IncreaseSelectedCellsLength, TimelineShortcuts, "Increase Selected Cells Length", "Increase Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Add));
     UI_BUNDLE_COMMAND( DecreaseSelectedCellsLength, TimelineShortcuts, "Decrease Selected Cells Length", "Decrease Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Subtract));
     UI_BUNDLE_COMMAND( SetSelectedCellsLength, TimelineShortcuts, "Set Selected Cells Length", "Set Selected Cells Length", EUserInterfaceActionType::Button, FInputChord());
+
+    UI_BUNDLE_COMMAND( PanZoomTimeline, TimelineShortcuts,  "Pan / Zoom Timeline", "Hold the key to Pan (Left Mouse Button) or Zoom (Right Mouse Button) the Timeline",                                        EUserInterfaceActionType::None, FInputChord(EKeys::M));
 }
 
 #undef LOCTEXT_NAMESPACE

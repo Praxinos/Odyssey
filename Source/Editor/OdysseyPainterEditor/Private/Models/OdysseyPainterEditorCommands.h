@@ -50,14 +50,11 @@ public:
 
     //Viewport Actions
 
-    /** Action to pan the viewport */
-    TSharedPtr<FUICommandInfo> PanViewport;
+    /** Action to pan/Zoom the viewport */
+    TSharedPtr<FUICommandInfo> PanZoomViewport;
 
     /** Action to rotate the viewport*/
     TSharedPtr<FUICommandInfo> RotateViewport;
-
-    /** Action to zoom the viewport */
-    TSharedPtr<FUICommandInfo> ZoomViewport;
 
     /** Action to pick a color in the viewport */
     TSharedPtr<FUICommandInfo> PickColorInViewport;

@@ -666,8 +666,7 @@ SOdysseyAnimationCells::GetAddCellsHandleRightVisibility() const
     if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
 
-    bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleRightBrush->ImageSize.X;
-    return (mShowHandles.Get() && isZoomedEnough) ? EVisibility::Visible : EVisibility::Hidden;
+    return mShowHandles.Get() ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 EVisibility
@@ -676,8 +675,7 @@ SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility() const
     if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
         
-    bool isZoomedEnough = mExtension->Timeline()->GetFrameWidth() > mAddCellsHandleLeftBrush->ImageSize.X;
-    return (mShowHandles.Get() && isZoomedEnough && GetOffset() > 0) ? EVisibility::Visible : EVisibility::Hidden;
+    return mShowHandles.Get() && GetOffset() > 0 ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 void

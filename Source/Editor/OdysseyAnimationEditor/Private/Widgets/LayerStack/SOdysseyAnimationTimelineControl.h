@@ -35,6 +35,11 @@ public:
 
 private:
     FOdysseyAnimationEditorExtension*            mExtension;
+    
 	FVector2D 					        mOffsetMousePosition;
 	bool 						        mIsOffsetting;
+    
+    FVector2D 					        mZoomMousePosition;
+    float                               mInitialZoom;
+    bool 						        mIsZooming;
 };

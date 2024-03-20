@@ -101,4 +101,7 @@ public:
     TSharedPtr<FUICommandInfo> IncreaseSelectedCellsLength;
     TSharedPtr<FUICommandInfo> DecreaseSelectedCellsLength;
     TSharedPtr<FUICommandInfo> SetSelectedCellsLength;
+
+    /** Action to pan/Zoom the timeline */
+    TSharedPtr<FUICommandInfo> PanZoomTimeline;
 };

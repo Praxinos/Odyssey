@@ -38,15 +38,14 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( VisitPraxinosWebsite, HelpShortcuts, "Praxinos Website...", "Praxinos Website...",                                                   EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ManualAndReleaseNotes, HelpShortcuts, "Manual and Release Notes ...", "Manual and Release Notes ...",                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( Discord, HelpShortcuts, "Talk with the developpers ...", "Talk with the developpers ...",                                            EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( SwitchTabletAPI, HelpShortcuts, "Change Tablet API", "Switch between Ink and Wintab on Windows, use NSevent on Mac",                 EUserInterfaceActionType::Button, FInputChord( EKeys::F8 ) );
+    UI_BUNDLE_COMMAND( SwitchTabletAPI, HelpShortcuts, "Change Tablet API", "Switch between Ink and Wintab on Windows, use NSevent on Mac",                 EUserInterfaceActionType::Button, FInputChord() );
 
 // Uncategorized Yet Shortcuts
     UI_BUNDLE_COMMAND( ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer",                                          EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) );
 
 // Viewport Shortcuts Category
-    UI_BUNDLE_COMMAND( PanViewport, ViewportShortcuts,  "Pan Viewport", "Hold the key to pan the viewport",                                                 EUserInterfaceActionType::None, FInputChord(EKeys::P));
-    UI_BUNDLE_COMMAND( RotateViewport, ViewportShortcuts,  "Rotate Viewport", "Hold the key to Rotate the viewport",                                        EUserInterfaceActionType::None, FInputChord(EKeys::R));
-    UI_BUNDLE_COMMAND( ZoomViewport, ViewportShortcuts,  "Zoom Viewport", "Hold the key to Zoom the viewport",                                              EUserInterfaceActionType::None, FInputChord(EKeys::Z));
+    UI_BUNDLE_COMMAND( PanZoomViewport, ViewportShortcuts,  "Pan / Zoom Viewport", "Hold the key to Pan (Left Mouse Button) or Zoom (Right Mouse Button) the viewport",                                        EUserInterfaceActionType::None, FInputChord(EKeys::M));
+    UI_BUNDLE_COMMAND( RotateViewport, ViewportShortcuts,  "Zoom Viewport", "Hold the key to Rotate the viewport",                                              EUserInterfaceActionType::None, FInputChord(EModifierKey::Control, EKeys::M));
     UI_BUNDLE_COMMAND( ResetViewportRotation, ViewportShortcuts, "Reset Viewport Rotation", "Reset viewport rotation",                                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::R ) );
     UI_BUNDLE_COMMAND( ResetViewportPosition, ViewportShortcuts, "Reset Viewport Position", "Reset viewport position",                                      EUserInterfaceActionType::Button, FInputChord( EKeys::Escape ) );
     UI_BUNDLE_COMMAND( RotateViewportLeft, ViewportShortcuts, "Rotate Viewport Left", "Rotate viewport left",                                               EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::L ) );
@@ -55,7 +54,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( SetZoom20Percent, ViewportShortcuts, "Set Zoom 20 Percent", "Set zoom at 20 percent",                                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetZoom30Percent, ViewportShortcuts, "Set Zoom 30 Percent", "Set zoom at 30 percent",                                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetZoom40Percent, ViewportShortcuts, "Set Zoom 40 Percent", "Set zoom at 40 percent",                                                EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( SetZoom50Percent, ViewportShortcuts, "Set Zoom 50 Percent", "Set zoom at 50 percent",                                                EUserInterfaceActionType::Button, FInputChord( EKeys::H ) );
+    UI_BUNDLE_COMMAND( SetZoom50Percent, ViewportShortcuts, "Set Zoom 50 Percent", "Set zoom at 50 percent",                                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetZoom60Percent, ViewportShortcuts, "Set Zoom 60 Percent", "Set zoom at 60 percent",                                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetZoom70Percent, ViewportShortcuts, "Set Zoom 70 Percent", "Set zoom at 70 percent",                                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetZoom80Percent, ViewportShortcuts, "Set Zoom 80 Percent", "Set zoom at 80 percent",                                                EUserInterfaceActionType::Button, FInputChord() );

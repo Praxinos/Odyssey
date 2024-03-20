@@ -232,7 +232,7 @@ FOdysseyAnimationEditorTimeline::ZoomOut()
 void 
 FOdysseyAnimationEditorTimeline::SetZoom(float iZoom)
 {
-    mZoom = iZoom;
+    mZoom = FMath::Clamp(iZoom, MIN_ZOOM, MAX_ZOOM);
     mOnZoomChanged.Broadcast();
 }
 

@@ -275,7 +275,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 EMouseCursor::Type
 FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, int32 iY )
 {
-    if( mCurrentToolState == eState::kPan )
+    if( mCurrentToolState == eState::kPan || mCurrentToolState == eState::kPanZoom || mCurrentToolState == eState::kZoom )
         mCurrentMouseCursor = EMouseCursor::GrabHand;
     else if( mCurrentToolState == eState::kPick )
         mCurrentMouseCursor = EMouseCursor::EyeDropper;
@@ -355,7 +355,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     point_in_viewport.x = iViewport->GetMouseX();
     point_in_viewport.y = iViewport->GetMouseY();
 
-    if (!mIsMouseDown || mCurrentToolState != eState::kIdle)
+    if (!mIsMouseDown || mCurrentToolState != eState::kIdle )
         mCurrentToolState = InputChordToState();
 
     if (!mIsMouseDown && (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton))
@@ -510,7 +510,7 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
         if (mOnMouseDown.IsBound())
             mOnMouseDown.Execute(mCurrentPointInTexture, mMouseButton);
     }
-    else if( mCurrentToolState == eState::kRotate && mMouseButton == EKeys::LeftMouseButton )
+    else if( mCurrentToolState == eState::kRotate )
     {
         FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
         FVector2D center = FVector2D( size.X / 2, size.Y / 2 );
@@ -518,19 +518,25 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
         FVector2D deltaCenter = position_in_viewport - center;
         mRotationReference = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
     }
-    else if( mCurrentToolState == eState::kPan && mMouseButton == EKeys::LeftMouseButton )
+    else if( mCurrentToolState == eState::kPanZoom )
     {
-        mPanReference = FVector2D( iPoint.x, iPoint.y );
-    }
-    else if (mCurrentToolState == eState::kZoom && mMouseButton == EKeys::LeftMouseButton)
-    {
-        uint32 width;
-        uint32 height;
-        mOdysseyPainterEditorViewportPtr.Pin()->ComputeTextureDisplayDimensions(width, height);
+        if (mMouseButton == EKeys::LeftMouseButton)
+        {
+            mCurrentToolState = eState::kPan;
+            mPanReference = FVector2D( iPoint.x, iPoint.y );
+        }
+        else if (mMouseButton == EKeys::RightMouseButton)
+        {
+            mCurrentToolState = eState::kZoom;
 
-        double zoom = mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
-        mZoomReference = ::FMath::Loge(zoom);
-        mZoomViewportPointReference = FVector2D(iPoint.x, iPoint.y);
+            uint32 width;
+            uint32 height;
+            mOdysseyPainterEditorViewportPtr.Pin()->ComputeTextureDisplayDimensions(width, height);
+
+            double zoom = mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
+            mZoomReference = ::FMath::Loge(zoom);
+            mZoomViewportPointReference = FVector2D(iPoint.x, iPoint.y);
+        }
     }
     else if( mCurrentToolState == eState::kPick && mMouseButton == EKeys::LeftMouseButton )
     {
@@ -575,7 +581,7 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
         if (mOnMouseUp.IsBound())
             mOnMouseUp.Execute(mCurrentPointInTexture, mMouseButton);
     }
-    else if( mCurrentToolState == eState::kRotate && mMouseButton == EKeys::LeftMouseButton )
+    else if( mCurrentToolState == eState::kRotate )
     {
     }
     else if( mCurrentToolState == eState::kPan && mMouseButton == EKeys::LeftMouseButton )
@@ -861,17 +867,13 @@ FOdysseyPainterEditorViewportClient::InputChordToState()
         )
     );
 
-    if (FOdysseyPainterEditorCommands::Get().PanViewport->HasActiveChord(activeChord))
+    if (FOdysseyPainterEditorCommands::Get().PanZoomViewport->HasActiveChord(activeChord))
     {
-        return eState::kPan;
+        return mIsMouseDown ? mCurrentToolState : eState::kPanZoom;
     }
     else if (FOdysseyPainterEditorCommands::Get().RotateViewport->HasActiveChord(activeChord))
     {
         return eState::kRotate;
-    }
-    else if (FOdysseyPainterEditorCommands::Get().ZoomViewport->HasActiveChord(activeChord))
-    {
-        return eState::kZoom;
     }
     else if (FOdysseyPainterEditorCommands::Get().PickColorInViewport->HasActiveChord(activeChord))
     {
