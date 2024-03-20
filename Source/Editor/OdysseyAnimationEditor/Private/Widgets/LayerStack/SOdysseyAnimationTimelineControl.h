@@ -40,6 +40,9 @@ private:
 	bool 						        mIsOffsetting;
     
     FVector2D 					        mZoomMousePosition;
-    float                               mInitialZoom;
+    float 					            mZoomInitialValue;
+    float 					            mOffsetInitialValue;
+    float                               mInitialValueFrameWidth;
+
     bool 						        mIsZooming;
 };

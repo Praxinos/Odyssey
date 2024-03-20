@@ -83,7 +83,9 @@ SOdysseyAnimationTimelineControl::OnPreviewMouseButtonDown(const FGeometry& MyGe
 		{
 			mIsZooming = true;
 			mZoomMousePosition = MouseEvent.GetScreenSpacePosition();
-			mZoomMousePosition.Y = mExtension->Timeline()->GetZoom();
+			mZoomInitialValue = mExtension->Timeline()->GetZoom();
+			mOffsetInitialValue = mExtension->Timeline()->GetOffset();
+			mInitialValueFrameWidth = mExtension->Timeline()->GetFrameWidth();
     		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
 		}
     }
@@ -113,17 +115,16 @@ SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const
 	if (mIsZooming)
 	{
 		float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mZoomMousePosition.X;
-        //mOffsetMousePosition.Y contains the starting offset instead of the Y position
-		
-		//float minZoom = FMath::Loge(mExtension->Timeline()->GetMinZoom());
-		//float maxZoom = FMath::Loge(mExtension->Timeline()->GetMaxZoom());
-		//float zoom = FMath::Loge(mZoomMousePosition.Y) * (1.f + mouseOffset / 1000.f);
-		//mExtension->Timeline()->SetZoom(FMath::Exp(zoom));
+		float mousePosition = MyGeometry.AbsoluteToLocal(mZoomMousePosition).X;
 
-		double sliderPos = FMath::Loge(mZoomMousePosition.Y);
+		float offset = mOffsetInitialValue + mousePosition / mInitialValueFrameWidth;
+
+		double sliderPos = FMath::Loge(mZoomInitialValue);
 		sliderPos += mouseOffset / 200.f;
 		double newZoom = FMath::Exp(sliderPos);
 		mExtension->Timeline()->SetZoom(newZoom);
+
+		mExtension->Timeline()->SetOffset(FMath::Max(0.f, offset - mousePosition / mExtension->Timeline()->GetFrameWidth()));
 
 		return FReply::Handled();
 	}
