@@ -32,6 +32,7 @@ FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
 	mTexture = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
 	//mTexture2 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
 	mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->Width(), mAnimation->Height(), mTexture.Get());
+	mImageRenderingComposition.Empty();
 
 	mInvalidTileMap = FULISInvalidTileMap(64, mAnimation->Width(), mAnimation->Height());
 
@@ -72,6 +73,8 @@ FOdysseyAnimationMediaSamples::OnClose()
 	mAnimation = nullptr;
 	mSample = nullptr;
 	mTexture = nullptr;
+
+	mImageRenderingComposition.Empty();
 }
 
 void

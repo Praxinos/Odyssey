@@ -373,18 +373,7 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 	if (mTexture->IsA(UMediaTexture::StaticClass()))
 	{
 		UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
-		if (mActor->GetClass() == AMediaPlate::StaticClass())
-		{
-			AMediaPlate* mediaPlate = Cast<AMediaPlate>(mActor);
-			if (!mediaPlate->MediaPlateComponent->IsMediaPlatePlaying()) //Is the mediaplate closed ?
-			{
-				bool bPlayOnOpen = mediaPlate->MediaPlateComponent->bPlayOnOpen;
-				mediaPlate->MediaPlateComponent->bPlayOnOpen = false;
-				mediaPlate->MediaPlateComponent->Open();
-				mediaPlate->MediaPlateComponent->Rewind();
-				mediaPlate->MediaPlateComponent->bPlayOnOpen = bPlayOnOpen;
-			}
-		}
+		bool wasOpened = EnsureMediaPlateIsOpened();
 
 		UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
 		if (mediaPlayer)
@@ -407,7 +396,40 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 		{
 			//TODO: Warn user to add a media player to its mediatexture
 		}
+
+		if (wasOpened)
+			SyncMediaPlayerWithAnimationCurrentFrame();
 	}
+}
+
+bool
+FOdysseyViewportDrawingEditorExtension::EnsureMediaPlateIsOpened()
+{
+	if (!mTexture->IsA(UMediaTexture::StaticClass()))
+		return false;
+	
+	if (mActor->GetClass() != AMediaPlate::StaticClass())
+		return false;
+	
+	UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
+		
+	bool needsOpen = true;
+	AMediaPlate* mediaPlate = Cast<AMediaPlate>(mActor);
+	UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
+	if (mediaPlayer)
+	{
+		UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
+		int32 index = mediaPlayer->GetPlaylistIndex();
+		UMediaSource* mediaSource = playlist.Get(index);
+		if (mediaSource && mediaPlate->MediaPlateComponent->IsMediaPlatePlaying()) //Is the mediaplate closed ?
+			return false;
+	}
+	
+	bool bPlayOnOpen = mediaPlate->MediaPlateComponent->bPlayOnOpen;
+	mediaPlate->MediaPlateComponent->bPlayOnOpen = false;
+	mediaPlate->MediaPlateComponent->Open();
+	mediaPlate->MediaPlateComponent->bPlayOnOpen = bPlayOnOpen;
+	return true;
 }
 
 void
@@ -416,31 +438,8 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
 	if (mTexture && mTexture->IsA(UMediaTexture::StaticClass()))
 	{
 		UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
-		if (mActor->GetClass() == AMediaPlate::StaticClass())
-		{
-			AMediaPlate* mediaPlate = Cast<AMediaPlate>(mActor);
-			UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
-			bool needsOpen = true;
-			if (mediaPlayer) //If the mediaplayer has been removed, remove the source
-			{
-				UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
-				int32 index = mediaPlayer->GetPlaylistIndex();
-				UMediaSource* mediaSource = playlist.Get(index);
-				if (mediaSource && mediaPlate->MediaPlateComponent->IsMediaPlatePlaying()) //Is the mediaplate closed ?
-				{
-					needsOpen = false;
-				}
-			}
-			
-			if (needsOpen)
-			{
-				bool bPlayOnOpen = mediaPlate->MediaPlateComponent->bPlayOnOpen;
-				mediaPlate->MediaPlateComponent->bPlayOnOpen = false;
-				mediaPlate->MediaPlateComponent->Open();
-				mediaPlate->MediaPlateComponent->Rewind();
-				mediaPlate->MediaPlateComponent->bPlayOnOpen = bPlayOnOpen;
-			}
-		}
+
+		bool wasOpened = EnsureMediaPlateIsOpened();
 
 		UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
 		if (mediaPlayer) //If the mediaplayer has been removed, remove the source
@@ -453,7 +452,6 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
 			{
 				TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
 				TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
-				TSharedPtr<FOdysseyAnimationMediaControls> animationMediaControls = animationMediaPlayer->GetAnimationControls();
 				animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
 
 				if (!mCurrentSource)
@@ -463,17 +461,13 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
 					mEditor->SetSource(animationSource);
 				}
 				
-				TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
-				if (animationSource)
+				if (wasOpened)
 				{
-					UOdysseyAnimation* animation = animationSource->GetAnimation();
-
-					FTimespan timespan = mediaPlayer->GetTime() + FTimespan(1); //for precision purposes, otherwise "frame" can be the previous frame because of double imprecision
-					double seconds = timespan.GetTotalSeconds();
-					int frame = seconds * animation->GetFramesPerSecond() + animationMediaControls->GetFrameRange().GetLowerBoundValue();
-
-					if (frame != animation->CurrentFrame)
-						FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frame);
+					SyncMediaPlayerWithAnimationCurrentFrame();
+				}
+				else
+				{
+					SyncAnimationCurrentFrameWithMediaPlayer();
 				}
 			}
 		}
@@ -797,6 +791,12 @@ void FOdysseyViewportDrawingEditorExtension::EnableDelegatesSequencer()
 void
 FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentTimeChanged()
 {
+	SyncMediaPlayerWithAnimationPlayer();
+}
+
+void
+FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationFrame(int iFrame)
+{
 	if (!mCurrentSource || mCurrentSource->Id() != FOdysseyAnimationEditorSource::StaticId())
 		return;
 		
@@ -805,35 +805,24 @@ FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentTimeChanged()
 		
 	TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
 	UOdysseyAnimation* animation = animationSource->GetAnimation();
-	UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
-	if (!animation || !player)
+	if (!animation)
 		return;
 	
 	UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
 	UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
 	if (!mediaPlayer || mediaPlayer->IsPlaying())
 		return;
-
-	UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
-	int32 index = mediaPlayer->GetPlaylistIndex();
-	UMediaSource* mediaSource = playlist.Get(index);
-	if (!mediaSource || !mediaSource->IsA(UOdysseyAnimation::StaticClass()))
-		return;
 	
 	TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
 	TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
 	TSharedPtr<FOdysseyAnimationMediaControls> animationMediaControls = animationMediaPlayer->GetAnimationControls();
 
-	FTimespan timespan = player->GetCurrentTime(); //for precision purposes, otherwise "frame" can be the previous frame because of double imprecision
 	FTimespan frameDuration = FTimespan::FromSeconds(1 / animation->GetFramesPerSecond());
 
-	//1
-	int currentFrame = animation->GetFrameIndexAtTime(timespan);
-	animationMediaPlayer->SetFrameToIncludeIntoDuration(currentFrame);
+	animationMediaPlayer->SetFrameToIncludeIntoDuration(iFrame);
 
-	//2
 	//ensure timespan is aligne on the start of a frame
-	timespan = animation->GetFrameTimeRange(currentFrame).GetLowerBoundValue();
+	FTimespan timespan = animation->GetFrameTimeRange(iFrame).GetLowerBoundValue();
 
 	FInt32Range frameRange = animationMediaControls->GetFrameRange();
 	FTimespan startTime = animation->GetFrameTimeRange(frameRange.GetLowerBoundValue()).GetLowerBoundValue();
@@ -841,6 +830,74 @@ FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentTimeChanged()
 	timespan -= startTime;
 	mediaPlayer->Seek(timespan);
 	mediaPlayer->SetBlockOnTimeRange(TRange<FTimespan>(timespan, timespan + frameDuration));
+}
+
+void
+FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationPlayer()
+{
+	if (!mCurrentSource || mCurrentSource->Id() != FOdysseyAnimationEditorSource::StaticId())
+		return;
+		
+	TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
+	UOdysseyAnimation* animation = animationSource->GetAnimation();
+	UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
+	if (!animation || !player)
+		return;
+
+	FTimespan timespan = player->GetCurrentTime();
+
+	//1
+	int currentFrame = animation->GetFrameIndexAtTime(timespan);
+	SyncMediaPlayerWithAnimationFrame(currentFrame);
+}
+
+void
+FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationCurrentFrame()
+{
+	if (!mCurrentSource || mCurrentSource->Id() != FOdysseyAnimationEditorSource::StaticId())
+		return;
+		
+	TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
+	UOdysseyAnimation* animation = animationSource->GetAnimation();
+	if (!animation)
+		return;
+
+	SyncMediaPlayerWithAnimationFrame(animation->CurrentFrame);
+}
+
+void
+FOdysseyViewportDrawingEditorExtension::SyncAnimationCurrentFrameWithMediaPlayer()
+{
+	if (!mCurrentSource || mCurrentSource->Id() != FOdysseyAnimationEditorSource::StaticId())
+		return;
+		
+	if (!mTexture || !mTexture->IsA(UMediaTexture::StaticClass()))
+		return;
+		
+	TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
+	UOdysseyAnimation* animation = animationSource->GetAnimation();
+	if (!animation)
+		return;
+	
+	UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
+	UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
+	UOdysseyAnimationPlayer* animationPlayer = animationSource->GetAnimationPlayer();
+	if (!mediaPlayer || mediaPlayer->IsPlaying() || animationPlayer->Status == EOdysseyAnimationPlayerStatus::Playing)
+		return;
+	
+	TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
+	TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
+	TSharedPtr<FOdysseyAnimationMediaControls> animationMediaControls = animationMediaPlayer->GetAnimationControls();
+
+	//Use of controls->GetTime() instead of mediaPlayer->GetTime()
+	//Because controls->GetTime() is synchronous with mediaPlayer->Seek()
+	//And mediaPlayer->GetTime() is asynchronous with mediaPlayer->Seek()
+	FTimespan timespan = animationMediaControls->GetTime() + FTimespan(1); //for precision purposes, otherwise "frame" can be the previous frame because of double imprecision
+	double seconds = timespan.GetTotalSeconds();
+	int frame = seconds * animation->GetFramesPerSecond() + animationMediaControls->GetFrameRange().GetLowerBoundValue();
+
+	if (frame != animation->CurrentFrame)
+		FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frame);
 }
 
 void

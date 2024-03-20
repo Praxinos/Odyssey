@@ -121,7 +121,7 @@ FTimespan
 UOdysseyAnimation::GetDuration() const
 {
 	FInt32Range range = GetFrameRange();
-	return FTimespan::FromSeconds((range.GetUpperBoundValue() + 1) / GetFramesPerSecond()) - FTimespan(1);
+	return FTimespan::FromSeconds((range.GetUpperBoundValue() - range.GetLowerBoundValue() + 1) / GetFramesPerSecond()) - FTimespan(1);
 }
 
 FInt32Range
@@ -133,7 +133,8 @@ UOdysseyAnimation::GetFrameRange() const
 	if ( !mLayerStack )
 		return FInt32Range::Empty();
 
-	return mLayerStack->GetFrameRange();
+	FInt32Range layerStackFrameRange = mLayerStack->GetFrameRange();
+	return FInt32Range::Inclusive(0, layerStackFrameRange.GetUpperBoundValue()); //Animation starts always at 0 if there is no startPoint
 }
 
 uint32
