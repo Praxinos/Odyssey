@@ -32,6 +32,7 @@ FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
 	mTexture = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
 	//mTexture2 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
 	mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->Width(), mAnimation->Height(), mTexture.Get());
+	mImageRenderingComposition.Empty();
 
 	mInvalidTileMap = FULISInvalidTileMap(64, mAnimation->Width(), mAnimation->Height());
 
@@ -72,6 +73,8 @@ FOdysseyAnimationMediaSamples::OnClose()
 	mAnimation = nullptr;
 	mSample = nullptr;
 	mTexture = nullptr;
+
+	mImageRenderingComposition.Empty();
 }
 
 void
@@ -126,17 +129,17 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
 	if (isLowerOutOfBound && controls->IsLooping())
 	{
 		FMediaTimeStamp timestamp = timeRange.GetLowerBoundValue();
-		timestamp.Time += mAnimation->GetDuration();
+		timestamp.Time += controls->GetDuration();
 		timestamp.SequenceIndex--;
 		timeRange.SetLowerBoundValue(timestamp);
 		isLowerOutOfBound = false;
 	}
 	
-	bool isUpperOutOfBound = timeRange.HasUpperBound() && timeRange.GetUpperBoundValue().Time >= mAnimation->GetDuration();
+	bool isUpperOutOfBound = timeRange.HasUpperBound() && timeRange.GetUpperBoundValue().Time >= controls->GetDuration();
 	if (isUpperOutOfBound && controls->IsLooping())
 	{
 		FMediaTimeStamp timestamp = timeRange.GetUpperBoundValue();
-		timestamp.Time -= mAnimation->GetDuration();
+		timestamp.Time -= controls->GetDuration();
 		timestamp.SequenceIndex++;
 		timeRange.SetUpperBoundValue(timestamp);
 		isUpperOutOfBound = false;
@@ -147,7 +150,7 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
 	FMediaTimeStamp lowerBoundTimestamp = timeRange.GetLowerBoundValue();
 	FMediaTimeStamp upperBoundTimestamp = timeRange.GetUpperBoundValue();
 	lowerBoundTimestamp.Time = FMath::Max(FTimespan(0), lowerBoundTimestamp.Time);
-	upperBoundTimestamp.Time = FMath::Min(mAnimation->GetDuration(), upperBoundTimestamp.Time);
+	upperBoundTimestamp.Time = FMath::Min(controls->GetDuration(), upperBoundTimestamp.Time);
 	timeRange.SetLowerBoundValue(lowerBoundTimestamp);
 	timeRange.SetUpperBoundValue(upperBoundTimestamp);
 
@@ -186,8 +189,8 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	//Find which frame overlaps the timerange the most
 	FTimespan startTime = timeRange.GetLowerBoundValue().Time;
 	FTimespan endTime = timeRange.GetUpperBoundValue().Time;
-	int startFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(startTime), 0, mAnimation->GetFrameCount());
-	int endFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(endTime), 0, mAnimation->GetFrameCount());
+	int startFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(startTime), 0, controls->GetFrameCount());
+	int endFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(endTime), 0, controls->GetFrameCount());
 	int64 startSequenceIndex = timeRange.GetLowerBoundValue().SequenceIndex;
 	int64 endSequenceIndex = timeRange.GetUpperBoundValue().SequenceIndex;
 
@@ -220,7 +223,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 	else if ( startTime <= endTime || endSequenceIndex - startSequenceIndex >= 2 )
 	{
 		frameIndex = INDEX_NONE;
-		FindMaxOverlapingFrame(FTimespan(0), mAnimation->GetDuration(), &frameIndex);
+		FindMaxOverlapingFrame(FTimespan(0), controls->GetDuration(), &frameIndex);
 	}
 	else
 	{
@@ -231,7 +234,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 		int frameIndex1 = INDEX_NONE;
 		int frameIndex2 = INDEX_NONE;
 		FTimespan overlap1 = FindMaxOverlapingFrame(0, endTime, &frameIndex1);
-		FTimespan overlap2 = FindMaxOverlapingFrame(startTime, mAnimation->GetDuration(), &frameIndex2);
+		FTimespan overlap2 = FindMaxOverlapingFrame(startTime, controls->GetDuration(), &frameIndex2);
 		frameIndex = overlap1 > overlap2 ? frameIndex1 : frameIndex2;
 		resultingSequenceIndex = overlap1 > overlap2 ? endSequenceIndex : startSequenceIndex;
 	}
@@ -277,17 +280,21 @@ FOdysseyAnimationMediaSamples::PeekVideoSampleTime(FMediaTimeStamp & TimeStamp)
 void
 FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 {
-    mCurrentFrameIndex = iFrameIndex;
+	TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
+	if (!controls)
+		return;
 
-	TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
-
-    TRange<FTimespan> timeRange = mAnimation->GetFrameTimeRange(mCurrentFrameIndex);
+    TRange<FTimespan> timeRange = mAnimation->GetFrameTimeRange(iFrameIndex);
 	FMediaTimeStamp frameTime = FMediaTimeStamp(timeRange.GetLowerBoundValue(), iSequenceIndex);
     FTimespan frameDuration = timeRange.Size<FTimespan>();
 
 	mSample->SetTime(frameTime);
 	mSample->SetDuration(frameDuration);
 	
+	int controlsStartFrame = controls->GetFrameRange().GetLowerBoundValue();
+    mCurrentFrameIndex = iFrameIndex + controlsStartFrame;
+	TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
+
 	if ( imageRenderingComposition == mImageRenderingComposition )
 		return;
 

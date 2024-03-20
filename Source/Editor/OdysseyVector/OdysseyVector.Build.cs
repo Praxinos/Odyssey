@@ -19,6 +19,7 @@ public class OdysseyVector : ModuleRules
                 "Slate",
                 "SlateCore",
                 "EditorScriptingUtilities",
+                "XmlParser",
                 "OdysseyFile",
                 "OdysseyCore",
                 "OdysseyStyle",
@@ -28,6 +29,7 @@ public class OdysseyVector : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
             new string[] {
+                "XmlParser",
                 "ULIS",
                 "ULISLoader",
                 "blend2d"

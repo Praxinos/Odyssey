@@ -55,6 +55,18 @@ FOdysseyAnimationMediaPlayer::SetRenderType(IOdysseyImageRenderer::eRenderType i
 	return mSamples->SetRenderType(iRenderType);
 }
 
+void
+FOdysseyAnimationMediaPlayer::SetFrameToIncludeIntoDuration(int iFrame)
+{
+	mControls->SetFrameToIncludeIntoDuration(iFrame);
+}
+
+void
+FOdysseyAnimationMediaPlayer::UnsetFrameToIncludeIntoDuration()
+{
+	mControls->UnsetFrameToIncludeIntoDuration();
+}
+
 //~ IMediaPlayer interface
 
 bool
@@ -78,8 +90,6 @@ FOdysseyAnimationMediaPlayer::Open(const FString& iUrl, const IMediaOptions* iOp
 		mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpenFailed);
 		return false;
 	}
-
-	mCurrentDuration = mAnimation->GetDuration();
 	
 	//succeeded
 	mCache->OnOpen(mAnimation.Get());
@@ -219,17 +229,4 @@ FOdysseyAnimationMediaPlayer::GetPlayerFeatureFlag(EFeatureFlag iFlag) const
 	}
 
 	return IMediaPlayer::GetPlayerFeatureFlag(iFlag);
-}
-
-void
-FOdysseyAnimationMediaPlayer::Tick(float DeltaTime)
-{
-	if ( !mAnimation )
-		return;
-
-	FTimespan duration = mAnimation->GetDuration();
-	if ( duration != mCurrentDuration )
-	{
-		mCurrentDuration = duration;
-	}
 }

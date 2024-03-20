@@ -7,6 +7,9 @@
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 
+// testing
+#include "Import/svg/OdysseyVectorImportSVG.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 #ifndef M_PI
@@ -54,7 +57,14 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorGroupPaint* iScen
 
     mGridHUD->Export( mPointArray );
 
+
+
     //MakeTest( iScene );
+    //#ifdef _DEBUG
+    //FOdysseyVectorImportSVG svgReader( iScene, TEXT("C:\\CODE\\tiger.svg") );
+    //#endif
+
+
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );

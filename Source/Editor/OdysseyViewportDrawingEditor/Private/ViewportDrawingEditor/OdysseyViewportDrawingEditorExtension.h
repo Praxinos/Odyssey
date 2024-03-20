@@ -104,6 +104,16 @@ private:
 	void EnableDelegatesSequencer();
     void SetAllDelegatesSequencers();
 	void ClearAllDelegatesSequencers();
+    
+private:
+    void OnAnimationPlayerCurrentTimeChanged();
+    
+    void SyncMediaPlayerWithAnimationFrame(int iFrame);
+    void SyncMediaPlayerWithAnimationPlayer();
+    void SyncMediaPlayerWithAnimationCurrentFrame();
+    void SyncAnimationCurrentFrameWithMediaPlayer();
+
+    bool EnsureMediaPlateIsOpened();
 
 private:
     // FGCObject implementation

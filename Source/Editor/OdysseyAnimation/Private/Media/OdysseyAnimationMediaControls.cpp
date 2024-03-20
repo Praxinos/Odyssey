@@ -52,7 +52,42 @@ FOdysseyAnimationMediaControls::GetDuration() const
     if (!mAnimation)
         return FTimespan();
 
-    return mAnimation->GetDuration();
+	FInt32Range range = GetFrameRange();
+	FTimespan duration = FTimespan::FromSeconds((range.GetUpperBoundValue() + 1) / mAnimation->GetFramesPerSecond()) - FTimespan(1);
+	return duration;
+}
+
+int
+FOdysseyAnimationMediaControls::GetFrameCount() const
+{
+	FInt32Range frameRange = GetFrameRange();
+	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
+	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
+	return endFrame - startFrame + 1;
+}
+
+FInt32Range
+FOdysseyAnimationMediaControls::GetFrameRange() const
+{
+	FInt32Range frameRange = mAnimation->GetFrameRange();
+	if (mFrameToIncludeIntoDuration.IsSet())
+	{
+		frameRange.SetLowerBoundValue(FMath::Min(frameRange.GetLowerBoundValue(), mFrameToIncludeIntoDuration.GetValue()));
+		frameRange.SetUpperBoundValue(FMath::Max(frameRange.GetUpperBoundValue(), mFrameToIncludeIntoDuration.GetValue()));
+	}
+	return frameRange;
+}
+
+void
+FOdysseyAnimationMediaControls::SetFrameToIncludeIntoDuration(int iFrame)
+{
+	mFrameToIncludeIntoDuration = iFrame;
+}
+
+void
+FOdysseyAnimationMediaControls::UnsetFrameToIncludeIntoDuration()
+{
+	mFrameToIncludeIntoDuration = TOptional<int>();
 }
 
 float
