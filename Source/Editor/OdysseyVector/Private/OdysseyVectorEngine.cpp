@@ -2,6 +2,7 @@
 
 #include "OdysseyVector.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVector.h"
 #include <future>
 #include <execution>
 
