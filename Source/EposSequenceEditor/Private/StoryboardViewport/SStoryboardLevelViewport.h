@@ -203,6 +203,11 @@ private:
     FReply OnViewportResetTransformButtonClicked();
     void ResetViewportTransform();
 
+    FVector2D GetTranslationFromSlidersOffsets(float InScrollOffsetFractionX, float InScrollOffsetFractionY);
+    void UpdateScrollBars();
+    void OnHorizontalScrollBarScrolled( float InScrollOffsetFraction );
+    void OnVerticalScrollBarScrolled(float InScrollOffsetFraction);
+
 private:
 
     /** Widget where the scene viewport is drawn in */
@@ -279,4 +284,10 @@ private:
     bool mIsZooming = false;
     FVector2D mZoomMouseInitialPosition;
     float mZoomInitialZoom;
+
+    TSharedPtr<SScrollBar> mVerticalScrollBar;
+    TSharedPtr<SScrollBar> mHorizontalScrollBar;
+    bool mNeedUpdateScrollbars = true;
+
+    TSharedPtr<SWidget> mViewportTransformBox;
 };

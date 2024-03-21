@@ -52,6 +52,8 @@
 
 #define MinZoom 0.01
 #define MaxZoom 200.0
+#define ScrollbarThumbRatio 0.1f
+#define ScrollbarSpaceRatio (1.f - ScrollbarThumbRatio)
 
 template<typename T>
 struct SNonThrottledSpinBox : SSpinBox<T>
@@ -239,7 +241,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     ViewportWidget = SNew( SStoryboardPreviewViewport, ViewportConstructionArgs )
         .LevelEditorViewportClient(ViewportClient)
         .ParentLevelEditor(InArgs._ParentLevelEditor);
-    ViewportWidget->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
+    //ViewportWidget->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
     ViewportClient->SetViewportWidget(ViewportWidget);
 
     // Automatically engage game-view to hide editor only sprites. This needs to be done
@@ -254,7 +256,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     FLinearColor Gray(.3f, .3f, .3f, 1.f);
 
     FilmOverlayOptions = SNew(SFilmOverlayOptions);
-    FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
+    //FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
 
     //---
 
@@ -335,30 +337,34 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
                 + SVerticalBox::Slot()
                 .AutoHeight()
-                .HAlign(HAlign_Center)
                 [
                     SNew(SBox)
-                    .HeightOverride(this, &SStoryboardLevelViewport::GetDesiredViewportHeight)
-                    .WidthOverride(this, &SStoryboardLevelViewport::GetDesiredViewportWidth)
+                    .Clipping( EWidgetClipping::ClipToBoundsAlways )
+                    .HAlign(HAlign_Center)
                     [
-                        SNew(SOverlay)
-                        .Clipping( EWidgetClipping::ClipToBoundsAlways )
-
-                        + SOverlay::Slot()
+                        SAssignNew(mViewportTransformBox, SBox)
+                        .HeightOverride(this, &SStoryboardLevelViewport::GetDesiredViewportHeight)
+                        .WidthOverride(this, &SStoryboardLevelViewport::GetDesiredViewportWidth)
                         [
-                            ViewportWidget.ToSharedRef()
-                        ]
+                            SNew(SOverlay)
+                            //.Clipping( EWidgetClipping::ClipToBoundsAlways )
 
-                        + SOverlay::Slot()
-                        [
-                            FilmOverlayOptions->GetFilmOverlayWidget()
-                        ]
+                            + SOverlay::Slot()
+                            [
+                                ViewportWidget.ToSharedRef()
+                            ]
 
-                        + SOverlay::Slot()
-                        [
-                            SAssignNew( mWidgetNotesAsOverlay, SNotesAsOverlay )
-                            .Visibility_Lambda( [=]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay /*&& SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0*/ ) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; } )
-                            .ListItemsSource( &mNotes )
+                            + SOverlay::Slot()
+                            [
+                                FilmOverlayOptions->GetFilmOverlayWidget()
+                            ]
+
+                            + SOverlay::Slot()
+                            [
+                                SAssignNew( mWidgetNotesAsOverlay, SNotesAsOverlay )
+                                .Visibility_Lambda( [=]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay /*&& SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0*/ ) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; } )
+                                .ListItemsSource( &mNotes )
+                            ]
                         ]
                     ]
                 ]
@@ -711,7 +717,29 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             + SVerticalBox::Slot()
             .Padding( 5.f, 0.f )
             [
-                mNoteSplitter.ToSharedRef()
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                [
+                    mNoteSplitter.ToSharedRef()
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(mVerticalScrollBar, SScrollBar)
+                    .AlwaysShowScrollbar(true)
+                    .Thickness(FVector2D(10.f, 10.f))
+                    .OnUserScrolled(this, &SStoryboardLevelViewport::OnVerticalScrollBarScrolled)
+                ]
+            ]
+
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SAssignNew(mHorizontalScrollBar, SScrollBar)
+                    .Orientation( Orient_Horizontal )
+                    .AlwaysShowScrollbar(true)
+                    .Thickness(FVector2D(10.f, 10.f))
+                    .OnUserScrolled(this, &SStoryboardLevelViewport::OnHorizontalScrollBarScrolled)
             ]
 
             // Timeline + playback
@@ -786,6 +814,8 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             .ShowEffectWhenDisabled( false )
         ]
     ];
+
+    mViewportTransformBox->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
 
     UpdateViewportWidgetTransform();
 
@@ -990,8 +1020,8 @@ void
 SStoryboardLevelViewport::UpdateViewportWidgetTransform()
 {
     FSlateRenderTransform transform = GetViewportTransform();
-    ViewportWidget->SetRenderTransform( transform );
-    FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransform( transform );
+    mViewportTransformBox->SetRenderTransform( transform );
+    //FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransform( transform );
 }
 
 void
@@ -1139,7 +1169,6 @@ SStoryboardLevelViewport::FitToScreen()
 
     SetViewportZoom(zoom);
     SetViewportPan(FVector2D(0.0f, 0.0f));
-    //UpdateScrollBars();
 }
 
 bool
@@ -1189,6 +1218,101 @@ SStoryboardLevelViewport::SetViewportPan( FVector2D iPan )
     mViewportPan = iPan;
     UpdateViewportWidgetTransform();
 }
+
+//---
+
+void
+SStoryboardLevelViewport::UpdateScrollBars()
+{
+    float width = ViewportWidget->GetCachedGeometry().GetLocalSize().X;
+    float height = ViewportWidget->GetCachedGeometry().GetLocalSize().Y;
+
+    float selfWidth = ViewportWidget->GetCachedGeometry().GetLocalSize().X;
+    float selfHeight = ViewportWidget->GetCachedGeometry().GetLocalSize().Y;
+
+    //Get the BoundingBox
+
+    //All calculations are done in the Transform Coodinate system
+    //So (0,0) is bottom left
+    TArray<FVector2D> points;
+    FSlateRenderTransform transform = GetViewportTransform();
+    points.Add(transform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(width / 2.f, -height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
+
+    FBox2D bbox(points);
+
+    FVector2D minPos( -bbox.GetSize().X / 2.f, -bbox.GetSize().Y / 2.f);
+    FVector2D maxPos( selfWidth + bbox.GetSize().X / 2.f, selfHeight + bbox.GetSize().Y / 2.f);
+
+    FVector2D dist = maxPos - minPos;
+    FVector2D center = bbox.GetCenter() + FVector2D(selfWidth / 2.f, selfHeight / 2.f);
+
+    FVector2D pos = (center - minPos) / dist;
+    pos = pos.ClampAxes(0.f, 1.f) ;
+
+    mHorizontalScrollBar->SetState((1.0 - pos.X) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
+    mVerticalScrollBar->SetState((1.0 - pos.Y) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
+}
+
+
+
+FVector2D
+SStoryboardLevelViewport::GetTranslationFromSlidersOffsets( float InScrollOffsetFractionX, float InScrollOffsetFractionY )
+{
+    float width = ViewportWidget->GetCachedGeometry().GetLocalSize().X;
+    float height = ViewportWidget->GetCachedGeometry().GetLocalSize().Y;
+
+    float selfWidth = ViewportWidget->GetCachedGeometry().GetLocalSize().X;
+    float selfHeight = ViewportWidget->GetCachedGeometry().GetLocalSize().Y;
+
+    //Get the BoundingBox
+
+    //All calculations are done in the Transform Coodinate system
+    //So (0,0) is bottom left
+    TArray<FVector2D> points;
+    FSlateRenderTransform transform = GetViewportTransform();
+    points.Add(transform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(width / 2.f, -height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
+
+    FBox2D bbox(points);
+
+    FVector2D minPos(-bbox.GetSize().X / 2.f, -bbox.GetSize().Y / 2.f);
+    FVector2D maxPos(selfWidth + bbox.GetSize().X / 2.f, selfHeight + bbox.GetSize().Y / 2.f);
+
+    FVector2D dist = maxPos - minPos;
+
+    FVector2D pos = FVector2D( 1.f - (InScrollOffsetFractionX / (ScrollbarSpaceRatio)), 1.f - (InScrollOffsetFractionY / (ScrollbarSpaceRatio)));
+    pos *= dist;
+    pos += minPos;
+    pos -= FVector2D(selfWidth / 2.f, selfHeight / 2.f);
+
+    return pos;
+}
+
+void
+SStoryboardLevelViewport::OnHorizontalScrollBarScrolled(float InScrollOffsetFraction)
+{
+    FVector2D translation = GetTranslationFromSlidersOffsets(InScrollOffsetFraction, mVerticalScrollBar->DistanceFromTop());
+    FSlateRenderTransform transform = GetViewportTransform();
+    SetViewportPan(FVector2D(translation.X, transform.GetTranslation().Y));
+    //mHorizontalScrollBar->SetState(FMath::Clamp(InScrollOffsetFraction, 0.f, ScrollbarSpaceRatio), ScrollbarThumbRatio);
+}
+
+
+void
+SStoryboardLevelViewport::OnVerticalScrollBarScrolled( float InScrollOffsetFraction )
+{
+    FVector2D translation = GetTranslationFromSlidersOffsets(mHorizontalScrollBar->DistanceFromTop(), InScrollOffsetFraction);
+    FSlateRenderTransform transform = GetViewportTransform();
+    SetViewportPan(FVector2D(transform.GetTranslation().X, translation.Y));
+    //mVerticalScrollBar->SetState(FMath::Clamp(InScrollOffsetFraction, 0.f, ScrollbarSpaceRatio), ScrollbarThumbRatio);
+}
+
+//---
 
 int32
 SStoryboardLevelViewport::GetScaleVisibleWidgetIndex() const
@@ -1490,6 +1614,8 @@ ISequencer* SStoryboardLevelViewport::GetSequencer() const
 void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
     SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
+
+    UpdateScrollBars();
 
     ISequencer* Sequencer = GetSequencer();
     if (!Sequencer)
