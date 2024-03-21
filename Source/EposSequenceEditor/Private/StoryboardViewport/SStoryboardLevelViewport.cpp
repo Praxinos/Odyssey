@@ -582,6 +582,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //HACK: ue4
     TSharedPtr<SSpinBox<float>> viewportRotationSpinBox;
+    TSharedPtr<SSpinBox<float>> viewportZoomSpinBox;
 
     TSharedRef<SWidget> MainViewport = SNew(SBorder)
         .BorderImage(FAppStyle::Get().GetBrush("BlackBrush"))
@@ -618,27 +619,84 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 .AutoWidth()
                 .VAlign( VAlign_Center )
                 [
-                    SAssignNew( viewportRotationSpinBox, SSpinBox<float> )
-                    .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Degrees ) ) )
-                    .MinDesiredWidth( 65 )
-                    .Justification( ETextJustify::Right )
-                    .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
-                    .PreventThrottling( true ) // To refresh the viewport during value change
-                    .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
-                    .Delta( 1 )
-                    .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                    .SliderExponentNeutralValue( 100 )
-                    .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
-                    .OnValueChanged_Lambda( [this] ( float Value) { SetViewportRotation(Value); } )
-                    .Value( this, &SStoryboardLevelViewport::GetViewportRotation )
+                    SNew(SVerticalBox)
+                    + SVerticalBox::Slot()
+                    .AutoHeight()
+                    [
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SAssignNew( viewportZoomSpinBox, SSpinBox<float> )
+                            .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ) )
+                            .MinDesiredWidth( 55 )
+                            .Justification( ETextJustify::Right )
+                            .ToolTipText( LOCTEXT( "ViewportZoomTooltip", "Change the viewport zoom." ) )
+                            .PreventThrottling( true ) // To refresh the viewport during value change
+                            .Delta( 1 )
+                            .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                            .SliderExponentNeutralValue( 100 )
+                            .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportZoom(Value / 100.f); } )
+                            .OnValueChanged_Lambda( [this] ( float Value) { SetViewportZoom(Value / 100.f); } )
+                            .Value_Lambda( [this] () { return GetViewportZoom() * 100.f; } )
+                        ]
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SNew( SComboButton )
+                            .ToolTipText( LOCTEXT( "ViewportZoomTooltip", "Change the viewport zoom." ) )
+                            .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportZoomMenuContent )
+                        ]
+                    ]
+                    + SVerticalBox::Slot()
+                    .AutoHeight()
+                    [
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SAssignNew( viewportRotationSpinBox, SSpinBox<float> )
+                            .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Degrees ) ) )
+                            .MinDesiredWidth( 55 )
+                            .Justification( ETextJustify::Right )
+                            .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
+                            .PreventThrottling( true ) // To refresh the viewport during value change
+                            .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                            .Delta( 1 )
+                            .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                            .SliderExponentNeutralValue( 100 )
+                            .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
+                            .OnValueChanged_Lambda( [this] ( float Value) { SetViewportRotation(Value); } )
+                            .Value( this, &SStoryboardLevelViewport::GetViewportRotation )
+                        ]
+
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SNew( SComboButton )
+                            .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
+                            .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportRotationMenuContent )
+                        ]
+                    ]
                 ]
+
                 + SHorizontalBox::Slot()
                 .AutoWidth()
-                .VAlign( VAlign_Center )
+                .Padding(4.0f, 0.0f)
+                .VAlign(VAlign_Center)
                 [
-                    SNew( SComboButton )
-                    .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
-                    .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportRotationMenuContent )
+                    SNew(SButton)
+                    .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
+                    .ToolTipText( LOCTEXT( "ViewportResetTransformTooltip", "Reset Viewport Pan, Zoom and Rotation." ) )
+                    .OnClicked(this, &SStoryboardLevelViewport::OnViewportResetTransformButtonClicked)
+                    [
+                        SNew(SImage)
+                        .Image( FEposSequenceEditorStyle::Get().GetBrush( "Viewport.ResetTransform" ) )
+                    ]
                 ]
 
                 + SHorizontalBox::Slot()
@@ -704,6 +762,9 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     viewportRotationSpinBox->SetMinFractionalDigits( 2 );
     viewportRotationSpinBox->SetMaxFractionalDigits( 2 );
 
+    viewportZoomSpinBox->SetMinFractionalDigits( 2 );
+    viewportZoomSpinBox->SetMaxFractionalDigits( 2 );
+
     //---
 
     ChildSlot
@@ -737,8 +798,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     CommandList->MapAction(
         FEposSequenceEditorCommands::Get().StoryboardViewportAdd10Rotate,
-        FUIAction(
-            FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::AddViewportRotation, 10.f ) )
+        FUIAction( FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::AddViewportRotation, 10.f ) )
     );
     CommandList->MapAction(
         FEposSequenceEditorCommands::Get().StoryboardViewportSubstract10Rotate,
@@ -753,6 +813,35 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::SetViewportRotation, float( command.Key ) ),
                 FCanExecuteAction(),
                 FIsActionChecked::CreateSP( this, &SStoryboardLevelViewport::IsViewportRotationChecked, float( command.Key ) )
+            )
+        );
+    }
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StoryboardViewportAdd10Zoom,
+        FUIAction( FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::AddViewportZoom, 0.1f ) )
+    );
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StoryboardViewportSubstract10Zoom,
+        FUIAction( FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::AddViewportZoom, -0.1f ) )
+    );
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StoryboardViewportFitToScreen,
+        FUIAction( FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::FitToScreen ) )
+    );
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StoryboardViewportResetPanZoomRotate,
+        FUIAction( FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::ResetViewportTransform ) )
+    );
+
+    for( auto command : FEposSequenceEditorCommands::Get().StoryboardViewportSetZoomX )
+    {
+        CommandList->MapAction(
+            command.Value,
+            FUIAction(
+                FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::SetViewportZoom, float( command.Key ), FVector2D(0.0f, 0.0f) ),
+                FCanExecuteAction(),
+                FIsActionChecked::CreateSP( this, &SStoryboardLevelViewport::IsViewportZoomChecked, float( command.Key ) )
             )
         );
     }
@@ -905,6 +994,21 @@ SStoryboardLevelViewport::UpdateViewportWidgetTransform()
     FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransform( transform );
 }
 
+void
+SStoryboardLevelViewport::ResetViewportTransform()
+{
+    SetViewportPan(FVector2D(0.f, 0.f));
+    SetViewportZoom(1.f);
+    SetViewportRotation(0.f);
+}
+
+FReply
+SStoryboardLevelViewport::OnViewportResetTransformButtonClicked()
+{
+    ResetViewportTransform();
+    return FReply::Handled();
+}
+
 float
 SStoryboardLevelViewport::GetViewportRotation() const
 {
@@ -973,19 +1077,8 @@ SStoryboardLevelViewport::GetViewportZoom() const
 }
 
 void
-SStoryboardLevelViewport::SetViewportZoom( float iZoom, const FVector2D& iZoomPosition )
+SStoryboardLevelViewport::SetViewportZoom( float iZoom, FVector2D iZoomPosition )
 {
-    //Compute new pan value
-    /* float oldRotationRadians = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
-    float newRotationDegrees = FMath::Fmod(iRotation + 180, 360) - 180;
-    float newRotationRadians = FUnitConversion::Convert( newRotationDegrees, EUnit::Degrees, EUnit::Radians );
-
-    FSlateRenderTransform transform = GetViewportTransform();
-    transform = transform.Concatenate(FSlateRenderTransform(FQuat2D(newRotationRadians - oldRotationRadians)));
-
-    mViewportRotation = newRotationDegrees;
-    mViewportPan = transform.GetTranslation(); */
-
     float oldZoom = mViewportZoom;
     float newZoom = FMath::Clamp( iZoom, MinZoom, MaxZoom );
     FTransform2D zoomTransform = FTransform2D(newZoom / oldZoom, FVector2D(0,0));
@@ -1000,6 +1093,89 @@ SStoryboardLevelViewport::SetViewportZoom( float iZoom, const FVector2D& iZoomPo
 
     UpdateViewportWidgetTransform();
 }
+
+void
+SStoryboardLevelViewport::AddViewportZoom( float iDeltaZoom )
+{
+    SetViewportZoom(mViewportZoom + iDeltaZoom);
+}
+
+void
+SStoryboardLevelViewport::FitToScreen()
+{
+    float width = ViewportWidget->GetCachedGeometry().GetLocalSize().X;
+    float height = ViewportWidget->GetCachedGeometry().GetLocalSize().Y;
+
+    float selfWidth = ViewportWidget->GetCachedGeometry().GetLocalSize().X;
+    float selfHeight = ViewportWidget->GetCachedGeometry().GetLocalSize().Y;
+
+    //Get the BoundingBox
+
+    //All calculations are done in the Transform Coodinate system
+    //So (0,0) is bottom left
+    TArray<FVector2D> points;
+    FSlateRenderTransform transform = GetViewportTransform();
+    points.Add(transform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(width / 2.f, -height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
+
+    FBox2D bbox(points);
+
+    float selfRatio = (float)selfWidth / selfHeight;
+    float ratio = bbox.GetSize().X / bbox.GetSize().Y;
+
+    float zoom = GetViewportZoom();
+    if (ratio > selfRatio)
+    {
+        //width
+        zoom *= selfWidth / bbox.GetSize().X;
+    }
+    else
+    {
+        //height
+        zoom *= selfHeight / bbox.GetSize().Y;
+    }
+
+    SetViewportZoom(zoom);
+    SetViewportPan(FVector2D(0.0f, 0.0f));
+    //UpdateScrollBars();
+}
+
+bool
+SStoryboardLevelViewport::IsViewportZoomChecked( float iZoom )
+{
+    return FMath::IsNearlyEqual( mViewportZoom, iZoom );
+}
+
+TSharedRef<SWidget>
+SStoryboardLevelViewport::OnGetViewportZoomMenuContent() const
+{
+    // create zoom menu
+    FMenuBuilder ViewportZoomMenuBuilder( true, CommandList );
+    {
+        TNumericUnitTypeInterface<int> percentage( EUnit::Percentage );
+
+        ViewportZoomMenuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-add-zoom-section", "Add Viewport Zoom" ) );
+        ViewportZoomMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportAdd10Zoom, NAME_None, FText::FromString( TEXT( "+" ) + percentage.ToString( 10 ) ) );
+        ViewportZoomMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportSubstract10Zoom, NAME_None, FText::FromString( percentage.ToString( -10 ) ) );
+        ViewportZoomMenuBuilder.EndSection();
+
+        ViewportZoomMenuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-set-zoom-section", "Set Viewport Zoom" ) );
+        for( auto command : FEposSequenceEditorCommands::Get().StoryboardViewportSetZoomX )
+        {
+            ViewportZoomMenuBuilder.AddMenuEntry( command.Value, NAME_None, FText::FromString( percentage.ToString( FMath::RoundToInt32(command.Key * 100.f) ) ) );
+        }
+        ViewportZoomMenuBuilder.EndSection();
+
+        ViewportZoomMenuBuilder.AddSeparator();
+        ViewportZoomMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportFitToScreen, NAME_None, LOCTEXT( "storyboard-viewport-fit-to-screen", "Fit To Screen" ) );
+    }
+
+    return ViewportZoomMenuBuilder.MakeWidget();
+}
+
+//---
 
 FVector2D
 SStoryboardLevelViewport::GetViewportPan() const

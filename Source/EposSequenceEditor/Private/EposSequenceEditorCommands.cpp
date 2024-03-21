@@ -13,12 +13,14 @@
 namespace
 {
 const FName ViewportRotationBundleName = "ViewportRotation";
+const FName ViewportZoomBundleName = "ViewportZoom";
 }
 
 FEposSequenceEditorCommands::FEposSequenceEditorCommands()
     : TCommands<FEposSequenceEditorCommands>( "EposSequenceCommands" /* must match Set() parameter in style*/, LOCTEXT("EposSequenceEditorStyle", "Epos Editor"), NAME_None, FEposSequenceEditorStyle::Get().GetStyleSetName() )
 {
     AddBundle( ViewportRotationBundleName, LOCTEXT( "CommandsCategory.ViewportRotation", "Viewport Rotation" ) );
+    AddBundle( ViewportZoomBundleName, LOCTEXT( "CommandsCategory.ViewportZoom", "Viewport Zoom" ) );
 }
 
 void
@@ -30,8 +32,13 @@ FEposSequenceEditorCommands::RegisterCommands()
 
     //---
 
-    UI_COMMAND( StoryboardViewportAdd10Rotate,      "Storyboard Viewport +10°", "+10° to the viewport rotation", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( StoryboardViewportSubstract10Rotate,"Storyboard Viewport -10°", "-10° to the viewport rotation", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( StoryboardViewportAdd10Rotate,      "Storyboard Viewport Rotation +10°", "+10° to the viewport rotation", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( StoryboardViewportSubstract10Rotate,"Storyboard Viewport Rotation -10°", "-10° to the viewport rotation", EUserInterfaceActionType::Button, FInputChord() );
+
+    UI_COMMAND( StoryboardViewportAdd10Zoom,      "Storyboard Viewport Zoom +10%", "+10% to the viewport Zoom", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( StoryboardViewportSubstract10Zoom,"Storyboard Viewport Zoom -10%", "-10% to the viewport Zoom", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( StoryboardViewportFitToScreen, "Storyboard Viewport Fit To Screen", "Zoom the the viewport to fit its content in the available space", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( StoryboardViewportResetPanZoomRotate, "Storyboard Viewport Reset Pan, Zoom and Rotation ", "Resets the viewport Pan, Zoom and Rotation values", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::M) );
 
     FTextFormat rotation_label_format( LOCTEXT( "storyboard-viewport-rotation-label", "Set Storyboard Viewport to {0}°" ) );
     FTextFormat rotation_tooltip_format( LOCTEXT( "storyboard-viewport-rotation-tooltip", "Set the viewport rotation to {0}°" ) );
@@ -46,6 +53,24 @@ FEposSequenceEditorCommands::RegisterCommands()
                                                 FText::Format( rotation_label_format, angle ),
                                                 FText::Format( rotation_tooltip_format, angle ),
                                                 ViewportRotationBundleName )
+                                            .UserInterfaceType( EUserInterfaceActionType::Check )
+                                            .DefaultChord( FInputChord() )
+        );
+    }
+
+    FTextFormat zoom_label_format( LOCTEXT( "storyboard-viewport-zoom-label", "Set Storyboard Viewport to {0}%" ) );
+    FTextFormat zoom_tooltip_format( LOCTEXT( "storyboard-viewport-zoom-tooltip", "Set the viewport zoom to {0}%" ) );
+
+    TArray<float> zooms = { 0.25f, 0.5f, 1.f, 2.f, 4.f };
+    for( auto zoom : zooms )
+    {
+        StoryboardViewportSetZoomX.Add( zoom,
+                                            FUICommandInfoDecl(
+                                                this->AsShared(),
+                                                FName( *FString::Printf( TEXT( "StoryboardViewportRotate-%d" ), FMath::RoundToInt32(zoom * 100.f) ) ),
+                                                FText::Format( zoom_label_format, FMath::RoundToInt32(zoom * 100.f) ),
+                                                FText::Format( zoom_tooltip_format, FMath::RoundToInt32(zoom * 100.f) ),
+                                                ViewportZoomBundleName )
                                             .UserInterfaceType( EUserInterfaceActionType::Check )
                                             .DefaultChord( FInputChord() )
         );

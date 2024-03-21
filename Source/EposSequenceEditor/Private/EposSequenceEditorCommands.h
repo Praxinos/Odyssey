@@ -26,6 +26,11 @@ public:
     TSharedPtr<FUICommandInfo> StoryboardViewportAdd10Rotate;
     TSharedPtr<FUICommandInfo> StoryboardViewportSubstract10Rotate;
     TMap<int32, TSharedPtr<FUICommandInfo>> StoryboardViewportSetRotationX;
+    TSharedPtr<FUICommandInfo> StoryboardViewportAdd10Zoom;
+    TSharedPtr<FUICommandInfo> StoryboardViewportSubstract10Zoom;
+    TSharedPtr<FUICommandInfo> StoryboardViewportFitToScreen;
+    TSharedPtr<FUICommandInfo> StoryboardViewportResetPanZoomRotate;
+    TMap<float, TSharedPtr<FUICommandInfo>> StoryboardViewportSetZoomX;
     TSharedPtr<FUICommandInfo> StoryboardViewportHoldToPanZoom;
     TSharedPtr<FUICommandInfo> StoryboardViewportHoldToRotate;
 

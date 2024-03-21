@@ -189,13 +189,19 @@ private:
     TSharedRef<SWidget> OnGetViewportRotationMenuContent() const;
 
     float GetViewportZoom() const;
-    void SetViewportZoom( float iZoom, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f) );
+    void SetViewportZoom( float iZoom, FVector2D iZoomPosition = FVector2D(0.0f, 0.0f) );
+    void AddViewportZoom( float iDeltaZoom );
+    void FitToScreen();
+    TSharedRef<SWidget> OnGetViewportZoomMenuContent() const;
+    bool IsViewportZoomChecked( float iZoom );
 
     FVector2D GetViewportPan() const;
     void SetViewportPan( FVector2D iPan );
 
     FSlateRenderTransform GetViewportTransform() const;
     void UpdateViewportWidgetTransform();
+    FReply OnViewportResetTransformButtonClicked();
+    void ResetViewportTransform();
 
 private:
 
