@@ -11,6 +11,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "LevelEditorViewport.h"
 #include "Misc/FrameRate.h"
+#include "Framework/Application/IInputProcessor.h"
 
 #include "Tools/EposSequenceTools.h"
 
@@ -72,9 +73,28 @@ struct FUIData
     FFrameRate OuterPlayRate;
 };
 
-
-class SStoryboardLevelViewport : public SCompoundWidget
+class FStoryboardLevelViewportInputProcessor
+    : public IInputProcessor
 {
+public:
+    const FKey& GetKey();
+
+private:
+    //needed to compile against IInputProcessor
+	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override {};
+	virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+	virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+
+private:
+    FKey mKey;
+};
+
+class SStoryboardLevelViewport
+    : public SCompoundWidget
+{
+public:
+    virtual ~SStoryboardLevelViewport();
+
 public:
 
     SLATE_BEGIN_ARGS(SStoryboardLevelViewport) {}
@@ -97,8 +117,12 @@ public:
     void Construct(const FArguments& InArgs);
 
     virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime);
+    virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& iMouseEvent) override;
+    virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& iMouseEvent) override;
+    virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& iMouseEvent) override;
     virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
     virtual bool SupportsKeyboardFocus() const override { return true; }
+
 private:
 
     /** Set up this viewport to operate on its sequencer */
@@ -164,6 +188,26 @@ private:
     bool IsViewportRotationChecked( float iRotation ); // in degrees
     TSharedRef<SWidget> OnGetViewportRotationMenuContent() const;
 
+    float GetViewportZoom() const;
+    void SetViewportZoom( float iZoom, FVector2D iZoomPosition = FVector2D(0.0f, 0.0f) );
+    void AddViewportZoom( float iDeltaZoom );
+    void FitToScreen();
+    TSharedRef<SWidget> OnGetViewportZoomMenuContent() const;
+    bool IsViewportZoomChecked( float iZoom );
+
+    FVector2D GetViewportPan() const;
+    void SetViewportPan( FVector2D iPan );
+
+    FSlateRenderTransform GetViewportTransform() const;
+    void UpdateViewportWidgetTransform();
+    FReply OnViewportResetTransformButtonClicked();
+    void ResetViewportTransform();
+
+    FVector2D GetTranslationFromSlidersOffsets(float InScrollOffsetFractionX, float InScrollOffsetFractionY);
+    void UpdateScrollBars();
+    void OnHorizontalScrollBarScrolled( float InScrollOffsetFraction );
+    void OnVerticalScrollBarScrolled(float InScrollOffsetFraction);
+
 private:
 
     /** Widget where the scene viewport is drawn in */
@@ -210,6 +254,8 @@ private:
     TSharedPtr<FStoryboardViewportClient> ViewportClient;
 
     float mViewportRotation { 0.f };
+    FVector2D mViewportPan { 0.f, 0.f };
+    float mViewportZoom { 1.f };
 
     TSharedPtr<SSplitter> mNoteSplitter;
 
@@ -219,4 +265,29 @@ private:
     TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
     TSharedPtr<SNotesInViewport>        mWidgetNotesInViewport;
     TSharedPtr<SNotesAsOverlay>         mWidgetNotesAsOverlay;
+
+    TSharedPtr<FStoryboardLevelViewportInputProcessor> mInputProcessor;
+
+    //Rotation ---
+    bool mIsRotating = false;
+    FVector2D mRotateMouseInitialPosition;
+    FVector2D mRotateCenter;
+    float mRotateInitialMouseAngle;
+    float mRotateInitialRotation;
+
+    //Paning ---
+    bool mIsPaning = false;
+    FVector2D mPanMouseInitialPosition;
+    FVector2D mPanInitialPan;
+
+    //Zooming ---
+    bool mIsZooming = false;
+    FVector2D mZoomMouseInitialPosition;
+    float mZoomInitialZoom;
+
+    TSharedPtr<SScrollBar> mVerticalScrollBar;
+    TSharedPtr<SScrollBar> mHorizontalScrollBar;
+    bool mNeedUpdateScrollbars = true;
+
+    TSharedPtr<SWidget> mViewportTransformBox;
 };

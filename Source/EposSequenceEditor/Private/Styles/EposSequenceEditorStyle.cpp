@@ -220,6 +220,9 @@ FEposSequenceEditorStyle::InitViewport()
                                         .SetFont( DEFAULT_FONT( "Italic", 10 ) )
                                         .SetColorAndOpacity( FLinearColor( FColor( 32, 32, 32 ) ) ) );
 
+    //TODO: should be a 24x24 icon
+    Set( "Viewport.ResetTransform", new IMAGE_BRUSH( "viewport-reset-transform", Icon16x16 ) );
+
     //---
 
     SetContentRoot( FPaths::EnginePluginsDir() / TEXT( "MovieScene/LevelSequenceEditor/Content" ) );
