@@ -45,7 +45,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 
 // Viewport Shortcuts Category
     UI_BUNDLE_COMMAND( PanZoomViewport, ViewportShortcuts,  "Pan / Zoom Viewport", "Hold the key to Pan (Left Mouse Button) or Zoom (Right Mouse Button) the viewport",                                        EUserInterfaceActionType::None, FInputChord(EKeys::M));
-    UI_BUNDLE_COMMAND( RotateViewport, ViewportShortcuts,  "Zoom Viewport", "Hold the key to Rotate the viewport",                                              EUserInterfaceActionType::None, FInputChord(EModifierKey::Control, EKeys::M));
+    UI_BUNDLE_COMMAND( RotateViewport, ViewportShortcuts,  "Rotate Viewport", "Hold the key to Rotate the viewport",                                              EUserInterfaceActionType::None, FInputChord(EModifierKey::Control, EKeys::M));
     UI_BUNDLE_COMMAND( ResetViewportRotation, ViewportShortcuts, "Reset Viewport Rotation", "Reset viewport rotation",                                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::R ) );
     UI_BUNDLE_COMMAND( ResetViewportPosition, ViewportShortcuts, "Reset Viewport Position", "Reset viewport position",                                      EUserInterfaceActionType::Button, FInputChord( EKeys::Escape ) );
     UI_BUNDLE_COMMAND( RotateViewportLeft, ViewportShortcuts, "Rotate Viewport Left", "Rotate viewport left",                                               EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::L ) );
