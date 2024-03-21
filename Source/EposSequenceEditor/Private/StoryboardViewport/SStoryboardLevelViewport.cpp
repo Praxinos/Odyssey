@@ -50,6 +50,9 @@
 
 #define LOCTEXT_NAMESPACE "SStoryboardLevelViewport"
 
+#define MinZoom 0.01
+#define MaxZoom 200.0
+
 template<typename T>
 struct SNonThrottledSpinBox : SSpinBox<T>
 {
@@ -226,8 +229,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     mInputProcessor = MakeShared<FStoryboardLevelViewportInputProcessor>();
     FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
-
-    mIsRotating = false;
 
     ViewportClient = MakeShareable( new FStoryboardViewportClient() );
 
@@ -890,7 +891,9 @@ FSlateRenderTransform
 SStoryboardLevelViewport::GetViewportTransform() const
 {
     float radian = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
-    FSlateRenderTransform transform = FSlateRenderTransform( FQuat2D( radian ), mViewportPan );
+    FSlateRenderTransform transform = FSlateRenderTransform( FQuat2D( radian ) );
+    transform = transform.Concatenate(FSlateRenderTransform( mViewportZoom ));
+    transform = transform.Concatenate(FSlateRenderTransform( mViewportPan ));
     return transform;
 }
 
@@ -912,13 +915,14 @@ void
 SStoryboardLevelViewport::SetViewportRotation( float iRotation )
 {
     //Compute new pan value
-    float rotation = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
-    mViewportRotation = FMath::Fmod(iRotation + 180, 360) - 180;
+    float oldRotationRadians = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
+    float newRotationDegrees = FMath::Fmod(iRotation + 180, 360) - 180;
+    float newRotationRadians = FUnitConversion::Convert( newRotationDegrees, EUnit::Degrees, EUnit::Radians );
 
-    float newRotation = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
     FSlateRenderTransform transform = GetViewportTransform();
+    transform = transform.Concatenate(FSlateRenderTransform(FQuat2D(newRotationRadians - oldRotationRadians)));
 
-    transform = transform.Concatenate(FSlateRenderTransform(FQuat2D(newRotation - rotation)));
+    mViewportRotation = newRotationDegrees;
     mViewportPan = transform.GetTranslation();
 
     UpdateViewportWidgetTransform();
@@ -961,6 +965,41 @@ SStoryboardLevelViewport::OnGetViewportRotationMenuContent() const
 }
 
 //---
+
+float
+SStoryboardLevelViewport::GetViewportZoom() const
+{
+    return mViewportZoom;
+}
+
+void
+SStoryboardLevelViewport::SetViewportZoom( float iZoom, const FVector2D& iZoomPosition )
+{
+    //Compute new pan value
+    /* float oldRotationRadians = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
+    float newRotationDegrees = FMath::Fmod(iRotation + 180, 360) - 180;
+    float newRotationRadians = FUnitConversion::Convert( newRotationDegrees, EUnit::Degrees, EUnit::Radians );
+
+    FSlateRenderTransform transform = GetViewportTransform();
+    transform = transform.Concatenate(FSlateRenderTransform(FQuat2D(newRotationRadians - oldRotationRadians)));
+
+    mViewportRotation = newRotationDegrees;
+    mViewportPan = transform.GetTranslation(); */
+
+    float oldZoom = mViewportZoom;
+    float newZoom = FMath::Clamp( iZoom, MinZoom, MaxZoom );
+    FTransform2D zoomTransform = FTransform2D(newZoom / oldZoom, FVector2D(0,0));
+
+    FSlateRenderTransform transform = GetViewportTransform();
+    transform = transform.Concatenate(FTransform2D(-iZoomPosition));
+    transform = FTransform2D( Concatenate(transform, zoomTransform.GetMatrix()));
+    transform = transform.Concatenate(FTransform2D(iZoomPosition));
+
+    mViewportZoom = newZoom;
+    mViewportPan = transform.GetTranslation();
+
+    UpdateViewportWidgetTransform();
+}
 
 FVector2D
 SStoryboardLevelViewport::GetViewportPan() const
@@ -1094,7 +1133,6 @@ SStoryboardLevelViewport::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, 
     {
         if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
         {
-            //Pan
             mIsPaning = true;
             mPanMouseInitialPosition = MyGeometry.AbsoluteToLocal(iMouseEvent.GetScreenSpacePosition());
             mPanInitialPan = mViewportPan;
@@ -1102,7 +1140,9 @@ SStoryboardLevelViewport::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, 
         }
         else if (iMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
         {
-            //Zoom
+            mIsZooming = true;
+            mZoomInitialZoom = FMath::Loge(mViewportZoom);
+            mZoomMouseInitialPosition = MyGeometry.AbsoluteToLocal(iMouseEvent.GetScreenSpacePosition());
             return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
         }
     }
@@ -1110,11 +1150,11 @@ SStoryboardLevelViewport::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, 
     if (FEposSequenceEditorCommands::Get().StoryboardViewportHoldToRotate->HasActiveChord(activeChord))
     {
         mIsRotating = true;
-        //Rotate Left AND Right Mouse Button
-        mRotateMouseInitialPosition = iMouseEvent.GetScreenSpacePosition();
+
+        mRotateMouseInitialPosition = MyGeometry.AbsoluteToLocal(iMouseEvent.GetScreenSpacePosition());
         FVector2D size = MyGeometry.GetLocalSize(); //mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
         FVector2D center = FVector2D( size.X / 2.f, size.Y / 2.f );
-        mRotateCenter = MyGeometry.LocalToAbsolute(center);
+        mRotateCenter = center;
 
         FVector2D deltaCenter = mRotateMouseInitialPosition - mRotateCenter;
         mRotateInitialMouseAngle = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
@@ -1133,15 +1173,35 @@ SStoryboardLevelViewport::OnMouseMove(const FGeometry& MyGeometry, const FPointe
         FVector2D mousePosition = MyGeometry.AbsoluteToLocal(iMouseEvent.GetScreenSpacePosition());
         FVector2D delta = mousePosition - mPanMouseInitialPosition;
         SetViewportPan(mPanInitialPan + delta);
+
+        return FReply::Handled();
+    }
+    else if (mIsZooming)
+    {
+        FVector2D mousePosition = MyGeometry.AbsoluteToLocal(iMouseEvent.GetScreenSpacePosition());
+        float delta = mousePosition.X - mZoomMouseInitialPosition.X;
+        float smoothness = 200.f; //TODO: do a Setting to let the user change it at will
+        FVector2D size = MyGeometry.GetLocalSize();
+        FVector2D center = FVector2D( size.X / 2.f, size.Y / 2.f );
+
+        if (delta > KINDA_SMALL_NUMBER || delta < KINDA_SMALL_NUMBER)
+        {
+            float zoom = FMath::Exp(mZoomInitialZoom + (delta / smoothness));
+            SetViewportZoom(zoom, mZoomMouseInitialPosition - center);
+        }
+
+        return FReply::Handled();
     }
     else if( mIsRotating )
     {
-        FVector2D mousePosition = iMouseEvent.GetScreenSpacePosition();
+        FVector2D mousePosition = MyGeometry.AbsoluteToLocal(iMouseEvent.GetScreenSpacePosition());
         FVector2D deltaCenter = mousePosition - mRotateCenter;
         float newAngle = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
         float deltaAngle = mRotateInitialMouseAngle - newAngle;
         float degrees = FUnitConversion::Convert( deltaAngle, EUnit::Radians, EUnit::Degrees );
         SetViewportRotation(mRotateInitialRotation + degrees);
+
+        return FReply::Handled();
     }
     return FReply::Unhandled();
 }
@@ -1154,7 +1214,12 @@ SStoryboardLevelViewport::OnMouseButtonUp(const FGeometry& MyGeometry, const FPo
         mIsPaning = false;
         return FReply::Handled().ReleaseMouseCapture();
     }
-    if (mIsRotating)
+    else if (mIsZooming)
+    {
+        mIsZooming = false;
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+    else if (mIsRotating)
     {
         mIsRotating = false;
         return FReply::Handled().ReleaseMouseCapture();

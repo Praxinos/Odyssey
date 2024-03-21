@@ -188,6 +188,9 @@ private:
     bool IsViewportRotationChecked( float iRotation ); // in degrees
     TSharedRef<SWidget> OnGetViewportRotationMenuContent() const;
 
+    float GetViewportZoom() const;
+    void SetViewportZoom( float iZoom, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f) );
+
     FVector2D GetViewportPan() const;
     void SetViewportPan( FVector2D iPan );
 
@@ -241,6 +244,7 @@ private:
 
     float mViewportRotation { 0.f };
     FVector2D mViewportPan { 0.f, 0.f };
+    float mViewportZoom { 1.f };
 
     TSharedPtr<SSplitter> mNoteSplitter;
 
@@ -254,14 +258,19 @@ private:
     TSharedPtr<FStoryboardLevelViewportInputProcessor> mInputProcessor;
 
     //Rotation ---
-    bool mIsRotating;
+    bool mIsRotating = false;
     FVector2D mRotateMouseInitialPosition;
     FVector2D mRotateCenter;
     float mRotateInitialMouseAngle;
     float mRotateInitialRotation;
 
     //Paning ---
-    bool mIsPaning;
+    bool mIsPaning = false;
     FVector2D mPanMouseInitialPosition;
     FVector2D mPanInitialPan;
+
+    //Zooming ---
+    bool mIsZooming = false;
+    FVector2D mZoomMouseInitialPosition;
+    float mZoomInitialZoom;
 };
