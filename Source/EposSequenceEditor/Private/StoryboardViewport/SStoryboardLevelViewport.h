@@ -188,6 +188,12 @@ private:
     bool IsViewportRotationChecked( float iRotation ); // in degrees
     TSharedRef<SWidget> OnGetViewportRotationMenuContent() const;
 
+    FVector2D GetViewportPan() const;
+    void SetViewportPan( FVector2D iPan );
+
+    FSlateRenderTransform GetViewportTransform() const;
+    void UpdateViewportWidgetTransform();
+
 private:
 
     /** Widget where the scene viewport is drawn in */
@@ -234,6 +240,7 @@ private:
     TSharedPtr<FStoryboardViewportClient> ViewportClient;
 
     float mViewportRotation { 0.f };
+    FVector2D mViewportPan { 0.f, 0.f };
 
     TSharedPtr<SSplitter> mNoteSplitter;
 
@@ -248,8 +255,13 @@ private:
 
     //Rotation ---
     bool mIsRotating;
-    FVector2f mRotateMouseInitialPosition;
-    FVector2f mRotateCenter;
+    FVector2D mRotateMouseInitialPosition;
+    FVector2D mRotateCenter;
     float mRotateInitialMouseAngle;
     float mRotateInitialRotation;
+
+    //Paning ---
+    bool mIsPaning;
+    FVector2D mPanMouseInitialPosition;
+    FVector2D mPanInitialPan;
 };
