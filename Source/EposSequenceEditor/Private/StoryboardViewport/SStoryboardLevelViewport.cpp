@@ -122,6 +122,33 @@ FStoryboardViewportClient::FStoryboardViewportClient()
     bDisableInput = false;
 }
 
+const FKey&
+FStoryboardLevelViewportInputProcessor::GetKey()
+{
+    return mKey;
+}
+
+bool
+FStoryboardLevelViewportInputProcessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+{
+    if (InKeyEvent.GetKey().IsModifierKey())
+        return false;
+
+    mKey = InKeyEvent.GetKey();
+    return false; //false means Unreal will continue as if we did nothing
+}
+
+/** Key up input */
+bool
+FStoryboardLevelViewportInputProcessor::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+{
+    if (InKeyEvent.GetKey() == mKey)
+    {
+        mKey = FKey();
+    }
+    return false; //false means Unreal will continue as if we did nothing
+}
+
 class SPreArrangedBox : public SCompoundWidget
 {
 public:
@@ -185,12 +212,22 @@ private:
 };
 
 
+SStoryboardLevelViewport::~SStoryboardLevelViewport()
+{
+    FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
+}
+
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 {
     ParentLayout = InArgs._ParentLayout;
     LayoutName = InArgs._LayoutName;
     RevertToLayoutName = InArgs._RevertToLayoutName;
+
+    mInputProcessor = MakeShared<FStoryboardLevelViewportInputProcessor>();
+    FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
+
+    mIsRotating = false;
 
     ViewportClient = MakeShareable( new FStoryboardViewportClient() );
 
@@ -863,7 +900,7 @@ SStoryboardLevelViewport::GetViewportRotation() const
 void
 SStoryboardLevelViewport::SetViewportRotation( float iRotation )
 {
-    mViewportRotation = iRotation;
+    mViewportRotation = FMath::Fmod(iRotation + 180, 360) - 180;
 
     float radian = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
 
@@ -876,7 +913,7 @@ SStoryboardLevelViewport::SetViewportRotation( float iRotation )
 void
 SStoryboardLevelViewport::AddViewportRotation( float iDeltaRotation )
 {
-    mViewportRotation += iDeltaRotation;
+    mViewportRotation = FMath::Fmod(mViewportRotation + iDeltaRotation + 180, 360) - 180;
 
     float radian = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
 
@@ -1013,6 +1050,83 @@ SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength )
 }
 
 //---
+
+FReply
+SStoryboardLevelViewport::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& iMouseEvent)
+{
+    FModifierKeysState ModifierKeysState = FSlateApplication::Get().GetModifierKeys();
+    const FInputChord activeChord(mInputProcessor->GetKey(),
+        EModifierKey::FromBools(
+            ModifierKeysState.IsControlDown(),
+            ModifierKeysState.IsAltDown(),
+            ModifierKeysState.IsShiftDown(),
+            ModifierKeysState.IsCommandDown()
+        )
+    );
+
+    if (!activeChord.IsValidChord())
+        return FReply::Unhandled();
+
+
+    if (FEposSequenceEditorCommands::Get().StoryboardViewportHoldToPanZoom->HasActiveChord(activeChord))
+    {
+        if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+        {
+            //Pan
+            return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
+        }
+        else if (iMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+        {
+            //Zoom
+            return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
+        }
+    }
+
+    if (FEposSequenceEditorCommands::Get().StoryboardViewportHoldToRotate->HasActiveChord(activeChord))
+    {
+        mIsRotating = true;
+        //Rotate Left AND Right Mouse Button
+        mRotateMouseInitialPosition = iMouseEvent.GetScreenSpacePosition();
+        FVector2f size = MyGeometry.GetLocalSize(); //mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
+        FVector2f center = FVector2f( size.X / 2.f, size.Y / 2.f );
+        mRotateCenter = MyGeometry.LocalToAbsolute(center);
+
+        FVector2f deltaCenter = mRotateMouseInitialPosition - mRotateCenter;
+        mRotateInitialMouseAngle = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
+        mRotateInitialRotation = mViewportRotation;
+
+        return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
+    }
+    return FReply::Unhandled();
+}
+
+FReply
+SStoryboardLevelViewport::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& iMouseEvent)
+{
+    if( mIsRotating )
+    {
+        FVector2f mousePosition = iMouseEvent.GetScreenSpacePosition();
+        FVector2f deltaCenter = mousePosition - mRotateCenter;
+        float newAngle = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
+        float deltaAngle = mRotateInitialMouseAngle - newAngle;
+        float degrees = FUnitConversion::Convert( deltaAngle, EUnit::Radians, EUnit::Degrees );
+        SetViewportRotation(mRotateInitialRotation);
+        AddViewportRotation(degrees);
+    }
+    return FReply::Unhandled();
+}
+
+FReply
+SStoryboardLevelViewport::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& iMouseEvent)
+{
+    if (mIsRotating)
+    {
+        mIsRotating = false;
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+
+    return FReply::Unhandled();
+}
 
 FReply SStoryboardLevelViewport::OnKeyDown( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent )
 {

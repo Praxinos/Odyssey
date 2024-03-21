@@ -51,6 +51,9 @@ FEposSequenceEditorCommands::RegisterCommands()
         );
     }
 
+    UI_COMMAND( StoryboardViewportHoldToPanZoom, "Storyboard Viewport Pan/Zoom (Hold)", "Hold this key to pan (left mouse button) or zoom (right mouse button) the viewport", EUserInterfaceActionType::Button, FInputChord(EKeys::M) );
+    UI_COMMAND( StoryboardViewportHoldToRotate, "Storyboard Viewport Rotate (Hold)", "Hold this key to to rotate the viewport using the left mouse button", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::M) );
+
     //---
 
     UI_COMMAND( FixActorReferences,                 "Fix Actor References", "Try to automatically fix up broken actor bindings", EUserInterfaceActionType::Button, FInputChord());
