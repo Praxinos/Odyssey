@@ -11,12 +11,12 @@
 #include "Widgets/SCompoundWidget.h"
 
 
-/** A custom widget that comprises a combo box displaying all available note options */
-class SNoteSettings
+/** A custom widget that comprises a combo box displaying all available storyboard viewport options */
+class SStoryboardViewportSettings
     : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS( SNoteSettings )
+    SLATE_BEGIN_ARGS( SStoryboardViewportSettings )
     {}
     SLATE_END_ARGS()
 

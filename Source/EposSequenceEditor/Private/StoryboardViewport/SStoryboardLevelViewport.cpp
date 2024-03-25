@@ -30,6 +30,7 @@
 #include "SEnumCombo.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "AnimatedRange.h"
+#include "LevelEditor.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -41,7 +42,7 @@
 #include "StoryNote.h"
 #include "StoryboardViewport/FilmOverlays.h"
 #include "StoryboardViewport/SNotes.h"
-#include "StoryboardViewport/SNoteSettings.h"
+#include "StoryboardViewport/SStoryboardViewportSettings.h"
 #include "StoryboardViewport/SStoryboardTransportRange.h"
 #include "StoryboardViewport/StoryboardViewportCommands.h"
 #include "Styles/EposSequenceEditorStyle.h"
@@ -225,6 +226,8 @@ SStoryboardLevelViewport::~SStoryboardLevelViewport()
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 {
+    CreateCommandList();
+
     ParentLayout = InArgs._ParentLayout;
     LayoutName = InArgs._LayoutName;
     RevertToLayoutName = InArgs._RevertToLayoutName;
@@ -384,6 +387,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                         + SVerticalBox::Slot()
                         [
                             SNew(SHorizontalBox)
+                            .Visibility_Lambda([](){ return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplaySequenceInfos ? EVisibility::Visible : EVisibility::Collapsed; })
 
                             + SHorizontalBox::Slot()
                             .HAlign(HAlign_Left)
@@ -450,6 +454,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                         .Padding(0, 5, 0, 2)
                         [
                             SNew( SWidgetSwitcher )
+                            .Visibility_Lambda([](){ return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayActorControls ? EVisibility::Visible : EVisibility::Collapsed; })
                             .WidgetIndex( this, &SStoryboardLevelViewport::GetScaleVisibleWidgetIndex )
 
                             + SWidgetSwitcher::Slot()
@@ -586,14 +591,19 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //---
 
-    //HACK: ue4
-    TSharedPtr<SSpinBox<float>> viewportRotationSpinBox;
-    TSharedPtr<SSpinBox<float>> viewportZoomSpinBox;
+    RegisterToolBarExtender();
+    TSharedRef<SWidget> ToolBar = SNew(SHorizontalBox)
+        .Visibility_Lambda([] { return GLevelEditorModeTools().IsViewportUIHidden() ? EVisibility::Hidden : EVisibility::Visible; })
+        + SHorizontalBox::Slot()
+        [
+            ViewportWidget->MakeExternalViewportToolbar().ToSharedRef()
+        ];
+    UnregisterToolBarExtender();
 
-    TSharedRef<SWidget> MainViewport = SNew(SBorder)
-        .BorderImage(FAppStyle::Get().GetBrush("BlackBrush"))
-        .ForegroundColor(Gray)
-        .Padding(0)
+    TSharedRef<SWidget> ViewportAndToolBar = SNew(SWidgetSwitcher)
+        .WidgetIndex(this, &SStoryboardLevelViewport::GetToolbarIntegrationMode)
+
+        + SWidgetSwitcher::Slot()
         [
             SNew(SVerticalBox)
 
@@ -602,125 +612,49 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             .Padding(5.f)
             .AutoHeight()
             [
-                SNew(SHorizontalBox)
-                .Visibility_Lambda([] { return GLevelEditorModeTools().IsViewportUIHidden() ? EVisibility::Hidden : EVisibility::Visible; })
-
-                + SHorizontalBox::Slot()
-                [
-                    ViewportWidget->MakeExternalViewportToolbar().ToSharedRef()
-                ]
-
-                + SHorizontalBox::Slot()
-                .AutoWidth()
-                [
-                    FilmOverlayOptions.ToSharedRef()
-                ]
-
-                + SHorizontalBox::Slot()
-                .AutoWidth()
-                [
-                    SNew( SNoteSettings )
-                ]
-                + SHorizontalBox::Slot()
-                .AutoWidth()
-                .VAlign( VAlign_Center )
-                [
-                    SNew(SVerticalBox)
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    [
-                        SNew(SHorizontalBox)
-                        + SHorizontalBox::Slot()
-                        .AutoWidth()
-                        .VAlign( VAlign_Center )
-                        [
-                            SAssignNew( viewportZoomSpinBox, SSpinBox<float> )
-                            .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ) )
-                            .MinDesiredWidth( 55 )
-                            .Justification( ETextJustify::Right )
-                            .ToolTipText( LOCTEXT( "ViewportZoomTooltip", "Change the viewport zoom." ) )
-                            .PreventThrottling( true ) // To refresh the viewport during value change
-                            .Delta( 1 )
-                            .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                            .SliderExponentNeutralValue( 100 )
-                            .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportZoom(Value / 100.f); } )
-                            .OnValueChanged_Lambda( [this] ( float Value) { SetViewportZoom(Value / 100.f); } )
-                            .Value_Lambda( [this] () { return GetViewportZoom() * 100.f; } )
-                        ]
-                        + SHorizontalBox::Slot()
-                        .AutoWidth()
-                        .VAlign( VAlign_Center )
-                        [
-                            SNew( SComboButton )
-                            .ToolTipText( LOCTEXT( "ViewportZoomTooltip", "Change the viewport zoom." ) )
-                            .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportZoomMenuContent )
-                        ]
-                    ]
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    [
-                        SNew(SHorizontalBox)
-                        + SHorizontalBox::Slot()
-                        .AutoWidth()
-                        .VAlign( VAlign_Center )
-                        [
-                            SAssignNew( viewportRotationSpinBox, SSpinBox<float> )
-                            .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Degrees ) ) )
-                            .MinDesiredWidth( 55 )
-                            .Justification( ETextJustify::Right )
-                            .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
-                            .PreventThrottling( true ) // To refresh the viewport during value change
-                            .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
-                            .Delta( 1 )
-                            .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                            .SliderExponentNeutralValue( 100 )
-                            .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
-                            .OnValueChanged_Lambda( [this] ( float Value) { SetViewportRotation(Value); } )
-                            .Value( this, &SStoryboardLevelViewport::GetViewportRotation )
-                        ]
-
-                        + SHorizontalBox::Slot()
-                        .AutoWidth()
-                        .VAlign( VAlign_Center )
-                        [
-                            SNew( SComboButton )
-                            .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
-                            .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportRotationMenuContent )
-                        ]
-                    ]
-                ]
-
-                + SHorizontalBox::Slot()
-                .AutoWidth()
-                .Padding(4.0f, 0.0f)
-                .VAlign(VAlign_Center)
-                [
-                    SNew(SButton)
-                    .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
-                    .ToolTipText( LOCTEXT( "ViewportResetTransformTooltip", "Reset Viewport Pan, Zoom and Rotation." ) )
-                    .OnClicked(this, &SStoryboardLevelViewport::OnViewportResetTransformButtonClicked)
-                    [
-                        SNew(SImage)
-                        .Image( FEposSequenceEditorStyle::Get().GetBrush( "Viewport.ResetTransform" ) )
-                    ]
-                ]
-
-                + SHorizontalBox::Slot()
-                .AutoWidth()
-                [
-                    SNew( SSpacer )
-                    .Size( FVector2D( 0, 55 ) )
-                ]
+                ToolBar
             ]
 
-            // Viewport + options + notes
             + SVerticalBox::Slot()
             .Padding( 5.f, 0.f )
             [
+                mNoteSplitter.ToSharedRef()
+            ]
+        ]
+
+        + SWidgetSwitcher::Slot()
+        [
+            SNew(SOverlay)
+
+            + SOverlay::Slot()
+            .VAlign(VAlign_Fill)
+            [
+                mNoteSplitter.ToSharedRef()
+            ]
+
+            + SOverlay::Slot()
+            .VAlign(VAlign_Top)
+            [
+                ToolBar
+            ]
+        ];
+
+    TSharedRef<SWidget> MainViewport = SNew(SBorder)
+        .BorderImage(FAppStyle::Get().GetBrush("BlackBrush"))
+        .ForegroundColor(Gray)
+        .Padding(0)
+        [
+            SNew(SVerticalBox)
+
+            // ScrollBar
+            + SVerticalBox::Slot()
+            [
                 SNew(SHorizontalBox)
+
+                // ScrollBar
                 + SHorizontalBox::Slot()
                 [
-                    mNoteSplitter.ToSharedRef()
+                    ViewportAndToolBar
                 ]
                 + SHorizontalBox::Slot()
                 .AutoWidth()
@@ -759,6 +693,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                     .Padding(5.f)
                     [
                         SAssignNew(TransportRange, SStoryboardTransportRange)
+                        .Visibility_Lambda([](){ return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack ? EVisibility::Visible : EVisibility::Collapsed; })
                     ]
 
                     + SVerticalBox::Slot()
@@ -766,6 +701,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                     .Padding(5.f, 0.f)
                     [
                         SAssignNew(TimeRangeContainer, SBox)
+                        .Visibility_Lambda([](){ return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackControls ? EVisibility::Visible : EVisibility::Collapsed; })
                     ]
                 ]
 
@@ -783,15 +719,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 ]
             ]
         ];
-
-    //TODO: HACK:
-    // UE5: MaxFractionnal digits is set correctly in UE5.
-    // UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
-    viewportRotationSpinBox->SetMinFractionalDigits( 2 );
-    viewportRotationSpinBox->SetMaxFractionalDigits( 2 );
-
-    viewportZoomSpinBox->SetMinFractionalDigits( 2 );
-    viewportZoomSpinBox->SetMaxFractionalDigits( 2 );
 
     //---
 
@@ -823,6 +750,13 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //---
 
+    FilmOverlayOptions->BindCommands( CommandList.ToSharedRef() );
+}
+END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+void
+SStoryboardLevelViewport::CreateCommandList()
+{
     CommandList = MakeShareable( new FUICommandList );
     //CommandList = ViewportWidget->GetCommandList();
 
@@ -879,10 +813,177 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     // Ensure the commands are registered
     FStoryboardViewportCommands::Register();
     //FLevelSequenceEditorCommands::Register(); //TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    FilmOverlayOptions->BindCommands( CommandList.ToSharedRef() );
 }
-END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+void
+SStoryboardLevelViewport::RegisterToolBarExtender()
+{
+    mToolBarExtender = MakeShared<FExtender>();
+    mToolBarExtender->AddToolBarExtension(
+        "CameraSpeed",
+        EExtensionHook::After,
+        CommandList,
+        FToolBarExtensionDelegate::CreateSP( SharedThis(this), &SStoryboardLevelViewport::ExtendToolBar)
+    );
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT("LevelEditor") );
+    LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(mToolBarExtender);
+}
+
+void
+SStoryboardLevelViewport::UnregisterToolBarExtender()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT("LevelEditor") );
+    LevelEditorModule.GetToolBarExtensibilityManager()->RemoveExtender(mToolBarExtender);
+}
+
+void
+SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
+{
+	iBuilder.BeginSection( TEXT("Storyboard") );
+
+        /* Degueulasse !!!
+            iBuilder.AddComboButton(
+            FUIAction(),
+            FOnGetContent::CreateSP(SharedThis(this),&SStoryboardLevelViewport::NoteSettingsGetMenuContent),
+            TAttribute<FText>(),//label
+            TAttribute<FText>(),//tooltip
+            FSlateIcon("EposSequenceEditorStyle", "Viewport.ResetTransform"),
+            false //bInSimpleComboBox
+        ); */
+
+        iBuilder.AddWidget(
+            FilmOverlayOptions.ToSharedRef()
+		);
+
+        iBuilder.AddSeparator();
+
+		iBuilder.AddWidget(
+            SNew(SStoryboardViewportSettings)
+		);
+
+        iBuilder.AddSeparator();
+
+		iBuilder.AddWidget(
+            SNew( SComboButton )
+            .ComboButtonStyle(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox.ComboButton")
+            .ButtonStyle(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox.Button")
+            //.ButtonStyle(FAppStyle::Get(), "NoBorder")
+            .ForegroundColor(FSlateColor::UseStyle())
+            .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
+            .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportRotationMenuContent )
+            .ContentPadding(FMargin(0))
+            .ButtonContent()
+            [
+                SNew( SSpinBox<float> )
+                .Style(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox")
+                .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Degrees ) ) )
+                .MinDesiredWidth( 55 )
+                .Justification( ETextJustify::Right )
+                .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
+                .PreventThrottling( true ) // To refresh the viewport during value change
+                .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                .Delta( 1 )
+                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                .SliderExponentNeutralValue( 100 )
+                .MinFractionalDigits(2)
+                .MaxFractionalDigits(2)
+                .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
+                .OnValueChanged_Lambda( [this] ( float Value) { SetViewportRotation(Value); } )
+                .Value( this, &SStoryboardLevelViewport::GetViewportRotation )
+            ]
+        );
+
+        iBuilder.AddSeparator();
+
+		iBuilder.AddWidget(
+            SNew( SComboButton )
+            .ComboButtonStyle(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox.ComboButton")
+            .ButtonStyle(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox.Button")
+            .ForegroundColor(FSlateColor::UseStyle())
+            .ToolTipText( LOCTEXT( "ViewportZoomTooltip", "Change the viewport zoom." ) )
+            .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportZoomMenuContent )
+            .ContentPadding(FMargin(0))
+            .ButtonContent()
+            [
+                SNew( SSpinBox<float> )
+                .Style(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox")
+                .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ) )
+                .MinDesiredWidth( 65 )
+                .Justification( ETextJustify::Right )
+                .ToolTipText( LOCTEXT( "ViewportZoomTooltip", "Change the viewport zoom." ) )
+                .PreventThrottling( true ) // To refresh the viewport during value change
+                .Delta( 1 )
+                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                .SliderExponentNeutralValue( 100 )
+                .MinFractionalDigits(2)
+                .MaxFractionalDigits(2)
+                .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportZoom(Value / 100.f); } )
+                .OnValueChanged_Lambda( [this] ( float Value) { SetViewportZoom(Value / 100.f); } )
+                .Value_Lambda( [this] () { return GetViewportZoom() * 100.f; } )
+            ]
+        );
+
+        iBuilder.AddSeparator();
+
+        iBuilder.AddToolBarButton(
+            FEposSequenceEditorCommands::Get().StoryboardViewportResetPanZoomRotate,
+            NAME_None,
+            TAttribute<FText>(),
+            TAttribute<FText>(),
+            FSlateIcon("EposSequenceEditorStyle", "Viewport.ResetTransform")
+        );
+
+	iBuilder.EndSection();
+}
+
+TSharedRef<SWidget>
+SStoryboardLevelViewport::NoteSettingsGetMenuContent()
+{
+    FMenuBuilder menuBuilder( true, nullptr );
+
+    auto ExecuteDisplayNoteInViewport = [=]()
+    {
+        GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport = !GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
+    };
+
+    auto IsDisplayNoteInViewport = [=]() -> bool
+    {
+        return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
+    };
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "note-settings.display-in-viewport-label", "Display notes in viewport" ),
+                              LOCTEXT( "note-settings.display-in-viewport-tooltip", "Display the notes at the current frame under the 3D scene." ),
+                              FSlateIcon(),
+                              FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteInViewport ),
+                                         FCanExecuteAction(),
+                                         FIsActionChecked::CreateLambda( IsDisplayNoteInViewport ) ),
+                              NAME_None,
+                              EUserInterfaceActionType::ToggleButton );
+
+    //
+
+    auto ExecuteDisplayNoteAsOverlay = [=]()
+    {
+        GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay = !GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
+    };
+
+    auto IsDisplayNoteAsOverlay = [=]() -> bool
+    {
+        return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
+    };
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "note-settings.display-as-overlay-label", "Display notes as overlay" ),
+                              LOCTEXT( "note-settings.display-as-overlay-tooltip", "Display the notes at the current frame on the 3D scene." ),
+                              FSlateIcon(),
+                              FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteAsOverlay ),
+                                         FCanExecuteAction(),
+                                         FIsActionChecked::CreateLambda( IsDisplayNoteAsOverlay ) ),
+                              NAME_None,
+                              EUserInterfaceActionType::ToggleButton );
+
+    return menuBuilder.MakeWidget();
+}
 
 TSharedPtr<SLevelViewport> SStoryboardLevelViewport::GetLevelViewport() const
 {
@@ -1050,7 +1151,17 @@ SStoryboardLevelViewport::SetViewportRotation( float iRotation )
 {
     //Compute new pan value
     float oldRotationRadians = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
-    float newRotationDegrees = FMath::Fmod(iRotation + 180, 360) - 180;
+
+    float newRotationDegrees = iRotation;
+    while(newRotationDegrees <= -180)
+    {
+        newRotationDegrees += 360.f;
+    }
+    while(newRotationDegrees > 180)
+    {
+        newRotationDegrees -= 360.f;
+    }
+
     float newRotationRadians = FUnitConversion::Convert( newRotationDegrees, EUnit::Degrees, EUnit::Radians );
 
     FSlateRenderTransform transform = GetViewportTransform();
@@ -1310,6 +1421,12 @@ SStoryboardLevelViewport::OnVerticalScrollBarScrolled( float InScrollOffsetFract
     FSlateRenderTransform transform = GetViewportTransform();
     SetViewportPan(FVector2D(transform.GetTranslation().X, translation.Y));
     //mVerticalScrollBar->SetState(FMath::Clamp(InScrollOffsetFraction, 0.f, ScrollbarSpaceRatio), ScrollbarThumbRatio);
+}
+
+int
+SStoryboardLevelViewport::GetToolbarIntegrationMode() const
+{
+    return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.OverlayToolbar ? 1 : 0;
 }
 
 //---
