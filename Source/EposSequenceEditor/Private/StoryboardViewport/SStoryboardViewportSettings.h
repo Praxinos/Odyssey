@@ -23,8 +23,7 @@ public:
     /** Construct this widget */
     void Construct(const FArguments& InArgs);
 
-private:
-
+public:
     /** Generate menu content for the combo button */
-    TSharedRef<SWidget> GetMenuContent();
+    static TSharedRef<SWidget> GetMenuContent();
 };

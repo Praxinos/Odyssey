@@ -50,10 +50,10 @@ public:
     /** Bind commands for the overlays */
     void BindCommands( TSharedRef<FUICommandList> );
 
-private:
-
     /** Generate menu content for the combo button */
     TSharedRef<SWidget> GetMenuContent();
+
+private:
 
     /** Construct the part of the menu that defines the set of film overlays */
     TSharedRef<SWidget> ConstructPrimaryOverlaysMenu();

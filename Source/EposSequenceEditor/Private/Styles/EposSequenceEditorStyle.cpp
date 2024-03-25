@@ -136,6 +136,10 @@ FEposSequenceEditorStyle::InitCommands()
 
     Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
     Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
+
+    //TODO: should be a 20x20 icon
+    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon24x24 ) );
+    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate.Small", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon24x24 ) );
 }
 
 void
@@ -192,6 +196,8 @@ FEposSequenceEditorStyle::InitViewport()
     //---
 
     Set( "Viewport.Settings", new IMAGE_BRUSH_SVG( "viewport-settings", Icon24x24 ) );
+    Set( "Viewport.RotationOptions", new IMAGE_BRUSH_SVG( "viewport-rotation-options", Icon24x24 ) );
+    Set( "Viewport.ZoomOptions", new IMAGE_BRUSH_SVG( "viewport-zoom-options", Icon24x24 ) );
 
     //-
 

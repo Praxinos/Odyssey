@@ -842,24 +842,40 @@ SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
 {
 	iBuilder.BeginSection( TEXT("Storyboard") );
 
-        /* Degueulasse !!!
-            iBuilder.AddComboButton(
-            FUIAction(),
-            FOnGetContent::CreateSP(SharedThis(this),&SStoryboardLevelViewport::NoteSettingsGetMenuContent),
-            TAttribute<FText>(),//label
-            TAttribute<FText>(),//tooltip
-            FSlateIcon("EposSequenceEditorStyle", "Viewport.ResetTransform"),
-            false //bInSimpleComboBox
-        ); */
-
         iBuilder.AddWidget(
-            FilmOverlayOptions.ToSharedRef()
+            FilmOverlayOptions.ToSharedRef(),
+            NAME_None,
+            false,
+            HAlign_Fill,
+            FNewMenuDelegate::CreateLambda(
+                [this](FMenuBuilder& iMenuBuilder)
+                {
+                    iMenuBuilder.AddWrapperSubMenu(
+                        LOCTEXT( "viewport-toolbar-options.film-overlay.label", "Film Overlays" ),
+                        LOCTEXT( "viewport-toolbar-options.film-overlay.tooltip", "Change the appearance of the film overlays." ),
+                        FOnGetContent::CreateLambda([this]() { return FilmOverlayOptions->GetMenuContent(); }),
+                        FSlateIcon(FEposSequenceEditorStyle::Get().GetStyleSetName(), "FilmOverlay.DefaultThumbnail"));
+                }
+            )
 		);
 
         iBuilder.AddSeparator();
 
 		iBuilder.AddWidget(
-            SNew(SStoryboardViewportSettings)
+            SNew(SStoryboardViewportSettings),
+            NAME_None,
+            false,
+            HAlign_Fill,
+            FNewMenuDelegate::CreateLambda(
+                [this](FMenuBuilder& iMenuBuilder)
+                {
+                    iMenuBuilder.AddWrapperSubMenu(
+                        LOCTEXT( "viewport-toolbar-options.viewport-settings.label", "Viewport Settings" ),
+                        LOCTEXT( "viewport-toolbar-options.viewport-settings.tooltip", "Change the settings of the Storyboard viewport" ),
+                        FOnGetContent::CreateLambda([this]() { return SStoryboardViewportSettings::GetMenuContent(); }),
+                        FSlateIcon(FEposSequenceEditorStyle::Get().GetStyleSetName(), "FilmOverlay.DefaultThumbnail"));
+                }
+            )
 		);
 
         iBuilder.AddSeparator();
@@ -891,7 +907,48 @@ SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
                 .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
                 .OnValueChanged_Lambda( [this] ( float Value) { SetViewportRotation(Value); } )
                 .Value( this, &SStoryboardLevelViewport::GetViewportRotation )
-            ]
+            ],
+            NAME_None,
+            false,
+            HAlign_Fill,
+            FNewMenuDelegate::CreateLambda(
+                [this](FMenuBuilder& iMenuBuilder)
+                {
+                    iMenuBuilder.AddWidget(
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot()
+                        [
+                            SNew(SSpacer)
+                        ]
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        [
+                            SNew( SSpinBox<float> )
+                            .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Degrees ) ) )
+                            .MinDesiredWidth( 65 )
+                            .Justification( ETextJustify::Right )
+                            .PreventThrottling( true ) // To refresh the viewport during value change
+                            .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                            .Delta( 1 )
+                            .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                            .SliderExponentNeutralValue( 100 )
+                            .MinFractionalDigits(2)
+                            .MaxFractionalDigits(2)
+                            .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
+                            .OnValueChanged_Lambda( [this] ( float Value) { SetViewportRotation(Value); } )
+                            .Value( this, &SStoryboardLevelViewport::GetViewportRotation )
+                        ],
+                        LOCTEXT( "viewport-toolbar-options.viewport-rotation.label", "Rotation" )
+                    );
+
+                    iMenuBuilder.AddWrapperSubMenu(
+                        LOCTEXT( "viewport-toolbar-options.rotation-options.label", "Rotation Options" ),
+                        LOCTEXT( "viewport-toolbar-options.rotation-options.tooltip", "Rotate the viewport" ),
+                        FOnGetContent::CreateRaw(this, &SStoryboardLevelViewport::OnGetViewportRotationMenuContent),
+                        FSlateIcon(FEposSequenceEditorStyle::Get().GetStyleSetName(), "Viewport.RotationOptions")
+                    );
+                }
+            )
         );
 
         iBuilder.AddSeparator();
@@ -921,7 +978,47 @@ SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
                 .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportZoom(Value / 100.f); } )
                 .OnValueChanged_Lambda( [this] ( float Value) { SetViewportZoom(Value / 100.f); } )
                 .Value_Lambda( [this] () { return GetViewportZoom() * 100.f; } )
-            ]
+            ],
+            NAME_None,
+            false,
+            HAlign_Fill,
+            FNewMenuDelegate::CreateLambda(
+                [this](FMenuBuilder& iMenuBuilder)
+                {
+                    iMenuBuilder.AddWidget(
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot()
+                        [
+                            SNew(SSpacer)
+                        ]
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        [
+                            SNew( SSpinBox<float> )
+                            .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ) )
+                            .MinDesiredWidth( 65 )
+                            .Justification( ETextJustify::Right )
+                            .PreventThrottling( true ) // To refresh the viewport during value change
+                            .Delta( 1 )
+                            .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                            .SliderExponentNeutralValue( 100 )
+                            .MinFractionalDigits(2)
+                            .MaxFractionalDigits(2)
+                            .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { SetViewportZoom(Value / 100.f); } )
+                            .OnValueChanged_Lambda( [this] ( float Value) { SetViewportZoom(Value / 100.f); } )
+                            .Value_Lambda( [this] () { return GetViewportZoom() * 100.f; } )
+                        ],
+                        LOCTEXT( "viewport-toolbar-options.viewport-zoom.label", "Zoom" )
+                    );
+
+                    iMenuBuilder.AddWrapperSubMenu(
+                        LOCTEXT( "viewport-toolbar-options.zoom-options.label", "Zoom Options" ),
+                        LOCTEXT( "viewport-toolbar-options.zoom-options.tooltip", "Zoom the viewport" ),
+                        FOnGetContent::CreateRaw(this, &SStoryboardLevelViewport::OnGetViewportZoomMenuContent),
+                        FSlateIcon(FEposSequenceEditorStyle::Get().GetStyleSetName(), "Viewport.ZoomOptions")
+                    );
+                }
+            )
         );
 
         iBuilder.AddSeparator();
@@ -931,7 +1028,20 @@ SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
             NAME_None,
             TAttribute<FText>(),
             TAttribute<FText>(),
-            FSlateIcon("EposSequenceEditorStyle", "Viewport.ResetTransform")
+            FSlateIcon(FEposSequenceEditorStyle::Get().GetStyleSetName(), "Viewport.ResetTransform"),
+            NAME_None,
+            FNewMenuDelegate::CreateLambda(
+                [this](FMenuBuilder& iMenuBuilder)
+                {
+                    iMenuBuilder.AddMenuEntry(
+                        FEposSequenceEditorCommands::Get().StoryboardViewportResetPanZoomRotate,
+                        NAME_None,
+                        LOCTEXT( "viewport-toolbar-options.reset-viewport-transform.label", "Reset Pan/Zoom/Rotation" ),
+                        LOCTEXT( "viewport-toolbar-options.reset-viewport-transform.tooltip", "Resets the Pan, Zoom and Rotation values of the viewport" ),
+                        FSlateIcon(FEposSequenceEditorStyle::Get().GetStyleSetName(), "Viewport.ResetTransform")
+                    );
+                }
+            )
         );
 
 	iBuilder.EndSection();
