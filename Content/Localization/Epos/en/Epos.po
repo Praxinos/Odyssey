@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2024-03-18 16:59\n"
-"PO-Revision-Date: 2024-03-18 16:59\n"
+"POT-Creation-Date: 2024-03-26 11:58\n"
+"PO-Revision-Date: 2024-03-26 11:58\n"
 "Language-Team: \n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
@@ -251,425 +251,530 @@ msgctxt "BoardSequenceCustomization,ExportFBXTooltip"
 msgid "Export FBX animation from this object"
 msgstr "Export FBX animation from this object"
 
-#. Key:	EposSequenceEditorStyle
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(19)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(19)
-msgctxt "EposSequenceEditorCommands,EposSequenceEditorStyle"
-msgid "Epos Editor"
-msgstr "Epos Editor"
-
-#. Key:	CommandsCategory.ViewportRotation
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(21)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(21)
-msgctxt "EposSequenceEditorCommands,CommandsCategory.ViewportRotation"
-msgid "Viewport Rotation"
-msgstr "Viewport Rotation"
-
-#. Key:	NewStoryboardWithSettings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(27)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(27)
-msgctxt "UICommands.EposSequenceEditorCommands,NewStoryboardWithSettings"
-msgid "Start Storyboarding"
-msgstr "Start Storyboarding"
-
-#. Key:	NewStoryboardWithSettings_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(27)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(27)
-msgctxt "UICommands.EposSequenceEditorCommands,NewStoryboardWithSettings_ToolTip"
-msgid "Create a new storyboard with settings"
-msgstr "Create a new storyboard with settings"
-
-#. Key:	NewStoryboardImportImageSequence
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(28)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(28)
-msgctxt "UICommands.EposSequenceEditorCommands,NewStoryboardImportImageSequence"
-msgid "Import Image Sequence"
-msgstr "Import Image Sequence"
-
-#. Key:	NewStoryboardImportImageSequence_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(28)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(28)
-msgctxt "UICommands.EposSequenceEditorCommands,NewStoryboardImportImageSequence_ToolTip"
-msgid "Create a new storyboard from a sequence of images"
-msgstr "Create a new storyboard from a sequence of images"
-
-#. Key:	ToggleStoryboardViewportCommand
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(29)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(29)
-msgctxt "UICommands.EposSequenceEditorCommands,ToggleStoryboardViewportCommand"
-msgid "Storyboard Viewport"
-msgstr "Storyboard Viewport"
-
-#. Key:	ToggleStoryboardViewportCommand_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(29)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(29)
-msgctxt "UICommands.EposSequenceEditorCommands,ToggleStoryboardViewportCommand_ToolTip"
-msgid "A viewport layout tailored to storyboard preview"
-msgstr "A viewport layout tailored to storyboard preview"
-
-#. Key:	StoryboardViewportAdd10Rotate
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(33)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(33)
-msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Rotate"
-msgid "Storyboard Viewport +10°"
-msgstr "Storyboard Viewport +10°"
-
-#. Key:	StoryboardViewportAdd10Rotate_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(33)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(33)
-msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Rotate_ToolTip"
-msgid "+10° to the viewport rotation"
-msgstr "+10° to the viewport rotation"
-
-#. Key:	StoryboardViewportSubstract10Rotate
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(34)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(34)
-msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Rotate"
-msgid "Storyboard Viewport -10°"
-msgstr "Storyboard Viewport -10°"
-
-#. Key:	StoryboardViewportSubstract10Rotate_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(34)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(34)
-msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Rotate_ToolTip"
-msgid "-10° to the viewport rotation"
-msgstr "-10° to the viewport rotation"
-
-#. Key:	storyboard-viewport-rotation-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
-msgctxt "EposSequenceEditorCommands,storyboard-viewport-rotation-label"
-msgid "Set Storyboard Viewport to {0}°"
-msgstr "Set Storyboard Viewport to {0}°"
-
-#. Key:	storyboard-viewport-rotation-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(37)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(37)
-msgctxt "EposSequenceEditorCommands,storyboard-viewport-rotation-tooltip"
-msgid "Set the viewport rotation to {0}°"
-msgstr "Set the viewport rotation to {0}°"
-
-#. Key:	FixActorReferences
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
-msgctxt "UICommands.EposSequenceEditorCommands,FixActorReferences"
-msgid "Fix Actor References"
-msgstr "Fix Actor References"
-
-#. Key:	FixActorReferences_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(56)
-msgctxt "UICommands.EposSequenceEditorCommands,FixActorReferences_ToolTip"
-msgid "Try to automatically fix up broken actor bindings"
-msgstr "Try to automatically fix up broken actor bindings"
-
-#. Key:	StepToPreviousShot
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(60)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(60)
-msgctxt "UICommands.EposSequenceEditorCommands,StepToPreviousShot"
-msgid "Step to Previous Shot"
-msgstr "Step to Previous Shot"
-
-#. Key:	StepToPreviousShot_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(60)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(60)
-msgctxt "UICommands.EposSequenceEditorCommands,StepToPreviousShot_ToolTip"
-msgid "Step to previous shot"
-msgstr "Step to previous shot"
-
-#. Key:	StepToNextShot
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
-msgctxt "UICommands.EposSequenceEditorCommands,StepToNextShot"
-msgid "Step to Next Shot"
-msgstr "Step to Next Shot"
-
-#. Key:	StepToNextShot_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
-msgctxt "UICommands.EposSequenceEditorCommands,StepToNextShot_ToolTip"
-msgid "Step to next shot"
-msgstr "Step to next shot"
-
-#. Key:	CreateCameraAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
-msgctxt "UICommands.EposSequenceEditorCommands,CreateCameraAtCurrentTime"
-msgid "Create Camera"
-msgstr "Create Camera"
-
-#. Key:	CreateCameraAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(65)
-msgctxt "UICommands.EposSequenceEditorCommands,CreateCameraAtCurrentTime_ToolTip"
-msgid "Create a new camera and set it as the current camera cut"
-msgstr "Create a new camera and set it as the current camera cut"
-
-#. Key:	SnapCameraToViewportAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
-msgctxt "UICommands.EposSequenceEditorCommands,SnapCameraToViewportAtCurrentTime"
-msgid "Snap Camera to Viewport"
-msgstr "Snap Camera to Viewport"
-
-#. Key:	SnapCameraToViewportAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(66)
-msgctxt "UICommands.EposSequenceEditorCommands,SnapCameraToViewportAtCurrentTime_ToolTip"
-msgid "Snap the existing camera to the viewport"
-msgstr "Snap the existing camera to the viewport"
-
-#. Key:	PilotCameraAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(67)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(67)
-msgctxt "UICommands.EposSequenceEditorCommands,PilotCameraAtCurrentTime"
-msgid "Pilot Camera"
-msgstr "Pilot Camera"
-
-#. Key:	PilotCameraAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(67)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(67)
-msgctxt "UICommands.EposSequenceEditorCommands,PilotCameraAtCurrentTime_ToolTip"
-msgid "Pilot the existing camera"
-msgstr "Pilot the existing camera"
-
-#. Key:	EjectCameraAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
-msgctxt "UICommands.EposSequenceEditorCommands,EjectCameraAtCurrentTime"
-msgid "Eject Camera"
-msgstr "Eject Camera"
-
-#. Key:	EjectCameraAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(68)
-msgctxt "UICommands.EposSequenceEditorCommands,EjectCameraAtCurrentTime_ToolTip"
-msgid "Eject the existing camera"
-msgstr "Eject the existing camera"
-
-#. Key:	GotoPreviousCameraPosition
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
-msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousCameraPosition"
-msgid "Go to Previous Camera Position"
-msgstr "Go to Previous Camera Position"
-
-#. Key:	GotoPreviousCameraPosition_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(69)
-msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousCameraPosition_ToolTip"
-msgid "Go to the previous camera position"
-msgstr "Go to the previous camera position"
-
-#. Key:	GotoNextCameraPosition
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(70)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(70)
-msgctxt "UICommands.EposSequenceEditorCommands,GotoNextCameraPosition"
-msgid "Go to Next Camera Position"
-msgstr "Go to Next Camera Position"
-
-#. Key:	GotoNextCameraPosition_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(70)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(70)
-msgctxt "UICommands.EposSequenceEditorCommands,GotoNextCameraPosition_ToolTip"
-msgid "Go to the next camera position"
-msgstr "Go to the next camera position"
-
 #. Key:	CreatePlaneAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(100)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(100)
 msgctxt "UICommands.EposSequenceEditorCommands,CreatePlaneAtCurrentTime"
 msgid "Create Plane"
 msgstr "Create Plane"
 
 #. Key:	CreatePlaneAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(72)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(100)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(100)
 msgctxt "UICommands.EposSequenceEditorCommands,CreatePlaneAtCurrentTime_ToolTip"
 msgid "Create a new plane in front of the current camera"
 msgstr "Create a new plane in front of the current camera"
 
 #. Key:	DetachPlaneAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(101)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(101)
 msgctxt "UICommands.EposSequenceEditorCommands,DetachPlaneAtCurrentTime"
 msgid "Detach Plane"
 msgstr "Detach Plane"
 
 #. Key:	DetachPlaneAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(73)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(101)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(101)
 msgctxt "UICommands.EposSequenceEditorCommands,DetachPlaneAtCurrentTime_ToolTip"
 msgid "Detach the plane of the current camera"
 msgstr "Detach the plane of the current camera"
 
 #. Key:	CreateDrawingAtCurrentTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(75)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(75)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(103)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(103)
 msgctxt "UICommands.EposSequenceEditorCommands,CreateDrawingAtCurrentTime"
 msgid "Create Drawing"
 msgstr "Create Drawing"
 
 #. Key:	CreateDrawingAtCurrentTime_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(75)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(75)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(103)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(103)
 msgctxt "UICommands.EposSequenceEditorCommands,CreateDrawingAtCurrentTime_ToolTip"
 msgid "Create a new drawing"
 msgstr "Create a new drawing"
 
 #. Key:	GotoPreviousDrawing
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(76)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(76)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(104)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(104)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousDrawing"
 msgid "Go to Previous Drawing"
 msgstr "Go to Previous Drawing"
 
 #. Key:	GotoPreviousDrawing_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(76)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(76)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(104)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(104)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousDrawing_ToolTip"
 msgid "Go to the previous drawing"
 msgstr "Go to the previous drawing"
 
 #. Key:	GotoNextDrawing
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(105)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(105)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoNextDrawing"
 msgid "Go to Next Drawing"
 msgstr "Go to Next Drawing"
 
 #. Key:	GotoNextDrawing_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(77)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(105)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(105)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoNextDrawing_ToolTip"
 msgid "Go to the next drawing"
 msgstr "Go to the next drawing"
 
 #. Key:	OpenSequenceEditorSettings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(109)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(109)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenSequenceEditorSettings"
 msgid "Sequence Settings..."
 msgstr "Sequence Settings..."
 
 #. Key:	OpenSequenceEditorSettings_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(81)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(109)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(109)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenSequenceEditorSettings_ToolTip"
 msgid "Open sequence settings"
 msgstr "Open sequence settings"
 
 #. Key:	OpenTrackEditorSettings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(110)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(110)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenTrackEditorSettings"
 msgid "Track Settings..."
 msgstr "Track Settings..."
 
 #. Key:	OpenTrackEditorSettings_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(82)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(110)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(110)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenTrackEditorSettings_ToolTip"
 msgid "Open track settings"
 msgstr "Open track settings"
 
 #. Key:	OpenNamingConventionEditorSettings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(111)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(111)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenNamingConventionEditorSettings"
 msgid "Naming Convention Settings..."
 msgstr "Naming Convention Settings..."
 
 #. Key:	OpenNamingConventionEditorSettings_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(83)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(111)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(111)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenNamingConventionEditorSettings_ToolTip"
 msgid "Open naming convention settings"
 msgstr "Open naming convention settings"
 
 #. Key:	GotoPraxinos
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(113)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(113)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPraxinos"
 msgid "Praxinos website..."
 msgstr "Praxinos website..."
 
 #. Key:	GotoPraxinos_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(85)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(113)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(113)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoPraxinos_ToolTip"
 msgid "Go to Praxinos website"
 msgstr "Go to Praxinos website"
 
 #. Key:	GotoForum
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(86)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(86)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(114)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(114)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoForum"
 msgid "Praxinos forum..."
 msgstr "Praxinos forum..."
 
 #. Key:	GotoForum_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(86)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(86)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(114)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(114)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoForum_ToolTip"
 msgid "Go to Praxinos forum"
 msgstr "Go to Praxinos forum"
 
 #. Key:	GotoDiscord
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(115)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(115)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoDiscord"
 msgid "Praxinos discord..."
 msgstr "Praxinos discord..."
 
 #. Key:	GotoDiscord_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(87)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(115)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(115)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoDiscord_ToolTip"
 msgid "Go to Praxinos discord"
 msgstr "Go to Praxinos discord"
 
 #. Key:	GotoUserDocumentation
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(116)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(116)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoUserDocumentation"
 msgid "Epos User Documentation..."
 msgstr "Epos User Documentation..."
 
 #. Key:	GotoUserDocumentation_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(116)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(116)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoUserDocumentation_ToolTip"
 msgid "Go to User Documentation"
 msgstr "Go to User Documentation"
 
 #. Key:	GotoProjects
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(117)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(117)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoProjects"
 msgid "Epos Samples..."
 msgstr "Epos Samples..."
 
 #. Key:	GotoProjects_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(117)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(117)
 msgctxt "UICommands.EposSequenceEditorCommands,GotoProjects_ToolTip"
 msgid "Download projects made by Epos"
 msgstr "Download projects made by Epos"
 
 #. Key:	OpenAboutWindow
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(91)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(91)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(119)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(119)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenAboutWindow"
 msgid "About Epos..."
 msgstr "About Epos..."
 
 #. Key:	OpenAboutWindow_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(91)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(91)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(119)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(119)
 msgctxt "UICommands.EposSequenceEditorCommands,OpenAboutWindow_ToolTip"
 msgid "Open the About window"
 msgstr "Open the About window"
+
+#. Key:	EposSequenceEditorStyle
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(20)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(20)
+msgctxt "EposSequenceEditorCommands,EposSequenceEditorStyle"
+msgid "Epos Editor"
+msgstr "Epos Editor"
+
+#. Key:	CommandsCategory.ViewportRotation
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(22)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(22)
+msgctxt "EposSequenceEditorCommands,CommandsCategory.ViewportRotation"
+msgid "Viewport Rotation"
+msgstr "Viewport Rotation"
+
+#. Key:	CommandsCategory.ViewportZoom
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(23)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(23)
+msgctxt "EposSequenceEditorCommands,CommandsCategory.ViewportZoom"
+msgid "Viewport Zoom"
+msgstr "Viewport Zoom"
+
+#. Key:	NewStoryboardWithSettings
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(29)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(29)
+msgctxt "UICommands.EposSequenceEditorCommands,NewStoryboardWithSettings"
+msgid "Start Storyboarding"
+msgstr "Start Storyboarding"
+
+#. Key:	NewStoryboardWithSettings_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(29)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(29)
+msgctxt "UICommands.EposSequenceEditorCommands,NewStoryboardWithSettings_ToolTip"
+msgid "Create a new storyboard with settings"
+msgstr "Create a new storyboard with settings"
+
+#. Key:	NewStoryboardImportImageSequence
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(30)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(30)
+msgctxt "UICommands.EposSequenceEditorCommands,NewStoryboardImportImageSequence"
+msgid "Import Image Sequence"
+msgstr "Import Image Sequence"
+
+#. Key:	NewStoryboardImportImageSequence_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(30)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(30)
+msgctxt "UICommands.EposSequenceEditorCommands,NewStoryboardImportImageSequence_ToolTip"
+msgid "Create a new storyboard from a sequence of images"
+msgstr "Create a new storyboard from a sequence of images"
+
+#. Key:	ToggleStoryboardViewportCommand
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(31)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(31)
+msgctxt "UICommands.EposSequenceEditorCommands,ToggleStoryboardViewportCommand"
+msgid "Storyboard Viewport"
+msgstr "Storyboard Viewport"
+
+#. Key:	ToggleStoryboardViewportCommand_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(31)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(31)
+msgctxt "UICommands.EposSequenceEditorCommands,ToggleStoryboardViewportCommand_ToolTip"
+msgid "A viewport layout tailored to storyboard preview"
+msgstr "A viewport layout tailored to storyboard preview"
+
+#. Key:	StoryboardViewportAdd10Rotate
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(35)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(35)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Rotate"
+msgid "Storyboard Viewport Rotation +10°"
+msgstr "Storyboard Viewport Rotation +10°"
+
+#. Key:	StoryboardViewportAdd10Rotate_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(35)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(35)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Rotate_ToolTip"
+msgid "+10° to the viewport rotation"
+msgstr "+10° to the viewport rotation"
+
+#. Key:	StoryboardViewportSubstract10Rotate
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Rotate"
+msgid "Storyboard Viewport Rotation -10°"
+msgstr "Storyboard Viewport Rotation -10°"
+
+#. Key:	StoryboardViewportSubstract10Rotate_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Rotate_ToolTip"
+msgid "-10° to the viewport rotation"
+msgstr "-10° to the viewport rotation"
+
+#. Key:	StoryboardViewportAdd10Zoom
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(38)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(38)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Zoom"
+msgid "Storyboard Viewport Zoom +10%"
+msgstr "Storyboard Viewport Zoom +10%"
+
+#. Key:	StoryboardViewportAdd10Zoom_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(38)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(38)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Zoom_ToolTip"
+msgid "+10% to the viewport Zoom"
+msgstr "+10% to the viewport Zoom"
+
+#. Key:	StoryboardViewportSubstract10Zoom
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(39)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(39)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Zoom"
+msgid "Storyboard Viewport Zoom -10%"
+msgstr "Storyboard Viewport Zoom -10%"
+
+#. Key:	StoryboardViewportSubstract10Zoom_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(39)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(39)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Zoom_ToolTip"
+msgid "-10% to the viewport Zoom"
+msgstr "-10% to the viewport Zoom"
+
+#. Key:	StoryboardViewportFitToScreen
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(40)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(40)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportFitToScreen"
+msgid "Storyboard Viewport Fit To Screen"
+msgstr "Storyboard Viewport Fit To Screen"
+
+#. Key:	StoryboardViewportFitToScreen_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(40)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(40)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportFitToScreen_ToolTip"
+msgid "Zoom the the viewport to fit its content in the available space"
+msgstr "Zoom the the viewport to fit its content in the available space"
+
+#. Key:	StoryboardViewportResetPanZoomRotate
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(41)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(41)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportResetPanZoomRotate"
+msgid "Storyboard Viewport Reset Pan, Zoom and Rotation "
+msgstr "Storyboard Viewport Reset Pan, Zoom and Rotation "
+
+#. Key:	StoryboardViewportResetPanZoomRotate_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(41)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(41)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportResetPanZoomRotate_ToolTip"
+msgid "Resets the viewport Pan, Zoom and Rotation values"
+msgstr "Resets the viewport Pan, Zoom and Rotation values"
+
+#. Key:	storyboard-viewport-rotation-label
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(43)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(43)
+msgctxt "EposSequenceEditorCommands,storyboard-viewport-rotation-label"
+msgid "Set Storyboard Viewport to {0}°"
+msgstr "Set Storyboard Viewport to {0}°"
+
+#. Key:	storyboard-viewport-rotation-tooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(44)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(44)
+msgctxt "EposSequenceEditorCommands,storyboard-viewport-rotation-tooltip"
+msgid "Set the viewport rotation to {0}°"
+msgstr "Set the viewport rotation to {0}°"
+
+#. Key:	storyboard-viewport-zoom-label
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
+msgctxt "EposSequenceEditorCommands,storyboard-viewport-zoom-label"
+msgid "Set Storyboard Viewport to {0}%"
+msgstr "Set Storyboard Viewport to {0}%"
+
+#. Key:	storyboard-viewport-zoom-tooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(62)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(62)
+msgctxt "EposSequenceEditorCommands,storyboard-viewport-zoom-tooltip"
+msgid "Set the viewport zoom to {0}%"
+msgstr "Set the viewport zoom to {0}%"
+
+#. Key:	StoryboardViewportHoldToPanZoom
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportHoldToPanZoom"
+msgid "Storyboard Viewport Pan/Zoom (Hold)"
+msgstr "Storyboard Viewport Pan/Zoom (Hold)"
+
+#. Key:	StoryboardViewportHoldToPanZoom_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportHoldToPanZoom_ToolTip"
+msgid "Hold this key to pan (left mouse button) or zoom (right mouse button) the viewport"
+msgstr "Hold this key to pan (left mouse button) or zoom (right mouse button) the viewport"
+
+#. Key:	StoryboardViewportHoldToRotate
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(80)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(80)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportHoldToRotate"
+msgid "Storyboard Viewport Rotate (Hold)"
+msgstr "Storyboard Viewport Rotate (Hold)"
+
+#. Key:	StoryboardViewportHoldToRotate_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(80)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(80)
+msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportHoldToRotate_ToolTip"
+msgid "Hold this key to to rotate the viewport using the left mouse button"
+msgstr "Hold this key to to rotate the viewport using the left mouse button"
+
+#. Key:	FixActorReferences
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(84)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(84)
+msgctxt "UICommands.EposSequenceEditorCommands,FixActorReferences"
+msgid "Fix Actor References"
+msgstr "Fix Actor References"
+
+#. Key:	FixActorReferences_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(84)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(84)
+msgctxt "UICommands.EposSequenceEditorCommands,FixActorReferences_ToolTip"
+msgid "Try to automatically fix up broken actor bindings"
+msgstr "Try to automatically fix up broken actor bindings"
+
+#. Key:	StepToPreviousShot
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
+msgctxt "UICommands.EposSequenceEditorCommands,StepToPreviousShot"
+msgid "Step to Previous Shot"
+msgstr "Step to Previous Shot"
+
+#. Key:	StepToPreviousShot_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(88)
+msgctxt "UICommands.EposSequenceEditorCommands,StepToPreviousShot_ToolTip"
+msgid "Step to previous shot"
+msgstr "Step to previous shot"
+
+#. Key:	StepToNextShot
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
+msgctxt "UICommands.EposSequenceEditorCommands,StepToNextShot"
+msgid "Step to Next Shot"
+msgstr "Step to Next Shot"
+
+#. Key:	StepToNextShot_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(89)
+msgctxt "UICommands.EposSequenceEditorCommands,StepToNextShot_ToolTip"
+msgid "Step to next shot"
+msgstr "Step to next shot"
+
+#. Key:	CreateCameraAtCurrentTime
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(93)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(93)
+msgctxt "UICommands.EposSequenceEditorCommands,CreateCameraAtCurrentTime"
+msgid "Create Camera"
+msgstr "Create Camera"
+
+#. Key:	CreateCameraAtCurrentTime_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(93)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(93)
+msgctxt "UICommands.EposSequenceEditorCommands,CreateCameraAtCurrentTime_ToolTip"
+msgid "Create a new camera and set it as the current camera cut"
+msgstr "Create a new camera and set it as the current camera cut"
+
+#. Key:	SnapCameraToViewportAtCurrentTime
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(94)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(94)
+msgctxt "UICommands.EposSequenceEditorCommands,SnapCameraToViewportAtCurrentTime"
+msgid "Snap Camera to Viewport"
+msgstr "Snap Camera to Viewport"
+
+#. Key:	SnapCameraToViewportAtCurrentTime_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(94)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(94)
+msgctxt "UICommands.EposSequenceEditorCommands,SnapCameraToViewportAtCurrentTime_ToolTip"
+msgid "Snap the existing camera to the viewport"
+msgstr "Snap the existing camera to the viewport"
+
+#. Key:	PilotCameraAtCurrentTime
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(95)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(95)
+msgctxt "UICommands.EposSequenceEditorCommands,PilotCameraAtCurrentTime"
+msgid "Pilot Camera"
+msgstr "Pilot Camera"
+
+#. Key:	PilotCameraAtCurrentTime_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(95)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(95)
+msgctxt "UICommands.EposSequenceEditorCommands,PilotCameraAtCurrentTime_ToolTip"
+msgid "Pilot the existing camera"
+msgstr "Pilot the existing camera"
+
+#. Key:	EjectCameraAtCurrentTime
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(96)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(96)
+msgctxt "UICommands.EposSequenceEditorCommands,EjectCameraAtCurrentTime"
+msgid "Eject Camera"
+msgstr "Eject Camera"
+
+#. Key:	EjectCameraAtCurrentTime_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(96)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(96)
+msgctxt "UICommands.EposSequenceEditorCommands,EjectCameraAtCurrentTime_ToolTip"
+msgid "Eject the existing camera"
+msgstr "Eject the existing camera"
+
+#. Key:	GotoPreviousCameraPosition
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(97)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(97)
+msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousCameraPosition"
+msgid "Go to Previous Camera Position"
+msgstr "Go to Previous Camera Position"
+
+#. Key:	GotoPreviousCameraPosition_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(97)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(97)
+msgctxt "UICommands.EposSequenceEditorCommands,GotoPreviousCameraPosition_ToolTip"
+msgid "Go to the previous camera position"
+msgstr "Go to the previous camera position"
+
+#. Key:	GotoNextCameraPosition
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(98)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(98)
+msgctxt "UICommands.EposSequenceEditorCommands,GotoNextCameraPosition"
+msgid "Go to Next Camera Position"
+msgstr "Go to Next Camera Position"
+
+#. Key:	GotoNextCameraPosition_ToolTip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(98)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(98)
+msgctxt "UICommands.EposSequenceEditorCommands,GotoNextCameraPosition_ToolTip"
+msgid "Go to the next camera position"
+msgstr "Go to the next camera position"
 
 #. Key:	CinematicsEpos
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorModule.cpp(123)
@@ -1770,247 +1875,282 @@ msgctxt "EposSequenceEditorNoteSettings,note-settings.display-as-overlay-tooltip
 msgid "Display the notes at the current frame on the 3D scene."
 msgstr "Display the notes at the current frame on the 3D scene."
 
-#. Key:	TimeFormat
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1138)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1138)
-msgctxt "SStoryboardLevelViewport,TimeFormat"
-msgid "{0}"
-msgstr "{0}"
-
-#. Key:	TimeLocalToCurrentSequence
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(257)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(257)
-msgctxt "SStoryboardLevelViewport,TimeLocalToCurrentSequence"
-msgid "The current time of the sequence relative to the focused sequence."
-msgstr "The current time of the sequence relative to the focused sequence."
-
-#. Key:	CurrentSequence
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(363)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(363)
-msgctxt "SStoryboardLevelViewport,CurrentSequence"
-msgid "The name of the currently evaluated sequence."
-msgstr "The name of the currently evaluated sequence."
-
-#. Key:	CurrentCamera
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(374)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(374)
-msgctxt "SStoryboardLevelViewport,CurrentCamera"
-msgid "The name of the current camera."
-msgstr "The name of the current camera."
-
-#. Key:	SelectedPlanes
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(385)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(385)
-msgctxt "SStoryboardLevelViewport,SelectedPlanes"
-msgid "The name of all selected planes."
-msgstr "The name of all selected planes."
-
-#. Key:	CurrentFilmback
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(396)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(396)
-msgctxt "SStoryboardLevelViewport,CurrentFilmback"
-msgid "The name of the current shot's filmback (the imaging area of the frame/sensor)."
-msgstr "The name of the current shot's filmback (the imaging area of the frame/sensor)."
-
-#. Key:	LocalPlaybackTime
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(406)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(406)
-msgctxt "SStoryboardLevelViewport,LocalPlaybackTime"
-msgid "The current playback time relative to the currently evaluated sequence."
-msgstr "The current playback time relative to the currently evaluated sequence."
-
-#. Key:	PlaneDistanceLabel
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(430)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(430)
-msgctxt "SStoryboardLevelViewport,PlaneDistanceLabel"
-msgid "{0} Distance"
-msgstr "{0} Distance"
-
-#. Key:	PlaneDistanceTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(437)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(437)
-msgctxt "SStoryboardLevelViewport,PlaneDistanceTooltip"
-msgid "Modify the distance between the selected plane and its parent camera."
-msgstr "Modify the distance between the selected plane and its parent camera."
-
-#. Key:	PlaneScaleLabel
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(455)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(455)
-msgctxt "SStoryboardLevelViewport,PlaneScaleLabel"
-msgid "Scale"
-msgstr "Scale"
-
-#. Key:	PlaneScaleTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(467)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(467)
-msgctxt "SStoryboardLevelViewport,PlaneScaleTooltip"
-msgid "Scale the plane accordingly to its parent camera."
-msgstr "Scale the plane accordingly to its parent camera."
-
-#. Key:	CameraFocalLengthLabel
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(483)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(483)
-msgctxt "SStoryboardLevelViewport,CameraFocalLengthLabel"
-msgid "{0} Focal Length"
-msgstr "{0} Focal Length"
-
-#. Key:	CameraFocalLengthTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(490)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(490)
-msgctxt "SStoryboardLevelViewport,CameraFocalLengthTooltip"
-msgid "Modify the current focal length of the camera."
-msgstr "Modify the current focal length of the camera."
-
-#. Key:	ViewportRotationTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(594)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(594)
-msgctxt "SStoryboardLevelViewport,ViewportRotationTooltip"
-msgid "Change the viewport rotation."
-msgstr "Change the viewport rotation."
-
-#. Key:	NoSequencerMessage
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(664)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(664)
-msgctxt "SStoryboardLevelViewport,NoSequencerMessage"
-msgid "No active Board/Shot Sequence Editor detected. Please edit a Board/Shot Sequence to enable full controls."
-msgstr "No active Board/Shot Sequence Editor detected. Please edit a Board/Shot Sequence to enable full controls."
-
 #. Key:	storyboard-viewport-add-rotation-section
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(903)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(903)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1085)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1085)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-add-rotation-section"
 msgid "Add Viewport Rotation"
 msgstr "Add Viewport Rotation"
 
 #. Key:	storyboard-viewport-set-rotation-section
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(908)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(908)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1090)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1090)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-set-rotation-section"
 msgid "Set Viewport Rotation"
 msgstr "Set Viewport Rotation"
 
+#. Key:	storyboard-viewport-add-zoom-section
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1188)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1188)
+msgctxt "SStoryboardLevelViewport,storyboard-viewport-add-zoom-section"
+msgid "Add Viewport Zoom"
+msgstr "Add Viewport Zoom"
+
+#. Key:	storyboard-viewport-set-zoom-section
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1193)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1193)
+msgctxt "SStoryboardLevelViewport,storyboard-viewport-set-zoom-section"
+msgid "Set Viewport Zoom"
+msgstr "Set Viewport Zoom"
+
+#. Key:	storyboard-viewport-fit-to-screen
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1201)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1201)
+msgctxt "SStoryboardLevelViewport,storyboard-viewport-fit-to-screen"
+msgid "Fit To Screen"
+msgstr "Fit To Screen"
+
+#. Key:	TimeFormat
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1654)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1654)
+msgctxt "SStoryboardLevelViewport,TimeFormat"
+msgid "{0}"
+msgstr "{0}"
+
+#. Key:	TimeLocalToCurrentSequence
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(290)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(290)
+msgctxt "SStoryboardLevelViewport,TimeLocalToCurrentSequence"
+msgid "The current time of the sequence relative to the focused sequence."
+msgstr "The current time of the sequence relative to the focused sequence."
+
+#. Key:	CurrentSequence
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(400)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(400)
+msgctxt "SStoryboardLevelViewport,CurrentSequence"
+msgid "The name of the currently evaluated sequence."
+msgstr "The name of the currently evaluated sequence."
+
+#. Key:	CurrentCamera
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(411)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(411)
+msgctxt "SStoryboardLevelViewport,CurrentCamera"
+msgid "The name of the current camera."
+msgstr "The name of the current camera."
+
+#. Key:	SelectedPlanes
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(422)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(422)
+msgctxt "SStoryboardLevelViewport,SelectedPlanes"
+msgid "The name of all selected planes."
+msgstr "The name of all selected planes."
+
+#. Key:	CurrentFilmback
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(433)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(433)
+msgctxt "SStoryboardLevelViewport,CurrentFilmback"
+msgid "The name of the current shot's filmback (the imaging area of the frame/sensor)."
+msgstr "The name of the current shot's filmback (the imaging area of the frame/sensor)."
+
+#. Key:	LocalPlaybackTime
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(443)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(443)
+msgctxt "SStoryboardLevelViewport,LocalPlaybackTime"
+msgid "The current playback time relative to the currently evaluated sequence."
+msgstr "The current playback time relative to the currently evaluated sequence."
+
+#. Key:	PlaneDistanceLabel
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(467)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(467)
+msgctxt "SStoryboardLevelViewport,PlaneDistanceLabel"
+msgid "{0} Distance"
+msgstr "{0} Distance"
+
+#. Key:	PlaneDistanceTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(474)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(474)
+msgctxt "SStoryboardLevelViewport,PlaneDistanceTooltip"
+msgid "Modify the distance between the selected plane and its parent camera."
+msgstr "Modify the distance between the selected plane and its parent camera."
+
+#. Key:	PlaneScaleLabel
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(492)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(492)
+msgctxt "SStoryboardLevelViewport,PlaneScaleLabel"
+msgid "Scale"
+msgstr "Scale"
+
+#. Key:	PlaneScaleTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(504)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(504)
+msgctxt "SStoryboardLevelViewport,PlaneScaleTooltip"
+msgid "Scale the plane accordingly to its parent camera."
+msgstr "Scale the plane accordingly to its parent camera."
+
+#. Key:	CameraFocalLengthLabel
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(520)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(520)
+msgctxt "SStoryboardLevelViewport,CameraFocalLengthLabel"
+msgid "{0} Focal Length"
+msgstr "{0} Focal Length"
+
+#. Key:	CameraFocalLengthTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(527)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(527)
+msgctxt "SStoryboardLevelViewport,CameraFocalLengthTooltip"
+msgid "Modify the current focal length of the camera."
+msgstr "Modify the current focal length of the camera."
+
+#. Key:	ViewportZoomTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(641)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(641)
+msgctxt "SStoryboardLevelViewport,ViewportZoomTooltip"
+msgid "Change the viewport zoom."
+msgstr "Change the viewport zoom."
+
+#. Key:	ViewportRotationTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(671)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(671)
+msgctxt "SStoryboardLevelViewport,ViewportRotationTooltip"
+msgid "Change the viewport rotation."
+msgstr "Change the viewport rotation."
+
+#. Key:	ViewportResetTransformTooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(700)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(700)
+msgctxt "SStoryboardLevelViewport,ViewportResetTransformTooltip"
+msgid "Reset Viewport Pan, Zoom and Rotation."
+msgstr "Reset Viewport Pan, Zoom and Rotation."
+
+#. Key:	NoSequencerMessage
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(781)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(781)
+msgctxt "SStoryboardLevelViewport,NoSequencerMessage"
+msgid "No active Board/Shot Sequence Editor detected. Please edit a Board/Shot Sequence to enable full controls."
+msgstr "No active Board/Shot Sequence Editor detected. Please edit a Board/Shot Sequence to enable full controls."
+
 #. Key:	Disabled
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(14)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(14)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(15)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(15)
 msgctxt "UICommands.StoryboardViewportCommands,Disabled"
 msgid "Disabled"
 msgstr "Disabled"
 
 #. Key:	Disabled_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(14)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(14)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(15)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(15)
 msgctxt "UICommands.StoryboardViewportCommands,Disabled_ToolTip"
 msgid "Disable the composition overlay"
 msgstr "Disable the composition overlay"
 
 #. Key:	Grid3x3
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(15)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(15)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(16)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(16)
 msgctxt "UICommands.StoryboardViewportCommands,Grid3x3"
 msgid "Grid 3x3"
 msgstr "Grid 3x3"
 
 #. Key:	Grid3x3_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(15)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(15)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(16)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(16)
 msgctxt "UICommands.StoryboardViewportCommands,Grid3x3_ToolTip"
 msgid "Enable the grid (3x3) composition overlay"
 msgstr "Enable the grid (3x3) composition overlay"
 
 #. Key:	Grid2x2
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(16)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(16)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(17)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(17)
 msgctxt "UICommands.StoryboardViewportCommands,Grid2x2"
 msgid "Grid 2x2"
 msgstr "Grid 2x2"
 
 #. Key:	Grid2x2_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(16)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(16)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(17)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(17)
 msgctxt "UICommands.StoryboardViewportCommands,Grid2x2_ToolTip"
 msgid "Enable the grid (2x2) composition overlay"
 msgstr "Enable the grid (2x2) composition overlay"
 
 #. Key:	Crosshair
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(17)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(17)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(18)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(18)
 msgctxt "UICommands.StoryboardViewportCommands,Crosshair"
 msgid "Crosshair"
 msgstr "Crosshair"
 
 #. Key:	Crosshair_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(17)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(17)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(18)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(18)
 msgctxt "UICommands.StoryboardViewportCommands,Crosshair_ToolTip"
 msgid "Enable the crosshair composition overlay"
 msgstr "Enable the crosshair composition overlay"
 
 #. Key:	Rabatment
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(18)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(18)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(19)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(19)
 msgctxt "UICommands.StoryboardViewportCommands,Rabatment"
 msgid "Rabatment"
 msgstr "Rabatment"
 
 #. Key:	Rabatment_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(18)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(18)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(19)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(19)
 msgctxt "UICommands.StoryboardViewportCommands,Rabatment_ToolTip"
 msgid "Enable the rabatment composition overlay"
 msgstr "Enable the rabatment composition overlay"
 
 #. Key:	ActionSafe
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(19)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(19)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(20)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(20)
 msgctxt "UICommands.StoryboardViewportCommands,ActionSafe"
 msgid "Action Safe"
 msgstr "Action Safe"
 
 #. Key:	ActionSafe_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(19)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(19)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(20)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(20)
 msgctxt "UICommands.StoryboardViewportCommands,ActionSafe_ToolTip"
 msgid "Enable the action safe composition overlay"
 msgstr "Enable the action safe composition overlay"
 
 #. Key:	TitleSafe
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(20)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(20)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(21)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(21)
 msgctxt "UICommands.StoryboardViewportCommands,TitleSafe"
 msgid "Title Safe"
 msgstr "Title Safe"
 
 #. Key:	TitleSafe_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(20)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(20)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(21)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(21)
 msgctxt "UICommands.StoryboardViewportCommands,TitleSafe_ToolTip"
 msgid "Enable the title safe composition overlay"
 msgstr "Enable the title safe composition overlay"
 
 #. Key:	CustomSafe
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(21)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(21)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(22)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(22)
 msgctxt "UICommands.StoryboardViewportCommands,CustomSafe"
 msgid "Custom Safe"
 msgstr "Custom Safe"
 
 #. Key:	CustomSafe_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(21)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(21)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(22)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(22)
 msgctxt "UICommands.StoryboardViewportCommands,CustomSafe_ToolTip"
 msgid "Enable the custom safe composition overlay"
 msgstr "Enable the custom safe composition overlay"
 
 #. Key:	Letterbox
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(22)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(22)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(23)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(23)
 msgctxt "UICommands.StoryboardViewportCommands,Letterbox"
 msgid "Letterbox"
 msgstr "Letterbox"
 
 #. Key:	Letterbox_ToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(22)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(22)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(23)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(23)
 msgctxt "UICommands.StoryboardViewportCommands,Letterbox_ToolTip"
 msgid "Enable the letterbox composition overlay"
 msgstr "Enable the letterbox composition overlay"
