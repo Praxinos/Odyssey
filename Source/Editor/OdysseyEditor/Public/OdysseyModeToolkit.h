@@ -52,10 +52,6 @@ public:
 	void SaveOpenedTabs();
 	void LoadOpenedTabs();
 
-
-private:
-	void OnWindowClosed(const TSharedRef<SWindow>& Window);
-
 public:
 	TSharedPtr<FOdysseyEditor> mEditor;
 	bool mTabSaved;

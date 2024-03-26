@@ -61,14 +61,6 @@ FOdysseyModeToolkit::Initialize(
 
     IMainFrameModule& mainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
     const TSharedPtr<SWindow>& mainFrameParentWindow = mainFrameModule.GetParentWindow();
-    mainFrameParentWindow->SetOnWindowClosed(FOnWindowClosed::CreateSP(this, &FOdysseyModeToolkit::OnWindowClosed));
-}
-
-void
-FOdysseyModeToolkit::OnWindowClosed(const TSharedRef<SWindow>& Window)
-{
-    //PATCH: Saves tabs state when closing Unreal Main Window while being in ILIAD Mode
-    OnToolkitHostShutdownUI();
 }
 
 TSharedPtr<SWidget>
