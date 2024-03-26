@@ -21,7 +21,7 @@ class /*EPOSSEQUENCEEDITOR_API*/ UExportPDFBlueprintLibrary
 public:
     /**
      * Get the name of the storyboard
-     * 
+     *
      * @param The list of panels
      * @return The name of the storyboard
      */
@@ -30,7 +30,7 @@ public:
 
     /**
      * Get the name of the studio
-     * 
+     *
      * @param The list of panels
      * @return The name of the studio
      */
@@ -40,7 +40,7 @@ public:
 public:
     /**
      * Get the number of panels
-     * 
+     *
      * @param The list of panels
      * @return The number of panels
      */
@@ -49,7 +49,7 @@ public:
 
     /**
      * Get the frame number of a panel as formatted string
-     * 
+     *
      * @param The list of panels
      * @param The index of the desired panel
      * @return The frame number as string (manage frame/timecode/second settings)
@@ -59,7 +59,7 @@ public:
 
     /**
      * Get the frame number of a panel
-     * 
+     *
      * @param The list of panels
      * @param The index of the desired panel
      * @return The frame number (in tick resolution)
@@ -69,7 +69,7 @@ public:
 
     /**
      * Get the frame number of a panel
-     * 
+     *
      * @param The list of panels
      * @param The index of the desired panel
      * @return The frame number (in tick resolution)
@@ -79,7 +79,7 @@ public:
 
     /**
      * Get the shot name of a panel
-     * 
+     *
      * @param The list of panels
      * @param The index of the desired panel
      * @return The name of the shot
@@ -97,7 +97,7 @@ public:
     /**
      * Get the render scene of a panel
      * The width of the texture is computed to match the camera ratio
-     * 
+     *
      * @param The list of panels
      * @param The index of the desired panel
      * @param The height (in px) of the wanted texture
@@ -109,7 +109,7 @@ public:
     /**
      * Get the notes of a panel
      * The notes are taken through the whole hierarchy
-     * 
+     *
      * @param The list of panels
      * @param The index of the desired panel
      * @return The array of all notes at the frame of the panel

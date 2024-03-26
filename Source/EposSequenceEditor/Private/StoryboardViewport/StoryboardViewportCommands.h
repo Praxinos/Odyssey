@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN.FR.001.220036.002.S.P.2021.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2024
 
 #pragma once
 
@@ -14,46 +15,46 @@ class FUICommandInfo;
 
 class FStoryboardViewportCommands : public TCommands<FStoryboardViewportCommands>
 {
-
 public:
-	FStoryboardViewportCommands() : TCommands<FStoryboardViewportCommands>
-	(
-		"Storyboard Viewport",
-		NSLOCTEXT("Contexts", "StoryboardViewport", "Storyboard Viewport"),
-		NAME_None,
-		FAppStyle::GetAppStyleSetName() // Icon Style Set
-	)
-	{}
-	
-	/** Disabled */
-	TSharedPtr<FUICommandInfo> Disabled;
+    FStoryboardViewportCommands(): TCommands<FStoryboardViewportCommands>
+    (
+        "Storyboard Viewport",
+        NSLOCTEXT( "Contexts", "StoryboardViewport", "Storyboard Viewport" ),
+        NAME_None,
+        FAppStyle::GetAppStyleSetName() // Icon Style Set
+    )
+    {
+    }
 
-	/** Grid 2x2 */
-	TSharedPtr<FUICommandInfo> Grid2x2;
+    /** Disabled */
+    TSharedPtr<FUICommandInfo> Disabled;
 
-	/** Grid 3x3 */
-	TSharedPtr<FUICommandInfo> Grid3x3;
+    /** Grid 2x2 */
+    TSharedPtr<FUICommandInfo> Grid2x2;
 
-	/** Crosshair */
-	TSharedPtr<FUICommandInfo> Crosshair;
+    /** Grid 3x3 */
+    TSharedPtr<FUICommandInfo> Grid3x3;
 
-	/** Rabatment */
-	TSharedPtr<FUICommandInfo> Rabatment;
+    /** Crosshair */
+    TSharedPtr<FUICommandInfo> Crosshair;
 
-	/** ActionSafe */
-	TSharedPtr<FUICommandInfo> ActionSafe;
+    /** Rabatment */
+    TSharedPtr<FUICommandInfo> Rabatment;
 
-	/** TitleSafe */
-	TSharedPtr<FUICommandInfo> TitleSafe;
+    /** ActionSafe */
+    TSharedPtr<FUICommandInfo> ActionSafe;
 
-	/** CustomSafe */
-	TSharedPtr<FUICommandInfo> CustomSafe;
+    /** TitleSafe */
+    TSharedPtr<FUICommandInfo> TitleSafe;
 
-	/** Letterbox */
-	TSharedPtr<FUICommandInfo> Letterbox;
+    /** CustomSafe */
+    TSharedPtr<FUICommandInfo> CustomSafe;
 
-	/**
-	 * Initialize commands
-	 */
-	virtual void RegisterCommands() override;
+    /** Letterbox */
+    TSharedPtr<FUICommandInfo> Letterbox;
+
+    /**
+     * Initialize commands
+     */
+    virtual void RegisterCommands() override;
 };

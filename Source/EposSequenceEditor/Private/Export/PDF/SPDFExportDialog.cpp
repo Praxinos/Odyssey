@@ -179,7 +179,7 @@ SExportPDFSettings::GetPageRatio() const
         return FMath::Sqrt( 1.f );
 
     int32 current_page = mPDFDocWidget->GetCurrentPDFPageNumber();
-    
+
     if( mPDFDocWidget->GetPDFPageFormat( current_page ) == EPDFPageFormat::A4 && mPDFDocWidget->GetPDFPageOrientation( current_page ) == EPDFPageOrientation::Landscape )
         return FMath::Sqrt( 2.f );
 

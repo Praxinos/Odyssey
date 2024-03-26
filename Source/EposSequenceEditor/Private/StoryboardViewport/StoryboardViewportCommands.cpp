@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN.FR.001.220036.002.S.P.2021.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2024
 
 #include "StoryboardViewport/StoryboardViewportCommands.h"
 
@@ -11,15 +12,15 @@
 
 void FStoryboardViewportCommands::RegisterCommands()
 {
-	UI_COMMAND( Disabled, "Disabled", "Disable the composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadZero) );
-	UI_COMMAND( Grid3x3, "Grid 3x3", "Enable the grid (3x3) composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadSix) );
-	UI_COMMAND( Grid2x2, "Grid 2x2", "Enable the grid (2x2) composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadSeven) );
-	UI_COMMAND( Crosshair, "Crosshair", "Enable the crosshair composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadEight) );
-	UI_COMMAND( Rabatment, "Rabatment", "Enable the rabatment composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadNine));
-	UI_COMMAND( ActionSafe, "Action Safe", "Enable the action safe composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadOne));
-	UI_COMMAND( TitleSafe, "Title Safe", "Enable the title safe composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadTwo));
-	UI_COMMAND( CustomSafe, "Custom Safe", "Enable the custom safe composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadThree));
-	UI_COMMAND( Letterbox, "Letterbox", "Enable the letterbox composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadFour));
+    UI_COMMAND( Disabled, "Disabled", "Disable the composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadZero) );
+    UI_COMMAND( Grid3x3, "Grid 3x3", "Enable the grid (3x3) composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadSix) );
+    UI_COMMAND( Grid2x2, "Grid 2x2", "Enable the grid (2x2) composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadSeven) );
+    UI_COMMAND( Crosshair, "Crosshair", "Enable the crosshair composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadEight) );
+    UI_COMMAND( Rabatment, "Rabatment", "Enable the rabatment composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadNine));
+    UI_COMMAND( ActionSafe, "Action Safe", "Enable the action safe composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadOne));
+    UI_COMMAND( TitleSafe, "Title Safe", "Enable the title safe composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadTwo));
+    UI_COMMAND( CustomSafe, "Custom Safe", "Enable the custom safe composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadThree));
+    UI_COMMAND( Letterbox, "Letterbox", "Enable the letterbox composition overlay", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::NumPadFour));
 }
 
 #undef LOCTEXT_NAMESPACE

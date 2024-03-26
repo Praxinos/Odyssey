@@ -180,8 +180,8 @@ private:
 struct FFilmOverlay_Rabatment : IFilmOverlay
 {
     FText GetDisplayName() const { return LOCTEXT("RabatmentName", "Rabatment"); }
-    
-	FText GetToolTip() const { return FStoryboardViewportCommands::Get().Rabatment.Get()->GetInputText(); }
+
+    FText GetToolTip() const { return FStoryboardViewportCommands::Get().Rabatment.Get()->GetInputText(); }
 
     const FSlateBrush* GetThumbnail() const { return FEposSequenceEditorStyle::Get().GetBrush("FilmOverlay.Rabatment"); }
 
@@ -223,7 +223,7 @@ struct FFilmOverlay_Rabatment : IFilmOverlay
 struct FFilmOverlay_Crosshair : IFilmOverlay
 {
     FText GetDisplayName() const { return LOCTEXT("CrosshairName", "Crosshair"); }
-	FText GetToolTip() const { return FStoryboardViewportCommands::Get().Crosshair.Get()->GetInputText(); }
+    FText GetToolTip() const { return FStoryboardViewportCommands::Get().Crosshair.Get()->GetInputText(); }
     const FSlateBrush* GetThumbnail() const { return FEposSequenceEditorStyle::Get().GetBrush("FilmOverlay.Crosshair"); }
     void Paint(const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId) const
     {
@@ -383,7 +383,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
     }
 
     FText GetDisplayName() const { return LOCTEXT("LetterboxMask", "Letterbox Mask"); }
-	FText GetToolTip() const { return FStoryboardViewportCommands::Get().Letterbox.Get()->GetInputText(); }
+    FText GetToolTip() const { return FStoryboardViewportCommands::Get().Letterbox.Get()->GetInputText(); }
 
     const FSlateBrush* GetThumbnail() const { return nullptr; }
 

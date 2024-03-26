@@ -204,7 +204,7 @@ def main():
 
     # source/Epos*/** (recursive)
     options = [ eOptions.kUTF8, eOptions.kTabs, eOptions.kTrailingSpaces, eOptions.kOnlySpaces, eOptions.kEOL, eOptions.kEOF, eOptions.kIDDN ]
-    pathfiles = [ entry for entry in source.rglob( 'Epos*' ) if entry.is_file() and entry.suffix in ['.h', '.cpp', '.cs'] ]
+    pathfiles = [ entry for entry in source.glob( 'Epos*/**/*' ) if entry.is_file() and entry.suffix in ['.h', '.cpp', '.cs'] ]
     ok.append( Check( pathfiles, options ) )
 
     # source/third party/*/* (not recursive)

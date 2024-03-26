@@ -332,7 +332,7 @@ NamingConvention::GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSce
             root_path = iRootSequence->GetPackage()->GetName() + TEXT( "_Private" ); // ie. /Game/MyStoryboard2_Private
         }
     }
-    
+
     if( root_path.IsEmpty() )
     {
         IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate()
