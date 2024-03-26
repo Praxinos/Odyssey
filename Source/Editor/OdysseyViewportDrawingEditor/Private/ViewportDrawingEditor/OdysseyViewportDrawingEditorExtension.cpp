@@ -812,6 +812,12 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationFrame(int iF
 	UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
 	if (!mediaPlayer || mediaPlayer->IsPlaying())
 		return;
+
+	UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
+	int32 index = mediaPlayer->GetPlaylistIndex();
+	UMediaSource* mediaSource = playlist.Get(index);
+	if ( !mediaSource || !mediaSource->IsA(UOdysseyAnimation::StaticClass()) )
+		return;
 	
 	TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
 	TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
@@ -883,6 +889,12 @@ FOdysseyViewportDrawingEditorExtension::SyncAnimationCurrentFrameWithMediaPlayer
 	UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
 	UOdysseyAnimationPlayer* animationPlayer = animationSource->GetAnimationPlayer();
 	if (!mediaPlayer || mediaPlayer->IsPlaying() || animationPlayer->Status == EOdysseyAnimationPlayerStatus::Playing)
+		return;
+
+	UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
+	int32 index = mediaPlayer->GetPlaylistIndex();
+	UMediaSource* mediaSource = playlist.Get(index);
+	if ( !mediaSource || !mediaSource->IsA(UOdysseyAnimation::StaticClass()) )
 		return;
 	
 	TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
