@@ -87,7 +87,8 @@ Read the [:blue_book:User Documentation](https://praxinos.coop/epos-user-doc) to
 - rename `pre-commit.sample` to `pre-commit`
 - open `pre-commit` file
 - add this line after the last `fi`:  
-    `exec .githooks/check.py`
+    `exec py .githooks/check.py` [Windows]  
+    `exec python3 .githooks/check.py` [MacOSX]  
 
 <!-- -->
 
