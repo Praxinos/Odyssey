@@ -8,7 +8,7 @@ class FOdysseyVectorSegment;
 class ODYSSEYVECTOR_API FOdysseyVectorImportSVG : public IFastXmlCallback
 {
     public:
-        ~FOdysseyVectorImportSVG( );
+        virtual ~FOdysseyVectorImportSVG( );
         FOdysseyVectorImportSVG( );
         FOdysseyVectorImportSVG( FOdysseyVectorGroupPaint* iScene
                                , const FString& iPath );

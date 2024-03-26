@@ -650,23 +650,23 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     {                                                                                                                      \
         case 32 :                                                                                                          \
         {                                                                                                                  \
-            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4]) PIXELS;                                                 \
-            double TEXUF = U * ( WIDTH  - 1 );                                                                             \
-            double TEXVF = V * ( HEIGHT - 1 );                                                                             \
+            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4])(PIXELS);                                                \
+            double TEXUF = (U) * ( (WIDTH ) - 1 );                                                                         \
+            double TEXVF = (V) * ( (HEIGHT) - 1 );                                                                         \
             int32  TEXUI = TEXUF;                                                                                          \
             int32  TEXVI = TEXVF;                                                                                          \
             double  WEIGHTU = TEXUF - TEXUI;                                                                               \
             double  WEIGHTV = TEXVF - TEXVI;                                                                               \
             double  INVWEIGHTU = 1.0f - WEIGHTU;                                                                           \
             double  INVWEIGHTV = 1.0f - WEIGHTV;                                                                           \
-            uint32 OFFSETTOPLEFT     = ( TEXVI * WIDTH ) + TEXUI                                                           \
+            uint32 OFFSETTOPLEFT     = ( TEXVI * (WIDTH) ) + TEXUI                                                         \
                  , OFFSETTOPRIGHT    = OFFSETTOPLEFT + 1                                                                   \
-                 , OFFSETBOTTOMRIGHT = OFFSETTOPLEFT + 1 + WIDTH                                                           \
-                 , OFFSETBOTTOMLEFT  = OFFSETTOPLEFT + WIDTH;                                                              \
+                 , OFFSETBOTTOMRIGHT = OFFSETTOPLEFT + 1 + (WIDTH)                                                         \
+                 , OFFSETBOTTOMLEFT  = OFFSETTOPLEFT + (WIDTH);                                                            \
             uint8 UPOL0, UPOL1;                                                                                            \
             uint8 VPOL0, VPOL1;                                                                                            \
                                                                                                                            \
-            if( ( FLAGS & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )                                                    \
+            if( ( (FLAGS) & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )                                                  \
             {                                                                                                              \
                 /* bilinear interpolations */                                                                              \
                 UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][0] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][0] * WEIGHTU ); \
@@ -711,19 +711,19 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     {                                                                      \
         case 32 :                                                          \
         {                                                                  \
-            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4]) PIXELS; \
-            int32 TEXU = U * ( WIDTH  - 1 );                               \
-            int32 TEXV = V * ( HEIGHT - 1 );                               \
-            uint32 TEXOFFSET = ( TEXV * WIDTH ) + TEXU;                    \
+            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4])(PIXELS);\
+            int32 TEXU = (U) * ( (WIDTH ) - 1 );                           \
+            int32 TEXV = (V) * ( (HEIGHT) - 1 );                           \
+            uint32 TEXOFFSET = ( TEXV * (WIDTH) ) + TEXU;                  \
                                                                            \
-            if( ( FLAGS & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )    \
+            if( ( (FLAGS) & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )  \
             {                                                              \
-                B = PIXELS32[TEXOFFSET][0];                                \
-                G = PIXELS32[TEXOFFSET][1];                                \
-                R = PIXELS32[TEXOFFSET][2];                                \
+                (B) = (PIXELS32)[TEXOFFSET][0];                            \
+                (G) = (PIXELS32)[TEXOFFSET][1];                            \
+                (R) = (PIXELS32)[TEXOFFSET][2];                            \
             }                                                              \
                                                                            \
-            A = PIXELS32[TEXOFFSET][3];                                    \
+            (A) = (PIXELS32)[TEXOFFSET][3];                                \
         }                                                                  \
         break;                                                             \
                                                                            \
@@ -807,8 +807,8 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
                               , iBrushHeight
                               , iBrushBitsPerPixel
                               , iPolygonDrawingFlags
-                              , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
-                              , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
+                              , u >= 1.0f ? u - (int)u : u
+                              , v >= 1.0f ? v - (int)v : v
                               , BR
                               , BG
                               , BB
@@ -821,8 +821,8 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
                             , iBrushHeight
                             , iBrushBitsPerPixel
                             , iPolygonDrawingFlags
-                            , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
-                            , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
+                            , u >= 1.0f ? u - (int)u : u
+                            , v >= 1.0f ? v - (int)v : v
                             , BR
                             , BG
                             , BB

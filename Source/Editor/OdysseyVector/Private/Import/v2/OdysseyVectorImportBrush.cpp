@@ -28,7 +28,8 @@ FOdysseyVectorImportV2::ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd
 
                     Ar << extendOverPath;
 
-                    iBrush.ExtendOverPath = static_cast<bool>(extendOverPath);
+                    //iBrush.ExtendOverPath = static_cast<bool>(extendOverPath);
+                    iBrush.ExtensionMode = extendOverPath ? eBrushExtensionMode::Path : eBrushExtensionMode::Segment;
                 }
                 break;
 

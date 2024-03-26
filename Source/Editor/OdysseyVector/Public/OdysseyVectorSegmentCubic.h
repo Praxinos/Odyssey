@@ -259,7 +259,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                        , uint32 iMaxRecurse
                                        , uint32 iCurrentRecurse
                                        , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray );
-        void ThickenFraction( FOdysseyVectorFraction* iFraction );
+        double ThickenFraction( FOdysseyVectorFraction* iFraction
+                              , double iStartU );
         void SmoothOffsetCurves( std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray );
         static void SmoothOffsetCurvesFragments( FOdysseyVectorVertex* iVertex
                                                , FOdysseyVectorSegmentCubic* iPrevSegment

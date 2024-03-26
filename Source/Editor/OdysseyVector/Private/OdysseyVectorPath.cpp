@@ -1668,9 +1668,24 @@ FOdysseyVectorPath::DrawShape( BLContext* iBLContext
          && ( ( worldBBoxMin.y ) < invalidationAreaMax.y )
          && ( ( worldBBoxMax.y ) > invalidationAreaMin.y ) )
         {
-            for( FOdysseyVectorChain& chain : mChainArray )
+            // for testing purpose (vector brush)
+            if( FOdysseyVectorBrush::GetDemoBrush() )
             {
-                DrawChain( iBLContext, vectorEngine, iCombinedOpacity, chain, iDrawingFlags );
+                for( FOdysseyVectorChain& chain : mChainArray )
+                {
+                    FOdysseyVectorBrush::GetDemoBrush()->Draw( iBLContext
+                                                             , iInvalidationArea
+                                                             , iCombinedOpacity
+                                                             , &chain
+                                                             , iDrawingFlags );
+                }
+            }
+            else
+            {
+                for( FOdysseyVectorChain& chain : mChainArray )
+                {
+                    DrawChain( iBLContext, vectorEngine, iCombinedOpacity, chain, iDrawingFlags );
+                }
             }
         }
     }
@@ -1718,6 +1733,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                                     , &screen
                                     , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
             {
+                FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( vertex );
                 ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( true );
                 ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( true );
                 FOdysseyVectorJoint& joint = vertex->GetJoint();
@@ -1726,28 +1742,46 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 double segmentAndJointLength = segmentLength + jointLength;
                 double endU = 0.0f;
 
-                if( mBrush.ExtendOverPath )
+                if( mBrush.ExtensionMode == eBrushExtensionMode::Path )
                 {
                     if( mBrush.Revert )
                     {
-                        endU = iChain.mLength ? startU - ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                        endU = startU - iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f;
                     }
                     else
                     {
-                        endU = iChain.mLength ? startU + ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                        endU = startU + iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f;
                     }
                 }
-                else
+
+                if( mBrush.ExtensionMode == eBrushExtensionMode::Segment )
                 {
                     if( mBrush.Revert )
+                    {
+                        startU = 1.0f;
+                        endU   = 0.0f;
+                    }
+                    else
                     {
                         startU = 0.0f;
                         endU   = 1.0f;
                     }
+                }
+
+                if( mBrush.ExtensionMode == eBrushExtensionMode::Adapt )
+                {
+                    double brushRatio = mBrush.height ? (double) mBrush.width  / mBrush.height : 0.0f;
+                    double averageSegmentRadius = ( vertex->GetRadius() + otherVertex->GetRadius() ) * 0.5f;
+                    double adaptedSegmentLength = averageSegmentRadius * brushRatio;
+                    
+
+                    if( mBrush.Revert )
+                    {
+                        endU   = startU - adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f;
+                    }
                     else
                     {
-                        startU = 1.0f;
-                        endU   = 0.0f;
+                        endU   = startU + adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f;
                     }
                 }
 
@@ -1763,7 +1797,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     // Textured joints are drawn only in texture mode (obviously) and if the texture
                     // goes all over the path.
                     if( ( vertex->IsHandleAligned() == false )
-                    && ( mBrush.ExtendOverPath == true ) )
+                    && ( mBrush.ExtensionMode == eBrushExtensionMode::Path ) )
                     {
                         double segmentJointRatio = jointLength / ( segmentAndJointLength );
                         double jointStartU = segmentStartU;

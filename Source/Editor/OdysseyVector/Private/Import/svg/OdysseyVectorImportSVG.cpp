@@ -16,8 +16,8 @@ FOdysseyVectorImportSVG::FOdysseyVectorImportSVG()
 
 FOdysseyVectorImportSVG::FOdysseyVectorImportSVG( FOdysseyVectorGroupPaint* iScene
                                                 , const FString& iPath )
-    : mScene( iScene )
-    , ProcessAttributeCallback( nullptr )
+    : ProcessAttributeCallback( nullptr )
+    , mScene( iScene )
     , mProcessedObject( nullptr )
     , mLastVertex( nullptr )
     , mLastSegment( nullptr )

@@ -571,8 +571,9 @@ IntersectGapSection( FOdysseyVectorSection* iGapSection
                                                   , &gapSectionT
                                                   , &segmentPolySubT ) )
             {
+                // this seems useless
                 double segmentT = segmentPoly->fromT + ( segmentPolySubT * ( segmentPoly->toT - segmentPoly->fromT ) );
-
+                // this seems useless
                 if( ( segmentT > 0.0f && segmentT < 1.0f )
                  && ( segmentT > 0.0f && segmentT < 1.0f ) )
                 {

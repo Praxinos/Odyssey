@@ -79,18 +79,19 @@ FOdysseyPainterEditorVectorGridToolHUD::DeformCell( FGridCell& iCell )
         ::ULIS::FVec2D p0p1s = p0 + ( p0p1 * iCell.mPointArray[i].s );
         ::ULIS::FVec2D p3p2s = p3 + ( p3p2 * iCell.mPointArray[i].s );
         ::ULIS::FVec2D sLine = ( p3p2s - p0p1s );
-        ::ULIS::FVec2D p1p2t = p1 + ( p1p2 * iCell.mPointArray[i].t );
-        ::ULIS::FVec2D p0p3t = p0 + ( p0p3 * iCell.mPointArray[i].t );
-        ::ULIS::FVec2D isxCoords;
+        //::ULIS::FVec2D p1p2t = p1 + ( p1p2 * iCell.mPointArray[i].t );
+        //::ULIS::FVec2D p0p3t = p0 + ( p0p3 * iCell.mPointArray[i].t );
+        ::ULIS::FVec2D newCoords;
         BLPoint worldPt;
         BLPoint objectPt;
-        double isx;
+        //double isx;
 
-        FOdysseyVector::IntersectSegment( p0p1s, p3p2s, p1p2t, p0p3t, &isx, nullptr );
+        //FOdysseyVector::IntersectSegment( p0p1s, p3p2s, p1p2t, p0p3t, &isx, nullptr );
+        //isxCoords = p0p1s + ( sLine * isx );
 
-        isxCoords = p0p1s + ( sLine * isx );
+        newCoords = p0p1s + ( ( p3p2s - p0p1s ) * iCell.mPointArray[i].t );
 
-        worldPt = mSelectionBox.worldMatrix.mapPoint( isxCoords.x, isxCoords.y );
+        worldPt = mSelectionBox.worldMatrix.mapPoint( newCoords.x, newCoords.y );
         objectPt = iCell.mPointArray[i].mDeformedObject->GetInverseWorldMatrix().mapPoint( worldPt.x, worldPt.y );
 
         iCell.mPointArray[i].mPoint->Set( objectPt.x, objectPt.y );

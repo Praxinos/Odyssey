@@ -972,12 +972,27 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
                     , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
                     , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ApplyTransformations, vectorScene )));
+                //menu.AddMenuEntry(
+                //    LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Make DemoBrush")
+                //    , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Make DemoBrush")
+                //    , FSlateIcon()
+                //    , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::MakeDemoBrush, vectorScene )));
         //    }
         //    menu.EndSection();
         }
     }
 
     //return menu.MakeWidget();
+}
+
+// for testing purpose.
+void
+UOdysseyPainterEditorVectorBaseTool::MakeDemoBrush( FOdysseyVectorGroupPaint* iScene )
+{
+   std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
+
+   FOdysseyVectorBrush::MakeDemoBrush( selectedObjectList
+                                     , FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList ) );
 }
 
 void

@@ -23,7 +23,7 @@ FOdysseyVectorExportV2::WriteBrushExtendOverPath( const FOdysseyVectorBrush& iBr
                             , Ar
                             , [&iBrush](FArchive &Ar) -> void
     {
-        uint32 extendOverPath = (uint32) iBrush.ExtendOverPath;
+        uint32 extendOverPath = (uint32) ( iBrush.ExtensionMode == eBrushExtensionMode::Path ) ? 1 : 0;
 
         Ar << extendOverPath;
     } );

@@ -120,6 +120,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
                          , eBaseToolColorSource iColorSource );
         void MakeTest( FOdysseyVectorGroupPaint* iScene );
 
+        // for testing purpose
+        void MakeDemoBrush( FOdysseyVectorGroupPaint* iScene );
+
     private:
         void ExtendContextMenuObject( FMenuBuilder& menu );
         void ExtendContextMenuVertex( FMenuBuilder& menu );
