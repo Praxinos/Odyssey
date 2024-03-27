@@ -131,6 +131,19 @@ UOdysseyTextureLayerImageVector::PostLoad()
 }
 
 void
+UOdysseyTextureLayerImageVector::PostDuplicate(bool bDuplicateForPIE)
+{
+    Super::PostDuplicate(bDuplicateForPIE);
+
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    UTexture2D* texture = layerStack->GetTexture();
+
+    Width = texture->Source.GetSizeX();
+    Height = texture->Source.GetSizeY();
+    mVectorBlockId = FGuid::NewGuid();
+}
+
+void
 UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize( Ar );
