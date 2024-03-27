@@ -712,8 +712,10 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
         case 32 :                                                          \
         {                                                                  \
             unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4])(PIXELS);\
-            int32 TEXU = (U) * ( (WIDTH ) - 1 );                           \
-            int32 TEXV = (V) * ( (HEIGHT) - 1 );                           \
+            double SANU = (U) < 0.0f ? 1.0f + (U) : (U);                   \
+            double SANV = (V) < 0.0f ? 1.0f + (V) : (V);                   \
+            int32 TEXU = SANU * ( (WIDTH ) - 1 );                          \
+            int32 TEXV = SANV * ( (HEIGHT) - 1 );                          \
             uint32 TEXOFFSET = ( TEXV * (WIDTH) ) + TEXU;                  \
                                                                            \
             if( ( (FLAGS) & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )  \
@@ -798,17 +800,22 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
 
             if( iBrushPixelData && iBrushWidth && iBrushHeight )
             {
+                double argu = fabs(u) > 1.0f ? u - (int)u : u;
+                double argv = fabs(v) > 1.0f ? v - (int)v : v;
+
                 if( ( iPolygonDrawingFlags & FPolygonDrawingFlags::BILINEARFILTERING )
                  && (        x < (int32)(iImageWidth  - 1) )   // prevent overflow
                  && ( hline->y < (int32)(iImageHeight - 1) ) ) // prevent overflow
                 {
+
+
                     GETPIXELBF( iBrushPixelData
                               , iBrushWidth
                               , iBrushHeight
                               , iBrushBitsPerPixel
                               , iPolygonDrawingFlags
-                              , u >= 1.0f ? u - (int)u : u
-                              , v >= 1.0f ? v - (int)v : v
+                              , argu
+                              , argv
                               , BR
                               , BG
                               , BB
@@ -821,8 +828,8 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
                             , iBrushHeight
                             , iBrushBitsPerPixel
                             , iPolygonDrawingFlags
-                            , u >= 1.0f ? u - (int)u : u
-                            , v >= 1.0f ? v - (int)v : v
+                            , argu
+                            , argv
                             , BR
                             , BG
                             , BB

@@ -15,8 +15,8 @@ class FOdysseyVectorChain;
 UENUM(BlueprintType)
 enum class eBrushExtensionMode : uint8
 {
-    Path    = 0,
-    Segment = 1,
+    Segment = 0,
+    Path    = 1,
     Adapt   = 2
 };
 

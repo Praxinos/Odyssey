@@ -1721,6 +1721,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
         if( mBrush.GetTexture() )
         {
             double startU = mBrush.Revert ? 1.0f : 0.0f;
+            double remainingSegmentLength = 0.0f;
 
             mBrush.Lock();
 
@@ -1730,6 +1731,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                                     , &iCombinedOpacity
                                     , &iDrawingFlags
                                     , &startU
+                                    , &remainingSegmentLength
                                     , &screen
                                     , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
             {
@@ -1746,11 +1748,11 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 {
                     if( mBrush.Revert )
                     {
-                        endU = startU - iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                        endU = startU - ( iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f );
                     }
                     else
                     {
-                        endU = startU + iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                        endU = startU + ( iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f );
                     }
                 }
 
@@ -1773,15 +1775,14 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     double brushRatio = mBrush.height ? (double) mBrush.width  / mBrush.height : 0.0f;
                     double averageSegmentRadius = ( vertex->GetRadius() + otherVertex->GetRadius() ) * 0.5f;
                     double adaptedSegmentLength = averageSegmentRadius * brushRatio;
-                    
 
                     if( mBrush.Revert )
                     {
-                        endU   = startU - adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f;
+                        endU   = startU - ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
                     }
                     else
                     {
-                        endU   = startU + adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f;
+                        endU   = startU + ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
                     }
                 }
 
@@ -1791,13 +1792,13 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
 
                     // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
-                    if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
-                    if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
+                    //if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
+                    //if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
 
                     // Textured joints are drawn only in texture mode (obviously) and if the texture
                     // goes all over the path.
                     if( ( vertex->IsHandleAligned() == false )
-                    && ( mBrush.ExtensionMode == eBrushExtensionMode::Path ) )
+                    && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
                     {
                         double segmentJointRatio = jointLength / ( segmentAndJointLength );
                         double jointStartU = segmentStartU;
@@ -1806,8 +1807,8 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                         segmentStartU = jointEndU;
 
                         // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
-                        if ( jointStartU < 0.0f ) jointStartU = 0.0f;
-                        if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
+                        //if ( jointStartU < 0.0f ) jointStartU = 0.0f;
+                        //if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
 
                         // don't draw if joint is outside the screen
                         if( ( ( jointBBox.x               ) < screen.w )
