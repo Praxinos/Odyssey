@@ -595,8 +595,8 @@ IntersectGapSection( FOdysseyVectorSection* iGapSection
 // A Tolerance value is accepted to test for near-intersections, that will be created later in the
 // process.
 void
-FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment0
-                                          , FOdysseyVectorSegmentCubic* iSegment1
+FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
+                                          , FOdysseyVectorSegment* iSegment1
                                           , const ::ULIS::FVec2D& iSegment1MinInParentWithTolerance
                                           , const ::ULIS::FVec2D& iSegment1MaxInParentWithTolerance
                                           , std::vector<FXIntersectionRecord>& oIntersectionRecordArray )
@@ -612,7 +612,6 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegmentCubic* iSegment
     std::vector<FOdysseyVectorFraction>& segment1FractionCache = iSegment1->GetFractionCache();
     ::ULIS::FVec2D segment1Point0InParent = iSegment1->GetFractionCacheStartPointInParent();
     ::ULIS::FVec2D segment1Point1InParent = iSegment1->GetFractionCacheEndPointInParent();
-    ::ULIS::FVec2D* segment1Bezier = iSegment1->GetBezier();
 
     //uint32 intersectionCount = 0;
 
