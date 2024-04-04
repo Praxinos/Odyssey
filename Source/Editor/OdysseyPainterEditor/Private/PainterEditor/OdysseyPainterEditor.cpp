@@ -1655,6 +1655,8 @@ FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
 
             iDestinationScene->AppendChild( copiedChild );
         }
+
+        iSourceSceneArray[i]->CopyBuckets( iDestinationScene, false );
     }
 
     iDestinationScene->UpdateMatrix();
