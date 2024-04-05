@@ -88,12 +88,32 @@ FOdysseyVectorBrush::Lock()
 {
     if( texture )
     {
-        const FColor* colors = static_cast<const FColor*>(texture->GetPlatformData()->Mips[0].BulkData.LockReadOnly());
+        FTexture2DMipMap *mip = &texture->GetPlatformData()->Mips[0];
+        const FColor* colors = static_cast<const FColor*>(mip->BulkData.LockReadOnly());
+        EPixelFormat pixelFormat = texture->GetPixelFormat(0);
 
         pixels = const_cast<FColor*>(colors);
-        width  = texture->GetSurfaceWidth();
-        height = texture->GetSurfaceHeight();
-        bitsPerPixel = 32;
+        // Commented-out: do not use these methods. They return a wrong
+        // value when the texture is first loaded. then the right value
+        // but it means that at first, the texture does not display correctly.  
+        //width  = texture->GetSurfaceWidth();
+        //height = texture->GetSurfaceHeight();
+        width  = mip->SizeX;
+        height = mip->SizeY;
+
+        switch( pixelFormat )
+        {
+            case PF_B8G8R8A8:
+                bitsPerPixel = 32;
+            break;
+
+            default : // other formats are unsupported
+                width  = 0;
+                height = 0;
+                pixels = nullptr;
+                bitsPerPixel = 0; 
+            break;
+        }
     }
 }
 

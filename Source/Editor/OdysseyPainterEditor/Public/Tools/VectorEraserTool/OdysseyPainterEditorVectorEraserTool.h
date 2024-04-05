@@ -68,10 +68,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
 
     public:
-        UPROPERTY( EditAnywhere, Category = EraserTool )
+        UPROPERTY( EditAnywhere
+                 , Category = EraserTool
+                 , meta = ( Tooltip = "Split Path" ) )
         bool SplitPath;
 
-        UPROPERTY( EditAnywhere, Category = EraserTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+        UPROPERTY( EditAnywhere
+                 , Category = EraserTool
+                 , meta = ( Tooltip  = "Radius"
+                          , ClampMin = "0.0"
+                          , UIMin    = "0.0") )
         double Radius;
 
     private:

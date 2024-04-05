@@ -2,6 +2,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVector.h"
+#include <execution> // for_each
 
 FOdysseyVectorPath::~FOdysseyVectorPath()
 {
@@ -311,10 +312,15 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
     mBLPath.clear();
 
     // update invalidated segments only
+    /*std::for_each( std::execution::par_unseq
+                 , mInvalidatedSegmentList.begin()
+                 , mInvalidatedSegmentList.end()
+                 , [ this ]( FOdysseyVectorSegment *segment )*/
     for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
     {
         segment->Update();
-    }
+    } 
+    /*);*/
 
     mInvalidatedSegmentList.clear();
 

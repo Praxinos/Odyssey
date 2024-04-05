@@ -57,7 +57,9 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
             if( iPropertyName == "Monochrome" )
                 selectedPaintGroup->SetMonochrome( Monochrome );
 
-            if( iPropertyName == "MonochromeColor" )
+            // Note: iMemberPropertyName because FColor is a struct 
+            // and we can edit individual struct members RGBA
+            if( ( iPropertyName == "MonochromeColor" ) || ( iMemberPropertyName == "MonochromeColor" ) )
                 selectedPaintGroup->SetMonochromeColor( MonochromeColor );
 
             if( iPropertyName == "Realtime" )
@@ -72,12 +74,13 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
             //if( iPropertyName == "Wireframe" )
             //    selectedPaintGroup->SetWireframe( Wireframe );
 
-            if( iPropertyName == "WireframeColor" )
+            // Note: iMemberPropertyName because FColor is a struct 
+            // and we can edit individual struct members RGBA
+            if( ( iPropertyName == "WireframeColor" ) || ( iMemberPropertyName == "WireframeColor" ) )
                 selectedPaintGroup->SetWireframeColor( WireframeColor );
 
             if( iPropertyName == "Multithreaded" )
                 selectedPaintGroup->SetMultithreaded( Multithreaded );
-
         }
     }
 

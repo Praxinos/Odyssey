@@ -1658,8 +1658,6 @@ FOdysseyVectorGroupPaint::FindCycles()
     explorationPairsBuffer.reserve( 100 );
 
     BuildGraph();
-    // remove sections of length 0 
-    //SanitizeGraph();
 
     // Build exploration pair before simplification
     for( FOdysseyVectorVertexIntersection& intersectionVertex : mIntersectionVertexArray )
@@ -1669,23 +1667,24 @@ FOdysseyVectorGroupPaint::FindCycles()
         intersectionVertex.BuildExplorationPairs( explorationPairsBuffer );
     }
 
-    // Build exploration pair before simplification
+    // Build exploration pair for vertex-vertex gaps before simplification
     for( int i = 0; i < mGapSectionBuffer.size(); i++ )
     {
-        // gap sections of length 0 were unlinked in SanitizeGraph(). check that first.
-        if( mGapSectionBuffer[i].IsLinked() )
+        if( mGapSectionBuffer[i].IsLinked() ) // not sure if really needed anymore
         {
             FOdysseyVectorVertex* vertex0 = mGapSectionBuffer[i].GetVertex(0);
             FOdysseyVectorVertex* vertex1 = mGapSectionBuffer[i].GetVertex(1);
 
-            if( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            // exploration pairs only needed for vertex-vertex gaps because 
+            // for vertex-segment gaps, there is an intersection that have created
+            // the exploration pairs in the previous loop.
+            if( ( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
+             && ( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() ) )
             {
-                vertex0->BuildExplorationPairs( explorationPairsBuffer);
-            }
-
-            if( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() )
-            {
-                vertex1->BuildExplorationPairs( explorationPairsBuffer );
+                vertex0->BuildExplorationPairs( explorationPairsBuffer );
+                // commented-out: only one vertex is necessary to build
+                // the exploration pairs for vertex-vertex gaps, I believe.
+                // vertex1->BuildExplorationPairs( explorationPairsBuffer );
             }
         }
     }
@@ -2246,26 +2245,6 @@ GapSectionIntersects( FOdysseyVectorSection& iSection
     }
 
     return false;
-}
-
-void
-FOdysseyVectorGroupPaint::SanitizeGraph()
-{
-    // unlink sections that are of length 0 and whose 
-    // at least one vertex doesn't link with valid sections.
-    // They put a mess in the grap because of their length, making
-    // impossible the calculation of a cross or a dot product.
-    for( FOdysseyVectorSection* section : mShortSectionArray )
-    {
-        if( section->GetLength() == 0.0f )
-        {
-            //if( ( section->GetVertex(0)->HasLengthySection() == false )
-            // || ( section->GetVertex(1)->HasLengthySection() == false ) )
-            {
-                section->Unlink();
-            }
-        }
-    }
 }
 
 void

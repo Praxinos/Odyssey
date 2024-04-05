@@ -158,9 +158,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         ::ULIS::FVec2D mOldPointInTexture;
 
     public:
-        UPROPERTY( EditAnywhere, Category = PathEditTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+        UPROPERTY( EditAnywhere
+                 , Category = PathEditTool
+                 , meta = ( ToolTip = "Picking Radius"
+                          , ClampMin = "0.0"
+                          , UIMin = "0.0" ) )
         double PickingRadius;
 
-        UPROPERTY( EditAnywhere, Category = PathEditTool )
+        UPROPERTY( EditAnywhere
+                 , Category = PathEditTool
+                 , meta = ( ToolTip = "Widen All Along" ) )
         bool WidenAllAlong;
 };

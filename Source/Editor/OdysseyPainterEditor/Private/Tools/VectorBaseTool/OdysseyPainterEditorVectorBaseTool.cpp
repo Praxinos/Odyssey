@@ -54,11 +54,11 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
 
 void
 UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath
-                                                 , eBaseToolColorSource iColorSource )
+                                                 , eForegroundColorMode iColorMode )
 {
-    switch( iColorSource )
+    switch( iColorMode )
     {
-        case eBaseToolColorSource::ColorWheel:
+        case eForegroundColorMode::SolidColor:
         {
             ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
             ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
@@ -68,7 +68,7 @@ UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath
         }
         break;
 
-        case eBaseToolColorSource::Palette:
+        case eForegroundColorMode::Palette:
         {
             TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
             UOdysseyPalette* palette = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette();
@@ -89,7 +89,7 @@ UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath
         break;
     }
 
-    iPath->GetForegroundBucket().SetColorMode( (eBucketColorMode) iColorSource );
+    iPath->GetForegroundBucket().SetColorMode( (eBucketColorMode) iColorMode );
 }
 
 void

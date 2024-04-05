@@ -8,6 +8,7 @@
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -24,7 +25,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorBaseToolHUD( this ), true )
     , PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
-    , ColorSource( eBaseToolColorSource::ColorWheel )
+    , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
     , StrokeWidth( 4.0f )
     , Uniform( false )
@@ -141,7 +142,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
         parentObject->AppendChild( mPrimitive );
 
-        SetPathColor( mPrimitive, ColorSource );
+        SetPathColor( mPrimitive, ColorMode );
         mPrimitive->SetOpacity( Opacity );
         mPrimitive->SetBrush( Brush );
         //mPrimitive->SetForegroundColor( ueColor );

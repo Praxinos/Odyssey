@@ -25,7 +25,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
 
     protected:
         virtual void ImportParam();
-        virtual void PropertyChanged( const FName& iPropertyName, const FName& iCategory );
+        virtual void PropertyChanged( const FName& iPropertyName
+                                    , const FName& iMemberPropertyName
+                                    , const FName& iCategory );
 
     protected:
         FOdysseyVectorBucket* mBucket;

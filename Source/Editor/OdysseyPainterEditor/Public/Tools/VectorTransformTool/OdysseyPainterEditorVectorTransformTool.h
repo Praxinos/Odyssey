@@ -75,13 +75,21 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         FVector2D mScreenMouseAtDown;
 
     public:
-        UPROPERTY( EditAnywhere, Category = TransformTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+        UPROPERTY( EditAnywhere
+                 , Category = TransformTool
+                 , meta = ( ToolTip  = "PickingRadius"
+                          , ClampMin = "0.0"
+                          , UIMin    = "0.0" ) )
         double PickingRadius;
 
-        UPROPERTY( EditAnywhere, Category = TransformTool)
+        UPROPERTY( EditAnywhere
+                 , Category = TransformTool
+                 , meta = ( ToolTip = "Uniform" ) )
         bool Uniform;
         bool UniformAtKeyDown;
 
-        UPROPERTY( EditAnywhere, Category = TransformTool )
+        UPROPERTY( EditAnywhere
+                 , Category = TransformTool
+                 , meta = ( ToolTip = "World" ) )
         bool World;
 };

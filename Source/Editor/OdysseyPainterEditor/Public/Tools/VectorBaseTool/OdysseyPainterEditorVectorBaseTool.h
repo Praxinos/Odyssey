@@ -11,13 +11,6 @@
 
 class FOdysseyPainterEditorVectorBaseToolHUD;
 
-UENUM()
-enum class eBaseToolColorSource : uint8
-{
-    ColorWheel = uint8(eBucketColorMode::SolidColor),
-    Palette  = uint8(eBucketColorMode::Palette)
-};
-
 enum class eMouseEventName : uint8
 {
     MouseHover = 0,
@@ -117,7 +110,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void GetSegmentHandlesFromVertices( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                           , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray );
         void SetPathColor( FOdysseyVectorPath* iPath
-                         , eBaseToolColorSource iColorSource );
+                         , eForegroundColorMode iColorSource );
         void MakeTest( FOdysseyVectorGroupPaint* iScene );
 
         // for testing purpose
