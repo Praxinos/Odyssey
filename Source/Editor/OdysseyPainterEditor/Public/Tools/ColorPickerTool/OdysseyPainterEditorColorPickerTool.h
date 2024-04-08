@@ -32,6 +32,8 @@ public:
 
     virtual void Commit() override;
 
+    virtual FText GetTooltip() const override;
+
 protected:
     // protected Data Members
 

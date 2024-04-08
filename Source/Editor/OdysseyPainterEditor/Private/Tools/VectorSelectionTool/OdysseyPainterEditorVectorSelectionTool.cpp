@@ -451,4 +451,10 @@ UOdysseyPainterEditorVectorSelectionTool::CreateTopTabWidget()
                     ];
 }
 
+FText
+UOdysseyPainterEditorVectorSelectionTool::GetTooltip() const
+{
+    return LOCTEXT("vector-selection-tool.tooltip", "Selection Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

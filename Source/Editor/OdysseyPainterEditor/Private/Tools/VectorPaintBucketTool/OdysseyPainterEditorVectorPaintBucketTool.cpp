@@ -740,4 +740,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::CreateTopTabWidget()
         ];
 }
 
+FText
+UOdysseyPainterEditorVectorPaintBucketTool::GetTooltip() const
+{
+    return LOCTEXT("vector-paint-bucket-tool.tooltip", "Paint Bucket Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

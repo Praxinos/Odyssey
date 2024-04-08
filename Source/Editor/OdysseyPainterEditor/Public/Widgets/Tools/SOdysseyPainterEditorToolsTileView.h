@@ -32,6 +32,7 @@ private:
     void OnToolCheckStateChanged(ECheckBoxState InValue, UOdysseyPainterEditorTool* iTool);
     EVisibility ToolVisibility(UOdysseyPainterEditorTool* iTool) const;
     ECheckBoxState IsToolChecked(UOdysseyPainterEditorTool* iTool) const;
+    FText ToolTooltip(UOdysseyPainterEditorTool* iTool) const;
 
 private:
     TArray<UOdysseyPainterEditorTool*> mTools;

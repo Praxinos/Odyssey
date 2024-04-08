@@ -749,4 +749,10 @@ UOdysseyPainterEditorRasterDrawingTool::GetMouseCursor() const
     return UOdysseyPainterEditorTool::GetMouseCursor();
 }
 
+FText
+UOdysseyPainterEditorRasterDrawingTool::GetTooltip() const
+{
+    return LOCTEXT("raster-drawing-tool.tooltip", "Drawing Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

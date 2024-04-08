@@ -683,4 +683,10 @@ bool UOdysseyPainterEditorRasterTransformTool::IsPolygonConvex(const TArray<FVec
     return true;
 }
 
+FText
+UOdysseyPainterEditorRasterTransformTool::GetTooltip() const
+{
+    return LOCTEXT("raster-transform-tool.tooltip", "Transform Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

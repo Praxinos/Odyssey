@@ -356,4 +356,10 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetMouseCursor() const
     return UOdysseyPainterEditorTool::GetMouseCursor();
 }
 
+FText
+UOdysseyPainterEditorRasterPaintBucketTool::GetTooltip() const
+{
+    return LOCTEXT("raster-paint-bucket-tool.tooltip", "Paint Bucket Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

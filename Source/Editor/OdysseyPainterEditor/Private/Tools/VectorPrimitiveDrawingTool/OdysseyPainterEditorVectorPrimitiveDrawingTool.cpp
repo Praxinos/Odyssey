@@ -337,4 +337,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::CreateTopTabWidget()
         ];
 }
 
+FText
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetTooltip() const
+{
+    return LOCTEXT("vector-primitive-drawing-tool.tooltip", "Primitive Drawing Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

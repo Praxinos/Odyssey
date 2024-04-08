@@ -241,4 +241,10 @@ UOdysseyPainterEditorVectorPathStitchTool::CreateTopTabWidget()
         ];
 }
 
+FText
+UOdysseyPainterEditorVectorPathStitchTool::GetTooltip() const
+{
+    return LOCTEXT("vector-path-stitch-tool.tooltip", "Path Stitch Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

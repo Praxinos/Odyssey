@@ -68,6 +68,8 @@ public:
     //Validates any action that finished. (example, any drawing in queue is finished and validated so that it creates an undoable state)
     virtual void Commit();
 
+    virtual FText GetTooltip() const;
+
 public:
     // Interface
     virtual void BindShortcuts(class FBaseToolkit* iToolkit);

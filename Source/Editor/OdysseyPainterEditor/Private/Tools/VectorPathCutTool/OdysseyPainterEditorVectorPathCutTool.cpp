@@ -217,4 +217,10 @@ UOdysseyPainterEditorVectorPathCutTool::OnMouseUpVector( FOdysseyVectorGroupPain
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
 }
 
+FText
+UOdysseyPainterEditorVectorPathCutTool::GetTooltip() const
+{
+    return LOCTEXT("vector-path-cut-tool.tooltip", "Path Cut Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

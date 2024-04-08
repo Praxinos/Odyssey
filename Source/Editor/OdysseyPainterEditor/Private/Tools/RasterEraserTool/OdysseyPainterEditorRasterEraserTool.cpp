@@ -418,4 +418,10 @@ UOdysseyPainterEditorRasterEraserTool::GetMouseCursor() const
     return UOdysseyPainterEditorTool::GetMouseCursor();
 }
 
+FText
+UOdysseyPainterEditorRasterEraserTool::GetTooltip() const
+{
+    return LOCTEXT("raster-eraser-tool.tooltip", "Eraser Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

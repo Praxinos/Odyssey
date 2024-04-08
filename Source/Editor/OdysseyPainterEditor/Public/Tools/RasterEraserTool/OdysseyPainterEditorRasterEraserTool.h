@@ -48,6 +48,8 @@ public:
 
     virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
+    virtual FText GetTooltip() const override;
+
 public:
     // Getters
     // Returns the Selected Shape

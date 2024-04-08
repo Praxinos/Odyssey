@@ -168,4 +168,10 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPai
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
+FText
+UOdysseyPainterEditorVectorScenePanTool::GetTooltip() const
+{
+    return LOCTEXT("vector-scene-pan-tool.tooltip", "Scene Pan Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

@@ -30,6 +30,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
 
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
+        virtual FText GetTooltip() const override;
+
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;

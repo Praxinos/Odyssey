@@ -319,4 +319,10 @@ UOdysseyPainterEditorVectorPathPushTool::CreateTopTabWidget()
         ];
 }
 
+FText
+UOdysseyPainterEditorVectorPathPushTool::GetTooltip() const
+{
+    return LOCTEXT("vector-path-push-tool.tooltip", "Path Push Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

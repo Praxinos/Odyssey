@@ -32,6 +32,7 @@ SOdysseyPainterEditorToolsTileView::Construct(const FArguments& InArgs)
             .OnCheckStateChanged(this, &SOdysseyPainterEditorToolsTileView::OnToolCheckStateChanged, tool)
             .IsChecked(this, &SOdysseyPainterEditorToolsTileView::IsToolChecked, tool)
             .Visibility(this, &SOdysseyPainterEditorToolsTileView::ToolVisibility, tool)
+            .ToolTipText(this, &SOdysseyPainterEditorToolsTileView::ToolTooltip, tool)
             .Padding(FMargin(2.f))
             [
                 SNew(SImage)
@@ -66,4 +67,10 @@ ECheckBoxState
 SOdysseyPainterEditorToolsTileView::IsToolChecked(UOdysseyPainterEditorTool* iTool) const
 {
     return iTool->IsActivated() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+}
+
+FText
+SOdysseyPainterEditorToolsTileView::ToolTooltip(UOdysseyPainterEditorTool* iTool) const
+{
+    return iTool->GetTooltip();
 }

@@ -60,6 +60,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         //                                  , const FName& iPropertyName ) override;
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
+        virtual FText GetTooltip() const override;
+
     protected:
         virtual void ExtendContextMenu( FMenuBuilder& menu );
 

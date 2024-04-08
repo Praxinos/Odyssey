@@ -424,4 +424,10 @@ UOdysseyPainterEditorVectorEraserTool::CreateTopTabWidget()
         ];
 }
 
+FText
+UOdysseyPainterEditorVectorEraserTool::GetTooltip() const
+{
+    return LOCTEXT("vector-eraser-tool.tooltip", "Eraser Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

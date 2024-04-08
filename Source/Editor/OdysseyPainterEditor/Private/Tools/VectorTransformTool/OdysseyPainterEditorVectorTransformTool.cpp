@@ -887,4 +887,10 @@ UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
     return UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget();
 }
 
+FText
+UOdysseyPainterEditorVectorTransformTool::GetTooltip() const
+{
+    return LOCTEXT("vector-transform-tool.tooltip", "Transform Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

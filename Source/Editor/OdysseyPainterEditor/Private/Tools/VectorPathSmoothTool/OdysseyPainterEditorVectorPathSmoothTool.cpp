@@ -184,4 +184,10 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
+FText
+UOdysseyPainterEditorVectorPathSmoothTool::GetTooltip() const
+{
+    return LOCTEXT("vector-path-smooth-tool.tooltip", "Path Smooth Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

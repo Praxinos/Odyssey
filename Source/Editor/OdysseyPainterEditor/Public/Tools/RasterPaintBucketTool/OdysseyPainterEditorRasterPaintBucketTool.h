@@ -63,6 +63,8 @@ public:
     virtual void Commit() override;
     virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
+    virtual FText GetTooltip() const override;
+
 public:
     void SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider);
     FOdysseyBlendParameters GetBlendParameters() const;

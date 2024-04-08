@@ -498,4 +498,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
         ];
 }
 
+FText
+UOdysseyPainterEditorVectorPathDrawingTool::GetTooltip() const
+{
+    return LOCTEXT("vector-path-drawing-tool.tooltip", "Drawing Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

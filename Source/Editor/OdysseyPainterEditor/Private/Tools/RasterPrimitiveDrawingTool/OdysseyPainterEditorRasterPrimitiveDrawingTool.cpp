@@ -258,4 +258,10 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetMouseCursor() const
     return UOdysseyPainterEditorTool::GetMouseCursor();
 }
 
+FText
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetTooltip() const
+{
+    return LOCTEXT("raster-primitive-drawing-tool.tooltip", "Primitive Drawing Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

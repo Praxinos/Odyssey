@@ -5,6 +5,8 @@
 
 #include "OdysseyMediaVector.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorColorPickerTool::~UOdysseyPainterEditorColorPickerTool()
@@ -52,3 +54,11 @@ UOdysseyPainterEditorColorPickerTool::Commit()
 {
 	mPaintEngine.Commit(FOdysseyBlendParameters());
 }
+
+FText
+UOdysseyPainterEditorColorPickerTool::GetTooltip() const
+{
+    return LOCTEXT("color-picker-tool.tooltip", "Color Picker Tool");
+}
+
+#undef LOCTEXT_NAMESPACE

@@ -58,6 +58,8 @@ public:
     virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
+    virtual FText GetTooltip() const override;
+
 private:
     int GetRotationAngleFromLastReference(FVector2D iPointInTexture);
 

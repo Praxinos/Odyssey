@@ -57,6 +57,8 @@ public:
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
+    virtual FText GetTooltip() const override;
+
 private:
     // Internal - Callbacks
     void SelectedShapeChanged();

@@ -785,4 +785,10 @@ UOdysseyPainterEditorVectorPathEditTool::CreateTopTabWidget()
         ];
 }
 
+FText
+UOdysseyPainterEditorVectorPathEditTool::GetTooltip() const
+{
+    return LOCTEXT("vector-path-edit-tool.tooltip", "Path Edit Tool");
+}
+
 #undef LOCTEXT_NAMESPACE

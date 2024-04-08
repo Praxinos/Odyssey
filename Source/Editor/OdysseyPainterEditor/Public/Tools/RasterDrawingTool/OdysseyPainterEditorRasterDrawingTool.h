@@ -69,6 +69,8 @@ public:
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
+    virtual FText GetTooltip() const override;
+
 public:
     // Setters
     // Sets the BrushContexts to apply to brushInstance
