@@ -60,6 +60,30 @@ public:
 
 //---
 
+USTRUCT( BlueprintType )
+struct FViewportSettings
+{
+    GENERATED_BODY()
+
+public:
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
+    bool OverlayToolbar { true };
+
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
+    bool DisplayPlaybackTrack { true };
+
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
+    bool DisplayPlaybackControls { true };
+
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
+    bool DisplaySequenceInfos { true };
+
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
+    bool DisplayActorControls { true };
+};
+
+//---
+
 enum class EInfoBarPatternKeyword : uint32
 {
     ENUM_UNIQUE_ID( CurrentFrame_InStoryboard ),
@@ -150,4 +174,8 @@ public:
     /** Specifies InfoBar stuff. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
     FInfoBarSettings InfoBarSettings;
+
+    /** Specifies Viewport stuff. */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
+    FViewportSettings ViewportSettings;
 };

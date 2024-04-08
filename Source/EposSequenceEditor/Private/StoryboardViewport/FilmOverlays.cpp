@@ -539,18 +539,20 @@ void SFilmOverlayOptions::Construct(const FArguments& InArgs)
     ChildSlot
     [
         SNew(SComboButton)
-        .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
-        .ForegroundColor(FAppStyle::Get().GetColor("InvertedForeground"))
+        .ButtonStyle(FAppStyle::Get(), "EditorViewportToolBar.Button")
+        .ForegroundColor(FSlateColor::UseStyle())
         .OnGetMenuContent(this, &SFilmOverlayOptions::GetMenuContent)
+        .ToolTipText(LOCTEXT("FilmOverlaysToolTip", "Displays a list of available film overlays to apply to this viewport."))
+        .HasDownArrow(false)
         .ButtonContent()
         [
             SNew(SBox)
-            .WidthOverride(36)
-            .HeightOverride(24)
-            .ToolTipText(LOCTEXT("FilmOverlaysToolTip", "Displays a list of available film overlays to apply to this viewport."))
+            .WidthOverride(24)
+            .HeightOverride(16)
             [
                 SNew(SImage)
                 .Image(this, &SFilmOverlayOptions::GetCurrentThumbnail)
+				.ColorAndOpacity(FSlateColor::UseForeground())
             ]
         ]
     ];

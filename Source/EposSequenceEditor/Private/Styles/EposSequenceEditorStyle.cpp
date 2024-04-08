@@ -136,6 +136,10 @@ FEposSequenceEditorStyle::InitCommands()
 
     Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
     Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
+
+    //TODO: should be a 20x20 icon
+    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon24x24 ) );
+    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate.Small", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon24x24 ) );
 }
 
 void
@@ -191,7 +195,9 @@ FEposSequenceEditorStyle::InitViewport()
 
     //---
 
-    Set( "Notes.Viewport.Settings", new IMAGE_BRUSH_SVG( "note", Icon24x24 ) );
+    Set( "Viewport.Settings", new IMAGE_BRUSH_SVG( "viewport-settings", Icon24x24 ) );
+    Set( "Viewport.RotationOptions", new IMAGE_BRUSH_SVG( "viewport-rotation-options", Icon24x24 ) );
+    Set( "Viewport.ZoomOptions", new IMAGE_BRUSH_SVG( "viewport-zoom-options", Icon24x24 ) );
 
     //-
 
@@ -222,6 +228,19 @@ FEposSequenceEditorStyle::InitViewport()
 
     //TODO: should be a 24x24 icon
     Set( "Viewport.ResetTransform", new IMAGE_BRUSH( "viewport-reset-transform", Icon16x16 ) );
+
+    Set( "Viewport.Toolbar.SpinBox", FSpinBoxStyle( FAppStyle::Get().GetWidgetStyle<FSpinBoxStyle>("SpinBox") )
+        .SetTextPadding(FMargin(0.f))
+        .SetInsetPadding(FMargin(0.f))
+    );
+    Set( "Viewport.Toolbar.SpinBox.ComboButton", FComboButtonStyle( FAppStyle::Get().GetWidgetStyle< FComboButtonStyle >( "ComboButton" ) )
+        .SetContentPadding(FMargin(0))
+        .SetDownArrowPadding(FMargin(0))
+    );
+    Set( "Viewport.Toolbar.SpinBox.Button", FButtonStyle( FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "EditorViewportToolBar.Button" ) )
+        .SetNormalPadding(FMargin(4.f, 0.f, 3.0f, 0.f))
+        .SetPressedPadding(FMargin(4.f, 0.f, 3.0f, 0.f))
+    );
 
     //---
 

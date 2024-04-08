@@ -208,6 +208,15 @@ private:
     void OnHorizontalScrollBarScrolled( float InScrollOffsetFraction );
     void OnVerticalScrollBarScrolled(float InScrollOffsetFraction);
 
+    int GetToolbarIntegrationMode() const;
+
+private:
+    void CreateCommandList();
+    void RegisterToolBarExtender();
+    void UnregisterToolBarExtender();
+    void ExtendToolBar(FToolBarBuilder& iBuilder);
+    TSharedRef<SWidget> NoteSettingsGetMenuContent();
+
 private:
 
     /** Widget where the scene viewport is drawn in */
@@ -290,4 +299,6 @@ private:
     bool mNeedUpdateScrollbars = true;
 
     TSharedPtr<SWidget> mViewportTransformBox;
+
+    TSharedPtr<FExtender> mToolBarExtender;
 };
