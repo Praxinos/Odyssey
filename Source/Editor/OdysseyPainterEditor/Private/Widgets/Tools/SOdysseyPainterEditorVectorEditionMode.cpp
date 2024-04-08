@@ -11,6 +11,8 @@
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 ECheckBoxState
 SOdysseyPainterEditorVectorEditionMode::GetObjectModeState() const
 {
@@ -39,6 +41,7 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
    .Style(FAppStyle::Get(),TEXT("ToggleButtonCheckBox"))
    .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_OBJECT) ))
    .IsChecked( objectModeChecked )
+   .ToolTipText(LOCTEXT("vector-edition-mode.object-mode.tooltip", "Object Mode"))
     [
         SNew(SImage)
        .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeObject32"))
@@ -50,6 +53,7 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
    .Style(FAppStyle::Get(),TEXT("ToggleButtonCheckBox"))
    .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_VERTEX) ))
    .IsChecked( vertexModeChecked )
+   .ToolTipText(LOCTEXT("vector-edition-mode.vertex-mode.tooltip", "Vertex Mode"))
     [
         SNew(SImage)
        .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeVertex32"))
@@ -96,3 +100,5 @@ SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags( ECheckBoxState iN
         vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 }
+
+#undef LOCTEXT_NAMESPACE
