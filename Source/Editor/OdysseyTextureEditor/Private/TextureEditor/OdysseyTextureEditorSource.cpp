@@ -11,6 +11,8 @@
 #include "OdysseyRasterBlockMutator.h"
 #include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoEngineClear.h"
+#include "OdysseyMediaRaster.h"
+#include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -141,47 +143,63 @@ FOdysseyTextureEditorSource::Clear()
 	if ( !layerStack )
 		return;
 
-    UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
-    UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    //UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
+    //UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
 	#ifdef WITH_EDITOR
 		FScopedTransaction ScopedTransaction(LOCTEXT("actions.clear", "Clear"));
 	#endif
+	
+	UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+	if (!currentLayer)
+		return;
 
-	if (currentLayerRaster)
-	{		
-		
-		TSharedPtr<FOdysseyRasterBlock> rasterBlock = currentLayerRaster->GetRasterBlock();
-		FOdysseyRasterBlockMutator mutator(rasterBlock);
-		mutator.EditTilesFromRects(
-			{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-			FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-				{
-					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-					::ULIS::FEvent clearEvent;
-					ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &clearEvent);
-					return { clearEvent };
-				}
-			)
-		);
-		mutator.Commit();
+	FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(0);
+	if ( mediaProvider.IsLocked() )
+		return;
+	
+	if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
+	{
+		TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+		for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
+		{
+			TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
+			if (!rasterBlock)
+				continue;
+
+			FOdysseyRasterBlockMutator mutator(rasterBlock);
+			mutator.EditTilesFromRects(
+				{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+				FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+					[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+					{
+						::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+						::ULIS::FEvent eventClear;
+						ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+						return { eventClear };
+					}
+				)
+			);
+			mutator.Commit();
+		}
 	}
+	else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
+	{
+		TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
+		for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
+		{
+			FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
+			// needed for undos
+			if (GUndo)
+			{
+				FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
+				GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
+			}
 
-    if( currentLayerVector )
-    {
-        FOdysseyVectorEngine* vectorEngine = currentLayerVector->GetEngine();
-
-        // needed for undos
-        if( GUndo )
-        {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear( vectorEngine );
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        }
-
-        vectorEngine->SetScene( new FOdysseyVectorGroupPaint("Scene") );
-		vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
-    }
+			vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));
+			vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+		}
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
