@@ -17,6 +17,9 @@ FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(FOdysseyAnima
 FReply
 FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iParams)
 {
+    if (iParams.mMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
+        return FReply::Unhandled();
+
     if (iParams.mLayer->GetIsLocked())
         return FReply::Unhandled();
 
