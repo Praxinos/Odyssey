@@ -561,12 +561,15 @@ FOdysseySurfaceTexture2DEditable::~FOdysseySurfaceTexture2DEditable()
 FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,int iHeight, ::ULIS::eFormat iFormat)
     : mIsBorrowedTexture(false)
 {
-    mTexture = UTexture2D::CreateTransient(iWidth, iHeight, PixelFormatForULISFormat(iFormat));
+    EPixelFormat pixelFormat = PixelFormatForULISFormat(iFormat);
+    mTexture = UTexture2D::CreateTransient(iWidth, iHeight, pixelFormat);
     #if WITH_EDITORONLY_DATA
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     #endif
     mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    mTexture->SRGB = 1;
+    
+    //IsImageInfoValid() in ImageCore.h allows use of sRGB only on G8 and BGRA8 textures
+    mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
     //texture->AddToRoot(); // Prevent GC
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
@@ -625,12 +628,16 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::
     checkf(iBlock,TEXT("Cannot Initialize with Null borrowed block"));
     mBlock = iBlock;
 
-    mTexture = UTexture2D::CreateTransient(mBlock->Width(),mBlock->Height(), PixelFormatForULISFormat(mBlock->Format()));
+    EPixelFormat pixelFormat = PixelFormatForULISFormat(mBlock->Format());
+
+    mTexture = UTexture2D::CreateTransient(mBlock->Width(),mBlock->Height(), pixelFormat);
     #if WITH_EDITORONLY_DATA
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     #endif
     mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    mTexture->SRGB = 1;
+
+    //IsImageInfoValid() in ImageCore.h allows use of sRGB only on G8 and BGRA8 textures
+    mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({ mTexture });

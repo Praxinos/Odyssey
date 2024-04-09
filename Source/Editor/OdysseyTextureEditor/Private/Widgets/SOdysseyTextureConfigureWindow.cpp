@@ -59,6 +59,9 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
     int textureWidth = Width;
     int textureHeight = Height;
     ETextureSourceFormat textureFormat = TextureSourceFormat();
+
+    //IsImageInfoValid() in ImageCore.h allows use of sRGB only on G8 and BGRA8 textures
+    bool useSRGB = textureFormat == ETextureSourceFormat::TSF_BGRA8 || textureFormat == ETextureSourceFormat::TSF_G8;
     FString defaultName = Name.ToString();
     FLinearColor backgroundColor = GetBackgroundColor();
     EOdysseyTextureDefaultLayerType defaultLayerType = LayerType;
@@ -72,6 +75,7 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
     ctx.Finish();
     
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags );
+    texture->SRGB = useSRGB;
     InitTextureWithBlockData(&block, texture, textureFormat);
 
     if (defaultLayerType != EOdysseyTextureDefaultLayerType::kRaster) //Raster is heavy and will be automatically created on Texture Editor first launch
