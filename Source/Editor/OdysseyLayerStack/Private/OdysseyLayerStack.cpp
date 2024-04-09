@@ -248,7 +248,7 @@ UOdysseyLayerStack::CopyLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
             int depthA = iLayerA.GetParents().Num();
             int depthB = iLayerB.GetParents().Num();
 
-            if (depthA < depthB)
+            if (depthA > depthB)
                 return true;
 
             if (depthA == depthB)
@@ -256,7 +256,7 @@ UOdysseyLayerStack::CopyLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
                 int indexA = iLayerA.GetIndexInParent();
                 int indexB = iLayerB.GetIndexInParent();
 
-                return indexA < indexB;
+                return indexA > indexB;
             }
 
             return false;
@@ -267,7 +267,7 @@ UOdysseyLayerStack::CopyLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
     {   
         //Duplicate the layer
         UOdysseyLayer* layerCopy = CopyLayerInternal(layer, ParentLayer, IndexInParent);
-        layerCopies.Add(layerCopy);
+        layerCopies.Insert(layerCopy, 0);
     }
 
     return layerCopies;
@@ -565,6 +565,7 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
 		}
 	);
 
+    //Sort Layers in reverse depth order to ease the insertion of layers in new parent later on
     Layers.Sort(
         [this](UOdysseyLayer& iLayerA, UOdysseyLayer& iLayerB)
         {
@@ -572,7 +573,7 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
             int depthA = iLayerA.GetParents().Num();
             int depthB = iLayerB.GetParents().Num();
 
-            if (depthA < depthB)
+            if (depthA > depthB)
                 return true;
 
             if (depthA == depthB)
@@ -580,7 +581,7 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
                 int indexA = iLayerA.GetIndexInParent();
                 int indexB = iLayerB.GetIndexInParent();
 
-                return indexA < indexB;
+                return indexA > indexB;
             }
 
             return false;
@@ -591,35 +592,51 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
 	if ( Layers.Num() <= 0 )
 		return;
 
+    TArray<UOdysseyLayer*> layersParentChanged;
+    TArray<UOdysseyLayer*> layersChildrenChanged;
+
+    layersChildrenChanged.AddUnique(ParentLayer);
+    FOdysseyObjectEditorUtils::PreChangePropertyValue(ParentLayer, "Children");
+
     int index = FMath::Clamp(IndexInParent, 0, ParentLayer->Children.Num());
     for (UOdysseyLayer* layer : Layers)
     {
-        bool bChangeParent = layer->Parent != ParentLayer;
+        UOdysseyLayer* oldParent = layer->Parent;
+        bool bChangeParent = oldParent != ParentLayer;
         
         if (bChangeParent)
         {
             FOdysseyObjectEditorUtils::PreChangePropertyValue(layer, "Parent");
-            FOdysseyObjectEditorUtils::PreChangePropertyValue(layer->Parent, "Children");
+            FOdysseyObjectEditorUtils::PreChangePropertyValue(oldParent, "Children");
+            layersParentChanged.AddUnique(layer);
+            layersChildrenChanged.AddUnique(oldParent);
         }
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(ParentLayer, "Children");
 
-        UOdysseyLayer* parent = layer->Parent;
+        int oldIndex = oldParent->Children.Find(layer);
+        if (!bChangeParent && oldIndex < index)
+            index--;
 
-        int oldIndex = parent->Children.Find(layer);
-        parent->Children.Remove(layer);
-        ParentLayer->Children.Insert(layer, (parent == ParentLayer && oldIndex < index) ? index - 1 : index);
-        layer->Parent = ParentLayer;
-
-        if (parent == ParentLayer && oldIndex > index)
-            index++;
-
-        if (bChangeParent)
-        {
-            FOdysseyObjectEditorUtils::PostChangePropertyValue(layer, "Parent", EPropertyChangeType::ValueSet);
-            FOdysseyObjectEditorUtils::PostChangePropertyValue(layer, "Children", EPropertyChangeType::ArrayRemove);
-        }
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(ParentLayer, "Children", EPropertyChangeType::ArrayAdd);
+        oldParent->Children.Remove(layer);
     }
+    index = FMath::Clamp(IndexInParent, 0, ParentLayer->Children.Num());
+
+    for (UOdysseyLayer* layer : Layers)
+    {
+        ParentLayer->Children.Insert(layer, index);
+        layer->Parent = ParentLayer;
+    }
+
+    for (UOdysseyLayer* layer : layersParentChanged)
+    {
+        FOdysseyObjectEditorUtils::PostChangePropertyValue(layer, "Parent", EPropertyChangeType::ValueSet);
+    }
+
+    for (UOdysseyLayer* layer : layersChildrenChanged)
+    {
+        FOdysseyObjectEditorUtils::PostChangePropertyValue(layer, "Children", EPropertyChangeType::ArrayRemove);
+    }
+
+    FOdysseyObjectEditorUtils::PostChangePropertyValue(ParentLayer, "Children", EPropertyChangeType::ArrayAdd);
 }
 
 bool
