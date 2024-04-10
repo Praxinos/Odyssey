@@ -159,26 +159,47 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
 {
     UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
 
-    FToolMenuSection& section = menu->AddSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.import-export-section.name", "Import / Export"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
-    {
-        section.AddSubMenu(
-            TEXT("Import"),
-            LOCTEXT("timeline-tab.file-menu.import-submenu.name", "Import"),
-            LOCTEXT("timeline-tab.file-menu.import-submenu.tooltip", "Contains Import actions"),
-            FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildImportMenu),
-            false,
-            FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Import" )
-        );
+    FToolMenuInsert menuInsert;
+    if (menu->FindSection("FileActors")) //FileActirs is a weird name but it is the actual name of the "Import/Export" Section from Unreal File Menu
+        menuInsert = FToolMenuInsert("FileActors", EToolMenuInsertType::After);
 
-        section.AddSubMenu(
-            TEXT("Export"),
-            LOCTEXT("timeline-tab.file-menu.export-submenu.name", "Export"),
-            LOCTEXT("timeline-tab.file-menu.export-submenu.tooltip", "Contains Export actions"),
-            FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildExportMenu),
-            false,
-            FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Export" )
-        );
-    }
+    menu->AddDynamicSection(
+        "OdysseyAnimationDynamic",
+        FNewToolMenuDelegate::CreateLambda(
+            [this](UToolMenu* iToolMenu)
+            {
+                FOdysseyPainterEditor* editor = mExtension->GetEditor();
+                if (!editor)
+                    return;
+
+                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+                if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
+                    return;
+                
+                FToolMenuSection& section = iToolMenu->AddSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.animation-import-export-section.name", "Animation Import / Export"));
+                {
+                    section.AddSubMenu(
+                        TEXT("Import"),
+                        LOCTEXT("timeline-tab.file-menu.import-submenu.name", "Import"),
+                        LOCTEXT("timeline-tab.file-menu.import-submenu.tooltip", "Contains Import actions"),
+                        FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildImportMenu),
+                        false,
+                        FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Import" )
+                    );
+
+                    section.AddSubMenu(
+                        TEXT("Export"),
+                        LOCTEXT("timeline-tab.file-menu.export-submenu.name", "Export"),
+                        LOCTEXT("timeline-tab.file-menu.export-submenu.tooltip", "Contains Export actions"),
+                        FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildExportMenu),
+                        false,
+                        FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Export" )
+                    );
+                }
+            }
+        )
+        , menuInsert
+    );
 }
 
 void

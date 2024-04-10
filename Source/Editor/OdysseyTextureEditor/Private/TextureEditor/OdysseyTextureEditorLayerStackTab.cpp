@@ -116,13 +116,34 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
 {
     UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
 
-    FToolMenuSection& section = menu->AddSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-section.name", "Odyssey Texture"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
-    {
-        section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
-        section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
-        section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
-        section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
-    }
+    FToolMenuInsert menuInsert;
+    if (menu->FindSection("FileActors")) //FileActirs is a weird name but it is the actual name of the "Import/Export" Section from Unreal File Menu
+        menuInsert = FToolMenuInsert("FileActors", EToolMenuInsertType::After);
+
+    menu->AddDynamicSection(
+        "OdysseyTextureDynamic",
+        FNewToolMenuDelegate::CreateLambda(
+            [this](UToolMenu* iToolMenu)
+            {
+                FOdysseyPainterEditor* editor = mExtension->GetEditor();
+                if (!editor)
+                    return;
+
+                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+                if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+                    return;
+                
+                FToolMenuSection& section = iToolMenu->AddSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-import-export-section.name", "Texture Import/Export"));
+                {
+                    section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
+                    section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
+                    section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
+                    section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
+                }
+            }
+        )
+        , menuInsert
+    );
 }
 
 void
