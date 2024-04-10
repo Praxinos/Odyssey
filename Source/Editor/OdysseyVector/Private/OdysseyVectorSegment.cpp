@@ -1,3 +1,4 @@
+#include "OdysseyVector.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorIntersection.h"
@@ -205,6 +206,49 @@ FOdysseyVectorSegment::Unlink()
 FOdysseyVectorSegment::GetVectorAtEnd( bool iNormalize )
 {
     return - GetVectorAtStart( iNormalize );
+}
+
+double
+FOdysseyVectorSegment::ProjectConstrained( const ::ULIS::FVec2D& iPoint
+                                         , ::ULIS::FVec2D& oProjectedPoint )
+{
+    FOdysseyVectorFraction* closestFraction = nullptr;
+    ::ULIS::FVec2D projectedPoint;
+    double minDistance = DBL_MAX;
+    double projectedPointT = -DBL_MAX;
+
+    // first step : find closest fraction
+    for( FOdysseyVectorFraction& fraction : mFractionCache )
+    {
+        double distance;
+        double t = FOdysseyVector::DistanceToSegmentConstrained( iPoint
+                                                               , fraction.point[0]->GetCoords()
+                                                               , fraction.point[1]->GetCoords()
+                                                               , distance );
+
+        if( distance < minDistance )
+        {
+            ::ULIS::FVec2D fractionVector = ( fraction.point[1]->GetCoords()
+                                            - fraction.point[0]->GetCoords() );
+
+            minDistance = distance;
+
+            oProjectedPoint = fraction.point[0]->GetCoords() + ( fractionVector * t );
+
+            projectedPointT = fraction.fromT + ( ( fraction.toT - fraction.fromT ) * t );
+        }
+    }
+
+    return projectedPointT;
+}
+
+void
+FOdysseyVectorSegment::Split( const ::ULIS::FVec2D& iPoint
+                            , double iPoinT
+                            , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                            , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray )
+{
+    /** unimplemented */
 }
 
 FOdysseyVectorVertex*

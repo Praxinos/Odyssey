@@ -869,68 +869,6 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
 }
 
 void
-FOdysseyVectorEngine::FillHexagon( BLContext* iBLContext
-                                 , const ::ULIS::FVec2D* iPoint
-                                 , const double* iU
-                                 , const double* iV
-                                 , double iOpacity
-                                 //
-                                 , const FColor& iColor
-                                 //
-                                 , const int8*  iBrushPixelData
-                                 , uint32 iBrushWidth
-                                 , uint32 iBrushHeight
-                                 , int32  iBrushBitsPerPixel
-                                 , uint64 iPolygonDrawingFlags )
-{
-    const BLMatrix2D& userMatrix = iBLContext->userMatrix();
-    BLPoint worldPoint[6] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
-                            , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
-                            , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y )
-                            , userMatrix.mapPoint( iPoint[3].x, iPoint[3].y )
-                            , userMatrix.mapPoint( iPoint[4].x, iPoint[4].y )
-                            , userMatrix.mapPoint( iPoint[5].x, iPoint[5].y ) };
-    ::ULIS::FVec2I intPt[6] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
-                              , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
-                              , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
-                              , { (int32)worldPoint[3].x, (int32)worldPoint[3].y }
-                              , { (int32)worldPoint[4].x, (int32)worldPoint[4].y }
-                              , { (int32)worldPoint[5].x, (int32)worldPoint[5].y } };
-
-    int32 xmin = intPt[0].x;
-    int32 xmax = intPt[0].x;
-    int32 ymin = intPt[0].y;
-    int32 ymax = intPt[0].y;
-
-    for( int i = 1; i < 6; i++ )
-    {
-        if( intPt[i].x < xmin ) xmin = intPt[i].x;
-        if( intPt[i].x > xmax ) xmax = intPt[i].x;
-        if( intPt[i].y < ymin ) ymin = intPt[i].y;
-        if( intPt[i].y > ymax ) ymax = intPt[i].y;
-    }
-
-    // don't draw if quad is outside the screen
-    if( ( ( xmin ) < (int32) mRenderData.size.w )
-     && ( ( xmax ) > 0                          )
-     && ( ( ymin ) < (int32) mRenderData.size.h )
-     && ( ( ymax ) > 0                          ) )
-    {
-        TracePolygon( intPt
-                    , iU
-                    , iV
-                    , 6
-                    , iOpacity
-                    , iColor
-                    , iBrushPixelData
-                    , iBrushWidth
-                    , iBrushHeight
-                    , iBrushBitsPerPixel
-                    , iPolygonDrawingFlags );
-    }
-}
-
-void
 FOdysseyVectorEngine::FillQuad( BLContext* iBLContext
                               , const ::ULIS::FVec2D* iPoint
                               , const double* iU
@@ -1384,6 +1322,56 @@ FOdysseyVectorEngine::ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
     }
 
     return false;
+}
+
+void
+FOdysseyVectorEngine::PickPathPoints( FOdysseyVectorGroupPaint* iScene
+                                    , double iWorldX
+                                    , double iWorldY
+                                    , double iWorldRadius
+                                    , uint64 iPickingFlags
+                                    , bool iStopAtFirstSuccess
+                                    , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                                    , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray )
+{                                           
+    Traverse
+    ( mScene
+    , 0
+    , [ this
+      , iScene
+      , &iWorldX
+      , &iWorldY
+      , &iWorldRadius
+      , &iPickingFlags
+      , &iStopAtFirstSuccess
+      , &oPickedVertexArray
+      , &oPickedHandleArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( ObjectHasFocus( iScene, object, traversalFlags ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                  if( path->PickPoint( iWorldX
+                                     , iWorldY
+                                     , iWorldRadius
+                                     , oPickedVertexArray
+                                     , oPickedHandleArray
+                                     , iPickingFlags ) )
+                  {
+                      if( iStopAtFirstSuccess )
+                      {
+                          return FOdysseyVectorEngine::TRAVERSE_STOP;
+                      }
+                  }
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
 }
 
 // Execute callback on object tree

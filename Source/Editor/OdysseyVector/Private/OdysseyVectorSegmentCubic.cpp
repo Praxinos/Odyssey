@@ -26,7 +26,7 @@ FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
     }
 }
 
-FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
+FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iOwner
                                                       , FOdysseyVectorVertex* iPoint0
                                                       , double iCtrlPoint0x
                                                       , double iCtrlPoint0y
@@ -34,7 +34,7 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPat
                                                       , double iCtrlPoint1y
                                                       , FOdysseyVectorVertex* iPoint1
                                                       , bool iNeedWidth )
-    : FOdysseyVectorSegment( iPath, iPoint0, iPoint1 )
+    : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1 )
     , mFractionPointBuffer ( nullptr )
     , mNeedWidth( iNeedWidth )
     , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0, 0.0f, 0.0f )
@@ -546,6 +546,68 @@ FOdysseyVectorSegmentCubic::GetBoundingBox( bool iWorld )
     }
 
     return mBBox;
+}
+
+void
+FOdysseyVectorSegmentCubic::Split( const ::ULIS::FVec2D& iPoint
+                                 , double iPoinT
+                                 , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                                 , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray )
+{
+    FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( iPoint.x
+                                                              , iPoint.y
+                                                              , ( GetVertex(0)->GetRadius()
+                                                                + GetVertex(1)->GetRadius() ) * 0.5f );
+    ::ULIS::FVec2D tmpBezier0[4] = { mBezier[0], mBezier[1], mBezier[2], mBezier[3] };
+    ::ULIS::FVec2D tmpBezier1[4] = { mBezier[0], mBezier[1], mBezier[2], mBezier[3] };
+    FOdysseyVectorSegmentCubic* newCubicSegment[2];
+
+    newVertex->SetHandleAligned( true );
+
+    ::ULIS::CubicBezierSplitAtParameter<::ULIS::FVec2D>( &tmpBezier0[0]
+                                                       , &tmpBezier0[1]
+                                                       , &tmpBezier0[2]
+                                                       , &tmpBezier0[3]
+                                                       , iPoinT );
+
+    // here we take the vertex coords and not the one we could retrieve from the 
+    // subBezier because it might be inconsistent due to the value at T found from
+    // performing linear intersection and not from a bezier-bezier intersection.
+    // for this reason T might no be reliable to find the endpoints of our bezier.
+    // we only use it for the handles. 
+    newCubicSegment[0] = new FOdysseyVectorSegmentCubic( mOwner
+                                                       , GetVertex(0)
+                                                       , mBezier[0].x + ( tmpBezier0[1].x - tmpBezier0[0].x )
+                                                       , mBezier[0].y + ( tmpBezier0[1].y - tmpBezier0[0].y )
+                                                       , iPoint.x     + ( tmpBezier0[2].x - tmpBezier0[3].x )
+                                                       , iPoint.y     + ( tmpBezier0[2].y - tmpBezier0[3].y )
+                                                       , newVertex
+                                                       , true );
+
+    ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &tmpBezier1[0]
+                                                              , &tmpBezier1[1]
+                                                              , &tmpBezier1[2]
+                                                              , &tmpBezier1[3]
+                                                              , iPoinT );
+
+    // here we take the vertex coords and not the one we could retrieve from the 
+    // subBezier because it might be inconsistent due to the value at T found from
+    // performing linear intersection and not from a bezier-bezier intersection.
+    // for this reason T might no be reliable to find the endpoints of our bezier.
+    // we only use it for the handles. 
+    newCubicSegment[1] = new FOdysseyVectorSegmentCubic( mOwner
+                                                       , newVertex
+                                                       , iPoint.x     + ( tmpBezier1[1].x - tmpBezier1[0].x )
+                                                       , iPoint.y     + ( tmpBezier1[1].y - tmpBezier1[0].y )
+                                                       , mBezier[3].x + ( tmpBezier1[2].x - tmpBezier1[3].x )
+                                                       , mBezier[3].y + ( tmpBezier1[2].y - tmpBezier1[3].y )
+                                                       , GetVertex(1)
+                                                       , true );
+
+    oNewVertexArray.push_back( newVertex );
+
+    oNewSegmentArray.push_back( newCubicSegment[0] );
+    oNewSegmentArray.push_back( newCubicSegment[1] );
 }
 
 bool

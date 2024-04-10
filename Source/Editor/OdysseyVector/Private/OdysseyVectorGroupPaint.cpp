@@ -319,41 +319,6 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     mCanevasPath.AddSegment( &mCanevasSegment[3] );
 }
 
-// This is a constrained version of a segment-to-point proximity test.
-// It means that if the projection of the point on the segment is beyond limits,
-// it will remain within limits (0.0f) or (1.0f). On the figure below, x would be at t=0.0
-//
-//                    ° (point)
-//     segment        |
-// 1______________0   x (proj. point will also be at t = 0.0,
-//                       even though it is outside the segment)
-//
-static double
-DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
-                            , const ::ULIS::FVec2D& iSegmentP0
-                            , const ::ULIS::FVec2D& iSegmentP1
-                            , double&         oDistance)
-{
-    double t = FOdysseyVector::DistanceToSegment( iPt, iSegmentP0, iSegmentP1, oDistance );
-
-    if( t < 0.0f )
-    {
-        t = 0.0f;
-
-        oDistance = ( iSegmentP0 - iPt ).Distance();
-    }
-
-
-    if( t > 1.0f )
-    {
-        t = 1.0f;
-
-        oDistance = ( iSegmentP1 - iPt ).Distance();
-    }
-
-    return t;
-}
-
 std::vector<FOdysseyVectorVertexIntersection>&
 FOdysseyVectorGroupPaint::GetIntersectionVertexArray()
 {
@@ -760,10 +725,10 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                 {
                     // check distance at endpoints
                     double distance;
-                    double t = DistanceToSegmentConstrained( segment1Point0InParent
-                                                           , segment0Poly->pointCoordsInParent[0]
-                                                           , segment0Poly->pointCoordsInParent[1]
-                                                           , distance );
+                    double t = FOdysseyVector::DistanceToSegmentConstrained( segment1Point0InParent
+                                                                           , segment0Poly->pointCoordsInParent[0]
+                                                                           , segment0Poly->pointCoordsInParent[1]
+                                                                           , distance );
 
                     //if ( ( t > 0.0f ) && ( t < 1.0f ) )
                     {
@@ -794,10 +759,10 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                   && ( segment1Point1InParent.y >= ( segment0Poly->yMinInParent - mGapTolerance ) ) && ( segment1Point1InParent.y <= ( segment0Poly->yMaxInParent + mGapTolerance ) ) )
                 {
                     double distance;
-                    double t = DistanceToSegmentConstrained( segment1Point1InParent
-                                                           , segment0Poly->pointCoordsInParent[0]
-                                                           , segment0Poly->pointCoordsInParent[1]
-                                                           , distance );
+                    double t = FOdysseyVector::DistanceToSegmentConstrained( segment1Point1InParent
+                                                                           , segment0Poly->pointCoordsInParent[0]
+                                                                           , segment0Poly->pointCoordsInParent[1]
+                                                                           , distance );
 
                     //if ( ( t > 0.0f ) && ( t < 1.0f ) )
                     {

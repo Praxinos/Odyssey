@@ -22,10 +22,12 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         BLImage* GetMask();
 
         bool SetCursorPosition( double iX, double iY );
+        std::vector<FOdysseyVectorPoint*>& GetHoveredPointArray();
 
     private:
         double mX;
         double mY;
+        std::vector<FOdysseyVectorPoint*> mHoveredPointArray;
         UOdysseyPainterEditorVectorPathEditTool* mPathEditTool;
         BLContext mBLSelectionContext;
         BLImage mBLSelectionMask;

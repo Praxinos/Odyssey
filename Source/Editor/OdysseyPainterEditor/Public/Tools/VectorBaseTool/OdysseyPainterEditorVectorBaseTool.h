@@ -104,6 +104,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void Cut();
 
     protected:
+        void PickSegments( FOdysseyVectorGroupPaint* iScene
+                         , double iWorldX
+                         , double iWorldY
+                         , double iWorldRadius
+                         , bool iRestrictToSelection
+                         , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray );
+
         void GetSelectedVertices( FOdysseyVectorGroupPaint* iScene
                                 , std::vector<FOdysseyVectorVertex*>& oSelectedVertexArray );
         // static

@@ -221,6 +221,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         void AddIntersectionSlot();
         uint32 GetIntersectionSlotCount();
+        double ProjectConstrained( const ::ULIS::FVec2D& iPoint
+                                , ::ULIS::FVec2D& oProjectedPoint );
+        virtual void Split( const ::ULIS::FVec2D& iPoint
+                          , double iPoinT
+                          , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
 
     protected:
         void DrawFractionCache( BLContext* iBLContext );

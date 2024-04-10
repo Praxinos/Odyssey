@@ -16,7 +16,8 @@ enum class ePathPickingMode : uint8
 {
     Vertex = 0,
     VertexHandle = 1,
-    SegmentHandle = 2
+    SegmentHandle = 2,
+    Alter = 3 // Add, Remove or cut
 };
 
 // struct that stores the ratio of handleLength / segmentLength at mouseDown
@@ -109,9 +110,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorGroupPaint* iScene
                                           , double iWorldX
                                           , double iWorldY );
-        void OnMouseDownDeletePoint( FOdysseyVectorGroupPaint* iScene
-                                   , const FOdysseyPoint& iPointInTexture
-                                   , const FKey& iKey );
+        void OnMouseUpDeletePoint( FOdysseyVectorGroupPaint* iScene
+                                 , const std::vector<FOdysseyVectorPoint*>& iPickedPointArray );
         void OnMouseDownPickPoint( FOdysseyVectorGroupPaint* iScene
                                  , const FOdysseyPoint& iPointInTexture
                                  , const FKey& iKey );

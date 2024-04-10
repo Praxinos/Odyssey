@@ -245,6 +245,32 @@ FOdysseyVector::DistanceToSegment( const ::ULIS::FVec2D& iPt
     return t;
 }
 
+double
+FOdysseyVector::DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
+                                            , const ::ULIS::FVec2D& iSegmentP0
+                                            , const ::ULIS::FVec2D& iSegmentP1
+                                            , double&         oDistance )
+{
+    double t = FOdysseyVector::DistanceToSegment( iPt, iSegmentP0, iSegmentP1, oDistance );
+
+    if( t < 0.0f )
+    {
+        t = 0.0f;
+
+        oDistance = ( iSegmentP0 - iPt ).Distance();
+    }
+
+
+    if( t > 1.0f )
+    {
+        t = 1.0f;
+
+        oDistance = ( iSegmentP1 - iPt ).Distance();
+    }
+
+    return t;
+}
+
 // convenience function that does not alter arguments
 void
 FOdysseyVector::MatrixMultiply( BLMatrix2D& iA, BLMatrix2D& iB, BLMatrix2D& oOut )

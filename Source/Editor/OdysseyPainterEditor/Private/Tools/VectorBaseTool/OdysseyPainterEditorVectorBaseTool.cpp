@@ -93,6 +93,50 @@ UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath
 }
 
 void
+UOdysseyPainterEditorVectorBaseTool::PickSegments( FOdysseyVectorGroupPaint* iScene
+                                                 , double iWorldX
+                                                 , double iWorldY
+                                                 , double iWorldRadius
+                                                 , bool iRestrictToSelection
+                                                 , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    oPickedSegmentArray.clear();
+
+    vectorEngine->Traverse
+    ( iScene
+    , 0
+    , [ iScene
+      , vectorEngine
+      , &iWorldX
+      , &iWorldY
+      , &iWorldRadius
+      , &iRestrictToSelection
+      , &oPickedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( iRestrictToSelection == false ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                  path->PickSegments( iWorldX
+                                    , iWorldY
+                                    , iWorldRadius
+                                    , oPickedSegmentArray
+                                    , nullptr );
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+}
+
+
+void
 UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorGroupPaint* iScene
                                                         , std::vector<FOdysseyVectorVertex*>& oSelectedVertexArray )
 {

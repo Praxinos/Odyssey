@@ -17,10 +17,10 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorGroupPaint* iSc
 {
     uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
 
+    MakePointQuadTree( iScene, true, hudFlags );
+
     // Updates the selection box
     UpdateSelectionBox( iScene, false, hudFlags );
-
-    //MakePointQuadTree( iScene, hudFlags );
 }
 
 void
@@ -124,6 +124,12 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
     iBLContext->restore();
 }
 
+std::vector<FOdysseyVectorPoint*>&
+FOdysseyPainterEditorVectorPathEditToolHUD::GetHoveredPointArray()
+{
+    return mHoveredPointArray;
+}
+
 bool
 FOdysseyPainterEditorVectorPathEditToolHUD::SetCursorPosition( double iX, double iY )
 {
@@ -131,6 +137,13 @@ FOdysseyPainterEditorVectorPathEditToolHUD::SetCursorPosition( double iX, double
 
     mX = iX;
     mY = iY;
+
+    if( mPathEditTool->GetPickingMode() == ePathPickingMode::Alter )
+    {
+        mHoveredPointArray.clear();
+
+        PickPoints( iX, iY, mPathEditTool->PickingRadius, mHoveredPointArray );
+    }
 
     return needsFullRedrawing;
 }

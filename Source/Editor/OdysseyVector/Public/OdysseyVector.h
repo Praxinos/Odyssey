@@ -28,6 +28,20 @@ namespace FOdysseyVector
                                               , const ::ULIS::FVec2D& iSegmentP1
                                               , double& oDistance );
 
+    // This is a constrained version of a segment-to-point proximity test.
+    // It means that if the projection of the point on the segment is beyond limits,
+    // it will remain within limits (0.0f) or (1.0f). On the figure below, x would be at t=0.0
+    //
+    //                    ° (point)
+    //     segment        |
+    // 1______________0   x (proj. point will also be at t = 0.0,
+    //                       even though it is outside the segment)
+    //
+    double ODYSSEYVECTOR_API DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
+                                                         , const ::ULIS::FVec2D& iSegmentP0
+                                                         , const ::ULIS::FVec2D& iSegmentP1
+                                                         , double&         oDistance );
+
     void ODYSSEYVECTOR_API BezierExtract( const ::ULIS::FVec2D& iP0
                                         , const ::ULIS::FVec2D& iP1
                                         , const ::ULIS::FVec2D& iP2

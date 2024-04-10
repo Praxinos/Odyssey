@@ -7,6 +7,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
+#include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "HUD/OdysseyVectorHUD.h"
@@ -112,22 +113,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                             , uint32 iPreferredHeight );
 
         /**
-         * @brief Erase objects based on the mask image. Currently works with cubic paths only.
-         * @param iScene a pointer to the root object
-         * @param iRoi the region of interest.
-         * @param iSelectedOnly restrict erasure to selected objects only.
-         */
-        void Erase( FOdysseyVectorGroupPaint* iScene
-                  , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
-                  , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                  , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
-                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                  , ::ULIS::FRectD &iRoi
-                  , bool iSelectedOnly );
-
-        /**
          * @brief Pick an object
          * @param iScene the root object
          * @param iRoi
@@ -141,52 +126,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                  , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
                  , uint32 iSelectionFlags );
 
-        /**
-         * @brief Pick segments depending on a selection circle passed as parameters.
-         * @param iScene the root object
-         * @param iX "world" x-axis coordinates for the selection circle.
-         * @param iY "world" y-axis coordinates for the selection circle.
-         * @param oPickedSegmentArray array of returned segments matching the selection circle.
-         * @param oDistance array of returned distance between the segment.
-         *  and coordinates iX,iY. Distance is in local coordinates. Can be NULL.
-         */
-        void PickSegments( FOdysseyVectorGroupPaint* iScene
-                         , bool iRestrictToSelection
-                         , double iX
-                         , double iY
-                         , double iRadius
-                         , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
-                         , std::vector<double>* oDistance );
-
-        /**
-         * @brief Pick segments depending on a selection circle passed as parameters.
-         * @param iRestrictToSelection restrict to selected objects (and children objects)
-         * @param iScene the root object
-         * @param iX "world" x-axis coordinates for the selection circle.
-         * @param iY "world" y-axis coordinates for the selection circle.
-         * @param oPickedPointArray array of returned points matching the selection circle.
-         * @param iPickingFlags can be a combination of the following bit values :
-         *  FOdysseyVectorPath::PICK_HANDLE_POINT : pick point handles
-         *  FOdysseyVectorPath::PICK_HANDLE_SEGMENT : pick segment handles
-         *  FOdysseyVectorPath::PICK_POINT : pick vertices
-         */
-        void PickPoints( FOdysseyVectorGroupPaint* iScene
-                       , bool iRestrictToSelection
-                       , double iX
-                       , double iY
-                       , double iRadius
-                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray
-                       , uint64 iPickingFlags );
-
-        static void RecursivePickCycles( FOdysseyVectorObject* iObj
-                                       , double iWorldX
-                                       , double iWorldY
-                                       , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
-
-        void PickCycles( FOdysseyVectorGroupPaint* iScene
-                       , double iWorldX
-                       , double iWorldY
-                       , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
+        void PickPathPoints( FOdysseyVectorGroupPaint* iScene
+                           , double iWorldX
+                           , double iWorldY
+                           , double iWorldRadius
+                           , uint64 iPickingFlags
+                           , bool iContinue
+                           , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                           , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray );
 
         /**
          * @brief Render the scene to the current buffer
@@ -284,19 +231,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                        , double iV1
                        , uint32 iImageWidth
                        , uint32 iImageHeight );
-        void FillHexagon( BLContext* iBLContext
-                        , const ::ULIS::FVec2D* iPoint
-                        , const double* iU
-                        , const double* iV
-                        , double iOpacity
-                        //
-                        , const FColor& iColor
-                        //
-                        , const int8*  iBrushPixelData
-                        , uint32 iBrushWidth
-                        , uint32 iBrushHeight
-                        , int32  iBrushBitsPerPixel
-                        , uint64 iPolygonDrawingFlags );
+
         void FillQuad( BLContext* iBLContext
                      , const ::ULIS::FVec2D* iPoint
                      , const double* iU
