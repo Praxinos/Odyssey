@@ -47,7 +47,9 @@ FOdysseyPainterEditorBrushSelectorTab::CreateWidget()
         .WidgetIndex(this, &FOdysseyPainterEditorBrushSelectorTab::WidgetIndex)
         + SWidgetSwitcher::Slot()
         [
-            SNullWidget::NullWidget
+            SNew(STextBlock)
+            .Text(LOCTEXT("brush-selector-tab.unavailable-text", "This tab is only available when the raster drawing tool is active."))
+            .AutoWrapText(true)
         ];
 
     SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorRasterDrawingToolBrushSelector).Tool(mEditor->GetRasterDrawingTool()));

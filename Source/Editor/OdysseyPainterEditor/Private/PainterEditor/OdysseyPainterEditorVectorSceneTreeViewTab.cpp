@@ -48,6 +48,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdyss
 {
     if( iScene )
     {
+        mScene = iScene;
         // defaults to scene
         std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetEngine()->GetChildrenList();
         std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
@@ -110,33 +111,48 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
     mVectorSceneTreeView = SNew( SOdysseyPainterEditorVectorSceneTreeView );
     mDetailsView = CreateObjectPropertiesPanel();
 
-    return SNew(SSplitter)
-          .Orientation( EOrientation::Orient_Vertical )
-          +SSplitter::Slot()
-          [
-              mVectorSceneTreeView.ToSharedRef()
-          ]
-          +SSplitter::Slot()
-          [
-              mDetailsView.ToSharedRef()
-          ];
+    return SNew(SWidgetSwitcher)
+        .WidgetIndex(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::WidgetIndex)
+        +SWidgetSwitcher::Slot()
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("vector-scene-tree-view-tab.no-scene-text", "This tab is only available when editing a vector scene."))
+            .AutoWrapText(true)
+        ]
+        +SWidgetSwitcher::Slot()
+        [
+            SNew(SSplitter)
+            .Orientation( EOrientation::Orient_Vertical )
+            +SSplitter::Slot()
+            [
+                mVectorSceneTreeView.ToSharedRef()
+            ]
+            +SSplitter::Slot()
+            [
+                mDetailsView.ToSharedRef()
+            ]
+        ];
+        
 }
 
 void
 FOdysseyPainterEditorVectorSceneTreeViewTab::OnRefresh( FOdysseyVectorGroupPaint* iScene )
 {
+    mScene = iScene;
     Update( iScene );
 }
 
 void
 FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateSceneTreeView( FOdysseyVectorGroupPaint* iScene )
 {
+    mScene = iScene;
     mVectorSceneTreeView.Get()->Update( iScene );
 }
 
 void
 FOdysseyPainterEditorVectorSceneTreeViewTab::Update( FOdysseyVectorGroupPaint* iScene )
 {
+    mScene = iScene;
     UpdateSceneTreeView( iScene );
     UpdateObjectPropertiesPanel( iScene );
 }
@@ -155,6 +171,17 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::AddReferencedObjects(FReferenceColl
 	Collector.AddReferencedObject(mPathView);
 	Collector.AddReferencedObject(mGroupPaintView);
 	//Collector.AddReferencedObject(mDetailsView);
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Widget Getters
+
+int
+FOdysseyPainterEditorVectorSceneTreeViewTab::WidgetIndex() const
+{
+    if (mScene)
+        return 1;
+    return 0;
 }
 
 #undef LOCTEXT_NAMESPACE

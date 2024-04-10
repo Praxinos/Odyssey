@@ -45,7 +45,9 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
         .WidgetIndex(this, &FOdysseyPainterEditorToolOptionsTab::WidgetIndex)
         +SWidgetSwitcher::Slot()
         [
-            SNullWidget::NullWidget
+            SNew(STextBlock)
+            .Text(LOCTEXT("tool-options-tab.no-options-text", "No options to display for this tool."))
+            .AutoWrapText(true)
         ];
 
     SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterDrawingTool()));

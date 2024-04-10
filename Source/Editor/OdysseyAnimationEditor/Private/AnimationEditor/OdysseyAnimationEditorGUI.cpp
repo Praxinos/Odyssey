@@ -117,7 +117,7 @@ FOdysseyAnimationEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerSta
     }
     else
     {
-        ParseVectorSignal( nullptr, 0 );
+        ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
     }
 }
 
@@ -136,6 +136,10 @@ FOdysseyAnimationEditorGUI::OnSourceChanged()
 
             OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
         }
+        else
+        {
+            ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+        }
     }
 }
 
@@ -152,10 +156,14 @@ FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation
 
             ParseVectorSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
         }
+        else
+        {
+            ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+        }
     }
     else
     {
-        ParseVectorSignal( nullptr, 0 );
+        ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
     }
 }
 

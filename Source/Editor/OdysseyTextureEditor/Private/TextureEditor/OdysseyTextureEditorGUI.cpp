@@ -72,6 +72,10 @@ FOdysseyTextureEditorGUI::OnSourceChanged()
 
             OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
         }
+        else
+        {
+            OnVectorSceneSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+        }
     }
 }
 

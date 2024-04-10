@@ -40,6 +40,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
         void Update( FOdysseyVectorGroupPaint* iScene );
         virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
         virtual FString GetReferencerName() const override;
+        int WidgetIndex() const;
 
     private:
         FOdysseyPainterEditor* mEditor;
@@ -49,4 +50,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
         UOdysseyPainterEditorVectorObjectView* mObjectView;
         UOdysseyPainterEditorVectorPathView* mPathView;
         UOdysseyPainterEditorVectorGroupPaintView* mGroupPaintView;
+
+        FOdysseyVectorGroupPaint* mScene = nullptr;
 };
