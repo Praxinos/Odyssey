@@ -511,6 +511,8 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
     if (iSource)
     {
         mSource = iSource;
+        mSource->OnAddEditedObjectDelegate().AddLambda([this](UObject* iObject) { AddEditedObject(iObject);});
+        mSource->OnRemoveEditedObjectDelegate().AddLambda([this](UObject* iObject) { RemoveEditedObject(iObject);});
         mSource->Activate();
         
         if ( mSelectedTool && mSelectedTool->IsActivable() )

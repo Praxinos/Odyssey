@@ -46,6 +46,8 @@ FOdysseyAnimationEditorSource::Id() const
 void
 FOdysseyAnimationEditorSource::Activate()
 {
+	AddEditedObject(mAnimation);
+
 	FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, "Animation", mAnimation);
 	mTexture->SetPlayer(mPlayer);
 	mTexture->UpdateResource();
@@ -63,7 +65,8 @@ FOdysseyAnimationEditorSource::Activate()
 void
 FOdysseyAnimationEditorSource::Inactivate()
 {
-	
+	RemoveEditedObject(mAnimation);
+
 	mPlayer->OnPlay().RemoveAll(this);
 	mPlayer->OnStop().RemoveAll(this);
 	mPlayer->Stop();

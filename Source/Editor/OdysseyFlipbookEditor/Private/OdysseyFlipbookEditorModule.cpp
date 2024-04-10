@@ -128,34 +128,73 @@ FOdysseyFlipbookEditorModule::UnregisterSettings()
 	settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyFlipbookEditor" );
 }
 
-TSharedRef<FOdysseyFlipbookEditorToolkit>
-FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook )
+void
+FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbooks )
 {
-	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
-		TEXT("OdysseyFlipbookEditor"),
-		LOCTEXT("main-menu.category", "Odyssey Flipbook Editor"),
-		iFlipbook,
-		"OdysseyFlipbookEditor_Layout"
-	);
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+    bool warningDisplayed = false;
+    for( auto FlipbookIt = iFlipbooks.CreateConstIterator(); FlipbookIt; ++FlipbookIt )
+    {
+		UPaperFlipbook* Flipbook = *FlipbookIt;
 
-	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
-	TSharedRef<FOdysseyFlipbookEditorExtension> flipbookExtension = MakeShared<FOdysseyFlipbookEditorExtension>(editor.Get());
+		//PATCH: To avoid opening ILIAD when another editor for this asset is opened
+		// To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
+        if (AssetEditorSubsystem->FindEditorForAsset(Flipbook, true) != nullptr)
+            continue;
 
-	editor->AddExtension(textureExtension);
-	editor->AddExtension(flipbookExtension);
+        bool editorFound = false;
 
-    TSharedPtr<FOdysseyFlipbookEditorToolkit> toolkit = MakeShared<FOdysseyFlipbookEditorToolkit>();
-    toolkit->Initialize(iFlipbook, editor);
+        for (int i = 0; i < Flipbook->GetNumKeyFrames(); i++)
+        {
+            UPaperSprite* sprite = Flipbook->GetKeyFrameChecked(i).Sprite;
+            if (!sprite)
+                continue;
 
-	flipbookExtension->SetFlipbook(iFlipbook);
+            if (AssetEditorSubsystem->FindEditorForAsset(sprite, true) != nullptr)
+            {
+                editorFound = true;
+                break;
+            }
 
-    return toolkit.ToSharedRef();
+            UTexture2D* texture = sprite->GetSourceTexture();
+            if (!texture)
+                continue;
 
-	/* TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook));
-	TSharedRef<FOdysseyFlipbookEditorToolkit> toolkit = MakeShareable(new FOdysseyFlipbookEditorToolkit(editor));
-	editor->Initialize(iFlipbook);
-	toolkit->Initialize();
-    return toolkit; */
+            if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+            {
+                editorFound = true;
+                break;
+            }
+        }
+
+        if (editorFound)
+        {
+            if (!warningDisplayed)
+            {
+                EditFlipbooksWarning();
+                warningDisplayed = true;
+            }
+            continue;
+        }
+
+		TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+			TEXT("OdysseyFlipbookEditor"),
+			LOCTEXT("main-menu.category", "Odyssey Flipbook Editor"),
+			Flipbook,
+			"OdysseyFlipbookEditor_Layout"
+		);
+
+		TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
+		TSharedRef<FOdysseyFlipbookEditorExtension> flipbookExtension = MakeShared<FOdysseyFlipbookEditorExtension>(editor.Get());
+
+		editor->AddExtension(textureExtension);
+		editor->AddExtension(flipbookExtension);
+
+		TSharedPtr<FOdysseyFlipbookEditorToolkit> toolkit = MakeShared<FOdysseyFlipbookEditorToolkit>();
+		toolkit->Initialize(Flipbook, editor);
+
+		flipbookExtension->SetFlipbook(Flipbook);
+	}
 }
 
 void

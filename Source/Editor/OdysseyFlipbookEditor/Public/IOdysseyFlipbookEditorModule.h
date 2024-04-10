@@ -13,5 +13,5 @@ class IOdysseyFlipbookEditorModule
 	: public IModuleInterface
 {
 public:
-    virtual TSharedRef<FOdysseyFlipbookEditorToolkit> CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook ) = 0;
+    virtual void CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbook ) = 0;
 };

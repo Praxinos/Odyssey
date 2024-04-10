@@ -63,9 +63,10 @@ void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& I
         if (odysseyFlipbook != NULL)
         {
             FOdysseyFlipbookEditorModule* odysseyFlipbookModule = &FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
-            odysseyFlipbookModule->CreateOdysseyFlipbookEditor(odysseyFlipbook);
+            odysseyFlipbookModule->CreateOdysseyFlipbookEditor({odysseyFlipbook});
         }
     }
+    
     if( objects.Num() != 0 )
         FAssetTypeActions_Base::OpenAssetEditor( objects, EditWithinLevelEditor );
 }

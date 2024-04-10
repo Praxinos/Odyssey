@@ -25,7 +25,7 @@ FOdysseyFlipbookEditorToolkit::OpenAsset(UObject* iObject)
 {
 	UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(iObject);
 	IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
-	odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor(flipbook);
+	odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( { flipbook } );
 }
 
 FText

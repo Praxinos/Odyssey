@@ -28,41 +28,56 @@
    FOdysseyTextureEditorModule
 -----------------------------------------------------------------------------*/
 
-TSharedRef<FOdysseyTextureEditorToolkit>
-FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
+void
+FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures )
 {
-	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
-		TEXT("OdysseyTextureEditor"),
-		LOCTEXT("main-menu.category", "Odyssey Texture2D Editor"),
-		iTexture,
-		"OdysseyTextureEditor_Layout"
-	);
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem< UAssetEditorSubsystem >();
+	bool warningDisplayed = false;
+	for( UTexture2D* texture : iTextures )
+	{
+		//PATCH: To avoid opening ILIAD when another editor for this asset is opened
+		// To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
+		if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+		{
+			if (!warningDisplayed)
+			{
+				FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.texture-already-opened-dialog.message", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), LOCTEXT("content-browser-extension.edit-texture.texture-already-opened-dialog.title", "Texture Already Opened"));
+				warningDisplayed = true;
+			}
+			continue;
+		}
 
-	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
-	editor->AddExtension(textureExtension);
+		TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+			TEXT("OdysseyTextureEditor"),
+			LOCTEXT("main-menu.category", "Odyssey Texture2D Editor"),
+			texture,
+			"OdysseyTextureEditor_Layout"
+		);
 
-    TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
-    toolkit->Initialize(iTexture, editor);
+		TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
+		editor->AddExtension(textureExtension);
 
-    //----- Extend the Edit menu using the FMenuBuilder API
-	TSharedPtr<FExtender> menuExtender = MakeShareable(new FExtender());
-    // Extend the Edit menu after the "Configuration" category
-	menuExtender->AddMenuExtension(
-		"Configuration",
-		EExtensionHook::After,
-		NULL,
-		FMenuExtensionDelegate::CreateRaw( editor.Get(), &FOdysseyPainterEditor::AddEditMenuEntry )
-	);
-	toolkit->AddMenuExtender( menuExtender );
-    // Rebuild the the menu bar and take into account the above extender. 
-    // FOdysseyPainterEditor::AddEditMenuEntry() will then be called each time the Edit menu needs to be shown.
-	toolkit->RegenerateMenusAndToolbars();
-    //-----
+		TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
+		toolkit->Initialize(texture, editor);
 
-	TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(iTexture);
-	editor->SetSource(source);
+		//----- Extend the Edit menu using the FMenuBuilder API
+		TSharedPtr<FExtender> menuExtender = MakeShareable(new FExtender());
+		// Extend the Edit menu after the "Configuration" category
+		menuExtender->AddMenuExtension(
+			"Configuration",
+			EExtensionHook::After,
+			NULL,
+			FMenuExtensionDelegate::CreateRaw( editor.Get(), &FOdysseyPainterEditor::AddEditMenuEntry )
+		);
+		toolkit->AddMenuExtender( menuExtender );
+		// Rebuild the the menu bar and take into account the above extender. 
+		// FOdysseyPainterEditor::AddEditMenuEntry() will then be called each time the Edit menu needs to be shown.
+		toolkit->RegenerateMenusAndToolbars();
+		//-----
 
-    return toolkit.ToSharedRef();
+		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+		editor->SetSource(source);
+	}
 }
 
 void

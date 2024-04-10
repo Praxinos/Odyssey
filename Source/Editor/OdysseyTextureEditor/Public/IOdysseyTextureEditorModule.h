@@ -13,5 +13,5 @@ class IOdysseyTextureEditorModule
 	: public IModuleInterface
 {
 public:
-    virtual TSharedRef<FOdysseyTextureEditorToolkit> CreateOdysseyTextureEditor( UTexture2D* iTexture ) = 0;
+    virtual void CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures ) = 0;
 };

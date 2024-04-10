@@ -100,56 +100,8 @@ EditFlipbooksWarning()
 void
 FEditFlipbookExtension::EditFlipbooks( TArray<UPaperFlipbook*>& iFlipbooks )
 {
-	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-    bool warningDisplayed = false;
-    for( auto FlipbookIt = iFlipbooks.CreateConstIterator(); FlipbookIt; ++FlipbookIt )
-    {
-		UPaperFlipbook* Flipbook = *FlipbookIt;
-
-		//PATCH: To avoid opening ILIAD when another editor for this asset is opened
-		// To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
-        if (AssetEditorSubsystem->FindEditorForAsset(Flipbook, true) != nullptr)
-            continue;
-
-        bool editorFound = false;
-
-        for (int i = 0; i < Flipbook->GetNumKeyFrames(); i++)
-        {
-            UPaperSprite* sprite = Flipbook->GetKeyFrameChecked(i).Sprite;
-            if (!sprite)
-                continue;
-
-            if (AssetEditorSubsystem->FindEditorForAsset(sprite, true) != nullptr)
-            {
-                editorFound = true;
-                break;
-            }
-
-            UTexture2D* texture = sprite->GetSourceTexture();
-            if (!texture)
-                continue;
-
-            if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
-            {
-                editorFound = true;
-                break;
-            }
-        }
-
-        if (editorFound)
-        {
-            if (!warningDisplayed)
-            {
-                EditFlipbooksWarning();
-                warningDisplayed = true;
-            }
-            continue;
-        }
-
-
-        IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>( "OdysseyFlipbookEditor" );
-        odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( Flipbook );
-    }
+    IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>( "OdysseyFlipbookEditor" );
+    odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( iFlipbooks );
 }
 
 //////////////////////////////////////////////////////////////////////////

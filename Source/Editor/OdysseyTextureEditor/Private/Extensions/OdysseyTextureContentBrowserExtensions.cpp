@@ -80,26 +80,8 @@ public:
 
     void ActionTextures( TArray< UTexture2D* >& iTextures ) override
     {
-	    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem< UAssetEditorSubsystem >();
-        bool warningDisplayed = false;
-        for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
-        {
-            UTexture2D* texture = *textureIt;
-
-		    //PATCH: To avoid opening ILIAD when another editor for this asset is opened
-		    // To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
-            if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
-            {
-                if (!warningDisplayed)
-                {
-                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.texture-already-opened-dialog.message", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), LOCTEXT("content-browser-extension.edit-texture.texture-already-opened-dialog.title", "Texture Already Opened"));
-                    warningDisplayed = true;
-                }
-			    continue;
-		    }
-            IOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked< IOdysseyTextureEditorModule >( "OdysseyTextureEditor" );
-            OdysseyTextureEditorModule->CreateOdysseyTextureEditor( texture );
-        }
+        IOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked< IOdysseyTextureEditorModule >( "OdysseyTextureEditor" );
+        OdysseyTextureEditorModule->CreateOdysseyTextureEditor( iTextures );
     }
 };
 

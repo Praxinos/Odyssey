@@ -30,7 +30,7 @@ FOdysseyTextureEditorToolkit::OpenAsset(UObject* iObject)
 {
 	UTexture2D* texture = Cast<UTexture2D>(iObject);
 	IOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>("OdysseyTextureEditor");
-	OdysseyTextureEditorModule->CreateOdysseyTextureEditor(texture);
+	OdysseyTextureEditorModule->CreateOdysseyTextureEditor( { texture } );
 }
 
 FText

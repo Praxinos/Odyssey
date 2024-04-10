@@ -328,9 +328,72 @@ FOdysseyViewportDrawingEditorExtension::SetMaterial(UMaterialInterface* iMateria
         SelectDefaultTexture();
 }
 
-void
-FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
+bool
+FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture, bool iWarnUserIfFailed)
 {
+	if (iTexture == mTexture)
+		return true;
+
+	if (iTexture)
+	{
+
+		bool canSetTexture = true;
+
+		UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+		if (iTexture->IsA(UMediaTexture::StaticClass()))
+		{
+			canSetTexture = false;
+			UMediaTexture* texture = Cast<UMediaTexture>(iTexture);
+			UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
+			if (mediaPlayer)
+			{
+				UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
+				int32 index = mediaPlayer->GetPlaylistIndex();
+				UMediaSource* mediaSource = playlist.Get(index);
+				if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
+				{
+					UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
+					canSetTexture = AssetEditorSubsystem->FindEditorForAsset(animation, true) == nullptr;
+				}
+			}
+			
+			if (!canSetTexture)
+			{
+				if (mActor->GetClass() == AMediaPlate::StaticClass())
+				{
+					bool needsOpen = true;
+					AMediaPlate* mediaPlate = Cast<AMediaPlate>(mActor);
+					UMediaSource* mediaSource = mediaPlate->MediaPlateComponent->MediaPlaylist->Get(0);
+					if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
+					{
+						UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
+						canSetTexture = AssetEditorSubsystem->FindEditorForAsset(animation, true) == nullptr;
+					}
+				}
+			}
+		}
+		else if (iTexture->IsA(UTexture2D::StaticClass()) && AssetEditorSubsystem->FindEditorForAsset(iTexture, true) != nullptr)
+		{
+			canSetTexture = false;
+		}
+
+		if (!canSetTexture)
+		{
+			if (iWarnUserIfFailed)
+				FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened"), LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."));
+			return false;
+		}
+	}
+
+	SetTextureInternal(iTexture);
+
+	return true;
+}
+
+void
+FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
+{
+	
 	//Cleanup previous texture if it exist
 	if (mTexture)
 	{
@@ -356,6 +419,7 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture)
 
 	mTexture = nullptr;
 	mEditor->SetSource(nullptr);
+	
 	if (!iTexture)
 		return;
 
@@ -596,7 +660,7 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultComponent()
 void
 FOdysseyViewportDrawingEditorExtension::ClearSelectableTextures()
 {
-	SetTexture(nullptr);
+	SetTexture(nullptr, false);
 	mSelectableTextures.Empty();
 }
 
@@ -621,8 +685,6 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 
 	if (mSelectableTextures.Num() <= 0)
 		return;
-		
-	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 
 	bool displayWarning = true;
 
@@ -633,17 +695,11 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 		if (texturePaintSettings.mSelectedTexture == Texture()) //if the texture is already selected we assume we have nothing to do
 			return;
 
-		if (AssetEditorSubsystem->FindEditorForAsset(texturePaintSettings.mSelectedTexture, true) == nullptr)
-		{
-			SetTexture(texturePaintSettings.mSelectedTexture);
+		bool succeeded = SetTexture(texturePaintSettings.mSelectedTexture, displayWarning);
+		if (succeeded)
 			return;
-		}
-		
-		if (displayWarning) //only display the Warning Message for the first texture
-		{
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened"), LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."));
-			displayWarning = false;
-		}
+
+		displayWarning = false;
 	}
 	else
 	{
@@ -656,18 +712,11 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 		if (paintableTexture.Texture == Texture()) //if the texture is already selected we assume we have nothing to do
 			break;
 
-		if (AssetEditorSubsystem->FindEditorForAsset(paintableTexture.Texture, true) != nullptr)
-		{
-			if (displayWarning) //only display the Warning Message for the first texture
-			{
-				FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened"), LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."));
-				displayWarning = false;
-			}
-			continue;
-		}
+		bool succeeded = SetTexture(paintableTexture.Texture, displayWarning);
+		if (succeeded)
+			return;
 
-		SetTexture(paintableTexture.Texture);
-		break;
+		displayWarning = false;
 	}
 }
 

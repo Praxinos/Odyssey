@@ -46,28 +46,4 @@ FOdysseyPaletteAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
     InFilter.ClassPaths.Add( UOdysseyPalette::StaticClass()->GetClassPathName() );
 }
 
-/*
-void FOdysseyPaletteAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
-{    
-    EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
-
-	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
-	{
-		auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
-		if (odysseyTexture != NULL)
-		{
-            if( UOdysseyTextureEditorSettings::Get()->IliadDefaultEditorEnabled )
-            {
-                FOdysseyTextureEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTextureEditorModule>("OdysseyTextureEditor");
-                odysseyTextureModule->CreateOdysseyTextureEditor(odysseyTexture);
-            }
-            else
-            {
-                ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");
-                TextureEditorModule->CreateTextureEditor(Mode, EditWithinLevelEditor, odysseyTexture);
-            }
-		}
-	}
-}*/
-
 #undef LOCTEXT_NAMESPACE

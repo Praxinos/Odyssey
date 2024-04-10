@@ -64,7 +64,7 @@ void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& In
             if( UOdysseyTextureEditorSettings::Get()->IliadDefaultEditorEnabled )
             {
                 FOdysseyTextureEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTextureEditorModule>("OdysseyTextureEditor");
-                odysseyTextureModule->CreateOdysseyTextureEditor(odysseyTexture);
+                odysseyTextureModule->CreateOdysseyTextureEditor( { odysseyTexture } );
             }
             else
             {

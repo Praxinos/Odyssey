@@ -42,6 +42,8 @@ FOdysseyTextureEditorSource::Id() const
 void
 FOdysseyTextureEditorSource::Activate()
 {
+	AddEditedObject(mTexture);
+
     InitTextureUserData();
 
 	UOdysseyTextureLayerStack* layerStack = GetLayerStack();
@@ -54,6 +56,8 @@ FOdysseyTextureEditorSource::Activate()
 void
 FOdysseyTextureEditorSource::Inactivate()
 {
+	RemoveEditedObject(mTexture);
+
 	UOdysseyTextureLayerStack* layerStack = GetLayerStack();
 	if ( layerStack )
 		layerStack->InactivateTextureFastUpdate();

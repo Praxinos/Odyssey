@@ -71,7 +71,7 @@ public:
     void SetActor(AActor* iActor);
     void SetComponent(UMeshComponent* iComponent);
     void SetMaterial(UMaterialInterface* iMaterial);
-    void SetTexture(UTexture* iTexture);
+    bool SetTexture(UTexture* iTexture, bool iWarnUserIfFailed);
     void SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod iNewMethod);
 
 private:
@@ -86,6 +86,7 @@ private:
 
 private:
     // Private Methods
+    void SetTextureInternal(UTexture* iTexture);
     void ClearSelectableComponents();
     void UpdateSelectableComponents();
     void SelectDefaultComponent();
