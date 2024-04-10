@@ -15,6 +15,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "TexturePaintHelpers.h"
+#include "OdysseyKeyState.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
 IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
 {
@@ -116,6 +118,13 @@ void IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance(UOdysseyBrushA
 
 void IOdysseyViewportDrawingEditorAdapter::StartPainting()
 {
+    if (mIsPickingColor)
+    {   
+        mCapturedByEditor = true;
+        mExtension->GetEditor()->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
+        return;
+    }
+
     UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
     if (rasterDrawingTool)
     {
@@ -123,13 +132,21 @@ void IOdysseyViewportDrawingEditorAdapter::StartPainting()
         if (brushInstance)
             brushInstance->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
     }
-
+    
     if (mTool)
+    {
         mCapturedByEditor = mTool->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
+    }
 }
 
 void IOdysseyViewportDrawingEditorAdapter::Paint()
 {
+    if (mIsPickingColor)
+    {
+        mExtension->GetEditor()->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
+        return;
+    }
+
     if (!mTool)
         return;
 
@@ -138,6 +155,13 @@ void IOdysseyViewportDrawingEditorAdapter::Paint()
 
 void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
 {
+    if (mIsPickingColor)
+    {
+        mCapturedByEditor = false;
+        mExtension->GetEditor()->GetColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint);
+        return;
+    }
+
     if (!mTool)
         return;
     
@@ -239,6 +263,29 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     mCurrentStrokeRay.mPoint.y = pointPos.Y;
     mCurrentStrokeRay.mPoint.keysDown = mKeysPressed;
     mCurrentStrokeRay.mPoint.ComputeRelativeParameters(mLastStrokeRay.mPoint);
+
+    if (FOdysseyKeyState::GetLastKey() != FKey())
+    {   
+        FModifierKeysState ModifierKeysState = FSlateApplication::Get().GetModifierKeys();
+        const FInputChord activeChord(FOdysseyKeyState::GetLastKey(),
+            EModifierKey::FromBools(
+                ModifierKeysState.IsControlDown(),
+                ModifierKeysState.IsAltDown(),
+                ModifierKeysState.IsShiftDown(),
+                ModifierKeysState.IsCommandDown()
+            )
+        );
+
+        if (FOdysseyPainterEditorCommands::Get().PickColorInViewport->HasActiveChord(activeChord))
+        {
+            mIsPickingColor = true;
+            mOverrideMouseCursor = true;
+            mMouseCursor = EMouseCursor::EyeDropper;
+            return true;
+        }
+    }
+
+    mIsPickingColor = false;
 
     if( mExtension->GetEditor()->GetSelectedTool() )
     {

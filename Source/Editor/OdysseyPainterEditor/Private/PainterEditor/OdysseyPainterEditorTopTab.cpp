@@ -3,7 +3,7 @@
 
 #include "OdysseyPainterEditorTopTab.h"
 
-#include "OdysseyPainterEditorCommands.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditor.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "OdysseyBrushOptions.h"

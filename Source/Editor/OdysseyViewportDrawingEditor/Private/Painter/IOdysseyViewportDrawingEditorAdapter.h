@@ -138,4 +138,5 @@ protected:
 
     bool mOverrideMouseCursor = false;
     EMouseCursor::Type mMouseCursor = EMouseCursor::Default;
+    bool mIsPickingColor = false;
 };

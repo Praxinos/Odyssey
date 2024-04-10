@@ -10,7 +10,7 @@
 /**
  * Holds the UI commands for the OdysseyPainterEditorToolkit widget.
  */
-class FOdysseyPainterEditorCommands
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorCommands
     : public TCommands<FOdysseyPainterEditorCommands>
 {
 public:

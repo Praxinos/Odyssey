@@ -146,25 +146,11 @@ FOdysseyPainterEditorViewportTab::Texture() const
 
 void
 FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture)
-{
-    if (!mEditor->GetSource())
-        return;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = mEditor->GetSource()->GetDisplayBlock();
-    if ( !block )
-        return;
-
-    if (iPositionInTexture.X >= 0 && iPositionInTexture.X < block->Width() &&
-        iPositionInTexture.Y >= 0 && iPositionInTexture.Y < block->Height())
-    {
-        const ::ULIS::FColor& color = block->Color(iPositionInTexture.X, iPositionInTexture.Y);
-        mEditor->PaintColor( color, false ); //interactively change paintColor
-    }
-        
+{       
     if (iEventState == eOdysseyEventState::kSet)
-    {
-        mEditor->PaintColor(mEditor->PaintColor(), true); //Commit paintColor
-    }
+        mEditor->GetColorPickerTool()->PickColorUp(FOdysseyPoint(iPositionInTexture.X, iPositionInTexture.Y));
+    else
+        mEditor->GetColorPickerTool()->PickColorMove(FOdysseyPoint(iPositionInTexture.X, iPositionInTexture.Y));
 }
 
 bool

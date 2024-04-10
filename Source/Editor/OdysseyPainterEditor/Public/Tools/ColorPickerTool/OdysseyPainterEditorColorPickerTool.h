@@ -28,15 +28,23 @@ public:
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
     //OdysseyPainterEditorTool overrides
+    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture);
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
 
     virtual void Commit() override;
 
     virtual FText GetTooltip() const override;
 
+    virtual EMouseCursor::Type GetMouseCursor() const override;
+
+    void PickColorMove( const FOdysseyPoint& iPointInTexture );
+    void PickColorUp( const FOdysseyPoint& iPointInTexture );
+
 protected:
     // protected Data Members
 
     //Resources
     FOdysseyPaintEngine mPaintEngine;
+    bool mIsPicking = false;
 };
