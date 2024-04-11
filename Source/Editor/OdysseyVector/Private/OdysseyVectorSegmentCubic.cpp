@@ -1366,7 +1366,7 @@ FOdysseyVectorSegmentCubic::BuildVariable()
         {
             mFractionPointBuffer = ( FOdysseyVectorPoint * ) realloc( mFractionPointBuffer
                                                                     , subPointBuffer.size()
-                                                                    * sizeof FOdysseyVectorPoint );
+                                                                    * sizeof (FOdysseyVectorPoint) );
 
             for( int i = 0; i < subPointBuffer.size(); i++ )
             {

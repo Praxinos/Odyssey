@@ -114,11 +114,13 @@ static TCHAR* ReadXY( const TCHAR* iCommandArgs
 {
     TCHAR* currentArg = (TCHAR*) iCommandArgs;
 
-    coords.x = _tcstod( currentArg, &currentArg );
+    /*Temporary comment, to see if _tsctod is standard, since it doesn't compile on CLang for now*/
+    //coords.x = _tcstod( currentArg, &currentArg );
 
     currentArg = SkipCommaWhitespace( currentArg );
 
-    coords.y = _tcstod( currentArg, &currentArg );
+    /*Temporary comment, to see if _tsctod is standard, since it doesn't compile on CLang for now*/
+    //coords.y = _tcstod( currentArg, &currentArg );
 
     if( referenceCoords )
     {
