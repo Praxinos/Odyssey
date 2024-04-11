@@ -107,9 +107,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         //                                  , const FName& iPropertyName ) override;
 
     private:
-        FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorGroupPaint* iScene
-                                          , double iWorldX
-                                          , double iWorldY );
+        void OnMouseUpCutPaths( FOdysseyVectorGroupPaint* iScene
+                              , const FOdysseyPoint& iPointInTexture );
+        void OnMouseUpAddPoint( FOdysseyVectorGroupPaint* iScene
+                              , const FOdysseyPoint& iPointInTexture
+                              , const std::vector<FOdysseyVectorSegment*>& iPickedSegmentArray );
         void OnMouseUpDeletePoint( FOdysseyVectorGroupPaint* iScene
                                  , const std::vector<FOdysseyVectorPoint*>& iPickedPointArray );
         void OnMouseDownPickPoint( FOdysseyVectorGroupPaint* iScene

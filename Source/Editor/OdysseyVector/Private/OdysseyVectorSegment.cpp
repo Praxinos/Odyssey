@@ -1,7 +1,7 @@
-#include "OdysseyVector.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorIntersection.h"
+#include "OdysseyVector.h"
 
 FOdysseyVectorSegment::~FOdysseyVectorSegment()
 {

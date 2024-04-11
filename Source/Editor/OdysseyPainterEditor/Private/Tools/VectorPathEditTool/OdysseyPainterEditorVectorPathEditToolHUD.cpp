@@ -17,6 +17,9 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorGroupPaint* iSc
 {
     uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
 
+    // reset cut line by setting both end points at the same location
+    mCutLinePoint[0] = mCutLinePoint[1] = ::ULIS::FVec2D( 0.0f, 0.0f );
+
     MakePointQuadTree( iScene, true, hudFlags );
 
     // Updates the selection box
@@ -79,6 +82,64 @@ FOdysseyPainterEditorVectorPathEditToolHUD::GenerateMask( double iX
 }
 
 void
+FOdysseyPainterEditorVectorPathEditToolHUD::DrawMinus( BLContext* iBLContext
+                                                     , const BLRgba32& iFgColor
+                                                     , const BLRgba32& iBgColor
+                                                     , const BLRgba32& iHcColor  )
+{
+    BLRgba32 blackColor = BLRgba32( 0, 0, 0, 255 );
+
+    iBLContext->setStrokeStyle( blackColor );
+    iBLContext->setStrokeWidth( 2.0f );
+    // we are over a vertex, draw a minus sign
+    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius
+                          , mY - mPathEditTool->PickingRadius
+                          , mX + mPathEditTool->PickingRadius + 8
+                          , mY - mPathEditTool->PickingRadius );
+
+    iBLContext->setStrokeStyle( iHcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+    // we are over a vertex, draw a minus sign
+    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius
+                          , mY - mPathEditTool->PickingRadius
+                          , mX + mPathEditTool->PickingRadius + 8
+                          , mY - mPathEditTool->PickingRadius );
+}
+
+void
+FOdysseyPainterEditorVectorPathEditToolHUD::DrawPlus( BLContext* iBLContext
+                                                    , const BLRgba32& iFgColor
+                                                    , const BLRgba32& iBgColor
+                                                    , const BLRgba32& iHcColor  )
+{
+    BLRgba32 blackColor = BLRgba32( 0, 0, 0, 255 );
+
+    iBLContext->setStrokeStyle( blackColor );
+    iBLContext->setStrokeWidth( 2.0f );
+    // we are over a vertex, draw a minus sign
+    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius
+                          , mY - mPathEditTool->PickingRadius
+                          , mX + mPathEditTool->PickingRadius + 8
+                          , mY - mPathEditTool->PickingRadius );
+    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius + 4
+                          , mY - mPathEditTool->PickingRadius - 4
+                          , mX + mPathEditTool->PickingRadius + 4
+                          , mY - mPathEditTool->PickingRadius + 4 );
+
+    iBLContext->setStrokeStyle( iHcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+    // we are over a vertex, draw a minus sign
+    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius
+                          , mY - mPathEditTool->PickingRadius
+                          , mX + mPathEditTool->PickingRadius + 8
+                          , mY - mPathEditTool->PickingRadius );
+    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius + 4
+                          , mY - mPathEditTool->PickingRadius - 4
+                          , mX + mPathEditTool->PickingRadius + 4
+                          , mY - mPathEditTool->PickingRadius + 4 );
+}
+
+void
 FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorGroupPaint* iScene )
 {
@@ -116,10 +177,32 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
 //    }
 
     iBLContext->save();
-
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
     iBLContext->setStrokeStyle( hcColor );
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->strokeCircle( mX, mY, mPathEditTool->PickingRadius );
+
+    if( mPathEditTool->GetPickingMode() == ePathPickingMode::Alter )
+    {
+        if(  mHoveredPointArray.size() )
+        {
+            // we are over a vertex, draw a minus sign
+            DrawMinus( iBLContext, fgColor, bgColor, hcColor );
+        }
+        else
+        {
+            // we are NOT over a vertex, draw a plus sign
+            DrawPlus( iBLContext, fgColor, bgColor, hcColor );
+
+            // cutting Line
+            iBLContext->setStrokeStyle( hcColor );
+            iBLContext->strokeLine( mCutLinePoint[0].x
+                                  , mCutLinePoint[0].y
+                                  , mCutLinePoint[1].x
+                                  , mCutLinePoint[1].y );
+        }
+    }
+
 
     iBLContext->restore();
 }
@@ -146,4 +229,30 @@ FOdysseyPainterEditorVectorPathEditToolHUD::SetCursorPosition( double iX, double
     }
 
     return needsFullRedrawing;
+}
+
+void
+FOdysseyPainterEditorVectorPathEditToolHUD::SetCutLineP0( double iX, double iY )
+{
+    mCutLinePoint[0].x = iX;
+    mCutLinePoint[0].y = iY;
+}
+
+void
+FOdysseyPainterEditorVectorPathEditToolHUD::SetCutLineP1(  double iX, double iY )
+{
+    mCutLinePoint[1].x = iX;
+    mCutLinePoint[1].y = iY;
+}
+
+::ULIS::FVec2D&
+FOdysseyPainterEditorVectorPathEditToolHUD::GetCutLineP0()
+{
+    return mCutLinePoint[0];
+}
+
+::ULIS::FVec2D&
+FOdysseyPainterEditorVectorPathEditToolHUD::GetCutLineP1()
+{
+    return mCutLinePoint[1];
 }

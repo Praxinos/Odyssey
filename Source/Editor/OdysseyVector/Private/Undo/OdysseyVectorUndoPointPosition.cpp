@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoPointPosition.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
 {

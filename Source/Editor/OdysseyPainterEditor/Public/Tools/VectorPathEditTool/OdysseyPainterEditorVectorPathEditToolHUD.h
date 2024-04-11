@@ -24,6 +24,21 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         bool SetCursorPosition( double iX, double iY );
         std::vector<FOdysseyVectorPoint*>& GetHoveredPointArray();
 
+        void SetCutLineP0( double iX, double iY );
+        void SetCutLineP1(  double iX, double iY );
+        ::ULIS::FVec2D& GetCutLineP0();
+        ::ULIS::FVec2D& GetCutLineP1();
+
+    private:
+        void DrawMinus( BLContext* iBLContext
+                      , const BLRgba32& iFgColor
+                      , const BLRgba32& iBgColor
+                      , const BLRgba32& iHcColor  );
+        void DrawPlus( BLContext* iBLContext
+                     , const BLRgba32& iFgColor
+                     , const BLRgba32& iBgColor
+                     , const BLRgba32& iHcColor  );
+
     private:
         double mX;
         double mY;
@@ -31,5 +46,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         UOdysseyPainterEditorVectorPathEditTool* mPathEditTool;
         BLContext mBLSelectionContext;
         BLImage mBLSelectionMask;
-
+        ::ULIS::FVec2D mCutLinePoint[2];
 };

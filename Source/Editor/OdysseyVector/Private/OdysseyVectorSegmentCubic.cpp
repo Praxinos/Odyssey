@@ -1367,9 +1367,17 @@ FOdysseyVectorSegmentCubic::BuildVariable()
             mFractionPointBuffer = ( FOdysseyVectorPoint * ) realloc( mFractionPointBuffer
                                                                     , subPointBuffer.size()
                                                                     * sizeof FOdysseyVectorPoint );
-            memcpy( mFractionPointBuffer
-                 , &subPointBuffer[0]
-                 ,  subPointBuffer.size() * sizeof FOdysseyVectorPoint );
+
+            for( int i = 0; i < subPointBuffer.size(); i++ )
+            {
+                mFractionPointBuffer[i] = subPointBuffer[i];
+            }
+
+            // not compatible with MACOS CLang. Not sure this is very CPU-cycles saving anyways.
+            //memcpy( mFractionPointBuffer
+            //     , &subPointBuffer[0]
+            //     ,  subPointBuffer.size() * sizeof FOdysseyVectorPoint );
+
         }
 
         mFractionCache.reserve( subLineBuffer.size() );

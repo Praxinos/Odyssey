@@ -13,7 +13,6 @@
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
-#include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
@@ -78,7 +77,6 @@ public:
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathEditTool*                 GetVectorPathEditTool() const;
-    virtual UOdysseyPainterEditorVectorPathCutTool*                  GetVectorPathCutTool() const;
     virtual UOdysseyPainterEditorVectorSelectionTool*                GetVectorSelectionTool() const;
     virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const;
     virtual UOdysseyPainterEditorVectorTransformTool*                GetVectorTransformTool() const;
@@ -197,7 +195,6 @@ protected:
     UOdysseyPainterEditorVectorPrimitiveDrawingTool* mVectorPrimitiveDrawingTool;
     UOdysseyPainterEditorVectorPathDrawingTool* mVectorPathDrawingTool;
     UOdysseyPainterEditorVectorPathEditTool* mVectorPathEditTool;
-    UOdysseyPainterEditorVectorPathCutTool* mVectorPathCutTool;
     UOdysseyPainterEditorVectorSelectionTool* mVectorSelectionTool;
     UOdysseyPainterEditorVectorScenePanTool* mVectorScenePanTool;
     UOdysseyPainterEditorVectorEraserTool* mVectorEraserTool;
