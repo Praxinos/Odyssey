@@ -442,8 +442,25 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.create-new-layer", "Add Layer"));
     #endif
+        UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+        if (currentLayer)
+        {
+            if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+            {
+                layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), currentLayer);
+            }
+            else
+            {
+                UOdysseyLayer* parent = currentLayer->GetParent();
+                int index = currentLayer->GetIndexInParent();
+                layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), parent, index);
+            }
+        }
+        else
+        {
+            layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
+        }
 
-        layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
         if (!layer)
             return;
     }

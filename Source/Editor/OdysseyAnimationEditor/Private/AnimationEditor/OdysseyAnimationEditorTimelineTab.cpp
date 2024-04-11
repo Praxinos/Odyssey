@@ -684,7 +684,25 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.create-new-layer", "Add Layer"));
     #endif
-        layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
+        UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+        if (currentLayer)
+        {
+            if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+            {
+                layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), currentLayer);
+            }
+            else
+            {
+                UOdysseyLayer* parent = currentLayer->GetParent();
+                int index = currentLayer->GetIndexInParent();
+                layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), parent, index);
+            }
+        }
+        else
+        {
+            layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
+        }
+
         UOdysseyAnimationLayerImageRaster* animLayer = Cast<UOdysseyAnimationLayerImageRaster>(layer);
         if (!animLayer)
             return;
@@ -692,6 +710,7 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
         TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(animLayer, 1, animation->Width(), animation->Height(), animation->Format());
         FOdysseyAnimationCellsMutator mutator(animLayer, animLayer->GetCellsContainer());
         mutator.Add({ cell });
+        mutator.SetOffset(animation->CurrentFrame);
         mutator.Commit();
     }
 
