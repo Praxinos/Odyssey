@@ -9,6 +9,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -24,8 +25,9 @@ SOdysseyPainterEditorVectorSceneTreeView::SOdysseyPainterEditorVectorSceneTreeVi
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
+SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs, FOdysseyPainterEditor* iEditor)
 {
+    mEditor = iEditor;
     STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::Construct(
         STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments()
         // for some reason, SetTreeItemsSource does not work, so we have to use an array that we
@@ -76,6 +78,12 @@ TSharedPtr<FVectorSceneTreeViewItem>
 SOdysseyPainterEditorVectorSceneTreeView::GetRootItem()
 {
 	return mRootItem;
+}
+
+FOdysseyPainterEditor*
+SOdysseyPainterEditorVectorSceneTreeView::GetEditor() const
+{
+    return mEditor;
 }
 
 void
@@ -197,6 +205,10 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
 
@@ -246,7 +258,7 @@ SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects()
     {
         FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::DeleteObjects( scene );
+        FOdysseyPainterEditor::DeleteObjects( mEditor, scene );
     }
 }
 
@@ -275,7 +287,7 @@ SOdysseyPainterEditorVectorSceneTreeView::PasteObjects()
     {
         FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 
-        FOdysseyPainterEditor::PasteObjects( scene );
+        FOdysseyPainterEditor::PasteObjects( mEditor, scene );
     }
 }
 

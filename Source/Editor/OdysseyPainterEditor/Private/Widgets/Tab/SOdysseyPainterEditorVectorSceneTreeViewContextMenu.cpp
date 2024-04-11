@@ -27,17 +27,17 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
           LOCTEXT("vector-scene-tree-view.context-menu.group-paint.name", "Make Paint Group")
         , LOCTEXT("vector-scene-tree-view.context-menu.group-paint.tooltip", "Make Paint Group")
         , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::MakePaintGroup, vectorScene )));
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::MakePaintGroup, iTreeView->GetEditor(), vectorScene )));
     menu.AddMenuEntry(
           LOCTEXT("vector-scene-tree-view.context-menu.group.name", "Group")
         , LOCTEXT("vector-scene-tree-view.context-menu.group.tooltip", "Group")
         , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Group, vectorScene )));
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Group, iTreeView->GetEditor(), vectorScene )));
     menu.AddMenuEntry(
           LOCTEXT("vector-scene-tree-view.context-menu.ungroup.name", "Ungroup")
         , LOCTEXT("vector-scene-tree-view.context-menu.ungroup.tooltip", "Ungroup")
         , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, vectorScene )));
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, iTreeView->GetEditor(), vectorScene )));
     menu.AddMenuEntry(
           LOCTEXT("vector-scene-tree-view.context-menu.copy.name", "Copy")
         , LOCTEXT("vector-scene-tree-view.context-menu.copy.tooltip", "Copy")
@@ -47,7 +47,7 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
           LOCTEXT("vector-scene-tree-view.context-menu.paste.name", "Paste")
         , LOCTEXT("vector-scene-tree-view.context-menu.paste.tooltip", "Paste")
         , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteObjects, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteObjects, iTreeView->GetEditor(), vectorScene)));
     menu.AddMenuEntry(
           LOCTEXT("vector-scene-tree-view.context-menu.copy-transformation.name", "Copy Transformation")
         , LOCTEXT("vector-scene-tree-view.context-menu.copy-transformation.tooltip", "Copy Transformation")
@@ -57,12 +57,12 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
           LOCTEXT("vector-scene-tree-view.context-menu.paste-transformation.name", "Paste Transformation")
         , LOCTEXT("vector-scene-tree-view.context-menu.paste-transformation.tooltip", "Paste Transformation")
         , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteTransformation, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PasteTransformation, iTreeView->GetEditor(), vectorScene)));
     menu.AddMenuEntry(
           LOCTEXT("vector-scene-tree-view.context-menu.delete-selection.name","Delete Selection")
         , LOCTEXT("vector-scene-tree-view.context-menu.delete-selection.tooltip","Delete Selection")
         , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, vectorScene)));
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, iTreeView->GetEditor(), vectorScene)));
     }
     menu.EndSection();
 

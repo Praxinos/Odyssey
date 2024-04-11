@@ -6,6 +6,7 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 // testing
 #include "Import/svg/OdysseyVectorImportSVG.h"
@@ -89,6 +90,10 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
 

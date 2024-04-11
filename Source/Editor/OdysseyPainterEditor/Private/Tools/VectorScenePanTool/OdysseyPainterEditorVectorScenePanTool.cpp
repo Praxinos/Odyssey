@@ -66,6 +66,10 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 

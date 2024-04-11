@@ -173,8 +173,17 @@ SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit:
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
 #endif
-    FOdysseyAnimationCellImageStaggerMutator mutator(mCell->GetLayer(), mCell);
+    UOdysseyAnimationLayer* layer = mCell->GetLayer();
+    UOdysseyAnimation* animation = layer->GetAnimation();
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+
+    FOdysseyAnimationCellImageStaggerMutator mutator(layer, mCell);
     mutator.SetReach(FMath::Max(0, iReach));
+
+    int frame = cellsContainer->GetCellFrame(mCell);
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
 }
 
 void
@@ -250,8 +259,17 @@ SOdysseyAnimationCellImageStagger::SetBehaviour(FOdysseyAnimationCellImageStagge
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.transaction.set-behaviour", "Set Stagger Cell Behaviour"));
 #endif
-    FOdysseyAnimationCellImageStaggerMutator mutator(mCell->GetLayer(), mCell);
+    UOdysseyAnimationLayer* layer = mCell->GetLayer();
+    UOdysseyAnimation* animation = layer->GetAnimation();
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+
+    FOdysseyAnimationCellImageStaggerMutator mutator(layer, mCell);
     mutator.SetBehaviour(iBehaviour);
+
+    int frame = cellsContainer->GetCellFrame(mCell);
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
 }
 
 bool

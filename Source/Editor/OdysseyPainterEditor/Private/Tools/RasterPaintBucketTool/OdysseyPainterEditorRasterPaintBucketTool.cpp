@@ -9,6 +9,7 @@
 #include "OdysseyPainterEditor.h"
 #include "Palette/OdysseyPaletteEntryColor.h" 
 #include "Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -149,6 +150,12 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
     
 	paintBlock->Dirty();
     Commit();
+    
+    FOdysseyPainterEditor* editor = GetEditor();
+    TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+    if (source)
+        source->RecordCurrentFrameUndo();
+
     GEditor->EndTransaction();
 
     return true;

@@ -99,39 +99,40 @@ public:
     uint64 GetVectorDrawingFlags();
 
     // generic reusable vector methods. 
-    static void BringForward( FOdysseyVectorGroupPaint* iScene );
-    static void SendBackward( FOdysseyVectorGroupPaint* iScene );
-    static void ApplyTransformations( FOdysseyVectorGroupPaint* iScene );
-    static void MakePaintGroup( FOdysseyVectorGroupPaint* iScene );
-    static void Ungroup( FOdysseyVectorGroupPaint* iScene );
-    static void Group( FOdysseyVectorGroupPaint* iScene );
-    static void SelectAllPoints( FOdysseyVectorGroupPaint* iScene );
-    static void SelectAllObjects( FOdysseyVectorGroupPaint* iScene );
-    static void ResetView( FOdysseyVectorGroupPaint* iScene );
-    static void LockPointSelection( FOdysseyVectorGroupPaint* iScene );
-    static void UnlockPointSelection( FOdysseyVectorGroupPaint* iScene );
-    static void UnalignPointSelection( FOdysseyVectorGroupPaint* iScene );
-    static void AlignPointSelection( FOdysseyVectorGroupPaint* iScene );
-    static void DeletePointSelectionRecursive( FOdysseyVectorObject* iVectorObject
+    static void BringForward( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void SendBackward( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void ApplyTransformations( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void Group( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void SelectAllObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void ResetView( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void LockPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void UnalignPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void DeletePointSelectionRecursive( FOdysseyPainterEditor* iEditor
+                                             , FOdysseyVectorObject* iVectorObject
                                              , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                                              , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                                              , std::vector<FOdysseyVectorPath*>& oRemovedPathArray
                                              , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray );
-    static void DeletePointSelection( FOdysseyVectorGroupPaint* iScene );
-    static void DeleteObjects( FOdysseyVectorGroupPaint* iScene );
-    static void FlipHorizontal( FOdysseyVectorGroupPaint* iScene );
-    static void ClearColoring( FOdysseyVectorGroupPaint* iScene );
-    static void FlipVertical( FOdysseyVectorGroupPaint* iScene );
-    static void DeleteBucket( FOdysseyVectorBucket* iBucket );
-    static void PropagateBucket( FOdysseyVectorBucket* iBucket );
-    static void UnpropagateBucket( FOdysseyVectorBucket* iBucket );
+    static void DeletePointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void ClearColoring( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void FlipVertical( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void DeleteBucket( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
+    static void PropagateBucket( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
+    static void UnpropagateBucket( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
     static void CopyObjects( FOdysseyVectorGroupPaint* iScene );
-    static void PasteObjects( FOdysseyVectorGroupPaint* iScene );
-    static void StitchVertices( FOdysseyVectorGroupPaint* iScene
+    static void PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void StitchVertices( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene
                               , FOdysseyVectorVertex* iVertexA
                               , FOdysseyVectorVertex* iVertexB );
     static void CopyTransformation( FOdysseyVectorGroupPaint* iScene );
-    static void PasteTransformation( FOdysseyVectorGroupPaint* iScene );
+    static void PasteTransformation( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
                            , const TArray<FOdysseyVectorGroupPaint*>& iSourceSceneArray );
     static void AlterContourWidth( FOdysseyVectorGroupPaint* iScene

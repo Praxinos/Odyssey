@@ -230,6 +230,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownDeletePoint( FOdysseyVectorG
                                                                       , addedSegmentArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
     }
@@ -329,6 +333,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, mPickedVertexArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction(); 
         //---------- end of undo ------------//
@@ -364,6 +372,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                     }
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                    if (source)
+                        source->RecordCurrentFrameUndo();
                 }
                 GEditor->EndTransaction();
             break;
@@ -400,6 +412,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                                              , alteredSegmentArray );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                    if (source)
+                        source->RecordCurrentFrameUndo();
                 }
                 GEditor->EndTransaction();
                 //---------- end of undo
@@ -425,6 +441,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                                              , alteredSegmentArray );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                    if (source)
+                        source->RecordCurrentFrameUndo();
                 }
                 GEditor->EndTransaction();
                 //---------- end of undo
@@ -691,6 +711,10 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 

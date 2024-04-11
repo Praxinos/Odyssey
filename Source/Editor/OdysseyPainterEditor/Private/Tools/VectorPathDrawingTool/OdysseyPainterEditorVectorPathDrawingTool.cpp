@@ -9,6 +9,7 @@
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -102,7 +103,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorGroupPaint
     return nullptr;
 }
 
-// static
 void
 UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                                                , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
@@ -121,11 +121,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorG
                                                                   , iAddedSegmentArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 }
 
-//static
 void
 UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGroupPaint* iScene
                                                              , FOdysseyVectorPath* iPath
@@ -139,6 +142,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, iPath ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 }

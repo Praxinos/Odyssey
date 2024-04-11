@@ -17,6 +17,7 @@
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"
 #include "OdysseyHUDHandle.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -216,6 +217,12 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
 
     Flush();
     Commit();
+    
+    FOdysseyPainterEditor* editor = GetEditor();
+    TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+    if (source)
+        source->RecordCurrentFrameUndo();
+
     GEditor->EndTransaction();
     mHUD->EmptyHUDElements();
     mEditor->HUDSystem()->ClearHUDSurface();

@@ -28,13 +28,15 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         ~SOdysseyPainterEditorVectorSceneTreeView();
         SOdysseyPainterEditorVectorSceneTreeView();
     
-        void Construct(const FArguments& InArgs);
+        void Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor);
 
         void Update( FOdysseyVectorGroupPaint* iScene );
 
         void RenameSelectedItem();
 
         TSharedPtr<FVectorSceneTreeViewItem> GetRootItem();
+
+        FOdysseyPainterEditor* GetEditor() const;
 
     protected:
         /**
@@ -65,6 +67,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent );
 
     protected:
+        FOdysseyPainterEditor* mEditor;
         TSharedPtr<FVectorSceneTreeViewItem> mRootItem;
         TArray<TSharedPtr<FVectorSceneTreeViewItem>> mItemsSource;
         TSharedRef<FUICommandList> mCommandList;

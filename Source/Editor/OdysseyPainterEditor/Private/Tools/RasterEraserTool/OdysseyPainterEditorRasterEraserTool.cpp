@@ -244,6 +244,11 @@ UOdysseyPainterEditorRasterEraserTool::Commit()
 {
     FScopedTransaction transaction(LOCTEXT("raster-drawing-tool.transaction.paint-stroke", "Paint Stroke"));
     mPaintEngine.Commit(mBlendParameters);
+    
+    FOdysseyPainterEditor* editor = GetEditor();
+    TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+    if (source)
+        source->RecordCurrentFrameUndo();
 }
 
 TSharedRef<SWidget>

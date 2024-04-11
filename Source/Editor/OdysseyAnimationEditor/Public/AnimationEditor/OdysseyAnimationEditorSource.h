@@ -31,6 +31,7 @@ public:
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
     virtual FOdysseyMediaProvider GetCurrentMediaProvider() override;
     virtual void Clear() override;
+    virtual void RecordCurrentFrameUndo() const override;
 
 public:
     UOdysseyAnimation* GetAnimation() const;

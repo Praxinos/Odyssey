@@ -6,6 +6,7 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -125,6 +126,11 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene, focusedObjectList ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+        const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+        TSharedPtr<FOdysseyPainterEditorSource> source = treeView->GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 

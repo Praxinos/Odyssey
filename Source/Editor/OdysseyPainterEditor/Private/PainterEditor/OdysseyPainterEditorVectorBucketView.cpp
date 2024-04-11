@@ -8,13 +8,14 @@ UOdysseyPainterEditorVectorBucketView::~UOdysseyPainterEditorVectorBucketView()
 }
 
 UOdysseyPainterEditorVectorBucketView::UOdysseyPainterEditorVectorBucketView()
-    : mBucket( nullptr )
+    : mEditor( nullptr )
+    , mBucket( nullptr )
 {
 }
 
-UOdysseyPainterEditorVectorBucketView::UOdysseyPainterEditorVectorBucketView( FOdysseyVectorBucket* iBucket )
+UOdysseyPainterEditorVectorBucketView::UOdysseyPainterEditorVectorBucketView( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
-    Update( iBucket );
+    Update( iEditor, iBucket );
 }
 
 void
@@ -31,8 +32,9 @@ UOdysseyPainterEditorVectorBucketView::ImportParam()
 }
 
 void 
-UOdysseyPainterEditorVectorBucketView::Update( FOdysseyVectorBucket* iBucket )
+UOdysseyPainterEditorVectorBucketView::Update( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
+    mEditor = iEditor;
     mBucket = iBucket;
 
     ImportParam();
@@ -92,6 +94,10 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
 

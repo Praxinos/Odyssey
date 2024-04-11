@@ -295,6 +295,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
                 FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
             }
             GEditor->EndTransaction();
         }

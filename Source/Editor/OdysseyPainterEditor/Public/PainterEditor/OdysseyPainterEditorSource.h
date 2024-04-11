@@ -42,6 +42,8 @@ public:
     virtual void AddReferencedObjects(FReferenceCollector& Collector);
     virtual FString GetReferencerName() const;
 
+    virtual void RecordCurrentFrameUndo() const;
+
 protected:
     // Interface
     void AddEditedObject(UObject* iObject);

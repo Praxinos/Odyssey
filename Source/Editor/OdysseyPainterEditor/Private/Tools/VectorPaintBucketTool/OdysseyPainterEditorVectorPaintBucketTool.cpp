@@ -14,6 +14,7 @@
 #include "OdysseyPainterEditorVectorBucketView.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -148,6 +149,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedBucket );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                            if (source)
+                                source->RecordCurrentFrameUndo();
                         }
                         GEditor->EndTransaction();
 
@@ -163,6 +168,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, mPickedBucket );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                            if (source)
+                                source->RecordCurrentFrameUndo();
                         }
                         GEditor->EndTransaction();
 
@@ -179,6 +188,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, mPickedBucket );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                                
+                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                            if (source)
+                                source->RecordCurrentFrameUndo();
                         }
                         GEditor->EndTransaction();
                     }
@@ -438,6 +451,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
                                                                     , paramBucketArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -467,6 +484,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorRemoveBucket( FOdysse
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 }
@@ -483,6 +504,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorPropagateBucket( FOdy
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -500,6 +525,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorColorBucket( FOdyssey
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -517,6 +546,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorClearBucket( FOdyssey
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -588,17 +621,17 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
                 LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.name", "Delete Bucket")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.tooltip", "Delete Bucket")
               , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, mPickedBucket )));
+              , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, GetEditor(), mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.name", "Propagate Bucket")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip", "Propagate Bucket")
               , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, mPickedBucket )));
+              , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, GetEditor(), mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.name", "Unpropagate Bucket")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip", "Unpropagate Bucket")
               , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, mPickedBucket )));
+              , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, GetEditor(), mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.name", "Copy Bucket Param")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.tooltip", "Copy Bucket Param")
@@ -608,7 +641,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
               LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.name", "Paste Bucket Param")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.tooltip", "Paste Bucket Param")
               , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam, mPickedBucket )));
+              , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam, mPickedBucket )));
             iMenu.AddMenuEntry(
                 LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.name", "Bucket properties")
               , LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.tooltip", "Bucket Properties")
@@ -634,7 +667,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties( FOdysseyPainterEdi
     FDetailsViewArgs DetailsViewArgs;
     UOdysseyPainterEditorVectorBucketView* bucketView = NewObject<UOdysseyPainterEditorVectorBucketView>();
 
-    bucketView->Update( iBucket );
+    bucketView->Update( iEditor, iBucket );
 
     DetailsViewArgs.bUpdatesFromSelection = false;
     DetailsViewArgs.bLockable = false;
@@ -692,7 +725,6 @@ UOdysseyPainterEditorVectorPaintBucketTool::CopyBucketParam( FOdysseyVectorBucke
     iSourceBucket->Copy( &destinationBucket );
 }
 
-// static
 void
 UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBucket* iDestinationBucket )
 {
@@ -707,6 +739,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( scene, iDestinationBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 

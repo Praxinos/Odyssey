@@ -7,6 +7,7 @@
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "OdysseyVector.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -384,6 +385,10 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                                   , removedSegmentArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
    }

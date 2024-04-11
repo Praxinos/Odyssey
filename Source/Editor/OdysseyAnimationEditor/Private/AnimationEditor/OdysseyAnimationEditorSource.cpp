@@ -14,6 +14,7 @@
 #include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -212,6 +213,10 @@ FOdysseyAnimationEditorSource::Clear()
 				)
 			);
 			mutator.Commit();
+			
+			FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
+			currentFrameMutator.Set(mAnimation->CurrentFrame);
+			currentFrameMutator.Commit();
 		}
 	}
 	else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
@@ -227,6 +232,10 @@ FOdysseyAnimationEditorSource::Clear()
 				FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
 
 				GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
+			
+				FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
+				currentFrameMutator.Set(mAnimation->CurrentFrame);
+				currentFrameMutator.Commit();
 			}
 			GEditor->EndTransaction();
 
@@ -234,6 +243,14 @@ FOdysseyAnimationEditorSource::Clear()
 			vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
 		}
 	}
+}
+
+void
+FOdysseyAnimationEditorSource::RecordCurrentFrameUndo() const
+{
+	FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
+	currentFrameMutator.Set(mAnimation->CurrentFrame);
+	currentFrameMutator.Commit();
 }
 
 #undef LOCTEXT_NAMESPACE

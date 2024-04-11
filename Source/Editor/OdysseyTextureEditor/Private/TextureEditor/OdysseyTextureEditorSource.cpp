@@ -198,6 +198,7 @@ FOdysseyTextureEditorSource::Clear()
 			{
 				FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
 				GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
+                RecordCurrentFrameUndo();
 			}
 
 			vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));

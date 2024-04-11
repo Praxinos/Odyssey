@@ -303,7 +303,11 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     
     FOdysseyAnimationCellsMutator mutator(layerImageRaster, layerImageRaster->GetCellsContainer());
     mutator.Add(cells);
-    mutator.Commit();
+    mutator.Commit(); 
+    
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(0);
+    currentFrameMutator.Commit();
 }
 
 void           
@@ -415,6 +419,10 @@ FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
     FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
     mutator.Add(cells);
     mutator.Commit();
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(0);
+    currentFrameMutator.Commit();
 }
 
 void           
@@ -712,6 +720,10 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
         mutator.Add({ cell });
         mutator.SetOffset(animation->CurrentFrame);
         mutator.Commit();
+    
+        FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+        currentFrameMutator.Set(animation->CurrentFrame);
+        currentFrameMutator.Commit();
     }
 
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));

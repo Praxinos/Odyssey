@@ -18,9 +18,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
     public:
         ~UOdysseyPainterEditorVectorBucketView();
         UOdysseyPainterEditorVectorBucketView();
-        UOdysseyPainterEditorVectorBucketView( FOdysseyVectorBucket* iBucket );
+        UOdysseyPainterEditorVectorBucketView( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
 
-        void Update( FOdysseyVectorBucket* iBucket );
+        void Update( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     protected:
@@ -28,6 +28,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
         virtual void PropertyChanged( const FName& iPropertyName, const FName& iCategory );
 
     protected:
+        FOdysseyPainterEditor* mEditor;
         FOdysseyVectorBucket* mBucket;
 
     public:

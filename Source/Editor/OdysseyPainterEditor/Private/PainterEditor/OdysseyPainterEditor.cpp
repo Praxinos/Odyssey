@@ -692,7 +692,7 @@ FOdysseyPainterEditor::AddEditMenuEntry( FMenuBuilder& iMenuBuilder )
 
 // static
 void
-FOdysseyPainterEditor::BringForward( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::BringForward( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
@@ -706,6 +706,10 @@ FOdysseyPainterEditor::BringForward( FOdysseyVectorGroupPaint* iScene )
            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTransferObjects( iScene, selectedObject );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
 
@@ -722,7 +726,7 @@ FOdysseyPainterEditor::BringForward( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::SendBackward( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::SendBackward( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
@@ -736,6 +740,10 @@ FOdysseyPainterEditor::SendBackward( FOdysseyVectorGroupPaint* iScene )
            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTransferObjects( iScene, selectedObject );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
 
@@ -752,7 +760,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::ApplyTransformations( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*> objectList;
@@ -768,6 +776,10 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoApplyTransformations( iScene, objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -787,7 +799,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::MakePaintGroup( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorObject*> cubicPathOldParentArray;
@@ -818,6 +830,10 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyVectorGroupPaint* iScene )
                                                                   , removedBucketArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
 
@@ -836,7 +852,7 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::Ungroup( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
@@ -857,6 +873,10 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorGroupPaint* iScene )
                 FOdysseyVectorUndo* undo = new FOdysseyVectorUndoUngroup( iScene, group );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
             }
             GEditor->EndTransaction();
 
@@ -883,7 +903,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::Group( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::Group( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorObject*> objectOldParentArray;
@@ -907,6 +927,10 @@ FOdysseyPainterEditor::Group( FOdysseyVectorGroupPaint* iScene )
                                                                   , objectOldParentArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
 
@@ -926,7 +950,7 @@ FOdysseyPainterEditor::Group( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::SelectAllPoints( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*> objectList;
@@ -941,6 +965,10 @@ FOdysseyPainterEditor::SelectAllPoints( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -971,7 +999,7 @@ FOdysseyPainterEditor::SelectAllPoints( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::SelectAllObjects( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::SelectAllObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
@@ -982,6 +1010,10 @@ FOdysseyPainterEditor::SelectAllObjects( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -996,7 +1028,7 @@ FOdysseyPainterEditor::SelectAllObjects( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::ResetView( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::ResetView( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
@@ -1007,6 +1039,10 @@ FOdysseyPainterEditor::ResetView( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -1021,7 +1057,7 @@ FOdysseyPainterEditor::ResetView( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::LockPointSelection( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::LockPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
@@ -1039,6 +1075,10 @@ FOdysseyPainterEditor::LockPointSelection( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexLock( iScene, selectedVertexArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
     //---------- end of undo ------------//
@@ -1058,7 +1098,7 @@ FOdysseyPainterEditor::LockPointSelection( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::UnlockPointSelection( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
@@ -1076,6 +1116,10 @@ FOdysseyPainterEditor::UnlockPointSelection( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexLock( iScene, selectedVertexArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
     //---------- end of undo ------------//
@@ -1095,7 +1139,7 @@ FOdysseyPainterEditor::UnlockPointSelection( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::UnalignPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
@@ -1112,7 +1156,11 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorGroupPaint* iScene )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, selectedVertexArray );
 
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );        
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
     //---------- end of undo ------------//
@@ -1133,7 +1181,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
@@ -1151,6 +1199,10 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, selectedVertexArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction(); 
     //---------- end of undo ------------//
@@ -1175,7 +1227,7 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::DeletePointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorPath*> removedPathArray;
@@ -1237,6 +1289,10 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorGroupPaint* iScene )
                                                                   , addedSegmentArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -1248,7 +1304,7 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::DeleteObjects( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*>& selectedObjectList = vectorEngine->GetSelectedObjectList();
@@ -1268,6 +1324,10 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyVectorGroupPaint* iScene )
                                                                       , removedObjectArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -1282,7 +1342,7 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*> objectList;
@@ -1297,6 +1357,10 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -1312,7 +1376,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::FlipVertical( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::FlipVertical( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*> objectList;
@@ -1327,6 +1391,10 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -1342,7 +1410,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::ClearColoring( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::ClearColoring( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorBucket*> bucketArray;
@@ -1386,6 +1454,10 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, bucketArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -1400,7 +1472,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::DeleteBucket( FOdysseyVectorBucket* iBucket )
+FOdysseyPainterEditor::DeleteBucket( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
     FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
     FOdysseyVectorGroupPaint* scene = ownerObject->GetScene();
@@ -1418,6 +1490,10 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyVectorBucket* iBucket )
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( scene, iBucket );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
     }
@@ -1467,7 +1543,7 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
 }
 
 static void
-SetBucketPropagation( FOdysseyVectorBucket* iBucket, bool iPropagate )
+SetBucketPropagation( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket, bool iPropagate )
 {
     FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
     FOdysseyVectorGroupPaint* scene = ownerObject->GetScene();
@@ -1479,6 +1555,10 @@ SetBucketPropagation( FOdysseyVectorBucket* iBucket, bool iPropagate )
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( scene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -1491,16 +1571,16 @@ SetBucketPropagation( FOdysseyVectorBucket* iBucket, bool iPropagate )
 
 // static
 void
-FOdysseyPainterEditor::PropagateBucket( FOdysseyVectorBucket* iBucket )
+FOdysseyPainterEditor::PropagateBucket( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
-    SetBucketPropagation( iBucket, true );
+    SetBucketPropagation( iEditor, iBucket, true );
 }
 
 // static
 void
-FOdysseyPainterEditor::UnpropagateBucket( FOdysseyVectorBucket* iBucket )
+FOdysseyPainterEditor::UnpropagateBucket( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
-    SetBucketPropagation( iBucket, false );
+    SetBucketPropagation( iEditor, iBucket, false );
 }
 
 static std::list<FOdysseyVectorObject*>&
@@ -1535,7 +1615,7 @@ FOdysseyPainterEditor::CopyTransformation( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::PasteTransformation( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::PasteTransformation( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
@@ -1551,6 +1631,10 @@ FOdysseyPainterEditor::PasteTransformation( FOdysseyVectorGroupPaint* iScene )
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, selectedObject );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
         // -------------------------- //
@@ -1592,7 +1676,7 @@ FOdysseyPainterEditor::CopyObjects( FOdysseyVectorGroupPaint* iScene )
 
 // static
 void
-FOdysseyPainterEditor::PasteObjects( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*> pastedObjectList;
@@ -1614,6 +1698,10 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyVectorGroupPaint* iScene )
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, pastedObjectList ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
 
@@ -1666,7 +1754,8 @@ FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
 }
 
 void
-FOdysseyPainterEditor::StitchVertices( FOdysseyVectorGroupPaint* iScene
+FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
+                                     , FOdysseyVectorGroupPaint* iScene
                                      , FOdysseyVectorVertex* iVertexA
                                      , FOdysseyVectorVertex* iVertexB )
 {
@@ -1724,6 +1813,10 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyVectorGroupPaint* iScene
                                                                             , mergedSegmentArray );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
             }
             GEditor->EndTransaction();
         }

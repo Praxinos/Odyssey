@@ -10,7 +10,8 @@ UOdysseyPainterEditorVectorObjectView::~UOdysseyPainterEditorVectorObjectView()
 }
 
 UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
-    : mScene( nullptr )
+    : mEditor( nullptr )
+    , mScene( nullptr )
 {
 }
 
@@ -41,9 +42,11 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
 }
 
 void 
-UOdysseyPainterEditorVectorObjectView::Update( FOdysseyVectorGroupPaint* iScene
+UOdysseyPainterEditorVectorObjectView::Update( FOdysseyPainterEditor* iEditor
+                                             , FOdysseyVectorGroupPaint* iScene
                                              , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
+    mEditor = iEditor;
     mScene = iScene;
     mFocusedObjectList = iFocusedObjectList;
 
@@ -129,6 +132,10 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
 

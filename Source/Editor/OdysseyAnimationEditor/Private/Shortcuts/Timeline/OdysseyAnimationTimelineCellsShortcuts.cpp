@@ -145,7 +145,12 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.paste-frame", "Paste Frames"));
 #endif
 
-    clipboardData->Paste(layer, layer->GetAnimation()->CurrentFrame);
+    UOdysseyAnimation* animation = layer->GetAnimation();
+    clipboardData->Paste(layer, animation->CurrentFrame);
+    
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(animation->CurrentFrame);
+    currentFrameMutator.Commit();
 }
 
 void
@@ -184,6 +189,13 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.remove-frame", "Remove Frames"));
 #endif
 
+    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
+    UOdysseyAnimation* animation = layer->GetAnimation();
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
+
     FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
     mutator.Remove(selectedCells);
     mutator.Commit();
@@ -220,6 +232,13 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.create-stagger-cell", "Stagger Cell"));
 #endif
 
+    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
+    UOdysseyAnimation* animation = layer->GetAnimation();
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
+
     FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
     for (TSharedPtr<FOdysseyAnimationCell> cell : selectedCells)
     {
@@ -255,6 +274,13 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseSelectedCellsLength()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.increase-selected-cells-length", "Increase Selected Cells Length"));
 #endif
+    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
+    UOdysseyAnimation* animation = layer->GetAnimation();
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
+
     FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
     for (TSharedPtr<FOdysseyAnimationCell> selectedCell : selectedCells)
     {
@@ -284,6 +310,13 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseSelectedCellsLength()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.decrease-selected-cells-length", "Decrease Selected Cells Length"));
 #endif
+    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
+    UOdysseyAnimation* animation = layer->GetAnimation();
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
+    
     FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
     for (TSharedPtr<FOdysseyAnimationCell> selectedCell : selectedCells)
     {
@@ -337,9 +370,17 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetSelectedCellsLength()
         .OnOkPressed_Lambda(
             [&value, &layer, &cellsContainer, &selectedCells]()
             {
+                UOdysseyAnimation* animation = layer->GetAnimation();
+
                 #ifdef WITH_EDITOR
                 FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-selected-cells-length", "Set Selected Cells Length"));
                 #endif
+
+                int frame = cellsContainer->GetCellFrame(selectedCells[0]);
+
+                FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+                currentFrameMutator.Set(frame);
+                currentFrameMutator.Commit();
 
                 FOdysseyAnimationCellsMutator mutator(layer, cellsContainer);
                 for (TSharedPtr<FOdysseyAnimationCell> selectedCell : selectedCells)

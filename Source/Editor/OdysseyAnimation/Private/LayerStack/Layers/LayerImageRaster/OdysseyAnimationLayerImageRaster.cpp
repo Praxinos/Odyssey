@@ -16,6 +16,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterExport.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImport.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -527,6 +528,10 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
         mutator.Add({cell}, 0);
         mutator.SetOffset(mCellsContainer->GetOffset() - length);
         mutator.Commit();
+
+        FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+        currentFrameMutator.Set(animation->CurrentFrame);
+        currentFrameMutator.Commit();
         return;
     }
 
@@ -545,6 +550,10 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
         mutator.SetLength( cellCount - 1, lastCellLength + iFrameIndex - range.GetUpperBoundValue() - 1);
         mutator.Add({cell});
         mutator.Commit();
+        
+        FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+        currentFrameMutator.Set(animation->CurrentFrame);
+        currentFrameMutator.Commit();
         return;
     }
 }

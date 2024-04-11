@@ -80,11 +80,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                         , double iWorldY
                                         , double iPickingRadius );
 
-        static void RecordUndoPathAdd( FOdysseyVectorGroupPaint* iScene
+        void RecordUndoPathAdd( FOdysseyVectorGroupPaint* iScene
                                      , FOdysseyVectorPath* iPath
                                      , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                      , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
-        static void RecordUndoPathAlter( FOdysseyVectorGroupPaint* iScene
+        void RecordUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                        , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                        , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 

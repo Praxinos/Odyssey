@@ -60,14 +60,14 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdyss
         {
             if( objectClass == FOdysseyVectorPath::StaticClass() )
             {
-                mPathView->Update( iScene, focusedObjectList );
+                mPathView->Update( mEditor, iScene, focusedObjectList );
                 mDetailsView->SetObject( mPathView );
             }
 
             if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
              || ( objectClass == FOdysseyVectorGroupPaint::StaticClass() ) )
             {
-                mGroupPaintView->Update( iScene, focusedObjectList );
+                mGroupPaintView->Update( mEditor, iScene, focusedObjectList );
                 mDetailsView->SetObject( mGroupPaintView );
             }
 
@@ -75,7 +75,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdyss
              || ( objectClass == FOdysseyVectorGroup::StaticClass() ) )
             {
                 // default
-                mObjectView->Update( iScene, focusedObjectList );
+                mObjectView->Update( mEditor, iScene, focusedObjectList );
                 mDetailsView->SetObject( mObjectView );
             }
 
@@ -108,7 +108,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateObjectPropertiesPanel()
 TSharedPtr<SWidget>
 FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
 {
-    mVectorSceneTreeView = SNew( SOdysseyPainterEditorVectorSceneTreeView );
+    mVectorSceneTreeView = SNew( SOdysseyPainterEditorVectorSceneTreeView, mEditor );
     mDetailsView = CreateObjectPropertiesPanel();
 
     return SNew(SWidgetSwitcher)

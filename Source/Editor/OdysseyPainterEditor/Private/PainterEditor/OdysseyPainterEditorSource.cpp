@@ -75,3 +75,8 @@ FOdysseyPainterEditorSource::GetReferencerName() const
 {
     return "FOdysseyPainterEditorSource";
 }
+
+void
+FOdysseyPainterEditorSource::RecordCurrentFrameUndo() const
+{
+}

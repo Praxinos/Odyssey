@@ -12,6 +12,7 @@
 #include "OdysseyHUDHandle.h"
 #include "OdysseyBrushTransform.h"
 #include "GeomTools.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -606,6 +607,12 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
         GEditor->BeginTransaction(LOCTEXT("raster-transform-tool.transaction.transform", "Transform"));
         mRasterMutator.Commit();
         mPaintEngine.Commit(FOdysseyBlendParameters());
+
+        FOdysseyPainterEditor* editor = GetEditor();
+        TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+
         GEditor->EndTransaction();
         mRasterMutator.SetRasterBlock(nullptr);
     }

@@ -9,6 +9,8 @@
 
 #include "OdysseyPainterEditorVectorObjectView.generated.h"
 
+class FOdysseyPainterEditor;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UObject
 {
@@ -19,7 +21,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         ~UOdysseyPainterEditorVectorObjectView();
         UOdysseyPainterEditorVectorObjectView();
 
-        void Update( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iFocusedObjectList );
+        void Update( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iFocusedObjectList );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     protected:
@@ -29,6 +31,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
                                       , const FName& iCategory );
 
     protected:
+        FOdysseyPainterEditor* mEditor;
         FOdysseyVectorGroupPaint* mScene;
         std::list<FOdysseyVectorObject*> mFocusedObjectList;
 

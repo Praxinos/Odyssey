@@ -47,10 +47,14 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
         return;
         
 #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("timeline.move-tool.transaction.set-offset", "Change Layer Offset"));
+        FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
 #endif
     TSharedRef<FOdysseyAnimationCellsMutator> cellsMutator = MakeShared<FOdysseyAnimationCellsMutator>(currentLayer, cellsContainer.ToSharedRef());
     cellsMutator->BreakCellAtFrame(animation->CurrentFrame);
+
+    FOdysseyAnimationCurrentFrameMutator mutator(animation);
+    mutator.Set(animation->CurrentFrame);
+    mutator.Commit();
 }
 
 bool
