@@ -114,11 +114,15 @@ static TCHAR* ReadXY( const TCHAR* iCommandArgs
 {
     TCHAR* currentArg = (TCHAR*) iCommandArgs;
 
-    coords.x = _tcstod( currentArg, &currentArg );
+    // wcstod is for wide chars. It should be portable on both windows and linux but I am unsure
+    // about the result compared to the windows-only _tcstod function.
+    coords.x = wcstod( currentArg, &currentArg );
 
     currentArg = SkipCommaWhitespace( currentArg );
 
-    coords.y = _tcstod( currentArg, &currentArg );
+    // wcstod is for wide chars. It should be portable on both windows and linux but I am unsure
+    // about the result compared to the windows-only _tcstod function.
+    coords.y = wcstod( currentArg, &currentArg );
 
     if( referenceCoords )
     {
