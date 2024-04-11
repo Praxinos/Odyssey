@@ -2,6 +2,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVector.h"
+#include <execution> // for_each
 
 FOdysseyVectorPath::~FOdysseyVectorPath()
 {
@@ -311,10 +312,15 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
     mBLPath.clear();
 
     // update invalidated segments only
+    /*std::for_each( std::execution::par_unseq
+                 , mInvalidatedSegmentList.begin()
+                 , mInvalidatedSegmentList.end()
+                 , [ this ]( FOdysseyVectorSegment *segment )*/
     for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
     {
         segment->Update();
-    }
+    } 
+    /*);*/
 
     mInvalidatedSegmentList.clear();
 
@@ -1608,32 +1614,96 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
         FOdysseyVectorEngine* vectorEngine = GetEngine();
         double difU = iEndU - iStartU;
 
+        // for testing
+        //iBLContext->setStrokeWidth( 1.0f );
+        //iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
+
         for( int i = 0; i < fractionCache.size(); i++ )
         {
+        // for testing
+/*
+            BLPoint pt[6] = { { fractionCache[i].polygon.point[0].x, fractionCache[i].polygon.point[0].y }
+                            , { fractionCache[i].polygon.point[1].x, fractionCache[i].polygon.point[1].y }
+                            , { fractionCache[i].polygon.point[2].x, fractionCache[i].polygon.point[2].y }
+                            , { fractionCache[i].polygon.point[3].x, fractionCache[i].polygon.point[3].y }
+                            , { fractionCache[i].polygon.point[4].x, fractionCache[i].polygon.point[4].y }
+                            , { fractionCache[i].polygon.point[5].x, fractionCache[i].polygon.point[5].y } };
+*/
             FOdysseyVectorFraction* fraction = &fractionCache[i];
+            // deprecated
+/*
             double hexaU[6] = { iStartU + ( fraction->polygon.U[0] * difU )
                               , iStartU + ( fraction->polygon.U[1] * difU )
                               , iStartU + ( fraction->polygon.U[2] * difU )
                               , iStartU + ( fraction->polygon.U[3] * difU )
                               , iStartU + ( fraction->polygon.U[4] * difU )
                               , iStartU + ( fraction->polygon.U[5] * difU ) };
+
+            double quadU[6] = { iStartU + ( fraction->polygon.U[0] * difU )
+                              , iStartU + ( fraction->polygon.U[1] * difU )
+                              , iStartU + ( fraction->polygon.U[2] * difU )
+                              , iStartU + ( fraction->polygon.U[3] * difU )
+                              , iStartU + ( fraction->polygon.U[4] * difU )
+                              , iStartU + ( fraction->polygon.U[5] * difU ) };
+*/
+            // We have to divide the hexagon into 2 quads or else it can creates artefacts 
+            // due to UV Mapping when the hexagon is not "a square".
+            ::ULIS::FVec2D quad0P[4] = { fraction->polygon.point[0]
+                                       , fraction->polygon.point[1]
+                                       , fraction->polygon.point[2]
+                                       , fraction->polygon.point[3] };
+            double quad0U[6] = { iStartU + ( fraction->polygon.U[0] * difU )
+                               , iStartU + ( fraction->polygon.U[1] * difU )
+                               , iStartU + ( fraction->polygon.U[2] * difU )
+                               , iStartU + ( fraction->polygon.U[3] * difU ) };
+            double quad0V[6] = { fraction->polygon.V[0]
+                               , fraction->polygon.V[1]
+                               , fraction->polygon.V[2]
+                               , fraction->polygon.V[3] };
+            ::ULIS::FVec2D quad1P[4] = { fraction->polygon.point[3]
+                                       , fraction->polygon.point[4]
+                                       , fraction->polygon.point[5]
+                                       , fraction->polygon.point[0] };
+            double quad1U[6] = { iStartU + ( fraction->polygon.U[3] * difU )
+                               , iStartU + ( fraction->polygon.U[4] * difU )
+                               , iStartU + ( fraction->polygon.U[5] * difU )
+                               , iStartU + ( fraction->polygon.U[0] * difU ) };
+            double quad1V[6] = { fraction->polygon.V[3]
+                               , fraction->polygon.V[4]
+                               , fraction->polygon.V[5]
+                               , fraction->polygon.V[0] };
+
             uint64 polygonDrawingFlags = 0;
 
             polygonDrawingFlags |= mBrush.ColorFromBrush    ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
             polygonDrawingFlags |= mBrush.BilinearFiltering ? FPolygonDrawingFlags::BILINEARFILTERING : 0;
 
             // should be a static function
-            vectorEngine->FillHexagon( iBLContext
-                                     , fraction->polygon.point
-                                     , hexaU
-                                     , fraction->polygon.V
-                                     , iCombinedOpacity
-                                     , foregroundColor
-                                     , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
-                                     , mBrush.width
-                                     , mBrush.height
-                                     , mBrush.bitsPerPixel
-                                     , polygonDrawingFlags );
+            vectorEngine->FillQuad( iBLContext
+                                  , quad0P
+                                  , quad0U
+                                  , quad0V
+                                  , iCombinedOpacity
+                                  , foregroundColor
+                                  , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                  , mBrush.width
+                                  , mBrush.height
+                                  , mBrush.bitsPerPixel
+                                  , polygonDrawingFlags );
+
+            vectorEngine->FillQuad( iBLContext
+                                  , quad1P
+                                  , quad1U
+                                  , quad1V
+                                  , iCombinedOpacity
+                                  , foregroundColor
+                                  , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                  , mBrush.width
+                                  , mBrush.height
+                                  , mBrush.bitsPerPixel
+                                  , polygonDrawingFlags );
+            // for testing
+            // iBLContext->strokePolygon( pt, 6 );
         }
     }
     else // otherwise use Blend2D's
@@ -1668,9 +1738,24 @@ FOdysseyVectorPath::DrawShape( BLContext* iBLContext
          && ( ( worldBBoxMin.y ) < invalidationAreaMax.y )
          && ( ( worldBBoxMax.y ) > invalidationAreaMin.y ) )
         {
-            for( FOdysseyVectorChain& chain : mChainArray )
+            // for testing purpose (vector brush)
+            if( FOdysseyVectorBrush::GetDemoBrush() )
             {
-                DrawChain( iBLContext, vectorEngine, iCombinedOpacity, chain, iDrawingFlags );
+                for( FOdysseyVectorChain& chain : mChainArray )
+                {
+                    FOdysseyVectorBrush::GetDemoBrush()->Draw( iBLContext
+                                                             , iInvalidationArea
+                                                             , iCombinedOpacity
+                                                             , &chain
+                                                             , iDrawingFlags );
+                }
+            }
+            else
+            {
+                for( FOdysseyVectorChain& chain : mChainArray )
+                {
+                    DrawChain( iBLContext, vectorEngine, iCombinedOpacity, chain, iDrawingFlags );
+                }
             }
         }
     }
@@ -1706,6 +1791,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
         if( mBrush.GetTexture() )
         {
             double startU = mBrush.Revert ? 1.0f : 0.0f;
+            double remainingSegmentLength = 0.0f;
 
             mBrush.Lock();
 
@@ -1715,9 +1801,11 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                                     , &iCombinedOpacity
                                     , &iDrawingFlags
                                     , &startU
+                                    , &remainingSegmentLength
                                     , &screen
                                     , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
             {
+                FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( vertex );
                 ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( true );
                 ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( true );
                 FOdysseyVectorJoint& joint = vertex->GetJoint();
@@ -1726,28 +1814,45 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 double segmentAndJointLength = segmentLength + jointLength;
                 double endU = 0.0f;
 
-                if( mBrush.ExtendOverPath )
+                if( mBrush.ExtensionMode == eBrushExtensionMode::Path )
                 {
                     if( mBrush.Revert )
                     {
-                        endU = iChain.mLength ? startU - ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                        endU = startU - ( iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f );
                     }
                     else
                     {
-                        endU = iChain.mLength ? startU + ( segmentAndJointLength / iChain.mLength ) : 0.0f;
+                        endU = startU + ( iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f );
                     }
                 }
-                else
+
+                if( mBrush.ExtensionMode == eBrushExtensionMode::Segment )
                 {
                     if( mBrush.Revert )
+                    {
+                        startU = 1.0f;
+                        endU   = 0.0f;
+                    }
+                    else
                     {
                         startU = 0.0f;
                         endU   = 1.0f;
                     }
+                }
+
+                if( mBrush.ExtensionMode == eBrushExtensionMode::Adapt )
+                {
+                    double brushRatio = mBrush.height ? (double) mBrush.width  / mBrush.height : 0.0f;
+                    double averageSegmentRadius = ( vertex->GetRadius() + otherVertex->GetRadius() ) * 0.5f;
+                    double adaptedSegmentLength = averageSegmentRadius * brushRatio;
+
+                    if( mBrush.Revert )
+                    {
+                        endU   = startU - ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
+                    }
                     else
                     {
-                        startU = 1.0f;
-                        endU   = 0.0f;
+                        endU   = startU + ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
                     }
                 }
 
@@ -1757,13 +1862,13 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
 
                     // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
-                    if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
-                    if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
+                    //if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
+                    //if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
 
                     // Textured joints are drawn only in texture mode (obviously) and if the texture
                     // goes all over the path.
                     if( ( vertex->IsHandleAligned() == false )
-                    && ( mBrush.ExtendOverPath == true ) )
+                    && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
                     {
                         double segmentJointRatio = jointLength / ( segmentAndJointLength );
                         double jointStartU = segmentStartU;
@@ -1772,8 +1877,8 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                         segmentStartU = jointEndU;
 
                         // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
-                        if ( jointStartU < 0.0f ) jointStartU = 0.0f;
-                        if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
+                        //if ( jointStartU < 0.0f ) jointStartU = 0.0f;
+                        //if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
 
                         // don't draw if joint is outside the screen
                         if( ( ( jointBBox.x               ) < screen.w )

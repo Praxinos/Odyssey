@@ -16,7 +16,8 @@ enum class ePathPickingMode : uint8
 {
     Vertex = 0,
     VertexHandle = 1,
-    SegmentHandle = 2
+    SegmentHandle = 2,
+    Alter = 3 // Add, Remove or cut
 };
 
 // struct that stores the ratio of handleLength / segmentLength at mouseDown
@@ -108,12 +109,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         //                                  , const FName& iPropertyName ) override;
 
     private:
-        FOdysseyVectorPathCubic* FetchPath( FOdysseyVectorGroupPaint* iScene
-                                          , double iWorldX
-                                          , double iWorldY );
-        void OnMouseDownDeletePoint( FOdysseyVectorGroupPaint* iScene
-                                   , const FOdysseyPoint& iPointInTexture
-                                   , const FKey& iKey );
+        void OnMouseUpCutPaths( FOdysseyVectorGroupPaint* iScene
+                              , const FOdysseyPoint& iPointInTexture );
+        void OnMouseUpAddPoint( FOdysseyVectorGroupPaint* iScene
+                              , const FOdysseyPoint& iPointInTexture
+                              , const std::vector<FOdysseyVectorSegment*>& iPickedSegmentArray );
+        void OnMouseUpDeletePoint( FOdysseyVectorGroupPaint* iScene
+                                 , const std::vector<FOdysseyVectorPoint*>& iPickedPointArray );
         void OnMouseDownPickPoint( FOdysseyVectorGroupPaint* iScene
                                  , const FOdysseyPoint& iPointInTexture
                                  , const FKey& iKey );
@@ -160,9 +162,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         ::ULIS::FVec2D mOldPointInTexture;
 
     public:
-        UPROPERTY( EditAnywhere, Category = PathEditTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+        UPROPERTY( EditAnywhere
+                 , Category = PathEditTool
+                 , meta = ( ToolTip = "Picking Radius"
+                          , ClampMin = "0.0"
+                          , UIMin = "0.0" ) )
         double PickingRadius;
 
-        UPROPERTY( EditAnywhere, Category = PathEditTool )
+        UPROPERTY( EditAnywhere
+                 , Category = PathEditTool
+                 , meta = ( ToolTip = "Widen All Along" ) )
         bool WidenAllAlong;
 };

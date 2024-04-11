@@ -76,11 +76,11 @@ class FOdysseyVectorChain
         std::vector<FOdysseyVectorVertex*>& GetVertexArray();
         std::vector<FOdysseyVectorSegment*>& GetSegmentArray();
 
-    private :
         void IterateSegments( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSegment*)> iCallback );
         void IterateSections( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSection*)> iCallback );
 
 
+    private :
         bool EraseSections( BLImageData* iImageData
                           , std::vector<FWayPoint>& oWayPointArray
                           , std::vector<FWayFragment>& oWayFragmentArray );

@@ -19,13 +19,13 @@ FOdysseyVectorExportV2::WriteBrushColorFromBrush( const FOdysseyVectorBrush& iBr
 void
 FOdysseyVectorExportV2::WriteBrushExtendOverPath( const FOdysseyVectorBrush& iBrush, FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BRUSH_EXTENDOVERPATH
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BRUSH_EXTENSIONMODE
                             , Ar
                             , [&iBrush](FArchive &Ar) -> void
     {
-        uint32 extendOverPath = (uint32) iBrush.ExtendOverPath;
+        uint32 extensionMode = (uint32) iBrush.ExtensionMode;
 
-        Ar << extendOverPath;
+        Ar << extensionMode;
     } );
 }
 

@@ -650,23 +650,23 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     {                                                                                                                      \
         case 32 :                                                                                                          \
         {                                                                                                                  \
-            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4]) PIXELS;                                                 \
-            double TEXUF = U * ( WIDTH  - 1 );                                                                             \
-            double TEXVF = V * ( HEIGHT - 1 );                                                                             \
+            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4])(PIXELS);                                                \
+            double TEXUF = (U) * ( (WIDTH ) - 1 );                                                                         \
+            double TEXVF = (V) * ( (HEIGHT) - 1 );                                                                         \
             int32  TEXUI = TEXUF;                                                                                          \
             int32  TEXVI = TEXVF;                                                                                          \
             double  WEIGHTU = TEXUF - TEXUI;                                                                               \
             double  WEIGHTV = TEXVF - TEXVI;                                                                               \
             double  INVWEIGHTU = 1.0f - WEIGHTU;                                                                           \
             double  INVWEIGHTV = 1.0f - WEIGHTV;                                                                           \
-            uint32 OFFSETTOPLEFT     = ( TEXVI * WIDTH ) + TEXUI                                                           \
+            uint32 OFFSETTOPLEFT     = ( TEXVI * (WIDTH) ) + TEXUI                                                         \
                  , OFFSETTOPRIGHT    = OFFSETTOPLEFT + 1                                                                   \
-                 , OFFSETBOTTOMRIGHT = OFFSETTOPLEFT + 1 + WIDTH                                                           \
-                 , OFFSETBOTTOMLEFT  = OFFSETTOPLEFT + WIDTH;                                                              \
+                 , OFFSETBOTTOMRIGHT = OFFSETTOPLEFT + 1 + (WIDTH)                                                         \
+                 , OFFSETBOTTOMLEFT  = OFFSETTOPLEFT + (WIDTH);                                                            \
             uint8 UPOL0, UPOL1;                                                                                            \
             uint8 VPOL0, VPOL1;                                                                                            \
                                                                                                                            \
-            if( ( FLAGS & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )                                                    \
+            if( ( (FLAGS) & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )                                                  \
             {                                                                                                              \
                 /* bilinear interpolations */                                                                              \
                 UPOL0 = ( PIXELS32[OFFSETTOPLEFT   ][0] * ( INVWEIGHTU ) ) + ( PIXELS32[OFFSETTOPRIGHT   ][0] * WEIGHTU ); \
@@ -711,19 +711,21 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
     {                                                                      \
         case 32 :                                                          \
         {                                                                  \
-            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4]) PIXELS; \
-            int32 TEXU = U * ( WIDTH  - 1 );                               \
-            int32 TEXV = V * ( HEIGHT - 1 );                               \
-            uint32 TEXOFFSET = ( TEXV * WIDTH ) + TEXU;                    \
+            unsigned char (*PIXELS32)[4] = ( unsigned char (*)[4])(PIXELS);\
+            double SANU = (U) < 0.0f ? 1.0f + (U) : (U);                   \
+            double SANV = (V) < 0.0f ? 1.0f + (V) : (V);                   \
+            int32 TEXU = SANU * ( (WIDTH ) - 1 );                          \
+            int32 TEXV = SANV * ( (HEIGHT) - 1 );                          \
+            uint32 TEXOFFSET = ( TEXV * (WIDTH) ) + TEXU;                  \
                                                                            \
-            if( ( FLAGS & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )    \
+            if( ( (FLAGS) & FPolygonDrawingFlags::BRUSHALPHAONLY ) == 0 )  \
             {                                                              \
-                B = PIXELS32[TEXOFFSET][0];                                \
-                G = PIXELS32[TEXOFFSET][1];                                \
-                R = PIXELS32[TEXOFFSET][2];                                \
+                (B) = (PIXELS32)[TEXOFFSET][0];                            \
+                (G) = (PIXELS32)[TEXOFFSET][1];                            \
+                (R) = (PIXELS32)[TEXOFFSET][2];                            \
             }                                                              \
                                                                            \
-            A = PIXELS32[TEXOFFSET][3];                                    \
+            (A) = (PIXELS32)[TEXOFFSET][3];                                \
         }                                                                  \
         break;                                                             \
                                                                            \
@@ -798,17 +800,22 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
 
             if( iBrushPixelData && iBrushWidth && iBrushHeight )
             {
+                double argu = fabs(u) > 1.0f ? u - (int)u : u;
+                double argv = fabs(v) > 1.0f ? v - (int)v : v;
+
                 if( ( iPolygonDrawingFlags & FPolygonDrawingFlags::BILINEARFILTERING )
                  && (        x < (int32)(iImageWidth  - 1) )   // prevent overflow
                  && ( hline->y < (int32)(iImageHeight - 1) ) ) // prevent overflow
                 {
+
+
                     GETPIXELBF( iBrushPixelData
                               , iBrushWidth
                               , iBrushHeight
                               , iBrushBitsPerPixel
                               , iPolygonDrawingFlags
-                              , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
-                              , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
+                              , argu
+                              , argv
                               , BR
                               , BG
                               , BB
@@ -821,8 +828,8 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
                             , iBrushHeight
                             , iBrushBitsPerPixel
                             , iPolygonDrawingFlags
-                            , u >= 1.0f ? fmod(u,1.0f) : u// function call might slow things (maybe not that much, as fmod is declared inline)
-                            , v >= 1.0f ? fmod(v,1.0f) : v// function call might slow things (maybe not that much, as fmod is declared inline)
+                            , argu
+                            , argv
                             , BR
                             , BG
                             , BB
@@ -858,68 +865,6 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
         x ++;
         u += pu;
         v += pv;
-    }
-}
-
-void
-FOdysseyVectorEngine::FillHexagon( BLContext* iBLContext
-                                 , const ::ULIS::FVec2D* iPoint
-                                 , const double* iU
-                                 , const double* iV
-                                 , double iOpacity
-                                 //
-                                 , const FColor& iColor
-                                 //
-                                 , const int8*  iBrushPixelData
-                                 , uint32 iBrushWidth
-                                 , uint32 iBrushHeight
-                                 , int32  iBrushBitsPerPixel
-                                 , uint64 iPolygonDrawingFlags )
-{
-    const BLMatrix2D& userMatrix = iBLContext->userMatrix();
-    BLPoint worldPoint[6] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
-                            , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
-                            , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y )
-                            , userMatrix.mapPoint( iPoint[3].x, iPoint[3].y )
-                            , userMatrix.mapPoint( iPoint[4].x, iPoint[4].y )
-                            , userMatrix.mapPoint( iPoint[5].x, iPoint[5].y ) };
-    ::ULIS::FVec2I intPt[6] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
-                              , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
-                              , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
-                              , { (int32)worldPoint[3].x, (int32)worldPoint[3].y }
-                              , { (int32)worldPoint[4].x, (int32)worldPoint[4].y }
-                              , { (int32)worldPoint[5].x, (int32)worldPoint[5].y } };
-
-    int32 xmin = intPt[0].x;
-    int32 xmax = intPt[0].x;
-    int32 ymin = intPt[0].y;
-    int32 ymax = intPt[0].y;
-
-    for( int i = 1; i < 6; i++ )
-    {
-        if( intPt[i].x < xmin ) xmin = intPt[i].x;
-        if( intPt[i].x > xmax ) xmax = intPt[i].x;
-        if( intPt[i].y < ymin ) ymin = intPt[i].y;
-        if( intPt[i].y > ymax ) ymax = intPt[i].y;
-    }
-
-    // don't draw if quad is outside the screen
-    if( ( ( xmin ) < (int32) mRenderData.size.w )
-     && ( ( xmax ) > 0                          )
-     && ( ( ymin ) < (int32) mRenderData.size.h )
-     && ( ( ymax ) > 0                          ) )
-    {
-        TracePolygon( intPt
-                    , iU
-                    , iV
-                    , 6
-                    , iOpacity
-                    , iColor
-                    , iBrushPixelData
-                    , iBrushWidth
-                    , iBrushHeight
-                    , iBrushBitsPerPixel
-                    , iPolygonDrawingFlags );
     }
 }
 
@@ -1377,6 +1322,56 @@ FOdysseyVectorEngine::ObjectHasFocus( FOdysseyVectorGroupPaint* iScene
     }
 
     return false;
+}
+
+void
+FOdysseyVectorEngine::PickPathPoints( FOdysseyVectorGroupPaint* iScene
+                                    , double iWorldX
+                                    , double iWorldY
+                                    , double iWorldRadius
+                                    , uint64 iPickingFlags
+                                    , bool iStopAtFirstSuccess
+                                    , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                                    , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray )
+{                                           
+    Traverse
+    ( mScene
+    , 0
+    , [ this
+      , iScene
+      , &iWorldX
+      , &iWorldY
+      , &iWorldRadius
+      , &iPickingFlags
+      , &iStopAtFirstSuccess
+      , &oPickedVertexArray
+      , &oPickedHandleArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( ObjectHasFocus( iScene, object, traversalFlags ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                  if( path->PickPoint( iWorldX
+                                     , iWorldY
+                                     , iWorldRadius
+                                     , oPickedVertexArray
+                                     , oPickedHandleArray
+                                     , iPickingFlags ) )
+                  {
+                      if( iStopAtFirstSuccess )
+                      {
+                          return FOdysseyVectorEngine::TRAVERSE_STOP;
+                      }
+                  }
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
 }
 
 // Execute callback on object tree

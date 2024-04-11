@@ -102,11 +102,6 @@ FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FU
         FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPaintBucketTool()))
     );
     iCommandList->MapAction(
-        FOdysseyPainterEditorCommands::Get().ActivateVectorPathCutTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathCutTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathCutTool()))
-    );
-    iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorPathDrawingTool,
         FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathDrawingTool())),
         FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathDrawingTool()))

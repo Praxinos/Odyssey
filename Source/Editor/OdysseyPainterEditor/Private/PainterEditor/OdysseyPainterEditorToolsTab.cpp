@@ -51,7 +51,6 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetRasterPaintBucketTool(),
         mEditor->GetVectorPathDrawingTool(),
         mEditor->GetVectorPathEditTool(),
-        mEditor->GetVectorPathCutTool(),
         mEditor->GetVectorPrimitiveDrawingTool(),
         mEditor->GetVectorSelectionTool(),
         mEditor->GetVectorTransformTool(),

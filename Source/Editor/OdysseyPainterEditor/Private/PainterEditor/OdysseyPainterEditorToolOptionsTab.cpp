@@ -6,6 +6,8 @@
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 
+#include "OdysseyPainterEditor.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
@@ -58,7 +60,6 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
     SetWidgetForTool(mEditor->GetVectorPathDrawingTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathDrawingTool()));
     SetWidgetForTool(mEditor->GetVectorPathEditTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathEditTool()));
     SetWidgetForTool(mEditor->GetVectorPrimitiveDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPrimitiveDrawingTool()));
-    SetWidgetForTool(mEditor->GetVectorPathCutTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathCutTool()));
     SetWidgetForTool(mEditor->GetVectorPathStitchTool(),SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathStitchTool()));
     SetWidgetForTool(mEditor->GetVectorPathSmoothTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPathSmoothTool()));
     SetWidgetForTool(mEditor->GetVectorSelectionTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorSelectionTool()));

@@ -133,7 +133,7 @@ namespace FOdysseyFile
                             static const uint32 CHUNK_BRUSH =  0xd697217f; // container
                                 static const uint32 CHUNK_BRUSH_TEXTURE =  0xd3070f03; // FName(path)
                                 static const uint32 CHUNK_BRUSH_COLORFROMBRUSH =  0xc42013ad; // uint32(bool)
-                                static const uint32 CHUNK_BRUSH_EXTENDOVERPATH =  0x6965cf17; // uint32(bool)
+                                static const uint32 CHUNK_BRUSH_EXTENSIONMODE =  0x6965cf17; // uint32
                                 static const uint32 CHUNK_BRUSH_REVERT = 0x53d1e69f; // uint32(bool)
 
                     static const uint32 CHUNK_GROUP = 0x4af0b779; // container

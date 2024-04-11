@@ -90,6 +90,8 @@ protected:
     ::ULIS::FVec2D mPressedMouseCoords;
 
 public:
-    UPROPERTY( EditAnywhere, Category = SelectionTool )
+    UPROPERTY( EditAnywhere
+             , Category = SelectionTool
+             , meta = ( ToolTip  = "Selection Shape" ) )
     EOdysseyVectorSelectionShape SelectionShape;
 };

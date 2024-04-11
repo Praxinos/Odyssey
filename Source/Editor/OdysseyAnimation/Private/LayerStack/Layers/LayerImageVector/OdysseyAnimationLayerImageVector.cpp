@@ -491,6 +491,8 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
             {
                 FOdysseyVectorObject* copiedChild = child->Copy();
                 destinationScene->AppendChild( copiedChild );
+
+                scene->CopyBuckets( destinationScene, false );
             }
         }
 

@@ -88,22 +88,42 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
                                 , const FOdysseyPoint& iPointInTexture );
 
     public:
-        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+        UPROPERTY( EditAnywhere
+                 , Category = PaintBucketTool
+                 , meta = ( ToolTip  = "Propagate" ) )
         bool Propagate;
 
-        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+        UPROPERTY( EditAnywhere
+                 , Category = PaintBucketTool
+                 , meta = ( ToolTip  = "Color Mode" ) )
         eBucketColorMode ColorMode;
 
-        UPROPERTY( EditAnywhere, Category = PaintBucketTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        UPROPERTY( EditAnywhere
+                 , Category = PaintBucketTool
+                 , meta = ( ToolTip  = "Opacity"
+                          , ClampMin = "0.0"
+                          , UIMin    = "0.0"
+                          , ClampMax = "1.0"
+                          , UIMax    = "1.0" ) )
         double Opacity;
 
-        UPROPERTY( EditAnywhere, Category = PaintBucketTool, meta = (EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)", EditConditionHides) )
+        UPROPERTY( EditAnywhere
+                 , Category = PaintBucketTool
+                 , meta = ( ToolTip = "Color1"
+                          , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)"
+                          , EditConditionHides ) )
         FColor Color1;
 
-        UPROPERTY( EditAnywhere, Category = PaintBucketTool, meta = (EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)", EditConditionHides) )
+        UPROPERTY( EditAnywhere
+                 , Category = PaintBucketTool
+                 , meta = ( ToolTip = "Color2"
+                          , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)"
+                          , EditConditionHides ) )
         FColor Color2;
 
-        UPROPERTY( EditAnywhere, Category = PaintBucketTool )
+        UPROPERTY( EditAnywhere
+                 , Category = PaintBucketTool
+                 , meta = ( ToolTip = "Picking Radius" ) )
         double PickingRadius;
 
     protected:

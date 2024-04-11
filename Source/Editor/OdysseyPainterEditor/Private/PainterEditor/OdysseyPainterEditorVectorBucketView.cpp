@@ -1,5 +1,6 @@
 #include "OdysseyPainterEditorVectorBucketView.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
+#include "OdysseyVectorEngine.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -41,7 +42,9 @@ UOdysseyPainterEditorVectorBucketView::Update( FOdysseyPainterEditor* iEditor, F
 }
 
 void
-UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyName, const FName& iCategory )
+UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyName
+                                                      , const FName& iMemberPropertyName
+                                                      , const FName& iCategory )
 {
     if( mBucket )
     {
@@ -51,7 +54,9 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == "SpreadingPolicy" )
             mBucket->SetSpreadingPolicy( SpreadingPolicy );
 
-        if( iPropertyName == "SolidColor" )
+        // note: iMemberPropertyName because FColor is a struct 
+        // and we can edit individual struct members RGBA
+        if( ( iPropertyName == "SolidColor" ) || ( iMemberPropertyName == "SolidColor" ) )
             mBucket->SetSolidColor( SolidColor );
 
         if( iPropertyName == "Rotation" )
@@ -60,10 +65,14 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == "Propagated" )
             mBucket->SetPropagated( Propagated );
 
-        if( iPropertyName == "GradientColor0" )
+        // note: iMemberPropertyName because FColor is a struct 
+        // and we can edit individual struct members RGBA
+        if( ( iPropertyName == "GradientColor0" ) || ( iMemberPropertyName == "GradientColor0" ) )
             mBucket->SetGradientColor0( GradientColor0 );
 
-        if( iPropertyName == "GradientColor1" )
+        // note: iMemberPropertyName because FColor is a struct 
+        // and we can edit individual struct members RGBA
+        if( ( iPropertyName == "GradientColor1" ) || ( iMemberPropertyName == "GradientColor1" ) )
             mBucket->SetGradientColor1( GradientColor1 );
 
         if( iPropertyName == "RadialRadius" )
@@ -102,6 +111,7 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
         GEditor->EndTransaction();
 
         PropertyChanged( PropertyChangedEvent.GetPropertyName()
+                       , PropertyChangedEvent.MemberProperty->GetFName()
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         vectorScene->Update( 0 );

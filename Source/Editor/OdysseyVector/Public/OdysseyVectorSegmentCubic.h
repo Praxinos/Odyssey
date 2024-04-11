@@ -39,7 +39,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
 
        /**
          * @brief function to allocate a new cubic segment
-         * @param iPath the path this segment belongs to
+         * @param iOwner the path this segment belongs to
          * @param iVertex0
          * @param iCtrlPoint0x
          * @param iCtrlPoint0y
@@ -48,7 +48,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iVertex1
          * @return a pointer to the newly created segment
          */
-        FOdysseyVectorSegmentCubic( FOdysseyVectorPath* iPath
+        FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iOwner
                                   , FOdysseyVectorVertex* iVertex0
                                   , double iCtrlPoint0x
                                   , double iCtrlPoint0y
@@ -221,6 +221,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         virtual ::ULIS::FVec2D GetOffsetPoint( uint32 iSide, double iT ) override;
         uint32 CompareBezier( FOdysseyVectorSegmentCubic* iOtherCubicSegment );
 
+        virtual void Split( const ::ULIS::FVec2D& iPoint
+                          , double iPoinT
+                          , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray ) override;
+
     private:
         // static
         static void GetOffsetPoints( ::ULIS::FVec2D& iPoint0
@@ -259,7 +264,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                        , uint32 iMaxRecurse
                                        , uint32 iCurrentRecurse
                                        , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray );
-        void ThickenFraction( FOdysseyVectorFraction* iFraction );
+        double ThickenFraction( FOdysseyVectorFraction* iFraction
+                              , double iStartU );
         void SmoothOffsetCurves( std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray );
         static void SmoothOffsetCurvesFragments( FOdysseyVectorVertex* iVertex
                                                , FOdysseyVectorSegmentCubic* iPrevSegment

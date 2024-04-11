@@ -171,8 +171,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool IsPainted();
         void SetPainted( bool iPainted );
 
-        void IntersectSegment( FOdysseyVectorSegmentCubic* iSegment0
-                             , FOdysseyVectorSegmentCubic* iSegment1
+        void IntersectSegment( FOdysseyVectorSegment* iSegment0
+                             , FOdysseyVectorSegment* iSegment1
                              , const ::ULIS::FVec2D& iSegment1MinInParentWithTolerance
                              , const ::ULIS::FVec2D& iSegment1MaxInParentWithTolerance
                              , std::vector<FXIntersectionRecord>& iIntersectionRecordArray );

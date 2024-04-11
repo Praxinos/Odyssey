@@ -22,13 +22,14 @@ FOdysseyVectorImportV2::ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd
                 }
                 break;
 
-                case FOdysseyFile::VectorV2::CHUNK_BRUSH_EXTENDOVERPATH:
+                case FOdysseyFile::VectorV2::CHUNK_BRUSH_EXTENSIONMODE:
                 {
-                    uint32 extendOverPath;
+                    uint32 extensionMode;
 
-                    Ar << extendOverPath;
+                    Ar << extensionMode;
 
-                    iBrush.ExtendOverPath = static_cast<bool>(extendOverPath);
+                    //iBrush.ExtendOverPath = static_cast<bool>(extendOverPath);
+                    iBrush.ExtensionMode = static_cast<eBrushExtensionMode>(extensionMode);
                 }
                 break;
 

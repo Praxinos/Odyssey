@@ -22,6 +22,20 @@ enum class eBucketColorMode : uint8
 };
 
 UENUM()
+enum class eForegroundColorMode : uint8
+{
+    SolidColor = uint8(eBucketColorMode::SolidColor),
+    Palette  = uint8(eBucketColorMode::Palette)
+};
+
+UENUM()
+enum class eBackgroundColorMode : uint8
+{
+    SolidColor = uint8(eBucketColorMode::SolidColor),
+    Palette  = uint8(eBucketColorMode::Palette)
+};
+
+UENUM()
 enum class eBucketSpreadingPolicy : uint8
 {
     Group = 0,

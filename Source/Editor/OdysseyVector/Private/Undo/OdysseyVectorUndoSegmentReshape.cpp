@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
 {

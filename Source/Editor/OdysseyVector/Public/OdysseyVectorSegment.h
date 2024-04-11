@@ -15,7 +15,8 @@ class FOdysseyVectorPath;
 typedef struct _FSegmentSubLine
 {
     FOdysseyVectorPoint* point[2];
-    double mT[2];
+    double t[2];
+    double length;
 
    ~_FSegmentSubLine(){};
     _FSegmentSubLine( FOdysseyVectorPoint* iPoint0
@@ -23,8 +24,9 @@ typedef struct _FSegmentSubLine
                     , FOdysseyVectorPoint* iPoint1
                     , double iT1 )
     : point { iPoint0, iPoint1 }
-    , mT { iT0, iT1 }
+    , t { iT0, iT1 }
     {
+        length = ( iPoint1->GetCoords() - iPoint0->GetCoords() ).Distance();
     }
 } FSegmentSubLine;
 
@@ -36,16 +38,19 @@ typedef struct _FOdysseyVectorFraction {
     ::ULIS::FVec2D pointCoordsInParent[2];
     // TODO : compute on the fly to reduce memory footprint ?
     double xMinInParent, xMaxInParent, yMinInParent, yMaxInParent;
-    double fromT; // TODO : convert to float to reduce memory footprint
-    double toT; // TODO : convert to float to reduce memory footprint
+    float fromT; // We don't need double, at most there are 128 fractions. so 1.0/128 precision
+    float toT; // We don't need double, at most there are 128 fractions. so 1.0/128 precision
+    double length;
 
     _FOdysseyVectorFraction( FOdysseyVectorPoint* iPoint0
                            , double iFromT
                            , FOdysseyVectorPoint* iPoint1
-                           , double iToT )
+                           , double iToT
+                           , double iLength )
     : point { iPoint0, iPoint1 }
     , fromT( iFromT )
     , toT( iToT )
+    , length ( iLength )
     {
     }
 } FOdysseyVectorFraction;
@@ -216,6 +221,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
 
         void AddIntersectionSlot();
         uint32 GetIntersectionSlotCount();
+        double ProjectConstrained( const ::ULIS::FVec2D& iPoint
+                                , ::ULIS::FVec2D& oProjectedPoint );
+        virtual void Split( const ::ULIS::FVec2D& iPoint
+                          , double iPoinT
+                          , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
+                          , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
 
     protected:
         void DrawFractionCache( BLContext* iBLContext );

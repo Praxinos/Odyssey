@@ -34,6 +34,9 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
         Opacity         = focusedObject->GetOpacity();
         Visible = Opacity ? true : false;
 
+        ForegroundColorMode = static_cast<eForegroundColorMode>(focusedObject->GetForegroundBucket().GetColorMode());
+        BackgroundColorMode = static_cast<eBackgroundColorMode>(focusedObject->GetBackgroundBucket().GetColorMode());
+
         ForegroundColor = focusedObject->GetForegroundBucket().GetSolidColor();
         BackgroundColor = focusedObject->GetBackgroundBucket().GetSolidColor();
 
@@ -99,13 +102,21 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == "Visible" )
             selectedObject->SetOpacity( Visible ? 1.0f : 0.0f );
 
+        if( iPropertyName == "ForegroundColorMode" )
+            selectedObject->GetForegroundBucket().SetColorMode( static_cast<eBucketColorMode>(ForegroundColorMode) );
 
+        // note: iMemberPropertyName because FColor is a struct 
+        // and we can edit individual struct members RGBA
         if( ( iPropertyName == "ForegroundColor" ) || ( iMemberPropertyName == "ForegroundColor" ) )
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
 
+        if( iPropertyName == "BackgroundColorMode" )
+            selectedObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );
+
+        // note: iMemberPropertyName because FColor is a struct 
+        // and we can edit individual struct members RGBA
         if( ( iPropertyName == "BackgroundColor" ) || ( iMemberPropertyName == "BackgroundColor" ) )
             selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
-
     }
 
     return signalFlags;

@@ -43,7 +43,6 @@
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
-#include "Tools/VectorPathCutTool/OdysseyPainterEditorVectorPathCutTool.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
@@ -88,7 +87,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
 	, mVectorPrimitiveDrawingTool(nullptr)
     , mVectorPathDrawingTool(nullptr)
     , mVectorPathEditTool(nullptr)
-	, mVectorPathCutTool(nullptr)
 	, mVectorSelectionTool(nullptr)
 	, mVectorScenePanTool(nullptr)
 	, mVectorEraserTool(nullptr)
@@ -156,7 +154,6 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
     mRasterTransformTool->BindShortcuts(iToolkit);
     mRasterPrimitiveDrawingTool->BindShortcuts(iToolkit);
 	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
-	mVectorPathCutTool->BindShortcuts(iToolkit);
 	mVectorSelectionTool->BindShortcuts(iToolkit);
 	mVectorScenePanTool->BindShortcuts(iToolkit);
 	mVectorEraserTool->BindShortcuts(iToolkit);
@@ -195,7 +192,6 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
     mVectorPathEditTool->ExtendMenu(iOwner,iMenuName);
     mRasterPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
 	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathCutTool->ExtendMenu(iOwner, iMenuName);
 	mVectorSelectionTool->ExtendMenu(iOwner, iMenuName);
 	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
 	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
@@ -242,7 +238,6 @@ FOdysseyPainterEditor::InitTools()
     mVectorPathEditTool = NewObject<UOdysseyPainterEditorVectorPathEditTool>();
     mRasterPrimitiveDrawingTool = NewObject<UOdysseyPainterEditorRasterPrimitiveDrawingTool>();
 	mVectorPrimitiveDrawingTool = NewObject<UOdysseyPainterEditorVectorPrimitiveDrawingTool>();
-	mVectorPathCutTool = NewObject<UOdysseyPainterEditorVectorPathCutTool>();
 	mVectorSelectionTool = NewObject<UOdysseyPainterEditorVectorSelectionTool>();
     mVectorScenePanTool = NewObject<UOdysseyPainterEditorVectorScenePanTool>();
     mVectorEraserTool = NewObject<UOdysseyPainterEditorVectorEraserTool>();
@@ -262,7 +257,6 @@ FOdysseyPainterEditor::InitTools()
     mVectorPathEditTool->SetEditor(this);
     mRasterPrimitiveDrawingTool->SetEditor(this);
     mVectorPrimitiveDrawingTool->SetEditor(this);
-    mVectorPathCutTool->SetEditor(this);
     mVectorSelectionTool->SetEditor(this);
     mVectorScenePanTool->SetEditor(this);
     mVectorEraserTool->SetEditor(this);
@@ -294,7 +288,6 @@ FOdysseyPainterEditor::InitTools()
 	mTools.Add(mRasterPaintBucketTool);
     mTools.Add(mVectorPrimitiveDrawingTool);
     mTools.Add(mVectorPathEditTool);
-    mTools.Add(mVectorPathCutTool);
     mTools.Add(mVectorSelectionTool);
     mTools.Add(mVectorScenePanTool);
     mTools.Add(mVectorEraserTool);
@@ -375,12 +368,6 @@ UOdysseyPainterEditorVectorPathEditTool*
 FOdysseyPainterEditor::GetVectorPathEditTool() const
 {
     return mVectorPathEditTool;
-}
-
-UOdysseyPainterEditorVectorPathCutTool*
-FOdysseyPainterEditor::GetVectorPathCutTool() const
-{
-    return mVectorPathCutTool;
 }
 
 UOdysseyPainterEditorVectorSelectionTool*
@@ -1745,6 +1732,8 @@ FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
 
             iDestinationScene->AppendChild( copiedChild );
         }
+
+        iSourceSceneArray[i]->CopyBuckets( iDestinationScene, false );
     }
 
     iDestinationScene->UpdateMatrix();
@@ -1844,7 +1833,6 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mVectorPrimitiveDrawingTool);
 	Collector.AddReferencedObject(mVectorPathDrawingTool);
 	Collector.AddReferencedObject(mVectorPathEditTool);
-	Collector.AddReferencedObject(mVectorPathCutTool);
 	Collector.AddReferencedObject(mVectorSelectionTool);
     Collector.AddReferencedObject(mVectorScenePanTool);
     Collector.AddReferencedObject(mVectorEraserTool);

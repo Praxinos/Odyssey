@@ -54,11 +54,11 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
 
 void
 UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath
-                                                 , eBaseToolColorSource iColorSource )
+                                                 , eForegroundColorMode iColorMode )
 {
-    switch( iColorSource )
+    switch( iColorMode )
     {
-        case eBaseToolColorSource::ColorWheel:
+        case eForegroundColorMode::SolidColor:
         {
             ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
             ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
@@ -68,7 +68,7 @@ UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath
         }
         break;
 
-        case eBaseToolColorSource::Palette:
+        case eForegroundColorMode::Palette:
         {
             TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
             UOdysseyPalette* palette = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette();
@@ -89,8 +89,52 @@ UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath
         break;
     }
 
-    iPath->GetForegroundBucket().SetColorMode( (eBucketColorMode) iColorSource );
+    iPath->GetForegroundBucket().SetColorMode( (eBucketColorMode) iColorMode );
 }
+
+void
+UOdysseyPainterEditorVectorBaseTool::PickSegments( FOdysseyVectorGroupPaint* iScene
+                                                 , double iWorldX
+                                                 , double iWorldY
+                                                 , double iWorldRadius
+                                                 , bool iRestrictToSelection
+                                                 , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    oPickedSegmentArray.clear();
+
+    vectorEngine->Traverse
+    ( iScene
+    , 0
+    , [ iScene
+      , vectorEngine
+      , &iWorldX
+      , &iWorldY
+      , &iWorldRadius
+      , &iRestrictToSelection
+      , &oPickedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( iRestrictToSelection == false ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                  path->PickSegments( iWorldX
+                                    , iWorldY
+                                    , iWorldRadius
+                                    , oPickedSegmentArray
+                                    , nullptr );
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+}
+
 
 void
 UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorGroupPaint* iScene
@@ -972,12 +1016,27 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
                     , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
                     , FSlateIcon()
                     , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ApplyTransformations, GetEditor(), vectorScene )));
+                //menu.AddMenuEntry(
+                //    LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Make DemoBrush")
+                //    , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Make DemoBrush")
+                //    , FSlateIcon()
+                //    , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::MakeDemoBrush, vectorScene )));
         //    }
         //    menu.EndSection();
         }
     }
 
     //return menu.MakeWidget();
+}
+
+// for testing purpose.
+void
+UOdysseyPainterEditorVectorBaseTool::MakeDemoBrush( FOdysseyVectorGroupPaint* iScene )
+{
+   std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
+
+   FOdysseyVectorBrush::MakeDemoBrush( selectedObjectList
+                                     , FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList ) );
 }
 
 void

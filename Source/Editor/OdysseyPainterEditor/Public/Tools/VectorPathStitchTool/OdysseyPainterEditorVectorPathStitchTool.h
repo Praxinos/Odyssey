@@ -55,7 +55,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathStitchTool : publi
             FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;
 
     public:
-        UPROPERTY( EditAnywhere, Category = PathStitchTool, meta = (ClampMin = "0.0", UIMin = "0.0") )
+        UPROPERTY( EditAnywhere
+                 , Category = PathStitchTool
+                 , meta = ( ToolTip = "Picking Radius"
+                          , ClampMin = "0.0"
+                          , UIMin    = "0.0" ) )
         double PickingRadius;
 /*
         UPROPERTY( EditAnywhere, Category = PathStitchTool, meta = (ClampMin = "0.0", UIMin = "0.0") )

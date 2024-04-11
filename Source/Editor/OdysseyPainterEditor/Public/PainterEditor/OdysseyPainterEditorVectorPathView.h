@@ -26,13 +26,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
                                       , const FName& iMemberPropertyName
                                       , const FName& iCategory ) override;
     public:
-        UPROPERTY( EditAnywhere, Category = Path )
+        UPROPERTY( EditAnywhere
+                 , Category = Path
+                 , meta = ( ToolTip = "Joint Type" ) )
         eJointType JointType;
 
-        UPROPERTY( EditAnywhere, Category = Path )
+        UPROPERTY( EditAnywhere
+                 , Category = Path
+                 , meta = ( ToolTip = "Miter Limit" ) )
         double MiterLimit;
 
-        UPROPERTY( EditAnywhere, Category = Path )
+        UPROPERTY( EditAnywhere
+                 , Category = Path
+                 , meta = ( ToolTip = "Brush" ) )
         FOdysseyVectorBrush Brush;
 
         //UPROPERTY(EditAnywhere,Category = Path, meta = (ContentDir = ))

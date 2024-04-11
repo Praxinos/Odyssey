@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoSelectObject.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
 {

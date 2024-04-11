@@ -234,7 +234,14 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
         scene->GetEngine()->ResetHUD();
 
         scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+                                 // sending the MODIFIED flag will trigger the update
+                                 // of the Object's DetailsView. If we send the SELECTED signal
+                                 // it makes more sense but this widget will be immediately 
+                                 // updated whereas it's already being updated, hence it creates
+                                 // some problems, one of them being the selection of the whole
+                                 //  vector scene when holding the shift key.
+                                 // See https://github.com/Praxinos/IliadDev/issues/411
+                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
     }
 }
 
