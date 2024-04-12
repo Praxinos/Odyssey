@@ -39,7 +39,7 @@ SStoryboardViewportSettings::Construct(const FArguments& InArgs)
             [
                 SNew(SImage)
                 .Image( FEposSequenceEditorStyle::Get().GetBrush( "Viewport.Settings" ) )
-				.ColorAndOpacity(FSlateColor::UseForeground())
+                .ColorAndOpacity(FSlateColor::UseForeground())
             ]
         ]
     ];
@@ -197,7 +197,7 @@ SStoryboardViewportSettings::GetMenuContent()
                                 NAME_None,
                                 EUserInterfaceActionType::ToggleButton );
     }
-	//menuBuilder.EndSection();
+    //menuBuilder.EndSection();
 
     return menuBuilder.MakeWidget();
 }

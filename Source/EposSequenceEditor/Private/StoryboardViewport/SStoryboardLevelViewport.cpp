@@ -840,7 +840,7 @@ SStoryboardLevelViewport::UnregisterToolBarExtender()
 void
 SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
 {
-	iBuilder.BeginSection( TEXT("Storyboard") );
+    iBuilder.BeginSection( TEXT("Storyboard") );
 
         iBuilder.AddWidget(
             FilmOverlayOptions.ToSharedRef(),
@@ -857,11 +857,11 @@ SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
                         FSlateIcon(FEposSequenceEditorStyle::Get().GetStyleSetName(), "FilmOverlay.DefaultThumbnail"));
                 }
             )
-		);
+        );
 
         iBuilder.AddSeparator();
 
-		iBuilder.AddWidget(
+        iBuilder.AddWidget(
             SNew(SStoryboardViewportSettings),
             NAME_None,
             false,
@@ -876,11 +876,11 @@ SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
                         FSlateIcon(FEposSequenceEditorStyle::Get().GetStyleSetName(), "FilmOverlay.DefaultThumbnail"));
                 }
             )
-		);
+        );
 
         iBuilder.AddSeparator();
 
-		iBuilder.AddWidget(
+        iBuilder.AddWidget(
             SNew( SComboButton )
             .ComboButtonStyle(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox.ComboButton")
             .ButtonStyle(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox.Button")
@@ -953,7 +953,7 @@ SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
 
         iBuilder.AddSeparator();
 
-		iBuilder.AddWidget(
+        iBuilder.AddWidget(
             SNew( SComboButton )
             .ComboButtonStyle(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox.ComboButton")
             .ButtonStyle(FEposSequenceEditorStyle::Get(), "Viewport.Toolbar.SpinBox.Button")
@@ -1044,7 +1044,7 @@ SStoryboardLevelViewport::ExtendToolBar(FToolBarBuilder& iBuilder)
             )
         );
 
-	iBuilder.EndSection();
+    iBuilder.EndSection();
 }
 
 TSharedRef<SWidget>

@@ -552,7 +552,7 @@ void SFilmOverlayOptions::Construct(const FArguments& InArgs)
             [
                 SNew(SImage)
                 .Image(this, &SFilmOverlayOptions::GetCurrentThumbnail)
-				.ColorAndOpacity(FSlateColor::UseForeground())
+                .ColorAndOpacity(FSlateColor::UseForeground())
             ]
         ]
     ];
