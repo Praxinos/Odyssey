@@ -128,7 +128,16 @@ FOdysseyVectorVertex::GetOwnerAsPath()
 {
     return static_cast<FOdysseyVectorPath*>(mOwner);
 }
+/*
+void
+FOdysseyVectorVertex::GetSurroundingSections( std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
+                                            , std::vector<FCycleSectionInfo>& oSurroundingSectionArray )
+{
+    oPartnerVertexArray.push_back( this );
 
+    
+}
+*/
 void
 FOdysseyVectorVertex::GetCandidateSections( FOdysseyVectorSection* iLastSection
                                           , uint32 iLastSectionVertexIndex

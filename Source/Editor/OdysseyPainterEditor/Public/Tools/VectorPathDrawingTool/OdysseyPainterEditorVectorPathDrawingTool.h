@@ -140,12 +140,17 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         UPROPERTY( EditAnywhere
                  , Category = PathDrawingTool
+                 , meta = ( ToolTip = "Snap" ) )
+        bool Snap;
+
+        UPROPERTY( EditAnywhere
+                 , Category = PathDrawingTool
                  , meta = ( ToolTip = "Average Stitched Radius" ) )
         bool AverageStitchedRadius;
 
         UPROPERTY( EditAnywhere
                  , Category = PathDrawingTool
-                 , meta = ( ToolTip = "Stitching Radius"
+                 , meta = ( ToolTip = "Snap/Stitching Radius"
                           , ClampMin = "0.0"
                           , UIMin = "0.0" ) )
         double StitchingRadius;

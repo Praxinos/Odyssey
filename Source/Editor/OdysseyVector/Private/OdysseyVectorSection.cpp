@@ -69,7 +69,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
     // Get "sub-bezier" from t values. Will help us building the adjacent cycle and draw the section.
     // We indeed have to draw the section or else you can expect a small 1-pixel gap between cycles,
     // especially where strokes are transparent.
-    if( iSegment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+    if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
         ::ULIS::FVec2D* segmentBezier = cubicSegment->GetBezier();
@@ -142,6 +142,15 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
 
         mBezier[3].x = convertedPoint[3].x;
         mBezier[3].y = convertedPoint[3].y;
+    }
+
+    if( iSegment->GetClass() == FOdysseyVectorSegmentCubicGap::StaticClass() )
+    {
+        FOdysseyVectorSegmentCubicGap* gapCubicSegment = static_cast<FOdysseyVectorSegmentCubicGap*>(iSegment);
+        ::ULIS::FVec2D* segmentBezier = gapCubicSegment->GetBezier();
+
+        // Gap segments already are in parent coordinates. Just copy the whole thing
+        memcpy( mBezier, segmentBezier, sizeof( mBezier ) );
     }
 
     // check bezier validity. It can happen at very very small values

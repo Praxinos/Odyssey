@@ -31,6 +31,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     //, Absolute( true )
     , UpdatePaintGroups( true )
     , Stitch( false )
+    , Snap( true )
     , AverageStitchedRadius( true )
     , StitchingRadius( 10 )
     , Debug( false )
@@ -81,7 +82,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorGroupPaint
                                                       , double iWorldY
                                                       , double iPickingRadius )
 {
-    if( Stitch || FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    if( Stitch || Snap || FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         FOdysseyVectorVertex* stitchCubicVertex = nullptr;
         // the HUD provides the hovered vertices
@@ -198,7 +199,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
+    double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
     mPathTracer.Reset();
     mStitchedVertex = nullptr;
@@ -211,15 +214,35 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         mAddedVertexArray.clear();
         mAddedSegmentArray.clear();
 
-        if( Stitch )
+        if( Stitch || Snap )
         {
-            mStitchedVertex = PickVertex( iScene
-                                        , iPointInTexture.x
-                                        , iPointInTexture.y
-                                        , StitchingRadius );
-            if( mStitchedVertex )
+            FOdysseyVectorVertex* pickedVertex = PickVertex( iScene
+                                                           , iPointInTexture.x
+                                                           , iPointInTexture.y
+                                                           , StitchingRadius );
+
+            if( pickedVertex )
             {
-                path = mStitchedVertex->GetOwnerAsPath();
+                if( Stitch )
+                {
+                    mStitchedVertex = pickedVertex;
+
+                    path = mStitchedVertex->GetOwnerAsPath();
+                }
+
+                if( Snap )
+                {
+                    ::ULIS::FVec2D& localCoords = pickedVertex->GetCoords();
+                    double localRadius = pickedVertex->GetRadius();
+                    BLPoint worldCoords = pickedVertex->GetOwner()->GetWorldMatrix().mapPoint( localCoords.x, localCoords.y );
+
+                    // note: we add an epsilon value in order to avoid zero-length sections
+                    // on paintgroups, because this will confuse the algorithm when building
+                    // the exploration-pairs, especially for the return section. However this
+                    // hack is only temporary and we'll find a solution later.
+                    vertexWorldCoords = ::ULIS::FVec2D( worldCoords.x + 0.001f
+                                                      , worldCoords.y + 0.001f );
+                }
             }
         }
 
@@ -235,6 +258,22 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
             SetPathColor( path, ColorMode );
 
             path->SetOpacity( Opacity );
+        }
+
+        if( mStitchedVertex == nullptr )
+        {
+            BLMatrix2D& pathInverseWorldMatrix = path->GetInverseWorldMatrix();
+            BLPoint localPoint = pathInverseWorldMatrix.mapPoint( vertexWorldCoords.x
+                                                                , vertexWorldCoords.y );
+            BLPoint localVector = pathInverseWorldMatrix.mapVector( pointRadius * 0.7071f
+                                                                  , pointRadius * 0.7071f );
+            double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
+
+            mStitchedVertex = new FOdysseyVectorVertex( localPoint.x
+                                                      , localPoint.y
+                                                      , localRadius );
+
+            path->AddVertex( mStitchedVertex );
         }
 
         path->SetBrush( Brush );
@@ -306,12 +345,23 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         // mandatory for stitching vertices
         mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-        newSegment = mPathTracer.Trace( mStitchedVertex, iPointInTexture.x, iPointInTexture.y, pointRadius );
+/*
+        if( mSnappedVertexCoords )
+        {
+        }
+*/
+
+        newSegment = mPathTracer.Trace( mStitchedVertex
+                                      , iPointInTexture.x
+                                      , iPointInTexture.y
+                                      , pointRadius );
 
         if( newSegment )
         {
             mAddedVertexArray.push_back( newSegment->GetVertex(1) );
             mAddedSegmentArray.push_back( newSegment );
+
+            mStitchedVertex = mAddedVertexArray.back();
 
             //mUndoPathExtend->RecordSegment( newSegment, newSegment->GetVertex(1) );
         }
@@ -384,7 +434,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 endingVertex = nullptr;
             }
 
-            newSegment = mPathTracer.Flush( endingVertex );
+            newSegment = mPathTracer.Flush( mStitchedVertex, endingVertex );
 
             if( newSegment )
             {
