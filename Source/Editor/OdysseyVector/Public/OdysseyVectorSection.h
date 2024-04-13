@@ -118,6 +118,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         double GetT( uint32 iIndex );
         FOdysseyVectorObject* GetOwner();
         void Merge( uint32 iPartnerID );
+        void Stitch();
 
     protected:
         FOdysseyVectorObject* mOwner;

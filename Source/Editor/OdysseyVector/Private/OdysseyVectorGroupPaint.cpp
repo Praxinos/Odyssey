@@ -490,6 +490,8 @@ FOdysseyVectorGroupPaint::IntersectVertex( FOdysseyVectorVertex* iVertex0
 {
     if( iVertex0 != iVertex1 )
     {
+        // We only test if vertex0 belongs to only 1 segment. Indeed, vertex1 can be between 2 segments
+        // for example when nearestSegmentT equals 0 or 1.
         if( iVertex0->GetSegmentCount() == 1 )
         {
             if( mGapTolerance )
@@ -497,8 +499,7 @@ FOdysseyVectorGroupPaint::IntersectVertex( FOdysseyVectorVertex* iVertex0
                 ::ULIS::FVec2D dif = ::ULIS::FVec2D( iPoint1InParent - iPoint0InParent );
                 double distance = dif.Distance();
 
-                if( ( distance > 0.0f ) // if distance equals 0 it will fully intersect
-                 && ( distance < mGapTolerance ) )
+                if( distance < mGapTolerance )
                 {
                     if( distance < iVertex0->GetDistanceToNearestVertex() )
                     {
@@ -1469,18 +1470,18 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     }
     else
     {
-        FCycleSectionInfo nextCycleSectionInfo = sectionNextVertex->GetCycleNextSection( iSection
-                                                                                       , sectionNextVertexIndex
-                                                                                       , 1.0f );
-        FOdysseyVectorSection* nextSection = nextCycleSectionInfo.section;
+        FSectionLinkInfo* sectionLinkInfo = sectionNextVertex->GetSectionLinkInfo( iSection, sectionNextVertexIndex );
+        FSectionLinkInfo* nextSectionLinkInfo = sectionNextVertex->GetCycleNextSection( sectionLinkInfo, 1.0f );
 
-        if( nextSection )
+        if( nextSectionLinkInfo )
         {
-            if( nextSection->IsBlocked( nextCycleSectionInfo.sectionVertexIndex ) == false )
+            FOdysseyVectorSection* nextSection = nextSectionLinkInfo->section;
+
+            if( nextSection->IsBlocked( nextSectionLinkInfo->sectionVertexIndex ) == false )
             {
                 ret = FindPath( iReturnSection
-                              , nextCycleSectionInfo.sectionVertexIndex
-                              , nextCycleSectionInfo.section
+                              , nextSectionLinkInfo->sectionVertexIndex
+                              , nextSectionLinkInfo->section
                               , oVertexIndexArray
                               , oSectionArray
                               , iOrientation

@@ -19,6 +19,27 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner // pa
     Init( iOwner, iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1, oShortSectionArray );
 }
 
+// Note: must be unlinked before stitching
+void
+FOdysseyVectorSection::Stitch()
+{
+    std::vector<FSectionLinkInfo> vertex0SectionLinkInfoArray;
+    std::vector<FSectionLinkInfo> vertex1SectionLinkInfoArray;
+
+    mVertex[0]->GetSectionLinkInfo( vertex0SectionLinkInfoArray );
+    mVertex[1]->GetSectionLinkInfo( vertex1SectionLinkInfoArray );
+
+    for( FSectionLinkInfo& sectionLinkInfo : vertex0SectionLinkInfoArray )
+    {
+        sectionLinkInfo.section->mVertex[0] = mVertex[1];
+    }
+
+    for( FSectionLinkInfo& sectionLinkInfo : vertex1SectionLinkInfoArray )
+    {
+        sectionLinkInfo.section->mVertex[1] = mVertex[0];
+    }
+}
+
 double
 FOdysseyVectorSection::GetLength()
 {
@@ -54,7 +75,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
                            , std::vector<FOdysseyVectorSection*>& oShortSectionArray )
 {
     BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
-    mLength = fabs ( iT1 - iT0 ) * iSegment->GetLength();
+
     mSegment = iSegment;
     mVertex[0] = iVertex0;
     mVertex[1] = iVertex1;
@@ -63,8 +84,6 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
     mCycleCount = 0;
     mFlags = 0;
     mOwner = iOwner;
-
-    Link();
 
     // Get "sub-bezier" from t values. Will help us building the adjacent cycle and draw the section.
     // We indeed have to draw the section or else you can expect a small 1-pixel gap between cycles,
@@ -142,6 +161,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
 
         mBezier[3].x = convertedPoint[3].x;
         mBezier[3].y = convertedPoint[3].y;
+
+        mLength = fabs ( iT1 - iT0 ) * iSegment->GetLength();
     }
 
     if( iSegment->GetClass() == FOdysseyVectorSegmentCubicGap::StaticClass() )
@@ -151,6 +172,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
 
         // Gap segments already are in parent coordinates. Just copy the whole thing
         memcpy( mBezier, segmentBezier, sizeof( mBezier ) );
+
+        mLength = ::ULIS::FVec2D( mBezier[0] - mBezier[3] ).Distance();
     }
 
     // check bezier validity. It can happen at very very small values
@@ -164,6 +187,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
 
         oShortSectionArray.push_back( this );
     }
+
+    Link();
 }
 
 ::ULIS::FVec2D&
@@ -361,23 +386,17 @@ FOdysseyVectorSection::HasCycle( FOdysseyVectorCycle* iCycle )
 void
 FOdysseyVectorSection::Link()
 {
-    if( mVertex[0] != mVertex[1] )
-    {
-        mVertex[0]->AddSection( this );
-        mVertex[1]->AddSection( this );
-    }
-    else
-    {
-        mVertex[0]->AddSection( this );
-    }
+    // Note: a looping section will be added twice
+    mVertex[0]->AddSection( this, 0 );
+    mVertex[1]->AddSection( this, 1 );
 
     mFlags |= LINKED;
 }
 
 void FOdysseyVectorSection::Unlink()
 {
-    mVertex[0]->RemoveSection( this );
-    mVertex[1]->RemoveSection( this );
+    mVertex[0]->RemoveSection( this, 0 );
+    mVertex[1]->RemoveSection( this, 1 );
 
     mFlags &= (~LINKED);
 }
