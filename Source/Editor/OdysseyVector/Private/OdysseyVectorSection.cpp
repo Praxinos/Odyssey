@@ -19,25 +19,32 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner // pa
     Init( iOwner, iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1, oShortSectionArray );
 }
 
-// Note: must be unlinked before stitching
 void
 FOdysseyVectorSection::Stitch()
 {
     std::vector<FSectionLinkInfo> vertex0SectionLinkInfoArray;
-    std::vector<FSectionLinkInfo> vertex1SectionLinkInfoArray;
+    //std::vector<FSectionLinkInfo> vertex1SectionLinkInfoArray;
+
+    // unlink first or else it will be returned in the arrays
+    Unlink();
 
     mVertex[0]->GetSectionLinkInfo( vertex0SectionLinkInfoArray );
-    mVertex[1]->GetSectionLinkInfo( vertex1SectionLinkInfoArray );
+    //mVertex[1]->GetSectionLinkInfo( vertex1SectionLinkInfoArray );
 
     for( FSectionLinkInfo& sectionLinkInfo : vertex0SectionLinkInfoArray )
     {
-        sectionLinkInfo.section->mVertex[0] = mVertex[1];
+        sectionLinkInfo.section->Unlink();
+        sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[1];
+        sectionLinkInfo.section->Link();
     }
-
+/*
     for( FSectionLinkInfo& sectionLinkInfo : vertex1SectionLinkInfoArray )
     {
-        sectionLinkInfo.section->mVertex[1] = mVertex[0];
+        sectionLinkInfo.section->Unlink();
+        sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[0];
+        sectionLinkInfo.section->Link();
     }
+*/
 }
 
 double
@@ -179,9 +186,9 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
     // check bezier validity. It can happen at very very small values
     // of T that the bezier has the same values at all controllers. We get rid of those
     // sections in FOdysseyVectorGroupPaint::SimplifyGraph()
-    if( ( mBezier[0] == mBezier[1] )
+    if( mLength < 0.0001f /*( mBezier[0] == mBezier[1] )
      && ( mBezier[0] == mBezier[2] )
-     && ( mBezier[0] == mBezier[3] ) )
+     && ( mBezier[0] == mBezier[3] )*/ )
     {
         mLength = 0.0f;
 

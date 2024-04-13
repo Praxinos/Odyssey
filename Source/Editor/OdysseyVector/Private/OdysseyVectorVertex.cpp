@@ -115,6 +115,7 @@ FOdysseyVectorVertex::GetOwnerAsPath()
     return static_cast<FOdysseyVectorPath*>(mOwner);
 }
 
+#ifdef unused
 void
 FOdysseyVectorVertex::GetSurroundingSections( std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
                                             , std::vector<FSectionLinkInfo*>& oSurroundingSectionArray )
@@ -158,7 +159,6 @@ FOdysseyVectorVertex::GetSurroundingSections( std::vector<FOdysseyVectorVertex*>
     }
 }
 
-#ifdef unused
 void
 FOdysseyVectorVertex::GetCandidateSections( FOdysseyVectorSection* iLastSection
                                           , uint32 iLastSectionVertexIndex
@@ -254,41 +254,41 @@ FOdysseyVectorVertex::GetSectionLinkInfo( FOdysseyVectorSection* iSection
 
 static FSectionLinkInfo*
 FindNextSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo
-                       , const std::vector<FSectionLinkInfo*>& iCandidateSectionArray
+                       , std::list<FSectionLinkInfo>& iCandidateSectionList
                        , double iOrientation )
 {
     FSectionLinkInfo* rightRet = nullptr;
     FSectionLinkInfo* wrongRet = nullptr;
 
-    if( iCandidateSectionArray.size() )
+    if( iCandidateSectionList.size() )
     {
         ::ULIS::FVec2D lastSectionVector = iLastSectionLinkInfo->sectionVector;
         double minDot =  DBL_MAX;
         double maxDot = -DBL_MAX;
         std::vector<FSectionLinkInfo*> rightSideSection;
         std::vector<FSectionLinkInfo*> wrongSideSection;
-        uint32 sectionCount = iCandidateSectionArray.size();
+        uint32 sectionCount = iCandidateSectionList.size();
 
         rightSideSection.reserve( sectionCount );
         wrongSideSection.reserve( sectionCount );
 
-        for( FSectionLinkInfo* candidateSectionInfo : iCandidateSectionArray )
+        for( FSectionLinkInfo& candidateSectionInfo : iCandidateSectionList )
         {
-            if( candidateSectionInfo != iLastSectionLinkInfo )
+            if( &candidateSectionInfo != iLastSectionLinkInfo )
             {
-                if( candidateSectionInfo->sectionVector.DistanceSquared() )
+                if( candidateSectionInfo.sectionVector.DistanceSquared() )
                 {
                     double crossProduct = FOdysseyVector::Cross2D( -lastSectionVector
-                                                                  , candidateSectionInfo->sectionVector );
+                                                                  , candidateSectionInfo.sectionVector );
 
                     if( ( crossProduct * iOrientation >= 0.0f ) )
                     {
-                        rightSideSection.emplace_back( candidateSectionInfo );
+                        rightSideSection.emplace_back( &candidateSectionInfo );
                     }
 
                     if( ( crossProduct * iOrientation <= 0.0f ) )
                     {
-                        wrongSideSection.emplace_back( candidateSectionInfo );
+                        wrongSideSection.emplace_back( &candidateSectionInfo );
                     }
                 }
             }
@@ -340,16 +340,16 @@ FSectionLinkInfo*
 FOdysseyVectorVertex::GetCycleNextSection( FSectionLinkInfo* iLastSectionLinkInfo
                                          , double iOrientation )
 {
-    std::vector<FOdysseyVectorVertex*> partnerVertexArray;
-    std::vector<FSectionLinkInfo*> candidateSectionArray;
+    //std::vector<FOdysseyVectorVertex*> partnerVertexArray;
+    //std::vector<FSectionLinkInfo*> candidateSectionArray;
 
-    partnerVertexArray.reserve( 4 );
-    candidateSectionArray.reserve( 4 );
+    //partnerVertexArray.reserve( 4 );
+    //candidateSectionArray.reserve( 4 );
 
-    GetSurroundingSections( partnerVertexArray, candidateSectionArray );
+    //GetSurroundingSections( partnerVertexArray, candidateSectionArray );
 
     return FindNextSectionLinkInfo( iLastSectionLinkInfo
-                                  , candidateSectionArray
+                                  , mSectionLinkInfoList
                                   , iOrientation );
 }
 
@@ -461,24 +461,24 @@ FOdysseyVectorVertex::GetCycleNextSection( FOdysseyVectorSection* iLastSection
 void
 FOdysseyVectorVertex::BuildExplorationPairs( std::vector<FExplorationPair>& oExplorationPairsArray )
 {
-    std::vector<FOdysseyVectorVertex*> partnerVertexArray;
-    std::vector<FSectionLinkInfo*> candidateSectionArray;
+    //std::vector<FOdysseyVectorVertex*> partnerVertexArray;
+    //std::vector<FSectionLinkInfo*> candidateSectionArray;
     FSectionLinkInfo* departSectionLinkInfo = nullptr;
 
-    partnerVertexArray.reserve( 4 );
-    candidateSectionArray.reserve( 4 );
+    //partnerVertexArray.reserve( 4 );
+    //candidateSectionArray.reserve( 4 );
 
-    GetSurroundingSections( partnerVertexArray, candidateSectionArray );
+    //GetSurroundingSections( partnerVertexArray, candidateSectionArray );
 
-    for( FSectionLinkInfo* returnSectionLinkInfo : candidateSectionArray )
+    for( FSectionLinkInfo& returnSectionLinkInfo : mSectionLinkInfoList )
     {
-        departSectionLinkInfo = FindNextSectionLinkInfo( returnSectionLinkInfo
-                                                       , candidateSectionArray
+        departSectionLinkInfo = FindNextSectionLinkInfo( &returnSectionLinkInfo
+                                                       , mSectionLinkInfoList
                                                        , 1.0f );
 
         if( departSectionLinkInfo )
         {
-            oExplorationPairsArray.push_back( FExplorationPair( returnSectionLinkInfo->section
+            oExplorationPairsArray.push_back( FExplorationPair( returnSectionLinkInfo.section
                                                               , this
                                                               , departSectionLinkInfo->sectionVertexIndex
                                                               , departSectionLinkInfo->section ) );
@@ -1031,6 +1031,8 @@ FOdysseyVectorVertex::GetBoundingBox( bool iWorld )
 void
 FOdysseyVectorVertex::GetSectionLinkInfo( std::vector<FSectionLinkInfo>& oSectionLinkInfoArray )
 {
+    oSectionLinkInfoArray.reserve( mSectionLinkInfoList.size() );
+
     for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
     {
         oSectionLinkInfoArray.emplace_back( sectionLinkInfo );

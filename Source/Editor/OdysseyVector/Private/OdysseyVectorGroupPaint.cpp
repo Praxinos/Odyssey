@@ -1449,9 +1449,13 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     oSectionArray.push_back( iSection );
     iSection->Block( iSectionVertexIndex );
 
+//UE_LOG(LogTemp, Warning, TEXT("Next vertex valence %d"), sectionNextVertex->GetSectionCount() );
 //PrintSection( iSection );
+
 //UE_LOG(LogTemp, Warning, TEXT("vertices %x %x"), sectionNextVertex, oSectionArray[0]->GetVertex(oVertexIndexArray[0]) );
-    isLoop = ( oSectionArray[0]->GetVertex(oVertexIndexArray[0])->GetID() == sectionNextVertex->GetID() );
+    //isLoop = ( oSectionArray[0]->GetVertex(oVertexIndexArray[0])->GetID() == sectionNextVertex->GetID() );
+
+    isLoop = ( oSectionArray[0]->GetVertex(oVertexIndexArray[0]) == sectionNextVertex );
 
     if( ( isLoop == true )// cycle detected
     && ( ( ( iReturnSection->IsLinked() == true ) && ( iReturnSection == iSection ) ) // 1 return path accepted
@@ -1564,6 +1568,9 @@ GetCycleNormalVector( std::vector<uint32>& iVertexIndexArray
 uint32
 FOdysseyVectorGroupPaint::Explore( FExplorationPair* iExplorationPair )
 {
+    //UE_LOG(LogTemp, Warning, TEXT("Valence: %d"), iExplorationPair->departSection->GetVertex( iExplorationPair->departVertexIndex )->GetSectionCount() );
+    //PrintVertex( iExplorationPair->departSection->GetVertex( iExplorationPair->departVertexIndex ) );
+
     if( iExplorationPair->departSection )
     {
         if( iExplorationPair->departSection->IsLinked() == true )
@@ -1628,7 +1635,7 @@ FOdysseyVectorGroupPaint::FindCycles()
     // Build exploration pair before simplification
     for( FOdysseyVectorVertexIntersection& intersectionVertex : mIntersectionVertexArray )
     {
-        intersectionVertex.SetID( mVertexID++ );
+        //intersectionVertex.SetID( mVertexID++ );
 
         intersectionVertex.BuildExplorationPairs( explorationPairsBuffer );
     }
@@ -2109,6 +2116,13 @@ FOdysseyVectorGroupPaint::BuildGraph()
             }
         }
     }
+
+    // Get rid of section of length 0
+    for( FOdysseyVectorSection* shortSection : mShortSectionArray )
+    {
+        // Unlink() and stitch
+        shortSection->Stitch();
+    }
 }
 
 void
@@ -2291,6 +2305,8 @@ FOdysseyVectorGroupPaint::Clear()
     mGapSectionBuffer.clear();
     // clean section topology (unlinking has been moved after the cycle detection).
     mSectionBuffer.clear();
+    // handling of sections of length 0
+    mShortSectionArray.clear();
 
     mVertexID = 0;
 
@@ -2321,7 +2337,7 @@ FOdysseyVectorGroupPaint::Clear()
                 vertex->ResetNearestSegment();
                 vertex->ResetNearestVertex();
                 // reset vertex ID to get ready for partnerization
-                vertex->SetID( mVertexID++ );
+                //vertex->SetID( mVertexID++ );
             }
         } );
 #endif
@@ -2348,7 +2364,7 @@ FOdysseyVectorGroupPaint::Clear()
                 vertex->ResetNearestSegment();
                 vertex->ResetNearestVertex();
                 // reset vertex ID to get ready for partnerization
-                vertex->SetID( mVertexID++ );
+                //vertex->SetID( mVertexID++ );
             }
         }
     }
