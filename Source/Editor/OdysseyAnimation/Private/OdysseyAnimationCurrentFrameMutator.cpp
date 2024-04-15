@@ -34,7 +34,9 @@ void
 FOdysseyAnimationCurrentFrameMutator::Set(int iFrame)
 {
 	TSharedRef<FOdysseySetCurrentFrameMutation> mutation = MakeShared<FOdysseySetCurrentFrameMutation>(mAnimation, iFrame);
-	AddAndApplyMutation(mutation);		
+	AddMutation(mutation);
+	if (iFrame != mAnimation->CurrentFrame)
+		ApplyMutation(mutation);
 }
 
 #undef LOCTEXT_NAMESPACE
