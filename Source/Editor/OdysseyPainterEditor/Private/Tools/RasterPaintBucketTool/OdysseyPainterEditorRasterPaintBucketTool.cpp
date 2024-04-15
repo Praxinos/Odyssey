@@ -10,6 +10,8 @@
 #include "Palette/OdysseyPaletteEntryColor.h" 
 #include "Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorViewportTab.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -76,7 +78,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnKeyUp( const FKey& iKey )
 }
 
 bool
-UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock
+UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUpRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
@@ -143,6 +145,30 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
         ctx.Finish();
     }
 
+    if (IncludeColors.Num() > 0)
+    {
+        TSharedPtr<::ULIS::FBlock> tmpMaskBlock = MakeShared<::ULIS::FBlock>(iBlock->Width(), iBlock->Height(), ::ULIS::Format_G8);
+        ctx.Clear(*tmpMaskBlock);
+        ctx.Finish();
+
+        //add lines to maskBlock as 255
+        IncludeColorsToMaskBlock(sourceBlock, maskBlock);
+
+        //floodfill at same position with src 255 dst 255
+        ctx.FloodFill(
+            *maskBlock
+            , *tmpMaskBlock
+            , iPointInTexture.x
+            , iPointInTexture.y
+            , ::ULIS::FColor::FromGrey8(255)
+            , ::ULIS::FColor::FromGrey8(255)
+        );
+        ctx.Finish();
+
+        //use the resulting mask as the maskblock
+        maskBlock = tmpMaskBlock;
+    }
+
     //Apply the color to the paintblock
     
     GEditor->BeginTransaction(LOCTEXT("raster-paint-bucket-tool.transaction.paint-stroke", "FloodFill"));
@@ -162,7 +188,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDownRaster( TSharedPtr<::ULIS
 }
 
 bool
-UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
+UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
@@ -178,9 +204,51 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDown( const FOdysseyPoint& iP
         return false;
     
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    mPaintEngine.RasterBlock(rasterBlock);
-    return OnMouseDownRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
-        
+    if (iKey == EKeys::LeftMouseButton)
+    {
+        mPaintEngine.RasterBlock(rasterBlock);
+        return OnMouseUpRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
+    }
+    else if (iKey == EKeys::RightMouseButton)
+    {
+        TSharedPtr<SWidget> contextMenu = CreateContextMenu(rasterBlock->GetBlock(), iPointInTexture);
+
+        TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+        FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
+                                        FWidgetPath(),
+                                        contextMenu.ToSharedRef(),
+                                        FSlateApplication::Get().GetCursorPos(),
+                                        FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
+                                        
+        return true;
+    }
+    return false;
+}
+
+TSharedPtr<SWidget>
+UOdysseyPainterEditorRasterPaintBucketTool::CreateContextMenu(TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyPoint& iPointInTexture)
+{
+    FMenuBuilder menu( true, nullptr );
+
+    ::ULIS::FColor color = iBlock->Color(iPointInTexture.x, iPointInTexture.y);
+
+    menu.AddMenuEntry(
+        LOCTEXT("raster-paint-bucket-tool.context-menu.include-color.name", "Include Color")
+        , LOCTEXT("raster-paint-bucket-tool.context-menu.include-color.tooltip", "Adds this color in the paint bucket include color list.")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::IncludeColor, color )));
+
+    return menu.MakeWidget();
+}
+
+void
+UOdysseyPainterEditorRasterPaintBucketTool::IncludeColor( ::ULIS::FColor iColor )
+{
+    ::ULIS::FColor color = iColor.ToFormat(::ULIS::Format_RGBAF);
+    color.SetAlphaF(1.f);
+    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "IncludeColors");
+    IncludeColors.AddUnique(FLinearColor(iColor.RedF(), iColor.GreenF(), iColor.BlueF(), iColor.AlphaF()));
+    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "IncludeColors", EPropertyChangeType::ArrayAdd);
 }
 
 void
@@ -194,7 +262,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iP
 }
 
 bool
-UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
+UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
                                                      , const FKey& iKey )
 {
     return false;
@@ -298,6 +366,59 @@ UOdysseyPainterEditorRasterPaintBucketTool::CreateSourceMaskBlockFromLuminosity(
     ctx.Finish();
 
     return block;
+}
+
+void
+UOdysseyPainterEditorRasterPaintBucketTool::IncludeColorsToMaskBlock(TSharedPtr<::ULIS::FBlock> iSrcBlock, TSharedPtr<::ULIS::FBlock> iMaskBlock) const
+{
+    TArray<::ULIS::FColor> colors;
+
+    for (const FLinearColor& linearColor : IncludeColors)
+    {
+        ::ULIS::FColor color = ::ULIS::FColor::FromRGBAF(linearColor.R, linearColor.G, linearColor.B, linearColor.A);
+        if (color.Format() != iSrcBlock->Format())
+            color = color.ToFormat(iSrcBlock->Format());
+
+        colors.Add(color);
+    }
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_G8);
+    ctx.FilterInto(
+        [this, &colors]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+        {
+            for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+            {
+                if (iSrcPixel.AlphaF() == 0.f)
+                    continue;
+
+                for (const ::ULIS::FColor& color : colors)
+                {
+                    bool includeColor = true;
+                    for (int j = 0; j < color.SamplesPerPixel(); j++)
+                    {
+                        if (iSrcPixel.HasAlpha() && iSrcPixel.AlphaIndex() == j)
+                            continue;
+
+                        
+                        if (iSrcPixel.ChannelF(j) != color.ChannelF(j))
+                        {
+                            includeColor = false;
+                            break;
+                        }
+                    }
+
+                    if (includeColor)
+                    {
+                        iDstPixel.SetGrey8( 255 );
+                        break;    
+                    }
+                }
+            }
+        }
+        , *iSrcBlock
+        , *iMaskBlock
+    );
+    ctx.Finish();
 }
 
 void

@@ -57,8 +57,8 @@ public:
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
-    // Raster Mouse Down
-    bool OnMouseDownRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    // Raster Mouse Up
+    bool OnMouseUpRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
     virtual void Commit() override;
     virtual TSharedRef<SWidget> CreateTopTabWidget() override;
@@ -75,6 +75,10 @@ private:
     TSharedPtr<::ULIS::FBlock> CreateSourceMaskBlockFromLuminosity(TSharedPtr<::ULIS::FBlock> iBlock, const ::ULIS::ISample& iColor) const;
     void ConvertMaskBlockToColorBlock(TSharedPtr<::ULIS::FBlock> iMask, TSharedPtr<::ULIS::FBlock> iColorBlock, const ::ULIS::FColor& iColor) const;
     TSharedPtr<::ULIS::FBlock> GetSourceBlock() const;
+    void IncludeColorsToMaskBlock(TSharedPtr<::ULIS::FBlock> iSrcBlock, TSharedPtr<::ULIS::FBlock> iMaskBlock) const;
+
+    TSharedPtr<SWidget> CreateContextMenu(TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyPoint& iPointInTexture);
+    void IncludeColor( ::ULIS::FColor iColor );
 
 public:
     UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool)
@@ -87,6 +91,8 @@ public:
     float Expansion; //pixels positive and negative
     UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool, meta=(ClampMin=0, UIMin=0, LinearDeltaSensitivity=1) )
     float GapTolerance; //pixels positive only
+    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool)
+    TArray<FLinearColor> IncludeColors;
     
     UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;
