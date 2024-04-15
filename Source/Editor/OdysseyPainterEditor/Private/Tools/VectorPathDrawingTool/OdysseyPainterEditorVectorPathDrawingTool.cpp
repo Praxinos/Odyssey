@@ -236,12 +236,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
                     double localRadius = pickedVertex->GetRadius();
                     BLPoint worldCoords = pickedVertex->GetOwner()->GetWorldMatrix().mapPoint( localCoords.x, localCoords.y );
 
-                    // note: we add an epsilon value in order to avoid zero-length sections
-                    // on paintgroups, because this will confuse the algorithm when building
-                    // the exploration-pairs, especially for the return section. However this
-                    // hack is only temporary and we'll find a solution later.
-                    vertexWorldCoords = ::ULIS::FVec2D( worldCoords.x + 0.001f
-                                                      , worldCoords.y + 0.001f );
+                    vertexWorldCoords = ::ULIS::FVec2D( worldCoords.x
+                                                      , worldCoords.y );
                 }
             }
         }

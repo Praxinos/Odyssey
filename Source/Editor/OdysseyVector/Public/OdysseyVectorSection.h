@@ -68,16 +68,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
          */
         FOdysseyVectorVertex* GetVertex( int iNum );
 
-       /**
-         * @brief Get a vector tangent to this section, starting at this vertex.
-         * @param iVertexIndex index the vertex (0 or 1)
-         * @param iStraight
-         * @param iNormalize normalize the vector or not
-         * return a vector tangent to this section, starting at this vertex. 
-         */
-        ::ULIS::FVec2D GetVectorFromVertex( uint32 iVertexIndex
-                                          , bool iStraight
-                                          , bool iNormalize );
+
 
        /**
          * @brief Block the section for traversal from the vertex passed as parameter. Used by the GroupPaint class.
@@ -98,6 +89,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
          */
         bool IsBlocked( uint32 iVertexIndex );
 
+        ::ULIS::FVec2D& GetVector( uint32 iVertexIndex );
         bool IsLinked();
         void Link();
         void Unlink();
@@ -120,6 +112,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         void Merge( uint32 iPartnerID );
         void Stitch();
 
+       /**
+         * @brief Get a vector tangent to this section, starting at this vertex.
+         * @param iVertexIndex index the vertex (0 or 1)
+         * @param iStraight
+         * @param iNormalize normalize the vector or not
+         * return a vector tangent to this section, starting at this vertex. 
+         */
+        ::ULIS::FVec2D GetVectorFromVertex( uint32 iVertexIndex
+                                          , bool iStraight
+                                          , bool iNormalize );
+
     protected:
         FOdysseyVectorObject* mOwner;
         FOdysseyVectorSegment* mSegment;
@@ -129,6 +132,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
         ::ULIS::FVec2D mBezier[4];
         double mLength;
+        // vectors at endpoint;
+        ::ULIS::FVec2D mVector[2];
 
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );

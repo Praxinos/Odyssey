@@ -115,127 +115,6 @@ FOdysseyVectorVertex::GetOwnerAsPath()
     return static_cast<FOdysseyVectorPath*>(mOwner);
 }
 
-#ifdef unused
-void
-FOdysseyVectorVertex::GetSurroundingSections( std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
-                                            , std::vector<FSectionLinkInfo*>& oSurroundingSectionArray )
-{
-    oPartnerVertexArray.push_back( this );
-
-    for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
-    {
-        if( sectionLinkInfo.section->GetLength() )
-        {
-            oSurroundingSectionArray.emplace_back( &sectionLinkInfo );
-        }
-        else
-        {
-            FOdysseyVectorVertex* nextVertex = sectionLinkInfo.section->GetOtherVertex( this );
-
-            // check if we've ever met this potential partner vertex
-            // Note: we cannot compare vertex ID to see if it was already partnerize
-            // because this function is also called to build the graph
-            // which already sets the ID (and there is no step in between to reset it).
-            // so we just use this lookup table. A bit slower but hey, it works.
-            if( std::find( oPartnerVertexArray.begin()
-                         , oPartnerVertexArray.end()
-                         , nextVertex ) == oPartnerVertexArray.end() )
-            {
-                oPartnerVertexArray.push_back( nextVertex );
-                // partnerize with the first vertex.
-                // This will be used to determine if there is a loop
-                nextVertex->SetID( oPartnerVertexArray[0]->GetID() );
-
-                // check if the section hasn't been already added
-                //if( std::find( oSurroundingSectionArray.begin()
-                //             , oSurroundingSectionArray.end()
-                //             , &sectionLinkInfo ) == oSurroundingSectionArray.end() )
-                //{
-                    nextVertex->GetSurroundingSections( oPartnerVertexArray
-                                                      , oSurroundingSectionArray );
-                //}
-            }
-        }
-    }
-}
-
-void
-FOdysseyVectorVertex::GetCandidateSections( FOdysseyVectorSection* iLastSection
-                                          , uint32 iLastSectionVertexIndex
-                                          , std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
-                                          , std::vector<FSectionLinkInfo*>& oCandidateSectionArray )
-{
-    oPartnerVertexArray.push_back( this );
-
-    for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
-    {
-        if( sectionLinkInfo.section->GetLength() )
-        {
-            // special treatment for self-intersections
-            if( sectionLinkInfo.section == iLastSection )
-            {
-                if ( sectionLinkInfo.section->GetVertex(0) == sectionLinkInfo.section->GetVertex(1) )
-                {
-                    uint32 sectionVertexIndex = ( iLastSectionVertexIndex == 0 ) ? 1 : 0;
-                    //::ULIS::FVec2D sectionVector = sectionLinkInfo.section->GetVectorFromVertex( sectionVertexIndex
-                    //                                                           , false
-                    //                                                           , true );
-
-                    oCandidateSectionArray.emplace_back( sectionLinkInfo.section
-                                                       //, sectionVector
-                                                       , sectionVertexIndex );
-                }
-            }
-            else
-            {
-                uint32 sectionVertexIndex = this->GetIndex( sectionLinkInfo.section );
-                //::ULIS::FVec2D sectionVector = sectionLinkInfo.section->GetVectorFromVertex( sectionVertexIndex
-                //                                                           , false
-                //                                                           , true );
-
-                oCandidateSectionArray.emplace_back( sectionLinkInfo.section
-                                                   //, sectionVector
-                                                   , sectionVertexIndex );
-            }
-        }
-        else
-        {
-            FOdysseyVectorVertex* nextVertex = sectionLinkInfo.section->GetOtherVertex( this );
-
-            // check if we've ever met this potential partner vertex
-            // Note: we cannot compare vertex ID to see if it was already partnerize
-            // because this function is also called to build the graph
-            // which already sets the ID (and there is no step in between to reset it).
-            // so we just use this lookup table. A bit slower but hey, it works.
-            if( std::find( oPartnerVertexArray.begin()
-                         , oPartnerVertexArray.end()
-                         , nextVertex ) == oPartnerVertexArray.end() )
-            {
-                uint32 nextVertexIndex = nextVertex->GetIndex( sectionLinkInfo.section );
-
-                oPartnerVertexArray.push_back( nextVertex );
-                // partnerize with the first vertex.
-                // This will be used to determine if there is a loop
-                nextVertex->SetID( oPartnerVertexArray[0]->GetID() );
-
-                if( std::find_if( oCandidateSectionArray.begin()
-                                , oCandidateSectionArray.end()
-                                , [ &sectionLinkInfo ]( FSectionLinkInfo& cycleSectionInfo ) -> bool
-                                  { 
-                                      return ( cycleSectionInfo.section == sectionLinkInfo.section );
-                                  } ) == oCandidateSectionArray.end() )
-                {
-                    nextVertex->GetCandidateSections( sectionLinkInfo.section
-                                                    , nextVertexIndex
-                                                    , oPartnerVertexArray
-                                                    , oCandidateSectionArray );
-                }
-            }
-        }
-    }
-}
-#endif
-
 FSectionLinkInfo*
 FOdysseyVectorVertex::GetSectionLinkInfo( FOdysseyVectorSection* iSection
                                         , uint32 iSectionVertexIndex )
@@ -262,7 +141,7 @@ FindNextSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo
 
     if( iCandidateSectionList.size() )
     {
-        ::ULIS::FVec2D lastSectionVector = iLastSectionLinkInfo->sectionVector;
+        ::ULIS::FVec2D lastSectionVector = iLastSectionLinkInfo->GetVector();
         double minDot =  DBL_MAX;
         double maxDot = -DBL_MAX;
         std::vector<FSectionLinkInfo*> rightSideSection;
@@ -276,10 +155,10 @@ FindNextSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo
         {
             if( &candidateSectionInfo != iLastSectionLinkInfo )
             {
-                if( candidateSectionInfo.sectionVector.DistanceSquared() )
+                if( candidateSectionInfo.GetVector().DistanceSquared() )
                 {
                     double crossProduct = FOdysseyVector::Cross2D( -lastSectionVector
-                                                                  , candidateSectionInfo.sectionVector );
+                                                                  , candidateSectionInfo.GetVector() );
 
                     if( ( crossProduct * iOrientation >= 0.0f ) )
                     {
@@ -297,7 +176,7 @@ FindNextSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo
         for( int i = 0; i < rightSideSection.size(); i++ )
         {
             FOdysseyVectorSection* section = rightSideSection[i]->section;
-            ::ULIS::FVec2D sectionVector = rightSideSection[i]->sectionVector;
+            ::ULIS::FVec2D& sectionVector = rightSideSection[i]->GetVector();
             double dot = lastSectionVector.DotProduct( sectionVector );
 
             if( dot > maxDot )
@@ -316,7 +195,7 @@ FindNextSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo
         for( int i = 0; i < wrongSideSection.size(); i++ )
         {
             FOdysseyVectorSection* section = wrongSideSection[i]->section;
-            ::ULIS::FVec2D sectionVector = wrongSideSection[i]->sectionVector;
+            ::ULIS::FVec2D& sectionVector = wrongSideSection[i]->GetVector();
             double dot = lastSectionVector.DotProduct( sectionVector );
 
             if( dot < minDot )
@@ -337,6 +216,20 @@ FindNextSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo
 }
 
 FSectionLinkInfo*
+FOdysseyVectorVertex::GetOtherSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo )
+{
+    for( FSectionLinkInfo& candidateSectionInfo : mSectionLinkInfoList )
+    {
+        if( &candidateSectionInfo != iLastSectionLinkInfo )
+        {
+            return &candidateSectionInfo;
+        }
+    }
+
+    return nullptr;
+}
+
+FSectionLinkInfo*
 FOdysseyVectorVertex::GetCycleNextSection( FSectionLinkInfo* iLastSectionLinkInfo
                                          , double iOrientation )
 {
@@ -347,6 +240,11 @@ FOdysseyVectorVertex::GetCycleNextSection( FSectionLinkInfo* iLastSectionLinkInf
     //candidateSectionArray.reserve( 4 );
 
     //GetSurroundingSections( partnerVertexArray, candidateSectionArray );
+
+    if( mSectionLinkInfoList.size() == 2 )
+    {
+        return GetOtherSectionLinkInfo( iLastSectionLinkInfo );
+    }
 
     return FindNextSectionLinkInfo( iLastSectionLinkInfo
                                   , mSectionLinkInfoList

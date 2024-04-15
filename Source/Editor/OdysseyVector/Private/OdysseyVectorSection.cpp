@@ -82,6 +82,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
                            , std::vector<FOdysseyVectorSection*>& oShortSectionArray )
 {
     BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
+    static ::ULIS::FVec2D zeroVector = ::ULIS::FVec2D( 0.0f, 0.0f );
 
     mSegment = iSegment;
     mVertex[0] = iVertex0;
@@ -183,15 +184,26 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
         mLength = ::ULIS::FVec2D( mBezier[0] - mBezier[3] ).Distance();
     }
 
-    // check bezier validity. It can happen at very very small values
-    // of T that the bezier has the same values at all controllers. We get rid of those
-    // sections in FOdysseyVectorGroupPaint::SimplifyGraph()
-    if( mLength < 0.0001f /*( mBezier[0] == mBezier[1] )
-     && ( mBezier[0] == mBezier[2] )
-     && ( mBezier[0] == mBezier[3] )*/ )
+    if( mLength > 0.0f )
     {
-        mLength = 0.0f;
+        mVector[0] = GetVectorFromVertex( 0, false, true );
+        mVector[1] = GetVectorFromVertex( 1, false, true );
 
+        // check bezier validity. It can happen at very very small values
+        // of T that the bezier has the same values at all controllers. We get rid of those
+        // sections in FOdysseyVectorGroupPaint::SimplifyGraph()
+        if( /*( mVector[0] == zeroVector ) || ( mVector[1] == zeroVector )*/
+            mLength < 0.0000000001f
+            /*( mBezier[0] == mBezier[1] )
+         && ( mBezier[0] == mBezier[2] )
+         && ( mBezier[0] == mBezier[3] )*/ )
+        {
+            mLength = 0.0f;
+        }
+    }
+
+    if( mLength == 0.0f )
+    {
         oShortSectionArray.push_back( this );
     }
 
@@ -285,6 +297,12 @@ uint32
 FOdysseyVectorSection::GetCycleCount()
 {
     return mCycleCount;
+}
+
+::ULIS::FVec2D&
+FOdysseyVectorSection::GetVector( uint32 iVertexIndex )
+{
+    return mVector[iVertexIndex];
 }
 
 ::ULIS::FVec2D
@@ -388,7 +406,6 @@ FOdysseyVectorSection::HasCycle( FOdysseyVectorCycle* iCycle )
 {
     return ( ( mCycle[0] == iCycle ) || ( mCycle[1] == iCycle ) );
 }
-
 
 void
 FOdysseyVectorSection::Link()

@@ -64,14 +64,12 @@ struct FExplorationWayPoint
 struct ODYSSEYVECTOR_API FSectionLinkInfo
 {
     FOdysseyVectorSection* section;
-    ::ULIS::FVec2D sectionVector;
     uint32 sectionVertexIndex;
 
     // copy constructor
     FSectionLinkInfo( const FSectionLinkInfo& iCycleSectionInfo )
     {
         this->section            = iCycleSectionInfo.section;
-        this->sectionVector      = iCycleSectionInfo.sectionVector;
         this->sectionVertexIndex = iCycleSectionInfo.sectionVertexIndex;
     }
 
@@ -79,18 +77,12 @@ struct ODYSSEYVECTOR_API FSectionLinkInfo
     {
         section = iSection;
         sectionVertexIndex = iSectionVertexIndex;
-
-        sectionVector = section->GetVectorFromVertex( sectionVertexIndex
-                                                    , false
-                                                    , true );
     }
 
-    // This can be done after Graph simplification
-    void
-    ComputeVector()
-    {
-        //sectionVector = iSectionVector;
-    }
+   ::ULIS::FVec2D& GetVector()
+   {
+        return section->GetVector( sectionVertexIndex );
+   }
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
@@ -413,6 +405,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void GetSurroundingSections( std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
                                    , std::vector<FSectionLinkInfo*>& oSurroundingSectionArray );
         void GetSectionLinkInfo( std::vector<FSectionLinkInfo>& oSectionLinkInfoArray );
+        FSectionLinkInfo* GetOtherSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo );
 
     protected:
         /**

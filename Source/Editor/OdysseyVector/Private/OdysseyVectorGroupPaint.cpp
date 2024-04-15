@@ -537,9 +537,8 @@ IntersectGapSection( FOdysseyVectorSection* iGapSection
                                                   , &gapSectionT
                                                   , &segmentPolySubT ) )
             {
-                // this seems useless
                 double segmentT = segmentPoly->fromT + ( segmentPolySubT * ( segmentPoly->toT - segmentPoly->fromT ) );
-                // this seems useless
+
                 if( ( segmentT > 0.0f && segmentT < 1.0f )
                  && ( segmentT > 0.0f && segmentT < 1.0f ) )
                 {
@@ -572,23 +571,17 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
     std::vector<FOdysseyVectorFraction>& segment0FractionCache = iSegment0->GetFractionCache();
     ::ULIS::FVec2D segment0Point0InParent = iSegment0->GetFractionCacheStartPointInParent();
     ::ULIS::FVec2D segment0Point1InParent = iSegment0->GetFractionCacheEndPointInParent();
+    uint32 segment0Vertex0SegmentCount = segment0Vertex0->GetSegmentCount();
+    uint32 segment0Vertex1SegmentCount = segment0Vertex1->GetSegmentCount();
 
     FOdysseyVectorVertex* segment1Vertex0 = iSegment1->GetVertex(0);
     FOdysseyVectorVertex* segment1Vertex1 = iSegment1->GetVertex(1);
     std::vector<FOdysseyVectorFraction>& segment1FractionCache = iSegment1->GetFractionCache();
     ::ULIS::FVec2D segment1Point0InParent = iSegment1->GetFractionCacheStartPointInParent();
     ::ULIS::FVec2D segment1Point1InParent = iSegment1->GetFractionCacheEndPointInParent();
+    uint32 segment1Vertex0SegmentCount = segment1Vertex0->GetSegmentCount();
+    uint32 segment1Vertex1SegmentCount = segment1Vertex1->GetSegmentCount();
 
-    //uint32 intersectionCount = 0;
-
-    // TODO: compare beziers. If they are the same (two segments one over the other), don't intersect
-/*
-    if( ( iSegment0 != iSegment1 )
-      &&( iSegment0->CompareBezier( iSegment1 ) == 0 ) )
-    {
-        return;
-    }
-*/
     for ( int i = 0; i < segment0FractionCache.size(); i++ )
     {
         FOdysseyVectorFraction* segment0Poly = &segment0FractionCache[i];
@@ -597,21 +590,9 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
 
         ::ULIS::FVec2D segment0PolyVector = ( segment0P1Coords - segment0P0Coords );
         ::ULIS::FVec2D segment0PolyVectorInParent = ( segment0Poly->pointCoordsInParent[1] - segment0Poly->pointCoordsInParent[0] );
-        //FOdysseyVectorVertex* segment0PolyVertex0 = nullptr;
-        //FOdysseyVectorVertex* segment0PolyVertex1 = nullptr;
         int p = i - 1;
         int n = i + 1;
-/*
-        if( segment0Poly == &segment0FractionCache.front() )
-        {
-            segment0PolyVertex0 = segment0Vertex0;
-        }
 
-        if( segment0Poly == &segment0FractionCache.back() )
-        {
-            segment0PolyVertex1 = segment0Vertex1;
-        }
-*/
         if( iSegment0 >= iSegment1 )
         {
             if( ( segment0Poly->xMinInParent <= iSegment1MaxInParentWithTolerance.x )
@@ -624,21 +605,8 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                     FOdysseyVectorFraction* segment1Poly = &segment1FractionCache[j];
                     ::ULIS::FVec2D& segment1P0Coords = segment1Poly->point[0]->GetCoords();
                     ::ULIS::FVec2D& segment1P1Coords = segment1Poly->point[1]->GetCoords();
-
-                    //FOdysseyVectorVertex* segment1PolyVertex0 = nullptr;
-                    //FOdysseyVectorVertex* segment1PolyVertex1 = nullptr;
                     double segment0PolySubT, segment1PolySubT;
-/*
-                    if( segment1Poly == &segment1FractionCache.front() )
-                    {
-                        segment1PolyVertex0 = segment1Vertex0;
-                    }
 
-                    if( segment1Poly == &segment1FractionCache.back() )
-                    {
-                        segment1PolyVertex1 = segment1Vertex1;
-                    }
-*/
                     // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
                     if( ( segment0Poly->xMaxInParent >= segment1Poly->xMinInParent ) && ( segment0Poly->xMinInParent <= segment1Poly->xMaxInParent )
                      && ( segment0Poly->yMaxInParent >= segment1Poly->yMinInParent ) && ( segment0Poly->yMinInParent <= segment1Poly->yMaxInParent ) )
@@ -678,25 +646,35 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                                 if( ( segment0T >= 0.0f && segment0T <= 1.0f )
                                  && ( segment1T >= 0.0f && segment1T <= 1.0f ) )
                                 {
-/*
-                                    //FOdysseyVectorVertexIntersection* intersectionVertex = new FOdysseyVectorVertexIntersection( segment0ISXCoords.x
-                                    //                                                                                           , segment0ISXCoords.y );
-                                    // don't intersect adjacent fraction from contiguous segments.
-                                    // as they would always intersect
-                                    if( ( segment0PolyVertex1 && segment1PolyVertex0 )
-                                     && ( segment0PolyVertex1 == segment1PolyVertex0 ) )
+                                    // ignore intersection at end points if there is only
+                                    // one segment. The intersection is handled by the gap
+                                    // management
                                     {
-                                        continue;
+                                        if( ( segment0T == 0.0f )
+                                         && ( segment0Vertex0SegmentCount == 1 ) )
+                                        {
+                                            continue;
+                                        }
+
+                                        if( ( segment0T == 1.0f )
+                                         && ( segment0Vertex1SegmentCount == 1 ) )
+                                        {
+                                            continue;
+                                        }
+
+                                        if( ( segment1T == 0.0f )
+                                         && ( segment1Vertex0SegmentCount == 1 ) )
+                                        {
+                                            continue;
+                                        }
+
+                                        if( ( segment1T == 1.0f )
+                                         && ( segment1Vertex1SegmentCount == 1 ) )
+                                        {
+                                            continue;
+                                        }
                                     }
 
-                                    // don't intersect adjacent fraction from contiguous segments.
-                                    // as they would always intersect
-                                    if( ( segment0PolyVertex0 && segment1PolyVertex1 )
-                                     && ( segment0PolyVertex0 == segment1PolyVertex1 ) )
-                                    {
-                                        continue;
-                                    }
-*/
                                     // save in temporary struct array will allow to alloc vertices in one go.
                                     mMutex.lock();
                                     oIntersectionRecordArray.emplace_back( segment0ISXCoords.x
@@ -718,7 +696,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
 ////////////////////////////// Gap detection /////////////////////////////////
         if( ( mGapTolerance  ) && ( iSegment0 != iSegment1 ) )
         {
-            if( segment1Vertex0->GetSegmentCount() == 1 )
+            if( segment1Vertex0SegmentCount == 1 )
             {
                 // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
                 if ( ( segment1Point0InParent.x >= ( segment0Poly->xMinInParent - mGapTolerance ) ) && ( segment1Point0InParent.x <= ( segment0Poly->xMaxInParent + mGapTolerance ) )
@@ -734,8 +712,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                     //if ( ( t > 0.0f ) && ( t < 1.0f ) )
                     {
                         mMutex.lock();
-                        if( ( distance > 0.0f ) // if distance equals 0, it will fully intersect
-                         && ( distance < mGapTolerance )
+                        if( ( distance < mGapTolerance )
                          && ( distance < segment1Vertex0->GetDistanceToNearestSegment() ) )
                         {
                             double segmentT = segment0Poly->fromT + ( ( segment0Poly->toT - segment0Poly->fromT ) * t );
@@ -753,7 +730,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                 }
             }
 
-            if( segment1Vertex1->GetSegmentCount() == 1 )
+            if( segment1Vertex1SegmentCount == 1 )
             {
                 // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
                 if ( ( segment1Point1InParent.x >= ( segment0Poly->xMinInParent - mGapTolerance ) ) && ( segment1Point1InParent.x <= ( segment0Poly->xMaxInParent + mGapTolerance ) )
@@ -768,8 +745,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                     //if ( ( t > 0.0f ) && ( t < 1.0f ) )
                     {
                         mMutex.lock();
-                        if( ( distance > 0.0f ) // if distance equals 0, it will fully intersect
-                         && ( distance < mGapTolerance )
+                        if( ( distance < mGapTolerance )
                          && ( distance < segment1Vertex1->GetDistanceToNearestSegment() ) )
                         {
                             double segmentT = segment0Poly->fromT + ( ( segment0Poly->toT - segment0Poly->fromT ) * t );
@@ -2182,9 +2158,17 @@ GapSectionIntersects( FOdysseyVectorSection& iSection
     {
         if( ( &otherSection != &iSection ) && otherSection.IsLinked() )
         {
+            FOdysseyVectorVertex* otherVertex0 = otherSection.GetVertex(0);
+            FOdysseyVectorVertex* otherVertex1 = otherSection.GetVertex(1);
             ::ULIS::FVec2D* otherSectionBezier = otherSection.GetBezier();
             double otherSectionT;
             double sectionT;
+
+            if( ( ( otherVertex0 == vertex0 ) && ( otherVertex1 == vertex1 ) )
+            ||  ( ( otherVertex1 == vertex0 ) && ( otherVertex0 == vertex1 ) ) )
+            {
+                return true;
+            }
 
             if( FOdysseyVector::IntersectSegment( sectionBezier[0]
                                                 , sectionBezier[3]
@@ -2217,6 +2201,16 @@ GapSectionIntersects( FOdysseyVectorSection& iSection
             if( vertex0Segment == vertex1Segment )
             {
                 if( IntersectGapSection( &iSection, vertex0Segment ) )
+                {
+                    return true;
+                }
+
+                // check the section is not colinear with the segment.
+                // this confuses the algorithm from cross and dot products.
+                // this happens when a vertex-vertex gap is created between to endpoints of
+                // the same segment and this segment is small and straight. This is why the
+                // simpliest check is to compare the length of the section and the said segment
+                if( iSection.GetLength() == vertex0Segment->GetLength() )
                 {
                     return true;
                 }
