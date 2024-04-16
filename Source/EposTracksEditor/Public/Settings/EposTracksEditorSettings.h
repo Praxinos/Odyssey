@@ -26,6 +26,10 @@ public:
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category = Camera )
     FCameraLensSettings LensSettings;
 
+    /** Controls the camera's focus. */
+    UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category = Camera )
+    FCameraFocusSettings FocusSettings;
+
     /** Current focal length of the camera (i.e. controls FoV, zoom) */
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category = Camera )
     float CurrentFocalLength = -1; // Compute and set in UpdateValues()

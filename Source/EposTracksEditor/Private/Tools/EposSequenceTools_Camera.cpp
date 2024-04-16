@@ -210,6 +210,7 @@ ShotSequenceTools::SpawnCamera( UWorld* iWorld, const FTransform& iTransform )
 
     camera->GetCineCameraComponent()->LensSettings = settings->CameraSettings.LensSettings;
     camera->GetCineCameraComponent()->Filmback = settings->CameraSettings.Filmback;
+    camera->GetCineCameraComponent()->FocusSettings = settings->CameraSettings.FocusSettings;
     camera->GetCineCameraComponent()->CurrentAperture = settings->CameraSettings.CurrentAperture;
     camera->GetCineCameraComponent()->SetCurrentFocalLength( settings->CameraSettings.CurrentFocalLength ); // Use setter to trigger RecalcDerivedData(), so no need to call Pre/PostChange() and its huge syntax
 
