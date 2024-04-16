@@ -294,7 +294,7 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
         TSharedPtr<FOdysseyAnimationCell> nextCell = cellsContainer->GetCellAtFrame(mDragPosition);
         TSharedPtr<FOdysseyAnimationCell> previousCell = cellsContainer->GetCellAtFrame(mDragPosition - 1);
 
-        if ((!nextCell || selectedCells.Contains(nextCell)) && (!previousCell || selectedCells.Contains(previousCell)))
+        if (selectedCells.Contains(nextCell) && selectedCells.Contains(previousCell))
         {
             //Trying to copy cells inside the current layer selection
             //This is not allowed
