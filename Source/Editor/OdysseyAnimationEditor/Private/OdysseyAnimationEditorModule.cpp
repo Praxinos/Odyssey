@@ -18,6 +18,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
+#include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -80,6 +81,8 @@ FOdysseyAnimationEditorModule::StartupModule()
 	// Register Commands
 	RegisterCommands();
 
+	RegisterSettings();
+
 	RegisterLevelEditorLayoutExtensions();
 }
 
@@ -88,6 +91,8 @@ FOdysseyAnimationEditorModule::ShutdownModule()
 {
 	// Unregister Commands
 	UnregisterCommands();
+
+	UnregisterSettings();
 
 	// Unregister Assets Type Actions
 	UnregisterAssetTypeActions();
@@ -144,6 +149,31 @@ FOdysseyAnimationEditorModule::UnregisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
 	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
+}
+
+void
+FOdysseyAnimationEditorModule::RegisterSettings()
+{
+    ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+
+    if( !settingsModule )
+        return;
+
+    settingsModule->RegisterSettings( "Project", "Plugins", "OdysseyAnimationEditor"
+                                        , LOCTEXT( "settings.name", "2D Animation Editor" )
+                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
+                                        , GetMutableDefault<UOdysseyAnimationEditorProjectSettings>() );
+}
+
+void
+FOdysseyAnimationEditorModule::UnregisterSettings()
+{
+    ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+
+    if( !settingsModule )
+        return;
+        
+    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditor" );
 }
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );

@@ -78,6 +78,15 @@ private:
     bool IsPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
     bool CanSetPreBehaviour() const;
 
+    void RemoveCellMark();
+    bool CanRemoveCellMark() const;
+    void SetCellMark( FString iMarkId );
+    bool CanSetCellMark() const;
+    bool IsCellMarkChecked( FString iMarkId ) const;
+
+    TSharedRef<SWidget> CreateCellMarkMenuWidget(const FString& iMarkId);
+    void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder);
+
     FReply OnContextMenuMinusButtonClicked();
     FReply OnContextMenuPlusButtonClicked();
 

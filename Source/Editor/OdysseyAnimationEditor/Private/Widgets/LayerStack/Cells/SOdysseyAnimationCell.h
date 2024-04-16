@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 
+struct FSlateBrush;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCell
     : public SCompoundWidget
 {
@@ -31,6 +32,16 @@ public:
 private:
     bool IsSelected() const;
 	bool IsSelectionCursor() const;
+
+    //int GetMarkWidgetIndex() const;
+    const FSlateBrush* GetMarkBrush() const;
+    FLinearColor GetMarkColor() const;
+    float GetMarkOpacity() const;
+    //FSlateColor GetMarkColorAndOpacity() const;
+    FText GetMarkTooltipText() const;
+    bool IsMarkSymbol() const;
+    bool IsMarkFill() const;
+    bool IsMarkInvalid() const;
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;

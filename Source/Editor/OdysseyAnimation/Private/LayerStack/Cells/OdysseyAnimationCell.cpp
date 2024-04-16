@@ -34,6 +34,12 @@ FOdysseyAnimationCell::GetLength() const
     return mLength;
 }
 
+const FString&
+FOdysseyAnimationCell::GetMarkId() const
+{
+    return mMarkId;
+}
+
 void
 FOdysseyAnimationCell::PostDuplicate()
 {

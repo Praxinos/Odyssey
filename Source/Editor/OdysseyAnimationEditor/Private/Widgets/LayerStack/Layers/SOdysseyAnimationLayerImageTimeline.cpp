@@ -35,7 +35,7 @@ SOdysseyAnimationLayerImageTimeline::Construct(
     TAttribute<FMargin> cellsPadding = TAttribute<FMargin>::CreateLambda(
         [this]()
         {
-            return IsCollapsed() ? FMargin(0.f, 5.f, 0.f, 5.f) : FMargin(0);
+            return /*IsCollapsed() ? FMargin(0.f, 5.f, 0.f, 5.f) :*/ FMargin(0);
         }
     );
     
@@ -384,6 +384,11 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
             NAME_None,
             LOCTEXT("timeline-cells.context-menu.set-selected-cells-length.name", "Set Length")
         );
+        iMenuBuilder.AddSubMenu(
+            LOCTEXT("timeline-cells.context-menu.cell-mark.name", "Mark"),
+            LOCTEXT("timeline-cells.context-menu.cell-mark.tooltip", "Set a mark on the selected cells"),
+            FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu)
+        );
     iMenuBuilder.EndSection();
 
     iMenuBuilder.BeginSection("Layer", LOCTEXT("timeline-cells.context-menu.layer-section.name", "Layer"));
@@ -398,6 +403,77 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
             FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu)
         );
     iMenuBuilder.EndSection();
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageTimeline::CreateCellMarkMenuWidget(const FString& iMarkId)
+{
+    UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
+    if (!settings->AnimationCellsMarks.Contains(iMarkId))
+        return SNullWidget::NullWidget; //TODO: return an invalid icon with a tooltip explaining everything
+    
+    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[iMarkId];
+    const FSlateBrush* icon = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
+    switch(markSettings.Symbol)
+    {
+        case EOdysseyAnimationCellMarkSymbol::Triangle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Triangle"); break;
+        case EOdysseyAnimationCellMarkSymbol::Circle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Circle"); break;
+        case EOdysseyAnimationCellMarkSymbol::Diamond: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Diamond"); break;
+        case EOdysseyAnimationCellMarkSymbol::Star: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Star"); break;
+    }
+    FLinearColor iconColor = markSettings.Color;
+    FText name = FText::FromName(markSettings.Name);
+
+    return SNew(SHorizontalBox)
+    + SHorizontalBox::Slot()
+    .Padding(FMargin(0, 0, 4, 0))
+    .AutoWidth()
+    [
+        SNew(SImage)
+        .Image(icon)
+        .ColorAndOpacity(iconColor)
+    ]
+    + SHorizontalBox::Slot()
+    .AutoWidth()
+    [
+        SNew(STextBlock)
+        .Text(name)
+    ];
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder)
+{
+    iMenuBuilder.AddMenuEntry(
+        LOCTEXT("timeline-cells.context-menu.cell-mark.reset.name", "Remove"),
+        LOCTEXT("timeline-cells.context-menu.cell-mark.reset.name", "Removes the any mark from selected cells"),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::RemoveCellMark),
+            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanRemoveCellMark)
+        )
+    );
+
+    iMenuBuilder.AddSeparator();
+
+    UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
+    for (auto element : settings->AnimationCellsMarks)
+    {
+        const FString& markId = element.Key;
+        const FAnimationCellMarkSettings& markSettings = element.Value;
+
+        iMenuBuilder.AddMenuEntry(
+            FUIAction(
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetCellMark, markId),
+                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetCellMark),
+                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked, markId)
+            ),
+            CreateCellMarkMenuWidget(markId),
+            NAME_None,
+            TAttribute<FText>(),
+            EUserInterfaceActionType::RadioButton
+        );
+    }
 }
 
 void
@@ -585,6 +661,127 @@ SOdysseyAnimationLayerImageTimeline::OnContextMenuPlusButtonClicked()
 {
     mAnimationTimelineCellsShortcuts->Action_IncreaseSelectedCellsLength();
     return FReply::Handled();
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
+{
+    if (mLayer->GetIsLocked())
+        return;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return;
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
+        return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
+#endif
+    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
+    UOdysseyAnimation* animation = mLayer->GetAnimation();
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
+    
+    FOdysseyAnimationCellsMutator mutator(mLayer, cellsContainer);
+    for (TSharedPtr<FOdysseyAnimationCell> selectedCell : selectedCells)
+    {
+        mutator.SetMarkId(selectedCell, FString());
+    }
+    mutator.Commit();
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::CanRemoveCellMark() const
+{
+    if (mLayer->GetIsLocked())
+        return false;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return false;
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
+        return false;
+
+    return true;
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::SetCellMark( FString iMarkId )
+{
+    if (mLayer->GetIsLocked())
+        return;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return;
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
+        return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
+#endif
+    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
+    UOdysseyAnimation* animation = mLayer->GetAnimation();
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
+    
+    FOdysseyAnimationCellsMutator mutator(mLayer, cellsContainer);
+    for (TSharedPtr<FOdysseyAnimationCell> selectedCell : selectedCells)
+    {
+        mutator.SetMarkId(selectedCell, iMarkId);
+    }
+    mutator.Commit();
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
+{
+    if (mLayer->GetIsLocked())
+        return false;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return false;
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
+        return false;
+
+    return true;
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked(FString iMarkId) const
+{
+    if (mLayer->GetIsLocked())
+        return false;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+    if (!cellsContainer)
+        return false;
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
+        return false;
+
+    for (TSharedPtr<FOdysseyAnimationCell> selectedCell : selectedCells)
+    {
+        if (selectedCell->GetMarkId() != iMarkId)
+            return false;
+    }
+
+    return true;
 }
 
 #undef LOCTEXT_NAMESPACE

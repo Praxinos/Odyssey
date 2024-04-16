@@ -177,6 +177,7 @@ namespace FOdysseyFile
         // You can use website https://crc32.online/ to generate a code
         static const uint32 CHUNK_CELL =  0xf93591b3; // container
             static const uint32 CHUNK_CELL_LENGTH = 0x5dbe40b7; // uint32 (Length)
+            static const uint32 CHUNK_CELL_MARKID = 0x866d04a6; // FString (MarkId)
 
         static const uint32 CHUNK_CELLIMAGEVECTOR =  0x60fdee3a; // container
             static const uint32 CHUNK_CELLIMAGEVECTOR_RESOLUTION = 0xc1bb48e1; // uint32(Width)-uint32(Height)

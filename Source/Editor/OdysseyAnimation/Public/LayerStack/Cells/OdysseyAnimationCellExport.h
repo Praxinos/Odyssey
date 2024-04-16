@@ -12,4 +12,5 @@ public:
 private:
     ////////////////////////////////////
     static void WriteLength( FOdysseyAnimationCell* iAnimationCell, FArchive &Ar );
+    static void WriteMarkId( FOdysseyAnimationCell* iAnimationCell, FArchive &Ar );
 };

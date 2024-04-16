@@ -51,6 +51,12 @@ FOdysseyAnimationCellImport::Read( FOdysseyAnimationCell* iAnimationCell
                 }
                 break;
 
+                case FOdysseyFile::Animation::CHUNK_CELL_MARKID :
+                {
+                    Ar << iAnimationCell->mMarkId;
+                }
+                break;
+
                 default:
 				// Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

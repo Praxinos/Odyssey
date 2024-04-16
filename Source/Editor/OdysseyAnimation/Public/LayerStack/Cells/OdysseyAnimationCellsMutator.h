@@ -30,6 +30,8 @@ public:
     void RemoveFrameRange(const FInt32Range& iRange);
     void SetLength(TSharedPtr<FOdysseyAnimationCell> iCell, int iLength);
     void SetLength(int iIndex, int iLength);
+    void SetMarkId(TSharedPtr<FOdysseyAnimationCell> iCell, const FString& iMarkId);
+    void SetMarkId(int iIndex, const FString& iMarkId);
     void SetOffset(int iOffset);
 
 private:
@@ -99,6 +101,25 @@ public:
     TSharedPtr<FOdysseyAnimationCell> mCell;
     int mNewLength; //Index of the cells
     int mOldLength; //Index of the cells
+};
+
+class ODYSSEYANIMATION_API FOdysseySetCellMarkIdMutation
+    : public IOdysseyMutation
+{
+public:
+    FOdysseySetCellMarkIdMutation(TSharedPtr<FOdysseyAnimationCell> iCell, const FString& iNewMarkId, const FString& iOldMarkId);
+
+public:
+    //Applies the mutation
+    virtual void Apply() override;
+
+    //Reverts the mutation (Undo)
+    virtual void Revert() override;
+
+public:
+    TSharedPtr<FOdysseyAnimationCell> mCell;
+    FString mNewMarkId;
+    FString mOldMarkId;
 };
 
 class ODYSSEYANIMATION_API FOdysseySetCellsOffsetMutation

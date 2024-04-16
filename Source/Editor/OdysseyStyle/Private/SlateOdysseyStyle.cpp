@@ -759,6 +759,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.CellImageStagger.Behaviour.Loop", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourLoop", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.PingPong", new IMAGE_BRUSH("OdysseyAnimation/CellImageStaggerBehaviourPingPong", mIcon16x16));
 
+    Set("Animation.CellMark.Symbol.Triangle", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-triangle", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Diamond", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-diamond", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Circle", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-circle", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Star", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-star", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Invalid", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-invalid", mIcon16x16));
+
     FSlateColor primary( FStyleColors::Primary );
     FSlateColor background( FStyleColors::Background );
     FSlateColor input( FStyleColors::Input );
@@ -767,14 +773,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.LightTableKey.Front", new FSlateRoundedBoxBrush( background, FVector4( 8.0f, 8.0f, 8.0f, 8.0f ) ));
     Set("Animation.LightTableKey.BackColor", primary);
     Set("Animation.LightTableKey.FrontColor", background);
-    
-    //Animation Command Icons
-    //Icons are used automatically
-    //Just use the prefix "OdysseyAnimationEditorCommands.[CommandName]"
-    {
-        
-    }
-    
 
     //Texture
     Set("Texture.AlphaLockedToggle", FCheckBoxStyle()
