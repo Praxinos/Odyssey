@@ -543,7 +543,9 @@ SRenderOptions::Construct( const FArguments& iArgs )
         AssetPickerConfig.bShowTypeInColumnView = false;
         AssetPickerConfig.bSortByPathInColumnView = false;
         AssetPickerConfig.ThumbnailScale = 0.25f;
-        //AssetPickerConfig.SaveSettingsName = TEXT( "MoviePipelineConfigAsset" ); // Use the same as in MovieRenderQueue menu ... no ... to not share the same ThumbnailScale value
+        //AssetPickerConfig.SaveSettingsName = TEXT( "MoviePipelineRenderConfigAsset" ); // Use the same as in MovieRenderQueue menu ... no ... to not share the same ThumbnailScale value
+        AssetPickerConfig.bForceShowEngineContent = true;
+        AssetPickerConfig.bForceShowPluginContent = true;
 
         AssetPickerConfig.AssetShowWarningText = LOCTEXT( "NoConfigs_Warning", "No Master Configurations Found" );
         AssetPickerConfig.Filter.ClassPaths.Add( UMoviePipelinePrimaryConfig::StaticClass()->GetClassPathName() );
