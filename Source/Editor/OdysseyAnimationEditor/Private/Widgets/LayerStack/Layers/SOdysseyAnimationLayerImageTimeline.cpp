@@ -126,7 +126,7 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
 
         TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
         MapActions(commandList, frame);
-		FMenuBuilder menuBuilder(true, commandList);
+		FMenuBuilder menuBuilder(true, commandList, ExtendContextMenu());
 		BuildContextMenu(menuBuilder);
 
 		TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
@@ -330,6 +330,11 @@ SOdysseyAnimationLayerImageTimeline::OnDrop(const FGeometry& iGeometry, const FD
     return FReply::Handled();
 }
 
+TSharedPtr<FExtender>
+SOdysseyAnimationLayerImageTimeline::ExtendContextMenu()
+{
+    return nullptr;
+}
 
 void
 SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder)
@@ -378,7 +383,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
     iMenuBuilder.EndSection();
 
     iMenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell);
+        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell, TEXT("ConvertToStagger"));
         iMenuBuilder.AddMenuEntry(
             FOdysseyAnimationEditorCommands::Get().SetSelectedCellsLength,
             NAME_None,

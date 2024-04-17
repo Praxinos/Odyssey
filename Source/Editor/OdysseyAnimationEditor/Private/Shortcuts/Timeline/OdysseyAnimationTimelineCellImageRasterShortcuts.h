@@ -1,0 +1,28 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+class SOdysseyAnimationLayerStackTreeView;
+
+class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellImageRasterShortcuts
+{
+public:
+    FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension);
+
+public:
+    //Shortcuts
+    void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList);
+
+public:
+    //Common Shortcuts
+    void Action_ConvertToRasterCell();
+    void Action_CrossFade();
+
+    bool CanAction_ConvertToRasterCell();
+    bool CanAction_CrossFade();
+
+private:
+    UOdysseyLayerStack* mLayerStack;
+    FOdysseyAnimationEditorExtension* mAnimationExtension;
+};

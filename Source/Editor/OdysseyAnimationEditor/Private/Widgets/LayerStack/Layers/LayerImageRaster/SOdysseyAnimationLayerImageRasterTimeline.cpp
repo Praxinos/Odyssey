@@ -5,6 +5,9 @@
 #include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/LayerStack/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
+
+#define LOCTEXT_NAMESPACE "AnimationEditor"
 
 SOdysseyAnimationLayerImageRasterTimeline::~SOdysseyAnimationLayerImageRasterTimeline()
 {
@@ -71,3 +74,46 @@ SOdysseyAnimationLayerImageRasterTimeline::GetShowStaggerCellContent() const
 
     return !IsCollapsed();
 }
+
+TSharedPtr<FExtender>
+SOdysseyAnimationLayerImageRasterTimeline::ExtendContextMenu()
+{
+    TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
+    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetLayerStack(), mExtension);
+    mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList(commandList);
+
+    TSharedRef<FExtender> extender = MakeShared<FExtender>();
+    extender->AddMenuExtension
+    (
+        TEXT("ConvertToStagger"),
+        EExtensionHook::After,
+        commandList,
+        FMenuExtensionDelegate::CreateLambda(
+            [](FMenuBuilder& iMenuBuilder)
+            {
+                iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToRasterCell);
+            }
+        )
+    );
+
+    extender->AddMenuExtension
+    (
+        TEXT("Cells"),
+        EExtensionHook::After,
+        commandList,
+        FMenuExtensionDelegate::CreateLambda(
+            [](FMenuBuilder& iMenuBuilder)
+            {
+                iMenuBuilder.AddMenuEntry(
+                    FOdysseyAnimationEditorCommands::Get().CrossFade,
+                    NAME_None,
+                    LOCTEXT("timeline-cells.context-menu.cross-fade.name", "Cross Fade")
+                );
+            }
+        )
+    );
+
+    return extender;
+}
+
+#undef LOCTEXT_NAMESPACE

@@ -218,7 +218,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
         return;
 
     TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
-    selectedCells.FilterByPredicate(
+    selectedCells = selectedCells.FilterByPredicate(
         [](TSharedPtr<FOdysseyAnimationCell> iCell)
         {
             return iCell->GetType() != FOdysseyAnimationCellImageStagger::StaticType();
@@ -504,7 +504,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
         return false;
 
     TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
-    selectedCells.FilterByPredicate(
+    selectedCells = selectedCells.FilterByPredicate(
         [](TSharedPtr<FOdysseyAnimationCell> iCell)
         {
             return iCell->GetType() != FOdysseyAnimationCellImageStagger::StaticType();

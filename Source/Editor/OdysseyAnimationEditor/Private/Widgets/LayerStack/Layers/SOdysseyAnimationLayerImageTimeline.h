@@ -63,10 +63,13 @@ protected:
 
     bool GetShowCellsHandles() const;
 
-private:
+protected:
     //Context Menu
-    void BuildContextMenu(FMenuBuilder& iMenuBuilder);
-    void MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame);
+    virtual void BuildContextMenu(FMenuBuilder& iMenuBuilder);
+    virtual TSharedPtr<FExtender> ExtendContextMenu();
+    virtual void MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame);
+
+private:
     void BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
     void BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
 

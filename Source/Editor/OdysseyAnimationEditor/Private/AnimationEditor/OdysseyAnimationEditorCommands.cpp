@@ -64,6 +64,8 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ChangeLayerOpacity100, LayersShortcuts, "Change current Layer Opacity to 100%", "Change current Layer Opacity to 100%",                                                             EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( ConvertToStaggerCell, CellsShortcuts, "Convert To Stagger Cell", "Converts selected cells to Stagger Cells", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ConvertToRasterCell, CellsShortcuts, "Convert To Raster Cell", "Converts selected cells to Raster Cells", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( CrossFade, CellsShortcuts, "Cross Fade Selected Cells", "Applies a cross fade on selected cells", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( ActivateTimelineSelectionTool, TimelineShortcuts, "Activate Timeline Selection Tool", "Activates the timeline Selection Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::V));
     UI_BUNDLE_COMMAND( ActivateTimelineMoveTool, TimelineShortcuts, "Activate Timeline Move Tool", "Activates the timeline Move Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::A));

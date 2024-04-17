@@ -29,6 +29,10 @@ public:
         UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
     );
 
+protected:
+    //Context Menu
+    virtual TSharedPtr<FExtender> ExtendContextMenu() override;
+
 private:
     virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() override;
     virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) override;
@@ -36,4 +40,7 @@ private:
 
 private:
     bool GetShowStaggerCellContent() const;
+
+private:
+    TSharedPtr<FOdysseyAnimationTimelineCellImageRasterShortcuts> mAnimationTimelineCellImageRasterShortcuts;
 };
