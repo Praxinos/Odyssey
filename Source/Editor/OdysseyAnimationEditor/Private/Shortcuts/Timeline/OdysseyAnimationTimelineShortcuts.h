@@ -7,6 +7,7 @@ class FOdysseyAnimationEditorExtension;
 class UOdysseyLayerStack;
 class FUICommandList;
 class FOdysseyAnimationTimelineCellsShortcuts;
+class FOdysseyAnimationTimelineCellImageRasterShortcuts;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineShortcuts
 {
@@ -23,4 +24,5 @@ private:
 private:
     TSharedRef<FUICommandList> mCommandList;
     TSharedRef<FOdysseyAnimationTimelineCellsShortcuts> mCellsShortcuts;
+    TSharedRef<FOdysseyAnimationTimelineCellImageRasterShortcuts> mCellImageRasterShortcuts;
 };

@@ -4,12 +4,14 @@
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineShortcuts.h"
 
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.h"
+#include "Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension)
     : mCommandList(MakeShared<FUICommandList>())
     , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iLayerStack, iAnimationExtension))
+    , mCellImageRasterShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(iLayerStack, iAnimationExtension))
 {
     MapActionsToCommandList();
 }
@@ -24,6 +26,7 @@ void
 FOdysseyAnimationTimelineShortcuts::MapActionsToCommandList()
 {
     mCellsShortcuts->MapActionsToCommandList(mCommandList);
+    mCellImageRasterShortcuts->MapActionsToCommandList(mCommandList);
 }
 
 #undef LOCTEXT_NAMESPACE
