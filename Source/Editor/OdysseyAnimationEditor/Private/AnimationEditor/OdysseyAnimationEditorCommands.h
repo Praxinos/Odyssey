@@ -86,6 +86,7 @@ public:
     TSharedPtr<FUICommandInfo> HoldActivateTimelineMoveTool;
     TSharedPtr<FUICommandInfo> HoldActivateTimelineCutTool;
     TSharedPtr<FUICommandInfo> BreakCell;
+    TSharedPtr<FUICommandInfo> RemoveCellMark;
 
     //Timeline Navigation Commands
     TSharedPtr<FUICommandInfo> NavigateToNextCell;

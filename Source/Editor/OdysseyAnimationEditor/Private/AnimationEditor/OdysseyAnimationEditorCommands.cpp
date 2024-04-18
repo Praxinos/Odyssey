@@ -80,6 +80,8 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( DecreaseSelectedCellsLength, TimelineShortcuts, "Decrease Selected Cells Length", "Decrease Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Subtract));
     UI_BUNDLE_COMMAND( SetSelectedCellsLength, TimelineShortcuts, "Set Selected Cells Length", "Set Selected Cells Length", EUserInterfaceActionType::Button, FInputChord());
 
+    UI_BUNDLE_COMMAND( RemoveCellMark, TimelineShortcuts, "Remove Cell Mark", "Removes any cell mark applied on the selected cells", EUserInterfaceActionType::Button, FInputChord());
+
     UI_BUNDLE_COMMAND( PanZoomTimeline, TimelineShortcuts,  "Pan / Zoom Timeline", "Hold the key to Pan (Left Mouse Button) or Zoom (Right Mouse Button) the Timeline",                                        EUserInterfaceActionType::None, FInputChord(EKeys::M));
 }
 

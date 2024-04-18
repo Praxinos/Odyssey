@@ -17,6 +17,12 @@ public:
     void Action_BreakCell();
     bool CanAction_BreakCell();
 
+    void Action_RemoveCellMark();
+    bool CanAction_RemoveCellMark();
+
+    //void Action_SetCellMark(FString iMarkId);
+    //bool CanAction_SetCellMark(FString iMarkId);
+
 public:
     //Shortcuts
     virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
