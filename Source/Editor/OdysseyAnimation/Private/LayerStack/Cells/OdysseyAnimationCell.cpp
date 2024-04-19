@@ -19,6 +19,7 @@ FOdysseyAnimationCell::~FOdysseyAnimationCell()
 FOdysseyAnimationCell::FOdysseyAnimationCell(int iLength, UOdysseyAnimationLayer* iLayer)
     : mLayer(iLayer)
     , mLength(iLength)
+    , mMarkId(INDEX_NONE)
 {
 }
 
@@ -34,7 +35,7 @@ FOdysseyAnimationCell::GetLength() const
     return mLength;
 }
 
-const FString&
+int
 FOdysseyAnimationCell::GetMarkId() const
 {
     return mMarkId;

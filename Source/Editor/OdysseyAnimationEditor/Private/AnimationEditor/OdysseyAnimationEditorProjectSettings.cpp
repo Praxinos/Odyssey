@@ -6,8 +6,16 @@
 UOdysseyAnimationEditorProjectSettings::UOdysseyAnimationEditorProjectSettings()
     : AnimationCellsMarks()
 {
-    AnimationCellsMarks.Add(
-        "red",
+}
+
+void
+UOdysseyAnimationEditorProjectSettings::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    TArray<FAnimationCellMarkSettings> defaultCellMarks;
+    
+    defaultCellMarks.Add(
         {
             TEXT("Red"),
             FLinearColor::Red,
@@ -15,8 +23,7 @@ UOdysseyAnimationEditorProjectSettings::UOdysseyAnimationEditorProjectSettings()
         }
     );
 
-    AnimationCellsMarks.Add(
-        "green",
+    defaultCellMarks.Add(
         {
             TEXT("Green"),
             FLinearColor::Green,
@@ -24,14 +31,95 @@ UOdysseyAnimationEditorProjectSettings::UOdysseyAnimationEditorProjectSettings()
         }
     );
 
-    AnimationCellsMarks.Add(
-        "blue",
+    defaultCellMarks.Add(
         {
             TEXT("Blue"),
             FLinearColor::Blue,
             EOdysseyAnimationCellMarkSymbol::Fill
         }
     );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Red"),
+            FLinearColor::Red,
+            EOdysseyAnimationCellMarkSymbol::Fill
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Green"),
+            FLinearColor::Green,
+            EOdysseyAnimationCellMarkSymbol::Fill
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Blue"),
+            FLinearColor::Blue,
+            EOdysseyAnimationCellMarkSymbol::Fill
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Red"),
+            FLinearColor::Red,
+            EOdysseyAnimationCellMarkSymbol::Fill
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Green"),
+            FLinearColor::Green,
+            EOdysseyAnimationCellMarkSymbol::Fill
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Blue"),
+            FLinearColor::Blue,
+            EOdysseyAnimationCellMarkSymbol::Fill
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Red"),
+            FLinearColor::Red,
+            EOdysseyAnimationCellMarkSymbol::Fill
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Green"),
+            FLinearColor::Green,
+            EOdysseyAnimationCellMarkSymbol::Fill
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Blue"),
+            FLinearColor::Blue,
+            EOdysseyAnimationCellMarkSymbol::Fill
+        }
+    );   
+
+    for (int i = AnimationCellsMarks.Num(); i < 12; i++)
+    {
+        AnimationCellsMarks.Add(defaultCellMarks[i]);
+    }
+
+    for (int i = AnimationCellsMarks.Num() - 1; i >= 12; i--)
+    {
+        AnimationCellsMarks.RemoveAt(i);
+    }
 }
 
 //Static

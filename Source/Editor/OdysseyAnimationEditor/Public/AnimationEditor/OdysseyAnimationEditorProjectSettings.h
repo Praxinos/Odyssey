@@ -30,6 +30,9 @@ struct FAnimationCellMarkSettings
 
     UPROPERTY(EditAnywhere, Category="Cell Marks")
     EOdysseyAnimationCellMarkSymbol Symbol;
+
+    UPROPERTY(EditAnywhere, Category="Cell Marks")
+    bool DisplayInContextMenu = true;
 };
 
 UCLASS(config=Engine)
@@ -41,11 +44,14 @@ class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationEditorProjectSettings
 public:
     UOdysseyAnimationEditorProjectSettings();
     static UOdysseyAnimationEditorProjectSettings* Get();
+ 
+
+    virtual void PostInitProperties() override;
 
 public:
     /** The type of background to draw in the texture editor view port. */
-    UPROPERTY(config, EditAnywhere, Category = "Animation Cell Marks Settings", meta=(ForceInlineRow))
-    TMap<FString, FAnimationCellMarkSettings> AnimationCellsMarks;
+    UPROPERTY(config, EditAnywhere, EditFixedSize, Category = "Animation Cell Marks Settings", meta=(ForceInlineRow, EditFixedOrder))
+    TArray<FAnimationCellMarkSettings> AnimationCellsMarks;
 
     UPROPERTY(config, EditAnywhere, Category = "Animation Cell Marks Settings", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
     float AnimationCellsMarksFillOpacity = 10.f;

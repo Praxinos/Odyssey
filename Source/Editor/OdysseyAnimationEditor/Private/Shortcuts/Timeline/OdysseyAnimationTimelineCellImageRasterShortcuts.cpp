@@ -40,11 +40,25 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
     if (layer->GetIsLocked())
         return;
 
+    UOdysseyAnimation* animation = layer->GetAnimation();
+    if (!animation)
+        return;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+    if (!cellsContainer)
+        return;
+
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
 
     TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
-        return;
+    {
+        TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(animation->CurrentFrame);
+        if (!cell)
+            return;
+            
+        selectedCells.Add(cell);
+    }
         
     TArray<TSharedPtr<FOdysseyAnimationCell>> filteredCells = selectedCells.FilterByPredicate(
         [](TSharedPtr<FOdysseyAnimationCell> iCell)
@@ -55,12 +69,6 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
 
     if (filteredCells.IsEmpty())
         return;
-
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
-    UOdysseyAnimation* animation = layer->GetAnimation();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
 
 #ifdef WITH_EDITOR
@@ -327,11 +335,23 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_ConvertToRasterCell
     if (layer->GetIsLocked())
         return false;
 
+    UOdysseyAnimation* animation = layer->GetAnimation();
+    if (!animation)
+        return false;
+
+    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+    if (!cellsContainer)
+        return false;
+
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->CurrentLayer.Get());
 
-    const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
-        return false;
+    {
+        TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(animation->CurrentFrame);
+        if (!cell)
+            return false;
+    }
         
     TArray<TSharedPtr<FOdysseyAnimationCell>> filteredCells = selectedCells.FilterByPredicate(
         [](TSharedPtr<FOdysseyAnimationCell> iCell)
@@ -341,10 +361,6 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_ConvertToRasterCell
     );
 
     if (filteredCells.IsEmpty())
-        return false;
-
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
-    if (!cellsContainer)
         return false;
 
     return true;

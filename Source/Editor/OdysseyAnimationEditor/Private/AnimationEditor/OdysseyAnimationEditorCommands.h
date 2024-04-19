@@ -87,6 +87,7 @@ public:
     TSharedPtr<FUICommandInfo> HoldActivateTimelineCutTool;
     TSharedPtr<FUICommandInfo> BreakCell;
     TSharedPtr<FUICommandInfo> RemoveCellMark;
+    TArray<TSharedPtr<FUICommandInfo>> SetCellMark;
 
     //Timeline Navigation Commands
     TSharedPtr<FUICommandInfo> NavigateToNextCell;
@@ -103,9 +104,9 @@ public:
     TSharedPtr<FUICommandInfo> InactivateLooping;
     TSharedPtr<FUICommandInfo> ToggleLooping;
 
-    TSharedPtr<FUICommandInfo> IncreaseSelectedCellsLength;
-    TSharedPtr<FUICommandInfo> DecreaseSelectedCellsLength;
-    TSharedPtr<FUICommandInfo> SetSelectedCellsLength;
+    TSharedPtr<FUICommandInfo> IncreaseCellLength;
+    TSharedPtr<FUICommandInfo> DecreaseCellLength;
+    TSharedPtr<FUICommandInfo> SetCellLength;
 
     /** Action to pan/Zoom the timeline */
     TSharedPtr<FUICommandInfo> PanZoomTimeline;

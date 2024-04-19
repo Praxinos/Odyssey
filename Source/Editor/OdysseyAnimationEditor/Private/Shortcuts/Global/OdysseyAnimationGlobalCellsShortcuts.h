@@ -20,8 +20,8 @@ public:
     void Action_RemoveCellMark();
     bool CanAction_RemoveCellMark();
 
-    //void Action_SetCellMark(FString iMarkId);
-    //bool CanAction_SetCellMark(FString iMarkId);
+    void Action_SetCellMark(int iMarkId);
+    bool CanAction_SetCellMark(int iMarkId);
 
 public:
     //Shortcuts

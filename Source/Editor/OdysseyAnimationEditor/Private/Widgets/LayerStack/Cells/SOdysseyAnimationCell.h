@@ -38,10 +38,10 @@ private:
     FLinearColor GetMarkColor() const;
     float GetMarkOpacity() const;
     //FSlateColor GetMarkColorAndOpacity() const;
-    FText GetMarkTooltipText() const;
+    //FText GetMarkTooltipText() const;
     bool IsMarkSymbol() const;
     bool IsMarkFill() const;
-    bool IsMarkInvalid() const;
+    //bool IsMarkInvalid() const;
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;

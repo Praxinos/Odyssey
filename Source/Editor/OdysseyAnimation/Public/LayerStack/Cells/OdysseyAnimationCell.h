@@ -21,7 +21,7 @@ public:
 public:
     //void SetLength(int iLength);
     int GetLength() const;
-    const FString& GetMarkId() const;
+    int GetMarkId() const;
     virtual UOdysseyAnimationLayer* GetLayer() const;
     virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const = 0;
     virtual const FName& GetType() const = 0;
@@ -43,5 +43,5 @@ private:
 protected:
     UOdysseyAnimationLayer* mLayer;
     uint32 mLength;
-    FString mMarkId;
+    int mMarkId;
 };

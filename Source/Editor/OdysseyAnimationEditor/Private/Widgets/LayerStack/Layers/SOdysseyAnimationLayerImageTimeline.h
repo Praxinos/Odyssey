@@ -83,11 +83,11 @@ private:
 
     void RemoveCellMark();
     bool CanRemoveCellMark() const;
-    void SetCellMark( FString iMarkId );
+    void SetCellMark( int iMarkId );
     bool CanSetCellMark() const;
-    bool IsCellMarkChecked( FString iMarkId ) const;
+    bool IsCellMarkChecked( int iMarkId ) const;
 
-    TSharedRef<SWidget> CreateCellMarkMenuWidget(const FString& iMarkId);
+    TSharedRef<SWidget> CreateCellMarkMenuWidget(int iMarkId);
     void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder);
 
     FReply OnContextMenuMinusButtonClicked();

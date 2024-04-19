@@ -342,7 +342,7 @@ FOdysseyAnimationCellsMutator::SetLength(int iIndex, int iLength)
 }
 
 void
-FOdysseyAnimationCellsMutator::SetMarkId(TSharedPtr<FOdysseyAnimationCell> iCell, const FString& iMarkId)
+FOdysseyAnimationCellsMutator::SetMarkId(TSharedPtr<FOdysseyAnimationCell> iCell, int iMarkId)
 {
     if (!iCell)
         return;
@@ -352,7 +352,7 @@ FOdysseyAnimationCellsMutator::SetMarkId(TSharedPtr<FOdysseyAnimationCell> iCell
 }
 
 void
-FOdysseyAnimationCellsMutator::SetMarkId(int iIndex, const FString& iMarkId)
+FOdysseyAnimationCellsMutator::SetMarkId(int iIndex, int iMarkId)
 {
     if (iIndex < 0 || iIndex >= mContainer->mCells.Num())
         return;
@@ -450,7 +450,7 @@ FOdysseySetCellLengthMutation::Revert()
 
 //=======================================================================================
 
-FOdysseySetCellMarkIdMutation::FOdysseySetCellMarkIdMutation(TSharedPtr<FOdysseyAnimationCell> iCell, const FString& iNewMarkId, const FString& iOldMarkId)
+FOdysseySetCellMarkIdMutation::FOdysseySetCellMarkIdMutation(TSharedPtr<FOdysseyAnimationCell> iCell, int iNewMarkId, int iOldMarkId)
     : mCell(iCell)
     , mNewMarkId(iNewMarkId)
     , mOldMarkId(iOldMarkId)

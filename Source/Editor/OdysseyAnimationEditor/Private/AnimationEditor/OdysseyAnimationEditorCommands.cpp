@@ -76,11 +76,26 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( HoldActivateTimelineCutTool, TimelineShortcuts, "Activate Timeline Cut Tool (Hold)", "Hold the key to activate the timeline Cut Tool temporarily", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( BreakCell, TimelineShortcuts, "Break Cell", "Breaks Cell at Current Frame in Current Layer", EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( IncreaseSelectedCellsLength, TimelineShortcuts, "Increase Selected Cells Length", "Increase Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Add));
-    UI_BUNDLE_COMMAND( DecreaseSelectedCellsLength, TimelineShortcuts, "Decrease Selected Cells Length", "Decrease Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Subtract));
-    UI_BUNDLE_COMMAND( SetSelectedCellsLength, TimelineShortcuts, "Set Selected Cells Length", "Set Selected Cells Length", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( IncreaseCellLength, TimelineShortcuts, "Increase Cell Length", "Increase Current or Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Add));
+    UI_BUNDLE_COMMAND( DecreaseCellLength, TimelineShortcuts, "Decrease Cell Length", "Decrease Current or Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Subtract));
+    UI_BUNDLE_COMMAND( SetCellLength, TimelineShortcuts, "Set Cell Length", "Set Current or Selected Cells Length", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( RemoveCellMark, TimelineShortcuts, "Remove Cell Mark", "Removes any cell mark applied on the selected cells", EUserInterfaceActionType::Button, FInputChord());
+
+    for (int i = 0; i < 12; i++)
+    {
+        TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(
+              this->AsShared()
+            , FName( *FString::Printf( TEXT( "SetCellMark-%d" ), i + 1 ))
+            , FText::Format( LOCTEXT( "commands.set-cell-mark.label", "Set Cell Mark #{0}"), FText::AsNumber(i + 1) )
+            , FText::Format( LOCTEXT( "commands.set-cell-mark.tooltip", "Sets the Cell Mark #{0} on selected cells"), FText::AsNumber(i + 1))
+            , TimelineShortcuts
+        )
+        .UserInterfaceType( EUserInterfaceActionType::Button )
+        .DefaultChord( FInputChord() );
+        
+        SetCellMark.Add(commandInfo);
+    }
 
     UI_BUNDLE_COMMAND( PanZoomTimeline, TimelineShortcuts,  "Pan / Zoom Timeline", "Hold the key to Pan (Left Mouse Button) or Zoom (Right Mouse Button) the Timeline",                                        EUserInterfaceActionType::None, FInputChord(EKeys::M));
 }
