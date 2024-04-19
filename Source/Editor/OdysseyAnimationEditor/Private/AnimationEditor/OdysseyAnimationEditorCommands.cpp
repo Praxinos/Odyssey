@@ -84,11 +84,13 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
 
     for (int i = 0; i < 12; i++)
     {
+        FNumberFormattingOptions options;
+        options.SetMinimumIntegralDigits(2);
         TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(
               this->AsShared()
             , FName( *FString::Printf( TEXT( "SetCellMark-%d" ), i + 1 ))
-            , FText::Format( LOCTEXT( "commands.set-cell-mark.label", "Set Cell Mark #{0}"), FText::AsNumber(i + 1) )
-            , FText::Format( LOCTEXT( "commands.set-cell-mark.tooltip", "Sets the Cell Mark #{0} on selected cells"), FText::AsNumber(i + 1))
+            , FText::Format( LOCTEXT( "commands.set-cell-mark.label", "Set Cell Mark #{0}"), FText::AsNumber(i + 1, &options) )
+            , FText::Format( LOCTEXT( "commands.set-cell-mark.tooltip", "Sets the Cell Mark #{0} on selected cells"), FText::AsNumber(i + 1, &options))
             , TimelineShortcuts
         )
         .UserInterfaceType( EUserInterfaceActionType::Button )
