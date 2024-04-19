@@ -363,6 +363,10 @@ FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(UMeshComponent* MeshCompone
 			EachTri.V2_Color = FLinearColor::Black;
 			TriList.Add(EachTri);
 		}
+        
+        if( TriList.Num() == 0 )
+            return RetVal;
+        
 		// Setup the tri render item with the list of tris
 		FCanvasTriangleItem TriItem(TriList, RenderTargetResource);
 		TriItem.BlendMode = SE_BLEND_Opaque;
