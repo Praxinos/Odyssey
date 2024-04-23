@@ -17,6 +17,7 @@ class FOdysseyVectorObject;
 // a waypoint is met at segment vertex or when a constrast is met
 struct FWayPoint
 {
+    FOdysseyVectorVertexIntersection* intersectionVertex;
     FOdysseyVectorVertex* vertex;
     uint32 flags;
     double t;
@@ -39,9 +40,13 @@ struct FWayPoint
         flags = iWayPointFlags;
     }
 
-    FWayPoint( FOdysseyVectorVertex* iVertex, uint32 iWayPointFlags, double iT )
+    FWayPoint( FOdysseyVectorVertex* iVertex
+             , FOdysseyVectorVertexIntersection* iIntersectionVertex
+             , uint32 iWayPointFlags
+             , double iT )
     {
         vertex = iVertex;
+        intersectionVertex = iIntersectionVertex;
         flags = iWayPointFlags;
         t = iT;
     }
@@ -117,9 +122,8 @@ class FOdysseyVectorChain
         bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
         static void ExtendErasedSection( FOdysseyVectorVertex* iVertex
                                        , FOdysseyVectorSection* iFromSection );
-        static uint32 GetErasureFlag( FOdysseyVectorSection* iPreviousSection
-                                    , FOdysseyVectorVertex* iVertex
-                                    , FOdysseyVectorSection* iCurrentSection );
+        uint32 GetErasureFlags( FOdysseyVectorVertex* iVertex
+                              , uint32 iPreviousErasureFlags );
     private :
         FOdysseyVectorPath* mPath;
         std::vector<FOdysseyVectorVertex*> mVertexArray;

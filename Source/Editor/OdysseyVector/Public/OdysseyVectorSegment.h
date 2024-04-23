@@ -220,9 +220,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         FOdysseyVectorIntersection* GetClosestIntersection( FOdysseyVectorVertex* iVertex );
 
         void AddIntersectionSlot();
+        void RemoveIntersection ( FOdysseyVectorIntersection* iIntersection );
         uint32 GetIntersectionSlotCount();
         double ProjectConstrained( const ::ULIS::FVec2D& iPoint
                                 , ::ULIS::FVec2D& oProjectedPoint );
+        void GetUniqueIntersectionVertex( std::vector<FOdysseyVectorVertexIntersection*>& oIntersectionVertexArray );
         virtual void Split( const ::ULIS::FVec2D& iPoint
                           , double iPoinT
                           , std::vector<FOdysseyVectorVertex*>& oNewVertexArray

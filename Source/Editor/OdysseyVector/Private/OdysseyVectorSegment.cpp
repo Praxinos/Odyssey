@@ -291,6 +291,12 @@ FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorIntersection* iIntersecti
 }
 
 void
+FOdysseyVectorSegment::RemoveIntersection ( FOdysseyVectorIntersection* iIntersection )
+{
+    mIntersectionList.remove( iIntersection );
+}
+
+void
 FOdysseyVectorSegment::AddIntersectionSlot()
 {
     mIntersectionSlotCount++;
@@ -345,6 +351,22 @@ std::list<FOdysseyVectorIntersection*>&
 FOdysseyVectorSegment::GetIntersectionList()
 {
     return mIntersectionList;
+}
+
+void
+FOdysseyVectorSegment::GetUniqueIntersectionVertex( std::vector<FOdysseyVectorVertexIntersection*>& oIntersectionVertexArray )
+{
+    for( FOdysseyVectorIntersection* intersection : mIntersectionList )
+    {
+        FOdysseyVectorVertexIntersection* intersectionVertex = intersection->GetIntersectionVertex();
+
+        if( std::find( oIntersectionVertexArray.begin()
+                     , oIntersectionVertexArray.end()
+                     , intersectionVertex ) == oIntersectionVertexArray.end() )
+        {
+            oIntersectionVertexArray.push_back( intersectionVertex );
+        }
+    }
 }
 
 bool

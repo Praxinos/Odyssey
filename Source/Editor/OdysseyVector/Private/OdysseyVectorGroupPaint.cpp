@@ -2623,6 +2623,48 @@ typedef struct _FVertexPair
     }
 } FVertexPair;
 
+bool
+FOdysseyVectorGroupPaint::PickSection( FOdysseyVectorSection* iSection
+                                     , const ::ULIS::FRectD& iMaskRect
+                                     , const uint8* iMaskPixelData )
+{
+    ::ULIS::FVec2D* bezier = iSection->GetBezier();
+    // Note, section are in paingroup coordinates (path's parent), not in path coordinates.
+    BLMatrix2D& worldMatrix = iSection->GetOwner()->GetWorldMatrix();
+    BLPoint pt[4] = { worldMatrix.mapPoint( bezier[0].x, bezier[0].y )
+                    , worldMatrix.mapPoint( bezier[1].x, bezier[1].y )
+                    , worldMatrix.mapPoint( bezier[2].x, bezier[2].y )
+                    , worldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
+    ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
+                                    , ::ULIS::FVec2D( pt[1].x, pt[1].y )
+                                    , ::ULIS::FVec2D( pt[2].x, pt[2].y )
+                                    , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
+
+    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iMaskPixelData );
+}
+
+void
+FOdysseyVectorGroupPaint::PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray )
+{
+    BLImage* maskImage = GetEngine()->GetBLMask();
+    BLImageData maskData;
+    ::ULIS::FRectD maskRect;
+
+    maskImage->getData( &maskData );
+
+    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
+
+    for( FOdysseyVectorSection& section : mSectionBuffer )
+    {
+        if( PickSection( &section, maskRect, (uint8*) maskData.pixelData ) )
+        {
+            oErasedSectionArray.push_back( &section );
+
+            section.SetErased( true );
+        }
+    }
+}
+
 void
 FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                                        , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
@@ -2632,6 +2674,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
                                        , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                                        , bool iSplit )
 {
+    std::vector<FOdysseyVectorSection*> erasedSectionArray;
     BLImageData imageData;
     BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
 
@@ -2643,10 +2686,31 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
         mSectionBuffer[i].Link();
     }
 
+    // restore intersections
+    for( FOdysseyVectorVertexIntersection& intersectionVertex : mIntersectionVertexArray )
+    {
+        intersectionVertex.Attach();
+    }
+
 //    for( int i = 0; i < mGapSectionBuffer.size(); i++ )
 //    {
 //        mGapSectionBuffer[i].Link();
 //    }
+
+    // first step
+    PickErasedSections( erasedSectionArray );
+
+    // second step. Extend erased section array with the neighbour sections until we reach
+    // the end of the chain or an intersection
+    for( FOdysseyVectorSection* section : erasedSectionArray )
+    {
+        section->SetErased( true );
+
+        // static call
+        FOdysseyVectorChain::ExtendErasedSection( section->GetVertex(0), section );
+        // static call
+        FOdysseyVectorChain::ExtendErasedSection( section->GetVertex(1), section );
+    }
 
     // do not use mPathList because it may contains the canevas path
     for( FOdysseyVectorObject* child : mChildrenList )
@@ -2668,10 +2732,17 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
         }
     }
 
+    // remove intersections
+    for( FOdysseyVectorVertexIntersection& intersectionVertex : mIntersectionVertexArray )
+    {
+        intersectionVertex.Detach();
+    }
+
     // unlink sections again
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
         mSectionBuffer[i].Unlink();
+        mSectionBuffer[i].SetErased( false ); // unmark
     }
 
 //    for( int i = 0; i < mGapSectionBuffer.size(); i++ )
@@ -2691,7 +2762,9 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
             {
                 for( FOdysseyVectorChain& chain : path->GetChainArray() )
                 {
+                     // used just for being able to call the EraseSegments()
                     std::vector<FWayFragment> wayFragmentArray;
+                     // used just for being able to call the EraseSegments()
                     std::vector<FWayPoint> wayPointArray;
 
                     wayPointArray.reserve( 10 );

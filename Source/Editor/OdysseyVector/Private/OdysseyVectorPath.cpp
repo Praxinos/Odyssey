@@ -908,7 +908,10 @@ FOdysseyVectorPath::VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit )
 
     if( iWayPoint->flags & FWayPoint::InsideErasureArea )
     {
-        retFlags |= eVertexAdditionFlags::RemoveOriginalVertex;
+        if( iWayPoint->flags & FWayPoint::Original )
+        {
+            retFlags |= eVertexAdditionFlags::RemoveOriginalVertex;
+        }
     }
 
     if( iWayPoint->flags & FWayPoint::EntersErasureArea )
