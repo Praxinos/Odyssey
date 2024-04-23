@@ -34,14 +34,14 @@ public:
     virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
 public:
-    virtual void PropertyChanged(const FName& iPropertyName) override;
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& iEvent) override;
 
 public:
     TSharedPtr<FOdysseyAnimationCell> GetCell() const;
     void SetCell(TSharedPtr<FOdysseyAnimationCell> iCell);
 
 private:
-    void OnCellOutOfPegsChanged();
+    void OnCellOutOfPegsChanged(bool iIsInteractive);
 
 public:
     UPROPERTY(EditAnywhere, Category="Out Of Pegs")

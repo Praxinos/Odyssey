@@ -52,23 +52,18 @@ UOdysseyAnimationEditorOutOfPegsTool::CreateTopTabWidget()
 }
 
 void
-UOdysseyAnimationEditorOutOfPegsTool::PropertyChanged(const FName& iPropertyName)
+UOdysseyAnimationEditorOutOfPegsTool::PostEditChangeProperty( FPropertyChangedEvent& iEvent)
 {
-    if (iPropertyName == TEXT("X"))
+    Super::PostEditChangeProperty(iEvent);
+    
+    FName propertyName = iEvent.GetPropertyName();
+    FName memberPropertyName = iEvent.MemberProperty->GetFName();
+    
+    if (   memberPropertyName == TEXT("Pan")
+        || propertyName == TEXT("Rotation")
+        || propertyName == TEXT("Zoom") )
     {
-        mCell->OutOfPegsPan(Pan);
-    }
-    if (iPropertyName == TEXT("Y"))
-    {
-        mCell->OutOfPegsPan(Pan);
-    }
-    else if (iPropertyName == TEXT("Rotation"))
-    {
-        mCell->OutOfPegsRotation(Rotation);
-    }
-    else if (iPropertyName == TEXT("Zoom"))
-    {
-        mCell->OutOfPegsZoom(Zoom);
+        mCell->SetOutOfPegs(Pan, Rotation, Zoom, iEvent.ChangeType & EPropertyChangeType::Interactive);
     }
 }
 
@@ -102,9 +97,10 @@ UOdysseyAnimationEditorOutOfPegsTool::SetCell(TSharedPtr<FOdysseyAnimationCell> 
 }
 
 void
-UOdysseyAnimationEditorOutOfPegsTool::OnCellOutOfPegsChanged()
+UOdysseyAnimationEditorOutOfPegsTool::OnCellOutOfPegsChanged(bool iIsInteractive)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Pan", mCell->OutOfPegsPan());
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Rotation", mCell->OutOfPegsRotation());
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", mCell->OutOfPegsZoom());
+    EPropertyChangeType::Type changeType = iIsInteractive ? EPropertyChangeType::Interactive : EPropertyChangeType::Unspecified;
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Pan", mCell->OutOfPegsPan(), changeType);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Rotation", mCell->OutOfPegsRotation(), changeType);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", mCell->OutOfPegsZoom(), changeType);
 }
