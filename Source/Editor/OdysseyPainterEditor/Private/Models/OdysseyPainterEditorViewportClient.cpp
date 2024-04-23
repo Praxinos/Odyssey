@@ -241,8 +241,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         transform.SetTranslation( transform.GetTranslation() + FVector2D(texture->GetSurfaceWidth(), texture->GetSurfaceHeight()) / 2.f );
         transform = transform.Inverse(); 
          
-        if( mOdysseyPainterEditor->GetSelectedTool() && mOdysseyPainterEditor->GetSelectedTool()->GetHUD() )
-            mOdysseyPainterEditor->GetSelectedTool()->GetHUD()->Draw( HUDSurface->Block().Get(), transform );
+        if( mOdysseyPainterEditor->GetCurrentTool() && mOdysseyPainterEditor->GetCurrentTool()->GetHUD() )
+            mOdysseyPainterEditor->GetCurrentTool()->GetHUD()->Draw( HUDSurface->Block().Get(), transform );
         
         FCanvasTileItem tileItem(FVector2D(0, 0), HUDTexture->GetResource(), FVector2D(iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y), FLinearColor::White);
         tileItem.BatchedElementParameters = HUDbatchedElementParameters;
@@ -279,8 +279,8 @@ FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, 
         mCurrentMouseCursor = EMouseCursor::GrabHand;
     else if( mCurrentToolState == eState::kPick )
         mCurrentMouseCursor = EMouseCursor::EyeDropper;
-    else if( mOdysseyPainterEditor->GetSelectedTool() )
-        mCurrentMouseCursor = mOdysseyPainterEditor->GetSelectedTool()->GetMouseCursor();
+    else if( mOdysseyPainterEditor->GetCurrentTool() )
+        mCurrentMouseCursor = mOdysseyPainterEditor->GetCurrentTool()->GetMouseCursor();
 
     return mCurrentMouseCursor;
 }

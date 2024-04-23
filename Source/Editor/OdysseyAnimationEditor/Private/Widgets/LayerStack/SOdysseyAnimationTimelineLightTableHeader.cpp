@@ -73,6 +73,17 @@ SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
 					.IgnoreAlpha(true)
 				]
 			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(0.f, 2.f, 0.f, 2.f)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				[
+					SNew(STextBlock)
+					.Text(LOCTEXT("lighttable.timeline-header.out-of-pegs.name", "Out Of Pegs"))
+				]
+			]
 		]
 	];
 }

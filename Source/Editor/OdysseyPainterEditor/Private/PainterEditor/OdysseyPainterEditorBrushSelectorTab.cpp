@@ -77,7 +77,7 @@ FOdysseyPainterEditorBrushSelectorTab::SetWidgetForTool(UOdysseyPainterEditorToo
     FWidgetSlotForTool* widgetSlotForTool = mWidgetSlotForTool.FindByPredicate(
         [this](const FWidgetSlotForTool& iWidgetSlotForTool)
         {
-            return mEditor->GetSelectedTool() == iWidgetSlotForTool.mTool;
+            return mEditor->GetCurrentTool() == iWidgetSlotForTool.mTool;
         }
     );
 
@@ -102,7 +102,7 @@ FOdysseyPainterEditorBrushSelectorTab::WidgetIndex() const
     return 1 + mWidgetSlotForTool.IndexOfByPredicate(
         [this](const FWidgetSlotForTool& iWidgetSlotForTool)
         {
-            return mEditor->GetSelectedTool() == iWidgetSlotForTool.mTool;
+            return mEditor->GetCurrentTool() == iWidgetSlotForTool.mTool;
         }
     );
 }

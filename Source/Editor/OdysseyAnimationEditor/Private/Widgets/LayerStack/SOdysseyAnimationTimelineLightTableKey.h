@@ -11,8 +11,9 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableKey
 	: public SLeafWidget
 {
 public:
-	static inline const float mDesiredHeight = 40.f;
+	static inline const float mDesiredSliderHeight = 40.f;
 	static inline const float mDesiredWidth = 16.f;
+	static inline const float mDesiredHeight = 60.f;
 
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKey)

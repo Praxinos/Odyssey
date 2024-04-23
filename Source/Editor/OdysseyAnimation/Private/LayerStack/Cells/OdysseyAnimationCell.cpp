@@ -82,3 +82,63 @@ FOdysseyAnimationCell::CreateCellFromFrame(uint32 iFrameIndex) const
 {
     return nullptr;
 }
+
+bool
+FOdysseyAnimationCell::IsOutOfPegs() const
+{
+    return mOutOfPegsPan != FVector2D(0, 0) || mOutOfPegsRotation != 0.f || mOutOfPegsZoom != 1.f;
+}
+
+FVector2D
+FOdysseyAnimationCell::OutOfPegsPan() const
+{
+    return mOutOfPegsPan;
+}
+
+float
+FOdysseyAnimationCell::OutOfPegsRotation() const
+{
+    return mOutOfPegsRotation;
+}
+
+float
+FOdysseyAnimationCell::OutOfPegsZoom() const
+{
+    return mOutOfPegsZoom;
+}
+
+void
+FOdysseyAnimationCell::OutOfPegsPan(const FVector2D& iPan)
+{
+    if (iPan == mOutOfPegsPan)
+        return;
+
+    mOutOfPegsPan = iPan;
+    mOnOutOfPegsChanged.Broadcast();
+}
+
+void
+FOdysseyAnimationCell::OutOfPegsRotation(float iRotation)
+{
+    if (iRotation == mOutOfPegsRotation)
+        return;
+
+    mOutOfPegsRotation = iRotation;
+    mOnOutOfPegsChanged.Broadcast();
+}
+
+void
+FOdysseyAnimationCell::OutOfPegsZoom(float iZoom)
+{
+    if (iZoom == mOutOfPegsZoom)
+        return;
+
+    mOutOfPegsZoom = iZoom;
+    mOnOutOfPegsChanged.Broadcast();
+}
+
+FSimpleMulticastDelegate&
+FOdysseyAnimationCell::OnOutOfPegsChanged()
+{
+    return mOnOutOfPegsChanged;
+}

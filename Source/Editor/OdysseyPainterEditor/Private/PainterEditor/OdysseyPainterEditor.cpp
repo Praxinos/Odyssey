@@ -74,7 +74,8 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
     , mLayoutName(iLayoutName)
     , mSource(nullptr)
     , mMeshSelector(MakeShared<FOdysseyMeshSelector>())
-    , mSelectedTool(nullptr)
+    , mCurrentMainTool(nullptr)
+    , mCurrentTemporaryTool(nullptr)
     , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
     , mVectorDrawingFlags(0)
     , mHUDSystem(new FOdysseyHUDSystem())
@@ -302,9 +303,21 @@ FOdysseyPainterEditor::InitTools()
 }
 
 FSimpleMulticastDelegate&
-FOdysseyPainterEditor::OnSelectedToolChanged()
+FOdysseyPainterEditor::OnCurrentMainToolChanged()
 {
-    return mOnSelectedToolChanged;
+    return mOnCurrentMainToolChanged;
+}
+
+FSimpleMulticastDelegate&
+FOdysseyPainterEditor::OnCurrentTemporaryToolChanged()
+{
+    return mOnCurrentTemporaryToolChanged;
+}
+
+FSimpleMulticastDelegate&
+FOdysseyPainterEditor::OnCurrentToolChanged()
+{
+    return mOnCurrentToolChanged;
 }
 
 FSimpleMulticastDelegate&
@@ -449,9 +462,162 @@ FOdysseyPainterEditor::PaintColor() const
 }
 
 UOdysseyPainterEditorTool*
-FOdysseyPainterEditor::GetSelectedTool() const
+FOdysseyPainterEditor::GetCurrentMainTool() const
 {
-    return mSelectedTool;
+    return mCurrentMainTool;
+}
+
+UOdysseyPainterEditorTool*
+FOdysseyPainterEditor::GetCurrentTemporaryTool() const
+{
+    return mCurrentTemporaryTool;
+}
+
+UOdysseyPainterEditorTool*
+FOdysseyPainterEditor::GetCurrentTool() const
+{
+    return mCurrentTemporaryTool ? mCurrentTemporaryTool : mCurrentMainTool;
+}
+
+void
+FOdysseyPainterEditor::InactivateAllTools()
+{
+    if (!mCurrentMainTool && !mCurrentTemporaryTool)
+        return;
+
+    if (mCurrentTemporaryTool)
+    {
+        mCurrentTemporaryTool->Inactivate();
+        mCurrentTemporaryTool = nullptr;
+        mOnCurrentTemporaryToolChanged.Broadcast();
+    }
+
+    if (mCurrentMainTool)
+    {
+        mCurrentMainTool->Inactivate();
+        mCurrentMainTool = nullptr;
+        mOnCurrentMainToolChanged.Broadcast();
+    }
+    mOnCurrentToolChanged.Broadcast();
+}
+
+void
+FOdysseyPainterEditor::InactivateMainTool()
+{
+    if (mCurrentMainTool)
+    {
+        mCurrentMainTool->Inactivate();
+        mCurrentMainTool = nullptr;
+        mOnCurrentMainToolChanged.Broadcast();
+    }
+    mOnCurrentToolChanged.Broadcast();
+}
+
+void
+FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
+{
+    if (!iTool || mCurrentMainTool == iTool || !iTool->IsActivable())
+        return;
+
+    if (mCurrentTemporaryTool && mCurrentTemporaryTool->IsActivated())
+    {
+        mCurrentTemporaryTool->Inactivate();
+        mCurrentTemporaryTool = nullptr;
+        mOnCurrentTemporaryToolChanged.Broadcast();
+    }
+    
+    if (mCurrentMainTool && mCurrentMainTool->IsActivated())
+    {
+        mCurrentMainTool->Inactivate();
+        mCurrentMainTool = nullptr;
+    }
+
+    mCurrentMainTool = iTool;
+    mCurrentMainTool->Activate();
+
+    if (LayerStack())
+    {
+        UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+        if (currentLayer)
+        {
+            UClass* layerClass = currentLayer->GetClass();
+            if (!mCurrentMainToolPerLayerClass.Contains(layerClass))
+                mCurrentMainToolPerLayerClass.Add(layerClass, nullptr);
+
+            mCurrentMainToolPerLayerClass[layerClass] = mCurrentMainTool;
+        }
+    }
+
+    mOnCurrentMainToolChanged.Broadcast();
+    mOnCurrentToolChanged.Broadcast();
+}
+
+void
+FOdysseyPainterEditor::InactivateTemporaryTool()
+{
+    if (!mCurrentTemporaryTool)
+        return;
+
+    mCurrentTemporaryTool->Inactivate();
+    mCurrentTemporaryTool = nullptr;
+    mOnCurrentTemporaryToolChanged.Broadcast();
+
+
+    if (mCurrentMainTool && mCurrentMainTool->IsActivable())
+    {
+        mCurrentMainTool->Activate();
+        mOnCurrentMainToolChanged.Broadcast();
+    }
+    mOnCurrentToolChanged.Broadcast();
+}
+
+void
+FOdysseyPainterEditor::ActivateTemporaryTool( UOdysseyPainterEditorTool* iTool )
+{
+    if (!iTool || mCurrentTemporaryTool == iTool || !iTool->IsActivable())
+        return;
+
+    if (mCurrentTemporaryTool && mCurrentTemporaryTool->IsActivated())
+    {
+        mCurrentTemporaryTool->Inactivate();
+        mCurrentTemporaryTool = nullptr;
+    }
+
+    if (mCurrentMainTool && mCurrentMainTool->IsActivated())
+    {
+        mCurrentMainTool->Inactivate();
+        mCurrentMainTool = nullptr;
+        mOnCurrentMainToolChanged.Broadcast();
+    }
+
+    mCurrentTemporaryTool = iTool;
+    mCurrentTemporaryTool->Activate();
+
+    mOnCurrentTemporaryToolChanged.Broadcast();
+    mOnCurrentToolChanged.Broadcast();
+}
+
+void
+FOdysseyPainterEditor::SanitizeCurrentTool()
+{
+    InactivateAllTools();
+
+	UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+	if (!currentLayer)
+		return;
+
+	UOdysseyPainterEditorTool* tool = nullptr;
+	UClass* layerClass = currentLayer->GetClass();
+	if (mCurrentMainToolPerLayerClass.Contains(layerClass))
+		tool = mCurrentMainToolPerLayerClass[layerClass];
+	
+	if (!tool || !tool->IsActivable())
+		tool = FindDefaultToolForCurrentLayer();
+
+    if (!tool || !tool->IsActivable())
+        return;
+
+	ActivateMainTool(tool);
 }
 
 FOdysseyMediaProvider
@@ -491,8 +657,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->Inactivate();
         mSource = nullptr;
 		
-        if (mSelectedTool)
-            mSelectedTool->Inactivate();
+        InactivateAllTools();
     }
 
     if (iSource)
@@ -502,15 +667,14 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->OnRemoveEditedObjectDelegate().AddLambda([this](UObject* iObject) { RemoveEditedObject(iObject);});
         mSource->Activate();
         
-        if ( mSelectedTool && mSelectedTool->IsActivable() )
+        if ( mCurrentMainTool && mCurrentMainTool->IsActivable() )
         {
-            //just reload the tool
-            mSelectedTool->Activate();
+            ActivateMainTool(mCurrentMainTool);
         }
         else
         {
             //select the best tool
-            RefreshCurrentTool();
+            SanitizeCurrentTool();
         }
     }
 
@@ -525,33 +689,6 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
 	//PATCH: should be automatic in the new drawing Tool, fix it asap
 	if (iIsCommit)
 		FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), "Color", iColor);
-}
-
-void
-FOdysseyPainterEditor::SetSelectedTool(UOdysseyPainterEditorTool* iTool)
-{
-	if (mSelectedTool)
-		mSelectedTool->Inactivate();
-		
-    mSelectedTool = iTool;
-
-	if (mSelectedTool)
-		mSelectedTool->Activate();
-
-    if (LayerStack())
-    {
-        UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
-        if (currentLayer)
-        {
-            UClass* layerClass = currentLayer->GetClass();
-            if (!mCurrentToolPerLayerClass.Contains(layerClass))
-                mCurrentToolPerLayerClass.Add(layerClass, nullptr);
-
-            mCurrentToolPerLayerClass[layerClass] = mSelectedTool;
-        }
-    }
-
-    mOnSelectedToolChanged.Broadcast();
 }
 
 UOdysseyPainterEditorTool*
@@ -582,34 +719,12 @@ FOdysseyPainterEditor::AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> i
 }
 
 void
-FOdysseyPainterEditor::RefreshCurrentTool()
-{
-	UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
-	if (!currentLayer)
-	{
-		SetSelectedTool(nullptr);
-		return;
-	}
-
-	UOdysseyPainterEditorTool* tool = nullptr;
-
-	UClass* layerClass = currentLayer->GetClass();
-	if (mCurrentToolPerLayerClass.Contains(layerClass))
-		tool = mCurrentToolPerLayerClass[layerClass];
-	
-	if (!tool || !tool->IsActivable())
-		tool = FindDefaultToolForCurrentLayer();
-
-	SetSelectedTool(tool);
-}
-
-void
 FOdysseyPainterEditor::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
 	if ( iLayerStack != LayerStack() )
 		return;
 
-	RefreshCurrentTool(); //Refresh the current tool when we change layer
+	SanitizeCurrentTool(); //Refresh the current tool when we change layer
 }
 
 void
@@ -654,8 +769,9 @@ FOdysseyPainterEditor::Tick(float iDeltaTime)
 {
 	FOdysseyEditor::Tick(iDeltaTime);
 
-	if (mSelectedTool)
-		mSelectedTool->Tick(iDeltaTime);
+    UOdysseyPainterEditorTool* tool = GetCurrentTool();
+	if (tool)
+		tool->Tick(iDeltaTime);
 }
 
 //--------------------------------------------------------------------------------------
@@ -665,7 +781,7 @@ FOdysseyPainterEditor::Tick(float iDeltaTime)
 void
 FOdysseyPainterEditor::AddEditMenuEntry( FMenuBuilder& iMenuBuilder )
 {
-    UOdysseyPainterEditorVectorBaseTool* vectorBaseTool = Cast<UOdysseyPainterEditorVectorBaseTool>(mSelectedTool);
+    UOdysseyPainterEditorVectorBaseTool* vectorBaseTool = Cast<UOdysseyPainterEditorVectorBaseTool>(GetCurrentTool());
 
     if( vectorBaseTool )
     {

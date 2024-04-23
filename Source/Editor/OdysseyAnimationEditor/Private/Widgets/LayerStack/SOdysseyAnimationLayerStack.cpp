@@ -76,7 +76,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
             .VAlign(VAlign_Center)
             [
                 SNew(SSegmentedControl<EOdysseyTimelineTool>)
-                .Value(this, &SOdysseyAnimationLayerStack::GetSelectedTool)
+                .Value(this, &SOdysseyAnimationLayerStack::GetCurrentTool)
                 .OnValueChecked(this, &SOdysseyAnimationLayerStack::OnToolChecked)
 
                 //Selection Tool
@@ -143,9 +143,9 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 }
 
 EOdysseyTimelineTool
-SOdysseyAnimationLayerStack::GetSelectedTool() const
+SOdysseyAnimationLayerStack::GetCurrentTool() const
 {
-    return mExtension->Timeline()->GetSelectedTool();
+    return mExtension->Timeline()->GetCurrentTool();
 }
 
 void

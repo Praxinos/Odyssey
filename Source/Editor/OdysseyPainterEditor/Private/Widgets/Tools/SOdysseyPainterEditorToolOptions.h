@@ -21,15 +21,18 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolOptions
 public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyPainterEditorToolOptions )
+        : _Tool(nullptr)
         {}
-        SLATE_ARGUMENT(UOdysseyPainterEditorTool*, Tool)
+        SLATE_ATTRIBUTE(UOdysseyPainterEditorTool*, Tool)
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 private:
     // Private data members
-    UOdysseyPainterEditorTool*                mTool;
+    TAttribute<UOdysseyPainterEditorTool*> mTool;
+    UOdysseyPainterEditorTool* mDisplayedTool;
     TSharedPtr<IDetailsView> mDetailsView;
 };
 

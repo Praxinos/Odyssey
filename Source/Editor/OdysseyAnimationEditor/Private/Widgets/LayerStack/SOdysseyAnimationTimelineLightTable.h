@@ -21,6 +21,7 @@ public:
 		FOdysseyAnimationEditorExtension* iExtension);
 
 private:
+	TSharedRef<SWidget> CreateKeyWidget(int iCellOffset);
 	void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
 	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 	void Update();
@@ -28,6 +29,9 @@ private:
 	EVisibility GetLightTableKeyVisibility(int iCellOffset) const;
 	bool GetLightTableKeyIsActivated(int iCellOffset) const;
 	float GetCurrentCellLength() const;
+	const FSlateBrush* GetOutOfPegsButtonImage(int iCellOffset) const;
+	void OnOutOfPegsCheckStateChanged(ECheckBoxState InValue, int iCellOffset);
+    ECheckBoxState IsOutOfPegsChecked(int iCellOffset) const;
 
 private:
 	UOdysseyAnimationLayer* mLayer;

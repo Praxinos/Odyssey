@@ -74,7 +74,7 @@ private:
 
 protected: 
     virtual ::ULIS::FEvent StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams) = 0;
-    void OnSelectedToolChanged();
+    void OnCurrentToolChanged();
     virtual void SetTool(UOdysseyPainterEditorTool* iTool);
     UOdysseyPainterEditorRasterDrawingTool* GetDrawingTool();
 

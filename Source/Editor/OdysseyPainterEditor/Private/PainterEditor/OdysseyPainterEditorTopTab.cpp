@@ -30,7 +30,7 @@ class FOdysseyPainterEditor;
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 {
-    mEditor->OnSelectedToolChanged().RemoveAll(this);
+    mEditor->OnCurrentToolChanged().RemoveAll(this);
 }
 
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
@@ -47,7 +47,7 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
 void
 FOdysseyPainterEditorTopTab::Init()
 {
-    mEditor->OnSelectedToolChanged().AddSP(SharedThis<FOdysseyPainterEditorTopTab>(this), &FOdysseyPainterEditorTopTab::OnSelectedToolChanged);
+    mEditor->OnCurrentToolChanged().AddSP(SharedThis<FOdysseyPainterEditorTopTab>(this), &FOdysseyPainterEditorTopTab::OnCurrentToolChanged);
     FOdysseyEditorTab::Init();
 }
 
@@ -237,10 +237,10 @@ FOdysseyPainterEditorTopTab::UpdateToolWidget()
 {
     //Clear the tool widget content
     //mToolWidgetSlot->DetachWidget();
-    if (mCurrentTool == mEditor->GetSelectedTool())
+    if (mCurrentTool == mEditor->GetCurrentTool())
         return; //Fix jumping UI when moving in animation timeline
 
-    mCurrentTool = mEditor->GetSelectedTool();
+    mCurrentTool = mEditor->GetCurrentTool();
     if(!mCurrentTool)
     {
         mToolWidgetSlot->AttachWidget(SNullWidget::NullWidget);
@@ -251,7 +251,7 @@ FOdysseyPainterEditorTopTab::UpdateToolWidget()
 }
 
 void
-FOdysseyPainterEditorTopTab::OnSelectedToolChanged()
+FOdysseyPainterEditorTopTab::OnCurrentToolChanged()
 {
     UpdateToolWidget();
 }

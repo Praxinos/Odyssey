@@ -164,7 +164,7 @@ FOdysseyAnimationEditorTimeline::UnbindOnCellsChanged()
 TSharedPtr<FOdysseyAnimationTimelineTool>
 FOdysseyAnimationEditorTimeline::GetTool() const
 {
-    switch(GetSelectedTool())
+    switch(GetCurrentTool())
     {
         case EOdysseyTimelineTool::Selection: return mSelectionTool;
         case EOdysseyTimelineTool::Move: return mMoveTool;
@@ -175,7 +175,7 @@ FOdysseyAnimationEditorTimeline::GetTool() const
 }
 
 EOdysseyTimelineTool
-FOdysseyAnimationEditorTimeline::GetSelectedTool() const
+FOdysseyAnimationEditorTimeline::GetCurrentTool() const
 {
     FKey pressedKey = FOdysseyKeyState::GetLastKey();
     if (pressedKey == FKey())

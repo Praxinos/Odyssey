@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorPathView::ImportParam()
 uint64
 UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
                                                     , const FName& iMemberPropertyName
-                                                    , const FName& iCategory )
+                                                    , const FName& iCategory)
 {
     uint64 signalFlags = UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
                                                                                , iMemberPropertyName

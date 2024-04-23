@@ -28,6 +28,20 @@ public:
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
     virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const;
 
+    FSimpleMulticastDelegate& OnOutOfPegsChanged();
+
+public:
+    //OutOfPegs
+    bool IsOutOfPegs() const;
+    FVector2D OutOfPegsPan() const;
+    float OutOfPegsRotation() const;
+    float OutOfPegsZoom() const;
+
+    void IsOutOfPegs(bool iIsOutOfPegs);
+    void OutOfPegsPan(const FVector2D& iPan);
+    void OutOfPegsRotation(float iRotation);
+    void OutOfPegsZoom(float iZoom);
+
 public:
     virtual void PostDuplicate();
     virtual void PostLoad();
@@ -44,4 +58,11 @@ protected:
     UOdysseyAnimationLayer* mLayer;
     uint32 mLength;
     int mMarkId;
+
+    bool mIsOutOfPegs = false;
+    FVector2D mOutOfPegsPan = FVector2D(0, 0);
+    float mOutOfPegsRotation = 0.f;
+    float mOutOfPegsZoom = 1.f;
+
+    FSimpleMulticastDelegate mOnOutOfPegsChanged;
 };

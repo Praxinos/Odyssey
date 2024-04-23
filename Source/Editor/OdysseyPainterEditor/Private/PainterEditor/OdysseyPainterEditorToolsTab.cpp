@@ -91,7 +91,7 @@ FOdysseyPainterEditorToolsTab::BindShortcuts(FBaseToolkit* iToolkit)
 void
 FOdysseyPainterEditorToolsTab::OnToolSelected(UOdysseyPainterEditorTool* iTool)
 {
-    mEditor->SetSelectedTool(iTool);
+    mEditor->ActivateMainTool(iTool);
 }
 
 #undef LOCTEXT_NAMESPACE

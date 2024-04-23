@@ -54,20 +54,55 @@ public:
     virtual void OnClose() override;
 
 public:
-    // Getters
-    FSimpleMulticastDelegate& OnSourceChanged();
-    FSimpleMulticastDelegate& OnSelectedToolChanged();
-    
-    TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
-    virtual FOdysseyPainterEditorGUI*                    GetGUI();
+    //Tools
 
-    virtual FOdysseyHUDSystem*                              HUDSystem() const;
-	virtual const FOdysseyBrushColor&                       PaintColor() const;
-    virtual UOdysseyPainterEditorTool*                      GetSelectedTool() const;
-    virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
-    virtual UOdysseyLayerStack*                             LayerStack() const;
-    
-    TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
+    /**
+     * @brief Returns the current main tool
+     */
+    virtual UOdysseyPainterEditorTool* GetCurrentMainTool() const;
+
+    /**
+     * @brief Returns the current temporary tool
+     */
+    virtual UOdysseyPainterEditorTool* GetCurrentTemporaryTool() const;
+
+    /**
+     * @brief Returns the current tool (main or temporary)
+     */
+    virtual UOdysseyPainterEditorTool* GetCurrentTool() const;
+
+    /**
+     * @brief Inactivates all tools
+     */
+    void InactivateAllTools();
+
+    /**
+     * @brief Inactivates the current main tool
+     * and activates the main tool (if any)
+     */
+    void InactivateMainTool();
+
+    /**
+     * @brief Activates a main tool over the main tool
+     */
+    void ActivateMainTool( UOdysseyPainterEditorTool* iTool );
+
+    /**
+     * @brief Inactivates the current temporary tool
+     * and activates the main tool (if any)
+     */
+    void InactivateTemporaryTool();
+
+    /**
+     * @brief Activates a temporary tool over the main tool
+     */
+    void ActivateTemporaryTool( UOdysseyPainterEditorTool* iTool );
+
+    /**
+     * @brief Ensures the current active tool is activable
+     * And activates the first activable tool available if needed
+     */
+    void SanitizeCurrentTool();
     
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorRasterEraserTool*                   GetRasterEraserTool() const;
@@ -87,6 +122,23 @@ public:
     virtual UOdysseyPainterEditorVectorPathStitchTool*               GetVectorPathStitchTool() const;
     virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
+
+public:
+    // Getters
+    FSimpleMulticastDelegate& OnSourceChanged();
+    FSimpleMulticastDelegate& OnCurrentToolChanged();
+    FSimpleMulticastDelegate& OnCurrentMainToolChanged();
+    FSimpleMulticastDelegate& OnCurrentTemporaryToolChanged();
+    
+    TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
+    virtual FOdysseyPainterEditorGUI*                    GetGUI();
+
+    virtual FOdysseyHUDSystem*                              HUDSystem() const;
+	virtual const FOdysseyBrushColor&                       PaintColor() const;
+    virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
+    virtual UOdysseyLayerStack*                             LayerStack() const;
+    
+    TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
     
     TArray<FOdysseyBrushContext*>& GetBrushContexts();
 
@@ -145,8 +197,6 @@ public:
     void  AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension);
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
-    void  SetSelectedTool( UOdysseyPainterEditorTool* iSelectedTool );
-    void  RefreshCurrentTool();
 
 
 
@@ -175,7 +225,9 @@ protected:
     TSharedPtr<FOdysseyPainterEditorSource>  mSource;
     TSharedPtr<FOdysseyMeshSelector>         mMeshSelector;
     TArray<TSharedPtr<FOdysseyPainterEditorExtension>> mExtensions;
-    UOdysseyPainterEditorTool*               mSelectedTool;
+    UOdysseyPainterEditorTool*               mCurrentMainTool;
+    UOdysseyPainterEditorTool*               mCurrentTemporaryTool;
+
     TArray<UOdysseyPainterEditorTool*>       mTools;
     TSharedPtr<FOdysseyPainterEditorGUI>     mGUI;
 
@@ -185,7 +237,9 @@ protected:
     FOdysseyHUDSystem*              mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
-    FSimpleMulticastDelegate        mOnSelectedToolChanged;
+    FSimpleMulticastDelegate        mOnCurrentToolChanged;
+    FSimpleMulticastDelegate        mOnCurrentMainToolChanged;
+    FSimpleMulticastDelegate        mOnCurrentTemporaryToolChanged;
     FSimpleMulticastDelegate        mOnSourceChanged;
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
@@ -207,5 +261,5 @@ protected:
     UOdysseyPainterEditorVectorGridTool* mVectorGridTool;
     UOdysseyPainterEditorVectorTransformTool* mVectorTransformTool;
 
-    TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentToolPerLayerClass;
+    TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 };

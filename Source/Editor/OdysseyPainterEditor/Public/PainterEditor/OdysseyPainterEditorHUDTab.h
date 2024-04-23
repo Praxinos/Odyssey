@@ -27,7 +27,7 @@ protected:
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     void RefreshWidgetContent();
-    void OnSelectedToolChanged();
+    void OnCurrentToolChanged();
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 private:
