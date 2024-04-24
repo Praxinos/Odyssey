@@ -26,6 +26,12 @@ FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVect
     Attach();
 }
 
+bool
+FOdysseyVectorVertexIntersection::SelfIntersects()
+{
+    return mSegment[0] == mSegment[1];
+}
+
 void
 FOdysseyVectorVertexIntersection::Attach()
 {

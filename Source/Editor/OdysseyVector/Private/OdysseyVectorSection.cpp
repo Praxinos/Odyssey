@@ -22,29 +22,40 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner // pa
 void
 FOdysseyVectorSection::Stitch()
 {
-    std::vector<FSectionLinkInfo> vertex0SectionLinkInfoArray;
-    //std::vector<FSectionLinkInfo> vertex1SectionLinkInfoArray;
-
     // unlink first or else it will be returned in the arrays
     Unlink();
 
-    mVertex[0]->GetSectionLinkInfo( vertex0SectionLinkInfoArray );
-    //mVertex[1]->GetSectionLinkInfo( vertex1SectionLinkInfoArray );
+    // link preferably to a genuine vertex (not an intersection vertex). 
+    // This is useful for the eraser tool in "section mode"
+    if( ( mVertex[1]->GetClass() == FOdysseyVectorVertex::StaticClass() )
+     || ( ( mVertex[0]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+       && ( mVertex[1]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() ) ) )
+    {
+        std::vector<FSectionLinkInfo> sectionLinkInfoArray;
 
-    for( FSectionLinkInfo& sectionLinkInfo : vertex0SectionLinkInfoArray )
-    {
-        sectionLinkInfo.section->Unlink();
-        sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[1];
-        sectionLinkInfo.section->Link();
+        mVertex[0]->GetSectionLinkInfo( sectionLinkInfoArray );
+
+        for( FSectionLinkInfo& sectionLinkInfo : sectionLinkInfoArray )
+        {
+            sectionLinkInfo.section->Unlink();
+            sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[1];
+            sectionLinkInfo.section->Link();
+        }
     }
-/*
-    for( FSectionLinkInfo& sectionLinkInfo : vertex1SectionLinkInfoArray )
+    else // ( mVertex[0]->GetClass() == FOdysseyVectorVertex::StaticClass() )
     {
-        sectionLinkInfo.section->Unlink();
-        sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[0];
-        sectionLinkInfo.section->Link();
+        std::vector<FSectionLinkInfo> sectionLinkInfoArray;
+
+        mVertex[1]->GetSectionLinkInfo( sectionLinkInfoArray );
+        //mVertex[1]->GetSectionLinkInfo( vertex1SectionLinkInfoArray );
+
+        for( FSectionLinkInfo& sectionLinkInfo : sectionLinkInfoArray )
+        {
+            sectionLinkInfo.section->Unlink();
+            sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[0];
+            sectionLinkInfo.section->Link();
+        }
     }
-*/
 }
 
 double

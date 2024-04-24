@@ -123,7 +123,18 @@ class FOdysseyVectorChain
         static void ExtendErasedSection( FOdysseyVectorVertex* iVertex
                                        , FOdysseyVectorSection* iFromSection );
         uint32 GetErasureFlags( FOdysseyVectorVertex* iVertex
-                              , uint32 iPreviousErasureFlags );
+                              , const std::vector<FOdysseyVectorSection*>& iSectionArray
+                              , uint32 iPreviousVertexErasureFlags );
+        void GetSections( FOdysseyVectorVertex* iVertex
+                        , FOdysseyVectorPath* iPath
+                        , std::vector<FOdysseyVectorSection*>& oSectionArray );
+        void GetSections( FOdysseyVectorVertexIntersection* iIntersectionVertex
+                        , FOdysseyVectorSegment* iSegment
+                        , std::vector<FOdysseyVectorSection*>& oSectionArray );
+        FSectionLinkInfo* GetNextSectionLinkInfo( FOdysseyVectorSection* iLastSection
+                                                , FOdysseyVectorVertex* iLastSectionVertex
+                                                , uint32 iLastSectionVertexIndex );
+
     private :
         FOdysseyVectorPath* mPath;
         std::vector<FOdysseyVectorVertex*> mVertexArray;

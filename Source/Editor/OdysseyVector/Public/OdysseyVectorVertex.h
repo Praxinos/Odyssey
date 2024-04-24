@@ -406,6 +406,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                                    , std::vector<FSectionLinkInfo*>& oSurroundingSectionArray );
         void GetSectionLinkInfo( std::vector<FSectionLinkInfo>& oSectionLinkInfoArray );
         FSectionLinkInfo* GetOtherSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo );
+        FOdysseyVectorSection* GetFirstSection();
+        FSectionLinkInfo* GetSectionLinkInfo( FOdysseyVectorSegment* iSegment );
 
     protected:
         /**

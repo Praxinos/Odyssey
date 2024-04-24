@@ -116,6 +116,20 @@ FOdysseyVectorVertex::GetOwnerAsPath()
 }
 
 FSectionLinkInfo*
+FOdysseyVectorVertex::GetSectionLinkInfo( FOdysseyVectorSegment* iSegment )
+{
+    for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
+    {
+        if( sectionLinkInfo.section->GetSegment() == iSegment )
+        {
+            return &sectionLinkInfo;
+        }
+    }
+
+    return nullptr;
+}
+
+FSectionLinkInfo*
 FOdysseyVectorVertex::GetSectionLinkInfo( FOdysseyVectorSection* iSection
                                         , uint32 iSectionVertexIndex )
 {
@@ -704,6 +718,13 @@ FOdysseyVectorVertex::GetFirstSegment()
 {
     return mSegmentList.size() ? mSegmentList.front() : nullptr;
 }
+
+FOdysseyVectorSection*
+FOdysseyVectorVertex::GetFirstSection()
+{
+    return mSectionLinkInfoList.size() ? mSectionLinkInfoList.front().section : nullptr;
+}
+
 /*
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetVectorOnSegment( FOdysseyVectorSegment* iSegment, bool iNormalize )
