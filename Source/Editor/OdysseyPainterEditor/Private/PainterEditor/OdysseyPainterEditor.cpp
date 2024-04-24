@@ -562,11 +562,9 @@ FOdysseyPainterEditor::InactivateTemporaryTool()
     mCurrentTemporaryTool = nullptr;
     mOnCurrentTemporaryToolChanged.Broadcast();
 
-
     if (mCurrentMainTool && mCurrentMainTool->IsActivable())
     {
         mCurrentMainTool->Activate();
-        mOnCurrentMainToolChanged.Broadcast();
     }
     mOnCurrentToolChanged.Broadcast();
 }
@@ -586,8 +584,6 @@ FOdysseyPainterEditor::ActivateTemporaryTool( UOdysseyPainterEditorTool* iTool )
     if (mCurrentMainTool && mCurrentMainTool->IsActivated())
     {
         mCurrentMainTool->Inactivate();
-        mCurrentMainTool = nullptr;
-        mOnCurrentMainToolChanged.Broadcast();
     }
 
     mCurrentTemporaryTool = iTool;
