@@ -233,7 +233,8 @@ UOdysseyAnimationPlayer::UpdateTexture()
 		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->Width(), Animation->Height(), Animation->Format());
 
 		{
-			mRenderer->Copy(block, rect, {});
+			FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+			mRenderer->Copy(params, {});
 
 			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
 			ctx.Finish();
@@ -259,7 +260,8 @@ UOdysseyAnimationPlayer::UpdateTexture()
 			for ( const ::ULIS::FRectI& rect : invalidRects )
 			{
 				TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->Format());
-				mRenderer->Copy(block, rect, ::ULIS::FVec2I(0), {});
+				FOdysseyImageRendererCopyParams params(block, { block->Rect() }, rect.Position());
+				mRenderer->Copy(params, {});
 				blocks.Add(block);
 			}
 			

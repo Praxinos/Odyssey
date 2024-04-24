@@ -95,7 +95,9 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
         ctx.Finish();
         TSharedPtr<IOdysseyImageRenderer> renderer = filteredCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
         renderer->Init();
-        renderer->Copy(block, {});
+
+        FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+        renderer->Copy(params, {});
         ctx.Finish();
 
         FResultingCell resultingCell;
@@ -122,7 +124,9 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
 
             renderer = filteredCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
             renderer->Init();
-            renderer->Copy(block, {});
+
+            params = FOdysseyImageRendererCopyParams(block, { block->Rect() });
+            renderer->Copy(params, {});
             ctx.Finish();
 
             resultingCell.mBlock = block;
@@ -223,7 +227,9 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         ctx.Finish();
         TSharedPtr<IOdysseyImageRenderer> renderer = selectedCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
         renderer->Init();
-        renderer->Copy(startBlock, {});
+
+        FOdysseyImageRendererCopyParams startParams(startBlock, { startBlock->Rect() });
+        renderer->Copy(startParams, {});
         ctx.Finish();
 
         int cellIndex = cellsContainer->GetCellIndex(selectedCell);
@@ -241,7 +247,9 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
             ctx.Finish();
             renderer = nextCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
             renderer->Init();
-            renderer->Copy(endBlock, {});
+
+            FOdysseyImageRendererCopyParams endParams(endBlock, { endBlock->Rect() });
+            renderer->Copy(endParams, {});
             ctx.Finish();
 
             TArray<TSharedPtr<FOdysseyAnimationCell>> rasterCells;

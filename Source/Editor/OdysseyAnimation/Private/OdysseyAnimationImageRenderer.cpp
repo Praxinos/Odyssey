@@ -21,21 +21,21 @@ FOdysseyAnimationImageRenderer::Init()
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mLayerStackRenderer)
         return iWaitList;
 
-    return mLayerStackRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    return mLayerStackRenderer->Blend(iParams, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mLayerStackRenderer)
         return iWaitList;
 
-    return mLayerStackRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+    return mLayerStackRenderer->Copy(iParams, iWaitList);
 }
 
 bool

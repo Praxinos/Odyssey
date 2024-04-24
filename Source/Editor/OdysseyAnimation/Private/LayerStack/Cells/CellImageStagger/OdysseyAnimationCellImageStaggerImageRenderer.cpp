@@ -36,19 +36,19 @@ FOdysseyAnimationCellImageStaggerImageRenderer::IsGameThreadOnly()
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationCellImageStaggerImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationCellImageStaggerImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {   
     if (!mCellRenderer)
         return iWaitList;
 
-    return mCellRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    return mCellRenderer->Blend(iParams, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationCellImageStaggerImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationCellImageStaggerImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mCellRenderer)
         return iWaitList;
 
-    return mCellRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+    return mCellRenderer->Copy(iParams, iWaitList);
 }

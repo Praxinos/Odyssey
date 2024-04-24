@@ -350,7 +350,9 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 
         TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
         renderer->Init();
-        renderer->Copy(block, {});
+
+        FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+        renderer->Copy(params, {});
         ctx.Finish();
 
         // Create texture asset
@@ -420,7 +422,9 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
 
     TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
     renderer->Init();
-    renderer->Copy(block, {});
+
+    FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+    renderer->Copy(params, {});
     ctx.Finish();
 
     InitTextureWithBlockData(block.Get(), outTexture, texture->Source.GetFormat());

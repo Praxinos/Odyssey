@@ -305,8 +305,10 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 	TArray<::ULIS::FEvent> events;
 	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
 	renderer->Init();
+
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
-	renderer->Copy(block, rect, ::ULIS::FVec2I(0), {});
+	FOdysseyImageRendererBlendParams params(block, {block->Rect()});
+	renderer->Copy(params, {});
 	ctx.Finish();
 
 	CopyBlockToTexture(block, { rect });
@@ -409,7 +411,9 @@ FOdysseyAnimationMediaSamples::Render()
 	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
 	renderer->Init();
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
-	renderer->Copy(block, mInvalidTileMap.InvalidRects(), {});
+
+	FOdysseyImageRendererBlendParams params(block, mInvalidTileMap.InvalidRects());
+	renderer->Copy(params, {});
 
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->Format());
 	ctx.Finish();

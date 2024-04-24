@@ -34,36 +34,32 @@ FOdysseyAnimationProxyImageRenderer::Init()
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationProxyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationProxyImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Blend);
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render || mForceRender)
-        return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
-
-    /* if ( !mBlock )
-        mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory */
+        return mAnimationRenderer->Blend(iParams, iWaitList);
 
     if ( !mBlock )
-        return mAnimationRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
-        //return iWaitList;
+        return mAnimationRenderer->Blend(iParams, iWaitList);
 
-    return ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    return ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationProxyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationProxyImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Copy);
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render || mForceRender)
-        return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+        return mAnimationRenderer->Copy(iParams, iWaitList);
 
     /* if ( !mBlock )
         mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory */
 
     if ( !mBlock )
-        return mAnimationRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+        return mAnimationRenderer->Copy(iParams, iWaitList);
 
-    return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
+    return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
 }
 
 bool

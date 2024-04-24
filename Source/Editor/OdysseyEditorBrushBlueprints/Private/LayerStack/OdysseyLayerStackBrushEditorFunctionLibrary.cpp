@@ -57,7 +57,10 @@ namespace
 
             TSharedPtr<IOdysseyImageRenderer> imageRenderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
             imageRenderer->Init();
-            TArray<::ULIS::FEvent> eventCopy = imageRenderer->Copy(dst, { src_rect }, { dst_pos }, { eventClear });
+
+            ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);
+            FOdysseyImageRendererCopyParams params(dst, { dstRect }, src_rect.Position() - dst_pos);
+            TArray<::ULIS::FEvent> eventCopy = imageRenderer->Copy(params, { eventClear });
             ctx.Flush();
 
             return FOdysseyBlockProxy::MakeProxy(dst, eventCopy.Num(), eventCopy.GetData());
@@ -83,7 +86,10 @@ namespace
 
             TSharedPtr<IOdysseyImageRenderer> imageRenderer = animationLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
             imageRenderer->Init();
-            TArray<::ULIS::FEvent> eventCopy = imageRenderer->Copy(dst, { src_rect }, { dst_pos }, { eventClear });
+            
+            ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);
+            FOdysseyImageRendererCopyParams params(dst, { dstRect }, src_rect.Position() - dst_pos);
+            TArray<::ULIS::FEvent> eventCopy = imageRenderer->Copy(params, { eventClear });
             ctx.Flush();
 
             return FOdysseyBlockProxy::MakeProxy(dst, eventCopy.Num(), eventCopy.GetData());

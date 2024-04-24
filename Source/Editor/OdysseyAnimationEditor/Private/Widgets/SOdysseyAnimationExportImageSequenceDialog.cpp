@@ -302,7 +302,8 @@ SOdysseyAnimationExportImageSequenceDialog::ExportSource(const FSource& iSource,
 
         TSharedPtr<IOdysseyImageRenderer> renderer = iSource.mImageRenderingAbility->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
         renderer->Init();
-        renderer->Copy(block, {});
+        FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+        renderer->Copy(params, {});
 
         ctx.Finish();
 

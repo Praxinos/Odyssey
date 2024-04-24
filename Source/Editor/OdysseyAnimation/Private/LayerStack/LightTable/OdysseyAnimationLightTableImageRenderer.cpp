@@ -8,6 +8,9 @@
 FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
+    UOdysseyAnimationLayer* layer = iLightTable->GetLayer();
+
+    UOdysseyAnimation* animation = layer->GetAnimation();
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iLightTable->GetLayer()->GetCellsContainer();
     int currentCellIndex = cellsContainer->GetCellIndexAtFrame(iFrame);
@@ -31,11 +34,22 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 
         int cellFirstFrame = cellsContainer->GetCellFrame(cell);
 
+        FVector2D outOfPegsPan = cell->OutOfPegsPan();
+        float outOfPegsRotation = cell->OutOfPegsRotation();
+        float outOfPegsZoom = cell->OutOfPegsZoom();
+
+        ::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+            * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
+            * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
+            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
+            * ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
+
         FFrameData data;
         data.mOpacity = iLightTable->GetKeyOpacity(i);
         data.mRenderer = iLightTable->GetLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
         data.mColor = iLightTable->GetKeyColor(i);
         data.mContrast = iLightTable->GetPreviousKeysContrast();
+        data.mOutOfPegsTransform = oopTransform;
         mFramesData.Add(data);
     }
 
@@ -52,11 +66,24 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 
         int cellFirstFrame = cellsContainer->GetCellFrame(cell);
 
+        FVector2D outOfPegsPan = cell->OutOfPegsPan();
+        float outOfPegsRotation = cell->OutOfPegsRotation();
+        float outOfPegsZoom = cell->OutOfPegsZoom();
+
+        
+
+        ::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+            * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
+            * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
+            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
+            * ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / -2.f, animation->Height() / -2.f);
+
         FFrameData data;
         data.mOpacity = iLightTable->GetKeyOpacity(i);
         data.mRenderer = iLightTable->GetLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
         data.mColor = iLightTable->GetKeyColor(i);
         data.mContrast = iLightTable->GetNextKeysContrast();
+        data.mOutOfPegsTransform = oopTransform;
         mFramesData.Add(data);
     }
 }
@@ -82,24 +109,29 @@ FOdysseyAnimationLightTableImageRenderer::IsGameThreadOnly()
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLightTableImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLightTableImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {   
     TArray<::ULIS::FEvent> events;
-    for (int i = 0; i < iRects.Num(); i++)
+    for (const ::ULIS::FRectI& rect : iParams.mRects)
     {
-        const ::ULIS::FRectI& rect = iRects[i];
-        const ::ULIS::FVec2I& pos = iPos[i];
         TSharedPtr<::ULIS::FBlock> greyblock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ::ULIS::Format_GAF);
-        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ioBlock->Format());
+        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, iParams.mBlock->Format());
         ::ULIS::FRectI blockRect = block->Rect();
-        ::ULIS::FVec2I blockPos(0);
+        ::ULIS::FVec2I blockPos(iParams.mPos.x + rect.x, iParams.mPos.y + rect.y);
         
         
         TArray<::ULIS::FEvent> lastEvent = iWaitList;
         for (const FFrameData& frameData : mFramesData)
         {
-            TArray<::ULIS::FEvent> clearEvents = Clear(block, { blockRect }, { blockPos }, lastEvent);
-            TArray<::ULIS::FEvent> rendererBlendEvents = frameData.mRenderer->Copy(block, { rect }, { blockPos }, clearEvents);
+            TArray<::ULIS::FEvent> clearEvents = Clear(block, { blockRect }, lastEvent);
+
+            FOdysseyImageRendererCopyParams frameParams(iParams);
+            frameParams.mBlock = block;
+            frameParams.mRects = { block->Rect() };
+            frameParams.mPos = blockPos;
+            frameParams.mTransform = frameData.mOutOfPegsTransform;
+
+            TArray<::ULIS::FEvent> rendererBlendEvents = frameData.mRenderer->Copy(frameParams, clearEvents);
 
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
 
@@ -163,7 +195,13 @@ FOdysseyAnimationLightTableImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlo
                 &eventBlend
             );
 
-            lastEvent = ConvertAndBlend(block, ioBlock, ::ULIS::Blend_Normal, frameData.mOpacity, { blockRect }, { pos }, {eventBlend});
+            FOdysseyImageRendererBlendParams blendParams(iParams);
+            blendParams.mBlendMode = ::ULIS::Blend_Normal;
+            blendParams.mOpacity = frameData.mOpacity;
+            blendParams.mRects = { rect };
+            blendParams.mTransform = ::ULIS::FMat3F();
+
+            lastEvent = ConvertAndBlend(block, blockPos, blendParams, {eventBlend});
         }
 
         events.Append(lastEvent);
@@ -172,7 +210,9 @@ FOdysseyAnimationLightTableImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlo
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLightTableImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLightTableImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    return Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, iWaitList);
+    FOdysseyImageRendererBlendParams params(iParams);
+
+    return Blend(params, iWaitList);
 }
