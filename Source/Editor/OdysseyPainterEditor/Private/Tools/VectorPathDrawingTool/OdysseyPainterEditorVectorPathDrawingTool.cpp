@@ -423,6 +423,19 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , iPointInTexture.x
                                                            , iPointInTexture.y
                                                            , StitchingRadius );
+            std::vector<FOdysseyVectorSegment*> pickedSegmentArray;
+
+            // check for hovered segment before the new segment is added
+            if( Snap )
+            {
+                // check if we picked any segment
+                PickSegments( iScene
+                            , iPointInTexture.x
+                            , iPointInTexture.y
+                            , StitchingRadius
+                            , false
+                            , pickedSegmentArray );
+            }
 
             // stitching to another path at MouseUp is CURRENTLY not supported
             if( endingVertex && ( endingVertex->GetOwnerAsPath() != path ) )
@@ -437,6 +450,20 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 if( endingVertex == nullptr )
                 {
                     mAddedVertexArray.push_back( newSegment->GetVertex(1) );
+
+                    for( FOdysseyVectorSegment* pickedSegment : pickedSegmentArray )
+                    {
+                        BLPoint point = pickedSegment->GetOwner()->GetInverseWorldMatrix().mapPoint( iPointInTexture.x
+                                                                                                    , iPointInTexture.y );
+                        ::ULIS::FVec2D projectedPoint;
+                        double projectedPointT = pickedSegment->ProjectConstrained( ::ULIS::FVec2D( point.x
+                                                                                                  , point.y )
+                                                                                    , projectedPoint );
+
+                        newSegment->GetVertex(1)->Set( projectedPoint );
+
+                        break;
+                    }
                 }
 
                 mAddedSegmentArray.push_back( newSegment );

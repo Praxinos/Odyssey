@@ -11,12 +11,12 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner // pa
                                             , FOdysseyVectorSegment* iSegment
                                             , FOdysseyVectorVertex* iVertex0
                                             , FOdysseyVectorVertex* iVertex1
-                                            , double iSectionT0
-                                            , double iSectionT1
+                                            , double iSegmentT0
+                                            , double iSegmentT1
                                             , std::vector<FOdysseyVectorSection*>& oShortSectionArray
  )
 {
-    Init( iOwner, iSegment, iVertex0, iVertex1, iSectionT0, iSectionT1, oShortSectionArray );
+    Init( iOwner, iSegment, iVertex0, iVertex1, iSegmentT0, iSegmentT1, oShortSectionArray );
 }
 
 void
@@ -88,16 +88,18 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
                            , FOdysseyVectorSegment* iSegment
                            , FOdysseyVectorVertex* iVertex0
                            , FOdysseyVectorVertex* iVertex1
-                           , double iT0
-                           , double iT1
+                           , double iSegmentT0
+                           , double iSegmentT1
                            , std::vector<FOdysseyVectorSection*>& oShortSectionArray )
 {
     BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
     static ::ULIS::FVec2D zeroVector = ::ULIS::FVec2D( 0.0f, 0.0f );
 
     mSegment = iSegment;
-    mVertex[0] = iVertex0;
-    mVertex[1] = iVertex1;
+    mSegmentT[0] = iSegmentT0;
+    mSegmentT[1] = iSegmentT1;
+    mOriginalVertex[0] = mVertex[0] = iVertex0;
+    mOriginalVertex[1] = mVertex[1] = iVertex1;
     mCycle[0] = nullptr;
     mCycle[1] = nullptr;
     mCycleCount = 0;
@@ -120,7 +122,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
 
         BLPoint convertedPoint[4];
 
-        if( fabs( iT0 - iT1 ) < 1.0f )
+        if( fabs( iSegmentT0 - iSegmentT1 ) < 1.0f )
         {
             ::ULIS::FVec2D vertex0Worldcoords = iVertex0->GetWorldCoords();
             ::ULIS::FVec2D vertex1Worldcoords = iVertex1->GetWorldCoords();
@@ -130,8 +132,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
                                          , ::ULIS::FVec2D( worldSegmentBezier[1].x, worldSegmentBezier[1].y )
                                          , ::ULIS::FVec2D( worldSegmentBezier[2].x, worldSegmentBezier[2].y )
                                          , ::ULIS::FVec2D( worldSegmentBezier[3].x, worldSegmentBezier[3].y )
-                                         , iT0
-                                         , iT1
+                                         , iSegmentT0
+                                         , iSegmentT1
                                          , subBezier[0]
                                          , subBezier[1]
                                          , subBezier[2]
@@ -181,7 +183,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
         mBezier[3].x = convertedPoint[3].x;
         mBezier[3].y = convertedPoint[3].y;
 
-        mLength = fabs ( iT1 - iT0 ) * iSegment->GetLength();
+        mLength = fabs ( iSegmentT1 - iSegmentT0 ) * iSegment->GetLength();
     }
 
     if( iSegment->GetClass() == FOdysseyVectorSegmentCubicGap::StaticClass() )
@@ -419,6 +421,25 @@ FOdysseyVectorSection::HasCycle( FOdysseyVectorCycle* iCycle )
 }
 
 void
+FOdysseyVectorSection::LinkWithoutStitching()
+{
+    // Note: a looping section will be added twice
+    mOriginalVertex[0]->AddSection( this, 0 );
+    mOriginalVertex[1]->AddSection( this, 1 );
+
+    mFlags |= LINKED;
+}
+
+void
+FOdysseyVectorSection::UnlinkWithoutStitching()
+{
+    mOriginalVertex[0]->RemoveSection( this, 0 );
+    mOriginalVertex[1]->RemoveSection( this, 1 );
+
+    mFlags &= (~LINKED);
+}
+
+void
 FOdysseyVectorSection::Link()
 {
     // Note: a looping section will be added twice
@@ -448,6 +469,12 @@ FOdysseyVectorSection::GetSegment()
     return mSegment;
 }
 
+double
+FOdysseyVectorSection::GetSegmentT( uint32 iIndex )
+{
+    return mSegmentT[iIndex];
+}
+
 FOdysseyVectorVertex*
 FOdysseyVectorSection::GetVertex( int iNum )
 {
@@ -465,4 +492,18 @@ FOdysseyVectorSection::ListToArray( const std::list<FOdysseyVectorSection*>& iSe
     {
         oSectionArray.push_back( section );
     }
+}
+
+void
+FOdysseyVectorSection::Print()
+{
+    FOdysseyVectorObject* owner0 = mVertex[0]->GetOwner();
+    FOdysseyVectorObject* owner1 = mVertex[1]->GetOwner();
+    BLPoint pt0 = owner0->GetWorldMatrix().mapPoint( mVertex[0]->GetCoords().x, mVertex[0]->GetCoords().y );
+    BLPoint pt1 = owner1->GetWorldMatrix().mapPoint( mVertex[1]->GetCoords().x, mVertex[1]->GetCoords().y );
+    BLPoint segpt0 = owner0->GetWorldMatrix().mapPoint( mSegment->GetVertex(0)->GetCoords().x, mSegment->GetVertex(0)->GetCoords().y );
+    BLPoint segpt1 = owner1->GetWorldMatrix().mapPoint( mSegment->GetVertex(1)->GetCoords().x, mSegment->GetVertex(1)->GetCoords().y );
+
+    //UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]/segment[x:%f y:%f] -- [x:%f y:%f] - flags : %d"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y, iSection->GetFlags() );
+    UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]"), pt0.x, pt0.y, pt1.x, pt1.y );
 }

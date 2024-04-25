@@ -36,6 +36,7 @@ struct FWayPoint
 
     FWayPoint( FOdysseyVectorVertex* iVertex, uint32 iWayPointFlags )
     {
+        intersectionVertex = nullptr;
         vertex = iVertex;
         flags = iWayPointFlags;
     }
@@ -122,9 +123,9 @@ class FOdysseyVectorChain
         bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
         static void ExtendErasedSection( FOdysseyVectorVertex* iVertex
                                        , FOdysseyVectorSection* iFromSection );
-        uint32 GetErasureFlags( FOdysseyVectorVertex* iVertex
-                              , const std::vector<FOdysseyVectorSection*>& iSectionArray
-                              , uint32 iPreviousVertexErasureFlags );
+        uint32 GetErasureFlags( FOdysseyVectorSection* iPrevSection
+                              , FOdysseyVectorVertex* iVertex
+                              , FOdysseyVectorSection* iNextSection );
         void GetSections( FOdysseyVectorVertex* iVertex
                         , FOdysseyVectorPath* iPath
                         , std::vector<FOdysseyVectorSection*>& oSectionArray );

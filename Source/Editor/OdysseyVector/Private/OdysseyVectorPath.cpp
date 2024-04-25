@@ -957,7 +957,11 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
 
             if( ( vertexAdditionFlags & eVertexAdditionFlags::RemoveOriginalVertex ) == eVertexAdditionFlags::RemoveOriginalVertex )
             {
-                oRemovedVertexArray.push_back( wayPoint.vertex );
+                // mark original vertex for deletion. No duplicates (duplicates happen in case of loops)
+                if( std::find( oRemovedVertexArray.begin(), oRemovedVertexArray.end(), wayPoint.vertex ) == oRemovedVertexArray.end() )
+                {
+                    oRemovedVertexArray.push_back( wayPoint.vertex );
+                }
             }
 
             // boundary vertices are guaranteed unique per nature, no need to check uniqueness

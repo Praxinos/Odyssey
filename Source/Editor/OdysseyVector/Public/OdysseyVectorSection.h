@@ -20,7 +20,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
          * @brief default destructor
          */
         ~FOdysseyVectorSection();
-        FOdysseyVectorSection();
 
        /**
          * @brief constructor
@@ -123,10 +122,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
                                           , bool iStraight
                                           , bool iNormalize );
 
+        double GetSegmentT( uint32 iIndex );
+        void Print();
+        void LinkWithoutStitching();
+        void UnlinkWithoutStitching();
+
     protected:
         FOdysseyVectorObject* mOwner;
         FOdysseyVectorSegment* mSegment;
         FOdysseyVectorVertex* mVertex[2];
+        // used by the eraser tool in "section mode"
+        FOdysseyVectorVertex* mOriginalVertex[2];
         uint32 mFlags;
         uint32 mCycleCount;
         FOdysseyVectorCycle* mCycle[2]; // there are 2 cycles per section at most. No need for a complicated container.
@@ -134,6 +140,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         double mLength;
         // vectors at endpoint;
         ::ULIS::FVec2D mVector[2];
+        double mSegmentT[2];
 
     private:
         static const uint32 BLOCKVERTEX0 = ( 1 << 0 );

@@ -603,6 +603,11 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                 for( int j = 0; j < segment1FractionCache.size(); j++ )
                 {
                     FOdysseyVectorFraction* segment1Poly = &segment1FractionCache[j];
+
+                  if(    ( iSegment0 >  iSegment1 )
+                    // test only once in case of self-intersecting segment
+                    || ( ( iSegment0 == iSegment1 ) && ( segment0Poly > segment1Poly ) ) )
+                  {
                     ::ULIS::FVec2D& segment1P0Coords = segment1Poly->point[0]->GetCoords();
                     ::ULIS::FVec2D& segment1P1Coords = segment1Poly->point[1]->GetCoords();
                     double segment0PolySubT, segment1PolySubT;
@@ -688,6 +693,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                             }
                         }
                     }
+                  }
                 }
             }
         }
@@ -2683,13 +2689,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
     // first step : relink sections as they were all unlinked after the cycle detection process
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
-        mSectionBuffer[i].Link();
-    }
-
-    // restore intersections
-    for( FOdysseyVectorVertexIntersection& intersectionVertex : mIntersectionVertexArray )
-    {
-        intersectionVertex.Attach();
+        mSectionBuffer[i].LinkWithoutStitching();
     }
 
 //    for( int i = 0; i < mGapSectionBuffer.size(); i++ )
@@ -2732,16 +2732,10 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
         }
     }
 
-    // remove intersections
-    for( FOdysseyVectorVertexIntersection& intersectionVertex : mIntersectionVertexArray )
-    {
-        intersectionVertex.Detach();
-    }
-
     // unlink sections again
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
-        mSectionBuffer[i].Unlink();
+        mSectionBuffer[i].UnlinkWithoutStitching();
         mSectionBuffer[i].SetErased( false ); // unmark
     }
 
