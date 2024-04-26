@@ -410,9 +410,9 @@ void FOdysseyPainterEditorGUI::ToggleEraserButton()
 {
     if( mEditor )
     {
-        if( mEditor->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()) )
+        if( mEditor->GetCurrentTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()) )
         {
-            Cast< UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool())->BlendParameters.bEraserMode = !Cast< UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool())->BlendParameters.bEraserMode;
+            Cast< UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetCurrentTool())->BlendParameters.bEraserMode = !Cast< UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetCurrentTool())->BlendParameters.bEraserMode;
         }
     }
 }

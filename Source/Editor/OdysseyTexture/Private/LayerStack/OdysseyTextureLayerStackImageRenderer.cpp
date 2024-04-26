@@ -30,19 +30,19 @@ FOdysseyTextureLayerStackImageRenderer::IsGameThreadOnly()
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyTextureLayerStackImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyTextureLayerStackImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mLayerRootRenderer)
         return iWaitList;
 
-    return mLayerRootRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    return mLayerRootRenderer->Blend(iParams, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyTextureLayerStackImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyTextureLayerStackImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mLayerRootRenderer)
         return iWaitList;
         
-    return mLayerRootRenderer->Copy(ioBlock, iRects, iPos, iWaitList);
+    return mLayerRootRenderer->Copy(iParams, iWaitList);
 }

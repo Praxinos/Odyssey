@@ -55,7 +55,9 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetCurrentLayerBlock
 	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
 	TSharedPtr<IOdysseyImageRenderer> renderer = currentLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	renderer->Init();
-	renderer->Copy(block, {});
+
+	FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+	renderer->Copy(params, {});
 
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
 	ctx.Finish();
@@ -89,7 +91,9 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetForegroundLayersB
 		return nullptr;
 
 	renderer->Init();
-	renderer->Copy(block, {});
+	
+	FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+	renderer->Copy(params, {});
 
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
 	ctx.Finish();
@@ -123,7 +127,8 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetBackgroundLayersB
 		return nullptr;
 
 	renderer->Init();
-	renderer->Copy(block, {});
+	FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+	renderer->Copy(params, {});
 
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
 	ctx.Finish();
@@ -141,7 +146,8 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetAllLayersBlock() 
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
 	TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	renderer->Init();
-	renderer->Copy(block, {});
+	FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+	renderer->Copy(params, {});
 
 	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
 	ctx.Finish();

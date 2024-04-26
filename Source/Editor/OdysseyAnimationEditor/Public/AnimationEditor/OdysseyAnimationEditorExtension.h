@@ -16,6 +16,7 @@ class FOdysseyAnimationEditorSource;
 class FOdysseyAnimationEditorGUI;
 class FOdysseyLayerStackEditorBrushContext;
 class FOdysseyAnimationGlobalShortcuts;
+class UOdysseyAnimationEditorOutOfPegsTool;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorExtension
     : public FOdysseyPainterEditorExtension
@@ -30,6 +31,10 @@ public:
     virtual void Initialize() override;
     virtual void Finalize() override;
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
+    virtual void AddReferencedObjects(FReferenceCollector& Collector);
+    
+    virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName ) override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
     UOdysseyAnimation*				    Animation() const;
@@ -37,6 +42,8 @@ public:
     UOdysseyAnimationPlayer*            Player() const;
     FOdysseyAnimationEditorTimeline*    Timeline();
     float                               PlaybackFramesPerSecond() const;
+
+    UOdysseyAnimationEditorOutOfPegsTool* GetOutOfPegsTool() const;
 
 private:
     void OnSourceChanged();
@@ -55,4 +62,6 @@ public:
     float mPlaybackFramesPerSecond;
     TArray<FGuid> mImageRenderingComposition;
     TSharedPtr<FOdysseyLayerStackEditorBrushContext> mLayerStackBrushEditorContext;
+
+    UOdysseyAnimationEditorOutOfPegsTool* mOutOfPegsTool;
 };

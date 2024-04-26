@@ -36,7 +36,7 @@ FOdysseyPainterEditorHUDTab::FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* 
 void FOdysseyPainterEditorHUDTab::Init()
 {
     if (mEditor)
-        mEditor->OnSelectedToolChanged().AddSP(SharedThis<FOdysseyPainterEditorHUDTab>(this), &FOdysseyPainterEditorHUDTab::OnSelectedToolChanged);
+        mEditor->OnCurrentToolChanged().AddSP(SharedThis<FOdysseyPainterEditorHUDTab>(this), &FOdysseyPainterEditorHUDTab::OnCurrentToolChanged);
 
     FOdysseyEditorTab::Init();
 }
@@ -63,7 +63,7 @@ FOdysseyPainterEditorHUDTab::RefreshWidgetContent()
 }
 
 void
-FOdysseyPainterEditorHUDTab::OnSelectedToolChanged()
+FOdysseyPainterEditorHUDTab::OnCurrentToolChanged()
 {
     RefreshWidgetContent();
 }

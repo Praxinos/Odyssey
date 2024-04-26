@@ -435,7 +435,7 @@ SOdysseyAnimationCells::OnDragDetected(const FGeometry& iGeometry, const FPointe
 float
 SOdysseyAnimationCells::GetCellBreakIndicatorOffset(TSharedPtr<FOdysseyAnimationCell> iCell) const
 {
-    if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Cut)
+    if (mExtension->Timeline()->GetCurrentTool() != EOdysseyTimelineTool::Cut)
         return 0.f;
 
     if (GetCellBreakIndicatorVisibility(iCell) != EVisibility::Visible)
@@ -457,7 +457,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(TSharedPtr<FOdysseyAnima
     if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
         
-    if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Cut)
+    if (mExtension->Timeline()->GetCurrentTool() != EOdysseyTimelineTool::Cut)
         return EVisibility::Hidden;
 
     if (!IsHovered() || iCell != mHoveredCell)
@@ -481,7 +481,7 @@ SOdysseyAnimationCells::GetTimingHandleVisibility(TSharedPtr<FOdysseyAnimationCe
     if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
 
-    if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Selection)
+    if (mExtension->Timeline()->GetCurrentTool() != EOdysseyTimelineTool::Selection)
         return EVisibility::Hidden;
 
     if ((!IsHovered() && !mLockHandlesVisibility) || !mTimingHandleCells.Contains(iCell))
@@ -496,7 +496,7 @@ SOdysseyAnimationCells::GetLengthHandleVisibility(TSharedPtr<FOdysseyAnimationCe
     if (mAnimationLayer->GetIsLocked())
         return EVisibility::Hidden;
         
-    if (mExtension->Timeline()->GetSelectedTool() != EOdysseyTimelineTool::Selection)
+    if (mExtension->Timeline()->GetCurrentTool() != EOdysseyTimelineTool::Selection)
         return EVisibility::Hidden;
 
     if ((!IsHovered() && !mLockHandlesVisibility) || iCell != mHoveredCell)

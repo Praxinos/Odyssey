@@ -10,9 +10,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCell
     : public TSharedFromThis<FOdysseyAnimationCell>
     , public FOdysseyAnimationImageRenderingAbility
 {
-//public:
-    //DECLARE_MULTICAST_DELEGATE_OneParam(FOnLengthChanged, TSharedRef<FOdysseyAnimationCell>)
-    //static FOnLengthChanged& OnLengthChanged();
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOutOfPegsChanged, bool /*iIsInteractive*/)
 
 public:
     virtual ~FOdysseyAnimationCell();
@@ -27,6 +25,18 @@ public:
     virtual const FName& GetType() const = 0;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
     virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const;
+
+    FOnOutOfPegsChanged& OnOutOfPegsChanged();
+
+public:
+    //OutOfPegs
+    bool IsOutOfPegs() const;
+    FVector2D OutOfPegsPan() const;
+    float OutOfPegsRotation() const;
+    float OutOfPegsZoom() const;
+    ::ULIS::FMat3F OutOfPegsTransform() const;
+
+    void SetOutOfPegs(const FVector2D& iPan, float iRotation, float iZoom, bool iIsInteractive);
 
 public:
     virtual void PostDuplicate();
@@ -44,4 +54,11 @@ protected:
     UOdysseyAnimationLayer* mLayer;
     uint32 mLength;
     int mMarkId;
+
+    bool mIsOutOfPegs = false;
+    FVector2D mOutOfPegsPan = FVector2D(0, 0);
+    float mOutOfPegsRotation = 0.f;
+    float mOutOfPegsZoom = 1.f;
+
+    FOnOutOfPegsChanged mOnOutOfPegsChanged;
 };

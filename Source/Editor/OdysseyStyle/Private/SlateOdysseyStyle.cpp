@@ -152,9 +152,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 #if WITH_EDITOR
     // Generic Button styles
     Set( "Button.NoPadding", FButtonStyle()
-        .SetNormal ( FSlateNoResource() )
-        .SetPressed( FSlateNoResource() )
-        .SetHovered( FSlateNoResource() )
+        .SetNormalPadding( FMargin(0,0) )
+        .SetPressedPadding( FMargin(0,0) )
     );
     Set( "Button.Transparent", FButtonStyle()
         .SetNormal ( FSlateNoResource() )
@@ -773,6 +772,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.LightTableKey.Front", new FSlateRoundedBoxBrush( background, FVector4( 8.0f, 8.0f, 8.0f, 8.0f ) ));
     Set("Animation.LightTableKey.BackColor", primary);
     Set("Animation.LightTableKey.FrontColor", background);
+
+    Set("Animation.LightTable.OutOfPegs.Button.Dirty", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-dirty", mIcon16x16));
+    Set("Animation.LightTable.OutOfPegs.Button.None", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-none", mIcon16x16));
+    Set("Animation.LightTable.OutOfPegs.Button.Color", primary);
 
     //Texture
     Set("Texture.AlphaLockedToggle", FCheckBoxStyle()

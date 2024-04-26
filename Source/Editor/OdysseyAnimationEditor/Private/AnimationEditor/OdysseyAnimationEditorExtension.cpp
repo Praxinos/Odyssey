@@ -26,6 +26,7 @@ FOdysseyAnimationEditorExtension::FOdysseyAnimationEditorExtension(FOdysseyPaint
 	, mTimeline(this)
 	, mPlaybackFramesPerSecond(0)
 	, mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
+	, mOutOfPegsTool(nullptr)
 {
 }
 
@@ -37,6 +38,9 @@ FOdysseyAnimationEditorExtension::Initialize()
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnSourceChanged);
 	mGUI = MakeShareable(new FOdysseyAnimationEditorGUI(this));
 	mGUI->Initialize();
+	
+	mOutOfPegsTool = NewObject<UOdysseyAnimationEditorOutOfPegsTool>();
+	mOutOfPegsTool->SetEditor(GetEditor());
 }
 
 void
@@ -144,7 +148,7 @@ FOdysseyAnimationEditorExtension::PlaybackFramesPerSecond() const
 void
 FOdysseyAnimationEditorExtension::OnLayerMediaChanged()
 {
-	GetEditor()->RefreshCurrentTool(); //Refresh the current tool
+	GetEditor()->SanitizeCurrentTool(); //Refresh the current tool
 }
 
 void
@@ -163,7 +167,7 @@ FOdysseyAnimationEditorExtension::OnImageRenderingChanged(const FOdysseyImageRen
 
 	mImageRenderingComposition = imageRenderingComposition;
 
-	GetEditor()->RefreshCurrentTool();
+	GetEditor()->SanitizeCurrentTool();
 }
 
 void
@@ -179,7 +183,7 @@ FOdysseyAnimationEditorExtension::OnCurrentFrameChanged(UOdysseyAnimation* iAnim
 		return;
 
 	mImageRenderingComposition = imageRenderingComposition;
-	GetEditor()->RefreshCurrentTool();
+	GetEditor()->SanitizeCurrentTool();
 }
 
 void
@@ -187,4 +191,35 @@ FOdysseyAnimationEditorExtension::ConfigureTools()
 {
 	TSharedPtr<FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider> provider = MakeShared<FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider>(this);
 	GetEditor()->GetRasterPaintBucketTool()->SetSourceProvider(provider);
+}//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Getters
+
+UOdysseyAnimationEditorOutOfPegsTool*
+FOdysseyAnimationEditorExtension::GetOutOfPegsTool() const
+{
+    return mOutOfPegsTool;
+}
+
+
+void
+FOdysseyAnimationEditorExtension::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	FOdysseyPainterEditorExtension::AddReferencedObjects(Collector);
+	Collector.AddReferencedObject(mOutOfPegsTool);
+}
+
+void
+FOdysseyAnimationEditorExtension::ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName )
+{
+	FOdysseyPainterEditorExtension::ExtendMenu(iOwnerFName, iMenuName);
+
+    mOutOfPegsTool->ExtendMenu(iOwnerFName, iMenuName);
+}
+
+void
+FOdysseyAnimationEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
+{
+	FOdysseyPainterEditorExtension::BindShortcuts(iToolkit);
+	
+    mOutOfPegsTool->BindShortcuts(iToolkit);
 }

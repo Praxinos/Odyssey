@@ -35,6 +35,7 @@ protected:
 protected:
     // Widget Getters
     int WidgetIndex() const;
+    UOdysseyPainterEditorTool* GetCurrentTool() const;
 
 protected:
     // Event Listeners

@@ -43,7 +43,7 @@ private:
     void OnLayerAdded(UOdysseyLayer* iLayer);
     float PlaybackFramesPerSecond() const;
 
-    EOdysseyTimelineTool GetSelectedTool() const;
+    EOdysseyTimelineTool GetCurrentTool() const;
     void OnToolChecked(EOdysseyTimelineTool iTool, ECheckBoxState iState);
 
 private:

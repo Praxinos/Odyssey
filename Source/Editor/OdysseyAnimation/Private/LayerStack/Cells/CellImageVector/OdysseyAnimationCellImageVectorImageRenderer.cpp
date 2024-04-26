@@ -69,26 +69,30 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationCellImageVectorImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationCellImageVectorImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {   
     if (!mBlock)
         return iWaitList;
 
-    TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ioBlock, iBlendMode, iOpacity, iRects, iPos, iWaitList);
+    TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
     
     if (!mHUDBlock)
         return events;
 
-    return ConvertAndBlend(mHUDBlock, ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
+    FOdysseyImageRendererBlendParams hudParams = iParams;
+    hudParams.mBlendMode = ::ULIS::Blend_Normal;
+    hudParams.mOpacity = 1.f;
+
+    return ConvertAndBlend(mHUDBlock, ::ULIS::FVec2I(0), hudParams, events);
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationCellImageVectorImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationCellImageVectorImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mBlock)
         return iWaitList;
 
-    return ConvertAndCopy(mBlock, ioBlock, iRects, iPos, iWaitList);
+    return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
 }
 
 void

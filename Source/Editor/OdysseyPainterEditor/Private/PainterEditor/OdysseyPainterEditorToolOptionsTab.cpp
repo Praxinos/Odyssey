@@ -72,7 +72,10 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
 
     //mToolsTab->GetToolsTab()->SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterVectorDrawingTool, mEditor->GetVectorDrawingTool()));
 
-    return mWidgetSwitcher;
+    //return mWidgetSwitcher;
+
+    return SNew(SOdysseyPainterEditorToolOptions)
+        .Tool_Raw(this, &FOdysseyPainterEditorToolOptionsTab::GetCurrentTool);
 }
 
 void
@@ -126,9 +129,15 @@ FOdysseyPainterEditorToolOptionsTab::WidgetIndex() const
     return 1 + mWidgetSlotForTool.IndexOfByPredicate(
         [this](const FWidgetSlotForTool& iWidgetSlotForTool)
         {
-            return mEditor->GetSelectedTool() == iWidgetSlotForTool.mTool;
+            return mEditor->GetCurrentTool() == iWidgetSlotForTool.mTool;
         }
     );
+}
+
+UOdysseyPainterEditorTool*
+FOdysseyPainterEditorToolOptionsTab::GetCurrentTool() const
+{
+    return mEditor->GetCurrentTool();
 }
 
 #undef LOCTEXT_NAMESPACE

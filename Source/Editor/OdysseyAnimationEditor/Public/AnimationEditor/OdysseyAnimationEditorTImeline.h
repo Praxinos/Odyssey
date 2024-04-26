@@ -33,7 +33,7 @@ public:
 
 public:
     TSharedPtr<FOdysseyAnimationTimelineTool> GetTool() const;
-    EOdysseyTimelineTool GetSelectedTool() const;
+    EOdysseyTimelineTool GetCurrentTool() const;
     void SetSelectedTool(EOdysseyTimelineTool iTool);
 
     void ZoomIn();

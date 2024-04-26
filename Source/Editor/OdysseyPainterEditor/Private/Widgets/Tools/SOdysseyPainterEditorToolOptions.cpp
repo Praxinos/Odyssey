@@ -16,6 +16,7 @@ void
 SOdysseyPainterEditorToolOptions::Construct( const FArguments& InArgs )
 {
     mTool = InArgs._Tool;
+    mDisplayedTool = mTool.Get();
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
@@ -28,10 +29,21 @@ SOdysseyPainterEditorToolOptions::Construct( const FArguments& InArgs )
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
     
     mDetailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    mDetailsView->SetObject(mTool);
+    mDetailsView->SetObject(mDisplayedTool);
 
     this->ChildSlot
     [
         mDetailsView.ToSharedRef()
     ];
+}
+
+void
+SOdysseyPainterEditorToolOptions::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+    UOdysseyPainterEditorTool* tool = mTool.Get();
+    if (tool != mDisplayedTool)
+    {
+        mDisplayedTool = tool;
+        mDetailsView->SetObject(mDisplayedTool);
+    }
 }

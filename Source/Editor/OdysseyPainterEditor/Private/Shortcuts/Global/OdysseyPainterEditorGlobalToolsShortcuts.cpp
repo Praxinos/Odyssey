@@ -158,7 +158,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool(UOdysseyPainterEd
     if (!iTool->IsActivable() || iTool->IsActivated() )
         return;
 
-    editor->SetSelectedTool(iTool);
+    editor->ActivateMainTool(iTool);
 }
 
 void

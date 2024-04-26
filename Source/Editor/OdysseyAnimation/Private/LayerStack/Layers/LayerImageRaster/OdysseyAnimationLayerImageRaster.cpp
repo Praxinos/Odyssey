@@ -259,7 +259,11 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
                         TSharedPtr<IOdysseyImageRenderer> renderer = layer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, frame);
                         renderer->Init();
-                        lastEvent = renderer->Blend(iBlock, layer->GetImageRenderingBlendMode(), layer->GetImageRenderingOpacity(), rect, lastEvent);
+
+                        FOdysseyImageRendererBlendParams params(iBlock, { rect });
+                        params.mBlendMode = layer->GetImageRenderingBlendMode();
+                        params.mOpacity = layer->GetImageRenderingOpacity();
+                        lastEvent = renderer->Blend(params, lastEvent);
                     }
 
                     return lastEvent;
@@ -287,6 +291,8 @@ UOdysseyAnimationLayerImageRaster::IsLightTableActivatedChanged()
         return;
 
     ImageRenderingChanged();
+    
+    OnLightTableIsActivatedChanged().Broadcast();
 }
 
 void

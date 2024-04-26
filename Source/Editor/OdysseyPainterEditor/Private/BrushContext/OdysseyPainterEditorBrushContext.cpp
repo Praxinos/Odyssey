@@ -60,7 +60,7 @@ FOdysseyPainterEditorBrushContext::Pan()
 float
 FOdysseyPainterEditorBrushContext::GetStep()
 {
-    UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetSelectedTool());
+    UOdysseyPainterEditorRasterDrawingTool* drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetCurrentTool());
     if (!drawingTool)
         return 0.f;
 

@@ -5,6 +5,8 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
+#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
+
 SOdysseyAnimationTimelineLightTable::SOdysseyAnimationTimelineLightTable()
 	: mLayer(nullptr)
 	, mExtension(nullptr)
@@ -50,18 +52,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 		horizontalBox->AddSlot()
 		.AutoWidth()
 		[
-			SNew(SOdysseyAnimationTimelineSection, mExtension)
-			.WidthInFrames(1)
-			.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, i)
-			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				.HAlign(HAlign_Center)
-				[
-					SNew(SOdysseyAnimationTimelineLightTableKey, mLayer, i)
-					.IsActivated(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated, i)
-				]
-			]
+			CreateKeyWidget(i)
 		];
 
 		horizontalBox->AddSlot()
@@ -95,18 +86,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 		horizontalBox->AddSlot()
 		.AutoWidth()
 		[
-			SNew(SOdysseyAnimationTimelineSection, mExtension)
-			.WidthInFrames(1)
-			.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, i)
-			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				.HAlign(HAlign_Center)
-				[
-					SNew(SOdysseyAnimationTimelineLightTableKey, mLayer, i)
-					.IsActivated(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated, i)
-				]
-			]
+			CreateKeyWidget(i)
 		];
 
 		horizontalBox->AddSlot()
@@ -135,6 +115,45 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 	];
 
 	Update();
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationTimelineLightTable::CreateKeyWidget(int iCellOffset)
+{
+	//const FButtonStyle* outOfPegButtonStyle = &FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding");
+	const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
+
+	return SNew(SOdysseyAnimationTimelineSection, mExtension)
+		.WidthInFrames(1)
+		.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, iCellOffset)
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.HAlign(HAlign_Center)
+			[
+				SNew(SBox)
+        		.HeightOverride(FOptionalSize(SOdysseyAnimationTimelineLightTableKey::mDesiredSliderHeight))
+				[
+					SNew(SOdysseyAnimationTimelineLightTableKey, mLayer, iCellOffset)
+					.IsActivated(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated, iCellOffset)
+				]
+			]
+			+ SVerticalBox::Slot()
+			.HAlign(HAlign_Center)
+			.AutoHeight()
+			[
+				SNew(SCheckBox)
+				.IsEnabled(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated, iCellOffset)
+				.Style( checkboxStyle )
+				.OnCheckStateChanged(this, &SOdysseyAnimationTimelineLightTable::OnOutOfPegsCheckStateChanged, iCellOffset)
+				.IsChecked(this, &SOdysseyAnimationTimelineLightTable::IsOutOfPegsChecked, iCellOffset)
+				.Padding(FMargin(2.f))
+				[
+					SNew(SImage)
+					.Image(this, &SOdysseyAnimationTimelineLightTable::GetOutOfPegsButtonImage, iCellOffset)
+				]
+			]
+		];
 }
 
 void
@@ -229,4 +248,84 @@ bool
 SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated(int iCellOffset) const
 {
 	return mLayer->GetLightTable()->GetKeyIsActivated(iCellOffset);
+}
+
+const FSlateBrush*
+SOdysseyAnimationTimelineLightTable::GetOutOfPegsButtonImage(int iCellOffset) const
+{
+	if (mCurrentCellIndex == INDEX_NONE)
+		return nullptr;
+
+	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+
+	int cellIndex = mCurrentCellIndex + iCellOffset;
+	if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
+		return nullptr;
+
+	TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
+	if (cell->IsOutOfPegs())
+		return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.Dirty");
+
+	return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.None");
+}
+
+void
+SOdysseyAnimationTimelineLightTable::OnOutOfPegsCheckStateChanged(ECheckBoxState iValue, int iCellOffset)
+{
+	FOdysseyPainterEditor* editor = mExtension->GetEditor();
+	if (!editor)
+		return;
+
+	if (iValue == ECheckBoxState::Checked)
+	{
+		if (mCurrentCellIndex == INDEX_NONE)
+			return;
+
+		TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+
+		int cellIndex = mCurrentCellIndex + iCellOffset;
+		if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
+			return;
+
+		TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
+		mExtension->GetOutOfPegsTool()->SetCell(cell);
+		editor->ActivateTemporaryTool(mExtension->GetOutOfPegsTool());
+	}
+	else
+	{
+		editor->InactivateTemporaryTool();
+	}
+}
+
+ECheckBoxState
+SOdysseyAnimationTimelineLightTable::IsOutOfPegsChecked(int iCellOffset) const
+{
+	FOdysseyPainterEditor* editor = mExtension->GetEditor();
+	if (!editor)
+		return ECheckBoxState::Unchecked;
+
+	UOdysseyPainterEditorTool* tool = editor->GetCurrentTool();
+	if (!tool)
+		return ECheckBoxState::Unchecked;
+
+	if (mCurrentCellIndex == INDEX_NONE)
+		return ECheckBoxState::Unchecked;
+
+	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
+
+	int cellIndex = mCurrentCellIndex + iCellOffset;
+	if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
+		return ECheckBoxState::Unchecked;
+
+	TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
+
+	bool isToolActive = tool->IsA(UOdysseyAnimationEditorOutOfPegsTool::StaticClass());
+	if (isToolActive)
+	{
+		UOdysseyAnimationEditorOutOfPegsTool* outOfPegsTool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(tool);
+		if (outOfPegsTool->GetCell() == cell)
+			return ECheckBoxState::Checked;
+	}
+	
+	return ECheckBoxState::Unchecked;
 }

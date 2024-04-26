@@ -38,7 +38,7 @@ protected:
 protected:
     // Event Listeners
     void UpdateToolWidget();
-    void OnSelectedToolChanged();
+    void OnCurrentToolChanged();
     virtual FReply OnSaveButtonClicked();
     virtual FReply OnUndoButtonClicked();
     virtual FReply OnRedoButtonClicked();

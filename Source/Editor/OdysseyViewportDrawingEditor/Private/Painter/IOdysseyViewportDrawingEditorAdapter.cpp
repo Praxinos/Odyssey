@@ -34,12 +34,12 @@ IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(FOdys
 void
 IOdysseyViewportDrawingEditorAdapter::Initialize()
 {
-    mExtension->GetEditor()->OnSelectedToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnSelectedToolChanged);
+    mExtension->GetEditor()->OnCurrentToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnCurrentToolChanged);
 
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->AddMessageHandler(*this);
 
-    SetTool(mExtension->GetEditor()->GetSelectedTool());
+    SetTool(mExtension->GetEditor()->GetCurrentTool());
 
     mState = eState::kIdleReady;
 }
@@ -50,7 +50,7 @@ IOdysseyViewportDrawingEditorAdapter::Finalize()
     mState = eState::kIdle;
     SetTexture(nullptr);
     SetTool(nullptr);
-    mExtension->GetEditor()->OnSelectedToolChanged().RemoveAll(this);
+    mExtension->GetEditor()->OnCurrentToolChanged().RemoveAll(this);
     
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->RemoveMessageHandler(*this);
@@ -70,10 +70,10 @@ IOdysseyViewportDrawingEditorAdapter::GetTexture() const
 }
 
 void
-IOdysseyViewportDrawingEditorAdapter::OnSelectedToolChanged()
+IOdysseyViewportDrawingEditorAdapter::OnCurrentToolChanged()
 {
     //If the tool is a drawing tool, we need to prepare the brushInstance to draw in a 3D Context
-    SetTool(mExtension->GetEditor()->GetSelectedTool());
+    SetTool(mExtension->GetEditor()->GetCurrentTool());
 }
 
 void
@@ -287,11 +287,11 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
 
     mIsPickingColor = false;
 
-    if( mExtension->GetEditor()->GetSelectedTool() )
+    if( mExtension->GetEditor()->GetCurrentTool() )
     {
-        mExtension->GetEditor()->GetSelectedTool()->OnMouseHover( mCurrentStrokeRay.mPoint );
+        mExtension->GetEditor()->GetCurrentTool()->OnMouseHover( mCurrentStrokeRay.mPoint );
         
-        mMouseCursor = mExtension->GetEditor()->GetSelectedTool()->GetMouseCursor();
+        mMouseCursor = mExtension->GetEditor()->GetCurrentTool()->GetMouseCursor();
         mOverrideMouseCursor = true;
     }
 
@@ -332,7 +332,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     }
     else if( iEvent == EInputEvent::IE_DoubleClick )
     {
-        UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetSelectedTool();
+        UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetCurrentTool();
         if (!selectedTool)
             return false;
 
@@ -572,7 +572,7 @@ IOdysseyViewportDrawingEditorAdapter::KeyDown(FKey iKey)
     if(!IsReadyToDraw())
         return false;
 
-    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetSelectedTool();
+    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetCurrentTool();
     if (selectedTool)
         return selectedTool->OnKeyDown(iKey);
 
@@ -585,7 +585,7 @@ IOdysseyViewportDrawingEditorAdapter::KeyUp(FKey iKey)
     if(!IsReadyToDraw())
         return false;
 
-    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetSelectedTool();
+    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetCurrentTool();
     if (selectedTool)
         return selectedTool->OnKeyUp(iKey);
 

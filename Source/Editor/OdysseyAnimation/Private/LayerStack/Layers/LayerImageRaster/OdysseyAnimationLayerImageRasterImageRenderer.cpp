@@ -44,37 +44,57 @@ FOdysseyAnimationLayerImageRasterImageRenderer::Init()
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRasterImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLayerImageRasterImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    if (!mCellRenderer)
-        return iWaitList;
-        
     TArray<::ULIS::FEvent> events = iWaitList;
+    if (!mCellRenderer)
+        return events;
+        
     if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
-        events = mLightTableRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
+    {
+        FOdysseyImageRendererBlendParams lightTableParams(iParams);
+        lightTableParams.mBlendMode = ::ULIS::Blend_Normal;
+        lightTableParams.mOpacity = 1.f;
+        events = mLightTableRenderer->Blend(lightTableParams, events);
+    }
 
-    events = mCellRenderer->Blend(ioBlock, iBlendMode, iOpacity, iRects, iPos, events);
+    events = mCellRenderer->Blend(iParams, events);
 
     if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
-        events = mLightTableRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
+    {
+        FOdysseyImageRendererBlendParams lightTableParams(iParams);
+        lightTableParams.mBlendMode = ::ULIS::Blend_Normal;
+        lightTableParams.mOpacity = 1.f;
+        events = mLightTableRenderer->Blend(lightTableParams, events);
+    }
 
     return events;
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRasterImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyAnimationLayerImageRasterImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!mCellRenderer)
         return iWaitList;
         
-    TArray<::ULIS::FEvent> events = Clear(ioBlock, iRects, iPos, iWaitList);
+    TArray<::ULIS::FEvent> events = Clear(iParams.mBlock, iParams.mRects, iWaitList);
     if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
-        events = mLightTableRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
+    {
+        FOdysseyImageRendererBlendParams lightTableParams(iParams);
+        lightTableParams.mBlendMode = ::ULIS::Blend_Normal;
+        lightTableParams.mOpacity = 1.f;
+        events = mLightTableRenderer->Blend(lightTableParams, events);
+    }
 
-    events = mCellRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
+    events = mCellRenderer->Blend(iParams, events);
 
     if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
-        events = mLightTableRenderer->Blend(ioBlock, ::ULIS::Blend_Normal, 1.f, iRects, iPos, events);
+    {
+        FOdysseyImageRendererBlendParams lightTableParams(iParams);
+        lightTableParams.mBlendMode = ::ULIS::Blend_Normal;
+        lightTableParams.mOpacity = 1.f;
+        events = mLightTableRenderer->Blend(lightTableParams, events);
+    }
 
     return events;
 }

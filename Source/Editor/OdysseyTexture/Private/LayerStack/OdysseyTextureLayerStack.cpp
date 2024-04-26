@@ -254,7 +254,9 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<::ULIS::FRectI>& iRect
 
     mRenderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render); //TODO: should depend on a variable or something ?
     mRenderer->Init();
-    mRenderer->Copy(mTextureFastUpdateSurface->Block(), iRects, {});
+
+    FOdysseyImageRendererCopyParams params(mTextureFastUpdateSurface->Block(), iRects);
+    mRenderer->Copy(params, {});
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mTextureFastUpdateSurface->Block()->Format());
     ctx.Finish();
@@ -356,7 +358,9 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
         TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
         TSharedPtr<IOdysseyImageRenderer> renderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render); //TODO: should depend on a variable or something ?
         renderer->Init();
-        renderer->Copy(block, invalidRects, {});
+
+        FOdysseyImageRendererCopyParams params(block, invalidRects);
+        renderer->Copy(params, {});
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
         ctx.Finish();

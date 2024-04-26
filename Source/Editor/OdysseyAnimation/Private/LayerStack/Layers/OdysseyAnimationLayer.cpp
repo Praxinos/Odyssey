@@ -48,6 +48,12 @@ UOdysseyAnimationLayer::GetIsLightTableActivated() const
     return false;
 }
 
+FSimpleMulticastDelegate&
+UOdysseyAnimationLayer::OnLightTableIsActivatedChanged()
+{
+    return mOnLightTableIsActivatedChanged;
+}
+
 void
 UOdysseyAnimationLayer::ChildrenChanged()
 {

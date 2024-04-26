@@ -422,7 +422,8 @@ FBlockData::Render(TSharedPtr<IOdysseyImageRenderer> iRenderer, TSharedPtr<FOdys
         FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
             [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
             {
-                return iRenderer->Copy(iBlock, iTileMap.InvalidRects(),  {});
+                FOdysseyImageRendererCopyParams params(iBlock, iTileMap.InvalidRects());
+                return iRenderer->Copy(params,  {});
             }
         )
     );

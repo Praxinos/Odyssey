@@ -44,7 +44,7 @@ UOdysseyPainterEditorVectorBucketView::Update( FOdysseyPainterEditor* iEditor, F
 void
 UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyName
                                                       , const FName& iMemberPropertyName
-                                                      , const FName& iCategory )
+                                                      , const FName& iCategory)
 {
     if( mBucket )
     {

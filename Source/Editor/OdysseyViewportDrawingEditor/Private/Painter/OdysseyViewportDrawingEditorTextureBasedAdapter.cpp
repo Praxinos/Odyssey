@@ -38,8 +38,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
 ::ULIS::FEvent FOdysseyViewportDrawingEditorTextureBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
 {
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
-    if (mExtension->GetEditor()->GetSelectedTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetSelectedTool());
+    if (mExtension->GetEditor()->GetCurrentTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetCurrentTool());
 
     if (mStopDrawing == true || !drawingTool)
         return iStampParams.mEvent;

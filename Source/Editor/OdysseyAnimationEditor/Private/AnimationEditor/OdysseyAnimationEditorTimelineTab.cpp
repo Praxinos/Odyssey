@@ -437,114 +437,6 @@ FOdysseyAnimationEditorTimelineTab::ExportImageSequence()
     UOdysseyAnimation* animation = animationSource->GetAnimation();
 
     SOdysseyAnimationExportImageSequenceDialog::Open(animation);
-
-    /* 
-    IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
-    TArray< FString > filenames;
-    bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
-        FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
-        , LOCTEXT("animation.export-image-sequence.save-dialog.title", "Select Export Path & Name").ToString()
-        , FPaths::ProjectDir()
-        , animation->GetName()
-        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
-        , EFileDialogFlags::None
-        , filenames
-    );
-
-    if( !saveSuccess || filenames.Num() <= 0 )
-        return;
-
-    FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
-    FString folder = FPaths::GetPath(path);
-    FString filename = FPaths::GetBaseFilename(path);
-    FString extension = FPaths::GetExtension(path, false);
-    //std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
-    ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
-    bool extensionFound = false;
-    for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
-    {
-        if( extension == ::ULIS::kwImageFormat[i] )
-        {
-            exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
-            extensionFound = true;
-            break;
-        }
-    }
-
-    if( !extensionFound )
-    {
-        FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("animation.export-image-sequence.invalid-extension-dialog.message", "The file extension or the file format is not supported"), LOCTEXT("animation.export-image-sequence.invalid-extension-dialog.title", "Invalid extension"));
-        return;
-    }
-
-    FInt32Range frameRange = animation->GetFrameRange();
-    int startFrame = frameRange.GetLowerBoundValue();
-	int endFrame = frameRange.GetUpperBoundValue();
-
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( animation->Format() );
-
-    FScopedSlowTask progressBar(endFrame - startFrame + 1, LOCTEXT("timeline-tab.export-image-sequence.progress-bar.title", "Exporting Image Sequence"));
-    progressBar.MakeDialog();
-
-    for (int i = startFrame; i <= endFrame; i++)
-    {
-        progressBar.EnterProgressFrame();
-        TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
-        renderer->Init();
-        renderer->Copy(block, {});
-
-        ctx.Finish();
-
-        //Path
-        FString imagePath = folder / filename + FString::Printf(TEXT("_%d."), i + 1) + extension;
-        std::string str = std::string( TCHAR_TO_UTF8( *imagePath ) );
-
-        bool canSaveDirectly = false;
-        ::ULIS::FContext::SaveBlockToDiskMetrics( *block, exportImageFormat, &canSaveDirectly );
-        if (canSaveDirectly)
-        {
-            ctx.SaveBlockToDisk(
-                *block
-                , str
-                , exportImageFormat
-                , 100
-            );
-
-            ctx.Finish();
-        }
-        else
-        {
-            ::ULIS::eFormat format = block->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
-            if (exportImageFormat == ::ULIS::FileFormat_hdr)
-            {
-                format = ::ULIS::Format_RGBAF;
-            }
-
-            ::ULIS::FBlock blockProxy(block->Width(), block->Height(), format);
-
-            ::ULIS::FEvent eventConvert;
-            ctx.ConvertFormat(
-                *block
-                , blockProxy
-                , ::ULIS::FRectI::Auto
-                , ::ULIS::FVec2I( 0 )
-                , ULIS::FSchedulePolicy::CacheEfficient
-                , 0
-                , nullptr
-                , &eventConvert
-            );
-
-            ctx.SaveBlockToDisk(
-                blockProxy
-                , str
-                , exportImageFormat
-                , 100
-            );
-
-            ctx.Finish();
-        }
-    } */
 }
 
 void
@@ -612,7 +504,9 @@ FOdysseyAnimationEditorTimelineTab::ExportAsFlipbook()
         //Render frame block
         TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
         renderer->Init();
-        renderer->Copy(block, {});
+
+        FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+        renderer->Copy(params, {});
         ctx.Finish();
 
         //FString assetName = FPaths::GetBaseFilename(saveObjectPath) + FString::Format(TEXT("_{0}"), { i });
