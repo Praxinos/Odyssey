@@ -56,6 +56,7 @@ public:
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
     virtual bool GetIsLightTableActivated() const;
+    virtual FSimpleMulticastDelegate& OnLightTableIsActivatedChanged();
 
 public:
     //UObject overrides
@@ -67,4 +68,6 @@ public:
 
     UPROPERTY()
     EOdysseyAnimationLayerImagePostBehaviour PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
+
+    FSimpleMulticastDelegate mOnLightTableIsActivatedChanged;
 };

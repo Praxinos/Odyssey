@@ -9,6 +9,10 @@
 
 class FOdysseyPaintEngine;
 class FOdysseyAnimationCell;
+class UOdysseyAnimationLayer;
+class FOdysseyHUDPolygon;
+class FOdysseyHUDHandle;
+class FOdysseyHUDLine;
 
 UCLASS()
 class UOdysseyAnimationEditorOutOfPegsTool :
@@ -24,6 +28,8 @@ public:
     UOdysseyAnimationEditorOutOfPegsTool();
 
 public:
+    virtual void Load();
+
     //OdysseyPainterEditorTool overrides
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
@@ -42,17 +48,44 @@ public:
 
 private:
     void OnCellOutOfPegsChanged(bool iIsInteractive);
+    void OnLightTableIsActivatedChanged();
+    void RebuildHUD();
+    void RefreshHUD();
+    FVector2D GetCenter() const;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Out Of Pegs")
+    UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = (LinearDeltaSensitivity="1") )
     FVector2D Pan = FVector2D(0, 0);
 
-    UPROPERTY(EditAnywhere, Category="Out Of Pegs")
+    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0", ClampMax = "360", UIMin = "0", UIMax = "360", Units="Degrees" ) )
     float Rotation = 0.f;
 
-    UPROPERTY(EditAnywhere, Category="Out Of Pegs")
-    float Zoom = 1.f;
+    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0", UIMin = "0", Units="Percent" ) )
+    float Zoom = 100.f;
 
-public:
+private:
+    UOdysseyAnimationLayer* mLayer;
     TSharedPtr<FOdysseyAnimationCell> mCell;
+    FOdysseyHUDPolygon* mTransformHUD = nullptr;
+    FOdysseyHUDHandle* mTransformTopLeftHandleHUD = nullptr;
+    FOdysseyHUDHandle* mTransformTopRightHandleHUD = nullptr;
+    FOdysseyHUDHandle* mTransformBottomRightHandleHUD = nullptr;
+    FOdysseyHUDHandle* mTransformBottomLeftHandleHUD = nullptr;
+    FOdysseyHUDHandle* mTransformRotationHandleHUD = nullptr;
+    FOdysseyHUDLine* mTransformRotationLineHUD = nullptr;
+
+    FVector2D mTransformRotationPoint;
+    FVector2D mRotationCenter;
+
+    bool mIsPanning = false;
+    FVector2D mPanPointReference;
+    FVector2D mPanReference;
+
+    /* class FOdysseyHUDPolygon* mLeftPegHUD = nullptr;
+    class FOdysseyHUDPolygon* mRightPegHUD = nullptr;
+    class FOdysseyHUDCircle* mCenterPegHUD = nullptr; */
+
+    FVector2D mZoomCenter;
+    float mZoomDistanceReference;
+    float mZoomReference;
 };

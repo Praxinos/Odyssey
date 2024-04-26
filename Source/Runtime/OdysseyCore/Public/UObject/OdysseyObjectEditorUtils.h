@@ -37,6 +37,9 @@ namespace FOdysseyObjectEditorUtils
 		{
 			FEditPropertyChain PropertyChain;
 			PropertyChain.AddHead(Property);
+
+			PropertyChain.SetActivePropertyNode(Property);
+			PropertyChain.SetActiveMemberPropertyNode(Property);
 			
 			Object->Modify();
 			Object->PreEditChange(PropertyChain);

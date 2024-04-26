@@ -34,6 +34,7 @@ public:
     FVector2D OutOfPegsPan() const;
     float OutOfPegsRotation() const;
     float OutOfPegsZoom() const;
+    ::ULIS::FMat3F OutOfPegsTransform() const;
 
     void SetOutOfPegs(const FVector2D& iPan, float iRotation, float iZoom, bool iIsInteractive);
 

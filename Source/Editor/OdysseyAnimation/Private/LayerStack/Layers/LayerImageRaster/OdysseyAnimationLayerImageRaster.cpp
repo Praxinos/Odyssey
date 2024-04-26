@@ -291,6 +291,8 @@ UOdysseyAnimationLayerImageRaster::IsLightTableActivatedChanged()
         return;
 
     ImageRenderingChanged();
+    
+    OnLightTableIsActivatedChanged().Broadcast();
 }
 
 void

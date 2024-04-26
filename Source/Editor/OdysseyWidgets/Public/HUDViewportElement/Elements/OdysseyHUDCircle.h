@@ -17,22 +17,26 @@ public:
 
     //Constructor
     FOdysseyHUDCircle( FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint, FTransform2D iTransform = FTransform2D() );
-    FOdysseyHUDCircle( FName iName, FVector2D iCenterPoint, int iRadius, FTransform2D iTransform = FTransform2D() );
+    FOdysseyHUDCircle( FName iName, FVector2D iCenterPoint, float iRadius, FTransform2D iTransform = FTransform2D() );
 
 //FOdysseyHUDElement overrides
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
+public:
+    void SetCenter(const FVector2D iCenterPoint);
+    void SetRadius(float iRadius);
+
 private:
     FVector2D mCenterPoint;
-    int mRadius;
+    float mRadius;
     FVector2D mBorderPoint;
 
 private:
     FVector2D mPreviousCenterPoint;
     FVector2D mPreviousBorderPoint;
-    int mPreviousRadius;
+    float mPreviousRadius;
 
 private:
     /** The widget representation of the line in Editor */

@@ -516,7 +516,7 @@ FOdysseyPainterEditor::InactivateMainTool()
 void
 FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
 {
-    if (!iTool || mCurrentMainTool == iTool || !iTool->IsActivable())
+    if (mCurrentMainTool && mCurrentMainTool == iTool && mCurrentMainTool->IsActivated() )
         return;
 
     if (mCurrentTemporaryTool && mCurrentTemporaryTool->IsActivated())
@@ -526,10 +526,17 @@ FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
         mOnCurrentTemporaryToolChanged.Broadcast();
     }
     
-    if (mCurrentMainTool && mCurrentMainTool->IsActivated())
+    if (mCurrentMainTool && mCurrentMainTool != iTool && mCurrentMainTool->IsActivated())
     {
         mCurrentMainTool->Inactivate();
         mCurrentMainTool = nullptr;
+    }
+    
+    if (!iTool || !iTool->IsActivable())
+    {
+        mOnCurrentMainToolChanged.Broadcast();
+        mOnCurrentToolChanged.Broadcast();
+        return;
     }
 
     mCurrentMainTool = iTool;

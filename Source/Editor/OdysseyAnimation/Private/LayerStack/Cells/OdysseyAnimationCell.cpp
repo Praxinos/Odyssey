@@ -107,12 +107,27 @@ FOdysseyAnimationCell::OutOfPegsZoom() const
     return mOutOfPegsZoom;
 }
 
+::ULIS::FMat3F
+FOdysseyAnimationCell::OutOfPegsTransform() const
+{
+    UOdysseyAnimationLayer* layer = GetLayer();
+    if (!layer)
+        return ::ULIS::FMat3F();
+
+    UOdysseyAnimation* animation = layer->GetAnimation();
+    if (!animation)
+        return ::ULIS::FMat3F();
+
+    return ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+            * ::ULIS::FMat3F::MakeTranslationMatrix(mOutOfPegsPan.X, mOutOfPegsPan.Y)
+            * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(mOutOfPegsRotation))
+            * ::ULIS::FMat3F::MakeScaleMatrix(mOutOfPegsZoom, mOutOfPegsZoom)
+            * ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / -2.f, animation->Height() / -2.f);
+}
+
 void
 FOdysseyAnimationCell::SetOutOfPegs(const FVector2D& iPan, float iRotation, float iZoom, bool iIsInteractive)
 {
-    if (iPan == mOutOfPegsPan && iRotation == mOutOfPegsRotation && iZoom == mOutOfPegsZoom)
-        return;
-
     mOutOfPegsPan = iPan;
     mOutOfPegsRotation = iRotation;
     mOutOfPegsZoom = iZoom;
