@@ -1432,7 +1432,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     iSection->Block( iSectionVertexIndex );
 
 //UE_LOG(LogTemp, Warning, TEXT("Next vertex valence %d"), sectionNextVertex->GetSectionCount() );
-//PrintSection( iSection );
+    //iSection->Print();
 
 //UE_LOG(LogTemp, Warning, TEXT("vertices %x %x"), sectionNextVertex, oSectionArray[0]->GetVertex(oVertexIndexArray[0]) );
     //isLoop = ( oSectionArray[0]->GetVertex(oVertexIndexArray[0])->GetID() == sectionNextVertex->GetID() );
@@ -1466,12 +1466,12 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
             if( nextSection->IsBlocked( nextSectionLinkInfo->sectionVertexIndex ) == false )
             {
                 ret = FindPath( iReturnSection
-                              , nextSectionLinkInfo->sectionVertexIndex
-                              , nextSectionLinkInfo->section
-                              , oVertexIndexArray
-                              , oSectionArray
-                              , iOrientation
-                              , iDepth + 1 );
+                                , nextSectionLinkInfo->sectionVertexIndex
+                                , nextSectionLinkInfo->section
+                                , oVertexIndexArray
+                                , oSectionArray
+                                , iOrientation
+                                , iDepth + 1 );
             }
             else
             {
@@ -1625,7 +1625,7 @@ FOdysseyVectorGroupPaint::FindCycles()
     // Build exploration pair for vertex-vertex gaps before simplification
     for( int i = 0; i < mGapSectionBuffer.size(); i++ )
     {
-        if( mGapSectionBuffer[i].IsLinked() ) // not sure if really needed anymore
+        //if( mGapSectionBuffer[i].IsLinked() ) // not sure if really needed anymore
         {
             FOdysseyVectorVertex* vertex0 = mGapSectionBuffer[i].GetVertex(0);
             FOdysseyVectorVertex* vertex1 = mGapSectionBuffer[i].GetVertex(1);
@@ -1637,9 +1637,11 @@ FOdysseyVectorGroupPaint::FindCycles()
              && ( vertex1->GetClass() == FOdysseyVectorVertex::StaticClass() ) )
             {
                 vertex0->BuildExplorationPairs( explorationPairsBuffer );
-                // commented-out: only one vertex is necessary to build
-                // the exploration pairs for vertex-vertex gaps, I believe.
-                // vertex1->BuildExplorationPairs( explorationPairsBuffer );
+                // Note: Technically, we don't have to check the second vertex. Only
+                // one is needed to build an exploration pair. however, due to section stitching
+                // it is not guaranted that the first vertex will be linked to any section
+                // so we build an exploration pair for both of them.
+                vertex1->BuildExplorationPairs( explorationPairsBuffer );
             }
         }
     }
@@ -1674,7 +1676,7 @@ FOdysseyVectorGroupPaint::FindCycles()
 
         if( section->IsLinked() == true )
         {
-            section->Unlink();
+            section->Unlink( true );
         }
     }
 
@@ -1684,7 +1686,7 @@ FOdysseyVectorGroupPaint::FindCycles()
 
         if( section->IsLinked() == true )
         {
-            section->Unlink();
+            section->Unlink( true );
         }
     }
 
@@ -2237,7 +2239,7 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
     {
         if( GapSectionIntersects( section, mGapSectionBuffer ) )
         {
-            section.Unlink();
+            section.Unlink( false );
         }
     }
 
@@ -2261,7 +2263,7 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
                     {
                         keepSimplifying = true;
 
-                        section->Unlink();
+                        section->Unlink( false );
                     }
                 }
             }
@@ -2280,7 +2282,7 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
                     {
                         keepSimplifying = true;
 
-                        section->Unlink();
+                        section->Unlink( false );
                     }
                 }
             }
@@ -2687,9 +2689,10 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
     blimg->getData( &imageData );
 
     // first step : relink sections as they were all unlinked after the cycle detection process
+    // Note: we don't stitch sections of size 0 here because it disturb the erasing process.
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
-        mSectionBuffer[i].LinkWithoutStitching();
+        mSectionBuffer[i].Link();
     }
 
 //    for( int i = 0; i < mGapSectionBuffer.size(); i++ )
@@ -2735,7 +2738,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
     // unlink sections again
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
-        mSectionBuffer[i].UnlinkWithoutStitching();
+        mSectionBuffer[i].Unlink( false );
         mSectionBuffer[i].SetErased( false ); // unmark
     }
 

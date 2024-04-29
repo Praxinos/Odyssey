@@ -22,39 +22,18 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner // pa
 void
 FOdysseyVectorSection::Stitch()
 {
+    std::vector<FSectionLinkInfo> sectionLinkInfoArray;
+
     // unlink first or else it will be returned in the arrays
-    Unlink();
+    Unlink( false );
 
-    // link preferably to a genuine vertex (not an intersection vertex). 
-    // This is useful for the eraser tool in "section mode"
-    if( ( mVertex[1]->GetClass() == FOdysseyVectorVertex::StaticClass() )
-     || ( ( mVertex[0]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
-       && ( mVertex[1]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() ) ) )
+    mVertex[0]->GetSectionLinkInfo( sectionLinkInfoArray );
+
+    for( FSectionLinkInfo& sectionLinkInfo : sectionLinkInfoArray )
     {
-        std::vector<FSectionLinkInfo> sectionLinkInfoArray;
-
-        mVertex[0]->GetSectionLinkInfo( sectionLinkInfoArray );
-
-        for( FSectionLinkInfo& sectionLinkInfo : sectionLinkInfoArray )
-        {
-            sectionLinkInfo.section->Unlink();
-            sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[1];
-            sectionLinkInfo.section->Link();
-        }
-    }
-    else // ( mVertex[0]->GetClass() == FOdysseyVectorVertex::StaticClass() )
-    {
-        std::vector<FSectionLinkInfo> sectionLinkInfoArray;
-
-        mVertex[1]->GetSectionLinkInfo( sectionLinkInfoArray );
-        //mVertex[1]->GetSectionLinkInfo( vertex1SectionLinkInfoArray );
-
-        for( FSectionLinkInfo& sectionLinkInfo : sectionLinkInfoArray )
-        {
-            sectionLinkInfo.section->Unlink();
-            sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[0];
-            sectionLinkInfo.section->Link();
-        }
+        sectionLinkInfo.section->Unlink( false );
+        sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[1];
+        sectionLinkInfo.section->Link();
     }
 }
 
@@ -421,25 +400,6 @@ FOdysseyVectorSection::HasCycle( FOdysseyVectorCycle* iCycle )
 }
 
 void
-FOdysseyVectorSection::LinkWithoutStitching()
-{
-    // Note: a looping section will be added twice
-    mOriginalVertex[0]->AddSection( this, 0 );
-    mOriginalVertex[1]->AddSection( this, 1 );
-
-    mFlags |= LINKED;
-}
-
-void
-FOdysseyVectorSection::UnlinkWithoutStitching()
-{
-    mOriginalVertex[0]->RemoveSection( this, 0 );
-    mOriginalVertex[1]->RemoveSection( this, 1 );
-
-    mFlags &= (~LINKED);
-}
-
-void
 FOdysseyVectorSection::Link()
 {
     // Note: a looping section will be added twice
@@ -449,10 +409,16 @@ FOdysseyVectorSection::Link()
     mFlags |= LINKED;
 }
 
-void FOdysseyVectorSection::Unlink()
+void FOdysseyVectorSection::Unlink( bool iRestore )
 {
     mVertex[0]->RemoveSection( this, 0 );
     mVertex[1]->RemoveSection( this, 1 );
+
+    if( iRestore )
+    {
+        mVertex[0] = mOriginalVertex[0];
+        mVertex[1] = mOriginalVertex[1];
+    }
 
     mFlags &= (~LINKED);
 }

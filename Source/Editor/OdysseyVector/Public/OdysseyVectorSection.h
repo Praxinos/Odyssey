@@ -91,7 +91,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         ::ULIS::FVec2D& GetVector( uint32 iVertexIndex );
         bool IsLinked();
         void Link();
-        void Unlink();
+        void Unlink( bool iRestore  );
         FOdysseyVectorCycle* GetCycle( uint32 iCycleID );
         void AddCycle( FOdysseyVectorCycle* iCycle );
         FOdysseyVectorCycle* GetOtherCycle( FOdysseyVectorCycle* iCycle );

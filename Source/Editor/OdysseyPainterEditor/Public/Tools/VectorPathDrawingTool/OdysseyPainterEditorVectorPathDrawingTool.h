@@ -159,6 +159,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         bool Debug;
 
     private:
+        uint64 mTimeAtDown;
+        uint64 mTimeAtUp;
         std::vector<FOdysseyVectorVertex*> mAddedVertexArray;
         std::vector<FOdysseyVectorSegment*> mAddedSegmentArray;
         FOdysseyPainterEditorVectorPathDrawingToolHUD* mPathDrawingHUD;

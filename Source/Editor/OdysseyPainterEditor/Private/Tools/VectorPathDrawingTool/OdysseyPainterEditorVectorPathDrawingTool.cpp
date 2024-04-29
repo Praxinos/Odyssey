@@ -10,7 +10,7 @@
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
-
+#include "GenericPlatform/GenericPlatformTime.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -205,6 +205,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
     mPathTracer.Reset();
     mStitchedVertex = nullptr;
+
+    mTimeAtDown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -407,9 +409,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
+    ::ULIS::FVec2D* snapLocalCoords = nullptr;
+    ::ULIS::FVec2D vertexLocalCoords;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint32 imgW = vectorEngine->GetPreferredWidth(),
            imgH = vectorEngine->GetPreferredHeight();
+
+    mTimeAtUp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton)
@@ -428,13 +434,46 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
             // check for hovered segment before the new segment is added
             if( Snap )
             {
-                // check if we picked any segment
-                PickSegments( iScene
-                            , iPointInTexture.x
-                            , iPointInTexture.y
-                            , StitchingRadius
-                            , false
-                            , pickedSegmentArray );
+                if( endingVertex )
+                {
+                    ::ULIS::FVec2D vertexWorldCoords = endingVertex->GetWorldCoords();
+                    BLMatrix2D& inverseWorldMatrix = path->GetInverseWorldMatrix();
+                    BLPoint localPoint = inverseWorldMatrix.mapPoint( vertexWorldCoords.x
+                                                                    , vertexWorldCoords.y );
+
+                    vertexLocalCoords = ::ULIS::FVec2D( localPoint.x, localPoint.y );
+
+                    snapLocalCoords = &vertexLocalCoords;
+                }
+                else
+                {
+                    // don't snap when the user does small strokes.
+                    if( ( mTimeAtUp - mTimeAtDown ) > 200 )
+                    {
+                        // check if we picked any segment
+                        FOdysseyVectorSegment* closestSegment = PickSegments( iScene
+                                                                            , iPointInTexture.x
+                                                                            , iPointInTexture.y
+                                                                            , 10
+                                                                            , false
+                                                                            , true
+                                                                            , pickedSegmentArray );
+
+                        if( closestSegment )
+                        {
+                            FOdysseyVectorSegment* pickedSegment = pickedSegmentArray[0];
+                            BLMatrix2D& inverseWorldMatrix = pickedSegment->GetOwner()->GetInverseWorldMatrix();
+                            BLPoint localPoint = inverseWorldMatrix.mapPoint( iPointInTexture.x
+                                                                            , iPointInTexture.y );
+                                                                         
+                            double projectedPointT = pickedSegment->ProjectConstrained( ::ULIS::FVec2D( localPoint.x
+                                                                                                      , localPoint.y )
+                                                                                        , vertexLocalCoords );
+
+                            snapLocalCoords = &vertexLocalCoords;
+                        }
+                    }
+                }
             }
 
             // stitching to another path at MouseUp is CURRENTLY not supported
@@ -443,27 +482,18 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 endingVertex = nullptr;
             }
 
-            newSegment = mPathTracer.Flush( mStitchedVertex, endingVertex );
+            newSegment = mPathTracer.Flush( mStitchedVertex, Stitch ? endingVertex : nullptr );
 
             if( newSegment )
             {
+                if( snapLocalCoords )
+                {
+                    newSegment->GetVertex(1)->Set( *snapLocalCoords );
+                }
+
                 if( endingVertex == nullptr )
                 {
                     mAddedVertexArray.push_back( newSegment->GetVertex(1) );
-
-                    for( FOdysseyVectorSegment* pickedSegment : pickedSegmentArray )
-                    {
-                        BLPoint point = pickedSegment->GetOwner()->GetInverseWorldMatrix().mapPoint( iPointInTexture.x
-                                                                                                    , iPointInTexture.y );
-                        ::ULIS::FVec2D projectedPoint;
-                        double projectedPointT = pickedSegment->ProjectConstrained( ::ULIS::FVec2D( point.x
-                                                                                                  , point.y )
-                                                                                    , projectedPoint );
-
-                        newSegment->GetVertex(1)->Set( projectedPoint );
-
-                        break;
-                    }
                 }
 
                 mAddedSegmentArray.push_back( newSegment );

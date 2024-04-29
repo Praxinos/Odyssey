@@ -966,6 +966,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                 , iPointInTexture.y
                                 , PickingRadius
                                 , true
+                                , false
                                 , pickedSegmentArray );
 
                     if( pickedSegmentArray.size() )
