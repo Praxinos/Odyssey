@@ -12,10 +12,16 @@ struct FMovieSceneCameraCutParams;
 
 namespace UE::MovieScene
 {
+    struct FCameraCutPlaybackCapability;
+    struct FSequenceInstance;
+}
 
-struct FCameraCutPlaybackCapability;
+namespace UE::EposMovieScene
+{
+
 struct FPreAnimatedCameraCutStorage;
-struct FSequenceInstance;
+
+using namespace UE::MovieScene;
 
 /** Pre-animated view target info */
 struct FPreAnimatedCameraCutState

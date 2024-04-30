@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "TrackInstances/MovieSceneCameraCutViewportPreviewer.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutViewportPreviewer.h"
 
 #if WITH_EDITOR
 
@@ -8,10 +8,12 @@
 #include "IMovieScenePlayer.h"
 #include "LevelEditorViewport.h"
 #include "MovieSceneCommonHelpers.h"
-#include "TrackInstances/MovieSceneCameraCutEditorHandler.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutEditorHandler.h"
 
-namespace UE::MovieScene
+namespace UE::EposMovieScene
 {
+
+using namespace UE::MovieScene;
 
 void FCameraCutViewportPreviewerTarget::Get(FLevelEditorViewportClient* InClient, FVector& OutLocation, FRotator& OutRotation, float& OutFOV) const
 {

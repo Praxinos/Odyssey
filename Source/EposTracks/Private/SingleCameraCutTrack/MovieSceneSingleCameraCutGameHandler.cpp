@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "TrackInstances/MovieSceneCameraCutGameHandler.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutGameHandler.h"
 
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
@@ -14,10 +14,12 @@
 #include "IMovieScenePlayer.h"
 #include "MovieSceneCommonHelpers.h"
 #include "Systems/MovieSceneMotionVectorSimulationSystem.h"
-#include "TrackInstances/MovieSceneCameraCutTrackInstance.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 
-namespace UE::MovieScene
+namespace UE::EposMovieScene
 {
+
+using namespace UE::MovieScene;
 
 bool FPreAnimatedCameraCutTraits::ShouldHandleWorldCameraCuts(UWorld* World)
 {

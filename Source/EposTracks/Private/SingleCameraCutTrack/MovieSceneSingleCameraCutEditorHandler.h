@@ -17,11 +17,17 @@ struct FMovieSceneCameraCutParams;
 
 namespace UE::MovieScene
 {
+    struct FCameraCutPlaybackCapability;
+    struct FPreAnimatedCameraCutEditorStorage;
+    struct FSequenceInstance;
+}
+
+namespace UE::EposMovieScene
+{
 
 class FCameraCutViewportPreviewer;
-struct FCameraCutPlaybackCapability;
-struct FPreAnimatedCameraCutEditorStorage;
-struct FSequenceInstance;
+
+using namespace UE::MovieScene;
 
 /** Pre-animated editor viewpoint */
 struct FPreAnimatedCameraCutEditorState
@@ -43,13 +49,23 @@ struct FPreAnimatedCameraCutEditorTraits : FPreAnimatedStateTraits
 
 	void RestorePreAnimatedValue(KeyType InKey, const StorageType& CachedValue, const FRestoreStateParams& Params);
 };
+}
 
+// I don't know how to include this part directly inside the main namespace UE::EposMovieScene, so split namespace...
+namespace UE::MovieScene
+{
 // Make it possible to declare our storage below with a forward-declared FLevelEditorViewportClient.
 template<>
 struct THasAddReferencedObjectForComponent<FLevelEditorViewportClient*>
 {
 	static constexpr bool Value = false;
 };
+}
+
+namespace UE::EposMovieScene
+{
+
+using namespace UE::MovieScene;
 
 /** Pre-animated state storage for in-editor camera cuts */
 struct FPreAnimatedCameraCutEditorStorage : TPreAnimatedStateStorage<FPreAnimatedCameraCutEditorTraits>

@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "TrackInstances/MovieSceneCameraCutEditorHandler.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutEditorHandler.h"
 #include "Engine/EngineTypes.h"
 
 #if WITH_EDITOR
@@ -9,11 +9,13 @@
 #include "IMovieScenePlayer.h"
 #include "LevelEditorViewport.h"
 #include "Systems/MovieSceneMotionVectorSimulationSystem.h"
-#include "TrackInstances/MovieSceneCameraCutTrackInstance.h"
-#include "TrackInstances/MovieSceneCameraCutViewportPreviewer.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutViewportPreviewer.h"
 
-namespace UE::MovieScene
+namespace UE::EposMovieScene
 {
+
+using namespace UE::MovieScene;
 
 bool FPreAnimatedCameraCutEditorTraits::ShouldHandleViewportCameraCuts(UWorld* ViewportWorld)
 {
