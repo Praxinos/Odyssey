@@ -822,9 +822,10 @@ ShotSequenceHelpers::FindOrCreateMaterialDrawingTrackAndSections( IMovieScenePla
         UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieScenePrimitiveMaterialTrack::StaticClass(), result.mPlaneComponentBinding );
         result.mTrack = Cast<UMovieScenePrimitiveMaterialTrack>( track );
 
-        result.mTrack->SetMaterialIndex( 0 ); //TODO: iMaterialTrackIndex;
+        FComponentMaterialInfo material_info = { FName(), 0, EComponentMaterialType::IndexedMaterial }; //TODO: iMaterialTrackIndex;
+        result.mTrack->SetMaterialInfo( material_info );
 #if WITH_EDITORONLY_DATA
-        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialIndex() ) ) );
+        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "IndexedMaterialSwitcherTrackName", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialInfo().MaterialSlotIndex ) ) );
 #endif
     }
 
@@ -1092,9 +1093,10 @@ ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieSceneP
         UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieSceneComponentMaterialTrack::StaticClass(), result.mPlaneComponentBinding );
         result.mTrack = Cast<UMovieSceneComponentMaterialTrack>( track );
 
-        result.mTrack->SetMaterialIndex( 0 ); //TODO: iMaterialTrackIndex;
+        FComponentMaterialInfo material_info = { FName(), 0, EComponentMaterialType::IndexedMaterial }; //TODO: iMaterialTrackIndex;
+        result.mTrack->SetMaterialInfo( material_info );
 #if WITH_EDITORONLY_DATA
-        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialIndex() ) ) );
+        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "IndexedMaterialSwitcherTrackName", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialInfo().MaterialSlotIndex ) ) );
 #endif
     }
 

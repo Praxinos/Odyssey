@@ -4,10 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Misc/Guid.h"
 
 #include "KeyParams.h"
+#include "Misc/Guid.h"
 #include "MovieSceneSequenceID.h"
+#include "Tracks/MovieSceneMaterialTrack.h"
 #include "TransformData.h"
 
 class AActor;
@@ -45,7 +46,7 @@ public:
     static void PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding );
 
 private:
-    static UMovieSceneTrack* CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex = INDEX_NONE );
+    static UMovieSceneTrack* CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, FComponentMaterialInfo iMaterialTrackInfo = FComponentMaterialInfo() );
     //static FGuid CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName );
     static FGuid CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, UActorComponent* iComponent );
     static void CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, const FString& iComponentPath, const FString& iPropertyPath );
