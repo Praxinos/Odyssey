@@ -5,8 +5,11 @@
 
 #include "CoreMinimal.h"
 
+#include "MovieSceneSequenceID.h"
+
 class IDetailsView;
 class ISequencer;
+class UEposMovieSceneSequence;
 class UExportPDFSettings;
 class UPDFDocExportWidget;
 class UMovieSceneSequence;

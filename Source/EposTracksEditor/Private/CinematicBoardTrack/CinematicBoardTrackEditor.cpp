@@ -33,6 +33,7 @@
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
+#include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"

@@ -11,6 +11,8 @@
 
 //---
 
+struct FImportImageSequenceOptions;
+
 struct FImportPanelItem
 {
     const FImportImageSequenceStruct*   mRootStruct;

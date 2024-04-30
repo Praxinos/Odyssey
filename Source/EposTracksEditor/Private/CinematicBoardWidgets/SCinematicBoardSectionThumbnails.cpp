@@ -16,6 +16,7 @@
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
+#include "TimeToPixel.h"
 #include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionThumbnails"

@@ -5,7 +5,7 @@
 
 #include "ISequencer.h"
 
-//#include "EposMovieSceneSequence.h"
+#include "EposMovieSceneSequence.h"
 #include "NamingConvention.h"
 #include "Settings/NamingConventionSettings.h"
 

@@ -335,8 +335,8 @@ FBoardSequenceCustomization::CreateInfoText() const
         // convert to display rate -> substract 1 to get the (inclusive) last frame -> convert back to tick resolution
         stop_sequence_in_sequence = FFrameRate::TransformTime( FFrameRate::TransformTime( stop_sequence_in_sequence, sequence_tick_resolution, sequence_display_rate ).FloorToFrame() - 1, sequence_display_rate, sequence_tick_resolution ).FloorToFrame();
 
-        FFrameNumber start_sequence_in_storyboard = ( start_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseLinearOnly() ).GetFrame();
-        FFrameNumber stop_sequence_in_storyboard = ( stop_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseLinearOnly() ).GetFrame();
+        FFrameNumber start_sequence_in_storyboard = ( start_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
+        FFrameNumber stop_sequence_in_storyboard = ( stop_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
 
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSequence_InStoryboard, start_sequence_in_storyboard );
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSequence_InStoryboard, stop_sequence_in_storyboard );
@@ -359,8 +359,8 @@ FBoardSequenceCustomization::CreateInfoText() const
         FFrameNumber start_subsequence_in_subsequence = board_subsection ? start_subsequence_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
         FFrameNumber stop_subsequence_in_subsequence = board_subsection ? stop_subsequence_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
 
-        FFrameNumber start_subsequence_in_storyboard = ( start_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseLinearOnly() ).GetFrame();
-        FFrameNumber stop_subsequence_in_storyboard = ( stop_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseLinearOnly() ).GetFrame();
+        FFrameNumber start_subsequence_in_storyboard = ( start_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
+        FFrameNumber stop_subsequence_in_storyboard = ( stop_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
 
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InStoryboard, start_subsequence_in_storyboard );
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InStoryboard, stop_subsequence_in_storyboard );

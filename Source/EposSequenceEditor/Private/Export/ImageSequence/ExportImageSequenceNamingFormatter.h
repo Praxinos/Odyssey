@@ -5,12 +5,15 @@
 
 #include "CoreMinimal.h"
 
+#include "MovieSceneSequenceID.h"
+
 //---
 
 struct FExportPanel;
 struct FExportImageSequenceOptions;
 struct FExportStruct;
 class ISequencer;
+class UEposMovieSceneSequence;
 class UMovieSceneSequence;
 class UShotSequence;
 

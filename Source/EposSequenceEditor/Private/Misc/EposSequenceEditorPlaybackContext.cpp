@@ -4,6 +4,8 @@
 #include "Misc/EposSequenceEditorPlaybackContext.h"
 #include "Editor.h"
 
+#include "EposMovieSceneSequence.h"
+
 #define LOCTEXT_NAMESPACE "EposSequenceEditorPlaybackContext"
 
 FEposSequenceEditorPlaybackContext::FEposSequenceEditorPlaybackContext( UEposMovieSceneSequence* iEposSequence )

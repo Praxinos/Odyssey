@@ -5,8 +5,11 @@
 
 #include "CoreMinimal.h"
 
+#include "MovieSceneSequenceID.h"
+
 class IDetailsView;
 class ISequencer;
+template<typename ItemType> class STileView;
 class UEposMovieSceneSequence;
 class UExportImageSequenceSettings;
 class UExportImageSequenceUISettings;

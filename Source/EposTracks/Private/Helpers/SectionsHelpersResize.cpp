@@ -6,6 +6,8 @@
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSection.h"
 
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
+
 //---
 
 //static

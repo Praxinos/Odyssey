@@ -26,7 +26,9 @@
 #include "Import/ImportImageSequenceConverter.h"
 #include "Import/ImportImageSequenceImporter.h"
 #include "Import/ImportImageSequenceStruct.h"
+#include "PlaneActor.h"
 #include "Settings/EposSequenceEditorSettings.h"
+#include "Shot/ShotSequence.h"
 #include "Tools/EposSequenceTools.h"
 #include "Tools/LighttableTools.h"
 

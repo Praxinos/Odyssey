@@ -1263,7 +1263,7 @@ InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iIn
 {
     TArray<FFrameTime> converted_keys;
 
-    const FMovieSceneSequenceTransform InnerToOuterTransform = iOuterSection->OuterToInnerTransform().InverseLinearOnly();
+    const FMovieSceneSequenceTransform InnerToOuterTransform = iOuterSection->OuterToInnerTransform().InverseNoLooping();
     for( auto key : iInnerKeys )
     {
         const FFrameTime converted_key = key * InnerToOuterTransform;

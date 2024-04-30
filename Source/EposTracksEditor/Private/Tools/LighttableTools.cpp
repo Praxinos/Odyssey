@@ -11,7 +11,9 @@
 #include "MovieSceneSequence.h"
 #include "ISequencer.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
+#include "Sections/MovieSceneSubSection.h"
 
+#include "EposMovieSceneSequence.h"
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "Tools/ResourceAssetTools.h"
