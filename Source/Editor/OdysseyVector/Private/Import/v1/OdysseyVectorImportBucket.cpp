@@ -1,6 +1,7 @@
 #include "Import/v1/OdysseyVectorImport.h"
 #include "Palette/OdysseyPalette.h"
 #include "Engine/ObjectLibrary.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
 
@@ -22,7 +23,7 @@ FOdysseyVectorImportV1::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                     {
                         FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
                         TArray<FAssetData> AssetData;
-                        AssetRegistryModule.Get().GetAssetsByClass(FName("OdysseyPalette"), AssetData, true);
+                        AssetRegistryModule.Get().GetAssetsByClass(UOdysseyPalette::StaticClass()->GetClassPathName(), AssetData, true);
 
                         for (int i = 0; i < AssetData.Num(); i++)
                         {

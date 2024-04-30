@@ -327,8 +327,7 @@ static bool IsPathCommand( const TCHAR* iCommandName )
             return true;
         break;
 
-        default :
-        return false;
+        default: break;
     }
 
     return false;
@@ -397,12 +396,10 @@ TCHAR* FOdysseyVectorImportSVG::PathProcessAttributeDCommand( const TCHAR* iComm
         case TCHAR('A'):
         case TCHAR('a'):
 
-        default:
-            return SkipToNextCommand( iCommandArgs );
-        break;
+        default: break;
     }
 
-    return nullptr;
+    return SkipToNextCommand( iCommandArgs );
 }
 
 bool

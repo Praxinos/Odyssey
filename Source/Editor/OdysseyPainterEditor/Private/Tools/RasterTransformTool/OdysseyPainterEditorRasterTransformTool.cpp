@@ -393,13 +393,9 @@ EOdysseyTransformCapture UOdysseyPainterEditorRasterTransformTool::DetectCapture
     {
         return EOdysseyTransformCapture::Inside;
     }
-    else
-    {  
-        mLastReferenceRotation = GetRotationAngleFromLastReference( iPoint );
-        return EOdysseyTransformCapture::Rotation;
-    }
-
-    return EOdysseyTransformCapture::NoCapture;
+	
+	mLastReferenceRotation = GetRotationAngleFromLastReference( iPoint );
+	return EOdysseyTransformCapture::Rotation;
 }
 
 void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iPosition)

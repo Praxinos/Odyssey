@@ -46,10 +46,10 @@ FOdysseyAnimationConfiguration::GetBackgroundColor() const
 {
     switch(BackgroundColor)
     {
-        default:
         case EOdysseyAnimationBackgroundColor::kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
         case EOdysseyAnimationBackgroundColor::kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
         case EOdysseyAnimationBackgroundColor::kNormal:       return FLinearColor( .5f, .5f, 1.f );
+        default: break;
     }
 
     check(false); //should not be called

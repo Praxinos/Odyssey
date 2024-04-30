@@ -3,6 +3,9 @@
 
 #include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterEllipseSelection.h"
 #include "OdysseyBrushShape.h"
+#include "OdysseyHUDPolygon.h"
+#include "OdysseyMediaRaster.h"
+#include "PainterEditor/OdysseyPainterEditor.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

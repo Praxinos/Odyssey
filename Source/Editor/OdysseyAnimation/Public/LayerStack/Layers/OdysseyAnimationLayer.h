@@ -17,7 +17,7 @@ class FOdysseyAnimationLightTable;
 class UOdysseyAnimation;
 
 UENUM(BlueprintType)
-enum class EOdysseyAnimationLayerImagePostBehaviour
+enum class EOdysseyAnimationLayerImagePostBehaviour : uint8
 {
     None,
     Hold,

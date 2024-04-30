@@ -18,6 +18,7 @@
 #include "RHI.h"
 #include "Async/ParallelFor.h"
 #include "TextureCompiler.h"
+#include "OdysseyPixelFormat.h"
 #include <ULIS>
 
 #ifdef UE_BUILD_DEBUG
@@ -195,9 +196,7 @@ GetRawImageFormatFromTextureSourceFormat(ETextureSourceFormat iFormat)
         case TSF_BGRE8:     return ERawImageFormat::BGRE8;
         case TSF_RGBA16:    return ERawImageFormat::RGBA16;
         case TSF_RGBA16F:   return ERawImageFormat::RGBA16F;
-        default:
-            //UE_LOG(LogTexture, Fatal, TEXT("Texture %s invalid format."), *InTexture.GetName());
-            return ERawImageFormat::BGRA8;
+        default: break;
     }
     return ERawImageFormat::BGRA8;
 }

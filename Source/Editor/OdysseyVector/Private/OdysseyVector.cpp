@@ -283,7 +283,7 @@ FOdysseyVector::MatrixMultiply( BLMatrix2D& iA, BLMatrix2D& iB, BLMatrix2D& oOut
 void
 FOdysseyVector::PrintMatrix( char* name, BLMatrix2D& matrix )
 {
-    UE_LOG(LogTemp,Warning,TEXT("%s -- M00:%f M01:%f // M10:%f  M11:%f // M20:%f M21:%f"), name, matrix.m00, matrix.m01, matrix.m10, matrix.m11, matrix.m20, matrix.m21 );
+    UE_LOG(LogTemp,Warning,TEXT("%hs -- M00:%f M01:%f // M10:%f  M11:%f // M20:%f M21:%f"), name, matrix.m00, matrix.m01, matrix.m10, matrix.m11, matrix.m20, matrix.m21 );
 }
 
 void

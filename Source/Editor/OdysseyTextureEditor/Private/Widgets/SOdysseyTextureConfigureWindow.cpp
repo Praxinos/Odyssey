@@ -43,10 +43,10 @@ FOdysseyTextureConfiguration::GetBackgroundColor() const
 {
     switch(BackgroundColor)
     {
-        default:
         case EOdysseyTextureBackgroundColor::kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
         case EOdysseyTextureBackgroundColor::kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
         case EOdysseyTextureBackgroundColor::kNormal:       return FLinearColor( .5f, .5f, 1.f );
+		default: break;
     }
 
     check(false); //should not be called

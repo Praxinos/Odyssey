@@ -225,7 +225,7 @@ bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw()
     if( !mTexture )
         return false;
 
-    if (!mExtension->Actor() || !mExtension->Component() || !mExtension->Material() || mExtension->Actor()->IsPendingKill() || mExtension->Component()->IsPendingKill() || mExtension->Material()->IsPendingKill() )
+    if (!IsValid(mExtension->Actor()) || !IsValid(mExtension->Component()) || !IsValid(mExtension->Material()) )
     {
         SetTexture(nullptr);
         return false;

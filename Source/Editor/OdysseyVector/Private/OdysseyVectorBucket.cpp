@@ -151,7 +151,6 @@ bool
 FOdysseyVectorBucket::IsPropagated()
 {
     return bPropagated;
-    return bPropagated;
 }
 
 FColor&
