@@ -20,7 +20,6 @@
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneTimeHelpers.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
-#include "CommonMovieSceneTools.h"
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Editor.h"
 #include "Tracks/MovieScene3DTransformTrack.h"

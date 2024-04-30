@@ -16,7 +16,6 @@
 #include "Widgets/Input/SCheckBox.h"
 #include "EditorStyleSet.h"
 #include "LevelEditorViewport.h"
-#include "CommonMovieSceneTools.h"
 #include "MovieSceneToolHelpers.h"
 #include "FCPXML/FCPXMLMovieSceneTranslator.h"
 #include "LevelSequence.h"

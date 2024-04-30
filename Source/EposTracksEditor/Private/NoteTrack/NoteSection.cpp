@@ -7,7 +7,6 @@
 #include "SequencerSectionPainter.h"
 #include "EditorStyleSet.h"
 #include "ISequencerSection.h"
-#include "CommonMovieSceneTools.h"
 #include "SequencerUtilities.h"
 
 #include "NoteTrack/MovieSceneNoteTrack.h"
