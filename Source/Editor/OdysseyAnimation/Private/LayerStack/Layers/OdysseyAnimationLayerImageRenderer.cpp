@@ -79,6 +79,7 @@ FOdysseyAnimationLayerImageRenderer::Blend(const FOdysseyImageRendererBlendParam
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLayerImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationLayerImageRenderer::Copy);
     TArray<::ULIS::FEvent> clearEvents = Clear(iParams.mBlock, iParams.mRects, iWaitList);
     TArray<::ULIS::FEvent> lastEvent = clearEvents;
     for (const FChildData& childData : mChildrenData)

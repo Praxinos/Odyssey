@@ -106,6 +106,7 @@ IOdysseyImageRenderer::GetRenderType() const
 TArray<::ULIS::FEvent>
 IOdysseyImageRenderer::ConvertAndBlend(TSharedPtr<::ULIS::FBlock> iFront, const ::ULIS::FVec2I& iFrontOffset, const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(IOdysseyImageRenderer::ConvertAndBlend);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iFront->Format());
 
     TArray<::ULIS::FEvent> events;
@@ -194,6 +195,7 @@ IOdysseyImageRenderer::ConvertAndBlend(TSharedPtr<::ULIS::FBlock> iFront, const 
 TArray<::ULIS::FEvent>
 IOdysseyImageRenderer::ConvertAndCopy(TSharedPtr<::ULIS::FBlock> iSrc, const ::ULIS::FVec2I& iSrcOffset, const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(IOdysseyImageRenderer::ConvertAndCopy);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iSrc->Format());
     TArray<::ULIS::FEvent> events;
     ::ULIS::FVec2I pos = iParams.mPos - iSrcOffset;
@@ -260,6 +262,7 @@ IOdysseyImageRenderer::ConvertAndCopy(TSharedPtr<::ULIS::FBlock> iSrc, const ::U
 TArray<::ULIS::FEvent>
 IOdysseyImageRenderer::Clear(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(IOdysseyImageRenderer::Clear);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
     TArray<::ULIS::FEvent> events;
     for ( int i = 0; i < iRects.Num(); i++ )

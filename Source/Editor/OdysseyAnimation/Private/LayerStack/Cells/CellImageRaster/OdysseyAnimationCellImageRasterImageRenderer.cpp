@@ -45,6 +45,7 @@ FOdysseyAnimationCellImageRasterImageRenderer::IsGameThreadOnly()
 TArray<::ULIS::FEvent>
 FOdysseyAnimationCellImageRasterImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {   
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationCellImageRasterImageRenderer::Blend);
     if (!mBlock)
         return iWaitList;
 
@@ -54,6 +55,7 @@ FOdysseyAnimationCellImageRasterImageRenderer::Blend(const FOdysseyImageRenderer
 TArray<::ULIS::FEvent>
 FOdysseyAnimationCellImageRasterImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationCellImageRasterImageRenderer::Copy);
     if (!mBlock)
         return iWaitList;
 

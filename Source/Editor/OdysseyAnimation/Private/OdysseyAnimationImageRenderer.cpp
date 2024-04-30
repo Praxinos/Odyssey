@@ -32,6 +32,7 @@ FOdysseyAnimationImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iP
 TArray<::ULIS::FEvent>
 FOdysseyAnimationImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationImageRenderer::Copy);
     if (!mLayerStackRenderer)
         return iWaitList;
 

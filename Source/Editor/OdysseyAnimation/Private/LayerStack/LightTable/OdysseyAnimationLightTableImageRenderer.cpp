@@ -110,7 +110,8 @@ FOdysseyAnimationLightTableImageRenderer::IsGameThreadOnly()
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLightTableImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
-{   
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationLightTableImageRenderer::Blend);
     TArray<::ULIS::FEvent> events;
     for (const ::ULIS::FRectI& rect : iParams.mRects)
     {

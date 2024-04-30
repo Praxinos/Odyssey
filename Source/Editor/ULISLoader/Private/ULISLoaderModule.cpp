@@ -69,7 +69,7 @@ FULISLoaderModule::GetCurrentThreadData() {
         mThreadsData.Add(
             CurrentThreadId,
             {
-                new ::ULIS::FThreadPool(),
+                threadPool,
                 new ::ULIS::FCommandQueue( *threadPool),
                 new ::ULIS::FFontEngine(),
                 TMap< uint32, ::ULIS::FContext* >()

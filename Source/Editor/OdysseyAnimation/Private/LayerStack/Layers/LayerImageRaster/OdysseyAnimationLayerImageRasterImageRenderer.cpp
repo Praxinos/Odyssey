@@ -46,6 +46,7 @@ FOdysseyAnimationLayerImageRasterImageRenderer::Init()
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLayerImageRasterImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationLayerImageRasterImageRenderer::Blend);
     TArray<::ULIS::FEvent> events = iWaitList;
     if (!mCellRenderer)
         return events;
@@ -74,6 +75,7 @@ FOdysseyAnimationLayerImageRasterImageRenderer::Blend(const FOdysseyImageRendere
 TArray<::ULIS::FEvent>
 FOdysseyAnimationLayerImageRasterImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationLayerImageRasterImageRenderer::Copy);
     if (!mCellRenderer)
         return iWaitList;
         
