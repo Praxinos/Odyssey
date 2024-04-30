@@ -126,6 +126,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         void Print();
         void LinkWithoutStitching();
         void UnlinkWithoutStitching();
+        bool IsGap();
 
     protected:
         FOdysseyVectorObject* mOwner;
@@ -147,4 +148,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
         static const uint32 BLOCKVERTEX1 = ( 1 << 1 );
         static const uint32 LINKED       = ( 1 << 2 );
         static const uint32 ERASED       = ( 1 << 3 );
+        static const uint32 GAP          = ( 1 << 4 );
 };

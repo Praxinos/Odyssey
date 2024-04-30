@@ -409,8 +409,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
-    ::ULIS::FVec2D* snapLocalCoords = nullptr;
-    ::ULIS::FVec2D vertexLocalCoords;
+    ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint32 imgW = vectorEngine->GetPreferredWidth(),
            imgH = vectorEngine->GetPreferredHeight();
@@ -436,14 +435,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
             {
                 if( endingVertex )
                 {
-                    ::ULIS::FVec2D vertexWorldCoords = endingVertex->GetWorldCoords();
-                    BLMatrix2D& inverseWorldMatrix = path->GetInverseWorldMatrix();
-                    BLPoint localPoint = inverseWorldMatrix.mapPoint( vertexWorldCoords.x
-                                                                    , vertexWorldCoords.y );
-
-                    vertexLocalCoords = ::ULIS::FVec2D( localPoint.x, localPoint.y );
-
-                    snapLocalCoords = &vertexLocalCoords;
+                    vertexWorldCoords = endingVertex->GetWorldCoords();
                 }
                 else
                 {
@@ -454,7 +446,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                         FOdysseyVectorSegment* closestSegment = PickSegments( iScene
                                                                             , iPointInTexture.x
                                                                             , iPointInTexture.y
-                                                                            , 10
+                                                                            , StitchingRadius
                                                                             , false
                                                                             , true
                                                                             , pickedSegmentArray );
@@ -463,14 +455,16 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                         {
                             FOdysseyVectorSegment* pickedSegment = pickedSegmentArray[0];
                             BLMatrix2D& inverseWorldMatrix = pickedSegment->GetOwner()->GetInverseWorldMatrix();
+                            BLMatrix2D& worldMatrix = pickedSegment->GetOwner()->GetWorldMatrix();
                             BLPoint localPoint = inverseWorldMatrix.mapPoint( iPointInTexture.x
                                                                             , iPointInTexture.y );
-                                                                         
+                            ::ULIS::FVec2D vertexLocalCoords;
                             double projectedPointT = pickedSegment->ProjectConstrained( ::ULIS::FVec2D( localPoint.x
                                                                                                       , localPoint.y )
                                                                                         , vertexLocalCoords );
-
-                            snapLocalCoords = &vertexLocalCoords;
+                            BLPoint worldPoint = worldMatrix.mapPoint( vertexLocalCoords.x
+                                                                     , vertexLocalCoords.y );
+                            vertexWorldCoords = ::ULIS::FVec2D( worldPoint.x, worldPoint.y );
                         }
                     }
                 }
@@ -486,10 +480,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
 
             if( newSegment )
             {
-                if( snapLocalCoords )
-                {
-                    newSegment->GetVertex(1)->Set( *snapLocalCoords );
-                }
+                BLPoint vertexLocalPoint = path->GetInverseWorldMatrix().mapPoint( vertexWorldCoords.x
+                                                                                 , vertexWorldCoords.y );
+
+                // this will snap to the correct location and do nothing in the worst case scenario.
+                newSegment->GetVertex(1)->Set( vertexLocalPoint.x, vertexLocalPoint.y );
 
                 if( endingVertex == nullptr )
                 {

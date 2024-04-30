@@ -62,6 +62,12 @@ FOdysseyVectorSection::GetOwner()
     return mOwner;
 }
 
+bool
+FOdysseyVectorSection::IsGap()
+{
+    return ( mFlags & GAP ) ? true: false;
+}
+
 void
 FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgroup
                            , FOdysseyVectorSegment* iSegment
@@ -174,6 +180,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
         memcpy( mBezier, segmentBezier, sizeof( mBezier ) );
 
         mLength = ::ULIS::FVec2D( mBezier[0] - mBezier[3] ).Distance();
+
+        mFlags |= GAP;
     }
 
     if( mLength > 0.0f )
