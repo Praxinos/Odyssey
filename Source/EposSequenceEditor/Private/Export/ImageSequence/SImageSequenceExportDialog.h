@@ -63,6 +63,6 @@ private:
     float                                           mItemDefaultWidth { 192.f };
     float                                           mItemDefaultHeight { 192.f };
 
-    UExportImageSequenceSettings*                   mExportImageSequenceSettings;
-    UExportImageSequenceUISettings*                 mExportImageSequenceUISettings;
+    TObjectPtr<UExportImageSequenceSettings>        mExportImageSequenceSettings;
+    TObjectPtr<UExportImageSequenceUISettings>      mExportImageSequenceUISettings;
 };

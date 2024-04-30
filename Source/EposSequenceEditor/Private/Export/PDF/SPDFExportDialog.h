@@ -55,7 +55,7 @@ private:
 
     TSharedPtr<IDetailsView>    mDetailsViewExportPDFSettings;
 
-    UExportPDFSettings*         mExportPDFSettings { nullptr };
+    TObjectPtr<UExportPDFSettings>  mExportPDFSettings { nullptr };
 
     UPDFDocExportWidget*        mPDFDocWidget { nullptr };
     //SHorizontalBox::FSlot*      mPDFSlot { nullptr };

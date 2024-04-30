@@ -120,11 +120,11 @@ private:
 
     ETabs mActiveTab;
 
-    UStoryboardSettings*                mStoryboardSettings;
-    UImportImageSequenceSettings*       mImportImageSequenceSettings;
-    UImportImageSequenceUISettings*     mImportImageSequenceUISettings;
-    UNamingConventionSettings*          mNamingConventionSettings;
-    UEposSequenceEditorSettings*        mSequenceEditorSettings;
+    TObjectPtr<UStoryboardSettings>             mStoryboardSettings;
+    TObjectPtr<UImportImageSequenceSettings>    mImportImageSequenceSettings;
+    TObjectPtr<UImportImageSequenceUISettings>  mImportImageSequenceUISettings;
+    TObjectPtr<UNamingConventionSettings>       mNamingConventionSettings;
+    TObjectPtr<UEposSequenceEditorSettings>     mSequenceEditorSettings;
 
     FString                             mImageSequenceImportErrorMessage;
     FImportImageSequenceStruct          mImageSequenceStruct;
