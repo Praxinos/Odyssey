@@ -54,5 +54,13 @@ public class EposTracks : ModuleRules
                 // ... add any modules that your module loads dynamically here ...
             }
             );
+
+        if (Target.bBuildWithEditorOnlyData && Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[]
+                {
+                    "UnrealEd"
+                });
+        }
     }
 }
