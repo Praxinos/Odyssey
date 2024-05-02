@@ -11,6 +11,11 @@
 #include "PolygonShape/OdysseyPolygonShape.h"
 #include "EllipseShape/OdysseyEllipseShape.h"
 #include "BezierShape/OdysseyBezierShape.h"
+#include "PainterEditor/OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyMediaProvider.h"
+#include "OdysseyHUDElement.h"
+#include "OdysseyHUDSystem.h"
 
 #include "UObject/OdysseyObjectEditorUtils.h"
 
