@@ -48,7 +48,7 @@ namespace UE::EposMovieScene
  * Track instance used to animate camera cuts.
  */
 UCLASS()
-class /*EPOSTRACKS_API*/ UMovieSceneSingleCameraCutTrackInstance : public UMovieSceneTrackInstance
+class EPOSTRACKS_API UMovieSceneSingleCameraCutTrackInstance : public UMovieSceneTrackInstance
 {
 	GENERATED_BODY()
 

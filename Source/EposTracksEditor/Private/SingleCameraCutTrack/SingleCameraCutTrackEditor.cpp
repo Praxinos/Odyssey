@@ -3,27 +3,32 @@
 
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
 
-#include "Widgets/SBoxPanel.h"
-#include "ActorTreeItem.h"
-#include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "Modules/ModuleManager.h"
-#include "Application/ThrottleManager.h"
-#include "Widgets/Layout/SBox.h"
-#include "Widgets/Input/SCheckBox.h"
+#include "DragAndDrop/ActorDragDropGraphEdOp.h"
 #include "MovieSceneCommonHelpers.h"
-#include "EditorStyleSet.h"
+#include "MovieSceneObjectBindingIDPicker.h"
+#include "MovieSceneToolHelpers.h"
+#include "SequencerSettings.h"
+#include "MVVM/Views/ViewUtilities.h"
+#include "MVVM/ViewModels/OutlinerColumns/OutlinerColumnTypes.h"
+#include "TrackEditorThumbnail/TrackEditorThumbnailPool.h"
+#include "TrackInstances/MovieSceneCameraCutTrackInstance.h"
+#include "Tracks/MovieSceneCameraCutTrack.h"
+
+#include "ActorEditorUtils.h"
+#include "ActorTreeItem.h"
+#include "Application/ThrottleManager.h"
+#include "Editor.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "GameFramework/WorldSettings.h"
 #include "LevelEditorViewport.h"
 #include "LevelSequence.h"
-#include "SequencerUtilities.h"
-#include "Editor.h"
-#include "ActorEditorUtils.h"
-#include "SceneOutlinerPublicTypes.h"
+#include "Modules/ModuleManager.h"
 #include "SceneOutlinerModule.h"
-#include "TrackEditorThumbnail/TrackEditorThumbnailPool.h"
-#include "MovieSceneObjectBindingIDPicker.h"
-#include "MovieSceneToolHelpers.h"
-#include "DragAndDrop/ActorDragDropGraphEdOp.h"
+#include "SceneOutlinerPublicTypes.h"
+#include "Styling/AppStyle.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/SBoxPanel.h"
 
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
@@ -107,6 +112,12 @@ void FSingleCameraCutTrackEditor::BindCommands(TSharedRef<FUICommandList> Sequen
         Commands.ToggleLockCamera,
         FExecuteAction::CreateSP( this, &FSingleCameraCutTrackEditor::ToggleLockCamera) );
 
+    TSharedPtr<FUICommandList> CurveEditorSharedBindings = GetSequencer()->GetCommandBindings( ESequencerCommandBindings::CurveEditor );
+    if( CurveEditorSharedBindings )
+    {
+        CurveEditorSharedBindings->MapAction( Commands.ToggleLockCamera, *SequencerCommandBindings->GetActionForCommand( Commands.ToggleLockCamera ) );
+    }
+
     Commands.BindingCount++;
 }
 
@@ -141,91 +152,109 @@ void FSingleCameraCutTrackEditor::BuildTrackContextMenu(FMenuBuilder& MenuBuilde
     //  "Edit",
     //  EUserInterfaceActionType::ToggleButton
     //);
+
+    //MenuBuilder.AddMenuEntry(
+    //    LOCTEXT( "AutoArrangeShots", "Auto Arrange" ),
+    //    LOCTEXT( "AutoArrangeShotsTooltip", "Auto-arrange and resize sections to fill gaps." ),
+    //    FSlateIcon(),
+    //    FUIAction(
+    //        FExecuteAction::CreateSP( this, &FCameraCutTrackEditor::HandleToggleAutoArrangeSectionsExecute, CameraCutTrack ),
+    //        FCanExecuteAction::CreateLambda( [=]() { return CameraCutTrack != nullptr; } ),
+    //        FIsActionChecked::CreateLambda( [=]() { return CameraCutTrack->IsAutoManagingSections(); } )
+    //    ),
+    //    "Edit",
+    //    EUserInterfaceActionType::ToggleButton
+    //);
 }
 
 //void FCameraCutTrackEditor::HandleToggleCanBlendExecute(UMovieSceneCameraCutTrack* CameraCutTrack)
 //{
-//  CameraCutTrack->bCanBlend = !CameraCutTrack->bCanBlend;
+//    const FScopedTransaction Transaction( LOCTEXT( "CameraCutTrackSetCanBlend", "Set Camera Cut Track Can Blend" ) );
 //
-//  if (!CameraCutTrack->bCanBlend)
-//  {
-//      // Reset all easing and remove overlaps.
-//      const UMovieScene* FocusedMovieScene = GetFocusedMovieScene();
-//      const FFrameRate TickResolution = FocusedMovieScene->GetTickResolution();
-//      const FFrameRate DisplayRate = FocusedMovieScene->GetDisplayRate();
+//    CameraCutTrack->Modify();
 //
-//      const TArray<UMovieSceneSection*> Sections = CameraCutTrack->GetAllSections();
-//      for (int32 Idx = 1; Idx < Sections.Num(); ++Idx)
-//      {
-//          UMovieSceneSection* CurSection = Sections[Idx];
-//          UMovieSceneSection* PrevSection = Sections[Idx - 1];
+//    CameraCutTrack->bCanBlend = !CameraCutTrack->bCanBlend;
 //
-//          CurSection->Modify();
+//    if( !CameraCutTrack->bCanBlend )
+//    {
+//        CameraCutTrack->RearrangeAllSections();
+//    }
+//}
 //
-//          TRange<FFrameNumber> CurSectionRange = CurSection->GetRange();
-//          TRange<FFrameNumber> PrevSectionRange = PrevSection->GetRange();
-//          const FFrameNumber OverlapOrGap = (PrevSectionRange.GetUpperBoundValue() - CurSectionRange.GetLowerBoundValue());
-//          if (OverlapOrGap > 0)
-//          {
-//              const FFrameTime TimeAtHalfBlend = CurSectionRange.GetLowerBoundValue() + FMath::FloorToInt(OverlapOrGap.Value / 2.f);
-//              const FFrameNumber FrameAtHalfBlend = FFrameRate::Snap(TimeAtHalfBlend, TickResolution, DisplayRate).CeilToFrame();
+//void FCameraCutTrackEditor::HandleToggleAutoArrangeSectionsExecute( UMovieSceneCameraCutTrack* CameraCutTrack )
+//{
+//    const FScopedTransaction Transaction( LOCTEXT( "CameraCutTrackSetAutoArrangeSections", "Set Camera Cut Track Auto Arrange" ) );
 //
-//              PrevSectionRange.SetUpperBoundValue(FrameAtHalfBlend);
-//              PrevSection->SetRange(PrevSectionRange);
+//    CameraCutTrack->Modify();
 //
-//              CurSectionRange.SetLowerBoundValue(FrameAtHalfBlend);
-//              CurSection->SetRange(CurSectionRange);
-//          }
+//    CameraCutTrack->SetIsAutoManagingSections( !CameraCutTrack->IsAutoManagingSections() );
 //
-//          CurSection->Easing.AutoEaseInDuration = 0;
-//          PrevSection->Easing.AutoEaseOutDuration = 0;
-//      }
-//      if (Sections.Num() > 0)
-//      {
-//          Sections[0]->Modify();
-//
-//          Sections[0]->Easing.AutoEaseInDuration = 0;
-//          Sections[0]->Easing.ManualEaseInDuration = 0;
-//          Sections.Last()->Easing.AutoEaseOutDuration = 0;
-//          Sections.Last()->Easing.ManualEaseOutDuration = 0;
-//      }
-//  }
+//    if( CameraCutTrack->IsAutoManagingSections() )
+//    {
+//        CameraCutTrack->RearrangeAllSections();
+//    }
 //}
 
-TSharedPtr<SWidget> FSingleCameraCutTrackEditor::BuildOutlinerEditWidget(const FGuid& ObjectBinding, UMovieSceneTrack* Track, const FBuildEditWidgetParams& Params)
+TSharedPtr<SWidget> FSingleCameraCutTrackEditor::BuildOutlinerColumnWidget( const FBuildColumnWidgetParams& Params, const FName& ColumnName )
 {
-    // Create a container edit box
-    return SNew(SHorizontalBox)
+    using namespace UE::Sequencer;
 
-    // Add the camera combo box
-    + SHorizontalBox::Slot()
-    .AutoWidth()
-    .VAlign(VAlign_Center)
-    [
-        FSequencerUtilities::MakeAddButton(LOCTEXT("SingleCameraCutText", "Camera"), FOnGetContent::CreateSP(this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutComboButtonGetMenuContent), Params.NodeIsHovered, GetSequencer())
-    ]
+    if( ColumnName == FCommonOutlinerNames::Add )
+    {
+        return UE::Sequencer::MakeAddButton(
+            LOCTEXT( "CameraCutText", "Camera" ),
+            FOnGetContent::CreateSP( this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutComboButtonGetMenuContent ),
+            Params.ViewModel );
+    }
 
-    + SHorizontalBox::Slot()
-    .VAlign(VAlign_Center)
-    .HAlign(HAlign_Right)
-    .AutoWidth()
-    .Padding(4, 0, 0, 0)
-    [
-        SNew(SCheckBox)
-        .Style( &FAppStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "ToggleButtonCheckBoxAlt" ) )
-        .Type( ESlateCheckBoxType::CheckBox )
-        .Padding( FMargin( 0.f ) )
-        .IsFocusable( false )
-        .IsChecked( this, &FSingleCameraCutTrackEditor::IsCameraLocked )
-        .OnCheckStateChanged( this, &FSingleCameraCutTrackEditor::OnLockCameraClicked )
-        .ToolTipText( this, &FSingleCameraCutTrackEditor::GetLockCameraToolTip )
-        .CheckedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
-        .CheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
-        .CheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
-        .UncheckedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
-        .UncheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
-        .UncheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
-    ];
+    bool bAddCameraLock = false;
+    if( ColumnName == FCommonOutlinerNames::Nav )
+    {
+        bAddCameraLock = true;
+    }
+    else if( ColumnName == FCommonOutlinerNames::KeyFrame )
+    {
+        // Add the camera lock button to the keyframe column if Nav is disabled
+        bAddCameraLock = Params.TreeViewRow->IsColumnVisible( FCommonOutlinerNames::Nav ) == false;
+    }
+    else if( ColumnName == FCommonOutlinerNames::Edit )
+    {
+        // Add the camera lock button to the edit column if both Nav and KeyFrame are disabled
+        bAddCameraLock = Params.TreeViewRow->IsColumnVisible( FCommonOutlinerNames::Nav ) == false &&
+            Params.TreeViewRow->IsColumnVisible( FCommonOutlinerNames::KeyFrame ) == false;
+    }
+
+    if( bAddCameraLock )
+    {
+        TSharedRef<SWidget> Button = SNew( SCheckBox )
+            .Style( FAppStyle::Get(), "Sequencer.Outliner.ToggleButton" )
+            .Type( ESlateCheckBoxType::ToggleButton )
+            .IsFocusable( false )
+            .IsChecked( this, &FSingleCameraCutTrackEditor::IsCameraLocked )
+            .OnCheckStateChanged( this, &FSingleCameraCutTrackEditor::OnLockCameraClicked )
+            .ToolTipText( this, &FSingleCameraCutTrackEditor::GetLockCameraToolTip )
+            [
+                SNew( SImage )
+                    .Image( FAppStyle::GetBrush( "Sequencer.Outliner.CameraLock" ) )
+            ];
+
+        if( ColumnName == FCommonOutlinerNames::Edit )
+        {
+            // Needs to be left aligned in the edit column because this column slot is set to fill
+            return SNew( SBox )
+                .HAlign( HAlign_Left )
+                .Padding( 4.f, 0.f )
+                [
+                    Button
+                ];
+        }
+        else
+        {
+            return Button;
+        }
+    }
+
+    return FMovieSceneTrackEditor::BuildOutlinerColumnWidget( Params, ColumnName );;
 }
 
 
@@ -577,27 +606,21 @@ ECheckBoxState FSingleCameraCutTrackEditor::IsCameraLocked() const
 
 void FSingleCameraCutTrackEditor::OnLockCameraClicked(ECheckBoxState CheckBoxState)
 {
-    if (CheckBoxState == ECheckBoxState::Checked)
+    TSharedPtr<ISequencer> SequencerPtr = GetSequencer();
+
+    const bool bEnableCameraCuts = ( CheckBoxState == ECheckBoxState::Checked );
+    SequencerPtr->SetPerspectiveViewportCameraCutEnabled( bEnableCameraCuts );
+
+    bool bNeedsRestoreViewport = true;
+    if( const USequencerSettings* SequencerSettings = SequencerPtr->GetSequencerSettings() )
     {
-        for(FLevelEditorViewportClient* LevelVC : GEditor->GetLevelViewportClients())
-        {
-            if (LevelVC && LevelVC->AllowsCinematicControl() && LevelVC->GetViewMode() != VMI_Unknown)
-            {
-                LevelVC->SetActorLock(nullptr);
-                LevelVC->bLockedCameraView = false;
-                LevelVC->UpdateViewForLockedActor();
-                LevelVC->Invalidate();
-            }
-        }
-        GetSequencer()->SetPerspectiveViewportCameraCutEnabled(true);
-    }
-    else
-    {
-        GetSequencer()->UpdateCameraCut(nullptr, EMovieSceneCameraCutParams());
-        GetSequencer()->SetPerspectiveViewportCameraCutEnabled(false);
+        bNeedsRestoreViewport = SequencerSettings->GetRestoreOriginalViewportOnCameraCutUnlock();
     }
 
-    GetSequencer()->ForceEvaluate();
+    UMovieSceneEntitySystemLinker* Linker = SequencerPtr->GetEvaluationTemplate().GetEntitySystemLinker();
+    UMovieSceneCameraCutTrackInstance::ToggleCameraCutLock( Linker, bEnableCameraCuts, bNeedsRestoreViewport );
+
+    SequencerPtr->ForceEvaluate();
 }
 
 void FSingleCameraCutTrackEditor::ToggleLockCamera()
