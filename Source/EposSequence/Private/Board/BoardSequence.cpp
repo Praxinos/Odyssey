@@ -20,6 +20,8 @@
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
 #include "Tracks/MovieSceneSkeletalAnimationTrack.h"
+#include "SubObjectLocator.h"
+#include "UniversalObjectLocators/ActorLocatorFragment.h"
 
 #include "Board/BoardHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -55,7 +57,30 @@ void UBoardSequence::PostLoad()
 {
     Super::PostLoad();
 
-#if WITH_EDITOR             //TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ActorsBindingIdToReferences
+    for( TPair< FGuid, FLevelSequenceBindingReference > pair : ActorsBindingIdToReferences_DEPRECATED )
+    {
+        FLevelSequenceBindingReference legacy_ref = pair.Value;
+
+        if( legacy_ref.ExternalObjectPath.IsNull() )
+        {
+            // Make a copy and add the object path
+            FUniversalObjectLocator NewLocator;
+            NewLocator.AddFragment<FSubObjectLocator>( MoveTemp( legacy_ref.ObjectPath ) );
+
+            BindingReferences.FMovieSceneBindingReferences::AddBinding( pair.Key, MoveTemp( NewLocator ) );
+        }
+        else
+        {
+            FUniversalObjectLocator NewLocator;
+            NewLocator.AddFragment<FActorLocatorFragment>( MoveTemp( legacy_ref.ExternalObjectPath ) );
+
+            BindingReferences.FMovieSceneBindingReferences::AddBinding( pair.Key, MoveTemp( NewLocator ) );
+        }
+    }
+
+    ActorsBindingIdToReferences_DEPRECATED.Empty();
+
+#if WITH_EDITOR
 #endif
 }
 

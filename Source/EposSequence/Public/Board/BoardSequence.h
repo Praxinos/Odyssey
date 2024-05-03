@@ -8,6 +8,7 @@
 #include "UObject/SoftObjectPtr.h"
 
 #include "Board/BoardSequenceBindingReference.h"
+#include "LevelSequenceBindingReference.h"
 #include "SequenceNameElements.h"
 
 #include "BoardSequence.generated.h"
@@ -64,6 +65,8 @@ public:
 
     UPROPERTY()
     FBoardSequenceBindingReferences BindingReferences;
+    UPROPERTY()
+    TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences_DEPRECATED;
 
     UPROPERTY(EditAnywhere, Category=NamingConvention)
     FBoardNameElements NameElements;

@@ -7,6 +7,7 @@
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
 
+#include "LevelSequenceBindingReference.h"
 #include "Shot/ShotSequenceBindingReference.h"
 #include "SequenceNameElements.h"
 
@@ -69,6 +70,13 @@ public:
     FShotSequenceBindingReferences PlanesBindingReferences;
     UPROPERTY()
     FShotSequenceBindingReferences ActorsBindingReferences;
+
+    UPROPERTY()
+    TMap< FGuid, FLevelSequenceBindingReference > CameraBindingIdToReferences_DEPRECATED;
+    UPROPERTY()
+    TMap< FGuid, FLevelSequenceBindingReference > PlanesBindingIdToReferences_DEPRECATED;
+    UPROPERTY()
+    TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences_DEPRECATED;
 
     UPROPERTY(EditAnywhere, Category=NamingConvention)
     FShotNameElements NameElements;

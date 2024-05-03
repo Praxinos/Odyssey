@@ -22,8 +22,9 @@
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
 #include "Tracks/MovieSceneSkeletalAnimationTrack.h"
-//#include "UniversalObjectLocators/ActorLocatorFragment.h"
 #include "UObject/AssetRegistryTagsContext.h"
+#include "SubObjectLocator.h"
+#include "UniversalObjectLocators/ActorLocatorFragment.h"
 
 #include "Board/BoardHelpers.h"
 #include "EposSequenceModule.h"
@@ -59,7 +60,76 @@ void UShotSequence::PostLoad()
 {
     Super::PostLoad();
 
-#if WITH_EDITOR             //TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ActorsBindingIdToReferences
+    for( TPair< FGuid, FLevelSequenceBindingReference > pair : CameraBindingIdToReferences_DEPRECATED )
+    {
+        FLevelSequenceBindingReference legacy_ref = pair.Value;
+
+        if( legacy_ref.ExternalObjectPath.IsNull() )
+        {
+            // Make a copy and add the object path
+            FUniversalObjectLocator NewLocator;
+            NewLocator.AddFragment<FSubObjectLocator>( MoveTemp( legacy_ref.ObjectPath ) );
+
+            CameraBindingReferences.FMovieSceneBindingReferences::AddBinding( pair.Key, MoveTemp( NewLocator ) );
+        }
+        else
+        {
+            FUniversalObjectLocator NewLocator;
+            NewLocator.AddFragment<FActorLocatorFragment>( MoveTemp( legacy_ref.ExternalObjectPath ) );
+
+            CameraBindingReferences.FMovieSceneBindingReferences::AddBinding( pair.Key, MoveTemp( NewLocator ) );
+        }
+    }
+
+    CameraBindingIdToReferences_DEPRECATED.Empty();
+    
+    for( TPair< FGuid, FLevelSequenceBindingReference > pair : PlanesBindingIdToReferences_DEPRECATED )
+    {
+        FLevelSequenceBindingReference legacy_ref = pair.Value;
+
+        if( legacy_ref.ExternalObjectPath.IsNull() )
+        {
+            // Make a copy and add the object path
+            FUniversalObjectLocator NewLocator;
+            NewLocator.AddFragment<FSubObjectLocator>( MoveTemp( legacy_ref.ObjectPath ) );
+
+            PlanesBindingReferences.FMovieSceneBindingReferences::AddBinding( pair.Key, MoveTemp( NewLocator ) );
+        }
+        else
+        {
+            FUniversalObjectLocator NewLocator;
+            NewLocator.AddFragment<FActorLocatorFragment>( MoveTemp( legacy_ref.ExternalObjectPath ) );
+
+            PlanesBindingReferences.FMovieSceneBindingReferences::AddBinding( pair.Key, MoveTemp( NewLocator ) );
+        }
+    }
+
+    PlanesBindingIdToReferences_DEPRECATED.Empty();
+    
+    for( TPair< FGuid, FLevelSequenceBindingReference > pair : ActorsBindingIdToReferences_DEPRECATED )
+    {
+        FLevelSequenceBindingReference legacy_ref = pair.Value;
+
+        if( legacy_ref.ExternalObjectPath.IsNull() )
+        {
+            // Make a copy and add the object path
+            FUniversalObjectLocator NewLocator;
+            NewLocator.AddFragment<FSubObjectLocator>( MoveTemp( legacy_ref.ObjectPath ) );
+
+            ActorsBindingReferences.FMovieSceneBindingReferences::AddBinding( pair.Key, MoveTemp( NewLocator ) );
+        }
+        else
+        {
+            FUniversalObjectLocator NewLocator;
+            NewLocator.AddFragment<FActorLocatorFragment>( MoveTemp( legacy_ref.ExternalObjectPath ) );
+
+            ActorsBindingReferences.FMovieSceneBindingReferences::AddBinding( pair.Key, MoveTemp( NewLocator ) );
+        }
+    }
+
+    ActorsBindingIdToReferences_DEPRECATED.Empty();
+
+#if WITH_EDITOR
 #endif
 }
 
