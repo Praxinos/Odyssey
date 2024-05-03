@@ -23,6 +23,7 @@
 #include "Tracks/MovieSceneAudioTrack.h"
 #include "Tracks/MovieSceneSkeletalAnimationTrack.h"
 //#include "UniversalObjectLocators/ActorLocatorFragment.h"
+#include "UObject/AssetRegistryTagsContext.h"
 
 #include "Board/BoardHelpers.h"
 #include "EposSequenceModule.h"
@@ -260,9 +261,9 @@ FText UShotSequence::GetDisplayName() const
     return FText::FromString( name );
 }
 
-void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const
+void UShotSequence::GetAssetRegistryTags( FAssetRegistryTagsContext ioContext ) const
 {
-    Super::GetAssetRegistryTags( OutTags );
+    Super::GetAssetRegistryTags( ioContext );
 
     if( CameraBindingReferences.GetAllReferences().Num() )
     {
@@ -280,12 +281,11 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
             }
         }
 
-        FAssetRegistryTag Tag( "Camera", value, FAssetRegistryTag::TT_Alphabetical );
-        OutTags.Add( Tag );
+        ioContext.AddTag( { "Camera", value, FAssetRegistryTag::TT_Alphabetical } );
     }
     else
     {
-        OutTags.Emplace( "Camera", "(None)", FAssetRegistryTag::TT_Alphabetical );
+        ioContext.AddTag( { "Camera", "(None)", FAssetRegistryTag::TT_Alphabetical } );
     }
 
     if( PlanesBindingReferences.GetAllReferences().Num() )
@@ -301,13 +301,11 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
             }
         }
 
-        FAssetRegistryTag Tag( "Planes", FString::FromInt( plane_count ), FAssetRegistryTag::TT_Alphabetical );
-        //FAssetRegistryTag Tag( "Planes", FString::FromInt( PlanesBindingIdToReferences.Num() ), FAssetRegistryTag::TT_Alphabetical );
-        OutTags.Add( Tag );
+        ioContext.AddTag( { "Planes", FString::FromInt( plane_count ), FAssetRegistryTag::TT_Alphabetical } );
     }
     else
     {
-        OutTags.Emplace( "Planes", "(0)", FAssetRegistryTag::TT_Alphabetical );
+        ioContext.AddTag( { "Planes", "(0)", FAssetRegistryTag::TT_Alphabetical } );
     }
 
     if( ActorsBindingReferences.GetAllReferences().Num() )
@@ -323,13 +321,11 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
             }
         }
 
-        FAssetRegistryTag Tag( "Actors", FString::FromInt( actor_count ), FAssetRegistryTag::TT_Alphabetical );
-        //FAssetRegistryTag Tag( "Actors", FString::FromInt( ActorsBindingIdToReferences.Num() ), FAssetRegistryTag::TT_Alphabetical );
-        OutTags.Add( Tag );
+        ioContext.AddTag( { "Actors", FString::FromInt( actor_count ), FAssetRegistryTag::TT_Alphabetical } );
     }
     else
     {
-        OutTags.Emplace( "Actors", "(0)", FAssetRegistryTag::TT_Alphabetical );
+        ioContext.AddTag( { "Actors", "(0)", FAssetRegistryTag::TT_Alphabetical } );
     }
 }
 

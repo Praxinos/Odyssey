@@ -48,7 +48,7 @@ public:
     virtual FText GetDisplayName() const override;
 //
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
-    virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
+    virtual void GetAssetRegistryTags( FAssetRegistryTagsContext ioContext ) const override;
 #endif
 
     //~ UEposMovieSceneSequence interface
