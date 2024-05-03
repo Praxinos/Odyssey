@@ -12,6 +12,7 @@
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 #include "MovieScene.h"
+#include "MovieSceneBindingReferences.h"
 #include "MovieSceneMediaTrack.h"
 #include "MovieSceneTimeHelpers.h"
 #include "NiagaraActor.h"
@@ -21,6 +22,7 @@
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
 #include "Tracks/MovieSceneSkeletalAnimationTrack.h"
+//#include "UniversalObjectLocators/ActorLocatorFragment.h"
 
 #include "Board/BoardHelpers.h"
 #include "EposSequenceModule.h"
@@ -52,6 +54,30 @@ void UShotSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
     MovieScene->SetDisplayRate( iDisplayRate );
 }
 
+void UShotSequence::PostLoad()
+{
+    Super::PostLoad();
+
+#if WITH_EDITOR             //TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ActorsBindingIdToReferences
+#endif
+}
+
+const FMovieSceneBindingReferences* UShotSequence::GetBindingReferences() const //override
+{
+    // For the moment, don't use GetBindingReferences()
+    // because in this case, BindPossessableObject() won't be called in the FSequencerUtilities::CreateBinding()#2650
+    // as CreateGenericBinding() will be called instead of CreateImplementationDefinedBinding()
+    //
+    // and when CreateGenericBinding() is used, FMovieSceneBindingReferences::AddBinding() is called directly (without BindPossessableObject())
+    // so the check of possible possessables object (Camera/Plane/...) must be done there
+    // (No, because FMovieSceneBindingReferences::AddBinding() is not virtual...)
+    //
+    // (If GetBindingReferences() is not used (aka return nullptr), LocateBoundObjects() is required)
+    return nullptr;
+
+    //return &BindingReferences;
+}
+
 void UShotSequence::BindPossessableObject( const FGuid& ObjectId, UObject& PossessedObject, UObject* Context )
 {
     if( !CanPossessObject( PossessedObject, Context ) )
@@ -68,34 +94,71 @@ void UShotSequence::BindPossessableObject( const FGuid& ObjectId, UObject& Posse
         // If it exists, it was added by FSequencer::CreateBinding()#1083, and then, juste remove everything about camera
         if( possessable )
         {
-            for( auto It = CameraBindingIdToReferences.CreateConstIterator(); It; ++It )
+            // Temporary reference ids, otherwise UnbindPossessableObjects() modify CameraBindingReferences
+            TArray<FGuid> old_references;
+            for( const FMovieSceneBindingReference& reference : CameraBindingReferences.GetAllReferences() )
             {
-                FGuid binding = It.Key();
-                //FLevelSequenceBindingReference reference = It.Value();
-
-                MovieScene->RemovePossessable( binding );
-                UnbindPossessableObjects( binding );
+                old_references.Add( reference.ID );
+            }
+            for( FGuid reference_id : old_references )
+            {
+                MovieScene->RemovePossessable( reference_id );
+                UnbindPossessableObjects( reference_id );
             }
 
-            check( !CameraBindingIdToReferences.Num() );
+            check( CameraBindingReferences.GetAllReferences().IsEmpty() );
+
+            //for( const FMovieSceneBindingReference& reference : BindingReferences.GetAllReferences() )
+            //{
+            //    const FUniversalObjectLocatorFragment* fragment = reference.Locator.GetLastFragment();
+            //    const UE::UniversalObjectLocator::FFragmentType* fragment_type = reference.Locator.GetLastFragmentType();
+            //    //fragment_type->FragmentTypeID
+            //    const void* payload = fragment->GetPayload();
+            //    const FActorLocatorFragment* p = fragment->GetPayloadAs( FActorLocatorFragment::FragmentType );
+            //    UObject* object = p->Path.ResolveObject();
+
+
+            //    UObject* object = reference.Locator.SyncFind( nullptr ); // nullptr ?????????????????
+            //    //UE::UniversalObjectLocator::FResolveResult result = reference.Locator.Resolve(
+            //    if( !object )
+            //        continue;
+
+            //    if( object->IsA<ACineCameraActor>() )
+            //    {
+            //        MovieScene->RemovePossessable( reference.ID );
+            //        UnbindPossessableObjects( reference.ID );
+            //    }
+            //}
         }
         // Otherwise it comes from (at least) FSequencer::DoAssignActor()#7611,
         // and in this case, just add the new camera and let this function update everything to keep all existing components and remove the old one
 
-        CameraBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
+        if( Context )
+        {
+            CameraBindingReferences.AddBinding( ObjectId, &PossessedObject, Context );
+        }
     }
     else if( PossessedObject.IsA<UActorComponent>() && PossessedObject.GetTypedOuter<ACineCameraActor>() )
     {
-        CameraBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
+        if( Context )
+        {
+            CameraBindingReferences.AddBinding( ObjectId, &PossessedObject, Context );
+        }
     }
     else if( PossessedObject.IsA<APlaneActor>()
              || PossessedObject.IsA<UActorComponent>() && PossessedObject.GetTypedOuter<APlaneActor>() )
     {
-        PlanesBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
+        if( Context )
+        {
+            PlanesBindingReferences.AddBinding( ObjectId, &PossessedObject, Context );
+        }
     }
     else
     {
-        ActorsBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
+        if( Context )
+        {
+            ActorsBindingReferences.AddBinding( ObjectId, &PossessedObject, Context );
+        }
     }
 }
 
@@ -119,36 +182,9 @@ bool UShotSequence::CanRebindPossessable( const FMovieScenePossessable& InPosses
 
 void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects ) const
 {
-    const FLevelSequenceBindingReference* Reference = CameraBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( ResolvedObject && ResolvedObject->GetWorld() )
-        {
-            OutObjects.Add( ResolvedObject );
-        }
-        return;
-    }
-
-    Reference = PlanesBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( ResolvedObject && ResolvedObject->GetWorld() )
-        {
-            OutObjects.Add( ResolvedObject );
-        }
-    }
-
-    Reference = ActorsBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( ResolvedObject && ResolvedObject->GetWorld() )
-        {
-            OutObjects.Add( ResolvedObject );
-        }
-    }
+    CameraBindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
+    PlanesBindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
+    ActorsBindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
 }
 
 UMovieScene* UShotSequence::GetMovieScene() const
@@ -168,87 +204,23 @@ UObject* UShotSequence::GetParentObject( UObject* Object ) const
 
 void UShotSequence::UnbindPossessableObjects( const FGuid& ObjectId )
 {
-    CameraBindingIdToReferences.Remove( ObjectId );
-    PlanesBindingIdToReferences.Remove( ObjectId );
-    ActorsBindingIdToReferences.Remove( ObjectId );
+    CameraBindingReferences.RemoveBinding( ObjectId );
+    PlanesBindingReferences.RemoveBinding( ObjectId );
+    ActorsBindingReferences.RemoveBinding( ObjectId );
 }
 
 void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context )
 {
-    FLevelSequenceBindingReference* Reference = CameraBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( InObjects.Contains( ResolvedObject ) )
-        {
-            *Reference = FLevelSequenceBindingReference();
-        }
-
-        return;
-    }
-
-    Reference = PlanesBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( InObjects.Contains( ResolvedObject ) )
-        {
-            *Reference = FLevelSequenceBindingReference();
-        }
-
-        return;
-    }
-
-    Reference = ActorsBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( InObjects.Contains( ResolvedObject ) )
-        {
-            *Reference = FLevelSequenceBindingReference();
-        }
-
-        return;
-    }
+    CameraBindingReferences.RemoveObjects( ObjectId, InObjects, Context );
+    PlanesBindingReferences.RemoveObjects( ObjectId, InObjects, Context );
+    ActorsBindingReferences.RemoveObjects( ObjectId, InObjects, Context );
 }
 
 void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Context )
 {
-    FLevelSequenceBindingReference* Reference = CameraBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( !IsValid( ResolvedObject ) )
-        {
-            *Reference = FLevelSequenceBindingReference();
-        }
-
-        return;
-    }
-
-    Reference = PlanesBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( !IsValid( ResolvedObject ) )
-        {
-            *Reference = FLevelSequenceBindingReference();
-        }
-
-        return;
-    }
-
-    Reference = ActorsBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( !IsValid( ResolvedObject ) )
-        {
-            *Reference = FLevelSequenceBindingReference();
-        }
-
-        return;
-    }
+    CameraBindingReferences.RemoveInvalidObjects( ObjectId, Context );
+    PlanesBindingReferences.RemoveInvalidObjects( ObjectId, Context );
+    ActorsBindingReferences.RemoveInvalidObjects( ObjectId, Context );
 }
 
 #if WITH_EDITOR
@@ -292,15 +264,13 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
 {
     Super::GetAssetRegistryTags( OutTags );
 
-    if( CameraBindingIdToReferences.Num() )
+    if( CameraBindingReferences.GetAllReferences().Num() )
     {
         FString value;
-        for( const TPair< FGuid, FLevelSequenceBindingReference >& pair : CameraBindingIdToReferences )
+        TArrayView<const FMovieSceneBindingReference> references = CameraBindingReferences.GetAllReferences();
+        for( const FMovieSceneBindingReference& reference : references )
         {
-            FGuid binding = pair.Key;
-            //FLevelSequenceBindingReference reference = pair.Value;
-
-            FMovieScenePossessable* possessable = MovieScene->FindPossessable( binding );
+            FMovieScenePossessable* possessable = MovieScene->FindPossessable( reference.ID );
             if( possessable )
             {
                 value = possessable->GetName();
@@ -318,15 +288,13 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
         OutTags.Emplace( "Camera", "(None)", FAssetRegistryTag::TT_Alphabetical );
     }
 
-    if( PlanesBindingIdToReferences.Num() )
+    if( PlanesBindingReferences.GetAllReferences().Num() )
     {
         int plane_count = 0;
-        for( const TPair< FGuid, FLevelSequenceBindingReference >& pair : PlanesBindingIdToReferences )
+        TArrayView<const FMovieSceneBindingReference> references = PlanesBindingReferences.GetAllReferences();
+        for( const FMovieSceneBindingReference& reference : references )
         {
-            FGuid binding = pair.Key;
-            //FLevelSequenceBindingReference reference = pair.Value;
-
-            FMovieScenePossessable* possessable = MovieScene->FindPossessable( binding );
+            FMovieScenePossessable* possessable = MovieScene->FindPossessable( reference.ID );
             if( possessable && !possessable->GetParent().IsValid() /* to get only root planes */ )
             {
                 plane_count++;
@@ -342,15 +310,13 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
         OutTags.Emplace( "Planes", "(0)", FAssetRegistryTag::TT_Alphabetical );
     }
 
-    if( ActorsBindingIdToReferences.Num() )
+    if( ActorsBindingReferences.GetAllReferences().Num() )
     {
         int actor_count = 0;
-        for( const TPair< FGuid, FLevelSequenceBindingReference >& pair : ActorsBindingIdToReferences )
+        TArrayView<const FMovieSceneBindingReference> references = ActorsBindingReferences.GetAllReferences();
+        for( const FMovieSceneBindingReference& reference : references )
         {
-            FGuid binding = pair.Key;
-            //FLevelSequenceBindingReference reference = pair.Value;
-
-            FMovieScenePossessable* possessable = MovieScene->FindPossessable( binding );
+            FMovieScenePossessable* possessable = MovieScene->FindPossessable( reference.ID );
             if( possessable && !possessable->GetParent().IsValid() /* to get only root actors */ )
             {
                 actor_count++;

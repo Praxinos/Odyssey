@@ -4,10 +4,10 @@
 #pragma once
 
 #include "EposMovieSceneSequence.h"
-#include "LevelSequenceBindingReference.h"
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
 
+#include "Shot/ShotSequenceBindingReference.h"
 #include "SequenceNameElements.h"
 
 #include "ShotSequence.generated.h"
@@ -39,6 +39,10 @@ public:
     virtual void UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context ) override;
     virtual void UnbindInvalidObjects( const FGuid& ObjectId, UObject* Context ) override;
 
+    virtual const FMovieSceneBindingReferences* GetBindingReferences() const override;
+
+    virtual void PostLoad() override;
+
 #if WITH_EDITOR
     virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
     virtual FText GetDisplayName() const override;
@@ -58,18 +62,13 @@ public:
     UPROPERTY()
     TObjectPtr<UMovieScene> MovieScene;
 
-    // The map should contain only one root cinecamera actor and its multiple components
-    // Only one entry should have an invalid guid
+    // The list should only contain one root cinecamera actor and its multiple components
     UPROPERTY()
-    TMap< FGuid, FLevelSequenceBindingReference > CameraBindingIdToReferences;
-
-    // The map will contain multiple plane actors and all their multiple components
+    FShotSequenceBindingReferences CameraBindingReferences;
     UPROPERTY()
-    TMap< FGuid, FLevelSequenceBindingReference > PlanesBindingIdToReferences;
-
-    // The map will contain multiple actors and all their multiple components
+    FShotSequenceBindingReferences PlanesBindingReferences;
     UPROPERTY()
-    TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences;
+    FShotSequenceBindingReferences ActorsBindingReferences;
 
     UPROPERTY(EditAnywhere, Category=NamingConvention)
     FShotNameElements NameElements;

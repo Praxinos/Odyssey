@@ -4,10 +4,10 @@
 #pragma once
 
 #include "EposMovieSceneSequence.h"
-#include "LevelSequenceBindingReference.h"
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
 
+#include "Board/BoardSequenceBindingReference.h"
 #include "SequenceNameElements.h"
 
 #include "BoardSequence.generated.h"
@@ -39,6 +39,10 @@ public:
     virtual void UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context ) override;
     virtual void UnbindInvalidObjects( const FGuid& ObjectId, UObject* Context ) override;
 
+    virtual const FMovieSceneBindingReferences* GetBindingReferences() const override;
+
+    virtual void PostLoad() override;
+
 #if WITH_EDITOR
     virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
     virtual FText GetDisplayName() const override;
@@ -58,10 +62,8 @@ public:
     UPROPERTY()
     UMovieScene* MovieScene;
 
-    // The map should contain only one root cinecamera actor and its multiple components
-    // Only one entry should have an invalid guid
     UPROPERTY()
-    TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences;
+    FBoardSequenceBindingReferences BindingReferences;
 
     UPROPERTY(EditAnywhere, Category=NamingConvention)
     FBoardNameElements NameElements;

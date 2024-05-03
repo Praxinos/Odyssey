@@ -51,6 +51,30 @@ void UBoardSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
     MovieScene->SetDisplayRate( iDisplayRate );
 }
 
+void UBoardSequence::PostLoad()
+{
+    Super::PostLoad();
+
+#if WITH_EDITOR             //TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ActorsBindingIdToReferences
+#endif
+}
+
+const FMovieSceneBindingReferences* UBoardSequence::GetBindingReferences() const //override
+{
+    // For the moment, don't use GetBindingReferences()
+    // because in this case, BindPossessableObject() won't be called in the FSequencerUtilities::CreateBinding()#2650
+    // as CreateGenericBinding() will be called instead of CreateImplementationDefinedBinding()
+    //
+    // and when CreateGenericBinding() is used, FMovieSceneBindingReferences::AddBinding() is called directly (without BindPossessableObject())
+    // so the check of possible possessables object (Camera/Plane/...) must be done there
+    // (No, because FMovieSceneBindingReferences::AddBinding() is not virtual...)
+    //
+    // (If GetBindingReferences() is not used (aka return nullptr), LocateBoundObjects() is required)
+    return nullptr;
+
+    //return &BindingReferences;
+}
+
 void UBoardSequence::BindPossessableObject(const FGuid& ObjectId, UObject& PossessedObject, UObject* Context)
 {
     if( !CanPossessObject( PossessedObject, Context ) )
@@ -61,7 +85,10 @@ void UBoardSequence::BindPossessableObject(const FGuid& ObjectId, UObject& Posse
         return;
     }
 
-    ActorsBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
+    if( Context )
+    {
+        BindingReferences.AddBinding( ObjectId, &PossessedObject, Context );
+    }
 }
 
 bool UBoardSequence::CanPossessObject(UObject& Object, UObject* InPlaybackContext) const
@@ -80,17 +107,9 @@ bool UBoardSequence::CanRebindPossessable( const FMovieScenePossessable& InPosse
     return !InPossessable.GetParent().IsValid();
 }
 
-void UBoardSequence::LocateBoundObjects(const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects) const
+void UBoardSequence::LocateBoundObjects(const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects) const // override
 {
-    const FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( ResolvedObject && ResolvedObject->GetWorld() )
-        {
-            OutObjects.Add( ResolvedObject );
-        }
-    }
+    BindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
 }
 
 UMovieScene* UBoardSequence::GetMovieScene() const
@@ -110,37 +129,17 @@ UObject* UBoardSequence::GetParentObject(UObject* Object) const
 
 void UBoardSequence::UnbindPossessableObjects(const FGuid& ObjectId)
 {
-    ActorsBindingIdToReferences.Remove( ObjectId );
+    BindingReferences.RemoveBinding( ObjectId );
 }
 
 void UBoardSequence::UnbindObjects(const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context)
 {
-    FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( InObjects.Contains( ResolvedObject ) )
-        {
-            *Reference = FLevelSequenceBindingReference();
-        }
-
-        return;
-    }
+    BindingReferences.RemoveObjects( ObjectId, InObjects, Context );
 }
 
 void UBoardSequence::UnbindInvalidObjects(const FGuid& ObjectId, UObject* Context)
 {
-    FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
-    if( Reference )
-    {
-        UObject* ResolvedObject = Reference->Resolve( Context, FLevelSequenceBindingReference::FResolveBindingParams() );
-        if( !IsValid( ResolvedObject ) )
-        {
-            *Reference = FLevelSequenceBindingReference();
-        }
-
-        return;
-    }
+    BindingReferences.RemoveInvalidObjects( ObjectId, Context );
 }
 
 #if WITH_EDITOR
