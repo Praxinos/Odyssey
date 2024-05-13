@@ -5,6 +5,8 @@
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditToolHUD.h"
 #include "OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyMediaVector.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoVertexRadius.h"
@@ -13,6 +15,7 @@
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
+
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -963,6 +966,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                 , iPointInTexture.y
                                 , PickingRadius
                                 , true
+                                , false
                                 , pickedSegmentArray );
 
                     if( pickedSegmentArray.size() )

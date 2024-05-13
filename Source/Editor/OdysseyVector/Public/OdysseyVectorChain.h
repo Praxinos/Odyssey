@@ -17,6 +17,7 @@ class FOdysseyVectorObject;
 // a waypoint is met at segment vertex or when a constrast is met
 struct FWayPoint
 {
+    FOdysseyVectorVertexIntersection* intersectionVertex;
     FOdysseyVectorVertex* vertex;
     uint32 flags;
     double t;
@@ -35,13 +36,18 @@ struct FWayPoint
 
     FWayPoint( FOdysseyVectorVertex* iVertex, uint32 iWayPointFlags )
     {
+        intersectionVertex = nullptr;
         vertex = iVertex;
         flags = iWayPointFlags;
     }
 
-    FWayPoint( FOdysseyVectorVertex* iVertex, uint32 iWayPointFlags, double iT )
+    FWayPoint( FOdysseyVectorVertex* iVertex
+             , FOdysseyVectorVertexIntersection* iIntersectionVertex
+             , uint32 iWayPointFlags
+             , double iT )
     {
         vertex = iVertex;
+        intersectionVertex = iIntersectionVertex;
         flags = iWayPointFlags;
         t = iT;
     }
@@ -117,9 +123,19 @@ class FOdysseyVectorChain
         bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
         static void ExtendErasedSection( FOdysseyVectorVertex* iVertex
                                        , FOdysseyVectorSection* iFromSection );
-        static uint32 GetErasureFlag( FOdysseyVectorSection* iPreviousSection
-                                    , FOdysseyVectorVertex* iVertex
-                                    , FOdysseyVectorSection* iCurrentSection );
+        uint32 GetErasureFlags( FOdysseyVectorSection* iPrevSection
+                              , FOdysseyVectorVertex* iVertex
+                              , FOdysseyVectorSection* iNextSection );
+        void GetSections( FOdysseyVectorVertex* iVertex
+                        , FOdysseyVectorPath* iPath
+                        , std::vector<FOdysseyVectorSection*>& oSectionArray );
+        void GetSections( FOdysseyVectorVertexIntersection* iIntersectionVertex
+                        , FOdysseyVectorSegment* iSegment
+                        , std::vector<FOdysseyVectorSection*>& oSectionArray );
+        FSectionLinkInfo* GetNextSectionLinkInfo( FOdysseyVectorSection* iLastSection
+                                                , FOdysseyVectorVertex* iLastSectionVertex
+                                                , uint32 iLastSectionVertexIndex );
+
     private :
         FOdysseyVectorPath* mPath;
         std::vector<FOdysseyVectorVertex*> mVertexArray;

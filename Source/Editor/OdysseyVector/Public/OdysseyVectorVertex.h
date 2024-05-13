@@ -61,27 +61,28 @@ struct FExplorationWayPoint
     }
 };
 
-struct FCycleSectionInfo
+struct ODYSSEYVECTOR_API FSectionLinkInfo
 {
     FOdysseyVectorSection* section;
-    ::ULIS::FVec2D sectionVector;
     uint32 sectionVertexIndex;
 
-    FCycleSectionInfo( const FCycleSectionInfo& iCycleSectionInfo )
+    // copy constructor
+    FSectionLinkInfo( const FSectionLinkInfo& iCycleSectionInfo )
     {
         this->section            = iCycleSectionInfo.section;
-        this->sectionVector      = iCycleSectionInfo.sectionVector;
         this->sectionVertexIndex = iCycleSectionInfo.sectionVertexIndex;
     }
 
-    FCycleSectionInfo( FOdysseyVectorSection* iSection
-                     , const ::ULIS::FVec2D& iSectionVector
-                     , uint32 iSectionVertexIndex )
+    FSectionLinkInfo( FOdysseyVectorSection* iSection, uint32 iSectionVertexIndex )
     {
         section = iSection;
-        sectionVector = iSectionVector;
         sectionVertexIndex = iSectionVertexIndex;
     }
+
+   ::ULIS::FVec2D& GetVector()
+   {
+        return section->GetVector( sectionVertexIndex );
+   }
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
@@ -108,7 +109,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Add a section to the list of section connected to this vertex
          * @param iSection the section to add
          */
-        void AddSection( FOdysseyVectorSection* iSection );
+        void AddSection( FOdysseyVectorSection* iSection
+                       , uint32 iSectionVertexIndex );
 
         /**
          * @brief Add a segment to the list of segments connected to this vertex
@@ -209,7 +211,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get a reference to the list of sections connected to this vertex.
          * @return a reference to the list of sections connected to this vertex.
          */
-        std::list<FOdysseyVectorSection*>& GetSectionList();
+        std::list<FSectionLinkInfo>& GetSectionLinkInfoList();
 
         /**
          * @brief Get the number of segments connected to this vertex. Equals to a call to "GetSegmentList().size()".
@@ -253,9 +255,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iOrientation the orientation for the desired next section (1.0f or -1.0f).
          * @return a pointer to the next section to go trough.
          */
-        FCycleSectionInfo GetCycleNextSection( FOdysseyVectorSection* iLastSection
+        FSectionLinkInfo* GetCycleNextSection( FOdysseyVectorSection* iLastSection
                                              , uint32 iLastSectionVertexIndex
                                              , double iOrientation );
+
+        FSectionLinkInfo* GetCycleNextSection( FSectionLinkInfo* iLastSectionLinkInfo
+                                             , double iOrientation );
+        FSectionLinkInfo* GetCycleNextSection( FSectionLinkInfo* iLastSectionLinkInfo
+                                             , const std::vector<FSectionLinkInfo*> iCandidateSectionArray
+                                             , double iOrientation );
+
+        FSectionLinkInfo* GetSectionLinkInfo( FOdysseyVectorSection* iSection
+                                            , uint32 iSectionVertexIndex );
 
         /**
          * @brief Mark all connected segments for update.
@@ -315,7 +326,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Remove a section from the list of section connected to this vertex
          * @param iSection the section to remove
          */
-        void RemoveSection( FOdysseyVectorSection* iSection );
+        void RemoveSection( FOdysseyVectorSection* iSection
+                          , uint32 iSectionVertexIndex );
 
         /**
          * @brief Remove a segment from the list of segments connected to this vertex.
@@ -379,7 +391,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void GetCandidateSections( FOdysseyVectorSection* iLastSection
                                  , uint32 iLastSectionVertexIndex
                                  , std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
-                                 , std::vector<FCycleSectionInfo>& oCandidateSectionArray );
+                                 , std::vector<FSectionLinkInfo*>& oCandidateSectionArray );
         void SetLocked( bool iIsLocked );
         bool IsLocked();
 
@@ -389,6 +401,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iID the desired point's ID
          */
         void SetID( uint32 iID );
+
+        void GetSurroundingSections( std::vector<FOdysseyVectorVertex*>& oPartnerVertexArray
+                                   , std::vector<FSectionLinkInfo*>& oSurroundingSectionArray );
+        void GetSectionLinkInfo( std::vector<FSectionLinkInfo>& oSectionLinkInfoArray );
+        FSectionLinkInfo* GetOtherSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo );
+        FOdysseyVectorSection* GetFirstSection();
+        FSectionLinkInfo* GetSectionLinkInfo( FOdysseyVectorSegment* iSegment );
 
     protected:
         /**
@@ -402,7 +421,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorJoint mJoint;
         //eJointType mJointType;
         std::list<FOdysseyVectorSegment*> mSegmentList;
-        std::list<FOdysseyVectorSection*> mSectionList;
+        std::list<FSectionLinkInfo> mSectionLinkInfoList;
         std::list<FOdysseyVectorVertex*> mPartnerList;
         FOdysseyVectorObject* mOwner;
         uint32 mFlags;

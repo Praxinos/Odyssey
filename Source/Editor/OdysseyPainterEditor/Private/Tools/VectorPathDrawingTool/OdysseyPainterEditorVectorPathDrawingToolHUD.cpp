@@ -230,7 +230,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::SetCursorPosition( double iX, dou
     mY = iY;
 
     // here we use the quadtree built buy the HUD to pick points
-    if( mPathDrawingTool->Stitch && mPointQuadTree )
+    if( ( mPathDrawingTool->Stitch || mPathDrawingTool->Snap ) && mPointQuadTree )
     {
         if( mStitchedPointArray.size() )
         {

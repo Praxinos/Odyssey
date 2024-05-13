@@ -307,10 +307,13 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
         iBLContext->setFillStyle( blFillColor );
 
-        iBLContext->fillRect( BLRect( sanitizedRect.x
-                                    , sanitizedRect.y
-                                    , sanitizedRect.w
-                                    , sanitizedRect.h ) );
+        // Note: we enlarge the block 1 pixel because when FOdysseyVectorBlock renders,
+        // the rect seems to be 1 pixel larger. If we don't do this, then the block
+        // isn't filled fully and this creates an artefact on the screen.
+        iBLContext->fillRect( BLRect( sanitizedRect.x - 1
+                                    , sanitizedRect.y - 1
+                                    , sanitizedRect.w + 2
+                                    , sanitizedRect.h + 2 ) );
 
         mScene->Draw( iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
 

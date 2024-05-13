@@ -49,6 +49,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertexIntersection : public FOdysseyVector
 
         FOdysseyVectorIntersection* GetIntersection( uint32 iIndex );
         double GetT( FOdysseyVectorSegment* iSegment );
+        void Attach();
+        void Detach();
+        bool SelfIntersects();
 
     protected:
         FOdysseyVectorIntersection mIntersection[2];

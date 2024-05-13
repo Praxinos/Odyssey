@@ -97,18 +97,55 @@ FOdysseyVectorCycle::SetParentCycle( FOdysseyVectorCycle *iParent )
 }
 
 bool
+FOdysseyVectorCycle::HasVertex( FOdysseyVectorVertex* iVertex )
+{
+    // First test : get sure they don't share a common section
+    // which would in that case mean that we do not fit in the parent cycle
+    for( int i = 0; i < mContourSectionArray.size(); i++ )
+    {
+        FOdysseyVectorSection* section = mContourSectionArray[i];
+        uint32 contourVertexIndex = mContourVertexIndexArray[i];
+        FOdysseyVectorVertex* contourVertex = section->GetVertex( contourVertexIndex );
+
+        if( contourVertex == iVertex )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
 FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
 {
     // First test : get sure they don't share a common section
     // which would in that case mean that we do not fit in the parent cycle
     for( int i = 0; i < mContourSectionArray.size(); i++ )
     {
-        if( mContourSectionArray[i]->GetOtherCycle( this ) == iParentCandidate )
+        FOdysseyVectorSection* section = mContourSectionArray[i];
+        uint32 contourVertexIndex = mContourVertexIndexArray[i];
+        FOdysseyVectorVertex* contourVertex = section->GetVertex( contourVertexIndex );
+        ::ULIS::FVec2D midPoint = section->GetPointAt( 0.5f );
+        BLPoint pt = BLPoint( midPoint.x, midPoint.y );
+
+        if( section->GetOtherCycle( this ) == iParentCandidate )
+        {
+            return false;
+        }
+
+        // also check they don't have a vertex in common.
+        if( iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD ) != BL_HIT_TEST_IN )
         {
             return false;
         }
     }
 
+    // commented out: the test below does not guaranty
+    // that a 1-vertex-1-section cycle lies within another cycle.
+    // We replaced it with the mid-section test above.
+
+/*
     // Then check if all vertices lies within the parent candidate
     for( int i = 0; i < mContourSectionArray.size(); i++ )
     {
@@ -124,7 +161,7 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
             return false;
         }
     }
-
+*/
     return true;
 }
 

@@ -645,11 +645,14 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
                                              , &interPolySubT ) )
         {
             double segmentT = fraction->fromT + ( polySubT * ( fraction->toT - fraction->fromT ) );
-            ::ULIS::FVec2D pointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
-                                                                                        , ctrlPoint0
-                                                                                        , ctrlPoint1
-                                                                                        , point1
-                                                                                        , segmentT );
+            // Commented out: unprecise due to the linear nature of a fraction
+            // compared to its "parent" bezier curve.
+            //::ULIS::FVec2D pointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( point0
+            //                                                                            , ctrlPoint0
+            //                                                                            , ctrlPoint1
+            //                                                                            , point1
+            //                                                                            , segmentT );
+            ::ULIS::FVec2D pointAt = p0Coords + ( ( p1Coords - p0Coords ) * polySubT );
             FOdysseyVectorVertex* newCubicPoint = new FOdysseyVectorVertex( pointAt.x, pointAt.y, 0.0f );
 
             newCubicPoint->SetRadius( vertex0->GetRadius() + ( difRadius * segmentT ) );
@@ -678,15 +681,26 @@ FOdysseyVectorSegmentCubic::Cut( const ::ULIS::FVec2D& linePoint0
                                                                                    , static_cast<FOdysseyVectorVertex*>(pointChain[i])
                                                                                    , static_cast<FOdysseyVectorVertex*>(pointChain[n])
                                                                                    , true );
-            ::ULIS::FVec2D& newSegmentPoint0 = newSegment->GetVertex(0)->GetCoords();
-            ::ULIS::FVec2D& newSegmentPoint1 = newSegment->GetVertex(1)->GetCoords();
+
             ::ULIS::FVec2D& newSegmentCtrlPoint0 = newSegment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& newSegmentCtrlPoint1 = newSegment->GetHandle(1)->GetCoords();
+            // we ignore the coords of the end points because the parametric value "t"
+            // that we obtained when intersecting fractions is not accurate enough to be used
+            // to position the points. Plus they were already positionned in the above step
+            // when being created using "new FOdysseyVectorVertex"
+            ::ULIS::FVec2D ignoredSegmentPoint0;
+            ::ULIS::FVec2D ignoredSegmentPoint1;
 
-            FOdysseyVector::BezierExtract( point0, ctrlPoint0, ctrlPoint1, point1
+            FOdysseyVector::BezierExtract( point0
+                                         , ctrlPoint0
+                                         , ctrlPoint1
+                                         , point1
                                          , tChain[i]
                                          , tChain[n]
-                                         , newSegmentPoint0, newSegmentCtrlPoint0, newSegmentCtrlPoint1, newSegmentPoint1 );
+                                         , ignoredSegmentPoint0
+                                         , newSegmentCtrlPoint0
+                                         , newSegmentCtrlPoint1
+                                         , ignoredSegmentPoint1 );
 
             oNewSegmentArray.push_back( newSegment );
         }
