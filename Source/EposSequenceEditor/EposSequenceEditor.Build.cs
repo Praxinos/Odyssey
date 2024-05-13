@@ -85,6 +85,7 @@ public class EposSequenceEditor : ModuleRules
                 "AssetDefinition",
                 "UMG",
                 "SequencerScripting",
+                "SequencerScriptingEditor",
                 "CurveEditor",
                 "LevelSequenceEditor",
                 "EditorSubsystem",

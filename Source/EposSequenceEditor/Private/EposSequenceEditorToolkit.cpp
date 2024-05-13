@@ -83,12 +83,6 @@ FEposSequenceEditorToolkit::OnClosed()
 FEposSequenceEditorToolkit::FEposSequenceEditorToolkit()
     : mSequence( nullptr )
 {
-    // register sequencer menu extenders
-    ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-    int32 NewIndex = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates().Add(
-        FAssetEditorExtender::CreateRaw( this, &FEposSequenceEditorToolkit::HandleMenuExtensibilityGetExtender ) );
-    mSequencerExtenderHandle = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates()[NewIndex].GetHandle();
-
     sgOpenToolkits.Add( this );
 }
 
@@ -107,13 +101,6 @@ FEposSequenceEditorToolkit::~FEposSequenceEditorToolkit()
     }
 
     mSequencer->Close();
-
-    // unregister sequencer menu extenders
-    ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-    SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates().RemoveAll( [this]( const FAssetEditorExtender& Extender )
-    {
-        return mSequencerExtenderHandle == Extender.GetHandle();
-    } );
 }
 
 void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, TArray< UEposMovieSceneSequence* > iSequences )
@@ -337,99 +324,6 @@ void FEposSequenceEditorToolkit::BringToolkitToFront()
     FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
     TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
     LevelEditorTabManager->TryInvokeTab( LevelEditorTabIds::Sequencer );
-}
-
-//---
-
-TSharedRef<FExtender>
-FEposSequenceEditorToolkit::HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects )
-{
-    TSharedRef<FExtender> AddTrackMenuExtender( new FExtender() );
-    AddTrackMenuExtender->AddMenuExtension(
-        SequencerMenuExtensionPoints::AddTrackMenu_PropertiesSection,
-        EExtensionHook::Before,
-        CommandList,
-        FMenuExtensionDelegate::CreateRaw( this, &FEposSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack, ContextSensitiveObjects ) );
-
-    return AddTrackMenuExtender;
-}
-
-void
-FEposSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects )
-{
-    // TODO-lchabant: stolen from level sequence.
-    if( ContextObjects.Num() != 1 )
-    {
-        return;
-    }
-
-    AActor* Actor = Cast<AActor>( ContextObjects[0] );
-    if( Actor == nullptr )
-    {
-        return;
-    }
-
-    AddTrackMenuBuilder.BeginSection( "Components", LOCTEXT( "ComponentsSection", "Components" ) );
-    {
-        TMap<FString, UActorComponent*> SortedComponents;
-        for( UActorComponent* Component : Actor->GetComponents() )
-        {
-            if( Component )
-            {
-                SortedComponents.Add( Component->GetName(), Component );
-            }
-        }
-        SortedComponents.KeySort( []( const FString& A, const FString& B )
-                                  {
-                                      return A < B;
-                                  } );
-
-        for( const TPair<FString, UActorComponent*>& Component : SortedComponents )
-        {
-            FUIAction AddComponentAction( FExecuteAction::CreateSP( this, &FEposSequenceEditorToolkit::HandleAddComponentActionExecute, Component.Value ) );
-            FText AddComponentLabel = FText::FromString( Component.Key );
-            FText AddComponentToolTip = FText::Format( LOCTEXT( "ComponentToolTipFormat", "Add {0} component" ), AddComponentLabel );
-            AddTrackMenuBuilder.AddMenuEntry( AddComponentLabel, AddComponentToolTip, FSlateIcon(), AddComponentAction );
-        }
-    }
-    AddTrackMenuBuilder.EndSection();
-}
-
-void
-FEposSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Component )
-{
-    // TODO-lchabant: stolen from level sequence.
-    const FScopedTransaction Transaction( LOCTEXT( "AddComponent", "Add Component" ) );
-
-    FString ComponentName = Component->GetName();
-
-    TArray<UActorComponent*> ActorComponents;
-    ActorComponents.Add( Component );
-
-    USelection* SelectedActors = GEditor->GetSelectedActors();
-    if( SelectedActors && SelectedActors->Num() > 0 )
-    {
-        for( FSelectionIterator Iter( *SelectedActors ); Iter; ++Iter )
-        {
-            AActor* Actor = CastChecked<AActor>( *Iter );
-
-            TArray<UActorComponent*> OutActorComponents;
-            Actor->GetComponents( OutActorComponents );
-
-            for( UActorComponent* ActorComponent : OutActorComponents )
-            {
-                if( ActorComponent->GetName() == ComponentName )
-                {
-                    ActorComponents.AddUnique( ActorComponent );
-                }
-            }
-        }
-    }
-
-    for( UActorComponent* ActorComponent : ActorComponents )
-    {
-        mSequencer->GetHandleToObject( ActorComponent );
-    }
 }
 
 //---

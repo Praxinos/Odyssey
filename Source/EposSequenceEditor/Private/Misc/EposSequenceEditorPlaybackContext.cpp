@@ -35,10 +35,16 @@ FEposSequenceEditorPlaybackContext::GetEposSequence() const
     return mEposSequence.Get();
 }
 
-UWorld*
+UObject*
 FEposSequenceEditorPlaybackContext::GetPlaybackContext() const
 {
     UpdateCachedContextAndClient();
+
+    //if( ALevelSequenceActor* Client = GetPlaybackClient() )
+    //{
+    //    return Client;
+    //}
+
     return mWeakCurrentContext.Get();
 }
 
