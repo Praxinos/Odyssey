@@ -44,7 +44,7 @@ public:
     virtual void    BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid& iObjectBinding ) override;
     virtual FText   GetSectionTitle() const override;
     virtual FText   GetSectionToolTip() const override;
-    virtual float   GetSectionHeight() const override;
+    virtual float   GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const override;
     virtual FMargin GetContentPadding() const override;
     virtual bool    IsReadOnly() const override;
 
@@ -120,7 +120,6 @@ private:
 
 private:
     TSharedPtr<SCinematicBoardSectionContent> mWidgetSectionContent;
-    mutable float mLastSectionValidHeight = 100.f;
 
 public:
     /** Get the painter (named root) provided by OnPaintSection()
