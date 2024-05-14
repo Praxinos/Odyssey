@@ -8,7 +8,10 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MovieSceneBindingProxy.h"
 #include "MovieSceneSequencePlayer.h"
+#include "MovieSceneTimeUnit.h"
 #include "MovieSceneObjectBindingID.h"
+#include "SequencerSettings.h"
+#include "SequencerCurveEditorObject.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "Export/ImageSequence/ExportImageSequenceSettings.h"
@@ -425,35 +428,75 @@ public:
 
 public:
 
-    /**
-     * Set global playback position for the current level sequence in frames
-     */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use SetCurrentTime that takes a FMovieSceneSequencePlaybackParams" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use SetCurrentTime that takes a FMovieSceneSequencePlaybackParams" ) )
     static void SetCurrentTime(int32 NewFrame);
 
-    /**
-     * Get the current global playback position in frames
-     */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use GetCurrentTime that returns a FMovieSceneSequencePlaybackParams" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use GetCurrentTime that returns a FMovieSceneSequencePlaybackParams" ) )
     static int32 GetCurrentTime();
 
-    /**
-     * Set local playback position for the current level sequence in frames
-     */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use SetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use SetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" ) )
     static void SetCurrentLocalTime(int32 NewFrame);
 
-    /**
-     * Get the current local playback position in frames
-     */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use GetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use GetCurrentLocalTime that returns a FMovieSceneSequencePlaybackParams" ) )
     static int32 GetCurrentLocalTime();
+
+    /**
+     * Set global playhead position for the current epos sequence. If the requested time is the same as the current time, an evaluation will be forced.
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor", DisplayName = "Set Current Time" )
+    static void SetGlobalPosition( FMovieSceneSequencePlaybackParams PlaybackParams, EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
+
+    /**
+     * Get the current global playhead position
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor", DisplayName = "Get Current Time" )
+    static FMovieSceneSequencePlaybackParams GetGlobalPosition( EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
+
+    /**
+     * Set local playhead position for the current epos sequence. If the requested time is the same as the current time, an evaluation will be forced.
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor", DisplayName = "Set Current Local Time" )
+    static void SetLocalPosition( FMovieSceneSequencePlaybackParams PlaybackParams, EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
+
+    /**
+     * Get the current local playhead position
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor", DisplayName = "Get Current Local Time" )
+    static FMovieSceneSequencePlaybackParams GetLocalPosition( EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
+
+    /**
+     * Set playback speed of the current epos sequence
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static void SetPlaybackSpeed( float NewPlaybackSpeed );
+
+    /**
+     * Get playback speed of the current epos sequence
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static float GetPlaybackSpeed();
+
+    /**
+     * Set loop mode (note this is a per user preference)
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static void SetLoopMode( ESequencerLoopMode NewLoopMode );
+
+    /**
+     * Get loop mode (note this is a per user preference)
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static ESequencerLoopMode GetLoopMode();
 
     /**
      * Play from the current time to the requested time in frames
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
-    static void PlayTo(FMovieSceneSequencePlaybackParams PlaybackParams);
+    static void PlayTo(FMovieSceneSequencePlaybackParams PlaybackParams, EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate);
 
 public:
 
@@ -471,9 +514,17 @@ public:
     UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
     static TArray<UMovieSceneSection*> GetSelectedSections();
 
-    ///** Gets the currently selected channels. */
-    //UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
-    //static TArray<FSequencerChannelProxy> GetSelectedChannels();
+    /** Gets the currently selected channels. */
+    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    static TArray<FSequencerChannelProxy> GetSelectedChannels();
+
+    /** Gets the channel with selected keys. */
+    UFUNCTION( BlueprintPure, Category = "Level Sequence Editor" )
+    static TArray<FSequencerChannelProxy> GetChannelsWithSelectedKeys();
+
+    /** Gets the selected key indices with this channel */
+    UFUNCTION( BlueprintPure, Category = "Level Sequence Editor" )
+    static TArray<int32> GetSelectedKeys( const FSequencerChannelProxy& ChannelProxy );
 
     /** Gets the currently selected folders. */
     UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
@@ -491,9 +542,13 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static void SelectSections(const TArray<UMovieSceneSection*>& Sections);
 
-    ///** Select channels */
-    //UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
-    //static void SelectChannels(const TArray<FSequencerChannelProxy>& Channels);
+    /** Select channels */
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    static void SelectChannels(const TArray<FSequencerChannelProxy>& Channels);
+
+    /** Select keys from indices */
+    UFUNCTION( BlueprintCallable, Category = "Level Sequence Editor" )
+    static void SelectKeys( const FSequencerChannelProxy& Channel, const TArray<int32>& Indices );
 
     /** Select folders */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
@@ -574,29 +629,40 @@ public:
     static TArray<FText> GetTrackFilterNames();
 
 public:
-
     /** Get if a custom color for specified channel idendified by it's class and identifier exists */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::HasCustomColorForChannel" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::HasCustomColorForChannel"))
     static bool HasCustomColorForChannel(UClass* Class, const FString& Identifier);
 
     /** Get custom color for specified channel idendified by it's class and identifier,if none exists will return white*/
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::GetCustomColorForChannel" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::HasCustomColorForChannel"))
     static FLinearColor GetCustomColorForChannel(UClass* Class, const FString& Identifier);
 
     /** Set Custom Color for specified channel idendified by it's class and identifier. This will be stored in editor user preferences.*/
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::SetCustomColorForChannel" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::SetCustomColorForChannel"))
     static void SetCustomColorForChannel(UClass* Class, const FString& Identifier, const FLinearColor& NewColor);
 
     /** Set Custom Color for specified channels idendified by it's class and identifiers. This will be stored in editor user preferences.*/
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::DeleteColorForChannels" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::DeleteColorForChannels"))
     static void SetCustomColorForChannels(UClass* Class, const TArray<FString>& Identifiers, const TArray<FLinearColor>& NewColors);
 
     /** Set Random Colors for specified channels idendified by it's class and identifiers. This will be stored in editor user preferences.*/
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::SetRandomColorForChannels" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::SetRandomColorForChannels"))
     static void SetRandomColorForChannels(UClass* Class, const TArray<FString>& Identifiers);
 
     /** Delete for specified channel idendified by it's class and identifier.*/
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::DeleteColorForChannels" )
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::DeleteColorForChannels"))
     static void DeleteColorForChannels(UClass* Class, FString& Identifier);
 
 public:

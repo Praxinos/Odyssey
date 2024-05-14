@@ -191,7 +191,7 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
                 FDrawing first_drawing;
                 first_drawing.mSection = result.mSections[0];
                 first_drawing.mChannel = channel;
-                first_drawing.mKeyHandle = channel->GetData().GetHandle( 0 );
+                first_drawing.mKeyHandle = channel->GetHandle( 0 );
 
                 UMaterialInstance* material = first_drawing.GetMaterial();
                 UTexture2D* first_texture = ProjectAssetTools::GetTexture2D( iSequence, material );

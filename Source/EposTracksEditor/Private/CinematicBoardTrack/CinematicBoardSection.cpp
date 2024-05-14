@@ -301,24 +301,23 @@ FCinematicBoardSection::GetSectionToolTip() const
 }
 
 float
-FCinematicBoardSection::GetSectionHeight() const
+FCinematicBoardSection::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
 {
-    float height = mLastSectionValidHeight; // Use the last known height, this remove some track height flickering when dragging sections
-
     UMovieSceneCinematicBoardTrack* track = Section->GetTypedOuter<UMovieSceneCinematicBoardTrack>();
-    if( track )
+    check( track );
+
+    int max_height = 0;
+    for( auto section : track->GetAllSections() )
     {
-        for( auto section : track->GetAllSections() )
-        {
-            UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
-            int current_height = board_section->GetWidgetHeight();
-            height = FMath::Max( height, current_height );
-        }
+        UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
+        int current_height = board_section->GetWidgetHeight();
+        max_height = FMath::Max( max_height, current_height );
     }
 
-    mLastSectionValidHeight = FMath::Max( 100.f, height ); // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
+    int new_height = FMath::Max( 100, max_height );
+    track->SetRowHeight( new_height ); // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
 
-    return mLastSectionValidHeight;
+    return track->GetRowHeight();
 }
 
 FMargin

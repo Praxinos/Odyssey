@@ -7,7 +7,6 @@
 #include "UObject/WeakObjectPtr.h"
 
 class UEposMovieSceneSequence;
-class UWorld;
 
 /**
  * Class that manages the current UWorld context that a level-sequence editor should use for playback
@@ -28,7 +27,7 @@ public:
     /**
      * Resolve the current world context pointer. Can never be nullptr.
      */
-    UWorld* GetPlaybackContext() const;
+    UObject* GetPlaybackContext() const;
 
     /**
      * Returns GetPlaybackContext as a plain object.
