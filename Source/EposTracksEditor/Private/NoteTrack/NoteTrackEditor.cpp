@@ -12,7 +12,6 @@
 #include "EditorStyleSet.h"
 #include "ISequencerSection.h"
 #include "LevelSequence.h"
-#include "CommonMovieSceneTools.h"
 #include "MovieSceneTimeHelpers.h"
 #include "SequencerUtilities.h"
 #include "Widgets/Text/SMultiLineEditableText.h"

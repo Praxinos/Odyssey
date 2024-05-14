@@ -77,7 +77,7 @@ SPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableView
             FGuid binding = source_drawing.mDrawings[0].mBindingId;
 
             //FMovieSceneObjectPathChannel* channel = drawing.mChannel;
-            //int32 index = channel->GetData().GetIndex( drawing.mKeyHandle );
+            //int32 index = channel->GetIndex( drawing.mKeyHandle );
 
             FText track_name = mPanelItem->mPanel.mSequence->GetMovieScene()->GetObjectDisplayName( binding );
 
@@ -261,7 +261,7 @@ SPanelTileView::GetTooltipText() const
             FGuid binding = drawing_and_binding.mBindingId;
 
             //FMovieSceneObjectPathChannel* channel = drawing.mChannel;
-            //int32 index = channel->GetData().GetIndex( drawing.mKeyHandle );
+            //int32 index = channel->GetIndex( drawing.mKeyHandle );
 
             line = FText::Format( LOCTEXT( "item.source-drawing-entry.tooltip", "- {0}" ), mPanelItem->mPanel.mSequence->GetMovieScene()->GetObjectDisplayName( binding ) );
             tooltip_texts.Add( line );

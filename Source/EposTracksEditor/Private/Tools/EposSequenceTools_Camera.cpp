@@ -1251,7 +1251,7 @@ ShotSequenceTools::GotoPreviousCameraPosition( ISequencer& iSequencer, UMovieSce
     const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    iSequencer.SetGlobalTime( previous_time * subdata->RootToSequenceTransform.InverseLinearOnly() );
+    iSequencer.SetGlobalTime( previous_time * subdata->RootToSequenceTransform.InverseNoLooping() );
 }
 
 //-
@@ -1325,7 +1325,7 @@ ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSe
     const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    iSequencer.SetGlobalTime( *next_time * subdata->RootToSequenceTransform.InverseLinearOnly() );
+    iSequencer.SetGlobalTime( *next_time * subdata->RootToSequenceTransform.InverseNoLooping() );
 }
 
 //---

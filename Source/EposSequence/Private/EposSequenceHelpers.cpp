@@ -822,9 +822,10 @@ ShotSequenceHelpers::FindOrCreateMaterialDrawingTrackAndSections( IMovieScenePla
         UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieScenePrimitiveMaterialTrack::StaticClass(), result.mPlaneComponentBinding );
         result.mTrack = Cast<UMovieScenePrimitiveMaterialTrack>( track );
 
-        result.mTrack->SetMaterialIndex( 0 ); //TODO: iMaterialTrackIndex;
+        FComponentMaterialInfo material_info = { FName(), 0, EComponentMaterialType::IndexedMaterial }; //TODO: iMaterialTrackIndex;
+        result.mTrack->SetMaterialInfo( material_info );
 #if WITH_EDITORONLY_DATA
-        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialIndex() ) ) );
+        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "IndexedMaterialSwitcherTrackName", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialInfo().MaterialSlotIndex ) ) );
 #endif
     }
 
@@ -915,7 +916,7 @@ ShotSequenceHelpers::GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequ
         check( channels.Num() == 1 );
         for( int k = 0; k < channels[0]->GetNumKeys(); k++ )
         {
-            FDrawing drawing = { channels[0], section, channels[0]->GetData().GetHandle( k ) };
+            FDrawing drawing = { channels[0], section, channels[0]->GetHandle( k ) };
             drawings.Add( drawing );
         }
     }
@@ -1092,9 +1093,10 @@ ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieSceneP
         UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieSceneComponentMaterialTrack::StaticClass(), result.mPlaneComponentBinding );
         result.mTrack = Cast<UMovieSceneComponentMaterialTrack>( track );
 
-        result.mTrack->SetMaterialIndex( 0 ); //TODO: iMaterialTrackIndex;
+        FComponentMaterialInfo material_info = { FName(), 0, EComponentMaterialType::IndexedMaterial }; //TODO: iMaterialTrackIndex;
+        result.mTrack->SetMaterialInfo( material_info );
 #if WITH_EDITORONLY_DATA
-        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialIndex() ) ) );
+        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "IndexedMaterialSwitcherTrackName", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialInfo().MaterialSlotIndex ) ) );
 #endif
     }
 
@@ -1263,7 +1265,7 @@ InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iIn
 {
     TArray<FFrameTime> converted_keys;
 
-    const FMovieSceneSequenceTransform InnerToOuterTransform = iOuterSection->OuterToInnerTransform().InverseLinearOnly();
+    const FMovieSceneSequenceTransform InnerToOuterTransform = iOuterSection->OuterToInnerTransform().InverseNoLooping();
     for( auto key : iInnerKeys )
     {
         const FFrameTime converted_key = key * InnerToOuterTransform;

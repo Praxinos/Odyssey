@@ -7,6 +7,7 @@
 
 class ISequencer;
 class UMovieSceneSequence;
+class UMovieSceneSubSection;
 
 /*
  * The lighttable management

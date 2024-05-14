@@ -12,6 +12,8 @@
 
 //---
 
+struct FExportImageSequenceOptions;
+
 struct FPanelItem
 {
     FExportPanel                    mPanel;

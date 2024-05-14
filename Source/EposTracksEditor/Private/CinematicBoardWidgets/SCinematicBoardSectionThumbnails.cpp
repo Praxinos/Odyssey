@@ -16,6 +16,7 @@
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
+#include "TimeToPixel.h"
 #include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionThumbnails"
@@ -830,8 +831,7 @@ SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeomet
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     UMovieSceneSubSection*  subsection_object = &board_section->GetSubSectionObject();
     // Just to be sure
-    check( &board_section->GetRootPainter( Args )->Section == subsection_object );
-    //check( board_section->GetRootPainter( Args )->SectionModel->GetSection() == subsection_object );
+    check( board_section->GetRootPainter( Args )->SectionModel->GetSection() == subsection_object );
 
     FSequencerSectionPainterImpl painter( *subsection_object, board_section->GetRootPainter( Args )->SectionModel, OutDrawElements, AllottedGeometry );
     //painter.KeyAreaElements = ;

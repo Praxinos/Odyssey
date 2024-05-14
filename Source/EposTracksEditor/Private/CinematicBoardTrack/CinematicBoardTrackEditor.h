@@ -60,7 +60,7 @@ public:
     virtual void OnRelease() override;
     virtual void BindCommands( TSharedRef<FUICommandList> SequencerCommandBindings ) override;
     virtual void BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder ) override;
-    virtual TSharedPtr<SWidget> BuildOutlinerEditWidget( const FGuid& iObjectBinding, UMovieSceneTrack* iTrack, const FBuildEditWidgetParams& iParams ) override;
+    virtual TSharedPtr<SWidget> BuildOutlinerColumnWidget( const FBuildColumnWidgetParams& Params, const FName& ColumnName ) override;
     virtual TSharedRef<ISequencerSection> MakeSectionInterface( UMovieSceneSection& ioSectionObject, UMovieSceneTrack& ioTrack, FGuid iObjectBinding ) override;
     //virtual bool HandleAssetAdded( UObject* iAsset, const FGuid& iTargetObjectGuid ) override;
     virtual bool SupportsSequence( UMovieSceneSequence* iSequence ) const override;

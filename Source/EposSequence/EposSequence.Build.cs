@@ -48,6 +48,7 @@ public class EposSequence : ModuleRules
                 "Niagara",
                 "Paper2D",
                 "MediaPlate",
+                "UniversalObjectLocator",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposTracks",

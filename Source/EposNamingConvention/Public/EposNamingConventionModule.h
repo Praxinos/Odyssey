@@ -30,6 +30,6 @@ private:
     void UnregisterNamingFormatter();
 
 private:
-    UDefaultNamingFormatterBoard* mNamingFormatterBoard;
-    UDefaultNamingFormatterShot* mNamingFormatterShot;
+    TObjectPtr<UDefaultNamingFormatterBoard> mNamingFormatterBoard;
+    TObjectPtr<UDefaultNamingFormatterShot> mNamingFormatterShot;
 };

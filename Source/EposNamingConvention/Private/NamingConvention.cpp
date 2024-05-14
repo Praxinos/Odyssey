@@ -18,6 +18,7 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
+#include "EposMovieSceneSequence.h"
 #include "EposSequenceHelpers.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"

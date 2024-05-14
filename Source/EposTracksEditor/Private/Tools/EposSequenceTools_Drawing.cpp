@@ -191,7 +191,7 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
                 FDrawing first_drawing;
                 first_drawing.mSection = result.mSections[0];
                 first_drawing.mChannel = channel;
-                first_drawing.mKeyHandle = channel->GetData().GetHandle( 0 );
+                first_drawing.mKeyHandle = channel->GetHandle( 0 );
 
                 UMaterialInstance* material = first_drawing.GetMaterial();
                 UTexture2D* first_texture = ProjectAssetTools::GetTexture2D( iSequence, material );
@@ -468,7 +468,7 @@ ShotSequenceTools::GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSeque
     const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    iSequencer.SetGlobalTime( previous_time * subdata->RootToSequenceTransform.InverseLinearOnly() );
+    iSequencer.SetGlobalTime( previous_time * subdata->RootToSequenceTransform.InverseNoLooping() );
 }
 
 //---
@@ -528,7 +528,7 @@ ShotSequenceTools::GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence*
     const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    iSequencer.SetGlobalTime( *next_time * subdata->RootToSequenceTransform.InverseLinearOnly() );
+    iSequencer.SetGlobalTime( *next_time * subdata->RootToSequenceTransform.InverseNoLooping() );
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -9,6 +9,7 @@
 #include "MVVM/Views/KeyDrawParams.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "SequencerSettings.h"
+#include "TimeToPixel.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
@@ -259,7 +260,7 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
         const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
         FFrameTime local_inner_time = mDraggedKeys->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
-        FFrameTime local_time = local_inner_time * OuterToInnerTransform.InverseLinearOnly();
+        FFrameTime local_time = local_inner_time * OuterToInnerTransform.InverseNoLooping();
 
         //---
 
@@ -353,7 +354,7 @@ SMetaKeysArea::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometr
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
     FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
-    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseLinearOnly();
+    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseNoLooping();
     const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
     check( movie_scene );
 
