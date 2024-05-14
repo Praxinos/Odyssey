@@ -916,7 +916,7 @@ ShotSequenceHelpers::GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequ
         check( channels.Num() == 1 );
         for( int k = 0; k < channels[0]->GetNumKeys(); k++ )
         {
-            FDrawing drawing = { channels[0], section, channels[0]->GetData().GetHandle( k ) };
+            FDrawing drawing = { channels[0], section, channels[0]->GetHandle( k ) };
             drawings.Add( drawing );
         }
     }
