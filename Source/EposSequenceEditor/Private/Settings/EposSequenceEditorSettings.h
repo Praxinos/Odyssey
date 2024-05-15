@@ -61,7 +61,7 @@ public:
 //---
 
 USTRUCT( BlueprintType )
-struct FViewportSettings
+struct FStoryboardViewportSettings
 {
     GENERATED_BODY()
 
@@ -177,5 +177,5 @@ public:
 
     /** Specifies Viewport stuff. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
-    FViewportSettings ViewportSettings;
+    FStoryboardViewportSettings ViewportSettings;
 };
