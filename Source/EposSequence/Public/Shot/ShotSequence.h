@@ -4,10 +4,11 @@
 #pragma once
 
 #include "EposMovieSceneSequence.h"
-#include "LevelSequenceBindingReference.h"
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
 
+#include "LevelSequenceBindingReference.h"
+#include "Shot/ShotSequenceBindingReference.h"
 #include "SequenceNameElements.h"
 
 #include "ShotSequence.generated.h"
@@ -39,12 +40,16 @@ public:
     virtual void UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context ) override;
     virtual void UnbindInvalidObjects( const FGuid& ObjectId, UObject* Context ) override;
 
+    virtual const FMovieSceneBindingReferences* GetBindingReferences() const override;
+
+    virtual void PostLoad() override;
+
 #if WITH_EDITOR
     virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
     virtual FText GetDisplayName() const override;
 //
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
-    virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
+    virtual void GetAssetRegistryTags( FAssetRegistryTagsContext ioContext ) const override;
 #endif
 
     //~ UEposMovieSceneSequence interface
@@ -58,18 +63,20 @@ public:
     UPROPERTY()
     TObjectPtr<UMovieScene> MovieScene;
 
-    // The map should contain only one root cinecamera actor and its multiple components
-    // Only one entry should have an invalid guid
+    // The list should only contain one root cinecamera actor and its multiple components
     UPROPERTY()
-    TMap< FGuid, FLevelSequenceBindingReference > CameraBindingIdToReferences;
+    FShotSequenceBindingReferences CameraBindingReferences;
+    UPROPERTY()
+    FShotSequenceBindingReferences PlanesBindingReferences;
+    UPROPERTY()
+    FShotSequenceBindingReferences ActorsBindingReferences;
 
-    // The map will contain multiple plane actors and all their multiple components
     UPROPERTY()
-    TMap< FGuid, FLevelSequenceBindingReference > PlanesBindingIdToReferences;
-
-    // The map will contain multiple actors and all their multiple components
+    TMap< FGuid, FLevelSequenceBindingReference > CameraBindingIdToReferences_DEPRECATED;
     UPROPERTY()
-    TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences;
+    TMap< FGuid, FLevelSequenceBindingReference > PlanesBindingIdToReferences_DEPRECATED;
+    UPROPERTY()
+    TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences_DEPRECATED;
 
     UPROPERTY(EditAnywhere, Category=NamingConvention)
     FShotNameElements NameElements;

@@ -3,39 +3,45 @@
 
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 
-#include "Misc/Paths.h"
-#include "Widgets/SBoxPanel.h"
-#include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "GameFramework/Actor.h"
-#include "Factories/Factory.h"
-#include "Tracks/MovieSceneSubTrack.h"
-#include "Modules/ModuleManager.h"
-#include "Application/ThrottleManager.h"
-#include "Framework/Application/SlateApplication.h"
-#include "Widgets/Layout/SBox.h"
-#include "Widgets/Input/SCheckBox.h"
-#include "EditorStyleSet.h"
-#include "LevelEditorViewport.h"
-#include "CommonMovieSceneTools.h"
-#include "MovieSceneToolHelpers.h"
-#include "FCPXML/FCPXMLMovieSceneTranslator.h"
+#include "AutomatedLevelSequenceCapture.h"
 #include "LevelSequence.h"
-#include "SequencerUtilities.h"
-#include "IContentBrowserSingleton.h"
-#include "ContentBrowserModule.h"
+#include "MovieSceneCaptureModule.h"
+#include "MovieSceneTimeHelpers.h"
+#include "MovieSceneToolHelpers.h"
+#include "MovieSceneToolsProjectSettings.h"
+#include "SequencerSettings.h"
+#include "MVVM/Views/ViewUtilities.h"
+#include "MVVM/ViewModels/TrackRowModel.h"
+#include "MVVM/ViewModels/OutlinerColumns/OutlinerColumnTypes.h"
+#include "MVVM/Extensions/ITrackExtension.h"
+#include "TrackEditorThumbnail/TrackEditorThumbnailPool.h"
+#include "Tracks/MovieSceneSubTrack.h"
+
+#include "Application/ThrottleManager.h"
+#include "DragAndDrop/AssetDragDropOp.h"
+#include "Editor.h"
+#include "FCPXML/FCPXMLMovieSceneTranslator.h"
+#include "Factories/Factory.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Framework/Notifications/NotificationManager.h"
+#include "GameFramework/Actor.h"
+#include "LevelEditorViewport.h"
+#include "Misc/Paths.h"
+#include "Modules/ModuleManager.h"
+#include "Styling/AppStyle.h"
 #include "UObject/UObjectHash.h"
 #include "UObject/UObjectIterator.h"
-#include "TrackEditorThumbnail/TrackEditorThumbnailPool.h"
-#include "MovieSceneToolsProjectSettings.h"
-#include "Editor.h"
-#include "DragAndDrop/AssetDragDropOp.h"
-#include "MovieSceneTimeHelpers.h"
-#include "Framework/Notifications/NotificationManager.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Layout/SBox.h"
 #include "Widgets/Notifications/SNotificationList.h"
+#include "Widgets/SBoxPanel.h"
 
+#include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 #include "EposTracksEditorCommands.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
@@ -189,40 +195,69 @@ FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryIsVisible()
 //---
 
 TSharedPtr<SWidget>
-FCinematicBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding, UMovieSceneTrack* iTrack, const FBuildEditWidgetParams& iParams ) //override
+FCinematicBoardTrackEditor::BuildOutlinerColumnWidget( const FBuildColumnWidgetParams& Params, const FName& ColumnName ) //override
 {
-    // Create a container edit box
-    return SNew( SHorizontalBox )
+    using namespace UE::Sequencer;
 
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        .VAlign( VAlign_Center )
-        [
-            FSequencerUtilities::MakeAddButton( LOCTEXT( "CreateBoardShotText", "Shot/Board" ), FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent, iTrack ), iParams.NodeIsHovered, GetSequencer() )
-        ]
+    if( ColumnName == FCommonOutlinerNames::Add )
+    {
+        return UE::Sequencer::MakeAddButton(
+            LOCTEXT( "CreateBoardShotText", "Shot/Board" ),
+            FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent, Params.TrackModel->GetTrack() ),
+            Params.ViewModel );
+    }
 
-        // Add the camera check box
-        + SHorizontalBox::Slot()
-        .VAlign( VAlign_Center )
-        .HAlign( HAlign_Right )
-        .AutoWidth()
-        .Padding( 4, 0, 0, 0 )
-        [
-            SNew( SCheckBox )
-            .Style( &FAppStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "ToggleButtonCheckBoxAlt" ) )
-            .Type( ESlateCheckBoxType::CheckBox )
-            .Padding( FMargin( 0.f ) )
-            .IsFocusable( false )
-            .IsChecked( this, &FCinematicBoardTrackEditor::AreBoardsLocked )
-            .OnCheckStateChanged( this, &FCinematicBoardTrackEditor::OnLockBoardsClicked )
-            .ToolTipText( this, &FCinematicBoardTrackEditor::GetLockBoardsToolTip )
-            .CheckedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
-            .CheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
-            .CheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
-            .UncheckedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
-            .UncheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
-            .UncheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
-        ];
+    if( !Params.ViewModel->IsA<FTrackRowModel>() )
+    {
+        bool bAddCameraLock = false;
+        if( ColumnName == FCommonOutlinerNames::Nav )
+        {
+            bAddCameraLock = true;
+        }
+        else if( ColumnName == FCommonOutlinerNames::KeyFrame )
+        {
+            // Add the camera lock button to the keyframe column if Nav is disabled
+            bAddCameraLock = Params.TreeViewRow->IsColumnVisible( FCommonOutlinerNames::Nav ) == false;
+        }
+        else if( ColumnName == FCommonOutlinerNames::Edit )
+        {
+            // Add the camera lock button to the edit column if both Nav and KeyFrame are disabled
+            bAddCameraLock = Params.TreeViewRow->IsColumnVisible( FCommonOutlinerNames::Nav ) == false &&
+                Params.TreeViewRow->IsColumnVisible( FCommonOutlinerNames::KeyFrame ) == false;
+        }
+
+        if( bAddCameraLock )
+        {
+            TSharedRef<SWidget> Button = SNew( SCheckBox )
+                .Style( FAppStyle::Get(), "Sequencer.Outliner.ToggleButton" )
+                .Type( ESlateCheckBoxType::ToggleButton )
+                .IsFocusable( false )
+                .IsChecked( this, &FCinematicBoardTrackEditor::AreBoardsLocked )
+                .OnCheckStateChanged( this, &FCinematicBoardTrackEditor::OnLockBoardsClicked )
+                .ToolTipText( this, &FCinematicBoardTrackEditor::GetLockBoardsToolTip )
+                [
+                    SNew( SImage )
+                        .Image( FAppStyle::GetBrush( "Sequencer.Outliner.CameraLock" ) )
+                ];
+
+            if( ColumnName == FCommonOutlinerNames::Edit )
+            {
+                // Needs to be left aligned in the edit column because this column slot is set to fill
+                return SNew( SBox )
+                    .HAlign( HAlign_Left )
+                    .Padding( 4.f, 0.f )
+                    [
+                        Button
+                    ];
+            }
+            else
+            {
+                return Button;
+            }
+        }
+    }
+
+    return FMovieSceneTrackEditor::BuildOutlinerColumnWidget( Params, ColumnName );
 }
 
 TSharedRef<SWidget>
@@ -843,27 +878,21 @@ FCinematicBoardTrackEditor::AreBoardsLocked() const
 void
 FCinematicBoardTrackEditor::OnLockBoardsClicked( ECheckBoxState iCheckBoxState )
 {
-    if( iCheckBoxState == ECheckBoxState::Checked )
+    TSharedPtr<ISequencer> SequencerPtr = GetSequencer();
+
+    const bool bEnableCameraCuts = ( iCheckBoxState == ECheckBoxState::Checked );
+    SequencerPtr->SetPerspectiveViewportCameraCutEnabled( bEnableCameraCuts );
+
+    bool bNeedsRestoreViewport = true;
+    if( const USequencerSettings* SequencerSettings = SequencerPtr->GetSequencerSettings() )
     {
-        for( FLevelEditorViewportClient* levelVC : GEditor->GetLevelViewportClients() )
-        {
-            if( levelVC && levelVC->AllowsCinematicControl() && levelVC->GetViewMode() != VMI_Unknown )
-            {
-                levelVC->SetActorLock( nullptr );
-                levelVC->bLockedCameraView = false;
-                levelVC->UpdateViewForLockedActor();
-                levelVC->Invalidate();
-            }
-        }
-        GetSequencer()->SetPerspectiveViewportCameraCutEnabled( true );
-    }
-    else
-    {
-        GetSequencer()->UpdateCameraCut( nullptr, EMovieSceneCameraCutParams() );
-        GetSequencer()->SetPerspectiveViewportCameraCutEnabled( false );
+        bNeedsRestoreViewport = SequencerSettings->GetRestoreOriginalViewportOnCameraCutUnlock();
     }
 
-    GetSequencer()->ForceEvaluate();
+    UMovieSceneEntitySystemLinker* Linker = SequencerPtr->GetEvaluationTemplate().GetEntitySystemLinker();
+    UMovieSceneSingleCameraCutTrackInstance::ToggleCameraCutLock( Linker, bEnableCameraCuts, bNeedsRestoreViewport );
+
+    SequencerPtr->ForceEvaluate();
 }
 
 FText

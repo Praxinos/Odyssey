@@ -54,7 +54,7 @@ private:
     TSharedPtr<FUICommandList>          mCommandList;
     TSharedPtr<FExtender>               mCinematicsMenuExtender;
 
-    USequencerSettings*                 mSequencerSettings;
+    TObjectPtr<USequencerSettings>      mSequencerSettings;
 
     FDelegateHandle                     mMovieRendererDelegate;
     FDelegateHandle                     mExportSequencerRendererDelegate;

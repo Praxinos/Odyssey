@@ -5,8 +5,11 @@
 
 #include "CoreMinimal.h"
 
+#include "MovieSceneSequenceID.h"
+
 class IDetailsView;
 class ISequencer;
+class UEposMovieSceneSequence;
 class UExportPDFSettings;
 class UPDFDocExportWidget;
 class UMovieSceneSequence;
@@ -52,7 +55,7 @@ private:
 
     TSharedPtr<IDetailsView>    mDetailsViewExportPDFSettings;
 
-    UExportPDFSettings*         mExportPDFSettings { nullptr };
+    TObjectPtr<UExportPDFSettings>  mExportPDFSettings { nullptr };
 
     UPDFDocExportWidget*        mPDFDocWidget { nullptr };
     //SHorizontalBox::FSlot*      mPDFSlot { nullptr };

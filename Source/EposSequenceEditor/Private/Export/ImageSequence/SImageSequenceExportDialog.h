@@ -5,8 +5,11 @@
 
 #include "CoreMinimal.h"
 
+#include "MovieSceneSequenceID.h"
+
 class IDetailsView;
 class ISequencer;
+template<typename ItemType> class STileView;
 class UEposMovieSceneSequence;
 class UExportImageSequenceSettings;
 class UExportImageSequenceUISettings;
@@ -60,6 +63,6 @@ private:
     float                                           mItemDefaultWidth { 192.f };
     float                                           mItemDefaultHeight { 192.f };
 
-    UExportImageSequenceSettings*                   mExportImageSequenceSettings;
-    UExportImageSequenceUISettings*                 mExportImageSequenceUISettings;
+    TObjectPtr<UExportImageSequenceSettings>        mExportImageSequenceSettings;
+    TObjectPtr<UExportImageSequenceUISettings>      mExportImageSequenceUISettings;
 };

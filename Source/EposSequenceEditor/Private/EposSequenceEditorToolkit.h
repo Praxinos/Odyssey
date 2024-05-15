@@ -84,15 +84,6 @@ public:
 
 private:
 
-    /** Callback for the menu extensibility manager. */
-    TSharedRef<FExtender> HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects );
-    /** Callback for the track menu extender. */
-    void HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects );
-    /** Callback for executing the Add Component action. */
-    void HandleAddComponentActionExecute( UActorComponent* Component );
-
-    //---
-
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );
 
     void OnSequencerReceivedFocus();
@@ -111,9 +102,6 @@ private:
 
     /** Event that is cast when this toolkit is closed */
     FEposSequenceEditorToolkitClosed mOnClosedEvent;
-
-    /** Handle to the sequencer properties menu extender. */
-    FDelegateHandle mSequencerExtenderHandle;
 
     TSharedPtr<FEposSequenceEditorPlaybackContext> mPlaybackContext;
 

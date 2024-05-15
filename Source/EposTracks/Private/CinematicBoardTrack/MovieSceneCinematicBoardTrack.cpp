@@ -287,7 +287,7 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 // Now we must reorder physically the sections
                 // And this is what it made some flickering
                 // But now it's just at the end of the drag and not during the drag
-                MovieSceneHelpers::SortConsecutiveSections( Sections );
+                MovieSceneHelpers::SortConsecutiveSections( MutableView( Sections ) );
 
                 return EMovieSceneSectionMovedResult::SectionsChanged;
             }
@@ -315,7 +315,7 @@ UMovieSceneCinematicBoardTrack::GetDefaultDisplayName() const
 void
 UMovieSceneCinematicBoardTrack::SortSections()
 {
-    MovieSceneHelpers::SortConsecutiveSections( Sections );
+    MovieSceneHelpers::SortConsecutiveSections( MutableView( Sections ) );
 }
 
 void

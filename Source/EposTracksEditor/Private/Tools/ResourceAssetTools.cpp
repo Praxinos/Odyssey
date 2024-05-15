@@ -17,6 +17,7 @@
 #include "MovieSceneSequence.h"
 #include "ObjectTools.h"
 
+#include "EposMovieSceneSequence.h"
 #include "NamingConvention.h"
 #include "PlaneActor.h"
 #include "StoryNote.h"

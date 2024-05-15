@@ -11,6 +11,7 @@
 
 class ISequencer;
 class UBoardSequence;
+class UMovieSceneSubSection;
 class UShotSequence;
 
 class FImportImageSequenceConverter

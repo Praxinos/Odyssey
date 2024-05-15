@@ -205,9 +205,9 @@ FText FSingleCameraCutSection::GetSectionTitle() const
     return HandleThumbnailTextBlockText();
 }
 
-float FSingleCameraCutSection::GetSectionHeight() const
+float FSingleCameraCutSection::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
 {
-    return FKeyThumbnailSection::GetSectionHeight() + 10.f;
+    return FKeyThumbnailSection::GetSectionHeight( ViewDensity ) + 10.f;
 }
 
 FMargin FSingleCameraCutSection::GetContentPadding() const

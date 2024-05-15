@@ -5,6 +5,7 @@
 
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
+#include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"
 #include "IAssetTools.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -122,7 +123,7 @@ ShotSequenceTools::StepToNextShot( ISequencer& iSequencer, UMovieSceneSequence* 
     UMovieSceneSequence* parent_sequence = subsection->GetTypedOuter<UMovieSceneSequence>();
     check( parent_sequence );
 
-    FFrameTime time_in_parent = iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() * subsection->OuterToInnerTransform().InverseLinearOnly();
+    FFrameTime time_in_parent = iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() * subsection->OuterToInnerTransform().InverseNoLooping();
 
     UMovieSceneSubSection* next_subsection = FindNextOrPreviousShot( parent_sequence, time_in_parent.FloorToFrame(), true /* iNextShot */ );
     if( !next_subsection )
@@ -146,7 +147,7 @@ ShotSequenceTools::StepToPreviousShot( ISequencer& iSequencer, UMovieSceneSequen
     UMovieSceneSequence* parent_sequence = subsection->GetTypedOuter<UMovieSceneSequence>();
     check( parent_sequence );
 
-    FFrameTime time_in_parent = iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() * subsection->OuterToInnerTransform().InverseLinearOnly();
+    FFrameTime time_in_parent = iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() * subsection->OuterToInnerTransform().InverseNoLooping();
 
     UMovieSceneSubSection* previous_subsection = FindNextOrPreviousShot( parent_sequence, time_in_parent.FloorToFrame(), false /* iNextShot */ );
     if( !previous_subsection )

@@ -37,7 +37,7 @@ FExportConverter::ProcessSequencerMarks( UShotSequence& iShotSequence, FMovieSce
     TArray<FMovieSceneMarkedFrame> marks = iShotSequence.GetMovieScene()->GetMarkedFrames();
     for( auto mark : marks )
     {
-        FFrameNumber frame_in_root = ( mark.FrameNumber * iRootToSequenceTransform.InverseLinearOnly() ).GetFrame();
+        FFrameNumber frame_in_root = ( mark.FrameNumber * iRootToSequenceTransform.InverseNoLooping() ).GetFrame();
 
         FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
                                                                 {
@@ -77,7 +77,7 @@ FExportConverter::ProcessDrawings( UShotSequence& iShotSequence, FMovieSceneSequ
             FFrameNumber frame;
             drawing.mChannel->GetKeyTimes( TArrayView<const FKeyHandle>( &drawing.mKeyHandle, 1 ), TArrayView<FFrameNumber>( &frame, 1 ) );
 
-            FFrameNumber frame_in_root = ( frame * iRootToSequenceTransform.InverseLinearOnly() ).GetFrame();
+            FFrameNumber frame_in_root = ( frame * iRootToSequenceTransform.InverseNoLooping() ).GetFrame();
 
             FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
                                                                     {
@@ -114,7 +114,7 @@ FExportConverter::ProcessFirstShotFrame( UShotSequence& iShotSequence, FMovieSce
 {
     TRange<FFrameNumber> playback_range = iShotSequence.GetMovieScene()->GetPlaybackRange();
 
-    FFrameNumber frame_in_root = ( playback_range.GetLowerBoundValue() * iRootToSequenceTransform.InverseLinearOnly() ).GetFrame();
+    FFrameNumber frame_in_root = ( playback_range.GetLowerBoundValue() * iRootToSequenceTransform.InverseNoLooping() ).GetFrame();
 
     FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
                                                             {

@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+#include "MovieSceneSequenceID.h"
+
 #include "Settings/NamingConventionSettings.h"
 
 class ACineCameraActor;

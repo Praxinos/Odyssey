@@ -164,26 +164,23 @@ void UMovieSceneSingleCameraCutSection::ComputeInitialCameraCutTransform()
 
     // Find the transform track for our bound camera.
     UMovieScene3DTransformTrack* CameraTransformTrack = nullptr;
-    if (CameraBindingID.IsValid())
+    if( CameraBindingID.IsValid() )
     {
         UMovieScene* MovieScene = GetTypedOuter<UMovieScene>();
-        check(MovieScene);
+        check( MovieScene );
 
-        for (const FMovieSceneBinding& Binding : MovieScene->GetBindings())
+        if( const FMovieSceneBinding* Binding = MovieScene->FindBinding( CameraBindingID.GetGuid() ) )
         {
-            if (Binding.GetObjectGuid() == CameraBindingID.GetGuid())
+            for( UMovieSceneTrack* Track : Binding->GetTracks() )
             {
-                for (UMovieSceneTrack* Track : Binding.GetTracks())
+                CameraTransformTrack = Cast<UMovieScene3DTransformTrack>( Track );
+                if( CameraTransformTrack )
                 {
-                    CameraTransformTrack = Cast<UMovieScene3DTransformTrack>(Track);
-                    if (CameraTransformTrack)
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
         }
-    }
+    }   
 
     // Does the bound camera have a transform track?
     if (CameraTransformTrack == nullptr)

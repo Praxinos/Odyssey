@@ -58,7 +58,7 @@ FTransform GetTransformOrigin( TSharedPtr<ISequencer> Sequencer )
 
 //static
 UMovieSceneTrack*
-ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex )
+ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, FComponentMaterialInfo iMaterialTrackInfo )
 {
     if( !iBinding.IsValid() )
         return nullptr;
@@ -73,8 +73,9 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
         return nullptr;
 
     UMovieSceneTrack* NewTrack = movieScene->FindTrack( iClass, iBinding );
+    check( iMaterialTrackInfo.MaterialType == EComponentMaterialType::Empty || iMaterialTrackInfo.MaterialType == EComponentMaterialType::IndexedMaterial );
     // For material track, multiple new tracks (of the same type) may be needed
-    if( !NewTrack || iMaterialTrackIndex > 0 )
+    if( !NewTrack || iMaterialTrackInfo.MaterialSlotIndex > 0 )
         NewTrack = movieScene->AddTrack( iClass, iBinding );
 
     bool bCreateDefaultSection = false;
@@ -148,10 +149,14 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
         {
             UMovieScenePrimitiveMaterialTrack* material_track = Cast< UMovieScenePrimitiveMaterialTrack >( NewTrack );
 
-            auto material_section = Cast<UMovieScenePrimitiveMaterialSection>( NewSection );
+            UMovieScenePrimitiveMaterialSection* material_section = Cast<UMovieScenePrimitiveMaterialSection>( NewSection );
 
-            material_track->SetMaterialIndex( iMaterialTrackIndex );
-            material_track->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( material_track->GetMaterialIndex() ) ) );
+            material_track->SetMaterialInfo( iMaterialTrackInfo );
+
+            FText trackDisplayName = !iMaterialTrackInfo.MaterialSlotName.IsNone()
+                ? FText::Format( LOCTEXT( "SlotMaterialSwitcherTrackName", "Material Slot: {0}" ), FText::FromName( iMaterialTrackInfo.MaterialSlotName ) )
+                : FText::Format( LOCTEXT( "IndexedMaterialSwitcherTrackName", "Material Element {0}" ), FText::AsNumber( iMaterialTrackInfo.MaterialSlotIndex ) );
+            material_track->SetDisplayName( trackDisplayName );
 
             //---
 
@@ -159,7 +164,7 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
             FMovieSceneObjectPathChannelKeyValue material_objectpath;
             if( actor )
             {
-                UMaterialInterface* material = actor->GetStaticMeshComponent()->GetMaterial( material_track->GetMaterialIndex() );
+                UMaterialInterface* material = actor->GetStaticMeshComponent()->GetMaterial( material_track->GetMaterialInfo().MaterialSlotIndex );
                 material_objectpath = material;
             }
 
@@ -377,21 +382,23 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
         //---
 
         // From D:\work\UnrealEngine\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\PrimitiveMaterialTrackEditor.cpp
-        int32 minNumMaterials = TNumericLimits<int32>::Max();
-        for( TWeakObjectPtr<> weakObject : iSequencer->FindObjectsInCurrentSequence( component_binding ) )
+        UObject* object = iSequencer->FindSpawnedObjectOrTemplate( component_binding );
+        USceneComponent* sceneComponent = Cast<USceneComponent>( object );
+        UPrimitiveComponent* primitiveComponent = Cast<UPrimitiveComponent>( sceneComponent );
+
+        if( primitiveComponent )
         {
-            UPrimitiveComponent* primitiveComponent = Cast<UPrimitiveComponent>( weakObject.Get() );
-            if( !primitiveComponent )
-                continue;
+            int32 numMaterials = primitiveComponent->GetNumMaterials();
+            TArray<FName> materialSlotNames = primitiveComponent->GetMaterialSlotNames();
 
-            minNumMaterials = FMath::Min( minNumMaterials, primitiveComponent->GetNumMaterials() );
+            for( int32 materialIndex = 0; materialIndex < numMaterials; materialIndex++ )
+            {
+                FName materialSlotName = materialSlotNames.IsValidIndex( materialIndex ) ? materialSlotNames[materialIndex] : FName();
+                FComponentMaterialInfo materialInfo{ materialSlotName, materialIndex, EComponentMaterialType::IndexedMaterial };
+
+                CreateTrack( iSequencer, iActor, component_binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), materialInfo );
+            }
         }
-
-        if( minNumMaterials == TNumericLimits<int32>::Max() )
-            minNumMaterials = 0;
-
-        for( int material_index = 0; material_index < minNumMaterials; material_index++ )
-            CreateTrack( iSequencer, iActor, component_binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), material_index );
     }
     // For skeletal mesh actor
     // - '3DTransform' track

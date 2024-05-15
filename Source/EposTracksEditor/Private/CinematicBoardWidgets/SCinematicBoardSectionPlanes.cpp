@@ -13,6 +13,7 @@
 #include "SequencerSettings.h"
 #include "Styling/StyleColors.h"
 #include "Subsystems/AssetEditorSubsystem.h"
+#include "TimeToPixel.h"
 #include "Tracks/MovieSceneVisibilityTrack.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
@@ -105,7 +106,7 @@ SKeysOverviewBox::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeom
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
     FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
-    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseLinearOnly();
+    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseNoLooping();
     const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
     check( movie_scene );
 

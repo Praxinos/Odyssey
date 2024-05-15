@@ -4,6 +4,8 @@
 #include "Misc/EposSequenceEditorPlaybackContext.h"
 #include "Editor.h"
 
+#include "EposMovieSceneSequence.h"
+
 #define LOCTEXT_NAMESPACE "EposSequenceEditorPlaybackContext"
 
 FEposSequenceEditorPlaybackContext::FEposSequenceEditorPlaybackContext( UEposMovieSceneSequence* iEposSequence )
@@ -33,10 +35,16 @@ FEposSequenceEditorPlaybackContext::GetEposSequence() const
     return mEposSequence.Get();
 }
 
-UWorld*
+UObject*
 FEposSequenceEditorPlaybackContext::GetPlaybackContext() const
 {
     UpdateCachedContextAndClient();
+
+    //if( ALevelSequenceActor* Client = GetPlaybackClient() )
+    //{
+    //    return Client;
+    //}
+
     return mWeakCurrentContext.Get();
 }
 

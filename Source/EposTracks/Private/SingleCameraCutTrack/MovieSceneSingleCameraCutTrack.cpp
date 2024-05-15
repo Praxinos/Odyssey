@@ -64,10 +64,10 @@ UMovieSceneSingleCameraCutSection* UMovieSceneSingleCameraCutTrack::AddNewSingle
     }
 
     // When a new CameraCut is added, sort all CameraCuts to ensure they are in the correct order
-    MovieSceneHelpers::SortConsecutiveSections(Sections);
+    MovieSceneHelpers::SortConsecutiveSections( MutableView( Sections ) );
 
     // Once CameraCuts are sorted fixup the surrounding CameraCuts to fix any gaps
-    MovieSceneHelpers::FixupConsecutiveSections(Sections, *NewSection, false);
+    MovieSceneHelpers::FixupConsecutiveSections( MutableView( Sections ), *NewSection, false);
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -133,7 +133,7 @@ void UMovieSceneSingleCameraCutTrack::RemoveSection(UMovieSceneSection& Section)
 {
     Sections.Remove(&Section);
 
-    MovieSceneHelpers::FixupConsecutiveSections(Sections, Section, true);
+    MovieSceneHelpers::FixupConsecutiveSections( MutableView( Sections ), Section, true);
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -145,10 +145,10 @@ void UMovieSceneSingleCameraCutTrack::RemoveSection(UMovieSceneSection& Section)
 void UMovieSceneSingleCameraCutTrack::RemoveSectionAt(int32 SectionIndex)
 {
     UMovieSceneSection* SectionToDelete = Sections[SectionIndex];
-    MovieSceneHelpers::FixupConsecutiveSections(Sections, *SectionToDelete, true);
+    MovieSceneHelpers::FixupConsecutiveSections( MutableView( Sections ), *SectionToDelete, true);
 
     Sections.RemoveAt(SectionIndex);
-    MovieSceneHelpers::SortConsecutiveSections(Sections);
+    MovieSceneHelpers::SortConsecutiveSections( MutableView( Sections ) );
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );

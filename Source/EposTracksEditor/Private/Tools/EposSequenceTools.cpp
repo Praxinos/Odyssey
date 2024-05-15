@@ -3,6 +3,7 @@
 
 #include "Tools/EposSequenceTools.h"
 
+#include "AnimatedRange.h"
 #include "ISequencer.h"
 #include "MovieScene.h"
 #include "MovieSceneSection.h"

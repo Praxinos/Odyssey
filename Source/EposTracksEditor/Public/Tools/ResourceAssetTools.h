@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+#include "MovieSceneSequenceID.h"
+
 class ACineCameraActor;
 class APlaneActor;
 class FString;

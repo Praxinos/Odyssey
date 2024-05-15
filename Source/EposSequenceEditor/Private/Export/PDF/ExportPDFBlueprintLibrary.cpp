@@ -4,6 +4,7 @@
 #include "Export/PDF/ExportPDFBlueprintLibrary.h"
 
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
+#include "Evaluation/MovieSceneSequenceHierarchy.h"
 #include "ImageUtils.h"
 //#include "ImageWriteTask.h"
 #include "ISequencer.h"
