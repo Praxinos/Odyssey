@@ -36,6 +36,8 @@
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
+#include "Undo/OdysseyVectorUndoTagAdd.h"
+#include "Undo/OdysseyVectorUndoTagRemove.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
@@ -1506,9 +1508,12 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
                                            , FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = vectorEngine->GetSelectedObjectList();
+    std::vector<FOdysseyVectorTag*> removedTagArray;
 
-    if( selectedObject )
+    removedTagArray.reserve( selectedObjectList.size() );
+
+    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
         FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
@@ -1518,9 +1523,26 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
 
             selectedObject->RemoveTag( tag );
 
+            removedTagArray.push_back( tag );
+
             inbetweenerTag->UpdateAnimationCells();
         }
     }
+
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-tags", "Delete Tags"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagRemove( iScene
+                                                                  , removedTagArray );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
@@ -1534,21 +1556,41 @@ void
 FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = vectorEngine->GetSelectedObjectList();
+    std::vector<FOdysseyVectorTag*> addedTagArray;
 
-    if( selectedObject )
+    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
         FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
         if( tag == nullptr )
         {
-            selectedObject->AddTag( new FOdysseyVectorTagInbetweener( vectorEngine->GetSharedEnv()
-                                                                    , selectedObject
-                                                                    , 4
-                                                                    , 4
-                                                                    , 4 ) );
+            FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( vectorEngine->GetSharedEnv()
+                                                                                           , selectedObject
+                                                                                           , 4
+                                                                                           , 4
+                                                                                           , 4 );
+
+            selectedObject->AddTag( inbetweenerTag );
+
+            addedTagArray.push_back( inbetweenerTag );
         }
     }
+
+    // needed for undos
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.add-tags", "Add Tags"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagAdd( iScene
+                                                               , addedTagArray );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 

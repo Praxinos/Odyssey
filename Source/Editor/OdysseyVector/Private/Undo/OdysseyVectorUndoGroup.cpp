@@ -89,7 +89,7 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
     }
 
     // Add the created group
-    mAddedGroup->GetParent()->AppendChild( mAddedGroup );
+    mAddedGroup->GetOldParent()->AppendChild( mAddedGroup );
 
     // Add all children to the newly created group
     for( int i = 0; i < mAddedObjectArray.size(); i++ )

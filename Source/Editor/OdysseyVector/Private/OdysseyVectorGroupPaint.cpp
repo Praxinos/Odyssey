@@ -1213,6 +1213,8 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
 bool
 FOdysseyVectorGroupPaint::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
+    return FOdysseyVectorGroup::PickShape( iRoi, iSelectionFlags );
+/*
     if( iSelectionFlags & PICK_MATH_BASED )
     {
         BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
@@ -1227,6 +1229,7 @@ FOdysseyVectorGroupPaint::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelecti
     }
 
     return false;
+*/
 }
 
 void
