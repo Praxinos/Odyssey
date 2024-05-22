@@ -138,15 +138,6 @@ UOdysseyAnimationLayerImageVector::BlendModeChanged()
 void
 UOdysseyAnimationLayerImageVector::OnCellsChanged()
 {
-    int i = 0;
-
-    for( TSharedPtr<FOdysseyAnimationCell> cell : mCellsContainer.Get().GetCells() )
-    {
-        FOdysseyAnimationCellImageVector* vectorCell = static_cast<FOdysseyAnimationCellImageVector*>(cell.Get());
-
-        vectorCell->GetEngine()->SetCellIndex( i++ );
-    }
-
     //OnCellsChanged().Broadcast(this);
     ImageRenderingCompositionChanged();
     UOdysseyLayer::OnMediaChanged().Broadcast();

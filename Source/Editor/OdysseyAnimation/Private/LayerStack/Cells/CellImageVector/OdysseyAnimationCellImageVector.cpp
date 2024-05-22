@@ -7,6 +7,7 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorExport.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImport.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorBlock.h"
@@ -78,6 +79,7 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
     mHeight = iHeight;
 
     mEngine = new FOdysseyVectorEngine( GetLayer()->GetSharedEnv()
+                                      , this
                                       , new FOdysseyVectorGroupPaint( "Scene" )
                                       , (double)iWidth
                                       , (double)iHeight );
@@ -254,4 +256,41 @@ void
 FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
     ImageRenderingChanged( iRects, iIsInteractive);
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetCellByIndex
+IOdysseyVectorAnimationCell*
+FOdysseyAnimationCellImageVector::GetCellByIndex( uint32 iIndex )
+{
+    uint32 cellCount = GetLayer()->GetCellsContainer()->GetCells().Num();
+
+    if( ( iIndex >= 0 ) && ( iIndex < cellCount ) )
+    {
+        FOdysseyAnimationCell* cell = GetLayer()->GetCellsContainer()->GetCells()[iIndex].Get();
+
+        return static_cast<FOdysseyAnimationCellImageVector*>(cell);
+    }
+
+    return nullptr;
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetEngine
+FOdysseyVectorEngine* 
+FOdysseyAnimationCellImageVector::GetEngine()
+{
+    return mEngine;
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetIndex
+int32 
+FOdysseyAnimationCellImageVector::GetIndex()
+{
+    return GetLayer()->GetCellsContainer()->GetCellIndex(SharedThis(this));
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetLength
+uint32
+FOdysseyAnimationCellImageVector::GetLength()
+{
+    return GetLength();
 }

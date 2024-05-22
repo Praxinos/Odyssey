@@ -118,6 +118,7 @@ namespace FOdysseyVector
     //bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
 }
 
+#include "OdysseyVectorAnimationCell.h"
 #include "OdysseyVectorPolygon.h"
 #include "OdysseyVectorBrush.h"
 #include "OdysseyVectorTag.h"

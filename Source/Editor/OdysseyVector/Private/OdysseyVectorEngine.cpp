@@ -11,12 +11,14 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 }
 
 FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorSharedEnv* iSharedEnv
+                                          , IOdysseyVectorAnimationCell* iAnimationCell
                                           , FOdysseyVectorGroupPaint* iScene
                                           , uint32 iPreferredWidth
                                           , uint32 iPreferredHeight )
     : FOdysseyVectorObject( "Engine" )
     , mCellIndex( 0 )
     , mSharedEnv ( iSharedEnv )
+    , mAnimationCell( iAnimationCell )
     , mSelectionSpace( nullptr )
     , mInvalidTileMap( 64, iPreferredWidth, iPreferredHeight )
     , mPreferredWidth( iPreferredWidth )
@@ -94,16 +96,10 @@ FOdysseyVectorEngine::GetSharedEnv()
     return mSharedEnv;
 }
 
-uint32
-FOdysseyVectorEngine::GetCellIndex()
+IOdysseyVectorAnimationCell*
+FOdysseyVectorEngine::GetAnimationCell()
 {
-    return mCellIndex;
-}
-
-void
-FOdysseyVectorEngine::SetCellIndex( uint32 iCellIndex )
-{
-    mCellIndex = iCellIndex;
+    return mAnimationCell;
 }
 
 void
@@ -344,7 +340,11 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
         {
             for ( FOdysseyVectorTag* tag : mSharedEnv->GetTagList() )
             {
-                tag->Draw( mScene, iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
+                // only draw tag as a shared tag if it does NOT belong to the scene
+                if( tag->GetOwner()->GetScene() != mScene )
+                {
+                    tag->Draw( mScene, iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
+                }
             }
         }
 

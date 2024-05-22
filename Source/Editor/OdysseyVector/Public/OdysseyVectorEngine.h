@@ -14,6 +14,7 @@
 #include "ULISInvalidTileMap.h"
 
 class FOdysseyVectorSharedEnv;
+class IOdysseyVectorAnimationCell;
 
 //#include "OdysseyVectorGroupPaint.generated.h"
 
@@ -111,6 +112,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          * @brief Constructor
          */
         FOdysseyVectorEngine( FOdysseyVectorSharedEnv* iSharedEnv
+                            , IOdysseyVectorAnimationCell* iAnimationCell
                             , FOdysseyVectorGroupPaint* iScene
                             , uint32 iPreferredWidth
                             , uint32 iPreferredHeight );
@@ -225,8 +227,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         uint32 GetPreferredHeight();
 
         FOdysseyVectorSharedEnv* GetSharedEnv();
-        uint32 GetCellIndex();
-        void SetCellIndex( uint32 iCellIndex );
+        IOdysseyVectorAnimationCell* GetAnimationCell();
 
         void TraceLine ( int32 iX0
                        , int32 iY0
@@ -386,6 +387,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
     protected:
         uint32 mCellIndex;
         FOdysseyVectorSharedEnv* mSharedEnv;
+        IOdysseyVectorAnimationCell* mAnimationCell;
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
         BLContextCreateInfo mCreateInfo;
         BLImage* mBLMask;

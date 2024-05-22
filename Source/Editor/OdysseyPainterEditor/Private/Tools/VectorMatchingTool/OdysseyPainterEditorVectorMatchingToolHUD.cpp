@@ -88,7 +88,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawChart( BLContext* iBLContext
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
+    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
     iBLContext->setStrokeWidth( 1.0f );
 
     iBLContext->strokeLine( mChartRect.x               , cursorY

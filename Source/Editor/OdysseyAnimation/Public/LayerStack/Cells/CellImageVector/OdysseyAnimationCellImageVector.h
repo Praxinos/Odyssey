@@ -6,6 +6,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyAnimationImageRenderingAbility.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyVectorAnimationCell.h"
 
 class FOdysseyVectorBlock;
 class FOdysseyMediaVector;
@@ -13,7 +14,7 @@ class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVector
-    : public FOdysseyAnimationCell
+    : public FOdysseyAnimationCell, public IOdysseyVectorAnimationCell
 {    
 public:
     static TSharedRef<FOdysseyAnimationCellImageVector> Create(UOdysseyAnimationLayerImageVector* iLayer, int iLength, int iWidth, int iHeight);
@@ -57,6 +58,13 @@ public:
     FCriticalSection* GetImageRenderingMutex() const;
     bool IsImageRenderingGameThreadOnly() const;
     virtual UOdysseyAnimationLayerImageVector* GetLayer() const override;
+
+public:
+    // Implements Interface IOdysseyVectorAnimationCell
+    virtual IOdysseyVectorAnimationCell* GetCellByIndex( uint32 iIndex ) override;
+    virtual FOdysseyVectorEngine* GetEngine() override;
+    virtual int32 GetIndex() override;
+    virtual uint32 GetLength() override;
 
 private:
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);

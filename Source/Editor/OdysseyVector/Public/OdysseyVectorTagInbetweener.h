@@ -141,6 +141,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void MoveInbetween( FInbetweenerInbetween* iInbetween
                           , float iNewSpacing
                           , bool iRelative );
+        void UpdateAnimationCells();
 
     protected:
         void DrawGrid( BLContext* iBLContext
@@ -157,6 +158,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint, uint32 iPositionIndex );
         void FFDDeformPaths( uint32 iPositionIndex );
         void ResetChart();
+        void InterpolateInbetween( uint32 iInbetweenIndex );
 
     protected:
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;

@@ -127,7 +127,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                                                , mPickedInbetween
                                                , iPointInTexture.x
                                                , iPointInTexture.y
-                                               , false );
+                                               , FSlateApplication::Get().GetModifierKeys().IsControlDown() );
                 }
                 else
                 {
@@ -139,10 +139,10 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                         point->targetPosition.x += localDiff.x;
                         point->targetPosition.y += localDiff.y;
                     }
-                }
 
-                // update
-                inbetweenerTag->Interpolate();
+                    // update
+                    inbetweenerTag->Interpolate();
+                }
             }
         }
     }
@@ -161,6 +161,17 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
+        if( iEngine->GetSelectedObjectList().size() )
+        {
+            FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
+            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+            if( inbetweenerTag )
+            {
+                inbetweenerTag->UpdateAnimationCells();
+            }
+        }
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;

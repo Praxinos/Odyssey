@@ -230,9 +230,10 @@ FOdysseyVectorTagInbetweener::ResetChart()
     float spacing = step;
 
     mChart.inbetweenBuffer.clear();
-    mChart.inbetweenBuffer.resize( mInbetweenCount );
+    // Note: +1 for target position
+    mChart.inbetweenBuffer.resize( mInbetweenCount + 1 );
 
-    for( uint32 i = 0; i < mInbetweenCount; i++ )
+    for( uint32 i = 0; i <= mInbetweenCount; i++ )
     {
         mChart.inbetweenBuffer[i].spacing = spacing;
 
@@ -393,26 +394,56 @@ FOdysseyVectorTagInbetweener::FFDDeformPaths( uint32 iPositionIndex )
 }
 
 void
-FOdysseyVectorTagInbetweener::Interpolate()
+FOdysseyVectorTagInbetweener::InterpolateInbetween( uint32 iInbetweenIndex )
 {
     ::ULIS::FRectD bbox = mOwner->GetBBox( false );
 
+    for( FInbetweenerPoint& point : mGridPointBuffer )
+    {
+        ::ULIS::FVec2D diff = ( point.targetPosition - point.sourcePosition );
+        ::ULIS::FVec2D step = diff * mChart.inbetweenBuffer[iInbetweenIndex].spacing;
+
+        point.motionPosition = point.sourcePosition + step;
+
+        point.u = ( point.motionPosition.x - bbox.x ) / bbox.w;
+        point.v = ( point.motionPosition.y - bbox.y ) / bbox.h;
+    }
+
+    // deform the path according to grid geometry
+    FFDDeformPaths( iInbetweenIndex );
+}
+
+void
+FOdysseyVectorTagInbetweener::UpdateAnimationCells()
+{
+    IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
+
+    if( animationCell )
+    {
+        int32 animationCellIndex = animationCell->GetIndex();
+
+        // Redraw impacted cells
+        for( uint32 i = 0; ( i < mInbetweenCount ) && ( animationCell != nullptr ); i++ )
+        {
+            IOdysseyVectorAnimationCell* nextAnimationCell = animationCell->GetCellByIndex( animationCellIndex + i + 1 );
+
+            if( nextAnimationCell )
+            {
+                //nextAnimationCell->GetEngine()->Invalidate();
+                nextAnimationCell->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+            }
+
+            animationCell = nextAnimationCell;
+        }
+    }
+}
+
+void
+FOdysseyVectorTagInbetweener::Interpolate()
+{
     for( uint32 i = 0; i <= mInbetweenCount; i++ )
     {
-        // first step : deform the grid via linear interpolation
-        for( FInbetweenerPoint& point : mGridPointBuffer )
-        {
-            ::ULIS::FVec2D diff = ( point.targetPosition - point.sourcePosition );
-            ::ULIS::FVec2D step = diff * mChart.inbetweenBuffer[i].spacing;
-
-            point.motionPosition = point.sourcePosition + step;
-
-            point.u = ( point.motionPosition.x - bbox.x ) / bbox.w;
-            point.v = ( point.motionPosition.y - bbox.y ) / bbox.h;
-        }
-
-        // deform the path according to grid geometry
-        FFDDeformPaths( i );
+        InterpolateInbetween( i );
     }
 }
 
@@ -435,13 +466,14 @@ FOdysseyVectorTagInbetweener::Draw( BLContext* iBLContext
 
 // when drawn as a shared tag
 void
-FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iCurrentScene
+FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
                                   , BLContext* iBLContext
                                   , const ::ULIS::FRectD& iInvalidationArea
                                   , double iAncestorsOpacity
                                   , uint64 iDrawingFlags )
 {
-    FOdysseyVectorGroupPaint* scene = mOwner->GetScene();
+    IOdysseyVectorAnimationCell* displayedCell = iDisplayedScene->GetEngine()->GetAnimationCell();
+    IOdysseyVectorAnimationCell* tagCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -450,16 +482,15 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iCurrentScene
     iBLContext->setStrokeWidth( 3.0f );
 
     // if th eobject hasn't been removed from the scene
-    if( scene )
+    if( displayedCell && tagCell )
     {
-        uint32 cellIndex = scene->GetEngine()->GetCellIndex();
-        uint32 currentCellIndex = iCurrentScene->GetEngine()->GetCellIndex();
+        uint32 tagCellIndex = tagCell->GetIndex();
+        uint32 displayedCellIndex = displayedCell->GetIndex();
 
-        if ( ( currentCellIndex >    cellIndex                     )
-          && ( currentCellIndex <= ( cellIndex + mInbetweenCount ) ) )
+        if ( ( displayedCellIndex >    tagCellIndex                     )
+          && ( displayedCellIndex <= ( tagCellIndex + mInbetweenCount ) ) )
         {
-            DrawPathsInbetween( currentCellIndex - cellIndex - 1
-                              , iBLContext );
+            DrawPathsInbetween( displayedCellIndex - tagCellIndex - 1, iBLContext );
         }
     }
 
@@ -506,36 +537,58 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
                                            , float iNewSpacing
                                            , bool iRelative )
 {
-    int32 inbetweenIndex = iInbetween - &mChart.inbetweenBuffer[0];
-    int32 prevIndex  = inbetweenIndex - 1;
-    uint32 nextIndex = inbetweenIndex + 1;
-    float prevSpacing = prevIndex > -1 ? mChart.inbetweenBuffer[prevIndex].spacing
-                                       : 0.0f;
-    float nextSpacing = nextIndex < mInbetweenCount ? mChart.inbetweenBuffer[nextIndex].spacing
-                                                    : 1.0f;
-
-
-    if( iRelative == false )
+    if( ( iNewSpacing > 0.0f ) && ( iNewSpacing < 1.0f ) )
     {
-        if( ( iNewSpacing > prevSpacing )
-         && ( iNewSpacing < nextSpacing ) )
+        IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
+        int32 inbetweenIndex = iInbetween - &mChart.inbetweenBuffer[0];
+        int32 prevIndex  = inbetweenIndex - 1;
+        uint32 nextIndex = inbetweenIndex + 1;
+        float prevSpacing = prevIndex > -1 ? mChart.inbetweenBuffer[prevIndex].spacing
+                                           : 0.0f;
+        float nextSpacing = nextIndex < mInbetweenCount ? mChart.inbetweenBuffer[nextIndex].spacing
+                                                        : 1.0f;
+
+        if( iRelative == false )
         {
-            iInbetween->spacing = iNewSpacing;
-        }
-    }
-    else
-    {
-        for( FInbetweenerInbetween& otherInbetween : mChart.inbetweenBuffer )
-        {
-            if( &otherInbetween != iInbetween )
+            if( ( iNewSpacing > prevSpacing )
+             && ( iNewSpacing < nextSpacing ) )
             {
-                float ratio = iInbetween->spacing ? ( otherInbetween.spacing / iInbetween->spacing ) : 0.0f;
+                iInbetween->spacing = iNewSpacing;
 
-                otherInbetween.spacing = iNewSpacing * ratio;
+                // recompute single inbetweens
+                InterpolateInbetween( inbetweenIndex );
             }
         }
+        else
+        {
+            for( FInbetweenerInbetween& otherInbetween : mChart.inbetweenBuffer )
+            {
+                if( &otherInbetween != iInbetween )
+                {
+                    if( otherInbetween.spacing < iInbetween->spacing )
+                    {
+                        float length = iInbetween->spacing;
+                        float ratio = iInbetween->spacing ? ( otherInbetween.spacing / length ) : 0.0f;
+                        float newLength = iNewSpacing;
 
-        iInbetween->spacing = iNewSpacing;
+                        otherInbetween.spacing = newLength * ratio;
+                    }
+                    else
+                    {
+                        float length = 1.0f - iInbetween->spacing;
+                        float ratio = iInbetween->spacing ? ( ( otherInbetween.spacing - iInbetween->spacing ) / length ) : 0.0f;
+                        float newLength = 1.0f - iNewSpacing;
+
+                        otherInbetween.spacing = iNewSpacing + ( newLength * ratio );
+                    }
+                }
+            }
+
+            iInbetween->spacing = iNewSpacing;
+
+            // recompute all inbetweens
+            Interpolate();
+        }
     }
 }
 
