@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoRemoveObjects.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 
 #include "OdysseyVectorEngine.h"
 
@@ -58,9 +60,7 @@ FOdysseyVectorUndoRemoveObjects::Revert( UObject* iIgnored )
 
     for( FOdysseyVectorObject* object : mRemovedObjectArray )
     {
-        // Note: GetParent is still valid even though the object was removed from the children list.
-        // This helps us to add the object to its parent anew without having to store the pointer to the parent object.
-        object->GetParent()->AppendChild( object );
+        object->GetOldParent()->AppendChild( object );
 
         //mScene->GetEngine()->SelectObject( object );
     }

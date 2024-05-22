@@ -121,7 +121,7 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mAddedPathArray.size(); i++ )
     {
-        mAddedPathArray[i]->GetParent()->AppendChild( mAddedPathArray[i] );
+        mAddedPathArray[i]->GetOldParent()->AppendChild( mAddedPathArray[i] );
     }
 
     for( int i = 0; i < mAddedVertexArray.size(); i++ )
@@ -152,7 +152,7 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mRemovedPathArray.size(); i++ )
     {
-        mRemovedPathArray[i]->GetParent()->AppendChild( mRemovedPathArray[i] );
+        mRemovedPathArray[i]->GetOldParent()->AppendChild( mRemovedPathArray[i] );
     }
 
     for( int i = 0; i < mRemovedVertexArray.size(); i++ )

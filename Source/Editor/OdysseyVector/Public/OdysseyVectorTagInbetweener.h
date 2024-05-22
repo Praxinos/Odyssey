@@ -15,6 +15,7 @@ class FOdysseyVectorPoint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;
+class FOdysseyVectorSharedEnv;
 
 UENUM()
 enum class eInbetweenerGridType : uint8
@@ -132,7 +133,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         virtual uint32 GetClass() { return mStaticClass; };
 
         virtual ~FOdysseyVectorTagInbetweener();
-        FOdysseyVectorTagInbetweener( FOdysseyVectorObject* iOwnerObject
+        FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
+                                    , FOdysseyVectorObject* iOwnerObject
                                     , uint32 iNumCellX
                                     , uint32 iNumCellY
                                     , uint32 iInbetweenCount );
@@ -146,6 +148,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) override;
+        virtual void Added() override;
+        virtual void Removed() override;
+
         void MakeGrid();
         void Map();
         void Interpolate();
@@ -189,6 +194,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void AllocBuffers();
 
     protected:
+        FOdysseyVectorSharedEnv* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
         std::vector<FInbetweenerPoint> mGridPointBuffer;
         std::vector<double> mUBinomialCoefficientBuffer;

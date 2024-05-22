@@ -15,7 +15,7 @@ FOdysseyVectorHandleSegment::ArrayToVertexArray( const std::vector<FOdysseyVecto
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-            oVertexArray.push_back( cubicSegment->GetVertex( segmentHandle->GetID() ) );
+            oVertexArray.push_back( segmentHandle->GetAttachedVertex() );
         }
     }
 }

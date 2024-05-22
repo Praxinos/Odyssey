@@ -224,6 +224,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* GetParent();
 
         /**
+         * @brief Get the object's former parent.
+         * @return a pointer to this object's former parent.
+         */
+        FOdysseyVectorObject* GetOldParent();
+
+        /**
          * @brief Get the child object that is before the one passed as a parameter.
          * @return a pointer to that child.
          */
@@ -531,6 +537,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         std::list<FOdysseyVectorTag*> mTagList;
         std::list<FOdysseyVectorObject*> mChildrenList;
         std::list<FOdysseyVectorObject*> mInvalidatedChildrenList;
+        FOdysseyVectorObject* mOldParent;
         FOdysseyVectorObject* mParent;
         bool bSelected;
         bool bExpanded;

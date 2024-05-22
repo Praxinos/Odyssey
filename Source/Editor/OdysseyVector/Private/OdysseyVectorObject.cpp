@@ -10,15 +10,21 @@
 
 FOdysseyVectorObject::~FOdysseyVectorObject()
 {
-    for( FOdysseyVectorObject *obj : mChildrenList )
-    {
-        delete obj;
-    }
+    mTagList.remove_if( []( FOdysseyVectorTag *tag ) -> bool
+                          {
+                              tag->Removed();
 
-    for( FOdysseyVectorTag *tag : mTagList )
-    {
-        delete tag;
-    }
+                              delete tag;
+
+                              return true;
+                          } );
+
+    mChildrenList.remove_if( []( FOdysseyVectorObject *obj )
+                                {
+                                    delete obj;
+
+                                    return true;
+                                } );
 }
 
 FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
@@ -75,6 +81,8 @@ FOdysseyVectorObject::AddTag( FOdysseyVectorTag* iTag )
 {
     mTagList.push_back( iTag );
 
+    iTag->Added();
+
     Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAGS );
 }
 
@@ -82,6 +90,8 @@ void
 FOdysseyVectorObject::RemoveTag( FOdysseyVectorTag* iTag )
 {
     mTagList.remove( iTag );
+
+    iTag->Removed();
 
     Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAGS );
 }
@@ -842,6 +852,12 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
     return ret;
 }
 
+FOdysseyVectorObject*
+FOdysseyVectorObject::GetOldParent()
+{
+    return mOldParent;
+}
+
 uint32
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
@@ -851,8 +867,9 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         mInvalidatedChildrenList.remove( iChild );
 
         Invalidate( INVALIDATE_HIERARCHY );
-
-        //iChild->mParent = nullptr;
+        // needed for undoing
+        iChild->mOldParent = this;
+        iChild->mParent = nullptr;
 
         return HIERARCHY_CHANGE_SUCCESS; // removal succeeded
     }

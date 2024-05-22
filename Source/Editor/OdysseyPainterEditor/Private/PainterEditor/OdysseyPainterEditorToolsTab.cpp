@@ -4,6 +4,7 @@
 #include "OdysseyPainterEditorToolsTab.h"
 #include "Widgets/Input/SButton.h"
 #include "OdysseyPainterEditor.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Views/STileView.h"
@@ -63,7 +64,8 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorPaintBucketTool(),
         mEditor->GetColorPickerTool(),
         mEditor->GetVectorGridTool(),
-        mEditor->GetVectorMatchingTool()
+        mEditor->GetVectorMatchingTool(),
+        mEditor->GetVectorChartTool()
     };
 
     tools = tools.FilterByPredicate([](UOdysseyPainterEditorTool* iTool){return !!iTool;});

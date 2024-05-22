@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoGroup.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -29,25 +31,35 @@ FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
 FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
-                                                , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray
                                                 , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray  )
     : FOdysseyVectorUndo( iScene )
     , mAddedGroup( iAddedGroup )
 {
     mRemovedBucketArray = iRemovedBucketArray;
-    mAddedObjectOldParentArray = iAddedObjectOldParentArray;
     mAddedObjectArray = iAddedObjectArray;
+
+    mAddedObjectOldParentArray.reserve( iAddedObjectArray.size() );
+
+    for( FOdysseyVectorObject* vectorObject : iAddedObjectArray )
+    {
+        mAddedObjectOldParentArray.push_back( vectorObject->GetOldParent() );
+    }
 }
 
 FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
-                                                , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
-                                                , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray  )
+                                                , std::vector<FOdysseyVectorObject*>& iAddedObjectArray )
     : FOdysseyVectorUndo( iScene )
     , mAddedGroup( iAddedGroup )
 {
-    mAddedObjectOldParentArray = iAddedObjectOldParentArray;
     mAddedObjectArray = iAddedObjectArray;
+
+    mAddedObjectOldParentArray.reserve( iAddedObjectArray.size() );
+
+    for( FOdysseyVectorObject* vectorObject : iAddedObjectArray )
+    {
+        mAddedObjectOldParentArray.push_back( vectorObject->GetOldParent() );
+    }
 }
 
 void

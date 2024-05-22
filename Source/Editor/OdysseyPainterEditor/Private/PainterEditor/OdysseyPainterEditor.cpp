@@ -101,6 +101,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
 	, mVectorGridTool(nullptr)
 	, mVectorTransformTool(nullptr)
 	, mVectorMatchingTool(nullptr)
+	, mVectorChartTool(nullptr)
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
 	mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
@@ -169,6 +170,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mVectorGridTool->BindShortcuts(iToolkit);
 	mVectorTransformTool->BindShortcuts(iToolkit);
 	mVectorMatchingTool->BindShortcuts(iToolkit);
+	mVectorChartTool->BindShortcuts(iToolkit);
 
 	//---
 
@@ -208,6 +210,7 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
 	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
 	mVectorMatchingTool->ExtendMenu(iOwner, iMenuName);
+	mVectorChartTool->ExtendMenu(iOwner, iMenuName);
 
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->ExtendMenu(iOwner, iMenuName);
@@ -255,6 +258,7 @@ FOdysseyPainterEditor::InitTools()
 	mVectorGridTool = NewObject<UOdysseyPainterEditorVectorGridTool>();
 	mVectorTransformTool = NewObject<UOdysseyPainterEditorVectorTransformTool>();
 	mVectorMatchingTool = NewObject<UOdysseyPainterEditorVectorMatchingTool>();
+	mVectorChartTool = NewObject<UOdysseyPainterEditorVectorChartTool>();
 
 	mRasterDrawingTool->SetEditor(this);
     mRasterEraserTool->SetEditor(this);
@@ -275,6 +279,7 @@ FOdysseyPainterEditor::InitTools()
 	mVectorGridTool->SetEditor(this);
 	mVectorTransformTool->SetEditor(this);
 	mVectorMatchingTool->SetEditor(this);
+	mVectorChartTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(&mBrushContexts);
 
     //Default Tools a defined by their position in mTools
@@ -306,6 +311,7 @@ FOdysseyPainterEditor::InitTools()
 	mTools.Add(mVectorGridTool);
 	mTools.Add(mVectorTransformTool);
 	mTools.Add(mVectorMatchingTool);
+	mTools.Add(mVectorChartTool);
     //Generic Tools
 	mTools.Add(mColorPickerTool);
 }
@@ -413,6 +419,12 @@ UOdysseyPainterEditorVectorMatchingTool*
 FOdysseyPainterEditor::GetVectorMatchingTool() const
 {
     return mVectorMatchingTool;
+}
+
+UOdysseyPainterEditorVectorChartTool*
+FOdysseyPainterEditor::GetVectorChartTool() const
+{
+    return mVectorChartTool;
 }
 
 UOdysseyPainterEditorVectorScenePanTool*
@@ -922,7 +934,6 @@ void
 FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    std::vector<FOdysseyVectorObject*> cubicPathOldParentArray;
     std::vector<FOdysseyVectorBucket*> removedBucketArray;
     std::vector<FOdysseyVectorObject*> cubicPathArray;
     std::list<FOdysseyVectorObject*> objectList;
@@ -934,7 +945,6 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyV
     paintGroup = FOdysseyVectorEngine::MakePaintGroupFromObjects( iScene
                                                                 , objectList
                                                                 , cubicPathArray
-                                                                , cubicPathOldParentArray
                                                                 , removedBucketArray );
 
     if( paintGroup )
@@ -946,7 +956,6 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyV
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoGroup( iScene
                                                                   , paintGroup
                                                                   , cubicPathArray
-                                                                  , cubicPathOldParentArray
                                                                   , removedBucketArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
@@ -1030,7 +1039,11 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
     if( group )
     {
-        group->AddTag( new FOdysseyVectorTagInbetweener( group, 4, 4, 4 ) );
+        group->AddTag( new FOdysseyVectorTagInbetweener( vectorEngine->GetSharedEnv()
+                                                       , group
+                                                       , 4
+                                                       , 4
+                                                       , 4 ) );
     }
 
     // call callbacks if any (for refreshing GUI e.g)
@@ -1059,7 +1072,7 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
 
     vectorEngine->GetFocusedAncestorList( objectList );
 
-    group = vectorEngine->GroupObjects( iScene, objectList, objectArray, objectOldParentArray );
+    group = vectorEngine->GroupObjects( iScene, objectList, objectArray );
 
     if( group )
     {
@@ -1069,8 +1082,7 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoGroup( iScene
                                                                   , group
-                                                                  , objectArray
-                                                                  , objectOldParentArray );
+                                                                  , objectArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
             
@@ -1490,6 +1502,35 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVe
 
 // static
 void
+FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
+                                           , FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
+
+    if( selectedObject )
+    {
+        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+        if( tag )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+            selectedObject->RemoveTag( tag );
+
+            inbetweenerTag->UpdateAnimationCells();
+        }
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    // call callbacks if any (for refreshing GUI e.g)
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+// static
+void
 FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -1501,7 +1542,11 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdyss
 
         if( tag == nullptr )
         {
-            selectedObject->AddTag( new FOdysseyVectorTagInbetweener( selectedObject, 4, 4, 4 ) );
+            selectedObject->AddTag( new FOdysseyVectorTagInbetweener( vectorEngine->GetSharedEnv()
+                                                                    , selectedObject
+                                                                    , 4
+                                                                    , 4
+                                                                    , 4 ) );
         }
     }
 
@@ -2053,6 +2098,7 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mVectorGridTool);
 	Collector.AddReferencedObject(mVectorTransformTool);
 	Collector.AddReferencedObject(mVectorMatchingTool);
+	Collector.AddReferencedObject(mVectorChartTool);
 }
 
 #undef LOCTEXT_NAMESPACE

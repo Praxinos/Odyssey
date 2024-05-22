@@ -1,8 +1,8 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
-#include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingToolHUD.h"
+#include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
+#include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartToolHUD.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
@@ -12,24 +12,24 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyPainterEditorVectorMatchingTool::~UOdysseyPainterEditorVectorMatchingTool()
+UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 {
 }
 
-UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool()
-    : UOdysseyPainterEditorVectorSelectionTool( new FOdysseyPainterEditorVectorMatchingToolHUD( this ) )
+UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
+    : UOdysseyPainterEditorVectorSelectionTool( new FOdysseyPainterEditorVectorChartToolHUD( this ) )
     , PickingRadius( 10.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
 
-    mMatchingHUD = static_cast<FOdysseyPainterEditorVectorMatchingToolHUD*>( mBaseHUD );
+    mChartHUD = static_cast<FOdysseyPainterEditorVectorChartToolHUD*>( mBaseHUD );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
 bool
-UOdysseyPainterEditorVectorMatchingTool::IsActivable() const
+UOdysseyPainterEditorVectorChartTool::IsActivable() const
 {
     uint64 HUDFlags = GetEditor()->GetVectorHUDFlags();
 
@@ -38,13 +38,13 @@ UOdysseyPainterEditorVectorMatchingTool::IsActivable() const
 }
 
 uint64
-UOdysseyPainterEditorVectorMatchingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
+UOdysseyPainterEditorVectorChartTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
-UOdysseyPainterEditorVectorMatchingTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
+UOdysseyPainterEditorVectorChartTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -55,14 +55,13 @@ UOdysseyPainterEditorVectorMatchingTool::LoadVector( FOdysseyVectorGroupPaint* i
 }
 
 uint64
-UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
+UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    mPickedPointArray.clear();
-    mWorldDistanceArray.clear();
+    mPickedInbetween = nullptr;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -75,12 +74,10 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
 
             if( inbetweenerTag )
             {
-                mMatchingHUD->PickTargetPoints( inbetweenerTag
-                                                , iPointInTexture.x
-                                                , iPointInTexture.y
-                                                , PickingRadius
-                                                , mPickedPointArray
-                                                , mWorldDistanceArray );
+                mPickedInbetween = mChartHUD->PickInbetween( inbetweenerTag
+                                                             , iPointInTexture.x
+                                                             , iPointInTexture.y
+                                                             , 10 );
             }
         }
     }
@@ -90,7 +87,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
 }
 
 uint64
-UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
+UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture )
 {
     // TODO: highlight grid handles ?
@@ -99,7 +96,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroup
 }
 
 uint64
-UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
+UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
@@ -114,17 +111,14 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
 
             if( inbetweenerTag )
             {
-                BLPoint localDiff = selectedObject->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                                        , iPointInTexture.deltaPosition.Y );
-
-                for( FInbetweenerPoint* point : mPickedPointArray )
+                if( mPickedInbetween )
                 {
-                    point->targetPosition.x += localDiff.x;
-                    point->targetPosition.y += localDiff.y;
+                    mChartHUD->MoveInbetween( inbetweenerTag
+                                               , mPickedInbetween
+                                               , iPointInTexture.x
+                                               , iPointInTexture.y
+                                               , FSlateApplication::Get().GetModifierKeys().IsControlDown() );
                 }
-
-                // update
-                inbetweenerTag->Interpolate();
             }
         }
     }
@@ -134,7 +128,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
 }
 
 uint64
-UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
+UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
@@ -160,7 +154,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
 }
 
 uint64
-UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
+UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FName& iPropertyName )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
@@ -171,7 +165,7 @@ UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGr
 }
 
 TSharedRef<SWidget>
-UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
+UOdysseyPainterEditorVectorChartTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FSinglePropertyParams defaultPropertyParams;
@@ -202,9 +196,9 @@ UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
 }
 
 FText
-UOdysseyPainterEditorVectorMatchingTool::GetTooltip() const
+UOdysseyPainterEditorVectorChartTool::GetTooltip() const
 {
-    return LOCTEXT("vector-matching-tool.tooltip", "Matching Tool");
+    return LOCTEXT("vector-matching-tool.tooltip", "Chart Tool");
 }
 
 #undef LOCTEXT_NAMESPACE

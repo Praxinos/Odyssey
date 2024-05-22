@@ -46,7 +46,11 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
 bool
 UOdysseyPainterEditorVectorPathEditTool::IsActivable() const
 {
-    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    uint64 HUDFlags = GetEditor()->GetVectorHUDFlags();
+
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>()
+          && ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT
+            || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
 uint64
@@ -703,7 +707,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragSegmentHandle( FOdysseyVectorHandle
 {
     FOdysseyVectorSegment* segment = iHandle->GetOwner();
     FOdysseyVectorPath* path = segment->GetOwnerAsPath();
-    FOdysseyVectorVertex* vertex = segment->GetVertex( iHandle->GetID() );
+    FOdysseyVectorVertex* vertex = iHandle->GetAttachedVertex();
     BLPoint localCoords = path->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
     BLPoint localVector = path->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
 

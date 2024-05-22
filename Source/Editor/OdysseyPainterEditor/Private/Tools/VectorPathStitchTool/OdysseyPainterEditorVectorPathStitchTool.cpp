@@ -34,7 +34,11 @@ UOdysseyPainterEditorVectorPathStitchTool::UOdysseyPainterEditorVectorPathStitch
 bool
 UOdysseyPainterEditorVectorPathStitchTool::IsActivable() const
 {
-    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    uint64 HUDFlags = GetEditor()->GetVectorHUDFlags();
+
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>()
+          && ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT
+            || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
 uint64

@@ -311,13 +311,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         static FOdysseyVectorGroup* GroupObjects( FOdysseyVectorObject* iParent
                                                 , const std::list<FOdysseyVectorObject*>& iObjectList
-                                                , std::vector<FOdysseyVectorObject*>& oObjectArray
-                                                , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray );
+                                                , std::vector<FOdysseyVectorObject*>& oObjectArray );
 
         static FOdysseyVectorGroupPaint* MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
                                                                   , const std::list<FOdysseyVectorObject*>& iObjectList
                                                                   , std::vector<FOdysseyVectorObject*>& oCubicPathArray
-                                                                  , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
                                                                   , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray );
 
         static ::ULIS::FVec2D GetPositionFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList );

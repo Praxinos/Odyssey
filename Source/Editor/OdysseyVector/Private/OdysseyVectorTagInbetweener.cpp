@@ -225,14 +225,19 @@ FOdysseyVectorTagInbetweener::Map()
 
 FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
 {
-    mOwner->GetEngine()->GetSharedEnv()->RemoveTag( this );
+
 }
 
-FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject* iOwnerObject
+FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
+                                                          , FOdysseyVectorObject* iOwnerObject
                                                           , uint32 iNumCellX
                                                           , uint32 iNumCellY
                                                           , uint32 iInbetweenCount )
     : FOdysseyVectorTag( iOwnerObject )
+    // note: mSharedEnv is remebered as a member variable because GetEngine() calls
+    // GetClass() and the latter is a virtual function. virtual function don't work
+    // in destructors.
+    , mSharedEnv ( iSharedEnv )
     , mGridType( eInbetweenerGridType::FFD )
     , mNumCellX( iNumCellX )
     , mNumCellY( iNumCellY )
@@ -243,8 +248,16 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     ResetChart();
     AllocBuffers();
     Interpolate();
+}
 
-    mOwner->GetEngine()->GetSharedEnv()->AddTag( this );
+void FOdysseyVectorTagInbetweener::Added()
+{
+    mSharedEnv->AddTag( this );
+}
+
+void FOdysseyVectorTagInbetweener::Removed()
+{
+    mSharedEnv->RemoveTag( this );
 }
 
 void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags )
@@ -523,28 +536,33 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
                                   , uint64 iDrawingFlags )
 {
     IOdysseyVectorAnimationCell* displayedCell = iDisplayedScene->GetEngine()->GetAnimationCell();
-    IOdysseyVectorAnimationCell* tagCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
 
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
-    iBLContext->setStrokeWidth( 3.0f );
-
-    // if th eobject hasn't been removed from the scene
-    if( displayedCell && tagCell )
+    // check the object is still displayed (it could have been removed but still in memory)
+    if( mOwner->GetScene() )
     {
-        uint32 tagCellIndex = tagCell->GetIndex();
-        uint32 displayedCellIndex = displayedCell->GetIndex();
+        IOdysseyVectorAnimationCell* tagCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
 
-        if ( ( displayedCellIndex >    tagCellIndex                     )
-          && ( displayedCellIndex <= ( tagCellIndex + mInbetweenCount ) ) )
+        iBLContext->save();
+        iBLContext->resetMatrix();
+
+        iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
+        iBLContext->setStrokeWidth( 3.0f );
+
+        // if th eobject hasn't been removed from the scene
+        if( displayedCell && tagCell )
         {
-            DrawPathsInbetween( displayedCellIndex - tagCellIndex - 1, iBLContext );
-        }
-    }
+            uint32 tagCellIndex = tagCell->GetIndex();
+            uint32 displayedCellIndex = displayedCell->GetIndex();
 
-    iBLContext->restore();
+            if ( ( displayedCellIndex >    tagCellIndex                     )
+              && ( displayedCellIndex <= ( tagCellIndex + mInbetweenCount ) ) )
+            {
+                DrawPathsInbetween( displayedCellIndex - tagCellIndex - 1, iBLContext );
+            }
+        }
+
+        iBLContext->restore();
+    }
 }
 
 void

@@ -163,6 +163,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
 
     // draw object details in any mode (if statement is useles per-se but here for clarity)
     if( ( hudFlags & HUD_MODE_OBJECT    )
+     || ( hudFlags & HUD_MODE_VERTEX    )
      || ( hudFlags & HUD_MODE_INBETWEEN ) )
     {
         DrawObjects( iBLContext

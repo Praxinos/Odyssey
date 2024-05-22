@@ -24,6 +24,7 @@
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
+#include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 #include "OdysseyMediaProvider.h"
 #include <ULIS>
 
@@ -117,6 +118,7 @@ public:
     virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const;
     virtual UOdysseyPainterEditorVectorTransformTool*                GetVectorTransformTool() const;
     virtual UOdysseyPainterEditorVectorMatchingTool*                 GetVectorMatchingTool() const;
+    virtual UOdysseyPainterEditorVectorChartTool*                    GetVectorChartTool() const;
     virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const;
     virtual UOdysseyPainterEditorVectorEraserTool*                   GetVectorEraserTool() const;
     virtual UOdysseyPainterEditorVectorPathPushTool*                 GetVectorPathPushTool() const;
@@ -193,6 +195,7 @@ public:
                                  , double iValue
                                  , bool   iAbsolute );
     static void AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void ResetSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
 
     // Populates the Edit Menu everytime it is displayed
@@ -267,6 +270,7 @@ protected:
     UOdysseyPainterEditorVectorGridTool* mVectorGridTool;
     UOdysseyPainterEditorVectorTransformTool* mVectorTransformTool;
     UOdysseyPainterEditorVectorMatchingTool* mVectorMatchingTool;
+    UOdysseyPainterEditorVectorChartTool* mVectorChartTool;
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 };

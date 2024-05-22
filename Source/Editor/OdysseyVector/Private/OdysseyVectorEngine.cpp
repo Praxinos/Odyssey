@@ -1443,9 +1443,8 @@ FOdysseyVectorEngine::Traverse( FOdysseyVectorObject* iObject
 // static
 FOdysseyVectorGroupPaint*
 FOdysseyVectorEngine::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
-                                              , const std::list<FOdysseyVectorObject*>& iObjectList
+                                               , const std::list<FOdysseyVectorObject*>& iObjectList
                                                , std::vector<FOdysseyVectorObject*>& oCubicPathArray
-                                               , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
                                                , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray )
 {
     // this array will help us to transfer buckets as well
@@ -1469,13 +1468,9 @@ FOdysseyVectorEngine::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
             }
         }
 
-        oCubicPathOldParentArray.resize( oCubicPathArray.size() );
-
         for( int i = 0; i < oCubicPathArray.size(); i++ )
         {
             FOdysseyVectorObject* parentObject = oCubicPathArray[i]->GetParent();
-
-            oCubicPathOldParentArray[i] = parentObject;
 
             paintGroup->TransferChild( oCubicPathArray[i], paintGroup->GetLastChild() );
 
@@ -1622,8 +1617,7 @@ FOdysseyVectorEngine::FlipObjects( const std::list<FOdysseyVectorObject*>& iObje
 FOdysseyVectorGroup*
 FOdysseyVectorEngine::GroupObjects( FOdysseyVectorObject* iParent
                                   , const std::list<FOdysseyVectorObject*>& iObjectList
-                                  , std::vector<FOdysseyVectorObject*>& oObjectArray
-                                  , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray )
+                                  , std::vector<FOdysseyVectorObject*>& oObjectArray )
 {
     FOdysseyVectorGroupPaint* scene = iParent->GetScene();
     BLPoint averageTranslation = { 0.0f, 0.0f };
@@ -1638,14 +1632,12 @@ FOdysseyVectorEngine::GroupObjects( FOdysseyVectorObject* iParent
         group->UpdateMatrix();
 
         oObjectArray.reserve( iObjectList.size() );
-        oObjectOldParentArray.reserve( iObjectList.size() );
 
         for( FOdysseyVectorObject *obj : iObjectList )
         {
             if( obj != scene )
             {
                 oObjectArray.push_back( obj );
-                oObjectOldParentArray.push_back( obj->GetParent() );
 
                 group->TransferChild( obj, group->GetLastChild() );
             }

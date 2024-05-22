@@ -53,42 +53,6 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
 }
 
 void
-FOdysseyPainterEditorVectorMatchingToolHUD::DrawChart( BLContext* iBLContext
-                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag )
-{
-    FInbetweenerChart& chart = iInbetweenerTag->GetChart();
-    double cursorRadius = mChartRect.h *.5f;
-    double cursorY = mChartRect.y + cursorRadius;
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
-    iBLContext->setStrokeWidth( 1.0f );
-
-    iBLContext->strokeLine( mChartRect.x               , cursorY
-                          , mChartRect.x + mChartRect.w, cursorY );
-
-    for( FInbetweenerInbetween& inbetween : chart.inbetweenBuffer )
-    {
-        float cursorX = mChartRect.x + ( inbetween.spacing * mChartRect.w );
-
-        iBLContext->strokeLine( cursorX, cursorY - cursorRadius
-                              , cursorX, cursorY + cursorRadius );
-    }
-
-    iBLContext->setStrokeWidth( 3.0f );
-    // initial keypose
-    iBLContext->strokeLine( mChartRect.x, cursorY - 20
-                          , mChartRect.x, cursorY + 20 );
-    // final keypose
-    iBLContext->strokeLine( mChartRect.x + mChartRect.w, cursorY - cursorRadius
-                          , mChartRect.x + mChartRect.w, cursorY + cursorRadius );
-
-    iBLContext->restore();
-}
-
-void
 FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorGroupPaint* iScene )
 {
@@ -119,52 +83,12 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( tag );
 
                 DrawGrid ( iBLContext, inbetweenerTag );
-                DrawChart( iBLContext, inbetweenerTag );
             }
         }
     }
 
     iBLContext->save();
     iBLContext->resetMatrix();
-}
-
-FInbetweenerInbetween*
-FOdysseyPainterEditorVectorMatchingToolHUD::PickInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                         , double iWorldX
-                                                         , double iWorldY
-                                                         , double iRadius )
-{
-    FInbetweenerChart& chart = iInbetweenerTag->GetChart();
-    double cursorRadius = mChartRect.h *.5f;
-    double cursorY = mChartRect.y + cursorRadius;
-
-    if( mChartRect.HitTest( ::ULIS::FVec2D( iWorldX, iWorldY ) ) )
-    {
-        for( FInbetweenerInbetween& inbetween : chart.inbetweenBuffer )
-        {
-            float cursorX = mChartRect.x + ( inbetween.spacing * mChartRect.w );
-
-            if( ( iWorldX >= ( cursorX - iRadius ) )
-             && ( iWorldX <= ( cursorX + iRadius ) ) )
-            {
-                return &inbetween;
-            }
-        }
-    }
-
-    return nullptr;
-}
-
-void
-FOdysseyPainterEditorVectorMatchingToolHUD::MoveInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                         , FInbetweenerInbetween* iInbetween
-                                                         , double iWorldX
-                                                         , double iWorldY
-                                                         , bool iRelative )
-{
-    double newSpacing = ( iWorldX - mChartRect.x ) / mChartRect.w;
-
-    iInbetweenerTag->MoveInbetween( iInbetween, newSpacing, iRelative );
 }
 
 void
