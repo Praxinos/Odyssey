@@ -78,7 +78,6 @@ class FInterpolatedPath
                  , const ::ULIS::FRectD& iInvalidationArea
                  , double iAncestorsOpacity
                  , uint64 iDrawingFlags );
-
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
@@ -115,7 +114,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) override;
+        // when drawn as a shared tag
+        virtual void Draw( FOdysseyVectorGroupPaint* iCurrentScene
+                         , BLContext* iBLContext
+                         , const ::ULIS::FRectD& iInvalidationArea
+                         , double iAncestorsOpacity
+                         , uint64 iDrawingFlags ) override;
         void Map();
+        void PickTargetPoints( double iWorldX
+                             , double iWorldY
+                             , double iRadius
+                             , std::vector<FInbetweenerPoint*>& oPointArray
+                             , std::vector<double>& oWorldDistanceArray );
+        void Interpolate();
 
     protected:
         void DrawGrid( BLContext* iBLContext
@@ -126,10 +137,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                       , const ::ULIS::FRectD& iInvalidationArea
                       , double iAncestorsOpacity
                       , uint64 iDrawingFlags );
+        void DrawPathsInbetween( uint32 iInbetweenIndex
+                               , BLContext* iBLContext
+                               , const ::ULIS::FRectD& iInvalidationArea
+                               , double iAncestorsOpacity
+                               , uint64 iDrawingFlags );
+
         void FFDComputeBinomialCoefficients();
         void FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint, uint32 iPositionIndex );
         void FFDDeformPaths( uint32 iPositionIndex );
-        void Interpolate();
+
 
     protected:
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;

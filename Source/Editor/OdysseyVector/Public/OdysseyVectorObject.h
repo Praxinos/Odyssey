@@ -506,6 +506,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                      , const ::ULIS::FRectD& iInvalidationArea
                      , double iCombinedOpacity
                      , uint64 iFlags );
+        FOdysseyVectorTag* GetTagByType( uint32 iTagClass );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );

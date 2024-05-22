@@ -552,12 +552,12 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
 
     DrawShape( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
 
-    DrawTags( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
-
     // get sure the parent has finished drawing before drawing its children
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
     DrawChildren( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
+
+    DrawTags( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
 
     iBLContext->restore();
 }
@@ -572,6 +572,20 @@ bool
 FOdysseyVectorObject::IsSelected()
 {
     return bSelected;
+}
+
+FOdysseyVectorTag*
+FOdysseyVectorObject::GetTagByType( uint32 iTagClass )
+{
+    for( FOdysseyVectorTag* tag : mTagList )
+    {
+        if( tag->GetClass() == iTagClass )
+        {
+            return tag;
+        }
+    }
+
+    return nullptr;
 }
 
 void
@@ -807,14 +821,14 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
 uint32
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
-    //iChild->mParent = nullptr;
-
     if( iChild->mParent == this )
     {
         mChildrenList.remove( iChild );
         mInvalidatedChildrenList.remove( iChild );
 
         Invalidate( INVALIDATE_HIERARCHY );
+
+        iChild->mParent = nullptr;
 
         return HIERARCHY_CHANGE_SUCCESS; // removal succeeded
     }

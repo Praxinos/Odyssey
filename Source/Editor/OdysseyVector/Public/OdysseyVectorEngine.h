@@ -13,6 +13,8 @@
 #include "HUD/OdysseyVectorHUD.h"
 #include "ULISInvalidTileMap.h"
 
+class FOdysseyVectorSharedEnv;
+
 //#include "OdysseyVectorGroupPaint.generated.h"
 
 // I use namespaces and not ENUM_CLASS_FLAGS because I can't use them as bool without a cast, which is idiotic.
@@ -108,7 +110,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         /**
          * @brief Constructor
          */
-        FOdysseyVectorEngine( FOdysseyVectorGroupPaint* iScene
+        FOdysseyVectorEngine( FOdysseyVectorSharedEnv* iSharedEnv
+                            , FOdysseyVectorGroupPaint* iScene
                             , uint32 iPreferredWidth
                             , uint32 iPreferredHeight );
 
@@ -220,6 +223,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         uint32 GetPreferredWidth();
         uint32 GetPreferredHeight();
+
+        FOdysseyVectorSharedEnv* GetSharedEnv();
+        uint32 GetCellIndex();
+        void SetCellIndex( uint32 iCellIndex );
 
         void TraceLine ( int32 iX0
                        , int32 iY0
@@ -377,6 +384,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                          , uint64 iPolygonDrawingFlags );
 
     protected:
+        uint32 mCellIndex;
+        FOdysseyVectorSharedEnv* mSharedEnv;
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
         BLContextCreateInfo mCreateInfo;
         BLImage* mBLMask;

@@ -1,5 +1,5 @@
 #include "OdysseyVectorEngine.h"
-
+#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVector.h"
@@ -10,10 +10,13 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorGroupPaint* iScene
+FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorSharedEnv* iSharedEnv
+                                          , FOdysseyVectorGroupPaint* iScene
                                           , uint32 iPreferredWidth
                                           , uint32 iPreferredHeight )
     : FOdysseyVectorObject( "Engine" )
+    , mCellIndex( 0 )
+    , mSharedEnv ( iSharedEnv )
     , mSelectionSpace( nullptr )
     , mInvalidTileMap( 64, iPreferredWidth, iPreferredHeight )
     , mPreferredWidth( iPreferredWidth )
@@ -83,6 +86,24 @@ BLImageData&
 FOdysseyVectorEngine::GetRenderData()
 {
     return mRenderData;
+}
+
+FOdysseyVectorSharedEnv*
+FOdysseyVectorEngine::GetSharedEnv()
+{
+    return mSharedEnv;
+}
+
+uint32
+FOdysseyVectorEngine::GetCellIndex()
+{
+    return mCellIndex;
+}
+
+void
+FOdysseyVectorEngine::SetCellIndex( uint32 iCellIndex )
+{
+    mCellIndex = iCellIndex;
 }
 
 void
@@ -318,6 +339,14 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
         mScene->Draw( iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
 
         iBLContext->restore();
+
+        if( mSharedEnv )
+        {
+            for ( FOdysseyVectorTag* tag : mSharedEnv->GetTagList() )
+            {
+                tag->Draw( mScene, iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
+            }
+        }
 
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }

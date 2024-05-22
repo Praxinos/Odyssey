@@ -5,6 +5,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 
 FInterpolatedPoint::~FInterpolatedPoint()
@@ -78,10 +79,11 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
         double spaceY = pt.y - iSpaceBBox.y;
         //double u = std::clamp<double>( spaceX / iSpaceBBox.w, 0.0f, 1.0f );
         //double v = std::clamp<double>( spaceY / iSpaceBBox.h, 0.0f, 1.0f );
-        double u = spaceX / iSpaceBBox.w;
-        double v = spaceY / iSpaceBBox.h;
+        double u = std::clamp<double>( spaceX / iSpaceBBox.w, 0.0f, 1.0f );
+        double v = std::clamp<double>( spaceY / iSpaceBBox.h, 0.0f, 1.0f );
 
-        mInterpolatedPointBuffer.emplace_back( vertex, u, v, iInbetweenCount );
+            // Note: we add +1 for the target position
+        mInterpolatedPointBuffer.emplace_back( vertex, u, v, iInbetweenCount + 1 );
 
         vertex->SetID( pointID++ );
     }
@@ -101,17 +103,19 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
             // compute UV for first handle
             double space0X = pt0.x - iSpaceBBox.x;
             double space0Y = pt0.y - iSpaceBBox.y;
-            double u0 = std::clamp<double>( space0X, 0.0f, 1.0f );
-            double v0 = std::clamp<double>( space0Y, 0.0f, 1.0f );
+            double u0 = std::clamp<double>( space0X / iSpaceBBox.w, 0.0f, 1.0f );
+            double v0 = std::clamp<double>( space0Y / iSpaceBBox.h, 0.0f, 1.0f );
             // compute UV for second handle
             double space1X = pt1.x - iSpaceBBox.x;
             double space1Y = pt1.y - iSpaceBBox.y;
-            double u1 = std::clamp<double>( space1X, 0.0f, 1.0f );
-            double v1 = std::clamp<double>( space1Y, 0.0f, 1.0f );
+            double u1 = std::clamp<double>( space1X / iSpaceBBox.w, 0.0f, 1.0f );
+            double v1 = std::clamp<double>( space1Y / iSpaceBBox.h, 0.0f, 1.0f );
 
-            mInterpolatedPointBuffer.emplace_back( handle0, u0, v0, iInbetweenCount );
+            // Note: we add +1 for the target position
+            mInterpolatedPointBuffer.emplace_back( handle0, u0, v0, iInbetweenCount + 1 );
             handle0->SetID( pointID++ );
-            mInterpolatedPointBuffer.emplace_back( handle1, u1, v1, iInbetweenCount );
+            // Note: we add +1 for the target position
+            mInterpolatedPointBuffer.emplace_back( handle1, u1, v1, iInbetweenCount + 1 );
             handle1->SetID( pointID++ );
 
             mInterpolatedSegmentCubicBuffer.emplace_back( cubicSegment
@@ -157,6 +161,7 @@ void
 FOdysseyVectorTagInbetweener::Map()
 {
     FOdysseyVectorEngine* vectorEngine = mOwner->GetEngine();
+    uint32 pathCount = 0;
 
     mInterpolatedPathBuffer.clear();
 
@@ -164,7 +169,24 @@ FOdysseyVectorTagInbetweener::Map()
     ( mOwner
     , 0
     , [ this
-      , vectorEngine ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
+      , &pathCount ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
+      {
+            BLMatrix2D& inverseSpaceMatrix = mOwner->GetInverseWorldMatrix();
+
+            if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
+            {
+                pathCount++;
+            }
+
+            return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+      } );
+
+    mInterpolatedPathBuffer.reserve( pathCount );
+
+    vectorEngine->Traverse
+    ( mOwner
+    , 0
+    , [ this ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
             BLMatrix2D& inverseSpaceMatrix = mOwner->GetInverseWorldMatrix();
 
@@ -184,6 +206,7 @@ FOdysseyVectorTagInbetweener::Map()
 
 FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
 {
+    mOwner->GetEngine()->GetSharedEnv()->RemoveTag( this );
 }
 
 FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject* iOwnerObject
@@ -196,6 +219,8 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     , mInbetweenCount( iInbetweenCount )
 {
     Reset();
+
+    mOwner->GetEngine()->GetSharedEnv()->AddTag( this );
 }
 
 void
@@ -223,7 +248,7 @@ FOdysseyVectorTagInbetweener::Reset()
             uint32 offset = ( i * numVertexX ) + j;
 
             mGridPointBuffer[offset].sourcePosition = ::ULIS::FVec2D( x, y );
-            mGridPointBuffer[offset].targetPosition = mGridPointBuffer[offset].sourcePosition + 100;
+            mGridPointBuffer[offset].targetPosition = mGridPointBuffer[offset].sourcePosition;
 
             mGridPointBuffer[offset].u = std::clamp<double>( ( x - bbox.x ) / bbox.w, 0.0f, 1.0f );
             mGridPointBuffer[offset].v = std::clamp<double>( ( y - bbox.y ) / bbox.h, 0.0f, 1.0f );
@@ -304,6 +329,10 @@ FOdysseyVectorTagInbetweener::FFDDeformPoint( FInterpolatedPoint* iInterpolatedP
     uint32 numVertexX = mNumCellX + 1;
     uint32 numVertexY = mNumCellY + 1;
 
+/*
+    iInterpolatedPoint->positionBuffer[iPositionIndex] = ::ULIS::FVec2D( ( bbox.x + ( bbox.w * iInterpolatedPoint->mU ) )
+                                                                       , ( bbox.y + ( bbox.h * iInterpolatedPoint->mV ) ) );
+*/
     for ( uint32 i = 0; i < numVertexY; i++ )
     {
         ::ULIS::FVec2D vj = ::ULIS::FVec2D( 0.0f, 0.0f );
@@ -343,7 +372,7 @@ FOdysseyVectorTagInbetweener::Interpolate()
 {
     ::ULIS::FRectD bbox = mOwner->GetBBox( false );
 
-    for( uint32 i = 0; i < mInbetweenCount; i++ )
+    for( uint32 i = 0; i <= mInbetweenCount; i++ )
     {
         // first step : deform the grid via linear interpolation
         for( FInbetweenerPoint& point : mGridPointBuffer )
@@ -373,11 +402,40 @@ FOdysseyVectorTagInbetweener::Draw( BLContext* iBLContext
     DrawGrid( iBLContext, iInvalidationArea, iAncestorsOpacity, iDrawingFlags );
 }
 
+// when drawn as a shared tag
 void
-FOdysseyVectorTagInbetweener::DrawPaths( BLContext* iBLContext
-                                       , const ::ULIS::FRectD& iInvalidationArea
-                                       , double iAncestorsOpacity
-                                       , uint64 iDrawingFlags )
+FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iCurrentScene
+                                  , BLContext* iBLContext
+                                  , const ::ULIS::FRectD& iInvalidationArea
+                                  , double iAncestorsOpacity
+                                  , uint64 iDrawingFlags )
+{
+    FOdysseyVectorGroupPaint* scene = mOwner->GetScene();
+
+    // if th eobject hasn't been removed from the scene
+    if( scene )
+    {
+        uint32 cellIndex = scene->GetEngine()->GetCellIndex();
+        uint32 currentCellIndex = iCurrentScene->GetEngine()->GetCellIndex();
+
+        if ( ( currentCellIndex >    cellIndex                     )
+          && ( currentCellIndex <= ( cellIndex + mInbetweenCount ) ) )
+        {
+            DrawPathsInbetween( currentCellIndex - cellIndex - 1
+                              , iBLContext
+                              , iInvalidationArea
+                              , iAncestorsOpacity
+                              , iDrawingFlags );
+        }
+    }
+}
+
+void
+FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iInbetweenIndex
+                                                , BLContext* iBLContext
+                                                , const ::ULIS::FRectD& iInvalidationArea
+                                                , double iAncestorsOpacity
+                                                , uint64 iDrawingFlags )
 {
     BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
 
@@ -387,38 +445,54 @@ FOdysseyVectorTagInbetweener::DrawPaths( BLContext* iBLContext
     iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
     iBLContext->setStrokeWidth( 1.0f );
 
-    for( uint32 i = 0; i < mInbetweenCount; i++ )
+    for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
     {
-        for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
+        for( FInterpolatedSegmentCubic& interpolatedCubicSegment : interpolatedPath.mInterpolatedSegmentCubicBuffer )
         {
-            for( FInterpolatedSegmentCubic& interpolatedCubicSegment : interpolatedPath.mInterpolatedSegmentCubicBuffer )
-            {
-                FInterpolatedPoint* interpolatedPoint[4] = { interpolatedCubicSegment.mInterpolatedVertex[0]
-                                                           , interpolatedCubicSegment.mInterpolatedHandle[0]
-                                                           , interpolatedCubicSegment.mInterpolatedHandle[1]
-                                                           , interpolatedCubicSegment.mInterpolatedVertex[1] };
-                BLPoint pt[4] = { worldMatrix.mapPoint( interpolatedPoint[0]->positionBuffer[i].x
-                                                      , interpolatedPoint[0]->positionBuffer[i].y )
-                                , worldMatrix.mapPoint( interpolatedPoint[1]->positionBuffer[i].x
-                                                      , interpolatedPoint[1]->positionBuffer[i].y )
-                                , worldMatrix.mapPoint( interpolatedPoint[2]->positionBuffer[i].x
-                                                      , interpolatedPoint[2]->positionBuffer[i].y )
-                                , worldMatrix.mapPoint( interpolatedPoint[3]->positionBuffer[i].x
-                                                      , interpolatedPoint[3]->positionBuffer[i].y ) };
-                BLPath path;
+            FInterpolatedPoint* interpolatedPoint[4] = { interpolatedCubicSegment.mInterpolatedVertex[0]
+                                                       , interpolatedCubicSegment.mInterpolatedHandle[0]
+                                                       , interpolatedCubicSegment.mInterpolatedHandle[1]
+                                                       , interpolatedCubicSegment.mInterpolatedVertex[1] };
+            BLPoint pt[4] = { worldMatrix.mapPoint( interpolatedPoint[0]->positionBuffer[iInbetweenIndex].x
+                                                  , interpolatedPoint[0]->positionBuffer[iInbetweenIndex].y )
+                            , worldMatrix.mapPoint( interpolatedPoint[1]->positionBuffer[iInbetweenIndex].x
+                                                  , interpolatedPoint[1]->positionBuffer[iInbetweenIndex].y )
+                            , worldMatrix.mapPoint( interpolatedPoint[2]->positionBuffer[iInbetweenIndex].x
+                                                  , interpolatedPoint[2]->positionBuffer[iInbetweenIndex].y )
+                            , worldMatrix.mapPoint( interpolatedPoint[3]->positionBuffer[iInbetweenIndex].x
+                                                  , interpolatedPoint[3]->positionBuffer[iInbetweenIndex].y ) };
+            BLPath path;
 
 
-                path.moveTo ( pt[0].x, pt[0].y );
-                path.cubicTo( pt[1].x, pt[1].y
-                            , pt[2].x, pt[2].y
-                            , pt[3].x, pt[3].y );
+            path.moveTo ( pt[0].x, pt[0].y );
+            path.cubicTo( pt[1].x, pt[1].y
+                        , pt[2].x, pt[2].y
+                        , pt[3].x, pt[3].y );
 
-                iBLContext->strokePath( path );
-            }
+            iBLContext->strokePath( path );
         }
     }
 
     iBLContext->restore();
+}
+
+void
+FOdysseyVectorTagInbetweener::DrawPaths( BLContext* iBLContext
+                                       , const ::ULIS::FRectD& iInvalidationArea
+                                       , double iAncestorsOpacity
+                                       , uint64 iDrawingFlags )
+{
+    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
+
+    // note: mInbetweenCount+1 holds the target position
+    for( uint32 i = 0; i <= mInbetweenCount; i++ )
+    {
+        DrawPathsInbetween( i
+                          , iBLContext
+                          , iInvalidationArea
+                          , iAncestorsOpacity
+                          , iDrawingFlags );
+    }
 }
 
 void
@@ -432,7 +506,7 @@ FOdysseyVectorTagInbetweener::DrawGrid( BLContext* iBLContext
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
+    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
     iBLContext->setStrokeWidth( 1.0f );
 
     for( FInbetweenerCell& cell : mGridCellBuffer )
@@ -453,4 +527,27 @@ FOdysseyVectorTagInbetweener::DrawGrid( BLContext* iBLContext
     }
 
     iBLContext->restore();
+}
+
+void
+FOdysseyVectorTagInbetweener::PickTargetPoints( double iWorldX
+                                              , double iWorldY
+                                              , double iRadius
+                                              , std::vector<FInbetweenerPoint*>& oPointArray
+                                              , std::vector<double>& oWorldDistanceArray )
+{
+    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
+
+    for( FInbetweenerPoint& point : mGridPointBuffer )
+    {
+        BLPoint pt = worldMatrix.mapPoint( point.targetPosition.x, point.targetPosition.y );
+        ::ULIS::FVec2D vec = ::ULIS::FVec2D( pt.x - iWorldX, pt.y - iWorldY );
+        double distance = vec.Distance();
+
+        if( distance <= iRadius )
+        {
+            oPointArray.push_back( &point );
+            oWorldDistanceArray.push_back( distance );
+        }
+    }
 }
