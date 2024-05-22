@@ -273,7 +273,7 @@ FOdysseyVector::DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
 
 // convenience function that does not alter arguments
 void
-FOdysseyVector::MatrixMultiply( BLMatrix2D& iA, BLMatrix2D& iB, BLMatrix2D& oOut )
+FOdysseyVector::MatrixMultiply( const BLMatrix2D& iA, const BLMatrix2D& iB, BLMatrix2D& oOut )
 {
     oOut = iA;
 

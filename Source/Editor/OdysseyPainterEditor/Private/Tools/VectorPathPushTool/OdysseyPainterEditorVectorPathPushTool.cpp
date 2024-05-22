@@ -265,7 +265,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
             {
                 FOdysseyVectorHandleSegment* handle = static_cast<FOdysseyVectorHandleSegment*>(point);
                 FOdysseyVectorSegment* segment = handle->GetOwner();
-                FOdysseyVectorVertex* handleVertex = segment->GetVertex( handle->GetHandleID() );
+                FOdysseyVectorVertex* handleVertex = segment->GetVertex( handle->GetID() );
 
                 if( handleVertex->IsHandleAligned() )
                 {

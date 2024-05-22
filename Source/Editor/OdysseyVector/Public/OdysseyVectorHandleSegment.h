@@ -39,12 +39,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
          */
         FOdysseyVectorSegment* GetOwner();
 
-        uint32 GetHandleID();
+        uint32 GetID();
+        void SetID( uint32 iHandleID );
 
     protected:
         virtual void SetCoords( double iX, double iY ) override;
 
     private:
         FOdysseyVectorSegment* mOwnerSegment;
-        uint32 mHandleID;
+        uint32 mID;
 };

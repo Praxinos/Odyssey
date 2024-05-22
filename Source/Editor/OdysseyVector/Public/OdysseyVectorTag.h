@@ -19,6 +19,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) = 0;
 
+        FOdysseyVectorObject* GetOwner();
+
     protected:
-        FOdysseyVectorObject* mOwnerObject;
+        FOdysseyVectorObject* mOwner;
 };

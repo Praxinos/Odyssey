@@ -703,7 +703,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragSegmentHandle( FOdysseyVectorHandle
 {
     FOdysseyVectorSegment* segment = iHandle->GetOwner();
     FOdysseyVectorPath* path = segment->GetOwnerAsPath();
-    FOdysseyVectorVertex* vertex = segment->GetVertex( iHandle->GetHandleID() );
+    FOdysseyVectorVertex* vertex = segment->GetVertex( iHandle->GetID() );
     BLPoint localCoords = path->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
     BLPoint localVector = path->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
 

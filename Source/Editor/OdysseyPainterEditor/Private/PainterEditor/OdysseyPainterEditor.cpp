@@ -1457,7 +1457,7 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdyss
 
     for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
-        selectedObject->AddTag( new FOdysseyVectorTagInbetweener( selectedObject, 8, 8 ) );
+        selectedObject->AddTag( new FOdysseyVectorTagInbetweener( selectedObject, 8, 8, 4 ) );
     }
 }
 

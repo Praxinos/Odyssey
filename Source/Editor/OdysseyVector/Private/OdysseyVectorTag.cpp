@@ -5,6 +5,12 @@ FOdysseyVectorTag::~FOdysseyVectorTag()
 }
 
 FOdysseyVectorTag::FOdysseyVectorTag( FOdysseyVectorObject* iOwnerObject )
-    : mOwnerObject( iOwnerObject )
+    : mOwner( iOwnerObject )
 {
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorTag::GetOwner()
+{
+    return mOwner;
 }
