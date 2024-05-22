@@ -96,7 +96,10 @@ FOdysseyTextureLayerImageRenderer::Copy(const FOdysseyImageRendererCopyParams& i
     TArray<::ULIS::FEvent> lastEvent = clearEvents;
     for (const FChildData& childData : mChildrenData)
     {
-        lastEvent = childData.mRenderer->Blend(iParams, lastEvent);
+        FOdysseyImageRendererBlendParams params(iParams);
+        params.mBlendMode = childData.mBlendMode;
+        params.mOpacity = childData.mOpacity;
+        lastEvent = childData.mRenderer->Blend(params, lastEvent);
     }
     return lastEvent;
 }

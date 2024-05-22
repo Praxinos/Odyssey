@@ -207,6 +207,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         virtual void UpdateMatrix() override; // updates the canevas path
 
         void AlterContourWidth( double iValue, bool iAbsolute );
+        bool PickSection( FOdysseyVectorSection* iSection
+                        , const ::ULIS::FRectD& iMaskRect
+                        , const uint8* iMaskPixelData );
+        void PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
 
     protected:
         /**

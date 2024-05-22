@@ -7,6 +7,7 @@
 class FOdysseyVectorObject;
 class FOdysseyVectorSection;
 class FOdysseyVectorBucket;
+class FOdysseyVectorVertex;
 
 class ODYSSEYVECTOR_API FOdysseyVectorCycle
 {
@@ -134,6 +135,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
     private :
         void PropagateBucket( std::vector<FOdysseyVectorSection*> iSectionArray
                             , std::vector<FOdysseyVectorCycle*>& oNextCycleArray );
+
+        bool HasVertex( FOdysseyVectorVertex* iVertex );
 
     protected :
         BLPath mContourPath;

@@ -102,7 +102,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         std::vector<FTracerPoint> mPointArray;
         std::vector<FTracerRecord> mRecordArray;
         std::vector<FTracerEdge> mEdgeArray;
-        FOdysseyVectorVertex* mPreviousVertex;
         ::ULIS::FVec2D mSmoothVector;
         FTracerBezier mCandidateBezier;
         FTracerBezier mBestBezier;
@@ -130,8 +129,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         std::vector<FTracerPoint>& GetPointArray();
         std::vector<FTracerRecord>& GetRecordArray();
         std::vector<FTracerEdge>& GetEdgeArray();
-        FOdysseyVectorSegment* Flush( FOdysseyVectorVertex* iEndVertex );
-        FOdysseyVectorSegment* CommitSegment( FOdysseyVectorVertex* iEndVertex );
+        FOdysseyVectorSegment* Flush( FOdysseyVectorVertex* iPreviousVertex
+                                    , FOdysseyVectorVertex* iEndVertex );
+        FOdysseyVectorSegment* CommitSegment( FOdysseyVectorVertex* iPreviousVertex
+                                            , FOdysseyVectorVertex* iEndVertex );
         FOdysseyVectorVertex* CommitVertex( bool iIsHandleAligned );
         void Reset();
         void ClearPointsTo( uint32 iPointID );

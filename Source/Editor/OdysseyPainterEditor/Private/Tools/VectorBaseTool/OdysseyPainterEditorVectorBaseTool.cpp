@@ -92,15 +92,19 @@ UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath
     iPath->GetForegroundBucket().SetColorMode( (eBucketColorMode) iColorMode );
 }
 
-void
+FOdysseyVectorSegment*
 UOdysseyPainterEditorVectorBaseTool::PickSegments( FOdysseyVectorGroupPaint* iScene
                                                  , double iWorldX
                                                  , double iWorldY
                                                  , double iWorldRadius
                                                  , bool iRestrictToSelection
+                                                 , bool iStopImmediately
                                                  , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorSegment* closestSegment = nullptr;
+    std::vector<double> distanceArray;
+    double smallestDistance = DBL_MAX;
 
     oPickedSegmentArray.clear();
 
@@ -109,11 +113,14 @@ UOdysseyPainterEditorVectorBaseTool::PickSegments( FOdysseyVectorGroupPaint* iSc
     , 0
     , [ iScene
       , vectorEngine
+      , &closestSegment
       , &iWorldX
       , &iWorldY
       , &iWorldRadius
       , &iRestrictToSelection
-      , &oPickedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      , &iStopImmediately
+      , &oPickedSegmentArray
+      , &distanceArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
           if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( iRestrictToSelection == false ) )
           {
@@ -125,7 +132,12 @@ UOdysseyPainterEditorVectorBaseTool::PickSegments( FOdysseyVectorGroupPaint* iSc
                                     , iWorldY
                                     , iWorldRadius
                                     , oPickedSegmentArray
-                                    , nullptr );
+                                    , &distanceArray );
+
+                  if( oPickedSegmentArray.size() && iStopImmediately )
+                  {
+                      return FOdysseyVectorEngine::TRAVERSE_STOP;
+                  }
               }
 
               return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
@@ -133,6 +145,18 @@ UOdysseyPainterEditorVectorBaseTool::PickSegments( FOdysseyVectorGroupPaint* iSc
 
           return 0;
       } );
+
+    for( int i = 0; i < oPickedSegmentArray.size(); i++ )
+    {
+        if( distanceArray[i] < smallestDistance )
+        {
+            smallestDistance = distanceArray[i];
+
+            closestSegment = oPickedSegmentArray[i];
+        }
+    }
+
+    return closestSegment;
 }
 
 

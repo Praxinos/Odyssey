@@ -22,11 +22,36 @@ FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVect
 {
     SetOwner( iOwner );
 
-    iSegment0->AddIntersection( &mIntersection[0] );
-    iSegment1->AddIntersection( &mIntersection[1] );
+    // attach to segments
+    Attach();
+}
 
-    // get ready for partnerization
-    SetID( 0xFFFFFFFF );
+bool
+FOdysseyVectorVertexIntersection::SelfIntersects()
+{
+    return mSegment[0] == mSegment[1];
+}
+
+void
+FOdysseyVectorVertexIntersection::Attach()
+{
+    mSegment[0]->AddIntersection( &mIntersection[0] );
+
+    if( mSegment[1] )
+    {
+        mSegment[1]->AddIntersection( &mIntersection[1] );
+    }
+}
+
+void
+FOdysseyVectorVertexIntersection::Detach()
+{
+    mSegment[0]->RemoveIntersection( &mIntersection[0] );
+
+    if( mSegment[1] )
+    {
+        mSegment[1]->RemoveIntersection( &mIntersection[1] );
+    }
 }
 
 FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
@@ -41,13 +66,11 @@ FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVect
     , mSegment { iSegment, nullptr }
 {
     SetOwner( iOwner );
-    // T-Junction, one segment only.
-    iSegment->AddIntersection( &mIntersection[0] );
+
+    // attach to segments. T-Junction, one segment only.
+    Attach();
 
     iVertex->SetNearestVertex( this, 0.0f );
-
-    // get ready for partnerization
-    SetID( 0xFFFFFFFF );
 }
 
 double

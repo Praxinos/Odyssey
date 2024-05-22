@@ -5,6 +5,7 @@
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"

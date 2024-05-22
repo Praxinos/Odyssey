@@ -19,7 +19,6 @@ FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
     , mPointID( 0 )
     , mSampleDistance( 3.0f )
     , mTracingWidth( 6.0f )
-    , mPreviousVertex ( nullptr )
     , mCubicPath(nullptr)
 {
     mPointArray.reserve(100);
@@ -75,12 +74,12 @@ FOdysseyVectorPathTracer::Reset()
     mRecordArray.clear();
     mEdgeArray.clear();
     mCubicPath = nullptr;
-    mPreviousVertex = nullptr;
     mPointID = 0;
 }
 
 FOdysseyVectorSegment*
-FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
+FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iPreviousVertex
+                               , FOdysseyVectorVertex* iEndVertex )
 {
     FOdysseyVectorSegment* newSegment = nullptr;
 
@@ -97,7 +96,8 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iEndVertex )
     {
         MakeBezier( true );
         // newSegment will be nullptr if iEndVertex == mPreviousVertex
-        newSegment = CommitSegment( iEndVertex ? iEndVertex : CommitVertex( false ) );
+        newSegment = CommitSegment( iPreviousVertex
+                                  , iEndVertex ? iEndVertex : CommitVertex( false ) );
 
         // relocate the last vertex at the last entry
         if( ( iEndVertex == nullptr ) && mPointArray.size() )
@@ -492,9 +492,10 @@ FOdysseyVectorPathTracer::CommitVertex( bool iIsHandleAligned )
 }
 
 FOdysseyVectorSegment*
-FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
+FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
+                                       , FOdysseyVectorVertex* iEndVertex )
 {
-    if( iEndVertex != mPreviousVertex )
+    if( iEndVertex != iPreviousVertex )
     {
         BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
         BLPoint localHandlePoint[2] = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[1].x
@@ -502,7 +503,7 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
                                       , cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[2].x
                                                                             , mBestBezier.pt[2].y ) };
         FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath
-                                                                                    , mPreviousVertex
+                                                                                    , iPreviousVertex
                                                                                     , localHandlePoint[0].x
                                                                                     , localHandlePoint[0].y
                                                                                     , localHandlePoint[1].x
@@ -519,13 +520,11 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iEndVertex )
 
         // must be done after segments are added to the path
         // so that the topology exists
-        if( mPreviousVertex->IsHandleAligned() )
+        if( iPreviousVertex->IsHandleAligned() )
         {
-            mPreviousVertex->AlignHandles();
-            mPreviousVertex->SetHandleAligned( true );
+            iPreviousVertex->AlignHandles();
+            iPreviousVertex->SetHandleAligned( true );
         }
-
-        mPreviousVertex = iEndVertex;
 
         mSmoothVector = mBestBezier.pt[3] - mBestBezier.pt[2];
 
@@ -584,13 +583,12 @@ FOdysseyVectorPathTracer::GetRedrawRect()
 }
 
 FOdysseyVectorSegment*
-FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
+FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iPreviousVertex
                                , double iWorldX
                                , double iWorldY
                                , double iRadius )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorPathTracer::Trace);
-    BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
     uint32 indexn = mPointArray.size();
     FOdysseyVectorSegment* newSegment = nullptr;
 
@@ -598,23 +596,6 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
 
     if( indexn == 0 )
     {
-        BLPoint localPoint = cubicPathInverseWorldMatrix.mapPoint( iWorldX, iWorldY );
-        BLPoint localVector = cubicPathInverseWorldMatrix.mapVector( iRadius * 0.7071f
-                                                                   , iRadius * 0.7071f );
-        double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
-
-        if( iStitchedVertex )
-        {
-            mPreviousVertex = iStitchedVertex;
-        }
-        else
-        {
-            mPreviousVertex = new FOdysseyVectorVertex( localPoint.x
-                                                      , localPoint.y
-                                                      , localRadius );
-            mCubicPath->AddVertex( mPreviousVertex );
-        }
-
         mRecordArray.emplace_back( mPointID, iWorldX, iWorldY, iRadius );
     }
     else
@@ -660,7 +641,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                 MakeBezier( true );
 
                 newVertex = CommitVertex( lastRecord->smooth );
-                newSegment = CommitSegment( newVertex );
+                newSegment = CommitSegment( iPreviousVertex, newVertex );
 
                 mRecordArray.push_back( newRecord );
                 mEdgeArray.push_back( newEdge );
@@ -675,7 +656,7 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iStitchedVertex
                     FOdysseyVectorVertex* newVertex;
 
                     newVertex = CommitVertex( lastRecord->smooth );
-                    newSegment = CommitSegment( newVertex );
+                    newSegment = CommitSegment( iPreviousVertex, newVertex );
                 }
             }
         }

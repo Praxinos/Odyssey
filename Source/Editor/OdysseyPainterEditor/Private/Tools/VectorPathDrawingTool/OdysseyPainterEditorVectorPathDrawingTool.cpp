@@ -10,7 +10,7 @@
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
-
+#include "GenericPlatform/GenericPlatformTime.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -31,6 +31,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     //, Absolute( true )
     , UpdatePaintGroups( true )
     , Stitch( false )
+    , Snap( true )
     , AverageStitchedRadius( true )
     , StitchingRadius( 10 )
     , Debug( false )
@@ -81,7 +82,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PickVertex( FOdysseyVectorGroupPaint
                                                       , double iWorldY
                                                       , double iPickingRadius )
 {
-    if( Stitch || FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    if( Stitch || Snap || FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         FOdysseyVectorVertex* stitchCubicVertex = nullptr;
         // the HUD provides the hovered vertices
@@ -198,10 +199,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
+    double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
     mPathTracer.Reset();
     mStitchedVertex = nullptr;
+
+    mTimeAtDown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -211,15 +216,31 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         mAddedVertexArray.clear();
         mAddedSegmentArray.clear();
 
-        if( Stitch )
+        if( Stitch || Snap )
         {
-            mStitchedVertex = PickVertex( iScene
-                                        , iPointInTexture.x
-                                        , iPointInTexture.y
-                                        , StitchingRadius );
-            if( mStitchedVertex )
+            FOdysseyVectorVertex* pickedVertex = PickVertex( iScene
+                                                           , iPointInTexture.x
+                                                           , iPointInTexture.y
+                                                           , StitchingRadius );
+
+            if( pickedVertex )
             {
-                path = mStitchedVertex->GetOwnerAsPath();
+                if( Stitch )
+                {
+                    mStitchedVertex = pickedVertex;
+
+                    path = mStitchedVertex->GetOwnerAsPath();
+                }
+
+                if( Snap )
+                {
+                    ::ULIS::FVec2D& localCoords = pickedVertex->GetCoords();
+                    double localRadius = pickedVertex->GetRadius();
+                    BLPoint worldCoords = pickedVertex->GetOwner()->GetWorldMatrix().mapPoint( localCoords.x, localCoords.y );
+
+                    vertexWorldCoords = ::ULIS::FVec2D( worldCoords.x
+                                                      , worldCoords.y );
+                }
             }
         }
 
@@ -235,6 +256,22 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
             SetPathColor( path, ColorMode );
 
             path->SetOpacity( Opacity );
+        }
+
+        if( mStitchedVertex == nullptr )
+        {
+            BLMatrix2D& pathInverseWorldMatrix = path->GetInverseWorldMatrix();
+            BLPoint localPoint = pathInverseWorldMatrix.mapPoint( vertexWorldCoords.x
+                                                                , vertexWorldCoords.y );
+            BLPoint localVector = pathInverseWorldMatrix.mapVector( pointRadius * 0.7071f
+                                                                  , pointRadius * 0.7071f );
+            double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
+
+            mStitchedVertex = new FOdysseyVectorVertex( localPoint.x
+                                                      , localPoint.y
+                                                      , localRadius );
+
+            path->AddVertex( mStitchedVertex );
         }
 
         path->SetBrush( Brush );
@@ -306,12 +343,23 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         // mandatory for stitching vertices
         mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-        newSegment = mPathTracer.Trace( mStitchedVertex, iPointInTexture.x, iPointInTexture.y, pointRadius );
+/*
+        if( mSnappedVertexCoords )
+        {
+        }
+*/
+
+        newSegment = mPathTracer.Trace( mStitchedVertex
+                                      , iPointInTexture.x
+                                      , iPointInTexture.y
+                                      , pointRadius );
 
         if( newSegment )
         {
             mAddedVertexArray.push_back( newSegment->GetVertex(1) );
             mAddedSegmentArray.push_back( newSegment );
+
+            mStitchedVertex = mAddedVertexArray.back();
 
             //mUndoPathExtend->RecordSegment( newSegment, newSegment->GetVertex(1) );
         }
@@ -361,9 +409,12 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
+    ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint32 imgW = vectorEngine->GetPreferredWidth(),
            imgH = vectorEngine->GetPreferredHeight();
+
+    mTimeAtUp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton)
@@ -377,6 +428,47 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , iPointInTexture.x
                                                            , iPointInTexture.y
                                                            , StitchingRadius );
+            std::vector<FOdysseyVectorSegment*> pickedSegmentArray;
+
+            // check for hovered segment before the new segment is added
+            if( Snap )
+            {
+                if( endingVertex )
+                {
+                    vertexWorldCoords = endingVertex->GetWorldCoords();
+                }
+                else
+                {
+                    // don't snap when the user does small strokes.
+                    if( ( mTimeAtUp - mTimeAtDown ) > 200 )
+                    {
+                        // check if we picked any segment
+                        FOdysseyVectorSegment* closestSegment = PickSegments( iScene
+                                                                            , iPointInTexture.x
+                                                                            , iPointInTexture.y
+                                                                            , StitchingRadius
+                                                                            , false
+                                                                            , true
+                                                                            , pickedSegmentArray );
+
+                        if( closestSegment )
+                        {
+                            FOdysseyVectorSegment* pickedSegment = pickedSegmentArray[0];
+                            BLMatrix2D& inverseWorldMatrix = pickedSegment->GetOwner()->GetInverseWorldMatrix();
+                            BLMatrix2D& worldMatrix = pickedSegment->GetOwner()->GetWorldMatrix();
+                            BLPoint localPoint = inverseWorldMatrix.mapPoint( iPointInTexture.x
+                                                                            , iPointInTexture.y );
+                            ::ULIS::FVec2D vertexLocalCoords;
+                            double projectedPointT = pickedSegment->ProjectConstrained( ::ULIS::FVec2D( localPoint.x
+                                                                                                      , localPoint.y )
+                                                                                        , vertexLocalCoords );
+                            BLPoint worldPoint = worldMatrix.mapPoint( vertexLocalCoords.x
+                                                                     , vertexLocalCoords.y );
+                            vertexWorldCoords = ::ULIS::FVec2D( worldPoint.x, worldPoint.y );
+                        }
+                    }
+                }
+            }
 
             // stitching to another path at MouseUp is CURRENTLY not supported
             if( endingVertex && ( endingVertex->GetOwnerAsPath() != path ) )
@@ -384,10 +476,16 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 endingVertex = nullptr;
             }
 
-            newSegment = mPathTracer.Flush( endingVertex );
+            newSegment = mPathTracer.Flush( mStitchedVertex, Stitch ? endingVertex : nullptr );
 
             if( newSegment )
             {
+                BLPoint vertexLocalPoint = path->GetInverseWorldMatrix().mapPoint( vertexWorldCoords.x
+                                                                                 , vertexWorldCoords.y );
+
+                // this will snap to the correct location and do nothing in the worst case scenario.
+                newSegment->GetVertex(1)->Set( vertexLocalPoint.x, vertexLocalPoint.y );
+
                 if( endingVertex == nullptr )
                 {
                     mAddedVertexArray.push_back( newSegment->GetVertex(1) );
