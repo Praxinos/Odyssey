@@ -3,8 +3,8 @@
 
 #include "OdysseyHUDHandle.h"
 
-#define HANDLE_SMALL_SIZE 1
-#define HANDLE_BIG_SIZE 2
+#define HANDLE_SMALL_SIZE 10
+#define HANDLE_BIG_SIZE 20
 
 struct HOdysseyHUDHandleHitProxy : public HOdysseyHUDElementHitProxy
 {
@@ -25,7 +25,8 @@ FOdysseyHUDHandle::~FOdysseyHUDHandle()
 
 FOdysseyHUDHandle::FOdysseyHUDHandle(FName iName, FVector2D* iReferencePoint)
     : FOdysseyHUDElement(iName)
-    , mHandleMaterial(LoadObject<UMaterial>(nullptr, TEXT("/Engine/EditorMaterials/WidgetVertexColorMaterial")))
+    //, mHandleMaterial(LoadObject<UMaterial>(nullptr, TEXT("/Engine/EditorMaterials/WidgetVertexColorMaterial")))
+    , mHandleMaterial(LoadObject<UMaterial>(nullptr, TEXT("/Iliad/HUD/M_HUD_Handle")))
 {
     mHandleSize = HANDLE_SMALL_SIZE;
     mReferencePoint = iReferencePoint;
@@ -38,12 +39,16 @@ FOdysseyHUDHandle::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
     FVector handlePosition = iParams.mOrigin
         + mReferencePoint->X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
         + mReferencePoint->Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
+
+    float handleSizeX = ((float)mHandleSize) / iParams.mTextureWidth * iParams.mPlaneWidth;
+    float handleSizeY = ((float)mHandleSize) / iParams.mTextureHeight * iParams.mPlaneHeight;
+    float handleSize = FMath::Min(handleSizeX, handleSizeY);
     
     if (iParams.mPDI->IsHitTesting() && mIsInteractable)
 	    iParams.mPDI->SetHitProxy(new HOdysseyHUDHandleHitProxy(SharedThis(this)));
 
     FMaterialRenderProxy* handleMaterialProxy = mHandleMaterial->GetRenderProxy();
-    const int32 numSides = 64;
+    /* const int32 numSides = 64;
     DrawDisc(
         iParams.mPDI,
         handlePosition,
@@ -52,6 +57,18 @@ FOdysseyHUDHandle::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
         color.ToFColor(true),
         mHandleSize,
         64,
+        handleMaterialProxy,
+        SDPG_Foreground
+    ); */
+
+    DrawRectangleMesh(
+        iParams.mPDI,
+        handlePosition,
+        iParams.mXAxis,
+        iParams.mYAxis,
+        color.ToFColor(true),
+        handleSize,
+        handleSize,
         handleMaterialProxy,
         SDPG_Foreground
     );
