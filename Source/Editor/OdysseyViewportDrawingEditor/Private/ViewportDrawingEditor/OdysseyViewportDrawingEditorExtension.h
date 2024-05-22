@@ -66,6 +66,9 @@ public:
     int32 GetUVIndexUsedByCurrentTexture();
     float  GetMeshComponentMaxSize() const;
 
+    bool GetHUDPlaneParams(FVector& oPlaneTopLeft, double& oW, double& oH, FVector& oXAxis, FVector& oYAxis);
+    bool ViewportToHUD(FEditorViewportClient* iViewportClient, const FVector2D& iViewportPoint, FVector2D& oHUDPoint);
+
 public:
     //Setters
     void SetActor(AActor* iActor);

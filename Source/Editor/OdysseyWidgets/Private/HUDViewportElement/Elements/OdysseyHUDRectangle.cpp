@@ -10,57 +10,72 @@ FOdysseyHUDRectangle::~FOdysseyHUDRectangle()
 
 }
 
-FOdysseyHUDRectangle::FOdysseyHUDRectangle(FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint, FTransform2D iTransform /*= FTransform2D() */) :
-    FOdysseyHUDElement(iName, iTransform)
+FOdysseyHUDRectangle::FOdysseyHUDRectangle(FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint) :
+    FOdysseyHUDElement(iName)
 {
-    mTopLeftPoint = mPreviousTopLeftPoint = iTopLeftPoint;
-    mBottomRightPoint = mPreviousBottomRightPoint = iBottomRightPoint;
+    mTopLeftPoint = iTopLeftPoint;
+    mBottomRightPoint = iBottomRightPoint;
 }
 
-void FOdysseyHUDRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void
+FOdysseyHUDRectangle::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
 {
-    if( !ioBlock )
-        return;
+    const FLinearColor color(0.f, 1.f, 0.f);
+    FVector topLeft = iParams.mOrigin
+        + mTopLeftPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+        + mTopLeftPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    if ( mIsInvalid || mPreviousTopLeftPoint != mTopLeftPoint || mPreviousBottomRightPoint != mBottomRightPoint || mPreviousTransform != iTransform)
-    {
-        Erase(ioBlock, iTransform);
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-    }
-    else
-    {
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-        return;
-    }
+    FVector topRight = iParams.mOrigin
+        + mBottomRightPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+        + mTopLeftPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    FVector2D transformedTopLeftPoint = iTransform.TransformPoint(mTopLeftPoint);
-    FVector2D transformedBottomRightPoint = iTransform.TransformPoint(mBottomRightPoint);
+    FVector bottomRight = iParams.mOrigin
+        + mBottomRightPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+        + mBottomRightPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedTopLeftPoint.X, transformedTopLeftPoint.Y), ::ULIS::FVec2I(transformedBottomRightPoint.X, transformedBottomRightPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
-    ctx.Finish();
+    FVector bottomLeft = iParams.mOrigin
+        + mTopLeftPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+        + mBottomRightPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    mPreviousBottomRightPoint = mBottomRightPoint;
-    mPreviousTopLeftPoint = mTopLeftPoint;
-    mPreviousTransform = iTransform;
+    iParams.mPDI->DrawTranslucentLine(
+        topLeft,
+        topRight,
+        color,
+        SDPG_Foreground,
+        1.0f,
+        0.0f,
+        true
+    );
 
-    ioBlock->Dirty();
-}
+    iParams.mPDI->DrawTranslucentLine(
+        topRight,
+        bottomRight,
+        color,
+        SDPG_Foreground,
+        1.0f,
+        0.0f,
+        true
+    );
 
-void FOdysseyHUDRectangle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
-{
-    if (!ioBlock)
-        return;
- 
-    //Erase the children of this HUDElement
-    FOdysseyHUDElement::Erase(ioBlock, iTransform);
+    iParams.mPDI->DrawTranslucentLine(
+        bottomRight,
+        bottomLeft,
+        color,
+        SDPG_Foreground,
+        1.0f,
+        0.0f,
+        true
+    );
 
-    FVector2D transformedTopLeftPoint = mPreviousTransform.TransformPoint(mPreviousTopLeftPoint);
-    FVector2D transformedBottomRightPoint = mPreviousTransform.TransformPoint(mPreviousBottomRightPoint);
+    iParams.mPDI->DrawTranslucentLine(
+        bottomLeft,
+        topLeft,
+        color,
+        SDPG_Foreground,
+        1.0f,
+        0.0f,
+        true
+    );
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedTopLeftPoint.X, transformedTopLeftPoint.Y), ::ULIS::FVec2I(transformedBottomRightPoint.X, transformedBottomRightPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 0));
-    ctx.Finish();
+    FOdysseyHUDElement::Render(iParams);
 }

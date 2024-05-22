@@ -70,7 +70,7 @@ UOdysseyShape::ApplyOverrides(const TMap< TObjectPtr<UClass>, TObjectPtr<UObject
 }
 
 void 
-UOdysseyShape::SetHUD(FOdysseyHUDElement* iHUD)
+UOdysseyShape::SetHUD(TSharedPtr<FOdysseyHUDElement> iHUD)
 {
 	mHUD = iHUD;
 }

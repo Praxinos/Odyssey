@@ -10,110 +10,84 @@ FOdysseyHUDBezier::~FOdysseyHUDBezier()
 
 }
 
-FOdysseyHUDBezier::FOdysseyHUDBezier(FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint, FTransform2D iTransform /*= FTransform2D()*/) :
-    FOdysseyHUDElement(iName, iTransform)
+FOdysseyHUDBezier::FOdysseyHUDBezier(FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint) :
+    FOdysseyHUDElement(iName)
 {
-    mStartPoint = mPreviousStartPoint = iStartPoint;
-    mEndPoint = mPreviousEndPoint = iEndPoint;
-    mControlPoint = mPreviousControlPoint = iControlPoint;
+    mStartPoint = iStartPoint;
+    mEndPoint = iEndPoint;
+    mControlPoint = iControlPoint;
 }
 
-void FOdysseyHUDBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void
+FOdysseyHUDBezier::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
 {
-    if( !ioBlock )
-        return;
+    const FLinearColor bezierLineColor(0.f, 1.f, 0.f, 1.f);
+    const FLinearColor controlLineColor(0.f, 1.f, 0.f, 0.4f);
+    
+    FVector startPoint = iParams.mOrigin
+        + mStartPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+        + mStartPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    if ( mIsInvalid
-        || mPreviousStartPoint != mStartPoint
-        || mPreviousEndPoint != mEndPoint
-        || mPreviousControlPoint != mControlPoint
-        || mPreviousTransform != iTransform
-    )
-    {
-        Erase(ioBlock, iTransform);
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-    }
-    else
-    {
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-        return;
-    }
+    FVector controlPoint = iParams.mOrigin
+        + mControlPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+        + mControlPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    FVector2D transformedStartPoint = iTransform.TransformPoint(mStartPoint);
-    FVector2D transformedEndPoint = iTransform.TransformPoint(mEndPoint);
-    FVector2D transformedControlPoint = iTransform.TransformPoint(mControlPoint);
+    FVector endPoint = iParams.mOrigin
+        + mEndPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+        + mEndPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawQuadraticBezier(
-        *(ioBlock),
-        ::ULIS::FVec2I(transformedStartPoint.X,transformedStartPoint.Y),
-        ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
-        ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-        1.f,
-        ::ULIS::FColor::FromRGBA8(0, 255, 0, 255)
+    ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
+    ::ULIS::GenerateQuadraticBezierPoints(
+        ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y),
+        ::ULIS::FVec2I(mControlPoint.X, mControlPoint.Y),
+        ::ULIS::FVec2I(mEndPoint.X, mEndPoint.Y),
+        1.0f,
+        pointsArray
     );
-    if ( transformedStartPoint != transformedControlPoint )
-    {
-        ctx.DrawLine(
-            *(ioBlock),
-            ::ULIS::FVec2I(transformedStartPoint.X,transformedStartPoint.Y),
-            ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
-            ::ULIS::FColor::FromRGBA8(0, 255, 0, 95)
-        );
-        ctx.DrawLine(
-            *(ioBlock),
-            ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
-            ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-            ::ULIS::FColor::FromRGBA8(0, 255, 0, 95)
-        );
-    }
-    ctx.Finish();
 
-    mPreviousEndPoint = mEndPoint;
-    mPreviousStartPoint = mStartPoint;
-    mPreviousControlPoint = mControlPoint;
-    mPreviousTransform = iTransform;
-
-    ioBlock->Dirty();
-}
-
-void FOdysseyHUDBezier::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
-{
-    if (!ioBlock)
+    if (pointsArray.Size() < 2)
         return;
- 
-    //Erase the children of this HUDElement
-    FOdysseyHUDElement::Erase(ioBlock, iTransform);
-
-    FVector2D transformedStartPoint = mPreviousTransform.TransformPoint(mPreviousStartPoint);
-    FVector2D transformedEndPoint = mPreviousTransform.TransformPoint(mPreviousEndPoint);
-    FVector2D transformedControlPoint = mPreviousTransform.TransformPoint(mPreviousControlPoint);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawQuadraticBezier(
-        *(ioBlock),
-        ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y),
-        ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
-        ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-        1.f,
-        ::ULIS::FColor::FromRGBA8(0, 255, 0, 0)
-    );
-    if ( transformedStartPoint != transformedControlPoint )
+        
+    for (int i = 1; i < pointsArray.Size(); i++)
     {
-        ctx.DrawLine(
-            *(ioBlock),
-            ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y),
-            ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
-            ::ULIS::FColor::FromRGBA8(0, 255, 0, 0)
-        );
-        ctx.DrawLine(
-            *(ioBlock),
-            ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
-            ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-            ::ULIS::FColor::FromRGBA8(0, 255, 0, 0)
+        FVector startBezierPoint = iParams.mOrigin
+            + ((float)pointsArray[i - 1].x) / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+            + ((float)pointsArray[i - 1].y) / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
+
+        FVector endBezierPoint = iParams.mOrigin
+            + ((float)pointsArray[i].x) / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+            + ((float)pointsArray[i].y) / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
+
+        iParams.mPDI->DrawTranslucentLine(
+            startBezierPoint,
+            endBezierPoint,
+            bezierLineColor,
+            SDPG_Foreground,
+            1.0f,
+            0.0f,
+            true
         );
     }
-    ctx.Finish();
+
+    iParams.mPDI->DrawTranslucentLine(
+		startPoint,
+		controlPoint,
+		controlLineColor,
+		SDPG_Foreground,
+		1.0f,
+		0.0f,
+		true
+	);
+
+    iParams.mPDI->DrawTranslucentLine(
+		controlPoint,
+        endPoint, 
+		controlLineColor,
+		SDPG_Foreground,
+		1.0f,
+		0.0f,
+		true
+	);
+
+    FOdysseyHUDElement::Render(iParams);
 }

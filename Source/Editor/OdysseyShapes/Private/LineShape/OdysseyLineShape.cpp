@@ -31,16 +31,17 @@ UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey&
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mLine = new FOdysseyHUDLine(FName("Line"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
+        mLine = MakeShared<FOdysseyHUDLine>(FName("Line"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
         mHUD->AddElement(mLine);
 
-        FOdysseyHUDHandle* handleStart = new FOdysseyHUDHandle(FName("handleStart"), mLine, &(mLine->mStartPoint));
-        FOdysseyHUDHandle* handleFinish = new FOdysseyHUDHandle(FName("handleFinish"), mLine, &(mLine->mFinishPoint));
+        TSharedPtr<FOdysseyHUDHandle> handleStart = MakeShared<FOdysseyHUDHandle>(FName("handleStart"), &(mLine->mStartPoint));
+        TSharedPtr<FOdysseyHUDHandle> handleFinish = MakeShared<FOdysseyHUDHandle>(FName("handleFinish"), &(mLine->mFinishPoint));
+
+        handleStart->IsInteractable(false);
+        handleFinish->IsInteractable(false);
 
         mLine->AddElement(handleFinish);
         mLine->AddElement(handleStart);
-
-        mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
     }
 
@@ -52,7 +53,6 @@ UOdysseyLineShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& i
 {
     if( mHasStrokeBegun )
     {
-        mHUD->OnKeyUp(iPointInTexture, iKey);
         CommitLine();
         return true;
     }
@@ -62,8 +62,6 @@ UOdysseyLineShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& i
 void
 UOdysseyLineShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    mHUD->MouseMove(iPointInTexture);
-
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
 
@@ -83,7 +81,7 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
             else
                 point.x = mLine->mStartPoint.X;
         }
-        mHUD->CapturedMouseMove(point);
+        mLine->mFinishPoint = FVector2D(point.x, point.y);
 
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }

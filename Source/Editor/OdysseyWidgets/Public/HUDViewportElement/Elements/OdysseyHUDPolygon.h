@@ -16,24 +16,15 @@ public:
     virtual ~FOdysseyHUDPolygon();
 
     //Constructor
-    FOdysseyHUDPolygon( FName iName, TArray<FVector2D> iPoints, FTransform2D iTransform = FTransform2D() );
+    FOdysseyHUDPolygon( FName iName);
 
 //FOdysseyHUDElement overrides
 public:
-    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
-    void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams) override;
 
 public:
     TArray<FVector2D>& GetPoints();
 
-public:
+private:
     TArray<FVector2D> mPoints;
-
-private:
-    TArray<FVector2D> mPreviousPoints;
-
-private:
-    /** The widget representation of the polygon in Editor */
-    TSharedPtr<IDetailsView> mDetailsView;
-
 };

@@ -16,13 +16,11 @@ public:
     virtual ~FOdysseyHUDEllipse();
 
     //Constructor
-    FOdysseyHUDEllipse( FName iName, FVector2D iCenterPoint, FVector2D iEndPoint, FTransform2D iTransform = FTransform2D() );
-    FOdysseyHUDEllipse( FName iName, FVector2D iCenterPoint, int iEllipseAaxis, int iEllipseBaxis, FTransform2D iTransform = FTransform2D() );
+    FOdysseyHUDEllipse( FName iName, FVector2D iCenterPoint, FVector2D iEndPoint);
+    FOdysseyHUDEllipse( FName iName, FVector2D iCenterPoint, int iEllipseAaxis, int iEllipseBaxis);
 
-//FOdysseyHUDElement overrides
 public:
-    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
-    void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams) override;
 
     int GetAAxis();
     int GetBAxis();
@@ -31,17 +29,5 @@ public:
     FVector2D mCenterPoint;
     int mEllipseAaxis;
     int mEllipseBaxis;
-
     FVector2D mBorderPoint;
-
-private:
-    FVector2D mPreviousCenterPoint;
-    FVector2D mPreviousBorderPoint;
-    int mPreviousEllipseAaxis;
-    int mPreviousEllipseBaxis;
-
-private:
-    /** The widget representation of the line in Editor */
-    TSharedPtr<IDetailsView> mDetailsView;
-
 };

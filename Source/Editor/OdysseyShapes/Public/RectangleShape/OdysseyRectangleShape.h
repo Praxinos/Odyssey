@@ -69,5 +69,5 @@ protected:
     FAdaptStep                          mAdaptStepDelegate;
 
 private:
-    FOdysseyHUDRectangle* mRectangle;
+    TSharedPtr<FOdysseyHUDRectangle> mRectangle;
 };

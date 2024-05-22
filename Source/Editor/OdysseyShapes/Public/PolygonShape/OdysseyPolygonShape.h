@@ -50,6 +50,8 @@ public:
 private:
     void CommitPolygon();
     virtual bool AbortShape() override;
+    void OnFirstHandleDragEnd();
+    void RebuildHandles();
 
 protected:
     // protected Data Members
@@ -69,6 +71,6 @@ protected:
     FAdaptStep                          mAdaptStepDelegate;
 
 private:
-    FOdysseyHUDPolygon* mPolygon;
-    TArray<FOdysseyHUDHandle*> mHandles;
+    TSharedPtr<FOdysseyHUDPolygon> mPolygon;
+    TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
 };

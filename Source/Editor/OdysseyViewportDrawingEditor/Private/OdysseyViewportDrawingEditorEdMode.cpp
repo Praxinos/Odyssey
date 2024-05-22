@@ -66,6 +66,10 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
     if (!mViewportDrawingEditorExtension)
         return;
 
+    UTexture* texture = mViewportDrawingEditorExtension->Texture();
+    if (!texture)
+        return;
+
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
     if (!adapter)
         return;
@@ -74,71 +78,25 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
 
     /* TESTS */
 
-    UMeshComponent* component = mViewportDrawingEditorExtension->Component();
-    AActor* actor = mViewportDrawingEditorExtension->Actor();
-
-    if (!component || !component->IsA<UStaticMeshComponent>())
-        return;
-
-    UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
-    UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
-
-    if (!staticMesh)
-        return;
-
-    FVector actorLocation = actor->GetActorLocation();
-
-    // Display settings
-    FTransform componentToWorld = component->GetComponentToWorld();
-
-    FVector brushXAxis(1.0f, 0.f, 0.f);
-    FVector brushYAxis(0.f, 1.f, 0.f);
-
-    FBox bbox = staticMesh->GetBoundingBox();
-    FVector extent = bbox.GetExtent();
-    FVector scale = actor->GetActorScale();
-    
-    double w = extent.X * scale.X * 2;
-    double h = extent.Y * scale.Y * 2;
-
-    FString pathname = staticMesh->GetPathName();
-    if (actor->IsA<AMediaPlate>())
-    {
-        brushXAxis = FVector(0.f, 1.f, 0.f);
-        brushYAxis = FVector(0.f, 0.f, -1.f);
-        w = extent.Y * scale.Y * 2;
-        h = extent.Z * scale.Z * 2;
-    }
-
-    brushXAxis = componentToWorld.TransformVector(brushXAxis);
-    brushYAxis = componentToWorld.TransformVector(brushYAxis);
-
-    const FVector planeTopLeft = actorLocation - brushXAxis * w / 2.f - brushYAxis * h / 2.f;
-
-    /* const FLinearColor gridColor(1.f, 0.f, 0.f);
-    DrawRectangle(
-        PDI,
-        planeTopLeft,
-        brushXAxis,
-        brushYAxis,
-        gridColor.ToFColor(true),
-        w,
-        h,
-        SDPG_Foreground,
-        1.f,
-        0.f,
-        true
-    ); */
+    FVector planeTopLeft;
+	double w;
+	double h;
+	FVector xAxis;
+	FVector yAxis;
+	if (!mViewportDrawingEditorExtension->GetHUDPlaneParams(planeTopLeft, w, h, xAxis, yAxis))
+		return;
 
     FOdysseyHUDSystem::FRenderParams params;
     params.mView = View;
     params.mViewport = Viewport;
     params.mPDI = PDI;
     params.mOrigin = planeTopLeft;
-    params.mXAxis = brushXAxis;
-    params.mYAxis = brushYAxis;
+    params.mXAxis = xAxis;
+    params.mYAxis = yAxis;
     params.mPlaneWidth = w;
     params.mPlaneHeight = h;
+    params.mTextureWidth = texture->GetSurfaceWidth();
+    params.mTextureHeight = texture->GetSurfaceHeight();
 
     mEditor->HUDSystem()->Render(params);
 }

@@ -31,10 +31,8 @@ UOdysseyEllipseShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FK
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mEllipse = new FOdysseyHUDEllipse(FName("Ellipse"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
+        mEllipse = MakeShared<FOdysseyHUDEllipse>(FName("Ellipse"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
         mHUD->AddElement(mEllipse);
-
-        mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
     }
 
@@ -46,7 +44,6 @@ UOdysseyEllipseShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey
 {
     if( mHasStrokeBegun )
     {
-        mHUD->OnKeyUp(iPointInTexture, iKey);
         CommitEllipse();
         return true;
     }
@@ -56,7 +53,7 @@ UOdysseyEllipseShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey
 void
 UOdysseyEllipseShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    mHUD->MouseMove(iPointInTexture);
+    //mHUD->MouseMove(iPointInTexture);
 
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
@@ -77,7 +74,7 @@ UOdysseyEllipseShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
             point.x = mEllipse->mCenterPoint.X + maxShift;
             point.y = mEllipse->mCenterPoint.Y + maxShift;
         }
-        mHUD->CapturedMouseMove(point);
+        //mHUD->CapturedMouseMove(point);
         mEllipse->mBorderPoint = FVector2D(point.x, point.y);
 
         UOdysseyShape::OnMouseDrag(iPointInTexture);

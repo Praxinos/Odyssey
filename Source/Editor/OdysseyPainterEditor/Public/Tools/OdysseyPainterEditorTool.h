@@ -75,7 +75,7 @@ public:
     // Interface
     virtual void BindShortcuts(class FBaseToolkit* iToolkit);
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
-    virtual FOdysseyHUDElement* GetHUD();
+    virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
     virtual void RenderHUD(const FOdysseyHUDSystem::FRenderParams& iParams);
 
@@ -100,7 +100,7 @@ public:
 protected:
     TSharedPtr<FOdysseyPainterEditorToolInputProcessor> mInputProcessor;
     FOdysseyPainterEditor*              mEditor;
-    FOdysseyHUDElement*                 mHUD;
+    TSharedPtr<FOdysseyHUDElement>      mHUD;
     TSharedPtr<SWidget>                 mTopTabWidget;
 
 public:

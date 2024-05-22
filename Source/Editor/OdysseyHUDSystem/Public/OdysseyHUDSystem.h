@@ -22,6 +22,8 @@ public:
         FVector mYAxis;
         double mPlaneWidth;
         double mPlaneHeight;
+        int32 mTextureWidth;
+        int32 mTextureHeight;
     };
     
     DECLARE_DELEGATE_OneParam(FOnRender, const FRenderParams&)

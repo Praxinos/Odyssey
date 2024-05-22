@@ -69,6 +69,6 @@ protected:
     FAdaptStep                          mAdaptStepDelegate;
 
 private:
-    FOdysseyHUDEllipse* mEllipse;
-    TArray<FOdysseyHUDHandle*> mHandles;
+    TSharedPtr<FOdysseyHUDEllipse> mEllipse;
+    TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
 };

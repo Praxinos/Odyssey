@@ -16,23 +16,12 @@ public:
     virtual ~FOdysseyHUDRectangle();
 
     //Constructor
-    FOdysseyHUDRectangle( FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint, FTransform2D iTransform = FTransform2D() );
+    FOdysseyHUDRectangle( FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint);
 
-//FOdysseyHUDElement overrides
 public:
-    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
-    void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams) override;
 
 public:
     FVector2D mTopLeftPoint;
     FVector2D mBottomRightPoint;
-
-private:
-    FVector2D mPreviousTopLeftPoint;
-    FVector2D mPreviousBottomRightPoint;
-
-private:
-    /** The widget representation of the Rectangle in Editor */
-    TSharedPtr<IDetailsView> mDetailsView;
-
 };

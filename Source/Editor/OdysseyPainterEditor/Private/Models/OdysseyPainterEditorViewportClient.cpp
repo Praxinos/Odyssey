@@ -217,7 +217,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
     // Draw HUD Surface
-    if( HUDTexture && HUDTexture->GetResource() )
+    /* if( HUDTexture && HUDTexture->GetResource() )
     {
         //HUD needs its own way to be displayed, otherwise it will inherit the way the canvas texture is drawn, which is not always what we want
         TRefCountPtr<FBatchedElementParameters> HUDbatchedElementParameters;
@@ -254,7 +254,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         tileItem.BlendMode = (ESimpleElementBlendMode)result;
         tileItem.PivotPoint = pivotPoint;
         ioCanvas->DrawItem( tileItem );
-    }
+    } */
 
     if( mMeshSelector->GetCurrentMesh() )
     {

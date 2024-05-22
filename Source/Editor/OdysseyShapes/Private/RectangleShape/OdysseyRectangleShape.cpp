@@ -31,16 +31,17 @@ UOdysseyRectangleShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const 
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mRectangle = new FOdysseyHUDRectangle(FName("Rectangle"), FVector2D( iPointInTexture.x, iPointInTexture.y), FVector2D( iPointInTexture.x, iPointInTexture.y) );
+        mRectangle = MakeShared<FOdysseyHUDRectangle>(FName("Rectangle"), FVector2D( iPointInTexture.x, iPointInTexture.y), FVector2D( iPointInTexture.x, iPointInTexture.y) );
         mHUD->AddElement(mRectangle);
 
-        FOdysseyHUDHandle* handleTopLeft = new FOdysseyHUDHandle(FName("handleTopLeft"), mRectangle, &(mRectangle->mTopLeftPoint));
-        FOdysseyHUDHandle* handleBottomRight = new FOdysseyHUDHandle(FName("handleBottomRight"), mRectangle, &(mRectangle->mBottomRightPoint));
+        TSharedPtr<FOdysseyHUDHandle> handleTopLeft = MakeShared<FOdysseyHUDHandle>(FName("handleTopLeft"), &(mRectangle->mTopLeftPoint));
+        TSharedPtr<FOdysseyHUDHandle> handleBottomRight = MakeShared<FOdysseyHUDHandle>(FName("handleBottomRight"), &(mRectangle->mBottomRightPoint));
+
+        handleTopLeft->IsInteractable(false);
+        handleBottomRight->IsInteractable(false);
 
         mRectangle->AddElement(handleBottomRight);
         mRectangle->AddElement(handleTopLeft);
-
-        mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
     }
 
@@ -52,7 +53,6 @@ UOdysseyRectangleShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FK
 {
     if( mHasStrokeBegun )
     {
-        mHUD->OnKeyUp(iPointInTexture, iKey);
         CommitRectangle();
         return true;
     }
@@ -62,8 +62,6 @@ UOdysseyRectangleShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FK
 void
 UOdysseyRectangleShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    mHUD->MouseMove(iPointInTexture);
-
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
 
@@ -94,7 +92,7 @@ UOdysseyRectangleShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
                 point.y = mRectangle->mTopLeftPoint.Y + shiftY;
             }
         }
-        mHUD->CapturedMouseMove(point);
+        mRectangle->mBottomRightPoint = FVector2D(point.x, point.y);
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
 }

@@ -17,40 +17,42 @@ public:
     virtual ~FOdysseyHUDHandle();
 
     //Constructor
-    FOdysseyHUDHandle( FName iName, FOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FTransform2D iTransform = FTransform2D() );
+    FOdysseyHUDHandle( FName iName, FVector2D* iReferencePoint );
 
 //FOdysseyHUDElement overrides
 public:
-    virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams) override;
-    virtual void MouseMove( const FOdysseyPoint& iPointInTexture ) override;
-    virtual bool OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
-    virtual bool OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
-    virtual void CapturedMouseMove( const FOdysseyPoint& iPointInTexture ) override;
-    virtual void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
 
 public:
     //HitProxy version
-    /* virtual bool OnMouseDown(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-    virtual bool OnMouseDoubleClick(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-    virtual bool OnMouseUp(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-    virtual void OnMouseHover(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture);
-    virtual void OnMouseDrag(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture);
-    virtual bool OnKeyDown(const FKey& iKey);
-    virtual bool OnKeyUp(const FKey& iKey); */
+    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
 
 public:
+    bool IsInteractable() const;
+    void IsInteractable(bool iIsInteractable);
+
+    bool IsPositionLocked() const;
+    void IsPositionLocked(bool iIsPositionLocked);
+
     void SetPosition(FVector2D iNewPosition);
     FVector2D GetPosition();
 
-private:
-    FOdysseyHUDElement* mParent;
+    FSimpleMulticastDelegate& OnDragged();
+    FSimpleMulticastDelegate& OnDragBegin();
+    FSimpleMulticastDelegate& OnDragEnd();
 
+private:
     FVector2D* mReferencePoint;
-    FVector2D mPreviousPosition;
-    int mPreviousHandleSize;
 
-private:
     int mHandleSize;
-    //FHitProxyId mHitProxyId;
+    UMaterial* mHandleMaterial;
+    FSimpleMulticastDelegate mOnDragged;
+    FSimpleMulticastDelegate mOnDragBegin;
+    FSimpleMulticastDelegate mOnDragEnd;
+
+    bool mIsInteractable = true;
+    bool mIsPositionLocked = false;
 };

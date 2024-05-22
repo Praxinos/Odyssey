@@ -10,58 +10,34 @@ FOdysseyHUDLine::~FOdysseyHUDLine()
 
 }
 
-FOdysseyHUDLine::FOdysseyHUDLine(FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform /*= FTransform2D() */) :
-    FOdysseyHUDElement(iName, iTransform)
+FOdysseyHUDLine::FOdysseyHUDLine(FName iName, FVector2D iStartPoint, FVector2D iFinishPoint) :
+    FOdysseyHUDElement(iName)
 {
-    mStartPoint = mPreviousStartPoint = iStartPoint;
-    mFinishPoint = mPreviousFinishPoint = iFinishPoint;
+    mStartPoint = iStartPoint;
+    mFinishPoint = iFinishPoint;
 }
 
-
-void FOdysseyHUDLine::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void
+FOdysseyHUDLine::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
 {
-    if( !ioBlock )
-        return;
+    const FLinearColor color(0.f, 1.f, 0.f);
+    FVector startPosition = iParams.mOrigin
+        + mStartPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+        + mStartPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    if ( mIsInvalid || mPreviousStartPoint != mStartPoint || mPreviousFinishPoint != mFinishPoint || mPreviousTransform != iTransform)
-    {
-        Erase(ioBlock, iTransform);
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-    }
-    else
-    {
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-        return;
-    }
+    FVector finishPosition = iParams.mOrigin
+        + mFinishPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
+        + mFinishPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    FVector2D transformedStartPoint = iTransform.TransformPoint(mStartPoint);
-    FVector2D transformedFinishPoint = iTransform.TransformPoint(mFinishPoint);
+    iParams.mPDI->DrawTranslucentLine(
+		startPosition,
+		finishPosition,
+		color,
+		SDPG_Foreground,
+		1.0f,
+		0.0f,
+		true
+	);
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawLine(*(ioBlock), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
-    ctx.Finish();
-
-    mPreviousFinishPoint = mFinishPoint;
-    mPreviousStartPoint = mStartPoint;
-    mPreviousTransform = iTransform;
-
-    ioBlock->Dirty();
-}
-
-void FOdysseyHUDLine::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
-{
-    if (!ioBlock)
-        return;
- 
-    //Erase the children of this HUDElement
-    FOdysseyHUDElement::Erase(ioBlock, iTransform);
-
-    FVector2D transformedStartPoint = mPreviousTransform.TransformPoint(mPreviousStartPoint);
-    FVector2D transformedFinishPoint = mPreviousTransform.TransformPoint(mPreviousFinishPoint);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawLine(*(ioBlock), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 0));
-    ctx.Finish();
+    FOdysseyHUDElement::Render(iParams);
 }

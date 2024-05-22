@@ -70,6 +70,6 @@ protected:
     FAdaptStep                          mAdaptStepDelegate;
 
 private:
-    FOdysseyHUDBezier* mBezier;
-    TArray<FOdysseyHUDHandle*> mHandles;
+    TSharedPtr<FOdysseyHUDBezier> mBezier;
+    TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
 };

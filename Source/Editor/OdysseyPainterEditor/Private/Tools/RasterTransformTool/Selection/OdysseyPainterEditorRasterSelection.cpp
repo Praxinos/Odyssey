@@ -31,7 +31,7 @@ UOdysseyPainterEditorRasterSelection::UOdysseyPainterEditorRasterSelection():
 {
 }
 
-void UOdysseyPainterEditorRasterSelection::Init(FOdysseyHUDElement* iHUD, FOdysseyPainterEditor* iEditor, bool iUniform)
+void UOdysseyPainterEditorRasterSelection::Init(TSharedPtr<FOdysseyHUDElement> iHUD, FOdysseyPainterEditor* iEditor, bool iUniform)
 {
     mHUD = iHUD;
     mEditor = iEditor;

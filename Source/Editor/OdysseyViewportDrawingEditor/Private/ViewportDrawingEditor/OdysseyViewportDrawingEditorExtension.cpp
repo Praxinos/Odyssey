@@ -989,4 +989,91 @@ FOdysseyViewportDrawingEditorExtension::AddReferencedObjects(FReferenceCollector
 	}
 }
 
+bool
+FOdysseyViewportDrawingEditorExtension::GetHUDPlaneParams(FVector& oPlaneTopLeft, double& oW, double& oH, FVector& oXAxis, FVector& oYAxis)
+{
+	UMeshComponent* component = Component();
+	AActor* actor = Actor();
+
+	if (!component || !component->IsA<UStaticMeshComponent>())
+		return false;
+
+	UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
+	UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
+
+	if (!staticMesh)
+		return false;
+
+	FVector actorLocation = actor->GetActorLocation();
+
+	// Display settings
+	FTransform componentToWorld = component->GetComponentToWorld();
+
+	FVector brushXAxis(1.0f, 0.f, 0.f);
+	FVector brushYAxis(0.f, 1.f, 0.f);
+
+	FBox bbox = staticMesh->GetBoundingBox();
+	FVector extent = bbox.GetExtent();
+	FVector scale = actor->GetActorScale();
+	
+	oW = extent.X * scale.X * 2;
+	oH = extent.Y * scale.Y * 2;
+
+	FString pathname = staticMesh->GetPathName();
+	if (actor->IsA<AMediaPlate>())
+	{
+		brushXAxis = FVector(0.f, 1.f, 0.f);
+		brushYAxis = FVector(0.f, 0.f, -1.f);
+		oW = extent.Y * scale.Y * 2;
+		oH = extent.Z * scale.Z * 2;
+	}
+
+	oXAxis = componentToWorld.TransformVector(brushXAxis);
+	oYAxis = componentToWorld.TransformVector(brushYAxis);
+
+	oPlaneTopLeft = actorLocation - oXAxis * oW / 2.f - oYAxis * oH / 2.f;
+
+	return true;
+}
+
+bool
+FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iViewportClient, const FVector2D& iViewportPoint, FVector2D& oHUDPoint)
+{
+	if (!mTexture)
+		return false;
+
+	FVector planeTopLeft;
+	double w;
+	double h;
+	FVector xAxis;
+	FVector yAxis;
+	if (!GetHUDPlaneParams(planeTopLeft, w, h, xAxis, yAxis))
+		return false;
+
+	FSceneViewFamilyContext viewFamily(
+		FSceneViewFamily::ConstructionValues(
+			iViewportClient->Viewport,
+			iViewportClient->GetScene(),
+			iViewportClient->EngineShowFlags
+		)
+		.SetRealtimeUpdate(iViewportClient->IsRealtime())
+	);
+	FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
+
+	const FVector planeTopRight = planeTopLeft + xAxis * w;
+	const FVector planeBottomLeft = planeTopLeft + yAxis * h;
+
+	FPlane plane(planeTopLeft, planeTopRight, planeBottomLeft);
+
+	FVector rayOrigin;
+	FVector rayDirection;
+
+	view->DeprojectFVector2D(iViewportPoint, rayOrigin, rayDirection);
+
+	FVector texturePoint = FMath::RayPlaneIntersection(rayOrigin, rayDirection, plane) - planeTopLeft;
+	oHUDPoint = FVector2D(texturePoint.X * mTexture->GetSurfaceWidth() / w, texturePoint.Y * mTexture->GetSurfaceHeight() / h);
+
+	return true;
+}
+
 #undef LOCTEXT_NAMESPACE

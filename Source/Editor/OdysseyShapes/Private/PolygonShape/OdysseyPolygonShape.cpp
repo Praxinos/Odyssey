@@ -23,6 +23,31 @@ UOdysseyPolygonShape::UOdysseyPolygonShape(const FObjectInitializer& iObjectInit
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse Events
 
+void
+UOdysseyPolygonShape::RebuildHandles()
+{
+    mHandles.Empty();
+    mPolygon->EmptyHUDElements();
+
+    TArray<FVector2D>& points = mPolygon->GetPoints();
+    if (points.IsEmpty())
+        return;
+
+    TSharedPtr<FOdysseyHUDHandle> handle = MakeShared<FOdysseyHUDHandle>(FName("handle" + FString::FromInt(0)), &(points[0]));
+    handle->IsPositionLocked(true);
+    handle->OnDragEnd().AddUObject(this, &UOdysseyPolygonShape::OnFirstHandleDragEnd);
+    mHandles.Add(handle);
+    mPolygon->AddElement(handle);
+
+    for (int i = 1; i < points.Num(); i++)
+    {
+        handle = MakeShared<FOdysseyHUDHandle>(FName("handle" + FString::FromInt(i)), &(points[i]));
+        handle->IsInteractable(false);
+        mHandles.Add(handle);
+        mPolygon->AddElement(handle);
+    }
+}
+
 bool
 UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
@@ -31,28 +56,28 @@ UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FK
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        TArray<FVector2D> points;
+        mPolygon = MakeShared<FOdysseyHUDPolygon>(FName("Polygon"));
+        mPolygon->GetPoints().Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
 
-        mPolygon = new FOdysseyHUDPolygon(FName("Polygon"), TArray<FVector2D>() );
-        mPolygon->mPoints.Reserve(100);
         mHUD->AddElement(mPolygon);
 
-        mPolygon->mPoints.Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
-        FOdysseyHUDHandle* handle1 = new FOdysseyHUDHandle(FName("handle" + FString::FromInt(mPolygon->mPoints.Num())), mPolygon, &(mPolygon->mPoints.Last()));
-        mPolygon->mPoints.Add(FVector2D(iPointInTexture.x, iPointInTexture.y));
-        FOdysseyHUDHandle* handle2 = new FOdysseyHUDHandle(FName("handle" + FString::FromInt(mPolygon->mPoints.Num())), mPolygon, &(mPolygon->mPoints.Last()));
-
-        mPolygon->AddElement(handle2);
-        mPolygon->AddElement(handle1);
-
-        mHandles.Add(handle1);
-        mHandles.Add(handle2);
-
-        mHUD->OnKeyDown(iPointInTexture, iKey);
+        RebuildHandles();
         return true;
     }
 
-    return false;
+    return true;
+}
+
+void
+UOdysseyPolygonShape::OnFirstHandleDragEnd()
+{
+    if (mHandles.Num() <= 2)
+    {
+        AbortShape();
+        return;
+    }
+
+    CommitPolygon();
 }
 
 bool
@@ -60,30 +85,10 @@ UOdysseyPolygonShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey
 {
     if (mHasStrokeBegun)
     {
-        mHUD->OnKeyUp(iPointInTexture, iKey);
-        if( mHandles.Last()->GetPosition() == mHandles.Last(1)->GetPosition() )
-        {
-            if( mHandles.Num() == 2 )
-            {
-                mHandles.Last()->Capture();
-                return true;
-            }
-
-            CommitPolygon();
-            return true;
-        }
-        else
-        {
-            mPolygon->mPoints.Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
-            FOdysseyHUDHandle* handle = new FOdysseyHUDHandle(FName("handle" + FString::FromInt(mPolygon->mPoints.Num())), mPolygon, &(mPolygon->mPoints.Last()));
-            mPolygon->AddElement(handle);
-            mHandles.Add(handle);
-            mHandles.Last()->Capture();
-            return true;
-        }
+        mPolygon->GetPoints().Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
+        RebuildHandles();
+        return true;
     }
-
-    mHUD->OnKeyUp(iPointInTexture, iKey);
 
     return false;
 }
@@ -93,12 +98,21 @@ UOdysseyPolygonShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     if (mHasStrokeBegun)
     {
-        OnMouseDrag( iPointInTexture );
+        FOdysseyPoint point = iPointInTexture;
+        if (Uniform)
+        {
+            int num = mPolygon->GetPoints().Num() - 2; 
+            int shiftX = FMath::Abs(iPointInTexture.x - mPolygon->GetPoints()[num].X);
+            int shiftY = FMath::Abs(iPointInTexture.y - mPolygon->GetPoints()[num].Y);
+
+            if (shiftX > shiftY)
+                point.y = mPolygon->GetPoints()[num].Y;
+            else
+                point.x = mPolygon->GetPoints()[num].X;
+        }
+        mHandles.Last()->SetPosition(FVector2D(point.x, point.y));
     }
-    else
-    {
-        mHUD->MouseMove(iPointInTexture);
-    }
+        
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
 
@@ -119,8 +133,7 @@ UOdysseyPolygonShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
             else
                 point.x = mPolygon->GetPoints()[num].X;
         }
-
-        mHUD->CapturedMouseMove(point);
+        mHandles.Last()->SetPosition(FVector2D(point.x, point.y));
 
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
@@ -196,8 +209,8 @@ void UOdysseyPolygonShape::CommitPolygon()
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
         std::vector<::ULIS::FVec2I> polygonPoints;
 
-        for (int i = 0; i < mPolygon->mPoints.Num(); i++)
-            polygonPoints.push_back(::ULIS::FVec2I(mPolygon->mPoints[i].X, mPolygon->mPoints[i].Y));
+        for (const FVector2D& point : mPolygon->GetPoints())
+            polygonPoints.push_back(::ULIS::FVec2I(point.X, point.Y));
 
         ::ULIS::GeneratePolygonPoints(polygonPoints, pointsArray);
 
@@ -220,6 +233,7 @@ void UOdysseyPolygonShape::CommitPolygon()
         }
         mHasStrokeBegun = false;
         mHandles.Empty();
+        mPolygon = nullptr;
     }
 }
 
@@ -229,6 +243,7 @@ bool UOdysseyPolygonShape::AbortShape()
     {
         mHasStrokeBegun = false;
         mHandles.Empty();
+        mPolygon = nullptr;
         return UOdysseyShape::AbortShape();
     }
     return false;
