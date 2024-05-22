@@ -200,7 +200,19 @@ FOdysseyHUDElement::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& 
 }
 
 void
+FOdysseyHUDElement::OnMouseEnter()
+{
+
+}
+
+void
 FOdysseyHUDElement::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+{
+
+}
+
+void
+FOdysseyHUDElement::OnMouseLeave()
 {
 
 }

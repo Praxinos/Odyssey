@@ -196,4 +196,5 @@ private:
 
     FOdysseyPoint mCurrentHUDPoint;
     TSharedPtr<FOdysseyHUDElement> mCurrentHUDElement;
+    TSharedPtr<FOdysseyHUDElement> mHoveredHUDElement;
 };

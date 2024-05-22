@@ -255,14 +255,25 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
 
     //HUD
     TSharedPtr<FOdysseyHUDElement> hudElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
-    if (hudElement)
+    if (mHoveredHUDElement && !hudElement)
+    {
+        mHoveredHUDElement->OnMouseLeave();
+        mHoveredHUDElement = nullptr;
+    }
+    else if (!mHoveredHUDElement && hudElement)
+    {
+        mHoveredHUDElement = hudElement;
+        mHoveredHUDElement->OnMouseEnter();
+    }
+
+    if (mHoveredHUDElement)
     {
         FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
         FVector2D hudPoint;
         if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
         {
             mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
-            hudElement->OnMouseHover(mCurrentHUDPoint);
+            mHoveredHUDElement->OnMouseHover(mCurrentHUDPoint);
         }
     }
 

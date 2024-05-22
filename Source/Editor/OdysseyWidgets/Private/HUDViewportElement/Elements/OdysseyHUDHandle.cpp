@@ -5,7 +5,7 @@
 #include "CanvasTypes.h"
 
 #define HANDLE_SMALL_SIZE 10
-#define HANDLE_BIG_SIZE 20
+#define HANDLE_BIG_SIZE 15
 
 struct HOdysseyHUDHandleHitProxy : public HOdysseyHUDElementHitProxy
 {
@@ -29,7 +29,6 @@ FOdysseyHUDHandle::FOdysseyHUDHandle(FName iName, FVector2D* iReferencePoint)
     , mHandleTexture(LoadObject<UTexture>(nullptr, TEXT("/Iliad/HUD/T_HUD_Handle")))
     , mHandleMaterial(LoadObject<UMaterial>(nullptr, TEXT("/Iliad/HUD/M_HUD_Handle")))
 {
-    mHandleSize = HANDLE_SMALL_SIZE;
     mReferencePoint = iReferencePoint;
 }
 
@@ -40,11 +39,13 @@ FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
     
     if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
 	    iParams.mCanvas->SetHitProxy(new HOdysseyHUDHandleHitProxy(SharedThis(this)));
+        
+    int handleSize = mIsHovered && mIsInteractable ? HANDLE_BIG_SIZE : HANDLE_SMALL_SIZE;
 
-    FVector2D origin = iParams.mTextureToHUD.Execute(*mReferencePoint) - FVector2D(mHandleSize / 2.f, mHandleSize / 2.f);
+    FVector2D origin = iParams.mTextureToHUD.Execute(*mReferencePoint) - FVector2D(handleSize / 2.f, handleSize / 2.f);
 
     FMaterialRenderProxy* handleMaterialProxy = mHandleMaterial->GetRenderProxy();
-    iParams.mCanvas->DrawTile(origin.X, origin.Y, mHandleSize, mHandleSize, 0, 0, 1.f, 1.f, color, mHandleTexture->GetResource(), true);
+    iParams.mCanvas->DrawTile(origin.X, origin.Y, handleSize, handleSize, 0, 0, 1.f, 1.f, color, mHandleTexture->GetResource(), true);
 
     if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
 	    iParams.mCanvas->SetHitProxy(nullptr);
@@ -118,19 +119,15 @@ FOdysseyHUDHandle::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& i
 }
 
 void
-FOdysseyHUDHandle::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+FOdysseyHUDHandle::OnMouseEnter()
 {
-    /* float distSquared = FVector2D::DistSquared(*mReferencePoint, FVector2D(iPointInTexture.x, iPointInTexture.y));
-    if ( mHandleSize != HANDLE_BIG_SIZE && distSquared < HANDLE_BIG_SIZE * HANDLE_BIG_SIZE)
-    {
-        mHandleSize = HANDLE_BIG_SIZE;
-        mIsInvalid = true;
-    }
-    else if( mHandleSize != HANDLE_SMALL_SIZE && distSquared > HANDLE_BIG_SIZE * HANDLE_BIG_SIZE )
-    {
-        mHandleSize = HANDLE_SMALL_SIZE;
-        mIsInvalid = true;
-    } */
+    mIsHovered = true;
+}
+
+void
+FOdysseyHUDHandle::OnMouseLeave()
+{
+    mIsHovered = false;
 }
 
 void

@@ -27,7 +27,8 @@ public:
     //HitProxy version
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnMouseEnter() override;
+    virtual void OnMouseLeave() override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
 
 public:
@@ -47,7 +48,7 @@ public:
 private:
     FVector2D* mReferencePoint;
 
-    int mHandleSize;
+    
     UTexture* mHandleTexture;
     UMaterial* mHandleMaterial;
     FSimpleMulticastDelegate mOnDragged;
@@ -56,4 +57,5 @@ private:
 
     bool mIsInteractable = true;
     bool mIsPositionLocked = false;
+    bool mIsHovered = false;
 };
