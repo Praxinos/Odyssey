@@ -51,6 +51,8 @@ public:
     UMaterialInterface* Material() const;
     UTexture* Texture() const;
 
+    bool IsPlaneComponent() const;
+
 	IOdysseyViewportDrawingEditorAdapter* GetOdysseyViewportDrawingEditorAdapter();
 
     // Delegates

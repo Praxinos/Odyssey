@@ -80,7 +80,7 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
 void
 FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas)
 {
-    if (!mViewportDrawingEditorExtension)
+    if (!mViewportDrawingEditorExtension || !mViewportDrawingEditorExtension->IsPlaneComponent())
         return;
     
     FOdysseyHUDSystem::FDrawHUDParams params;

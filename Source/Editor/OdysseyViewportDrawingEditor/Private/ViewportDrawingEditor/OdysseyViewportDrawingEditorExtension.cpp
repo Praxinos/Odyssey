@@ -1175,4 +1175,76 @@ FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iVi
 	return true;
 }
 
+bool
+FOdysseyViewportDrawingEditorExtension::IsPlaneComponent() const
+{
+	UMeshComponent* component = Component();
+	if (!component || !component->IsA<UStaticMeshComponent>())
+		return false;
+
+	UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
+	UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
+	if (!staticMesh)
+		return false;
+
+	FStaticMeshLODResources& LODModel = staticMesh->GetRenderData()->LODResources[0];
+
+	// Retrieve mesh vertex and index data 
+	const int32 NumVertices = LODModel.VertexBuffers.PositionVertexBuffer.GetNumVertices();
+	
+	TArray<FVector> MeshVertices;
+	TArray<uint32> MeshIndices;
+
+	MeshVertices.Reset();
+	MeshVertices.AddDefaulted(NumVertices);
+	for (int32 Index = 0; Index < NumVertices; Index++)
+	{
+		const FVector& Position = (FVector)LODModel.VertexBuffers.PositionVertexBuffer.VertexPosition(Index);
+		MeshVertices[Index] = Position;
+	}
+
+	const int32 NumIndices = LODModel.IndexBuffer.GetNumIndices();
+	MeshIndices.Reset();
+	MeshIndices.AddDefaulted(NumIndices);
+	const FIndexArrayView ArrayView = LODModel.IndexBuffer.GetArrayView();
+	for (int32 Index = 0; Index < NumIndices; Index++)
+	{
+		MeshIndices[Index] = ArrayView[Index];
+	}
+
+	if (MeshIndices.Num() < 3)
+		return false;
+
+	uint32 i1 = MeshIndices[0];
+	uint32 i2 = MeshIndices[1];
+	uint32 i3 = MeshIndices[2];
+
+	FVector p1 = MeshVertices[i1];
+	FVector p2 = MeshVertices[i2];
+	FVector p3 = MeshVertices[i3];
+
+	FPlane plane(p1, p2, p3);
+	FVector baseNormal = plane.GetNormal();
+
+	for (int i = 3; i < MeshIndices.Num(); i+=3)
+	{
+		i1 = MeshIndices[i];
+		i2 = MeshIndices[i+1];
+		i3 = MeshIndices[i+2];
+
+		p1 = MeshVertices[i1];
+		p2 = MeshVertices[i2];
+		p3 = MeshVertices[i3];
+
+		plane = FPlane(p1, p2, p3);
+		FVector normal = plane.GetNormal();
+
+		FVector diff = baseNormal - normal;
+		if (!diff.IsNearlyZero())
+			return false;
+	}
+
+	return true;
+}
+
 #undef LOCTEXT_NAMESPACE
