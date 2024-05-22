@@ -43,25 +43,30 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
 {
     STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::Construct( InArgs, InOwnerTableView );
     FOdysseyVectorObject* vectorObject = iItem->GetVectorObject();
-    const FSlateBrush* icon = nullptr;
+    TSharedPtr<SHorizontalBox> tagBox;
+    const FSlateBrush* objectIcon = nullptr;
+    const FSlateBrush* inbetweenerTagIcon = nullptr;
+
+    //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
+    inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid16" );
 
     if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup16" );
+        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup16" );
     }
     else
     if ( vectorObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group16" );
+        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group16" );
     }
     else
     if ( vectorObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path16" );
+        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path16" );
     }
     else
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.null16" );
+        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.null16" );
     }
 
     mItem = iItem;
@@ -71,20 +76,40 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
                        .OnVerifyTextChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
                        .OnTextCommitted( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged );
 
+    tagBox = SNew(SHorizontalBox);
+
+    for( FOdysseyVectorTag* tag : vectorObject->GetTagList() )
+    {
+        if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+        {
+            //Cells widgets
+            tagBox->AddSlot()
+            .AutoWidth()
+            [
+                SNew( SImage )
+                .Image( inbetweenerTagIcon )
+            ];
+        }
+    }
+
     SetContent( SNew(SHorizontalBox)
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
                     SNew( SImage )
-                    .Image( icon )
+                    .Image( objectIcon )
                 ]
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
                     mTextBlockWidget.ToSharedRef()
+                ]
+                + SHorizontalBox::Slot()
+                .Padding( 10, 0 )
+                .AutoWidth()
+                [
+                    tagBox.ToSharedRef()
                 ] );
-
-    //SetContent( mTextBlockWidget.ToSharedRef() );
 }
 
 bool

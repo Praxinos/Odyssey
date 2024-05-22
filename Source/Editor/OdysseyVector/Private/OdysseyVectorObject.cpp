@@ -965,6 +965,12 @@ FOdysseyVectorObject::TreeToList( FOdysseyVectorObject* iObject, std::list<FOdys
     return iOutList.size();
 }
 
+std::list<FOdysseyVectorTag*>&
+FOdysseyVectorObject::GetTagList()
+{
+    return mTagList;
+}
+
 //static
 uint32
 FOdysseyVectorObject::TreeToArray( FOdysseyVectorObject* iObject, std::vector<FOdysseyVectorObject*>& iOutArray )

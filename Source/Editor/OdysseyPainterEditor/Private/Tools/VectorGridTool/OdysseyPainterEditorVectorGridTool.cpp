@@ -42,6 +42,8 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
 bool
 UOdysseyPainterEditorVectorGridTool::IsActivable() const
 {
+    uint64 HUDFlags = GetEditor()->GetVectorHUDFlags();
+
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 }
 

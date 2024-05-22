@@ -4,16 +4,17 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
-#include "OdysseyVector.h"
-#include "OdysseyPainterEditorVectorObjectView.h"
-#include "OdysseyPainterEditorVectorPathView.h"
-#include "OdysseyPainterEditorVectorGroupPaintView.h"
 #include <ULIS>
 
 class FOdysseyPainterEditor;
 class SOdysseyPainterEditorVectorSceneTreeView;
 class FVectorSceneTreeViewItem;
 class FOdysseyVectorGroupPaint;
+
+class UOdysseyPainterEditorVectorObjectView;
+class UOdysseyPainterEditorVectorPathView;
+class UOdysseyPainterEditorVectorGroupPaintView;
+class UOdysseyPainterEditorVectorTagInbetweenerView;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
     public FOdysseyEditorTab, public FGCObject
@@ -50,6 +51,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
         UOdysseyPainterEditorVectorObjectView* mObjectView;
         UOdysseyPainterEditorVectorPathView* mPathView;
         UOdysseyPainterEditorVectorGroupPaintView* mGroupPaintView;
+        UOdysseyPainterEditorVectorTagInbetweenerView* mTagInbetweenerView;
 
         FOdysseyVectorGroupPaint* mScene = nullptr;
 };

@@ -7,6 +7,7 @@
 
 #include "CoreMinimal.h"
 
+#include <chrono>
 #include <functional>
 #include <chrono>
 

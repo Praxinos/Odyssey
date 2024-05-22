@@ -6,6 +6,10 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVector.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
+#include "OdysseyPainterEditorVectorObjectView.h"
+#include "OdysseyPainterEditorVectorPathView.h"
+#include "OdysseyPainterEditorVectorGroupPaintView.h"
+#include "OdysseyPainterEditorVectorTagInbetweenerView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -33,6 +37,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::FOdysseyPainterEditorVectorSceneTre
     mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
     mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
     mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
+    mTagInbetweenerView = NewObject<UOdysseyPainterEditorVectorTagInbetweenerView>();
 }
 
 //--------------------------------------------------------------------------------------
@@ -47,44 +52,63 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::GetId() const
 void
 FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdysseyVectorGroupPaint* iScene )
 {
+    mDetailsView->SetObject( nullptr );
+
     if( iScene )
     {
         mScene = iScene;
-        // defaults to scene
-        std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetEngine()->GetChildrenList();
-        std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
-        std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
-                                                                                        : sceneAsList;
-        uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );
 
-        if( objectClass )
+        if( mEditor->GetVectorHUDFlags() == FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-            if( objectClass == FOdysseyVectorPath::StaticClass() )
-            {
-                mPathView->Update( mEditor, iScene, focusedObjectList );
-                mDetailsView->SetObject( mPathView );
-            }
+            FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
 
-            if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
-             || ( objectClass == FOdysseyVectorGroupPaint::StaticClass() ) )
+            if( selectedObject )
             {
-                mGroupPaintView->Update( mEditor, iScene, focusedObjectList );
-                mDetailsView->SetObject( mGroupPaintView );
-            }
+                FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
-            if( ( objectClass == FOdysseyVectorObject::StaticClass() )
-             || ( objectClass == FOdysseyVectorGroup::StaticClass() ) )
+                if( tag )
+                {
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                    mTagInbetweenerView->Update( mEditor, inbetweenerTag );
+                    mDetailsView->SetObject( mTagInbetweenerView );
+                }
+            }
+        }
+        else
+        {
+            // defaults to scene
+            std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetEngine()->GetChildrenList();
+            std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
+            std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
+                                                                                            : sceneAsList;
+            uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );
+
+            if( objectClass )
             {
-                // default
-                mObjectView->Update( mEditor, iScene, focusedObjectList );
-                mDetailsView->SetObject( mObjectView );
-            }
+                if( objectClass == FOdysseyVectorPath::StaticClass() )
+                {
+                    mPathView->Update( mEditor, iScene, focusedObjectList );
+                    mDetailsView->SetObject( mPathView );
+                }
 
-            return;
+                if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
+                 || ( objectClass == FOdysseyVectorGroupPaint::StaticClass() ) )
+                {
+                    mGroupPaintView->Update( mEditor, iScene, focusedObjectList );
+                    mDetailsView->SetObject( mGroupPaintView );
+                }
+
+                if( ( objectClass == FOdysseyVectorObject::StaticClass() )
+                 || ( objectClass == FOdysseyVectorGroup::StaticClass() ) )
+                {
+                    // default
+                    mObjectView->Update( mEditor, iScene, focusedObjectList );
+                    mDetailsView->SetObject( mObjectView );
+                }
+            }
         }
     }
-
-    mDetailsView->SetObject( nullptr );
 }
 
 TSharedPtr<IDetailsView>

@@ -1152,6 +1152,11 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& m
                 , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-grid.tooltip", "Add Inbetweener Grid")
                 , FSlateIcon()
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, GetEditor(), vectorScene )));
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-chart.name", "Reset Spacing Chart")
+                , LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-chart.tooltip", "Reset Spacing Chart")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetSpacingChart, GetEditor(), vectorScene )));
         }
     }
 

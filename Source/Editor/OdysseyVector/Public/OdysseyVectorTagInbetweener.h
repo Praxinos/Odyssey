@@ -9,11 +9,19 @@
 
 #include "OdysseyVectorTag.h"
 
+#include "OdysseyVectorTagInbetweener.generated.h"
+
 class FOdysseyVectorPoint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;
 
+UENUM()
+enum class eInbetweenerGridType : uint8
+{
+    FFD = 0,
+    ARAP = 1
+};
 
 //////////////// interpolation data structures //////////////////
 
@@ -113,7 +121,13 @@ struct FInbetweenerCell
 
 class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 {
+    private:
+        static const uint32 mStaticClass =  0x7cf60edf; // value is crc32 FOdysseyVectorTagInbetweener
+
     public:
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+
         virtual ~FOdysseyVectorTagInbetweener();
         FOdysseyVectorTagInbetweener( FOdysseyVectorObject* iOwnerObject
                                     , uint32 iNumCellX
@@ -142,6 +156,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                           , float iNewSpacing
                           , bool iRelative );
         void UpdateAnimationCells();
+        void ResetChart();
+        void SetInbetweenCount( uint32 iInbetweenCount );
+        void SetGridType( eInbetweenerGridType iGridType );
+        void SetFFDNumCellX( uint32 iNumCellX );
+        void SetFFDNumCellY( uint32 iNumCellY );
+        eInbetweenerGridType GetGridType();
+        uint32 GetFFDNumCellX();
+        uint32 GetFFDNumCellY();
+
+        virtual void Update( uint32 iUpdateFlags ) override;
 
     protected:
         void DrawGrid( BLContext* iBLContext
@@ -157,7 +181,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void FFDComputeBinomialCoefficients();
         void FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint, uint32 iPositionIndex );
         void FFDDeformPaths( uint32 iPositionIndex );
-        void ResetChart();
         void InterpolateInbetween( uint32 iInbetweenIndex );
 
     protected:
@@ -166,6 +189,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::vector<double> mUBinomialCoefficientBuffer;
         std::vector<double> mVBinomialCoefficientBuffer;
         std::vector<FInbetweenerCell> mGridCellBuffer;
+        eInbetweenerGridType mGridType;
         FInbetweenerChart mChart;
         uint32 mNumCellX;
         uint32 mNumCellY;

@@ -122,7 +122,8 @@ SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags( ECheckBoxState iN
 
         vectorEngine->ResetHUD();
 
-        vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                            | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
     }
 }
 

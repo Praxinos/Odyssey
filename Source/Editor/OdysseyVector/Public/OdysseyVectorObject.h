@@ -508,6 +508,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                      , uint64 iFlags );
         FOdysseyVectorTag* GetTagByType( uint32 iTagClass );
 
+        std::list<FOdysseyVectorTag*>& GetTagList();
+
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
         virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };

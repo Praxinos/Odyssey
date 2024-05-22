@@ -1465,12 +1465,45 @@ void
 FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = vectorEngine->GetSelectedObjectList();
+    FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
 
-    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
+    if( selectedObject )
     {
-        selectedObject->AddTag( new FOdysseyVectorTagInbetweener( selectedObject, 8, 8, 4 ) );
+        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+        if( tag == nullptr )
+        {
+            selectedObject->AddTag( new FOdysseyVectorTagInbetweener( selectedObject, 8, 8, 4 ) );
+        }
     }
+
+    // call callbacks if any (for refreshing GUI e.g)
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+// static
+void
+FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
+
+    if( selectedObject )
+    {
+        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+        if( tag )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+            inbetweenerTag->ResetChart();
+        }
+    }
+
+    // call callbacks if any (for refreshing GUI e.g)
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
 // static

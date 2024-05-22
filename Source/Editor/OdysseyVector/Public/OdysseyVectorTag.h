@@ -31,6 +31,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) = 0;
+        virtual void Update( uint32 iUpdateFlags ) = 0;
 
         FOdysseyVectorObject* GetOwner();
 

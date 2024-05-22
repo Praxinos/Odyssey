@@ -171,14 +171,23 @@ FOdysseyVectorTagInbetweener::Map()
     , [ this
       , &pathCount ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
-            BLMatrix2D& inverseSpaceMatrix = mOwner->GetInverseWorldMatrix();
+          FOdysseyVectorTag* objectInbetweenerTag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
-            if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
-            {
-                pathCount++;
-            }
+          if( ( objectInbetweenerTag == nullptr ) || ( objectInbetweenerTag == this ) )
+          {
+              if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
+              {
+                  pathCount++;
 
-            return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              }
+          }
+          else
+          {
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+          }
+
+          return 0;
       } );
 
     mInterpolatedPathBuffer.reserve( pathCount );
@@ -188,19 +197,29 @@ FOdysseyVectorTagInbetweener::Map()
     , 0
     , [ this ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
-            BLMatrix2D& inverseSpaceMatrix = mOwner->GetInverseWorldMatrix();
+          BLMatrix2D& inverseSpaceMatrix = mOwner->GetInverseWorldMatrix();
+          FOdysseyVectorTag* objectInbetweenerTag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
-            if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
-            {
-                FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+          if( ( objectInbetweenerTag == nullptr ) || ( objectInbetweenerTag == this ) )
+          {
+              if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                mInterpolatedPathBuffer.emplace_back( path
-                                                    , mOwner->GetBBox( false )
-                                                    , inverseSpaceMatrix
-                                                    , mInbetweenCount );
-            }
+                  mInterpolatedPathBuffer.emplace_back( path
+                                                      , mOwner->GetBBox( false )
+                                                      , inverseSpaceMatrix
+                                                      , mInbetweenCount );
 
-            return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              }
+          }
+          else
+          {
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+          }
+
+          return 0;
       } );
 }
 
@@ -214,6 +233,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
                                                           , uint32 iNumCellY
                                                           , uint32 iInbetweenCount )
     : FOdysseyVectorTag( iOwnerObject )
+    , mGridType( eInbetweenerGridType::FFD )
     , mNumCellX( iNumCellX )
     , mNumCellY( iNumCellY )
     , mInbetweenCount( iInbetweenCount )
@@ -221,6 +241,10 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     Reset();
 
     mOwner->GetEngine()->GetSharedEnv()->AddTag( this );
+}
+
+void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags )
+{
 }
 
 void
@@ -602,6 +626,48 @@ std::vector<FInbetweenerPoint>&
 FOdysseyVectorTagInbetweener::GetGridPointBuffer()
 {
     return mGridPointBuffer;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetInbetweenCount( uint32 iInbetweenCount )
+{
+    mInbetweenCount = iInbetweenCount;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
+{
+    mGridType = iGridType;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetFFDNumCellX( uint32 iNumCellX )
+{
+    mNumCellX = iNumCellX;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetFFDNumCellY( uint32 iNumCellY )
+{
+    mNumCellY = iNumCellY;
+}
+
+eInbetweenerGridType
+FOdysseyVectorTagInbetweener::GetGridType()
+{
+    return mGridType;
+}
+
+uint32
+FOdysseyVectorTagInbetweener::GetFFDNumCellX()
+{
+    return mNumCellX;
+}
+
+uint32
+FOdysseyVectorTagInbetweener::GetFFDNumCellY()
+{
+    return mNumCellY;
 }
 
 /*

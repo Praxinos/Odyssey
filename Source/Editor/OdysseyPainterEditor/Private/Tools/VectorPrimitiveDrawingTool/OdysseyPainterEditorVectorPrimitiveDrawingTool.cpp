@@ -6,6 +6,7 @@
 #include "OdysseyPaletteEntryColor.h"
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
