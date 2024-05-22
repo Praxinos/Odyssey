@@ -20,7 +20,7 @@ public:
     FOdysseyHUDEllipse( FName iName, FVector2D iCenterPoint, int iEllipseAaxis, int iEllipseBaxis);
 
 public:
-    virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
     int GetAAxis();
     int GetBAxis();

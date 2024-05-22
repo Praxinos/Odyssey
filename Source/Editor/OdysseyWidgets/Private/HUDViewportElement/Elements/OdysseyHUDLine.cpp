@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyHUDLine.h"
+#include "CanvasTypes.h"
 
 #include "ULISLoaderModule.h"
 
@@ -18,26 +19,15 @@ FOdysseyHUDLine::FOdysseyHUDLine(FName iName, FVector2D iStartPoint, FVector2D i
 }
 
 void
-FOdysseyHUDLine::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
+FOdysseyHUDLine::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     const FLinearColor color(0.f, 1.f, 0.f);
-    FVector startPosition = iParams.mOrigin
-        + mStartPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mStartPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    FVector finishPosition = iParams.mOrigin
-        + mFinishPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mFinishPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
+    FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
+    FVector2D finishPoint = iParams.mTextureToHUD.Execute(mFinishPoint);
 
-    iParams.mPDI->DrawTranslucentLine(
-		startPosition,
-		finishPosition,
-		color,
-		SDPG_Foreground,
-		1.0f,
-		0.0f,
-		true
-	);
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
+    batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(finishPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
-    FOdysseyHUDElement::Render(iParams);
+    FOdysseyHUDElement::DrawHUD(iParams); 
 }

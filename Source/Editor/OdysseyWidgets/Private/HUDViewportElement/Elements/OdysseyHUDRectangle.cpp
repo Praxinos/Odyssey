@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyHUDRectangle.h"
+#include "CanvasTypes.h"
 
 #include "ULISLoaderModule.h"
 
@@ -18,64 +19,19 @@ FOdysseyHUDRectangle::FOdysseyHUDRectangle(FName iName, FVector2D iTopLeftPoint,
 }
 
 void
-FOdysseyHUDRectangle::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
+FOdysseyHUDRectangle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     const FLinearColor color(0.f, 1.f, 0.f);
-    FVector topLeft = iParams.mOrigin
-        + mTopLeftPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mTopLeftPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
+    FVector2D topLeft = iParams.mTextureToHUD.Execute(mTopLeftPoint);
+    FVector2D topRight = iParams.mTextureToHUD.Execute(FVector2D(mBottomRightPoint.X, mTopLeftPoint.Y));
+    FVector2D bottomRight = iParams.mTextureToHUD.Execute(mBottomRightPoint);
+    FVector2D bottomLeft = iParams.mTextureToHUD.Execute(FVector2D(mTopLeftPoint.X, mBottomRightPoint.Y));
 
-    FVector topRight = iParams.mOrigin
-        + mBottomRightPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mTopLeftPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
+    batchedElements->AddTranslucentLine(FVector(topLeft, 0.f), FVector(topRight, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    batchedElements->AddTranslucentLine(FVector(topRight, 0.f), FVector(bottomRight, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    batchedElements->AddTranslucentLine(FVector(bottomRight, 0.f), FVector(bottomLeft, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    batchedElements->AddTranslucentLine(FVector(bottomLeft, 0.f), FVector(topLeft, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
-    FVector bottomRight = iParams.mOrigin
-        + mBottomRightPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mBottomRightPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
-
-    FVector bottomLeft = iParams.mOrigin
-        + mTopLeftPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mBottomRightPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
-
-    iParams.mPDI->DrawTranslucentLine(
-        topLeft,
-        topRight,
-        color,
-        SDPG_Foreground,
-        1.0f,
-        0.0f,
-        true
-    );
-
-    iParams.mPDI->DrawTranslucentLine(
-        topRight,
-        bottomRight,
-        color,
-        SDPG_Foreground,
-        1.0f,
-        0.0f,
-        true
-    );
-
-    iParams.mPDI->DrawTranslucentLine(
-        bottomRight,
-        bottomLeft,
-        color,
-        SDPG_Foreground,
-        1.0f,
-        0.0f,
-        true
-    );
-
-    iParams.mPDI->DrawTranslucentLine(
-        bottomLeft,
-        topLeft,
-        color,
-        SDPG_Foreground,
-        1.0f,
-        0.0f,
-        true
-    );
-
-    FOdysseyHUDElement::Render(iParams);
+    FOdysseyHUDElement::DrawHUD(iParams); 
 }

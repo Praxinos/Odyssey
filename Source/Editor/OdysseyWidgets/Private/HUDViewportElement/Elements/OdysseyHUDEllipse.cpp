@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyHUDEllipse.h"
+#include "CanvasTypes.h"
 
 #include "ULISLoaderModule.h"
 
@@ -29,45 +30,34 @@ FOdysseyHUDEllipse::FOdysseyHUDEllipse(FName iName, FVector2D iCenterPoint, int 
 }
 
 void
-FOdysseyHUDEllipse::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
+FOdysseyHUDEllipse::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     const FLinearColor color(0.f, 1.f, 0.f);
-    
-    FVector center = iParams.mOrigin
-        + mCenterPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mCenterPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
     int ellipseAaxis = FMath::Abs( mCenterPoint.X - mBorderPoint.X );
     int ellipseBaxis = FMath::Abs( mCenterPoint.Y - mBorderPoint.Y );
 
-    float radius = 1.f / iParams.mTextureWidth * iParams.mPlaneWidth;
+    ::ULIS::TArray<::ULIS::FVec2I> points;
+    ::ULIS::GenerateEllipsePoints( ::ULIS::FVec2I(mCenterPoint.X, mCenterPoint.Y), ellipseAaxis, ellipseBaxis, points );
 
-    UE_LOG(LogTemp, Warning, TEXT("mXAxis: %2f      %2f      %2f"), iParams.mXAxis.X, iParams.mXAxis.Y, iParams.mXAxis.Z);
-    UE_LOG(LogTemp, Warning, TEXT("mYAxis: %2f      %2f      %2f"), iParams.mYAxis.X, iParams.mYAxis.Y, iParams.mYAxis.Z);
-    UE_LOG(LogTemp, Warning, TEXT("Aaxis: %d"), ellipseAaxis);
-    UE_LOG(LogTemp, Warning, TEXT("Baxis: %d"), ellipseBaxis);
+    if (points.Size() < 2)
+        return;
 
-    FVector x = iParams.mXAxis * ellipseAaxis;
-    FVector y = iParams.mYAxis * ellipseBaxis;
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
+        
+    for (int i = 1; i < points.Size(); i++)
+    {
+        FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y));
+        FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y));
+        
+        batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(endPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    }
 
-    UE_LOG(LogTemp, Warning, TEXT("x: %2f      %2f      %2f"), x.X, x.Y, x.Z);
-    UE_LOG(LogTemp, Warning, TEXT("y: %2f      %2f      %2f"), y.X, y.Y, y.Z);
+    FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y));
+    FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[0].x, points[0].y));
+    batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(endPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
-    DrawCircle(
-        iParams.mPDI,
-        center,
-        x,
-        y,
-        color,
-        radius,
-        64,
-        SDPG_Foreground,
-        1.f,
-        0.f,
-        true
-    );
-
-    FOdysseyHUDElement::Render(iParams);
+    FOdysseyHUDElement::DrawHUD(iParams); 
 }
 
 int FOdysseyHUDEllipse::GetAAxis()

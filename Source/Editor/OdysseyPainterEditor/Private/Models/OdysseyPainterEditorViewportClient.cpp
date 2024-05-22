@@ -270,6 +270,21 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
             DrawUVsOntoViewport( iViewport, ioCanvas, currentUV, mMeshSelector->GetCurrentMesh()->GetRenderData()->LODResources[0].VertexBuffers.StaticMeshVertexBuffer, indexBuffer );
         }
     }
+
+    FOdysseyHUDSystem::FDrawHUDParams params;
+    params.mCanvas = ioCanvas;
+    params.mTextureWidth = texture->GetSurfaceWidth();
+    params.mTextureHeight = texture->GetSurfaceHeight();
+
+    TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+    params.mTextureToHUD = FOdysseyHUDSystem::FDrawHUDParams::FTextureToHUD::CreateLambda(
+		[viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
+		{
+			return viewportWidget->ToWorld(iPosition - FVector2D(w / 2.f, h / 2.f));
+		}
+	);
+
+    mOdysseyPainterEditor->HUDSystem()->DrawHUD(params);
 }
 
 EMouseCursor::Type
@@ -306,6 +321,10 @@ FOdysseyPainterEditorViewportClient::GetMouseCaptureMode() const
 bool
 FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
+    TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+    UTexture* texture       = viewportWidget->GetTexture();
+    if (!texture)
+        return false;
     //Here you receive Mouse Buttons and Keyboard keys events
     //UE_LOG(LogTemp, Warning, TEXT("UE InputKey %s %s"), *iKey.ToString(), iEvent == EInputEvent::IE_Pressed ? TEXT("PRESSED") : iEvent == EInputEvent::IE_Released ? TEXT("RELEASED") : TEXT("OTHER"));
 
@@ -329,6 +348,11 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     }
     else if( iEvent == EInputEvent::IE_DoubleClick )
     {
+        //HUD
+        TSharedPtr<FOdysseyHUDElement> hudElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
+        if (hudElement && hudElement->OnMouseDoubleClick(mCurrentHUDPoint, iKey))
+            return true;
+
         bool ignoreDown = mOnMouseDoubleClick.IsBound() && mOnMouseDoubleClick.Execute(mCurrentPointInViewport, iKey);
         if (ignoreDown)
             return true;
@@ -340,12 +364,47 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     }
 
     //Cleanup PressedKeys
-    TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
     for (int i = mKeysPressed.Num() - 1; i >= 0; i--)
     {
         if (!viewportWidget->GetViewport()->KeyState(mKeysPressed[i]))
         {
             mKeysPressed.RemoveAt(i);
+        }
+    }
+
+    //---
+
+    //HUD
+    if (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton)
+    {
+        if (iEvent == EInputEvent::IE_Pressed || iEvent == EInputEvent::IE_DoubleClick)
+        {
+            mCurrentHUDElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
+            if (mCurrentHUDElement)
+            {
+                uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
+                uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
+                FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+                FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
+                mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+                if (mCurrentHUDElement->OnMouseDown(mCurrentHUDPoint, iKey))
+                    return true;
+            }
+        }
+        else if(iEvent == EInputEvent::IE_Released)
+        {
+            if (mCurrentHUDElement)
+            {
+                uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
+                uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
+                FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+                FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
+                mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+                mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+                mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iKey);
+                mCurrentHUDElement = nullptr;
+                return true;
+            }
         }
     }
 
@@ -409,6 +468,22 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     if (mIsRecordingStylus)
         return;
 
+    //HUD
+    if (mCurrentHUDElement)
+    {
+        TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+        UTexture* texture = viewportWidget->GetTexture();
+        if (!texture)
+            return;
+        uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
+        uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
+        FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+        FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
+        mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+        mCurrentHUDElement->OnMouseDrag(mCurrentHUDPoint);
+        return;
+    }
+
     FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
     point_in_viewport.x = iX;
     point_in_viewport.y = iY;
@@ -443,6 +518,26 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
     if (!texture)
         return;
+
+    //Ensures our huds hit proxies are clickable
+    //Be cause sometimes we change the hud values but the proxy map needs to be invalidated
+    //As we don't know everytime the hud values changes change, we need to call that here
+    //RequestInvalidateHitProxy() is usually called after InputKey() if it returns false
+    //But we return true on occasions where the hud needs to be invalidated too.
+    RequestInvalidateHitProxy(iViewport);
+
+    //HUD
+    TSharedPtr<FOdysseyHUDElement> hudElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
+    if (hudElement)
+    {
+        TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+        uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
+        uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
+        FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+        FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
+        mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+        hudElement->OnMouseHover(mCurrentHUDPoint);
+    }
 
     TArray<FKey> pressedKeys = mKeysPressed;
     if (FOdysseyKeyState::GetLastKey() != FKey())
@@ -1083,6 +1178,16 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
             }
         }
     }
+}
+
+TSharedPtr<FOdysseyHUDElement>
+FOdysseyPainterEditorViewportClient::GetHUDElement(FViewport* iViewport, int32 iX, int32 iY)
+{
+    HOdysseyHUDElementHitProxy* hitproxy = HitProxyCast<HOdysseyHUDElementHitProxy>(iViewport->GetHitProxy(iX, iY));
+    if (!hitproxy)
+        return nullptr;
+    
+    return hitproxy->HUDElement();
 }
 
 #undef LOCTEXT_NAMESPACE

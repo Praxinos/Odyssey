@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyHUDCircle.h"
+#include "CanvasTypes.h"
 
 #include "ULISLoaderModule.h"
 
@@ -27,31 +28,31 @@ FOdysseyHUDCircle::FOdysseyHUDCircle(FName iName, FVector2D iCenterPoint, float 
 }
 
 void
-FOdysseyHUDCircle::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
+FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     const FLinearColor color(0.f, 1.f, 0.f);
-    
-    FVector center = iParams.mOrigin
-        + mCenterPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mCenterPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
 
-    float radius = mRadius / iParams.mTextureWidth * iParams.mPlaneWidth;
+    ::ULIS::TArray<::ULIS::FVec2I> points;
+    ::ULIS::GenerateCirclePoints( ::ULIS::FVec2I(mCenterPoint.X, mCenterPoint.Y), mRadius, points );
 
-    DrawCircle(
-        iParams.mPDI,
-        center,
-        iParams.mXAxis,
-        iParams.mYAxis,
-        color,
-        radius,
-        64,
-        SDPG_Foreground,
-        1.f,
-        0.f,
-        true
-    );
+    if (points.Size() < 2)
+        return;
 
-    FOdysseyHUDElement::Render(iParams);
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
+        
+    for (int i = 1; i < points.Size(); i++)
+    {
+        FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y));
+        FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y));
+        
+        batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(endPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    }
+
+    FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y));
+    FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[0].x, points[0].y));
+    batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(endPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+
+    FOdysseyHUDElement::DrawHUD(iParams);
 }
 
 void

@@ -216,7 +216,7 @@ private:
     void InitTools();
     void InitHUD();
 
-    void OnRenderHUD(const FOdysseyHUDSystem::FRenderParams& iParams);
+    void OnDrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
 
 protected:

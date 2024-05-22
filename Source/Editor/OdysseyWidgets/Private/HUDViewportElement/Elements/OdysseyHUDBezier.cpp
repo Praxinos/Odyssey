@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyHUDBezier.h"
+#include "CanvasTypes.h"
 
 #include "ULISLoaderModule.h"
 
@@ -19,22 +20,16 @@ FOdysseyHUDBezier::FOdysseyHUDBezier(FName iName, FVector2D iStartPoint, FVector
 }
 
 void
-FOdysseyHUDBezier::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
+FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     const FLinearColor bezierLineColor(0.f, 1.f, 0.f, 1.f);
     const FLinearColor controlLineColor(0.f, 1.f, 0.f, 0.4f);
     
-    FVector startPoint = iParams.mOrigin
-        + mStartPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mStartPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
+    FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
+    FVector2D controlPoint = iParams.mTextureToHUD.Execute(mControlPoint);
+    FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);
 
-    FVector controlPoint = iParams.mOrigin
-        + mControlPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mControlPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
-
-    FVector endPoint = iParams.mOrigin
-        + mEndPoint.X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mEndPoint.Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
 
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
     ::ULIS::GenerateQuadraticBezierPoints(
@@ -50,44 +45,15 @@ FOdysseyHUDBezier::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
         
     for (int i = 1; i < pointsArray.Size(); i++)
     {
-        FVector startBezierPoint = iParams.mOrigin
-            + ((float)pointsArray[i - 1].x) / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-            + ((float)pointsArray[i - 1].y) / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
-
-        FVector endBezierPoint = iParams.mOrigin
-            + ((float)pointsArray[i].x) / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-            + ((float)pointsArray[i].y) / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
-
-        iParams.mPDI->DrawTranslucentLine(
-            startBezierPoint,
-            endBezierPoint,
-            bezierLineColor,
-            SDPG_Foreground,
-            1.0f,
-            0.0f,
-            true
-        );
+        
+        FVector2D startBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i - 1].x, pointsArray[i - 1].y));
+        FVector2D endBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i].x, pointsArray[i].y));
+        
+        batchedElements->AddTranslucentLine(FVector(startBezierPoint, 0.f), FVector(endBezierPoint, 0.f), bezierLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
     }
 
-    iParams.mPDI->DrawTranslucentLine(
-		startPoint,
-		controlPoint,
-		controlLineColor,
-		SDPG_Foreground,
-		1.0f,
-		0.0f,
-		true
-	);
+    batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(controlPoint, 0.f), controlLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    batchedElements->AddTranslucentLine(FVector(controlPoint, 0.f), FVector(endPoint, 0.f), controlLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
-    iParams.mPDI->DrawTranslucentLine(
-		controlPoint,
-        endPoint, 
-		controlLineColor,
-		SDPG_Foreground,
-		1.0f,
-		0.0f,
-		true
-	);
-
-    FOdysseyHUDElement::Render(iParams);
+    FOdysseyHUDElement::DrawHUD(iParams); 
 }

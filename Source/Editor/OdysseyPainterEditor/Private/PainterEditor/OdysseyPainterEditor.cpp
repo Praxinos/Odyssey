@@ -234,15 +234,15 @@ FOdysseyPainterEditor::OnClose()
 void
 FOdysseyPainterEditor::InitHUD()
 {
-    mHUDSystem->OnRender().BindRaw(this, &FOdysseyPainterEditor::OnRenderHUD);
+    mHUDSystem->OnDrawHUD().BindRaw(this, &FOdysseyPainterEditor::OnDrawHUD);
 }
 
 void
-FOdysseyPainterEditor::OnRenderHUD(const FOdysseyHUDSystem::FRenderParams& iParams)
+FOdysseyPainterEditor::OnDrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     UOdysseyPainterEditorTool* tool = GetCurrentTool();
     if (tool)
-        tool->RenderHUD(iParams);
+        tool->DrawHUD(iParams);
 }
 
 void

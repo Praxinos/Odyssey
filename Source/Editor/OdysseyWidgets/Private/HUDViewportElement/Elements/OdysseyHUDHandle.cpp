@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyHUDHandle.h"
+#include "CanvasTypes.h"
 
 #define HANDLE_SMALL_SIZE 10
 #define HANDLE_BIG_SIZE 20
@@ -25,7 +26,7 @@ FOdysseyHUDHandle::~FOdysseyHUDHandle()
 
 FOdysseyHUDHandle::FOdysseyHUDHandle(FName iName, FVector2D* iReferencePoint)
     : FOdysseyHUDElement(iName)
-    //, mHandleMaterial(LoadObject<UMaterial>(nullptr, TEXT("/Engine/EditorMaterials/WidgetVertexColorMaterial")))
+    , mHandleTexture(LoadObject<UTexture>(nullptr, TEXT("/Iliad/HUD/T_HUD_Handle")))
     , mHandleMaterial(LoadObject<UMaterial>(nullptr, TEXT("/Iliad/HUD/M_HUD_Handle")))
 {
     mHandleSize = HANDLE_SMALL_SIZE;
@@ -33,50 +34,22 @@ FOdysseyHUDHandle::FOdysseyHUDHandle(FName iName, FVector2D* iReferencePoint)
 }
 
 void
-FOdysseyHUDHandle::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
+FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     const FLinearColor color(1.f, 0.f, 0.f);
-    FVector handlePosition = iParams.mOrigin
-        + mReferencePoint->X / iParams.mTextureWidth * iParams.mPlaneWidth * iParams.mXAxis
-        + mReferencePoint->Y / iParams.mTextureHeight * iParams.mPlaneHeight * iParams.mYAxis;
-
-    float handleSizeX = ((float)mHandleSize) / iParams.mTextureWidth * iParams.mPlaneWidth;
-    float handleSizeY = ((float)mHandleSize) / iParams.mTextureHeight * iParams.mPlaneHeight;
-    float handleSize = FMath::Min(handleSizeX, handleSizeY);
     
-    if (iParams.mPDI->IsHitTesting() && mIsInteractable)
-	    iParams.mPDI->SetHitProxy(new HOdysseyHUDHandleHitProxy(SharedThis(this)));
+    if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
+	    iParams.mCanvas->SetHitProxy(new HOdysseyHUDHandleHitProxy(SharedThis(this)));
+
+    FVector2D origin = iParams.mTextureToHUD.Execute(*mReferencePoint) - FVector2D(mHandleSize / 2.f, mHandleSize / 2.f);
 
     FMaterialRenderProxy* handleMaterialProxy = mHandleMaterial->GetRenderProxy();
-    /* const int32 numSides = 64;
-    DrawDisc(
-        iParams.mPDI,
-        handlePosition,
-        iParams.mXAxis,
-        iParams.mYAxis,
-        color.ToFColor(true),
-        mHandleSize,
-        64,
-        handleMaterialProxy,
-        SDPG_Foreground
-    ); */
+    iParams.mCanvas->DrawTile(origin.X, origin.Y, mHandleSize, mHandleSize, 0, 0, 1.f, 1.f, color, mHandleTexture->GetResource(), true);
 
-    DrawRectangleMesh(
-        iParams.mPDI,
-        handlePosition,
-        iParams.mXAxis,
-        iParams.mYAxis,
-        color.ToFColor(true),
-        handleSize,
-        handleSize,
-        handleMaterialProxy,
-        SDPG_Foreground
-    );
+    if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
+	    iParams.mCanvas->SetHitProxy(nullptr);
 
-    if (iParams.mPDI->IsHitTesting() && mIsInteractable)
-	    iParams.mPDI->SetHitProxy(nullptr);
-
-    FOdysseyHUDElement::Render(iParams);
+    FOdysseyHUDElement::DrawHUD(iParams); 
 }
 
 bool

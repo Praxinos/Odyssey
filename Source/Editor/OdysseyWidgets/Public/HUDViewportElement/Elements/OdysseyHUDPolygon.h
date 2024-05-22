@@ -20,11 +20,13 @@ public:
 
 //FOdysseyHUDElement overrides
 public:
-    virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
     TArray<FVector2D>& GetPoints();
+    void ClosePolygon(bool iClosePolygon);
 
 private:
     TArray<FVector2D> mPoints;
+    bool mClosePolygon = true;
 };

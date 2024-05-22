@@ -199,11 +199,11 @@ TSharedPtr<FOdysseyHUDElement> UOdysseyPainterEditorTool::GetHUD()
 }
 
 void
-UOdysseyPainterEditorTool::RenderHUD(const FOdysseyHUDSystem::FRenderParams& iParams)
+UOdysseyPainterEditorTool::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     TSharedPtr<FOdysseyHUDElement> hud = GetHUD();
     if (hud)
-        hud->Render(iParams);
+        hud->DrawHUD(iParams);
 }
 
 EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor() const

@@ -41,6 +41,7 @@ public:
     virtual bool UsesToolkits() const override { return true; }
 
     virtual void Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI) override;
+	virtual void DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas) override;
     virtual bool Select(AActor* InActor, bool bInSelected) override;
 
     virtual bool MouseMove(FEditorViewportClient* iViewportClient,FViewport* iViewport,int32 iMouseX,int32 iMouseY) override;
@@ -54,9 +55,6 @@ public:
 	bool IsEditingEnabled() const;
 
 	virtual bool GetCursor(EMouseCursor::Type& OutCursor) const override;
-
-	/** Overlays the editor hud (brushes, drag tools, static mesh vertices, etc*. */
-	virtual void DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas) override;
 
 private:
     void OnResetViewMode();

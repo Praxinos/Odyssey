@@ -19,7 +19,7 @@ public:
     FOdysseyHUDRectangle( FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint);
 
 public:
-    virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
     FVector2D mTopLeftPoint;

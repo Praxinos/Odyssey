@@ -57,6 +57,7 @@ UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FK
         mRawStroke.Empty();
 
         mPolygon = MakeShared<FOdysseyHUDPolygon>(FName("Polygon"));
+        mPolygon->ClosePolygon(false);
         mPolygon->GetPoints().Add( FVector2D( iPointInTexture.x, iPointInTexture.y ));
 
         mHUD->AddElement(mPolygon);

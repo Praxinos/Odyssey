@@ -53,7 +53,7 @@ public:
 public:
     //virtual void Invalidate();
     //virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D());
-    virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams);
+    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
     /*virtual void MouseMove( const FOdysseyPoint& iPointInTexture );
     virtual bool OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey );
     virtual bool OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey );

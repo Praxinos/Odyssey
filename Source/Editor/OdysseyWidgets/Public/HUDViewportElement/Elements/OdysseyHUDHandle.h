@@ -21,7 +21,7 @@ public:
 
 //FOdysseyHUDElement overrides
 public:
-    virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
     //HitProxy version
@@ -48,6 +48,7 @@ private:
     FVector2D* mReferencePoint;
 
     int mHandleSize;
+    UTexture* mHandleTexture;
     UMaterial* mHandleMaterial;
     FSimpleMulticastDelegate mOnDragged;
     FSimpleMulticastDelegate mOnDragBegin;

@@ -990,6 +990,77 @@ FOdysseyViewportDrawingEditorExtension::AddReferencedObjects(FReferenceCollector
 }
 
 bool
+FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View, FCanvas* Canvas, FOdysseyHUDSystem::FDrawHUDParams& oParams)
+{	
+	AActor* actor = Actor();
+	UMeshComponent* component = Component();
+	if (!component || !component->IsA<UStaticMeshComponent>())
+		return false;
+
+	UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
+	UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
+
+	if (!staticMesh)
+		return false;
+
+    UTexture* texture = Texture();
+    if (!texture)
+        return false;
+
+	FBox meshBoundingBox = staticMesh->GetBoundingBox();
+	FVector meshSize = meshBoundingBox.GetSize();
+
+	float meshW = meshSize.X;
+	float meshH = meshSize.Y;
+	float textureW = texture->GetSurfaceWidth();
+	float textureH = texture->GetSurfaceHeight();
+
+	FVector meshPosition = meshBoundingBox.Min;
+	FMatrix textureToComponent = FTransform(
+		FQuat::Identity,
+		FVector(meshBoundingBox.Min.X, meshBoundingBox.Min.Y, 0.f),
+		FVector(meshSize.X / textureW, meshSize.Y / textureH, 1.f)
+	).ToMatrixWithScale();
+
+	
+
+	if (actor->IsA<AMediaPlate>())
+	{
+		FQuat rotY(FVector(0, 1, 0), FMath::DegreesToRadians(90.f));
+		FQuat rotX(FVector(1, 0, 0), FMath::DegreesToRadians(90.f));
+		//FQuat rot = rotX * rotZ;
+		FQuat rot = rotX * rotY;
+		textureToComponent = FTransform(
+			//FQuat::Identity,
+			rot.GetNormalized(),
+			FVector(0.f, meshBoundingBox.Min.Y, -meshBoundingBox.Min.Z),
+			FVector(meshSize.Y / textureW, -meshSize.Z / textureH, 1.f)
+		).ToMatrixWithScale();
+	}
+    FMatrix componentToWorld = component->GetComponentToWorld().ToMatrixWithScale();
+	FMatrix textureToWorld = textureToComponent * componentToWorld;
+
+	oParams.mCanvas = Canvas;
+	oParams.mTextureToHUD = FOdysseyHUDSystem::FDrawHUDParams::FTextureToHUD::CreateLambda(
+		[textureToWorld, View](const FVector2D& iPosition)
+		{
+			FVector worldPoint = textureToWorld.TransformPosition(FVector(iPosition.X, iPosition.Y, 0.f));
+			FVector2D hudPoint;
+			View->WorldToPixel(worldPoint, hudPoint);
+
+			FVector test1;
+			test1 = View->PixelToWorld(hudPoint.X, hudPoint.Y, 0.5f);
+			test1 = textureToWorld.InverseTransformPosition(test1);
+			return hudPoint;
+		}
+	);
+	oParams.mTextureWidth = textureW;
+	oParams.mTextureHeight = textureH;
+
+	return true;
+}
+
+bool
 FOdysseyViewportDrawingEditorExtension::GetHUDPlaneParams(FVector& oPlaneTopLeft, double& oW, double& oH, FVector& oXAxis, FVector& oYAxis)
 {
 	UMeshComponent* component = Component();
@@ -1014,18 +1085,16 @@ FOdysseyViewportDrawingEditorExtension::GetHUDPlaneParams(FVector& oPlaneTopLeft
 
 	FBox bbox = staticMesh->GetBoundingBox();
 	FVector bboxSize = bbox.GetSize();
-	FVector scale = actor->GetActorScale();
 	
-	oW = bboxSize.X;// * scale.X;
-	oH = bboxSize.Y;// * scale.Y;
+	oW = bboxSize.X;
+	oH = bboxSize.Y;
 
-	FString pathname = staticMesh->GetPathName();
 	if (actor->IsA<AMediaPlate>())
 	{
 		brushXAxis = FVector(0.f, 1.f, 0.f);
 		brushYAxis = FVector(0.f, 0.f, -1.f);
-		oW = bboxSize.Y; //* scale.Y;
-		oH = bboxSize.Z; //* scale.Z;
+		oW = bboxSize.Y;
+		oH = bboxSize.Z;
 	}
 
 	oXAxis = componentToWorld.TransformVector(brushXAxis);
@@ -1099,7 +1168,7 @@ FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iVi
 	else
 	{
 		componentPoint.X -= bboxMin.X;
-		componentPoint.Y += bboxMin.Y;
+		componentPoint.Y -= bboxMin.Y;
 		oHUDPoint = FVector2D(componentPoint.X * mTexture->GetSurfaceWidth() / w, componentPoint.Y * mTexture->GetSurfaceHeight() / h);
 	}
 

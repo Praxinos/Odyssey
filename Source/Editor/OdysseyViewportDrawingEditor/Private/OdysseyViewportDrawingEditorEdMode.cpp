@@ -75,30 +75,19 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
         return;
     
     adapter->RenderInteractorWidget(View, Viewport, PDI);
+}
 
-    /* TESTS */
-
-    FVector planeTopLeft;
-	double w;
-	double h;
-	FVector xAxis;
-	FVector yAxis;
-	if (!mViewportDrawingEditorExtension->GetHUDPlaneParams(planeTopLeft, w, h, xAxis, yAxis))
+void
+FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas)
+{
+    if (!mViewportDrawingEditorExtension)
+        return;
+    
+    FOdysseyHUDSystem::FDrawHUDParams params;
+	if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, params))
 		return;
 
-    FOdysseyHUDSystem::FRenderParams params;
-    params.mView = View;
-    params.mViewport = Viewport;
-    params.mPDI = PDI;
-    params.mOrigin = planeTopLeft;
-    params.mXAxis = xAxis;
-    params.mYAxis = yAxis;
-    params.mPlaneWidth = w;
-    params.mPlaneHeight = h;
-    params.mTextureWidth = texture->GetSurfaceWidth();
-    params.mTextureHeight = texture->GetSurfaceHeight();
-
-    mEditor->HUDSystem()->Render(params);
+    mEditor->HUDSystem()->DrawHUD(params);
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelected)
@@ -263,12 +252,6 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
 
     // Call parent implementation
     FEdMode::Exit();
-}
-
-void
-FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas)
-{
-    FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
 }
 
 #undef LOCTEXT_NAMESPACE

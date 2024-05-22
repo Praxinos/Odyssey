@@ -73,13 +73,13 @@ void FOdysseyHUDSystem::ClearHUDSurface()
 }
 
 void
-FOdysseyHUDSystem::Render( const FRenderParams& iParams )
+FOdysseyHUDSystem::DrawHUD( const FDrawHUDParams& iParams )
 {
-    OnRender().ExecuteIfBound(iParams);
+    OnDrawHUD().ExecuteIfBound(iParams);
 }
 
-FOdysseyHUDSystem::FOnRender&
-FOdysseyHUDSystem::OnRender()
+FOdysseyHUDSystem::FOnDrawHUD&
+FOdysseyHUDSystem::OnDrawHUD()
 {
-    return mOnRender;
+    return mOnDrawHUD;
 }

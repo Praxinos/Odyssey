@@ -12,21 +12,17 @@ class FOdysseySurfaceTexture2DEditable;
 class ODYSSEYHUDSYSTEM_API FOdysseyHUDSystem 
 {
 public:
-    struct FRenderParams
+    struct FDrawHUDParams
     {
-        const FSceneView* mView;
-        FViewport* mViewport;
-        FPrimitiveDrawInterface* mPDI;
-        FVector mOrigin;
-        FVector mXAxis;
-        FVector mYAxis;
-        double mPlaneWidth;
-        double mPlaneHeight;
+        DECLARE_DELEGATE_RetVal_OneParam(FVector2D, FTextureToHUD, const FVector2D&)
+
+        FCanvas* mCanvas;
+        FTextureToHUD mTextureToHUD;
         int32 mTextureWidth;
         int32 mTextureHeight;
     };
     
-    DECLARE_DELEGATE_OneParam(FOnRender, const FRenderParams&)
+    DECLARE_DELEGATE_OneParam(FOnDrawHUD, const FDrawHUDParams&)
 
 public:
     // Construction / Destruction
@@ -45,11 +41,11 @@ public:
 public:
     void RebuildHUDSurface(FVector2D iSize);
     void ClearHUDSurface();
-    void Render( const FRenderParams& iParams );
-    FOnRender& OnRender();
+    void DrawHUD( const FDrawHUDParams& iParams );
+    FOnDrawHUD& OnDrawHUD();
 
 private:
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mHUDBlock; // Holds the block in which we draw the HUD
     FOdysseySurfaceTexture2DEditable*    mHUDSurface;
-    FOnRender mOnRender;
+    FOnDrawHUD mOnDrawHUD;
 };

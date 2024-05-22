@@ -77,7 +77,7 @@ public:
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
-    virtual void RenderHUD(const FOdysseyHUDSystem::FRenderParams& iParams);
+    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
 
 protected:
     virtual TSharedRef<SWidget> CreateTopTabWidget();

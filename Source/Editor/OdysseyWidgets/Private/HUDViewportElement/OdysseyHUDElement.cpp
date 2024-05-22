@@ -38,11 +38,11 @@ void FOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 }*/
 
 void
-FOdysseyHUDElement::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
+FOdysseyHUDElement::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        it->Value->Render(iParams);
+        it->Value->DrawHUD(iParams);
     }
 }
 
