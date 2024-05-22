@@ -195,6 +195,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::AddReferencedObjects(FReferenceColl
 	Collector.AddReferencedObject(mObjectView);
 	Collector.AddReferencedObject(mPathView);
 	Collector.AddReferencedObject(mGroupPaintView);
+	Collector.AddReferencedObject(mTagInbetweenerView);
 	//Collector.AddReferencedObject(mDetailsView);
 }
 

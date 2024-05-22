@@ -114,6 +114,13 @@ namespace FOdysseyFile
                             //static const uint32 CHUNK_BUCKET_ENTRY = ... // see CHUNK_BUCKET_ENTRY
                         static const uint32 CHUNK_OBJECT_BACKGROUNDBUCKET = 0x1816973a; // container
                             //static const uint32 CHUNK_BUCKET_ENTRY = ... // see CHUNK_BUCKET_ENTRY
+                        static const uint32 CHUNK_OBJECT_TAGS = 0x6c2511f0; // container
+                            static const uint32 CHUNK_TAGINBETWEENER = 0x3da0a9c0; // container
+                                static const uint32 CHUNK_TAGINBETWEENER_INBETWEENCOUNT = 0x73d1119d; // uint32(count)
+                                static const uint32 CHUNK_TAGINBETWEENER_CHART = 0x953d8893; // array[float]
+                                static const uint32 CHUNK_TAGINBETWEENER_FFDGRID = 0x6b443e74; // container
+                                    static const uint32 CHUNK_TAG_INBETWEENER_FFDGRID_SIZE = 0xb3e7577b; // uint32(x)-uint32(y)
+                                    static const uint32 CHUNK_TAG_INBETWEENER_FFDGRID_GEOMETRY = 0x88fd3275; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
 
                     static const uint32 CHUNK_PATH = 0x138d0bec; // container
                         // ... inherited chunks.

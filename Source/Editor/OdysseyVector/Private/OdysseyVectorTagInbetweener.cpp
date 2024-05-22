@@ -479,6 +479,13 @@ FOdysseyVectorTagInbetweener::InterpolateInbetween( uint32 iInbetweenIndex )
 void
 FOdysseyVectorTagInbetweener::UpdateAnimationCells()
 {
+    UpdateAnimationCells( mInbetweenCount );
+}
+
+
+void
+FOdysseyVectorTagInbetweener::UpdateAnimationCells( uint32 iInbetweenCount )
+{
     IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
 
     if( animationCell )
@@ -486,7 +493,7 @@ FOdysseyVectorTagInbetweener::UpdateAnimationCells()
         int32 animationCellIndex = animationCell->GetIndex();
 
         // Redraw impacted cells
-        for( uint32 i = 0; ( i < mInbetweenCount ) && ( animationCell != nullptr ); i++ )
+        for( uint32 i = 0; ( i < iInbetweenCount ) && ( animationCell != nullptr ); i++ )
         {
             IOdysseyVectorAnimationCell* nextAnimationCell = animationCell->GetCellByIndex( animationCellIndex + i + 1 );
 
@@ -690,11 +697,15 @@ FOdysseyVectorTagInbetweener::AllocBuffers()
 void
 FOdysseyVectorTagInbetweener::SetInbetweenCount( uint32 iInbetweenCount )
 {
+    uint32 maxInbetweenCount = ::ULIS::FMath::Max( iInbetweenCount, mInbetweenCount );
+
     mInbetweenCount = iInbetweenCount;
 
     ResetChart();
     AllocBuffers();
     Interpolate();
+
+    UpdateAnimationCells( maxInbetweenCount );
 }
 
 void
@@ -743,76 +754,3 @@ FOdysseyVectorTagInbetweener::GetFFDNumCellY()
 {
     return mNumCellY;
 }
-
-/*
-void
-FOdysseyVectorTagInbetweener::DrawPaths( BLContext* iBLContext
-                                       , const ::ULIS::FRectD& iInvalidationArea
-                                       , double iAncestorsOpacity
-                                       , uint64 iDrawingFlags )
-{
-    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
-    iBLContext->setStrokeWidth( 1.0f );
-
-    // note: mInbetweenCount+1 holds the target position
-    for( uint32 i = 0; i < mInbetweenCount; i++ )
-    {
-        DrawPathsInbetween( i
-                          , iBLContext
-                          , iInvalidationArea
-                          , iAncestorsOpacity
-                          , iDrawingFlags );
-    }
-
-    iBLContext->setStrokeWidth( 3.0f );
-
-    DrawPathsInbetween( mInbetweenCount
-                      , iBLContext
-                      , iInvalidationArea
-                      , iAncestorsOpacity
-                      , iDrawingFlags );
-
-    iBLContext->restore();
-}
-
-
-void
-FOdysseyVectorTagInbetweener::DrawGrid( BLContext* iBLContext
-                                      , const ::ULIS::FRectD& iInvalidationArea
-                                      , double iAncestorsOpacity
-                                      , uint64 iDrawingFlags )
-{
-    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
-    iBLContext->setStrokeWidth( 1.0f );
-
-    for( FInbetweenerCell& cell : mGridCellBuffer )
-    {
-        BLPoint pt[4] = { worldMatrix.mapPoint( cell.point[0]->targetPosition.x
-                                              , cell.point[0]->targetPosition.y )
-                        , worldMatrix.mapPoint( cell.point[1]->targetPosition.x
-                                              , cell.point[1]->targetPosition.y )
-                        , worldMatrix.mapPoint( cell.point[2]->targetPosition.x
-                                              , cell.point[2]->targetPosition.y )
-                        , worldMatrix.mapPoint( cell.point[3]->targetPosition.x
-                                              , cell.point[3]->targetPosition.y ) };
-
-        iBLContext->strokeLine( pt[0], pt[1] );
-        iBLContext->strokeLine( pt[1], pt[2] );
-        iBLContext->strokeLine( pt[2], pt[3] );
-        iBLContext->strokeLine( pt[3], pt[0] );
-    }
-
-    iBLContext->restore();
-}
-*/
-

@@ -1,6 +1,8 @@
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
-//#include "Undo/OdysseyVectorUndoBucketParam.h"
+#include "Undo/OdysseyVectorUndoChartAlter.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -46,8 +48,30 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
 {
     if( mInbetweenerTag )
     {
+        FOdysseyVectorGroupPaint* vectorScene = mInbetweenerTag->GetOwner()->GetScene();
+
+        //////////
         if( iPropertyName == "InbetweenCount" )
+        {
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("vector-tag.transaction.property-changed","Property Changed"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo *undo = new FOdysseyVectorUndoChartAlter( vectorScene
+                                                                           , mInbetweenerTag );
+                // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
+                // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
+                // of a call to GEditor::PostEditChangeProperty()
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
+            GEditor->EndTransaction();
+
             mInbetweenerTag->SetInbetweenCount( InbetweenCount );
+        }
 
         if( iPropertyName == "GridType" )
             mInbetweenerTag->SetGridType( GridType );
@@ -71,24 +95,6 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
     if( mInbetweenerTag )
     {
         FOdysseyVectorGroupPaint* vectorScene = mInbetweenerTag->GetOwner()->GetScene();
-
-/*
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("vector-bucket.transaction.property-changed","Property Changed"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoBucketParam( vectorScene, mBucket );
-            // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
-            // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
-            // of a call to GEditor::PostEditChangeProperty()
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
-            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-            if (source)
-                source->RecordCurrentFrameUndo();
-        }
-        GEditor->EndTransaction();
-*/
 
         PropertyChanged( PropertyChangedEvent.GetPropertyName()
                        , PropertyChangedEvent.MemberProperty->GetFName()

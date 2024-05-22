@@ -184,7 +184,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                       , const ::ULIS::FRectD& iInvalidationArea
                       , double iAncestorsOpacity
                       , uint64 iDrawingFlags );
-
+        void UpdateAnimationCells( uint32 iInbetweenCount );
 
         void FFDComputeBinomialCoefficients();
         ::ULIS::FVec2D FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint );

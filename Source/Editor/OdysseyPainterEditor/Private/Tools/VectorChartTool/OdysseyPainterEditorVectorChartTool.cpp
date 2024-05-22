@@ -3,10 +3,12 @@
 
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartToolHUD.h"
+#include "Undo/OdysseyVectorUndoChartAlter.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -78,6 +80,20 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                                                              , iPointInTexture.x
                                                              , iPointInTexture.y
                                                              , 10 );
+
+                // needed for valid GUndo pointer
+                GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
+                if( GUndo )
+                {
+                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoChartAlter( iScene, inbetweenerTag );
+
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                    if (source)
+                        source->RecordCurrentFrameUndo();
+                }
+                GEditor->EndTransaction();
             }
         }
     }
