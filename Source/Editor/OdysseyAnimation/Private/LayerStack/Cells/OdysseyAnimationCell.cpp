@@ -128,13 +128,26 @@ FOdysseyAnimationCell::OutOfPegsTransform() const
 }
 
 void
-FOdysseyAnimationCell::SetOutOfPegs(const FVector2D& iPan, float iRotation, float iZoom, bool iIsInteractive)
+FOdysseyAnimationCell::SetOutOfPegsPan(const FVector2D& iPan, bool iIsInteractive)
 {
     mOutOfPegsPan = iPan;
+    mOnOutOfPegsChanged.Broadcast(iIsInteractive);
+    ImageRenderingChanged(iIsInteractive);
+}
+
+void
+FOdysseyAnimationCell::SetOutOfPegsRotation(float iRotation, bool iIsInteractive)
+{
     mOutOfPegsRotation = iRotation;
+    mOnOutOfPegsChanged.Broadcast(iIsInteractive);
+    ImageRenderingChanged(iIsInteractive);
+}
+
+void
+FOdysseyAnimationCell::SetOutOfPegsZoom(float iZoom, bool iIsInteractive)
+{
     mOutOfPegsZoom = iZoom;
     mOnOutOfPegsChanged.Broadcast(iIsInteractive);
-
     ImageRenderingChanged(iIsInteractive);
 }
 

@@ -30,6 +30,7 @@ public:
 
     FOnOutOfPegsChanged& OnOutOfPegsChanged();
 
+
 public:
     //OutOfPegs
     bool IsOutOfPegs() const;
@@ -38,7 +39,9 @@ public:
     float OutOfPegsZoom() const;
     ::ULIS::FMat3F OutOfPegsTransform() const;
 
-    void SetOutOfPegs(const FVector2D& iPan, float iRotation, float iZoom, bool iIsInteractive);
+    void SetOutOfPegsPan(const FVector2D& iPan, bool iIsInteractive);
+    void SetOutOfPegsRotation(float iRotation, bool iIsInteractive);
+    void SetOutOfPegsZoom(float iZoom, bool iIsInteractive);
 
 public:
     virtual void PostDuplicate();
