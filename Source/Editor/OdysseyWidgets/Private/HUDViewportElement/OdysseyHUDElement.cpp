@@ -36,6 +36,15 @@ void FOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
     mIsInvalid = false;
 }
 
+void
+FOdysseyHUDElement::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it->Value->Render(iParams);
+    }
+}
+
 void FOdysseyHUDElement::MouseMove( const FOdysseyPoint& iPointInTexture )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)

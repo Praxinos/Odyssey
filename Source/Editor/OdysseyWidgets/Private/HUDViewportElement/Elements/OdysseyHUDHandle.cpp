@@ -8,6 +8,38 @@
 #define HANDLE_SMALL_SIZE 10
 #define HANDLE_BIG_SIZE 20
 
+/* struct HOdysseyHUDHandleHitProxy : public HHitProxy
+{
+	DECLARE_HIT_PROXY();
+
+    bool mOverrideMouseCursor;
+	EMouseCursor::Type mMouseCursor;
+
+	HOdysseyHUDHandleHitProxy()
+        : HHitProxy(HPP_Foreground),
+        , mOverrideMouseCursor(false)
+		, mMouseCursor(EMouseCursor::Default)
+	{
+	}
+
+    HOdysseyHUDHandleHitProxy(EMouseCursor::Type iMouseCursor)
+        : HHitProxy(HPP_Foreground),
+        , mOverrideMouseCursor(true)
+		, mMouseCursor(iMouseCursor)
+	{
+	}
+
+	virtual EMouseCursor::Type GetMouseCursor() override
+	{
+        if (!mOverrideMouseCursor)
+            return HHitProxy::GetMouseCursor();
+
+        return mMouseCursor;
+	}
+};
+
+IMPLEMENT_HIT_PROXY(HOdysseyHUDHandleHitProxy, HHitProxy)*/
+
 FOdysseyHUDHandle::~FOdysseyHUDHandle()
 {
 
@@ -50,6 +82,29 @@ void FOdysseyHUDHandle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
     mPreviousPosition = *mReferencePoint;
 
     ioBlock->Dirty();
+}
+
+void
+FOdysseyHUDHandle::Render(const FOdysseyHUDSystem::FRenderParams& iParams)
+{
+    const FLinearColor color(1.f, 0.f, 0.f);
+    FVector handlePosition = iParams.mOrigin + mReferencePoint->X * iParams.mPlaneWidth * iParams.mXAxis + mReferencePoint->Y * iParams.mPlaneHeight * iParams.mYAxis;
+
+    DrawRectangle(
+        iParams.mPDI,
+        handlePosition, //center of the rectangle
+        iParams.mXAxis,
+        iParams.mYAxis,
+        color.ToFColor(true),
+        mHandleSize, //width of the rectangle
+        mHandleSize, //height of the rectangle
+        SDPG_Foreground,
+        1.f,
+        0.f,
+        true
+    );
+
+    FOdysseyHUDElement::Render(iParams);
 }
 
 void FOdysseyHUDHandle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
@@ -134,3 +189,58 @@ void FOdysseyHUDHandle::CapturedMouseMove( const FOdysseyPoint& iPointInTexture 
         mIsInvalid = true;
     }
 }
+
+//HitProxy version
+/*
+bool
+FOdysseyHUDHandle::OnMouseDown(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    if (iHitProxyId != mHitProxyId)
+        return FOdysseyHUDElement::OnMouseDown(iHitProxyId, iPointInTexture, iKey);
+
+    if (iKey == EKeys::LeftMouseButton)
+    {
+        mIsCaptured = true;
+        return true;
+    }
+    
+    return FOdysseyHUDElement::OnMouseDown(iHitProxyId, iPointInTexture, iKey);
+}
+
+bool
+FOdysseyHUDHandle::OnMouseDoubleClick(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    return false;
+}
+
+bool
+FOdysseyHUDHandle::OnMouseUp(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    if (iHitProxyId != mHitProxyId)
+        return FOdysseyHUDElement::OnMouseDown(iHitProxyId, iPointInTexture, iKey);
+
+}
+
+void
+FOdysseyHUDHandle::OnMouseHover(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture)
+{
+
+}
+
+void
+FOdysseyHUDHandle::OnMouseDrag(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture)
+{
+
+}
+
+bool
+FOdysseyHUDHandle::OnKeyDown(const FKey& iKey)
+{
+
+}
+
+bool
+FOdysseyHUDHandle::OnKeyUp(const FKey& iKey)
+{
+
+} */

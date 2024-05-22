@@ -7,6 +7,7 @@
 #include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
 #include "OdysseyStyleSet.h"
+#include "OdysseyHUDSystem.h"
 #include "OdysseyPainterEditorToolContext.h"
 #include "OdysseyPainterEditorToolInputProcessor.h"
 #include "OdysseyPainterEditorTool.generated.h"
@@ -76,6 +77,7 @@ public:
     virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
     virtual FOdysseyHUDElement* GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
+    virtual void RenderHUD(const FOdysseyHUDSystem::FRenderParams& iParams);
 
 protected:
     virtual TSharedRef<SWidget> CreateTopTabWidget();

@@ -29,16 +29,11 @@
 
 #include "UObject/UObjectGlobals.h"
 #include "Editor/EditorPerProjectUserSettings.h"
+#include "MediaPlate.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
 const FEditorModeID FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId = TEXT("EM_OdysseyViewportDrawingEditorEdMode");
-
-FOdysseyViewportDrawingEditorEdMode::FOdysseyViewportDrawingEditorEdMode()
-    : FEdMode()
-{
-    GEditor->OnEditorClose().AddRaw(this, &FOdysseyViewportDrawingEditorEdMode::OnResetViewMode);
-}
 
 FOdysseyViewportDrawingEditorEdMode::~FOdysseyViewportDrawingEditorEdMode()
 {
@@ -46,6 +41,12 @@ FOdysseyViewportDrawingEditorEdMode::~FOdysseyViewportDrawingEditorEdMode()
     {
         GEditor->OnEditorClose().RemoveAll(this);
     }
+}
+
+FOdysseyViewportDrawingEditorEdMode::FOdysseyViewportDrawingEditorEdMode()
+    : FEdMode()
+{
+    GEditor->OnEditorClose().AddRaw(this, &FOdysseyViewportDrawingEditorEdMode::OnResetViewMode);
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Initialize()
@@ -70,6 +71,76 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
         return;
     
     adapter->RenderInteractorWidget(View, Viewport, PDI);
+
+    /* TESTS */
+
+    UMeshComponent* component = mViewportDrawingEditorExtension->Component();
+    AActor* actor = mViewportDrawingEditorExtension->Actor();
+
+    if (!component || !component->IsA<UStaticMeshComponent>())
+        return;
+
+    UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
+    UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
+
+    if (!staticMesh)
+        return;
+
+    FVector actorLocation = actor->GetActorLocation();
+
+    // Display settings
+    FTransform componentToWorld = component->GetComponentToWorld();
+
+    FVector brushXAxis(1.0f, 0.f, 0.f);
+    FVector brushYAxis(0.f, 1.f, 0.f);
+
+    FBox bbox = staticMesh->GetBoundingBox();
+    FVector extent = bbox.GetExtent();
+    FVector scale = actor->GetActorScale();
+    
+    double w = extent.X * scale.X * 2;
+    double h = extent.Y * scale.Y * 2;
+
+    FString pathname = staticMesh->GetPathName();
+    if (actor->IsA<AMediaPlate>())
+    {
+        brushXAxis = FVector(0.f, 1.f, 0.f);
+        brushYAxis = FVector(0.f, 0.f, -1.f);
+        w = extent.Y * scale.Y * 2;
+        h = extent.Z * scale.Z * 2;
+    }
+
+    brushXAxis = componentToWorld.TransformVector(brushXAxis);
+    brushYAxis = componentToWorld.TransformVector(brushYAxis);
+
+    const FVector planeTopLeft = actorLocation - brushXAxis * w / 2.f - brushYAxis * h / 2.f;
+
+    /* const FLinearColor gridColor(1.f, 0.f, 0.f);
+    DrawRectangle(
+        PDI,
+        planeTopLeft,
+        brushXAxis,
+        brushYAxis,
+        gridColor.ToFColor(true),
+        w,
+        h,
+        SDPG_Foreground,
+        1.f,
+        0.f,
+        true
+    ); */
+
+    FOdysseyHUDSystem::FRenderParams params;
+    params.mView = View;
+    params.mViewport = Viewport;
+    params.mPDI = PDI;
+    params.mOrigin = planeTopLeft;
+    params.mXAxis = brushXAxis;
+    params.mYAxis = brushYAxis;
+    params.mPlaneWidth = w;
+    params.mPlaneHeight = h;
+
+    mEditor->HUDSystem()->Render(params);
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelected)
@@ -234,6 +305,12 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
 
     // Call parent implementation
     FEdMode::Exit();
+}
+
+void
+FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas)
+{
+    FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
 }
 
 #undef LOCTEXT_NAMESPACE

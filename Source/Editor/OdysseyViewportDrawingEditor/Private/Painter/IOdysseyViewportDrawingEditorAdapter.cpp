@@ -138,6 +138,14 @@ void IOdysseyViewportDrawingEditorAdapter::StartPainting()
             brushInstance->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
     }
     
+    //HUD
+    /*
+    hudSystem = mExtension->GetEditor()->GetHUDSystem();
+    isCapturedByHUD = hudSystem->OnMouseDown();
+    if (isCapturedByHUD)
+        return;
+    */
+
     if (mTool)
     {
         mCapturedByEditor = mTool->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);

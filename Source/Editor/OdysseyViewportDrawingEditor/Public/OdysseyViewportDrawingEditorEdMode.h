@@ -55,6 +55,9 @@ public:
 
 	virtual bool GetCursor(EMouseCursor::Type& OutCursor) const override;
 
+	/** Overlays the editor hud (brushes, drag tools, static mesh vertices, etc*. */
+	virtual void DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas) override;
+
 private:
     void OnResetViewMode();
 

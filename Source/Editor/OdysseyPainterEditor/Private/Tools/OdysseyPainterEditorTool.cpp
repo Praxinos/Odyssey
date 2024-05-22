@@ -199,6 +199,14 @@ FOdysseyHUDElement* UOdysseyPainterEditorTool::GetHUD()
     return mHUD;
 }
 
+void
+UOdysseyPainterEditorTool::RenderHUD(const FOdysseyHUDSystem::FRenderParams& iParams)
+{
+    FOdysseyHUDElement* hud = GetHUD();
+    if (hud)
+        hud->Render(iParams);
+}
+
 EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor() const
 {
     return EMouseCursor::Crosshairs;

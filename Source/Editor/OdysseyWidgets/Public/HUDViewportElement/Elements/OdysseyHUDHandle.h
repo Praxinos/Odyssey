@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "OdysseyHUDElement.h"
+#include "OdysseyHUDSystem.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDHandle
@@ -20,12 +21,23 @@ public:
 
 //FOdysseyHUDElement overrides
 public:
-    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    virtual void Render(const FOdysseyHUDSystem::FRenderParams& iParams) override;
     virtual void MouseMove( const FOdysseyPoint& iPointInTexture ) override;
     virtual bool OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
     virtual bool OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey ) override;
     virtual void CapturedMouseMove( const FOdysseyPoint& iPointInTexture ) override;
-    void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    virtual void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+
+public:
+    //HitProxy version
+    /* virtual bool OnMouseDown(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual bool OnMouseDoubleClick(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual bool OnMouseUp(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual void OnMouseHover(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture);
+    virtual void OnMouseDrag(FHitProxyId iHitProxyId, const FOdysseyPoint& iPointInTexture);
+    virtual bool OnKeyDown(const FKey& iKey);
+    virtual bool OnKeyUp(const FKey& iKey); */
 
 public:
     void SetPosition(FVector2D iNewPosition);
@@ -40,4 +52,5 @@ private:
 
 private:
     int mHandleSize;
+    //FHitProxyId mHitProxyId;
 };
