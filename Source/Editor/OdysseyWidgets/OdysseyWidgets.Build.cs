@@ -46,6 +46,7 @@ public class OdysseyWidgets : ModuleRules
                 "ULIS",
                 "ULISLoader",
                 "EditorWidgets",
+                "OdysseyHUDSystem",
 			 }
         );
 

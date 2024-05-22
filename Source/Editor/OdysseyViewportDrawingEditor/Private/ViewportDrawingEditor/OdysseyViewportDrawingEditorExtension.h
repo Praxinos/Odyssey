@@ -7,6 +7,7 @@
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
 #include "MeshPaintTypes.h"
 #include "ISequencer.h"
+#include "OdysseyHUDSystem.h"
 
 class FOdysseyPainterEditor;
 class FOdysseyViewportDrawingEditorGUI;
@@ -50,6 +51,8 @@ public:
     UMaterialInterface* Material() const;
     UTexture* Texture() const;
 
+    bool IsPlaneComponent() const;
+
 	IOdysseyViewportDrawingEditorAdapter* GetOdysseyViewportDrawingEditorAdapter();
 
     // Delegates
@@ -65,6 +68,10 @@ public:
     
     int32 GetUVIndexUsedByCurrentTexture();
     float  GetMeshComponentMaxSize() const;
+
+    bool GetHUDPlaneParams(FVector& oPlaneTopLeft, double& oW, double& oH, FVector& oXAxis, FVector& oYAxis);
+    bool GetDrawHUDParams(const FSceneView* View, FCanvas* Canvas, FOdysseyHUDSystem::FDrawHUDParams& oParams);
+    bool ViewportToHUD(FEditorViewportClient* iViewportClient, const FVector2D& iViewportPoint, FVector2D& oHUDPoint);
 
 public:
     //Setters

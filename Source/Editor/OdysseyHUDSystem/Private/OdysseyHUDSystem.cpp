@@ -3,6 +3,8 @@
 
 #include "OdysseyHUDSystem.h"
 
+#include "OdysseySurfaceTexture2DEditable.h"
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyHUDSystem::~FOdysseyHUDSystem()
@@ -68,4 +70,16 @@ void FOdysseyHUDSystem::ClearHUDSurface()
 
     if( mHUDSurface )
         mHUDSurface->Invalidate();
+}
+
+void
+FOdysseyHUDSystem::DrawHUD( const FDrawHUDParams& iParams )
+{
+    OnDrawHUD().ExecuteIfBound(iParams);
+}
+
+FOdysseyHUDSystem::FOnDrawHUD&
+FOdysseyHUDSystem::OnDrawHUD()
+{
+    return mOnDrawHUD;
 }

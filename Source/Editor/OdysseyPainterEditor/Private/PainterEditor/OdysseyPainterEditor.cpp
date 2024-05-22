@@ -111,6 +111,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
 void
 FOdysseyPainterEditor::Initialize()
 {
+    InitHUD();
 
     //Init Tools
 	InitTools();
@@ -228,6 +229,20 @@ FOdysseyPainterEditor::OnClose()
     mHUDSystem = nullptr;
 
     FOdysseyEditor::OnClose();
+}
+
+void
+FOdysseyPainterEditor::InitHUD()
+{
+    mHUDSystem->OnDrawHUD().BindRaw(this, &FOdysseyPainterEditor::OnDrawHUD);
+}
+
+void
+FOdysseyPainterEditor::OnDrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+{
+    UOdysseyPainterEditorTool* tool = GetCurrentTool();
+    if (tool)
+        tool->DrawHUD(iParams);
 }
 
 void

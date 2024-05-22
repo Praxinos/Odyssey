@@ -989,4 +989,262 @@ FOdysseyViewportDrawingEditorExtension::AddReferencedObjects(FReferenceCollector
 	}
 }
 
+bool
+FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View, FCanvas* Canvas, FOdysseyHUDSystem::FDrawHUDParams& oParams)
+{	
+	AActor* actor = Actor();
+	UMeshComponent* component = Component();
+	if (!component || !component->IsA<UStaticMeshComponent>())
+		return false;
+
+	UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
+	UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
+
+	if (!staticMesh)
+		return false;
+
+    UTexture* texture = Texture();
+    if (!texture)
+        return false;
+
+	FBox meshBoundingBox = staticMesh->GetBoundingBox();
+	FVector meshSize = meshBoundingBox.GetSize();
+
+	float meshW = meshSize.X;
+	float meshH = meshSize.Y;
+	float textureW = texture->GetSurfaceWidth();
+	float textureH = texture->GetSurfaceHeight();
+
+	FVector meshPosition = meshBoundingBox.Min;
+	FMatrix textureToComponent = FTransform(
+		FQuat::Identity,
+		FVector(meshBoundingBox.Min.X, meshBoundingBox.Min.Y, 0.f),
+		FVector(meshSize.X / textureW, meshSize.Y / textureH, 1.f)
+	).ToMatrixWithScale();
+
+	
+
+	if (actor->IsA<AMediaPlate>())
+	{
+		FQuat rotY(FVector(0, 1, 0), FMath::DegreesToRadians(90.f));
+		FQuat rotX(FVector(1, 0, 0), FMath::DegreesToRadians(90.f));
+		//FQuat rot = rotX * rotZ;
+		FQuat rot = rotX * rotY;
+		textureToComponent = FTransform(
+			//FQuat::Identity,
+			rot.GetNormalized(),
+			FVector(0.f, meshBoundingBox.Min.Y, -meshBoundingBox.Min.Z),
+			FVector(meshSize.Y / textureW, -meshSize.Z / textureH, 1.f)
+		).ToMatrixWithScale();
+	}
+    FMatrix componentToWorld = component->GetComponentToWorld().ToMatrixWithScale();
+	FMatrix textureToWorld = textureToComponent * componentToWorld;
+
+	oParams.mCanvas = Canvas;
+	oParams.mTextureToHUD = FOdysseyHUDSystem::FDrawHUDParams::FTextureToHUD::CreateLambda(
+		[textureToWorld, View](const FVector2D& iPosition)
+		{
+			FVector worldPoint = textureToWorld.TransformPosition(FVector(iPosition.X, iPosition.Y, 0.f));
+			FVector2D hudPoint;
+			View->WorldToPixel(worldPoint, hudPoint);
+
+			FVector test1;
+			test1 = View->PixelToWorld(hudPoint.X, hudPoint.Y, 0.5f);
+			test1 = textureToWorld.InverseTransformPosition(test1);
+			return hudPoint;
+		}
+	);
+	oParams.mTextureWidth = textureW;
+	oParams.mTextureHeight = textureH;
+
+	return true;
+}
+
+bool
+FOdysseyViewportDrawingEditorExtension::GetHUDPlaneParams(FVector& oPlaneTopLeft, double& oW, double& oH, FVector& oXAxis, FVector& oYAxis)
+{
+	UMeshComponent* component = Component();
+	AActor* actor = Actor();
+
+	if (!component || !component->IsA<UStaticMeshComponent>())
+		return false;
+
+	UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
+	UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
+
+	if (!staticMesh)
+		return false;
+
+	FVector actorLocation = actor->GetActorLocation();
+
+	// Display settings
+	FTransform componentToWorld = component->GetComponentToWorld();
+
+	FVector brushXAxis(1.0f, 0.f, 0.f);
+	FVector brushYAxis(0.f, 1.f, 0.f);
+
+	FBox bbox = staticMesh->GetBoundingBox();
+	FVector bboxSize = bbox.GetSize();
+	
+	oW = bboxSize.X;
+	oH = bboxSize.Y;
+
+	if (actor->IsA<AMediaPlate>())
+	{
+		brushXAxis = FVector(0.f, 1.f, 0.f);
+		brushYAxis = FVector(0.f, 0.f, -1.f);
+		oW = bboxSize.Y;
+		oH = bboxSize.Z;
+	}
+
+	oXAxis = componentToWorld.TransformVector(brushXAxis);
+	oYAxis = componentToWorld.TransformVector(brushYAxis);
+
+	oPlaneTopLeft = actorLocation - oXAxis * oW / 2.f - oYAxis * oH / 2.f;
+
+	return true;
+}
+
+bool
+FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iViewportClient, const FVector2D& iViewportPoint, FVector2D& oHUDPoint)
+{
+	if (!mTexture)
+		return false;
+
+	UMeshComponent* component = Component();
+	if (!component || !component->IsA<UStaticMeshComponent>())
+		return false;
+
+	UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
+	UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
+	if (!staticMesh)
+		return false;
+
+	FVector planeTopLeft;
+	double w;
+	double h;
+	FVector xAxis;
+	FVector yAxis;
+	if (!GetHUDPlaneParams(planeTopLeft, w, h, xAxis, yAxis))
+		return false;
+
+	FSceneViewFamilyContext viewFamily(
+		FSceneViewFamily::ConstructionValues(
+			iViewportClient->Viewport,
+			iViewportClient->GetScene(),
+			iViewportClient->EngineShowFlags
+		)
+		.SetRealtimeUpdate(iViewportClient->IsRealtime())
+	);
+	FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
+
+	const FVector planeTopRight = planeTopLeft + xAxis * w;
+	const FVector planeBottomLeft = planeTopLeft + yAxis * h;
+
+	FPlane plane(planeTopLeft, planeTopRight, planeBottomLeft);
+
+	FVector rayOrigin;
+	FVector rayDirection;
+
+	view->DeprojectFVector2D(iViewportPoint, rayOrigin, rayDirection);
+
+	FVector worldPoint = FMath::RayPlaneIntersection(rayOrigin, rayDirection, plane);
+
+	FTransform componentToWorld = component->GetComponentToWorld();
+	FVector componentPoint = componentToWorld.InverseTransformPosition(worldPoint);
+
+	FBox bbox = staticMesh->GetBoundingBox();
+	FVector bboxMin = bbox.Min;
+
+	AActor* actor = Actor();
+	
+	if (actor->IsA<AMediaPlate>())
+	{
+		componentPoint.Y -= bboxMin.Y;
+		componentPoint.Z += bboxMin.Z;
+		componentPoint.Z *= -1;
+		oHUDPoint = FVector2D(componentPoint.Y * mTexture->GetSurfaceWidth() / w, componentPoint.Z * mTexture->GetSurfaceHeight() / h);
+	}
+	else
+	{
+		componentPoint.X -= bboxMin.X;
+		componentPoint.Y -= bboxMin.Y;
+		oHUDPoint = FVector2D(componentPoint.X * mTexture->GetSurfaceWidth() / w, componentPoint.Y * mTexture->GetSurfaceHeight() / h);
+	}
+
+	return true;
+}
+
+bool
+FOdysseyViewportDrawingEditorExtension::IsPlaneComponent() const
+{
+	UMeshComponent* component = Component();
+	if (!component || !component->IsA<UStaticMeshComponent>())
+		return false;
+
+	UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
+	UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
+	if (!staticMesh)
+		return false;
+
+	FStaticMeshLODResources& LODModel = staticMesh->GetRenderData()->LODResources[0];
+
+	// Retrieve mesh vertex and index data 
+	const int32 NumVertices = LODModel.VertexBuffers.PositionVertexBuffer.GetNumVertices();
+	
+	TArray<FVector> MeshVertices;
+	TArray<uint32> MeshIndices;
+
+	MeshVertices.Reset();
+	MeshVertices.AddDefaulted(NumVertices);
+	for (int32 Index = 0; Index < NumVertices; Index++)
+	{
+		const FVector& Position = (FVector)LODModel.VertexBuffers.PositionVertexBuffer.VertexPosition(Index);
+		MeshVertices[Index] = Position;
+	}
+
+	const int32 NumIndices = LODModel.IndexBuffer.GetNumIndices();
+	MeshIndices.Reset();
+	MeshIndices.AddDefaulted(NumIndices);
+	const FIndexArrayView ArrayView = LODModel.IndexBuffer.GetArrayView();
+	for (int32 Index = 0; Index < NumIndices; Index++)
+	{
+		MeshIndices[Index] = ArrayView[Index];
+	}
+
+	if (MeshIndices.Num() < 3)
+		return false;
+
+	uint32 i1 = MeshIndices[0];
+	uint32 i2 = MeshIndices[1];
+	uint32 i3 = MeshIndices[2];
+
+	FVector p1 = MeshVertices[i1];
+	FVector p2 = MeshVertices[i2];
+	FVector p3 = MeshVertices[i3];
+
+	FPlane plane(p1, p2, p3);
+	FVector baseNormal = plane.GetNormal();
+
+	for (int i = 3; i < MeshIndices.Num(); i+=3)
+	{
+		i1 = MeshIndices[i];
+		i2 = MeshIndices[i+1];
+		i3 = MeshIndices[i+2];
+
+		p1 = MeshVertices[i1];
+		p2 = MeshVertices[i2];
+		p3 = MeshVertices[i3];
+
+		plane = FPlane(p1, p2, p3);
+		FVector normal = plane.GetNormal();
+
+		FVector diff = baseNormal - normal;
+		if (!diff.IsNearlyZero())
+			return false;
+	}
+
+	return true;
+}
+
 #undef LOCTEXT_NAMESPACE

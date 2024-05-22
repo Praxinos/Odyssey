@@ -12,14 +12,13 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorTool::~UOdysseyPainterEditorTool()
 {
-    delete mHUD;
 }
 
 UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
     , mIsActivated(false)
 {
-    mHUD = new FOdysseyHUDElement( FName("RootHUD") );
+    mHUD = MakeShared<FOdysseyHUDElement>( FName("RootHUD") );
     mInputProcessor = MakeShared<FOdysseyPainterEditorToolInputProcessor>(this);
 }
 
@@ -194,9 +193,17 @@ UOdysseyPainterEditorTool::CreateTopTabWidget()
     return SNullWidget::NullWidget;
 }
 
-FOdysseyHUDElement* UOdysseyPainterEditorTool::GetHUD()
+TSharedPtr<FOdysseyHUDElement> UOdysseyPainterEditorTool::GetHUD()
 {
     return mHUD;
+}
+
+void
+UOdysseyPainterEditorTool::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+{
+    TSharedPtr<FOdysseyHUDElement> hud = GetHUD();
+    if (hud)
+        hud->DrawHUD(iParams);
 }
 
 EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor() const

@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyHUDBezier.h"
+#include "CanvasTypes.h"
 
 #include "ULISLoaderModule.h"
 
@@ -10,110 +11,49 @@ FOdysseyHUDBezier::~FOdysseyHUDBezier()
 
 }
 
-FOdysseyHUDBezier::FOdysseyHUDBezier(FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint, FTransform2D iTransform /*= FTransform2D()*/) :
-    FOdysseyHUDElement(iName, iTransform)
+FOdysseyHUDBezier::FOdysseyHUDBezier(FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint) :
+    FOdysseyHUDElement(iName)
 {
-    mStartPoint = mPreviousStartPoint = iStartPoint;
-    mEndPoint = mPreviousEndPoint = iEndPoint;
-    mControlPoint = mPreviousControlPoint = iControlPoint;
+    mStartPoint = iStartPoint;
+    mEndPoint = iEndPoint;
+    mControlPoint = iControlPoint;
 }
 
-void FOdysseyHUDBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void
+FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
-    if( !ioBlock )
-        return;
+    const FLinearColor bezierLineColor(0.f, 1.f, 0.f, 1.f);
+    const FLinearColor controlLineColor(0.f, 1.f, 0.f, 0.4f);
+    
+    FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
+    FVector2D controlPoint = iParams.mTextureToHUD.Execute(mControlPoint);
+    FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);
 
-    if ( mIsInvalid
-        || mPreviousStartPoint != mStartPoint
-        || mPreviousEndPoint != mEndPoint
-        || mPreviousControlPoint != mControlPoint
-        || mPreviousTransform != iTransform
-    )
-    {
-        Erase(ioBlock, iTransform);
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-    }
-    else
-    {
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-        return;
-    }
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
 
-    FVector2D transformedStartPoint = iTransform.TransformPoint(mStartPoint);
-    FVector2D transformedEndPoint = iTransform.TransformPoint(mEndPoint);
-    FVector2D transformedControlPoint = iTransform.TransformPoint(mControlPoint);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawQuadraticBezier(
-        *(ioBlock),
-        ::ULIS::FVec2I(transformedStartPoint.X,transformedStartPoint.Y),
-        ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
-        ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-        1.f,
-        ::ULIS::FColor::FromRGBA8(0, 255, 0, 255)
+    ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
+    ::ULIS::GenerateQuadraticBezierPoints(
+        ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y),
+        ::ULIS::FVec2I(mControlPoint.X, mControlPoint.Y),
+        ::ULIS::FVec2I(mEndPoint.X, mEndPoint.Y),
+        1.0f,
+        pointsArray
     );
-    if ( transformedStartPoint != transformedControlPoint )
-    {
-        ctx.DrawLine(
-            *(ioBlock),
-            ::ULIS::FVec2I(transformedStartPoint.X,transformedStartPoint.Y),
-            ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
-            ::ULIS::FColor::FromRGBA8(0, 255, 0, 95)
-        );
-        ctx.DrawLine(
-            *(ioBlock),
-            ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
-            ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-            ::ULIS::FColor::FromRGBA8(0, 255, 0, 95)
-        );
-    }
-    ctx.Finish();
 
-    mPreviousEndPoint = mEndPoint;
-    mPreviousStartPoint = mStartPoint;
-    mPreviousControlPoint = mControlPoint;
-    mPreviousTransform = iTransform;
-
-    ioBlock->Dirty();
-}
-
-void FOdysseyHUDBezier::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
-{
-    if (!ioBlock)
+    if (pointsArray.Size() < 2)
         return;
- 
-    //Erase the children of this HUDElement
-    FOdysseyHUDElement::Erase(ioBlock, iTransform);
-
-    FVector2D transformedStartPoint = mPreviousTransform.TransformPoint(mPreviousStartPoint);
-    FVector2D transformedEndPoint = mPreviousTransform.TransformPoint(mPreviousEndPoint);
-    FVector2D transformedControlPoint = mPreviousTransform.TransformPoint(mPreviousControlPoint);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawQuadraticBezier(
-        *(ioBlock),
-        ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y),
-        ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
-        ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-        1.f,
-        ::ULIS::FColor::FromRGBA8(0, 255, 0, 0)
-    );
-    if ( transformedStartPoint != transformedControlPoint )
+        
+    for (int i = 1; i < pointsArray.Size(); i++)
     {
-        ctx.DrawLine(
-            *(ioBlock),
-            ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y),
-            ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
-            ::ULIS::FColor::FromRGBA8(0, 255, 0, 0)
-        );
-        ctx.DrawLine(
-            *(ioBlock),
-            ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
-            ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
-            ::ULIS::FColor::FromRGBA8(0, 255, 0, 0)
-        );
+        
+        FVector2D startBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i - 1].x, pointsArray[i - 1].y));
+        FVector2D endBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i].x, pointsArray[i].y));
+        
+        batchedElements->AddTranslucentLine(FVector(startBezierPoint, 0.f), FVector(endBezierPoint, 0.f), bezierLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
     }
-    ctx.Finish();
+
+    batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(controlPoint, 0.f), controlLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    batchedElements->AddTranslucentLine(FVector(controlPoint, 0.f), FVector(endPoint, 0.f), controlLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+
+    FOdysseyHUDElement::DrawHUD(iParams); 
 }

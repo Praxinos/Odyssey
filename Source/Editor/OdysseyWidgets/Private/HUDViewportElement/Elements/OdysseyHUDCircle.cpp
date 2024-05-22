@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyHUDCircle.h"
+#include "CanvasTypes.h"
 
 #include "ULISLoaderModule.h"
 
@@ -10,72 +11,48 @@ FOdysseyHUDCircle::~FOdysseyHUDCircle()
 
 }
 
-FOdysseyHUDCircle::FOdysseyHUDCircle(FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint, FTransform2D iTransform /*= FTransform2D() */) :
-    FOdysseyHUDElement(iName, iTransform)
+FOdysseyHUDCircle::FOdysseyHUDCircle(FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint) :
+    FOdysseyHUDElement(iName)
 {
-    mCenterPoint = mPreviousCenterPoint = iCenterPoint;
-    mBorderPoint = mPreviousBorderPoint = iBorderPoint;
-    mRadius = mPreviousRadius = (int)::ULIS::FMath::Dist(mCenterPoint.X, mCenterPoint.Y, mBorderPoint.X, mBorderPoint.Y);
+    mCenterPoint = iCenterPoint;
+    mBorderPoint = iBorderPoint;
+    mRadius = (int)::ULIS::FMath::Dist(mCenterPoint.X, mCenterPoint.Y, mBorderPoint.X, mBorderPoint.Y);
 }
 
-FOdysseyHUDCircle::FOdysseyHUDCircle(FName iName, FVector2D iCenterPoint, float iRadius, FTransform2D iTransform /*= FTransform2D() */) :
-    FOdysseyHUDElement(iName, iTransform)
+FOdysseyHUDCircle::FOdysseyHUDCircle(FName iName, FVector2D iCenterPoint, float iRadius) :
+    FOdysseyHUDElement(iName)
 {
-    mCenterPoint = mPreviousCenterPoint = iCenterPoint;
-    mRadius = mPreviousRadius = iRadius;
+    mCenterPoint = iCenterPoint;
+    mRadius = iRadius;
     mBorderPoint = FVector2D(mCenterPoint.X + iRadius, mCenterPoint.Y);
 }
 
-void FOdysseyHUDCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void
+FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
-    if( !ioBlock )
+    const FLinearColor color(0.f, 1.f, 0.f);
+
+    ::ULIS::TArray<::ULIS::FVec2I> points;
+    ::ULIS::GenerateCirclePoints( ::ULIS::FVec2I(mCenterPoint.X, mCenterPoint.Y), mRadius, points );
+
+    if (points.Size() < 2)
         return;
 
-    if ( mIsInvalid || mPreviousRadius != mRadius || mPreviousCenterPoint != mCenterPoint || mPreviousBorderPoint != mBorderPoint || mPreviousTransform != iTransform)
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
+        
+    for (int i = 1; i < points.Size(); i++)
     {
-        Erase(ioBlock, iTransform);
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-    }
-    else
-    {
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-        return;
+        FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y));
+        FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y));
+        
+        batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(endPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
     }
 
-   
-    FVector2D transformedCenterPoint = iTransform.TransformPoint(mCenterPoint);
-    FVector2D transformedBorderPoint = iTransform.TransformPoint(mBorderPoint);
-    int transformedRadius = (int)(iTransform.GetMatrix().GetScale().GetVector().X * mRadius);
+    FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y));
+    FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[0].x, points[0].y));
+    batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(endPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawCircle(*(ioBlock), ::ULIS::FVec2I(transformedCenterPoint.X, transformedCenterPoint.Y), transformedRadius, ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
-    ctx.Finish();
-
-    mPreviousRadius = mRadius;
-    mPreviousBorderPoint = mBorderPoint;
-    mPreviousCenterPoint = mCenterPoint;
-    mPreviousTransform = iTransform;
-
-    ioBlock->Dirty();
-}
-
-void FOdysseyHUDCircle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
-{
-    if (!ioBlock)
-        return;
- 
-    //Erase the children of this HUDElement
-    FOdysseyHUDElement::Erase(ioBlock, iTransform);
-
-    FVector2D previousTransformedCenterPoint = mPreviousTransform.TransformPoint(mPreviousCenterPoint);
-    FVector2D previousTransformedBorderPoint = mPreviousTransform.TransformPoint(mPreviousBorderPoint);
-    int transformedPreviousRadius = (int)(mPreviousTransform.GetMatrix().GetScale().GetVector().X * mPreviousRadius);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawCircle(*(ioBlock), ::ULIS::FVec2I(previousTransformedCenterPoint.X, previousTransformedCenterPoint.Y), transformedPreviousRadius, ::ULIS::FColor::FromRGBA8(0, 0, 0, 0));
-    ctx.Finish();
+    FOdysseyHUDElement::DrawHUD(iParams);
 }
 
 void

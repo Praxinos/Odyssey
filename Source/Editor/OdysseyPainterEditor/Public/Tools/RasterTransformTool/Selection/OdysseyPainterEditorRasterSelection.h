@@ -25,7 +25,7 @@ public:
     UOdysseyPainterEditorRasterSelection();
 
     //For now, we init the selection by sharing the HUD and the editor from the transform. When the selection and the transform will be two separate tools, we won't have to do this anymore
-    void Init( FOdysseyHUDElement* iHUD, FOdysseyPainterEditor* iEditor, bool iUniform );
+    void Init( TSharedPtr<FOdysseyHUDElement> iHUD, FOdysseyPainterEditor* iEditor, bool iUniform );
     
     virtual bool IsActivable() const override;
 
@@ -54,7 +54,7 @@ protected:
 protected:
     bool Uniform; // Will become a UProperty when selection will become a tool
     bool mIsSelectionAreaSet;
-    FOdysseyHUDPolygon* mSelectionArea;
+    TSharedPtr<FOdysseyHUDPolygon> mSelectionArea;
     FOdysseyPaintEngine mPaintEngine;
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mSelectionBlock;

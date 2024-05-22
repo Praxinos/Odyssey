@@ -26,6 +26,7 @@ class FOdysseyPainterEditorData;
 class IStylusInputInterfaceInternal;
 class SOdysseyViewport;
 class FOdysseyPainterEditor;
+class FOdysseyHUDElement;
 
 //
 //                                                                                                         MouseWheelUp/Down
@@ -149,6 +150,8 @@ private:
     bool KeyDown(FKey iKey);
     bool KeyUp(FKey iKey);
 
+    TSharedPtr<FOdysseyHUDElement> GetHUDElement(FViewport* iViewport, int32 iX, int32 iY);
+
 private:
     // Private Data Members
     UOdysseyStylusInputSubsystem*           InputSubsystem;
@@ -191,4 +194,8 @@ private:
     bool mIsRecordingStylus = false;
     int mLastStylusEventIndex = 0;
     bool mStylusIsDown = false;
+
+    FOdysseyPoint mCurrentHUDPoint;
+    TSharedPtr<FOdysseyHUDElement> mCurrentHUDElement;
+    TSharedPtr<FOdysseyHUDElement> mHoveredHUDElement;
 };

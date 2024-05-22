@@ -16,25 +16,13 @@ public:
     virtual ~FOdysseyHUDBezier();
 
     //Constructor
-    FOdysseyHUDBezier(FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint, FTransform2D iTransform = FTransform2D());
+    FOdysseyHUDBezier(FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint);
 
-//FOdysseyHUDElement overrides
 public:
-    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
-    void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
     FVector2D mStartPoint;
     FVector2D mEndPoint;
     FVector2D mControlPoint;
-
-private:
-    FVector2D mPreviousStartPoint;
-    FVector2D mPreviousEndPoint;
-    FVector2D mPreviousControlPoint;
-
-private:
-    /** The widget representation of the Bezier in Editor */
-    TSharedPtr<IDetailsView> mDetailsView;
-
 };

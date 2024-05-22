@@ -27,17 +27,21 @@ UOdysseyBezierShape::UOdysseyBezierShape(const FObjectInitializer& iObjectInitia
 bool
 UOdysseyBezierShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if( !mHasStrokeBegun )
+    if( !mHasStrokeBegun && !mHasControlBegun)
     {
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mBezier = new FOdysseyHUDBezier(FName("Bezier"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y) );
+        mBezier = MakeShared<FOdysseyHUDBezier>(FName("Bezier"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y) );
         mHUD->AddElement(mBezier);
 
-        FOdysseyHUDHandle* handleStart = new FOdysseyHUDHandle(FName("handleStart"), mBezier, &(mBezier->mStartPoint));
-        FOdysseyHUDHandle* handleControl = new FOdysseyHUDHandle(FName("handleControl"), mBezier, &(mBezier->mControlPoint));
-        FOdysseyHUDHandle* handleEnd = new FOdysseyHUDHandle(FName("handleEnd"), mBezier, &(mBezier->mEndPoint));
+        TSharedPtr<FOdysseyHUDHandle> handleStart = MakeShared<FOdysseyHUDHandle>(FName("handleStart"), &(mBezier->mStartPoint));
+        TSharedPtr<FOdysseyHUDHandle> handleControl = MakeShared<FOdysseyHUDHandle>(FName("handleControl"), &(mBezier->mControlPoint));
+        TSharedPtr<FOdysseyHUDHandle> handleEnd = MakeShared<FOdysseyHUDHandle>(FName("handleEnd"), &(mBezier->mEndPoint));
+
+        handleStart->IsInteractable(false);
+        handleControl->IsInteractable(false);
+        handleEnd->IsInteractable(false);
 
         mBezier->AddElement(handleStart);
         mBezier->AddElement(handleControl);
@@ -47,11 +51,10 @@ UOdysseyBezierShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKe
         mHandles.Add(handleControl);
         mHandles.Add(handleEnd);
 
-        mHUD->OnKeyDown(iPointInTexture, iKey);
         return true;
     }
 
-    return false;
+    return true;
 }
 
 bool
@@ -60,24 +63,14 @@ UOdysseyBezierShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey&
     if (mHasControlBegun)
     {
         CommitBezier();
+        return true;
     }
     else if( mHasStrokeBegun )
     {
-        mHUD->OnKeyUp(iPointInTexture, iKey);
-        if ( mHandles[2]->GetPosition() == mHandles[0]->GetPosition() )
-        {
-            mHandles[2]->Capture();
-            return true;
-        }
-        else
-        {
-            mHasControlBegun = true;
-            mHandles[1]->Capture();
-            return true;
-        }
+        mHasStrokeBegun = false;
+        mHasControlBegun = true;
+        return true;
     }
-
-    mHUD->OnKeyUp(iPointInTexture, iKey);
 
     return false;
 }
@@ -85,26 +78,22 @@ UOdysseyBezierShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey&
 void
 UOdysseyBezierShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    if (mHasStrokeBegun || mHasControlBegun)
-    {
-        mHUD->CapturedMouseMove(iPointInTexture);
-    }
-    else
-    {
-        mHUD->MouseMove(iPointInTexture);
-    }
+    if (mHasControlBegun)
+        mHandles[1]->SetPosition(FVector2D(iPointInTexture.x, iPointInTexture.y));
+    
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
 
 void
 UOdysseyBezierShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if( mHasStrokeBegun || mHasControlBegun )
-    {
-        mHUD->CapturedMouseMove(iPointInTexture);
+    if (mHasStrokeBegun)
+        mHandles[2]->SetPosition(FVector2D(iPointInTexture.x, iPointInTexture.y));
 
-        UOdysseyShape::OnMouseDrag(iPointInTexture);
-    }
+    if (mHasControlBegun)
+        mHandles[1]->SetPosition(FVector2D(iPointInTexture.x, iPointInTexture.y));
+
+    UOdysseyShape::OnMouseDrag(iPointInTexture);
 }
 
 bool
@@ -143,7 +132,7 @@ void UOdysseyBezierShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions&
 
 void UOdysseyBezierShape::CommitBezier()
 {
-    if( mHasStrokeBegun )
+    if( mHasControlBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
         ::ULIS::GenerateQuadraticBezierPoints(::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mControlPoint.X, mBezier->mControlPoint.Y), ::ULIS::FVec2I(mBezier->mEndPoint.X, mBezier->mEndPoint.Y), 1.f, pointsArray);

@@ -5,6 +5,7 @@
 
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
+#include "OdysseyHUDSystem.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
@@ -26,7 +27,6 @@
 #include "OdysseyMediaProvider.h"
 #include <ULIS>
 
-class FOdysseyHUDSystem;
 class IOdysseySurfaceEditable;
 class UOdysseyPainterEditorTool;
 class FOdysseyBrushContext;
@@ -214,6 +214,9 @@ protected:
 
 private:
     void InitTools();
+    void InitHUD();
+
+    void OnDrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
 
 protected:
@@ -234,7 +237,7 @@ protected:
     uint64                          mVectorHUDFlags;
     uint64                          mVectorDrawingFlags;
 
-    FOdysseyHUDSystem*              mHUDSystem;
+    FOdysseyHUDSystem*               mHUDSystem;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
     FSimpleMulticastDelegate        mOnCurrentToolChanged;

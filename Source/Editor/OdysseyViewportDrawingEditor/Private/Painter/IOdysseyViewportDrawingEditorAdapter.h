@@ -7,6 +7,7 @@
 #include "IStylusState.h"
 #include <chrono>
 #include "Input/OdysseyRay.h"
+#include "OdysseyHUDElement.h"
 
 #include <ULIS>
 
@@ -56,11 +57,8 @@ public:
 public:
     /** Viewport Client methods */
     virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y);
-
     virtual bool InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent);
-
     virtual bool CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY);
-
     virtual bool GetCursor(EMouseCursor::Type& OutCursor) const;
 
 private:
@@ -82,12 +80,14 @@ protected:
     virtual void BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush);
 
 private:
-    //New API to manage events
+    //New API to manage drawing events
     void MouseDown(const FOdysseyRay& iRay);
     void MouseUp(const FOdysseyRay& iRay);
     void MouseDrag(const FOdysseyRay& iRay);
     bool KeyDown(FKey iKey);
     bool KeyUp(FKey iKey);
+
+    TSharedPtr<FOdysseyHUDElement> GetHUDElement(FViewport* iViewport, int32 iX, int32 iY);
 
 protected:
     UTexture* mTexture;
@@ -139,4 +139,8 @@ protected:
     bool mOverrideMouseCursor = false;
     EMouseCursor::Type mMouseCursor = EMouseCursor::Default;
     bool mIsPickingColor = false;
+
+    FOdysseyPoint mCurrentHUDPoint;
+    TSharedPtr<FOdysseyHUDElement> mCurrentHUDElement;
+    TSharedPtr<FOdysseyHUDElement> mHoveredHUDElement;
 };

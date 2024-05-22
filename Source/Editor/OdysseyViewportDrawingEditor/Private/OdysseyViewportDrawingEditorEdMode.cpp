@@ -29,16 +29,11 @@
 
 #include "UObject/UObjectGlobals.h"
 #include "Editor/EditorPerProjectUserSettings.h"
+#include "MediaPlate.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
 const FEditorModeID FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId = TEXT("EM_OdysseyViewportDrawingEditorEdMode");
-
-FOdysseyViewportDrawingEditorEdMode::FOdysseyViewportDrawingEditorEdMode()
-    : FEdMode()
-{
-    GEditor->OnEditorClose().AddRaw(this, &FOdysseyViewportDrawingEditorEdMode::OnResetViewMode);
-}
 
 FOdysseyViewportDrawingEditorEdMode::~FOdysseyViewportDrawingEditorEdMode()
 {
@@ -46,6 +41,12 @@ FOdysseyViewportDrawingEditorEdMode::~FOdysseyViewportDrawingEditorEdMode()
     {
         GEditor->OnEditorClose().RemoveAll(this);
     }
+}
+
+FOdysseyViewportDrawingEditorEdMode::FOdysseyViewportDrawingEditorEdMode()
+    : FEdMode()
+{
+    GEditor->OnEditorClose().AddRaw(this, &FOdysseyViewportDrawingEditorEdMode::OnResetViewMode);
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Initialize()
@@ -65,11 +66,28 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
     if (!mViewportDrawingEditorExtension)
         return;
 
+    UTexture* texture = mViewportDrawingEditorExtension->Texture();
+    if (!texture)
+        return;
+
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
     if (!adapter)
         return;
     
     adapter->RenderInteractorWidget(View, Viewport, PDI);
+}
+
+void
+FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas)
+{
+    if (!mViewportDrawingEditorExtension || !mViewportDrawingEditorExtension->IsPlaneComponent())
+        return;
+    
+    FOdysseyHUDSystem::FDrawHUDParams params;
+	if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, params))
+		return;
+
+    mEditor->HUDSystem()->DrawHUD(params);
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelected)

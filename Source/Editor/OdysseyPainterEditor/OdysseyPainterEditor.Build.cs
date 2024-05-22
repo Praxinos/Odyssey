@@ -44,7 +44,6 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyImaging",
                 "OdysseyLayerStack",
                 "OdysseyLayerStackEditor",
-                "OdysseyHUDSystem",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyVector",
@@ -59,6 +58,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyVector",
                 "OdysseyPalette",
                 "OdysseyMedia",
+                "OdysseyHUDSystem",
                 "ULIS",
                 "ULISLoader"
              }

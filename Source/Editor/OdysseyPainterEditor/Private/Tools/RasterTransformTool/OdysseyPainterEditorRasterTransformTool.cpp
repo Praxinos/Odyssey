@@ -55,8 +55,8 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
     point.x = FMath::RoundToInt( point.x );
     point.y = FMath::RoundToInt( point.y );
 
-    if (mHUD->OnKeyDown(point, iKey)) //Handling HUD events if needed
-        return true;
+    /* if (mHUD->OnKeyDown(point, iKey)) //Handling HUD events if needed
+        return true; */
 
     if (mSelection->OnMouseDown(iPointInTexture, iKey))
         return true;
@@ -101,7 +101,7 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint&
         }
     }
 
-    mHUD->MouseMove(iPointInTexture);
+    //mHUD->MouseMove(iPointInTexture);
     mSelection->OnMouseHover( iPointInTexture );
 }
 
@@ -111,7 +111,7 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
     point.x = FMath::RoundToInt(point.x);
     point.y = FMath::RoundToInt(point.y);
 
-    mHUD->CapturedMouseMove(point);
+    //mHUD->CapturedMouseMove(point);
 
     mSelection->OnMouseDrag(iPointInTexture);
 
@@ -157,8 +157,8 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
 
     mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
 
-    if( mHUD->OnKeyUp(point, iKey) )
-        return true;
+    /* if( mHUD->OnKeyUp(point, iKey) )
+        return true; */
 
     if( mSelection->OnMouseUp( iPointInTexture, iKey ))
         return true;
@@ -298,23 +298,30 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
     ::ULIS::FRectI boundingBox = mSelection->GetSelectionAreaBoundingRect();
 
     //Creating the HUD
-    TArray<FVector2D> areaPoints;
+    mPivot = FVector2D(boundingBox.x + boundingBox.w / 2, boundingBox.y + boundingBox.h / 2);
+
+    mTransformArea = MakeShared<FOdysseyHUDPolygon>(FName("TransformArea"));
+    TArray<FVector2D>& areaPoints = mTransformArea->GetPoints();
     areaPoints.Add( FVector2D( boundingBox.x, boundingBox.y ) );
     areaPoints.Add( FVector2D( boundingBox.x + boundingBox.w, boundingBox.y ) );
     areaPoints.Add( FVector2D( boundingBox.x + boundingBox.w, boundingBox.y + boundingBox.h ) );
     areaPoints.Add( FVector2D( boundingBox.x, boundingBox.y + boundingBox.h ) );
-    mPivot = FVector2D(boundingBox.x + boundingBox.w / 2, boundingBox.y + boundingBox.h / 2);
 
-    mTransformArea = new FOdysseyHUDPolygon(FName("TransformArea"), areaPoints);
     mHUD->EmptyHUDElements(); //Deleting the HUD of the selection to create the one for the transform
     mEditor->HUDSystem()->ClearHUDSurface();
     mHUD->AddElement(mTransformArea);
 
-    FOdysseyHUDHandle* handleTopLeft = new FOdysseyHUDHandle(FName("handleTopLeft"), mTransformArea, &(mTransformArea->GetPoints()[0]));
-    FOdysseyHUDHandle* handleTopRight = new FOdysseyHUDHandle(FName("handleTopRight"), mTransformArea, &(mTransformArea->GetPoints()[1]));
-    FOdysseyHUDHandle* handleBottomRight = new FOdysseyHUDHandle(FName("handleBottomRight"), mTransformArea, &(mTransformArea->GetPoints()[2]));
-    FOdysseyHUDHandle* handleBottomLeft = new FOdysseyHUDHandle(FName("handleBottomLeft"), mTransformArea, &(mTransformArea->GetPoints()[3]));
-    FOdysseyHUDHandle* pivot = new FOdysseyHUDHandle(FName("pivot"), mTransformArea, &mPivot);
+    TSharedPtr<FOdysseyHUDHandle> handleTopLeft = MakeShared<FOdysseyHUDHandle>(FName("handleTopLeft"), &(areaPoints[0]));
+    TSharedPtr<FOdysseyHUDHandle> handleTopRight = MakeShared<FOdysseyHUDHandle>(FName("handleTopRight"), &(areaPoints[1]));
+    TSharedPtr<FOdysseyHUDHandle> handleBottomRight = MakeShared<FOdysseyHUDHandle>(FName("handleBottomRight"), &(areaPoints[2]));
+    TSharedPtr<FOdysseyHUDHandle> handleBottomLeft = MakeShared<FOdysseyHUDHandle>(FName("handleBottomLeft"), &(areaPoints[3]));
+    TSharedPtr<FOdysseyHUDHandle> pivot = MakeShared<FOdysseyHUDHandle>(FName("pivot"), &mPivot);
+
+    handleTopLeft->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnTopLeftHandleDragged);
+    handleTopRight->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnTopRightHandleDragged);
+    handleBottomRight->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnBottomRightHandleDragged);
+    handleBottomLeft->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnBottomLeftHandleDragged);
+    pivot->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnPivotHandleDragged);
 
     mTransformArea->AddElement(handleTopLeft);
     mTransformArea->AddElement(handleTopRight);
@@ -691,5 +698,47 @@ UOdysseyPainterEditorRasterTransformTool::GetTooltip() const
 {
     return LOCTEXT("raster-transform-tool.tooltip", "Transform Tool");
 }
+
+void
+UOdysseyPainterEditorRasterTransformTool::OnTopLeftHandleDragged()
+{
+    if( !Perspective )
+        ConstrainToRectangle( mHandles[0]->GetPosition() );
+
+    CreateTransformBlockFromSelectionBlock();
+}
+
+void
+UOdysseyPainterEditorRasterTransformTool::OnTopRightHandleDragged()
+{
+    if( !Perspective )
+        ConstrainToRectangle( mHandles[1]->GetPosition() );
+
+    CreateTransformBlockFromSelectionBlock();
+}
+
+void
+UOdysseyPainterEditorRasterTransformTool::OnBottomRightHandleDragged()
+{
+    if( !Perspective )
+        ConstrainToRectangle( mHandles[2]->GetPosition() );
+
+    CreateTransformBlockFromSelectionBlock();
+}
+
+void
+UOdysseyPainterEditorRasterTransformTool::OnBottomLeftHandleDragged()
+{
+    if( !Perspective )
+        ConstrainToRectangle( mHandles[3]->GetPosition() );
+
+    CreateTransformBlockFromSelectionBlock();
+}
+
+void
+UOdysseyPainterEditorRasterTransformTool::OnPivotHandleDragged()
+{
+}
+
 
 #undef LOCTEXT_NAMESPACE

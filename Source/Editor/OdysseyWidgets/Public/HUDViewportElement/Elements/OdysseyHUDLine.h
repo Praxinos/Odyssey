@@ -16,26 +16,12 @@ public:
     virtual ~FOdysseyHUDLine();
 
     //Constructor
-    FOdysseyHUDLine( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform = FTransform2D() );
+    FOdysseyHUDLine( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint);
 
 public:
-    void Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FTransform2D iTransform = FTransform2D() );
-
-//FOdysseyHUDElement overrides
-public:
-    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
-    void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
     FVector2D mStartPoint;
     FVector2D mFinishPoint;
-
-private:
-    FVector2D mPreviousStartPoint;
-    FVector2D mPreviousFinishPoint;
-
-private:
-    /** The widget representation of the line in Editor */
-    TSharedPtr<IDetailsView> mDetailsView;
-
 };

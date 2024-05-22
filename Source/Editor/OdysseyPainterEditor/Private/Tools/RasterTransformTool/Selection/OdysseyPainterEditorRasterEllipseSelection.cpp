@@ -21,9 +21,9 @@ bool UOdysseyPainterEditorRasterEllipseSelection::OnMouseDown(const FOdysseyPoin
 {
     if (!mIsSelectionAreaSet) //Creating a zone for the selection
     {
-        TArray<FVector2D> areaPoints;
+        mSelectionArea = MakeShared<FOdysseyHUDPolygon>(FName("SelectionArea"));
+        TArray<FVector2D>& areaPoints = mSelectionArea->GetPoints();
         areaPoints.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
-        mSelectionArea = new FOdysseyHUDPolygon(FName("SelectionArea"), areaPoints);
         mHUD->AddElement(mSelectionArea);
         mDownReference = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y) );
         return true;

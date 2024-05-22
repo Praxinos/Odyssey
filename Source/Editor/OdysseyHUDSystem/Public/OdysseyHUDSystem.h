@@ -4,12 +4,26 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseySurfaceTexture2DEditable.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
+class FOdysseySurfaceTexture2DEditable;
+
 class ODYSSEYHUDSYSTEM_API FOdysseyHUDSystem 
 {
+public:
+    struct FDrawHUDParams
+    {
+        DECLARE_DELEGATE_RetVal_OneParam(FVector2D, FTextureToHUD, const FVector2D&)
+
+        FCanvas* mCanvas;
+        FTextureToHUD mTextureToHUD;
+        int32 mTextureWidth;
+        int32 mTextureHeight;
+    };
+    
+    DECLARE_DELEGATE_OneParam(FOnDrawHUD, const FDrawHUDParams&)
+
 public:
     // Construction / Destruction
     ~FOdysseyHUDSystem();
@@ -27,8 +41,11 @@ public:
 public:
     void RebuildHUDSurface(FVector2D iSize);
     void ClearHUDSurface();
+    void DrawHUD( const FDrawHUDParams& iParams );
+    FOnDrawHUD& OnDrawHUD();
 
 private:
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mHUDBlock; // Holds the block in which we draw the HUD
     FOdysseySurfaceTexture2DEditable*    mHUDSurface;
+    FOnDrawHUD mOnDrawHUD;
 };

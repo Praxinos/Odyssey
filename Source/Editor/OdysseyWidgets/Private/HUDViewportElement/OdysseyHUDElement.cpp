@@ -3,20 +3,21 @@
 
 #include "OdysseyHUDElement.h"
 
+IMPLEMENT_HIT_PROXY(HOdysseyHUDElementHitProxy, HHitProxy)
+
 FOdysseyHUDElement::~FOdysseyHUDElement()
 {
-    mElements.Empty();
+    EmptyHUDElements();
 }
 
-FOdysseyHUDElement::FOdysseyHUDElement(FName iName, FTransform2D iTransform) :
+FOdysseyHUDElement::FOdysseyHUDElement(FName iName) :
     mName( iName ),
-    mPreviousTransform(iTransform),
-    mIsInvalid( true ),
+    //mIsInvalid( true ),
     mIsCaptured( false )
 {
 }
 
-void FOdysseyHUDElement::Invalidate()
+/* void FOdysseyHUDElement::Invalidate()
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -26,7 +27,7 @@ void FOdysseyHUDElement::Invalidate()
     mIsInvalid = true;
 }
 
-void FOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -34,9 +35,18 @@ void FOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
     }
 
     mIsInvalid = false;
+}*/
+
+void
+FOdysseyHUDElement::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it->Value->DrawHUD(iParams);
+    }
 }
 
-void FOdysseyHUDElement::MouseMove( const FOdysseyPoint& iPointInTexture )
+/* void FOdysseyHUDElement::MouseMove( const FOdysseyPoint& iPointInTexture )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
@@ -75,53 +85,65 @@ void FOdysseyHUDElement::CapturedMouseMove( const FOdysseyPoint& iPointInTexture
     }
 }
 
-void FOdysseyHUDElement::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void FOdysseyHUDElement::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
         it->Value->Erase(ioBlock, iTransform);
         it->Value->mIsInvalid = true;
     }
-}
+}*/
 
-void FOdysseyHUDElement::AddElement(FOdysseyHUDElement* iElementToAdd)
+void FOdysseyHUDElement::AddElement(TSharedPtr<FOdysseyHUDElement> iElementToAdd)
 {
     if( iElementToAdd != nullptr )
         mElements.Emplace( iElementToAdd->mName.ToString(), iElementToAdd );
 
-    mIsInvalid = false;
+    //mIsInvalid = false;
 }
 
-void FOdysseyHUDElement::EmptyHUDElements()
+void FOdysseyHUDElement::RemoveElement(TSharedPtr<FOdysseyHUDElement> iElementToRemove)
 {
-    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    if( iElementToRemove != nullptr )
     {
-        it->Value->EmptyHUDElements();
-        delete it->Value;
+        mElements.Remove( iElementToRemove->mName.ToString() );
     }
+
+    //mIsInvalid = false;
+}
+
+void
+FOdysseyHUDElement::EmptyHUDElements()
+{
     mElements.Empty();
 }
 
-bool FOdysseyHUDElement::IsInvalid()
+/* bool FOdysseyHUDElement::IsInvalid()
 {
     InternalIsInvalid( mIsInvalid );
     return mIsInvalid;
+} */
+
+FName
+FOdysseyHUDElement::GetName() const
+{
+    return mName;
 }
 
-bool FOdysseyHUDElement::IsCaptured()
+bool FOdysseyHUDElement::IsCaptured() const
 {
     bool isCaptured = mIsCaptured;
 
-    InternalIsCaptured(isCaptured);
+    //InternalIsCaptured(isCaptured);
     return isCaptured;
 }
 
-void FOdysseyHUDElement::Capture()
+void FOdysseyHUDElement::Capture(bool iCapture)
 {
-    mIsCaptured = true;
+    mIsCaptured = iCapture;
 }
 
-void FOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
+/* void FOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
 {
     if( ioIsInvalid )
         return;
@@ -157,4 +179,46 @@ void FOdysseyHUDElement::InternalIsCaptured(bool& ioIsCaptured)
             it->Value->InternalIsCaptured(ioIsCaptured);
         }
     }
+} */
+
+bool
+FOdysseyHUDElement::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    return false;
+}
+
+bool
+FOdysseyHUDElement::OnMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    return false;
+}
+
+bool
+FOdysseyHUDElement::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    return false;
+}
+
+void
+FOdysseyHUDElement::OnMouseEnter()
+{
+
+}
+
+void
+FOdysseyHUDElement::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+{
+
+}
+
+void
+FOdysseyHUDElement::OnMouseLeave()
+{
+
+}
+
+void
+FOdysseyHUDElement::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+{
+
 }

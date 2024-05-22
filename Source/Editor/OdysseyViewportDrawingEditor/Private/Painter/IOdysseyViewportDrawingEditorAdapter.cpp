@@ -137,7 +137,7 @@ void IOdysseyViewportDrawingEditorAdapter::StartPainting()
         if (brushInstance)
             brushInstance->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
     }
-    
+
     if (mTool)
     {
         mCapturedByEditor = mTool->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
@@ -246,14 +246,36 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     if (!IsReadyToDraw())
         return false;
 
-    // Compute a world space ray from the screen space mouse coordinates
-    /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
-        iViewportClient->Viewport,
-        iViewportClient->GetScene(),
-        iViewportClient->EngineShowFlags)
-        .SetRealtimeUpdate(iViewportClient->IsRealtime()));
-    FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
-    const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY()); */
+    //Ensures our huds hit proxies are clickable
+    //Be cause sometimes we change the hud values but the proxy map needs to be invalidated
+    //As we don't know everytime the hud values changes change, we need to call that here
+    //RequestInvalidateHitProxy() is usually called after InputKey() if it returns false
+    //But we return true on occasions where the hud needs to be invalidated too.
+    iViewportClient->RequestInvalidateHitProxy(iViewport);
+
+    //HUD
+    TSharedPtr<FOdysseyHUDElement> hudElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
+    if (mHoveredHUDElement && !hudElement)
+    {
+        mHoveredHUDElement->OnMouseLeave();
+        mHoveredHUDElement = nullptr;
+    }
+    else if (!mHoveredHUDElement && hudElement)
+    {
+        mHoveredHUDElement = hudElement;
+        mHoveredHUDElement->OnMouseEnter();
+    }
+
+    if (mHoveredHUDElement)
+    {
+        FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+        FVector2D hudPoint;
+        if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
+        {
+            mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+            mHoveredHUDElement->OnMouseHover(mCurrentHUDPoint);
+        }
+    }
 
     FVector2D pointPos(iViewport->GetMouseX(), iViewport->GetMouseY());
     bool isTextureBased = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;
@@ -303,19 +325,20 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     return true;
 }
 
+TSharedPtr<FOdysseyHUDElement>
+IOdysseyViewportDrawingEditorAdapter::GetHUDElement(FViewport* iViewport, int32 iX, int32 iY)
+{
+    HOdysseyHUDElementHitProxy* hitproxy = HitProxyCast<HOdysseyHUDElementHitProxy>(iViewport->GetHitProxy(iX, iY));
+    if (!hitproxy)
+        return nullptr;
+    
+    return hitproxy->HUDElement();
+}
+
 bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent)
 {
     if (mLastKnownViewport != iViewport)
         mLastKnownViewport = iViewport;
-
-    /* FString eventStr = TEXT("");
-    if (iEvent == IE_Repeat)
-        eventStr = TEXT("REPEAT");
-    if (iEvent == IE_Pressed)
-        eventStr = TEXT("PRESSED");
-    if (iEvent == IE_Released)
-        eventStr = TEXT("RELEASED");
-    UE_LOG(LogTemp, Warning, TEXT("Input Key : %s %s"), *iKey.ToString(), *eventStr); */
 
     if( iEvent == EInputEvent::IE_Pressed )
     {
@@ -337,12 +360,17 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     }
     else if( iEvent == EInputEvent::IE_DoubleClick )
     {
+        //HUD
+        TSharedPtr<FOdysseyHUDElement> hudElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
+        if (hudElement && hudElement->OnMouseDoubleClick(mCurrentHUDPoint, iKey))
+            return true;
+
+        //Tool
         UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetCurrentTool();
         if (!selectedTool)
             return false;
 
-        bool ignoreDown = selectedTool->OnMouseDoubleClick(mCurrentStrokeRay.mPoint, iKey);
-        if (ignoreDown)
+        if (selectedTool->OnMouseDoubleClick(mCurrentStrokeRay.mPoint, iKey))
             return true;
         
         if (mKeysPressed.Contains(iKey))
@@ -362,24 +390,44 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 
     //---
 
-    /* const bool bIsAltDown =  mKeysPressed.Contains( EKeys::LeftAlt ) || mKeysPressed.Contains( EKeys::RightAlt );
-    const bool bIsCtrlDown = mKeysPressed.Contains( EKeys::LeftControl ) || mKeysPressed.Contains( EKeys::RightControl );
-    
-    UE_LOG(LogTemp, Warning, TEXT("bIsAltDown : %s"), bIsAltDown ? TEXT("TRUE") : TEXT("FALSE"));
-    //Dolly the camera, we're not painting
-    if ( bIsAltDown ) 
-        return false; */
+    //HUD
+    if (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton)
+    {
+        if (iEvent == EInputEvent::IE_Pressed || iEvent == EInputEvent::IE_DoubleClick)
+        {
+            mCurrentHUDElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
+            if (mCurrentHUDElement)
+            {
+                FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+                FVector2D hudPoint;
+                if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
+                {
+                    mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+                    if (mCurrentHUDElement->OnMouseDown(mCurrentHUDPoint, iKey))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        else if(iEvent == EInputEvent::IE_Released)
+        {
+            if (mCurrentHUDElement)
+            {
+                FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+                FVector2D hudPoint;
+                if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
+                {
+                    mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+                    mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iKey);
+                    mCurrentHUDElement = nullptr;
+                }
+                return true;
+            }
+        }
+    }
 
     //---
-
-    // Compute a world space ray from the screen space mouse coordinates
-    /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
-        iViewportClient->Viewport,
-        iViewportClient->GetScene(),
-        iViewportClient->EngineShowFlags)
-        .SetRealtimeUpdate(iViewportClient->IsRealtime()));
-    FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
-    const FViewportCursorLocation mouseViewportRay(view,(FEditorViewportClient*)iViewport->GetClient(),iViewport->GetMouseX(),iViewport->GetMouseY()); */
 
     FVector2D pointPos(iViewport->GetMouseX(), iViewport->GetMouseY());
     bool isTextureBased = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;
@@ -398,14 +446,14 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     bool isMouseEvent = iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton;
     if (!mIsMouseDown && isMouseEvent && (isOutsideTexture || iEvent == IE_Released)) 
     {
-        if (iEvent == EInputEvent::IE_DoubleClick)
+        /* if (iEvent == EInputEvent::IE_DoubleClick)
             return false;
-
+0
         if (iKey == EKeys::RightMouseButton)
             return false;
 
         if (iKey == EKeys::LeftMouseButton)
-            return false;
+            return false; */
 
         return false;
     }
@@ -467,14 +515,20 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     if (mIsRecordingStylus)
         return mCapturedByEditor;
 
-    // Compute a world space ray from the screen space mouse coordinates
-    /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
-        iViewportClient->Viewport,
-        iViewportClient->GetScene(),
-        iViewportClient->EngineShowFlags)
-        .SetRealtimeUpdate(iViewportClient->IsRealtime()));
-    FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
-    const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY()); */
+    //HUD
+    if (mCurrentHUDElement)
+    {
+        
+        FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+        FVector2D hudPoint;
+        if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
+        {
+            mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+            mCurrentHUDElement->OnMouseDrag(mCurrentHUDPoint);
+            return true;
+        }
+    }
+    
 
     FVector2D pointPos(iViewport->GetMouseX(), iViewport->GetMouseY());
     bool isTextureBased = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;

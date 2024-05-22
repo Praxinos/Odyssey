@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyHUDRectangle.h"
+#include "CanvasTypes.h"
 
 #include "ULISLoaderModule.h"
 
@@ -10,57 +11,27 @@ FOdysseyHUDRectangle::~FOdysseyHUDRectangle()
 
 }
 
-FOdysseyHUDRectangle::FOdysseyHUDRectangle(FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint, FTransform2D iTransform /*= FTransform2D() */) :
-    FOdysseyHUDElement(iName, iTransform)
+FOdysseyHUDRectangle::FOdysseyHUDRectangle(FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint) :
+    FOdysseyHUDElement(iName)
 {
-    mTopLeftPoint = mPreviousTopLeftPoint = iTopLeftPoint;
-    mBottomRightPoint = mPreviousBottomRightPoint = iBottomRightPoint;
+    mTopLeftPoint = iTopLeftPoint;
+    mBottomRightPoint = iBottomRightPoint;
 }
 
-void FOdysseyHUDRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+void
+FOdysseyHUDRectangle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
-    if( !ioBlock )
-        return;
+    const FLinearColor color(0.f, 1.f, 0.f);
+    FVector2D topLeft = iParams.mTextureToHUD.Execute(mTopLeftPoint);
+    FVector2D topRight = iParams.mTextureToHUD.Execute(FVector2D(mBottomRightPoint.X, mTopLeftPoint.Y));
+    FVector2D bottomRight = iParams.mTextureToHUD.Execute(mBottomRightPoint);
+    FVector2D bottomLeft = iParams.mTextureToHUD.Execute(FVector2D(mTopLeftPoint.X, mBottomRightPoint.Y));
 
-    if ( mIsInvalid || mPreviousTopLeftPoint != mTopLeftPoint || mPreviousBottomRightPoint != mBottomRightPoint || mPreviousTransform != iTransform)
-    {
-        Erase(ioBlock, iTransform);
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-    }
-    else
-    {
-        //Draw the children of this HUDElement
-        FOdysseyHUDElement::Draw(ioBlock, iTransform);
-        return;
-    }
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
+    batchedElements->AddTranslucentLine(FVector(topLeft, 0.f), FVector(topRight, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    batchedElements->AddTranslucentLine(FVector(topRight, 0.f), FVector(bottomRight, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    batchedElements->AddTranslucentLine(FVector(bottomRight, 0.f), FVector(bottomLeft, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    batchedElements->AddTranslucentLine(FVector(bottomLeft, 0.f), FVector(topLeft, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
-    FVector2D transformedTopLeftPoint = iTransform.TransformPoint(mTopLeftPoint);
-    FVector2D transformedBottomRightPoint = iTransform.TransformPoint(mBottomRightPoint);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedTopLeftPoint.X, transformedTopLeftPoint.Y), ::ULIS::FVec2I(transformedBottomRightPoint.X, transformedBottomRightPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 255));
-    ctx.Finish();
-
-    mPreviousBottomRightPoint = mBottomRightPoint;
-    mPreviousTopLeftPoint = mTopLeftPoint;
-    mPreviousTransform = iTransform;
-
-    ioBlock->Dirty();
-}
-
-void FOdysseyHUDRectangle::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
-{
-    if (!ioBlock)
-        return;
- 
-    //Erase the children of this HUDElement
-    FOdysseyHUDElement::Erase(ioBlock, iTransform);
-
-    FVector2D transformedTopLeftPoint = mPreviousTransform.TransformPoint(mPreviousTopLeftPoint);
-    FVector2D transformedBottomRightPoint = mPreviousTransform.TransformPoint(mPreviousBottomRightPoint);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(ioBlock), ::ULIS::FVec2I(transformedTopLeftPoint.X, transformedTopLeftPoint.Y), ::ULIS::FVec2I(transformedBottomRightPoint.X, transformedBottomRightPoint.Y), ::ULIS::FColor::FromRGBA8(0, 255, 0, 0));
-    ctx.Finish();
+    FOdysseyHUDElement::DrawHUD(iParams); 
 }

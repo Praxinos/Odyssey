@@ -81,6 +81,14 @@ private:
 
     //Copy from GeomTools.cpp
     bool IsPolygonConvex(const TArray<FVector2D>& Points);
+
+private:
+    void OnTopLeftHandleDragged();
+    void OnTopRightHandleDragged();
+    void OnBottomRightHandleDragged();
+    void OnBottomLeftHandleDragged();
+    void OnPivotHandleDragged();
+
 public:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     EOdysseySelectionShape SelectionShape;
@@ -99,8 +107,8 @@ private:
     FOdysseyRasterBlockMutator mRasterMutator;
 
     EOdysseyTransformCapture mTransformCaptureMode;
-    FOdysseyHUDPolygon* mTransformArea;
-    TArray<FOdysseyHUDHandle*> mHandles;
+    TSharedPtr<FOdysseyHUDPolygon> mTransformArea;
+    TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
     FVector2D mPivot;
 
     int mLastReferenceRotation;

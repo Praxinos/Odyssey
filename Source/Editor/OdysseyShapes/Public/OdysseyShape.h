@@ -69,7 +69,7 @@ public:
     // Applies the shapes specific overrides
     virtual void ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<UObject>>& iOverrides);
 
-    void SetHUD( FOdysseyHUDElement* iHUD );
+    void SetHUD( TSharedPtr<FOdysseyHUDElement> iHUD );
     virtual float GetStep() const;
     virtual bool AbortShape();
 
@@ -110,5 +110,5 @@ protected:
 
 protected:
     //Borrowed HUD from the tool
-    FOdysseyHUDElement* mHUD;
+    TSharedPtr<FOdysseyHUDElement> mHUD;
 };

@@ -69,5 +69,5 @@ protected:
     FAdaptStep                          mAdaptStepDelegate;
 
 private:
-    FOdysseyHUDLine* mLine;
+    TSharedPtr<FOdysseyHUDLine> mLine;
 };

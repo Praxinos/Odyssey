@@ -53,6 +53,24 @@ private:
     void RefreshHUD();
     FVector2D GetCenter() const;
 
+    void OnTopLeftHandleDragBegin();
+    void OnTopRightHandleDragBegin();
+    void OnBottomRightHandleDragBegin();
+    void OnBottomLeftHandleDragBegin();
+    void OnRotationHandleDragBegin();
+
+    void OnTopLeftHandleDragged();
+    void OnTopRightHandleDragged();
+    void OnBottomRightHandleDragged();
+    void OnBottomLeftHandleDragged();
+    void OnRotationHandleDragged();
+
+    void OnTopLeftHandleDragEnd();
+    void OnTopRightHandleDragEnd();
+    void OnBottomRightHandleDragEnd();
+    void OnBottomLeftHandleDragEnd();
+    void OnRotationHandleDragEnd();
+
 public:
     UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = (LinearDeltaSensitivity="1") )
     FVector2D Pan = FVector2D(0, 0);
@@ -66,13 +84,13 @@ public:
 private:
     UOdysseyAnimationLayer* mLayer;
     TSharedPtr<FOdysseyAnimationCell> mCell;
-    FOdysseyHUDPolygon* mTransformHUD = nullptr;
-    FOdysseyHUDHandle* mTransformTopLeftHandleHUD = nullptr;
-    FOdysseyHUDHandle* mTransformTopRightHandleHUD = nullptr;
-    FOdysseyHUDHandle* mTransformBottomRightHandleHUD = nullptr;
-    FOdysseyHUDHandle* mTransformBottomLeftHandleHUD = nullptr;
-    FOdysseyHUDHandle* mTransformRotationHandleHUD = nullptr;
-    FOdysseyHUDLine* mTransformRotationLineHUD = nullptr;
+    TSharedPtr<FOdysseyHUDPolygon> mTransformHUD = nullptr;
+    TSharedPtr<FOdysseyHUDHandle> mTransformTopLeftHandleHUD = nullptr;
+    TSharedPtr<FOdysseyHUDHandle> mTransformTopRightHandleHUD = nullptr;
+    TSharedPtr<FOdysseyHUDHandle> mTransformBottomRightHandleHUD = nullptr;
+    TSharedPtr<FOdysseyHUDHandle> mTransformBottomLeftHandleHUD = nullptr;
+    TSharedPtr<FOdysseyHUDHandle> mTransformRotationHandleHUD = nullptr;
+    TSharedPtr<FOdysseyHUDLine> mTransformRotationLineHUD = nullptr;
 
     FVector2D mTransformRotationPoint;
     FVector2D mRotationCenter;
