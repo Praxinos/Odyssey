@@ -5,7 +5,10 @@
 
 #include "OdysseyImageRenderer.h"
 
+#include <ULIS>
+
 class FOdysseyAnimationProxy;
+class UOdysseyAnimation;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationProxyImageRenderer
     : public IOdysseyImageRenderer

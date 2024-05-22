@@ -1,6 +1,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainerImport.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "OdysseyFile.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
 
 bool
 FOdysseyAnimationCellsContainerImport::Read( FOdysseyAnimationCellsContainer* iAnimationCellsContainer

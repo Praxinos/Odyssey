@@ -4,6 +4,9 @@
 #include "TextureEditor/OdysseyTextureEditorTextureDetailsTab.h"
 
 #include "Widgets/SOdysseyTextureDetails.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "TextureEditor/OdysseyTextureEditorExtension.h"
+#include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

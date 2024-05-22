@@ -8,8 +8,14 @@
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Layout/SSeparator.h"
-
 #include "IStructureDetailsView.h"
+#include "OdysseyPixelFormat.h"
+#include "ULISLoaderModule.h"
+#include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyTextureLayerStackUserData.h"
+#include "OdysseyRasterBlockMutator.h"
+#include <ULIS>
 
 /////////////////////////////////////////////////////
 // Defines

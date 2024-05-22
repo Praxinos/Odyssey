@@ -3,9 +3,12 @@
 
 #pragma once
 
+#include "OdysseyEditorLayoutBuilder.h"
+
 class FOdysseyAnimationEditorExtension;
-class FOdysseyAnimationEditorLightTableTab;
-class FOdysseyAnimationEditorTimelineTab;
+class FOdysseyVectorGroupPaint;
+class UOdysseyAnimation;
+class UOdysseyLayerStack;
 
 /**
  * Implements an Editor toolkit for textures.

@@ -5,8 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyImageRenderer.h"
-
-#include <ULIS>
+#include "OdysseyImageRenderingAbility.h"
 
 class ODYSSEYIMAGING_API FOdysseyImageRenderingChangedEvent
 {

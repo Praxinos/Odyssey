@@ -10,6 +10,8 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImport.h"
 #include "Misc/OdysseyDuplicate.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyRasterBlock.h"
+#include "OdysseyAnimation.h"
 
 TSharedRef<FOdysseyAnimationCellImageRaster>
 FOdysseyAnimationCellImageRaster::Create(UOdysseyAnimationLayerImageRaster* iLayer, int iLength, int iWidth, int iHeight, ::ULIS::eFormat iFormat)

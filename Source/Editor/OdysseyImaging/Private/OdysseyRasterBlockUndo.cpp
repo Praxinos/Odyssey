@@ -3,7 +3,18 @@
 
 #include "OdysseyRasterBlockUndo.h"
 
+#include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "ULISLoaderModule.h"
+#include "DerivedDataCacheInterface.h"
+#include "DerivedDataValue.h"
+#include "DerivedDataRequestTypes.h"
+#include "DerivedDataRequestOwner.h"
+#include "DerivedDataCache.h"
+#include "CoreTypes.h"
+
+#define FOdysseyRasterBlockUndo_CACHE_NAME TEXT("OdysseyRasterBlockUndo")
+#define FOdysseyRasterBlockUndo_CACHE_VERSION TEXT("C0E3215B0E9A4983B2C0C01131A37935")
 
 void
 FOdysseyRasterBlockUndoBuilder::StoreUndo(const FOdysseyRasterBlockMutator& iRasterBlockMutator)
@@ -119,8 +130,8 @@ void
 FOdysseyRasterBlockUndoBuilder::SaveToCache(const FString& iId, const TArray<uint8>& iData)
 {
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-        FOdysseyRasterBlock_CACHE_NAME,
-        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
+        FOdysseyRasterBlockUndo_CACHE_NAME,
+        FOdysseyRasterBlockUndo_CACHE_VERSION, //a GUID identifying the version of the key
         iId
     );
 
@@ -203,8 +214,8 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
 
     //Load Block from DDC
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-		FOdysseyRasterBlock_CACHE_NAME,
-        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
+		FOdysseyRasterBlockUndo_CACHE_NAME,
+        FOdysseyRasterBlockUndo_CACHE_VERSION, //a GUID identifying the version of the key
 		iId
 	);
 
@@ -271,8 +282,8 @@ void
 FOdysseyRasterBlockUndo::RemoveUndoFromCache(const FString& iId)
 {
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-        FOdysseyRasterBlock_CACHE_NAME,
-        FOdysseyRasterBlock_CACHE_VERSION, //a GUID identifying the version of the key
+        FOdysseyRasterBlockUndo_CACHE_NAME,
+        FOdysseyRasterBlockUndo_CACHE_VERSION, //a GUID identifying the version of the key
         iId
     );
 

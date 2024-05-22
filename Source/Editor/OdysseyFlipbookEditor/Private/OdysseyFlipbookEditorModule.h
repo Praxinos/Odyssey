@@ -4,6 +4,9 @@
 
 #include "IOdysseyFlipbookEditorModule.h"
 
+class UPaperFlipbook;
+class IAssetTypeActions;
+
 class FOdysseyFlipbookEditorModule
 	: public IOdysseyFlipbookEditorModule
 {

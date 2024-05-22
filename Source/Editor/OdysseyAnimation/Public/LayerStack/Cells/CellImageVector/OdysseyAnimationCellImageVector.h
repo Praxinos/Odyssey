@@ -5,11 +5,12 @@
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyAnimationImageRenderingAbility.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 
-class UOdysseyAnimationLayerImageVector;
 class FOdysseyVectorBlock;
 class FOdysseyMediaVector;
-
+class FOdysseyVectorEngine;
+class FOdysseyVectorGroupPaint;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVector
     : public FOdysseyAnimationCell

@@ -4,6 +4,7 @@
 #include "Media/OdysseyAnimationMediaPlayerFactory.h"
 
 #include "CoreMinimal.h"
+#include "Media/OdysseyAnimationMediaPlayer.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 

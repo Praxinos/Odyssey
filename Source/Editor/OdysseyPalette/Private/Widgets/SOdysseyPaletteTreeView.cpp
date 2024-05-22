@@ -9,6 +9,8 @@
 #include "ToolMenuContext.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Widgets/Views/STileView.h"
+#include "OdysseyPalette.h"
+#include "SOdysseyPaletteEntryRow.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 

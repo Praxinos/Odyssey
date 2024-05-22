@@ -5,7 +5,10 @@
 
 #include "OdysseyRasterBlockUndo.h"
 #include "Misc/OdysseyHandle.h"
+#include "ULISInvalidTileMap.h"
 
+namespace ULIS { class FBlock; }
+namespace ULIS { class FEvent; }
 class FOdysseyRasterBlock;
 
 class ODYSSEYIMAGING_API FOdysseyRasterBlockMutator

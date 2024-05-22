@@ -11,6 +11,7 @@
 #include "Tools/RasterPaintBucketTool/OdysseyAnimationEditorRasterPaintBucketToolSourceProvider.h"
 #include "BrushContext/OdysseyLayerStackEditorBrushContext.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalShortcuts.h"
+#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

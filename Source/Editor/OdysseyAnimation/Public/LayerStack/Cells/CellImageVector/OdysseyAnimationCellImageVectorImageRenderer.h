@@ -5,6 +5,10 @@
 
 #include "OdysseyImageRenderer.h"
 
+#include <ULIS>
+
+class FOdysseyAnimationCellImageVector;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVectorImageRenderer
     : public IOdysseyImageRenderer
 {

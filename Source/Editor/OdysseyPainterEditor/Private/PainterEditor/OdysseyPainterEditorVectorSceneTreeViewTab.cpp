@@ -5,6 +5,7 @@
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVector.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

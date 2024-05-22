@@ -8,6 +8,7 @@
 
 class SOdysseyTimelineFrameList;
 class SOdysseyTimelineFrame;
+class FOdysseyFlipbookWrapper;
 
 class SOdysseyFlipbookTimelineTrack : public SCompoundWidget
 {

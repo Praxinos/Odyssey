@@ -7,6 +7,7 @@
 #include "Framework/Commands/GenericCommands.h"
 
 #include "SOdysseyTimelineFrameHandle.h"
+#include "OdysseyStyleSet.h"
 
 void SOdysseyTimelineFrame::Construct( const SOdysseyTimelineFrame::FArguments& InArgs )
 {

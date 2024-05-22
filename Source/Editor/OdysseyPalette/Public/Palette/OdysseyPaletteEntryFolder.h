@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+#include "OdysseyPaletteEntry.h"
+
 #include "OdysseyPaletteEntryFolder.generated.h"
 
 /////////////////////////////////////////////////////

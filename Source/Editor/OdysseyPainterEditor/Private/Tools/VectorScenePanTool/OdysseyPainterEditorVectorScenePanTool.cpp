@@ -6,6 +6,7 @@
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

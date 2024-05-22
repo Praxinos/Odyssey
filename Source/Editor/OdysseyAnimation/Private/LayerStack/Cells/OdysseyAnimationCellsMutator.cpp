@@ -3,6 +3,7 @@
 
 #include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
 
 
 FOdysseyAnimationCellsMutator::FOdysseyAnimationCellsMutator(UObject* iOwner, TSharedPtr<FOdysseyAnimationCellsContainer> iContainer)

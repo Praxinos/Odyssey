@@ -89,7 +89,7 @@ FEditFlipbookExtension::Execute()
 }
 
 void
-EditFlipbooksWarning()
+FOdysseyFlipbookContentBrowserExtensions::EditFlipbooksWarning()
 {
     FMessageDialog::Open(
         EAppMsgType::Ok,

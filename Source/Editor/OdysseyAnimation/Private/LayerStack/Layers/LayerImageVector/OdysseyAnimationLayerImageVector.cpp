@@ -16,6 +16,9 @@
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorExport.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImport.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyMediaVector.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 

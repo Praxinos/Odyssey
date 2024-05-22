@@ -1,5 +1,7 @@
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanToolHUD.h"
+
 #include "OdysseyVectorEngine.h"
+#include "OdysseyPainterEditor.h"
 
 FOdysseyPainterEditorVectorScenePanToolHUD::~FOdysseyPainterEditorVectorScenePanToolHUD()
 {

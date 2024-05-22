@@ -4,6 +4,9 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableExport.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImport.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderer.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 FOdysseyAnimationLightTable::~FOdysseyAnimationLightTable()
 {

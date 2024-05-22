@@ -4,6 +4,7 @@
 #include "OdysseyFlipbookEditorToolkit.h"
 
 #include "IOdysseyFlipbookEditorModule.h"
+#include "PaperFlipbook.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 

@@ -3,6 +3,9 @@
 
 #include "SOdysseyPlaybackControls.h"
 
+#include "OdysseyStyleSet.h"
+
+
 void
 SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
 {

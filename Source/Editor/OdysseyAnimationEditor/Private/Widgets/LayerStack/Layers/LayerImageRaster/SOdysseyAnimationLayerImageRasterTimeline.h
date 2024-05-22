@@ -6,6 +6,7 @@
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.h"
 
 class UOdysseyAnimationLayerImageRaster;
+class FOdysseyAnimationTimelineCellImageRasterShortcuts;
 
 /**
  * Implements a layer row widget

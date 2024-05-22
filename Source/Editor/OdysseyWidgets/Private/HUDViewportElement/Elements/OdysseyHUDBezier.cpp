@@ -3,6 +3,7 @@
 
 #include "OdysseyHUDBezier.h"
 
+#include "ULISLoaderModule.h"
 
 FOdysseyHUDBezier::~FOdysseyHUDBezier()
 {

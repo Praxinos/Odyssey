@@ -22,6 +22,13 @@
 #include "UObject/SavePackage.h"
 #include "OdysseyFlipbookWrapper.h"
 #include "Widgets/SOdysseyAnimationExportImageSequenceDialog.h"
+#include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyPainterEditor.h"
+#include "AnimationEditor/OdysseyAnimationEditorSource.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

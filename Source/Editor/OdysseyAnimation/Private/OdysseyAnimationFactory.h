@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Factories/Factory.h"
 #include "OdysseyAnimationConfiguration.h"
+#include "Widgets/SOdysseyAnimationConfigureWindow.h"
 
 #include "OdysseyAnimationFactory.generated.h"
 

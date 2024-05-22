@@ -4,6 +4,10 @@
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineShortcuts.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

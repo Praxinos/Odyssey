@@ -8,6 +8,9 @@
 #include "OdysseyPainterEditor.h"
 #include "Models/OdysseyPainterEditorViewportClient.h"
 #include "OdysseyBrushOptions.h"
+#include "Models/OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

@@ -17,6 +17,11 @@
 #include "TexturePaintHelpers.h"
 #include "OdysseyKeyState.h"
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
+#include "OdysseyPainterEditor.h"
+#include "LevelEditorViewport.h"
+#include "SEditorViewport.h"
+#include "Slate/SceneViewport.h"
 
 IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
 {

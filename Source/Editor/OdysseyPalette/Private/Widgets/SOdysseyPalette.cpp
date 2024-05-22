@@ -8,6 +8,8 @@
 #include "PropertyCustomizationHelpers.h"
 #include "SOdysseyPaletteFolderRow.h"
 #include "SOdysseyPaletteColorRow.h"
+#include "OdysseyPaletteEntryColor.h"
+#include "OdysseyPaletteEntryFolder.h"
 
 /////////////////////////////////////////////////////
 // SOdysseyPalette

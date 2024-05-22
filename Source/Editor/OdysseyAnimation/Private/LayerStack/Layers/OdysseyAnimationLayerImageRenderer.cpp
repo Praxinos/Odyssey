@@ -5,6 +5,7 @@
 
 #include "OdysseyAnimationLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)

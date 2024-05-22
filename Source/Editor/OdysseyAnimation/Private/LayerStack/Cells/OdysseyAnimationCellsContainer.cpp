@@ -4,6 +4,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainerExport.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainerImport.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
 
 FOdysseyAnimationCellsContainer::FOnCellsChanged&
 FOdysseyAnimationCellsContainer::OnCellsChanged()

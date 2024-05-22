@@ -4,8 +4,16 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTable.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-
 #include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
+#include "OdysseyAnimation.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyPainterEditor.h"
 
 SOdysseyAnimationTimelineLightTable::SOdysseyAnimationTimelineLightTable()
 	: mLayer(nullptr)

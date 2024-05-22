@@ -12,6 +12,13 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
+#include "OdysseyPainterEditor.h"
+#include "IMeshPaintGeometryAdapter.h"
+#include "LevelEditorViewport.h"
+#include "SEditorViewport.h"
+#include "Slate/SceneViewport.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 
 FOdysseyViewportDrawingEditorScreenBasedAdapter::~FOdysseyViewportDrawingEditorScreenBasedAdapter()
 {

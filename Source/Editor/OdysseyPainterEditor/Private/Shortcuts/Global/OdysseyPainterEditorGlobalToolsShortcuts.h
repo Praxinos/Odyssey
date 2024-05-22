@@ -5,6 +5,9 @@
 
 #include "OdysseyEditorShortcuts.h"
 
+class FOdysseyPainterEditor;
+class UOdysseyPainterEditorTool;
+
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGlobalToolsShortcuts
     : public IOdysseyEditorShortcuts
 {

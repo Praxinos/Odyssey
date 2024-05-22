@@ -2,6 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineCurrentFrame.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationPlayer.h"
 
 SOdysseyAnimationTimelineCurrentFrame::SOdysseyAnimationTimelineCurrentFrame()
 	: mExtension(nullptr)

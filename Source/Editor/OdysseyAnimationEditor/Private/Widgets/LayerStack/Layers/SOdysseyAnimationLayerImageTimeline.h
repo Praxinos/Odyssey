@@ -4,10 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 class FOdysseyAnimationEditorExtension;
 class FOdysseyAnimationCell;
 class UOdysseyAnimationLayer;
+class FOdysseyAnimationTimelineCellsShortcuts;
 
 /**
  * Implements a layer row widget

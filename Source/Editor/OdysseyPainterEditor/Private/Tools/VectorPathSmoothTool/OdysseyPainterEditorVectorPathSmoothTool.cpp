@@ -4,6 +4,7 @@
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothToolHUD.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

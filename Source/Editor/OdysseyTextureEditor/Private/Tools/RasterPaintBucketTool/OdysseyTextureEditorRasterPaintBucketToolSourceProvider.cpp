@@ -2,6 +2,12 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/RasterPaintBucketTool/OdysseyTextureEditorRasterPaintBucketToolSourceProvider.h"
+#include "TextureEditor/OdysseyTextureEditorExtension.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "OdysseyPixelFormat.h"
+#include "LayerStack/OdysseyTextureLayer.h"
+#include "ULISLoaderModule.h"
 
 FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::~FOdysseyTextureEditorRasterPaintBucketToolSourceProvider()
 {

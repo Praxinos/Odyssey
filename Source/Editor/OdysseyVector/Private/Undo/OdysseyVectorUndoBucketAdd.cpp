@@ -1,5 +1,7 @@
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
 
+#include "OdysseyVectorEngine.h"
+
 FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
 {
     if( mApplied )

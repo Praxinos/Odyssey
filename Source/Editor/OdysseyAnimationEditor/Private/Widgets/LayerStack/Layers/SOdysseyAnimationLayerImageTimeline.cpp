@@ -4,6 +4,18 @@
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTable.h"
+#include "Widgets/LayerStack/Cells/SOdysseyAnimationCells.h"
+#include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "DragDropOperations/OdysseyAnimationCellsDragDropOperation.h"
+#include "Framework/Commands/GenericCommands.h"
+#include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
+#include "OdysseyStyleSet.h"
+#include "Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

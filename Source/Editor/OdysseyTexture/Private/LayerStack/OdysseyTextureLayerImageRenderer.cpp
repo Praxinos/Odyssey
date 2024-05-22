@@ -5,6 +5,8 @@
 
 #include "OdysseyTextureLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
+#include "OdysseyLayer.h"
+#include "LayerStack/OdysseyTextureLayer.h"
 
 FOdysseyTextureLayerImageRenderer::FOdysseyTextureLayerImageRenderer(const UOdysseyTextureLayer* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)

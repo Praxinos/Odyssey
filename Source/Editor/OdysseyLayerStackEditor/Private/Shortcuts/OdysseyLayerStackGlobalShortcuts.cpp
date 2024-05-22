@@ -2,6 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
+#include "Commands/OdysseyLayerStackEditorCommands.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 

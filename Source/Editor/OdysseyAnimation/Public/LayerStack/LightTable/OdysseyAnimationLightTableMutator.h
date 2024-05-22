@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "Mutations/OdysseyMutator.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+
 class FOdysseyAnimationLightTable;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationLightTableMutator

@@ -4,8 +4,11 @@
 #pragma once
 
 #include "OdysseyImageRenderer.h"
+#include <ULIS>
 
 class FOdysseyRasterBlock;
+class UOdysseyTextureLayerImageRaster;
+
 class FOdysseyTextureLayerImageRasterImageRenderer
     : public IOdysseyImageRenderer
 {

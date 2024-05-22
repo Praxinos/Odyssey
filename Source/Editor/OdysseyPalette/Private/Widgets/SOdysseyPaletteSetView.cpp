@@ -4,6 +4,7 @@
 #include "SOdysseyPaletteSetView.h"
 #include "SOdysseyPaletteSetTile.h"
 #include "Framework/Commands/GenericCommands.h"
+#include "OdysseyPalette.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 

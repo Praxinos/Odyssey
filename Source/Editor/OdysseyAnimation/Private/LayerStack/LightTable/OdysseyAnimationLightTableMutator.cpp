@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 FOdysseyAnimationLightTableMutator::FOdysseyAnimationLightTableMutator(TSharedPtr<FOdysseyAnimationLightTable> iLightTable)
     : FOdysseyMutator(iLightTable->GetLayer(), "FOdysseyAnimationLightTableMutator", false) //false means we never generate undo, we could also pass nullptr instead of the ownerlayer here

@@ -1,4 +1,5 @@
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoBucketRemove::~FOdysseyVectorUndoBucketRemove()
 {

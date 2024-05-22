@@ -6,6 +6,10 @@
 #include "CoreMinimal.h"
 
 struct FSlateBrush;
+class FOdysseyAnimationEditorExtension;
+class UOdysseyAnimationLayer;
+class FOdysseyAnimationCell;
+
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCell
     : public SCompoundWidget
 {

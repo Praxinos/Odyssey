@@ -6,6 +6,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 
 #include "IOdysseyAnimationEditorModule.h"
+#include "OdysseyAnimation.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

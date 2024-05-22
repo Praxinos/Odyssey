@@ -3,6 +3,8 @@
 #pragma once
 #include "OdysseySurface.h"
 
+namespace ULIS { class FBlock; }
+
 /////////////////////////////////////////////////////
 // FOdysseySurface
 // Allows pixel wise manipulation and easy interfacing with UTexture

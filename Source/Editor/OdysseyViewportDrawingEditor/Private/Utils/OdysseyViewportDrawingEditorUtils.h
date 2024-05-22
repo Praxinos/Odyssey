@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "MeshPaintTypes.h"
+
 class FOdysseyViewportDrawingEditorUtils
 {
 public:

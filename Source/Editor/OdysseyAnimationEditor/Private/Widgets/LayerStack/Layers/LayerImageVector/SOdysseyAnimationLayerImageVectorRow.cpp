@@ -10,7 +10,10 @@
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Widgets/Input/SNumericEntryBox.h"
 #include "Math/UnitConversion.h"
+#include "SEnumCombo.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

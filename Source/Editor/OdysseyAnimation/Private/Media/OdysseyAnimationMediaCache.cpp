@@ -4,6 +4,7 @@
 #include "Media/OdysseyAnimationMediaCache.h"
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
+#include "OdysseyAnimation.h"
 
 FOdysseyAnimationMediaCache::FOdysseyAnimationMediaCache()
     : mAnimation(nullptr)

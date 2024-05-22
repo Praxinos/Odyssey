@@ -5,6 +5,11 @@
 
 #include "Dialog/SCustomDialog.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimation.h"
+#include "SEnumCombo.h"
+#include "Widgets/Input/SNumericEntryBox.h"
+#include "DesktopPlatformModule.h"
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

@@ -1,6 +1,7 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterExport.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "OdysseyFile.h"
+#include "OdysseyRasterBlock.h"
 
 void
 FOdysseyAnimationCellImageRasterExport::WriteRasterBlock( FOdysseyAnimationCellImageRaster* iAnimationCellImageRaster

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 class FOdysseyAnimationLightTableMutator;
+class UOdysseyAnimationLayer;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableKey
 	: public SLeafWidget

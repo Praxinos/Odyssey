@@ -1,5 +1,7 @@
 #include "Undo/OdysseyVectorUndoRemoveObjects.h"
 
+#include "OdysseyVectorEngine.h"
+
 FOdysseyVectorUndoRemoveObjects::~FOdysseyVectorUndoRemoveObjects()
 {
     // Removal confirmed

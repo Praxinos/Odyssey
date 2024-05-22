@@ -1,6 +1,7 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImport.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableKeyImport.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTableKeyExport.h"
 #include "OdysseyFile.h"
 
 bool

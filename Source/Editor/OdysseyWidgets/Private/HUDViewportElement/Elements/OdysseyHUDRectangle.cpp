@@ -3,6 +3,8 @@
 
 #include "OdysseyHUDRectangle.h"
 
+#include "ULISLoaderModule.h"
+
 FOdysseyHUDRectangle::~FOdysseyHUDRectangle()
 {
 

@@ -5,6 +5,9 @@
 
 #include "LayerStack/OdysseyTextureLayerImageRasterImageRenderer.h"
 
+#include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyRasterBlock.h"
+
 FOdysseyTextureLayerImageRasterImageRenderer::FOdysseyTextureLayerImageRasterImageRenderer(const UOdysseyTextureLayerImageRaster* iLayer, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mRasterBlock(iLayer->GetRasterBlock())

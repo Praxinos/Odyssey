@@ -2,7 +2,7 @@
 
 #include <Core/Core.h>
 
-class FOdysseyAnimationLayerImageRaster;
+class UOdysseyAnimationLayerImageRaster;
 
 class FOdysseyAnimationLayerImageRasterImport
 {

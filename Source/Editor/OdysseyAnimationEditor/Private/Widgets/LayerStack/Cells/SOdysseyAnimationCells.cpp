@@ -9,6 +9,11 @@
 #include "Widgets/Layout/SMissingWidget.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "OdysseyStyleSet.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "Widgets/LayerStack/Cells/SOdysseyAnimationCellHandle.h"
+#include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

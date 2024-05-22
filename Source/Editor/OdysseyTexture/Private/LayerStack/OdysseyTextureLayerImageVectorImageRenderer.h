@@ -5,6 +5,11 @@
 
 #include "OdysseyImageRenderer.h"
 
+#include <ULIS>
+
+class UOdysseyTextureLayerImageVector;
+class FOdysseyVectorBlock;
+
 class FOdysseyTextureLayerImageVectorImageRenderer
     : public IOdysseyImageRenderer
 {

@@ -6,6 +6,7 @@
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayerImageRenderer.h"
 #include "ULISLoaderModule.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 
 //===========================
 

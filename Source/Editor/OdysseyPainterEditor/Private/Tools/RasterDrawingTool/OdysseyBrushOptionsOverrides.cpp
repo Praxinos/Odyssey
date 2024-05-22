@@ -3,6 +3,8 @@
 
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
 
+#include "UObject/OdysseyObjectEditorUtils.h"
+
 UOdysseyBrushOptionsOverrides::UOdysseyBrushOptionsOverrides()
     : bOverride_Size        ( false                                         )
     , bOverride_Flow        ( false                                         )

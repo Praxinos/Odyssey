@@ -7,6 +7,8 @@
 #include "Misc/Change.h"
 //#include "OdysseyRasterBlock.h"
 
+namespace ULIS { class FBlock; }
+
 class FOdysseyRasterBlockMutator;
 class FOdysseyRasterBlock;
 

@@ -3,6 +3,8 @@
 
 #include "OdysseyHUDHandle.h"
 
+#include "ULISLoaderModule.h"
+
 #define HANDLE_SMALL_SIZE 10
 #define HANDLE_BIG_SIZE 20
 

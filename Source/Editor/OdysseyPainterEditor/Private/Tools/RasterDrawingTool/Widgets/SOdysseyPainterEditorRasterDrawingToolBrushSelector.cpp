@@ -7,6 +7,9 @@
 #include "PropertyEditorModule.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Brush/SOdysseyBrushSelector.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyBrushAssetBase.h"
 
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorRasterDrawingToolBrushSelector

@@ -6,6 +6,7 @@
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 
 class FOdysseyAnimationEditorTimeline;
+class FOdysseyAnimationCell;
 
 class FOdysseyAnimationTimelineSelectionTool
     : public FOdysseyAnimationTimelineTool

@@ -1,5 +1,9 @@
 #include "Undo/OdysseyVectorUndoGroup.h"
 
+#include "OdysseyVectorGroup.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
+
 FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
 {
     // if Grouping action confirmed

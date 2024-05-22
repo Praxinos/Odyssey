@@ -12,6 +12,9 @@
 #include "SOdysseyTimeline.h"
 #include "SOdysseyFlipbookTimelineTrack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyFlipbookWrapper.h"
+#include "PaperSprite.h"
+#include "Models/OdysseyFlipbookEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 #define MaxZoom 1.0

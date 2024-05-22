@@ -9,6 +9,8 @@
 
 #include "OdysseyPainterEditorVectorBucketView.generated.h"
 
+class FOdysseyPainterEditor;
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UObject
 {

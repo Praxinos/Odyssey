@@ -4,6 +4,8 @@
 #pragma once
 
 #include "OdysseyModeToolkit.h"
+#include "OdysseyPainterEditor.h"
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
 
 class FOdysseyViewportDrawingEditor;
 class FEdMode;

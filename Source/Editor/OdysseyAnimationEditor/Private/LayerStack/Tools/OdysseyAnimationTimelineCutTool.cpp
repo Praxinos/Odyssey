@@ -2,6 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationEditorTimeline.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

@@ -1,6 +1,8 @@
 #include "Import/v2/OdysseyVectorImport.h"
 #include "Palette/OdysseyPalette.h"
 #include "Engine/ObjectLibrary.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+
 // from module OdysseyFile
 #include "OdysseyFile.h"
 

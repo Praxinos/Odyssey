@@ -3,6 +3,11 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineCurrentFrame.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyKeyState.h"
+#include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "OdysseyAnimation.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 SOdysseyAnimationTimelineControl::SOdysseyAnimationTimelineControl()
 	: mExtension(nullptr)

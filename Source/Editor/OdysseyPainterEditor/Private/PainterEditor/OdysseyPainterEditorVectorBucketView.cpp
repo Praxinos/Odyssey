@@ -2,6 +2,9 @@
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "OdysseyVectorEngine.h"
 
+#include "OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 UOdysseyPainterEditorVectorBucketView::~UOdysseyPainterEditorVectorBucketView()

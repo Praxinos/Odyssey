@@ -5,7 +5,7 @@
 
 #include "OdysseyEditorShortcuts.h"
 
-class FUICommandList;
+class FOdysseyPainterEditor;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGlobalShortcuts
     : public FOdysseyEditorShortcuts

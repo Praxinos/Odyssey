@@ -14,6 +14,8 @@
 #include "PaperSprite.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "PropertyCustomizationHelpers.h"
+#include "OdysseyFlipbookWrapper.h"
+#include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 

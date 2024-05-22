@@ -4,6 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyImageRenderingAbility.h"
+
+class UOdysseyAnimationLayer;
+class FOdysseyAnimationEditorExtension;
+class UOdysseyAnimation;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTable
 	: public SCompoundWidget

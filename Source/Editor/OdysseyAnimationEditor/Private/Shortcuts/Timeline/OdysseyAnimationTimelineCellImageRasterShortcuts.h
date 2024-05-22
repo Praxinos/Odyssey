@@ -3,7 +3,10 @@
 
 #pragma once
 
-class SOdysseyAnimationLayerStackTreeView;
+#include "Framework/Commands/UICommandList.h"
+
+class UOdysseyLayerStack;
+class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellImageRasterShortcuts
 {

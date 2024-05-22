@@ -3,8 +3,6 @@
 
 #include "NativeStylusInputDevice.h"
 
-
-
 void
 GetSubpixelLocation(POINTER_PEN_INFO& iPenInfo, float* oX, float* oY )
 {

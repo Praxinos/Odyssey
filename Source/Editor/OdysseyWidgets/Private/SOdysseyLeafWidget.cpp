@@ -4,6 +4,7 @@
 #include "SOdysseyLeafWidget.h"
 #include "Rendering/DrawElements.h"
 #include "OdysseySurface.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 

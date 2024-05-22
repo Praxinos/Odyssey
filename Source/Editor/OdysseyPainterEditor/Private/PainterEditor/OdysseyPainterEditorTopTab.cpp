@@ -12,6 +12,7 @@
 #include "FileHelpers.h"
 #include "ObjectEditorUtils.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

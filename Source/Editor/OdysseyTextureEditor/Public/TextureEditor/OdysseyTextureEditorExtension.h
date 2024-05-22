@@ -10,6 +10,7 @@ class FOdysseyPainterEditor;
 class FOdysseyTextureEditorGUI;
 class FOdysseyTextureEditorSource;
 class FOdysseyLayerStackEditorBrushContext;
+class UOdysseyLayerStack;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorExtension
     : public FOdysseyPainterEditorExtension

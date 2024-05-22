@@ -5,6 +5,7 @@
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushToolHUD.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 

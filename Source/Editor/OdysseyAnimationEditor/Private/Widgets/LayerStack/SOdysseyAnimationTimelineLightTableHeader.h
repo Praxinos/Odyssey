@@ -7,6 +7,8 @@
 
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
+class SColorBlock;
+
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineLightTableHeader
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableHeader : public SCompoundWidget

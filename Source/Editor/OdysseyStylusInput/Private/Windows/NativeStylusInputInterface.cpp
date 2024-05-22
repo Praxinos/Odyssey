@@ -9,6 +9,7 @@
 #include "Windows/NativeStylusInputDevice.h"
 
 #include <chrono>
+#include <tpcshrd.h>
 
 //---
 

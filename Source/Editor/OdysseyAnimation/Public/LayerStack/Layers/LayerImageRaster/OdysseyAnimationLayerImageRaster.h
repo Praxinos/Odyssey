@@ -6,13 +6,13 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "Image/OdysseyBlendingMode.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 
 #include <ULIS>
 
 #include "OdysseyAnimationLayerImageRaster.generated.h"
 
 class FOdysseyAnimationLightTable;
-class FOdysseyAnimationCellsContainer;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster

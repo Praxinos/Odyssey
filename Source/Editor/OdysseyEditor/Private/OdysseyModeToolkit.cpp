@@ -4,6 +4,9 @@
 #include "OdysseyModeToolkit.h"
 #include "LevelEditor.h"
 #include "Interfaces/IMainFrameModule.h"
+#include "OdysseyEditor.h"
+#include "Toolkits/AssetEditorModeUILayer.h"
+#include "OdysseyEditorModule.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyModeToolkit

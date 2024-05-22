@@ -10,6 +10,11 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyRectUtils.h"
 #include "LayerStack/OdysseyTextureLayerStackImageRenderer.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "LayerStack/OdysseyTextureLayer.h"
+#include "OdysseyTextureLayerImageVector.h"
+#include "ULISLoaderModule.h"
+#include "OdysseyPixelFormat.h"
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter)

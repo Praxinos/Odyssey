@@ -6,6 +6,7 @@
 #include "OdysseyEditorShortcuts.h"
 
 class FUICommandList;
+class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationGlobalShortcuts
     : public FOdysseyEditorShortcuts

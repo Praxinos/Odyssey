@@ -3,6 +3,8 @@
 
 #include "OdysseyHUDCircle.h"
 
+#include "ULISLoaderModule.h"
+
 FOdysseyHUDCircle::~FOdysseyHUDCircle()
 {
 

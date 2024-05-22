@@ -1,5 +1,7 @@
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImport.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "OdysseyFile.h"
 
 bool

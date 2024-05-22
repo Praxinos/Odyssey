@@ -1,5 +1,7 @@
 #include "Undo/OdysseyVectorUndoPathEdit.h"
 
+#include "OdysseyVectorEngine.h"
+
 FOdysseyVectorUndoPathEdit::~FOdysseyVectorUndoPathEdit()
 {
     if( mApplied )

@@ -6,6 +6,7 @@
 #include "Media/OdysseyAnimationMediaPlayer.h"
 #include "Media/OdysseyAnimationMediaTextureSample.h"
 #include "Engine/Texture2D.h"
+#include "ULISLoaderModule.h"
 
 FOdysseyAnimationMediaSamples::FOdysseyAnimationMediaSamples()
 	: mAnimation(nullptr)

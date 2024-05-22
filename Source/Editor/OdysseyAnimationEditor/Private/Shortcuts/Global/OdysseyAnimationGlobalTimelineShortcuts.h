@@ -5,6 +5,8 @@
 
 #include "OdysseyEditorShortcuts.h"
 
+class FOdysseyAnimationEditorExtension;
+
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationGlobalTimelineShortcuts
     : public IOdysseyEditorShortcuts
 {

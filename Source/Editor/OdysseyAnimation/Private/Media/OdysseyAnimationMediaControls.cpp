@@ -4,6 +4,7 @@
 #include "Media/OdysseyAnimationMediaControls.h"
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
+#include "OdysseyAnimation.h"
 
 FOdysseyAnimationMediaControls::FOdysseyAnimationMediaControls()
 	: mAnimation(nullptr)

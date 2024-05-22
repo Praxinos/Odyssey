@@ -10,6 +10,16 @@
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 #include "OdysseyAnimationEditorTimeline.h"
 #include "Widgets/Input/SSegmentedControl.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyStyleSet.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
+#include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
+#include "Widgets/LayerStack/Layers/LayerFolder/SOdysseyAnimationLayerFolderRow.h"
+#include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.h"
+#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
+#include "OdysseyAnimation.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

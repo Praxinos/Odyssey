@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "Widgets/Views/STileView.h"
 
+class UOdysseyPalette;
+
 class ODYSSEYPALETTE_API SOdysseyPaletteSetView
     : public STileView<FName>
 {

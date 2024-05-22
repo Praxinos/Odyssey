@@ -3,6 +3,8 @@
 
 #include "OdysseyAnimationTextureResource.h"
 
+#include "OdysseyAnimationTexture.h"
+
 FOdysseyAnimationTextureResource::~FOdysseyAnimationTextureResource()
 {
 }

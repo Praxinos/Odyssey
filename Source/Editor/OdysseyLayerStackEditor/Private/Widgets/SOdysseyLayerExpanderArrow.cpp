@@ -4,6 +4,8 @@
 #include "Widgets/SOdysseyLayerExpanderArrow.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/SOdysseyLayerRow.h"
+#include "OdysseyStyleSet.h"
+#include "Widgets/SOdysseyLayerStackTreeView.h"
 
 SLATE_IMPLEMENT_WIDGET(SOdysseyLayerExpanderArrow)
 void SOdysseyLayerExpanderArrow::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)

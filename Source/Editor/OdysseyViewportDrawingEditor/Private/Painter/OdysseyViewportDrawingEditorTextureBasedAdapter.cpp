@@ -6,6 +6,8 @@
 #include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
 #include "MeshPaintHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
+#include "OdysseyPainterEditor.h"
 
 FOdysseyViewportDrawingEditorTextureBasedAdapter::~FOdysseyViewportDrawingEditorTextureBasedAdapter()
 {

@@ -2,6 +2,12 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/SOdysseyAnimationPlaybackControls.h"
+#include "OdysseyStyleSet.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyAnimationPlayer.h"
+#include "OdysseyAnimation.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 void
 SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)

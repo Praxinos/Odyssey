@@ -5,6 +5,9 @@
 
 #include "OdysseyClipboard.h"
 
+class FOdysseyAnimationCell;
+class UOdysseyAnimationLayer;
+
 class FOdysseyAnimationCellClipboardData
     : public IOdysseyClipboardData
 {

@@ -4,6 +4,8 @@
 #pragma once
 
 #include "LayerStack/OdysseyTextureLayerStackImageRenderer.h"
+#include "LayerStack/OdysseyTextureLayer.h"
+#include "OdysseyTextureLayerStack.h"
 
 FOdysseyTextureLayerStackImageRenderer::FOdysseyTextureLayerStackImageRenderer(const UOdysseyTextureLayerStack* iLayerStack, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)

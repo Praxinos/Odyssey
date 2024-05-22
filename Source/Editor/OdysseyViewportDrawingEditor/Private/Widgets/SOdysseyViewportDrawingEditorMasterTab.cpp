@@ -8,6 +8,7 @@
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Widgets/Layout/SScrollBox.h"
+#include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 

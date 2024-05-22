@@ -13,7 +13,9 @@
 #include "Widgets/Colors/SColorPicker.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Widgets/Input/SNumericEntryBox.h"
 #include "Math/UnitConversion.h"
+#include "SEnumCombo.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyPaletteEntry.h"
 
 #include "OdysseyPaletteEntryMaterial.generated.h"
 

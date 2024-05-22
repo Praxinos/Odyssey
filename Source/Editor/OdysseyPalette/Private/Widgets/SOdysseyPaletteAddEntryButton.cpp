@@ -8,6 +8,7 @@
 #include "OdysseyPaletteEntryFolder.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "SPositiveActionButton.h"
+#include "OdysseyPalette.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 

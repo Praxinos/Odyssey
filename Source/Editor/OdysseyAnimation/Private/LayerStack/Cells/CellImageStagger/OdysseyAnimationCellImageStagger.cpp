@@ -6,6 +6,7 @@
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerImport.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerImageRenderer.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 #include "Misc/OdysseyDuplicate.h"
 

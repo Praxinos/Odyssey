@@ -3,6 +3,7 @@
 
 #include "OdysseyVectorBlock.h"
 #include "OdysseyVector.h"
+#include "ULISLoaderModule.h"
 
 #define FOdysseyVectorBlock_CACHE_NAME TEXT("OdysseyVectorBlock")
 #define FOdysseyVectorBlock_CACHE_VERSION TEXT("79ED1F6D43774CB1B8BE2766ED7F0120")

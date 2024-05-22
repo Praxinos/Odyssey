@@ -1,5 +1,6 @@
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyPainterEditor.h"
 
 FOdysseyPainterEditorVectorGridToolHUD::~FOdysseyPainterEditorVectorGridToolHUD()
 {

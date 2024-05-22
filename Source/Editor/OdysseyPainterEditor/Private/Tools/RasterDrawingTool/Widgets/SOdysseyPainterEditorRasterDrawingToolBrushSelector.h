@@ -9,6 +9,7 @@
 #include "Framework/SlateDelegates.h"
 
 class UOdysseyPainterEditorRasterDrawingTool;
+class UOdysseyBrush;
 
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorRasterDrawingToolBrushSelector

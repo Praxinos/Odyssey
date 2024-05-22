@@ -12,6 +12,7 @@
 
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #include <chrono>
 

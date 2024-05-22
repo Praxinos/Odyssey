@@ -6,6 +6,12 @@
 #include "CoreMinimal.h"
 #include "IMediaSamples.h"
 #include "OdysseyImageRenderer.h"
+#include "OdysseyImageRenderingAbility.h"
+#include "ULISInvalidTileMap.h"
+
+class FOdysseyAnimationMediaPlayer;
+class FOdysseyAnimationMediaControls;
+class UOdysseyAnimation;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationMediaSamples
 	: public IMediaSamples

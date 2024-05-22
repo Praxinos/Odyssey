@@ -7,6 +7,9 @@
 #include "SOdysseyFlipbookTimelineView.h"
 #include "Types/NavigationMetaData.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "FlipbookEditor/OdysseyFlipbookEditorExtension.h"
+#include "OdysseyPainterEditor.h"
+#include "PaperSprite.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 

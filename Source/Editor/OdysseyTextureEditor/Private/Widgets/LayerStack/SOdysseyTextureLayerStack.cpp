@@ -3,6 +3,12 @@
 
 #include "Widgets/LayerStack/SOdysseyTextureLayerStack.h"
 #include "Widgets/SOdysseyLayerStackAddLayerButton.h"
+#include "LayerStack/OdysseyTextureLayerFolder.h"
+#include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "Widgets/LayerStack/SOdysseyTextureLayerFolderRow.h"
+#include "Widgets/LayerStack/SOdysseyTextureLayerImageRasterRow.h"
+#include "Widgets/LayerStack/SOdysseyTextureLayerImageVectorRow.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

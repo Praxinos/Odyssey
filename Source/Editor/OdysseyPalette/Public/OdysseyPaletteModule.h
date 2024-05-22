@@ -6,7 +6,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
 
-class  FAssetTypeActions_OdysseyPalette;
+class FAssetTypeActions_OdysseyPalette;
+class IAssetTypeActions;
 
 /**
  * The Texture Asset module.

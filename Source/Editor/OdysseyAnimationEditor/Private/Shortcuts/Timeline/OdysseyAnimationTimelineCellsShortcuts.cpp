@@ -13,6 +13,12 @@
 #include "OdysseyEditorModule.h"
 #include "Dialogs/Dialogs.h"
 #include "Widgets/Input/SNumericEntryBox.h"
+#include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

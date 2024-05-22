@@ -6,8 +6,11 @@
 #include "CoreMinimal.h"
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
+#include "OdysseyPaletteEntry.h"
+#include "Widgets/SOdysseyPaletteTreeView.h"
 
 class SOdysseyLayerStackTreeView;
+class UOdysseyPaletteEntry;
 
 /**
  * Implements a layer row widget

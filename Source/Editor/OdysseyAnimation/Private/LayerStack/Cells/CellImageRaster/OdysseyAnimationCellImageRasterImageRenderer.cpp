@@ -5,6 +5,7 @@
 
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImageRenderer.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "OdysseyRasterBlock.h"
 
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"

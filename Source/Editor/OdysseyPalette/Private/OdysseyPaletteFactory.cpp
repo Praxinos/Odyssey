@@ -5,6 +5,7 @@
 
 #include "Editor.h"
 #include "EditorStyleSet.h"
+#include "OdysseyPalette.h"
 
 #include "ULISLoaderModule.h"
 

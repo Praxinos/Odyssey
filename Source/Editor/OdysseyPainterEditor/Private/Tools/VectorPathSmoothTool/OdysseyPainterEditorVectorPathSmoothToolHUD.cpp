@@ -1,5 +1,6 @@
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyPainterEditor.h"
 
 FOdysseyPainterEditorVectorPathSmoothToolHUD::~FOdysseyPainterEditorVectorPathSmoothToolHUD()
 {

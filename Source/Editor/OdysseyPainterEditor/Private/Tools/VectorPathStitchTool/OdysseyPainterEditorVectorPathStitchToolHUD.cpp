@@ -1,5 +1,6 @@
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyPainterEditor.h"
 
 FOdysseyPainterEditorVectorPathStitchToolHUD::~FOdysseyPainterEditorVectorPathStitchToolHUD()
 {

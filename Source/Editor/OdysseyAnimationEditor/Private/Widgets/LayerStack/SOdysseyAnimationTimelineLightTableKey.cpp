@@ -4,6 +4,8 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
+#include "OdysseyStyleSet.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 SOdysseyAnimationTimelineLightTableKey::SOdysseyAnimationTimelineLightTableKey()
 	: mLayer(nullptr)

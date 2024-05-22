@@ -6,6 +6,9 @@
 #include "CoreMinimal.h"
 #include "OdysseyClipboard.h"
 
+class UOdysseyLayer;
+class UOdysseyLayerStack;
+
 class ODYSSEYLAYERSTACKEDITOR_API FOdysseyLayerStackClipboardData
     : public IOdysseyClipboardData
     , public FGCObject

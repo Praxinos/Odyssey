@@ -4,6 +4,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorLightTableTab.h"
 
 #include "Widgets/SOdysseyAnimationLightTable.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

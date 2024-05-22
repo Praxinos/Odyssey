@@ -4,6 +4,8 @@
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 
 #include "OdysseyMediaVector.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "IMediaControls.h"
 
+class UOdysseyAnimation;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationMediaControls
 	: public IMediaControls
 {

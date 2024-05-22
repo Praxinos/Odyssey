@@ -7,6 +7,10 @@
 #include "LayerStack/Tools/OdysseyAnimationTimelineMoveTool.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
 #include "OdysseyKeyState.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyAnimation.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 
 //Define base frame width to be 50 pixels
 #define BASE_FRAMEWIDTH 50.f

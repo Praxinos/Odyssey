@@ -4,6 +4,12 @@
 #pragma once
 
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderer.h"
+#include "OdysseyAnimation.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "ULISLoaderModule.h"
+#include "ULISEventBuilder.h"
 
 FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)

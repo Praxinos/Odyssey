@@ -17,6 +17,7 @@
 #include "TextureCompiler.h"
 #include "UObject/SavePackage.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "AssetToolsModule.h"
 
 
 FOdysseyFlipbookWrapper::~FOdysseyFlipbookWrapper()

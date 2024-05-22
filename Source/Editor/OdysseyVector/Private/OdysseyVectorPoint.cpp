@@ -1,4 +1,5 @@
 #include "OdysseyVectorPoint.h"
+#include "OdysseyVectorVertex.h"
 
 FOdysseyVectorPoint::~FOdysseyVectorPoint()
 {

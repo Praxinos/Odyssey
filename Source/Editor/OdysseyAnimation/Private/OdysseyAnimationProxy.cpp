@@ -3,6 +3,9 @@
 
 #include "OdysseyAnimationProxy.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationImageRenderer.h"
+#include "ULISLoaderModule.h"
 
 FOdysseyAnimationProxy::~FOdysseyAnimationProxy()
 {

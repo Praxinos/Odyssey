@@ -5,6 +5,9 @@
 
 #include "OdysseyEditorTab.h"
 
+class FOdysseyAnimationEditorExtension;
+class UOdysseyAnimationLayerStack;
+
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorLightTableTab :
 	public FOdysseyEditorTab
 {

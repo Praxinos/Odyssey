@@ -25,6 +25,7 @@
 #include "LevelEditor.h"
 #include "ToolMenus.h"
 #include "Toolkits/AssetEditorModeUILayer.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

@@ -8,6 +8,8 @@
 
 class FOdysseyAnimationEditorExtension;
 class FOdysseyAnimationLightTable;
+class UOdysseyLayerStack;
+class UOdysseyAnimationLayerStack;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationLightTable

@@ -6,6 +6,11 @@
 #include "LayerStack/OdysseyTextureLayer.h"
 #include "Tools/RasterPaintBucketTool/OdysseyTextureEditorRasterPaintBucketToolSourceProvider.h"
 #include "BrushContext/OdysseyLayerStackEditorBrushContext.h"
+#include "TextureEditor/OdysseyTextureEditorGUI.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyLayerStack.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

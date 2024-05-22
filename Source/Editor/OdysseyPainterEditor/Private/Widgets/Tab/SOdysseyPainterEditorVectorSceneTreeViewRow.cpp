@@ -5,8 +5,10 @@
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyVector.h"
+#include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

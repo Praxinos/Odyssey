@@ -20,6 +20,18 @@
 #include "MediaPlate.h"
 #include "MediaPlateComponent.h"
 #include "OdysseyAnimationPlayer.h"
+#include "IOdysseyViewportDrawingEditorAdapter.h"
+#include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "TextureCompiler.h"
+#include "Materials/MaterialExpressionTextureBase.h"
+#include "Materials/MaterialExpressionTextureSample.h"
+#include "Materials/MaterialExpressionTextureCoordinate.h"
+#include "OdysseyViewportDrawingEditorTextureBasedAdapter.h"
+#include "OdysseyViewportDrawingEditorMeshBasedAdapter.h"
+#include "OdysseyViewportDrawingEditorScreenBasedAdapter.h"
+#include "IMeshPaintGeometryAdapter.h"
+#include "MeshPaintHelpers.h"
+#include "OdysseyViewportDrawingEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 

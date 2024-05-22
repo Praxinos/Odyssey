@@ -5,6 +5,8 @@
 #include "HUDViewportElement/OdysseyHUDElement.h"
 
 #include "Misc/TransactionObjectEvent.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyHUDSystem.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

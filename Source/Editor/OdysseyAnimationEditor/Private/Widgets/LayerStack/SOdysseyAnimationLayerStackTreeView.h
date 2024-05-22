@@ -6,6 +6,7 @@
 #include "Widgets/SOdysseyLayerStackTreeView.h"
 
 class FOdysseyAnimationTimelineShortcuts;
+class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStackTreeView
     : public SOdysseyLayerStackTreeView

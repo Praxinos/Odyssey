@@ -7,6 +7,8 @@
 #include "SOdysseyPaletteEntryRow.h"
 #include "Widgets/SOdysseyPaletteTreeView.h"
 #include "Widgets/Colors/SColorPicker.h"
+#include "OdysseyPaletteEntryColor.h"
+#include "Widgets/Colors/SColorBlock.h"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntryColor* iColorEntry)

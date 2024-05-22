@@ -5,6 +5,8 @@
 #include "OdysseyPaletteDragDropOperation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/SOdysseyPaletteExpanderArrow.h"
+#include "OdysseyStyleSet.h"
+#include "OdysseyPalette.h"
 	
 #define LOCTEXT_NAMESPACE "Palette"
 

@@ -1,4 +1,6 @@
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndoObjectAdd::~FOdysseyVectorUndoObjectAdd()
 {

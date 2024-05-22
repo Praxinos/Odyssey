@@ -6,6 +6,8 @@
 #include "OdysseyAnimationImageRenderingAbility.h"
 #include "OdysseyMediaProvider.h"
 
+class UOdysseyAnimationLayer;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationCell
     : public TSharedFromThis<FOdysseyAnimationCell>
     , public FOdysseyAnimationImageRenderingAbility

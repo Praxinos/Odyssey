@@ -5,6 +5,7 @@
 #include "Widgets/Colors/SColorBlock.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "OdysseyPaletteEntryFolder.h"
 
 UOdysseyPalette::UOdysseyPalette()
 {

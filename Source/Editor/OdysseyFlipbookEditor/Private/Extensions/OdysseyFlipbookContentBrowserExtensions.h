@@ -10,4 +10,6 @@ class FOdysseyFlipbookContentBrowserExtensions
 public:
     static void InstallHooks();
     static void RemoveHooks();
+
+    static void EditFlipbooksWarning();
 };

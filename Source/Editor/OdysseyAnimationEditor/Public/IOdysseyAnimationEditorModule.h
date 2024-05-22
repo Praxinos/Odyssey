@@ -8,6 +8,7 @@
 #include "Toolkits/IToolkitHost.h"
 
 class FOdysseyAnimationEditorToolkit;
+class UOdysseyAnimation;
 
 class IOdysseyAnimationEditorModule
 	: public IModuleInterface

@@ -4,6 +4,11 @@
 #pragma once
 
 #include "OdysseyImageRenderer.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+
+#include <ULIS>
+
+class UOdysseyAnimationLayerImageVector;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationLayerImageVectorImageRenderer
     : public IOdysseyImageRenderer

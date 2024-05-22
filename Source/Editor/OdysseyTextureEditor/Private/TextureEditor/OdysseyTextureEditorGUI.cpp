@@ -11,6 +11,8 @@
 #include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "TextureEditor/OdysseyTextureEditorCommands.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

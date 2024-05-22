@@ -3,9 +3,12 @@
 
 #include "OdysseyLayerStack.h"
 
+#include "OdysseyLayer.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Misc/ScopedSlowTask.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyLayerStackFunctionLibrary.h"
+#include "Misc/TransactionObjectEvent.h"
 
 void
 UOdysseyLayerStack::PostInitProperties()

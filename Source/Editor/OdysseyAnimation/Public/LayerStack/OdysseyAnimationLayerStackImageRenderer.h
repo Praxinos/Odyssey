@@ -5,6 +5,10 @@
 
 #include "OdysseyImageRenderer.h"
 
+#include <ULIS>
+
+class UOdysseyAnimationLayerStack;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationLayerStackImageRenderer
     : public IOdysseyImageRenderer
 {

@@ -5,6 +5,7 @@
 
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
 #include "OdysseyPainterEditor.h"
 

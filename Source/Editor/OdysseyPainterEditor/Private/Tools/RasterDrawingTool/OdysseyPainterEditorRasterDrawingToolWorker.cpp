@@ -8,6 +8,7 @@
 #include "CoreMinimal.h"
 
 #include <functional>
+#include <chrono>
 
 FOdysseyPainterEditorRasterDrawingToolWorker::~FOdysseyPainterEditorRasterDrawingToolWorker()
 {

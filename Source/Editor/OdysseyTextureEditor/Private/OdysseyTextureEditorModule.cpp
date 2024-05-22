@@ -21,6 +21,7 @@
 #include "TextureEditor/OdysseyTextureEditorCommands.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
+#include "Extensions/OdysseyTextureContentBrowserExtensions.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

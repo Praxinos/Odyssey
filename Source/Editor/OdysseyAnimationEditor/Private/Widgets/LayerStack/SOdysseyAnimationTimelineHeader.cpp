@@ -6,6 +6,10 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
+#include "OdysseyStyleSet.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineHeader

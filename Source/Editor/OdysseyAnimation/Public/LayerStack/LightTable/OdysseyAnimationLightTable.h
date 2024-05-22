@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyAnimationImageRenderingAbility.h"
 
 #include "OdysseyAnimationLightTable.generated.h"
 
@@ -22,6 +23,8 @@ enum class EOdysseyLightTableDisplayPosition
     AboveLayer,
     UnderLayer
 };
+
+class UOdysseyAnimationLayer;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationLightTable
     : public TSharedFromThis<FOdysseyAnimationLightTable>

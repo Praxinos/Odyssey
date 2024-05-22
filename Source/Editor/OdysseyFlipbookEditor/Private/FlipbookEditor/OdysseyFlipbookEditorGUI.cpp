@@ -6,6 +6,11 @@
 #include "OdysseyFlipbookEditorTimelineTab.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
 #include "Framework/Docking/LayoutExtender.h"
+#include "FlipbookEditor/OdysseyFlipbookEditorExtension.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorViewportTab.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "SOdysseyFlipbookTimelineView.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyFlipbookEditorGUI

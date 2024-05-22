@@ -9,6 +9,8 @@
 #include "Commands/OdysseyLayerStackEditorCommands.h"
 #include "Shortcuts/OdysseyLayerStackShortcuts.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
+#include "OdysseyLayerStack.h"
+#include "Widgets/SOdysseyLayerRow.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 

@@ -3,9 +3,14 @@
 
 #include "OdysseyAnimation.h"
 
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationProxyImageRenderer.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
+#include "OdysseyRasterBlockMutator.h"
 
 #include "Misc/TransactionObjectEvent.h"
 

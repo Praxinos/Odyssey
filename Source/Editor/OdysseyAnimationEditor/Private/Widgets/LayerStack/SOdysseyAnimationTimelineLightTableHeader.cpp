@@ -7,7 +7,12 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Widgets/Input/SNumericEntryBox.h"
 #include "Math/UnitConversion.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
+#include "OdysseyStyleSet.h"
+#include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Colors/SColorPicker.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

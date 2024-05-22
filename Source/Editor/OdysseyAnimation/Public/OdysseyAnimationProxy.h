@@ -4,8 +4,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyImageRenderingAbility.h"
+#include "ULISInvalidTileMap.h"
+
+#include <ULIS>
 
 class FBlockData;
+class UOdysseyAnimation;
+class FOdysseyRasterBlock;
+class IOdysseyImageRenderer;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationProxy
     : public FRunnable

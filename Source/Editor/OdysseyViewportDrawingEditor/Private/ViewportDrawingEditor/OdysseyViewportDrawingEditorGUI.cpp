@@ -3,6 +3,8 @@
 
 #include "ViewportDrawingEditor/OdysseyViewportDrawingEditorGUI.h"
 #include "AnimationEditor/OdysseyAnimationEditorTimelineTab.h"
+#include "OdysseyPainterEditor.h"
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 

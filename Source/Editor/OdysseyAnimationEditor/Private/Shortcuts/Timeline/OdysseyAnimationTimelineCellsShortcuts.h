@@ -3,7 +3,8 @@
 
 #pragma once
 
-class SOdysseyAnimationLayerStackTreeView;
+class FOdysseyAnimationEditorExtension;
+class UOdysseyLayerStack;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellsShortcuts
 {

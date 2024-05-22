@@ -7,6 +7,8 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 class FOdysseyAnimationCell;
+class FOdysseyAnimationEditorExtension;
+class FOdysseyAnimationCellsMutator;
 /**
  * Implements a layer row widget
  */

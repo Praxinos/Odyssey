@@ -3,6 +3,7 @@
 
 #include "OdysseyEditorModule.h"
 #include "Modules/ModuleManager.h"
+#include "OdysseyClipboard.h"
 
 IMPLEMENT_MODULE(FOdysseyEditorModule, OdysseyEditor );
 

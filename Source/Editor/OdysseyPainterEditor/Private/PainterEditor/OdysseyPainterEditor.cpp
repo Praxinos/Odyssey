@@ -56,6 +56,8 @@
 
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
+#include "Mesh/FOdysseyMeshSelector.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

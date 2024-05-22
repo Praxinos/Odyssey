@@ -7,6 +7,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayerStack.h"
 #include "SPositiveActionButton.h"
+#include "OdysseyLayer.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 

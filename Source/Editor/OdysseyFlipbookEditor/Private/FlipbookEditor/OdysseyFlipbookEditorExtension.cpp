@@ -8,6 +8,7 @@
 #include "FlipbookEditor/OdysseyFlipbookEditorTimelineTab.h"
 #include "Widgets/SOdysseyFlipbookTimelineView.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "PaperSprite.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

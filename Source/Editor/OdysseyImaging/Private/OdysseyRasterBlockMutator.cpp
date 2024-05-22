@@ -5,6 +5,7 @@
 
 #include "OdysseyRasterBlock.h"
 #include "Editor.h"
+#include "ULISLoaderModule.h"
 
 FOdysseyRasterBlockMutator::~FOdysseyRasterBlockMutator()
 {

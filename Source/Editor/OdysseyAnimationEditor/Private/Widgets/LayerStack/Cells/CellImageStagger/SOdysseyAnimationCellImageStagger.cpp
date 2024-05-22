@@ -4,6 +4,11 @@
 #include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerMutator.h"
 #include "Widgets/Input/SSpinBox.h"
+#include "OdysseyStyleSet.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

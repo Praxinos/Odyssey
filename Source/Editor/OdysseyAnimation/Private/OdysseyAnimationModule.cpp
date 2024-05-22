@@ -4,6 +4,7 @@
 #include "OdysseyAnimationModule.h"
 
 #include "IMediaModule.h"
+#include "Media/OdysseyAnimationMediaPlayerFactory.h"
 
 void FOdysseyAnimationModule::StartupModule()
 {

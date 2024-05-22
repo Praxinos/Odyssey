@@ -2,6 +2,8 @@
 //#include "Undo/OdysseyVectorUndoPropertyChanged.h"
 #include "Undo/OdysseyVectorUndoObjectParam.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

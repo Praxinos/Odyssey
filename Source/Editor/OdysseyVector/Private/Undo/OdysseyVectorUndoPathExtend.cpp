@@ -1,5 +1,8 @@
 #include "Undo/OdysseyVectorUndoPathExtend.h"
 
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
+
 FOdysseyVectorUndoPathExtend::~FOdysseyVectorUndoPathExtend()
 {
     if( mApplied )

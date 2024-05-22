@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyAnimationLayerImageVector;
+class UOdysseyAnimationLayerImageVector;
 
 class FOdysseyAnimationLayerImageVectorExport
 {

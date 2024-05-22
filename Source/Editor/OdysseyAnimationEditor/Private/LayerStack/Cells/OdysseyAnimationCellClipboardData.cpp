@@ -4,6 +4,9 @@
 #include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
 
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData()
     : IOdysseyClipboardData(StaticId())

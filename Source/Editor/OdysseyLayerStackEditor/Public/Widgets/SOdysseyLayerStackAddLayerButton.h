@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 class UOdysseyLayerStack;
+class UOdysseyLayer;
 
 /**
  * Implements the Layer stack widget

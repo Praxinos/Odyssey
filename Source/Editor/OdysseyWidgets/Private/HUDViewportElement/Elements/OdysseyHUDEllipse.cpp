@@ -3,6 +3,8 @@
 
 #include "OdysseyHUDEllipse.h"
 
+#include "ULISLoaderModule.h"
+
 FOdysseyHUDEllipse::~FOdysseyHUDEllipse()
 {
 

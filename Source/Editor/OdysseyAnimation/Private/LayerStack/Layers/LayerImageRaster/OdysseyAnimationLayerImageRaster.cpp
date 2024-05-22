@@ -17,6 +17,10 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterExport.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRasterImport.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyRasterBlock.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
+#include "OdysseyMediaRaster.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 

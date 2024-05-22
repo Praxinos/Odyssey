@@ -6,6 +6,7 @@
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
 

@@ -5,6 +5,7 @@
 
 #include "OdysseyMediaProvider.h"
 
+namespace ULIS { class FBlock; }
 class UOdysseyLayerStack;
 
 /**

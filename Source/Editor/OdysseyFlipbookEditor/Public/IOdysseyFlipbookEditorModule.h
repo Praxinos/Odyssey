@@ -8,6 +8,7 @@
 #include "Toolkits/IToolkitHost.h"
 
 class FOdysseyFlipbookEditorToolkit;
+class UPaperFlipbook;
 
 class IOdysseyFlipbookEditorModule
 	: public IModuleInterface

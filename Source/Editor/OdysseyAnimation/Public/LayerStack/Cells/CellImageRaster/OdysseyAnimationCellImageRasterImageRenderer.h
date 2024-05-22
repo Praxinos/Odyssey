@@ -4,6 +4,9 @@
 #pragma once
 
 #include "OdysseyImageRenderer.h"
+#include <ULIS>
+
+class FOdysseyAnimationCellImageRaster;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderer
     : public IOdysseyImageRenderer

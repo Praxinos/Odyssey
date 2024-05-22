@@ -6,6 +6,7 @@
 #include "SOdysseyViewport.h"
 #include "OdysseyEditorTab.h"
 #include "OdysseyEventState.h"
+#include "Input/OdysseyPoint.h"
 
 class FOdysseyPainterEditor;
 class SOdysseyViewport;

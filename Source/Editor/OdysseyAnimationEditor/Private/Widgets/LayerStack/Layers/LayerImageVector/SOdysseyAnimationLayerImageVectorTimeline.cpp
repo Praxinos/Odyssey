@@ -6,6 +6,7 @@
 #include "Widgets/LayerStack/Cells/CellImageVector/SOdysseyAnimationCellImageVector.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "OdysseyAnimation.h"
 
 SOdysseyAnimationLayerImageVectorTimeline::~SOdysseyAnimationLayerImageVectorTimeline()
 {

@@ -5,6 +5,9 @@
 
 #include "OdysseyEditorTab.h"
 
+class FOdysseyTextureEditorExtension;
+class UTexture;
+
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorTextureDetailsTab :
 	public FOdysseyEditorTab
 {

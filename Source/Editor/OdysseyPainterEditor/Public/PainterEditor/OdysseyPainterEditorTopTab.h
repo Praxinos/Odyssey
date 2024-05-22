@@ -7,6 +7,7 @@
 #include "Widgets/Layout/SWrapBox.h"
 
 class FOdysseyPainterEditor;
+class UOdysseyPainterEditorTool;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorTopTab :
 	public FOdysseyEditorTab

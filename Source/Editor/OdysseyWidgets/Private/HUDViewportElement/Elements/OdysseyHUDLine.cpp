@@ -3,6 +3,7 @@
 
 #include "OdysseyHUDLine.h"
 
+#include "ULISLoaderModule.h"
 
 FOdysseyHUDLine::~FOdysseyHUDLine()
 {

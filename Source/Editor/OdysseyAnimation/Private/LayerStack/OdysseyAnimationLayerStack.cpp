@@ -8,6 +8,7 @@
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "LayerStack/OdysseyAnimationLayerStackImageRenderer.h"
 #include "OdysseyRectUtils.h"
+#include "OdysseyAnimation.h"
 
 //===============================================
 

@@ -5,6 +5,8 @@
 
 #include "Mutations/OdysseyMutator.h"
 
+#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+
 class UObject;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageStaggerMutator

@@ -4,6 +4,8 @@
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "LayerStack/Cells/OdysseyAnimationCellExport.h"
 #include "LayerStack/Cells/OdysseyAnimationCellImport.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimation.h"
 
 /* FOdysseyAnimationCell::FOnLengthChanged&
 FOdysseyAnimationCell::OnLengthChanged()

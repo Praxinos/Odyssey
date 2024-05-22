@@ -2,6 +2,8 @@
 
 #include "OdysseyLayerStackClipboardData.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyLayer.h"
 
 FOdysseyLayerStackClipboardData::FOdysseyLayerStackClipboardData()
     : IOdysseyClipboardData(StaticId())

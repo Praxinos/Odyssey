@@ -9,6 +9,8 @@ class FModeToolkit;
 class FOdysseyViewportDrawingEditor;
 class FOdysseyViewportDrawingEditorToolkit;
 class FOdysseyViewportDrawingEditorPainter;
+class FOdysseyPainterEditor;
+class FOdysseyViewportDrawingEditorExtension;
 
 /**
  * Odyssey paint on viewport editor mode

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
 
 class FOdysseyViewportDrawingEditorExtension;
 

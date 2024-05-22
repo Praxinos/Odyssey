@@ -4,6 +4,7 @@
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerRow.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 //PUBLIC API-----------------------------------------------------------
 

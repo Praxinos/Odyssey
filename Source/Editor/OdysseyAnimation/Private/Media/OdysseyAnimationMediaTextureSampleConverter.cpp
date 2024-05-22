@@ -3,6 +3,8 @@
 
 #include "Media/OdysseyAnimationMediaTextureSampleConverter.h"
 
+#include "Media/OdysseyAnimationMediaTextureSample.h"
+
 FOdysseyAnimationMediaTextureSampleConverter::FOdysseyAnimationMediaTextureSampleConverter(FOdysseyAnimationMediaTextureSample* iSample)
 	: mSample(iSample)
 {

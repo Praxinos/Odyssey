@@ -5,6 +5,15 @@
 
 #include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/LayerStack/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyLayerStack.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyAnimation.h"
+#include "ULISLoaderModule.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

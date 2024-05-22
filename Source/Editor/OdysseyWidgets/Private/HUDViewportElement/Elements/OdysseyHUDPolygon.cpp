@@ -3,6 +3,8 @@
 
 #include "OdysseyHUDPolygon.h"
 
+#include "ULISLoaderModule.h"
+
 FOdysseyHUDPolygon::~FOdysseyHUDPolygon()
 {
 

@@ -8,6 +8,8 @@
 class UObject;
 class FOdysseySetCellsOffsetMutation;
 class FOdysseySetCellLengthMutation;
+class FOdysseyAnimationCellsContainer;
+class FOdysseyAnimationCell;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellsMutator
     : public FOdysseyMutator

@@ -9,6 +9,14 @@
 #include "ISettingsModule.h"
 #include "FlipbookEditor/OdysseyFlipbookEditorGUI.h"
 #include "LevelEditor.h"
+#include "OdysseyFlipbookContentBrowserExtensions.h"
+#include "AssetToolsModule.h"
+#include "PaperFlipbook.h"
+#include "OdysseyFlipbookAssetTypeActions.h"
+#include "OdysseyFlipbookEditorSettings.h"
+#include "PaperSprite.h"
+#include "OdysseyPainterEditor.h"
+#include "Models/OdysseyFlipbookEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
@@ -171,7 +179,7 @@ FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook
         {
             if (!warningDisplayed)
             {
-                EditFlipbooksWarning();
+                FOdysseyFlipbookContentBrowserExtensions::EditFlipbooksWarning();
                 warningDisplayed = true;
             }
             continue;

@@ -6,6 +6,7 @@
 #include "OdysseyEditorTab.h"
 #include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "TextureEditor/OdysseyTextureEditorExtension.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "IMediaPlayerFactory.h"
 #include "Modules/ModuleInterface.h"
+#include "Media/OdysseyAnimationMediaPlayerFactory.h"
 
 /**
  * The Animation Asset module.

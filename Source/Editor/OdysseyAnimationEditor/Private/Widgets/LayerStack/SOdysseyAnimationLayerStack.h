@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Widgets/SOdysseyLayerStackTreeView.h"
+#include "OdysseyAnimationEditorTimeline.h"
 
 /**
  * Implements the Animation Layer stack widget
@@ -11,6 +12,7 @@
 
 class FOdysseyAnimationEditorExtension;
 class SOdysseyLayerStackTreeView;
+class UOdysseyAnimationLayerStack;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget

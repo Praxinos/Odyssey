@@ -9,6 +9,10 @@
 #include "OdysseyHUDHandle.h"
 #include "OdysseyHUDCircle.h"
 #include "OdysseyHUDLine.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyAnimation.h"
 
 #include <ULIS>
 

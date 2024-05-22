@@ -8,6 +8,9 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorBlock.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyLayerStack.h"
 
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"

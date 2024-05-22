@@ -5,6 +5,7 @@
 
 class FOdysseyVectorChain;
 class FOdysseyVectorSegment;
+typedef struct _FOdysseyVectorFraction FOdysseyVectorFraction;
 
 class FOdysseyVectorBrushSegment
 {

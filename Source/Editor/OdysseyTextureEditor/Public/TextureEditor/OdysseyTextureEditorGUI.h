@@ -7,6 +7,7 @@
 
 class FOdysseyTextureEditorExtension;
 class UOdysseyLayerStack;
+class FOdysseyVectorGroupPaint;
 
 /**
  * Implements an Editor toolkit for textures.

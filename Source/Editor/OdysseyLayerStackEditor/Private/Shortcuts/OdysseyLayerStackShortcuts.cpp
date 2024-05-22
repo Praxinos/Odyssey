@@ -9,6 +9,7 @@
 #include "OdysseyLayerStackClipboardData.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyEditorModule.h"
+#include "Commands/OdysseyLayerStackEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 

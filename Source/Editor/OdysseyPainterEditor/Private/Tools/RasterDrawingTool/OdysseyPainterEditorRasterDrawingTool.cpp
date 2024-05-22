@@ -17,7 +17,14 @@
 #include "ISinglePropertyView.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Layout/SWrapBox.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSettings.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyMediaProvider.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
+#include "OdysseyHUDElement.h"
+#include "OdysseyHUDSystem.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

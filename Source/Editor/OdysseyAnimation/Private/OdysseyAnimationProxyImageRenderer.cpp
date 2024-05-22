@@ -5,6 +5,8 @@
 
 #include "OdysseyAnimationProxyImageRenderer.h"
 
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationImageRenderer.h"
 
 FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)

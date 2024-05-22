@@ -4,6 +4,9 @@
 #pragma once
 
 #include "OdysseyImageRenderer.h"
+#include <ULIS>
+
+class UOdysseyTextureLayerStack;
 
 class FOdysseyTextureLayerStackImageRenderer
     : public IOdysseyImageRenderer

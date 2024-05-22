@@ -13,6 +13,9 @@
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
+#include "OdysseyMediaVector.h"
+#include "OdysseyMediaProvider.h"
+#include "OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

@@ -8,6 +8,9 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SSlider.h"
+#include "OdysseyLayerStack.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 
 
 SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationLightTable)

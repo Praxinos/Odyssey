@@ -6,6 +6,10 @@
 #include "Widgets/LayerStack/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimation.h"
+#include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "IStylusState.h"
+#include <windows.h>
 
 // Implementation of the Native driver
 class FNativeStylusInputDevice

@@ -7,6 +7,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Views/STileView.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

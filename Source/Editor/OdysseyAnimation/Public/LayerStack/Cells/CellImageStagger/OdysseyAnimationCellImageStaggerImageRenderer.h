@@ -5,6 +5,10 @@
 
 #include "OdysseyImageRenderer.h"
 
+#include <ULIS>
+
+class FOdysseyAnimationCellImageStagger;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageStaggerImageRenderer
     : public IOdysseyImageRenderer
 {

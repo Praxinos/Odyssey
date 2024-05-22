@@ -6,6 +6,9 @@
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketToolSourceProvider.h"
 
 class FOdysseyTextureEditorExtension;
+class FOdysseyImageRenderingAbility;
+class UOdysseyLayer;
+class FOdysseyTextureEditorExtension;
 
 class FOdysseyTextureEditorRasterPaintBucketToolSourceProvider
 	: public FOdysseyPainterEditorRasterPaintBucketToolSourceProvider

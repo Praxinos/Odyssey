@@ -1,5 +1,7 @@
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 
+#include "OdysseyVectorEngine.h"
+
 FOdysseyVectorUndoEngineClear::~FOdysseyVectorUndoEngineClear()
 {
     delete mScene;

@@ -4,9 +4,12 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
+#include "PaperFlipbook.h"
 
 class FOdysseyFlipbookEditorExtension;
 class SOdysseyFlipbookTimelineView;
+class FOdysseyFlipbookWrapper;
+class UPaperSprite;
 
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorTimelineTab :
 	public FOdysseyEditorTab

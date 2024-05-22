@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyAnimationLayerImageRaster;
+class UOdysseyAnimationLayerImageRaster;
 
 class FOdysseyAnimationLayerImageRasterExport
 {

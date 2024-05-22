@@ -19,6 +19,9 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 #include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyAnimation.h"
+#include "AnimationEditor/OdysseyAnimationEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

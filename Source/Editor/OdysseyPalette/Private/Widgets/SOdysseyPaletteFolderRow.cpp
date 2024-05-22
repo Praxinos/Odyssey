@@ -6,6 +6,7 @@
 #include "OdysseyStyleSet.h"
 #include "SOdysseyPaletteEntryRow.h"
 #include "Widgets/SOdysseyPaletteTreeView.h"
+#include "OdysseyPaletteEntryFolder.h"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyPaletteFolderRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntryFolder* iFolderEntry)
