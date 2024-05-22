@@ -31,5 +31,5 @@ public:
     TArray<UOdysseyLayer*> Paste(UOdysseyLayerStack* iLayerStack) const;
 
 private:
-    TArray<UOdysseyLayer*> mLayers;
+    TArray<TObjectPtr<UOdysseyLayer>> mLayers;
 };
