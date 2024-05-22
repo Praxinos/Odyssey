@@ -1013,19 +1013,19 @@ FOdysseyViewportDrawingEditorExtension::GetHUDPlaneParams(FVector& oPlaneTopLeft
 	FVector brushYAxis(0.f, 1.f, 0.f);
 
 	FBox bbox = staticMesh->GetBoundingBox();
-	FVector extent = bbox.GetExtent();
+	FVector bboxSize = bbox.GetSize();
 	FVector scale = actor->GetActorScale();
 	
-	oW = extent.X * scale.X * 2;
-	oH = extent.Y * scale.Y * 2;
+	oW = bboxSize.X;// * scale.X;
+	oH = bboxSize.Y;// * scale.Y;
 
 	FString pathname = staticMesh->GetPathName();
 	if (actor->IsA<AMediaPlate>())
 	{
 		brushXAxis = FVector(0.f, 1.f, 0.f);
 		brushYAxis = FVector(0.f, 0.f, -1.f);
-		oW = extent.Y * scale.Y * 2;
-		oH = extent.Z * scale.Z * 2;
+		oW = bboxSize.Y; //* scale.Y;
+		oH = bboxSize.Z; //* scale.Z;
 	}
 
 	oXAxis = componentToWorld.TransformVector(brushXAxis);
@@ -1040,6 +1040,15 @@ bool
 FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iViewportClient, const FVector2D& iViewportPoint, FVector2D& oHUDPoint)
 {
 	if (!mTexture)
+		return false;
+
+	UMeshComponent* component = Component();
+	if (!component || !component->IsA<UStaticMeshComponent>())
+		return false;
+
+	UStaticMeshComponent* staticMeshComponent = Cast<UStaticMeshComponent>(component);
+	UStaticMesh* staticMesh = staticMeshComponent->GetStaticMesh();
+	if (!staticMesh)
 		return false;
 
 	FVector planeTopLeft;
@@ -1070,8 +1079,29 @@ FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iVi
 
 	view->DeprojectFVector2D(iViewportPoint, rayOrigin, rayDirection);
 
-	FVector texturePoint = FMath::RayPlaneIntersection(rayOrigin, rayDirection, plane) - planeTopLeft;
-	oHUDPoint = FVector2D(texturePoint.X * mTexture->GetSurfaceWidth() / w, texturePoint.Y * mTexture->GetSurfaceHeight() / h);
+	FVector worldPoint = FMath::RayPlaneIntersection(rayOrigin, rayDirection, plane);
+
+	FTransform componentToWorld = component->GetComponentToWorld();
+	FVector componentPoint = componentToWorld.InverseTransformPosition(worldPoint);
+
+	FBox bbox = staticMesh->GetBoundingBox();
+	FVector bboxMin = bbox.Min;
+
+	AActor* actor = Actor();
+	
+	if (actor->IsA<AMediaPlate>())
+	{
+		componentPoint.Y -= bboxMin.Y;
+		componentPoint.Z += bboxMin.Z;
+		componentPoint.Z *= -1;
+		oHUDPoint = FVector2D(componentPoint.Y * mTexture->GetSurfaceWidth() / w, componentPoint.Z * mTexture->GetSurfaceHeight() / h);
+	}
+	else
+	{
+		componentPoint.X -= bboxMin.X;
+		componentPoint.Y += bboxMin.Y;
+		oHUDPoint = FVector2D(componentPoint.X * mTexture->GetSurfaceWidth() / w, componentPoint.Y * mTexture->GetSurfaceHeight() / h);
+	}
 
 	return true;
 }
