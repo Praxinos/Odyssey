@@ -188,6 +188,7 @@ public:
     static void AlterContourWidth( FOdysseyVectorGroupPaint* iScene
                                  , double iValue
                                  , bool   iAbsolute );
+    static void AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
 
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );

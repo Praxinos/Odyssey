@@ -120,6 +120,8 @@ namespace FOdysseyVector
 
 #include "OdysseyVectorPolygon.h"
 #include "OdysseyVectorBrush.h"
+#include "OdysseyVectorTag.h"
+#include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorHandleSegment.h"

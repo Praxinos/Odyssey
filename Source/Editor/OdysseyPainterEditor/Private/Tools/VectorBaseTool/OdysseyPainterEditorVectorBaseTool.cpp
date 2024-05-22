@@ -955,6 +955,11 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenu( FMenuBuilder& menu )
     {
         ExtendContextMenuVertex( menu );
     }
+
+    if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        ExtendContextMenuInbetween( menu );
+    }
 }
 
 void
@@ -1113,6 +1118,40 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::UnlockPointSelection, GetEditor(), vectorScene )));
         //    }
         //    menu.EndSection();
+        }
+    }
+
+    //return menu.MakeWidget();
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& menu )
+{
+    //FMenuBuilder menu( true, nullptr );
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return;
+
+    bool hasVector = mediaProvider.HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+        // Commented-out: sections are not needed here as they would conflict with the section
+        // just created by the Edit Menu when this tool's menu appears in the Edit Menu
+        // See FOdysseyPainterEditor::AddEditMenuEntry() for details
+        //     menu.BeginSection("Context");
+        //     {
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-grid.name", "Add Inbetweener Grid")
+                , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-grid.tooltip", "Add Inbetweener Grid")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, GetEditor(), vectorScene )));
         }
     }
 

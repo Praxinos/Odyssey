@@ -151,8 +151,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         // HUD Drawing Flags
         static const uint64 HUD_MODE_OBJECT              = ( 1ULL <<  0 );
         static const uint64 HUD_MODE_VERTEX              = ( 1ULL <<  1 );
+        static const uint64 HUD_MODE_INBETWEEN           = ( 1ULL <<  2 );
         static const uint64 HUD_MODE_ALL                 = HUD_MODE_OBJECT
-                                                         | HUD_MODE_VERTEX;
+                                                         | HUD_MODE_VERTEX
+                                                         | HUD_MODE_INBETWEEN;
         static const uint64 HUD_PATH_VERTEX_VALENCE0     = ( 1ULL <<  2 );
         static const uint64 HUD_PATH_VERTEX_VALENCE1     = ( 1ULL <<  3 );
         static const uint64 HUD_PATH_VERTEX_VALENCE2     = ( 1ULL <<  4 );

@@ -27,11 +27,19 @@ SOdysseyPainterEditorVectorEditionMode::GetVertexModeState() const
                                                                              : ECheckBoxState::Unchecked;
 }
 
+ECheckBoxState
+SOdysseyPainterEditorVectorEditionMode::GetInbetweenModeState() const
+{
+    return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ? ECheckBoxState::Checked
+                                                                                : ECheckBoxState::Unchecked;
+}
+
 void
 SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOdysseyPainterEditor* iEditor )
 {
     TAttribute<ECheckBoxState> objectModeChecked( this, &SOdysseyPainterEditorVectorEditionMode::GetObjectModeState );
     TAttribute<ECheckBoxState> vertexModeChecked( this, &SOdysseyPainterEditorVectorEditionMode::GetVertexModeState ) ;
+    TAttribute<ECheckBoxState> inbetweenModeChecked( this, &SOdysseyPainterEditorVectorEditionMode::GetInbetweenModeState ) ;
 
     mEditor = iEditor;
 
@@ -59,6 +67,17 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
        .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeVertex32"))
     ];
 
+    mInbetweenModeCheckbox =
+    SNew(SCheckBox)
+   .Type(ESlateCheckBoxType::ToggleButton)
+   .Style(FAppStyle::Get(),TEXT("ToggleButtonCheckBox"))
+   .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_INBETWEEN) ))
+   .IsChecked( inbetweenModeChecked )
+   .ToolTipText(LOCTEXT("vector-edition-mode.inbetween-mode.tooltip", "Inbetween Mode"))
+    [
+        SNew(SImage)
+       .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeInbetweening32"))
+    ];
 
     ChildSlot
     .Padding(0)
@@ -79,6 +98,12 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
         //.HAlign(HAlign_Fill)
         [
             mVertexModeCheckbox.ToSharedRef()
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        //.HAlign(HAlign_Fill)
+        [
+            mInbetweenModeCheckbox.ToSharedRef()
         ]
     ];
 }

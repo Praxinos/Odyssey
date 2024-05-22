@@ -9,6 +9,7 @@
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorGroup;
+class FOdysseyVectorTag;
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
 {
@@ -499,7 +500,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         virtual void ApplyTransformations();
         virtual void ApplyMatrix( BLMatrix2D& iMatrix );
-
+        void AddTag( FOdysseyVectorTag* iTag );
+        void RemoveTag( FOdysseyVectorTag* iTag );
+        void DrawTags( BLContext* iBLContext
+                     , const ::ULIS::FRectD& iInvalidationArea
+                     , double iCombinedOpacity
+                     , uint64 iFlags );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
@@ -517,6 +523,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         BLMatrix2D mInverseLocalMatrix;
         BLMatrix2D mWorldMatrix;
         BLMatrix2D mInverseWorldMatrix;
+        std::list<FOdysseyVectorTag*> mTagList;
         std::list<FOdysseyVectorObject*> mChildrenList;
         std::list<FOdysseyVectorObject*> mInvalidatedChildrenList;
         FOdysseyVectorObject* mParent;

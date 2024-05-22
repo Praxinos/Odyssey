@@ -1,5 +1,6 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorTag.h"
 #include "OdysseyVectorEngine.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
@@ -62,6 +63,18 @@ void
 FOdysseyVectorObject::SetOpacity( double iOpacity )
 {
     mOpacity = iOpacity;
+}
+
+void
+FOdysseyVectorObject::AddTag( FOdysseyVectorTag* iTag )
+{
+    mTagList.push_back( iTag );
+}
+
+void
+FOdysseyVectorObject::RemoveTag( FOdysseyVectorTag* iTag )
+{
+    mTagList.remove( iTag );
 }
 
 void
@@ -511,6 +524,18 @@ FOdysseyVectorObject::DrawChildren( BLContext* iBLContext
 }
 
 void
+FOdysseyVectorObject::DrawTags( BLContext* iBLContext
+                              , const ::ULIS::FRectD& iInvalidationArea
+                              , double iCombinedOpacity
+                              , uint64 iFlags )
+{
+    for( FOdysseyVectorTag *tag : mTagList )
+    {
+        tag->Draw( iBLContext, iInvalidationArea, iCombinedOpacity, iFlags );
+    }
+}
+
+void
 FOdysseyVectorObject::Draw( BLContext* iBLContext
                           , const ::ULIS::FRectD& iInvalidationArea
                           , double iAncestorsOpacity
@@ -526,6 +551,9 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
     DrawShape( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
+
+    DrawTags( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
+
     // get sure the parent has finished drawing before drawing its children
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 

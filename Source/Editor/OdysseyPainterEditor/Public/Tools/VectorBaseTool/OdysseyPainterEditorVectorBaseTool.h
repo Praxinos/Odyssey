@@ -128,7 +128,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
     private:
         void ExtendContextMenuObject( FMenuBuilder& menu );
         void ExtendContextMenuVertex( FMenuBuilder& menu );
-
+        void ExtendContextMenuInbetween( FMenuBuilder& menu );
 
     protected:
         // to store the top tab widget in order to create it only once. this will prevent sizing 
