@@ -138,6 +138,15 @@ UOdysseyAnimationLayerImageVector::BlendModeChanged()
 void
 UOdysseyAnimationLayerImageVector::OnCellsChanged()
 {
+    int i = 0;
+
+    for( TSharedPtr<FOdysseyAnimationCell> cell : mCellsContainer.Get().GetCells() )
+    {
+        FOdysseyAnimationCellImageVector* vectorCell = static_cast<FOdysseyAnimationCellImageVector*>(cell.Get());
+
+        vectorCell->GetEngine()->SetCellIndex( i++ );
+    }
+
     //OnCellsChanged().Broadcast(this);
     ImageRenderingCompositionChanged();
     UOdysseyLayer::OnMediaChanged().Broadcast();
@@ -515,6 +524,12 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
         engine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
     }
+}
+
+FOdysseyVectorSharedEnv*
+UOdysseyAnimationLayerImageVector::GetSharedEnv()
+{
+    return &mSharedEnv;
 }
 
 #undef LOCTEXT_NAMESPACE

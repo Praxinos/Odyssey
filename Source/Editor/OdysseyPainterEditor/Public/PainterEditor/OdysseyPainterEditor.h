@@ -23,6 +23,7 @@
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
+#include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
 #include "OdysseyMediaProvider.h"
 #include <ULIS>
 
@@ -115,6 +116,7 @@ public:
     virtual UOdysseyPainterEditorVectorSelectionTool*                GetVectorSelectionTool() const;
     virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const;
     virtual UOdysseyPainterEditorVectorTransformTool*                GetVectorTransformTool() const;
+    virtual UOdysseyPainterEditorVectorMatchingTool*                 GetVectorMatchingTool() const;
     virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const;
     virtual UOdysseyPainterEditorVectorEraserTool*                   GetVectorEraserTool() const;
     virtual UOdysseyPainterEditorVectorPathPushTool*                 GetVectorPathPushTool() const;
@@ -261,6 +263,7 @@ protected:
     UOdysseyPainterEditorColorPickerTool* mColorPickerTool;
     UOdysseyPainterEditorVectorGridTool* mVectorGridTool;
     UOdysseyPainterEditorVectorTransformTool* mVectorTransformTool;
+    UOdysseyPainterEditorVectorMatchingTool* mVectorMatchingTool;
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 };

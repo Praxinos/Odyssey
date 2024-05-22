@@ -77,9 +77,10 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
     mWidth = iWidth;
     mHeight = iHeight;
 
-    mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
-                                       , (double)iWidth
-                                       , (double)iHeight );
+    mEngine = new FOdysseyVectorEngine( GetLayer()->GetSharedEnv()
+                                      , new FOdysseyVectorGroupPaint( "Scene" )
+                                      , (double)iWidth
+                                      , (double)iHeight );
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsColoredChanged );

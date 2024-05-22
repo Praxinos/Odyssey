@@ -828,7 +828,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 
         Invalidate( INVALIDATE_HIERARCHY );
 
-        iChild->mParent = nullptr;
+        //iChild->mParent = nullptr;
 
         return HIERARCHY_CHANGE_SUCCESS; // removal succeeded
     }

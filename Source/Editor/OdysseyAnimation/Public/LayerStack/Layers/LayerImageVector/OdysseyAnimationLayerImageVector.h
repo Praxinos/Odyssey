@@ -73,6 +73,10 @@ public:
     virtual FInt32Range GetFrameRange() const override;
 
 public:
+    // vector data shared between all cells
+    FOdysseyVectorSharedEnv* GetSharedEnv();
+
+public:
     virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const override;
     virtual bool GetIsLightTableActivated() const override;
     virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override;
@@ -132,4 +136,5 @@ public:
 private:
     TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;
     TSharedPtr<FOdysseyAnimationLightTable> mLightTable;
+    FOdysseyVectorSharedEnv mSharedEnv;
 };

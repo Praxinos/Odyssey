@@ -62,7 +62,8 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
         mEditor->GetVectorEraserTool(),
         mEditor->GetVectorPaintBucketTool(),
         mEditor->GetColorPickerTool(),
-        mEditor->GetVectorGridTool()
+        mEditor->GetVectorGridTool(),
+        mEditor->GetVectorMatchingTool()
     };
 
     tools = tools.FilterByPredicate([](UOdysseyPainterEditorTool* iTool){return !!iTool;});

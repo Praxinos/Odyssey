@@ -100,6 +100,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
 	, mColorPickerTool(nullptr)
 	, mVectorGridTool(nullptr)
 	, mVectorTransformTool(nullptr)
+	, mVectorMatchingTool(nullptr)
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
 	mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
@@ -167,6 +168,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mColorPickerTool->BindShortcuts(iToolkit);
 	mVectorGridTool->BindShortcuts(iToolkit);
 	mVectorTransformTool->BindShortcuts(iToolkit);
+	mVectorMatchingTool->BindShortcuts(iToolkit);
 
 	//---
 
@@ -205,6 +207,7 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
 	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
 	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
+	mVectorMatchingTool->ExtendMenu(iOwner, iMenuName);
 
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->ExtendMenu(iOwner, iMenuName);
@@ -251,6 +254,7 @@ FOdysseyPainterEditor::InitTools()
 	mColorPickerTool = NewObject<UOdysseyPainterEditorColorPickerTool>();
 	mVectorGridTool = NewObject<UOdysseyPainterEditorVectorGridTool>();
 	mVectorTransformTool = NewObject<UOdysseyPainterEditorVectorTransformTool>();
+	mVectorMatchingTool = NewObject<UOdysseyPainterEditorVectorMatchingTool>();
 
 	mRasterDrawingTool->SetEditor(this);
     mRasterEraserTool->SetEditor(this);
@@ -270,6 +274,7 @@ FOdysseyPainterEditor::InitTools()
 	mColorPickerTool->SetEditor(this);
 	mVectorGridTool->SetEditor(this);
 	mVectorTransformTool->SetEditor(this);
+	mVectorMatchingTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(&mBrushContexts);
 
     //Default Tools a defined by their position in mTools
@@ -300,6 +305,7 @@ FOdysseyPainterEditor::InitTools()
 	mTools.Add(mVectorPaintBucketTool);
 	mTools.Add(mVectorGridTool);
 	mTools.Add(mVectorTransformTool);
+	mTools.Add(mVectorMatchingTool);
     //Generic Tools
 	mTools.Add(mColorPickerTool);
 }
@@ -401,6 +407,12 @@ UOdysseyPainterEditorVectorTransformTool*
 FOdysseyPainterEditor::GetVectorTransformTool() const
 {
     return mVectorTransformTool;
+}
+
+UOdysseyPainterEditorVectorMatchingTool*
+FOdysseyPainterEditor::GetVectorMatchingTool() const
+{
+    return mVectorMatchingTool;
 }
 
 UOdysseyPainterEditorVectorScenePanTool*
@@ -1977,6 +1989,7 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mColorPickerTool);
 	Collector.AddReferencedObject(mVectorGridTool);
 	Collector.AddReferencedObject(mVectorTransformTool);
+	Collector.AddReferencedObject(mVectorMatchingTool);
 }
 
 #undef LOCTEXT_NAMESPACE

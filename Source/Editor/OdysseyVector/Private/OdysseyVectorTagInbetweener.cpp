@@ -224,6 +224,29 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
 }
 
 void
+FOdysseyVectorTagInbetweener::ResetChart()
+{
+    float step = 1.0f / ( mInbetweenCount + 1 );
+    float spacing = step;
+
+    mChart.inbetweenBuffer.clear();
+    mChart.inbetweenBuffer.resize( mInbetweenCount );
+
+    for( uint32 i = 0; i < mInbetweenCount; i++ )
+    {
+        mChart.inbetweenBuffer[i].spacing = spacing;
+
+        spacing += step;
+    }
+}
+
+FInbetweenerChart&
+FOdysseyVectorTagInbetweener::GetChart()
+{
+    return mChart;
+}
+
+void
 FOdysseyVectorTagInbetweener::Reset()
 {
     ::ULIS::FRectD bbox = mOwner->GetBBox( false );
@@ -278,6 +301,8 @@ FOdysseyVectorTagInbetweener::Reset()
     FFDComputeBinomialCoefficients();
 
     Map();
+
+    ResetChart();
 
     Interpolate();
 }
@@ -378,9 +403,9 @@ FOdysseyVectorTagInbetweener::Interpolate()
         for( FInbetweenerPoint& point : mGridPointBuffer )
         {
             ::ULIS::FVec2D diff = ( point.targetPosition - point.sourcePosition );
-            ::ULIS::FVec2D step = diff / ( mInbetweenCount + 1 );
+            ::ULIS::FVec2D step = diff * mChart.inbetweenBuffer[i].spacing;
 
-            point.motionPosition = point.sourcePosition + ( step * i );
+            point.motionPosition = point.sourcePosition + step;
 
             point.u = ( point.motionPosition.x - bbox.x ) / bbox.w;
             point.v = ( point.motionPosition.y - bbox.y ) / bbox.h;
@@ -391,15 +416,21 @@ FOdysseyVectorTagInbetweener::Interpolate()
     }
 }
 
+uint32
+FOdysseyVectorTagInbetweener::GetInbetweenCount()
+{
+    return mInbetweenCount;
+}
+
 void
 FOdysseyVectorTagInbetweener::Draw( BLContext* iBLContext
                                   , const ::ULIS::FRectD& iInvalidationArea
                                   , double iAncestorsOpacity
                                   , uint64 iDrawingFlags )
 {
-    DrawPaths( iBLContext, iInvalidationArea, iAncestorsOpacity, iDrawingFlags );
+    //DrawPaths( iBLContext, iInvalidationArea, iAncestorsOpacity, iDrawingFlags );
 
-    DrawGrid( iBLContext, iInvalidationArea, iAncestorsOpacity, iDrawingFlags );
+    //DrawGrid( iBLContext, iInvalidationArea, iAncestorsOpacity, iDrawingFlags );
 }
 
 // when drawn as a shared tag
@@ -412,6 +443,12 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iCurrentScene
 {
     FOdysseyVectorGroupPaint* scene = mOwner->GetScene();
 
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
+    iBLContext->setStrokeWidth( 3.0f );
+
     // if th eobject hasn't been removed from the scene
     if( scene )
     {
@@ -422,28 +459,18 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iCurrentScene
           && ( currentCellIndex <= ( cellIndex + mInbetweenCount ) ) )
         {
             DrawPathsInbetween( currentCellIndex - cellIndex - 1
-                              , iBLContext
-                              , iInvalidationArea
-                              , iAncestorsOpacity
-                              , iDrawingFlags );
+                              , iBLContext );
         }
     }
+
+    iBLContext->restore();
 }
 
 void
 FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iInbetweenIndex
-                                                , BLContext* iBLContext
-                                                , const ::ULIS::FRectD& iInvalidationArea
-                                                , double iAncestorsOpacity
-                                                , uint64 iDrawingFlags )
+                                                , BLContext* iBLContext )
 {
     BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
-    iBLContext->setStrokeWidth( 1.0f );
 
     for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
     {
@@ -472,10 +499,59 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iInbetweenIndex
             iBLContext->strokePath( path );
         }
     }
-
-    iBLContext->restore();
 }
 
+void
+FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
+                                           , float iNewSpacing
+                                           , bool iRelative )
+{
+    int32 inbetweenIndex = iInbetween - &mChart.inbetweenBuffer[0];
+    int32 prevIndex  = inbetweenIndex - 1;
+    uint32 nextIndex = inbetweenIndex + 1;
+    float prevSpacing = prevIndex > -1 ? mChart.inbetweenBuffer[prevIndex].spacing
+                                       : 0.0f;
+    float nextSpacing = nextIndex < mInbetweenCount ? mChart.inbetweenBuffer[nextIndex].spacing
+                                                    : 1.0f;
+
+
+    if( iRelative == false )
+    {
+        if( ( iNewSpacing > prevSpacing )
+         && ( iNewSpacing < nextSpacing ) )
+        {
+            iInbetween->spacing = iNewSpacing;
+        }
+    }
+    else
+    {
+        for( FInbetweenerInbetween& otherInbetween : mChart.inbetweenBuffer )
+        {
+            if( &otherInbetween != iInbetween )
+            {
+                float ratio = iInbetween->spacing ? ( otherInbetween.spacing / iInbetween->spacing ) : 0.0f;
+
+                otherInbetween.spacing = iNewSpacing * ratio;
+            }
+        }
+
+        iInbetween->spacing = iNewSpacing;
+    }
+}
+
+std::vector<FInbetweenerCell>&
+FOdysseyVectorTagInbetweener::GetGridCellBuffer()
+{
+    return mGridCellBuffer;
+}
+
+std::vector<FInbetweenerPoint>&
+FOdysseyVectorTagInbetweener::GetGridPointBuffer()
+{
+    return mGridPointBuffer;
+}
+
+/*
 void
 FOdysseyVectorTagInbetweener::DrawPaths( BLContext* iBLContext
                                        , const ::ULIS::FRectD& iInvalidationArea
@@ -484,8 +560,14 @@ FOdysseyVectorTagInbetweener::DrawPaths( BLContext* iBLContext
 {
     BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
 
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
+    iBLContext->setStrokeWidth( 1.0f );
+
     // note: mInbetweenCount+1 holds the target position
-    for( uint32 i = 0; i <= mInbetweenCount; i++ )
+    for( uint32 i = 0; i < mInbetweenCount; i++ )
     {
         DrawPathsInbetween( i
                           , iBLContext
@@ -493,7 +575,18 @@ FOdysseyVectorTagInbetweener::DrawPaths( BLContext* iBLContext
                           , iAncestorsOpacity
                           , iDrawingFlags );
     }
+
+    iBLContext->setStrokeWidth( 3.0f );
+
+    DrawPathsInbetween( mInbetweenCount
+                      , iBLContext
+                      , iInvalidationArea
+                      , iAncestorsOpacity
+                      , iDrawingFlags );
+
+    iBLContext->restore();
 }
+
 
 void
 FOdysseyVectorTagInbetweener::DrawGrid( BLContext* iBLContext
@@ -528,26 +621,5 @@ FOdysseyVectorTagInbetweener::DrawGrid( BLContext* iBLContext
 
     iBLContext->restore();
 }
+*/
 
-void
-FOdysseyVectorTagInbetweener::PickTargetPoints( double iWorldX
-                                              , double iWorldY
-                                              , double iRadius
-                                              , std::vector<FInbetweenerPoint*>& oPointArray
-                                              , std::vector<double>& oWorldDistanceArray )
-{
-    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
-
-    for( FInbetweenerPoint& point : mGridPointBuffer )
-    {
-        BLPoint pt = worldMatrix.mapPoint( point.targetPosition.x, point.targetPosition.y );
-        ::ULIS::FVec2D vec = ::ULIS::FVec2D( pt.x - iWorldX, pt.y - iWorldY );
-        double distance = vec.Distance();
-
-        if( distance <= iRadius )
-        {
-            oPointArray.push_back( &point );
-            oWorldDistanceArray.push_back( distance );
-        }
-    }
-}

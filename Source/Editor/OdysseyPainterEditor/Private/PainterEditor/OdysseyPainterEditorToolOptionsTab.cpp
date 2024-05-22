@@ -70,6 +70,7 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
     SetWidgetForTool(mEditor->GetVectorPaintBucketTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPaintBucketTool()));
     SetWidgetForTool(mEditor->GetVectorGridTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorGridTool()));
     SetWidgetForTool(mEditor->GetVectorTransformTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorTransformTool()));
+    SetWidgetForTool(mEditor->GetVectorMatchingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorMatchingTool()));
 
     //mToolsTab->GetToolsTab()->SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterVectorDrawingTool, mEditor->GetVectorDrawingTool()));
 
