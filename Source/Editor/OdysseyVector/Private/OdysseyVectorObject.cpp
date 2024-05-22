@@ -14,6 +14,11 @@ FOdysseyVectorObject::~FOdysseyVectorObject()
     {
         delete obj;
     }
+
+    for( FOdysseyVectorTag *tag : mTagList )
+    {
+        delete tag;
+    }
 }
 
 FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
@@ -69,12 +74,16 @@ void
 FOdysseyVectorObject::AddTag( FOdysseyVectorTag* iTag )
 {
     mTagList.push_back( iTag );
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAGS );
 }
 
 void
 FOdysseyVectorObject::RemoveTag( FOdysseyVectorTag* iTag )
 {
     mTagList.remove( iTag );
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAGS );
 }
 
 void
@@ -155,10 +164,12 @@ FOdysseyVectorObject::HasBaseClass( uint32 iBaseClassID )
 void
 FOdysseyVectorObject::UpdateShape( uint32 iUpdateFlags )
 {
+/*
     if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
     {
         mInvalidationFlags = 0;
     }
+*/
 }
 
 void
@@ -176,6 +187,17 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
                                             } );
 
         UpdateShape( iUpdateFlags );
+
+        // update tags
+        for( FOdysseyVectorTag* tag : mTagList )
+        {
+            tag->Update( iUpdateFlags );
+        }
+
+        if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
+        {
+            mInvalidationFlags = 0;
+        }
     }
 }
 
@@ -603,9 +625,11 @@ FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
               | ( ( iChildInvalidationFlags & INVALIDATE_SHAPE     ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_COLOR     ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_TOPOLOGY  ) << INVALIDATE_CHILD_SHIFT )
+              | ( ( iChildInvalidationFlags & INVALIDATE_TAGS      ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_MATRIX    ) << INVALIDATE_CHILD_SHIFT )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_SHAPE    )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_COLOR    )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TAGS     )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TOPOLOGY )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_MATRIX   ) );
 }

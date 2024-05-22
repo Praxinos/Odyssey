@@ -41,6 +41,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 INVALIDATE_SHAPE       = ( 1 << 2 );
         static const uint32 INVALIDATE_COLOR       = ( 1 << 3 );
         static const uint32 INVALIDATE_TOPOLOGY    = ( 1 << 4 );
+        static const uint32 INVALIDATE_TAGS        = ( 1 << 5 );
         static const uint32 INVALIDATE_ALL         = ( INVALIDATE_SHAPE
                                                      | INVALIDATE_HIERARCHY
                                                      | INVALIDATE_TOPOLOGY
@@ -49,6 +50,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 INVALIDATE_CHILD_SHAPE    = ( INVALIDATE_SHAPE    << INVALIDATE_CHILD_SHIFT );
         static const uint32 INVALIDATE_CHILD_COLOR    = ( INVALIDATE_COLOR    << INVALIDATE_CHILD_SHIFT );
         static const uint32 INVALIDATE_CHILD_TOPOLOGY = ( INVALIDATE_TOPOLOGY << INVALIDATE_CHILD_SHIFT );
+        static const uint32 INVALIDATE_CHILD_TAGS     = ( INVALIDATE_TAGS     << INVALIDATE_CHILD_SHIFT );
         static const uint32 INVALIDATE_CHILD_MATRIX   = ( INVALIDATE_MATRIX   << INVALIDATE_CHILD_SHIFT );
 
     public:

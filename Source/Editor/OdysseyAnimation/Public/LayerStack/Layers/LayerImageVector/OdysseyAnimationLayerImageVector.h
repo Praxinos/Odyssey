@@ -134,7 +134,8 @@ public:
     bool bAutoAddCells = true;
 
 private:
+    // mSharedEnv MUST be before mCellsContainer because of the destruction order
+    FOdysseyVectorSharedEnv mSharedEnv;
     TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;
     TSharedPtr<FOdysseyAnimationLightTable> mLightTable;
-    FOdysseyVectorSharedEnv mSharedEnv;
 };

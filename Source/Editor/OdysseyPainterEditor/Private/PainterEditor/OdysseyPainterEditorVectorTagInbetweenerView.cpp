@@ -57,8 +57,6 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
 
         if( iPropertyName == "DivisionY" )
             mInbetweenerTag->SetFFDNumCellY( DivisionY );
-
-        mInbetweenerTag->Reset();
     }
 }
 

@@ -1021,9 +1021,35 @@ FOdysseyPainterEditor::Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGr
                         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
+void
+FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
+                                                , FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorGroup* group = _Group( iEditor, iScene );
+
+    if( group )
+    {
+        group->AddTag( new FOdysseyVectorTagInbetweener( group, 4, 4, 4 ) );
+    }
+
+    // call callbacks if any (for refreshing GUI e.g)
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
 // static
 void
-FOdysseyPainterEditor::Group( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::Group( FOdysseyPainterEditor* iEditor
+                            , FOdysseyVectorGroupPaint* iScene )
+{
+    _Group( iEditor, iScene );
+}
+
+// static
+FOdysseyVectorGroup*
+FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
+                             , FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorObject*> objectOldParentArray;
@@ -1066,6 +1092,8 @@ FOdysseyPainterEditor::Group( FOdysseyPainterEditor* iEditor, FOdysseyVectorGrou
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                         | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
                         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+
+    return group;
 }
 
 // static
@@ -1473,9 +1501,11 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdyss
 
         if( tag == nullptr )
         {
-            selectedObject->AddTag( new FOdysseyVectorTagInbetweener( selectedObject, 8, 8, 4 ) );
+            selectedObject->AddTag( new FOdysseyVectorTagInbetweener( selectedObject, 4, 4, 4 ) );
         }
     }
+
+    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     // call callbacks if any (for refreshing GUI e.g)
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

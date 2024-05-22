@@ -1079,11 +1079,6 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
     {
         Clear();
     }
-
-    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-    {
-        mInvalidationFlags = 0;
-    }
 }
 
 void

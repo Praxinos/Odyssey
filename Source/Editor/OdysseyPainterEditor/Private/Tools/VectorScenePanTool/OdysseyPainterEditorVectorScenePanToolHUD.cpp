@@ -119,16 +119,11 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     frameLength.x = frame.w * 0.125f;
     frameLength.y = frame.h * 0.125f;
 
-    // Draw object details only in vertex mode
-    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
-    {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
-    }
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     iBLContext->save();
     iBLContext->resetMatrix();

@@ -161,7 +161,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( FOdysseyVectorGroupP
                                                           , bool iForceWorld
                                                           , uint64 iHUDFlags )
 {
-    if( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
+    if( ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
+     || ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
     {
         //case eVectorEditionMode::Object :
         UpdateSelectionBoxObjectMode( iScene, iForceWorld );
@@ -244,6 +245,19 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
       {
           if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( iHUDFlags & HUD_DRAW_ALL ) )
           {
+              if( iHUDFlags & HUD_TAGINBETWEENER_ALL )
+              {
+                  FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+                  if( tag )
+                  {
+                      FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                      FOdysseyVectorHUD::DrawInbetweens( iBLContext
+                                                       , inbetweenerTag );
+                  } 
+              }
+
               if( iHUDFlags & HUD_PATH_ALL )
               {
                   if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
@@ -306,5 +320,15 @@ FOdysseyPainterEditorVectorBaseToolHUD::Draw( BLContext* iBLContext
                    , bgColor
                    , hcColor
                    , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
+    }
+
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_TAGINBETWEENER_ALL );
     }
 }

@@ -24,10 +24,13 @@ FOdysseyVectorHandleSegment::~FOdysseyVectorHandleSegment()
 {
 }
 
-FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment, uint32 iHandleID, double iX, double iY )
+FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment
+                                                        , FOdysseyVectorVertex* iAttachedVertex
+                                                        , double iX
+                                                        , double iY )
     : FOdysseyVectorPoint( iX, iY )
     , mOwnerSegment ( iOwnerSegment )
-    , mID(iHandleID)
+    , mAttachedVertex( iAttachedVertex )
 {
 }
 
@@ -43,6 +46,12 @@ FOdysseyVectorHandleSegment::GetID()
     return mID;
 }
 
+FOdysseyVectorVertex*
+FOdysseyVectorHandleSegment::GetAttachedVertex()
+{
+    return mAttachedVertex;
+}
+
 FOdysseyVectorSegment*
 FOdysseyVectorHandleSegment::GetOwner()
 {
@@ -52,7 +61,7 @@ FOdysseyVectorHandleSegment::GetOwner()
 void 
 FOdysseyVectorHandleSegment::SetCoords( double iX, double iY )
 {
-    if( mOwnerSegment->GetVertex( mID )->IsLocked() == false )
+    if( mAttachedVertex->IsLocked() == false )
     {
         FOdysseyVectorPoint::SetCoords( iX, iY );
 
@@ -62,4 +71,3 @@ FOdysseyVectorHandleSegment::SetCoords( double iX, double iY )
         }
     }
 }
-

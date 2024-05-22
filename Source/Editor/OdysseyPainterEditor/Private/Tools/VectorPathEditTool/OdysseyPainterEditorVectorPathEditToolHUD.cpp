@@ -155,8 +155,15 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                                                                                   | HUD_PATH_VERTEX_ALIGNMENT : 0;
     uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
 
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+
     // draw object details in any mode (if statement is useles per-se but here for clarity)
-    if( ( hudFlags & HUD_MODE_VERTEX ) || ( hudFlags & HUD_MODE_OBJECT ) )
+    if( ( hudFlags & HUD_MODE_OBJECT    )
+     || ( hudFlags & HUD_MODE_INBETWEEN ) )
     {
         DrawObjects( iBLContext
                    , iScene

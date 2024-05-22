@@ -37,8 +37,8 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iO
     : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1 )
     , mFractionPointBuffer ( nullptr )
     , mNeedWidth( iNeedWidth )
-    , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0, 0.0f, 0.0f )
-                 , FOdysseyVectorHandleSegment( this, 1, 0.0f, 0.0f ) }
+    , mCtrlPoint { FOdysseyVectorHandleSegment( this, iPoint0, 0.0f, 0.0f )
+                 , FOdysseyVectorHandleSegment( this, iPoint1, 0.0f, 0.0f ) }
 {
     Init ( iPoint0, iCtrlPoint0x, iCtrlPoint0y, iCtrlPoint1x, iCtrlPoint1y, iPoint1 );
 }
@@ -50,8 +50,8 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iO
     : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1 )
     , mFractionPointBuffer ( nullptr )
     , mNeedWidth( iNeedWidth )
-    , mCtrlPoint { FOdysseyVectorHandleSegment( this, 0, 0.0f, 0.0f )
-                 , FOdysseyVectorHandleSegment( this, 1, 0.0f, 0.0f ) }
+    , mCtrlPoint { FOdysseyVectorHandleSegment( this, iPoint0, 0.0f, 0.0f )
+                 , FOdysseyVectorHandleSegment( this, iPoint1, 0.0f, 0.0f ) }
 {
     Init( iPoint0, iPoint1 );
 }

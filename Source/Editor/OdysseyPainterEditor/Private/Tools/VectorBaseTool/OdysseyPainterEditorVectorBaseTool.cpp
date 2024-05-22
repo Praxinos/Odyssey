@@ -1147,11 +1147,21 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& m
         // See FOdysseyPainterEditor::AddEditMenuEntry() for details
         //     menu.BeginSection("Context");
         //     {
+            if( vectorScene->GetEngine()->GetSelectedObjectList().size() > 1 )
+            {
+                menu.AddMenuEntry(
+                      LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-grid.name", "Group and Add Inbetweener Grid")
+                    , LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-grid.tooltip", "Group and Add Inbetweener Grid")
+                    , FSlateIcon()
+                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::GroupAndAddInbetweenerTag, GetEditor(), vectorScene )));
+            }
+
             menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-grid.name", "Add Inbetweener Grid")
-                , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-grid.tooltip", "Add Inbetweener Grid")
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, GetEditor(), vectorScene )));
+                    LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-grid.name", "Add Inbetweener Grid")
+                  , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-grid.tooltip", "Add Inbetweener Grid")
+                  , FSlateIcon()
+                  , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, GetEditor(), vectorScene )));
+
             menu.AddMenuEntry(
                   LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-chart.name", "Reset Spacing Chart")
                 , LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-chart.tooltip", "Reset Spacing Chart")

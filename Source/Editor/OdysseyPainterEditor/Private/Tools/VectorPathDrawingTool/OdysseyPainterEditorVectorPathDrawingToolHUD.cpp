@@ -112,16 +112,11 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
     FTracerBezier& rawBezier = pathTracer.GetRawBezier();
     uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorHUDFlags();
 
-    // Draw object details only in vertex mode
-    if( hudFlags & HUD_MODE_VERTEX )
-    {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
-    }
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     //DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
 

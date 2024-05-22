@@ -20,7 +20,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
 
         virtual ~FOdysseyVectorTag();
         FOdysseyVectorTag( FOdysseyVectorObject* iOwnerObject );
-        virtual void Reset() = 0;
         virtual void Draw( BLContext* iBLContext
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity

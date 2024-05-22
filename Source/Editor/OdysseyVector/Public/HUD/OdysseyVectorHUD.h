@@ -12,6 +12,7 @@ class FOdysseyVectorPath;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorEngine;
+class FOdysseyVectorTagInbetweener;
 
 typedef struct _FPointQuadTreeEntry
 {
@@ -106,6 +107,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                             , bool iWorld
                             , uint64 iHUDFlags );
 
+        static void DrawInbetweens( BLContext* iBLContext
+                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+
         static ::ULIS::FVec2D GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketRadialPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
@@ -173,9 +177,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 HUD_GROUPPAINT_BUCKET_HANDLE = ( 1ULL << 10 );
         static const uint64 HUD_GROUPPAINT_ALL           = HUD_GROUPPAINT_BUCKET
                                                          | HUD_GROUPPAINT_BUCKET_HANDLE;
-        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 11 );
-        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 12 );
-        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 13 );
+        static const uint64 HUD_TAGINBETWEENER_ALL       = ( 1ULL << 11 );
+        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 12 );
+        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 13 );
+        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 14 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) = 0;

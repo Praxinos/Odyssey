@@ -359,11 +359,6 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                            , point1.y );
         }
     }
-
-    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-    {
-        mInvalidationFlags = 0;
-    }
 }
 
 bool

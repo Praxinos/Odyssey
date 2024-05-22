@@ -7,6 +7,7 @@
 #include "OdysseyVectorPoint.h"
 
 class FOdysseyVectorSegment;
+class FOdysseyVectorVertex;
 
 class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
 {
@@ -31,7 +32,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
          * @param iX x coordinates.
          * @param iY y coordinates.
          */
-        FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment, uint32 iHandleID, double iX, double iY );
+        FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment
+                                   , FOdysseyVectorVertex* iAttachedVertex
+                                   , double iX
+                                   , double iY );
 
         /**
          * @brief Get segment owning this handle
@@ -41,11 +45,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
 
         uint32 GetID();
         void SetID( uint32 iHandleID );
+        FOdysseyVectorVertex* GetAttachedVertex();
 
     protected:
         virtual void SetCoords( double iX, double iY ) override;
 
     private:
         FOdysseyVectorSegment* mOwnerSegment;
+        FOdysseyVectorVertex* mAttachedVertex;
         uint32 mID;
 };

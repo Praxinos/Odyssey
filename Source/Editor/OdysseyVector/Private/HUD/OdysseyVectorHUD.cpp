@@ -6,6 +6,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 FPointQuadTree::~FPointQuadTree()
 {
@@ -461,6 +462,32 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
                                          , blackColor );
         }
     }
+}
+
+// static
+void
+FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
+                                 , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+{
+    BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
+    iBLContext->setStrokeWidth( 1.0f );
+
+    // note: mInbetweenCount+1 holds the target position
+    for( uint32 i = 0; i < iInbetweenerTag->GetInbetweenCount(); i++ )
+    {
+        iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
+    }
+
+    iBLContext->setStrokeWidth( 3.0f );
+
+    iInbetweenerTag->DrawPathsInbetween( iInbetweenerTag->GetInbetweenCount(), iBLContext );
+
+    iBLContext->restore();
 }
 
 // static

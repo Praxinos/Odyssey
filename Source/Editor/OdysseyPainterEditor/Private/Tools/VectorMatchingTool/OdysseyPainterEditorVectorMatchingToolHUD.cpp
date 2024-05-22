@@ -21,31 +21,6 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Reset( FOdysseyVectorGroupPaint* iSc
 }
 
 void
-FOdysseyPainterEditorVectorMatchingToolHUD::DrawPaths( BLContext* iBLContext
-                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag )
-{
-    BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
-    iBLContext->setStrokeWidth( 1.0f );
-
-    // note: mInbetweenCount+1 holds the target position
-    for( uint32 i = 0; i < iInbetweenerTag->GetInbetweenCount(); i++ )
-    {
-        iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
-    }
-
-    iBLContext->setStrokeWidth( 3.0f );
-
-    iInbetweenerTag->DrawPathsInbetween( iInbetweenerTag->GetInbetweenCount(), iBLContext );
-
-    iBLContext->restore();
-}
-
-void
 FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag )
 {
@@ -125,16 +100,11 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
 
-    // Draw object details only in vertex mode
-    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
-    {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
-    }
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
@@ -149,7 +119,6 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( tag );
 
                 DrawGrid ( iBLContext, inbetweenerTag );
-                DrawPaths( iBLContext, inbetweenerTag );
                 DrawChart( iBLContext, inbetweenerTag );
             }
         }

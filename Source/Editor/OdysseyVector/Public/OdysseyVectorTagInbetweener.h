@@ -30,15 +30,15 @@ class FInterpolatedPoint
     public:
         virtual ~FInterpolatedPoint();
         FInterpolatedPoint( FOdysseyVectorPoint* iPoint
+                          , uint32 iIndex
                           , double iU
-                          , double iV
-                          , uint32 iPositionCount );
+                          , double iV );
 
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
         FOdysseyVectorPoint* mOriginalPoint;
-        std::vector<::ULIS::FVec2D> positionBuffer;
+        uint32 mIndex;
         double mU;
         double mV;
 };
@@ -86,12 +86,15 @@ class FInterpolatedPath
                  , const ::ULIS::FRectD& iInvalidationArea
                  , double iAncestorsOpacity
                  , uint64 iDrawingFlags );
+
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
         FOdysseyVectorPath* mOriginalPath;
         std::vector<FInterpolatedPoint> mInterpolatedPointBuffer;
         std::vector<FInterpolatedSegmentCubic> mInterpolatedSegmentCubicBuffer;
+        // we alloc point position in one single big array.
+        std::vector<::ULIS::FVec2D> mInterpolatedPointPositionBuffer;
 };
 
 //////////////// Grid data structures //////////////////
@@ -133,7 +136,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                     , uint32 iNumCellX
                                     , uint32 iNumCellY
                                     , uint32 iInbetweenCount );
-        virtual void Reset() override;
         virtual void Draw( BLContext* iBLContext
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
@@ -144,6 +146,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) override;
+        void MakeGrid();
         void Map();
         void Interpolate();
         void DrawPathsInbetween( uint32 iInbetweenIndex
@@ -179,9 +182,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
 
         void FFDComputeBinomialCoefficients();
-        void FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint, uint32 iPositionIndex );
+        ::ULIS::FVec2D FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint );
         void FFDDeformPaths( uint32 iPositionIndex );
         void InterpolateInbetween( uint32 iInbetweenIndex );
+        void Reset( bool iResetGridShape );
+        void AllocBuffers();
 
     protected:
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
