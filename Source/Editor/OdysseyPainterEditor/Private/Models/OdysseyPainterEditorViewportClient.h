@@ -26,6 +26,7 @@ class FOdysseyPainterEditorData;
 class IStylusInputInterfaceInternal;
 class SOdysseyViewport;
 class FOdysseyPainterEditor;
+class FOdysseyHUDElement;
 
 //
 //                                                                                                         MouseWheelUp/Down
