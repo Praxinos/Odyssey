@@ -48,7 +48,7 @@ private:
         kYoutube,
         kDiscord,
         kIliadUserDoc,
-        kIliadGit,
+        kIliadGithub,
     };
 
     struct FLogo

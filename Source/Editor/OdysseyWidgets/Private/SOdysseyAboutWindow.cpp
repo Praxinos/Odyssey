@@ -83,7 +83,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
     mLogos.Add( ELogo::kYoutube,     { TEXT( "About.Youtube" ),     LOCTEXT( "about-window.youtube.tooltip", "Praxinos on Youtube" ),             LOCTEXT( "about-window.youtube.url", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) } );
     mLogos.Add( ELogo::kDiscord,     { TEXT( "About.Discord" ),     LOCTEXT( "about-window.discord.tooltip", "Praxinos on Discord" ),             LOCTEXT( "about-window.discord.url", "https://discord.gg/gEd6pj7" ) } );
     mLogos.Add( ELogo::kIliadUserDoc, { TEXT( "About.UserDoc" ),     LOCTEXT( "about-window.userDoc.tooltip", "Go to Iliad User Documentation" ),   LOCTEXT( "about-window.userDoc.url", "https://praxinos.coop/Documentation/Iliad/User/html/" ) } );
-    mLogos.Add( ELogo::kIliadGit,     { TEXT( "About.Git" ),         LOCTEXT( "about-window.git.tooltip", "Praxinos on Git" ),                     LOCTEXT( "about-window.git.url", "https://github.com/Praxinos/Iliad" ) } );
+    mLogos.Add( ELogo::kIliadGithub,     { TEXT( "About.Github" ),         LOCTEXT( "about-window.github.tooltip", "Praxinos on Github" ),                     LOCTEXT( "about-window.git.url", "https://github.com/Praxinos/Iliad" ) } );
 
     ChildSlot
     [
@@ -298,7 +298,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                     .HAlign( HAlign_Left )
                     .Padding( FMargin( 5.f, 0.f, 5.f, 5.f ) )
                     [
-                        NewButtonImage( ELogo::kIliadGit )
+                        NewButtonImage( ELogo::kIliadGithub )
                     ]
                 ]
                 +SHorizontalBox::Slot()
