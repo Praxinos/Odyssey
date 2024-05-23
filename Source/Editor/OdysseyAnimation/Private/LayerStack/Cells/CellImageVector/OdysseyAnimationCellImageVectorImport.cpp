@@ -2,6 +2,7 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "Import/v2/OdysseyVectorImport.h"
 #include "OdysseyFile.h"
+#include "OdysseyVectorEngine.h"
 
 bool
 FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector

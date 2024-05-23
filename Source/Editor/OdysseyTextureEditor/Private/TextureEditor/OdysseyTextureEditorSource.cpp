@@ -14,6 +14,8 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
 
+#include "OdysseyVectorEngine.h"
+
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
 const FGuid&

@@ -7,6 +7,7 @@
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 
 class FOdysseyVectorTagInbetweener;
+struct FInbetweenerPoint;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -27,16 +28,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                           , double iWorldX
                           , double iWorldY
                           , bool iRelative );
-        void PickTargetPoints( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                             , double iWorldX
-                             , double iWorldY
-                             , double iRadius
-                             , std::vector<FInbetweenerPoint*>& oPointArray
-                             , std::vector<double>& oWorldDistanceArray );
 
     private:
-        void DrawPaths( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
-        void DrawGrid( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
         void DrawChart( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
     private:

@@ -2,6 +2,10 @@
 #include "OdysseyVectorPath.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyFile.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorObject*
 FOdysseyVectorImportV1::CreateObject( uint32 iObjectType )

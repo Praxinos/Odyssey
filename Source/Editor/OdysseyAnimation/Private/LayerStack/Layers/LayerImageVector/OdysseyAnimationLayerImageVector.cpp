@@ -20,6 +20,10 @@
 #include "OdysseyMediaVector.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
+
 #define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationLayerImageVector::FOnBlendModeChanged&

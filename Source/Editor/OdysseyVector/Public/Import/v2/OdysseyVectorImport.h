@@ -53,7 +53,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
                                       , FArchive &Ar );
     void ReadObjectBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar );
     void ReadObjectTransform( FOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar );
-    void ReadScene( FOdysseyVectorGroupPaint& iScene, uint64 iChunkEnd, FArchive &Ar );
+    void ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                           , uint64 iChunkEnd
+                           , FArchive &Ar );
+
 
     private:
         std::vector<FOdysseyVectorObject*> mObjectArray;

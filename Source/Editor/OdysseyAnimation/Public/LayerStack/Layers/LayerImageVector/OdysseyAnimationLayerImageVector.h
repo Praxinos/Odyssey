@@ -9,6 +9,7 @@
 #include <ULIS>
 
 #include "OdysseyVector.h"
+#include "OdysseyVectorSharedEnv.h"
 
 #include "OdysseyAnimationLayerImageVector.generated.h"
 

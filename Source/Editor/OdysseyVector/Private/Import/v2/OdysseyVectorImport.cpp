@@ -2,6 +2,8 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyVectorImportV2::~FOdysseyVectorImportV2()
 {

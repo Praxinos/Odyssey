@@ -19,6 +19,8 @@
 #include "Import/v2/OdysseyVectorImport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 
 #include "blend2d.h"
 

@@ -1,12 +1,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Serialization/Archive.h"
 
 #include <ULIS>
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+
 #include "OdysseyVector.h"
+
+class  FOdysseyVectorObject;
+class  FOdysseyVectorBucket;
+class  FOdysseyVectorPath;
+struct FOdysseyVectorBrush;
+class  FOdysseyVectorVertex;
+class  FOdysseyVectorGroup;
+class  FOdysseyVectorGroupPaint;
+class  FOdysseyVectorTagInbetweener;
 
 namespace FOdysseyVectorExportV2
 {
@@ -26,6 +37,7 @@ namespace FOdysseyVectorExportV2
     void WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectBackgroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectForegroundBucket( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectTags( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectID( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectParentID( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectName( FOdysseyVectorObject& iObject, FArchive &Ar );

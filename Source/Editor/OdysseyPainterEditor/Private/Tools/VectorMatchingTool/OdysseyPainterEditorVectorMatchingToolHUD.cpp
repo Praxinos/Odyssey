@@ -2,6 +2,7 @@
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 FOdysseyPainterEditorVectorMatchingToolHUD::~FOdysseyPainterEditorVectorMatchingToolHUD()
 {

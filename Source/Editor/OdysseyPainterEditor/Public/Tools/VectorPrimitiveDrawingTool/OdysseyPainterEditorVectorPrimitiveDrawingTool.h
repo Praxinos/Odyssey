@@ -9,6 +9,9 @@
 #include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyPainterEditorVectorPrimitiveDrawingTool.generated.h"
 
+class FOdysseyVectorLine;
+class FOdysseyVectorPrimitive;
+
 UENUM()
 enum class ePrimitiveDrawingToolColorSource : uint8
 {

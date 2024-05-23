@@ -8,6 +8,8 @@
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 
+#include "OdysseyVectorTagInbetweener.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
@@ -17,7 +19,7 @@ UOdysseyPainterEditorVectorMatchingTool::~UOdysseyPainterEditorVectorMatchingToo
 }
 
 UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool()
-    : UOdysseyPainterEditorVectorSelectionTool( new FOdysseyPainterEditorVectorMatchingToolHUD( this ) )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorMatchingToolHUD( this ), false )
     , PickingRadius( 10.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");

@@ -5,6 +5,7 @@
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVector.h"
+#include "HUD/OdysseyVectorHUD.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "OdysseyPainterEditorVectorObjectView.h"
 #include "OdysseyPainterEditorVectorPathView.h"

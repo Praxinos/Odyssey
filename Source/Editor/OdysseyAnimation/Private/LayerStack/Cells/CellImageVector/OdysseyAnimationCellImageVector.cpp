@@ -15,6 +15,8 @@
 #include "OdysseyAnimation.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 
 TSharedRef<FOdysseyAnimationCellImageVector>
 FOdysseyAnimationCellImageVector::Create(UOdysseyAnimationLayerImageVector* iLayer, int iLength, int iWidth, int iHeight)

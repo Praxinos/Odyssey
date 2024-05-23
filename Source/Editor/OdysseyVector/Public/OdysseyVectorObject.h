@@ -89,7 +89,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          * @brief Recursively copy the object
          * @return a copy of the object with copied children as well.
          */
-        virtual FOdysseyVectorObject* Copy();
+        FOdysseyVectorObject* Copy(); 
+
+        FOdysseyVectorObject* Copy( std::function<void(FOdysseyVectorObject*)> iPreCallback
+                                  , std::function<void(FOdysseyVectorObject*)> iPostCallback );
 
         /**
          * @brief Copy transformation to destination object passed as parameter.

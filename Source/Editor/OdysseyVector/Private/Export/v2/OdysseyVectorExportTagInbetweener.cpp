@@ -2,6 +2,7 @@
 #include "Palette/OdysseyPaletteEntry.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 void
 FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
@@ -95,6 +96,10 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
     {
         WriteTagInbetweenerInbetweenCount( iInbetweenerTag, Ar );
         WriteTagInbetweenerChart( iInbetweenerTag, Ar );
-        WriteTagInbetweenerFFDGrid( iInbetweenerTag, Ar );
+
+        if( iInbetweenerTag.GetGridType() == eInbetweenerGridType::FFD )
+        {
+            WriteTagInbetweenerFFDGrid( iInbetweenerTag, Ar );
+        }
     } );
 }

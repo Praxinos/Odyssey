@@ -7,6 +7,7 @@
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
 
 class FOdysseyVectorTagInbetweener;
+struct FInbetweenerInbetween;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {

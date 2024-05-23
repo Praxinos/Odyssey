@@ -21,6 +21,9 @@
 #include "Models/OdysseyPainterEditorCommands.h"
 
 #include "OdysseyVector.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorObject.h"
+#include "HUD/OdysseyVectorHUD.h"
 #include "Undo/OdysseyVectorUndoGroup.h"
 #include "Undo/OdysseyVectorUndoUngroup.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"

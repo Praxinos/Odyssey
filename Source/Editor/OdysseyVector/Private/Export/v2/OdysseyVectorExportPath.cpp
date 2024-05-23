@@ -3,6 +3,11 @@
 // from module OdysseyFile
 #include "OdysseyFile.h"
 
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorSegment.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorPath.h"
+
 //static
 void
 FOdysseyVectorExportV2::WritePathGeometrySegments( FOdysseyVectorPath& iPath, FArchive &Ar )

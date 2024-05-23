@@ -19,7 +19,7 @@ UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 }
 
 UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
-    : UOdysseyPainterEditorVectorSelectionTool( new FOdysseyPainterEditorVectorChartToolHUD( this ) )
+    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorChartToolHUD( this ), false )
     , PickingRadius( 10.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");

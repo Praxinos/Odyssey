@@ -1,8 +1,10 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVector.h"
+#include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyVectorPath.h"
-#include "OdysseyVector.h"
+#include "OdysseyVectorTag.h"
+#include "OdysseyVectorGroupPaint.h"
 #include <future>
 #include <execution>
 

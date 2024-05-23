@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyVectorBlock.h"
-#include "OdysseyVector.h"
+#include "OdysseyVectorEngine.h"
 #include "ULISLoaderModule.h"
 
 #define FOdysseyVectorBlock_CACHE_NAME TEXT("OdysseyVectorBlock")

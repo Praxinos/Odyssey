@@ -1,0 +1,94 @@
+#include "Import/v2/OdysseyVectorImport.h"
+#include "Palette/OdysseyPalette.h"
+#include "Engine/ObjectLibrary.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+
+// from module OdysseyFile
+#include "OdysseyFile.h"
+#include "OdysseyVectorTagInbetweener.h"
+
+void
+FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                          , uint64 iChunkEnd
+                                          , FArchive &Ar )
+{
+    FOdysseyFile::ReadChunks( iChunkEnd
+                            , Ar
+                            , [&iInbetweenerTag](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+        {
+            switch( iChunkID )
+            {
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_INBETWEENCOUNT:
+                {
+                    uint32 inbetweenCount;
+
+                    Ar << inbetweenCount;
+
+                    iInbetweenerTag.SetInbetweenCount( inbetweenCount );
+                    // allocating chart will alow us to read timing data
+                    iInbetweenerTag.ResetChart();
+                }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHART:
+                {
+                    for( FInbetweenerInbetween& inbetween : iInbetweenerTag.GetChart().inbetweenBuffer )
+                    {
+                        float spacing;
+
+                        Ar << spacing;
+
+                        inbetween.spacing = spacing;
+                    }
+                }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID:  // container
+                    iInbetweenerTag.SetGridType( eInbetweenerGridType::FFD );
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAG_INBETWEENER_FFDGRID_SIZE:
+                {
+                    uint32 numCellX;
+                    uint32 numCellY;
+
+                    Ar << numCellX;
+                    Ar << numCellY;
+
+                    iInbetweenerTag.SetFFDNumCell( numCellX, numCellY );
+                    // allocating grid will alow us to read grid geometry
+                    iInbetweenerTag.MakeGrid();
+                }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAG_INBETWEENER_FFDGRID_GEOMETRY:
+                {
+                    std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
+
+                    for( FInbetweenerPoint& point : gridPointbuffer )
+                    {
+                        double sourceX;
+                        double sourceY;
+                        double targetX;
+                        double targetY;
+
+                        Ar << sourceX;
+                        Ar << sourceY;
+                        Ar << targetX;
+                        Ar << targetY;
+
+                        point.sourcePosition.x = sourceX;
+                        point.sourcePosition.y = sourceY;
+                        point.targetPosition.x = targetX;
+                        point.targetPosition.y = targetY;
+                    }
+                }
+                break;
+
+                default:
+                // Mandatory
+                    Ar.Seek( Ar.Tell() + iChunkLen );
+                break;
+            }    
+        } );
+}

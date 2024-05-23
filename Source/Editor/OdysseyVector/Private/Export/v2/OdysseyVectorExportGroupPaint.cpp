@@ -1,6 +1,7 @@
 #include "Export/v2/OdysseyVectorExport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorGroupPaint.h"
 
 void
 FOdysseyVectorExportV2::WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )

@@ -2,6 +2,7 @@
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "Import/v2/OdysseyVectorImport.h"
 #include "OdysseyFile.h"
+#include "OdysseyVectorEngine.h"
 
 bool
 FOdysseyTextureLayerImageVectorImport::Read( UOdysseyTextureLayerImageVector* iTextureLayerImageVector

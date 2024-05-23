@@ -16,6 +16,8 @@
 #include "OdysseyTextureLayerImageVector.generated.h"
 
 class FOdysseyVectorBlock;
+class FOdysseyVectorGroupPaint;
+class FOdysseyVectorEngine;
 
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector

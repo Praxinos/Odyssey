@@ -16,6 +16,11 @@
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 
+#include "OdysseyVectorCycle.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorBucket.h"
+#include "OdysseyVectorEngine.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------

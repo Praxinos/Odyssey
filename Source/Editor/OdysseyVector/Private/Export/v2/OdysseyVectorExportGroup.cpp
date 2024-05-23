@@ -1,6 +1,7 @@
 #include "Export/v2/OdysseyVectorExport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorGroup.h"
 
 // Write chunks without encapsulation within the GroupPaint chunk header
 void

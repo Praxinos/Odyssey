@@ -5,6 +5,7 @@
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"

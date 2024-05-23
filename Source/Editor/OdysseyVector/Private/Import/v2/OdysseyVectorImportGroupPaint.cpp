@@ -1,6 +1,8 @@
 #include "Import/v2/OdysseyVectorImport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorBucket.h"
+#include "OdysseyVectorGroupPaint.h"
 
 void
 FOdysseyVectorImportV2::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )

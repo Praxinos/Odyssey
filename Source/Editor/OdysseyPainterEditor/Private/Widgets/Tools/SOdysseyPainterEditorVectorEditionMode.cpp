@@ -5,6 +5,7 @@
 #include "ISinglePropertyView.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorVectorEditionMode

@@ -2,6 +2,7 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "Export/v2/OdysseyVectorExport.h"
 #include "OdysseyFile.h"
+#include "OdysseyVectorEngine.h"
 
 void
 FOdysseyAnimationCellImageVectorExport::WriteResolution( FOdysseyAnimationCellImageVector* iAnimationCellImageVector

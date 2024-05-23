@@ -1,4 +1,5 @@
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
@@ -7,6 +8,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorAnimationCell.h"
 
 FInterpolatedPoint::~FInterpolatedPoint()
 {
@@ -242,6 +244,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mNumCellX( iNumCellX )
     , mNumCellY( iNumCellY )
     , mInbetweenCount( iInbetweenCount )
+    , mInvalidationFlags( 0 )
 {
     MakeGrid();
     Map();
@@ -274,10 +277,39 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags )
      || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAGS     )
      || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   ) )
     {
+        mInvalidationFlags |= ( INVALIDATE_MAP | INVALIDATE_BUFFERS | INVALIDATE_SPACING );
+    }
+
+    if( mInvalidationFlags & INVALIDATE_MAP )
+    {
         Map();
+    }
+
+    if( mInvalidationFlags & INVALIDATE_BUFFERS )
+    {
         AllocBuffers();
+    }
+
+    if( mInvalidationFlags & INVALIDATE_SPACING )
+    {
         Interpolate();
     }
+
+    if( mInvalidationFlags & INVALIDATE_CELLS )
+    {
+        UpdateAnimationCells();
+    }
+
+    // reset tag's invalidation flags (do not confuse with object's invalidation flags)
+    mInvalidationFlags = 0;
+}
+
+void
+FOdysseyVectorTagInbetweener::Invalidate( uint64 iInvalidationFlags )
+{
+    mOwner->Invalidate( FOdysseyVectorObject::INVALIDATE_TAGS );
+
+    mInvalidationFlags |= iInvalidationFlags;
 }
 
 void
@@ -701,9 +733,11 @@ FOdysseyVectorTagInbetweener::SetInbetweenCount( uint32 iInbetweenCount )
 
     mInbetweenCount = iInbetweenCount;
 
+    Invalidate( INVALIDATE_SPACING
+              | INVALIDATE_BUFFERS
+              | INVALIDATE_CELLS );
+
     ResetChart();
-    AllocBuffers();
-    Interpolate();
 
     UpdateAnimationCells( maxInbetweenCount );
 }
@@ -713,10 +747,24 @@ FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
 {
     mGridType = iGridType;
 
+    Invalidate( INVALIDATE_MAP
+              | INVALIDATE_SPACING
+              | INVALIDATE_BUFFERS
+              | INVALIDATE_CELLS );
+
     MakeGrid();
-    Map();
-    AllocBuffers();
-    Interpolate();
+}
+
+void
+FOdysseyVectorTagInbetweener::SetFFDNumCell( uint32 iNumCellX, uint32 iNumCellY )
+{
+    mNumCellX = iNumCellX;
+    mNumCellY = iNumCellY;
+
+    Invalidate( INVALIDATE_SPACING
+              | INVALIDATE_CELLS );
+
+    MakeGrid();
 }
 
 void
@@ -724,8 +772,10 @@ FOdysseyVectorTagInbetweener::SetFFDNumCellX( uint32 iNumCellX )
 {
     mNumCellX = iNumCellX;
 
+    Invalidate( INVALIDATE_SPACING
+              | INVALIDATE_CELLS );
+
     MakeGrid();
-    Interpolate();
 }
 
 void
@@ -733,8 +783,10 @@ FOdysseyVectorTagInbetweener::SetFFDNumCellY( uint32 iNumCellY )
 {
     mNumCellY = iNumCellY;
 
+    Invalidate( INVALIDATE_SPACING
+              | INVALIDATE_CELLS );
+
     MakeGrid();
-    Interpolate();
 }
 
 eInbetweenerGridType

@@ -1,6 +1,7 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorGroup.h"
 #include "OdysseyVectorEngine.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
@@ -354,8 +355,11 @@ FOdysseyVectorObject::ResetTransform()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorObject::Copy()
+FOdysseyVectorObject::Copy( std::function<void(FOdysseyVectorObject*)> iPreCallback
+                          , std::function<void(FOdysseyVectorObject*)> iPostCallback )
 {
+    iPreCallback( this );
+
     FOdysseyVectorObject* objectCopy = CopyShape();
 
     if( objectCopy )
@@ -371,7 +375,16 @@ FOdysseyVectorObject::Copy()
         }
     }
 
+    iPostCallback( this );
+
     return objectCopy;
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorObject::Copy()
+{
+    return Copy( []( FOdysseyVectorObject* object ){}
+               , []( FOdysseyVectorObject* object ){} );
 }
 
 // TODO: export flags

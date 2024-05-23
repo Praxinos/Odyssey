@@ -4,16 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyVector.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 
 #include "OdysseyPainterEditorVectorChartTool.generated.h"
 
+struct FInbetweenerInbetween;
 class FOdysseyPainterEditorVectorChartToolHUD;
 
 UCLASS( HideCategories = (SelectionTool) )
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOdysseyPainterEditorVectorSelectionTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOdysseyPainterEditorVectorBaseTool
 {
     public:
         GENERATED_BODY()

@@ -7,13 +7,18 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-#include "OdysseyVectorVertex.h"
-#include "OdysseyVectorSegment.h"
-#include "OdysseyVectorGroupPaint.h"
-#include "HUD/OdysseyVectorHUD.h"
+#include "OdysseyVectorObject.h"
+
 #include "ULISInvalidTileMap.h"
 
+class FOdysseyVectorHUD;
+class FOdysseyVectorVertex;
+class FOdysseyVectorSegment;
+class FOdysseyVectorPath;
+class FOdysseyVectorGroup;
+class FOdysseyVectorGroupPaint;
 class FOdysseyVectorSharedEnv;
+class FOdysseyVectorHandleSegment;
 class IOdysseyVectorAnimationCell;
 
 //#include "OdysseyVectorGroupPaint.generated.h"

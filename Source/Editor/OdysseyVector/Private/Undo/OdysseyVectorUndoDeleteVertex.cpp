@@ -1,6 +1,7 @@
 #include "Undo/OdysseyVectorUndoDeleteVertex.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyVectorUndoDeleteVertex::~FOdysseyVectorUndoDeleteVertex()
 {

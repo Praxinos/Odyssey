@@ -1,6 +1,8 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorEngine.h"
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorSegment.h"

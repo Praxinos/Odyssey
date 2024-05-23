@@ -169,6 +169,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetGridType( eInbetweenerGridType iGridType );
         void SetFFDNumCellX( uint32 iNumCellX );
         void SetFFDNumCellY( uint32 iNumCellY );
+        void SetFFDNumCell( uint32 iNumCellX, uint32 iNumCellY );
         eInbetweenerGridType GetGridType();
         uint32 GetFFDNumCellX();
         uint32 GetFFDNumCellY();
@@ -192,6 +193,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void InterpolateInbetween( uint32 iInbetweenIndex );
         void Reset( bool iResetGridShape );
         void AllocBuffers();
+        void Invalidate( uint64 iInvalidationFlags );
+
+    protected:
+        static const uint64 INVALIDATE_MAP        = ( 1LL << 0 );
+        static const uint64 INVALIDATE_BUFFERS    = ( 1LL << 1 );
+        static const uint64 INVALIDATE_SPACING    = ( 1LL << 2 );
+        static const uint64 INVALIDATE_CELLS      = ( 1LL << 3 );
+        static const uint64 INVALIDATE_ALL        = ( INVALIDATE_MAP
+                                                    | INVALIDATE_BUFFERS
+                                                    | INVALIDATE_SPACING
+                                                    | INVALIDATE_CELLS );
 
     protected:
         FOdysseyVectorSharedEnv* mSharedEnv;
@@ -205,4 +217,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 mNumCellX;
         uint32 mNumCellY;
         uint32 mInbetweenCount;
+        uint64 mInvalidationFlags;
 };

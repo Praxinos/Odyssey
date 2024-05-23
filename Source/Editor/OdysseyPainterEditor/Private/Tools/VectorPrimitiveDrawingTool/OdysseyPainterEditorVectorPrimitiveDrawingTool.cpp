@@ -12,6 +12,11 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 
+#include "OdysseyVectorPrimitive.h"
+#include "OdysseyVectorEllipse.h"
+#include "OdysseyVectorLine.h"
+#include "OdysseyVectorRectangle.h"
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
 #endif
