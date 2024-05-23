@@ -92,7 +92,10 @@ FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClie
 
 bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelected)
 {
-    mViewportDrawingEditorExtension->SetActor(InActor);
+    if (!bInSelected)
+        mViewportDrawingEditorExtension->SetActor(nullptr);
+    else
+        mViewportDrawingEditorExtension->SetActor(InActor);
 
     return false;
 }
