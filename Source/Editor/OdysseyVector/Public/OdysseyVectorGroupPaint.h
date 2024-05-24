@@ -213,6 +213,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
 
     protected:
+        // static
+        void RecursiveUpdatePathList( FOdysseyVectorObject* iCandidateObject
+                                    , std::list<FOdysseyVectorPath*>& iPathList );
+
         /**
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).
          * @param iSegment the segment.

@@ -94,6 +94,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* Copy( std::function<void(FOdysseyVectorObject*)> iPreCallback
                                   , std::function<void(FOdysseyVectorObject*)> iPostCallback );
 
+        void RecursiveRemoveTagByType( uint32 iTagType );
+
         /**
          * @brief Copy transformation to destination object passed as parameter.
                   Please call UpdateMatrix() afterwards.

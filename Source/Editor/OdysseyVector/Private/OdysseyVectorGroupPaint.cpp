@@ -1856,6 +1856,28 @@ FOdysseyVectorGroupPaint::SetMultithreaded( bool iMultithreaded )
     bMultithreaded = iMultithreaded;
 }
 
+// static
+void
+FOdysseyVectorGroupPaint::RecursiveUpdatePathList( FOdysseyVectorObject* iCandidateObject
+                                                 , std::list<FOdysseyVectorPath*>& iPathList )
+{
+    if( iCandidateObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iCandidateObject);
+
+        iPathList.push_back( path );
+    }
+
+    // recurse if simple group
+    if( iCandidateObject->GetClass() == FOdysseyVectorGroup::StaticClass() )
+    {
+        for( FOdysseyVectorObject* child : iCandidateObject->GetChildrenList() )
+        {
+            RecursiveUpdatePathList( child, iPathList );
+        }
+    }
+}
+
 void
 FOdysseyVectorGroupPaint::UpdatePathList()
 {
@@ -1868,6 +1890,12 @@ FOdysseyVectorGroupPaint::UpdatePathList()
 
     for( FOdysseyVectorObject* child : mChildrenList )
     {
+        RecursiveUpdatePathList( child, mPathList );
+    }
+
+/*
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
         if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(child);
@@ -1875,6 +1903,7 @@ FOdysseyVectorGroupPaint::UpdatePathList()
             mPathList.push_back( path );
         }
     }
+*/
 }
 
 void

@@ -806,3 +806,61 @@ FOdysseyVectorTagInbetweener::GetFFDNumCellY()
 {
     return mNumCellY;
 }
+
+void
+FOdysseyVectorTagInbetweener::Commit()
+{
+    IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
+    int32 animationCellIndex = animationCell->GetIndex();
+
+    for( uint32 inbetweenIndex = 0; inbetweenIndex < mInbetweenCount; inbetweenIndex++ )
+    {
+        IOdysseyVectorAnimationCell* inbetweenAnimationCell = animationCell->GetCellByIndex( animationCellIndex + inbetweenIndex + 1 );
+
+        if( inbetweenAnimationCell )
+        {
+            // change vertices coords before copying the object
+            std::function<void(FOdysseyVectorObject*)> preProcess = [ inbetweenIndex ]( FOdysseyVectorObject* vectorObject )
+            {
+                FOdysseyVectorTag* tag = vectorObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+                if( tag )
+                {
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                    for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
+                    {
+                        uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
+                        uint32 skippedOffset = ( inbetweenIndex * pointCount );
+
+                        for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
+                        {
+                            FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
+                            ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i];
+                            ::ULIS::FVec2D swapPosition = interpolatedPoint->mOriginalPoint->GetCoords();
+
+                            interpolatedPoint->mOriginalPoint->Set( *commitPosition );
+
+                            *commitPosition = swapPosition;
+                        }
+                    }
+
+                    //tag->GetOwner()->RemoveTag( tag );
+                }
+            };
+            // revert vertices coords after having copied the object. It's actually the same thing.
+            std::function<void(FOdysseyVectorObject*)> postProcess = preProcess;
+            FOdysseyVectorGroupPaint* inbetweenScene = inbetweenAnimationCell->GetEngine()->GetScene();
+
+            FOdysseyVectorObject* copiedObject = mOwner->Copy( preProcess, postProcess );
+
+            inbetweenScene->AppendChild( copiedObject );
+
+            inbetweenScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        }
+    }
+
+    mOwner->RecursiveRemoveTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+    UpdateAnimationCells();
+}

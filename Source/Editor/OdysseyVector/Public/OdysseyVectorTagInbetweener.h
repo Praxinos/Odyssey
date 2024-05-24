@@ -175,6 +175,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 GetFFDNumCellY();
 
         virtual void Update( uint32 iUpdateFlags ) override;
+        void Commit();
 
     protected:
         void DrawGrid( BLContext* iBLContext

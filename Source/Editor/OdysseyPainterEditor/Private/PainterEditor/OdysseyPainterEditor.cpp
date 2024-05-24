@@ -1556,7 +1556,29 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
 
 // static
 void
-FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::CommitInbetweenerTag( FOdysseyPainterEditor* iEditor
+                                           , FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = vectorEngine->GetSelectedObjectList();
+
+    for( FOdysseyVectorObject* selectedObject : selectedObjectList )
+    {
+        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+        if( tag )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+            inbetweenerTag->Commit();
+        }
+    }
+}
+
+// static
+void
+FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
+                                        , FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*>& selectedObjectList = vectorEngine->GetSelectedObjectList();

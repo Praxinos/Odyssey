@@ -354,6 +354,22 @@ FOdysseyVectorObject::ResetTransform()
     Rotate( 0.0f );
 }
 
+void
+FOdysseyVectorObject::RecursiveRemoveTagByType( uint32 iTagType )
+{
+    FOdysseyVectorTag* tag = GetTagByType( iTagType );
+
+    if( tag )
+    {
+        RemoveTag( tag );
+    }
+
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        child->RecursiveRemoveTagByType( iTagType );
+    }
+}
+
 FOdysseyVectorObject*
 FOdysseyVectorObject::Copy( std::function<void(FOdysseyVectorObject*)> iPreCallback
                           , std::function<void(FOdysseyVectorObject*)> iPostCallback )
@@ -369,7 +385,7 @@ FOdysseyVectorObject::Copy( std::function<void(FOdysseyVectorObject*)> iPreCallb
         // recurse
         for( FOdysseyVectorObject *child : mChildrenList )
         {
-            FOdysseyVectorObject *childCopy = child->Copy() ;
+            FOdysseyVectorObject *childCopy = child->Copy( iPreCallback, iPostCallback );
 
             objectCopy->AppendChild( childCopy );
         }
