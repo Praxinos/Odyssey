@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 
+#include "OdysseyHUDPolygon.h"
 #include <ULIS>
 
 struct FOdysseyCanvasZone
@@ -21,11 +22,16 @@ public:
     FOdysseyMask();
 
     void AddFromPointsAndBlock( TArray<FVector2D> iPoints, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock );
-    void ClearMask();
+    void ClearMaskData();
+    void ClearMaskHUD();
 
     ::ULIS::FRectI GetMaskBoundingRect();
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetMaskBlock();
+    TArray<TSharedPtr<FOdysseyHUDPolygon>>& GetMaskHUD();
+
+    void RefreshMaskHUD();
 
 private:
     TArray<FOdysseyCanvasZone> mMaskZones;
+    TArray<TSharedPtr<FOdysseyHUDPolygon>> mMaskHUD;
 };

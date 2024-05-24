@@ -414,7 +414,10 @@ void FOdysseyPainterEditorGUI::ClearCurrentLayer()
 
 void FOdysseyPainterEditorGUI::ClearCurrentSelection()
 {
-    UE_LOG(LogTemp, Display, TEXT("ClearSelection"))
+    if( mEditor )
+    {
+        mEditor->ClearMask();
+    }
 }
 
 void FOdysseyPainterEditorGUI::CopyCurrentSelection()

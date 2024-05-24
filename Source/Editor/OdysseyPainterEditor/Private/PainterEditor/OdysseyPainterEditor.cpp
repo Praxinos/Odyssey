@@ -238,7 +238,8 @@ FOdysseyPainterEditor::OnClose()
 void
 FOdysseyPainterEditor::InitHUD()
 {
-    //TODO: Add FOdysseyMask HUD here
+    for( int i = 0; i < EditorMask().GetMaskHUD().Num(); i++ )
+        mHUDSystem->AddElement( EditorMask().GetMaskHUD()[i] );
 }
 
 void
@@ -481,6 +482,26 @@ const FOdysseyBrushColor&
 FOdysseyPainterEditor::PaintColor() const
 {
 	return mPaintColor;
+}
+
+void FOdysseyPainterEditor::RefreshMaskHUD()
+{
+    mEditorMask.RefreshMaskHUD();
+    InitHUD();
+}
+
+void FOdysseyPainterEditor::ClearMask()
+{
+    EditorMask().ClearMaskData();
+    ClearMaskHUD();
+}
+
+void FOdysseyPainterEditor::ClearMaskHUD()
+{
+    for (int i = 0; i < EditorMask().GetMaskHUD().Num(); i++)
+        mHUDSystem->RemoveElement(EditorMask().GetMaskHUD()[i]);
+
+    EditorMask().ClearMaskHUD();
 }
 
 UOdysseyPainterEditorTool*

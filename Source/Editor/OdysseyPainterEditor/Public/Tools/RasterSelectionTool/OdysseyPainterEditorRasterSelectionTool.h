@@ -19,6 +19,14 @@ enum class EOdysseySelectionShape : uint8
     Ellipse
 };
 
+UENUM()
+enum class EOdysseySelectionState : uint8
+{
+    Normal,
+    Add,
+    Substract
+};
+
 //This is already a tool to prepare for the moment we'll separate transform and selection. When we'll have a "mask" feature in Odyssey
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelectionTool : public UOdysseyPainterEditorTool
@@ -45,9 +53,6 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
-    bool IsSelectionAreaSet();
-    bool IsInSelectionArea( FVector2D iPoint );
-
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetSelectionBlock();
     ::ULIS::FRectI GetSelectionAreaBoundingRect();
 
@@ -68,10 +73,11 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     EOdysseySelectionShape SelectionShape;
 
+    EOdysseySelectionState SelectionState;
+
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     bool Uniform;
 
-    bool mIsSelectionAreaSet;
     TSharedPtr<FOdysseyHUDPolygon> mToolSelectionArea;
     FOdysseyPaintEngine mPaintEngine;
 

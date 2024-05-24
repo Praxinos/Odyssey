@@ -172,6 +172,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
     else if( iKey == EKeys::Escape )
     {
         ClearTransform();
+        CreateTransformAreaFromSelection();
         return true;
     }
 
@@ -188,12 +189,14 @@ void UOdysseyPainterEditorRasterTransformTool::Tick(float iDeltaTime)
 void UOdysseyPainterEditorRasterTransformTool::Load()
 {
     CreateTransformAreaFromSelection();
+    mEditor->ClearMaskHUD();
     UOdysseyPainterEditorTool::Load();
 }
 
 void UOdysseyPainterEditorRasterTransformTool::Unload()
 {
     ClearTransform();
+    mEditor->RefreshMaskHUD();
     UOdysseyPainterEditorTool::Unload();
 }
 
@@ -223,11 +226,6 @@ UOdysseyPainterEditorRasterTransformTool::GetRotationAngleFromLastReference( FVe
 
 void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection()
 {
-    ::ULIS::FRectI boundingBox = mEditor->EditorMask().GetMaskBoundingRect();
-
-    if( boundingBox.Area() < 0 )
-        return;
-
     FOdysseyMediaProvider mediaProvider = mEditor->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
         return;
@@ -235,6 +233,11 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
         return;
+
+    ::ULIS::FRectI boundingBox = mEditor->EditorMask().GetMaskBoundingRect();
+
+    if (boundingBox.Area() <= 0)
+        boundingBox = ::ULIS::FRectI::FromMinMax(0, 0, mediaRasters[0]->GetRasterBlock()->GetWidth(), mediaRasters[0]->GetRasterBlock()->GetHeight());
 
     mTransformArea = MakeShared<FOdysseyHUDPolygon>();
     TArray<FVector2D>& areaPoints = mTransformArea->GetPoints();
@@ -287,6 +290,25 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
      }
      
      mOriginalTransformBlock = mEditor->EditorMask().GetMaskBlock();
+     if( mOriginalTransformBlock == nullptr ) //If we have no selection, we select the entire selected layer block
+     {
+         mOriginalTransformBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, paintBlock->Format());
+
+         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(paintBlock->Format());
+         ctx.Blend(
+             *rasterBlock->GetBlock(),
+             *mOriginalTransformBlock,
+             rasterBlock->GetRect(),
+             ::ULIS::FVec2I(0, 0),
+             ::ULIS::Blend_Normal,
+             ::ULIS::Alpha_Normal,
+             1.f,
+             ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+             0,
+             nullptr,
+             nullptr
+         );
+     }
 
      mRasterMutator.SetRasterBlock(rasterBlock);
      mRasterMutator.EditTilesFromRects(
@@ -572,11 +594,12 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
 
         GEditor->EndTransaction();
         mRasterMutator.SetRasterBlock(nullptr);
+        mEditor->ClearMask();
     }
     ClearTransform();
 }
 
-void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
+void UOdysseyPainterEditorRasterTransformTool::ClearTransform ()
 {
     if (mRasterMutator.GetRasterBlock() != nullptr)
     {

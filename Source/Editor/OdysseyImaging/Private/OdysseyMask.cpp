@@ -2,10 +2,14 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyMask.h"
+
 #include "ULISLoaderModule.h"
+#include "GeomTools.h"
 
 FOdysseyMask::~FOdysseyMask()
 {
+    ClearMaskData();
+    ClearMaskHUD();
 }
 
 FOdysseyMask::FOdysseyMask()
@@ -17,13 +21,22 @@ void FOdysseyMask::AddFromPointsAndBlock(TArray<FVector2D> iPoints, TSharedPtr<:
     mMaskZones.Add( FOdysseyCanvasZone( iPoints, iBlock ) );
 }
 
-void FOdysseyMask::ClearMask()
+void FOdysseyMask::ClearMaskData()
 {
-    for( int i = mMaskZones.Num(); i > 0; i-- )
+    for( int i = 0; i < mMaskZones.Num(); i++ )
     {
         mMaskZones[i].mBlock.Reset();
     }
     mMaskZones.Empty();
+}
+
+void FOdysseyMask::ClearMaskHUD()
+{
+    for (int i = 0; i < mMaskHUD.Num(); i++)
+    {
+        mMaskHUD[i].Reset();
+    }
+    mMaskHUD.Empty();
 }
 
 ::ULIS::FRectI FOdysseyMask::GetMaskBoundingRect()
@@ -40,7 +53,7 @@ void FOdysseyMask::ClearMask()
 
     for( int i = 0; i < mMaskZones.Num(); i++ )
     {
-        for (int j = 1; j < mMaskZones[0].mPolygonPoints.Num(); j++)
+        for (int j = 1; j < mMaskZones[i].mPolygonPoints.Num(); j++)
         {
             minX = FMath::Min(minX, mMaskZones[i].mPolygonPoints[j].X);
             maxX = FMath::Max(maxX, mMaskZones[i].mPolygonPoints[j].X);
@@ -62,6 +75,16 @@ TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> FOdysseyMask::GetMaskBlock()
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, mMaskZones[0].mBlock->Format() );
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mMaskZones[0].mBlock->Format());
+    ::ULIS::FEvent clearEvent;
+
+    ctx.Clear(
+        *maskBlock,
+        maskBlock->Rect(),
+        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+        0,
+        nullptr,
+        &clearEvent);
+
     for( int i = 0; i < mMaskZones.Num(); i++ )
     {
         ctx.Blend(
@@ -74,10 +97,47 @@ TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> FOdysseyMask::GetMaskBlock()
             1.f,
             ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
             0,
-            nullptr,
+            &clearEvent,
             nullptr
         );
     }
 
+    ctx.Finish();
+
     return maskBlock;
+}
+
+TArray<TSharedPtr<FOdysseyHUDPolygon>>& FOdysseyMask::GetMaskHUD()
+{
+    return mMaskHUD;
+}
+
+void FOdysseyMask::RefreshMaskHUD()
+{
+    for( int i = 0; i < mMaskHUD.Num(); i++ )
+    {
+        mMaskHUD[i].Reset();
+    }
+    mMaskHUD.Empty();
+
+    TArray<TArray<FVector2D>> polygons;
+    TArray<bool> windings;
+    for( int i = 0; i < mMaskZones.Num(); i++ )
+    {
+        polygons.Add( mMaskZones[i].mPolygonPoints );
+        windings.Add( false );
+    }
+
+    //Doesn't do what I want, I want to reduce multiple polygons to one, if possible
+    polygons = FGeomTools2D::ReducePolygons( polygons, windings );
+
+    for( int i = 0; i < polygons.Num(); i++ )
+    {
+        mMaskHUD.Add(MakeShared<FOdysseyHUDPolygon>());
+        TArray<FVector2D>& points = mMaskHUD[i]->GetPoints();
+        for( int j = 0; j < polygons[i].Num(); j++ )
+        {
+            points.Add( polygons[i][j] );
+        }
+    }
 }

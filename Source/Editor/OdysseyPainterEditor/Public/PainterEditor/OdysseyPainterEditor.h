@@ -205,6 +205,9 @@ public:
     void  AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension);
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
+    void  RefreshMaskHUD();
+    void  ClearMask(); //Clears the mask data and HUD
+    void  ClearMaskHUD(); //Only clears the HUD
 
 protected:
     //Callbacks

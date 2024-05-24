@@ -21,7 +21,8 @@ UOdysseyPainterEditorRasterSelectionTool::~UOdysseyPainterEditorRasterSelectionT
 }
 
 UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTool():
-    mIsSelectionAreaSet(false),
+    SelectionShape( EOdysseySelectionShape::Freehand ),
+    SelectionState( EOdysseySelectionState::Normal ),
     mToolSelectionArea(nullptr),
     mPaintEngine(),
     mSelectionBlock(nullptr)
@@ -95,8 +96,6 @@ void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& 
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    //Merge/replace/substract HUD of selection to already existing selection if it exists
-
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
         return false;
@@ -113,30 +112,74 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
         return true;
     }
 
-    int decalX = FMath::Min(boundingBox.x, 0);
-    int decalY = FMath::Min(boundingBox.y, 0);
+    if( SelectionShape == EOdysseySelectionShape::Rectangle )
+    {
+        int decalX = FMath::Min(boundingBox.x, 0);
+        int decalY = FMath::Min(boundingBox.y, 0);
 
-    mSelectionBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
-    ClearBlock(mSelectionBlock);
+        mSelectionBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
+        ClearBlock(mSelectionBlock);
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
-    ctx.Copy(
-        *rasterBlock->GetBlock(),
-        *mSelectionBlock,
-        boundingBox,
-        ::ULIS::FVec2I(-decalX, -decalY),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-        0,
-        nullptr,
-        nullptr
-    );
+        ctx.Copy(
+            *rasterBlock->GetBlock(),
+            *mSelectionBlock,
+            boundingBox,
+            ::ULIS::FVec2I(-decalX, -decalY),
+            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+            0,
+            nullptr,
+            nullptr
+        );
 
-    ctx.Finish();
+        ctx.Finish();
+    }
+    else
+    {
+        TArray<::ULIS::FRectI> rectangles = GetSelectionAreaAsScanlines();
 
-    mIsSelectionAreaSet = true;
+        mSelectionBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
+        ClearBlock(mSelectionBlock);
 
-    mEditor->EditorMask().AddFromPointsAndBlock( mToolSelectionArea->GetPoints(), mSelectionBlock );
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+
+        for (int i = 0; i < rectangles.Num(); i++)
+        {
+            int decalX = FMath::Min(rectangles[i].x, 0);
+            int decalY = FMath::Min(rectangles[i].y, 0);
+
+            ctx.Copy(
+                *rasterBlock->GetBlock(),
+                *mSelectionBlock,
+                rectangles[i],
+                ::ULIS::FVec2I(-decalX - boundingBox.x + rectangles[i].x, -decalY - boundingBox.y + rectangles[i].y),
+                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                0,
+                nullptr,
+                nullptr
+            );
+        }
+
+        ctx.Finish();
+    }
+
+
+    if (SelectionState == EOdysseySelectionState::Add) //Add selection to existing one
+    {
+        mEditor->EditorMask().AddFromPointsAndBlock(mToolSelectionArea->GetPoints(), mSelectionBlock);
+    }
+    else if (SelectionState == EOdysseySelectionState::Substract) //Remove selection to existing one
+    {
+
+    }
+    else //Normal, we replace the selection
+    {
+        mEditor->ClearMask();
+        mEditor->EditorMask().AddFromPointsAndBlock(mToolSelectionArea->GetPoints(), mSelectionBlock);
+    }
+
+    mEditor->RefreshMaskHUD();
     mHUD->RemoveElement(mToolSelectionArea);
    
     return true;
@@ -149,6 +192,16 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnKeyDown(const FKey& iKey)
         Uniform = !Uniform;
         return true;
     }
+    else if ( iKey == EKeys::LeftControl || iKey == EKeys::RightControl )
+    {
+        SelectionState = EOdysseySelectionState::Add;
+        return true;
+    }
+    else if ( iKey == EKeys::LeftAlt || iKey == EKeys::RightAlt )
+    {
+        SelectionState = EOdysseySelectionState::Substract;
+        return true;
+    }
     return false;
 }
 
@@ -157,6 +210,16 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(const FKey& iKey)
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
         Uniform = !Uniform;
+        return true;
+    }
+    else if (iKey == EKeys::LeftControl || iKey == EKeys::RightControl)
+    {
+        SelectionState = EOdysseySelectionState::Normal;
+        return true;
+    }
+    else if (iKey == EKeys::LeftAlt || iKey == EKeys::RightAlt)
+    {
+        SelectionState = EOdysseySelectionState::Normal;
         return true;
     }
     else if (iKey == EKeys::Enter || iKey == EKeys::SpaceBar || iKey == EKeys::Escape)
@@ -176,19 +239,6 @@ void UOdysseyPainterEditorRasterSelectionTool::Load()
 void UOdysseyPainterEditorRasterSelectionTool::Unload()
 {
     ClearSelection();
-}
-
-bool UOdysseyPainterEditorRasterSelectionTool::IsSelectionAreaSet()
-{
-    return mIsSelectionAreaSet;
-}
-
-bool UOdysseyPainterEditorRasterSelectionTool::IsInSelectionArea(FVector2D iPoint)
-{
-    if( !mToolSelectionArea || mToolSelectionArea->GetPoints().Num() == 0 )
-        return false;
-
-    return FGeomTools2D::IsPointInPolygon(iPoint, mToolSelectionArea->GetPoints()); 
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelectionTool::GetSelectionBlock()
@@ -227,7 +277,6 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsSelectionValid(::ULIS::FRectI i
 void UOdysseyPainterEditorRasterSelectionTool::ClearSelection()
 {
     mHUD->EmptyElements();
-    mIsSelectionAreaSet = false;
     if( mSelectionBlock )
     {
         mSelectionBlock.Reset();
