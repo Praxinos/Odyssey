@@ -202,7 +202,7 @@ TSharedPtr<SWidget> FSingleCameraCutTrackEditor::BuildOutlinerColumnWidget( cons
     if( ColumnName == FCommonOutlinerNames::Add )
     {
         return UE::Sequencer::MakeAddButton(
-            LOCTEXT( "CameraCutText", "Camera" ),
+            LOCTEXT( "SingleCameraCutText", "Camera" ),
             FOnGetContent::CreateSP( this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutComboButtonGetMenuContent ),
             Params.ViewModel );
     }
