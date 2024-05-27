@@ -320,3 +320,5 @@ UOdysseyAnimation::GetImageRenderingRects() const
 {
     return { ::ULIS::FRectI::FromXYWH(0, 0, Width(), Height()) };
 }
+
+#undef LOCTEXT_NAMESPACE

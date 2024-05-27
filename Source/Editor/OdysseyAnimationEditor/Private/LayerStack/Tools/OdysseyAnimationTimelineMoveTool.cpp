@@ -112,3 +112,5 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonUp(const FMouseEventParams& iPar
     }
     return FReply::Unhandled();
 }
+
+#undef LOCTEXT_NAMESPACE

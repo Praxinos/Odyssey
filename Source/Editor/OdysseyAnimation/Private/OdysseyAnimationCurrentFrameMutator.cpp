@@ -38,5 +38,3 @@ FOdysseyAnimationCurrentFrameMutator::Set(int iFrame)
 	if (iFrame != mAnimation->CurrentFrame)
 		ApplyMutation(mutation);
 }
-
-#undef LOCTEXT_NAMESPACE

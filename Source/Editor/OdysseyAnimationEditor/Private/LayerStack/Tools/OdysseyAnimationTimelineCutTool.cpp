@@ -48,3 +48,5 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
 
     return FReply::Unhandled();
 }
+
+#undef LOCTEXT_NAMESPACE
