@@ -9,38 +9,9 @@
 #include "OdysseyHUDSystem.h"
 #include <ULIS>
 
-class FOdysseyHUDElement;
-struct ODYSSEYWIDGETS_API HOdysseyHUDElementHitProxy : public HHitProxy
-{
-	DECLARE_HIT_PROXY();
-
-    TSharedPtr<FOdysseyHUDElement> mHUDElement;
-	TOptional<EMouseCursor::Type> mMouseCursor;
-
-    HOdysseyHUDElementHitProxy(TSharedPtr<FOdysseyHUDElement> iHUDElement, TOptional<EMouseCursor::Type> iMouseCursor)
-        : HHitProxy(HPP_Foreground)
-        , mHUDElement(iHUDElement)
-		, mMouseCursor(iMouseCursor)
-	{
-	}
-
-	virtual EMouseCursor::Type GetMouseCursor() override
-	{
-        if (!mMouseCursor.IsSet())
-            return HHitProxy::GetMouseCursor();
-
-        return mMouseCursor.GetValue();
-	}
-
-    virtual TSharedPtr<FOdysseyHUDElement> HUDElement()
-    {
-        return mHUDElement;
-    };
-};
-
 /////////////////////////////////////////////////////
 // UOdysseyHUDElement
-class ODYSSEYWIDGETS_API FOdysseyHUDElement
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDElement
     : public TSharedFromThis<FOdysseyHUDElement>
 {
 public:
@@ -97,4 +68,32 @@ private:
 
     /** If this element is captured by mouse or keyboard shortcut, then the associated viewport shouldn't do anything else than manipulating this HUD */
     bool mIsCaptured;
+};
+
+struct ODYSSEYHUDSYSTEM_API HOdysseyHUDElementHitProxy : public HHitProxy
+{
+	DECLARE_HIT_PROXY();
+
+    TSharedPtr<FOdysseyHUDElement> mHUDElement;
+	TOptional<EMouseCursor::Type> mMouseCursor;
+
+    HOdysseyHUDElementHitProxy(TSharedPtr<FOdysseyHUDElement> iHUDElement, TOptional<EMouseCursor::Type> iMouseCursor)
+        : HHitProxy(HPP_Foreground)
+        , mHUDElement(iHUDElement)
+		, mMouseCursor(iMouseCursor)
+	{
+	}
+
+	virtual EMouseCursor::Type GetMouseCursor() override
+	{
+        if (!mMouseCursor.IsSet())
+            return HHitProxy::GetMouseCursor();
+
+        return mMouseCursor.GetValue();
+	}
+
+    virtual TSharedPtr<FOdysseyHUDElement> HUDElement()
+    {
+        return mHUDElement;
+    };
 };

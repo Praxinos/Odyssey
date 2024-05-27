@@ -50,6 +50,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::Unload()
 void
 UOdysseyPainterEditorRasterPaintBucketTool::Load()
 {
+    UOdysseyPainterEditorTool::Load();
     bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
 
     if( hasRaster )

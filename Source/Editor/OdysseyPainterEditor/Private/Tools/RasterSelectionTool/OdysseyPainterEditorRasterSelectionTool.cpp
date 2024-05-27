@@ -36,26 +36,35 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    mToolSelectionArea = new FOdysseyHUDPolygon(FName("CurrentSelection"), TArray<FVector2D>());
+    mToolSelectionArea = MakeShared<FOdysseyHUDPolygon>(FName("CurrentSelection"));
     mHUD->AddElement(mToolSelectionArea);
 
     switch (SelectionShape)
     {
-    case EOdysseySelectionShape::Rectangle:
-        for (int i = 0; i < 4; i++)
+        case EOdysseySelectionShape::Rectangle:
+        {
+            for ( int i = 0; i < 4; i++ )
+            {
+                mToolSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+            }
+        }
+        break;
+        
+        case EOdysseySelectionShape::Freehand:
         {
             mToolSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
         }
         break;
-    case EOdysseySelectionShape::Freehand:
-        mToolSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+
+        case EOdysseySelectionShape::Ellipse:
+        {
+            mToolSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+            mDownReference = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y));
+        }
         break;
-    case EOdysseySelectionShape::Ellipse:
-        mToolSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
-        mDownReference = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y));
-        break;
-    default:
-        return false;
+        
+        default:
+            return false;
         break;
     }
 
@@ -127,10 +136,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
 
     mIsSelectionAreaSet = true;
 
-    mEditor->MakeHUDPersistent( mHUD->GetElementByKey("CurrentSelection") );
-    mHUD->RemoveElementByKey("CurrentSelection");
-
-    mEditor->ToolsHUDSystem()->ClearHUDSurface();
+    mHUD->RemoveElement(mToolSelectionArea);
    
     return true;
 }
@@ -163,6 +169,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(const FKey& iKey)
 
 void UOdysseyPainterEditorRasterSelectionTool::Load()
 {
+    UOdysseyPainterEditorTool::Load();
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::Unload()
@@ -226,7 +233,6 @@ void UOdysseyPainterEditorRasterSelectionTool::ClearSelection()
         mSelectionBlock = nullptr;
     }
     mToolSelectionArea = nullptr;
-    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterSelectionTool::GetSelectionAreaAsScanlines()

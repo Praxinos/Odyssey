@@ -66,7 +66,7 @@ protected:
     virtual void OnZoomOutExponential();
 
     //HUD
-    virtual void OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused);
+    //virtual void OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused);
 
 private:
     TAttribute<UTexture*> mTexture;

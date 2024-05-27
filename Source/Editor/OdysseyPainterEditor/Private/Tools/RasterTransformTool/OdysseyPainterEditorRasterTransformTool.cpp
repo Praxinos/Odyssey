@@ -57,7 +57,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
     /* if (mHUD->OnKeyDown(point, iKey)) //Handling HUD events if needed
         return true; */
 
-    if (mSelection->OnMouseDown(iPointInTexture, iKey))
+    /* if ( mSelection->OnMouseDown(iPointInTexture, iKey) )
         return true;
 
     if( mTransformArea )
@@ -163,7 +163,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
     /* if( mHUD->OnKeyUp(point, iKey) )
         return true; */
 
-    if( mSelection->OnMouseUp( iPointInTexture, iKey ))
+    /*if ( mSelection->OnMouseUp(iPointInTexture, iKey) )
         return true;
         */
     return false;
@@ -218,6 +218,7 @@ void UOdysseyPainterEditorRasterTransformTool::Tick(float iDeltaTime)
 
 void UOdysseyPainterEditorRasterTransformTool::Load()
 {
+    UOdysseyPainterEditorTool::Load();
 /*
     mSelection->Init(mHUD, mEditor, Uniform);
     mSelection->Load();

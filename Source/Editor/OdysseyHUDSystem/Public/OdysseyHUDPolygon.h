@@ -8,26 +8,25 @@
 #include "OdysseyHUDElement.h"
 
 /////////////////////////////////////////////////////
-// FOdysseyHUDCircle
-class ODYSSEYWIDGETS_API FOdysseyHUDCircle : public FOdysseyHUDElement
+// FOdysseyHUDPolygon
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDPolygon : public FOdysseyHUDElement
 {
 public:
     // Destructor
-    virtual ~FOdysseyHUDCircle();
+    virtual ~FOdysseyHUDPolygon();
 
     //Constructor
-    FOdysseyHUDCircle( FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint);
-    FOdysseyHUDCircle( FName iName, FVector2D iCenterPoint, float iRadius);
+    FOdysseyHUDPolygon( FName iName);
 
+//FOdysseyHUDElement overrides
 public:
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
-    void SetCenter(const FVector2D iCenterPoint);
-    void SetRadius(float iRadius);
+    TArray<FVector2D>& GetPoints();
+    void ClosePolygon(bool iClosePolygon);
 
 private:
-    FVector2D mCenterPoint;
-    float mRadius;
-    FVector2D mBorderPoint;
+    TArray<FVector2D> mPoints;
+    bool mClosePolygon = true;
 };

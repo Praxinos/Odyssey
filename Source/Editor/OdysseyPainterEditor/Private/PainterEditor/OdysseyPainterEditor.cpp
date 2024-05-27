@@ -81,10 +81,8 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
     , mCurrentTemporaryTool(nullptr)
     , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
     , mVectorDrawingFlags(0)
-    , mToolsHUDSystem(new FOdysseyHUDSystem())
-    , mPersistentHUDSystem(new FOdysseyHUDSystem())
-    , mPersistentHUD(new FOdysseyHUDElement(FName("RootHUD")))
-	, mBrushContexts()
+    , mHUDSystem(new FOdysseyHUDSystem())
+    , mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
 	, mRasterDrawingTool(nullptr)
     , mRasterEraserTool(nullptr)
@@ -231,15 +229,8 @@ FOdysseyPainterEditor::OnClose()
     mGUI->Finalize();
 
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	delete mToolsHUDSystem;
-    mToolsHUDSystem = nullptr;
-
-    delete mPersistentHUDSystem;
-    mPersistentHUDSystem = nullptr;
-
-    mPersistentHUD->EmptyHUDElements();
-    delete mPersistentHUD;
-    mPersistentHUD = nullptr;
+	delete mHUDSystem;
+    mHUDSystem = nullptr;
 
     FOdysseyEditor::OnClose();
 }
@@ -247,15 +238,7 @@ FOdysseyPainterEditor::OnClose()
 void
 FOdysseyPainterEditor::InitHUD()
 {
-    mHUDSystem->OnDrawHUD().BindRaw(this, &FOdysseyPainterEditor::OnDrawHUD);
-}
-
-void
-FOdysseyPainterEditor::OnDrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
-{
-    UOdysseyPainterEditorTool* tool = GetCurrentTool();
-    if (tool)
-        tool->DrawHUD(iParams);
+    //TODO: Add FOdysseyMask HUD here
 }
 
 void
@@ -489,19 +472,9 @@ FOdysseyPainterEditor::GetBrushContexts()
 }
 
 FOdysseyHUDSystem* 
-FOdysseyPainterEditor::ToolsHUDSystem() const
+FOdysseyPainterEditor::HUDSystem() const
 {
-	return mToolsHUDSystem;
-}
-
-FOdysseyHUDElement* FOdysseyPainterEditor::PersistentHUD() const
-{
-    return mPersistentHUD;
-}
-
-FOdysseyHUDSystem* FOdysseyPainterEditor::PersistentHUDSystem() const
-{
-    return mPersistentHUDSystem;
+	return mHUDSystem;
 }
 
 const FOdysseyBrushColor&
@@ -767,19 +740,6 @@ FOdysseyPainterEditor::GetGUI()
 	if (!mGUI)
 		mGUI = MakeShareable(new FOdysseyPainterEditorGUI(this));
 	return mGUI.Get();
-}
-
-void FOdysseyPainterEditor::MakeHUDPersistent(FOdysseyHUDElement* iHUD)
-{
-    mPersistentHUDSystem->ClearHUDSurface();
-    mPersistentHUD->AddElement( iHUD );
-}
-
-
-void FOdysseyPainterEditor::ClearHUDPersistent()
-{
-    mPersistentHUD->EmptyHUDElements();
-    mPersistentHUDSystem->ClearHUDSurface();
 }
 
 void

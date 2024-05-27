@@ -9,7 +9,7 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDBezier
-class ODYSSEYWIDGETS_API FOdysseyHUDBezier : public FOdysseyHUDElement
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDBezier : public FOdysseyHUDElement
 {
 public:
     // Destructor

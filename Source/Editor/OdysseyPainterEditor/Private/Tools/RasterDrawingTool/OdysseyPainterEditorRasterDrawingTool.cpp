@@ -99,6 +99,7 @@ UOdysseyPainterEditorRasterDrawingTool::Activate()
 void
 UOdysseyPainterEditorRasterDrawingTool::Load()
 {
+    UOdysseyPainterEditorTool::Load();
     //GEditor->OnBlueprintCompiled().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintCompiled);
     FCoreUObjectDelegates::OnObjectsReinstanced.AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced);
 
@@ -452,7 +453,6 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPo
     Commit();
 
     mHUD->EmptyHUDElements();
-    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void
@@ -471,7 +471,6 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathAbort()
     mPaintEngine.Update(BlendParameters);
 
     mHUD->EmptyHUDElements();
-    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void

@@ -8,20 +8,20 @@
 #include "OdysseyHUDElement.h"
 
 /////////////////////////////////////////////////////
-// FOdysseyHUDLine
-class ODYSSEYWIDGETS_API FOdysseyHUDLine : public FOdysseyHUDElement
+// FOdysseyHUDRectangle
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDRectangle : public FOdysseyHUDElement
 {
 public:
     // Destructor
-    virtual ~FOdysseyHUDLine();
+    virtual ~FOdysseyHUDRectangle();
 
     //Constructor
-    FOdysseyHUDLine( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint);
+    FOdysseyHUDRectangle( FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint);
 
 public:
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
-    FVector2D mStartPoint;
-    FVector2D mFinishPoint;
+    FVector2D mTopLeftPoint;
+    FVector2D mBottomRightPoint;
 };

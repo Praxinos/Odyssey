@@ -110,6 +110,7 @@ UOdysseyPainterEditorRasterEraserTool::Activate()
 void
 UOdysseyPainterEditorRasterEraserTool::Load()
 {
+    UOdysseyPainterEditorTool::Load();
 	/* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
     mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
 
@@ -326,7 +327,6 @@ UOdysseyPainterEditorRasterEraserTool::OnShapePathEnd( const FOdysseyPoint& iPoi
     Commit();
 
     mHUD->EmptyHUDElements();
-    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void
@@ -338,7 +338,6 @@ UOdysseyPainterEditorRasterEraserTool::OnShapePathAbort()
     mPaintEngine.Update(mBlendParameters);
     
     mHUD->EmptyHUDElements();
-    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void

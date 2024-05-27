@@ -4,82 +4,35 @@
 #include "OdysseyHUDSystem.h"
 
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyHUDElement.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyHUDSystem::~FOdysseyHUDSystem()
 {
-    delete mHUDSurface;
 }
 
 FOdysseyHUDSystem::FOdysseyHUDSystem()
-    : mHUDBlock(nullptr)
-    , mHUDSurface(nullptr)
 {
 }
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Setters
 
 void
-FOdysseyHUDSystem::SetHUDBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
+FOdysseyHUDSystem::AddElement(TSharedPtr<FOdysseyHUDElement> iElement)
 {
-    mHUDBlock = iBlock;
+    mElements.Add(iElement);
 }
 
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Getters
-
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyHUDSystem::GetHUDBlock() const
+void
+FOdysseyHUDSystem::RemoveElement(TSharedPtr<FOdysseyHUDElement> iElement)
 {
-    return mHUDBlock;
-}
-
-FOdysseySurfaceTexture2DEditable* FOdysseyHUDSystem::GetHUDSurface() const
-{
-    return mHUDSurface;
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Callback Usage
-
-void FOdysseyHUDSystem::RebuildHUDSurface(FVector2D iSize)
-{
-    if( mHUDSurface )
-    {
-        delete mHUDSurface;
-        mHUDSurface = nullptr;
-    }
-
-    SetHUDBlock( MakeShared<::ULIS::FBlock>(iSize.X, iSize.Y, ::ULIS::Format_BGRA8) );
-
-    ClearHUDSurface();
-
-    mHUDSurface = new FOdysseySurfaceTexture2DEditable( mHUDBlock );
-}
-
-void FOdysseyHUDSystem::ClearHUDSurface()
-{
-    if( mHUDBlock )
-    {
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-        ctx.Clear(*mHUDBlock);
-        ctx.Finish();
-    }
-
-    if( mHUDSurface )
-        mHUDSurface->Invalidate();
+    mElements.Remove(iElement);
 }
 
 void
 FOdysseyHUDSystem::DrawHUD( const FDrawHUDParams& iParams )
 {
-    OnDrawHUD().ExecuteIfBound(iParams);
-}
-
-FOdysseyHUDSystem::FOnDrawHUD&
-FOdysseyHUDSystem::OnDrawHUD()
-{
-    return mOnDrawHUD;
+    for (TSharedPtr<FOdysseyHUDElement> element : mElements)
+    {
+        element->DrawHUD(iParams);
+    }
 }

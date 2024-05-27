@@ -248,6 +248,7 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 void
 UOdysseyPainterEditorVectorBaseTool::Load()
 {
+    UOdysseyPainterEditorTool::Load();
     // we need the focus on the viewport for keyboard 
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();

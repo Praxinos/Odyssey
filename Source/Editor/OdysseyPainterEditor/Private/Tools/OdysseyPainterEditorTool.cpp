@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "HUDViewportElement/OdysseyHUDElement.h"
+#include "OdysseyHUDElement.h"
 
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyPainterEditor.h"
@@ -90,14 +90,14 @@ UOdysseyPainterEditorTool::Inactivate()
 void
 UOdysseyPainterEditorTool::Load()
 {
-
+    mEditor->HUDSystem()->AddElement(mHUD);
 }
 
 void
 UOdysseyPainterEditorTool::Unload()
 {
     mHUD->EmptyHUDElements();
-    mEditor->ToolsHUDSystem()->ClearHUDSurface();
+    mEditor->HUDSystem()->RemoveElement(mHUD);
 }
 
 bool

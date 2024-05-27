@@ -2,8 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LineShape/OdysseyLineShape.h"
-#include "HUDViewportElement/Elements/OdysseyHUDHandle.h"
-#include "HUDViewportElement/Elements/OdysseyHUDLine.h"
+#include "OdysseyHUDHandle.h"
+#include "OdysseyHUDLine.h"
 #include <ULIS>
 
 //--------------------------------------------------------------------------------------
