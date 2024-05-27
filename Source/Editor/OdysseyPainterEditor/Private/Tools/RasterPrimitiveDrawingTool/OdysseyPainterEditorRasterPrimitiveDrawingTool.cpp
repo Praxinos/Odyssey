@@ -235,7 +235,140 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
 
     //SelectedShapeInstance->Draw(mPaintEngine.PaintBlock().Get(), options);
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mPaintEngine.PaintBlock()->Format());
+
+    //START Blend2D version
+
+    int w = mPaintEngine.PaintBlock()->Width();
+    int h = mPaintEngine.PaintBlock()->Height();
+    ::ULIS::eFormat format = mPaintEngine.PaintBlock()->Format();
+
+    TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<ULIS::FBlock>(w, h, ::ULIS::Format_BGRA8);
+
+    ::ULIS::FContext& ulisCtx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
+    ulisCtx.Clear(*maskBlock);
+    ulisCtx.Finish();
+
+    BLImage img;
+    int stride = maskBlock->BytesPerScanLine();
+    img.createFromData(w, h, BL_FORMAT_PRGB32, (void*)maskBlock->Bits(), stride);
+    BLContext blend2DCtx;
+    BLContextCreateInfo createInfo{};
+    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    blend2DCtx.begin(img, createInfo);
+
+    bool isLine = SelectedShapeInstance == AvailableShapes[EOdysseyShape::kLine];
+    bool isBezier = SelectedShapeInstance == AvailableShapes[EOdysseyShape::kBezier];
+
+    if (mPath.Num() < 2)
+        return;
+
+    if ( isLine )
+    {
+        mPath = {
+            mPath[0],
+            mPath.Last()
+        };
+    }
+
+    BLPath path;
+
+    if ( SubPixel )
+    {
+        path.moveTo(mPath[0].x, mPath[0].y);
+        for ( int i = 1; i < mPath.Num(); i++ )
+        {
+            path.lineTo(mPath[i].x, mPath[i].y);
+        }
+    }
+    else
+    {
+        path.moveTo(FMath::Floor(mPath[0].x) + 0.5f, FMath::Floor(mPath[0].y) + 0.5f);
+        for ( int i = 1; i < mPath.Num(); i++ )
+        {
+            path.lineTo(FMath::Floor(mPath[i].x) + 0.5f, FMath::Floor(mPath[i].y) + 0.5f);
+        }
+    }
+
+    if ( !isLine && !isBezier || !isLine && Filled)
+    {
+        path.close();
+    }
+
+    const ::ULIS::FColor& ulisColor = GetEditor()->PaintColor().GetValue().ToFormat(::ULIS::Format_BGRA8);
+    BLRgba32 blend2DColor(ulisColor.Red8(), ulisColor.Green8(), ulisColor.Blue8(), 255);
+    int strokeWidth = 0;
+
+    if ( Filled && !isLine )
+    {
+        blend2DCtx.setFillStyle(blend2DColor);
+        blend2DCtx.fillPath(path);
+    }
+    else
+    {
+        strokeWidth = StrokeWidth;
+        blend2DCtx.setStrokeStyle(BLRgba32(0, 0, 0, 255));
+        blend2DCtx.setStrokeWidth(strokeWidth);
+        blend2DCtx.strokePath(path);
+    }
+    blend2DCtx.end();
+
+    BLBox bbox;
+    path.getBoundingBox(&bbox);
+
+    ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromMinMax(
+        bbox.x0 - 1 - strokeWidth / 2,
+        bbox.y0 - 1 - strokeWidth / 2,
+        bbox.x1 + 1 + strokeWidth / 2,
+        bbox.y1 + 1 + strokeWidth / 2
+    ) & maskBlock->Rect();
+
+    ulisCtx.Unpremultiply(*maskBlock, invalidRect );
+    ulisCtx.Finish();
+
+    if (!Antialiasing)
+    {
+        ulisCtx.FilterInPlace(
+            []( ::ULIS::FPixel& iPixel, uint64 iNumPixels )
+            {
+                for (int i = 0; i < iNumPixels; i++, iPixel.Next())
+                {
+                    if ( iPixel.Alpha8() >= 127 )
+                    {
+                        iPixel.SetAlpha8(255);
+                    }
+                    else
+                    {
+                        iPixel.SetAlpha8(0);
+                    }
+                }
+            }
+            , *maskBlock
+            , invalidRect
+        );
+        ulisCtx.Finish();
+    }
+
+    TSharedPtr<::ULIS::FBlock> dstBlock = MakeShared<ULIS::FBlock>(invalidRect.w, invalidRect.h, format);
+    ulisCtx.ConvertFormat(*maskBlock, *dstBlock, invalidRect);
+    ulisCtx.Finish();
+
+    ulisCtx.Blend(*dstBlock, *mPaintEngine.PaintBlock(), dstBlock->Rect(), invalidRect.Position());
+    ulisCtx.Finish();
+
+    //END Blend2D version
+
+
+
+
+
+
+
+
+
+
+
+
+    /* ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mPaintEngine.PaintBlock()->Format());
 
     if (SelectedShapeInstance == AvailableShapes[EOdysseyShape::kLine] && !Filled)
     {
@@ -291,7 +424,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
         }
     }
 
-    ctx.Finish();
+    ctx.Finish(); */
 
     mPaintEngine.PaintBlock()->Dirty();
     mPaintEngine.Update(BlendParameters);

@@ -106,7 +106,7 @@ UOdysseyLineShape::OnKeyUp(const FKey& iKey)
 }
 
 
-void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+/*void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
 {
     if (!iBlock)
         return;
@@ -122,7 +122,7 @@ void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& i
         ctx.DrawLineSP(*(iBlock), ::ULIS::FVec2I(mLine->GetStartPoint().X, mLine->GetStartPoint().Y), ::ULIS::FVec2I(mLine->GetEndPoint().X, mLine->GetEndPoint().Y), iOptions.mColor);
 
     ctx.Finish();
-}
+}*/
 
 void UOdysseyLineShape::CommitLine()
 {

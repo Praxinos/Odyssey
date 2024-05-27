@@ -115,7 +115,7 @@ UOdysseyRectangleShape::OnKeyUp(const FKey& iKey)
     return UOdysseyShape::OnKeyUp(iKey);
 }
 
-void UOdysseyRectangleShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+/* void UOdysseyRectangleShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
 {
     if (!iBlock)
         return;
@@ -126,6 +126,7 @@ void UOdysseyRectangleShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptio
 
     ctx.Finish();
 }
+*/
 
 void UOdysseyRectangleShape::CommitRectangle()
 {

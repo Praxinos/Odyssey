@@ -88,7 +88,8 @@ bool UOdysseyShape::AbortShape()
 	return true;
 }
 
-void UOdysseyShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+/* void UOdysseyShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
 {
 
 }
+*/

@@ -118,7 +118,7 @@ UOdysseyBezierShape::OnKeyUp(const FKey& iKey)
     return UOdysseyShape::OnKeyUp(iKey);
 }
 
-void UOdysseyBezierShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+/*void UOdysseyBezierShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
 {
     if (!iBlock)
         return;
@@ -133,7 +133,7 @@ void UOdysseyBezierShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions&
         ctx.DrawQuadraticBezierSP(*(iBlock), ::ULIS::FVec2I(mBezier->GetStartPoint().X, mBezier->GetStartPoint().Y), ::ULIS::FVec2I(mBezier->GetControlPoint().X, mBezier->GetControlPoint().Y), ::ULIS::FVec2I(mBezier->GetEndPoint().X, mBezier->GetEndPoint().Y), 1.f, iOptions.mColor);
 
     ctx.Finish();
-}
+}*/
 
 void UOdysseyBezierShape::CommitBezier()
 {

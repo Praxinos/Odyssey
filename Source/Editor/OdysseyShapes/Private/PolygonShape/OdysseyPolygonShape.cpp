@@ -164,7 +164,7 @@ UOdysseyPolygonShape::OnKeyUp(const FKey& iKey)
     return UOdysseyShape::OnKeyUp(iKey);
 }
 
-void UOdysseyPolygonShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+/*void UOdysseyPolygonShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
 {
     if (!iBlock)
         return;
@@ -203,7 +203,7 @@ void UOdysseyPolygonShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions
     }
 
     ctx.Finish();
-}
+}*/
 
 void UOdysseyPolygonShape::CommitPolygon()
 {

@@ -103,7 +103,7 @@ UOdysseyEllipseShape::OnKeyUp(const FKey& iKey)
     return UOdysseyShape::OnKeyUp(iKey);
 }
 
-void UOdysseyEllipseShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+/* void UOdysseyEllipseShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
 {
     if (!iBlock)
         return;
@@ -118,7 +118,7 @@ void UOdysseyEllipseShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions
         ctx.DrawEllipseSP(*(iBlock), ::ULIS::FVec2I(mEllipse->GetCenter().X, mEllipse->GetCenter().Y), mEllipse->GetXRadius(), mEllipse->GetYRadius(), iOptions.mColor, iOptions.mFilled);
 
     ctx.Finish();
-}
+}*/
 
 void UOdysseyEllipseShape::CommitEllipse()
 {
