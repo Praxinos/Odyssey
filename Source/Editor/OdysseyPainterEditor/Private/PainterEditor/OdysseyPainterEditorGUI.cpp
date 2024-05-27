@@ -126,6 +126,11 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 
     //Need to rethink the commands and shortcuts to put them in the right place and not in GUI
     MAP_ACTION(painterEditorCommands.ClearCurrentLayer, ClearCurrentLayer)
+    MAP_ACTION(painterEditorCommands.ClearCurrentSelection, ClearCurrentSelection)
+    MAP_ACTION(painterEditorCommands.CopyCurrentSelection, CopyCurrentSelection)
+    MAP_ACTION(painterEditorCommands.PasteCurrentSelection, PasteCurrentSelection)
+    MAP_ACTION(painterEditorCommands.PasteCurrentSelectionInNewLayer, PasteCurrentSelectionInNewLayer)
+
     MAP_ACTION(painterEditorCommands.ToggleEraserButton, ToggleEraserButton)
 
     #undef MAP_ACTION
@@ -405,6 +410,26 @@ void FOdysseyPainterEditorGUI::ClearCurrentLayer()
 {
     if( mEditor && mEditor->GetSource() )
         mEditor->GetSource()->Clear();
+}
+
+void FOdysseyPainterEditorGUI::ClearCurrentSelection()
+{
+    UE_LOG(LogTemp, Display, TEXT("ClearSelection"))
+}
+
+void FOdysseyPainterEditorGUI::CopyCurrentSelection()
+{
+    UE_LOG(LogTemp, Display, TEXT("CopySelection"))
+}
+
+void FOdysseyPainterEditorGUI::PasteCurrentSelection()
+{
+    UE_LOG(LogTemp, Display, TEXT("PasteSelection"))
+}
+
+void FOdysseyPainterEditorGUI::PasteCurrentSelectionInNewLayer()
+{
+    UE_LOG(LogTemp, Display, TEXT("PasteSelectionLayer"))
 }
 
 void FOdysseyPainterEditorGUI::ToggleEraserButton()
