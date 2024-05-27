@@ -152,7 +152,7 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mRemovedObjectArray.size(); i++ )
     {
-        mRemovedObjectArray[i]->GetParent()->AppendChild( mRemovedObjectArray[i] );
+        mRemovedObjectArray[i]->GetOldParent()->AppendChild( mRemovedObjectArray[i] );
         mRemovedObjectArray[i]->Invalidate();
     }
 

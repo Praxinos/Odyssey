@@ -1032,22 +1032,6 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
                 wayPoint0->vertex->SetOwner( currentPath );
                 wayPoint1->vertex->SetOwner( currentPath );
 
-                if( ( wayPoint0->flags & FWayPoint::EntersErasureArea )
-                 || ( wayPoint0->flags & FWayPoint::LeavesErasureArea ) )
-                {
-                    ::ULIS::FVec2D adjustedCoords = newSegment->GetPointAt( 0.001f );
-
-                    wayPoint0->vertex->Set( adjustedCoords.x, adjustedCoords.y );
-                }
-
-                if( ( wayPoint1->flags & FWayPoint::EntersErasureArea )
-                 || ( wayPoint1->flags & FWayPoint::LeavesErasureArea ) )
-                {
-                    ::ULIS::FVec2D adjustedCoords = newSegment->GetPointAt( 0.999f );
-
-                    wayPoint1->vertex->Set( adjustedCoords.x, adjustedCoords.y );
-                }
-
                 // mark new segment for addition
                 oAddedSegmentArray.push_back( newSegment );
             }
