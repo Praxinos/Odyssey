@@ -239,7 +239,7 @@ UOdysseyPainterEditorVectorGridTool::CreateTopTabWidget()
 FText
 UOdysseyPainterEditorVectorGridTool::GetTooltip() const
 {
-    return LOCTEXT("vector-eraser-tool.tooltip", "Grid Tool");
+    return LOCTEXT("vector-grid-tool.tooltip", "Grid Tool");
 }
 
 #undef LOCTEXT_NAMESPACE

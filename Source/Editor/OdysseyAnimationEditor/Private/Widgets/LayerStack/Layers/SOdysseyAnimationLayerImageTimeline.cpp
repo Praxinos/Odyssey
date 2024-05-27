@@ -460,7 +460,7 @@ SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu(FMenuBuilder& iMenuB
 {
     iMenuBuilder.AddMenuEntry(
         LOCTEXT("timeline-cells.context-menu.cell-mark.reset.name", "Remove"),
-        LOCTEXT("timeline-cells.context-menu.cell-mark.reset.name", "Removes the any mark from selected cells"),
+        LOCTEXT("timeline-cells.context-menu.cell-mark.reset.tooltip", "Removes the any mark from selected cells"),
         FSlateIcon(),
         FUIAction(
             FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::RemoveCellMark),

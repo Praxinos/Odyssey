@@ -84,7 +84,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-raster.transaction.convert-to-raster-cell", "Convert To Raster Cell"));
 #endif
 
-    FScopedSlowTask progressBar(filteredCells.Num(), LOCTEXT("cell-image-raster.cross-fade.progress-bar.title", "Converting To Raster Cell"));
+    FScopedSlowTask progressBar(filteredCells.Num(), LOCTEXT("cell-image-raster.convert-to-raster-cell.progress-bar.title", "Converting To Raster Cell"));
     progressBar.MakeDialog();
 
     struct FResultingCell
