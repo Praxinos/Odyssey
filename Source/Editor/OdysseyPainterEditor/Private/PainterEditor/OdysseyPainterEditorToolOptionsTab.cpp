@@ -55,6 +55,7 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
 
     SetWidgetForTool(mEditor->GetRasterDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterDrawingTool()));
     SetWidgetForTool(mEditor->GetRasterEraserTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterEraserTool()));
+    SetWidgetForTool(mEditor->GetRasterSelectionTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterSelectionTool()));
     SetWidgetForTool(mEditor->GetRasterTransformTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterTransformTool()));
     SetWidgetForTool(mEditor->GetRasterPrimitiveDrawingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterPrimitiveDrawingTool()));
     SetWidgetForTool(mEditor->GetRasterPaintBucketTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetRasterPaintBucketTool()));

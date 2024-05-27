@@ -6,23 +6,23 @@
 #include "CoreMinimal.h"
 #include "OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
-#include "OdysseyPainterEditorRasterSelection.generated.h"
+#include "OdysseyPainterEditorRasterSelectionTool.generated.h"
 
 class FOdysseyHUDPolygon;
 
 //This is already a tool to prepare for the moment we'll separate transform and selection. When we'll have a "mask" feature in Odyssey
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelection : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelectionTool : public UOdysseyPainterEditorTool
 {
 public:
     GENERATED_BODY()
 
 public:
     // Destructor
-    virtual ~UOdysseyPainterEditorRasterSelection();
+    virtual ~UOdysseyPainterEditorRasterSelectionTool();
 
     //Constructor
-    UOdysseyPainterEditorRasterSelection();
+    UOdysseyPainterEditorRasterSelectionTool();
 
     //For now, we init the selection by sharing the HUD and the editor from the transform. When the selection and the transform will be two separate tools, we won't have to do this anymore
     void Init( TSharedPtr<FOdysseyHUDElement> iHUD, FOdysseyPainterEditor* iEditor, bool iUniform );

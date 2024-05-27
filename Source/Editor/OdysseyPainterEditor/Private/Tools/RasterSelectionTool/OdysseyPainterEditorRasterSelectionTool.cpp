@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterSelection.h"
+#include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "GeomTools.h"
 #include "OdysseyHUDPolygon.h"
 #include "OdysseyPainterEditor.h"
@@ -9,7 +9,7 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-UOdysseyPainterEditorRasterSelection::~UOdysseyPainterEditorRasterSelection()
+UOdysseyPainterEditorRasterSelectionTool::~UOdysseyPainterEditorRasterSelectionTool()
 {
     //We give back what we don't own
     mEditor = nullptr;
@@ -23,7 +23,7 @@ UOdysseyPainterEditorRasterSelection::~UOdysseyPainterEditorRasterSelection()
     }
 }
 
-UOdysseyPainterEditorRasterSelection::UOdysseyPainterEditorRasterSelection():
+UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTool():
     mIsSelectionAreaSet(false),
     mSelectionArea(nullptr),
     mPaintEngine(),
@@ -31,39 +31,39 @@ UOdysseyPainterEditorRasterSelection::UOdysseyPainterEditorRasterSelection():
 {
 }
 
-void UOdysseyPainterEditorRasterSelection::Init(TSharedPtr<FOdysseyHUDElement> iHUD, FOdysseyPainterEditor* iEditor, bool iUniform)
+void UOdysseyPainterEditorRasterSelectionTool::Init(TSharedPtr<FOdysseyHUDElement> iHUD, FOdysseyPainterEditor* iEditor, bool iUniform)
 {
     mHUD = iHUD;
     mEditor = iEditor;
     Uniform = iUniform;
 }
 
-bool UOdysseyPainterEditorRasterSelection::IsActivable() const
+bool UOdysseyPainterEditorRasterSelectionTool::IsActivable() const
+{
+    return true;
+}
+
+bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     return false;
 }
 
-bool UOdysseyPainterEditorRasterSelection::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+void UOdysseyPainterEditorRasterSelectionTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+{
+
+}
+
+void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+{
+
+}
+
+bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     return false;
 }
 
-void UOdysseyPainterEditorRasterSelection::OnMouseHover(const FOdysseyPoint& iPointInTexture)
-{
-
-}
-
-void UOdysseyPainterEditorRasterSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
-{
-
-}
-
-bool UOdysseyPainterEditorRasterSelection::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    return false;
-}
-
-bool UOdysseyPainterEditorRasterSelection::OnKeyDown(const FKey& iKey)
+bool UOdysseyPainterEditorRasterSelectionTool::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
@@ -73,7 +73,7 @@ bool UOdysseyPainterEditorRasterSelection::OnKeyDown(const FKey& iKey)
     return false;
 }
 
-bool UOdysseyPainterEditorRasterSelection::OnKeyUp(const FKey& iKey)
+bool UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(const FKey& iKey)
 {
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
@@ -89,21 +89,21 @@ bool UOdysseyPainterEditorRasterSelection::OnKeyUp(const FKey& iKey)
     return false;
 }
 
-void UOdysseyPainterEditorRasterSelection::Load()
+void UOdysseyPainterEditorRasterSelectionTool::Load()
 {
 }
 
-void UOdysseyPainterEditorRasterSelection::Unload()
+void UOdysseyPainterEditorRasterSelectionTool::Unload()
 {
     ClearSelection();
 }
 
-bool UOdysseyPainterEditorRasterSelection::IsSelectionAreaSet()
+bool UOdysseyPainterEditorRasterSelectionTool::IsSelectionAreaSet()
 {
     return mIsSelectionAreaSet;
 }
 
-bool UOdysseyPainterEditorRasterSelection::IsInSelectionArea(FVector2D iPoint)
+bool UOdysseyPainterEditorRasterSelectionTool::IsInSelectionArea(FVector2D iPoint)
 {
     if( !mSelectionArea || mSelectionArea->GetPoints().Num() == 0 )
         return false;
@@ -111,12 +111,12 @@ bool UOdysseyPainterEditorRasterSelection::IsInSelectionArea(FVector2D iPoint)
     return FGeomTools2D::IsPointInPolygon(iPoint, mSelectionArea->GetPoints()); 
 }
 
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelection::GetSelectionBlock()
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelectionTool::GetSelectionBlock()
 {
     return mSelectionBlock;
 }
 
-::ULIS::FRectI UOdysseyPainterEditorRasterSelection::GetSelectionAreaBoundingRect()
+::ULIS::FRectI UOdysseyPainterEditorRasterSelectionTool::GetSelectionAreaBoundingRect()
 {
     if (mSelectionArea && mSelectionArea->GetPoints().Num() != 0)
     {
@@ -136,7 +136,7 @@ TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelec
     return ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
 }
 
-bool UOdysseyPainterEditorRasterSelection::IsSelectionValid(::ULIS::FRectI iSelectionArea)
+bool UOdysseyPainterEditorRasterSelectionTool::IsSelectionValid(::ULIS::FRectI iSelectionArea)
 {
     if (iSelectionArea.w > 8192 || iSelectionArea.h > 8192) //Unreal limitations + very slow in ULIS at these sizes
         return false;
@@ -144,7 +144,7 @@ bool UOdysseyPainterEditorRasterSelection::IsSelectionValid(::ULIS::FRectI iSele
     return true;
 }
 
-void UOdysseyPainterEditorRasterSelection::ClearSelection()
+void UOdysseyPainterEditorRasterSelectionTool::ClearSelection()
 {
     mHUD->EmptyHUDElements();
     mIsSelectionAreaSet = false;
@@ -157,7 +157,7 @@ void UOdysseyPainterEditorRasterSelection::ClearSelection()
     mEditor->HUDSystem()->ClearHUDSurface();
 }
 
-void UOdysseyPainterEditorRasterSelection::ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
+void UOdysseyPainterEditorRasterSelectionTool::ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
 {
     if (!iBlock)
         return;

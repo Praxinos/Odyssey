@@ -4,11 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorRasterSelectionTool.h"
 #include "OdysseyPainterEditorRasterFreehandSelection.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterFreehandSelection : public UOdysseyPainterEditorRasterSelection
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterFreehandSelection : public UOdysseyPainterEditorRasterSelectionTool
 {
 public:
     GENERATED_BODY()

@@ -4,22 +4,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyPainterEditorRasterSelection.h"
-#include "OdysseyPainterEditorRasterRectangleSelection.generated.h"
+#include "OdysseyPainterEditorRasterSelectionTool.h"
+#include "OdysseyPainterEditorRasterEllipseSelection.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterRectangleSelection : public UOdysseyPainterEditorRasterSelection
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterEllipseSelection : public UOdysseyPainterEditorRasterSelectionTool
 {
 public:
     GENERATED_BODY()
 
 public:
     // Destructor
-    virtual ~UOdysseyPainterEditorRasterRectangleSelection();
+    virtual ~UOdysseyPainterEditorRasterEllipseSelection();
 
     //Constructor
-    UOdysseyPainterEditorRasterRectangleSelection();
-
+    UOdysseyPainterEditorRasterEllipseSelection();
 
 public:
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
@@ -30,6 +29,8 @@ public:
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
 private:
-    void ConstrainSelectionToRectangle(FVector2D iPosition);
+    TArray<::ULIS::FRectI> GetSelectionAreaAsScanlines();
+
+    FVector2D mDownReference;
 
 };

@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/RasterTransformTool/Selection/OdysseyPainterEditorRasterEllipseSelection.h"
+#include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterEllipseSelection.h"
 #include "OdysseyBrushShape.h"
 #include "OdysseyHUDPolygon.h"
 #include "OdysseyMediaRaster.h"
@@ -129,7 +129,7 @@ bool UOdysseyPainterEditorRasterEllipseSelection::OnMouseUp(const FOdysseyPoint&
 
 bool UOdysseyPainterEditorRasterEllipseSelection::OnKeyUp(const FKey& iKey)
 {
-    return UOdysseyPainterEditorRasterSelection::OnKeyUp(iKey);
+    return UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(iKey);
 }
 
 TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterEllipseSelection::GetSelectionAreaAsScanlines()

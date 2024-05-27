@@ -8,6 +8,7 @@
 #include "OdysseyHUDSystem.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
+#include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
@@ -106,6 +107,7 @@ public:
     
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorRasterEraserTool*                   GetRasterEraserTool() const;
+    virtual UOdysseyPainterEditorRasterSelectionTool*                GetRasterSelectionTool() const;
     virtual UOdysseyPainterEditorRasterTransformTool*                GetRasterTransformTool() const;
     virtual UOdysseyPainterEditorRasterPrimitiveDrawingTool*         GetRasterPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorRasterPaintBucketTool*              GetRasterPaintBucketTool() const;
@@ -247,6 +249,7 @@ protected:
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
     UOdysseyPainterEditorRasterEraserTool* mRasterEraserTool;
+    UOdysseyPainterEditorRasterSelectionTool* mRasterSelectionTool;
     UOdysseyPainterEditorRasterTransformTool* mRasterTransformTool;
     UOdysseyPainterEditorRasterPrimitiveDrawingTool* mRasterPrimitiveDrawingTool;
     UOdysseyPainterEditorRasterPaintBucketTool* mRasterPaintBucketTool;
