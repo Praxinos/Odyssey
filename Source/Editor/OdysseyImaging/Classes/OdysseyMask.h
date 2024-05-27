@@ -9,8 +9,8 @@
 
 struct FOdysseyCanvasZone
 {
-    TArray<FVector2D> mPolygonZone;
-    ::ULIS::FBlock* mBlock; //We have the ownership of those blocks
+    TArray<FVector2D> mPolygonPoints;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock; //We have the ownership of those blocks
 };
 
 class ODYSSEYIMAGING_API FOdysseyMask 
@@ -20,8 +20,11 @@ public:
     ~FOdysseyMask();
     FOdysseyMask();
 
-    void AddFromPointsAndBlock( TArray<FVector2D> iPoints, ::ULIS::FBlock* iBlock );
+    void AddFromPointsAndBlock( TArray<FVector2D> iPoints, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock );
     void ClearMask();
+
+    ::ULIS::FRectI GetMaskBoundingRect();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetMaskBlock();
 
 private:
     TArray<FOdysseyCanvasZone> mMaskZones;

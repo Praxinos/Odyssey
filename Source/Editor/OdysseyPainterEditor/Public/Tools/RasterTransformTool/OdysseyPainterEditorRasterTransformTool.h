@@ -48,7 +48,6 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
-    virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
     virtual FText GetTooltip() const override;
@@ -81,24 +80,21 @@ private:
     void OnPivotHandleDragged();
 
 public:
-    UPROPERTY(EditAnywhere, Category = "Selection Shape")
-    EOdysseySelectionShape SelectionShape;
-
-    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    UPROPERTY(EditAnywhere, Category = "Transform options")
     bool Perspective = false;
 
-    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    UPROPERTY(EditAnywhere, Category = "Transform options")
     bool Uniform = false;
 
 private: 
     FOdysseyPaintEngine mPaintEngine;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mOriginalTransformBlock; //The block we're transforming, without any deformation
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
     FOdysseyRasterBlockMutator mRasterMutator;
 
     EOdysseyTransformCapture mTransformCaptureMode;
     TSharedPtr<FOdysseyHUDPolygon> mTransformArea;
     TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
-    FVector2D mPivot;
 
     int mLastReferenceRotation;
     FVector2D mMouseLastReferencePoint;

@@ -136,6 +136,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
 
     mIsSelectionAreaSet = true;
 
+    mEditor->EditorMask().AddFromPointsAndBlock( mToolSelectionArea->GetPoints(), mSelectionBlock );
     mHUD->RemoveElement(mToolSelectionArea);
    
     return true;
