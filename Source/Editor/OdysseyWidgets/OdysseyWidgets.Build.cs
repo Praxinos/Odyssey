@@ -45,8 +45,7 @@ public class OdysseyWidgets : ModuleRules
              new string[] {
                 "ULIS",
                 "ULISLoader",
-                "EditorWidgets",
-                "OdysseyHUDSystem",
+                "EditorWidgets"
 			 }
         );
 

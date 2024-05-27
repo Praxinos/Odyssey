@@ -26,8 +26,8 @@ FOdysseyHUDHandle::~FOdysseyHUDHandle()
 }
 
 FOdysseyHUDHandle::FOdysseyHUDHandle(const FVector2D& iPosition)
-    : mHandleTexture(LoadObject<UTexture>(nullptr, TEXT("/Iliad/HUD/T_HUD_Handle")))
-    , mPosition(iPosition)
+    : mPosition(iPosition)
+	, mHandleTexture(LoadObject<UTexture>(nullptr, TEXT("/Iliad/HUD/T_HUD_Handle")))
 {
 }
 
