@@ -691,6 +691,11 @@ FOdysseyPainterEditor::LayerStack() const
 	return source->GetLayerStack();
 }
 
+FOdysseyMask& FOdysseyPainterEditor::EditorMask()
+{
+    return mEditorMask;
+}
+
 TSharedPtr<FOdysseyMeshSelector>
 FOdysseyPainterEditor::GetMeshSelector() const
 {

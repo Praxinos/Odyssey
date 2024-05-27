@@ -139,7 +139,8 @@ public:
 	virtual const FOdysseyBrushColor&                       PaintColor() const;
     virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                             LayerStack() const;
-    
+    virtual FOdysseyMask&                                   EditorMask();
+
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
     
     TArray<FOdysseyBrushContext*>& GetBrushContexts();
@@ -205,8 +206,6 @@ public:
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
 
-
-
 protected:
     //Callbacks
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
@@ -244,7 +243,8 @@ protected:
     uint64                          mVectorHUDFlags;
     uint64                          mVectorDrawingFlags;
 
-    FOdysseyHUDSystem*               mHUDSystem;
+    FOdysseyHUDSystem*              mHUDSystem;
+    FOdysseyMask                    mEditorMask; //The mask created by a user made selection or from a tool that creates mask/stencil on the drawing
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
     FSimpleMulticastDelegate        mOnCurrentToolChanged;

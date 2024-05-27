@@ -62,8 +62,6 @@ private:
 
     void CreateTransformBlockFromSelectionBlock();
     ::ULIS::FRectI GetTransformAreaBoundingRect();
-
-    TArray<::ULIS::FRectI> GetTransformAreaAsScanlines(); //Returns rectangles with height of 1 that cover the entire transform area. Useful for freehand selection
     
     void BlendTransformAreaToPaintBlock();
 

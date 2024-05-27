@@ -53,6 +53,8 @@ public:
 
     void ClearSelection();
 
+    TArray<::ULIS::FRectI> GetSelectionAreaAsScanlines();
+
 protected:
     bool IsSelectionValid(::ULIS::FRectI iSelectionArea);
     void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
@@ -60,6 +62,7 @@ protected:
 private:
     void ConstrainSelectionToEllipse( const FOdysseyPoint& iPointInTexture );
     void ConstrainSelectionToRectangle(FVector2D iPosition);
+
 
 protected:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")

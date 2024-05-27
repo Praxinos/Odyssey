@@ -10,3 +10,16 @@ FOdysseyMask::~FOdysseyMask()
 FOdysseyMask::FOdysseyMask()
 {
 }
+
+void FOdysseyMask::AddFromPointsAndBlock(TArray<FVector2D> iPoints, ::ULIS::FBlock* iBlock)
+{
+}
+
+void FOdysseyMask::ClearMask()
+{
+    for( int i = mMaskZones.Num(); i > 0; i-- )
+    {
+        delete mMaskZones[i].mBlock;
+    }
+    mMaskZones.Empty();
+}
