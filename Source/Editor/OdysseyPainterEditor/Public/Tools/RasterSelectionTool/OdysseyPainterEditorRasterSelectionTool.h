@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
-#include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyMask.h"
 #include "OdysseyPainterEditorRasterSelectionTool.generated.h"
 
@@ -33,9 +32,6 @@ public:
 
     //Constructor
     UOdysseyPainterEditorRasterSelectionTool();
-
-    //For now, we init the selection by sharing the HUD and the editor from the transform. When the selection and the transform will be two separate tools, we won't have to do this anymore
-    void Init( TSharedPtr<FOdysseyHUDElement> iHUD, FOdysseyPainterEditor* iEditor, bool iUniform );
     
     virtual bool IsActivable() const override;
 
@@ -61,11 +57,11 @@ protected:
     bool IsSelectionValid(::ULIS::FRectI iSelectionArea);
     void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
+private:
+    void ConstrainSelectionToEllipse( const FOdysseyPoint& iPointInTexture );
+    void ConstrainSelectionToRectangle(FVector2D iPosition);
+
 protected:
-    FOdysseyPainterEditorRasterSelection* mCurrentSelection;
-
-    FOdysseyMask mCompleteSelection;
-
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     EOdysseySelectionShape SelectionShape;
 
@@ -77,4 +73,6 @@ protected:
     FOdysseyPaintEngine mPaintEngine;
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mSelectionBlock;
+
+    FVector2D mDownReference;
 };

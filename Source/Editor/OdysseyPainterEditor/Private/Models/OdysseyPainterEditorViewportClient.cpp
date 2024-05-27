@@ -209,11 +209,11 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
     //Tool system HUD drawing
-    IOdysseySurfaceEditable* HUDSurface = mOdysseyPainterEditor->HUDSystem()->GetHUDSurface();
-    UTexture* HUDTexture = nullptr;
-    if (HUDSurface)
+    IOdysseySurfaceEditable* toolsHUDSurface = mOdysseyPainterEditor->ToolsHUDSystem()->GetHUDSurface();
+    UTexture* toolsHUDTexture = nullptr;
+    if (toolsHUDSurface)
     {
-        HUDTexture = HUDSurface->Texture();
+        toolsHUDTexture = toolsHUDSurface->Texture();
     }
 
     // Draw HUD Surface
@@ -223,11 +223,11 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         TRefCountPtr<FBatchedElementParameters> HUDbatchedElementParameters;
         if( GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM5 )
         {
-            UTexture2D* HUDtexture2D = Cast<UTexture2D>(HUDTexture);
+            UTexture2D* HUDtexture2D = Cast<UTexture2D>(toolsHUDTexture);
 
-            bool isNormalMap = HUDTexture->IsNormalMap();
-            bool isSingleChannel = HUDTexture->CompressionSettings == TC_Grayscale || HUDTexture->CompressionSettings == TC_Alpha;
-            bool isVirtual = HUDTexture->IsCurrentlyVirtualTextured();
+            bool isNormalMap = toolsHUDTexture->IsNormalMap();
+            bool isSingleChannel = toolsHUDTexture->CompressionSettings == TC_Grayscale || toolsHUDTexture->CompressionSettings == TC_Alpha;
+            bool isVirtual = toolsHUDTexture->IsCurrentlyVirtualTextured();
             bool isVTSPS = HUDtexture2D ? HUDtexture2D->IsVirtualTexturedWithSinglePhysicalSpace() : false;
             bool isTextureArray = false;
             float layerIndex = 0.f;
@@ -242,9 +242,9 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         transform = transform.Inverse(); 
          
         if( mOdysseyPainterEditor->GetCurrentTool() && mOdysseyPainterEditor->GetCurrentTool()->GetHUD() )
-            mOdysseyPainterEditor->GetCurrentTool()->GetHUD()->Draw( HUDSurface->Block().Get(), transform );
+            mOdysseyPainterEditor->GetCurrentTool()->GetHUD()->Draw( toolsHUDSurface->Block().Get(), transform );
         
-        FCanvasTileItem tileItem(FVector2D(0, 0), HUDTexture->GetResource(), FVector2D(iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y), FLinearColor::White);
+        FCanvasTileItem tileItem(FVector2D(0, 0), toolsHUDTexture->GetResource(), FVector2D(iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y), FLinearColor::White);
         tileItem.BatchedElementParameters = HUDbatchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
         result += ( 1 << 0 );
@@ -255,6 +255,55 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         tileItem.PivotPoint = pivotPoint;
         ioCanvas->DrawItem( tileItem );
     } */
+
+    //Persistent system HUD drawing
+    IOdysseySurfaceEditable* persistentHUDSurface = mOdysseyPainterEditor->PersistentHUDSystem()->GetHUDSurface();
+    UTexture* persistentHUDTexture = nullptr;
+    if (persistentHUDSurface)
+    {
+        persistentHUDTexture = persistentHUDSurface->Texture();
+    }
+
+    // Draw HUD Surface
+    if (persistentHUDTexture && persistentHUDTexture->GetResource())
+    {
+        //HUD needs its own way to be displayed, otherwise it will inherit the way the canvas texture is drawn, which is not always what we want
+        TRefCountPtr<FBatchedElementParameters> HUDbatchedElementParameters;
+        if (GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM5)
+        {
+            UTexture2D* HUDtexture2D = Cast<UTexture2D>(persistentHUDTexture);
+
+            bool isNormalMap = persistentHUDTexture->IsNormalMap();
+            bool isSingleChannel = persistentHUDTexture->CompressionSettings == TC_Grayscale || persistentHUDTexture->CompressionSettings == TC_Alpha;
+            bool isVirtual = persistentHUDTexture->IsCurrentlyVirtualTextured();
+            bool isVTSPS = HUDtexture2D ? HUDtexture2D->IsVirtualTexturedWithSinglePhysicalSpace() : false;
+            bool isTextureArray = false;
+            float layerIndex = 0.f;
+            HUDbatchedElementParameters = new FBatchedElementTexture2DPreviewParameters(mipLevel, layerIndex, layerIndex, isNormalMap, isSingleChannel, isVTSPS, isVirtual, isTextureArray, false);
+        }
+
+        FTransform2D transformMinusCenter = FTransform2D(mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter() * -1);
+        FTransform2D transformAddHalfTexture = FTransform2D(FVector2D(texture->GetSurfaceWidth(), texture->GetSurfaceHeight()) / 2.f);
+        FTransform2D transformViewport = mOdysseyPainterEditorViewportPtr.Pin()->GetTransform();
+        FTransform2D transform = transformMinusCenter.Concatenate(transformViewport.Inverse());
+        transform.SetTranslation(transform.GetTranslation() + FVector2D(texture->GetSurfaceWidth(), texture->GetSurfaceHeight()) / 2.f);
+        transform = transform.Inverse();
+
+        if( mOdysseyPainterEditor->PersistentHUD() )
+            mOdysseyPainterEditor->PersistentHUD()->Draw(persistentHUDSurface->Block().Get(), transform);
+
+        FCanvasTileItem tileItem(FVector2D(0, 0), persistentHUDTexture->GetResource(), FVector2D(iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y), FLinearColor::White);
+        tileItem.BatchedElementParameters = HUDbatchedElementParameters;
+        uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
+        result += (1 << 0);
+        result += (1 << 1);
+        result += (1 << 2);
+        result += (1 << 3);
+        tileItem.BlendMode = (ESimpleElementBlendMode)result;
+        tileItem.PivotPoint = pivotPoint;
+        ioCanvas->DrawItem(tileItem);
+    }
+
 
     if( mMeshSelector->GetCurrentMesh() )
     {

@@ -80,7 +80,9 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
     , mCurrentTemporaryTool(nullptr)
     , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
     , mVectorDrawingFlags(0)
-    , mHUDSystem(new FOdysseyHUDSystem())
+    , mToolsHUDSystem(new FOdysseyHUDSystem())
+    , mPersistentHUDSystem(new FOdysseyHUDSystem())
+    , mPersistentHUD(new FOdysseyHUDElement(FName("RootHUD")))
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
 	, mRasterDrawingTool(nullptr)
@@ -228,8 +230,15 @@ FOdysseyPainterEditor::OnClose()
     mGUI->Finalize();
 
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	delete mHUDSystem;
-    mHUDSystem = nullptr;
+	delete mToolsHUDSystem;
+    mToolsHUDSystem = nullptr;
+
+    delete mPersistentHUDSystem;
+    mPersistentHUDSystem = nullptr;
+
+    mPersistentHUD->EmptyHUDElements();
+    delete mPersistentHUD;
+    mPersistentHUD = nullptr;
 
     FOdysseyEditor::OnClose();
 }
@@ -479,9 +488,19 @@ FOdysseyPainterEditor::GetBrushContexts()
 }
 
 FOdysseyHUDSystem* 
-FOdysseyPainterEditor::HUDSystem() const
+FOdysseyPainterEditor::ToolsHUDSystem() const
 {
-	return mHUDSystem;
+	return mToolsHUDSystem;
+}
+
+FOdysseyHUDElement* FOdysseyPainterEditor::PersistentHUD() const
+{
+    return mPersistentHUD;
+}
+
+FOdysseyHUDSystem* FOdysseyPainterEditor::PersistentHUDSystem() const
+{
+    return mPersistentHUDSystem;
 }
 
 const FOdysseyBrushColor&
@@ -742,6 +761,19 @@ FOdysseyPainterEditor::GetGUI()
 	if (!mGUI)
 		mGUI = MakeShareable(new FOdysseyPainterEditorGUI(this));
 	return mGUI.Get();
+}
+
+void FOdysseyPainterEditor::MakeHUDPersistent(FOdysseyHUDElement* iHUD)
+{
+    mPersistentHUDSystem->ClearHUDSurface();
+    mPersistentHUD->AddElement( iHUD );
+}
+
+
+void FOdysseyPainterEditor::ClearHUDPersistent()
+{
+    mPersistentHUD->EmptyHUDElements();
+    mPersistentHUDSystem->ClearHUDSurface();
 }
 
 void

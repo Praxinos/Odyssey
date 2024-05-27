@@ -288,7 +288,10 @@ FOdysseyPainterEditorViewportTab::OnZoomOutExponential()
 void FOdysseyPainterEditorViewportTab::OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused)
 {
     if( iViewport == mViewport->GetViewport().Get() )
-        mEditor->HUDSystem()->RebuildHUDSurface( FVector2D( iViewport->GetSizeXY() ));
+    {
+        mEditor->ToolsHUDSystem()->RebuildHUDSurface( FVector2D( iViewport->GetSizeXY() ));
+        mEditor->PersistentHUDSystem()->RebuildHUDSurface(FVector2D(iViewport->GetSizeXY()));
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

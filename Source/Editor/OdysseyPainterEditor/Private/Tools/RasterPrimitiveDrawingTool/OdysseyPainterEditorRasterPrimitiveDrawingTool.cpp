@@ -225,7 +225,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
 
     GEditor->EndTransaction();
     mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathAbort()
@@ -233,7 +233,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathAbort()
     mPaintEngine.Abort();
 
     mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathReset()
@@ -241,7 +241,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathReset()
     mPaintEngine.Abort();
 
     mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FName& iPropertyName)

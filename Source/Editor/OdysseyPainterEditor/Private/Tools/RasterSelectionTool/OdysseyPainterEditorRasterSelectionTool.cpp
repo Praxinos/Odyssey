@@ -6,16 +6,12 @@
 #include "OdysseyHUDPolygon.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDSystem.h"
+#include "../Classes/Proxies/OdysseyBrushShape.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterSelectionTool::~UOdysseyPainterEditorRasterSelectionTool()
 {
-    //We give back what we don't own
-    mEditor = nullptr;
-    mHUD = nullptr;
-    //--
-
     if (mSelectionBlock)
     {
         mSelectionBlock.Reset();
@@ -24,20 +20,12 @@ UOdysseyPainterEditorRasterSelectionTool::~UOdysseyPainterEditorRasterSelectionT
 }
 
 UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTool():
-    mCurrentSelection( nullptr ),
     mIsSelectionAreaSet(false),
     mToolSelectionArea(nullptr),
     mPaintEngine(),
     mSelectionBlock(nullptr)
 {
     Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Lasso32");
-}
-
-void UOdysseyPainterEditorRasterSelectionTool::Init(TSharedPtr<FOdysseyHUDElement> iHUD, FOdysseyPainterEditor* iEditor, bool iUniform)
-{
-    mHUD = iHUD;
-    mEditor = iEditor;
-    Uniform = iUniform;
 }
 
 bool UOdysseyPainterEditorRasterSelectionTool::IsActivable() const
@@ -47,37 +35,30 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if( mCurrentSelection )
-    {
-        delete mCurrentSelection;
-        mCurrentSelection = nullptr;
-    }
-
-    TArray<FVector2D> areaPoints;
-    FOdysseyHUDPolygon* selection = new FOdysseyHUDPolygon(FName("CurrentSelection"), areaPoints);
-    mHUD->AddElement(selection);
+    mToolSelectionArea = new FOdysseyHUDPolygon(FName("CurrentSelection"), TArray<FVector2D>());
+    mHUD->AddElement(mToolSelectionArea);
 
     switch (SelectionShape)
     {
     case EOdysseySelectionShape::Rectangle:
-        mCurrentSelection = new FOdysseyPainterEditorRasterRectangleSelection(selection->GetPoints());
+        for (int i = 0; i < 4; i++)
+        {
+            mToolSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+        }
         break;
     case EOdysseySelectionShape::Freehand:
-        mCurrentSelection = new FOdysseyPainterEditorRasterFreehandSelection(selection->GetPoints());
+        mToolSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
         break;
     case EOdysseySelectionShape::Ellipse:
-        mCurrentSelection = new FOdysseyPainterEditorRasterEllipseSelection(selection->GetPoints());
+        mToolSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+        mDownReference = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y));
         break;
     default:
+        return false;
         break;
     }
 
-    if( mCurrentSelection->OnMouseDown( iPointInTexture, iKey ) )
-    {
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
@@ -86,24 +67,69 @@ void UOdysseyPainterEditorRasterSelectionTool::OnMouseHover(const FOdysseyPoint&
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    mCurrentSelection->OnMouseDrag(iPointInTexture);
+    switch (SelectionShape)
+    {
+    case EOdysseySelectionShape::Rectangle:
+        ConstrainSelectionToRectangle(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+        break;
+    case EOdysseySelectionShape::Freehand:
+        mToolSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+        break;
+    case EOdysseySelectionShape::Ellipse:
+        ConstrainSelectionToEllipse( iPointInTexture );
+        break;
+    default:
+        break;
+    }
 }
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     //Merge/replace/substract HUD of selection to already existing selection if it exists
-    mCurrentSelection->OnMouseUp( iPointInTexture, iKey );
 
-    mHUD->RemoveElementByKey( "RasterSelection" );
-    mHUD->ChangeElementKeyTo( "CurrentSelection", "RasterSelection" );
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return false;
 
-    mEditor->HUDSystem()->ClearHUDSurface();
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    mPaintEngine.RasterBlock(rasterBlock);
 
-    if (mCurrentSelection)
+    ::ULIS::eFormat format = rasterBlock->GetFormat();
+    ::ULIS::FRectI boundingBox = GetSelectionAreaBoundingRect();
+
+    if (!IsSelectionValid(boundingBox))
     {
-        delete mCurrentSelection;
-        mCurrentSelection = nullptr;
+        ClearSelection();
+        return true;
     }
+
+    int decalX = FMath::Min(boundingBox.x, 0);
+    int decalY = FMath::Min(boundingBox.y, 0);
+
+    mSelectionBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
+    ClearBlock(mSelectionBlock);
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+
+    ctx.Copy(
+        *rasterBlock->GetBlock(),
+        *mSelectionBlock,
+        boundingBox,
+        ::ULIS::FVec2I(-decalX, -decalY),
+        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+        0,
+        nullptr,
+        nullptr
+    );
+
+    ctx.Finish();
+
+    mIsSelectionAreaSet = true;
+
+    mEditor->MakeHUDPersistent( mHUD->GetElementByKey("CurrentSelection") );
+    mHUD->RemoveElementByKey("CurrentSelection");
+
+    mEditor->ToolsHUDSystem()->ClearHUDSurface();
    
     return true;
 }
@@ -199,7 +225,7 @@ void UOdysseyPainterEditorRasterSelectionTool::ClearSelection()
         mSelectionBlock = nullptr;
     }
     mToolSelectionArea = nullptr;
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
@@ -220,4 +246,70 @@ void UOdysseyPainterEditorRasterSelectionTool::ClearBlock(TSharedPtr<::ULIS::FBl
         &clearEvent);
 
     ctx.Finish();
+}
+
+void UOdysseyPainterEditorRasterSelectionTool::ConstrainSelectionToEllipse(const FOdysseyPoint& iPointInTexture)
+{
+    mToolSelectionArea->GetPoints().Empty();
+    FVector2D referencePoint = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y));
+    FVector2D center = (mDownReference + referencePoint) / 2;
+
+    FOdysseyPoint point = iPointInTexture;
+    if (Uniform)
+    {
+        int shiftX = referencePoint.X - mDownReference.X;
+        int shiftY = referencePoint.Y - mDownReference.Y;
+
+        int signX = shiftX < 0 ? -1 : 1;
+        int signY = shiftY < 0 ? -1 : 1;
+
+        int mult = signX == signY ? 1 : -1;
+
+        if (FMath::Abs(shiftX) > FMath::Abs(shiftY))
+        {
+            referencePoint.X = mDownReference.X + shiftX;
+            referencePoint.Y = mDownReference.Y + shiftX * mult;
+        }
+        else
+        {
+            referencePoint.X = mDownReference.X + shiftY * mult;
+            referencePoint.Y = mDownReference.Y + shiftY;
+        }
+    }
+
+    int a = FMath::Abs(mDownReference.X - referencePoint.X) / 2;
+    int b = FMath::Abs(mDownReference.Y - referencePoint.Y) / 2;
+    UOdysseyBrushShape::GenerateEllipsePoints(center, a, b, 0, mToolSelectionArea->GetPoints());
+}
+
+void UOdysseyPainterEditorRasterSelectionTool::ConstrainSelectionToRectangle(FVector2D iPosition)
+{
+    if (mToolSelectionArea->GetPoints().Num() == 0)
+        return;
+
+    if (Uniform)
+    {
+        int shiftX = iPosition.X - mToolSelectionArea->GetPoints()[0].X;
+        int shiftY = iPosition.Y - mToolSelectionArea->GetPoints()[0].Y;
+
+        int signX = shiftX < 0 ? -1 : 1;
+        int signY = shiftY < 0 ? -1 : 1;
+
+        int mult = signX == signY ? 1 : -1;
+
+        if (FMath::Abs(shiftX) > FMath::Abs(shiftY))
+        {
+            iPosition.X = mToolSelectionArea->GetPoints()[0].X + shiftX;
+            iPosition.Y = mToolSelectionArea->GetPoints()[0].Y + shiftX * mult;
+        }
+        else
+        {
+            iPosition.X = mToolSelectionArea->GetPoints()[0].X + shiftY * mult;
+            iPosition.Y = mToolSelectionArea->GetPoints()[0].Y + shiftY;
+        }
+    }
+
+    mToolSelectionArea->GetPoints()[2] = iPosition;
+    mToolSelectionArea->GetPoints()[1] = FVector2D(iPosition.X, mToolSelectionArea->GetPoints()[0].Y);
+    mToolSelectionArea->GetPoints()[3] = FVector2D(mToolSelectionArea->GetPoints()[0].X, iPosition.Y);
 }

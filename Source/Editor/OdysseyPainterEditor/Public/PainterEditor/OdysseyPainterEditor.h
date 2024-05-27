@@ -194,6 +194,11 @@ public:
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );
 
+    //HUD system related
+    //void MakeHUDPersistent( FOdysseyHUDElement* iHUD ); //Make HUD in parameter persistent in this editor, relinquishing ownership to this editor
+    //void ClearHUDPersistent(); //Clear persistent HUD, happens on actions like deselect
+    //void RemoveHUDPersistent( FString iName) //Removes a particular HUD from the persistent HUD. Todo when we'll be stacking HUDs on top of each other, like selection + guides, things like that
+
 public:
     // Setters
     void  AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension);

@@ -97,7 +97,7 @@ void
 UOdysseyPainterEditorTool::Unload()
 {
     mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 bool

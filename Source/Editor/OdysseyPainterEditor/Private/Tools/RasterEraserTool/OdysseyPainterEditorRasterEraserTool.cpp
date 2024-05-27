@@ -326,7 +326,7 @@ UOdysseyPainterEditorRasterEraserTool::OnShapePathEnd( const FOdysseyPoint& iPoi
     Commit();
 
     mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void
@@ -338,7 +338,7 @@ UOdysseyPainterEditorRasterEraserTool::OnShapePathAbort()
     mPaintEngine.Update(mBlendParameters);
     
     mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mEditor->ToolsHUDSystem()->ClearHUDSurface();
 }
 
 void
