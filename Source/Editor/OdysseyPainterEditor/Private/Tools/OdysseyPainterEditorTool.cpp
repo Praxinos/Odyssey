@@ -18,7 +18,7 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
     , mIsActivated(false)
 {
-    mHUD = MakeShared<FOdysseyHUDElement>( FName("RootHUD") );
+    mHUD = MakeShared<FOdysseyHUDElement>();
     mInputProcessor = MakeShared<FOdysseyPainterEditorToolInputProcessor>(this);
 }
 
@@ -96,7 +96,7 @@ UOdysseyPainterEditorTool::Load()
 void
 UOdysseyPainterEditorTool::Unload()
 {
-    mHUD->EmptyHUDElements();
+    mHUD->EmptyElements();
     mEditor->HUDSystem()->RemoveElement(mHUD);
 }
 

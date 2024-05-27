@@ -36,7 +36,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    mToolSelectionArea = MakeShared<FOdysseyHUDPolygon>(FName("CurrentSelection"));
+    mToolSelectionArea = MakeShared<FOdysseyHUDPolygon>();
     mHUD->AddElement(mToolSelectionArea);
 
     switch (SelectionShape)
@@ -225,7 +225,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsSelectionValid(::ULIS::FRectI i
 
 void UOdysseyPainterEditorRasterSelectionTool::ClearSelection()
 {
-    mHUD->EmptyHUDElements();
+    mHUD->EmptyElements();
     mIsSelectionAreaSet = false;
     if( mSelectionBlock )
     {

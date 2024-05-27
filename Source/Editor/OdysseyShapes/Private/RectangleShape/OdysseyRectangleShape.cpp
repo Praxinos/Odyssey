@@ -31,17 +31,17 @@ UOdysseyRectangleShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const 
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mRectangle = MakeShared<FOdysseyHUDRectangle>(FName("Rectangle"), FVector2D( iPointInTexture.x, iPointInTexture.y), FVector2D( iPointInTexture.x, iPointInTexture.y) );
+        mRectangle = MakeShared<FOdysseyHUDRectangle>(iPointInTexture, iPointInTexture);
         mHUD->AddElement(mRectangle);
 
-        TSharedPtr<FOdysseyHUDHandle> handleTopLeft = MakeShared<FOdysseyHUDHandle>(FName("handleTopLeft"), &(mRectangle->mTopLeftPoint));
-        TSharedPtr<FOdysseyHUDHandle> handleBottomRight = MakeShared<FOdysseyHUDHandle>(FName("handleBottomRight"), &(mRectangle->mBottomRightPoint));
+        mHandleTopLeft = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
+        mHandleBottomRight = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
 
-        handleTopLeft->IsInteractable(false);
-        handleBottomRight->IsInteractable(false);
+        mHandleTopLeft->IsInteractable(false);
+        mHandleBottomRight->IsInteractable(false);
 
-        mRectangle->AddElement(handleBottomRight);
-        mRectangle->AddElement(handleTopLeft);
+        mRectangle->AddElement(mHandleTopLeft);
+        mRectangle->AddElement(mHandleBottomRight);
         return true;
     }
 
@@ -73,8 +73,8 @@ UOdysseyRectangleShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
         FOdysseyPoint point = iPointInTexture;
         if (Uniform)
         {
-            int shiftX = iPointInTexture.x - mRectangle->mTopLeftPoint.X;
-            int shiftY = iPointInTexture.y - mRectangle->mTopLeftPoint.Y;
+            int shiftX = iPointInTexture.x - mRectangle->GetTopLeftPoint().X;
+            int shiftY = iPointInTexture.y - mRectangle->GetTopLeftPoint().Y;
 
             int signX = shiftX < 0 ? -1 : 1;
             int signY = shiftY < 0 ? -1 : 1;
@@ -83,16 +83,17 @@ UOdysseyRectangleShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
             if( FMath::Abs(shiftX) > FMath::Abs(shiftY) )
             {
-                point.x = mRectangle->mTopLeftPoint.X + shiftX;
-                point.y = mRectangle->mTopLeftPoint.Y + shiftX * mult;
+                point.x = mRectangle->GetTopLeftPoint().X + shiftX;
+                point.y = mRectangle->GetTopLeftPoint().Y + shiftX * mult;
             }
             else
             {
-                point.x = mRectangle->mTopLeftPoint.X + shiftY * mult;
-                point.y = mRectangle->mTopLeftPoint.Y + shiftY;
+                point.x = mRectangle->GetTopLeftPoint().X + shiftY * mult;
+                point.y = mRectangle->GetTopLeftPoint().Y + shiftY;
             }
         }
-        mRectangle->mBottomRightPoint = FVector2D(point.x, point.y);
+        mRectangle->SetBottomRightPoint(point);
+        mHandleBottomRight->SetPosition(point);
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
 }
@@ -121,7 +122,7 @@ void UOdysseyRectangleShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptio
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
 
-    ctx.DrawRectangle(*(iBlock), ::ULIS::FVec2I(mRectangle->mTopLeftPoint.X, mRectangle->mTopLeftPoint.Y), ::ULIS::FVec2I(mRectangle->mBottomRightPoint.X, mRectangle->mBottomRightPoint.Y), iOptions.mColor, iOptions.mFilled);
+    ctx.DrawRectangle(*(iBlock), ::ULIS::FVec2I(mRectangle->GetTopLeftPoint().X, mRectangle->GetTopLeftPoint().Y), ::ULIS::FVec2I(mRectangle->GetBottomRightPoint().X, mRectangle->GetBottomRightPoint().Y), iOptions.mColor, iOptions.mFilled);
 
     ctx.Finish();
 }
@@ -131,7 +132,7 @@ void UOdysseyRectangleShape::CommitRectangle()
     if( mHasStrokeBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        ::ULIS::GenerateRectanglePoints(::ULIS::FVec2I(mRectangle->mTopLeftPoint.X, mRectangle->mTopLeftPoint.Y), ::ULIS::FVec2I(mRectangle->mBottomRightPoint.X, mRectangle->mBottomRightPoint.Y), pointsArray);
+        ::ULIS::GenerateRectanglePoints(::ULIS::FVec2I(mRectangle->GetTopLeftPoint().X, mRectangle->GetTopLeftPoint().Y), ::ULIS::FVec2I(mRectangle->GetBottomRightPoint().X, mRectangle->GetBottomRightPoint().Y), pointsArray);
 
         FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
         for (float i = 0.f; i < pointsArray.Size(); i+=Step)

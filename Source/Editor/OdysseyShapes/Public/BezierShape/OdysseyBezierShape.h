@@ -71,5 +71,7 @@ protected:
 
 private:
     TSharedPtr<FOdysseyHUDBezier> mBezier;
-    TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
+    TSharedPtr<FOdysseyHUDHandle> mHandleStart;
+    TSharedPtr<FOdysseyHUDHandle> mHandleControl;
+    TSharedPtr<FOdysseyHUDHandle> mHandleEnd;
 };

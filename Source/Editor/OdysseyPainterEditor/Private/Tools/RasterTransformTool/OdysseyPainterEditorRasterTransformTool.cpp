@@ -24,7 +24,7 @@ UOdysseyPainterEditorRasterTransformTool::~UOdysseyPainterEditorRasterTransformT
         mTransformedBlock = nullptr;
     }
     mHandles.Empty();
-    mHUD->EmptyHUDElements();
+    mHUD->EmptyElements();
     */
 }
 
@@ -323,7 +323,7 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
     areaPoints.Add( FVector2D( boundingBox.x + boundingBox.w, boundingBox.y + boundingBox.h ) );
     areaPoints.Add( FVector2D( boundingBox.x, boundingBox.y + boundingBox.h ) );
 
-    mHUD->EmptyHUDElements(); //Deleting the HUD of the selection to create the one for the transform
+    mHUD->EmptyElements(); //Deleting the HUD of the selection to create the one for the transform
     mEditor->HUDSystem()->ClearHUDSurface();
     mHUD->AddElement(mTransformArea);
 
@@ -667,7 +667,7 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
     mRotation = 0;
     mLastReferenceRotation = 0;
     mHandles.Empty();
-    mHUD->EmptyHUDElements();
+    mHUD->EmptyElements();
     mTransformArea = nullptr;
     mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
     mEditor->HUDSystem()->ClearHUDSurface();

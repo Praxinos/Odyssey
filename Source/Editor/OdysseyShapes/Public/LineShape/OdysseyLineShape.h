@@ -70,4 +70,6 @@ protected:
 
 private:
     TSharedPtr<FOdysseyHUDLine> mLine;
+    TSharedPtr<FOdysseyHUDHandle> mHandleStart;
+    TSharedPtr<FOdysseyHUDHandle> mHandleEnd;
 };

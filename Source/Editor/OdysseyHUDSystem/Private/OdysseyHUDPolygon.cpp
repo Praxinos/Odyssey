@@ -11,8 +11,7 @@ FOdysseyHUDPolygon::~FOdysseyHUDPolygon()
     mPoints.Empty();
 }
 
-FOdysseyHUDPolygon::FOdysseyHUDPolygon(FName iName) :
-    FOdysseyHUDElement(iName)
+FOdysseyHUDPolygon::FOdysseyHUDPolygon()
 {
 }
 

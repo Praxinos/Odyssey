@@ -16,6 +16,7 @@ public class OdysseyHUDSystem : ModuleRules
                 "InputCore",
                 "SlateCore",
                 "Engine",
+                "OdysseyCore",
                 "OdysseyImaging",
                 "OdysseyWidgets"
              }

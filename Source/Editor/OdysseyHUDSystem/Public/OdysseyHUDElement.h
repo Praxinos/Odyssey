@@ -7,29 +7,22 @@
 
 #include "Input/OdysseyPoint.h"
 #include "OdysseyHUDSystem.h"
-#include <ULIS>
 
 /////////////////////////////////////////////////////
 // UOdysseyHUDElement
 class ODYSSEYHUDSYSTEM_API FOdysseyHUDElement
     : public TSharedFromThis<FOdysseyHUDElement>
+    , public FGCObject //Allows us to register UObjects in Garbage Collector
 {
 public:
     // Destructor
     virtual ~FOdysseyHUDElement();
 
     //Constructor
-    FOdysseyHUDElement(FName iName);
+    FOdysseyHUDElement();
 
 public:
-    //virtual void Invalidate();
-    //virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D());
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
-    /*virtual void MouseMove( const FOdysseyPoint& iPointInTexture );
-    virtual bool OnKeyDown( const FOdysseyPoint& iPointInTexture, FKey iKey );
-    virtual bool OnKeyUp( const FOdysseyPoint& iPointInTexture, FKey iKey );
-    virtual void CapturedMouseMove( const FOdysseyPoint& iPointInTexture );
-    virtual void Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()); */
 
 public:
     //HitProxy version
@@ -44,27 +37,18 @@ public:
 public:
     void AddElement( TSharedPtr<FOdysseyHUDElement> iElementToAdd );
     void RemoveElement( TSharedPtr<FOdysseyHUDElement> iElementToRemove );
-    void EmptyHUDElements();
-    //bool IsInvalid();
-    FName GetName() const;
+    void EmptyElements();
+
     bool IsCaptured() const;
     void Capture(bool iCapture);
 
-//private:
-    //void InternalIsInvalid( bool &ioIsInvalid );
-    //void InternalIsCaptured( bool& ioIsCaptured );
+protected:
+    // FGCObject implementation
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    virtual FString GetReferencerName() const override;
 
 private:
-    FName mName;
-
-    TMap<FString, TSharedPtr<FOdysseyHUDElement>> mElements;
-    //TSharedPtr<SScrollBox> mElementsWidget;
-
-    /** The previous transform applied to the element*/
-    //FTransform2D mPreviousTransform;
-
-    /** If this element is invalid, then, we'll need to redraw it*/
-    //bool mIsInvalid;
+    TArray<TSharedPtr<FOdysseyHUDElement>> mElements;
 
     /** If this element is captured by mouse or keyboard shortcut, then the associated viewport shouldn't do anything else than manipulating this HUD */
     bool mIsCaptured;

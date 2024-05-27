@@ -70,4 +70,6 @@ protected:
 
 private:
     TSharedPtr<FOdysseyHUDRectangle> mRectangle;
+    TSharedPtr<FOdysseyHUDHandle> mHandleTopLeft;
+    TSharedPtr<FOdysseyHUDHandle> mHandleBottomRight;
 };

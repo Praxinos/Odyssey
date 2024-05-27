@@ -16,7 +16,7 @@ public:
     virtual ~FOdysseyHUDPolygon();
 
     //Constructor
-    FOdysseyHUDPolygon( FName iName);
+    FOdysseyHUDPolygon();
 
 //FOdysseyHUDElement overrides
 public:

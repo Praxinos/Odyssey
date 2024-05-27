@@ -31,7 +31,9 @@ UOdysseyEllipseShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FK
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mEllipse = MakeShared<FOdysseyHUDEllipse>(FName("Ellipse"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
+        int xRadius = 0;
+        int yRadius = 0;
+        mEllipse = MakeShared<FOdysseyHUDEllipse>(iPointInTexture, xRadius, yRadius);
         mHUD->AddElement(mEllipse);
         return true;
     }
@@ -66,16 +68,19 @@ UOdysseyEllipseShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
         FOdysseyPoint point = iPointInTexture;
         if (Uniform)
         {
-            int shiftX = FMath::Abs(iPointInTexture.x - mEllipse->mCenterPoint.X);
-            int shiftY = FMath::Abs(iPointInTexture.y - mEllipse->mCenterPoint.Y);
+            int shiftX = FMath::Abs(iPointInTexture.x - mEllipse->GetCenter().X);
+            int shiftY = FMath::Abs(iPointInTexture.y - mEllipse->GetCenter().Y);
 
             int maxShift = FMath::Max( shiftX, shiftY );
 
-            point.x = mEllipse->mCenterPoint.X + maxShift;
-            point.y = mEllipse->mCenterPoint.Y + maxShift;
+            point.x = mEllipse->GetCenter().X + maxShift;
+            point.y = mEllipse->GetCenter().Y + maxShift;
         }
-        //mHUD->CapturedMouseMove(point);
-        mEllipse->mBorderPoint = FVector2D(point.x, point.y);
+        
+        int xRadius = FMath::Abs((int)(mEllipse->GetCenter().X - point.x));
+        int yRadius = FMath::Abs((int)(mEllipse->GetCenter().Y - point.y));
+        mEllipse->SetXRadius(xRadius);
+        mEllipse->SetYRadius(yRadius);
 
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
@@ -106,11 +111,11 @@ void UOdysseyEllipseShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
     
     if (iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw)
-        ctx.DrawEllipse(*(iBlock), ::ULIS::FVec2I(mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), mEllipse->GetAAxis(), mEllipse->GetBAxis(), iOptions.mColor, iOptions.mFilled);
+        ctx.DrawEllipse(*(iBlock), ::ULIS::FVec2I(mEllipse->GetCenter().X, mEllipse->GetCenter().Y), mEllipse->GetXRadius(), mEllipse->GetYRadius(), iOptions.mColor, iOptions.mFilled);
     else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kAA)
-        ctx.DrawEllipseAA(*(iBlock), ::ULIS::FVec2I(mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), mEllipse->GetAAxis(), mEllipse->GetBAxis(), iOptions.mColor, iOptions.mFilled);
+        ctx.DrawEllipseAA(*(iBlock), ::ULIS::FVec2I(mEllipse->GetCenter().X, mEllipse->GetCenter().Y), mEllipse->GetXRadius(), mEllipse->GetYRadius(), iOptions.mColor, iOptions.mFilled);
     else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
-        ctx.DrawEllipseSP(*(iBlock), ::ULIS::FVec2I(mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), mEllipse->GetAAxis(), mEllipse->GetBAxis(), iOptions.mColor, iOptions.mFilled);
+        ctx.DrawEllipseSP(*(iBlock), ::ULIS::FVec2I(mEllipse->GetCenter().X, mEllipse->GetCenter().Y), mEllipse->GetXRadius(), mEllipse->GetYRadius(), iOptions.mColor, iOptions.mFilled);
 
     ctx.Finish();
 }
@@ -120,7 +125,7 @@ void UOdysseyEllipseShape::CommitEllipse()
     if( mHasStrokeBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        ::ULIS::GenerateEllipsePoints(::ULIS::FVec2I(mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), mEllipse->GetAAxis(), mEllipse->GetBAxis(), pointsArray);
+        ::ULIS::GenerateEllipsePoints(::ULIS::FVec2I(mEllipse->GetCenter().X, mEllipse->GetCenter().Y), mEllipse->GetXRadius(), mEllipse->GetYRadius(), pointsArray);
 
         FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
         for (float i = 0.f; i < pointsArray.Size(); i+=Step)

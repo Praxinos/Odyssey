@@ -11,22 +11,11 @@ FOdysseyHUDEllipse::~FOdysseyHUDEllipse()
 
 }
 
-FOdysseyHUDEllipse::FOdysseyHUDEllipse(FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint) :
-    FOdysseyHUDElement(iName)
+FOdysseyHUDEllipse::FOdysseyHUDEllipse(const FVector2D& iCenter, int iXRadius, int iYRadius)
+    : mCenter(iCenter)
+    , mXRadius(iXRadius)
+    , mYRadius(iYRadius)
 {
-    mCenterPoint = iCenterPoint;
-    mBorderPoint = iBorderPoint;
-    mEllipseAaxis = (int)(mCenterPoint.X - mBorderPoint.X);
-    mEllipseBaxis = (int)(mCenterPoint.Y - mBorderPoint.Y);
-}
-
-FOdysseyHUDEllipse::FOdysseyHUDEllipse(FName iName, FVector2D iCenterPoint, int iEllipseAaxis, int iEllipseBaxis) :
-    FOdysseyHUDElement(iName)
-{
-    mCenterPoint = iCenterPoint;
-    mEllipseAaxis = iEllipseAaxis;
-    mEllipseBaxis = iEllipseBaxis;
-    mBorderPoint = FVector2D(iCenterPoint.X + iEllipseAaxis, iCenterPoint.Y + iEllipseBaxis);
 }
 
 void
@@ -34,11 +23,8 @@ FOdysseyHUDEllipse::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     const FLinearColor color(0.f, 1.f, 0.f);
 
-    int ellipseAaxis = FMath::Abs( mCenterPoint.X - mBorderPoint.X );
-    int ellipseBaxis = FMath::Abs( mCenterPoint.Y - mBorderPoint.Y );
-
     ::ULIS::TArray<::ULIS::FVec2I> points;
-    ::ULIS::GenerateEllipsePoints( ::ULIS::FVec2I(mCenterPoint.X, mCenterPoint.Y), ellipseAaxis, ellipseBaxis, points );
+    ::ULIS::GenerateEllipsePoints( ::ULIS::FVec2I(mCenter.X, mCenter.Y), mXRadius, mYRadius, points );
 
     if (points.Size() < 2)
         return;
@@ -60,12 +46,38 @@ FOdysseyHUDEllipse::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
     FOdysseyHUDElement::DrawHUD(iParams); 
 }
 
-int FOdysseyHUDEllipse::GetAAxis()
+void
+FOdysseyHUDEllipse::SetCenter(const FVector2D& iCenter)
 {
-    return abs((int)(mCenterPoint.X - mBorderPoint.X));
+    mCenter = iCenter;
 }
 
-int FOdysseyHUDEllipse::GetBAxis()
+void
+FOdysseyHUDEllipse::SetXRadius(int iRadius)
 {
-    return abs((int)(mCenterPoint.Y - mBorderPoint.Y));
+    mXRadius = iRadius;
+}
+
+void
+FOdysseyHUDEllipse::SetYRadius(int iRadius)
+{
+    mYRadius = iRadius;
+}
+
+const FVector2D&
+FOdysseyHUDEllipse::GetCenter() const
+{
+    return mCenter;
+}
+
+int
+FOdysseyHUDEllipse::GetXRadius() const
+{
+    return mXRadius;
+}
+
+int
+FOdysseyHUDEllipse::GetYRadius() const
+{
+    return mYRadius;
 }

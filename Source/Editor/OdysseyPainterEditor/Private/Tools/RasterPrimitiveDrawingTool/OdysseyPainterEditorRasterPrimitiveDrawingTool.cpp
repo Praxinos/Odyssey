@@ -224,21 +224,21 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
         source->RecordCurrentFrameUndo();
 
     GEditor->EndTransaction();
-    mHUD->EmptyHUDElements();
+    mHUD->EmptyElements();
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathAbort()
 {
     mPaintEngine.Abort();
 
-    mHUD->EmptyHUDElements();
+    mHUD->EmptyElements();
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathReset()
 {
     mPaintEngine.Abort();
 
-    mHUD->EmptyHUDElements();
+    mHUD->EmptyElements();
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FName& iPropertyName)

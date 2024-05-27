@@ -16,12 +16,19 @@ public:
     virtual ~FOdysseyHUDRectangle();
 
     //Constructor
-    FOdysseyHUDRectangle( FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint);
+    FOdysseyHUDRectangle( const FVector2D& iTopLeftPoint, const FVector2D& iBottomRightPoint);
 
 public:
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
+    void SetTopLeftPoint(const FVector2D& iPoint);
+    void SetBottomRightPoint(const FVector2D& iPoint);
+
+    const FVector2D& GetTopLeftPoint() const;
+    const FVector2D& GetBottomRightPoint() const;
+
+private:
     FVector2D mTopLeftPoint;
     FVector2D mBottomRightPoint;
 };

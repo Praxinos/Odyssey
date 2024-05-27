@@ -452,7 +452,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPo
     Flush();
     Commit();
 
-    mHUD->EmptyHUDElements();
+    mHUD->EmptyElements();
 }
 
 void
@@ -470,7 +470,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathAbort()
     //Update immediately the changes
     mPaintEngine.Update(BlendParameters);
 
-    mHUD->EmptyHUDElements();
+    mHUD->EmptyElements();
 }
 
 void

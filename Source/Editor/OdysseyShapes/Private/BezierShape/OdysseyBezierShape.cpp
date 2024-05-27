@@ -32,24 +32,20 @@ UOdysseyBezierShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKe
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mBezier = MakeShared<FOdysseyHUDBezier>(FName("Bezier"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y) );
+        mBezier = MakeShared<FOdysseyHUDBezier>(iPointInTexture, iPointInTexture, iPointInTexture);
         mHUD->AddElement(mBezier);
 
-        TSharedPtr<FOdysseyHUDHandle> handleStart = MakeShared<FOdysseyHUDHandle>(FName("handleStart"), &(mBezier->mStartPoint));
-        TSharedPtr<FOdysseyHUDHandle> handleControl = MakeShared<FOdysseyHUDHandle>(FName("handleControl"), &(mBezier->mControlPoint));
-        TSharedPtr<FOdysseyHUDHandle> handleEnd = MakeShared<FOdysseyHUDHandle>(FName("handleEnd"), &(mBezier->mEndPoint));
+        mHandleStart = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
+        mHandleControl = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
+        mHandleEnd = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
 
-        handleStart->IsInteractable(false);
-        handleControl->IsInteractable(false);
-        handleEnd->IsInteractable(false);
+        mHandleStart->IsInteractable(false);
+        mHandleControl->IsInteractable(false);
+        mHandleEnd->IsInteractable(false);
 
-        mBezier->AddElement(handleStart);
-        mBezier->AddElement(handleControl);
-        mBezier->AddElement(handleEnd);
-
-        mHandles.Add(handleStart);
-        mHandles.Add(handleControl);
-        mHandles.Add(handleEnd);
+        mBezier->AddElement(mHandleStart);
+        mBezier->AddElement(mHandleControl);
+        mBezier->AddElement(mHandleEnd);
 
         return true;
     }
@@ -78,8 +74,11 @@ UOdysseyBezierShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey&
 void
 UOdysseyBezierShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    if (mHasControlBegun)
-        mHandles[1]->SetPosition(FVector2D(iPointInTexture.x, iPointInTexture.y));
+    if ( mHasControlBegun )
+    {
+        mBezier->SetControlPoint(iPointInTexture);
+        mHandleControl->SetPosition(iPointInTexture);
+    }
     
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
@@ -87,11 +86,17 @@ UOdysseyBezierShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 void
 UOdysseyBezierShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if (mHasStrokeBegun)
-        mHandles[2]->SetPosition(FVector2D(iPointInTexture.x, iPointInTexture.y));
+    if ( mHasStrokeBegun )
+    {
+        mBezier->SetEndPoint(iPointInTexture);
+        mHandleEnd->SetPosition(iPointInTexture);
+    }
 
-    if (mHasControlBegun)
-        mHandles[1]->SetPosition(FVector2D(iPointInTexture.x, iPointInTexture.y));
+    if ( mHasControlBegun )
+    {
+        mBezier->SetControlPoint(iPointInTexture);
+        mHandleControl->SetPosition(iPointInTexture);
+    }
 
     UOdysseyShape::OnMouseDrag(iPointInTexture);
 }
@@ -121,11 +126,11 @@ void UOdysseyBezierShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions&
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
 
     if (iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw)
-        ctx.DrawQuadraticBezier(*(iBlock), ::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mControlPoint.X, mBezier->mControlPoint.Y), ::ULIS::FVec2I(mBezier->mEndPoint.X, mBezier->mEndPoint.Y), 1.f, iOptions.mColor);
+        ctx.DrawQuadraticBezier(*(iBlock), ::ULIS::FVec2I(mBezier->GetStartPoint().X, mBezier->GetStartPoint().Y), ::ULIS::FVec2I(mBezier->GetControlPoint().X, mBezier->GetControlPoint().Y), ::ULIS::FVec2I(mBezier->GetEndPoint().X, mBezier->GetEndPoint().Y), 1.f, iOptions.mColor);
     else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kAA)
-        ctx.DrawQuadraticBezierAA(*(iBlock), ::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mControlPoint.X, mBezier->mControlPoint.Y), ::ULIS::FVec2I(mBezier->mEndPoint.X, mBezier->mEndPoint.Y), 1.f, iOptions.mColor);
+        ctx.DrawQuadraticBezierAA(*(iBlock), ::ULIS::FVec2I(mBezier->GetStartPoint().X, mBezier->GetStartPoint().Y), ::ULIS::FVec2I(mBezier->GetControlPoint().X, mBezier->GetControlPoint().Y), ::ULIS::FVec2I(mBezier->GetEndPoint().X, mBezier->GetEndPoint().Y), 1.f, iOptions.mColor);
     else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
-        ctx.DrawQuadraticBezierSP(*(iBlock), ::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mControlPoint.X, mBezier->mControlPoint.Y), ::ULIS::FVec2I(mBezier->mEndPoint.X, mBezier->mEndPoint.Y), 1.f, iOptions.mColor);
+        ctx.DrawQuadraticBezierSP(*(iBlock), ::ULIS::FVec2I(mBezier->GetStartPoint().X, mBezier->GetStartPoint().Y), ::ULIS::FVec2I(mBezier->GetControlPoint().X, mBezier->GetControlPoint().Y), ::ULIS::FVec2I(mBezier->GetEndPoint().X, mBezier->GetEndPoint().Y), 1.f, iOptions.mColor);
 
     ctx.Finish();
 }
@@ -135,7 +140,7 @@ void UOdysseyBezierShape::CommitBezier()
     if( mHasControlBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        ::ULIS::GenerateQuadraticBezierPoints(::ULIS::FVec2I(mBezier->mStartPoint.X, mBezier->mStartPoint.Y), ::ULIS::FVec2I(mBezier->mControlPoint.X, mBezier->mControlPoint.Y), ::ULIS::FVec2I(mBezier->mEndPoint.X, mBezier->mEndPoint.Y), 1.f, pointsArray);
+        ::ULIS::GenerateQuadraticBezierPoints(::ULIS::FVec2I(mBezier->GetStartPoint().X, mBezier->GetStartPoint().Y), ::ULIS::FVec2I(mBezier->GetControlPoint().X, mBezier->GetControlPoint().Y), ::ULIS::FVec2I(mBezier->GetEndPoint().X, mBezier->GetEndPoint().Y), 1.f, pointsArray);
 
         FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
         for (float i = 0.f; i < pointsArray.Size(); i+=Step)
@@ -156,7 +161,11 @@ void UOdysseyBezierShape::CommitBezier()
         }
         mHasStrokeBegun = false;
         mHasControlBegun = false;
-        mHandles.Empty();
+        
+        mBezier = nullptr;
+        mHandleStart = nullptr;
+        mHandleControl = nullptr;
+        mHandleEnd = nullptr;
     }
 }
 
@@ -166,7 +175,11 @@ bool UOdysseyBezierShape::AbortShape()
     {
         mHasStrokeBegun = false;
         mHasControlBegun = false;
-        mHandles.Empty();
+
+        mBezier = nullptr;
+        mHandleStart = nullptr;
+        mHandleControl = nullptr;
+        mHandleEnd = nullptr;
         return UOdysseyShape::AbortShape();
     }
     return false;

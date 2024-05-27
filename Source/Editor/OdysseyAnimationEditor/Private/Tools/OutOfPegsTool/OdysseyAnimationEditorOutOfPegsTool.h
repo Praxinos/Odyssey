@@ -92,7 +92,6 @@ private:
     TSharedPtr<FOdysseyHUDHandle> mTransformRotationHandleHUD = nullptr;
     TSharedPtr<FOdysseyHUDLine> mTransformRotationLineHUD = nullptr;
 
-    FVector2D mTransformRotationPoint;
     FVector2D mRotationCenter;
 
     bool mIsPanning = false;

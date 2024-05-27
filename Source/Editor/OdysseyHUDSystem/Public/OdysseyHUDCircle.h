@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include "OdysseyHUDElement.h"
 
 /////////////////////////////////////////////////////
@@ -16,18 +14,16 @@ public:
     virtual ~FOdysseyHUDCircle();
 
     //Constructor
-    FOdysseyHUDCircle( FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint);
-    FOdysseyHUDCircle( FName iName, FVector2D iCenterPoint, float iRadius);
+    FOdysseyHUDCircle( const FVector2D& iCenterPoint, float iRadius);
 
 public:
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
-    void SetCenter(const FVector2D iCenterPoint);
+    void SetCenter(const FVector2D& iCenterPoint);
     void SetRadius(float iRadius);
 
 private:
     FVector2D mCenterPoint;
     float mRadius;
-    FVector2D mBorderPoint;
 };
