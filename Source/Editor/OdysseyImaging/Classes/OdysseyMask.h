@@ -7,6 +7,11 @@
 
 #include <ULIS>
 
+struct FOdysseyCanvasZone
+{
+    TArray<FVector2D> mPolygonZone;
+    ::ULIS::FBlock* mBlock;
+};
 
 class ODYSSEYIMAGING_API FOdysseyMask 
 {
@@ -16,5 +21,5 @@ public:
     FOdysseyMask();
 
 private:
-    TArray<::ULIS::FBlock*> mBlocks;
+    TArray<FOdysseyCanvasZone> mMaskZones;
 };

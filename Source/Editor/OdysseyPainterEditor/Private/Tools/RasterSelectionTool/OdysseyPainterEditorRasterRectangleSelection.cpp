@@ -6,48 +6,44 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------- Construction / Destruction
-UOdysseyPainterEditorRasterRectangleSelection::~UOdysseyPainterEditorRasterRectangleSelection()
+FOdysseyPainterEditorRasterRectangleSelection::FOdysseyPainterEditorRasterRectangleSelection(TArray<FVector2D>& iSelectionArea):
+    FOdysseyPainterEditorRasterSelection( iSelectionArea )
 {
+
 }
 
-UOdysseyPainterEditorRasterRectangleSelection::UOdysseyPainterEditorRasterRectangleSelection()
+
+FOdysseyPainterEditorRasterRectangleSelection::~FOdysseyPainterEditorRasterRectangleSelection()
 {
+
 }
 
-bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+
+bool FOdysseyPainterEditorRasterRectangleSelection::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (!mIsSelectionAreaSet) //Creating a zone for the selection
+    mSelectionArea.Empty();
+    for (int i = 0; i < 4; i++)
     {
-        mSelectionArea = MakeShared<FOdysseyHUDPolygon>(FName("SelectionArea"));
-
-        TArray<FVector2D>& areaPoints = mSelectionArea->GetPoints();
-        for (int i = 0; i < 4; i++)
-        {
-            areaPoints.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
-        }
-        mHUD->AddElement(mSelectionArea);
-        return true;
+        mSelectionArea.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
     }
 
-    return false;
+    return true;
 }
 
 EMouseCursor::Type
-UOdysseyPainterEditorRasterRectangleSelection::GetMouseCursor() const
+FOdysseyPainterEditorRasterRectangleSelection::GetMouseCursor() const
 {
     return EMouseCursor::Default;
 }
 
-void UOdysseyPainterEditorRasterRectangleSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+void FOdysseyPainterEditorRasterRectangleSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if (!mIsSelectionAreaSet)
-        ConstrainSelectionToRectangle(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+    ConstrainSelectionToRectangle(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
 }
 
-bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+bool FOdysseyPainterEditorRasterRectangleSelection::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+/*
     if (!mIsSelectionAreaSet)
     {
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
@@ -91,25 +87,24 @@ bool UOdysseyPainterEditorRasterRectangleSelection::OnMouseUp(const FOdysseyPoin
         return true;
     }
 
-    return false;
+    return false;*/
+    return true;
 }
 
-bool UOdysseyPainterEditorRasterRectangleSelection::OnKeyUp(const FKey& iKey)
+bool FOdysseyPainterEditorRasterRectangleSelection::OnKeyUp(const FKey& iKey)
 {
-    return UOdysseyPainterEditorRasterSelectionTool::OnKeyUp( iKey );
+    return FOdysseyPainterEditorRasterSelection::OnKeyUp( iKey );
 }
 
-void UOdysseyPainterEditorRasterRectangleSelection::ConstrainSelectionToRectangle(FVector2D iPosition)
+void FOdysseyPainterEditorRasterRectangleSelection::ConstrainSelectionToRectangle(FVector2D iPosition)
 {
-    TArray<FVector2D>& points = mSelectionArea->GetPoints();
-
-    if (mSelectionArea->GetPoints().Num() == 0)
+    if (mSelectionArea.Num() == 0)
         return;
 
-    if (Uniform)
+    if (false/*Uniform*/)
     {
-        int shiftX = iPosition.X - points[0].X;
-        int shiftY = iPosition.Y - points[0].Y;
+        int shiftX = iPosition.X - mSelectionArea[0].X;
+        int shiftY = iPosition.Y - mSelectionArea[0].Y;
 
         int signX = shiftX < 0 ? -1 : 1;
         int signY = shiftY < 0 ? -1 : 1;
@@ -118,17 +113,18 @@ void UOdysseyPainterEditorRasterRectangleSelection::ConstrainSelectionToRectangl
 
         if (FMath::Abs(shiftX) > FMath::Abs(shiftY))
         {
-            iPosition.X = points[0].X + shiftX;
-            iPosition.Y = points[0].Y + shiftX * mult;
+            iPosition.X = mSelectionArea[0].X + shiftX;
+            iPosition.Y = mSelectionArea[0].Y + shiftX * mult;
         }
         else
         {
-            iPosition.X = points[0].X + shiftY * mult;
-            iPosition.Y = points[0].Y + shiftY;
+            iPosition.X = mSelectionArea[0].X + shiftY * mult;
+            iPosition.Y = mSelectionArea[0].Y + shiftY;
         }
     }
 
-    points[2] = iPosition;
-    points[1] = FVector2D(iPosition.X, points[0].Y);
-    points[3] = FVector2D(points[0].X, iPosition.Y);
+    mSelectionArea[2] = iPosition;
+    mSelectionArea[1] = FVector2D(iPosition.X, mSelectionArea[0].Y);
+    mSelectionArea[3] = FVector2D(mSelectionArea[0].X, iPosition.Y);
 }
+

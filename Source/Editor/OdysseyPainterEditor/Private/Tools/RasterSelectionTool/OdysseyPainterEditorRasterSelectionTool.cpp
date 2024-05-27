@@ -24,11 +24,13 @@ UOdysseyPainterEditorRasterSelectionTool::~UOdysseyPainterEditorRasterSelectionT
 }
 
 UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTool():
+    mCurrentSelection( nullptr ),
     mIsSelectionAreaSet(false),
-    mSelectionArea(nullptr),
+    mToolSelectionArea(nullptr),
     mPaintEngine(),
     mSelectionBlock(nullptr)
 {
+    Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Lasso32");
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::Init(TSharedPtr<FOdysseyHUDElement> iHUD, FOdysseyPainterEditor* iEditor, bool iUniform)
@@ -45,22 +47,65 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if( mCurrentSelection )
+    {
+        delete mCurrentSelection;
+        mCurrentSelection = nullptr;
+    }
+
+    TArray<FVector2D> areaPoints;
+    FOdysseyHUDPolygon* selection = new FOdysseyHUDPolygon(FName("CurrentSelection"), areaPoints);
+    mHUD->AddElement(selection);
+
+    switch (SelectionShape)
+    {
+    case EOdysseySelectionShape::Rectangle:
+        mCurrentSelection = new FOdysseyPainterEditorRasterRectangleSelection(selection->GetPoints());
+        break;
+    case EOdysseySelectionShape::Freehand:
+        mCurrentSelection = new FOdysseyPainterEditorRasterFreehandSelection(selection->GetPoints());
+        break;
+    case EOdysseySelectionShape::Ellipse:
+        mCurrentSelection = new FOdysseyPainterEditorRasterEllipseSelection(selection->GetPoints());
+        break;
+    default:
+        break;
+    }
+
+    if( mCurrentSelection->OnMouseDown( iPointInTexture, iKey ) )
+    {
+        return true;
+    }
+
     return false;
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-
+    mCurrentSelection->OnMouseDrag(iPointInTexture);
 }
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    return false;
+    //Merge/replace/substract HUD of selection to already existing selection if it exists
+    mCurrentSelection->OnMouseUp( iPointInTexture, iKey );
+
+    mHUD->RemoveElementByKey( "RasterSelection" );
+    mHUD->ChangeElementKeyTo( "CurrentSelection", "RasterSelection" );
+
+    mEditor->HUDSystem()->ClearHUDSurface();
+
+    if (mCurrentSelection)
+    {
+        delete mCurrentSelection;
+        mCurrentSelection = nullptr;
+    }
+   
+    return true;
 }
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnKeyDown(const FKey& iKey)
@@ -105,10 +150,10 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsSelectionAreaSet()
 
 bool UOdysseyPainterEditorRasterSelectionTool::IsInSelectionArea(FVector2D iPoint)
 {
-    if( !mSelectionArea || mSelectionArea->GetPoints().Num() == 0 )
+    if( !mToolSelectionArea || mToolSelectionArea->GetPoints().Num() == 0 )
         return false;
 
-    return FGeomTools2D::IsPointInPolygon(iPoint, mSelectionArea->GetPoints()); 
+    return FGeomTools2D::IsPointInPolygon(iPoint, mToolSelectionArea->GetPoints()); 
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelectionTool::GetSelectionBlock()
@@ -118,18 +163,18 @@ TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelec
 
 ::ULIS::FRectI UOdysseyPainterEditorRasterSelectionTool::GetSelectionAreaBoundingRect()
 {
-    if (mSelectionArea && mSelectionArea->GetPoints().Num() != 0)
+    if (mToolSelectionArea && mToolSelectionArea->GetPoints().Num() != 0)
     {
-        int minX = mSelectionArea->GetPoints()[0].X;
-        int maxX = mSelectionArea->GetPoints()[0].X;
-        int minY = mSelectionArea->GetPoints()[0].Y;
-        int maxY = mSelectionArea->GetPoints()[0].Y;
-        for (int i = 1; i < mSelectionArea->GetPoints().Num(); i++)
+        int minX = mToolSelectionArea->GetPoints()[0].X;
+        int maxX = mToolSelectionArea->GetPoints()[0].X;
+        int minY = mToolSelectionArea->GetPoints()[0].Y;
+        int maxY = mToolSelectionArea->GetPoints()[0].Y;
+        for (int i = 1; i < mToolSelectionArea->GetPoints().Num(); i++)
         {
-            minX = FMath::Min(minX, mSelectionArea->GetPoints()[i].X);
-            maxX = FMath::Max(maxX, mSelectionArea->GetPoints()[i].X);
-            minY = FMath::Min(minY, mSelectionArea->GetPoints()[i].Y);
-            maxY = FMath::Max(maxY, mSelectionArea->GetPoints()[i].Y);
+            minX = FMath::Min(minX, mToolSelectionArea->GetPoints()[i].X);
+            maxX = FMath::Max(maxX, mToolSelectionArea->GetPoints()[i].X);
+            minY = FMath::Min(minY, mToolSelectionArea->GetPoints()[i].Y);
+            maxY = FMath::Max(maxY, mToolSelectionArea->GetPoints()[i].Y);
         }
         return ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY);
     }
@@ -153,7 +198,7 @@ void UOdysseyPainterEditorRasterSelectionTool::ClearSelection()
         mSelectionBlock.Reset();
         mSelectionBlock = nullptr;
     }
-    mSelectionArea = nullptr;
+    mToolSelectionArea = nullptr;
     mEditor->HUDSystem()->ClearHUDSurface();
 }
 

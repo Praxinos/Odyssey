@@ -12,14 +12,6 @@ class FOdysseyHUDPolygon;
 class FOdysseyHUDHandle;
 class UOdysseyPainterEditorRasterSelectionTool;
 
-UENUM()
-enum class EOdysseySelectionShape : uint8
-{
-    Rectangle,
-    Freehand,
-    Ellipse
-};
-
 enum class EOdysseyTransformCapture
 {
     NoCapture,
@@ -100,8 +92,6 @@ public:
     bool Uniform = false;
 
 private: 
-    UOdysseyPainterEditorRasterSelectionTool* mSelection;
-
     FOdysseyPaintEngine mPaintEngine;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
     FOdysseyRasterBlockMutator mRasterMutator;

@@ -6,9 +6,19 @@
 #include "CoreMinimal.h"
 #include "OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
+#include "OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyMask.h"
 #include "OdysseyPainterEditorRasterSelectionTool.generated.h"
 
 class FOdysseyHUDPolygon;
+
+UENUM()
+enum class EOdysseySelectionShape : uint8
+{
+    Rectangle,
+    Freehand,
+    Ellipse
+};
 
 //This is already a tool to prepare for the moment we'll separate transform and selection. When we'll have a "mask" feature in Odyssey
 UCLASS()
@@ -52,9 +62,18 @@ protected:
     void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
 protected:
-    bool Uniform; // Will become a UProperty when selection will become a tool
+    FOdysseyPainterEditorRasterSelection* mCurrentSelection;
+
+    FOdysseyMask mCompleteSelection;
+
+    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    EOdysseySelectionShape SelectionShape;
+
+    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    bool Uniform;
+
     bool mIsSelectionAreaSet;
-    TSharedPtr<FOdysseyHUDPolygon> mSelectionArea;
+    TSharedPtr<FOdysseyHUDPolygon> mToolSelectionArea;
     FOdysseyPaintEngine mPaintEngine;
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mSelectionBlock;

@@ -4,32 +4,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyPainterEditorRasterSelectionTool.h"
-#include "OdysseyPainterEditorRasterFreehandSelection.generated.h"
+#include "OdysseyPainterEditorRasterSelection.h"
 
-UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterFreehandSelection : public UOdysseyPainterEditorRasterSelectionTool
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorRasterFreehandSelection : public FOdysseyPainterEditorRasterSelection
 {
 public:
-    GENERATED_BODY()
-
-public:
-    // Destructor
-    virtual ~UOdysseyPainterEditorRasterFreehandSelection();
-
-    //Constructor
-    UOdysseyPainterEditorRasterFreehandSelection();
-
+    FOdysseyPainterEditorRasterFreehandSelection(TArray<FVector2D>& iSelectionArea);
+    virtual ~FOdysseyPainterEditorRasterFreehandSelection();
 
 public:
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual bool OnKeyUp(const FKey& iKey);
+    virtual bool OnKeyUp(const FKey& iKey) override;
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
 private:
     TArray<::ULIS::FRectI> GetSelectionAreaAsScanlines();
-
 };

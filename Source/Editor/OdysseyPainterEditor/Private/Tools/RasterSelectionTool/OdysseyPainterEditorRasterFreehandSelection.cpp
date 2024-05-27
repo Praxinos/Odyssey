@@ -7,49 +7,39 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------- Construction / Destruction
-UOdysseyPainterEditorRasterFreehandSelection::~UOdysseyPainterEditorRasterFreehandSelection()
+FOdysseyPainterEditorRasterFreehandSelection::FOdysseyPainterEditorRasterFreehandSelection(TArray<FVector2D>& iSelectionArea) :
+    FOdysseyPainterEditorRasterSelection(iSelectionArea)
 {
+
 }
 
-UOdysseyPainterEditorRasterFreehandSelection::UOdysseyPainterEditorRasterFreehandSelection()
+
+FOdysseyPainterEditorRasterFreehandSelection::~FOdysseyPainterEditorRasterFreehandSelection()
 {
+
 }
 
-bool UOdysseyPainterEditorRasterFreehandSelection::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+bool FOdysseyPainterEditorRasterFreehandSelection::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (!mIsSelectionAreaSet) //Creating a zone for the selection
-    {
-        mSelectionArea = MakeShared<FOdysseyHUDPolygon>(FName("SelectionArea"));
-        TArray<FVector2D>& areaPoints = mSelectionArea->GetPoints();
-        areaPoints.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
-        mHUD->AddElement(mSelectionArea);
-
-        return true;
-    }
-
-    return false;
+    mSelectionArea.Empty();
+    mSelectionArea.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+    return true;
 }
 
 EMouseCursor::Type
-UOdysseyPainterEditorRasterFreehandSelection::GetMouseCursor() const
+FOdysseyPainterEditorRasterFreehandSelection::GetMouseCursor() const
 {
     return EMouseCursor::Default;
 }
 
-void UOdysseyPainterEditorRasterFreehandSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+void FOdysseyPainterEditorRasterFreehandSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if (!mIsSelectionAreaSet)
-    {
-        mSelectionArea->GetPoints().Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
-    }
+    mSelectionArea.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
 }
 
-bool UOdysseyPainterEditorRasterFreehandSelection::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+bool FOdysseyPainterEditorRasterFreehandSelection::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (!mIsSelectionAreaSet)
-    {
+        /*
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
         if (mediaRasters.Num() <= 0)
             return false;
@@ -92,20 +82,19 @@ bool UOdysseyPainterEditorRasterFreehandSelection::OnMouseUp(const FOdysseyPoint
 
         ctx.Finish();
 
-        mIsSelectionAreaSet = true;
-        return true;
-    }
-    return false;
+        mIsSelectionAreaSet = true;*/
+    return true;
 }
 
-bool UOdysseyPainterEditorRasterFreehandSelection::OnKeyUp(const FKey& iKey)
+bool FOdysseyPainterEditorRasterFreehandSelection::OnKeyUp(const FKey& iKey)
 {
-    return UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(iKey);
+    return FOdysseyPainterEditorRasterSelection::OnKeyUp(iKey);
 }
 
-TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterFreehandSelection::GetSelectionAreaAsScanlines()
+TArray<::ULIS::FRectI> FOdysseyPainterEditorRasterFreehandSelection::GetSelectionAreaAsScanlines()
 {
     TArray<::ULIS::FRectI> rectangles;
+    /*
     ::ULIS::FRectI boundingBox = GetSelectionAreaBoundingRect();
     int maxX = boundingBox.x + boundingBox.w;
     int maxY = boundingBox.y + boundingBox.h;
@@ -160,6 +149,6 @@ TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterFreehandSelection::GetSelectio
             }
         }
     }
-
+    */
     return rectangles;
 }

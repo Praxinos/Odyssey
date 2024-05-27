@@ -7,76 +7,69 @@
 #include "OdysseyMediaRaster.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
 
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------- Construction / Destruction
-UOdysseyPainterEditorRasterEllipseSelection::~UOdysseyPainterEditorRasterEllipseSelection()
+FOdysseyPainterEditorRasterEllipseSelection::FOdysseyPainterEditorRasterEllipseSelection(TArray<FVector2D>& iSelectionArea) :
+    FOdysseyPainterEditorRasterSelection(iSelectionArea)
 {
+
 }
 
-UOdysseyPainterEditorRasterEllipseSelection::UOdysseyPainterEditorRasterEllipseSelection()
+
+FOdysseyPainterEditorRasterEllipseSelection::~FOdysseyPainterEditorRasterEllipseSelection()
 {
+
 }
 
-bool UOdysseyPainterEditorRasterEllipseSelection::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    if (!mIsSelectionAreaSet) //Creating a zone for the selection
-    {
-        mSelectionArea = MakeShared<FOdysseyHUDPolygon>(FName("SelectionArea"));
-        TArray<FVector2D>& areaPoints = mSelectionArea->GetPoints();
-        areaPoints.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
-        mHUD->AddElement(mSelectionArea);
-        mDownReference = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y) );
-        return true;
-    }
 
-    return false;
+bool FOdysseyPainterEditorRasterEllipseSelection::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    mSelectionArea.Add(FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y)));
+    mDownReference = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y));
+    return true;
 }
 
 EMouseCursor::Type
-UOdysseyPainterEditorRasterEllipseSelection::GetMouseCursor() const
+FOdysseyPainterEditorRasterEllipseSelection::GetMouseCursor() const
 {
     return EMouseCursor::Default;
 }
 
-void UOdysseyPainterEditorRasterEllipseSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+void FOdysseyPainterEditorRasterEllipseSelection::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if (!mIsSelectionAreaSet)
+    mSelectionArea.Empty();
+    FVector2D referencePoint = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y));
+    FVector2D center = (mDownReference + referencePoint) / 2;
+
+    FOdysseyPoint point = iPointInTexture;
+    if (false/*Uniform*/)
     {
-        mSelectionArea->GetPoints().Empty();
-        FVector2D referencePoint = FVector2D(FMath::RoundToInt(iPointInTexture.x), FMath::RoundToInt(iPointInTexture.y));
-        FVector2D center = (mDownReference + referencePoint) / 2;
+        int shiftX = referencePoint.X - mDownReference.X;
+        int shiftY = referencePoint.Y - mDownReference.Y;
 
-        FOdysseyPoint point = iPointInTexture;
-        if (Uniform)
+        int signX = shiftX < 0 ? -1 : 1;
+        int signY = shiftY < 0 ? -1 : 1;
+
+        int mult = signX == signY ? 1 : -1;
+
+        if (FMath::Abs(shiftX) > FMath::Abs(shiftY))
         {
-            int shiftX = referencePoint.X - mDownReference.X;
-            int shiftY = referencePoint.Y - mDownReference.Y;
-
-            int signX = shiftX < 0 ? -1 : 1;
-            int signY = shiftY < 0 ? -1 : 1;
-
-            int mult = signX == signY ? 1 : -1;
-
-            if (FMath::Abs(shiftX) > FMath::Abs(shiftY))
-            {
-                referencePoint.X = mDownReference.X + shiftX;
-                referencePoint.Y = mDownReference.Y + shiftX * mult;
-            }
-            else
-            {
-                referencePoint.X = mDownReference.X + shiftY * mult;
-                referencePoint.Y = mDownReference.Y + shiftY;
-            }
+            referencePoint.X = mDownReference.X + shiftX;
+            referencePoint.Y = mDownReference.Y + shiftX * mult;
         }
-
-        int a = FMath::Abs( mDownReference.X - referencePoint.X ) / 2;
-        int b = FMath::Abs( mDownReference.Y - referencePoint.Y ) / 2;
-        UOdysseyBrushShape::GenerateEllipsePoints( center, a, b, 0, mSelectionArea->GetPoints() );
+        else
+        {
+            referencePoint.X = mDownReference.X + shiftY * mult;
+            referencePoint.Y = mDownReference.Y + shiftY;
+        }
     }
+
+    int a = FMath::Abs( mDownReference.X - referencePoint.X ) / 2;
+    int b = FMath::Abs( mDownReference.Y - referencePoint.Y ) / 2;
+    UOdysseyBrushShape::GenerateEllipsePoints( center, a, b, 0, mSelectionArea );
 }
 
-bool UOdysseyPainterEditorRasterEllipseSelection::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+bool FOdysseyPainterEditorRasterEllipseSelection::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+/*
     if (!mIsSelectionAreaSet)
     {
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
@@ -125,34 +118,35 @@ bool UOdysseyPainterEditorRasterEllipseSelection::OnMouseUp(const FOdysseyPoint&
         return true;
     }
     return false;
+    */
+    return true;
 }
 
-bool UOdysseyPainterEditorRasterEllipseSelection::OnKeyUp(const FKey& iKey)
+bool FOdysseyPainterEditorRasterEllipseSelection::OnKeyUp(const FKey& iKey)
 {
-    return UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(iKey);
+    return FOdysseyPainterEditorRasterSelection::OnKeyUp(iKey);
 }
 
-TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterEllipseSelection::GetSelectionAreaAsScanlines()
+TArray<::ULIS::FRectI> FOdysseyPainterEditorRasterEllipseSelection::GetSelectionAreaAsScanlines()
 {
     TArray<::ULIS::FRectI> rectangles;
+    /*
     ::ULIS::FRectI boundingBox = GetSelectionAreaBoundingRect();
     int maxX = boundingBox.x + boundingBox.w;
     int maxY = boundingBox.y + boundingBox.h;
     int minX = boundingBox.x;
     int minY = boundingBox.y;
 
-    TArray<FVector2D>& points = mSelectionArea->GetPoints();
-
     for (int y = minY; y <= maxY; y++)
     {
         std::vector< int > nodesX;
-        int j = int(points.Num() - 1);
+        int j = int(mSelectionArea.Num() - 1);
 
-        for (int i = 0; i < points.Num(); i++)
+        for (int i = 0; i < mSelectionArea.Num(); i++)
         {
-            if ((points[i].Y < y && points[j].Y >= y) || (points[j].Y < y && points[i].Y >= y))
+            if ((mSelectionArea[i].Y < y && mSelectionArea[j].Y >= y) || (mSelectionArea[j].Y < y && mSelectionArea[i].Y >= y))
             {
-                nodesX.push_back(int(points[i].X + double(y - points[i].Y) / double(points[j].Y - points[i].Y) * (points[j].X - points[i].X)));
+                nodesX.push_back(int(mSelectionArea[i].X + double(y - mSelectionArea[i].Y) / double(mSelectionArea[j].Y - mSelectionArea[i].Y) * (mSelectionArea[j].X - mSelectionArea[i].X)));
             }
             j = i;
         }
@@ -189,6 +183,6 @@ TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterEllipseSelection::GetSelection
             }
         }
     }
-
+    */
     return rectangles;
 }
