@@ -7,6 +7,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDSystem.h"
 #include "OdysseyBrushShape.h"
+#include "OdysseyMediaRaster.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

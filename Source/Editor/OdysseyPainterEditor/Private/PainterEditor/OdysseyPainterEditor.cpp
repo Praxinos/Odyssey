@@ -10,6 +10,7 @@
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyHUDSystem.h"
+#include "OdysseyHUDElement.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyPainterEditorExtension.h"
