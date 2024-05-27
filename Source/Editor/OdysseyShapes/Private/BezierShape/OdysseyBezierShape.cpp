@@ -184,3 +184,30 @@ bool UOdysseyBezierShape::AbortShape()
     }
     return false;
 }
+
+FVector2D
+UOdysseyBezierShape::GetStartPoint() const
+{
+    if (!mBezier)
+        return FVector2D(0, 0);
+
+    return mBezier->GetStartPoint();
+}
+
+FVector2D
+UOdysseyBezierShape::GetControlPoint() const
+{
+    if (!mBezier)
+        return FVector2D(0, 0);
+
+    return mBezier->GetControlPoint();
+}
+
+FVector2D
+UOdysseyBezierShape::GetEndPoint() const
+{
+    if (!mBezier)
+        return FVector2D(0, 0);
+
+    return mBezier->GetEndPoint();
+}

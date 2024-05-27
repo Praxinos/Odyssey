@@ -9,16 +9,6 @@
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorRasterPrimitiveDrawingTool.generated.h"
 
-UENUM()
-enum class EOdysseyPrimitiveShape : uint8
-{
-    kLine           UMETA(DisplayName = "Line"),
-    kRectangle      UMETA(DisplayName = "Rectangle"),
-    kPolygon        UMETA(DisplayName = "Polygon"),
-    kEllipse        UMETA(DisplayName = "Ellipse"),
-    kBezier         UMETA(DisplayName = "Bezier"),
-};
-
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterPrimitiveDrawingTool : public UOdysseyPainterEditorTool
 {
@@ -63,10 +53,10 @@ private:
     // Internal - Callbacks
     void SelectedShapeChanged();
 
+    void OnShapePathBegin(const FOdysseyPoint& iPoint);
+    void OnShapePathTo(const TArray<FOdysseyPoint>& iPoints);
     void OnShapePathEnd(const FOdysseyPoint& iPoint);
-
     void OnShapePathAbort();
-
     void OnShapePathReset();
 
 public:
@@ -77,23 +67,24 @@ protected:
     FOdysseyPaintEngine mPaintEngine;
 
     FSimpleMulticastDelegate            mOnShapeChanged;
+    TArray<FOdysseyPoint> mPath;
 
 public:
     UPROPERTY(EditAnywhere, Category = "Shape")
-    EOdysseyPrimitiveShape SelectedShape;
+    EOdysseyShape SelectedShape;
 
     UPROPERTY(EditAnywhere, Category = "Shape")
     EOdysseyDrawingPrecision Precision = EOdysseyDrawingPrecision::kRaw;
 
     UPROPERTY(EditAnywhere, Category = "Shape")
-    bool Filled = false;
+    bool Filled = true;
 
     UPROPERTY(VisibleInstanceOnly, Category = "Shape", Instanced, meta = (ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
 
     // Hidden properties
     UPROPERTY()
-    TMap<EOdysseyPrimitiveShape, class UOdysseyShape*> AvailableShapes;
+    TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
     UPROPERTY(EditInstanceOnly, Category = "Blending", meta = (ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;

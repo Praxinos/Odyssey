@@ -46,6 +46,10 @@ public:
     FAdaptStep& AdaptStepDelegate() { return mAdaptStepDelegate; }
 
     virtual void Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions) override; //Draw this shape onto a block
+    
+    FVector2D GetStartPoint() const;
+    FVector2D GetControlPoint() const;
+    FVector2D GetEndPoint() const;
 
 private:
     void CommitBezier();
