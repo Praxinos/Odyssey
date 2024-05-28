@@ -23,6 +23,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorEditionMode : public S
         ECheckBoxState GetObjectModeState() const;
         ECheckBoxState GetVertexModeState() const;
         ECheckBoxState GetInbetweenModeState() const;
+        EVisibility GetVisibility( uint64 iEditionMode ) const;
 
     private:
         FOdysseyPainterEditor* mEditor;

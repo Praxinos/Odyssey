@@ -50,6 +50,7 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
    .Style(FAppStyle::Get(),TEXT("ToggleButtonCheckBox"))
    .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_OBJECT) ))
    .IsChecked( objectModeChecked )
+   .Visibility( this, &SOdysseyPainterEditorVectorEditionMode::GetVisibility, static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_OBJECT) )
    .ToolTipText(LOCTEXT("vector-edition-mode.object-mode.tooltip", "Object Mode"))
     [
         SNew(SImage)
@@ -62,6 +63,7 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
    .Style(FAppStyle::Get(),TEXT("ToggleButtonCheckBox"))
    .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_VERTEX) ))
    .IsChecked( vertexModeChecked )
+   .Visibility( this, &SOdysseyPainterEditorVectorEditionMode::GetVisibility, static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_VERTEX) )
    .ToolTipText(LOCTEXT("vector-edition-mode.vertex-mode.tooltip", "Vertex Mode"))
     [
         SNew(SImage)
@@ -74,6 +76,7 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
    .Style(FAppStyle::Get(),TEXT("ToggleButtonCheckBox"))
    .OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags, static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_INBETWEEN) ))
    .IsChecked( inbetweenModeChecked )
+   .Visibility( this, &SOdysseyPainterEditorVectorEditionMode::GetVisibility, static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_INBETWEEN) )
    .ToolTipText(LOCTEXT("vector-edition-mode.inbetween-mode.tooltip", "Inbetween Mode"))
     [
         SNew(SImage)
@@ -107,6 +110,32 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
             mInbetweenModeCheckbox.ToSharedRef()
         ]
     ];
+}
+
+EVisibility
+SOdysseyPainterEditorVectorEditionMode::GetVisibility( uint64 iEditionMode ) const
+{
+    uint64 HUDFlags = mEditor->GetVectorHUDFlags();
+
+    if( iEditionMode == FOdysseyVectorHUD::HUD_MODE_OBJECT )
+    {
+        return ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED ) ? EVisibility::Visible
+                                                                         : EVisibility::Collapsed;
+    }
+
+    if( iEditionMode == FOdysseyVectorHUD::HUD_MODE_VERTEX )
+    {
+        return ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED ) ? EVisibility::Visible
+                                                                         : EVisibility::Collapsed;
+    }
+
+    if( iEditionMode == FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        return ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN_ALLOWED ) ? EVisibility::Visible
+                                                                            : EVisibility::Collapsed;
+    }
+
+    return EVisibility::Visible;
 }
 
 void

@@ -1592,109 +1592,114 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
                                , double iCombinedOpacity
                                , uint64 iDrawingFlags )
 {
-    // if the segment is textured, use our own routines.
-    if( mBrush.pixels )
+    // don't draw if segment is ridiculously small, it possess artefacts
+    // in the fractionCache because the polygon calculations where wrong
+    if( iSegment->GetLength() > 0.000001f )
     {
-        std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
-        FColor foregroundColor = GetForegroundColor();
-        FOdysseyVectorEngine* vectorEngine = GetEngine();
-        double difU = iEndU - iStartU;
-
-        // for testing
-        //iBLContext->setStrokeWidth( 1.0f );
-        //iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
-
-        for( int i = 0; i < fractionCache.size(); i++ )
+        // if the segment is textured, use our own routines.
+        if( mBrush.pixels )
         {
-        // for testing
-/*
-            BLPoint pt[6] = { { fractionCache[i].polygon.point[0].x, fractionCache[i].polygon.point[0].y }
-                            , { fractionCache[i].polygon.point[1].x, fractionCache[i].polygon.point[1].y }
-                            , { fractionCache[i].polygon.point[2].x, fractionCache[i].polygon.point[2].y }
-                            , { fractionCache[i].polygon.point[3].x, fractionCache[i].polygon.point[3].y }
-                            , { fractionCache[i].polygon.point[4].x, fractionCache[i].polygon.point[4].y }
-                            , { fractionCache[i].polygon.point[5].x, fractionCache[i].polygon.point[5].y } };
-*/
-            FOdysseyVectorFraction* fraction = &fractionCache[i];
-            // deprecated
-/*
-            double hexaU[6] = { iStartU + ( fraction->polygon.U[0] * difU )
-                              , iStartU + ( fraction->polygon.U[1] * difU )
-                              , iStartU + ( fraction->polygon.U[2] * difU )
-                              , iStartU + ( fraction->polygon.U[3] * difU )
-                              , iStartU + ( fraction->polygon.U[4] * difU )
-                              , iStartU + ( fraction->polygon.U[5] * difU ) };
+            std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
+            FColor foregroundColor = GetForegroundColor();
+            FOdysseyVectorEngine* vectorEngine = GetEngine();
+            double difU = iEndU - iStartU;
 
-            double quadU[6] = { iStartU + ( fraction->polygon.U[0] * difU )
-                              , iStartU + ( fraction->polygon.U[1] * difU )
-                              , iStartU + ( fraction->polygon.U[2] * difU )
-                              , iStartU + ( fraction->polygon.U[3] * difU )
-                              , iStartU + ( fraction->polygon.U[4] * difU )
-                              , iStartU + ( fraction->polygon.U[5] * difU ) };
-*/
-            // We have to divide the hexagon into 2 quads or else it can creates artefacts 
-            // due to UV Mapping when the hexagon is not "a square".
-            ::ULIS::FVec2D quad0P[4] = { fraction->polygon.point[0]
-                                       , fraction->polygon.point[1]
-                                       , fraction->polygon.point[2]
-                                       , fraction->polygon.point[3] };
-            double quad0U[6] = { iStartU + ( fraction->polygon.U[0] * difU )
-                               , iStartU + ( fraction->polygon.U[1] * difU )
-                               , iStartU + ( fraction->polygon.U[2] * difU )
-                               , iStartU + ( fraction->polygon.U[3] * difU ) };
-            double quad0V[6] = { fraction->polygon.V[0]
-                               , fraction->polygon.V[1]
-                               , fraction->polygon.V[2]
-                               , fraction->polygon.V[3] };
-            ::ULIS::FVec2D quad1P[4] = { fraction->polygon.point[3]
-                                       , fraction->polygon.point[4]
-                                       , fraction->polygon.point[5]
-                                       , fraction->polygon.point[0] };
-            double quad1U[6] = { iStartU + ( fraction->polygon.U[3] * difU )
-                               , iStartU + ( fraction->polygon.U[4] * difU )
-                               , iStartU + ( fraction->polygon.U[5] * difU )
-                               , iStartU + ( fraction->polygon.U[0] * difU ) };
-            double quad1V[6] = { fraction->polygon.V[3]
-                               , fraction->polygon.V[4]
-                               , fraction->polygon.V[5]
-                               , fraction->polygon.V[0] };
-
-            uint64 polygonDrawingFlags = 0;
-
-            polygonDrawingFlags |= mBrush.ColorFromBrush    ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
-            polygonDrawingFlags |= mBrush.BilinearFiltering ? FPolygonDrawingFlags::BILINEARFILTERING : 0;
-
-            // should be a static function
-            vectorEngine->FillQuad( iBLContext
-                                  , quad0P
-                                  , quad0U
-                                  , quad0V
-                                  , iCombinedOpacity
-                                  , foregroundColor
-                                  , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
-                                  , mBrush.width
-                                  , mBrush.height
-                                  , mBrush.bitsPerPixel
-                                  , polygonDrawingFlags );
-
-            vectorEngine->FillQuad( iBLContext
-                                  , quad1P
-                                  , quad1U
-                                  , quad1V
-                                  , iCombinedOpacity
-                                  , foregroundColor
-                                  , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
-                                  , mBrush.width
-                                  , mBrush.height
-                                  , mBrush.bitsPerPixel
-                                  , polygonDrawingFlags );
             // for testing
-            // iBLContext->strokePolygon( pt, 6 );
+            //iBLContext->setStrokeWidth( 1.0f );
+            //iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
+
+            for( int i = 0; i < fractionCache.size(); i++ )
+            {
+            // for testing
+    /*
+                BLPoint pt[6] = { { fractionCache[i].polygon.point[0].x, fractionCache[i].polygon.point[0].y }
+                                , { fractionCache[i].polygon.point[1].x, fractionCache[i].polygon.point[1].y }
+                                , { fractionCache[i].polygon.point[2].x, fractionCache[i].polygon.point[2].y }
+                                , { fractionCache[i].polygon.point[3].x, fractionCache[i].polygon.point[3].y }
+                                , { fractionCache[i].polygon.point[4].x, fractionCache[i].polygon.point[4].y }
+                                , { fractionCache[i].polygon.point[5].x, fractionCache[i].polygon.point[5].y } };
+    */
+                FOdysseyVectorFraction* fraction = &fractionCache[i];
+                // deprecated
+    /*
+                double hexaU[6] = { iStartU + ( fraction->polygon.U[0] * difU )
+                                  , iStartU + ( fraction->polygon.U[1] * difU )
+                                  , iStartU + ( fraction->polygon.U[2] * difU )
+                                  , iStartU + ( fraction->polygon.U[3] * difU )
+                                  , iStartU + ( fraction->polygon.U[4] * difU )
+                                  , iStartU + ( fraction->polygon.U[5] * difU ) };
+
+                double quadU[6] = { iStartU + ( fraction->polygon.U[0] * difU )
+                                  , iStartU + ( fraction->polygon.U[1] * difU )
+                                  , iStartU + ( fraction->polygon.U[2] * difU )
+                                  , iStartU + ( fraction->polygon.U[3] * difU )
+                                  , iStartU + ( fraction->polygon.U[4] * difU )
+                                  , iStartU + ( fraction->polygon.U[5] * difU ) };
+    */
+                // We have to divide the hexagon into 2 quads or else it can creates artefacts 
+                // due to UV Mapping when the hexagon is not "a square".
+                ::ULIS::FVec2D quad0P[4] = { fraction->polygon.point[0]
+                                           , fraction->polygon.point[1]
+                                           , fraction->polygon.point[2]
+                                           , fraction->polygon.point[3] };
+                double quad0U[6] = { iStartU + ( fraction->polygon.U[0] * difU )
+                                   , iStartU + ( fraction->polygon.U[1] * difU )
+                                   , iStartU + ( fraction->polygon.U[2] * difU )
+                                   , iStartU + ( fraction->polygon.U[3] * difU ) };
+                double quad0V[6] = { fraction->polygon.V[0]
+                                   , fraction->polygon.V[1]
+                                   , fraction->polygon.V[2]
+                                   , fraction->polygon.V[3] };
+                ::ULIS::FVec2D quad1P[4] = { fraction->polygon.point[3]
+                                           , fraction->polygon.point[4]
+                                           , fraction->polygon.point[5]
+                                           , fraction->polygon.point[0] };
+                double quad1U[6] = { iStartU + ( fraction->polygon.U[3] * difU )
+                                   , iStartU + ( fraction->polygon.U[4] * difU )
+                                   , iStartU + ( fraction->polygon.U[5] * difU )
+                                   , iStartU + ( fraction->polygon.U[0] * difU ) };
+                double quad1V[6] = { fraction->polygon.V[3]
+                                   , fraction->polygon.V[4]
+                                   , fraction->polygon.V[5]
+                                   , fraction->polygon.V[0] };
+
+                uint64 polygonDrawingFlags = 0;
+
+                polygonDrawingFlags |= mBrush.ColorFromBrush    ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
+                polygonDrawingFlags |= mBrush.BilinearFiltering ? FPolygonDrawingFlags::BILINEARFILTERING : 0;
+
+                // should be a static function
+                vectorEngine->FillQuad( iBLContext
+                                      , quad0P
+                                      , quad0U
+                                      , quad0V
+                                      , iCombinedOpacity
+                                      , foregroundColor
+                                      , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                      , mBrush.width
+                                      , mBrush.height
+                                      , mBrush.bitsPerPixel
+                                      , polygonDrawingFlags );
+
+                vectorEngine->FillQuad( iBLContext
+                                      , quad1P
+                                      , quad1U
+                                      , quad1V
+                                      , iCombinedOpacity
+                                      , foregroundColor
+                                      , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                      , mBrush.width
+                                      , mBrush.height
+                                      , mBrush.bitsPerPixel
+                                      , polygonDrawingFlags );
+                // for testing
+                // iBLContext->strokePolygon( pt, 6 );
+            }
         }
-    }
-    else // otherwise use Blend2D's
-    {
-        iSegment->Draw( iBLContext );
+        else // otherwise use Blend2D's
+        {
+            iSegment->Draw( iBLContext );
+        }
     }
 }
 

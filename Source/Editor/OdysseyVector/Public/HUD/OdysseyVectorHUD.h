@@ -156,31 +156,34 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 HUD_MODE_OBJECT              = ( 1ULL <<  0 );
         static const uint64 HUD_MODE_VERTEX              = ( 1ULL <<  1 );
         static const uint64 HUD_MODE_INBETWEEN           = ( 1ULL <<  2 );
+        static const uint64 HUD_MODE_OBJECT_ALLOWED      = ( 1ULL <<  3 );
+        static const uint64 HUD_MODE_VERTEX_ALLOWED      = ( 1ULL <<  4 );
+        static const uint64 HUD_MODE_INBETWEEN_ALLOWED   = ( 1ULL <<  5 );
         static const uint64 HUD_MODE_ALL                 = HUD_MODE_OBJECT
                                                          | HUD_MODE_VERTEX
                                                          | HUD_MODE_INBETWEEN;
-        static const uint64 HUD_PATH_VERTEX_VALENCE0     = ( 1ULL <<  2 );
-        static const uint64 HUD_PATH_VERTEX_VALENCE1     = ( 1ULL <<  3 );
-        static const uint64 HUD_PATH_VERTEX_VALENCE2     = ( 1ULL <<  4 );
+        static const uint64 HUD_PATH_VERTEX_VALENCE0     = ( 1ULL <<  6 );
+        static const uint64 HUD_PATH_VERTEX_VALENCE1     = ( 1ULL <<  7 );
+        static const uint64 HUD_PATH_VERTEX_VALENCE2     = ( 1ULL <<  8 );
         static const uint64 HUD_PATH_VERTEX              = HUD_PATH_VERTEX_VALENCE0
                                                          | HUD_PATH_VERTEX_VALENCE1
                                                          | HUD_PATH_VERTEX_VALENCE2;
-        static const uint64 HUD_PATH_VERTEX_HANDLE       = ( 1ULL <<  5 );
-        static const uint64 HUD_PATH_VERTEX_ALIGNMENT    = ( 1ULL <<  6 );
-        static const uint64 HUD_PATH_SEGMENT             = ( 1ULL <<  7 );
-        static const uint64 HUD_PATH_SEGMENT_HANDLE      = ( 1ULL <<  8 );
+        static const uint64 HUD_PATH_VERTEX_HANDLE       = ( 1ULL <<  9 );
+        static const uint64 HUD_PATH_VERTEX_ALIGNMENT    = ( 1ULL << 10 );
+        static const uint64 HUD_PATH_SEGMENT             = ( 1ULL << 11 );
+        static const uint64 HUD_PATH_SEGMENT_HANDLE      = ( 1ULL << 12 );
         static const uint64 HUD_PATH_ALL                 = HUD_PATH_VERTEX
                                                          | HUD_PATH_VERTEX_HANDLE
                                                          | HUD_PATH_SEGMENT
                                                          | HUD_PATH_SEGMENT_HANDLE;
-        static const uint64 HUD_GROUPPAINT_BUCKET        = ( 1ULL <<  9 );
-        static const uint64 HUD_GROUPPAINT_BUCKET_HANDLE = ( 1ULL << 10 );
+        static const uint64 HUD_GROUPPAINT_BUCKET        = ( 1ULL << 13 );
+        static const uint64 HUD_GROUPPAINT_BUCKET_HANDLE = ( 1ULL << 14 );
         static const uint64 HUD_GROUPPAINT_ALL           = HUD_GROUPPAINT_BUCKET
                                                          | HUD_GROUPPAINT_BUCKET_HANDLE;
-        static const uint64 HUD_TAGINBETWEENER_ALL       = ( 1ULL << 11 );
-        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 12 );
-        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 13 );
-        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 14 );
+        static const uint64 HUD_TAGINBETWEENER_ALL       = ( 1ULL << 15 );
+        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 16 );
+        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 17 );
+        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 18 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) = 0;
