@@ -292,17 +292,9 @@ FOdysseyVectorChain::GetNextSectionLinkInfo( FOdysseyVectorSection* iLastSection
         {
             FOdysseyVectorSegment* nextSectionSegment = nextSectionLinkInfo.section->GetSegment();
 
-            // Note: a vertex could be stitched to a section without being
-            // linked to the section's segment. Check that too.
-            if( iLastSectionVertex->HasSegment( nextSectionLinkInfo.section->GetSegment() ) )
+            if( nextSectionSegment != iLastSection->GetSegment() )
             {
-                if( nextSectionSegment != iLastSection->GetSegment() )
-                {
-                    if( nextSectionLinkInfo.section != iLastSection )
-                    {
-                        return &nextSectionLinkInfo;
-                    }
-                }
+                return &nextSectionLinkInfo;
             }
         }
     }
@@ -728,7 +720,7 @@ FOdysseyVectorChain::TraceLine( int32 iX0
 
                 FWayPoint wayPoint = FWayPoint( newVertex, nullptr, ( alphaValue == 0 ) ?                                                       FWayPoint::LeavesErasureArea
                                                : FWayPoint::EntersErasureArea, t );
-                
+
                 oWayPointArray.push_back( wayPoint );
 
                 newVertex->SetID( wayPointCount );

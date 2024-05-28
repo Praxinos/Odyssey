@@ -1673,21 +1673,15 @@ FOdysseyVectorGroupPaint::FindCycles()
     for( int i = 0; i < mSectionBuffer.size(); i++ )
     {
         FOdysseyVectorSection *section = &mSectionBuffer[i];
-
-        if( section->IsLinked() == true )
-        {
-            section->Unlink( true );
-        }
+        // Note: unlinking with true must be done on all section, not only the ones linked.
+        section->Unlink( true );
     }
 
     for( int i = 0; i < mGapSectionBuffer.size(); i++ )
     {
         FOdysseyVectorSection *section = &mGapSectionBuffer[i];
-
-        if( section->IsLinked() == true )
-        {
-            section->Unlink( true );
-        }
+        // Note: unlinking with true must be done on all section, not only the ones linked.
+        section->Unlink( true );
     }
 
     //auto stopTotal = std::chrono::high_resolution_clock::now();
