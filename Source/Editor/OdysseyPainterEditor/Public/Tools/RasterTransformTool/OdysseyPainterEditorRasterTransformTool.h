@@ -81,6 +81,9 @@ private:
     
     void OnRasterSelectionChanged();
 
+    void UpdateRasterSelection();
+    void ResetRasterSelection();
+
 public:
     UPROPERTY(EditAnywhere, Category = "Transform options")
     bool Perspective = false;
@@ -101,7 +104,9 @@ private:
     int mLastReferenceRotation;
     FVector2D mMouseLastReferencePoint;
 
-    int mRotation;
-
     EMouseCursor::Type mMouseCursor;
+
+    TSharedPtr<::ULIS::FBlock> mSelectionBlock;
+    TSharedPtr<::ULIS::FBlock> mTransformSelectionBlock;
+    ::ULIS::FRectI mSelectionBoundingBox;
 };

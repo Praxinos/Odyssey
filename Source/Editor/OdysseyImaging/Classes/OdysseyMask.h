@@ -18,7 +18,6 @@ public:
     FOdysseyMask();
 
     void Init(int iWidth, int iHeight);
-
     void Add( const TArray<FVector2D>& iPolygon );
     void Substract( const TArray<FVector2D>& iPolygon );
     void Clear();
@@ -31,10 +30,10 @@ public:
     TSharedPtr<FOdysseyHUDElement> GetHUD();
 
     FSimpleMulticastDelegate& OnChanged();
+    void RefreshHUD();
 
 private:
     ::ULIS::FRectI ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const;
-    void RefreshHUD();
 
 private:
     TSharedPtr<::ULIS::FBlock> mBlock;
