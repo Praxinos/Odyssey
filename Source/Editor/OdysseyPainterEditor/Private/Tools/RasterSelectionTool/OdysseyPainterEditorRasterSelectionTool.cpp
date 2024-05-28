@@ -112,18 +112,19 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
         return true;
     }
 
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
     if (SelectionState == EOdysseySelectionState::Add) //Add selection to existing one
     {
-        mEditor->EditorMask().Add(mToolSelectionArea->GetPoints());
+        rasterSelection.Add(mToolSelectionArea->GetPoints());
     }
     else if (SelectionState == EOdysseySelectionState::Substract) //Remove selection to existing one
     {
-        mEditor->EditorMask().Substract(mToolSelectionArea->GetPoints());
+        rasterSelection.Substract(mToolSelectionArea->GetPoints());
     }
     else //Normal, we replace the selection
     {
-        mEditor->EditorMask().Clear();
-        mEditor->EditorMask().Add(mToolSelectionArea->GetPoints());
+        rasterSelection.Clear();
+        rasterSelection.Add(mToolSelectionArea->GetPoints());
     }
 
     mHUD->RemoveElement(mToolSelectionArea);

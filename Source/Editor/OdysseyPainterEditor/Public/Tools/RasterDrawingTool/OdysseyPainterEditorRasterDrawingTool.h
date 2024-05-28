@@ -188,6 +188,8 @@ private:
     void OnShapePathReset();
 
     void OnPaintEngineBlockChanged();
+    
+    void OnRasterSelectionChanged();
 
     float AdaptShapeStep(float iStep);
 

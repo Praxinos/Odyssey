@@ -78,6 +78,8 @@ private:
     void OnBottomRightHandleDragged();
     void OnBottomLeftHandleDragged();
     void OnPivotHandleDragged();
+    
+    void OnRasterSelectionChanged();
 
 public:
     UPROPERTY(EditAnywhere, Category = "Transform options")

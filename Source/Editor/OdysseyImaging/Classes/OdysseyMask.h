@@ -30,6 +30,8 @@ public:
     TSharedPtr<::ULIS::FBlock> GetBlock();
     TSharedPtr<FOdysseyHUDElement> GetHUD();
 
+    FSimpleMulticastDelegate& OnChanged();
+
 private:
     ::ULIS::FRectI ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const;
     void RefreshHUD();
@@ -38,4 +40,6 @@ private:
     TSharedPtr<::ULIS::FBlock> mBlock;
     TSharedPtr<FOdysseyHUDElement> mHUD;
     ::ULIS::FRectI mBoundingRect;
+
+    FSimpleMulticastDelegate mOnChanged;
 };

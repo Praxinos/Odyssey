@@ -234,7 +234,8 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
     if (mediaRasters.Num() <= 0)
         return;
 
-    ::ULIS::FRectI boundingBox = mEditor->EditorMask().GetMaskBoundingRect();
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    ::ULIS::FRectI boundingBox = rasterSelection.GetMaskBoundingRect();
 
     if (boundingBox.Area() <= 0)
         boundingBox = ::ULIS::FRectI::FromMinMax(0, 0, mediaRasters[0]->GetRasterBlock()->GetWidth(), mediaRasters[0]->GetRasterBlock()->GetHeight());
@@ -289,7 +290,7 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
         mOriginalTransformBlock = nullptr;
      }
      
-     mOriginalTransformBlock = mEditor->EditorMask().GetBlock();
+     mOriginalTransformBlock = rasterSelection.GetBlock();
      if( mOriginalTransformBlock == nullptr ) //If we have no selection, we select the entire selected layer block
      {
          mOriginalTransformBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, paintBlock->Format());
@@ -720,6 +721,11 @@ UOdysseyPainterEditorRasterTransformTool::OnBottomLeftHandleDragged()
 
 void
 UOdysseyPainterEditorRasterTransformTool::OnPivotHandleDragged()
+{
+}
+    
+void
+UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged()
 {
 }
 

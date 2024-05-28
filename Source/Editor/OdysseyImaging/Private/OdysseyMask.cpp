@@ -15,12 +15,20 @@ FOdysseyMask::FOdysseyMask()
 {
 }
 
+FSimpleMulticastDelegate& 
+FOdysseyMask::OnChanged()
+{
+    return mOnChanged;
+}
+
 void
 FOdysseyMask::Init(int iWidth, int iHeight)
 {
     mBlock = MakeShared<::ULIS::FBlock>(iWidth, iHeight, ::ULIS::Format_GF);
     Clear();
     RefreshHUD();
+
+    mOnChanged.Broadcast();
 }
 
 void
@@ -28,6 +36,8 @@ FOdysseyMask::Reset()
 {
     mBlock = nullptr;
     RefreshHUD();
+
+    mOnChanged.Broadcast();
 }
 
 void
@@ -38,6 +48,8 @@ FOdysseyMask::Clear()
     ctx.Finish();
 
     RefreshHUD();
+
+    mOnChanged.Broadcast();
 }
 
 bool 
@@ -60,6 +72,8 @@ FOdysseyMask::Add(const TArray<FVector2D>& iPolygon)
     ctx.Finish();
 
     RefreshHUD();
+
+    mOnChanged.Broadcast();
 }
 
 void
@@ -76,6 +90,8 @@ FOdysseyMask::Substract(const TArray<FVector2D>& iPolygon)
     ctx.Finish();
 
     RefreshHUD();
+
+    mOnChanged.Broadcast();
 }
 
 ::ULIS::FRectI

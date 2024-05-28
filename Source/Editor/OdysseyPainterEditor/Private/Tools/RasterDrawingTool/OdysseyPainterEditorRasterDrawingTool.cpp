@@ -103,8 +103,10 @@ UOdysseyPainterEditorRasterDrawingTool::Load()
     //GEditor->OnBlueprintCompiled().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintCompiled);
     FCoreUObjectDelegates::OnObjectsReinstanced.AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced);
 
-    if (!GetEditor()->EditorMask().IsEmpty())
-        mPaintEngine.SetMaskBlock(GetEditor()->EditorMask().GetBlock());
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnRasterSelectionChanged);
+    if (!rasterSelection.IsEmpty())
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
 
 	/* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
     mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
@@ -118,6 +120,9 @@ UOdysseyPainterEditorRasterDrawingTool::Unload()
 {
 	mPaintEngine.RasterBlock(nullptr);
     mPaintEngine.SetMaskBlock(nullptr);
+    
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().RemoveAll(this);
 
 	if ( BrushInstance )
 		BrushInstance->SetBlock(nullptr);
@@ -768,6 +773,20 @@ FText
 UOdysseyPainterEditorRasterDrawingTool::GetTooltip() const
 {
     return LOCTEXT("raster-drawing-tool.tooltip", "Drawing Tool");
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::OnRasterSelectionChanged()
+{
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    if (rasterSelection.IsEmpty())
+    {
+        mPaintEngine.SetMaskBlock(nullptr);
+    }
+    else
+    {
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

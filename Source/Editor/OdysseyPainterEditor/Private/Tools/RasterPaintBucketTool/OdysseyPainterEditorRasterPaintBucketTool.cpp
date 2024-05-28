@@ -46,8 +46,10 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
     
-    if (!GetEditor()->EditorMask().IsEmpty())
-        mPaintEngine.SetMaskBlock(GetEditor()->EditorMask().GetBlock());
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged);
+    if (!rasterSelection.IsEmpty())
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
 
     bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
     if( hasRaster )
@@ -68,6 +70,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::Unload()
 {
     mPaintEngine.RasterBlock(nullptr);
     mPaintEngine.SetMaskBlock(nullptr);
+    
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().RemoveAll(this);
 }
 
 bool
@@ -493,6 +498,20 @@ FText
 UOdysseyPainterEditorRasterPaintBucketTool::GetTooltip() const
 {
     return LOCTEXT("raster-paint-bucket-tool.tooltip", "Paint Bucket Tool");
+}
+
+void
+UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged()
+{
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    if (rasterSelection.IsEmpty())
+    {
+        mPaintEngine.SetMaskBlock(nullptr);
+    }
+    else
+    {
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

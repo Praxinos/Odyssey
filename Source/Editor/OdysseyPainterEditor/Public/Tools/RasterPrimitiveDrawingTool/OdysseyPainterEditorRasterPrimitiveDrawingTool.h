@@ -58,6 +58,8 @@ private:
     void OnShapePathEnd(const FOdysseyPoint& iPoint);
     void OnShapePathAbort();
     void OnShapePathReset();
+    
+    void OnRasterSelectionChanged();
 
 public:
     virtual void PropertyChanged(const FName& iPropertyName) override;

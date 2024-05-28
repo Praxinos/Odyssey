@@ -81,6 +81,8 @@ private:
     void OnShapePathAbort();
     
     void OnShapePathReset();
+    
+    void OnRasterSelectionChanged();
 
     float AdaptShapeStep(float iStep);
 

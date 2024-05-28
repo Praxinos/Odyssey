@@ -55,8 +55,8 @@ protected:
     void SwitchTabletAPI();
 
     void ClearCurrentLayer();
-    /* void ClearCurrentSelection();
-    void CopyCurrentSelection();
+    void ClearCurrentSelection();
+    /* void CopyCurrentSelection();
     void PasteCurrentSelection();
     void PasteCurrentSelectionInNewLayer(); */
 

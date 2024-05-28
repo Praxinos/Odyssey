@@ -238,7 +238,7 @@ FOdysseyPainterEditor::OnClose()
 void
 FOdysseyPainterEditor::InitHUD()
 {
-    mHUDSystem->AddElement( EditorMask().GetHUD() );
+    mHUDSystem->AddElement( mRasterSelection.GetHUD() );
 }
 
 void
@@ -483,26 +483,6 @@ FOdysseyPainterEditor::PaintColor() const
 	return mPaintColor;
 }
 
-/* void FOdysseyPainterEditor::RefreshMaskHUD()
-{
-    mEditorMask.RefreshMaskHUD();
-    InitHUD();
-}
-
-void FOdysseyPainterEditor::ClearMask()
-{
-    EditorMask().ClearMaskData();
-    ClearMaskHUD();
-}
-
-void FOdysseyPainterEditor::ClearMaskHUD()
-{
-    for (int i = 0; i < EditorMask().GetMaskHUD().Num(); i++)
-        mHUDSystem->RemoveElement(EditorMask().GetMaskHUD()[i]);
-
-    EditorMask().ClearMaskHUD();
-} */
-
 UOdysseyPainterEditorTool*
 FOdysseyPainterEditor::GetCurrentMainTool() const
 {
@@ -685,9 +665,10 @@ FOdysseyPainterEditor::LayerStack() const
 	return source->GetLayerStack();
 }
 
-FOdysseyMask& FOdysseyPainterEditor::EditorMask()
+FOdysseyMask&
+FOdysseyPainterEditor::RasterSelection()
 {
-    return mEditorMask;
+    return mRasterSelection;
 }
 
 TSharedPtr<FOdysseyMeshSelector>
@@ -707,7 +688,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->Inactivate();
         mSource = nullptr;
 
-        mEditorMask.Reset();
+        mRasterSelection.Reset();
 		
         InactivateAllTools();
     }
@@ -719,7 +700,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->OnRemoveEditedObjectDelegate().AddLambda([this](UObject* iObject) { RemoveEditedObject(iObject);});
         mSource->Activate();
 
-        mEditorMask.Init(mSource->Width(), mSource->Height());
+        mRasterSelection.Init(mSource->Width(), mSource->Height());
         
         if ( mCurrentMainTool && mCurrentMainTool->IsActivable() )
         {

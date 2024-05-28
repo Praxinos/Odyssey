@@ -163,14 +163,19 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
     
-    if (!GetEditor()->EditorMask().IsEmpty())
-        mPaintEngine.SetMaskBlock(GetEditor()->EditorMask().GetBlock());
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnRasterSelectionChanged);
+    if (!rasterSelection.IsEmpty())
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
 {
     UOdysseyPainterEditorTool::Unload();
     mPaintEngine.SetMaskBlock(nullptr);
+    
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().RemoveAll(this);
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Flush()
@@ -484,6 +489,20 @@ FText
 UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetTooltip() const
 {
     return LOCTEXT("raster-primitive-drawing-tool.tooltip", "Primitive Drawing Tool");
+}
+
+void
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnRasterSelectionChanged()
+{
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    if (rasterSelection.IsEmpty())
+    {
+        mPaintEngine.SetMaskBlock(nullptr);
+    }
+    else
+    {
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+    }
 }
 
 #undef LOCTEXT_NAMESPACE
