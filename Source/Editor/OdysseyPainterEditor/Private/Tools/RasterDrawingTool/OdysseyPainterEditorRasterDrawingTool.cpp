@@ -103,6 +103,9 @@ UOdysseyPainterEditorRasterDrawingTool::Load()
     //GEditor->OnBlueprintCompiled().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintCompiled);
     FCoreUObjectDelegates::OnObjectsReinstanced.AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced);
 
+    if (!GetEditor()->EditorMask().IsEmpty())
+        mPaintEngine.SetMaskBlock(GetEditor()->EditorMask().GetBlock());
+
 	/* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
     mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
 
@@ -114,6 +117,7 @@ void
 UOdysseyPainterEditorRasterDrawingTool::Unload()
 {
 	mPaintEngine.RasterBlock(nullptr);
+    mPaintEngine.SetMaskBlock(nullptr);
 
 	if ( BrushInstance )
 		BrushInstance->SetBlock(nullptr);

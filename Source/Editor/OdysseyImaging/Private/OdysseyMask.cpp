@@ -40,6 +40,12 @@ FOdysseyMask::Clear()
     RefreshHUD();
 }
 
+bool 
+FOdysseyMask::IsEmpty() const
+{
+    return mBoundingRect.Area() <= 0;
+}
+
 void
 FOdysseyMask::Add(const TArray<FVector2D>& iPolygon)
 {
@@ -71,26 +77,6 @@ FOdysseyMask::Substract(const TArray<FVector2D>& iPolygon)
 
     RefreshHUD();
 }
-/*
-void
-FOdysseyMask::ClearMaskData()
-{
-    for( int i = 0; i < mMaskZones.Num(); i++ )
-    {
-        mMaskZones[i].mBlock.Reset();
-    }
-    mMaskZones.Empty();
-}
-
-void
-FOdysseyMask::ClearMaskHUD()
-{
-    for (int i = 0; i < mMaskHUD.Num(); i++)
-    {
-        mMaskHUD[i].Reset();
-    }
-    mMaskHUD.Empty();
-}*/
 
 ::ULIS::FRectI
 FOdysseyMask::ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const
@@ -124,44 +110,6 @@ TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyMask::GetBlock()
 {
     return mBlock;
-    /* if( mMaskZones.Num() == 0 ) 
-        return nullptr;
-
-    ::ULIS::FRectI boundingBox = GetMaskBoundingRect();
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, mMaskZones[0].mBlock->Format() );
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mMaskZones[0].mBlock->Format());
-    ::ULIS::FEvent clearEvent;
-
-    ctx.Clear(
-        *maskBlock,
-        maskBlock->Rect(),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-        0,
-        nullptr,
-        &clearEvent);
-
-    for( int i = 0; i < mMaskZones.Num(); i++ )
-    {
-        ctx.Blend(
-            *mMaskZones[i].mBlock,
-            *maskBlock,
-            mMaskZones[i].mBlock->Rect(),
-            ::ULIS::FVec2I(0,0),
-            ::ULIS::Blend_Normal,
-            ::ULIS::Alpha_Normal,
-            1.f,
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-            0,
-            &clearEvent,
-            nullptr
-        );
-    }
-
-    ctx.Finish();
-
-    return maskBlock;*/
 }
 
 TSharedPtr<FOdysseyHUDElement>

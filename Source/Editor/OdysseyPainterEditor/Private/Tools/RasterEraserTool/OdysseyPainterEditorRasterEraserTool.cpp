@@ -111,6 +111,9 @@ void
 UOdysseyPainterEditorRasterEraserTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
+
+    if (!GetEditor()->EditorMask().IsEmpty())
+        mPaintEngine.SetMaskBlock(GetEditor()->EditorMask().GetBlock());
 	/* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
     mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
 
@@ -122,6 +125,7 @@ void
 UOdysseyPainterEditorRasterEraserTool::Unload()
 {
 	mPaintEngine.RasterBlock(nullptr);
+    mPaintEngine.SetMaskBlock(nullptr);
 }
 
 bool

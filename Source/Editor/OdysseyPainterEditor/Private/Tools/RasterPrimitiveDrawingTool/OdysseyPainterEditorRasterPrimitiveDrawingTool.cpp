@@ -162,11 +162,15 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnKeyUp(const FKey& iKey)
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
+    
+    if (!GetEditor()->EditorMask().IsEmpty())
+        mPaintEngine.SetMaskBlock(GetEditor()->EditorMask().GetBlock());
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
 {
     UOdysseyPainterEditorTool::Unload();
+    mPaintEngine.SetMaskBlock(nullptr);
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Flush()

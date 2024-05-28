@@ -42,17 +42,14 @@ UOdysseyPainterEditorRasterPaintBucketTool::IsActivable() const
 }
 
 void
-UOdysseyPainterEditorRasterPaintBucketTool::Unload()
-{
-    mPaintEngine.RasterBlock(nullptr);
-}
-
-void
 UOdysseyPainterEditorRasterPaintBucketTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
-    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+    
+    if (!GetEditor()->EditorMask().IsEmpty())
+        mPaintEngine.SetMaskBlock(GetEditor()->EditorMask().GetBlock());
 
+    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
     if( hasRaster )
     {
         /* It would be better if this is done in OnMouseDown()
@@ -64,6 +61,13 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
         }
         */
     }
+}
+
+void
+UOdysseyPainterEditorRasterPaintBucketTool::Unload()
+{
+    mPaintEngine.RasterBlock(nullptr);
+    mPaintEngine.SetMaskBlock(nullptr);
 }
 
 bool

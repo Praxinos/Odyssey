@@ -35,6 +35,8 @@ public:
     // Sets the Block on which the Paint Engine will draw
     void RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
 
+    void SetMaskBlock(TSharedPtr<::ULIS::FBlock> iMaskBlock);
+
 public:
     // Getters
 
@@ -80,6 +82,7 @@ private:
 
     //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock; // The Block to edit (mPaintBlock over mOriginalBlock)
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mPaintBlock; // The Block containing only the modified tiles
+    TSharedPtr<::ULIS::FBlock> mMaskBlock;
     //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mOriginalBlock; // The Block containing the edited block before being edited
 
     //Options

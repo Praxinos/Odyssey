@@ -24,10 +24,11 @@ public:
     void Clear();
     void Reset();
 
+    bool IsEmpty() const;
+
     ::ULIS::FRectI GetMaskBoundingRect() const;
     TSharedPtr<::ULIS::FBlock> GetBlock();
     TSharedPtr<FOdysseyHUDElement> GetHUD();
-
 
 private:
     ::ULIS::FRectI ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const;
