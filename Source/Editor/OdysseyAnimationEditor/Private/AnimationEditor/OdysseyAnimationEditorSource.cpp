@@ -44,6 +44,18 @@ FOdysseyAnimationEditorSource::Id() const
 	return StaticId();
 }
 
+int
+FOdysseyAnimationEditorSource::Width() const
+{
+	return mAnimation->Width();
+}
+
+int
+FOdysseyAnimationEditorSource::Height() const
+{
+	return mAnimation->Height();
+}
+
 void
 FOdysseyAnimationEditorSource::Activate()
 {

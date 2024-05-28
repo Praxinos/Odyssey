@@ -189,14 +189,14 @@ void UOdysseyPainterEditorRasterTransformTool::Tick(float iDeltaTime)
 void UOdysseyPainterEditorRasterTransformTool::Load()
 {
     CreateTransformAreaFromSelection();
-    mEditor->ClearMaskHUD();
+    //mEditor->ClearMaskHUD();
     UOdysseyPainterEditorTool::Load();
 }
 
 void UOdysseyPainterEditorRasterTransformTool::Unload()
 {
     ClearTransform();
-    mEditor->RefreshMaskHUD();
+    //mEditor->RefreshMaskHUD();
     UOdysseyPainterEditorTool::Unload();
 }
 
@@ -289,7 +289,7 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
         mOriginalTransformBlock = nullptr;
      }
      
-     mOriginalTransformBlock = mEditor->EditorMask().GetMaskBlock();
+     mOriginalTransformBlock = mEditor->EditorMask().GetBlock();
      if( mOriginalTransformBlock == nullptr ) //If we have no selection, we select the entire selected layer block
      {
          mOriginalTransformBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, paintBlock->Format());
@@ -594,7 +594,7 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
 
         GEditor->EndTransaction();
         mRasterMutator.SetRasterBlock(nullptr);
-        mEditor->ClearMask();
+        //mEditor->ClearMask();
     }
     ClearTransform();
 }

@@ -112,74 +112,20 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
         return true;
     }
 
-    if( SelectionShape == EOdysseySelectionShape::Rectangle )
-    {
-        int decalX = FMath::Min(boundingBox.x, 0);
-        int decalY = FMath::Min(boundingBox.y, 0);
-
-        mSelectionBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
-        ClearBlock(mSelectionBlock);
-
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-
-        ctx.Copy(
-            *rasterBlock->GetBlock(),
-            *mSelectionBlock,
-            boundingBox,
-            ::ULIS::FVec2I(-decalX, -decalY),
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-            0,
-            nullptr,
-            nullptr
-        );
-
-        ctx.Finish();
-    }
-    else
-    {
-        TArray<::ULIS::FRectI> rectangles = GetSelectionAreaAsScanlines();
-
-        mSelectionBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
-        ClearBlock(mSelectionBlock);
-
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-
-        for (int i = 0; i < rectangles.Num(); i++)
-        {
-            int decalX = FMath::Min(rectangles[i].x, 0);
-            int decalY = FMath::Min(rectangles[i].y, 0);
-
-            ctx.Copy(
-                *rasterBlock->GetBlock(),
-                *mSelectionBlock,
-                rectangles[i],
-                ::ULIS::FVec2I(-decalX - boundingBox.x + rectangles[i].x, -decalY - boundingBox.y + rectangles[i].y),
-                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                0,
-                nullptr,
-                nullptr
-            );
-        }
-
-        ctx.Finish();
-    }
-
-
     if (SelectionState == EOdysseySelectionState::Add) //Add selection to existing one
     {
-        mEditor->EditorMask().AddFromPointsAndBlock(mToolSelectionArea->GetPoints(), mSelectionBlock);
+        mEditor->EditorMask().Add(mToolSelectionArea->GetPoints());
     }
     else if (SelectionState == EOdysseySelectionState::Substract) //Remove selection to existing one
     {
-
+        mEditor->EditorMask().Substract(mToolSelectionArea->GetPoints());
     }
     else //Normal, we replace the selection
     {
-        mEditor->ClearMask();
-        mEditor->EditorMask().AddFromPointsAndBlock(mToolSelectionArea->GetPoints(), mSelectionBlock);
+        mEditor->EditorMask().Clear();
+        mEditor->EditorMask().Add(mToolSelectionArea->GetPoints());
     }
 
-    mEditor->RefreshMaskHUD();
     mHUD->RemoveElement(mToolSelectionArea);
    
     return true;
@@ -305,7 +251,7 @@ TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterSelectionTool::GetSelectionAre
         {
             if ((points[i].Y < y && points[j].Y >= y) || (points[j].Y < y && points[i].Y >= y))
             {
-                nodesX.push_back(int(points[i].X + double(y - points[i].Y) / double(points[j].Y - points[i].Y) * (points[j].X - points[i].X)));
+                nodesX.push_back(int(points[i].X + double(y - points[i].Y) / double(points[j].Y - points[i]. Y) * (points[j].X - points[i].X)));
             }
             j = i;
         }
@@ -350,19 +296,9 @@ void UOdysseyPainterEditorRasterSelectionTool::ClearBlock(TSharedPtr<::ULIS::FBl
 {
     if (!iBlock)
         return;
-
-    ::ULIS::eFormat format = iBlock->Format();
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    ::ULIS::FEvent clearEvent;
-
-    ctx.Clear(
-        *iBlock,
-        iBlock->Rect(),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-        0,
-        nullptr,
-        &clearEvent);
-
+        
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+    ctx.Clear(*iBlock);
     ctx.Finish();
 }
 

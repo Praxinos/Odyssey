@@ -238,8 +238,7 @@ FOdysseyPainterEditor::OnClose()
 void
 FOdysseyPainterEditor::InitHUD()
 {
-    for( int i = 0; i < EditorMask().GetMaskHUD().Num(); i++ )
-        mHUDSystem->AddElement( EditorMask().GetMaskHUD()[i] );
+    mHUDSystem->AddElement( EditorMask().GetHUD() );
 }
 
 void
@@ -484,7 +483,7 @@ FOdysseyPainterEditor::PaintColor() const
 	return mPaintColor;
 }
 
-void FOdysseyPainterEditor::RefreshMaskHUD()
+/* void FOdysseyPainterEditor::RefreshMaskHUD()
 {
     mEditorMask.RefreshMaskHUD();
     InitHUD();
@@ -502,7 +501,7 @@ void FOdysseyPainterEditor::ClearMaskHUD()
         mHUDSystem->RemoveElement(EditorMask().GetMaskHUD()[i]);
 
     EditorMask().ClearMaskHUD();
-}
+} */
 
 UOdysseyPainterEditorTool*
 FOdysseyPainterEditor::GetCurrentMainTool() const
@@ -707,6 +706,8 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
     {
         mSource->Inactivate();
         mSource = nullptr;
+
+        mEditorMask.Reset();
 		
         InactivateAllTools();
     }
@@ -717,6 +718,8 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->OnAddEditedObjectDelegate().AddLambda([this](UObject* iObject) { AddEditedObject(iObject);});
         mSource->OnRemoveEditedObjectDelegate().AddLambda([this](UObject* iObject) { RemoveEditedObject(iObject);});
         mSource->Activate();
+
+        mEditorMask.Init(mSource->Width(), mSource->Height());
         
         if ( mCurrentMainTool && mCurrentMainTool->IsActivable() )
         {

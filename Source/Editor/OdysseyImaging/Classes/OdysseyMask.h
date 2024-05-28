@@ -5,14 +5,10 @@
 
 #include "CoreMinimal.h"
 
-#include "OdysseyHUDPolygon.h"
 #include <ULIS>
 
-struct FOdysseyCanvasZone
-{
-    TArray<FVector2D> mPolygonPoints;
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock; //We have the ownership of those blocks
-};
+class FOdysseyHUDElement;
+class FOdysseyHUDLine;
 
 class ODYSSEYIMAGING_API FOdysseyMask 
 {
@@ -21,17 +17,24 @@ public:
     ~FOdysseyMask();
     FOdysseyMask();
 
-    void AddFromPointsAndBlock( TArray<FVector2D> iPoints, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock );
-    void ClearMaskData();
-    void ClearMaskHUD();
+    void Init(int iWidth, int iHeight);
 
-    ::ULIS::FRectI GetMaskBoundingRect();
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetMaskBlock();
-    TArray<TSharedPtr<FOdysseyHUDPolygon>>& GetMaskHUD();
+    void Add( const TArray<FVector2D>& iPolygon );
+    void Substract( const TArray<FVector2D>& iPolygon );
+    void Clear();
+    void Reset();
 
-    void RefreshMaskHUD();
+    ::ULIS::FRectI GetMaskBoundingRect() const;
+    TSharedPtr<::ULIS::FBlock> GetBlock();
+    TSharedPtr<FOdysseyHUDElement> GetHUD();
+
 
 private:
-    TArray<FOdysseyCanvasZone> mMaskZones;
-    TArray<TSharedPtr<FOdysseyHUDPolygon>> mMaskHUD;
+    ::ULIS::FRectI ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const;
+    void RefreshHUD();
+
+private:
+    TSharedPtr<::ULIS::FBlock> mBlock;
+    TSharedPtr<FOdysseyHUDElement> mHUD;
+    ::ULIS::FRectI mBoundingRect;
 };

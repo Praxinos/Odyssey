@@ -48,16 +48,16 @@ public:
     TSharedPtr<FUICommandInfo> ClearCurrentLayer;
 
     /** Action for clearing the current selection block, if it exists */
-    TSharedPtr<FUICommandInfo> ClearCurrentSelection;
+    //TSharedPtr<FUICommandInfo> ClearCurrentSelection;
 
     /** Action for copying the current selection block, if it exists */
-    TSharedPtr<FUICommandInfo> CopyCurrentSelection;
+    //TSharedPtr<FUICommandInfo> CopyCurrentSelection;
 
     /** Action for pasting the current selection in the current layer */
-    TSharedPtr<FUICommandInfo> PasteCurrentSelection;
+    //TSharedPtr<FUICommandInfo> PasteCurrentSelection;
 
     /** Action for pasting the current selection in a new layer */
-    TSharedPtr<FUICommandInfo> PasteCurrentSelectionInNewLayer;
+    //TSharedPtr<FUICommandInfo> PasteCurrentSelectionInNewLayer;
 
     //Viewport Actions
 
