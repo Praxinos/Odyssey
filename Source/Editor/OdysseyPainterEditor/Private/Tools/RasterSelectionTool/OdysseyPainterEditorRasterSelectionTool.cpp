@@ -20,12 +20,14 @@ UOdysseyPainterEditorRasterSelectionTool::~UOdysseyPainterEditorRasterSelectionT
     }
 }
 
-UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTool():
-    SelectionShape( EOdysseySelectionShape::Freehand ),
-    SelectionState( EOdysseySelectionState::Normal ),
-    mToolSelectionArea(nullptr),
-    mPaintEngine(),
-    mSelectionBlock(nullptr)
+UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTool()
+    : SelectionShape( EOdysseySelectionShape::Freehand )
+    , SelectionState( EOdysseySelectionState::Normal )
+    , mToolSelectionArea(nullptr)
+    , mPaintEngine()
+    , mSelectionBlock(nullptr)
+    , mSelectionHUD(MakeShared<FOdysseyHUDElement>())
+    
 {
     Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Lasso32");
 }
@@ -38,7 +40,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsActivable() const
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     mToolSelectionArea = MakeShared<FOdysseyHUDPolygon>();
-    mHUD->AddElement(mToolSelectionArea);
+    mSelectionHUD->AddElement(mToolSelectionArea);
 
     switch (SelectionShape)
     {
@@ -127,7 +129,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
         rasterSelection.Add(mToolSelectionArea->GetPoints());
     }
 
-    mHUD->RemoveElement(mToolSelectionArea);
+    mSelectionHUD->RemoveElement(mToolSelectionArea);
    
     return true;
 }
@@ -181,11 +183,21 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(const FKey& iKey)
 void UOdysseyPainterEditorRasterSelectionTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
+
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    mHUD->AddElement(rasterSelection.GetHUD());
+    mHUD->AddElement(mSelectionHUD);
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::Unload()
 {
     ClearSelection();
+
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    mHUD->RemoveElement(rasterSelection.GetHUD());
+    mHUD->RemoveElement(mSelectionHUD);
+
+    UOdysseyPainterEditorTool::Unload();
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelectionTool::GetSelectionBlock()
@@ -223,7 +235,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsSelectionValid(::ULIS::FRectI i
 
 void UOdysseyPainterEditorRasterSelectionTool::ClearSelection()
 {
-    mHUD->EmptyElements();
+    mSelectionHUD->EmptyElements();
     if( mSelectionBlock )
     {
         mSelectionBlock.Reset();

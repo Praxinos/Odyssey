@@ -239,4 +239,6 @@ protected:
     FAdaptShapePoints                   mAdaptShapePointsDelegate;
     FSimpleMulticastDelegate            mOnBrushChanged;
     FSimpleMulticastDelegate            mOnShapeChanged;
+
+    TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 };

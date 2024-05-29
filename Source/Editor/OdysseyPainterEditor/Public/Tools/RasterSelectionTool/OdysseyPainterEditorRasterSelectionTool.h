@@ -78,6 +78,7 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Selection Shape")
     bool Uniform;
 
+    TSharedPtr<FOdysseyHUDElement> mSelectionHUD;
     TSharedPtr<FOdysseyHUDPolygon> mToolSelectionArea;
     FOdysseyPaintEngine mPaintEngine;
 

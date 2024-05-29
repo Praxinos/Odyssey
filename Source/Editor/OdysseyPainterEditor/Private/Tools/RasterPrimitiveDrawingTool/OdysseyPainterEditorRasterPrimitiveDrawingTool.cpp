@@ -28,9 +28,10 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::~UOdysseyPainterEditorRasterPri
 {
 }
 
-UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrimitiveDrawingTool() :
-    mPaintEngine(),
-    SelectedShape(EOdysseyShape::kFreehand)
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrimitiveDrawingTool()
+    : mPaintEngine()
+    , SelectedShape(EOdysseyShape::kFreehand)
+    , mShapeHUD(MakeShared<FOdysseyHUDElement>())
 {
     Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Shapes64");
 
@@ -64,7 +65,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::CreateShape(FName iName)
     shape->OnPathAbortDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathAbort);
     shape->OnPathResetDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathReset);
 
-    shape->SetHUD(mHUD);
+    shape->SetHUD(mShapeHUD);
 
     return shape;
 }
@@ -167,6 +168,9 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
     rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnRasterSelectionChanged);
     if (!rasterSelection.IsEmpty())
         mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+
+    mHUD->AddElement(rasterSelection.GetHUD());
+    mHUD->AddElement(mShapeHUD);
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
@@ -176,6 +180,9 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
     
     FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
     rasterSelection.OnChanged().RemoveAll(this);
+
+    mHUD->AddElement(rasterSelection.GetHUD());
+    mHUD->RemoveElement(mShapeHUD);
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Flush()
@@ -447,21 +454,21 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
         source->RecordCurrentFrameUndo();
 
     GEditor->EndTransaction();
-    mHUD->EmptyElements();
+    mShapeHUD->EmptyElements();
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathAbort()
 {
     mPaintEngine.Abort();
 
-    mHUD->EmptyElements();
+    mShapeHUD->EmptyElements();
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathReset()
 {
     mPaintEngine.Abort();
 
-    mHUD->EmptyElements();
+    mShapeHUD->EmptyElements();
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FName& iPropertyName)

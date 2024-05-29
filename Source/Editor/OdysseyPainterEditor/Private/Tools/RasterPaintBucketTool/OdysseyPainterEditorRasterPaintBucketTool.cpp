@@ -12,6 +12,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyHUDElement.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -50,6 +51,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
     rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged);
     if (!rasterSelection.IsEmpty())
         mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+    mHUD->AddElement(rasterSelection.GetHUD());
 
     bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
     if( hasRaster )
@@ -73,6 +75,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::Unload()
     
     FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
     rasterSelection.OnChanged().RemoveAll(this);
+    mHUD->RemoveElement(rasterSelection.GetHUD());
+    
+    UOdysseyPainterEditorTool::Unload();
 }
 
 bool

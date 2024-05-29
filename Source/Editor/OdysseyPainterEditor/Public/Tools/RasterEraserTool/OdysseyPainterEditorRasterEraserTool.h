@@ -125,4 +125,6 @@ protected:
     FSimpleMulticastDelegate            mOnShapeChanged;
     FSimpleMulticastDelegate            mOnSizeChanged;
     FSimpleMulticastDelegate            mOnOpacityChanged;
+
+    TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 };

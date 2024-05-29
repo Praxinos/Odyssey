@@ -238,7 +238,6 @@ FOdysseyPainterEditor::OnClose()
 void
 FOdysseyPainterEditor::InitHUD()
 {
-    mHUDSystem->AddElement( mRasterSelection.GetHUD() );
 }
 
 void

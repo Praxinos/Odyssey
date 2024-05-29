@@ -71,6 +71,8 @@ protected:
     FSimpleMulticastDelegate            mOnShapeChanged;
     TArray<FOdysseyPoint> mPath;
 
+    TSharedPtr<FOdysseyHUDElement> mShapeHUD;
+
 public:
     UPROPERTY(EditAnywhere, Category = "Shape")
     EOdysseyShape SelectedShape;

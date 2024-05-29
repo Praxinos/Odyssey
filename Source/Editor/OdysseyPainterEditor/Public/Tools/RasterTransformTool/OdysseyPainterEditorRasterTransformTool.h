@@ -98,6 +98,7 @@ private:
     FOdysseyRasterBlockMutator mRasterMutator;
 
     EOdysseyTransformCapture mTransformCaptureMode;
+    TSharedPtr<FOdysseyHUDElement> mTransformHUD;
     TSharedPtr<FOdysseyHUDPolygon> mTransformArea;
     TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
 
