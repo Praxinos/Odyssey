@@ -32,7 +32,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
                              , double iWorldX
                              , double iWorldY
                              , double iRadius
-                             , std::vector<FInbetweenerPoint*>& oPointArray
+                             , std::vector<FInbetweenerGridPoint*>& oPointArray
                              , std::vector<double>& oWorldDistanceArray );
 
     private:

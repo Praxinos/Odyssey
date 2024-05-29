@@ -158,12 +158,89 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
 }
 
 void
+FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysseyVectorGroupPaint* iScene
+                                                                       , bool iForceWorld )
+{
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
+    {
+        FOdysseyVectorObject* selectedObject = selectedObjectList.size() ? selectedObjectList.front() : iScene;
+        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+        if( tag )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+            mSelectionBox.inited = true;
+            mSelectionBox.rect = inbetweenerTag->GetTargetGridBBox( false );
+            mSelectionBox.worldMatrix = inbetweenerTag->GetTargetWorldMatrix();
+            mSelectionBox.inverseWorldMatrix = inbetweenerTag->GetTargetInverseWorldMatrix();
+        }
+    }
+    else 
+    {
+        mSelectionBox.inited = false;
+        mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
+        mSelectionBox.worldMatrix = iScene->GetWorldMatrix();
+        mSelectionBox.inverseWorldMatrix = iScene->GetInverseWorldMatrix();
+
+        // call lambda on each object of the tree
+        vectorEngine->Traverse
+        ( iScene
+        , 0
+        , [ this
+          , iScene
+          , vectorEngine
+          , &selectedObjectList ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
+          {
+              if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
+              {
+                  FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+                  if( tag )
+                  {
+                      FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                      ::ULIS::FRectD selectedObjectBBox = inbetweenerTag->GetTargetGridBBox( true );
+
+                      mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedObjectBBox
+                                                                : selectedObjectBBox;
+
+                      mSelectionBox.inited = true;
+
+                      return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  }
+              }
+
+              return 0;
+          } );
+
+        if( mSelectionBox.inited )
+        {
+            ::ULIS::FRectD rect = mSelectionBox.rect;
+            BLPoint p0, p1, p2, p3;
+
+            p0 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y          );
+            p1 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y          );
+            p2 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y + rect.h );
+            p3 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y + rect.h );
+
+            mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                           , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                           , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                           , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+        }
+    }
+}
+
+void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( FOdysseyVectorGroupPaint* iScene
                                                           , bool iForceWorld
                                                           , uint64 iHUDFlags )
 {
-    if( ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
-     || ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
+    if( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         //case eVectorEditionMode::Object :
         UpdateSelectionBoxObjectMode( iScene, iForceWorld );
@@ -173,6 +250,12 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( FOdysseyVectorGroupP
     {
         //case eVectorEditionMode::Vertex:
         UpdateSelectionBoxVertexMode( iScene );
+    }
+
+    if( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        //case eVectorEditionMode::Vertex:
+        UpdateSelectionBoxInbetweenMode( iScene, iForceWorld );
     }
 }
 

@@ -39,7 +39,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
 
         void UpdateSelectionBoxObjectMode( FOdysseyVectorGroupPaint* iScene
                                          , bool iForceWorld );
-
+        void UpdateSelectionBoxInbetweenMode( FOdysseyVectorGroupPaint* iScene
+                                            , bool iForceWorld );
         void UpdateSelectionBox( FOdysseyVectorGroupPaint* iScene
                                , bool iForceWorld
                                , uint64 iHUDFlags );

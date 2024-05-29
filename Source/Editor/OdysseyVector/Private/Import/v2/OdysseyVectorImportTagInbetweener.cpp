@@ -63,9 +63,9 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                 case FOdysseyFile::VectorV2::CHUNK_TAG_INBETWEENER_FFDGRID_GEOMETRY:
                 {
-                    std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
+                    std::vector<FInbetweenerGridPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
 
-                    for( FInbetweenerPoint& point : gridPointbuffer )
+                    for( FInbetweenerGridPoint& point : gridPointbuffer )
                     {
                         double sourceX;
                         double sourceY;
@@ -77,10 +77,8 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                         Ar << targetX;
                         Ar << targetY;
 
-                        point.sourcePosition.x = sourceX;
-                        point.sourcePosition.y = sourceY;
-                        point.targetPosition.x = targetX;
-                        point.targetPosition.y = targetY;
+                        point.SetSourcePosition( sourceX, sourceY );
+                        point.SetTargetPosition( targetX, targetY );
                     }
                 }
                 break;

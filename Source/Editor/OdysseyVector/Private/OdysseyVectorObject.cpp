@@ -487,6 +487,12 @@ FOdysseyVectorObject::UpdateMatrix()
             child->UpdateMatrix();
         }
 
+        //update tags
+        for( FOdysseyVectorTag* tag : mTagList )
+        {
+            tag->UpdateMatrix();
+        }
+
         mInvalidationFlags &= (~INVALIDATE_MATRIX);
     }
 }

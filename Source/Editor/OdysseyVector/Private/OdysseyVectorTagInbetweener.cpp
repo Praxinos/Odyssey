@@ -10,6 +10,10 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorAnimationCell.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
 FInterpolatedPoint::~FInterpolatedPoint()
 {
 }
@@ -159,6 +163,74 @@ FOdysseyVectorTagInbetweener::MapPoint( FOdysseyVectorObject* iObject
 }
 */
 
+FInbetweenerGridPoint::FInbetweenerGridPoint()
+{
+}
+
+void
+FInbetweenerGridPoint::Init( FOdysseyVectorTagInbetweener* iInbetweenerTag )
+{
+    mInbetweenerTag = iInbetweenerTag;
+}
+
+void
+FInbetweenerGridPoint::SetSourcePosition( double iX, double iY )
+{
+    mSourcePosition.x = iX;
+    mSourcePosition.y = iY;
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_BBOX );
+}
+
+void
+FInbetweenerGridPoint::SetTargetPosition( double iX, double iY )
+{
+    mTargetPosition.x = iX;
+    mTargetPosition.y = iY;
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_BBOX );
+}
+
+const ::ULIS::FVec2D&
+FInbetweenerGridPoint::GetSourcePosition()
+{
+    return mSourcePosition;
+}
+
+const ::ULIS::FVec2D&
+FInbetweenerGridPoint::GetTargetPosition()
+{
+    return mTargetPosition;
+}
+
+FInbetweenerGridPoint** 
+FInbetweenerGridCell::GetGridPoints()
+{
+    return mPoint;
+}
+
+void
+FOdysseyVectorTagInbetweener::UpdateGridBBox()
+{
+    double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
+    bool hasBBox = false;
+
+    for( FInbetweenerGridPoint& gridPoint : mGridPointBuffer )
+    {
+        const ::ULIS::FVec2D& targetPosition = gridPoint.GetTargetPosition();
+
+        hasBBox = true;
+
+        if ( targetPosition.x < xmin ) xmin = targetPosition.x;
+        if ( targetPosition.y < ymin ) ymin = targetPosition.y;
+        if ( targetPosition.x > xmax ) xmax = targetPosition.x;
+        if ( targetPosition.y > ymax ) ymax = targetPosition.y;
+    }
+
+    mTargetGridBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) 
+                                  : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+}
+
 void
 FOdysseyVectorTagInbetweener::Map()
 {
@@ -253,6 +325,26 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     Interpolate();
 }
 
+void
+FOdysseyVectorTagInbetweener::Translate( double iX, double iY )
+{
+    mTargetTranslationX = iX;
+    mTargetTranslationY = iY;
+}
+
+void
+FOdysseyVectorTagInbetweener::Rotate( double iAngle )
+{
+    mTargetRotation = iAngle;
+}
+
+void
+FOdysseyVectorTagInbetweener::Scale( double iX, double iY )
+{
+    mTargetScalingX = iX;
+    mTargetScalingY = iY;
+}
+
 void FOdysseyVectorTagInbetweener::Added()
 {
     mSharedEnv->AddTag( this );
@@ -290,6 +382,11 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags )
         AllocBuffers();
     }
 
+    if( mInvalidationFlags & INVALIDATE_BBOX )
+    {
+        UpdateGridBBox();
+    }
+
     if( mInvalidationFlags & INVALIDATE_SPACING )
     {
         Interpolate();
@@ -310,6 +407,38 @@ FOdysseyVectorTagInbetweener::Invalidate( uint64 iInvalidationFlags )
     mOwner->Invalidate( FOdysseyVectorObject::INVALIDATE_TAGS );
 
     mInvalidationFlags |= iInvalidationFlags;
+}
+
+BLMatrix2D&
+FOdysseyVectorTagInbetweener::GetTargetWorldMatrix()
+{
+    return mTargetWorldMatrix;
+}
+
+BLMatrix2D&
+FOdysseyVectorTagInbetweener::GetTargetInverseWorldMatrix()
+{
+    return mTargetInverseWorldMatrix;
+}
+
+::ULIS::FRectD
+FOdysseyVectorTagInbetweener::GetTargetGridBBox( bool iWorld )
+{
+    if ( iWorld == true )
+    {
+        BLPoint p0 = mTargetWorldMatrix.mapPoint( mTargetGridBBox.x                    , mTargetGridBBox.y                     );
+        BLPoint p1 = mTargetWorldMatrix.mapPoint( mTargetGridBBox.x + mTargetGridBBox.w, mTargetGridBBox.y                     );
+        BLPoint p2 = mTargetWorldMatrix.mapPoint( mTargetGridBBox.x + mTargetGridBBox.w, mTargetGridBBox.y + mTargetGridBBox.h );
+        BLPoint p3 = mTargetWorldMatrix.mapPoint( mTargetGridBBox.x                    , mTargetGridBBox.y + mTargetGridBBox.h );
+        ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                             , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                             , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                             , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+
+        return worldBBox;
+    }
+
+    return mTargetGridBBox;
 }
 
 void
@@ -337,6 +466,40 @@ FOdysseyVectorTagInbetweener::GetChart()
 }
 
 void
+FOdysseyVectorTagInbetweener::UpdateMatrix()
+{
+    double stepTranslationX = mTargetTranslationX / ( mInbetweenCount + 1 );
+    double stepTranslationY = mTargetTranslationY / ( mInbetweenCount + 1 );
+    double stepRotation = mTargetRotation / ( mInbetweenCount + 1 );
+    double translationX = stepTranslationX;
+    double translationY = stepTranslationY;
+    double rotation = stepRotation;
+
+    mTargetLocalMatrix.reset();
+    mTargetLocalMatrix.translate( mTargetTranslationX, mTargetTranslationY );
+    mTargetLocalMatrix.rotate( mTargetRotation * M_PI / 180.0f );
+    mTargetLocalMatrix.scale( mTargetScalingX, mTargetScalingY );
+
+    mTargetWorldMatrix = mOwner->GetWorldMatrix();
+    mTargetWorldMatrix.transform( mTargetLocalMatrix );
+
+    BLMatrix2D::invert( mTargetInverseWorldMatrix, mTargetWorldMatrix );
+
+    for( uint32 i = 0; i < mChart.inbetweenBuffer.size(); i++ )
+    {
+        FInbetweenerInbetween* inbetween = &mChart.inbetweenBuffer[i];
+
+        inbetween->matrix.reset();
+        inbetween->matrix.translate( translationX, translationY );
+        inbetween->matrix.rotate( rotation );
+
+        translationX += stepTranslationX;
+        translationY += stepTranslationY;
+        rotation += stepRotation;
+    }
+}
+
+void
 FOdysseyVectorTagInbetweener::MakeGrid()
 {
     ::ULIS::FRectD bbox = mOwner->GetBBox( false );
@@ -346,6 +509,16 @@ FOdysseyVectorTagInbetweener::MakeGrid()
     double stepy = bbox.h / mNumCellY;
     uint32 numVertexX = mNumCellX + 1;
     uint32 numVertexY = mNumCellY + 1;
+
+    mTargetTranslationX = 0.0f;
+    mTargetTranslationY = 0.0f;
+    mTargetScalingX     = 1.0f;
+    mTargetScalingY     = 1.0f;
+    mTargetRotation     = 0.0f;
+
+    UpdateMatrix();
+
+    //mGridBBox = bbox;
 
     mGridPointBuffer.resize( numVertexX * numVertexY );
     mUBinomialCoefficientBuffer.resize( mGridPointBuffer.size() );
@@ -360,8 +533,9 @@ FOdysseyVectorTagInbetweener::MakeGrid()
         {
             uint32 offset = ( i * numVertexX ) + j;
 
-            mGridPointBuffer[offset].sourcePosition = ::ULIS::FVec2D( x, y );
-            mGridPointBuffer[offset].targetPosition = mGridPointBuffer[offset].sourcePosition;
+            mGridPointBuffer[offset].Init( this );
+            mGridPointBuffer[offset].SetSourcePosition( x, y );
+            mGridPointBuffer[offset].mTargetPosition = mGridPointBuffer[offset].mSourcePosition;
 
             mGridPointBuffer[offset].u = std::clamp<double>( ( x - bbox.x ) / bbox.w, 0.0f, 1.0f );
             mGridPointBuffer[offset].v = std::clamp<double>( ( y - bbox.y ) / bbox.h, 0.0f, 1.0f );
@@ -380,11 +554,12 @@ FOdysseyVectorTagInbetweener::MakeGrid()
         {
             uint32 vertexOffset = ( i * numVertexX ) + j;
             uint32 cellOffset   = ( i * mNumCellX  ) + j;
+            FInbetweenerGridPoint** gridPoint = mGridCellBuffer[cellOffset].GetGridPoints();
 
-            mGridCellBuffer[cellOffset].point[0] = &mGridPointBuffer[vertexOffset];
-            mGridCellBuffer[cellOffset].point[1] = &mGridPointBuffer[vertexOffset+1];
-            mGridCellBuffer[cellOffset].point[2] = &mGridPointBuffer[vertexOffset+1+numVertexX];
-            mGridCellBuffer[cellOffset].point[3] = &mGridPointBuffer[vertexOffset+numVertexX];
+            gridPoint[0] = &mGridPointBuffer[vertexOffset];
+            gridPoint[1] = &mGridPointBuffer[vertexOffset+1];
+            gridPoint[2] = &mGridPointBuffer[vertexOffset+1+numVertexX];
+            gridPoint[3] = &mGridPointBuffer[vertexOffset+numVertexX];
         }
     }
 
@@ -493,15 +668,15 @@ FOdysseyVectorTagInbetweener::InterpolateInbetween( uint32 iInbetweenIndex )
 {
     ::ULIS::FRectD bbox = mOwner->GetBBox( false );
 
-    for( FInbetweenerPoint& point : mGridPointBuffer )
+    for( FInbetweenerGridPoint& point : mGridPointBuffer )
     {
-        ::ULIS::FVec2D diff = ( point.targetPosition - point.sourcePosition );
+        ::ULIS::FVec2D diff = ( point.mTargetPosition - point.mSourcePosition );
         ::ULIS::FVec2D step = diff * mChart.inbetweenBuffer[iInbetweenIndex].spacing;
 
-        point.motionPosition = point.sourcePosition + step;
+        point.mMotionPosition = point.mSourcePosition + step;
 
-        point.u = ( point.motionPosition.x - bbox.x ) / bbox.w;
-        point.v = ( point.motionPosition.y - bbox.y ) / bbox.h;
+        point.u = ( point.mMotionPosition.x - bbox.x ) / bbox.w;
+        point.v = ( point.mMotionPosition.y - bbox.y ) / bbox.h;
     }
 
     // deform the path according to grid geometry
@@ -608,7 +783,11 @@ void
 FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iInbetweenIndex
                                                 , BLContext* iBLContext )
 {
-    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
+    //BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
+
+    iBLContext->save();
+
+    //if( )
 
     for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
     {
@@ -621,14 +800,14 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iInbetweenIndex
                                                        , interpolatedCubicSegment.mInterpolatedHandle[0]
                                                        , interpolatedCubicSegment.mInterpolatedHandle[1]
                                                        , interpolatedCubicSegment.mInterpolatedVertex[1] };
-            BLPoint pt[4] = { worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[0]->mIndex].x
-                                                  , pointPositionBuffer[interpolatedPoint[0]->mIndex].y )
-                            , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[1]->mIndex].x
-                                                  , pointPositionBuffer[interpolatedPoint[1]->mIndex].y )
-                            , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[2]->mIndex].x
-                                                  , pointPositionBuffer[interpolatedPoint[2]->mIndex].y )
-                            , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[3]->mIndex].x
-                                                  , pointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
+            BLPoint pt[4] = { mTargetWorldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[0]->mIndex].x
+                                                         , pointPositionBuffer[interpolatedPoint[0]->mIndex].y )
+                            , mTargetWorldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[1]->mIndex].x
+                                                         , pointPositionBuffer[interpolatedPoint[1]->mIndex].y )
+                            , mTargetWorldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[2]->mIndex].x
+                                                         , pointPositionBuffer[interpolatedPoint[2]->mIndex].y )
+                            , mTargetWorldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[3]->mIndex].x
+                                                         , pointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
             BLPath path;
 
 
@@ -640,6 +819,8 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iInbetweenIndex
             iBLContext->strokePath( path );
         }
     }
+
+    iBLContext->restore();
 }
 
 void
@@ -702,13 +883,13 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
     }
 }
 
-std::vector<FInbetweenerCell>&
+std::vector<FInbetweenerGridCell>&
 FOdysseyVectorTagInbetweener::GetGridCellBuffer()
 {
     return mGridCellBuffer;
 }
 
-std::vector<FInbetweenerPoint>&
+std::vector<FInbetweenerGridPoint>&
 FOdysseyVectorTagInbetweener::GetGridPointBuffer()
 {
     return mGridPointBuffer;

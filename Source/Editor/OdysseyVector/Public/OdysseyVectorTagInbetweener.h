@@ -16,6 +16,7 @@ class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;
 class FOdysseyVectorSharedEnv;
+class FOdysseyVectorTagInbetweener;
 
 UENUM()
 enum class eInbetweenerGridType : uint8
@@ -103,6 +104,7 @@ class FInterpolatedPath
 struct FInbetweenerInbetween
 {
     float spacing;
+    BLMatrix2D matrix;
 };
 
 struct FInbetweenerChart
@@ -110,17 +112,39 @@ struct FInbetweenerChart
     std::vector<FInbetweenerInbetween> inbetweenBuffer;
 };
 
-struct FInbetweenerPoint
+class ODYSSEYVECTOR_API FInbetweenerGridPoint
 {
-    ::ULIS::FVec2D sourcePosition;
-    ::ULIS::FVec2D motionPosition;
-    ::ULIS::FVec2D targetPosition;
-    double u, v;
+    public:
+        virtual ~FInbetweenerGridPoint(){};
+        FInbetweenerGridPoint( );
+
+        void SetSourcePosition( double iX, double iY );
+        void SetTargetPosition( double iX, double iY );
+        const ::ULIS::FVec2D& GetSourcePosition();
+        const ::ULIS::FVec2D& GetTargetPosition();
+
+        friend class FOdysseyVectorTagInbetweener;
+
+    private: 
+        void Init( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+
+    private:
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        ::ULIS::FVec2D mSourcePosition;
+        ::ULIS::FVec2D mMotionPosition;
+        ::ULIS::FVec2D mTargetPosition;
+        double u, v;
 };
 
-struct FInbetweenerCell
+class ODYSSEYVECTOR_API FInbetweenerGridCell
 {
-    FInbetweenerPoint* point[4];
+    public:
+        FInbetweenerGridPoint** GetGridPoints();
+
+        friend class FOdysseyVectorTagInbetweener;
+
+    private:
+        FInbetweenerGridPoint* mPoint[4];
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
@@ -156,8 +180,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void Interpolate();
         void DrawPathsInbetween( uint32 iInbetweenIndex
                                , BLContext* iBLContext );
-        std::vector<FInbetweenerCell>& GetGridCellBuffer();
-        std::vector<FInbetweenerPoint>& GetGridPointBuffer();
+        std::vector<FInbetweenerGridCell>& GetGridCellBuffer();
+        std::vector<FInbetweenerGridPoint>& GetGridPointBuffer();
         uint32 GetInbetweenCount();
         FInbetweenerChart& GetChart();
         void MoveInbetween( FInbetweenerInbetween* iInbetween
@@ -176,44 +200,55 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
         virtual void Update( uint32 iUpdateFlags ) override;
         void Commit();
+        virtual void UpdateMatrix() override;
+        void Translate( double iX, double iY );
+        void Rotate( double iAngle );
+        void Scale( double iX, double iY );
+        ::ULIS::FRectD GetTargetGridBBox( bool iWorld );
+        BLMatrix2D& GetTargetWorldMatrix();
+        BLMatrix2D& GetTargetInverseWorldMatrix();
+        void Invalidate( uint64 iInvalidationFlags );
 
     protected:
-        void DrawGrid( BLContext* iBLContext
-                     , const ::ULIS::FRectD& iInvalidationArea
-                     , double iAncestorsOpacity
-                     , uint64 iDrawingFlags );
-        void DrawPaths( BLContext* iBLContext
-                      , const ::ULIS::FRectD& iInvalidationArea
-                      , double iAncestorsOpacity
-                      , uint64 iDrawingFlags );
         void UpdateAnimationCells( uint32 iInbetweenCount );
-
+        void UpdateGridBBox();
         void FFDComputeBinomialCoefficients();
         ::ULIS::FVec2D FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint );
         void FFDDeformPaths( uint32 iPositionIndex );
         void InterpolateInbetween( uint32 iInbetweenIndex );
         void Reset( bool iResetGridShape );
         void AllocBuffers();
-        void Invalidate( uint64 iInvalidationFlags );
 
-    protected:
+
+    public:
         static const uint64 INVALIDATE_MAP        = ( 1LL << 0 );
         static const uint64 INVALIDATE_BUFFERS    = ( 1LL << 1 );
         static const uint64 INVALIDATE_SPACING    = ( 1LL << 2 );
         static const uint64 INVALIDATE_CELLS      = ( 1LL << 3 );
+        static const uint64 INVALIDATE_BBOX       = ( 1LL << 4 );
         static const uint64 INVALIDATE_ALL        = ( INVALIDATE_MAP
                                                     | INVALIDATE_BUFFERS
                                                     | INVALIDATE_SPACING
-                                                    | INVALIDATE_CELLS );
+                                                    | INVALIDATE_CELLS
+                                                    | INVALIDATE_BBOX );
 
     protected:
+        double mTargetTranslationX;
+        double mTargetTranslationY;
+        double mTargetRotation;
+        double mTargetScalingX;
+        double mTargetScalingY;
+        BLMatrix2D mTargetLocalMatrix;
+        BLMatrix2D mTargetWorldMatrix;
+        BLMatrix2D mTargetInverseWorldMatrix;
         FOdysseyVectorSharedEnv* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
-        std::vector<FInbetweenerPoint> mGridPointBuffer;
+        std::vector<FInbetweenerGridPoint> mGridPointBuffer;
         std::vector<double> mUBinomialCoefficientBuffer;
         std::vector<double> mVBinomialCoefficientBuffer;
-        std::vector<FInbetweenerCell> mGridCellBuffer;
+        std::vector<FInbetweenerGridCell> mGridCellBuffer;
         eInbetweenerGridType mGridType;
+        ::ULIS::FRectD mTargetGridBBox;
         FInbetweenerChart mChart;
         uint32 mNumCellX;
         uint32 mNumCellY;

@@ -87,7 +87,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
+    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
+      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
     {
         mPickingMode   = ePathPickingMode::SegmentHandle;
         mPickingFlags  = FOdysseyVectorPath::PICK_HANDLE_SEGMENT
@@ -132,6 +133,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGrou
     // the same in the KeyDown event even though we could use 
     // FSlateApplication::Get().GetModifierKeys()
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
+      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand )
       || ( iKey == EKeys::LeftShift   ) || ( iKey == EKeys::RightShift   )
       || ( iKey == EKeys::LeftAlt     ) || ( iKey == EKeys::RightAlt     ) )
     {

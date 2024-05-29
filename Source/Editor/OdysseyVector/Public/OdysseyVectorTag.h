@@ -33,6 +33,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
         virtual void Update( uint32 iUpdateFlags ) = 0;
         virtual void Added() = 0;
         virtual void Removed() = 0;
+        virtual void UpdateMatrix() = 0;
 
         FOdysseyVectorObject* GetOwner();
 

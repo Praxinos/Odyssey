@@ -11,14 +11,14 @@ FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInb
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
+        std::vector<FInbetweenerGridPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
 
-        for( FInbetweenerPoint& point : gridPointbuffer )
+        for( FInbetweenerGridPoint& point : gridPointbuffer )
         {
-            double sourceX = point.sourcePosition.x;
-            double sourceY = point.sourcePosition.y;
-            double targetX = point.targetPosition.x;
-            double targetY = point.targetPosition.y;
+            double sourceX = point.GetSourcePosition().x;
+            double sourceY = point.GetSourcePosition().y;
+            double targetX = point.GetTargetPosition().x;
+            double targetY = point.GetTargetPosition().y;
 
             Ar << sourceX;
             Ar << sourceY;

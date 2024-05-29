@@ -90,7 +90,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVecto
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
+    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
+      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
     {
         mShowControls = true;
 
@@ -107,7 +108,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorG
 {
     uint64 retFlags = 0;
 
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
+    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
+      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
     {
         retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }

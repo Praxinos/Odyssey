@@ -119,10 +119,14 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                 BLPoint localDiff = selectedObject->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
                                                                                         , iPointInTexture.deltaPosition.Y );
 
-                for( FInbetweenerPoint* point : mPickedPointArray )
+                for( FInbetweenerGridPoint* gridPoint : mPickedPointArray )
                 {
-                    point->targetPosition.x += localDiff.x;
-                    point->targetPosition.y += localDiff.y;
+                    ::ULIS::FVec2D targetPosition = gridPoint->GetTargetPosition();
+
+                    targetPosition.x += localDiff.x;
+                    targetPosition.y += localDiff.y;
+
+                    gridPoint->SetTargetPosition( targetPosition.x, targetPosition.y );
                 }
 
                 // update

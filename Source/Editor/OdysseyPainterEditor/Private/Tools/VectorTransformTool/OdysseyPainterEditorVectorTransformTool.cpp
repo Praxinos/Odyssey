@@ -8,6 +8,10 @@
 #include "OdysseyMediaVector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 
+#include "OdysseyVectorTag.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorObject.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 #ifndef M_PI
@@ -394,6 +398,83 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         pivot.x = selectionBox.rect.x + spacePivot.x;
         pivot.y = selectionBox.rect.y + spacePivot.y;
     }
+
+    if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
+                                    , pivot.y - selectionBox.rect.y );
+
+        // run lambda recursively on altered objects
+        iEngine->Traverse
+        ( iScene
+        , 0
+        , [ iScene
+          , iEngine
+          , &spaceMatrix
+          , &inverseSpaceMatrix
+          , &translateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
+          {
+              if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
+              {
+                  FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+                  if( tag )
+                  {
+                      FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                      double translationX;
+                      double translationY;
+                      double rotation;
+                      double scalingX;
+                      double scalingY;
+                      BLMatrix2D tagSpaceMatrix;
+                      BLMatrix2D tagTranslateMatrix;
+                      BLMatrix2D tagLocalMatrix;
+                      BLMatrix2D tagWorldMatrix = inbetweenerTag->GetTargetWorldMatrix();
+                      BLMatrix2D parentInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+
+                      // transfer object in "Selection Space" coordinates system
+                      FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
+
+                      // translate the object (local to the "Selection Space" coordinates system)
+                      FOdysseyVector::MatrixMultiply( translateMatrix, tagSpaceMatrix, tagTranslateMatrix );
+
+                      // transfer the object back to world coordinates system
+                      FOdysseyVector::MatrixMultiply( spaceMatrix, tagTranslateMatrix, tagWorldMatrix );
+
+                      // Convert the object to its parent coordinate system, i.e its local coordinates system.
+                      FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, tagWorldMatrix, tagLocalMatrix );
+
+                      // Extract the local transformations
+                      FOdysseyVector::ExtractTransformations( tagLocalMatrix
+                                                            , &translationX
+                                                            , &translationY
+                                                            , &rotation // in radians
+                                                            , &scalingX
+                                                            , &scalingY );
+
+                      // Apply the local transformations
+                      inbetweenerTag->Translate( translationX, translationY );
+                      inbetweenerTag->Rotate( rotation / M_PI * 180 ); // in degrees
+                      inbetweenerTag->Scale( scalingX, scalingY );
+
+                      inbetweenerTag->UpdateMatrix();
+
+                      return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  }
+              }
+
+              return 0;
+          } );
+
+        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+
+        // update the selection box with the newly modified matrices
+        iEngine->ResetHUD();
+
+        // replace pivot correctly.
+        pivot.x = selectionBox.rect.x + spacePivot.x;
+        pivot.y = selectionBox.rect.y + spacePivot.y;
+    }
 }
 
 double
@@ -742,10 +823,10 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
         FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-        uint32 hudFlags = mTransformHUD->GetFlags();
         FVector2D currCursorPos = FSlateApplication::Get().GetCursorPos();
         FVector2D deltaPos = currCursorPos - mScreenMouseAtDown;
+        FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+        uint32 hudFlags = mTransformHUD->GetFlags();
 
         // What do we consider dragging ? We have to move at least a few pixels, otherwise we wouldn't
         // be able to differentiate an actual dragging from a simple down-up click, especially

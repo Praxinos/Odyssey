@@ -33,16 +33,17 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
     iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
     iBLContext->setStrokeWidth( 1.0f );
 
-    for( FInbetweenerCell& cell : iInbetweenerTag->GetGridCellBuffer() )
+    for( FInbetweenerGridCell& cell : iInbetweenerTag->GetGridCellBuffer() )
     {
-        BLPoint pt[4] = { worldMatrix.mapPoint( cell.point[0]->targetPosition.x
-                                              , cell.point[0]->targetPosition.y )
-                        , worldMatrix.mapPoint( cell.point[1]->targetPosition.x
-                                              , cell.point[1]->targetPosition.y )
-                        , worldMatrix.mapPoint( cell.point[2]->targetPosition.x
-                                              , cell.point[2]->targetPosition.y )
-                        , worldMatrix.mapPoint( cell.point[3]->targetPosition.x
-                                              , cell.point[3]->targetPosition.y ) };
+        FInbetweenerGridPoint** gridPoint = cell.GetGridPoints();
+        BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetTargetPosition().x
+                                              , gridPoint[0]->GetTargetPosition().y )
+                        , worldMatrix.mapPoint( gridPoint[1]->GetTargetPosition().x
+                                              , gridPoint[1]->GetTargetPosition().y )
+                        , worldMatrix.mapPoint( gridPoint[2]->GetTargetPosition().x
+                                              , gridPoint[2]->GetTargetPosition().y )
+                        , worldMatrix.mapPoint( gridPoint[3]->GetTargetPosition().x
+                                              , gridPoint[3]->GetTargetPosition().y ) };
 
         iBLContext->strokeLine( pt[0], pt[1] );
         iBLContext->strokeLine( pt[1], pt[2] );
@@ -97,14 +98,15 @@ FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FOdysseyVectorTagI
                                                             , double iWorldX
                                                             , double iWorldY
                                                             , double iRadius
-                                                            , std::vector<FInbetweenerPoint*>& oPointArray
+                                                            , std::vector<FInbetweenerGridPoint*>& oPointArray
                                                             , std::vector<double>& oWorldDistanceArray )
 {
     BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
 
-    for( FInbetweenerPoint& point : iInbetweenerTag->GetGridPointBuffer() )
+    for( FInbetweenerGridPoint& point : iInbetweenerTag->GetGridPointBuffer() )
     {
-        BLPoint pt = worldMatrix.mapPoint( point.targetPosition.x, point.targetPosition.y );
+        BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
+                                         , point.GetTargetPosition().y );
         ::ULIS::FVec2D vec = ::ULIS::FVec2D( pt.x - iWorldX, pt.y - iWorldY );
         double distance = vec.Distance();
 
