@@ -9,19 +9,25 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDLine
-class ODYSSEYWIDGETS_API FOdysseyHUDLine : public FOdysseyHUDElement
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDLine : public FOdysseyHUDElement
 {
 public:
     // Destructor
     virtual ~FOdysseyHUDLine();
 
     //Constructor
-    FOdysseyHUDLine( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint);
+    FOdysseyHUDLine(const FVector2D& iStartPoint, const FVector2D& iEndPoint);
 
 public:
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
+    void SetStartPoint(const FVector2D& iPoint);
+    void SetEndPoint(const FVector2D& iPoint);
+    const FVector2D& GetStartPoint() const;
+    const FVector2D& GetEndPoint() const;
+
+private:
     FVector2D mStartPoint;
-    FVector2D mFinishPoint;
+    FVector2D mEndPoint;
 };

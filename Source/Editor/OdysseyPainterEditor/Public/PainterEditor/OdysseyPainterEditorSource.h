@@ -31,6 +31,8 @@ public:
 public:
     // Getters
     virtual const FGuid& Id() const = 0;
+    virtual int Width() const = 0;
+    virtual int Height() const  = 0;
     virtual UTexture* DisplayTexture() const = 0;
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() = 0;
     virtual FOdysseyMediaProvider GetCurrentMediaProvider() = 0;

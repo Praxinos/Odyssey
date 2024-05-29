@@ -42,11 +42,22 @@ public:
     TSharedPtr<FUICommandInfo> Discord;
 
 
-    //Tools Actions
+    //Uncategorized Actions
 
     /** Action for clearing the current layer */
     TSharedPtr<FUICommandInfo> ClearCurrentLayer;
 
+    /** Action for clearing the current selection block, if it exists */
+    TSharedPtr<FUICommandInfo> ClearCurrentSelection;
+
+    /** Action for copying the current selection block, if it exists */
+    //TSharedPtr<FUICommandInfo> CopyCurrentSelection;
+
+    /** Action for pasting the current selection in the current layer */
+    //TSharedPtr<FUICommandInfo> PasteCurrentSelection;
+
+    /** Action for pasting the current selection in a new layer */
+    //TSharedPtr<FUICommandInfo> PasteCurrentSelectionInNewLayer;
 
     //Viewport Actions
 

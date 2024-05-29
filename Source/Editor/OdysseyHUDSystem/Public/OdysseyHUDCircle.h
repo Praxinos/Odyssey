@@ -3,25 +3,27 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include "OdysseyHUDElement.h"
 
 /////////////////////////////////////////////////////
-// FOdysseyHUDRectangle
-class ODYSSEYWIDGETS_API FOdysseyHUDRectangle : public FOdysseyHUDElement
+// FOdysseyHUDCircle
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDCircle : public FOdysseyHUDElement
 {
 public:
     // Destructor
-    virtual ~FOdysseyHUDRectangle();
+    virtual ~FOdysseyHUDCircle();
 
     //Constructor
-    FOdysseyHUDRectangle( FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint);
+    FOdysseyHUDCircle( const FVector2D& iCenterPoint, float iRadius);
 
 public:
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
-    FVector2D mTopLeftPoint;
-    FVector2D mBottomRightPoint;
+    void SetCenter(const FVector2D& iCenterPoint);
+    void SetRadius(float iRadius);
+
+private:
+    FVector2D mCenterPoint;
+    float mRadius;
 };

@@ -6,19 +6,12 @@
 #include "CoreMinimal.h"
 #include "OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
+#include "RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "OdysseyPainterEditorRasterTransformTool.generated.h"
 
 class FOdysseyHUDPolygon;
 class FOdysseyHUDHandle;
-class UOdysseyPainterEditorRasterSelection;
-
-UENUM()
-enum class EOdysseySelectionShape : uint8
-{
-    Rectangle,
-    Freehand,
-    Ellipse
-};
+class UOdysseyPainterEditorRasterSelectionTool;
 
 enum class EOdysseyTransformCapture
 {
@@ -55,7 +48,6 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
-    virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
     virtual FText GetTooltip() const override;
@@ -70,8 +62,6 @@ private:
 
     void CreateTransformBlockFromSelectionBlock();
     ::ULIS::FRectI GetTransformAreaBoundingRect();
-
-    TArray<::ULIS::FRectI> GetTransformAreaAsScanlines(); //Returns rectangles with height of 1 that cover the entire transform area. Useful for freehand selection
     
     void BlendTransformAreaToPaintBlock();
 
@@ -88,33 +78,36 @@ private:
     void OnBottomRightHandleDragged();
     void OnBottomLeftHandleDragged();
     void OnPivotHandleDragged();
+    
+    void OnRasterSelectionChanged();
+
+    void UpdateRasterSelection();
+    void ResetRasterSelection();
 
 public:
-    UPROPERTY(EditAnywhere, Category = "Selection Shape")
-    EOdysseySelectionShape SelectionShape;
-
-    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    UPROPERTY(EditAnywhere, Category = "Transform options")
     bool Perspective = false;
 
-    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    UPROPERTY(EditAnywhere, Category = "Transform options")
     bool Uniform = false;
 
 private: 
-    UOdysseyPainterEditorRasterSelection* mSelection;
-
     FOdysseyPaintEngine mPaintEngine;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mOriginalTransformBlock; //The block we're transforming, without any deformation
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
     FOdysseyRasterBlockMutator mRasterMutator;
 
     EOdysseyTransformCapture mTransformCaptureMode;
+    TSharedPtr<FOdysseyHUDElement> mTransformHUD;
     TSharedPtr<FOdysseyHUDPolygon> mTransformArea;
     TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
-    FVector2D mPivot;
 
     int mLastReferenceRotation;
     FVector2D mMouseLastReferencePoint;
 
-    int mRotation;
-
     EMouseCursor::Type mMouseCursor;
+
+    TSharedPtr<::ULIS::FBlock> mSelectionBlock;
+    TSharedPtr<::ULIS::FBlock> mTransformSelectionBlock;
+    ::ULIS::FRectI mSelectionBoundingBox;
 };

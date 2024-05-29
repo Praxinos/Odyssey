@@ -11,7 +11,7 @@
 
 class FOdysseyHUDElement;
 
-UENUM()
+/* UENUM()
 enum class EOdysseyDrawingPrecision : uint8
 {
     kRaw  UMETA(DisplayName = "Raw"),
@@ -25,7 +25,7 @@ struct FOdysseyShapeDrawOptions
     ::ULIS::FColor mColor = ::ULIS::FColor::FromRGBA8( 0, 0, 0, 255);
     bool mFilled = false;
     EOdysseyDrawingPrecision mPrecision = EOdysseyDrawingPrecision::kRaw;
-};
+}; */
 
 UENUM()
 enum class EOdysseyShape : uint8
@@ -73,7 +73,7 @@ public:
     virtual float GetStep() const;
     virtual bool AbortShape();
 
-    virtual void Draw( ::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions ); //Draw this shape onto a block
+    //virtual void Draw( ::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions ); //Draw this shape onto a block
 
 public:
     // Getters

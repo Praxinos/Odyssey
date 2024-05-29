@@ -188,6 +188,8 @@ private:
     void OnShapePathReset();
 
     void OnPaintEngineBlockChanged();
+    
+    void OnRasterSelectionChanged();
 
     float AdaptShapeStep(float iStep);
 
@@ -237,4 +239,6 @@ protected:
     FAdaptShapePoints                   mAdaptShapePointsDelegate;
     FSimpleMulticastDelegate            mOnBrushChanged;
     FSimpleMulticastDelegate            mOnShapeChanged;
+
+    TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 };

@@ -20,7 +20,7 @@ public class OdysseyShapes : ModuleRules
                 "SlateCore",
                 "OdysseyCore",
                 "OdysseyStyle",
-                "OdysseyWidgets",
+                "OdysseyHUDSystem",
                 "ULIS",
                 "ULISLoader"
             }

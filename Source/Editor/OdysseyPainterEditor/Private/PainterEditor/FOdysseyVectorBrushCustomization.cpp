@@ -4,8 +4,6 @@
 #include "IContentBrowserSingleton.h" // for FAssetPickerConfig
 #include "PropertyCustomizationHelpers.h" // for SObjectPropertyEntryBox
 
-#include "SlateBasics.h"
-
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 void

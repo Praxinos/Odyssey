@@ -45,7 +45,7 @@ public:
 
     FAdaptStep& AdaptStepDelegate() { return mAdaptStepDelegate; }
 
-    virtual void Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions) override; //Draw this shape onto a block
+    //virtual void Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions) override; //Draw this shape onto a block
 
 private:
     void CommitLine();
@@ -70,4 +70,6 @@ protected:
 
 private:
     TSharedPtr<FOdysseyHUDLine> mLine;
+    TSharedPtr<FOdysseyHUDHandle> mHandleStart;
+    TSharedPtr<FOdysseyHUDHandle> mHandleEnd;
 };

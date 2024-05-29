@@ -4,11 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include <ULIS>
-#include "ULISLoaderModule.h"
 
-class FOdysseySurfaceTexture2DEditable;
-
+class FOdysseyHUDElement;
 class ODYSSEYHUDSYSTEM_API FOdysseyHUDSystem 
 {
 public:
@@ -21,31 +18,19 @@ public:
         int32 mTextureWidth;
         int32 mTextureHeight;
     };
-    
-    DECLARE_DELEGATE_OneParam(FOnDrawHUD, const FDrawHUDParams&)
 
 public:
     // Construction / Destruction
     ~FOdysseyHUDSystem();
     FOdysseyHUDSystem();
 
-private:
-    // Setters (private)
-    void SetHUDBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
+public:
+    void AddElement(TSharedPtr<FOdysseyHUDElement> iElement);
+    void RemoveElement(TSharedPtr<FOdysseyHUDElement> iElement);
 
 public:
-    // Getters
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetHUDBlock() const;
-    FOdysseySurfaceTexture2DEditable* GetHUDSurface() const;
-
-public:
-    void RebuildHUDSurface(FVector2D iSize);
-    void ClearHUDSurface();
     void DrawHUD( const FDrawHUDParams& iParams );
-    FOnDrawHUD& OnDrawHUD();
 
 private:
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mHUDBlock; // Holds the block in which we draw the HUD
-    FOdysseySurfaceTexture2DEditable*    mHUDSurface;
-    FOnDrawHUD mOnDrawHUD;
+    TArray<TSharedPtr<FOdysseyHUDElement>> mElements;
 };

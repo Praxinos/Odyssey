@@ -2,8 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LineShape/OdysseyLineShape.h"
-#include "HUDViewportElement/Elements/OdysseyHUDHandle.h"
-#include "HUDViewportElement/Elements/OdysseyHUDLine.h"
+#include "OdysseyHUDHandle.h"
+#include "OdysseyHUDLine.h"
 #include <ULIS>
 
 //--------------------------------------------------------------------------------------
@@ -31,17 +31,17 @@ UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey&
         mHasStrokeBegun = true;
         mRawStroke.Empty();
 
-        mLine = MakeShared<FOdysseyHUDLine>(FName("Line"), FVector2D(iPointInTexture.x, iPointInTexture.y), FVector2D(iPointInTexture.x, iPointInTexture.y));
+        mLine = MakeShared<FOdysseyHUDLine>(iPointInTexture, iPointInTexture);
         mHUD->AddElement(mLine);
 
-        TSharedPtr<FOdysseyHUDHandle> handleStart = MakeShared<FOdysseyHUDHandle>(FName("handleStart"), &(mLine->mStartPoint));
-        TSharedPtr<FOdysseyHUDHandle> handleFinish = MakeShared<FOdysseyHUDHandle>(FName("handleFinish"), &(mLine->mFinishPoint));
+        mHandleStart = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
+        mHandleEnd = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
 
-        handleStart->IsInteractable(false);
-        handleFinish->IsInteractable(false);
+        mHandleStart->IsInteractable(false);
+        mHandleEnd->IsInteractable(false);
 
-        mLine->AddElement(handleFinish);
-        mLine->AddElement(handleStart);
+        mLine->AddElement(mHandleStart);
+        mLine->AddElement(mHandleEnd);
         return true;
     }
 
@@ -73,15 +73,16 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
         FOdysseyPoint point = iPointInTexture;
         if( Uniform )
         {
-            int shiftX = FMath::Abs( iPointInTexture.x - mLine->mStartPoint.X);
-            int shiftY = FMath::Abs( iPointInTexture.y - mLine->mStartPoint.Y);
+            int shiftX = FMath::Abs( iPointInTexture.x - mLine->GetStartPoint().X);
+            int shiftY = FMath::Abs( iPointInTexture.y - mLine->GetStartPoint().Y);
 
             if( shiftX > shiftY )
-                point.y = mLine->mStartPoint.Y;
+                point.y = mLine->GetStartPoint().Y;
             else
-                point.x = mLine->mStartPoint.X;
+                point.x = mLine->GetStartPoint().X;
         }
-        mLine->mFinishPoint = FVector2D(point.x, point.y);
+        mLine->SetEndPoint(point);
+        mHandleEnd->SetPosition(point);
 
         UOdysseyShape::OnMouseDrag(iPointInTexture);
     }
@@ -105,7 +106,7 @@ UOdysseyLineShape::OnKeyUp(const FKey& iKey)
 }
 
 
-void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+/*void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
 {
     if (!iBlock)
         return;
@@ -114,21 +115,21 @@ void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& i
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
 
     if (iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw)
-        ctx.DrawLine(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
+        ctx.DrawLine(*(iBlock), ::ULIS::FVec2I(mLine->GetStartPoint().X, mLine->GetStartPoint().Y), ::ULIS::FVec2I(mLine->GetEndPoint().X, mLine->GetEndPoint().Y), iOptions.mColor);
     else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kAA)
-        ctx.DrawLineAA(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
+        ctx.DrawLineAA(*(iBlock), ::ULIS::FVec2I(mLine->GetStartPoint().X, mLine->GetStartPoint().Y), ::ULIS::FVec2I(mLine->GetEndPoint().X, mLine->GetEndPoint().Y), iOptions.mColor);
     else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
-        ctx.DrawLineSP(*(iBlock), ::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), iOptions.mColor);
+        ctx.DrawLineSP(*(iBlock), ::ULIS::FVec2I(mLine->GetStartPoint().X, mLine->GetStartPoint().Y), ::ULIS::FVec2I(mLine->GetEndPoint().X, mLine->GetEndPoint().Y), iOptions.mColor);
 
     ctx.Finish();
-}
+}*/
 
 void UOdysseyLineShape::CommitLine()
 {
     if( mHasStrokeBegun )
     {
         ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        ::ULIS::GenerateLinePoints(::ULIS::FVec2I(mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I(mLine->mFinishPoint.X, mLine->mFinishPoint.Y), pointsArray);
+        ::ULIS::GenerateLinePoints(::ULIS::FVec2I(mLine->GetStartPoint().X, mLine->GetStartPoint().Y), ::ULIS::FVec2I(mLine->GetEndPoint().X, mLine->GetEndPoint().Y), pointsArray);
 
         //Todo ? Compute relative parameters
 

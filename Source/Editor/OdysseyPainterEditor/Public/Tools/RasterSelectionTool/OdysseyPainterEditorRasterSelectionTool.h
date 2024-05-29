@@ -6,26 +6,40 @@
 #include "CoreMinimal.h"
 #include "OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
-#include "OdysseyPainterEditorRasterSelection.generated.h"
+#include "OdysseyMask.h"
+#include "OdysseyPainterEditorRasterSelectionTool.generated.h"
 
 class FOdysseyHUDPolygon;
 
+UENUM()
+enum class EOdysseySelectionShape : uint8
+{
+    Rectangle,
+    Freehand,
+    Ellipse
+};
+
+UENUM()
+enum class EOdysseySelectionState : uint8
+{
+    Normal,
+    Add,
+    Substract
+};
+
 //This is already a tool to prepare for the moment we'll separate transform and selection. When we'll have a "mask" feature in Odyssey
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelection : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelectionTool : public UOdysseyPainterEditorTool
 {
 public:
     GENERATED_BODY()
 
 public:
     // Destructor
-    virtual ~UOdysseyPainterEditorRasterSelection();
+    virtual ~UOdysseyPainterEditorRasterSelectionTool();
 
     //Constructor
-    UOdysseyPainterEditorRasterSelection();
-
-    //For now, we init the selection by sharing the HUD and the editor from the transform. When the selection and the transform will be two separate tools, we won't have to do this anymore
-    void Init( TSharedPtr<FOdysseyHUDElement> iHUD, FOdysseyPainterEditor* iEditor, bool iUniform );
+    UOdysseyPainterEditorRasterSelectionTool();
     
     virtual bool IsActivable() const override;
 
@@ -39,23 +53,36 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
-    bool IsSelectionAreaSet();
-    bool IsInSelectionArea( FVector2D iPoint );
-
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetSelectionBlock();
     ::ULIS::FRectI GetSelectionAreaBoundingRect();
 
     void ClearSelection();
 
+    TArray<::ULIS::FRectI> GetSelectionAreaAsScanlines();
+
 protected:
     bool IsSelectionValid(::ULIS::FRectI iSelectionArea);
     void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
+private:
+    void ConstrainSelectionToEllipse( const FOdysseyPoint& iPointInTexture );
+    void ConstrainSelectionToRectangle(FVector2D iPosition);
+
+
 protected:
-    bool Uniform; // Will become a UProperty when selection will become a tool
-    bool mIsSelectionAreaSet;
-    TSharedPtr<FOdysseyHUDPolygon> mSelectionArea;
+    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    EOdysseySelectionShape SelectionShape;
+
+    EOdysseySelectionState SelectionState;
+
+    UPROPERTY(EditAnywhere, Category = "Selection Shape")
+    bool Uniform;
+
+    TSharedPtr<FOdysseyHUDElement> mSelectionHUD;
+    TSharedPtr<FOdysseyHUDPolygon> mToolSelectionArea;
     FOdysseyPaintEngine mPaintEngine;
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mSelectionBlock;
+
+    FVector2D mDownReference;
 };

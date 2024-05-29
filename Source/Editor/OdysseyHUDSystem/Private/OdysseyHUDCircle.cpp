@@ -11,20 +11,10 @@ FOdysseyHUDCircle::~FOdysseyHUDCircle()
 
 }
 
-FOdysseyHUDCircle::FOdysseyHUDCircle(FName iName, FVector2D iCenterPoint, FVector2D iBorderPoint) :
-    FOdysseyHUDElement(iName)
-{
-    mCenterPoint = iCenterPoint;
-    mBorderPoint = iBorderPoint;
-    mRadius = (int)::ULIS::FMath::Dist(mCenterPoint.X, mCenterPoint.Y, mBorderPoint.X, mBorderPoint.Y);
-}
-
-FOdysseyHUDCircle::FOdysseyHUDCircle(FName iName, FVector2D iCenterPoint, float iRadius) :
-    FOdysseyHUDElement(iName)
+FOdysseyHUDCircle::FOdysseyHUDCircle(const FVector2D& iCenterPoint, float iRadius)
 {
     mCenterPoint = iCenterPoint;
     mRadius = iRadius;
-    mBorderPoint = FVector2D(mCenterPoint.X + iRadius, mCenterPoint.Y);
 }
 
 void
@@ -56,15 +46,13 @@ FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 }
 
 void
-FOdysseyHUDCircle::SetCenter(const FVector2D iCenterPoint)
+FOdysseyHUDCircle::SetCenter(const FVector2D& iCenterPoint)
 {
     mCenterPoint = iCenterPoint;
-    mBorderPoint = FVector2D(mCenterPoint.X + mRadius, mCenterPoint.Y);
 }
 
 void
 FOdysseyHUDCircle::SetRadius(float iRadius)
 {
     mRadius = iRadius;
-    mBorderPoint = FVector2D(mCenterPoint.X + mRadius, mCenterPoint.Y);
 }

@@ -3,31 +3,33 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include "OdysseyHUDElement.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDEllipse
-class ODYSSEYWIDGETS_API FOdysseyHUDEllipse : public FOdysseyHUDElement
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDEllipse : public FOdysseyHUDElement
 {
 public:
     // Destructor
     virtual ~FOdysseyHUDEllipse();
 
     //Constructor
-    FOdysseyHUDEllipse( FName iName, FVector2D iCenterPoint, FVector2D iEndPoint);
-    FOdysseyHUDEllipse( FName iName, FVector2D iCenterPoint, int iEllipseAaxis, int iEllipseBaxis);
+    FOdysseyHUDEllipse( const FVector2D& iCenter, int iXRadius, int iYRadius);
 
 public:
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
-    int GetAAxis();
-    int GetBAxis();
-
 public:
-    FVector2D mCenterPoint;
-    int mEllipseAaxis;
-    int mEllipseBaxis;
-    FVector2D mBorderPoint;
+    void SetCenter(const FVector2D& iCenter);
+    void SetXRadius(int iRadius);
+    void SetYRadius(int iRadius);
+
+    const FVector2D& GetCenter() const;
+    int GetXRadius() const;
+    int GetYRadius() const;
+
+private:
+    FVector2D mCenter;
+    int mXRadius;
+    int mYRadius;
 };

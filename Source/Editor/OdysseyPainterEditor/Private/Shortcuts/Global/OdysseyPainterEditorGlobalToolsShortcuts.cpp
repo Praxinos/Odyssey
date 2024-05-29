@@ -85,6 +85,11 @@ FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FU
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateRasterTransformTool,
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterSelectionTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterSelectionTool()))
+    );
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().ActivateRasterTransformTool,
         FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterTransformTool())),
         FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterTransformTool()))
     );
@@ -204,13 +209,11 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateSelectionTool()
     if (!editor)
         return;
 
-    /* TODO:
     if (CanAction_ActivateTool(editor->GetRasterSelectionTool()))
     {
         Action_ActivateTool(editor->GetRasterSelectionTool());
         return;
     }
-    */
 
     if (CanAction_ActivateTool(editor->GetVectorSelectionTool()))
     {
@@ -371,10 +374,8 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateSelectionTool()
     if (!editor)
         return false;
 
-    /* TODO:
     if (CanAction_ActivateTool(editor->GetRasterSelectionTool()))
         return true;
-    */
 
     if (CanAction_ActivateTool(editor->GetVectorSelectionTool()))
         return true;

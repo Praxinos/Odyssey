@@ -6,6 +6,7 @@
 #include "FreehandShape/Smoothing/OdysseySmoothingAverage.h"
 #include "FreehandShape/Smoothing/OdysseySmoothingPull.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
+#include "OdysseyHUDPolygon.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -93,6 +94,13 @@ UOdysseyFreehandShape::BeginStroke( const FOdysseyPoint& iPoint )
 
     BeginSmoothing();
     BeginInterpolation();
+    
+    if (mDisplayHUD)
+    {
+        mPathHUD = MakeShared<FOdysseyHUDPolygon>();
+        mPathHUD->GetPoints().Add(iPoint);
+        mHUD->AddElement(mPathHUD);
+    }
 
     //Force first point to be drawn
     mOnPathBeginDelegate.Broadcast(iPoint);
@@ -124,7 +132,12 @@ UOdysseyFreehandShape::StrokeTo( const FOdysseyPoint& iPoint )
     TArray<FOdysseyPoint> interpolatedPoints = InterpolateTo(point);
 
     if (interpolatedPoints.Num() > 0)
+    {
+        if (mPathHUD)
+            mPathHUD->GetPoints().Append(interpolatedPoints);
+            
         mOnPathToDelegate.Broadcast(interpolatedPoints);
+    }
         
     return true;
 }
@@ -138,6 +151,8 @@ UOdysseyFreehandShape::EndStroke()
     EndSmoothing();
     EndInterpolation();
 
+    mHUD->EmptyElements();
+    mPathHUD = nullptr;
     mOnPathEndDelegate.Broadcast({ mInterpolatedStroke.Last() });
     mHasStrokeBegun = false;
 
@@ -152,6 +167,9 @@ UOdysseyFreehandShape::AbortShape()
 
     AbortSmoothing();
     AbortInterpolation();
+
+    mHUD->EmptyElements();
+    mPathHUD = nullptr;
 
     mHasStrokeBegun = false;
     
@@ -185,6 +203,12 @@ FOdysseySmoothingOptions&
 UOdysseyFreehandShape::GetSmoothingOptions()
 {
     return SmoothingOptions;
+}
+
+void
+UOdysseyFreehandShape::DisplayHUD(bool iDisplayHUD)
+{
+    mDisplayHUD = iDisplayHUD;
 }
 
 //--------------------------------------------------------------------------------------

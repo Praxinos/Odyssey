@@ -46,6 +46,7 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     , mPaintEngine()
     , mBrushContexts(nullptr)
     , mBaseSize(0)
+    , mShapeHUD(MakeShared<FOdysseyHUDElement>())
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
 
@@ -73,7 +74,7 @@ UOdysseyPainterEditorRasterDrawingTool::CreateShape(FName iName)
 
     shape->AdaptStepDelegate().BindUObject(this, &UOdysseyPainterEditorRasterDrawingTool::AdaptShapeStep);
 
-    shape->SetHUD( mHUD );
+    shape->SetHUD( mShapeHUD );
 
     return shape;
 }
@@ -99,8 +100,16 @@ UOdysseyPainterEditorRasterDrawingTool::Activate()
 void
 UOdysseyPainterEditorRasterDrawingTool::Load()
 {
+    UOdysseyPainterEditorTool::Load();
     //GEditor->OnBlueprintCompiled().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintCompiled);
     FCoreUObjectDelegates::OnObjectsReinstanced.AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced);
+
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnRasterSelectionChanged);
+    if (!rasterSelection.IsEmpty())
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+
+    mHUD->AddElement(rasterSelection.GetHUD());
 
 	/* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
     mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
@@ -113,11 +122,18 @@ void
 UOdysseyPainterEditorRasterDrawingTool::Unload()
 {
 	mPaintEngine.RasterBlock(nullptr);
+    mPaintEngine.SetMaskBlock(nullptr);
+    
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().RemoveAll(this);
+    mHUD->RemoveElement(rasterSelection.GetHUD());
 
 	if ( BrushInstance )
 		BrushInstance->SetBlock(nullptr);
 
     FCoreUObjectDelegates::OnObjectsReinstanced.RemoveAll(this);
+
+    UOdysseyPainterEditorTool::Unload();
 }
 
 bool
@@ -451,8 +467,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPo
     Flush();
     Commit();
 
-    mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mShapeHUD->EmptyElements();
 }
 
 void
@@ -470,8 +485,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapePathAbort()
     //Update immediately the changes
     mPaintEngine.Update(BlendParameters);
 
-    mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mShapeHUD->EmptyElements();
 }
 
 void
@@ -765,6 +779,20 @@ FText
 UOdysseyPainterEditorRasterDrawingTool::GetTooltip() const
 {
     return LOCTEXT("raster-drawing-tool.tooltip", "Drawing Tool");
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::OnRasterSelectionChanged()
+{
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    if (rasterSelection.IsEmpty())
+    {
+        mPaintEngine.SetMaskBlock(nullptr);
+    }
+    else
+    {
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

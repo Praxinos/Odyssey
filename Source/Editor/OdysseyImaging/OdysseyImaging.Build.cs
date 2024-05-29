@@ -27,6 +27,7 @@ public class OdysseyImaging : ModuleRules
                 "OdysseyFile",
                 "OdysseyMaths",
                 "OdysseyVector",
+                "OdysseyHUDSystem",
                 "blend2d",
              }
         );

@@ -38,6 +38,7 @@ UOdysseyPainterEditorRasterEraserTool::UOdysseyPainterEditorRasterEraserTool()
     , mStampBlock(nullptr)
     , mStampBlockMask(nullptr)
     , mBlendParameters(true, EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode::kNormal, Opacity)
+    , mShapeHUD(MakeShared<FOdysseyHUDElement>())
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 
@@ -66,7 +67,7 @@ UOdysseyPainterEditorRasterEraserTool::CreateShape(FName iName)
 
     shape->AdaptStepDelegate().BindUObject(this, &UOdysseyPainterEditorRasterEraserTool::AdaptShapeStep);
 
-    shape->SetHUD( mHUD );
+    shape->SetHUD( mShapeHUD );
 
     return shape;
 }
@@ -110,6 +111,14 @@ UOdysseyPainterEditorRasterEraserTool::Activate()
 void
 UOdysseyPainterEditorRasterEraserTool::Load()
 {
+    UOdysseyPainterEditorTool::Load();
+
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnRasterSelectionChanged);
+    if (!rasterSelection.IsEmpty())
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+    
+    mHUD->AddElement(rasterSelection.GetHUD());
 	/* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
     mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
 
@@ -121,6 +130,13 @@ void
 UOdysseyPainterEditorRasterEraserTool::Unload()
 {
 	mPaintEngine.RasterBlock(nullptr);
+    mPaintEngine.SetMaskBlock(nullptr);
+    
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection.OnChanged().RemoveAll(this);
+    mHUD->RemoveElement(rasterSelection.GetHUD());
+
+    UOdysseyPainterEditorTool::Unload();
 }
 
 bool
@@ -325,8 +341,7 @@ UOdysseyPainterEditorRasterEraserTool::OnShapePathEnd( const FOdysseyPoint& iPoi
     Flush();
     Commit();
 
-    mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mShapeHUD->EmptyElements();
 }
 
 void
@@ -337,8 +352,7 @@ UOdysseyPainterEditorRasterEraserTool::OnShapePathAbort()
     //Update immediately the changes
     mPaintEngine.Update(mBlendParameters);
     
-    mHUD->EmptyHUDElements();
-    mEditor->HUDSystem()->ClearHUDSurface();
+    mShapeHUD->EmptyElements();
 }
 
 void
@@ -432,6 +446,20 @@ FText
 UOdysseyPainterEditorRasterEraserTool::GetTooltip() const
 {
     return LOCTEXT("raster-eraser-tool.tooltip", "Eraser Tool");
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::OnRasterSelectionChanged()
+{
+    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    if (rasterSelection.IsEmpty())
+    {
+        mPaintEngine.SetMaskBlock(nullptr);
+    }
+    else
+    {
+        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

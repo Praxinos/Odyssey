@@ -79,6 +79,8 @@ private:
 
     TSharedPtr<SWidget> CreateContextMenu(TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyPoint& iPointInTexture);
     void IncludeColor( ::ULIS::FColor iColor );
+    
+    void OnRasterSelectionChanged();
 
 public:
     UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool)

@@ -81,6 +81,8 @@ private:
     void OnShapePathAbort();
     
     void OnShapePathReset();
+    
+    void OnRasterSelectionChanged();
 
     float AdaptShapeStep(float iStep);
 
@@ -123,4 +125,6 @@ protected:
     FSimpleMulticastDelegate            mOnShapeChanged;
     FSimpleMulticastDelegate            mOnSizeChanged;
     FSimpleMulticastDelegate            mOnOpacityChanged;
+
+    TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 };

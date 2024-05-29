@@ -9,14 +9,14 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDPolygon
-class ODYSSEYWIDGETS_API FOdysseyHUDPolygon : public FOdysseyHUDElement
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDPolygon : public FOdysseyHUDElement
 {
 public:
     // Destructor
     virtual ~FOdysseyHUDPolygon();
 
     //Constructor
-    FOdysseyHUDPolygon( FName iName);
+    FOdysseyHUDPolygon();
 
 //FOdysseyHUDElement overrides
 public:

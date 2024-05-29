@@ -39,6 +39,18 @@ FOdysseyTextureEditorSource::Id() const
 	return StaticId();
 }
 
+int
+FOdysseyTextureEditorSource::Width() const
+{
+	return mTexture->Source.GetSizeX();
+}
+
+int
+FOdysseyTextureEditorSource::Height() const
+{
+	return mTexture->Source.GetSizeY();
+}
+
 void
 FOdysseyTextureEditorSource::Activate()
 {

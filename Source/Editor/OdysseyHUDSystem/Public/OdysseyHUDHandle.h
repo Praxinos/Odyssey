@@ -10,14 +10,14 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDHandle
-class ODYSSEYWIDGETS_API FOdysseyHUDHandle : public FOdysseyHUDElement
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDHandle : public FOdysseyHUDElement
 {
 public:
     // Destructor
     virtual ~FOdysseyHUDHandle();
 
     //Constructor
-    FOdysseyHUDHandle( FName iName, FVector2D* iReferencePoint );
+    FOdysseyHUDHandle( const FVector2D& iPosition );
 
 //FOdysseyHUDElement overrides
 public:
@@ -38,19 +38,21 @@ public:
     bool IsPositionLocked() const;
     void IsPositionLocked(bool iIsPositionLocked);
 
-    void SetPosition(FVector2D iNewPosition);
-    FVector2D GetPosition();
+    void SetPosition(const FVector2D& iPosition);
+    const FVector2D& GetPosition() const;
 
     FSimpleMulticastDelegate& OnDragged();
     FSimpleMulticastDelegate& OnDragBegin();
     FSimpleMulticastDelegate& OnDragEnd();
 
-private:
-    FVector2D* mReferencePoint;
+protected:
+    // FGCObject implementation
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
-    
-    UTexture* mHandleTexture;
-    UMaterial* mHandleMaterial;
+private:
+    FVector2D mPosition;
+
+    TObjectPtr<UTexture> mHandleTexture;
     FSimpleMulticastDelegate mOnDragged;
     FSimpleMulticastDelegate mOnDragBegin;
     FSimpleMulticastDelegate mOnDragEnd;

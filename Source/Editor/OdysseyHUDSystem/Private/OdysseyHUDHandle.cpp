@@ -3,6 +3,7 @@
 
 #include "OdysseyHUDHandle.h"
 #include "CanvasTypes.h"
+#include "Input/OdysseyPoint.h"
 
 #define HANDLE_SMALL_SIZE 10
 #define HANDLE_BIG_SIZE 15
@@ -24,12 +25,10 @@ FOdysseyHUDHandle::~FOdysseyHUDHandle()
 
 }
 
-FOdysseyHUDHandle::FOdysseyHUDHandle(FName iName, FVector2D* iReferencePoint)
-    : FOdysseyHUDElement(iName)
-    , mHandleTexture(LoadObject<UTexture>(nullptr, TEXT("/Iliad/HUD/T_HUD_Handle")))
-    , mHandleMaterial(LoadObject<UMaterial>(nullptr, TEXT("/Iliad/HUD/M_HUD_Handle")))
+FOdysseyHUDHandle::FOdysseyHUDHandle(const FVector2D& iPosition)
+    : mPosition(iPosition)
+	, mHandleTexture(LoadObject<UTexture>(nullptr, TEXT("/Iliad/HUD/T_HUD_Handle")))
 {
-    mReferencePoint = iReferencePoint;
 }
 
 void
@@ -42,9 +41,8 @@ FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
         
     int handleSize = mIsHovered && mIsInteractable ? HANDLE_BIG_SIZE : HANDLE_SMALL_SIZE;
 
-    FVector2D origin = iParams.mTextureToHUD.Execute(*mReferencePoint) - FVector2D(handleSize / 2.f, handleSize / 2.f);
+    FVector2D origin = iParams.mTextureToHUD.Execute(mPosition) - FVector2D(handleSize / 2.f, handleSize / 2.f);
 
-    FMaterialRenderProxy* handleMaterialProxy = mHandleMaterial->GetRenderProxy();
     iParams.mCanvas->DrawTile(origin.X, origin.Y, handleSize, handleSize, 0, 0, 1.f, 1.f, color, mHandleTexture->GetResource(), true);
 
     if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
@@ -77,18 +75,15 @@ FOdysseyHUDHandle::IsPositionLocked(bool iIsPositionLocked)
     mIsPositionLocked = iIsPositionLocked;
 }
 
-void FOdysseyHUDHandle::SetPosition(FVector2D iNewPosition)
+void FOdysseyHUDHandle::SetPosition(const FVector2D& iPosition)
 {
-    if( mReferencePoint )
-        mReferencePoint->Set( iNewPosition.X, iNewPosition.Y );
+    mPosition = iPosition;
 }
 
-FVector2D FOdysseyHUDHandle::GetPosition()
+const FVector2D&
+FOdysseyHUDHandle::GetPosition() const
 {
-    if( mReferencePoint )
-        return *mReferencePoint;
-
-    return FVector2D( -1, -1 );
+    return mPosition;
 }
 
 //HitProxy version
@@ -134,7 +129,7 @@ void
 FOdysseyHUDHandle::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if (!mIsPositionLocked)
-        mReferencePoint->Set(iPointInTexture.x, iPointInTexture.y);
+        mPosition = iPointInTexture;
 
     mOnDragged.Broadcast();
 }
@@ -155,4 +150,12 @@ FSimpleMulticastDelegate&
 FOdysseyHUDHandle::OnDragEnd()
 {
     return mOnDragEnd;
+}
+
+void
+FOdysseyHUDHandle::AddReferencedObjects(FReferenceCollector& Collector)
+{
+    FOdysseyHUDElement::AddReferencedObjects(Collector);
+
+    Collector.AddReferencedObject(mHandleTexture);
 }

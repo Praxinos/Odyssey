@@ -11,11 +11,10 @@ FOdysseyHUDRectangle::~FOdysseyHUDRectangle()
 
 }
 
-FOdysseyHUDRectangle::FOdysseyHUDRectangle(FName iName, FVector2D iTopLeftPoint, FVector2D iBottomRightPoint) :
-    FOdysseyHUDElement(iName)
+FOdysseyHUDRectangle::FOdysseyHUDRectangle(const FVector2D& iTopLeftPoint, const FVector2D& iBottomRightPoint)
+    : mTopLeftPoint(iTopLeftPoint)
+    , mBottomRightPoint(iBottomRightPoint)
 {
-    mTopLeftPoint = iTopLeftPoint;
-    mBottomRightPoint = iBottomRightPoint;
 }
 
 void
@@ -34,4 +33,28 @@ FOdysseyHUDRectangle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
     batchedElements->AddTranslucentLine(FVector(bottomLeft, 0.f), FVector(topLeft, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
     FOdysseyHUDElement::DrawHUD(iParams); 
+}
+
+void
+FOdysseyHUDRectangle::SetTopLeftPoint(const FVector2D& iPoint)
+{
+    mTopLeftPoint = iPoint;
+}
+
+void
+FOdysseyHUDRectangle::SetBottomRightPoint(const FVector2D& iPoint)
+{
+    mBottomRightPoint = iPoint;
+}
+
+const FVector2D&
+FOdysseyHUDRectangle::GetTopLeftPoint() const
+{
+    return mTopLeftPoint;
+}
+
+const FVector2D&
+FOdysseyHUDRectangle::GetBottomRightPoint() const
+{
+    return mBottomRightPoint;
 }

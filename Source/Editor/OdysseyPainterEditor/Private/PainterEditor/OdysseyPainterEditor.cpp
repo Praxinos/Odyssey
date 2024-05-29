@@ -10,6 +10,7 @@
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyHUDSystem.h"
+#include "OdysseyHUDElement.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyPainterEditorExtension.h"
@@ -81,10 +82,11 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
     , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
     , mVectorDrawingFlags(0)
     , mHUDSystem(new FOdysseyHUDSystem())
-	, mBrushContexts()
+    , mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
 	, mRasterDrawingTool(nullptr)
     , mRasterEraserTool(nullptr)
+    , mRasterSelectionTool(nullptr)
     , mRasterTransformTool(nullptr)
     , mRasterPrimitiveDrawingTool(nullptr)
 	, mVectorPrimitiveDrawingTool(nullptr)
@@ -155,6 +157,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mRasterPaintBucketTool->BindShortcuts(iToolkit);
     mVectorPathDrawingTool->BindShortcuts(iToolkit);
     mVectorPathEditTool->BindShortcuts(iToolkit);
+    mRasterSelectionTool->BindShortcuts(iToolkit);
     mRasterTransformTool->BindShortcuts(iToolkit);
     mRasterPrimitiveDrawingTool->BindShortcuts(iToolkit);
 	mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
@@ -190,6 +193,7 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 
     mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
     mRasterEraserTool->ExtendMenu(iOwner, iMenuName);
+    mRasterSelectionTool->ExtendMenu(iOwner, iMenuName);
     mRasterTransformTool->ExtendMenu(iOwner, iMenuName);
 	mRasterPaintBucketTool->ExtendMenu(iOwner, iMenuName);
     mVectorPathDrawingTool->ExtendMenu(iOwner,iMenuName);
@@ -234,15 +238,6 @@ FOdysseyPainterEditor::OnClose()
 void
 FOdysseyPainterEditor::InitHUD()
 {
-    mHUDSystem->OnDrawHUD().BindRaw(this, &FOdysseyPainterEditor::OnDrawHUD);
-}
-
-void
-FOdysseyPainterEditor::OnDrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
-{
-    UOdysseyPainterEditorTool* tool = GetCurrentTool();
-    if (tool)
-        tool->DrawHUD(iParams);
 }
 
 void
@@ -250,6 +245,7 @@ FOdysseyPainterEditor::InitTools()
 {
     mRasterDrawingTool = NewObject<UOdysseyPainterEditorRasterDrawingTool>();
     mRasterEraserTool = NewObject<UOdysseyPainterEditorRasterEraserTool>();
+    mRasterSelectionTool = NewObject<UOdysseyPainterEditorRasterSelectionTool>();
     mRasterTransformTool = NewObject<UOdysseyPainterEditorRasterTransformTool>();
 	mRasterPaintBucketTool = NewObject<UOdysseyPainterEditorRasterPaintBucketTool>();
     mVectorPathDrawingTool = NewObject<UOdysseyPainterEditorVectorPathDrawingTool>();
@@ -269,6 +265,7 @@ FOdysseyPainterEditor::InitTools()
 
 	mRasterDrawingTool->SetEditor(this);
     mRasterEraserTool->SetEditor(this);
+    mRasterSelectionTool->SetEditor(this);
     mRasterTransformTool->SetEditor(this);
 	mRasterPaintBucketTool->SetEditor(this);
     mVectorPathDrawingTool->SetEditor(this);
@@ -299,6 +296,7 @@ FOdysseyPainterEditor::InitTools()
 
     //Other Raster Tools
     mTools.Add(mRasterEraserTool);
+    mTools.Add(mRasterSelectionTool);
     mTools.Add(mRasterTransformTool);
     mTools.Add(mRasterPrimitiveDrawingTool);
 
@@ -362,6 +360,12 @@ UOdysseyPainterEditorRasterEraserTool*
 FOdysseyPainterEditor::GetRasterEraserTool() const
 {
     return mRasterEraserTool;
+}
+
+UOdysseyPainterEditorRasterSelectionTool*
+FOdysseyPainterEditor::GetRasterSelectionTool() const
+{
+    return mRasterSelectionTool;
 }
 
 UOdysseyPainterEditorRasterTransformTool* 
@@ -660,6 +664,12 @@ FOdysseyPainterEditor::LayerStack() const
 	return source->GetLayerStack();
 }
 
+FOdysseyMask&
+FOdysseyPainterEditor::RasterSelection()
+{
+    return mRasterSelection;
+}
+
 TSharedPtr<FOdysseyMeshSelector>
 FOdysseyPainterEditor::GetMeshSelector() const
 {
@@ -676,6 +686,8 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
     {
         mSource->Inactivate();
         mSource = nullptr;
+
+        mRasterSelection.Reset();
 		
         InactivateAllTools();
     }
@@ -686,6 +698,8 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->OnAddEditedObjectDelegate().AddLambda([this](UObject* iObject) { AddEditedObject(iObject);});
         mSource->OnRemoveEditedObjectDelegate().AddLambda([this](UObject* iObject) { RemoveEditedObject(iObject);});
         mSource->Activate();
+
+        mRasterSelection.Init(mSource->Width(), mSource->Height());
         
         if ( mCurrentMainTool && mCurrentMainTool->IsActivable() )
         {
@@ -1963,6 +1977,7 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	FOdysseyEditor::AddReferencedObjects(Collector);
 	Collector.AddReferencedObject(mRasterDrawingTool);
     Collector.AddReferencedObject(mRasterEraserTool);
+    Collector.AddReferencedObject(mRasterSelectionTool);
     Collector.AddReferencedObject(mRasterTransformTool);
     Collector.AddReferencedObject(mRasterPrimitiveDrawingTool);
 	Collector.AddReferencedObject(mRasterPaintBucketTool);

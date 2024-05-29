@@ -9,16 +9,6 @@
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorRasterPrimitiveDrawingTool.generated.h"
 
-UENUM()
-enum class EOdysseyPrimitiveShape : uint8
-{
-    kLine           UMETA(DisplayName = "Line"),
-    kRectangle      UMETA(DisplayName = "Rectangle"),
-    kPolygon        UMETA(DisplayName = "Polygon"),
-    kEllipse        UMETA(DisplayName = "Ellipse"),
-    kBezier         UMETA(DisplayName = "Bezier"),
-};
-
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterPrimitiveDrawingTool : public UOdysseyPainterEditorTool
 {
@@ -63,11 +53,13 @@ private:
     // Internal - Callbacks
     void SelectedShapeChanged();
 
+    void OnShapePathBegin(const FOdysseyPoint& iPoint);
+    void OnShapePathTo(const TArray<FOdysseyPoint>& iPoints);
     void OnShapePathEnd(const FOdysseyPoint& iPoint);
-
     void OnShapePathAbort();
-
     void OnShapePathReset();
+    
+    void OnRasterSelectionChanged();
 
 public:
     virtual void PropertyChanged(const FName& iPropertyName) override;
@@ -77,23 +69,32 @@ protected:
     FOdysseyPaintEngine mPaintEngine;
 
     FSimpleMulticastDelegate            mOnShapeChanged;
+    TArray<FOdysseyPoint> mPath;
+
+    TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 
 public:
     UPROPERTY(EditAnywhere, Category = "Shape")
-    EOdysseyPrimitiveShape SelectedShape;
+    EOdysseyShape SelectedShape;
 
     UPROPERTY(EditAnywhere, Category = "Shape")
-    EOdysseyDrawingPrecision Precision = EOdysseyDrawingPrecision::kRaw;
+    bool Antialiasing = true;
 
     UPROPERTY(EditAnywhere, Category = "Shape")
-    bool Filled = false;
+    bool SubPixel = true;
+
+    UPROPERTY(EditAnywhere, Category = "Shape")
+    bool Filled = true;
+
+    UPROPERTY(EditAnywhere, Category = "Shape", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1))
+    float StrokeWidth = 1.0f;
 
     UPROPERTY(VisibleInstanceOnly, Category = "Shape", Instanced, meta = (ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
 
     // Hidden properties
     UPROPERTY()
-    TMap<EOdysseyPrimitiveShape, class UOdysseyShape*> AvailableShapes;
+    TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
     UPROPERTY(EditInstanceOnly, Category = "Blending", meta = (ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;

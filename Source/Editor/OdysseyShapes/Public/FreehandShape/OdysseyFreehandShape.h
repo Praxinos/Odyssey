@@ -13,6 +13,8 @@
 
 #include "OdysseyFreehandShape.generated.h"
 
+class FOdysseyHUDPolygon;
+
 UCLASS(meta=(DisplayName="Freehand Shape"))
 class ODYSSEYSHAPES_API UOdysseyFreehandShape : public UOdysseyShape
 {
@@ -50,6 +52,7 @@ public:
     // Getters
     //Returns the SmoothingOptions
     FOdysseySmoothingOptions& GetSmoothingOptions();
+    void DisplayHUD(bool iDisplayHUD);
 
     FOnPathBegin& OnPathBeginDelegate() { return mOnPathBeginDelegate; }
     FOnPathTo& OnPathToDelegate() { return mOnPathToDelegate; }
@@ -157,4 +160,6 @@ protected:
     FOnReset                            mOnResetDelegate;
 
     FAdaptStep                          mAdaptStepDelegate;
+    bool mDisplayHUD = false;
+    TSharedPtr<FOdysseyHUDPolygon> mPathHUD;
 };

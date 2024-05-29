@@ -3,25 +3,32 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include "OdysseyHUDElement.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDBezier
-class ODYSSEYWIDGETS_API FOdysseyHUDBezier : public FOdysseyHUDElement
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDBezier : public FOdysseyHUDElement
 {
 public:
     // Destructor
     virtual ~FOdysseyHUDBezier();
 
     //Constructor
-    FOdysseyHUDBezier(FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint);
+    FOdysseyHUDBezier(const FVector2D& iStartPoint, const FVector2D& iEndPoint, const FVector2D& iControlPoint);
 
 public:
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
 
 public:
+    void SetStartPoint(const FVector2D& iPoint);
+    void SetEndPoint(const FVector2D& iPoint);
+    void SetControlPoint(const FVector2D& iPoint);
+
+    const FVector2D& GetStartPoint() const;
+    const FVector2D& GetEndPoint() const;
+    const FVector2D& GetControlPoint() const;
+
+private:
     FVector2D mStartPoint;
     FVector2D mEndPoint;
     FVector2D mControlPoint;

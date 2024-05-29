@@ -8,6 +8,7 @@
 #include "OdysseyHUDSystem.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
+#include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
@@ -106,6 +107,7 @@ public:
     
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorRasterEraserTool*                   GetRasterEraserTool() const;
+    virtual UOdysseyPainterEditorRasterSelectionTool*                GetRasterSelectionTool() const;
     virtual UOdysseyPainterEditorRasterTransformTool*                GetRasterTransformTool() const;
     virtual UOdysseyPainterEditorRasterPrimitiveDrawingTool*         GetRasterPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorRasterPaintBucketTool*              GetRasterPaintBucketTool() const;
@@ -137,7 +139,8 @@ public:
 	virtual const FOdysseyBrushColor&                       PaintColor() const;
     virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                             LayerStack() const;
-    
+    virtual FOdysseyMask&                                   RasterSelection();
+
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
     
     TArray<FOdysseyBrushContext*>& GetBrushContexts();
@@ -192,13 +195,19 @@ public:
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );
 
+    //HUD system related
+    //void MakeHUDPersistent( FOdysseyHUDElement* iHUD ); //Make HUD in parameter persistent in this editor, relinquishing ownership to this editor
+    //void ClearHUDPersistent(); //Clear persistent HUD, happens on actions like deselect
+    //void RemoveHUDPersistent( FString iName) //Removes a particular HUD from the persistent HUD. Todo when we'll be stacking HUDs on top of each other, like selection + guides, things like that
+
 public:
     // Setters
     void  AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension);
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
-
-
+    /* void  RefreshMaskHUD();
+    void  ClearMask(); //Clears the mask data and HUD
+    void  ClearMaskHUD(); //Only clears the HUD */
 
 protected:
     //Callbacks
@@ -237,7 +246,8 @@ protected:
     uint64                          mVectorHUDFlags;
     uint64                          mVectorDrawingFlags;
 
-    FOdysseyHUDSystem*               mHUDSystem;
+    FOdysseyHUDSystem*              mHUDSystem;
+    FOdysseyMask                    mRasterSelection; //The mask created by a user made selection or from a tool that creates mask/stencil on the drawing
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
     FSimpleMulticastDelegate        mOnCurrentToolChanged;
@@ -247,6 +257,7 @@ protected:
     
     UOdysseyPainterEditorRasterDrawingTool* mRasterDrawingTool;
     UOdysseyPainterEditorRasterEraserTool* mRasterEraserTool;
+    UOdysseyPainterEditorRasterSelectionTool* mRasterSelectionTool;
     UOdysseyPainterEditorRasterTransformTool* mRasterTransformTool;
     UOdysseyPainterEditorRasterPrimitiveDrawingTool* mRasterPrimitiveDrawingTool;
     UOdysseyPainterEditorRasterPaintBucketTool* mRasterPaintBucketTool;

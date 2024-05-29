@@ -41,6 +41,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyCore",
                 "OdysseyBrush",
                 "OdysseyEditor",
+                "OdysseyHUDSystem",
                 "OdysseyImaging",
                 "OdysseyLayerStack",
                 "OdysseyLayerStackEditor",

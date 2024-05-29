@@ -45,8 +45,7 @@ public class OdysseyWidgets : ModuleRules
              new string[] {
                 "ULIS",
                 "ULISLoader",
-                "EditorWidgets",
-                "OdysseyHUDSystem",
+                "EditorWidgets"
 			 }
         );
 
@@ -59,8 +58,6 @@ public class OdysseyWidgets : ModuleRules
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public"),
-                Path.Combine(ModuleDirectory, "Public", "HUDViewportElement"),
-                Path.Combine(ModuleDirectory, "Public", "HUDViewportElement", "Elements"),
                 Path.Combine(ModuleDirectory, "Public", "Timeline"),
                 Path.Combine(ModuleDirectory, "Public", "Timeline", "Events"),
                 Path.Combine(ModuleDirectory, "Public", "Common"),

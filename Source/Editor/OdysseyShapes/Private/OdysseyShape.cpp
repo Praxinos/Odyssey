@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyShape.h"
-#include "HUDViewportElement/OdysseyHUDElement.h"
+#include "OdysseyHUDElement.h"
 
 
 UOdysseyShape::~UOdysseyShape()
@@ -88,7 +88,8 @@ bool UOdysseyShape::AbortShape()
 	return true;
 }
 
-void UOdysseyShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+/* void UOdysseyShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
 {
 
 }
+*/

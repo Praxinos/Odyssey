@@ -54,6 +54,8 @@ public:
     FOdysseyPoint  operator* ( float iRhs ) const;
     FOdysseyPoint  operator/ ( float iRhs ) const;
 
+    operator FVector2D() const { return FVector2D(x, y); }
+
     void ComputeRelativeParameters(const FOdysseyPoint& iPreviousPoint, bool iComputeTravelledDistance = false);
 
 public: 

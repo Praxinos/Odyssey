@@ -25,6 +25,8 @@ public:
 
 public:
     virtual const FGuid& Id() const;
+    virtual int Width() const override;
+    virtual int Height() const override;
     virtual void Activate() override;
     virtual void Inactivate() override;
     virtual UTexture* DisplayTexture() const override;
