@@ -53,11 +53,13 @@ private:
     // Internal - Callbacks
     void SelectedShapeChanged();
 
-    void OnShapePathBegin(const FOdysseyPoint& iPoint);
-    void OnShapePathTo(const TArray<FOdysseyPoint>& iPoints);
-    void OnShapePathEnd(const FOdysseyPoint& iPoint);
-    void OnShapePathAbort();
-    void OnShapePathReset();
+    //void OnShapePathBegin(const FOdysseyPoint& iPoint);
+    //void OnShapePathTo(const TArray<FOdysseyPoint>& iPoints);
+    //void OnShapePathEnd(const FOdysseyPoint& iPoint);
+    //void OnShapePathAbort();
+    //void OnShapePathReset();
+    
+    void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
     
     void OnRasterSelectionChanged();
 

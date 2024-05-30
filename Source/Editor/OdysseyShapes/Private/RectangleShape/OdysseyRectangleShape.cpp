@@ -2,9 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "RectangleShape/OdysseyRectangleShape.h"
+
 #include "OdysseyHUDHandle.h"
 #include "OdysseyHUDRectangle.h"
-#include <ULIS>
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -14,9 +14,6 @@ UOdysseyRectangleShape::~UOdysseyRectangleShape()
 
 UOdysseyRectangleShape::UOdysseyRectangleShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
-    //Internal
-    , mRawStroke()
-    , mHasStrokeBegun( false )
 {
 }
 
@@ -26,76 +23,70 @@ UOdysseyRectangleShape::UOdysseyRectangleShape(const FObjectInitializer& iObject
 bool
 UOdysseyRectangleShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if( !mHasStrokeBegun )
-    {
-        mHasStrokeBegun = true;
-        mRawStroke.Empty();
+    mIsDrawing = true;
 
-        mRectangle = MakeShared<FOdysseyHUDRectangle>(iPointInTexture, iPointInTexture);
-        mHUD->AddElement(mRectangle);
+    //Rectangle Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
+    mTopLeftPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
+    mBottomRightPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
 
-        mHandleTopLeft = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
-        mHandleBottomRight = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
-
-        mHandleTopLeft->IsInteractable(false);
-        mHandleBottomRight->IsInteractable(false);
-
-        mRectangle->AddElement(mHandleTopLeft);
-        mRectangle->AddElement(mHandleBottomRight);
-        return true;
-    }
-
-    return false;
-}
-
-bool
-UOdysseyRectangleShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    if( mHasStrokeBegun )
-    {
-        CommitRectangle();
-        return true;
-    }
-    return false;
-}
-
-void
-UOdysseyRectangleShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
-{
-    UOdysseyShape::OnMouseHover(iPointInTexture);
+    CreateHUD();
+    return true;
 }
 
 void
 UOdysseyRectangleShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if( mHasStrokeBegun )
+    if (!mIsDrawing)
+        return;
+
+    //Rectangle Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
+    mBottomRightPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
+    if (mUniform)
     {
-        FOdysseyPoint point = iPointInTexture;
-        if (Uniform)
+        int shiftX = mBottomRightPoint.x - mTopLeftPoint.x;
+        int shiftY = mBottomRightPoint.y - mTopLeftPoint.y;
+
+        int signX = shiftX < 0 ? -1 : 1;
+        int signY = shiftY < 0 ? -1 : 1;
+
+        int mult = signX == signY ? 1 : -1;
+
+        if( FMath::Abs(shiftX) > FMath::Abs(shiftY) )
         {
-            int shiftX = iPointInTexture.x - mRectangle->GetTopLeftPoint().X;
-            int shiftY = iPointInTexture.y - mRectangle->GetTopLeftPoint().Y;
-
-            int signX = shiftX < 0 ? -1 : 1;
-            int signY = shiftY < 0 ? -1 : 1;
-
-            int mult = signX == signY ? 1 : -1;
-
-            if( FMath::Abs(shiftX) > FMath::Abs(shiftY) )
-            {
-                point.x = mRectangle->GetTopLeftPoint().X + shiftX;
-                point.y = mRectangle->GetTopLeftPoint().Y + shiftX * mult;
-            }
-            else
-            {
-                point.x = mRectangle->GetTopLeftPoint().X + shiftY * mult;
-                point.y = mRectangle->GetTopLeftPoint().Y + shiftY;
-            }
+            mBottomRightPoint.x = mTopLeftPoint.x + shiftX;
+            mBottomRightPoint.y = mTopLeftPoint.y + shiftX * mult;
         }
-        mRectangle->SetBottomRightPoint(point);
-        mHandleBottomRight->SetPosition(point);
-        UOdysseyShape::OnMouseDrag(iPointInTexture);
+        else
+        {
+            mBottomRightPoint.x = mTopLeftPoint.x + shiftY * mult;
+            mBottomRightPoint.y = mTopLeftPoint.y + shiftY;
+        }
     }
+
+    RefreshHUD();
+
+    FOdysseyPoint topRightPoint(mBottomRightPoint.x, mTopLeftPoint.y);
+    FOdysseyPoint bottomLeftPoint(mTopLeftPoint.x, mBottomRightPoint.y);
+    mOnInteractive.Broadcast( { mTopLeftPoint, topRightPoint, mBottomRightPoint, bottomLeftPoint, mTopLeftPoint }, true );
+    
+    UOdysseyShape::OnMouseDrag(iPointInTexture);
+}
+
+bool
+UOdysseyRectangleShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    if (!mIsDrawing)
+        return UOdysseyShape::OnMouseUp(iPointInTexture, iKey);
+
+    mIsDrawing = false;
+
+    RemoveHUD();
+
+    FOdysseyPoint topRightPoint(mBottomRightPoint.x, mTopLeftPoint.y);
+    FOdysseyPoint bottomLeftPoint(mTopLeftPoint.x, mBottomRightPoint.y);
+    mOnCommit.Broadcast( { mTopLeftPoint, topRightPoint, mBottomRightPoint, bottomLeftPoint, mTopLeftPoint }, true);
+
+    return true;
 }
 
 bool
@@ -103,8 +94,15 @@ UOdysseyRectangleShape::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::Escape)
     {
-        return AbortShape();
+        Abort();
+        return true;
     }
+
+    if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
+	{
+		mUniform = true;
+		return true;
+	}
 
     return UOdysseyShape::OnKeyDown(iKey);
 }
@@ -112,56 +110,52 @@ UOdysseyRectangleShape::OnKeyDown(const FKey& iKey)
 bool
 UOdysseyRectangleShape::OnKeyUp(const FKey& iKey)
 {
+    if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
+    {
+        mUniform = false;
+		return true;
+    }
+
     return UOdysseyShape::OnKeyUp(iKey);
 }
 
-/* void UOdysseyRectangleShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+void
+UOdysseyRectangleShape::Abort()
 {
-    if (!iBlock)
-        return;
+    mIsDrawing = false;
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+    RemoveHUD();
 
-    ctx.DrawRectangle(*(iBlock), ::ULIS::FVec2I(mRectangle->GetTopLeftPoint().X, mRectangle->GetTopLeftPoint().Y), ::ULIS::FVec2I(mRectangle->GetBottomRightPoint().X, mRectangle->GetBottomRightPoint().Y), iOptions.mColor, iOptions.mFilled);
-
-    ctx.Finish();
-}
-*/
-
-void UOdysseyRectangleShape::CommitRectangle()
-{
-    if( mHasStrokeBegun )
-    {
-        ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        ::ULIS::GenerateRectanglePoints(::ULIS::FVec2I(mRectangle->GetTopLeftPoint().X, mRectangle->GetTopLeftPoint().Y), ::ULIS::FVec2I(mRectangle->GetBottomRightPoint().X, mRectangle->GetBottomRightPoint().Y), pointsArray);
-
-        FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
-        for (float i = 0.f; i < pointsArray.Size(); i+=Step)
-        {
-            pointToAdd.x = pointsArray[i].x;
-            pointToAdd.y = pointsArray[i].y;
-            mRawStroke.Add(pointToAdd);
-        }
-        if (mRawStroke.Num() != 0)
-        {
-            mOnPathBeginDelegate.Broadcast(mRawStroke[0]);
-            mOnPathToDelegate.Broadcast(mRawStroke);
-            mOnPathEndDelegate.Broadcast({ mRawStroke.Last() });
-        }
-        else
-        {
-            AbortShape();
-        }
-        mHasStrokeBegun = false;
-    }
+    mOnAbort.Broadcast();
 }
 
-bool UOdysseyRectangleShape::AbortShape()
+void
+UOdysseyRectangleShape::CreateHUD()
+{   
+    mRectangleHUD = MakeShared<FOdysseyHUDRectangle>(mTopLeftPoint, mBottomRightPoint);
+
+    mHandleTopLeftHUD = MakeShared<FOdysseyHUDHandle>(mTopLeftPoint);
+    mHandleBottomRightHUD = MakeShared<FOdysseyHUDHandle>(mBottomRightPoint);
+    mHandleTopLeftHUD->IsInteractable(false);
+    mHandleBottomRightHUD->IsInteractable(false);
+
+    mHUD->AddElement(mRectangleHUD);
+    mRectangleHUD->AddElement(mHandleTopLeftHUD);
+    mRectangleHUD->AddElement(mHandleBottomRightHUD);
+}
+
+void
+UOdysseyRectangleShape::RefreshHUD()
 {
-    if( mHasStrokeBegun )
-    {
-        mHasStrokeBegun = false;
-        return UOdysseyShape::AbortShape();
-    }
-    return false;
+    mRectangleHUD->SetBottomRightPoint(mBottomRightPoint);
+    mHandleBottomRightHUD->SetPosition(mBottomRightPoint);
+}
+
+void
+UOdysseyRectangleShape::RemoveHUD()
+{
+    mHUD->RemoveElement(mRectangleHUD);
+    mRectangleHUD = nullptr;
+    mHandleTopLeftHUD = nullptr;
+    mHandleBottomRightHUD = nullptr;
 }

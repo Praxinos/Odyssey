@@ -16,6 +16,7 @@
 #include "OdysseyMediaProvider.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationLine.h"
 
 #include "UObject/OdysseyObjectEditorUtils.h"
 
@@ -59,13 +60,9 @@ UOdysseyPainterEditorRasterEraserTool::CreateShape(FName iName)
 {
     T* shape = CreateDefaultSubobject<T>(iName, true);
 
-    shape->OnPathBeginDelegate().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapePathBegin);
-    shape->OnPathToDelegate().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapePathTo);
-    shape->OnPathEndDelegate().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapePathEnd);
-    shape->OnPathAbortDelegate().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapePathAbort);
-    shape->OnPathResetDelegate().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapePathReset);
-
-    shape->AdaptStepDelegate().BindUObject(this, &UOdysseyPainterEditorRasterEraserTool::AdaptShapeStep);
+    shape->OnInteractive().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive);
+    shape->OnCommit().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapeCommit);
+    shape->OnAbort().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapeAbort);
 
     shape->SetHUD( mShapeHUD );
 
@@ -119,6 +116,7 @@ UOdysseyPainterEditorRasterEraserTool::Load()
         mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
     
     mHUD->AddElement(rasterSelection.GetHUD());
+    mHUD->AddElement(mShapeHUD);
 	/* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
     mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
 
@@ -135,6 +133,7 @@ UOdysseyPainterEditorRasterEraserTool::Unload()
     FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
     rasterSelection.OnChanged().RemoveAll(this);
     mHUD->RemoveElement(rasterSelection.GetHUD());
+    mHUD->RemoveElement(mShapeHUD);
 
     UOdysseyPainterEditorTool::Unload();
 }
@@ -318,49 +317,6 @@ UOdysseyPainterEditorRasterEraserTool::Stamp(const FOdysseyPoint& iPoint)
     paintBlock->Dirty(rect);
 }
 
-void
-UOdysseyPainterEditorRasterEraserTool::OnShapePathBegin( const FOdysseyPoint& iPoint )
-{
-    Stamp(iPoint);
-    mPaintEngine.Update(mBlendParameters);
-}
-
-void
-UOdysseyPainterEditorRasterEraserTool::OnShapePathTo( const TArray<FOdysseyPoint>& iPoints )
-{
-    for (int i = 0; i < iPoints.Num(); i++)
-    {
-        Stamp(iPoints[i]);
-    }
-    mPaintEngine.Update(mBlendParameters);
-}
-
-void
-UOdysseyPainterEditorRasterEraserTool::OnShapePathEnd( const FOdysseyPoint& iPoint )
-{
-    Flush();
-    Commit();
-
-    mShapeHUD->EmptyElements();
-}
-
-void
-UOdysseyPainterEditorRasterEraserTool::OnShapePathAbort()
-{
-    mPaintEngine.Abort();
-
-    //Update immediately the changes
-    mPaintEngine.Update(mBlendParameters);
-    
-    mShapeHUD->EmptyElements();
-}
-
-void
-UOdysseyPainterEditorRasterEraserTool::OnShapePathReset()
-{
-    mPaintEngine.Abort();
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
@@ -400,7 +356,7 @@ UOdysseyPainterEditorRasterEraserTool::OnOpacityChanged()
 void
 UOdysseyPainterEditorRasterEraserTool::SelectedShapeChanged()
 {
-    SelectedShapeInstance->AbortShape();
+    SelectedShapeInstance->Abort();
     FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
     mOnShapeChanged.Broadcast();
 }
@@ -460,6 +416,123 @@ UOdysseyPainterEditorRasterEraserTool::OnRasterSelectionChanged()
     {
         mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
     }
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints, bool iReset)
+{
+    if ( iReset )
+        return;
+
+    for ( const FOdysseyPoint& point : iPoints )
+    {
+        TArray<FOdysseyPoint> interpolatedPoints = InterpolateTo(point);
+        for ( const FOdysseyPoint& interpolatedPoint : interpolatedPoints )
+        {
+            Stamp(interpolatedPoint);
+        }
+    }
+
+    Flush();
+
+    mPaintEngine.Update(mBlendParameters);
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset)
+{
+    if ( iReset )
+    {
+        ResetInterpolation();
+        mPaintEngine.Abort();
+
+        for ( const FOdysseyPoint& point : iPoints )
+        {
+            TArray<FOdysseyPoint> interpolatedPoints = InterpolateTo(point);
+            for ( const FOdysseyPoint& interpolatedPoint : interpolatedPoints )
+            {
+                Stamp(interpolatedPoint);
+            }
+        }
+    }
+
+    mPaintEngine.Update(mBlendParameters);
+
+    Flush();
+    Commit();
+
+    ResetInterpolation();
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::OnShapeAbort()
+{
+    ResetInterpolation();
+    mPaintEngine.Abort();
+    mPaintEngine.Update(mBlendParameters);
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- Internal - Interpolation
+
+TArray<FOdysseyPoint>
+UOdysseyPainterEditorRasterEraserTool::InterpolateTo(const FOdysseyPoint& iPoint)
+{
+    if (!mInterpolator)
+    {
+        if (SelectedShape == EOdysseyShape::kFreehand )
+        {
+            switch(InterpolationType)
+            {
+                case EOdysseyInterpolationType::kCatmullRom: mInterpolator = MakeShared<FOdysseyInterpolationCatmullRom>(); break;
+                case EOdysseyInterpolationType::kBezier: mInterpolator = MakeShared<FOdysseyInterpolationBezier>(); break;
+                case EOdysseyInterpolationType::kLine: mInterpolator = MakeShared<FOdysseyInterpolationLine>(); break;
+
+                default: break;
+            }
+        }
+        else
+        {
+            mInterpolator = MakeShared<FOdysseyInterpolationLine>();
+        }
+
+        if (AdaptativeStep)
+        {
+            mInterpolator->SetStep( FMath::Max( 1.f, AdaptShapeStep(Step) ) );
+        }
+        else
+        {
+            mInterpolator->SetStep(Step);
+        }
+        
+        mInterpolator->AddPoint( iPoint );
+        mLastPoint = iPoint;
+        return { iPoint };
+    }
+
+    //If the Interpolator is ready to produce points do it, otherwise.... don't (Thanks Captain Obvious)
+    while( !mInterpolator->IsReady() )
+    {
+        //Add Point to Interpolator
+        mInterpolator->AddPoint( iPoint );
+    }
+
+    TArray<FOdysseyPoint> newPoints = mInterpolator->ComputePoints();
+
+    for( int i = 0; i < newPoints.Num(); ++i )
+    {
+        newPoints[i].ComputeRelativeParameters(mLastPoint, true);
+        mLastPoint = newPoints[i];
+    }
+
+    return newPoints;
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::ResetInterpolation()
+{
+    mInterpolator = nullptr;
+    mLastPoint = FOdysseyPoint();
 }
 
 #undef LOCTEXT_NAMESPACE

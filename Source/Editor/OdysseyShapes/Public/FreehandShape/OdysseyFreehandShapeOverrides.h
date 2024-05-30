@@ -40,16 +40,16 @@ class ODYSSEYSHAPES_API UOdysseyFreehandShapeOverrides : public UObject
     bool    bOverride_SmoothingCatchUp;
 
     /** Enable Stroke Step Override. */
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
-    bool    bOverride_Step;
+    //UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
+    //bool    bOverride_Step;
 
     /** Enable Stroke Adaptative Override. */
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
-    bool    bOverride_AdaptativeStep;
+    //UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
+    //bool    bOverride_AdaptativeStep;
 
     /** Enable Interpolation Type Override. */
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
-    bool    bOverride_InterpolationType;
+    //UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
+    //bool    bOverride_InterpolationType;
 
 
     /////////////////////////////////////////////////////
@@ -76,16 +76,16 @@ class ODYSSEYSHAPES_API UOdysseyFreehandShapeOverrides : public UObject
     bool    SmoothingCatchUp;
 
     /** Stroke Step Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_Step" ) )
-    float   Step;
+    //UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_Step" ) )
+    //float   Step;
 
     /** Stroke Size Adaptative Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_AdaptativeStep" ) )
-    bool    AdaptativeStep;
+    //UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_AdaptativeStep" ) )
+    //bool    AdaptativeStep;
 
     /** Interpolation Type Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_InterpolationType" ) )
-    EOdysseyInterpolationType   InterpolationType;
+    //UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_InterpolationType" ) )
+    //EOdysseyInterpolationType   InterpolationType;
 
 public:
     //Applies the Overrides to the given object

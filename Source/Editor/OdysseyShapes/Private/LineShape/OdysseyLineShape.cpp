@@ -4,7 +4,6 @@
 #include "LineShape/OdysseyLineShape.h"
 #include "OdysseyHUDHandle.h"
 #include "OdysseyHUDLine.h"
-#include <ULIS>
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -14,9 +13,6 @@ UOdysseyLineShape::~UOdysseyLineShape()
 
 UOdysseyLineShape::UOdysseyLineShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
-    //Internal
-    , mRawStroke()
-    , mHasStrokeBegun( false )
 {
 }
 
@@ -26,66 +22,64 @@ UOdysseyLineShape::UOdysseyLineShape(const FObjectInitializer& iObjectInitialize
 bool
 UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if( !mHasStrokeBegun )
-    {
-        mHasStrokeBegun = true;
-        mRawStroke.Empty();
+    mIsDrawing = true;
 
-        mLine = MakeShared<FOdysseyHUDLine>(iPointInTexture, iPointInTexture);
-        mHUD->AddElement(mLine);
+    //Line Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
+    mStartPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
+    mEndPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
 
-        mHandleStart = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
-        mHandleEnd = MakeShared<FOdysseyHUDHandle>(iPointInTexture);
+    CreateHUD();
 
-        mHandleStart->IsInteractable(false);
-        mHandleEnd->IsInteractable(false);
-
-        mLine->AddElement(mHandleStart);
-        mLine->AddElement(mHandleEnd);
-        return true;
-    }
-
-    return false;
-}
-
-bool
-UOdysseyLineShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    if( mHasStrokeBegun )
-    {
-        CommitLine();
-        return true;
-    }
-    return false;
-}
-
-void
-UOdysseyLineShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
-{
-    UOdysseyShape::OnMouseHover(iPointInTexture);
+    return true;
 }
 
 void
 UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if( mHasStrokeBegun )
+    if (!mIsDrawing)
+        return;
+
+    //Line Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
+    mEndPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
+
+    if( mSnapAngles )
     {
-        FOdysseyPoint point = iPointInTexture;
-        if( Uniform )
-        {
-            int shiftX = FMath::Abs( iPointInTexture.x - mLine->GetStartPoint().X);
-            int shiftY = FMath::Abs( iPointInTexture.y - mLine->GetStartPoint().Y);
+        //TODO: Angles
+        /* float shiftX = mEndPoint.x - mStartPoint.x;
+        float shiftY = c.y - mStartPoint.y;
+        float angleStep = PI / 8.f;
+        float sinLimit = sin(angleStep);
+        float cosLimit = cos(angleStep);
 
-            if( shiftX > shiftY )
-                point.y = mLine->GetStartPoint().Y;
-            else
-                point.x = mLine->GetStartPoint().X;
-        }
-        mLine->SetEndPoint(point);
-        mHandleEnd->SetPosition(point);
+        float angle = FMath::RadiansToDegrees(FMath::Atan2(shiftY, shiftX));
+        float sinAngle = sin(angle);
+        float cosAngle = cos(angle); */
+        int shiftX = FMath::Abs( mEndPoint.x - mStartPoint.x);
+        int shiftY = FMath::Abs( mEndPoint.y - mStartPoint.y);
 
-        UOdysseyShape::OnMouseDrag(iPointInTexture);
+        if( shiftX > shiftY )
+            mEndPoint.y = mStartPoint.x;
+        else
+            mEndPoint.x = mStartPoint.y;
     }
+
+    RefreshHUD();
+
+    mOnInteractive.Broadcast( { mStartPoint, mEndPoint }, true );
+
+    UOdysseyShape::OnMouseDrag(iPointInTexture);
+}
+
+bool
+UOdysseyLineShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    if (!mIsDrawing)
+        return UOdysseyShape::OnMouseUp(iPointInTexture, iKey);
+
+    mIsDrawing = false;
+    RemoveHUD();
+    mOnCommit.Broadcast( { mStartPoint, mEndPoint }, true);
+    return true;
 }
 
 bool
@@ -93,8 +87,15 @@ UOdysseyLineShape::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::Escape)
     {
-        return AbortShape();
+        Abort();
+        return true;
     }
+
+    if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
+	{
+		mSnapAngles = true;
+		return true;
+	}
 
     return UOdysseyShape::OnKeyDown(iKey);
 }
@@ -102,64 +103,53 @@ UOdysseyLineShape::OnKeyDown(const FKey& iKey)
 bool
 UOdysseyLineShape::OnKeyUp(const FKey& iKey)
 {
-    return UOdysseyShape::OnKeyUp(iKey);
-}
-
-
-/*void UOdysseyLineShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
-{
-    if (!iBlock)
-        return;
-
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-
-    if (iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw)
-        ctx.DrawLine(*(iBlock), ::ULIS::FVec2I(mLine->GetStartPoint().X, mLine->GetStartPoint().Y), ::ULIS::FVec2I(mLine->GetEndPoint().X, mLine->GetEndPoint().Y), iOptions.mColor);
-    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kAA)
-        ctx.DrawLineAA(*(iBlock), ::ULIS::FVec2I(mLine->GetStartPoint().X, mLine->GetStartPoint().Y), ::ULIS::FVec2I(mLine->GetEndPoint().X, mLine->GetEndPoint().Y), iOptions.mColor);
-    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
-        ctx.DrawLineSP(*(iBlock), ::ULIS::FVec2I(mLine->GetStartPoint().X, mLine->GetStartPoint().Y), ::ULIS::FVec2I(mLine->GetEndPoint().X, mLine->GetEndPoint().Y), iOptions.mColor);
-
-    ctx.Finish();
-}*/
-
-void UOdysseyLineShape::CommitLine()
-{
-    if( mHasStrokeBegun )
+    if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
-        ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        ::ULIS::GenerateLinePoints(::ULIS::FVec2I(mLine->GetStartPoint().X, mLine->GetStartPoint().Y), ::ULIS::FVec2I(mLine->GetEndPoint().X, mLine->GetEndPoint().Y), pointsArray);
-
-        //Todo ? Compute relative parameters
-
-        FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
-        for (float i = 0.f; i < pointsArray.Size(); i+=Step)
-        {
-            pointToAdd.x = pointsArray[i].x;
-            pointToAdd.y = pointsArray[i].y;
-            mRawStroke.Add(pointToAdd);
-        }
-        if (mRawStroke.Num() != 0)
-        {
-            mOnPathBeginDelegate.Broadcast(mRawStroke[0]);
-            mOnPathToDelegate.Broadcast(mRawStroke);
-            mOnPathEndDelegate.Broadcast({ mRawStroke.Last() });
-        }
-        else
-        {
-            AbortShape();
-        }
-        mHasStrokeBegun = false;
+        mSnapAngles = false;
+		return true;
     }
+
+	return UOdysseyShape::OnKeyUp(iKey);
 }
 
-bool UOdysseyLineShape::AbortShape()
+void
+UOdysseyLineShape::Abort()
 {
-    if( mHasStrokeBegun )
-    {
-        mHasStrokeBegun = false;
-        return UOdysseyShape::AbortShape();
-    }
-    return false;
+    mIsDrawing = false;
+    
+    RemoveHUD();
+    
+    mOnAbort.Broadcast();
 }
+
+void
+UOdysseyLineShape::CreateHUD()
+{
+    mLineHUD = MakeShared<FOdysseyHUDLine>(mStartPoint, mEndPoint);
+
+    mHandleStartHUD = MakeShared<FOdysseyHUDHandle>(mStartPoint);
+    mHandleEndHUD = MakeShared<FOdysseyHUDHandle>(mEndPoint);
+    mHandleStartHUD->IsInteractable(false);
+    mHandleEndHUD->IsInteractable(false);
+
+    mHUD->AddElement(mLineHUD);
+    mLineHUD->AddElement(mHandleStartHUD);
+    mLineHUD->AddElement(mHandleEndHUD);
+}
+
+void
+UOdysseyLineShape::RefreshHUD()
+{
+    mLineHUD->SetEndPoint(mEndPoint);
+    mHandleEndHUD->SetPosition(mEndPoint);
+}
+
+void
+UOdysseyLineShape::RemoveHUD()
+{
+    mHUD->RemoveElement(mLineHUD);
+    mLineHUD = nullptr;
+    mHandleStartHUD = nullptr;
+    mHandleEndHUD = nullptr;
+}
+

@@ -36,24 +36,12 @@ UOdysseyShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 bool
 UOdysseyShape::OnKeyDown(const FKey& iKey)
 {
-	if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
-	{
-		Uniform = !Uniform;
-		return true;
-	}
-
 	return false;
 }
 
 bool
 UOdysseyShape::OnKeyUp(const FKey& iKey)
 {
-    if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
-    {
-        Uniform = !Uniform;
-		return true;
-    }
-
 	return false;
 }
 
@@ -75,21 +63,7 @@ UOdysseyShape::SetHUD(TSharedPtr<FOdysseyHUDElement> iHUD)
 	mHUD = iHUD;
 }
 
-float UOdysseyShape::GetStep() const
+void
+UOdysseyShape::Abort()
 {
-	return Step;
 }
-
-bool UOdysseyShape::AbortShape()
-{
-    mOnPathResetDelegate.Broadcast();
-    mOnPathAbortDelegate.Broadcast();
-
-	return true;
-}
-
-/* void UOdysseyShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
-{
-
-}
-*/

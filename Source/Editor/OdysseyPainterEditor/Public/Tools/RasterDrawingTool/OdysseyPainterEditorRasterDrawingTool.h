@@ -14,12 +14,14 @@
 #include "OdysseyPaintEngine.h"
 #include "OdysseyBrushContext.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolWorker.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationTypes.h"
 
 #include "OdysseyPainterEditorRasterDrawingTool.generated.h"
 
 class UOdysseyBrushAssetBase;
 class FOdysseyPaintEngine;
 class FOdysseyStrokeEngineBrushOptions;
+class IOdysseyInterpolation;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterDrawingTool : public UOdysseyPainterEditorTool
@@ -161,48 +163,42 @@ private:
 
     //Apply brush Overrides
     void ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance);
-
-private:
-    // Internal - Property Changed
-
-    // Fired when the Brush is compiled
-    /* void OnPreBrushChanged();
-
-    // Fired when the Brush is compiled
-    void OnPostBrushChanged();
-
-    // Fired when a Shape is selected
-    void OnPostShapeChanged(); */
     
 private:
+    void BeginStroke(const FOdysseyPoint& iPoint);
+    void StrokeTo(const TArray<FOdysseyPoint>& iPoints);
+    void StrokeEnd();
+    void StrokeAbort();
+    void StrokeReset();
+
     // Internal - Callbacks
-
-    void OnShapePathBegin(const FOdysseyPoint& iPoint);
-
-    void OnShapePathTo(const TArray<FOdysseyPoint>& iPoints);
-
-    void OnShapePathEnd(const FOdysseyPoint& iPoint);
-
-    void OnShapePathAbort();
-    
-    void OnShapePathReset();
+    void OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+    void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+    void OnShapeAbort();
 
     void OnPaintEngineBlockChanged();
-    
     void OnRasterSelectionChanged();
 
     float AdaptShapeStep(float iStep);
+
+    TArray<FOdysseyPoint> InterpolateTo(const FOdysseyPoint& iPoint);
+    void ResetInterpolation();
 
 protected:
     friend class SOdysseyPainterEditorRasterDrawingToolBrushSelector;
 
     //Visible properties
-
     UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
     UOdysseyBrush* Brush;
 
     UPROPERTY()
     UOdysseyBrushAssetBase* BrushInstance;
+
+    UPROPERTY( EditAnywhere, Category="Interpolation")
+    bool    AdaptativeStep = false;
+
+    UPROPERTY(EditAnywhere, Category = "Interpolation")
+    bool    RealtimePreview = false;
 
     UPROPERTY()
     UOdysseyBrushOptions* BrushOptions;
@@ -218,6 +214,12 @@ protected:
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
 public:
+    UPROPERTY( EditInstanceOnly, Category="Interpolation")
+    EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
+    
+    UPROPERTY(EditAnywhere, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority = "0"))
+    float   Step = 1.0;
+
     UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;
 
@@ -228,6 +230,7 @@ protected:
     FOdysseyPaintEngine                 mPaintEngine;
     TArray<FOdysseyBrushContext*>*       mBrushContexts;
     FOdysseyPainterEditorRasterDrawingToolWorker     mWorker;
+    TSharedPtr<IOdysseyInterpolation>   mInterpolator;
     float mBaseSize; //Size on which the tool is based to compute its size from a percentage
 
     //---
@@ -241,4 +244,7 @@ protected:
     FSimpleMulticastDelegate            mOnShapeChanged;
 
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
+
+    FOdysseyPoint mLastPoint;
+    bool mIsFirstPoint = true;
 };

@@ -12,17 +12,17 @@ UOdysseyFreehandShapeOverrides::UOdysseyFreehandShapeOverrides()
     , bOverride_SmoothingEnabled     ( false                                         )
     , bOverride_SmoothingRealTime    ( false                                         )
     , bOverride_SmoothingCatchUp     ( false                                         )
-    , bOverride_Step                 ( false                                         )
-    , bOverride_AdaptativeStep       ( false                                         )
-    , bOverride_InterpolationType    ( false                                         )
+    //, bOverride_Step                 ( false                                         )
+    //, bOverride_AdaptativeStep       ( false                                         )
+    //, bOverride_InterpolationType    ( false                                         )
     , SmoothingMethod                ( EOdysseySmoothingMethod::kAverage             )
     , SmoothingStrength              ( 10                                            )
     , SmoothingEnabled               ( true                                          )
     , SmoothingRealTime              ( true                                          )
     , SmoothingCatchUp               ( true                                          )
-    , Step                           ( 20                                            )
-    , AdaptativeStep                 ( true                                          )
-    , InterpolationType              ( EOdysseyInterpolationType::kCatmullRom   )
+    //, Step                           ( 20                                            )
+    //, AdaptativeStep                 ( true                                          )
+    //, InterpolationType              ( EOdysseyInterpolationType::kCatmullRom   )
 {}
 
 void
@@ -42,10 +42,10 @@ UOdysseyFreehandShapeOverrides::Override(UOdysseyFreehandShape* iFreehandShape) 
 
     if(bOverride_SmoothingEnabled)
         FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingEnabled", SmoothingEnabled);
-    if (bOverride_Step)
+    /*if ( bOverride_Step )
         FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "Step", Step);
     if (bOverride_AdaptativeStep)
         FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "AdaptativeStep", AdaptativeStep);
     if (bOverride_InterpolationType)
-        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "InterpolationType", InterpolationType);
+        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "InterpolationType", InterpolationType);*/
 }

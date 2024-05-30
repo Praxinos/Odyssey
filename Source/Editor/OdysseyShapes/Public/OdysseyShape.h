@@ -44,11 +44,8 @@ class ODYSSEYSHAPES_API UOdysseyShape : public UObject
     GENERATED_BODY()
 
 public:
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathBegin, const FOdysseyPoint&);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathTo, const TArray<FOdysseyPoint>&);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathEnd, const FOdysseyPoint&);
-    DECLARE_MULTICAST_DELEGATE(FOnPathAbort);
-    DECLARE_MULTICAST_DELEGATE(FOnPathReset);
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInteractive, const TArray<FOdysseyPoint>& /*iPoints*/, bool /*iReset*/);
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCommit, const TArray<FOdysseyPoint>& /*iPoints*/, bool /*iReset*/);
 
 public:
     // Destructor
@@ -63,6 +60,8 @@ public:
     virtual bool OnKeyDown(const FKey& iKey);
     virtual bool OnKeyUp(const FKey& iKey);
 
+    virtual void Abort();
+
     // Tick
     virtual void Tick(float iDeltaTime);
     
@@ -70,43 +69,29 @@ public:
     virtual void ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<UObject>>& iOverrides);
 
     void SetHUD( TSharedPtr<FOdysseyHUDElement> iHUD );
-    virtual float GetStep() const;
-    virtual bool AbortShape();
-
-    //virtual void Draw( ::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions ); //Draw this shape onto a block
 
 public:
     // Getters
-    FOnPathBegin& OnPathBeginDelegate() { return mOnPathBeginDelegate; }
-    FOnPathTo& OnPathToDelegate() { return mOnPathToDelegate; }
-    FOnPathEnd& OnPathEndDelegate() { return mOnPathEndDelegate; }
-    FOnPathAbort& OnPathAbortDelegate() { return mOnPathAbortDelegate; }
-    FOnPathReset& OnPathResetDelegate() { return mOnPathResetDelegate; }
-
+    FOnInteractive& OnInteractive() { return mOnInteractive; }
+    FOnCommit& OnCommit() { return mOnCommit; }
+    FSimpleMulticastDelegate& OnAbort() { return mOnAbort; }
 
 public:
     //Property to hide the step property depending on how the shape is used. If used in a primitive tool, step is irrelevant and is hidden. Else, it is visible and editable
     //The EditCondition property here should always be false, else, IsPrimitive will always be visible as a checkbox next to Step for some reason. So... Yeah.
-    UPROPERTY(EditAnywhere, Category = "Shape", meta = (EditCondition = "1==0", EditConditionHides))
-    bool IsPrimitive = false;
+    //UPROPERTY(EditAnywhere, Category = "Shape", meta = (EditCondition = "1==0", EditConditionHides))
+    //bool IsPrimitive = false;
 
-    UPROPERTY(EditInstanceOnly, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority="0"), meta = (EditCondition = "!IsPrimitive", EditConditionHides))
-    float   Step = 1.0;
+    //UPROPERTY(EditInstanceOnly, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority="0"), meta = (EditCondition = "!IsPrimitive", EditConditionHides))
+    //float   Step = 1.0;
 
-    UPROPERTY(EditAnywhere, Category = "Shape")
-    bool Uniform = false;
+    //UPROPERTY(EditAnywhere, Category = "Shape")
+    //bool Uniform = false;
 
 protected:
-    // protected Data Members
-
-    //---
-
-    //Internal
-    FOnPathBegin                        mOnPathBeginDelegate;
-    FOnPathTo                           mOnPathToDelegate;
-    FOnPathEnd                          mOnPathEndDelegate;
-    FOnPathAbort                        mOnPathAbortDelegate;
-    FOnPathReset                        mOnPathResetDelegate;
+    FOnInteractive mOnInteractive;
+    FOnCommit mOnCommit;
+    FSimpleMulticastDelegate mOnAbort;
 
 protected:
     //Borrowed HUD from the tool
