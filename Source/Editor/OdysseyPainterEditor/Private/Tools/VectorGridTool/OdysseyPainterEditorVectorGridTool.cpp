@@ -72,7 +72,7 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorGroupPaint* iScen
 
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
@@ -168,7 +168,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
                 mGridHUD->Deform();
 
                 // update invalidated objects
-                iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+                iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
             }
         }
     }
@@ -192,7 +192,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
             mGridHUD->EndSelectionRectangle( FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
         mMultipleSelectionMode = false;
     }

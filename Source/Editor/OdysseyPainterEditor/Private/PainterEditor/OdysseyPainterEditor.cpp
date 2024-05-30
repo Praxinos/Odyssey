@@ -925,7 +925,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyPainterEditor* iEditor, FOd
         transformedObject->ApplyTransformations();
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -974,7 +974,7 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyV
         vectorEngine->ClearObjectSelection();
         vectorEngine->SelectObject( paintGroup );
 
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     vectorEngine->ResetHUD();
@@ -1024,7 +1024,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGr
             vectorEngine->ClearObjectSelection();
 
             iScene->UpdateMatrix();
-            iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+            iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         }
     }
 
@@ -1097,7 +1097,7 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
         }
         GEditor->EndTransaction();
 
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
         vectorEngine->ClearObjectSelection();
         vectorEngine->SelectObject( group );
@@ -1253,7 +1253,7 @@ FOdysseyPainterEditor::LockPointSelection( FOdysseyPainterEditor* iEditor, FOdys
         vertex->SetLocked( true );
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // updated invalidated objects
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -1294,7 +1294,7 @@ FOdysseyPainterEditor::UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOd
         vertex->SetLocked( false );
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // updated invalidated objects
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -1336,7 +1336,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyPainterEditor* iEditor, FO
         vertex->SetHandleAligned( false );
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // updated invalidated objects
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -1382,7 +1382,7 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdy
         vertex->SetHandleAligned( true );
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // updated invalidated objects
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -1439,7 +1439,7 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyPainterEditor* iEditor, FOd
         path->GetParent()->RemoveChild( path );
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // updated invalidated objects
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // updated invalidated objects
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-point-selection","Delete Point Selection"));
@@ -1496,7 +1496,7 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVe
     }
     GEditor->EndTransaction();
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -1547,7 +1547,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
     }
     GEditor->EndTransaction();
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // call callbacks if any (for refreshing GUI e.g)
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
@@ -1617,7 +1617,7 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
     }
     GEditor->EndTransaction();
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // call callbacks if any (for refreshing GUI e.g)
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
@@ -1674,7 +1674,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyV
 
     FOdysseyVectorEngine::FlipObjectsHorizontal( objectList );
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -1708,7 +1708,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyPainterEditor* iEditor, FOdysseyVec
 
     FOdysseyVectorEngine::FlipObjectsVertical( objectList );
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -1770,7 +1770,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyPainterEditor* iEditor, FOdysseyVe
     GEditor->EndTransaction();
 
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // re-colorize paint group
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // re-colorize paint group
 
     vectorEngine->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -1806,7 +1806,7 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyPainterEditor* iEditor, FOdysseyVec
         GEditor->EndTransaction();
     }
 
-    scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // re-colorize paint group
+    scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // re-colorize paint group
 
     scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -1847,7 +1847,7 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
 
     //for( )
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 static void
@@ -1872,7 +1872,7 @@ SetBucketPropagation( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBuc
 
     iBucket->SetPropagated( iPropagate );
 
-    scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 }
@@ -1952,7 +1952,7 @@ FOdysseyPainterEditor::PasteTransformation( FOdysseyPainterEditor* iEditor, FOdy
         selectedObject->UpdateMatrix();
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     vectorEngine->ResetHUD();
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
@@ -2028,7 +2028,7 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVec
         vectorEngine->SelectObject( pastedObject );
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     vectorEngine->ResetHUD();
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
@@ -2058,7 +2058,7 @@ FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
     }
 
     iDestinationScene->UpdateMatrix();
-    iDestinationScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iDestinationScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
 }
@@ -2132,7 +2132,7 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED

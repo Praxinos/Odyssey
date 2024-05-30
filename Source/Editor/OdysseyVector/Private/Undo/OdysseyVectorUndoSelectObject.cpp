@@ -32,7 +32,7 @@ FOdysseyVectorUndoSelectObject::Apply( UObject* iIgnored )
     mSelectedObjectList = selectedObjectList;
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -59,7 +59,7 @@ FOdysseyVectorUndoSelectObject::Revert( UObject* iIgnored )
     mSelectedObjectList = selectedObjectList;
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

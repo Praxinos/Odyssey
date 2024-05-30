@@ -180,6 +180,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void Interpolate();
         void DrawPathsInbetween( uint32 iInbetweenIndex
                                , BLContext* iBLContext );
+        void DrawPathsTarget( BLContext* iBLContext );
         std::vector<FInbetweenerGridCell>& GetGridCellBuffer();
         std::vector<FInbetweenerGridPoint>& GetGridPointBuffer();
         uint32 GetInbetweenCount();
@@ -215,9 +216,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void FFDComputeBinomialCoefficients();
         ::ULIS::FVec2D FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint );
         void FFDDeformPaths( uint32 iPositionIndex );
-        void InterpolateInbetween( uint32 iInbetweenIndex );
+        void InterpolateGeometry( uint32 iInbetweenIndex );
+        void InterpolateTransform( uint32 iInbetweenIndex );
         void Reset( bool iResetGridShape );
         void AllocBuffers();
+        void DrawPathAt( FInterpolatedPath* iInterpolatedPath
+                       , ::ULIS::FVec2D* iPointPositionBuffer
+                       , const BLMatrix2D& iWorldMatrix
+                       , BLContext* iBLContext );
 
 
     public:

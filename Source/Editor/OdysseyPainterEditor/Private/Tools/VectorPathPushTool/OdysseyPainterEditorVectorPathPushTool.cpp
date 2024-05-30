@@ -44,7 +44,7 @@ uint64
 UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
      return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
@@ -280,7 +280,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
 
         // update vector scene and GUI widgets via delegates.
-        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
@@ -297,7 +297,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPai
     {
         FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
 
         vectorEngine->ResetHUD();
     }

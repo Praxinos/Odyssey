@@ -319,7 +319,7 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     }
 
     destinationScene->UpdateMatrix();
-    destinationScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    destinationScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
 }

@@ -42,7 +42,7 @@ FOdysseyVectorUndoChartAlter::Apply( UObject* iIgnored )
     mChart = swapChart;
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -68,7 +68,7 @@ FOdysseyVectorUndoChartAlter::Revert( UObject* iIgnored )
     mChart = swapChart;
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

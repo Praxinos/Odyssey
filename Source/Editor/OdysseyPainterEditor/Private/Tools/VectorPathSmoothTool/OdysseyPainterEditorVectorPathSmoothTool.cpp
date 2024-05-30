@@ -48,7 +48,7 @@ uint64
 UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
@@ -165,7 +165,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
             }
         }
 
-        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
@@ -185,7 +185,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
         std::vector<FOdysseyVectorPoint*> pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
         FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
 
         vectorEngine->ResetHUD();
     }

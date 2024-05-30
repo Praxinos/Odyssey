@@ -120,7 +120,7 @@ FOdysseyVectorEngine::SetScene( FOdysseyVectorGroupPaint* iScene )
     ResetHUD();
 
     mScene->UpdateMatrix();
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 FOdysseyVectorGroupPaint*
@@ -1493,7 +1493,7 @@ FOdysseyVectorEngine::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
         }
 
         // update paths and detect cycles for bucket matching
-        paintGroup->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        paintGroup->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
         // extract buckets if over
         for( FOdysseyVectorGroupPaint* parentPaintGroup : parentPaintGroupArray )

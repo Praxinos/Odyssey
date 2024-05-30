@@ -51,7 +51,7 @@ UOdysseyPainterEditorVectorChartTool::LoadVector( FOdysseyVectorGroupPaint* iSce
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }

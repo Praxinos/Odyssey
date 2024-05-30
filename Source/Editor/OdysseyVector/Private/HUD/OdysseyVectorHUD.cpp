@@ -485,7 +485,7 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
 
     iBLContext->setStrokeWidth( 3.0f );
 
-    iInbetweenerTag->DrawPathsInbetween( iInbetweenerTag->GetInbetweenCount(), iBLContext );
+    iInbetweenerTag->DrawPathsTarget( iBLContext );
 
     iBLContext->restore();
 }

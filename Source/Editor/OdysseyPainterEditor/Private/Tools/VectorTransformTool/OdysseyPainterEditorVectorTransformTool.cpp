@@ -67,7 +67,7 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
     mTransformHUD->CenterGizmo();
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
@@ -311,7 +311,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                           , translateMatrix );
         }
 
-        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
 
         // update the selection box with the newly modified matrices
         iEngine->ResetHUD();
@@ -389,7 +389,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         // Update the matrix for all objects
         //iScene->UpdateMatrix();
 
-        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
 
         // update the selection box with the newly modified matrices
         iEngine->ResetHUD();
@@ -466,7 +466,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
               return 0;
           } );
 
-        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
 
         // update the selection box with the newly modified matrices
         iEngine->ResetHUD();
@@ -615,7 +615,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
     // Update the matrix for all objects
     //iScene->UpdateMatrix();
 
-    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
+    iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
 
     // update the selection box with the newly modified matrices
     iEngine->ResetHUD();
@@ -922,7 +922,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                 GEditor->EndTransaction();
             }
 
-            iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+            iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
             // quick fix to place the gizmo at the right place
             FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();

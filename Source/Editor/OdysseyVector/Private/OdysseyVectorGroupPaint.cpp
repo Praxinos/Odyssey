@@ -966,7 +966,7 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
         mCanevasPath.Update( 0 );
 
         if( ( bRealtime == true  )
-       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
+       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATE_PAINTGROUPS ) ) )
         {
             /*std::for_each( std::execution::par_unseq
                           , mPathList.begin()
@@ -1041,7 +1041,7 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
     if( bPainted )
     {
         if( ( bRealtime == true  )
-       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
+       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATE_PAINTGROUPS ) ) )
         {
             if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
              || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
@@ -2463,7 +2463,7 @@ FOdysseyVectorGroupPaint::AlterContourWidth( double iValue, bool iAbsolute )
     {
         SetIntersectsCanevas( false );
 
-        Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     // set indexes for later fill the array
@@ -2508,7 +2508,7 @@ FOdysseyVectorGroupPaint::AlterContourWidth( double iValue, bool iAbsolute )
     {
         SetIntersectsCanevas( true );
 
-        Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 }
 /*

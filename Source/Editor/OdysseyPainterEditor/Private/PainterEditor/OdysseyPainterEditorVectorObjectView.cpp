@@ -156,7 +156,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
                                      , PropertyChangedEvent.MemberProperty->GetFName()
                                      , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
-        mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
         mScene->GetEngine()->Signal( signalFlags );
     }

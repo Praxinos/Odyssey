@@ -47,7 +47,7 @@ UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorGroupPaint*
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
@@ -153,7 +153,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
             }
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
         mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
     }

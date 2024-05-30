@@ -67,7 +67,7 @@ uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
@@ -315,7 +315,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             GEditor->EndTransaction();
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidate objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidate objects
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

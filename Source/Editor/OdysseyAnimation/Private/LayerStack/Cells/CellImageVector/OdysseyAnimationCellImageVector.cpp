@@ -249,7 +249,7 @@ FOdysseyAnimationCellImageVector::CreateCellFromFrame(uint32 iFrameIndex) const
     FOdysseyVectorGroupPaint* newScene = static_cast<FOdysseyVectorGroupPaint*>(mEngine->GetScene()->Copy());
     cell->GetEngine()->SetScene(newScene);
     newScene->UpdateMatrix();
-    newScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    newScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return cell;
 }

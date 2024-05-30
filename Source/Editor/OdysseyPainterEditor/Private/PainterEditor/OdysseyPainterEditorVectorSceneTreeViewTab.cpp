@@ -59,7 +59,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdyss
     {
         mScene = iScene;
 
-        if( mEditor->GetVectorHUDFlags() == FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
             FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
 

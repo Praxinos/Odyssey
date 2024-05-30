@@ -516,7 +516,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         FOdysseyVectorEngine* engine = vectorCell->GetEngine();
         FOdysseyVectorGroupPaint* scene = engine->GetScene();
         scene->UpdateMatrix();
-        scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         engine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
     }
 }

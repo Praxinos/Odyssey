@@ -29,7 +29,8 @@ enum class eTracingFidelity: uint8
     Low     =  8,
     Average =  6,
     High    =  4,
-    Highest =  2
+    Highest =  2,
+    PixelPerfect =  1
 };
 
 UCLASS()

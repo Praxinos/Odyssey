@@ -1232,7 +1232,7 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
     iScene->AppendChild( ellipse->Convert() );
 
     iScene->UpdateMatrix();
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 EMouseCursor::Type
