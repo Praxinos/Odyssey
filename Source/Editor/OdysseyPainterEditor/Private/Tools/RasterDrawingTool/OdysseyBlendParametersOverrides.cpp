@@ -13,16 +13,3 @@ UOdysseyBlendParametersOverrides::UOdysseyBlendParametersOverrides()
     , BlendingMode          ( EOdysseyBlendingMode::kNormal                 )
     , AlphaMode             ( EOdysseyAlphaMode::kNormal                    )
 {}
-
-void
-UOdysseyBlendParametersOverrides::Override(FOdysseyBlendParameters& iBendParameters) const
-{
-    if (bOverride_Opacity)
-        iBendParameters.Opacity = Opacity;
-
-    if (bOverride_BlendingMode)
-        iBendParameters.BlendingMode = BlendingMode;
-    
-    if (bOverride_AlphaMode)
-        iBendParameters.AlphaMode = AlphaMode;
-}

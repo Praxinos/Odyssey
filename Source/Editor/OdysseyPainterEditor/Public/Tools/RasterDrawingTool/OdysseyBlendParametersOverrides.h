@@ -16,9 +16,11 @@ UCLASS(meta=(DisplayName="Blend Parameters"))
 class ODYSSEYPAINTEREDITOR_API UOdysseyBlendParametersOverrides : public UObject
 {
     GENERATED_BODY()
-
+    
+public:
     UOdysseyBlendParametersOverrides();
 
+public:
     /** Enable Modifier Opacity Override. */
     UPROPERTY( EditAnywhere, Category = "Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Opacity;
@@ -44,8 +46,4 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyBlendParametersOverrides : public UObject
     /** Modifier AlphaMode Override Value. */
     UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( editcondition = "bOverride_AlphaMode" ) )
     EOdysseyAlphaMode       AlphaMode;
-
-public:
-    //Applies the Overrides to the given object
-    void Override(FOdysseyBlendParameters& iBlendParameters) const;
 };

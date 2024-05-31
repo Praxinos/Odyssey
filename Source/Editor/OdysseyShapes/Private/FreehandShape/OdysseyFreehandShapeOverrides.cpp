@@ -22,30 +22,5 @@ UOdysseyFreehandShapeOverrides::UOdysseyFreehandShapeOverrides()
     , SmoothingCatchUp               ( true                                          )
     , Step                           ( 20                                            )
     , AdaptativeStep                 ( true                                          )
-    , InterpolationType              ( EOdysseyInterpolationType::kCatmullRom   )
+    , InterpolationType              ( EOdysseyInterpolationType::kCatmullRom        )
 {}
-
-void
-UOdysseyFreehandShapeOverrides::Override(UOdysseyFreehandShape* iFreehandShape) const
-{
-    FOdysseySmoothingOptions smoothingOptions = iFreehandShape->GetSmoothingOptions();
-    if(bOverride_SmoothingMethod)
-        smoothingOptions.SmoothingMethod = SmoothingMethod;
-    if(bOverride_SmoothingStrength)
-        smoothingOptions.SmoothingStrength = SmoothingStrength;
-    if(bOverride_SmoothingRealTime)
-        smoothingOptions.SmoothingRealTime = SmoothingRealTime;
-    if(bOverride_SmoothingCatchUp)
-        smoothingOptions.SmoothingCatchUp = SmoothingCatchUp;
-    
-    FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingOptions", smoothingOptions);
-
-    if(bOverride_SmoothingEnabled)
-        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "SmoothingEnabled", SmoothingEnabled);
-    if (bOverride_Step)
-        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "Step", Step);
-    if (bOverride_AdaptativeStep)
-        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "AdaptativeStep", AdaptativeStep);
-    if (bOverride_InterpolationType)
-        FOdysseyObjectEditorUtils::SetPropertyValue(iFreehandShape, "InterpolationType", InterpolationType);
-}

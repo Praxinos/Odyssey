@@ -105,11 +105,11 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationCatmullRom::ComputePoints()
         mLastDrawnLength += (float)drawn_steps * mStep;
     }
 
-    if (mTotalStrokeLength < 1.f)
+    /* if ( mTotalStrokeLength < 1.f )
     {
         mLastDrawnLength = 0.f;
         mResultPoints.Add(mInputPoints[1]);
-    }
+    } */
 
     mInputPoints.RemoveAt(0, 1);
 

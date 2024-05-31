@@ -64,11 +64,5 @@ FOdysseyPainterEditorBrushContext::GetStep()
     if (!drawingTool)
         return 0.f;
 
-    if( drawingTool->GetSelectedShapeInstance() )
-        return drawingTool->GetSelectedShapeInstance()->GetStep();
-    UOdysseyFreehandShape* freehandShape = Cast<UOdysseyFreehandShape>(drawingTool->GetSelectedShapeInstance());
-    if (!freehandShape)
-        return 1.f;
-
-    return  freehandShape->GetStep();
+    return drawingTool->Step;
 }

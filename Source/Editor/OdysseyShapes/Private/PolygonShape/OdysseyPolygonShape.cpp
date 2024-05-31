@@ -14,132 +14,96 @@ UOdysseyPolygonShape::~UOdysseyPolygonShape()
 
 UOdysseyPolygonShape::UOdysseyPolygonShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
-    //Internal
-    , mRawStroke()
-    , mHasStrokeBegun( false )
 {
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------- Mouse Events
 
-void
-UOdysseyPolygonShape::RebuildHandles()
-{
-    mHandles.Empty();
-    mPolygon->EmptyElements();
-
-    TArray<FVector2D>& points = mPolygon->GetPoints();
-    if (points.IsEmpty())
-        return;
-
-    TSharedPtr<FOdysseyHUDHandle> handle = MakeShared<FOdysseyHUDHandle>(points[0]);
-    handle->IsPositionLocked(true);
-    handle->OnDragEnd().AddUObject(this, &UOdysseyPolygonShape::OnFirstHandleDragEnd);
-    mHandles.Add(handle);
-    mPolygon->AddElement(handle);
-
-    for (int i = 1; i < points.Num(); i++)
-    {
-        handle = MakeShared<FOdysseyHUDHandle>(points[i]);
-        handle->IsInteractable(false);
-        mHandles.Add(handle);
-        mPolygon->AddElement(handle);
-    }
-}
-
 bool
 UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (!mHasStrokeBegun)
+    if (!mIsDrawing)
     {
-        mHasStrokeBegun = true;
-        mRawStroke.Empty();
+        mIsDrawing = true;
 
-        mPolygon = MakeShared<FOdysseyHUDPolygon>();
-        mPolygon->ClosePolygon(false);
-        mPolygon->GetPoints().Add( iPointInTexture );
+        //Polygon Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
+        FOdysseyPoint point(iPointInTexture.x, iPointInTexture.y);
 
-        mHUD->AddElement(mPolygon);
+        mPoints.Add(point);
 
-        RebuildHandles();
-        return true;
+        CreateHUD();
     }
-
     return true;
-}
-
-void
-UOdysseyPolygonShape::OnFirstHandleDragEnd()
-{
-    if (mHandles.Num() <= 2)
-    {
-        AbortShape();
-        return;
-    }
-
-    CommitPolygon();
-}
-
-bool
-UOdysseyPolygonShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    if (mHasStrokeBegun)
-    {
-        mPolygon->GetPoints().Add( iPointInTexture);
-        RebuildHandles();
-        return true;
-    }
-
-    return false;
 }
 
 void
 UOdysseyPolygonShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    if (mHasStrokeBegun)
+    if (mIsDrawing)
     {
-        FOdysseyPoint point = iPointInTexture;
-        if (Uniform)
+        //Polygon Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
+        mPoints.Last() = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
+        if (mSnapAngles)
         {
-            int num = mPolygon->GetPoints().Num() - 2; 
-            int shiftX = FMath::Abs(iPointInTexture.x - mPolygon->GetPoints()[num].X);
-            int shiftY = FMath::Abs(iPointInTexture.y - mPolygon->GetPoints()[num].Y);
+            int num = mPoints.Num() - 2; 
+            int shiftX = FMath::Abs(iPointInTexture.x - mPoints[num].x);
+            int shiftY = FMath::Abs(iPointInTexture.y - mPoints[num].y);
 
             if (shiftX > shiftY)
-                point.y = mPolygon->GetPoints()[num].Y;
+                mPoints.Last().y = mPoints[num].y;
             else
-                point.x = mPolygon->GetPoints()[num].X;
+                mPoints.Last().x = mPoints[num].x;
         }
-        mPolygon->GetPoints().Last() = point;
-        mHandles.Last()->SetPosition(point);
+
+        SetLastHUDPoint(mPoints.Last());
+
+        mOnInteractive.Broadcast( mPoints );
     }
         
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
 
+bool
+UOdysseyPolygonShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    if (!mIsDrawing)
+        return UOdysseyShape::OnMouseUp(iPointInTexture, iKey);
+
+    FOdysseyPoint point(iPointInTexture.x, iPointInTexture.y);
+
+    mPoints.Add( point );
+    AddPointToHUD(point);
+
+    mOnInteractive.Broadcast( mPoints );
+    return true;
+}
+
 void
 UOdysseyPolygonShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if( mHasStrokeBegun )
+    if (!mIsDrawing)
+        return UOdysseyShape::OnMouseDrag(iPointInTexture);
+
+    //Polygon Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
+    mPoints.Last() = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
+    if (mSnapAngles && mPoints.Num() > 1)
     {
-        FOdysseyPoint point = iPointInTexture;
-        if (Uniform)
-        {
-            int num = mPolygon->GetPoints().Num() - 2; 
-            int shiftX = FMath::Abs(iPointInTexture.x - mPolygon->GetPoints()[num].X);
-            int shiftY = FMath::Abs(iPointInTexture.y - mPolygon->GetPoints()[num].Y);
+        int num = mPoints.Num() - 2; 
+        int shiftX = FMath::Abs(iPointInTexture.x - mPoints[num].x);
+        int shiftY = FMath::Abs(iPointInTexture.y - mPoints[num].y);
 
-            if (shiftX > shiftY)
-                point.y = mPolygon->GetPoints()[num].Y;
-            else
-                point.x = mPolygon->GetPoints()[num].X;
-        }
-        mPolygon->GetPoints().Last() = point;
-        mHandles.Last()->SetPosition(point);
-
-        UOdysseyShape::OnMouseDrag(iPointInTexture);
+        if (shiftX > shiftY)
+            mPoints.Last().y = mPoints[num].x;
+        else
+            mPoints.Last().x = mPoints[num].y;
     }
+    
+    SetLastHUDPoint(mPoints.Last());
+
+    mOnInteractive.Broadcast( mPoints );
+
+    UOdysseyShape::OnMouseDrag(iPointInTexture);
 }
 
 bool
@@ -147,13 +111,21 @@ UOdysseyPolygonShape::OnKeyDown(const FKey& iKey)
 {
     if (iKey == EKeys::Escape)
     {
-        return AbortShape();
+        Abort();
+        return true;
     }
-    else if( iKey == EKeys::Enter )
+    
+    if( iKey == EKeys::Enter )
     {
         CommitPolygon();
         return true;
     }
+
+    if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
+	{
+		mSnapAngles = true;
+		return true;
+	}
 
     return UOdysseyShape::OnKeyDown(iKey);
 }
@@ -161,93 +133,112 @@ UOdysseyPolygonShape::OnKeyDown(const FKey& iKey)
 bool
 UOdysseyPolygonShape::OnKeyUp(const FKey& iKey)
 {
+    if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
+    {
+        mSnapAngles = false;
+		return true;
+    }
+
     return UOdysseyShape::OnKeyUp(iKey);
 }
 
-/*void UOdysseyPolygonShape::Draw(::ULIS::FBlock* iBlock, FOdysseyShapeDrawOptions& iOptions)
+void
+UOdysseyPolygonShape::CommitPolygon()
 {
-    if (!iBlock)
+    mIsDrawing = false;
+
+    if ( mPoints.Num() <= 2 )
+    {
+        Abort();
         return;
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-
-    if (iOptions.mPrecision == EOdysseyDrawingPrecision::kRaw)
-    {
-        std::vector< ::ULIS::FVec2I > points;
-        for (int i = 0; i < mPolygon->GetPoints().Num(); i++)
-        {
-            points.push_back(::ULIS::FVec2I(mPolygon->GetPoints()[i].X, mPolygon->GetPoints()[i].Y));
-        }
-        
-        ctx.DrawPolygon(*(iBlock), points, iOptions.mColor, iOptions.mFilled );
-    }
-    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kAA)
-    {
-        std::vector< ::ULIS::FVec2I > points;
-        for (int i = 0; i < mPolygon->GetPoints().Num(); i++)
-        {
-            points.push_back(::ULIS::FVec2I(mPolygon->GetPoints()[i].X, mPolygon->GetPoints()[i].Y));
-        }
-
-        ctx.DrawPolygonAA(*(iBlock), points, iOptions.mColor, iOptions.mFilled);
-    }
-    else if (iOptions.mPrecision == EOdysseyDrawingPrecision::kSP)
-    {
-        std::vector< ::ULIS::FVec2F > points;
-        for (int i = 0; i < mPolygon->GetPoints().Num(); i++)
-        {
-            points.push_back(::ULIS::FVec2F(mPolygon->GetPoints()[i].X, mPolygon->GetPoints()[i].Y));
-        }
-
-        ctx.DrawPolygonSP(*(iBlock), points, iOptions.mColor, iOptions.mFilled);
     }
 
-    ctx.Finish();
-}*/
+    //The lastPoint is always a temporary point, so we remove it before commiting
+    mPoints.RemoveAt(mPoints.Num() - 1);
 
-void UOdysseyPolygonShape::CommitPolygon()
-{
-    if( mHasStrokeBegun )
-    {
-        ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-        std::vector<::ULIS::FVec2I> polygonPoints;
+    //We close the polygon by adding the first point again
+    mPoints.Emplace(mPoints[0]);
 
-        for (const FVector2D& point : mPolygon->GetPoints())
-            polygonPoints.push_back(::ULIS::FVec2I(point.X, point.Y));
+    mOnCommit.Broadcast( mPoints, true);
 
-        ::ULIS::GeneratePolygonPoints(polygonPoints, pointsArray);
+    mPoints.Empty();
 
-        FOdysseyPoint pointToAdd = FOdysseyPoint::DefaultPoint();
-        for (float i = 0.f; i < pointsArray.Size(); i+=Step)
-        {
-            pointToAdd.x = pointsArray[i].x;
-            pointToAdd.y = pointsArray[i].y;
-            mRawStroke.Add(pointToAdd);
-        }
-        if (mRawStroke.Num() != 0)
-        {
-            mOnPathBeginDelegate.Broadcast(mRawStroke[0]);
-            mOnPathToDelegate.Broadcast(mRawStroke);
-            mOnPathEndDelegate.Broadcast({ mRawStroke.Last() });
-        }
-        else
-        {
-            AbortShape();
-        }
-        mHasStrokeBegun = false;
-        mHandles.Empty();
-        mPolygon = nullptr;
-    }
+    //HUD
+    RemoveHUD();
 }
 
-bool UOdysseyPolygonShape::AbortShape()
+void
+UOdysseyPolygonShape::Abort()
 {
-    if( mHasStrokeBegun )
+    mIsDrawing = false;
+    mOnAbort.Broadcast();
+
+    mPoints.Empty();
+
+    //HUD
+    RemoveHUD();
+}
+
+void
+UOdysseyPolygonShape::OnFirstHandleDragEnd()
+{
+    CommitPolygon();
+}
+
+void
+UOdysseyPolygonShape::CreateHUD()
+{   
+    mPolygonHUD = MakeShared<FOdysseyHUDPolygon>();
+    mPolygonHUD->ClosePolygon(false);
+    mPolygonHUD->GetPoints().Append(mPoints);
+
+    mHUD->AddElement(mPolygonHUD);
+    RebuildHandleHUDs();
+}
+
+void
+UOdysseyPolygonShape::SetLastHUDPoint(const FOdysseyPoint& iPoint)
+{
+    mPolygonHUD->GetPoints().Last() = iPoint;
+    mHandleHUDs.Last()->SetPosition(iPoint);
+}
+
+void
+UOdysseyPolygonShape::AddPointToHUD(const FOdysseyPoint& iPoint)
+{
+    mPolygonHUD->GetPoints().Add(iPoint);
+    RebuildHandleHUDs();
+}
+
+void
+UOdysseyPolygonShape::RemoveHUD()
+{
+    mHUD->RemoveElement(mPolygonHUD);
+    mPolygonHUD = nullptr;
+    mHandleHUDs.Empty();
+}
+
+void
+UOdysseyPolygonShape::RebuildHandleHUDs()
+{
+    mHandleHUDs.Empty();
+    mPolygonHUD->EmptyElements();
+
+    TArray<FVector2D>& points = mPolygonHUD->GetPoints();
+    if (points.IsEmpty())
+        return;
+
+    TSharedPtr<FOdysseyHUDHandle> handle = MakeShared<FOdysseyHUDHandle>(points[0]);
+    handle->IsPositionLocked(true);
+    handle->OnDragEnd().AddUObject(this, &UOdysseyPolygonShape::OnFirstHandleDragEnd);
+    mHandleHUDs.Add(handle);
+    mPolygonHUD->AddElement(handle);
+
+    for (int i = 1; i < points.Num(); i++)
     {
-        mHasStrokeBegun = false;
-        mHandles.Empty();
-        mPolygon = nullptr;
-        return UOdysseyShape::AbortShape();
+        handle = MakeShared<FOdysseyHUDHandle>(points[i]);
+        handle->IsInteractable(false);
+        mHandleHUDs.Add(handle);
+        mPolygonHUD->AddElement(handle);
     }
-    return false;
 }

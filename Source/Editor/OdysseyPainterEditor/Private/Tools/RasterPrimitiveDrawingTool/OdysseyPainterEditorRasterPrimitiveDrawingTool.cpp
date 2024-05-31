@@ -45,10 +45,10 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrim
     AvailableShapes.Add(EOdysseyShape::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::EllipseShape"));
     AvailableShapes.Add(EOdysseyShape::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::BezierShape"));
 
-    for (const auto& Shape : AvailableShapes)
+    /* for (const auto& Shape : AvailableShapes)
     {
         Shape.Value->IsPrimitive = true;
-    }
+    } */
 
     SelectedShapeInstance = AvailableShapes[SelectedShape];
 }
@@ -59,11 +59,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::CreateShape(FName iName)
 {
     T* shape = CreateDefaultSubobject<T>(iName, true);
 
-    shape->OnPathBeginDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathBegin);
-    shape->OnPathToDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathTo);
-    shape->OnPathEndDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd);
-    shape->OnPathAbortDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathAbort);
-    shape->OnPathResetDelegate().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathReset);
+    shape->OnCommit().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit);
 
     shape->SetHUD(mShapeHUD);
 
@@ -93,7 +89,19 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdyssey
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
     mPaintEngine.RasterBlock(rasterBlock);
 
-    return SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
+    FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x);
+        point.y = FMath::Floor(point.y);
+        if (!Filled)
+        {
+            point.x += 0.5f;
+            point.y += 0.5f;
+        }
+    }
+
+    return SelectedShapeInstance->OnMouseDown(point, iKey);
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
@@ -111,7 +119,19 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysse
     if (mediaRasters.Num() <= 0)
         return;
 
-    SelectedShapeInstance->OnMouseHover( iPointInTexture );
+    FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x);
+        point.y = FMath::Floor(point.y);
+        if (!Filled)
+        {
+            point.x += 0.5f;
+            point.y += 0.5f;
+        }
+    }
+
+    SelectedShapeInstance->OnMouseHover( point );
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
@@ -129,7 +149,19 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdyssey
     if (mediaRasters.Num() <= 0)
         return;
 
-    SelectedShapeInstance->OnMouseDrag(iPointInTexture);
+    FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x);
+        point.y = FMath::Floor(point.y);
+        if (!Filled)
+        {
+            point.x += 0.5f;
+            point.y += 0.5f;
+        }
+    }
+
+    SelectedShapeInstance->OnMouseDrag(point);
 }
 
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
@@ -147,7 +179,19 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPo
     if (mediaRasters.Num() <= 0)
         return false;
 
-    return SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
+    FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x);
+        point.y = FMath::Floor(point.y);
+        if (!Filled)
+        {
+            point.x += 0.5f;
+            point.y += 0.5f;
+        }
+    }
+
+    return SelectedShapeInstance->OnMouseUp(point, iKey);
 }
 
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnKeyDown(const FKey& iKey)
@@ -219,40 +263,17 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Tick(float iDeltaTime)
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::SelectedShapeChanged()
 {
-    SelectedShapeInstance->AbortShape();
+    SelectedShapeInstance->Abort();
     FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
     mOnShapeChanged.Broadcast();
 }
 
 void
-UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathBegin(const FOdysseyPoint& iPoint)
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset)
 {
-    mPath.Empty();
-    mPath.Add(iPoint);
-}
-
-void
-UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathTo(const TArray<FOdysseyPoint>& iPoints)
-{
-    mPath.Append(iPoints);
-}
-
-void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdysseyPoint& iPoint)
-{
-    mPath.Add(iPoint);
+    mPath = iPoints;
 
     GEditor->BeginTransaction(LOCTEXT("raster-primitive-drawing-tool.transaction.draw-shape", "Draw Primitive Shape"));
-
-    /* FOdysseyShapeDrawOptions options;
-
-    options.mColor = GetEditor()->PaintColor().GetValue();
-    options.mFilled = Filled;
-    options.mPrecision = Precision; */
-
-    //SelectedShapeInstance->Draw(mPaintEngine.PaintBlock().Get(), options);
-
-
-    //START Blend2D version
 
     int w = mPaintEngine.PaintBlock()->Width();
     int h = mPaintEngine.PaintBlock()->Height();
@@ -288,14 +309,14 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
 
     BLPath path;
 
-    if ( SubPixel )
-    {
+    //if ( SubPixel )
+    //{
         path.moveTo(mPath[0].x, mPath[0].y);
         for ( int i = 1; i < mPath.Num(); i++ )
         {
             path.lineTo(mPath[i].x, mPath[i].y);
         }
-    }
+    /* }
     else
     {
         path.moveTo(FMath::Floor(mPath[0].x) + 0.5f, FMath::Floor(mPath[0].y) + 0.5f);
@@ -303,7 +324,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
         {
             path.lineTo(FMath::Floor(mPath[i].x) + 0.5f, FMath::Floor(mPath[i].y) + 0.5f);
         }
-    }
+    } */
 
     if ( !isLine && !isBezier || !isLine && Filled)
     {
@@ -322,7 +343,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
     else
     {
         strokeWidth = StrokeWidth;
-        blend2DCtx.setStrokeStyle(BLRgba32(0, 0, 0, 255));
+        blend2DCtx.setStrokeStyle(blend2DColor);
         blend2DCtx.setStrokeWidth(strokeWidth);
         blend2DCtx.strokePath(path);
     }
@@ -371,77 +392,6 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
     ulisCtx.Blend(*dstBlock, *mPaintEngine.PaintBlock(), dstBlock->Rect(), invalidRect.Position());
     ulisCtx.Finish();
 
-    //END Blend2D version
-
-
-
-
-
-
-
-
-
-
-
-
-    /* ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mPaintEngine.PaintBlock()->Format());
-
-    if (SelectedShapeInstance == AvailableShapes[EOdysseyShape::kLine] && !Filled)
-    {
-        if (Precision == EOdysseyDrawingPrecision::kRaw)
-            ctx.DrawLine(*mPaintEngine.PaintBlock(), ::ULIS::FVec2I(mPath[0].x, mPath[0].y), ::ULIS::FVec2I(mPath.Last().x, mPath.Last().y), GetEditor()->PaintColor().GetValue());
-        else if (Precision == EOdysseyDrawingPrecision::kAA)
-            ctx.DrawLineAA(*mPaintEngine.PaintBlock(), ::ULIS::FVec2I(mPath[0].x, mPath[0].y), ::ULIS::FVec2I(mPath.Last().x, mPath.Last().y), GetEditor()->PaintColor().GetValue());
-        else if (Precision == EOdysseyDrawingPrecision::kSP)
-            ctx.DrawLineSP(*mPaintEngine.PaintBlock(), ::ULIS::FVec2I(mPath[0].x, mPath[0].y), ::ULIS::FVec2I(mPath.Last().x, mPath.Last().y), GetEditor()->PaintColor().GetValue());
-    }
-    else if (SelectedShapeInstance == AvailableShapes[EOdysseyShape::kBezier] && !Filled)
-    {
-        UOdysseyBezierShape* bezierShape = Cast<UOdysseyBezierShape>(SelectedShapeInstance);
-        if (Precision == EOdysseyDrawingPrecision::kRaw)
-            ctx.DrawQuadraticBezier(*mPaintEngine.PaintBlock(), ::ULIS::FVec2I(bezierShape->GetStartPoint().X, bezierShape->GetStartPoint().Y), ::ULIS::FVec2I(bezierShape->GetControlPoint().X, bezierShape->GetControlPoint().Y), ::ULIS::FVec2I(bezierShape->GetEndPoint().X, bezierShape->GetEndPoint().Y), 1.f, GetEditor()->PaintColor().GetValue());
-        else if (Precision == EOdysseyDrawingPrecision::kAA)
-            ctx.DrawQuadraticBezierAA(*mPaintEngine.PaintBlock(), ::ULIS::FVec2I(bezierShape->GetStartPoint().X, bezierShape->GetStartPoint().Y), ::ULIS::FVec2I(bezierShape->GetControlPoint().X, bezierShape->GetControlPoint().Y), ::ULIS::FVec2I(bezierShape->GetEndPoint().X, bezierShape->GetEndPoint().Y), 1.f, GetEditor()->PaintColor().GetValue());
-        else if (Precision == EOdysseyDrawingPrecision::kSP)
-            ctx.DrawQuadraticBezierSP(*mPaintEngine.PaintBlock(), ::ULIS::FVec2I(bezierShape->GetStartPoint().X, bezierShape->GetStartPoint().Y), ::ULIS::FVec2I(bezierShape->GetControlPoint().X, bezierShape->GetControlPoint().Y), ::ULIS::FVec2I(bezierShape->GetEndPoint().X, bezierShape->GetEndPoint().Y), 1.f, GetEditor()->PaintColor().GetValue());
-    }
-    else
-    {
-
-        if (Precision == EOdysseyDrawingPrecision::kRaw)
-        {
-            std::vector< ::ULIS::FVec2I > points;
-            for (int i = 0; i < mPath.Num(); i++)
-            {
-                points.push_back(::ULIS::FVec2I(mPath[i].x, mPath[i].y));
-            }
-            
-            ctx.DrawPolygon(*mPaintEngine.PaintBlock(), points, GetEditor()->PaintColor().GetValue(), Filled );
-        }
-        else if (Precision == EOdysseyDrawingPrecision::kAA)
-        {
-            std::vector< ::ULIS::FVec2I > points;
-            for (int i = 0; i < mPath.Num(); i++)
-            {
-                points.push_back(::ULIS::FVec2I(mPath[i].x, mPath[i].y));
-            }
-
-            ctx.DrawPolygonAA(*mPaintEngine.PaintBlock(), points, GetEditor()->PaintColor().GetValue(), Filled);
-        }
-        else if (Precision == EOdysseyDrawingPrecision::kSP)
-        {
-            std::vector< ::ULIS::FVec2F > points;
-            for (int i = 0; i < mPath.Num(); i++)
-            {
-                points.push_back(::ULIS::FVec2F(mPath[i].x, mPath[i].y));
-            }
-
-            ctx.DrawPolygonSP(*mPaintEngine.PaintBlock(), points, GetEditor()->PaintColor().GetValue(), Filled);
-        }
-    }
-
-    ctx.Finish(); */
-
     mPaintEngine.PaintBlock()->Dirty();
     mPaintEngine.Update(BlendParameters);
 
@@ -454,20 +404,6 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathEnd(const FOdys
         source->RecordCurrentFrameUndo();
 
     GEditor->EndTransaction();
-    mShapeHUD->EmptyElements();
-}
-
-void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathAbort()
-{
-    mPaintEngine.Abort();
-
-    mShapeHUD->EmptyElements();
-}
-
-void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapePathReset()
-{
-    mPaintEngine.Abort();
-
     mShapeHUD->EmptyElements();
 }
 

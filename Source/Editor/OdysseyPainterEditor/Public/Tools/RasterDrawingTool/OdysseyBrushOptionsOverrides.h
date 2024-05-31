@@ -16,8 +16,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyBrushOptionsOverrides : public UObject
 {
     GENERATED_BODY()
 
+public:
     UOdysseyBrushOptionsOverrides();
 
+public:
     /////////////////////////////////////////////////////
     // Enable Overrides
     /** Enable Modifier Size Override. */
@@ -38,8 +40,4 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyBrushOptionsOverrides : public UObject
     /** Modifier Flow Override Value. */
     UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", SliderExponent = "1", editcondition = "bOverride_Flow" ) )
     float  Flow;
-
-public:
-    //Applies the Overrides to the given object
-    void Override(UOdysseyBrushOptions* iBlendParameters) const;
 };

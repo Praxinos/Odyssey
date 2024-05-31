@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "FreehandShape/Smoothing/OdysseySmoothingTypes.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationTypes.h"
 #include "FreehandShape/OdysseyFreehandShape.h"
 
 #include "OdysseyFreehandShapeOverrides.generated.h"
@@ -17,8 +18,10 @@ class ODYSSEYSHAPES_API UOdysseyFreehandShapeOverrides : public UObject
 {
     GENERATED_BODY()
 
+public:
     UOdysseyFreehandShapeOverrides();
 
+public:
     /** Enable Smoohting Method Override. */
     UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
     bool    bOverride_SmoothingMethod;
@@ -86,8 +89,4 @@ class ODYSSEYSHAPES_API UOdysseyFreehandShapeOverrides : public UObject
     /** Interpolation Type Override Value. */
     UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_InterpolationType" ) )
     EOdysseyInterpolationType   InterpolationType;
-
-public:
-    //Applies the Overrides to the given object
-    void Override(UOdysseyFreehandShape* iFreehandShape) const;
 };

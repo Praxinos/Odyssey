@@ -7,9 +7,11 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyShape.h"
 #include "OdysseyPaintEngine.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationTypes.h"
 #include "OdysseyPainterEditorRasterEraserTool.generated.h"
 
 class FOdysseyPaintEngine;
+class IOdysseyInterpolation;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterEraserTool :
@@ -72,19 +74,16 @@ public:
     
 private:
     // Internal - Callbacks
-    void OnShapePathBegin(const FOdysseyPoint& iPoint);
+    void OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints);
+    void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+    void OnShapeAbort();
 
-    void OnShapePathTo(const TArray<FOdysseyPoint>& iPoints);
-
-    void OnShapePathEnd(const FOdysseyPoint& iPoint);
-
-    void OnShapePathAbort();
-    
-    void OnShapePathReset();
-    
     void OnRasterSelectionChanged();
 
     float AdaptShapeStep(float iStep);
+
+    TArray<FOdysseyPoint> InterpolateTo(const FOdysseyPoint& iPoint);
+    void ResetInterpolation();
 
 private:
     TSharedPtr<::ULIS::FBlock> CreateStampBlockMask();
@@ -92,15 +91,6 @@ private:
     void Stamp(const FOdysseyPoint& iPoint);
 
 protected:
-    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1", DisplayPriority="1" ) )
-    float   Size = 20.f;
-
-    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
-    float   Flow = 100.f;
-
-    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple = "1", Units = "Percent"))
-    float   Opacity = 100.f;
-
     //Visible properties
     UPROPERTY(EditAnywhere, Category="Shape")
     EOdysseyShape SelectedShape;
@@ -111,6 +101,24 @@ protected:
     UPROPERTY()
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
+    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1", DisplayPriority="1" ) )
+    float   Size = 20.f;
+
+    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
+    float   Flow = 100.f;
+
+    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple = "1", Units = "Percent"))
+    float   Opacity = 100.f;
+
+    UPROPERTY( EditInstanceOnly, Category="Interpolation")
+    EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
+    
+    UPROPERTY( EditAnywhere, Category="Interpolation")
+    bool    AdaptativeStep = false;
+
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority = "0"))
+    float   Step = 1.0;
+
 protected:
     // protected Data Members
 
@@ -119,6 +127,8 @@ protected:
     TSharedPtr<::ULIS::FBlock>          mStampBlock;
     TSharedPtr<::ULIS::FBlock>          mStampBlockMask;
     FOdysseyBlendParameters             mBlendParameters;
+    TSharedPtr<IOdysseyInterpolation>   mInterpolator;
+    FOdysseyPoint mLastPoint;
     //---
 
     //Internal
