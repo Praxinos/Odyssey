@@ -520,6 +520,7 @@ UOdysseyPainterEditorRasterDrawingTool::RefreshBrushInstance()
 {
     DestroyBrushInstance();
     CreateBrushInstance(true);
+    mOnBrushChanged.Broadcast();
 }
 
 void
