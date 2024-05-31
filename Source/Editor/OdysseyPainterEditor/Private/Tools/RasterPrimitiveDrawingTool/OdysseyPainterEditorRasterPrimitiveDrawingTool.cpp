@@ -19,6 +19,7 @@
 #include "OdysseyHUDSystem.h"
 #include "OdysseyHUDHandle.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -30,8 +31,8 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::~UOdysseyPainterEditorRasterPri
 
 UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrimitiveDrawingTool()
     : mPaintEngine()
-    , SelectedShape(EOdysseyShape::kFreehand)
     , mShapeHUD(MakeShared<FOdysseyHUDElement>())
+    , SelectedShape(EOdysseyShape::kFreehand)
 {
     Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Shapes64");
 
@@ -208,12 +209,12 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
     
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnRasterSelectionChanged);
-    if (!rasterSelection.IsEmpty())
-        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnRasterSelectionChanged);
+    if (!rasterSelection->IsEmpty())
+        mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
 
-    mHUD->AddElement(rasterSelection.GetHUD());
+    mHUD->AddElement(rasterSelection->GetHUD());
     mHUD->AddElement(mShapeHUD);
 }
 
@@ -222,10 +223,10 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
     UOdysseyPainterEditorTool::Unload();
     mPaintEngine.SetMaskBlock(nullptr);
     
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    rasterSelection.OnChanged().RemoveAll(this);
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection->OnChanged().RemoveAll(this);
 
-    mHUD->AddElement(rasterSelection.GetHUD());
+    mHUD->AddElement(rasterSelection->GetHUD());
     mHUD->RemoveElement(mShapeHUD);
 }
 
@@ -437,14 +438,14 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetTooltip() const
 void
 UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnRasterSelectionChanged()
 {
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    if (rasterSelection.IsEmpty())
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    if (rasterSelection->IsEmpty())
     {
         mPaintEngine.SetMaskBlock(nullptr);
     }
     else
     {
-        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+        mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
     }
 }
 

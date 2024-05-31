@@ -8,6 +8,7 @@
 #include "OdysseyHUDSystem.h"
 #include "OdysseyBrushShape.h"
 #include "OdysseyMediaRaster.h"
+#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -25,8 +26,8 @@ UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTo
     , SelectionState( EOdysseySelectionState::Normal )
     , mToolSelectionArea(nullptr)
     , mPaintEngine()
-    , mSelectionBlock(nullptr)
     , mSelectionHUD(MakeShared<FOdysseyHUDElement>())
+    , mSelectionBlock(nullptr)
     
 {
     Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Lasso32");
@@ -114,19 +115,19 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
         return true;
     }
 
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     if (SelectionState == EOdysseySelectionState::Add) //Add selection to existing one
     {
-        rasterSelection.Add(mToolSelectionArea->GetPoints());
+        rasterSelection->Add(mToolSelectionArea->GetPoints());
     }
     else if (SelectionState == EOdysseySelectionState::Substract) //Remove selection to existing one
     {
-        rasterSelection.Substract(mToolSelectionArea->GetPoints());
+        rasterSelection->Substract(mToolSelectionArea->GetPoints());
     }
     else //Normal, we replace the selection
     {
-        rasterSelection.Clear();
-        rasterSelection.Add(mToolSelectionArea->GetPoints());
+        rasterSelection->Clear();
+        rasterSelection->Add(mToolSelectionArea->GetPoints());
     }
 
     mSelectionHUD->RemoveElement(mToolSelectionArea);
@@ -184,8 +185,8 @@ void UOdysseyPainterEditorRasterSelectionTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
 
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    mHUD->AddElement(rasterSelection.GetHUD());
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    mHUD->AddElement(rasterSelection->GetHUD());
     mHUD->AddElement(mSelectionHUD);
 }
 
@@ -193,8 +194,8 @@ void UOdysseyPainterEditorRasterSelectionTool::Unload()
 {
     ClearSelection();
 
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    mHUD->RemoveElement(rasterSelection.GetHUD());
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    mHUD->RemoveElement(rasterSelection->GetHUD());
     mHUD->RemoveElement(mSelectionHUD);
 
     UOdysseyPainterEditorTool::Unload();

@@ -13,6 +13,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyHUDElement.h"
+#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -47,11 +48,11 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
     
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged);
-    if (!rasterSelection.IsEmpty())
-        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
-    mHUD->AddElement(rasterSelection.GetHUD());
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged);
+    if (!rasterSelection->IsEmpty())
+        mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
+    mHUD->AddElement(rasterSelection->GetHUD());
 
     bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
     if( hasRaster )
@@ -73,9 +74,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::Unload()
     mPaintEngine.RasterBlock(nullptr);
     mPaintEngine.SetMaskBlock(nullptr);
     
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    rasterSelection.OnChanged().RemoveAll(this);
-    mHUD->RemoveElement(rasterSelection.GetHUD());
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection->OnChanged().RemoveAll(this);
+    mHUD->RemoveElement(rasterSelection->GetHUD());
     
     UOdysseyPainterEditorTool::Unload();
 }
@@ -508,14 +509,14 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetTooltip() const
 void
 UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged()
 {
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    if (rasterSelection.IsEmpty())
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    if (rasterSelection->IsEmpty())
     {
         mPaintEngine.SetMaskBlock(nullptr);
     }
     else
     {
-        mPaintEngine.SetMaskBlock(rasterSelection.GetBlock());
+        mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
     }
 }
 

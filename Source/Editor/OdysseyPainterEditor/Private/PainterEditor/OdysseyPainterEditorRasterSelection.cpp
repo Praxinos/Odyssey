@@ -1,28 +1,28 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyMask.h"
+#include "OdysseyPainterEditorRasterSelection.h"
 
 #include "ULISLoaderModule.h"
 #include "OdysseyHUDLine.h"
 
-FOdysseyMask::~FOdysseyMask()
+FOdysseyPainterEditorRasterSelection::~FOdysseyPainterEditorRasterSelection()
 {
 }
 
-FOdysseyMask::FOdysseyMask()
+FOdysseyPainterEditorRasterSelection::FOdysseyPainterEditorRasterSelection()
     : mHUD(MakeShared<FOdysseyHUDElement>())
 {
 }
 
 FSimpleMulticastDelegate& 
-FOdysseyMask::OnChanged()
+FOdysseyPainterEditorRasterSelection::OnChanged()
 {
     return mOnChanged;
 }
 
 void
-FOdysseyMask::Init(int iWidth, int iHeight)
+FOdysseyPainterEditorRasterSelection::Init(int iWidth, int iHeight)
 {
     mBlock = MakeShared<::ULIS::FBlock>(iWidth, iHeight, ::ULIS::Format_GF);
     Clear();
@@ -32,7 +32,7 @@ FOdysseyMask::Init(int iWidth, int iHeight)
 }
 
 void
-FOdysseyMask::Reset()
+FOdysseyPainterEditorRasterSelection::Reset()
 {
     mBlock = nullptr;
     RefreshHUD();
@@ -41,7 +41,7 @@ FOdysseyMask::Reset()
 }
 
 void
-FOdysseyMask::Clear()
+FOdysseyPainterEditorRasterSelection::Clear()
 {
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
     ctx.Clear(*mBlock);
@@ -53,13 +53,13 @@ FOdysseyMask::Clear()
 }
 
 bool 
-FOdysseyMask::IsEmpty() const
+FOdysseyPainterEditorRasterSelection::IsEmpty() const
 {
     return mBoundingRect.Area() <= 0;
 }
 
 void
-FOdysseyMask::Add(const TArray<FVector2D>& iPolygon)
+FOdysseyPainterEditorRasterSelection::Add(const TArray<FVector2D>& iPolygon)
 {
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
     std::vector<::ULIS::FVec2I> points;
@@ -77,7 +77,7 @@ FOdysseyMask::Add(const TArray<FVector2D>& iPolygon)
 }
 
 void
-FOdysseyMask::Substract(const TArray<FVector2D>& iPolygon)
+FOdysseyPainterEditorRasterSelection::Substract(const TArray<FVector2D>& iPolygon)
 {
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
     std::vector<::ULIS::FVec2I> points;
@@ -95,7 +95,7 @@ FOdysseyMask::Substract(const TArray<FVector2D>& iPolygon)
 }
 
 ::ULIS::FRectI
-FOdysseyMask::ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const
+FOdysseyPainterEditorRasterSelection::ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const
 {
     if ( iPoints.IsEmpty() )
         return ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
@@ -117,25 +117,25 @@ FOdysseyMask::ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const
 }
 
 ::ULIS::FRectI
-FOdysseyMask::GetMaskBoundingRect() const
+FOdysseyPainterEditorRasterSelection::GetMaskBoundingRect() const
 {
     return mBoundingRect;
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyMask::GetBlock()
+FOdysseyPainterEditorRasterSelection::GetBlock()
 {
     return mBlock;
 }
 
 TSharedPtr<FOdysseyHUDElement>
-FOdysseyMask::GetHUD()
+FOdysseyPainterEditorRasterSelection::GetHUD()
 {
     return mHUD;
 }
 
 void
-FOdysseyMask::RefreshHUD()
+FOdysseyPainterEditorRasterSelection::RefreshHUD()
 {
     mHUD->EmptyElements();
     mBoundingRect = ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);

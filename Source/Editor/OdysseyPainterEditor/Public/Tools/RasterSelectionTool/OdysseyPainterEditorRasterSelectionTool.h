@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "OdysseyPainterEditorTool.h"
 #include "OdysseyPaintEngine.h"
-#include "OdysseyMask.h"
 #include "OdysseyPainterEditorRasterSelectionTool.generated.h"
 
 class FOdysseyHUDPolygon;

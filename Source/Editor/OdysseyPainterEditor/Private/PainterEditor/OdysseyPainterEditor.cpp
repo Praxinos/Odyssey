@@ -59,6 +59,7 @@
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "Mesh/FOdysseyMeshSelector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -82,6 +83,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
     , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
     , mVectorDrawingFlags(0)
     , mHUDSystem(new FOdysseyHUDSystem())
+    , mRasterSelection(MakeShared< FOdysseyPainterEditorRasterSelection >())
     , mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
 	, mRasterDrawingTool(nullptr)
@@ -664,7 +666,7 @@ FOdysseyPainterEditor::LayerStack() const
 	return source->GetLayerStack();
 }
 
-FOdysseyMask&
+TSharedPtr<FOdysseyPainterEditorRasterSelection>
 FOdysseyPainterEditor::RasterSelection()
 {
     return mRasterSelection;
@@ -699,7 +701,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->OnRemoveEditedObjectDelegate().AddLambda([this](UObject* iObject) { RemoveEditedObject(iObject);});
         mSource->Activate();
 
-        mRasterSelection.Init(mSource->Width(), mSource->Height());
+        mRasterSelection->Init(mSource->Width(), mSource->Height());
         
         if ( mCurrentMainTool && mCurrentMainTool->IsActivable() )
         {

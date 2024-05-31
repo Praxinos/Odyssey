@@ -10,12 +10,12 @@
 class FOdysseyHUDElement;
 class FOdysseyHUDLine;
 
-class ODYSSEYIMAGING_API FOdysseyMask 
+class FOdysseyPainterEditorRasterSelection 
 {
 public:
     // Construction / Destruction
-    ~FOdysseyMask();
-    FOdysseyMask();
+    ~FOdysseyPainterEditorRasterSelection();
+    FOdysseyPainterEditorRasterSelection();
 
     void Init(int iWidth, int iHeight);
     void Add( const TArray<FVector2D>& iPolygon );

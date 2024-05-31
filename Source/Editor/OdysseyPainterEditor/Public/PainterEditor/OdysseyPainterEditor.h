@@ -35,6 +35,7 @@ class FOdysseyPainterEditorSource;
 class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
+class FOdysseyPainterEditorRasterSelection;
 
 /**
  * Base class for a Painting Editor
@@ -139,7 +140,7 @@ public:
 	virtual const FOdysseyBrushColor&                       PaintColor() const;
     virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                             LayerStack() const;
-    virtual FOdysseyMask&                                   RasterSelection();
+    virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
 
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
     
@@ -247,7 +248,7 @@ protected:
     uint64                          mVectorDrawingFlags;
 
     FOdysseyHUDSystem*              mHUDSystem;
-    FOdysseyMask                    mRasterSelection; //The mask created by a user made selection or from a tool that creates mask/stencil on the drawing
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
     FSimpleMulticastDelegate        mOnCurrentToolChanged;

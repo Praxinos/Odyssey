@@ -26,6 +26,7 @@
 #include "ToolMenus.h"
 #include "Toolkits/AssetEditorModeUILayer.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -426,7 +427,7 @@ void FOdysseyPainterEditorGUI::ToggleEraserButton()
 void
 FOdysseyPainterEditorGUI::ClearCurrentSelection()
 {
-    mEditor->RasterSelection().Clear();
+    mEditor->RasterSelection()->Clear();
 }
 
 #undef LOCTEXT_NAMESPACE

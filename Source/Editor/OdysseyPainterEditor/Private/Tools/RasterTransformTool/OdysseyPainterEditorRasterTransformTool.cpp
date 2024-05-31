@@ -10,6 +10,7 @@
 #include "OdysseyBrushTransform.h"
 #include "GeomTools.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -187,9 +188,9 @@ void UOdysseyPainterEditorRasterTransformTool::Tick(float iDeltaTime)
 
 void UOdysseyPainterEditorRasterTransformTool::Load()
 {
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    rasterSelection.OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged);
-    mHUD->AddElement(rasterSelection.GetHUD());
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged);
+    mHUD->AddElement(rasterSelection->GetHUD());
     mHUD->AddElement(mTransformHUD);
 
     UpdateRasterSelection();
@@ -200,9 +201,9 @@ void UOdysseyPainterEditorRasterTransformTool::Load()
 
 void UOdysseyPainterEditorRasterTransformTool::Unload()
 {
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    rasterSelection.OnChanged().RemoveAll(this);
-    mHUD->RemoveElement(rasterSelection.GetHUD());
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection->OnChanged().RemoveAll(this);
+    mHUD->RemoveElement(rasterSelection->GetHUD());
     mHUD->RemoveElement(mTransformHUD);
 
     ClearTransform();
@@ -245,8 +246,8 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
     if (mediaRasters.Num() <= 0)
         return;
 
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    ::ULIS::FRectI boundingBox = rasterSelection.GetMaskBoundingRect();
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    ::ULIS::FRectI boundingBox = rasterSelection->GetMaskBoundingRect();
 
     if (boundingBox.Area() <= 0)
         boundingBox = ::ULIS::FRectI::FromMinMax(0, 0, mediaRasters[0]->GetRasterBlock()->GetWidth(), mediaRasters[0]->GetRasterBlock()->GetHeight());
@@ -459,7 +460,7 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromSelection
     mTransformedBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, format));
     ClearBlock( mTransformedBlock );
 
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     if (mSelectionBlock)
     {
         mTransformSelectionBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, mSelectionBlock->Format()));
@@ -578,19 +579,19 @@ void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
 
         if (mTransformSelectionBlock)
         {
-            FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-            ClearBlock(rasterSelection.GetBlock());
+            TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+            ClearBlock(rasterSelection->GetBlock());
 
             ::ULIS::FContext& selectionCtx = IULISLoaderModule::StaticFindOrAddContext(mSelectionBlock->Format());
             selectionCtx.Blend(
                 *mTransformSelectionBlock,
-                *rasterSelection.GetBlock(),
+                *rasterSelection->GetBlock(),
                 mTransformSelectionBlock->Rect(),
                 ::ULIS::FVec2I(boundingBox.x, boundingBox.y)
             );
             selectionCtx.Finish();
 
-            rasterSelection.RefreshHUD();
+            rasterSelection->RefreshHUD();
         }
 
         paintBlock->Dirty();
@@ -617,9 +618,9 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
         GEditor->EndTransaction();
         mRasterMutator.SetRasterBlock(nullptr);
 
-        FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-        if (!rasterSelection.IsEmpty())
-            rasterSelection.OnChanged().Broadcast();
+        TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+        if (!rasterSelection->IsEmpty())
+            rasterSelection->OnChanged().Broadcast();
     }
     ClearTransform();
     CreateTransformAreaFromSelection();
@@ -750,17 +751,17 @@ UOdysseyPainterEditorRasterTransformTool::OnPivotHandleDragged()
 void
 UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection()
 {
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
-    if (rasterSelection.IsEmpty())
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    if (rasterSelection->IsEmpty())
     {
         mSelectionBlock = nullptr;
         mTransformSelectionBlock = nullptr;
         return;
     }
 
-    TSharedPtr<::ULIS::FBlock> block = rasterSelection.GetBlock();
+    TSharedPtr<::ULIS::FBlock> block = rasterSelection->GetBlock();
 
-    mSelectionBoundingBox = rasterSelection.GetMaskBoundingRect();
+    mSelectionBoundingBox = rasterSelection->GetMaskBoundingRect();
     mSelectionBlock = MakeShared<::ULIS::FBlock>(mSelectionBoundingBox.w, mSelectionBoundingBox.h, block->Format());
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mSelectionBlock->Format());
     ctx.Copy(*block, *mSelectionBlock, mSelectionBoundingBox);
@@ -773,17 +774,17 @@ UOdysseyPainterEditorRasterTransformTool::ResetRasterSelection()
     if (!mSelectionBlock)
         return;
 
-    FOdysseyMask& rasterSelection = GetEditor()->RasterSelection();
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mSelectionBlock->Format());
 
-    ctx.Clear(*rasterSelection.GetBlock());
+    ctx.Clear(*rasterSelection->GetBlock());
     ctx.Finish();
 
-    ctx.Copy(*mSelectionBlock, *rasterSelection.GetBlock(), ::ULIS::FRectI::Auto, ::ULIS::FVec2I(mSelectionBoundingBox.x, mSelectionBoundingBox.y));
+    ctx.Copy(*mSelectionBlock, *rasterSelection->GetBlock(), ::ULIS::FRectI::Auto, ::ULIS::FVec2I(mSelectionBoundingBox.x, mSelectionBoundingBox.y));
     ctx.Finish();
 
-    rasterSelection.RefreshHUD(); 
+    rasterSelection->RefreshHUD(); 
 }
 
 void
