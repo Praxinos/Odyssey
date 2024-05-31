@@ -89,7 +89,19 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdyssey
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
     mPaintEngine.RasterBlock(rasterBlock);
 
-    return SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
+    FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x);
+        point.y = FMath::Floor(point.y);
+        if (!Filled)
+        {
+            point.x += 0.5f;
+            point.y += 0.5f;
+        }
+    }
+
+    return SelectedShapeInstance->OnMouseDown(point, iKey);
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
@@ -107,7 +119,19 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysse
     if (mediaRasters.Num() <= 0)
         return;
 
-    SelectedShapeInstance->OnMouseHover( iPointInTexture );
+    FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x);
+        point.y = FMath::Floor(point.y);
+        if (!Filled)
+        {
+            point.x += 0.5f;
+            point.y += 0.5f;
+        }
+    }
+
+    SelectedShapeInstance->OnMouseHover( point );
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
@@ -125,7 +149,19 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdyssey
     if (mediaRasters.Num() <= 0)
         return;
 
-    SelectedShapeInstance->OnMouseDrag(iPointInTexture);
+    FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x);
+        point.y = FMath::Floor(point.y);
+        if (!Filled)
+        {
+            point.x += 0.5f;
+            point.y += 0.5f;
+        }
+    }
+
+    SelectedShapeInstance->OnMouseDrag(point);
 }
 
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
@@ -143,7 +179,19 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPo
     if (mediaRasters.Num() <= 0)
         return false;
 
-    return SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
+    FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x);
+        point.y = FMath::Floor(point.y);
+        if (!Filled)
+        {
+            point.x += 0.5f;
+            point.y += 0.5f;
+        }
+    }
+
+    return SelectedShapeInstance->OnMouseUp(point, iKey);
 }
 
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnKeyDown(const FKey& iKey)
@@ -261,14 +309,14 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 
     BLPath path;
 
-    if ( SubPixel )
-    {
+    //if ( SubPixel )
+    //{
         path.moveTo(mPath[0].x, mPath[0].y);
         for ( int i = 1; i < mPath.Num(); i++ )
         {
             path.lineTo(mPath[i].x, mPath[i].y);
         }
-    }
+    /* }
     else
     {
         path.moveTo(FMath::Floor(mPath[0].x) + 0.5f, FMath::Floor(mPath[0].y) + 0.5f);
@@ -276,7 +324,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
         {
             path.lineTo(FMath::Floor(mPath[i].x) + 0.5f, FMath::Floor(mPath[i].y) + 0.5f);
         }
-    }
+    } */
 
     if ( !isLine && !isBezier || !isLine && Filled)
     {
