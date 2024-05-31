@@ -79,24 +79,23 @@ public:
     UPROPERTY(EditAnywhere, Category = "Shape")
     EOdysseyShape SelectedShape;
 
-    UPROPERTY(EditAnywhere, Category = "Shape")
-    bool Antialiasing = true;
-
-    UPROPERTY(EditAnywhere, Category = "Shape")
-    bool SubPixel = true;
-
-    UPROPERTY(EditAnywhere, Category = "Shape")
-    bool Filled = true;
-
-    UPROPERTY(EditAnywhere, Category = "Shape", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1))
-    float StrokeWidth = 1.0f;
-
     UPROPERTY(VisibleInstanceOnly, Category = "Shape", Instanced, meta = (ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
 
-    // Hidden properties
     UPROPERTY()
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
+
+    UPROPERTY(EditAnywhere, Category = "Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1))
+    float StrokeWidth = 1.0f;
+
+    UPROPERTY(EditAnywhere, Category = "Parameters")
+    bool Antialiasing = true;
+
+    UPROPERTY(EditAnywhere, Category = "Parameters")
+    bool SubPixel = true;
+
+    UPROPERTY(EditAnywhere, Category = "Parameters")
+    bool Filled = true;
 
     UPROPERTY(EditInstanceOnly, Category = "Blending", meta = (ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;

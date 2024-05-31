@@ -69,10 +69,10 @@ private:
     void RemoveHUD();
 
 private:
-    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta=(InlineEditConditionToggle))
+    UPROPERTY( EditInstanceOnly, Category="Shape", meta=(InlineEditConditionToggle))
     bool    SmoothingEnabled = false;
 
-    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta=(DisplayName="Smoothing", editcondition = "SmoothingEnabled") )
+    UPROPERTY( EditInstanceOnly, Category="Shape", meta=(DisplayName="Smoothing", editcondition = "SmoothingEnabled") )
     FOdysseySmoothingOptions SmoothingOptions;
 
 protected:

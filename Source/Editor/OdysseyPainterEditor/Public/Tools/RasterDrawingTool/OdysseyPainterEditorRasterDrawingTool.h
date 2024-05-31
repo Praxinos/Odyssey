@@ -184,9 +184,10 @@ private:
     TArray<FOdysseyPoint> InterpolateTo(const FOdysseyPoint& iPoint);
     void ResetInterpolation();
 
-protected:
+public:
     friend class SOdysseyPainterEditorRasterDrawingToolBrushSelector;
 
+protected:
     //Visible properties
     UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
     UOdysseyBrush* Brush;
@@ -194,31 +195,31 @@ protected:
     UPROPERTY()
     UOdysseyBrushAssetBase* BrushInstance;
 
-    UPROPERTY( EditAnywhere, Category="Interpolation")
-    bool    AdaptativeStep = false;
-
-    UPROPERTY(EditAnywhere, Category = "Interpolation")
-    bool    RealtimePreview = false;
-
     UPROPERTY()
     UOdysseyBrushOptions* BrushOptions;
-
-    UPROPERTY(EditAnywhere, Category="Shape")
-    EOdysseyShape SelectedShape;
-
-    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
-    class UOdysseyShape* SelectedShapeInstance;
 
     // Hidden properties
     UPROPERTY()
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
 public:
+    UPROPERTY(EditAnywhere, Category="Shape")
+    EOdysseyShape SelectedShape;
+
+    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
+    class UOdysseyShape* SelectedShapeInstance;
+
+    UPROPERTY(EditAnywhere, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
+    float   Step = 1.0;
+
+    UPROPERTY( EditAnywhere, Category="Interpolation")
+    bool    AdaptativeStep = false;
+
+    UPROPERTY(EditAnywhere, Category = "Interpolation")
+    bool    RealtimePreview = false;
+    
     UPROPERTY( EditInstanceOnly, Category="Interpolation")
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
-    
-    UPROPERTY(EditAnywhere, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority = "0"))
-    float   Step = 1.0;
 
     UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;

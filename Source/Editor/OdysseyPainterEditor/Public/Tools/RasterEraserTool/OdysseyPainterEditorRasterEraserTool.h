@@ -91,6 +91,16 @@ private:
     void Stamp(const FOdysseyPoint& iPoint);
 
 protected:
+    //Visible properties
+    UPROPERTY(EditAnywhere, Category="Shape")
+    EOdysseyShape SelectedShape;
+
+    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
+    class UOdysseyShape* SelectedShapeInstance;
+    // Hidden properties
+    UPROPERTY()
+    TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
+
     UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1", DisplayPriority="1" ) )
     float   Size = 20.f;
 
@@ -108,16 +118,6 @@ protected:
 
     UPROPERTY( EditAnywhere, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority = "0"))
     float   Step = 1.0;
-
-    //Visible properties
-    UPROPERTY(EditAnywhere, Category="Shape")
-    EOdysseyShape SelectedShape;
-
-    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
-    class UOdysseyShape* SelectedShapeInstance;
-    // Hidden properties
-    UPROPERTY()
-    TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
 protected:
     // protected Data Members
