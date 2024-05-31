@@ -8,6 +8,7 @@
 
 class FOdysseyVectorTagInbetweener;
 struct FInbetweenerInbetween;
+class FInbetweenerGridPoint;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {

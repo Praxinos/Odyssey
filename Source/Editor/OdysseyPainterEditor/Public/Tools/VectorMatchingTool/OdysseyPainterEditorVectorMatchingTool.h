@@ -12,10 +12,10 @@
 
 class  FGridNode;
 class  FOdysseyPainterEditorVectorMatchingToolHUD;
-class FInbetweenerGridPoint;
 struct FInbetweenerInbetween;
+class  FInbetweenerGridPoint;
 
-UCLASS( HideCategories = (SelectionTool) )
+UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public UOdysseyPainterEditorVectorBaseTool
 {
     public:

@@ -43,25 +43,54 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM:  // container
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION:
+                    double translationX;
+                    double translationY;
+
+                    Ar << translationX;
+                    Ar << translationY;
+
+                    iInbetweenerTag.Translate( translationX, translationY );
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_ROTATION:
+                    double rotation;
+
+                    Ar << rotation;
+
+                    iInbetweenerTag.Rotate( rotation );
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_SCALING:
+                    double scalingX;
+                    double scalingY;
+
+                    Ar << scalingX;
+                    Ar << scalingY;
+
+                    iInbetweenerTag.Scale( scalingX, scalingY );
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID:  // container
                     iInbetweenerTag.SetGridType( eInbetweenerGridType::FFD );
                 break;
 
-                case FOdysseyFile::VectorV2::CHUNK_TAG_INBETWEENER_FFDGRID_SIZE:
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID_SIZE:
                 {
-                    uint32 numCellX;
-                    uint32 numCellY;
+                    uint32 numQuadX;
+                    uint32 numQuadY;
 
-                    Ar << numCellX;
-                    Ar << numCellY;
+                    Ar << numQuadX;
+                    Ar << numQuadY;
 
-                    iInbetweenerTag.SetFFDNumCell( numCellX, numCellY );
-                    // allocating grid will alow us to read grid geometry
-                    iInbetweenerTag.MakeGrid();
+                    iInbetweenerTag.SetGridNumQuad( numQuadX, numQuadY );
                 }
                 break;
 
-                case FOdysseyFile::VectorV2::CHUNK_TAG_INBETWEENER_FFDGRID_GEOMETRY:
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID_GEOMETRY:
                 {
                     std::vector<FInbetweenerGridPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
 

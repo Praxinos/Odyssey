@@ -106,4 +106,12 @@ namespace FOdysseyVectorExportV2
     void WriteTagInbetweenerFFDGrid( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerFFDGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerTransformTranslation( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                , FArchive &Ar );
+    void WriteTagInbetweenerTransformRotation( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                             , FArchive &Ar );
+    void WriteTagInbetweenerTransformScaling( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                            , FArchive &Ar );
+    void WriteTagInbetweenerTransform( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                     , FArchive &Ar );
 }

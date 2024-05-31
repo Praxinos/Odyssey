@@ -5,9 +5,10 @@
 #include "OdysseyVectorTagInbetweener.h"
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                          , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAG_INBETWEENER_FFDGRID_GEOMETRY
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID_GEOMETRY
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
@@ -31,15 +32,15 @@ FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInb
 void
 FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAG_INBETWEENER_FFDGRID_SIZE
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID_SIZE
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        uint32 numCellX = iInbetweenerTag.GetFFDNumCellX();
-        uint32 numCellY = iInbetweenerTag.GetFFDNumCellY();
+        uint32 numQuadX = iInbetweenerTag.GetGridNumQuadX();
+        uint32 numQuadY = iInbetweenerTag.GetGridNumQuadY();
 
-        Ar << numCellX;
-        Ar << numCellY;
+        Ar << numQuadX;
+        Ar << numQuadY;
     } );
 }
 
@@ -53,6 +54,66 @@ FOdysseyVectorExportV2::WriteTagInbetweenerFFDGrid( FOdysseyVectorTagInbetweener
     {
         WriteTagInbetweenerFFDGridSize( iInbetweenerTag, Ar );
         WriteTagInbetweenerFFDGridGeometry( iInbetweenerTag, Ar );
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerTransformScaling( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                           , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_SCALING
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        double scalingX = iInbetweenerTag.GetTargetScalingX();
+        double scalingY = iInbetweenerTag.GetTargetScalingY();
+
+        Ar << scalingX;
+        Ar << scalingY;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerTransformRotation( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                            , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_ROTATION
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        double rotation = iInbetweenerTag.GetTargetRotation();
+
+        Ar << rotation;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerTransformTranslation( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                               , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        double translationX = iInbetweenerTag.GetTargetTranslationX();
+        double translationY = iInbetweenerTag.GetTargetTranslationY();
+
+        Ar << translationX;
+        Ar << translationY;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerTransform( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                    , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        WriteTagInbetweenerTransformTranslation( iInbetweenerTag, Ar );
+        WriteTagInbetweenerTransformRotation( iInbetweenerTag, Ar );
+        WriteTagInbetweenerTransformScaling( iInbetweenerTag, Ar );
     } );
 }
 
@@ -96,6 +157,7 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
     {
         WriteTagInbetweenerInbetweenCount( iInbetweenerTag, Ar );
         WriteTagInbetweenerChart( iInbetweenerTag, Ar );
+        WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
 
         if( iInbetweenerTag.GetGridType() == eInbetweenerGridType::FFD )
         {

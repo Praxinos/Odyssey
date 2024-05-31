@@ -26,8 +26,8 @@ void
 UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
 {
     GridType = mInbetweenerTag->GetGridType();
-    DivisionX = mInbetweenerTag->GetFFDNumCellX();
-    DivisionY  = mInbetweenerTag->GetFFDNumCellY();
+    DivisionX = mInbetweenerTag->GetGridNumQuadX();
+    DivisionY  = mInbetweenerTag->GetGridNumQuadY();
     InbetweenCount = mInbetweenerTag->GetInbetweenCount();
 }
 
@@ -77,10 +77,10 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             mInbetweenerTag->SetGridType( GridType );
 
         if( iPropertyName == "DivisionX" )
-            mInbetweenerTag->SetFFDNumCellX( DivisionX );
+            mInbetweenerTag->SetGridNumQuadX( DivisionX );
 
         if( iPropertyName == "DivisionY" )
-            mInbetweenerTag->SetFFDNumCellY( DivisionY );
+            mInbetweenerTag->SetGridNumQuadY( DivisionY );
     }
 }
 

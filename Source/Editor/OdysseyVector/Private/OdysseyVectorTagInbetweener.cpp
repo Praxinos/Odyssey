@@ -135,6 +135,18 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
     }
 }
 
+std::vector<::ULIS::FVec2D>&
+FInterpolatedPath::GetInterpolatedPointPositionBuffer()
+{
+    return mInterpolatedPointPositionBuffer;
+}
+
+std::vector<FInterpolatedPoint>&
+FInterpolatedPath::GetInterpolatedPointBuffer()
+{
+    return mInterpolatedPointBuffer;
+}
+
 /*
 uint32
 FOdysseyVectorTagInbetweener::MapPoint( FOdysseyVectorObject* iObject
@@ -152,7 +164,7 @@ FOdysseyVectorTagInbetweener::MapPoint( FOdysseyVectorObject* iObject
         uint32 offset = ( colid * mGridTool->DivisionsX ) + rowid;
         double s = ( iSpaceX - (double) rowid * mCellSizeX ) / mCellSizeX;
         double t = ( iSpaceY - (double) colid * mCellSizeY ) / mCellSizeY;
-        FGridPoint gridPoint = { iObject, iPoint, s, t };
+        FInbetweenerGridPoint gridPoint = { iObject, iPoint, s, t };
 
         mCellArray[offset].mPointArray.push_back( gridPoint );
 
@@ -203,10 +215,229 @@ FInbetweenerGridPoint::GetTargetPosition()
     return mTargetPosition;
 }
 
+void
+FInbetweenerGridPoint::AddQuad( FInbetweenerGridQuad* iQuad )
+{
+    mQuadList.push_back( iQuad );
+}
+
+void
+FInbetweenerGridPoint::RemoveQuad( FInbetweenerGridQuad* iQuad )
+{
+    mQuadList.remove( iQuad );
+}
+
+FInbetweenerGridQuad::FInbetweenerGridQuad( )
+    : mFlags ( 0 )
+{
+}
+
 FInbetweenerGridPoint** 
-FInbetweenerGridCell::GetGridPoints()
+FInbetweenerGridQuad::GetPoints()
 {
     return mPoint;
+}
+
+bool
+FInbetweenerGridQuad::IsLinked()
+{
+    return ( mFlags & LINKED ) ? true : false; 
+}
+
+void
+FInbetweenerGridQuad::Link()
+{
+    mFlags |= LINKED;
+
+    for( uint32 i = 0; i < 4; i++ )
+    {
+        mPoint[i]->AddQuad( this );
+    }
+}
+
+void
+FInbetweenerGridQuad::Unlink()
+{
+    for( uint32 i = 0; i < 4; i++ )
+    {
+        mPoint[i]->RemoveQuad( this );
+    }
+
+    mFlags &= (~LINKED);
+}
+
+FInbetweenerGrid::FInbetweenerGrid()
+    : mNumQuadX( 0 )
+    , mNumQuadY( 0 )
+    , mBBox( 0, 0, 0, 0 )
+{
+}
+
+uint32
+FInbetweenerGrid::GetNumQuadX()
+{
+    return mNumQuadY;
+}
+
+uint32
+FInbetweenerGrid::GetNumQuadY()
+{
+    return mNumQuadY;
+}
+
+void
+FInbetweenerGrid::Make( uint32 iNumQuadX
+                      , uint32 iNumQuadY
+                      , const ::ULIS::FRectD& iBoundingBox
+                      , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+{
+    double x = iBoundingBox.x;
+    double y = iBoundingBox.y;
+    double stepx = iBoundingBox.w / iNumQuadX;
+    double stepy = iBoundingBox.h / iNumQuadY;
+    uint32 numVertexX = iNumQuadX + 1;
+    uint32 numVertexY = iNumQuadY + 1;
+
+    mNumQuadX = iNumQuadX;
+    mNumQuadY = iNumQuadY;
+    mBBox = iBoundingBox;
+
+    mPointBuffer.resize( numVertexX * numVertexY );
+    mQuadBuffer.resize( mNumQuadX * mNumQuadY );
+
+    // position vertices
+    for( uint32 i = 0; i < numVertexY; i++ )
+    {
+        for( uint32 j = 0; j < numVertexX; j++ )
+        {
+            uint32 offset = ( i * numVertexX ) + j;
+
+            mPointBuffer[offset].Init( iInbetweenerTag );
+            mPointBuffer[offset].SetSourcePosition( x, y );
+            mPointBuffer[offset].mTargetPosition = mPointBuffer[offset].mSourcePosition;
+
+            mPointBuffer[offset].u = std::clamp<double>( ( x - mBBox.x ) / mBBox.w, 0.0f, 1.0f );
+            mPointBuffer[offset].v = std::clamp<double>( ( y - mBBox.y ) / mBBox.h, 0.0f, 1.0f );
+
+            x += stepx;
+        }
+
+        y += stepy;
+        x = mBBox.x;
+    }
+
+    // design cells
+    for( uint32 i = 0; i < mNumQuadY; i++ )
+    {
+        for( uint32 j = 0; j < mNumQuadX; j++ )
+        {
+            uint32 vertexOffset = ( i * numVertexX ) + j;
+            uint32 quadOffset   = ( i * mNumQuadX  ) + j;
+            FInbetweenerGridQuad* quad = &mQuadBuffer[quadOffset];
+            FInbetweenerGridPoint** gridPoint = quad->GetPoints();
+
+            gridPoint[0] = &mPointBuffer[vertexOffset];
+            gridPoint[1] = &mPointBuffer[vertexOffset+1];
+            gridPoint[2] = &mPointBuffer[vertexOffset+1+numVertexX];
+            gridPoint[3] = &mPointBuffer[vertexOffset+numVertexX];
+
+            quad->Link();
+        }
+    }
+}
+
+FInbetweenerGridFFD::FInbetweenerGridFFD()
+{
+}
+
+void
+FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
+                             , uint32 iInbetweenIndex )
+{
+}
+
+::ULIS::FVec2D
+FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
+{
+    ::ULIS::FVec2D vi = ::ULIS::FVec2D( 0.0f, 0.0f );
+    uint32 numVertexX = mNumQuadX + 1;
+    uint32 numVertexY = mNumQuadY + 1;
+
+    for ( uint32 i = 0; i < numVertexY; i++ )
+    {
+        ::ULIS::FVec2D vj = ::ULIS::FVec2D( 0.0f, 0.0f );
+        double bcv = mVBinomialCoefficientBuffer[i];
+
+        for ( uint32 j = 0; j < numVertexX; j++ )
+        {
+            double bcu = mUBinomialCoefficientBuffer[j];
+            uint32 offset = ( i * numVertexX ) + j;
+
+            vj.x += ( bcu * pow ( ( 1 - iInterpolatedPoint->mU ), (mNumQuadX) - j ) * pow ( iInterpolatedPoint->mU, j ) * mPointBuffer[offset].u );
+            vj.y += ( bcu * pow ( ( 1 - iInterpolatedPoint->mU ), (mNumQuadX) - j ) * pow ( iInterpolatedPoint->mU, j ) * mPointBuffer[offset].v );
+        }
+
+        vi.x += ( bcv * pow ( ( 1 - iInterpolatedPoint->mV ), (mNumQuadY) - i ) * pow ( iInterpolatedPoint->mV, i ) * vj.x );
+        vi.y += ( bcv * pow ( ( 1 - iInterpolatedPoint->mV ), (mNumQuadY) - i ) * pow ( iInterpolatedPoint->mV, i ) * vj.y );
+    }
+
+    return ::ULIS::FVec2D( ( mBBox.x + ( mBBox.w * vi.x ) )
+                         , ( mBBox.y + ( mBBox.h * vi.y ) ) );
+}
+
+void
+FInbetweenerGridFFD::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
+                                , uint32 iInbetweenIndex )
+{
+
+    for( FInterpolatedPath& interpolatedPath : iInterpolatedPathBuffer )
+    {
+        std::vector<::ULIS::FVec2D>& interpolatedPointPositionBuffer = interpolatedPath.GetInterpolatedPointPositionBuffer();
+        uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
+        uint32 skippedOffset = ( iInbetweenIndex * pointCount );
+
+        for( uint32 i = 0; i < pointCount; i++ )
+        {
+            FInterpolatedPoint* interpolatedPoint = &interpolatedPath.GetInterpolatedPointBuffer()[i];
+
+            interpolatedPointPositionBuffer[skippedOffset + i] = DeformPoint( interpolatedPoint );
+        }
+    }
+}
+
+std::vector<FInbetweenerGridQuad>&
+FInbetweenerGrid::GetQuadBuffer()
+{
+    return mQuadBuffer;
+}
+
+std::vector<FInbetweenerGridPoint>&
+FInbetweenerGrid::GetPointBuffer()
+{
+    return mPointBuffer;
+}
+
+void
+FInbetweenerGridFFD::Make( uint32 iNumQuadX
+                         , uint32 iNumQuadY
+                         , const ::ULIS::FRectD& iBoundingBox
+                         , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+{
+    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY, iBoundingBox, iInbetweenerTag );
+
+    mUBinomialCoefficientBuffer.resize( mPointBuffer.size() );
+    mVBinomialCoefficientBuffer.resize( mPointBuffer.size() );
+
+    ComputeBinomialCoefficients();
+}
+
+void
+FInbetweenerGridARAP::Make( uint32 iNumQuadX
+                          , uint32 iNumQuadY
+                          , const ::ULIS::FRectD& iBoundingBox
+                         , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+{
+    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY, iBoundingBox, iInbetweenerTag );
 }
 
 void
@@ -215,7 +446,7 @@ FOdysseyVectorTagInbetweener::UpdateGridBBox()
     double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
     bool hasBBox = false;
 
-    for( FInbetweenerGridPoint& gridPoint : mGridPointBuffer )
+    for( FInbetweenerGridPoint& gridPoint : mGrid->GetPointBuffer() )
     {
         const ::ULIS::FVec2D& targetPosition = gridPoint.GetTargetPosition();
 
@@ -304,8 +535,8 @@ FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
 
 FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
                                                           , FOdysseyVectorObject* iOwnerObject
-                                                          , uint32 iNumCellX
-                                                          , uint32 iNumCellY
+                                                          , uint32 iNumQuadX
+                                                          , uint32 iNumQuadY
                                                           , uint32 iInbetweenCount )
     : FOdysseyVectorTag( iOwnerObject )
     // note: mSharedEnv is remebered as a member variable because GetEngine() calls
@@ -313,16 +544,25 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     // in destructors.
     , mSharedEnv ( iSharedEnv )
     , mGridType( eInbetweenerGridType::FFD )
-    , mNumCellX( iNumCellX )
-    , mNumCellY( iNumCellY )
     , mInbetweenCount( iInbetweenCount )
     , mInvalidationFlags( 0 )
 {
-    MakeGrid();
-    Map();
-    ResetChart();
-    AllocBuffers();
-    Interpolate();
+    mTargetTranslationX = 0.0f;
+    mTargetTranslationY = 0.0f;
+    mTargetScalingX     = 1.0f;
+    mTargetScalingY     = 1.0f;
+    mTargetRotation     = 0.0f;
+
+    UpdateMatrix();
+
+    mGrid = new FInbetweenerGridFFD();
+
+    //mGrid->Make( iNumQuadX, iNumQuadY, iOwnerObject->GetBBox( false ), this );
+
+    //Map();
+    //ResetChart();
+    //AllocBuffers();
+    //Interpolate();
 }
 
 void
@@ -331,7 +571,7 @@ FOdysseyVectorTagInbetweener::Translate( double iX, double iY )
     mTargetTranslationX = iX;
     mTargetTranslationY = iY;
 
-    Invalidate( INVALIDATE_CELLS );
+    //Invalidate( INVALIDATE_CELLS );
 }
 
 void
@@ -339,7 +579,7 @@ FOdysseyVectorTagInbetweener::Rotate( double iAngle )
 {
     mTargetRotation = iAngle;
 
-    Invalidate( INVALIDATE_CELLS );
+    //Invalidate( INVALIDATE_CELLS );
 }
 
 void
@@ -348,7 +588,7 @@ FOdysseyVectorTagInbetweener::Scale( double iX, double iY )
     mTargetScalingX = iX;
     mTargetScalingY = iY;
 
-    Invalidate( INVALIDATE_CELLS );
+    //Invalidate( INVALIDATE_CELLS );
 }
 
 void FOdysseyVectorTagInbetweener::Added()
@@ -488,81 +728,8 @@ FOdysseyVectorTagInbetweener::UpdateMatrix()
     {
         InterpolateTransform( inbetweenIndex );
     }
-}
 
-void
-FOdysseyVectorTagInbetweener::MakeGrid()
-{
-    ::ULIS::FRectD bbox = mOwner->GetBBox( false );
-    double x = bbox.x;
-    double y = bbox.y;
-    double stepx = bbox.w / mNumCellX;
-    double stepy = bbox.h / mNumCellY;
-    uint32 numVertexX = mNumCellX + 1;
-    uint32 numVertexY = mNumCellY + 1;
-
-    mTargetTranslationX = 0.0f;
-    mTargetTranslationY = 0.0f;
-    mTargetScalingX     = 1.0f;
-    mTargetScalingY     = 1.0f;
-    mTargetRotation     = 0.0f;
-
-    UpdateMatrix();
-
-    //mGridBBox = bbox;
-
-    mGridPointBuffer.resize( numVertexX * numVertexY );
-    mUBinomialCoefficientBuffer.resize( mGridPointBuffer.size() );
-    mVBinomialCoefficientBuffer.resize( mGridPointBuffer.size() );
-
-    mGridCellBuffer.resize( mNumCellX * mNumCellY );
-
-    // position vertices
-    for( uint32 i = 0; i < numVertexY; i++ )
-    {
-        for( uint32 j = 0; j < numVertexX; j++ )
-        {
-            uint32 offset = ( i * numVertexX ) + j;
-
-            mGridPointBuffer[offset].Init( this );
-            mGridPointBuffer[offset].SetSourcePosition( x, y );
-            mGridPointBuffer[offset].mTargetPosition = mGridPointBuffer[offset].mSourcePosition;
-
-            mGridPointBuffer[offset].u = std::clamp<double>( ( x - bbox.x ) / bbox.w, 0.0f, 1.0f );
-            mGridPointBuffer[offset].v = std::clamp<double>( ( y - bbox.y ) / bbox.h, 0.0f, 1.0f );
-
-            x += stepx;
-        }
-
-        y += stepy;
-        x = bbox.x;
-    }
-
-    // design cells
-    for( uint32 i = 0; i < mNumCellY; i++ )
-    {
-        for( uint32 j = 0; j < mNumCellX; j++ )
-        {
-            uint32 vertexOffset = ( i * numVertexX ) + j;
-            uint32 cellOffset   = ( i * mNumCellX  ) + j;
-            FInbetweenerGridPoint** gridPoint = mGridCellBuffer[cellOffset].GetGridPoints();
-
-            gridPoint[0] = &mGridPointBuffer[vertexOffset];
-            gridPoint[1] = &mGridPointBuffer[vertexOffset+1];
-            gridPoint[2] = &mGridPointBuffer[vertexOffset+1+numVertexX];
-            gridPoint[3] = &mGridPointBuffer[vertexOffset+numVertexX];
-        }
-    }
-
-    FFDComputeBinomialCoefficients();
-
-/*
-    Map();
-
-    ResetChart();
-
-    Interpolate();
-*/
+    Invalidate( INVALIDATE_CELLS );
 }
 
 static
@@ -583,74 +750,23 @@ double BinomialCoeff ( int n, int k )
 
 // precompute binaomial coefficient
 void
-FOdysseyVectorTagInbetweener::FFDComputeBinomialCoefficients()
+FInbetweenerGridFFD::ComputeBinomialCoefficients()
 {
-    uint32 numVertexX = mNumCellX + 1;
-    uint32 numVertexY = mNumCellY + 1;
+    uint32 numVertexX = mNumQuadX + 1;
+    uint32 numVertexY = mNumQuadY + 1;
 
     for ( uint32 i = 0; i < numVertexX; i++ )
     {
-        double coeffU = BinomialCoeff ( mNumCellX, i );
+        double coeffU = BinomialCoeff ( mNumQuadX, i );
 
         mUBinomialCoefficientBuffer[i] = coeffU;
     }
 
     for ( uint32 i = 0; i < numVertexY; i++ )
     {
-        double coeffV = BinomialCoeff ( mNumCellY, i );
+        double coeffV = BinomialCoeff ( mNumQuadY, i );
 
         mVBinomialCoefficientBuffer[i] = coeffV;
-    }
-}
-
-::ULIS::FVec2D
-FOdysseyVectorTagInbetweener::FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint )
-{
-    ::ULIS::FRectD bbox = mOwner->GetBBox( false );
-    ::ULIS::FVec2D vi = ::ULIS::FVec2D( 0.0f, 0.0f );
-    uint32 numVertexX = mNumCellX + 1;
-    uint32 numVertexY = mNumCellY + 1;
-
-/*
-    iInterpolatedPoint->positionBuffer[iPositionIndex] = ::ULIS::FVec2D( ( bbox.x + ( bbox.w * iInterpolatedPoint->mU ) )
-                                                                       , ( bbox.y + ( bbox.h * iInterpolatedPoint->mV ) ) );
-*/
-    for ( uint32 i = 0; i < numVertexY; i++ )
-    {
-        ::ULIS::FVec2D vj = ::ULIS::FVec2D( 0.0f, 0.0f );
-        double bcv = mVBinomialCoefficientBuffer[i];
-
-        for ( uint32 j = 0; j < numVertexX; j++ )
-        {
-            double bcu = mUBinomialCoefficientBuffer[j];
-            uint32 offset = ( i * numVertexX ) + j;
-
-            vj.x += ( bcu * pow ( ( 1 - iInterpolatedPoint->mU ), (mNumCellX) - j ) * pow ( iInterpolatedPoint->mU, j ) * mGridPointBuffer[offset].u );
-            vj.y += ( bcu * pow ( ( 1 - iInterpolatedPoint->mU ), (mNumCellX) - j ) * pow ( iInterpolatedPoint->mU, j ) * mGridPointBuffer[offset].v );
-        }
-
-        vi.x += ( bcv * pow ( ( 1 - iInterpolatedPoint->mV ), (mNumCellY) - i ) * pow ( iInterpolatedPoint->mV, i ) * vj.x );
-        vi.y += ( bcv * pow ( ( 1 - iInterpolatedPoint->mV ), (mNumCellY) - i ) * pow ( iInterpolatedPoint->mV, i ) * vj.y );
-    }
-
-    return ::ULIS::FVec2D( ( bbox.x + ( bbox.w * vi.x ) )
-                         , ( bbox.y + ( bbox.h * vi.y ) ) );
-}
-
-void
-FOdysseyVectorTagInbetweener::FFDDeformPaths( uint32 iInbetweenIndex )
-{
-    for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
-    {
-        uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
-        uint32 skippedOffset = ( iInbetweenIndex * pointCount );
-
-        for( uint32 i = 0; i < pointCount; i++ )
-        {
-            FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
-
-            interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i] = FFDDeformPoint( interpolatedPoint );
-        }
     }
 }
 
@@ -659,7 +775,7 @@ FOdysseyVectorTagInbetweener::InterpolateGeometry( uint32 iInbetweenIndex )
 {
     ::ULIS::FRectD bbox = mOwner->GetBBox( false );
 
-    for( FInbetweenerGridPoint& point : mGridPointBuffer )
+    for( FInbetweenerGridPoint& point : mGrid->GetPointBuffer() )
     {
         ::ULIS::FVec2D diff = ( point.mTargetPosition - point.mSourcePosition );
         ::ULIS::FVec2D step = diff * mChart.inbetweenBuffer[iInbetweenIndex].spacing;
@@ -671,7 +787,7 @@ FOdysseyVectorTagInbetweener::InterpolateGeometry( uint32 iInbetweenIndex )
     }
 
     // deform the path according to grid geometry
-    FFDDeformPaths( iInbetweenIndex );
+    mGrid->DeformPaths( mInterpolatedPathBuffer, iInbetweenIndex );
 }
 
 void
@@ -856,6 +972,12 @@ FOdysseyVectorTagInbetweener::DrawPathsTarget( BLContext* iBLContext )
     }
 }
 
+FInbetweenerGrid*
+FOdysseyVectorTagInbetweener::GetGrid()
+{
+    return mGrid;
+}
+
 void
 FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
                                            , float iNewSpacing
@@ -917,16 +1039,34 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
     }
 }
 
-std::vector<FInbetweenerGridCell>&
-FOdysseyVectorTagInbetweener::GetGridCellBuffer()
+double
+FOdysseyVectorTagInbetweener::GetTargetTranslationX()
 {
-    return mGridCellBuffer;
+    return mTargetTranslationX;
 }
 
-std::vector<FInbetweenerGridPoint>&
-FOdysseyVectorTagInbetweener::GetGridPointBuffer()
+double
+FOdysseyVectorTagInbetweener::GetTargetTranslationY()
 {
-    return mGridPointBuffer;
+    return mTargetTranslationY;
+}
+
+double
+FOdysseyVectorTagInbetweener::GetTargetRotation()
+{
+    return mTargetRotation;
+}
+
+double
+FOdysseyVectorTagInbetweener::GetTargetScalingX()
+{
+    return mTargetScalingX;
+}
+
+double
+FOdysseyVectorTagInbetweener::GetTargetScalingY()
+{
+    return mTargetScalingY;
 }
 
 void
@@ -957,6 +1097,36 @@ FOdysseyVectorTagInbetweener::SetInbetweenCount( uint32 iInbetweenCount )
     UpdateAnimationCells( maxInbetweenCount );
 }
 
+eInbetweenerGridType
+FOdysseyVectorTagInbetweener::GetGridType()
+{
+    return mGridType;
+}
+
+std::vector<FInbetweenerGridQuad>&
+FOdysseyVectorTagInbetweener::GetGridQuadBuffer()
+{
+    return mGrid->GetQuadBuffer();
+}
+
+std::vector<FInbetweenerGridPoint>&
+FOdysseyVectorTagInbetweener::GetGridPointBuffer()
+{
+    return mGrid->GetPointBuffer();
+}
+
+uint32
+FOdysseyVectorTagInbetweener::GetGridNumQuadX()
+{
+    return mGrid->GetNumQuadX();
+}
+
+uint32
+FOdysseyVectorTagInbetweener::GetGridNumQuadY()
+{
+    return mGrid->GetNumQuadY();
+}
+
 void
 FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
 {
@@ -967,59 +1137,46 @@ FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
               | INVALIDATE_BUFFERS
               | INVALIDATE_CELLS );
 
-    MakeGrid();
+    mGrid->Make( mGrid->GetNumQuadX()
+               , mGrid->GetNumQuadY()
+               , GetOwner()->GetBBox( false )
+               , this );
 }
 
 void
-FOdysseyVectorTagInbetweener::SetFFDNumCell( uint32 iNumCellX, uint32 iNumCellY )
+FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY )
 {
-    mNumCellX = iNumCellX;
-    mNumCellY = iNumCellY;
-
     Invalidate( INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    MakeGrid();
+    mGrid->Make( iNumQuadX
+               , iNumQuadY
+               , GetOwner()->GetBBox( false )
+               , this );
 }
 
 void
-FOdysseyVectorTagInbetweener::SetFFDNumCellX( uint32 iNumCellX )
+FOdysseyVectorTagInbetweener::SetGridNumQuadX( uint32 iNumQuadX )
 {
-    mNumCellX = iNumCellX;
-
     Invalidate( INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    MakeGrid();
+    mGrid->Make( iNumQuadX
+               , mGrid->GetNumQuadY()
+               , GetOwner()->GetBBox( false )
+               , this );
 }
 
 void
-FOdysseyVectorTagInbetweener::SetFFDNumCellY( uint32 iNumCellY )
+FOdysseyVectorTagInbetweener::SetGridNumQuadY( uint32 iNumQuadY )
 {
-    mNumCellY = iNumCellY;
-
     Invalidate( INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    MakeGrid();
-}
-
-eInbetweenerGridType
-FOdysseyVectorTagInbetweener::GetGridType()
-{
-    return mGridType;
-}
-
-uint32
-FOdysseyVectorTagInbetweener::GetFFDNumCellX()
-{
-    return mNumCellX;
-}
-
-uint32
-FOdysseyVectorTagInbetweener::GetFFDNumCellY()
-{
-    return mNumCellY;
+    mGrid->Make( mGrid->GetNumQuadX()
+               , iNumQuadY
+               , GetOwner()->GetBBox( false )
+               , this );
 }
 
 void

@@ -17,6 +17,7 @@ class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;
 class FOdysseyVectorSharedEnv;
 class FOdysseyVectorTagInbetweener;
+class FInbetweenerGridQuad;
 
 UENUM()
 enum class eInbetweenerGridType : uint8
@@ -37,6 +38,8 @@ class FInterpolatedPoint
                           , double iV );
 
         friend class FOdysseyVectorTagInbetweener;
+        friend class FInbetweenerGridFFD;
+        friend class FInbetweenerGrid;
 
     protected:
         FOdysseyVectorPoint* mOriginalPoint;
@@ -88,6 +91,8 @@ class FInterpolatedPath
                  , const ::ULIS::FRectD& iInvalidationArea
                  , double iAncestorsOpacity
                  , uint64 iDrawingFlags );
+        std::vector<FInterpolatedPoint>& GetInterpolatedPointBuffer();
+        std::vector<::ULIS::FVec2D>& GetInterpolatedPointPositionBuffer();
 
         friend class FOdysseyVectorTagInbetweener;
 
@@ -122,13 +127,18 @@ class ODYSSEYVECTOR_API FInbetweenerGridPoint
         void SetTargetPosition( double iX, double iY );
         const ::ULIS::FVec2D& GetSourcePosition();
         const ::ULIS::FVec2D& GetTargetPosition();
+        void AddQuad( FInbetweenerGridQuad* iQuad );
+        void RemoveQuad( FInbetweenerGridQuad* iQuad );
 
         friend class FOdysseyVectorTagInbetweener;
+        friend class FInbetweenerGridFFD;
+        friend class FInbetweenerGrid;
 
-    private: 
+    protected: 
         void Init( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
-    private:
+    protected:
+        std::list<FInbetweenerGridQuad*> mQuadList;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         ::ULIS::FVec2D mSourcePosition;
         ::ULIS::FVec2D mMotionPosition;
@@ -136,15 +146,90 @@ class ODYSSEYVECTOR_API FInbetweenerGridPoint
         double u, v;
 };
 
-class ODYSSEYVECTOR_API FInbetweenerGridCell
+class ODYSSEYVECTOR_API FInbetweenerGridQuad
 {
     public:
-        FInbetweenerGridPoint** GetGridPoints();
+        virtual ~FInbetweenerGridQuad(){};
+        FInbetweenerGridQuad( );
+
+        FInbetweenerGridPoint** GetPoints();
+        void Link();
+        void Unlink();
+        bool IsLinked();
 
         friend class FOdysseyVectorTagInbetweener;
 
-    private:
+    public:
+        static const uint32 LINKED = 1L << 0;
+
+    protected:
+        uint32 mFlags;
         FInbetweenerGridPoint* mPoint[4];
+};
+
+class FInbetweenerGrid
+{
+    public:
+        virtual ~FInbetweenerGrid(){};
+        FInbetweenerGrid();
+
+        virtual void Make( uint32 iNumQuadX
+                         , uint32 iNumQuadY
+                         , const ::ULIS::FRectD& iBoundingBox
+                         , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+
+        virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
+                                , uint32 iInbetweenIndex );
+
+        friend class FOdysseyVectorTagInbetweener;
+
+    protected:
+        std::vector<FInbetweenerGridQuad>& GetQuadBuffer();
+        std::vector<FInbetweenerGridPoint>& GetPointBuffer();
+        uint32 GetNumQuadX();
+        uint32 GetNumQuadY();
+
+    protected:
+        std::vector<FInbetweenerGridPoint> mPointBuffer;
+        std::vector<FInbetweenerGridQuad> mQuadBuffer;
+        ::ULIS::FRectD mBBox;
+        uint32 mNumQuadX;
+        uint32 mNumQuadY;
+};
+
+class FInbetweenerGridFFD : public FInbetweenerGrid
+{
+    public:
+        virtual ~FInbetweenerGridFFD(){};
+        FInbetweenerGridFFD();
+
+        virtual void Make( uint32 iNumQuadX
+                         , uint32 iNumQuadY
+                         , const ::ULIS::FRectD& iBoundingBox
+                         , FOdysseyVectorTagInbetweener* iInbetweenerTag ) override;
+        virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
+                                , uint32 iInbetweenIndex ) override;
+        void ComputeBinomialCoefficients();
+        ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint );
+
+        friend class FOdysseyVectorTagInbetweener;
+
+    protected:
+        std::vector<double> mUBinomialCoefficientBuffer;
+        std::vector<double> mVBinomialCoefficientBuffer;
+};
+
+class FInbetweenerGridARAP : public FInbetweenerGrid
+{
+    public:
+        friend class FOdysseyVectorTagInbetweener;
+        virtual void Make( uint32 iNumQuadX
+                         , uint32 iNumQuadY
+                         , const ::ULIS::FRectD& iBoundingBox
+                         , FOdysseyVectorTagInbetweener* iInbetweenerTag ) override;
+
+    protected:
+        int dummy;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
@@ -181,8 +266,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DrawPathsInbetween( uint32 iInbetweenIndex
                                , BLContext* iBLContext );
         void DrawPathsTarget( BLContext* iBLContext );
-        std::vector<FInbetweenerGridCell>& GetGridCellBuffer();
-        std::vector<FInbetweenerGridPoint>& GetGridPointBuffer();
         uint32 GetInbetweenCount();
         FInbetweenerChart& GetChart();
         void MoveInbetween( FInbetweenerInbetween* iInbetween
@@ -192,12 +275,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void ResetChart();
         void SetInbetweenCount( uint32 iInbetweenCount );
         void SetGridType( eInbetweenerGridType iGridType );
-        void SetFFDNumCellX( uint32 iNumCellX );
-        void SetFFDNumCellY( uint32 iNumCellY );
-        void SetFFDNumCell( uint32 iNumCellX, uint32 iNumCellY );
+        void SetGridNumQuadX( uint32 iNumQuadX );
+        void SetGridNumQuadY( uint32 iNumQuadY );
+        void SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY );
+
         eInbetweenerGridType GetGridType();
-        uint32 GetFFDNumCellX();
-        uint32 GetFFDNumCellY();
+        uint32 GetGridNumQuadX();
+        uint32 GetGridNumQuadY();
+        std::vector<FInbetweenerGridPoint>& GetGridPointBuffer();
+        std::vector<FInbetweenerGridQuad>& GetGridQuadBuffer();
 
         virtual void Update( uint32 iUpdateFlags ) override;
         void Commit();
@@ -205,17 +291,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void Translate( double iX, double iY );
         void Rotate( double iAngle );
         void Scale( double iX, double iY );
+        double GetTargetTranslationX();
+        double GetTargetTranslationY();
+        double GetTargetRotation();
+        double GetTargetScalingX();
+        double GetTargetScalingY();
         ::ULIS::FRectD GetTargetGridBBox( bool iWorld );
         BLMatrix2D& GetTargetWorldMatrix();
         BLMatrix2D& GetTargetInverseWorldMatrix();
         void Invalidate( uint64 iInvalidationFlags );
+        FInbetweenerGrid* GetGrid();
 
     protected:
         void UpdateAnimationCells( uint32 iInbetweenCount );
         void UpdateGridBBox();
-        void FFDComputeBinomialCoefficients();
-        ::ULIS::FVec2D FFDDeformPoint( FInterpolatedPoint* iInterpolatedPoint );
-        void FFDDeformPaths( uint32 iPositionIndex );
         void InterpolateGeometry( uint32 iInbetweenIndex );
         void InterpolateTransform( uint32 iInbetweenIndex );
         void Reset( bool iResetGridShape );
@@ -249,15 +338,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         BLMatrix2D mTargetInverseWorldMatrix;
         FOdysseyVectorSharedEnv* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
-        std::vector<FInbetweenerGridPoint> mGridPointBuffer;
-        std::vector<double> mUBinomialCoefficientBuffer;
-        std::vector<double> mVBinomialCoefficientBuffer;
-        std::vector<FInbetweenerGridCell> mGridCellBuffer;
+        FInbetweenerGrid* mGrid;
         eInbetweenerGridType mGridType;
         ::ULIS::FRectD mTargetGridBBox;
         FInbetweenerChart mChart;
-        uint32 mNumCellX;
-        uint32 mNumCellY;
         uint32 mInbetweenCount;
         uint64 mInvalidationFlags;
 };

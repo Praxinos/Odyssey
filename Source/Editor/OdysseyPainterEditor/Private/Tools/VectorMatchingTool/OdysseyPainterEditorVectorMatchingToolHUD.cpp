@@ -33,9 +33,9 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
     iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
     iBLContext->setStrokeWidth( 1.0f );
 
-    for( FInbetweenerGridCell& cell : iInbetweenerTag->GetGridCellBuffer() )
+    for( FInbetweenerGridQuad& quad : iInbetweenerTag->GetGridQuadBuffer() )
     {
-        FInbetweenerGridPoint** gridPoint = cell.GetGridPoints();
+        FInbetweenerGridPoint** gridPoint = quad.GetPoints();
         BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetTargetPosition().x
                                               , gridPoint[0]->GetTargetPosition().y )
                         , worldMatrix.mapPoint( gridPoint[1]->GetTargetPosition().x
