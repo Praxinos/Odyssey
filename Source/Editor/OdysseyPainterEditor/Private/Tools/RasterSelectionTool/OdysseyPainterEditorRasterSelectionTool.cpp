@@ -24,9 +24,9 @@ UOdysseyPainterEditorRasterSelectionTool::~UOdysseyPainterEditorRasterSelectionT
 UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTool()
     : SelectionShape( EOdysseySelectionShape::Freehand )
     , SelectionState( EOdysseySelectionState::Normal )
+    , mSelectionHUD(MakeShared<FOdysseyHUDElement>())
     , mToolSelectionArea(nullptr)
     , mPaintEngine()
-    , mSelectionHUD(MakeShared<FOdysseyHUDElement>())
     , mSelectionBlock(nullptr)
     
 {
