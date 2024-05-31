@@ -115,12 +115,17 @@ UOdysseyEllipseShape::Abort()
 TArray<FOdysseyPoint>
 UOdysseyEllipseShape::GeneratePoints() const
 {
-    /* float xRadius = FMath::Abs(mCenterPoint.X - mBorderPoint.x);
-    float yRadius = FMath::Abs(mCenterPoint.Y - mBorderPoint.y);
+    float xRadius = FMath::Abs(mCenterPoint.x - mBorderPoint.x);
+    float yRadius = FMath::Abs(mCenterPoint.y - mBorderPoint.y);
 
-    int numLines = FMath::Max(4, );*/
+    TArray<FOdysseyPoint> points = GeneratePointsFromFunction(
+        [centerPoint = mCenterPoint, xRadius, yRadius](float iValue)
+        {
+            return FVector2D(cos(iValue * 2 * PI) * xRadius + centerPoint.x, sin(iValue * 2 * PI) * yRadius + centerPoint.y);
+        }
+    );
 
-    return TArray<FOdysseyPoint>();
+    return points;
 }
 
 void

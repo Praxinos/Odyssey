@@ -128,7 +128,17 @@ UOdysseyBezierShape::Abort()
 TArray<FOdysseyPoint>
 UOdysseyBezierShape::GeneratePoints() const
 {
-    return TArray<FOdysseyPoint>();
+    TArray<FOdysseyPoint> points = GeneratePointsFromFunction(
+        [startPoint = mStartPoint, controlPoint = mControlPoint, endPoint = mEndPoint](float iValue)
+        {
+            return FVector2D(
+                (1.f - iValue) * ( (1.f - iValue) * startPoint.x + iValue * controlPoint.x ) + iValue * ((1.f - iValue) * controlPoint.x + iValue * endPoint.x),
+                (1.f - iValue) * ( (1.f - iValue) * startPoint.y + iValue * controlPoint.y ) + iValue * ((1.f - iValue) * controlPoint.y + iValue * endPoint.y)
+            );
+        }
+    );
+
+    return points;
 }
 
 void

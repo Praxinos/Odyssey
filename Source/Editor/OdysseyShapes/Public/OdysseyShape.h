@@ -89,6 +89,9 @@ public:
     //bool Uniform = false;
 
 protected:
+    TArray<FOdysseyPoint> GeneratePointsFromFunction(TFunction<FVector2D(float)> iFunction) const;
+
+protected:
     FOnInteractive mOnInteractive;
     FOnCommit mOnCommit;
     FSimpleMulticastDelegate mOnAbort;
