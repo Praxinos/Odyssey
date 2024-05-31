@@ -23,6 +23,7 @@
 #include "OdysseyMediaProvider.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 #include "FreehandShape/Interpolation/OdysseyInterpolationLine.h"
+#include "FreehandShape/OdysseyFreehandShapeOverrides.h"
 
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"
@@ -678,13 +679,39 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
     if (blendParametersOverrides)
     {
         FOdysseyBlendParameters blendParameters = GetBlendParameters();
-        blendParametersOverrides->Override(blendParameters);
+        if (blendParametersOverrides->bOverride_Opacity)
+            blendParameters.Opacity = blendParametersOverrides->Opacity;
+
+        if (blendParametersOverrides->bOverride_BlendingMode)
+            blendParameters.BlendingMode = blendParametersOverrides->BlendingMode;
+        
+        if (blendParametersOverrides->bOverride_AlphaMode)
+            blendParameters.AlphaMode = blendParametersOverrides->AlphaMode;
+
         FOdysseyObjectEditorUtils::SetPropertyValue(this, "BlendParameters", blendParameters);
     }
 
     UOdysseyBrushOptionsOverrides* brushOptionsOverrides = Cast<UOdysseyBrushOptionsOverrides>(iBrushInstance->EditorOverrides[UOdysseyBrushOptionsOverrides::StaticClass()]);
     if (brushOptionsOverrides)
-        brushOptionsOverrides->Override(BrushOptions);
+    {
+        if (brushOptionsOverrides->bOverride_Size)
+            FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Size", brushOptionsOverrides->Size);
+        if (brushOptionsOverrides->bOverride_Flow)
+            FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, "Flow", brushOptionsOverrides->Flow);
+    }
+
+    //PATCH: Use Step / AdaptativeStep / InterpolationType from FreehandShapeOverrides
+    //But we should have a RasterDrawingToolOverrides class
+    const UOdysseyFreehandShapeOverrides* freehandShapeOverrides = Cast<const UOdysseyFreehandShapeOverrides>(iBrushInstance->EditorOverrides[UOdysseyFreehandShapeOverrides::StaticClass()]);
+    if (freehandShapeOverrides)
+    {
+        if (freehandShapeOverrides->bOverride_Step)
+            FOdysseyObjectEditorUtils::SetPropertyValue(this, "Step", freehandShapeOverrides->Step);
+        if (freehandShapeOverrides->bOverride_AdaptativeStep)
+            FOdysseyObjectEditorUtils::SetPropertyValue(this, "AdaptativeStep", freehandShapeOverrides->AdaptativeStep);
+        if (freehandShapeOverrides->bOverride_InterpolationType)
+            FOdysseyObjectEditorUtils::SetPropertyValue(this, "InterpolationType", freehandShapeOverrides->InterpolationType);
+    }
 
     SelectedShapeInstance->ApplyOverrides(iBrushInstance->EditorOverrides);
 
@@ -788,24 +815,10 @@ UOdysseyPainterEditorRasterDrawingTool::OnRasterSelectionChanged()
 }
 
 void
-UOdysseyPainterEditorRasterDrawingTool::OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints, bool iReset)
+UOdysseyPainterEditorRasterDrawingTool::OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints)
 {
-    if ( iReset && !RealtimePreview )
+    if ( !SelectedShapeInstance->IsProgressive() )
         return;
-
-    if(iReset)
-    {
-        ResetInterpolation();
-
-        mWorker.Finish();
-        BrushInstance->StrokeFlush();
-        BrushInstance->StrokeAbort();
-        
-        //Reset the PaintEngine as if didn't draw on it
-        mPaintEngine.Abort();
-
-        mIsFirstPoint = true;
-    }
 
     for (const FOdysseyPoint& point : iPoints)
     {
@@ -825,12 +838,6 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeInteractive(const TArray<FOdyssey
             continue;
 
         StrokeTo(interpolatedPoints);
-    }
-
-    if (iReset)
-    {
-        StrokeEnd();
-        Flush();
     }
 }
 

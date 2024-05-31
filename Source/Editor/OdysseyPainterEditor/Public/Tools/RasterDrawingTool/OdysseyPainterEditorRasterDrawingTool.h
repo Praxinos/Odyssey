@@ -172,7 +172,7 @@ private:
     void StrokeReset();
 
     // Internal - Callbacks
-    void OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+    void OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints);
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
     void OnShapeAbort();
 
@@ -214,9 +214,6 @@ public:
 
     UPROPERTY( EditAnywhere, Category="Interpolation")
     bool    AdaptativeStep = false;
-
-    UPROPERTY(EditAnywhere, Category = "Interpolation")
-    bool    RealtimePreview = false;
     
     UPROPERTY( EditInstanceOnly, Category="Interpolation")
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;

@@ -49,7 +49,7 @@ UOdysseyBezierShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 
         RefreshHUD();
 
-        mOnInteractive.Broadcast(GeneratePoints(), true);
+        mOnInteractive.Broadcast(GeneratePoints());
     }
     
     UOdysseyShape::OnMouseHover(iPointInTexture);
@@ -66,7 +66,7 @@ UOdysseyBezierShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
         RefreshHUD();
 
-        mOnInteractive.Broadcast(GeneratePoints(), true);
+        mOnInteractive.Broadcast(GeneratePoints());
     }
 
     if ( mEventState == eEventState::ControlPoint )
@@ -77,7 +77,7 @@ UOdysseyBezierShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
         RefreshHUD();
 
-        mOnInteractive.Broadcast(GeneratePoints(), true);
+        mOnInteractive.Broadcast(GeneratePoints());
     }
 
     UOdysseyShape::OnMouseDrag(iPointInTexture);

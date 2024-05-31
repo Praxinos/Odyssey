@@ -419,9 +419,9 @@ UOdysseyPainterEditorRasterEraserTool::OnRasterSelectionChanged()
 }
 
 void
-UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints, bool iReset)
+UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints)
 {
-    if ( iReset )
+    if ( !SelectedShapeInstance->IsProgressive() )
         return;
 
     for ( const FOdysseyPoint& point : iPoints )

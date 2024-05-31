@@ -58,7 +58,7 @@ UOdysseyPolygonShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 
         SetLastHUDPoint(mPoints.Last());
 
-        mOnInteractive.Broadcast( mPoints, true );
+        mOnInteractive.Broadcast( mPoints );
     }
         
     UOdysseyShape::OnMouseHover(iPointInTexture);
@@ -75,7 +75,7 @@ UOdysseyPolygonShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey
     mPoints.Add( point );
     AddPointToHUD(point);
 
-    mOnInteractive.Broadcast( mPoints, true );
+    mOnInteractive.Broadcast( mPoints );
     return true;
 }
 
@@ -101,7 +101,7 @@ UOdysseyPolygonShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
     
     SetLastHUDPoint(mPoints.Last());
 
-    mOnInteractive.Broadcast( mPoints, true );
+    mOnInteractive.Broadcast( mPoints );
 
     UOdysseyShape::OnMouseDrag(iPointInTexture);
 }

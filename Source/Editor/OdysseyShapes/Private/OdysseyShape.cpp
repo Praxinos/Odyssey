@@ -63,6 +63,12 @@ UOdysseyShape::SetHUD(TSharedPtr<FOdysseyHUDElement> iHUD)
 	mHUD = iHUD;
 }
 
+bool
+UOdysseyShape::IsProgressive() const
+{
+	return mIsProgressive;
+}
+
 void
 UOdysseyShape::Abort()
 {

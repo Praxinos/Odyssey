@@ -67,7 +67,7 @@ UOdysseyRectangleShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
     FOdysseyPoint topRightPoint(mBottomRightPoint.x, mTopLeftPoint.y);
     FOdysseyPoint bottomLeftPoint(mTopLeftPoint.x, mBottomRightPoint.y);
-    mOnInteractive.Broadcast( { mTopLeftPoint, topRightPoint, mBottomRightPoint, bottomLeftPoint, mTopLeftPoint }, true );
+    mOnInteractive.Broadcast( { mTopLeftPoint, topRightPoint, mBottomRightPoint, bottomLeftPoint, mTopLeftPoint } );
     
     UOdysseyShape::OnMouseDrag(iPointInTexture);
 }

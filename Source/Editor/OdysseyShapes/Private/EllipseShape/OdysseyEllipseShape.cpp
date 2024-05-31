@@ -55,7 +55,7 @@ UOdysseyEllipseShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
     RefreshHUD();
 
-    mOnInteractive.Broadcast( GeneratePoints(), true );
+    mOnInteractive.Broadcast( GeneratePoints() );
 
     UOdysseyShape::OnMouseDrag(iPointInTexture);
 }

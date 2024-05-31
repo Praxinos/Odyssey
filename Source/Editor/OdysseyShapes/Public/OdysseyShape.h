@@ -44,7 +44,7 @@ class ODYSSEYSHAPES_API UOdysseyShape : public UObject
     GENERATED_BODY()
 
 public:
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInteractive, const TArray<FOdysseyPoint>& /*iPoints*/, bool /*iReset*/);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnInteractive, const TArray<FOdysseyPoint>& /*iPoints*/);
     DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCommit, const TArray<FOdysseyPoint>& /*iPoints*/, bool /*iReset*/);
 
 public:
@@ -69,6 +69,7 @@ public:
     virtual void ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<UObject>>& iOverrides);
 
     void SetHUD( TSharedPtr<FOdysseyHUDElement> iHUD );
+    bool IsProgressive() const;
 
 public:
     // Getters
@@ -99,4 +100,5 @@ protected:
 protected:
     //Borrowed HUD from the tool
     TSharedPtr<FOdysseyHUDElement> mHUD;
+    bool mIsProgressive = false;
 };

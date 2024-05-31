@@ -6,6 +6,7 @@
 #include "FreehandShape/Smoothing/OdysseySmoothingAverage.h"
 #include "FreehandShape/Smoothing/OdysseySmoothingPull.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyHUDPolygon.h"
 
 //--------------------------------------------------------------------------------------
@@ -17,6 +18,7 @@ UOdysseyFreehandShape::~UOdysseyFreehandShape()
 UOdysseyFreehandShape::UOdysseyFreehandShape(const FObjectInitializer& iObjectInitializer)
     : Super(iObjectInitializer)
 {
+    mIsProgressive = true;
 }
 
 //--------------------------------------------------------------------------------------
@@ -47,14 +49,14 @@ UOdysseyFreehandShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const F
     {
         BeginSmoothing();
 
-        mOnInteractive.Broadcast( mSmoothedStroke, false );
+        mOnInteractive.Broadcast( mSmoothedStroke );
 
         if ( mPathHUD )
             mPathHUD->GetPoints().Append(mSmoothedStroke);
     }
     else
     {
-        mOnInteractive.Broadcast( mRawStroke, false );
+        mOnInteractive.Broadcast( mRawStroke );
         if ( mPathHUD )
             mPathHUD->GetPoints().Append(mRawStroke);
     }
@@ -132,13 +134,13 @@ UOdysseyFreehandShape::StrokeTo( const FOdysseyPoint& iPoint )
         if (!SmoothTo(iPoint)) //false means SmoothTo has just not produced any point but it is not an error
             return true;
 
-        mOnInteractive.Broadcast( { mSmoothedStroke.Last() }, false );
+        mOnInteractive.Broadcast( { mSmoothedStroke.Last() } );
         if ( mPathHUD )
             mPathHUD->GetPoints().Add(mSmoothedStroke.Last());
     }
     else
     {
-        mOnInteractive.Broadcast( { mRawStroke.Last() }, false );
+        mOnInteractive.Broadcast( { mRawStroke.Last() } );
         if ( mPathHUD )
             mPathHUD->GetPoints().Add(mRawStroke.Last());
     }
@@ -161,7 +163,22 @@ UOdysseyFreehandShape::ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<
 {
     const UOdysseyFreehandShapeOverrides* freehandShapeOverrides = Cast<const UOdysseyFreehandShapeOverrides>(iOverrides[UOdysseyFreehandShapeOverrides::StaticClass()]);
     if (freehandShapeOverrides)
-        freehandShapeOverrides->Override(this);
+    {
+        FOdysseySmoothingOptions smoothingOptions = SmoothingOptions;
+        if(freehandShapeOverrides->bOverride_SmoothingMethod)
+            smoothingOptions.SmoothingMethod = freehandShapeOverrides->SmoothingMethod;
+        if(freehandShapeOverrides->bOverride_SmoothingStrength)
+            smoothingOptions.SmoothingStrength = freehandShapeOverrides->SmoothingStrength;
+        if(freehandShapeOverrides->bOverride_SmoothingRealTime)
+            smoothingOptions.SmoothingRealTime = freehandShapeOverrides->SmoothingRealTime;
+        if(freehandShapeOverrides->bOverride_SmoothingCatchUp)
+            smoothingOptions.SmoothingCatchUp = freehandShapeOverrides->SmoothingCatchUp;
+        
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, "SmoothingOptions", smoothingOptions);
+
+        if(freehandShapeOverrides->bOverride_SmoothingEnabled)
+            FOdysseyObjectEditorUtils::SetPropertyValue(this, "SmoothingEnabled", freehandShapeOverrides->SmoothingEnabled);
+    }
 }
 
 //--------------------------------------------------------------------------------------

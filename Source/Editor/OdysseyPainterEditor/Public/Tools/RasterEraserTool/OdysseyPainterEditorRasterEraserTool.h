@@ -74,7 +74,7 @@ public:
     
 private:
     // Internal - Callbacks
-    void OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+    void OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints);
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
     void OnShapeAbort();
 

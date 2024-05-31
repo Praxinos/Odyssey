@@ -65,7 +65,7 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
     RefreshHUD();
 
-    mOnInteractive.Broadcast( { mStartPoint, mEndPoint }, true );
+    mOnInteractive.Broadcast( { mStartPoint, mEndPoint } );
 
     UOdysseyShape::OnMouseDrag(iPointInTexture);
 }
