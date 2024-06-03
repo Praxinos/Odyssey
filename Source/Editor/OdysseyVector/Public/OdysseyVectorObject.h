@@ -92,7 +92,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* Copy(); 
 
         FOdysseyVectorObject* Copy( std::function<void(FOdysseyVectorObject*)> iPreCallback
-                                  , std::function<void(FOdysseyVectorObject*)> iPostCallback );
+                                  , std::function<void(FOdysseyVectorObject*
+                                                     , FOdysseyVectorObject*)> iPostCallback );
 
         void RecursiveRemoveTagByType( uint32 iTagType );
 

@@ -135,11 +135,11 @@ class ODYSSEYVECTOR_API FInbetweenerGridPoint
         friend class FInbetweenerGrid;
 
     protected: 
-        void Init( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        void Init( FInbetweenerGrid* iGrid );
 
     protected:
         std::list<FInbetweenerGridQuad*> mQuadList;
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        FInbetweenerGrid* mGrid;
         ::ULIS::FVec2D mSourcePosition;
         ::ULIS::FVec2D mMotionPosition;
         ::ULIS::FVec2D mTargetPosition;
@@ -171,15 +171,14 @@ class FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGrid(){};
-        FInbetweenerGrid();
+        FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
         virtual void Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY
-                         , const ::ULIS::FRectD& iBoundingBox
-                         , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+                         , uint32 iNumQuadY );
 
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                                 , uint32 iInbetweenIndex );
+        FOdysseyVectorTagInbetweener* GetInbetweenerTag();
 
         friend class FOdysseyVectorTagInbetweener;
 
@@ -190,9 +189,9 @@ class FInbetweenerGrid
         uint32 GetNumQuadY();
 
     protected:
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
         std::vector<FInbetweenerGridPoint> mPointBuffer;
         std::vector<FInbetweenerGridQuad> mQuadBuffer;
-        ::ULIS::FRectD mBBox;
         uint32 mNumQuadX;
         uint32 mNumQuadY;
 };
@@ -201,12 +200,10 @@ class FInbetweenerGridFFD : public FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGridFFD(){};
-        FInbetweenerGridFFD();
+        FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
         virtual void Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY
-                         , const ::ULIS::FRectD& iBoundingBox
-                         , FOdysseyVectorTagInbetweener* iInbetweenerTag ) override;
+                         , uint32 iNumQuadY  ) override;
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                                 , uint32 iInbetweenIndex ) override;
         void ComputeBinomialCoefficients();
@@ -222,11 +219,13 @@ class FInbetweenerGridFFD : public FInbetweenerGrid
 class FInbetweenerGridARAP : public FInbetweenerGrid
 {
     public:
+        virtual ~FInbetweenerGridARAP(){};
+        FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+
+        virtual void Make(  uint32 iNumQuadX
+                          , uint32 iNumQuadY ) override;
+
         friend class FOdysseyVectorTagInbetweener;
-        virtual void Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY
-                         , const ::ULIS::FRectD& iBoundingBox
-                         , FOdysseyVectorTagInbetweener* iInbetweenerTag ) override;
 
     protected:
         int dummy;

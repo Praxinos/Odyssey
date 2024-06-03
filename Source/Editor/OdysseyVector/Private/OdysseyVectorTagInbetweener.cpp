@@ -180,9 +180,9 @@ FInbetweenerGridPoint::FInbetweenerGridPoint()
 }
 
 void
-FInbetweenerGridPoint::Init( FOdysseyVectorTagInbetweener* iInbetweenerTag )
+FInbetweenerGridPoint::Init( FInbetweenerGrid* iGrid )
 {
-    mInbetweenerTag = iInbetweenerTag;
+    mGrid = iGrid;
 }
 
 void
@@ -191,7 +191,7 @@ FInbetweenerGridPoint::SetSourcePosition( double iX, double iY )
     mSourcePosition.x = iX;
     mSourcePosition.y = iY;
 
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_BBOX );
+    mGrid->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_BBOX );
 }
 
 void
@@ -200,7 +200,7 @@ FInbetweenerGridPoint::SetTargetPosition( double iX, double iY )
     mTargetPosition.x = iX;
     mTargetPosition.y = iY;
 
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_BBOX );
+    mGrid->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_BBOX );
 }
 
 const ::ULIS::FVec2D&
@@ -266,11 +266,17 @@ FInbetweenerGridQuad::Unlink()
     mFlags &= (~LINKED);
 }
 
-FInbetweenerGrid::FInbetweenerGrid()
+FInbetweenerGrid::FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : mNumQuadX( 0 )
     , mNumQuadY( 0 )
-    , mBBox( 0, 0, 0, 0 )
+    , mInbetweenerTag( iInbetweenerTag )
 {
+}
+
+FOdysseyVectorTagInbetweener*
+FInbetweenerGrid::GetInbetweenerTag()
+{
+    return mInbetweenerTag;
 }
 
 uint32
@@ -287,20 +293,18 @@ FInbetweenerGrid::GetNumQuadY()
 
 void
 FInbetweenerGrid::Make( uint32 iNumQuadX
-                      , uint32 iNumQuadY
-                      , const ::ULIS::FRectD& iBoundingBox
-                      , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+                      , uint32 iNumQuadY )
 {
-    double x = iBoundingBox.x;
-    double y = iBoundingBox.y;
-    double stepx = iBoundingBox.w / iNumQuadX;
-    double stepy = iBoundingBox.h / iNumQuadY;
+    ::ULIS::FRectD bbox = mInbetweenerTag->GetOwner()->GetBBox( false );
+    double x = bbox.x;
+    double y = bbox.y;
+    double stepx = bbox.w / iNumQuadX;
+    double stepy = bbox.h / iNumQuadY;
     uint32 numVertexX = iNumQuadX + 1;
     uint32 numVertexY = iNumQuadY + 1;
 
     mNumQuadX = iNumQuadX;
     mNumQuadY = iNumQuadY;
-    mBBox = iBoundingBox;
 
     mPointBuffer.resize( numVertexX * numVertexY );
     mQuadBuffer.resize( mNumQuadX * mNumQuadY );
@@ -312,18 +316,18 @@ FInbetweenerGrid::Make( uint32 iNumQuadX
         {
             uint32 offset = ( i * numVertexX ) + j;
 
-            mPointBuffer[offset].Init( iInbetweenerTag );
+            mPointBuffer[offset].Init( this );
             mPointBuffer[offset].SetSourcePosition( x, y );
             mPointBuffer[offset].mTargetPosition = mPointBuffer[offset].mSourcePosition;
 
-            mPointBuffer[offset].u = std::clamp<double>( ( x - mBBox.x ) / mBBox.w, 0.0f, 1.0f );
-            mPointBuffer[offset].v = std::clamp<double>( ( y - mBBox.y ) / mBBox.h, 0.0f, 1.0f );
+            mPointBuffer[offset].u = std::clamp<double>( ( x - bbox.x ) / bbox.w, 0.0f, 1.0f );
+            mPointBuffer[offset].v = std::clamp<double>( ( y - bbox.y ) / bbox.h, 0.0f, 1.0f );
 
             x += stepx;
         }
 
         y += stepy;
-        x = mBBox.x;
+        x = bbox.x;
     }
 
     // design cells
@@ -346,7 +350,8 @@ FInbetweenerGrid::Make( uint32 iNumQuadX
     }
 }
 
-FInbetweenerGridFFD::FInbetweenerGridFFD()
+FInbetweenerGridFFD::FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag )
+    : FInbetweenerGrid( iInbetweenerTag )
 {
 }
 
@@ -359,6 +364,7 @@ FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPath
 ::ULIS::FVec2D
 FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
 {
+    ::ULIS::FRectD bbox = mInbetweenerTag->GetOwner()->GetBBox( false );
     ::ULIS::FVec2D vi = ::ULIS::FVec2D( 0.0f, 0.0f );
     uint32 numVertexX = mNumQuadX + 1;
     uint32 numVertexY = mNumQuadY + 1;
@@ -381,8 +387,8 @@ FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
         vi.y += ( bcv * pow ( ( 1 - iInterpolatedPoint->mV ), (mNumQuadY) - i ) * pow ( iInterpolatedPoint->mV, i ) * vj.y );
     }
 
-    return ::ULIS::FVec2D( ( mBBox.x + ( mBBox.w * vi.x ) )
-                         , ( mBBox.y + ( mBBox.h * vi.y ) ) );
+    return ::ULIS::FVec2D( ( bbox.x + ( bbox.w * vi.x ) )
+                         , ( bbox.y + ( bbox.h * vi.y ) ) );
 }
 
 void
@@ -418,12 +424,9 @@ FInbetweenerGrid::GetPointBuffer()
 }
 
 void
-FInbetweenerGridFFD::Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY
-                         , const ::ULIS::FRectD& iBoundingBox
-                         , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+FInbetweenerGridFFD::Make( uint32 iNumQuadX, uint32 iNumQuadY )
 {
-    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY, iBoundingBox, iInbetweenerTag );
+    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY );
 
     mUBinomialCoefficientBuffer.resize( mPointBuffer.size() );
     mVBinomialCoefficientBuffer.resize( mPointBuffer.size() );
@@ -431,13 +434,15 @@ FInbetweenerGridFFD::Make( uint32 iNumQuadX
     ComputeBinomialCoefficients();
 }
 
-void
-FInbetweenerGridARAP::Make( uint32 iNumQuadX
-                          , uint32 iNumQuadY
-                          , const ::ULIS::FRectD& iBoundingBox
-                         , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+FInbetweenerGridARAP::FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag )
+    : FInbetweenerGrid( iInbetweenerTag )
 {
-    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY, iBoundingBox, iInbetweenerTag );
+}
+
+void
+FInbetweenerGridARAP::Make( uint32 iNumQuadX, uint32 iNumQuadY )
+{
+    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY );
 }
 
 void
@@ -530,7 +535,7 @@ FOdysseyVectorTagInbetweener::Map()
 
 FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
 {
-
+    delete mGrid;
 }
 
 FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
@@ -543,6 +548,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     // GetClass() and the latter is a virtual function. virtual function don't work
     // in destructors.
     , mSharedEnv ( iSharedEnv )
+    , mGrid( nullptr )
     , mGridType( eInbetweenerGridType::FFD )
     , mInbetweenCount( iInbetweenCount )
     , mInvalidationFlags( 0 )
@@ -555,7 +561,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
 
     UpdateMatrix();
 
-    mGrid = new FInbetweenerGridFFD();
+    SetGridType( mGridType );
 
     //mGrid->Make( iNumQuadX, iNumQuadY, iOwnerObject->GetBBox( false ), this );
 
@@ -570,16 +576,12 @@ FOdysseyVectorTagInbetweener::Translate( double iX, double iY )
 {
     mTargetTranslationX = iX;
     mTargetTranslationY = iY;
-
-    //Invalidate( INVALIDATE_CELLS );
 }
 
 void
 FOdysseyVectorTagInbetweener::Rotate( double iAngle )
 {
     mTargetRotation = iAngle;
-
-    //Invalidate( INVALIDATE_CELLS );
 }
 
 void
@@ -587,8 +589,6 @@ FOdysseyVectorTagInbetweener::Scale( double iX, double iY )
 {
     mTargetScalingX = iX;
     mTargetScalingY = iY;
-
-    //Invalidate( INVALIDATE_CELLS );
 }
 
 void FOdysseyVectorTagInbetweener::Added()
@@ -826,15 +826,19 @@ void
 FOdysseyVectorTagInbetweener::InterpolateTransform( uint32 iInbetweenIndex )
 {
     FInbetweenerInbetween* inbetween = &mChart.inbetweenBuffer[iInbetweenIndex];
+    double translationX, translationY, rotation, scalingX, scalingY;
     double spacing = inbetween->spacing;
 
-    double translationX = mTargetTranslationX * spacing;
-    double translationY = mTargetTranslationY * spacing;
-    double rotation = mTargetRotation * spacing;
+    translationX = mTargetTranslationX * spacing;
+    translationY = mTargetTranslationY * spacing;
+    rotation = mTargetRotation * spacing;
+    scalingX = 1.0f + ( ( mTargetScalingX - 1.0f ) * spacing );
+    scalingY = 1.0f + ( ( mTargetScalingY - 1.0f ) * spacing );
 
     inbetween->matrix.reset();
     inbetween->matrix.translate( translationX, translationY );
     inbetween->matrix.rotate( rotation );
+    inbetween->matrix.scale( scalingX, scalingY );
 }
 
 void
@@ -1130,17 +1134,32 @@ FOdysseyVectorTagInbetweener::GetGridNumQuadY()
 void
 FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
 {
+    if( mGrid )
+    {
+        delete mGrid;
+
+        mGrid = nullptr;
+    }
+
     mGridType = iGridType;
+
+    switch( iGridType )
+    {
+        case eInbetweenerGridType::ARAP :
+            mGrid = new FInbetweenerGridARAP( this );
+        break;
+
+        default:
+            mGrid = new FInbetweenerGridFFD( this );
+        break;
+    }
 
     Invalidate( INVALIDATE_MAP
               | INVALIDATE_SPACING
               | INVALIDATE_BUFFERS
               | INVALIDATE_CELLS );
 
-    mGrid->Make( mGrid->GetNumQuadX()
-               , mGrid->GetNumQuadY()
-               , GetOwner()->GetBBox( false )
-               , this );
+    mGrid->Make( mGrid->GetNumQuadX(), mGrid->GetNumQuadY() );
 }
 
 void
@@ -1149,10 +1168,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY
     Invalidate( INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    mGrid->Make( iNumQuadX
-               , iNumQuadY
-               , GetOwner()->GetBBox( false )
-               , this );
+    mGrid->Make( iNumQuadX, iNumQuadY );
 }
 
 void
@@ -1161,10 +1177,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuadX( uint32 iNumQuadX )
     Invalidate( INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    mGrid->Make( iNumQuadX
-               , mGrid->GetNumQuadY()
-               , GetOwner()->GetBBox( false )
-               , this );
+    mGrid->Make( iNumQuadX, mGrid->GetNumQuadY() );
 }
 
 void
@@ -1173,10 +1186,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuadY( uint32 iNumQuadY )
     Invalidate( INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    mGrid->Make( mGrid->GetNumQuadX()
-               , iNumQuadY
-               , GetOwner()->GetBBox( false )
-               , this );
+    mGrid->Make( mGrid->GetNumQuadX(), iNumQuadY );
 }
 
 void
@@ -1199,6 +1209,7 @@ FOdysseyVectorTagInbetweener::Commit()
                 if( tag )
                 {
                     FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                    FInbetweenerInbetween* inbetween = &inbetweenerTag->mChart.inbetweenBuffer[inbetweenIndex];
 
                     for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
                     {
@@ -1210,8 +1221,13 @@ FOdysseyVectorTagInbetweener::Commit()
                             FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
                             ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i];
                             ::ULIS::FVec2D swapPosition = interpolatedPoint->mOriginalPoint->GetCoords();
+                            BLPoint transformedPosition;
 
-                            interpolatedPoint->mOriginalPoint->Set( *commitPosition );
+                            transformedPosition = inbetween->matrix.mapPoint( commitPosition->x
+                                                                            , commitPosition->y );
+
+                            interpolatedPoint->mOriginalPoint->Set( transformedPosition.x
+                                                                  , transformedPosition.y );
 
                             *commitPosition = swapPosition;
                         }
@@ -1220,14 +1236,32 @@ FOdysseyVectorTagInbetweener::Commit()
                     //tag->GetOwner()->RemoveTag( tag );
                 }
             };
-            // revert vertices coords after having copied the object. It's actually the same thing.
-            std::function<void(FOdysseyVectorObject*)> postProcess = preProcess;
+
+            std::function<void(FOdysseyVectorObject*,FOdysseyVectorObject*)> postProcess = [ inbetweenIndex
+                                                                                           , preProcess ]( FOdysseyVectorObject* sourceObject
+                                                                                                         , FOdysseyVectorObject* objectCopy )
+            {
+                FOdysseyVectorTag* tag = sourceObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+                if( tag )
+                {
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                    FInbetweenerInbetween* inbetween = &inbetweenerTag->mChart.inbetweenBuffer[inbetweenIndex];
+
+                    inbetween->matrix.reset();
+                }
+
+                // revert vertices coords after having copied the object. It's actually the same thing.
+                preProcess( sourceObject );
+            };
+
             FOdysseyVectorGroupPaint* inbetweenScene = inbetweenAnimationCell->GetEngine()->GetScene();
 
             FOdysseyVectorObject* copiedObject = mOwner->Copy( preProcess, postProcess );
 
             inbetweenScene->AppendChild( copiedObject );
 
+            inbetweenScene->UpdateMatrix();
             inbetweenScene->Update( 0 );
         }
     }
