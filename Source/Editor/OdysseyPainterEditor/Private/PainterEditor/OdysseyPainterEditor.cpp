@@ -686,12 +686,12 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
 {
     if (mSource)
     {
+        InactivateAllTools();
+
         mSource->Inactivate();
         mSource = nullptr;
 
         mRasterSelection.Reset();
-		
-        InactivateAllTools();
     }
 
     if (iSource)
