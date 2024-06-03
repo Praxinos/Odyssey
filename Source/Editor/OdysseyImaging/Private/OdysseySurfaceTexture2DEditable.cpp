@@ -385,6 +385,9 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
             tileBlocks.Emplace( TArray< ::ULIS::FBlock >() );
             tileBlocks[i].Reserve( ioSrcRects[i].Num() );
             for( int32 j = 0; j < ioSrcRects[i].Num(); ++j ) {
+
+                EGammaSpace gammaSpace = ERawImageFormat::GetDefaultGammaSpace(fmt);
+
                 const int len = ioSrcRects[i][j].h;
                 tileImages[i].Emplace(
                     TArray< FImage >(
@@ -394,7 +397,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
                                 , ioSrcRects[i][j].h
                                 , 1
                                 , fmt
-                                , buildSettings[i][0].GetDestGammaSpace()
+                                , gammaSpace
                             )
                         }
                     )
