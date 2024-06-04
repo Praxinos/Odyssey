@@ -2,10 +2,21 @@
 
 #include "CoreMinimal.h"
 
+#include <set>
 #include <ULIS>
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+
+// MACRO check exists in Unreal and conflicts with another one defined in Eigen. We temporarily undefine it.
+#pragma push_macro("check")
+#undef check
+
+#include <Eigen/Geometry>
+#include <Eigen/SparseCore>
+#include <Eigen/SparseLU>
+
+#pragma pop_macro("check")
 
 #include "OdysseyVectorTag.h"
 
@@ -18,6 +29,9 @@ class FOdysseyVectorPath;
 class FOdysseyVectorSharedEnv;
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerGridQuad;
+
+typedef Eigen::Triplet<double> TripletD;
+
 
 UENUM()
 enum class eInbetweenerGridType : uint8
@@ -117,18 +131,33 @@ struct FInbetweenerChart
     std::vector<FInbetweenerInbetween> inbetweenBuffer;
 };
 
+enum eGridPointPositionType
+{
+    SourcePosition = 0,
+    MotionPosition = 1,
+    TargetPosition = 2
+};
+
 class ODYSSEYVECTOR_API FInbetweenerGridPoint
 {
     public:
+        typedef Eigen::Matrix<double, 2, 1> VectorType;
+        typedef Eigen::Transform<double, 2, Eigen::Affine> Affine;
+
         virtual ~FInbetweenerGridPoint(){};
         FInbetweenerGridPoint( );
 
         void SetSourcePosition( double iX, double iY );
         void SetTargetPosition( double iX, double iY );
+        void SetMotionPosition( double iX, double iY );
         const ::ULIS::FVec2D& GetSourcePosition();
         const ::ULIS::FVec2D& GetTargetPosition();
         void AddQuad( FInbetweenerGridQuad* iQuad );
         void RemoveQuad( FInbetweenerGridQuad* iQuad );
+        std::list<FInbetweenerGridQuad*>& GetQuadList();
+        void SetID( uint32 iID );
+        uint32 GetID();
+        ::ULIS::FVec2D GetPosition( eGridPointPositionType iPositionType );
 
         friend class FOdysseyVectorTagInbetweener;
         friend class FInbetweenerGridFFD;
@@ -143,6 +172,7 @@ class ODYSSEYVECTOR_API FInbetweenerGridPoint
         ::ULIS::FVec2D mSourcePosition;
         ::ULIS::FVec2D mMotionPosition;
         ::ULIS::FVec2D mTargetPosition;
+        uint32 mID;
         double u, v;
 };
 
@@ -171,7 +201,9 @@ class FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGrid(){};
-        FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                        , uint32 iNumQuadX
+                        , uint32 iNumQuadY );
 
         virtual void Make( uint32 iNumQuadX
                          , uint32 iNumQuadY );
@@ -181,6 +213,9 @@ class FInbetweenerGrid
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
 
         friend class FOdysseyVectorTagInbetweener;
+
+    protected:
+        ::ULIS::FVec2D GetCenterOfMass( eGridPointPositionType iPositionType );
 
     protected:
         std::vector<FInbetweenerGridQuad>& GetQuadBuffer();
@@ -194,13 +229,18 @@ class FInbetweenerGrid
         std::vector<FInbetweenerGridQuad> mQuadBuffer;
         uint32 mNumQuadX;
         uint32 mNumQuadY;
+        uint32 mUsedQuadCount;
+        uint32 mUsedPointCount;
+        double mQuadArea;
 };
 
 class FInbetweenerGridFFD : public FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGridFFD(){};
-        FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                           , uint32 iNumQuadX
+                           , uint32 iNumQuadY );
 
         virtual void Make( uint32 iNumQuadX
                          , uint32 iNumQuadY  ) override;
@@ -220,7 +260,9 @@ class FInbetweenerGridARAP : public FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGridARAP(){};
-        FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                            , uint32 iNumQuadX
+                            , uint32 iNumQuadY );
 
         virtual void Make(  uint32 iNumQuadX
                           , uint32 iNumQuadY ) override;
@@ -228,7 +270,35 @@ class FInbetweenerGridARAP : public FInbetweenerGrid
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
-        int dummy;
+        bool Precompute();
+        void ComputePStar( FInbetweenerGridPoint* iTriangle[3]
+                         , int triRow
+                         , eGridPointPositionType iPositionType
+                         , std::vector<TripletD>& PTriplets );
+        bool InterpolateARAP( float alphaLinear
+                            , float alpha
+                           // , const FInbetweenerGridPoint::Affine &globalRigidTransform
+                            , bool useRigidTransform );
+        void ComputeJAM( FInbetweenerGridPoint* iTriangle[3]
+                       , bool iInverseOrientation
+                       , Eigen::Matrix2d& iA );
+        void ComputeQuadA( FInbetweenerGridQuad* iQuad
+                         , Eigen::MatrixXd& iAt
+                         , int &i
+                         , float iT
+                         , bool iInverseOrientation );
+        double PolarDecomp( Eigen::Matrix2d &A, Eigen::Matrix2d &S );
+
+    protected:
+        // center of mass of the lattice in its reference and target positions
+        ::ULIS::FVec2D mSourceCenterOfMass;
+        ::ULIS::FVec2D mTargetCenterOfMass;
+        // Constraints indices in the keyframe list
+        std::set<uint32> mConstraintsIdx;
+        // Matrices for ARAP interpolation
+        Eigen::SparseMatrix<double, Eigen::ColMajor> mPt;
+        Eigen::SparseLU<Eigen::SparseMatrix<double, Eigen::ColMajor>, Eigen::COLAMDOrdering<int>> mLU;
+        Eigen::VectorXd mW;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
@@ -262,6 +332,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void MakeGrid();
         void Map();
         void Interpolate();
+        void DrawMotionGrid( BLContext* iBLContext
+                           , const ::ULIS::FRectD& iInvalidationArea
+                           , double iAncestorsOpacity
+                           , uint64 iDrawingFlags );
         void DrawPathsInbetween( uint32 iInbetweenIndex
                                , BLContext* iBLContext );
         void DrawPathsTarget( BLContext* iBLContext );

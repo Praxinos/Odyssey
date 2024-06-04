@@ -10,6 +10,9 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorAnimationCell.h"
 
+// for pow()
+#include <unsupported/Eigen/MatrixFunctions>
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
 #endif
@@ -203,6 +206,13 @@ FInbetweenerGridPoint::SetTargetPosition( double iX, double iY )
     mGrid->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_BBOX );
 }
 
+void
+FInbetweenerGridPoint::SetMotionPosition( double iX, double iY )
+{
+    mMotionPosition.x = iX;
+    mMotionPosition.y = iY;
+}
+
 const ::ULIS::FVec2D&
 FInbetweenerGridPoint::GetSourcePosition()
 {
@@ -225,6 +235,45 @@ void
 FInbetweenerGridPoint::RemoveQuad( FInbetweenerGridQuad* iQuad )
 {
     mQuadList.remove( iQuad );
+}
+
+std::list<FInbetweenerGridQuad*>&
+FInbetweenerGridPoint::GetQuadList()
+{
+    return mQuadList;
+}
+
+void
+FInbetweenerGridPoint::SetID( uint32 iID )
+{
+    mID = iID;
+}
+
+uint32
+FInbetweenerGridPoint::GetID()
+{
+    return mID;
+}
+
+::ULIS::FVec2D
+FInbetweenerGridPoint::GetPosition( eGridPointPositionType iPositionType )
+{
+    switch( iPositionType )
+    {
+        case eGridPointPositionType::SourcePosition : 
+        return mSourcePosition;
+
+        case eGridPointPositionType::MotionPosition : 
+        return mMotionPosition;
+
+        case eGridPointPositionType::TargetPosition : 
+        return mTargetPosition;
+
+        default:
+        break;
+    }
+
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
 }
 
 FInbetweenerGridQuad::FInbetweenerGridQuad( )
@@ -266,10 +315,15 @@ FInbetweenerGridQuad::Unlink()
     mFlags &= (~LINKED);
 }
 
-FInbetweenerGrid::FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag )
-    : mNumQuadX( 0 )
-    , mNumQuadY( 0 )
+FInbetweenerGrid::FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                  , uint32 iNumQuadX
+                                  , uint32 iNumQuadY )
+    : mNumQuadX( iNumQuadX )
+    , mNumQuadY( iNumQuadY )
     , mInbetweenerTag( iInbetweenerTag )
+    , mUsedQuadCount( 0 )
+    , mUsedPointCount( 0 )
+    , mQuadArea( 0 )
 {
 }
 
@@ -291,67 +345,105 @@ FInbetweenerGrid::GetNumQuadY()
     return mNumQuadY;
 }
 
-void
-FInbetweenerGrid::Make( uint32 iNumQuadX
-                      , uint32 iNumQuadY )
+::ULIS::FVec2D
+FInbetweenerGrid::GetCenterOfMass( eGridPointPositionType iPositionType )
 {
-    ::ULIS::FRectD bbox = mInbetweenerTag->GetOwner()->GetBBox( false );
-    double x = bbox.x;
-    double y = bbox.y;
-    double stepx = bbox.w / iNumQuadX;
-    double stepy = bbox.h / iNumQuadY;
-    uint32 numVertexX = iNumQuadX + 1;
-    uint32 numVertexY = iNumQuadY + 1;
+    ::ULIS::FVec2D center = ::ULIS::FVec2D( 0.0f, 0.0f );
+    uint32 pointCount = 0;
 
+    for ( FInbetweenerGridPoint& point : mPointBuffer )
+    {
+        if( point.mQuadList.size() )
+        {
+            center += point.GetPosition( iPositionType );
+
+            pointCount++;
+        }
+    }
+
+    return pointCount ? ( center / pointCount ) : ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
+void
+FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY )
+{
     mNumQuadX = iNumQuadX;
     mNumQuadY = iNumQuadY;
 
-    mPointBuffer.resize( numVertexX * numVertexY );
-    mQuadBuffer.resize( mNumQuadX * mNumQuadY );
-
-    // position vertices
-    for( uint32 i = 0; i < numVertexY; i++ )
+    if( mNumQuadX && mNumQuadY )
     {
-        for( uint32 j = 0; j < numVertexX; j++ )
+        ::ULIS::FRectD bbox = mInbetweenerTag->GetOwner()->GetBBox( false );
+        double x = bbox.x;
+        double y = bbox.y;
+        double stepx = bbox.w / iNumQuadX;
+        double stepy = bbox.h / iNumQuadY;
+        uint32 numVertexX = iNumQuadX + 1;
+        uint32 numVertexY = iNumQuadY + 1;
+        uint32 pointID = 0;
+
+        mPointBuffer.resize( numVertexX * numVertexY );
+        mQuadBuffer.resize( mNumQuadX * mNumQuadY );
+
+        // position vertices
+        for( uint32 i = 0; i < numVertexY; i++ )
         {
-            uint32 offset = ( i * numVertexX ) + j;
+            for( uint32 j = 0; j < numVertexX; j++ )
+            {
+                uint32 offset = ( i * numVertexX ) + j;
 
-            mPointBuffer[offset].Init( this );
-            mPointBuffer[offset].SetSourcePosition( x, y );
-            mPointBuffer[offset].mTargetPosition = mPointBuffer[offset].mSourcePosition;
+                mPointBuffer[offset].Init( this );
+                mPointBuffer[offset].SetSourcePosition( x, y );
+                mPointBuffer[offset].mTargetPosition = mPointBuffer[offset].mSourcePosition;
 
-            mPointBuffer[offset].u = std::clamp<double>( ( x - bbox.x ) / bbox.w, 0.0f, 1.0f );
-            mPointBuffer[offset].v = std::clamp<double>( ( y - bbox.y ) / bbox.h, 0.0f, 1.0f );
+                mPointBuffer[offset].u = std::clamp<double>( ( x - bbox.x ) / bbox.w, 0.0f, 1.0f );
+                mPointBuffer[offset].v = std::clamp<double>( ( y - bbox.y ) / bbox.h, 0.0f, 1.0f );
 
-            x += stepx;
+                x += stepx;
+            }
+
+            y += stepy;
+            x = bbox.x;
         }
 
-        y += stepy;
-        x = bbox.x;
-    }
-
-    // design cells
-    for( uint32 i = 0; i < mNumQuadY; i++ )
-    {
-        for( uint32 j = 0; j < mNumQuadX; j++ )
+        // design cells
+        for( uint32 i = 0; i < mNumQuadY; i++ )
         {
-            uint32 vertexOffset = ( i * numVertexX ) + j;
-            uint32 quadOffset   = ( i * mNumQuadX  ) + j;
-            FInbetweenerGridQuad* quad = &mQuadBuffer[quadOffset];
-            FInbetweenerGridPoint** gridPoint = quad->GetPoints();
+            for( uint32 j = 0; j < mNumQuadX; j++ )
+            {
+                uint32 vertexOffset = ( i * numVertexX ) + j;
+                uint32 quadOffset   = ( i * mNumQuadX  ) + j;
+                FInbetweenerGridQuad* quad = &mQuadBuffer[quadOffset];
+                FInbetweenerGridPoint** gridPoint = quad->GetPoints();
 
-            gridPoint[0] = &mPointBuffer[vertexOffset];
-            gridPoint[1] = &mPointBuffer[vertexOffset+1];
-            gridPoint[2] = &mPointBuffer[vertexOffset+1+numVertexX];
-            gridPoint[3] = &mPointBuffer[vertexOffset+numVertexX];
+                gridPoint[0] = &mPointBuffer[vertexOffset];
+                gridPoint[1] = &mPointBuffer[vertexOffset+1];
+                gridPoint[2] = &mPointBuffer[vertexOffset+1+numVertexX];
+                gridPoint[3] = &mPointBuffer[vertexOffset+numVertexX];
 
-            quad->Link();
+                quad->Link();
+            }
         }
+
+        for( FInbetweenerGridPoint& point : mPointBuffer )
+        {
+            if( point.GetQuadList().size() )
+            {
+                point.SetID( pointID++ );
+            }
+        }
+
+        mUsedQuadCount = mQuadBuffer.size();
+        mUsedPointCount = pointID;
+
+        mQuadArea = FOdysseyVector::Cross2D( ( mQuadBuffer[0].GetPoints()[1]->mSourcePosition - mQuadBuffer[0].GetPoints()[0]->mSourcePosition )
+                                           , ( mQuadBuffer[0].GetPoints()[2]->mSourcePosition - mQuadBuffer[0].GetPoints()[1]->mSourcePosition ) );
     }
 }
 
-FInbetweenerGridFFD::FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag )
-    : FInbetweenerGrid( iInbetweenerTag )
+FInbetweenerGridFFD::FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                        , uint32 iNumQuadX
+                                        , uint32 iNumQuadY )
+    : FInbetweenerGrid( iInbetweenerTag, iNumQuadX, iNumQuadY )
 {
 }
 
@@ -428,14 +520,19 @@ FInbetweenerGridFFD::Make( uint32 iNumQuadX, uint32 iNumQuadY )
 {
     FInbetweenerGrid::Make( iNumQuadX, iNumQuadY );
 
-    mUBinomialCoefficientBuffer.resize( mPointBuffer.size() );
-    mVBinomialCoefficientBuffer.resize( mPointBuffer.size() );
+    if( iNumQuadX && iNumQuadY )
+    {
+        mUBinomialCoefficientBuffer.resize( mPointBuffer.size() );
+        mVBinomialCoefficientBuffer.resize( mPointBuffer.size() );
 
-    ComputeBinomialCoefficients();
+        ComputeBinomialCoefficients();
+    }
 }
 
-FInbetweenerGridARAP::FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag )
-    : FInbetweenerGrid( iInbetweenerTag )
+FInbetweenerGridARAP::FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                          , uint32 iNumQuadX
+                                          , uint32 iNumQuadY )
+    : FInbetweenerGrid( iInbetweenerTag, iNumQuadX, iNumQuadY )
 {
 }
 
@@ -444,6 +541,380 @@ FInbetweenerGridARAP::Make( uint32 iNumQuadX, uint32 iNumQuadY )
 {
     FInbetweenerGrid::Make( iNumQuadX, iNumQuadY );
 }
+
+/** 
+ * Compute P* for the two triangles of the given quad and add them to the sparse matrix P (via the triplet list)
+ * See Baxter et al. 2008
+ */
+void
+FInbetweenerGridARAP::ComputePStar( FInbetweenerGridPoint* iTriangle[3]
+                                  , int triRow
+                                  , eGridPointPositionType iPositionType
+                                  , std::vector<TripletD>& PTriplets )
+{
+    Eigen::MatrixXd P( 3, 2 ), D( 2, 3 ), PStar( 2, 3 );
+    D << 1, 0, -1, 0, 1, -1;
+    int i, j, k;
+
+    P( 0, 0 ) = iTriangle[0]->GetPosition( iPositionType ).x;
+    P( 0, 1 ) = iTriangle[0]->GetPosition( iPositionType ).y;
+    P( 1, 0 ) = iTriangle[1]->GetPosition( iPositionType ).x;
+    P( 1, 1 ) = iTriangle[1]->GetPosition( iPositionType ).y;
+    P( 2, 0 ) = iTriangle[2]->GetPosition( iPositionType ).x;
+    P( 2, 1 ) = iTriangle[2]->GetPosition( iPositionType ).y;
+
+    PStar = ( D * P ).inverse() * D;
+
+    i = iTriangle[0]->GetID();
+    j = iTriangle[1]->GetID();
+    k = iTriangle[2]->GetID();
+
+    PTriplets.push_back( TripletD( 2 * triRow    , i, PStar( 0, 0 ) ) );
+    PTriplets.push_back( TripletD( 2 * triRow    , j, PStar( 0, 1 ) ) );
+    PTriplets.push_back( TripletD( 2 * triRow    , k, PStar( 0, 2 ) ) );
+    PTriplets.push_back( TripletD( 2 * triRow + 1, i, PStar( 1, 0 ) ) );
+    PTriplets.push_back( TripletD( 2 * triRow + 1, j, PStar( 1, 1 ) ) );
+    PTriplets.push_back( TripletD( 2 * triRow + 1, k, PStar( 1, 2 ) ) );
+}
+
+/**
+ * Precompute the sparse matrices P^T and prefactor P^T*P for later computations
+ * See Baxter et al. 2008
+ */
+bool
+FInbetweenerGridARAP::Precompute()
+{
+/*
+    if (!m_singleConnectedComponent)
+    {
+        qWarning() << "Cannot precompute a lattice with multiple connected components! ";
+        return;
+    }
+*/
+    std::vector<TripletD> P_triplets;
+    uint32 P_rows = 8 * mUsedQuadCount; // P_rows
+    double triArea = mQuadArea * 0.5f;
+    int triRow = 0;
+
+    // Compute P (sparse) and store its transpose to construct the RHS of the equation later
+    // TODO refactorize concatenation
+    for( FInbetweenerGridQuad& quad : mQuadBuffer )
+    {
+        FInbetweenerGridPoint** points = quad.GetPoints();
+        FInbetweenerGridPoint* triangleA[3] = { points[0], points[1], points[2] };
+        FInbetweenerGridPoint* triangleB[3] = { points[2], points[3], points[0] };
+
+        ComputePStar( triangleA, triRow, eGridPointPositionType::SourcePosition, P_triplets );
+        triRow++;
+        ComputePStar( triangleB, triRow, eGridPointPositionType::SourcePosition, P_triplets );
+        triRow++;
+    }
+
+    for( FInbetweenerGridQuad& quad : mQuadBuffer )
+    {
+        FInbetweenerGridPoint** points = quad.GetPoints();
+        FInbetweenerGridPoint* triangleA[3] = { points[0], points[1], points[2] };
+        FInbetweenerGridPoint* triangleB[3] = { points[2], points[3], points[0] };
+
+        ComputePStar( triangleA, triRow, eGridPointPositionType::TargetPosition, P_triplets );
+        triRow++;
+        ComputePStar( triangleB, triRow, eGridPointPositionType::TargetPosition, P_triplets );
+        triRow++;
+    }
+
+    Eigen::SparseMatrix<double, Eigen::ColMajor> P( P_rows, mUsedPointCount );
+    P.setFromTriplets( P_triplets.begin(), P_triplets.end() );
+    mPt = P.transpose();
+
+    // Assembling diagonal W matrix
+    mW = Eigen::VectorXd( P_rows );
+
+    for ( uint32 i = 0; i < P_rows; ++i )
+    {
+        mW[i] = triArea;
+    }
+
+    // Assembling LHS (with constraint)
+    uint32 constraintCount = mConstraintsIdx.size() > 0 ? mConstraintsIdx.size() : 1;
+    uint32 idx = mUsedPointCount;
+    Eigen::SparseMatrix<double, Eigen::ColMajor> PTP = mPt * mW.asDiagonal() * P;
+    // Left Hand Side is a square matrix
+    Eigen::SparseMatrix<double, Eigen::ColMajor> LHS( mUsedPointCount + constraintCount
+                                                    , mUsedPointCount + constraintCount );
+
+    // main constraint (linear interp of center of mass)
+    // TODO: is there a more efficient way to do this than using the intermediate var PTP?
+    LHS.innerVectors( 0, mUsedPointCount ) = PTP.innerVectors( 0, mUsedPointCount );
+
+    if ( mConstraintsIdx.size() == 0 )
+    {
+        float constraintMean = mUsedPointCount ? 1.0f / mUsedPointCount : 0.0f;
+
+        for ( uint32 i = 0; i < mUsedPointCount; ++i )
+        {
+            LHS.insert( idx, i ) = constraintMean;
+            LHS.insert( i, idx ) = constraintMean;
+        }
+        ++idx;
+    }
+
+/*
+    // user defined hard constraints
+    for ( uint32 constraintIdx : mConstraintsIdx )
+    {
+        const Trajectory *traj = m_keyframe->trajectoryConstraintPtr(constraintIdx);
+        const UVInfo &latticeCoord = traj->latticeCoord();
+
+        QuadPtr quad = m_hashTable[latticeCoord.quadKey];
+        // the constraint coeff vector and its transpose are set at the same time
+        LHS.insert(idx, quad->corners[TOP_LEFT]->getKey()) = LHS.insert(quad->corners[TOP_LEFT]->getKey(), idx) = (1.0 - latticeCoord.uv.x()) * (1.0 - latticeCoord.uv.y());
+        LHS.insert(idx, quad->corners[TOP_RIGHT]->getKey()) = LHS.insert(quad->corners[TOP_RIGHT]->getKey(), idx) = latticeCoord.uv.x() * (1.0 - latticeCoord.uv.y());
+        LHS.insert(idx, quad->corners[BOTTOM_RIGHT]->getKey()) = LHS.insert(quad->corners[BOTTOM_RIGHT]->getKey(), idx) = latticeCoord.uv.x() * latticeCoord.uv.y();
+        LHS.insert(idx, quad->corners[BOTTOM_LEFT]->getKey()) = LHS.insert(quad->corners[BOTTOM_LEFT]->getKey(), idx) = (1.0 - latticeCoord.uv.x()) * latticeCoord.uv.y();
+        ++idx;
+    }
+*/
+
+    // Factorization of LHS
+    LHS.makeCompressed();
+    mLU.compute( LHS );
+
+    if ( mLU.info() != Eigen::Success )
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ERROR DURING FACTORIZATION"));
+
+        return false;
+    }
+
+    // Compute ref and target center of mass
+    mSourceCenterOfMass = GetCenterOfMass( eGridPointPositionType::SourcePosition );
+    mTargetCenterOfMass = GetCenterOfMass( eGridPointPositionType::TargetPosition );
+
+    //m_precomputeDirty = false;
+    //m_arapDirty = true;
+    //sw.stop();
+
+    return true;
+}
+
+
+/**
+ * Computes "A" the transpose of the jacobian of the affine map between two triangles (ref pose vs target pose of a lattice cell) i.e. A is the linear part of the affine map between the two triangles.
+ * A=(1/P)*Q   Eq. 2, Rigid Shape Interpolation Using Normal Equations, Baxter et al. 2008. i and j are corner indices used to determine which triangle of the quad we are using
+ * 
+ * @param q                     quad
+ * @param i                     corner of the quad (!= BOTTOM_LEFT)
+ * @param j                     corner of the quad (!= BOTTOM_LEFT)
+ * @param inverseOrientation    if true the output linear transform goes from target to source (Q->P)
+ * @param A                     output linear transform
+ */
+void FInbetweenerGridARAP::ComputeJAM( FInbetweenerGridPoint* iTriangle[3]
+                                     , bool iInverseOrientation
+                                     , Eigen::Matrix2d& oA )
+{
+    ::ULIS::FVec2D qi, qj, qk, pi, pj, pk;
+    Eigen::Matrix2d P, Q;
+
+    // target pose
+    qi = iTriangle[0]->GetTargetPosition();
+    qj = iTriangle[1]->GetTargetPosition();
+    qk = iTriangle[2]->GetTargetPosition();
+
+    Q << qi.x - qk.x, qi.y - qk.y, qj.x - qk.x, qj.y - qk.y;
+
+    // reference pose
+    pi = iTriangle[0]->GetSourcePosition();
+    pj = iTriangle[1]->GetSourcePosition();
+    pk = iTriangle[2]->GetSourcePosition();
+
+    P << pi.x - pk.x, pi.y - pk.y, pj.x - pk.x, pj.y - pk.y;
+
+    if ( iInverseOrientation )
+    {
+        oA = Q.inverse() * P;
+    } else {
+        oA = P.inverse() * Q;
+    }
+}
+
+/**
+ * Computing the polar decomposition of A
+ * 
+ * @param A input linear transform matrix
+ * @param S output shear matrix
+ * @return rotation angle in rad
+ */
+double
+FInbetweenerGridARAP::PolarDecomp( Eigen::Matrix2d& iA, Eigen::Matrix2d& oS )
+{
+    Eigen::Matrix2d B = iA.transpose();
+    Eigen::Matrix2d Rt;
+    double angle = std::atan2( B( 1, 0 ), B( 0, 0 ) );
+
+    Rt << cos( angle ), sin( angle ), -sin( angle ), cos( angle );
+
+    oS = Rt * B;
+
+    return angle;
+}
+
+/**
+ * Compute interpolated target linear maps A(t) (concatenated for the two triangles of the given quad)
+ * See Baxter et al. 2008
+ */
+
+void
+FInbetweenerGridARAP::ComputeQuadA( FInbetweenerGridQuad* iQuad
+                                  , Eigen::MatrixXd& iAt
+                                  , int &i
+                                  , float iT
+                                  , bool iInverseOrientation )
+{
+    FInbetweenerGridPoint** points = iQuad->GetPoints();
+    FInbetweenerGridPoint* triangle0[3] = { points[0], points[1], points[2] };
+    FInbetweenerGridPoint* triangle1[3] = { points[2], points[3], points[0] };
+    Eigen::Matrix2d A_interp, I;
+    Eigen::Matrix2d A, Rt, S;
+    double angle;
+
+    I = Eigen::Matrix2d::Identity();
+
+    if ( iInverseOrientation ) iT = 1.0f - iT;
+
+    // Compute and concatenate the interpolated linear transformation of the triangle
+    // formed by CornerA, CornerB and the bottom left corner of the quad
+    auto computeTriangleA = [&]( FInbetweenerGridPoint* iTriangle[3] )
+    {
+        ComputeJAM( iTriangle, iInverseOrientation, A );
+
+        angle = PolarDecomp( A, S );
+
+        // Interpolated rotation matrix
+        Rt << cos( angle * iT ), -sin( angle * iT ), sin( angle * iT ), cos( angle * iT );
+
+        // Interpolated linear transformation of the triangle (rotation and shearing interpolated independently)
+        // A_interp = Rt * ((1 - t) * I + t * S);
+        A_interp = Rt * S.pow( iT );
+
+        // Concatenate transposed result to the input matrix A(t)
+        iAt( 0, i ) = A_interp( 0, 0 );
+        iAt( 1, i ) = A_interp( 1, 0 );
+        i++;
+        iAt( 0, i ) = A_interp( 0, 1 );
+        iAt( 1, i ) = A_interp( 1, 1 );
+        i++;
+    };
+
+    computeTriangleA( triangle0 );
+    computeTriangleA( triangle1 );
+}
+
+/**
+ * Compute the interpolation of the lattice between its REF_POS and TARGET_POS.
+ * Stores the results in INTERP_POS.
+ * The resulting interpolated lattice can be additionally transformed by a given rigid transformation. 
+ * 
+ * @param alphaLinear Linear interpolating factor between the two adjacent keyframes (from the timeline: (curFrame - prevKeyFrame) / (nextKeyFrame - prevKeyFrame))
+ * @param alpha Remapping of the linear interpolating factor by the group's spacing function. This is what controls the interpolation.  
+ * @param globalRigidTransform Global rigid transformation applied after the interpolation.
+ * @param useRigidTransform If true the global rigid transformation is applied.
+ */
+bool
+FInbetweenerGridARAP::InterpolateARAP( float alphaLinear
+                                     , float alpha
+                                     //, const FInbetweenerGridPoint::Affine& globalRigidTransform
+                                     , bool useRigidTransform )
+{
+//    qDebug() << "** Interpolating lattice at t=" << alpha;
+//    StopWatch sw("ARAP interpolation");
+
+    //useRigidTransform = useRigidTransform && k_useGlobalRigidTransform;
+//    m_currentPrecomputedTime = alpha;
+
+    // Lattices with multiple connected components cannot be interpolated, return reference or target configuration
+//    if (!m_singleConnectedComponent) {
+//        if (alpha < 1.0) copyPositions(this, REF_POS, INTERP_POS);
+//        else             copyPositions(this, TARGET_POS, INTERP_POS);
+//        return;
+//    }
+
+    Eigen::MatrixXd A( 2, 8 * mUsedQuadCount  );
+    double t = alpha;
+
+    // Compute A(t)
+    int i = 0;
+    for ( FInbetweenerGridQuad& quad : mQuadBuffer )
+    {
+        ComputeQuadA( &quad, A, i, t, false );
+    }
+
+    for ( FInbetweenerGridQuad& quad : mQuadBuffer )
+    {
+        ComputeQuadA( &quad, A, i, t, true );
+    }
+
+    // Assembling final RHS matrix and concatenating constraints values
+    unsigned int constraintCount = mConstraintsIdx.size() > 0 ? mConstraintsIdx.size() : 1;
+    unsigned int idx = mUsedPointCount;
+    Eigen::MatrixXd PTAD( mUsedPointCount + constraintCount, 2 );
+
+    PTAD.block( 0, 0, mUsedPointCount, 2 ) = mPt * mW.asDiagonal() * A.transpose();
+
+    // Main constraint (linear interp of center of mass)
+    if ( constraintCount == 0 )
+    {
+        PTAD( idx, 0 ) = mSourceCenterOfMass.x * ( 1.0f - t ) + mTargetCenterOfMass.x * t;
+        PTAD( idx, 1 ) = mSourceCenterOfMass.y * ( 1.0f - t ) + mTargetCenterOfMass.y * t;
+        ++idx;
+    }
+
+    // User defined constraints values
+/*
+    float offset;
+    for ( uint32 constraintIdx : mConstraintsIdx )
+    {
+        Trajectory *traj = m_keyframe->trajectoryConstraintPtr(constraintIdx);
+        traj->localOffset()->frameChanged(alphaLinear);
+        offset = traj->localOffset()->get();
+        Point::VectorType pos = traj->eval(t + (std::abs(offset) < 1e-5f ? 0.0f : offset));
+        PTAD(idx, 0) = pos.x();
+        PTAD(idx, 1) = pos.y();
+        ++idx;
+    }
+*/
+
+    Eigen::MatrixXd V = mLU.solve( PTAD ).eval();
+
+    if ( mLU.info() != Eigen::Success )
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ERROR DURING SOLVE"));
+
+        return false;
+    }
+
+    // Setting new interpolated vertices in corners INTERP_POS coordinates
+    for ( FInbetweenerGridPoint& point : mPointBuffer )
+    {
+        FInbetweenerGridPoint::VectorType coords = V.row( point.GetID() );
+
+        point.SetMotionPosition( coords.x(), coords.y() );
+
+/*
+        if ( useRigidTransform )
+        {
+            FInbetweenerGridPoint::VectorType rigidPoint = globalRigidTransform * coords;
+
+            point.SetMotionPosition( rigidPoint.x(), rigidPoint.y() );
+        }
+*/
+    }
+
+    //m_arapDirty = false;
+    //sw.stop();
+
+    return true;
+}
+
 
 void
 FOdysseyVectorTagInbetweener::UpdateGridBBox()
@@ -775,15 +1246,30 @@ FOdysseyVectorTagInbetweener::InterpolateGeometry( uint32 iInbetweenIndex )
 {
     ::ULIS::FRectD bbox = mOwner->GetBBox( false );
 
-    for( FInbetweenerGridPoint& point : mGrid->GetPointBuffer() )
+    if( mGridType == eInbetweenerGridType::FFD )
     {
-        ::ULIS::FVec2D diff = ( point.mTargetPosition - point.mSourcePosition );
-        ::ULIS::FVec2D step = diff * mChart.inbetweenBuffer[iInbetweenIndex].spacing;
+        for( FInbetweenerGridPoint& point : mGrid->GetPointBuffer() )
+        {
+            ::ULIS::FVec2D diff = ( point.mTargetPosition - point.mSourcePosition );
+            double t = mChart.inbetweenBuffer[iInbetweenIndex].spacing;
+            ::ULIS::FVec2D step = diff * t;
 
-        point.mMotionPosition = point.mSourcePosition + step;
+            point.mMotionPosition = point.mSourcePosition + step;
 
-        point.u = ( point.mMotionPosition.x - bbox.x ) / bbox.w;
-        point.v = ( point.mMotionPosition.y - bbox.y ) / bbox.h;
+            point.u = ( point.mMotionPosition.x - bbox.x ) / bbox.w;
+            point.v = ( point.mMotionPosition.y - bbox.y ) / bbox.h;
+        }
+    }
+
+    if( mGridType == eInbetweenerGridType::ARAP )
+    {
+        FInbetweenerGridARAP* gridARAP = static_cast<FInbetweenerGridARAP*>(mGrid);
+        double t = mChart.inbetweenBuffer[iInbetweenIndex].spacing;
+
+        gridARAP->InterpolateARAP( t
+                                 , t
+                                // , const FInbetweenerGridPoint::Affine &globalRigidTransform
+                                 , false );
     }
 
     // deform the path according to grid geometry
@@ -844,6 +1330,13 @@ FOdysseyVectorTagInbetweener::InterpolateTransform( uint32 iInbetweenIndex )
 void
 FOdysseyVectorTagInbetweener::Interpolate()
 {
+    if( mGridType == eInbetweenerGridType::ARAP )
+    {
+        FInbetweenerGridARAP* gridARAP = static_cast<FInbetweenerGridARAP*>(mGrid);
+
+        gridARAP->Precompute();
+    }
+
     for( uint32 i = 0; i <= mInbetweenCount; i++ )
     {
         InterpolateGeometry( i );
@@ -855,6 +1348,40 @@ uint32
 FOdysseyVectorTagInbetweener::GetInbetweenCount()
 {
     return mInbetweenCount;
+}
+
+void
+FOdysseyVectorTagInbetweener::DrawMotionGrid( BLContext* iBLContext
+                                            , const ::ULIS::FRectD& iInvalidationArea
+                                            , double iAncestorsOpacity
+                                            , uint64 iDrawingFlags )
+{
+    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
+
+    iBLContext->save();
+
+    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
+    iBLContext->setStrokeWidth( 1.0f );
+
+    for( FInbetweenerGridQuad& quad : mGrid->GetQuadBuffer() )
+    {
+        FInbetweenerGridPoint** gridPoint = quad.GetPoints();
+        BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetPosition( eGridPointPositionType::MotionPosition ).x
+                                              , gridPoint[0]->GetPosition( eGridPointPositionType::MotionPosition ).y )
+                        , worldMatrix.mapPoint( gridPoint[1]->GetPosition( eGridPointPositionType::MotionPosition ).x
+                                              , gridPoint[1]->GetPosition( eGridPointPositionType::MotionPosition ).y )
+                        , worldMatrix.mapPoint( gridPoint[2]->GetPosition( eGridPointPositionType::MotionPosition ).x
+                                              , gridPoint[2]->GetPosition( eGridPointPositionType::MotionPosition ).y )
+                        , worldMatrix.mapPoint( gridPoint[3]->GetPosition( eGridPointPositionType::MotionPosition ).x
+                                              , gridPoint[3]->GetPosition( eGridPointPositionType::MotionPosition ).y ) };
+
+        iBLContext->strokeLine( pt[0], pt[1] );
+        iBLContext->strokeLine( pt[1], pt[2] );
+        iBLContext->strokeLine( pt[2], pt[3] );
+        iBLContext->strokeLine( pt[3], pt[0] );
+    }
+
+    iBLContext->restore();
 }
 
 void
@@ -903,6 +1430,8 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
         }
 
         iBLContext->restore();
+
+        DrawMotionGrid( iBLContext, iInvalidationArea, iAncestorsOpacity, iDrawingFlags );
     }
 }
 
@@ -1134,6 +1663,9 @@ FOdysseyVectorTagInbetweener::GetGridNumQuadY()
 void
 FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
 {
+    uint32 numQuadX = ( mGrid ) ? mGrid->GetNumQuadX() : 4;
+    uint32 numQuadY = ( mGrid ) ? mGrid->GetNumQuadY() : 4;
+
     if( mGrid )
     {
         delete mGrid;
@@ -1146,11 +1678,11 @@ FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
     switch( iGridType )
     {
         case eInbetweenerGridType::ARAP :
-            mGrid = new FInbetweenerGridARAP( this );
+            mGrid = new FInbetweenerGridARAP( this, numQuadX, numQuadY );
         break;
 
         default:
-            mGrid = new FInbetweenerGridFFD( this );
+            mGrid = new FInbetweenerGridFFD( this, numQuadX, numQuadY );
         break;
     }
 
