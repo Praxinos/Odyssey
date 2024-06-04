@@ -34,6 +34,8 @@ struct FBoardSectionTake;
 struct FDrawing; // but only as private functions
 struct FMovieSceneChannelHandle;
 
+void EjectAnyActor();
+
 struct FCameraArgs
 {
     FString mName;

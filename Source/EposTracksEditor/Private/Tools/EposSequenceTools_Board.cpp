@@ -671,6 +671,8 @@ CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFra
     if( !epos_sequence )
         return nullptr;
 
+    EjectAnyActor();
+
     const FScopedTransaction transaction( LOCTEXT( "transaction.insert-board", "Insert Board" ) );
 
     FString sequence_path;
@@ -704,6 +706,8 @@ CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFram
     UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequencer->GetFocusedMovieSceneSequence() );
     if( !epos_sequence )
         return nullptr;
+
+    EjectAnyActor();
 
     const FScopedTransaction transaction( LOCTEXT( "transaction.insert-shot", "Insert Shot" ) );
 
@@ -822,6 +826,8 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
     UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( BoardSequenceHelpers::FindSequenceOfSubSection( *iSequencer, *iSection, epos_sequence_id ) );
     if( !epos_sequence )
         return nullptr;
+
+    EjectAnyActor();
 
     //---
 
