@@ -254,7 +254,7 @@ FMetaChannel::FillWithTime( const FFrameTime& iTime, const FFrameNumber& iTolera
 //---
 
 FFrameTime
-FMetaChannel::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate )
+FMetaChannel::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate, TOptional<TRange<FFrameNumber>> iTrueRangeToClamp )
 {
     FFrameNumber last_inner_sub_key; // This is the last sub key in the last meta key moved (at this moment, there is always only one), mainly to set the current frame in the sequencer
 
@@ -279,6 +279,12 @@ FMetaChannel::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTick
 
                 // Simple syntax (== above) as we don't manage ScrubStyle
                 inner_moved_key_frame = FFrameRate::TransformTime( FFrameRate::TransformTime( inner_moved_key_frame, iTickResolution, iDisplayRate ).FloorToFrame(), iDisplayRate, iTickResolution );
+            }
+
+            // Must be done here, because if iTime is clamped outside this function, the mOffset wont be sync'ed to the real value of the subkey
+            if( iTrueRangeToClamp.IsSet() )
+            {
+                inner_moved_key_frame = FMath::Clamp( inner_moved_key_frame, FFrameTime( iTrueRangeToClamp->GetLowerBoundValue() ), FFrameTime( iTrueRangeToClamp->GetUpperBoundValue() - 1 ) ); // -1 because clamp is both inclusive
             }
 
             last_inner_sub_key = inner_moved_key_frame.GetFrame();

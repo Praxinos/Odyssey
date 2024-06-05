@@ -50,7 +50,7 @@ public:
     virtual void Build( const FChannelProxyBySectionMap& iChannelProxyMap );
 
     /** Move all sub keys to the new time */
-    virtual FFrameTime Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate );
+    virtual FFrameTime Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate, TOptional<TRange<FFrameNumber>> iRangeToClamp );
 
 public:
     /** Get the number of meta key */
