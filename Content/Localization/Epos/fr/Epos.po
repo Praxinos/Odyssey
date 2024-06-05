@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2024-05-27 08:02\n"
-"PO-Revision-Date: 2024-05-27 08:02\n"
+"POT-Creation-Date: 2024-06-05 10:23\n"
+"PO-Revision-Date: 2024-06-05 10:23\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -144,6 +144,13 @@ msgstr ""
 #: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(375)
 msgctxt "NamingConventionSettingsCustomization,board-pattern-tooltip"
 msgid "Some examples:\n\n- board_{0} ->\n    board_10\n    board_20\n    board_30\n    ...\n- {2}_board_{0}_{10} ->\n    MS_board_0010_xy\n    MS_board_0020_xy\n    MS_board_0030_xy\n    ...\n\n(Click on a keyword to Copy it)"
+msgstr ""
+
+#. Key:	Pattern
+#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
+#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
+msgctxt "NamingConventionSettingsCustomization,Pattern"
+msgid "Pattern"
 msgstr ""
 
 #. Key:	wrong-pattern
@@ -1495,13 +1502,6 @@ msgstr ""
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(28)
 msgctxt "NamingConventionSettingsCustomization,infobar-pattern-tooltip"
 msgid "Each keywords will be replaced by its corresponding value.\nThe separator will be used to join each line of the pattern field.\n\n(Click on a keyword to Copy it)"
-msgstr ""
-
-#. Key:	Pattern
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
-msgctxt "NamingConventionSettingsCustomization,Pattern"
-msgid "Pattern"
 msgstr ""
 
 #. Key:	AssetTypeActions_ShotSequence
@@ -4032,22 +4032,22 @@ msgid "Toggle locking the viewport to the single camera cut track."
 msgstr ""
 
 #. Key:	SetTrackName
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(123)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(123)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(144)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(144)
 msgctxt "EposSequenceTools,SetTrackName"
 msgid "Set Track Name"
 msgstr ""
 
 #. Key:	transaction.insert-board
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(674)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(674)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(676)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(676)
 msgctxt "EposSequenceTools_Board,transaction.insert-board"
 msgid "Insert Board"
 msgstr ""
 
 #. Key:	transaction.insert-shot
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(708)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(708)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(712)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(712)
 msgctxt "EposSequenceTools_Board,transaction.insert-shot"
 msgid "Insert Shot"
 msgstr ""
@@ -4060,8 +4060,8 @@ msgid "Add Board Track"
 msgstr ""
 
 #. Key:	CloneSection_Transaction
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(828)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(828)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(834)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(834)
 msgctxt "EposSequenceTools_Board,CloneSection_Transaction"
 msgid "Clone Section"
 msgstr ""
