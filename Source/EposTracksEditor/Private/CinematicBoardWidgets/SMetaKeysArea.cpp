@@ -259,7 +259,10 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
         const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
         const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
-        FFrameTime local_inner_time = mDraggedKeys->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
+        TRange<FFrameNumber> subsection_range = subsection_object->GetTrueRange();
+        TRange<FFrameNumber> inner_clamp_range( ( subsection_range.GetLowerBoundValue() * OuterToInnerTransform ).FloorToFrame(), ( subsection_range.GetUpperBoundValue() * OuterToInnerTransform ).FloorToFrame() ); // Let's see if FloorToFrame() of the upper bound value is ok, as (as a true range) it is exclusive
+
+        FFrameTime local_inner_time = mDraggedKeys->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate, inner_clamp_range );
         FFrameTime local_time = local_inner_time * OuterToInnerTransform.InverseNoLooping();
 
         //---

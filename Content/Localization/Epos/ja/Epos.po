@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2024-05-27 08:02\n"
-"PO-Revision-Date: 2024-05-27 08:02\n"
+"POT-Creation-Date: 2024-06-05 14:59\n"
+"PO-Revision-Date: 2024-06-05 14:59\n"
 "Language-Team: \n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -466,7 +466,7 @@ msgstr "ビューポイントの回転"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(23)
 msgctxt "EposSequenceEditorCommands,CommandsCategory.ViewportZoom"
 msgid "Viewport Zoom"
-msgstr ""
+msgstr "ビューポートのズーム"
 
 #. Key:	NewStoryboardWithSettings
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(29)
@@ -515,84 +515,84 @@ msgstr "ストーリーボードのプレビュー用に設定されたビュー
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(35)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Rotate"
 msgid "Storyboard Viewport Rotation +10°"
-msgstr ""
+msgstr "ストーリーボードのビューポートの回転に +10° 追加"
 
 #. Key:	StoryboardViewportAdd10Rotate_ToolTip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(35)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(35)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Rotate_ToolTip"
 msgid "+10° to the viewport rotation"
-msgstr "ビューポートの回転に +10°"
+msgstr "ビューポートの回転に +10° 追加"
 
 #. Key:	StoryboardViewportSubstract10Rotate
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Rotate"
 msgid "Storyboard Viewport Rotation -10°"
-msgstr ""
+msgstr "ストーリーボードのビューポートの回転を -10°"
 
 #. Key:	StoryboardViewportSubstract10Rotate_ToolTip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(36)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Rotate_ToolTip"
 msgid "-10° to the viewport rotation"
-msgstr "ビューポートの回転に -10°"
+msgstr "ビューポートの回転に -10° 追加"
 
 #. Key:	StoryboardViewportAdd10Zoom
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(38)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(38)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Zoom"
 msgid "Storyboard Viewport Zoom +10%"
-msgstr ""
+msgstr "ストーリーボードのビューポートのズームに +10% 追加"
 
 #. Key:	StoryboardViewportAdd10Zoom_ToolTip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(38)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(38)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportAdd10Zoom_ToolTip"
 msgid "+10% to the viewport Zoom"
-msgstr ""
+msgstr "ビューポートの回転に +10% 追加"
 
 #. Key:	StoryboardViewportSubstract10Zoom
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(39)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(39)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Zoom"
 msgid "Storyboard Viewport Zoom -10%"
-msgstr ""
+msgstr "ストーリーボードのビューポートのズームに -10% 追加"
 
 #. Key:	StoryboardViewportSubstract10Zoom_ToolTip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(39)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(39)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportSubstract10Zoom_ToolTip"
 msgid "-10% to the viewport Zoom"
-msgstr ""
+msgstr "ビューポートの回転に -10% 追加"
 
 #. Key:	StoryboardViewportFitToScreen
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(40)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(40)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportFitToScreen"
 msgid "Storyboard Viewport Fit To Screen"
-msgstr ""
+msgstr "ストーリーボードのビューポートを画面にフィットさせる"
 
 #. Key:	StoryboardViewportFitToScreen_ToolTip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(40)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(40)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportFitToScreen_ToolTip"
 msgid "Zoom the the viewport to fit its content in the available space"
-msgstr ""
+msgstr "ビューポートをズームして、コンテンツを利用可能なスペースに収まるようにする"
 
 #. Key:	StoryboardViewportResetPanZoomRotate
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(41)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(41)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportResetPanZoomRotate"
 msgid "Storyboard Viewport Reset Pan, Zoom and Rotation "
-msgstr ""
+msgstr "ストーリーボードのビューポートの、パン、ズーム、回転のリセット"
 
 #. Key:	StoryboardViewportResetPanZoomRotate_ToolTip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(41)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(41)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportResetPanZoomRotate_ToolTip"
 msgid "Resets the viewport Pan, Zoom and Rotation values"
-msgstr ""
+msgstr "ストーリーボードのビューポートの、パン、ズーム、回転用の数値のリセット"
 
 #. Key:	storyboard-viewport-rotation-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(43)
@@ -613,42 +613,42 @@ msgstr "ビューポートの回転を {0}° に設定する"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(61)
 msgctxt "EposSequenceEditorCommands,storyboard-viewport-zoom-label"
 msgid "Set Storyboard Viewport to {0}%"
-msgstr ""
+msgstr "ストーリーボードのビューポートを {0}% に設定する"
 
 #. Key:	storyboard-viewport-zoom-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(62)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(62)
 msgctxt "EposSequenceEditorCommands,storyboard-viewport-zoom-tooltip"
 msgid "Set the viewport zoom to {0}%"
-msgstr ""
+msgstr "ビューポートのズーム率を {0}% に設定する"
 
 #. Key:	StoryboardViewportHoldToPanZoom
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportHoldToPanZoom"
 msgid "Storyboard Viewport Pan/Zoom (Hold)"
-msgstr ""
+msgstr "ストーリーボードのビューポートのパン／ズーム（長押し）"
 
 #. Key:	StoryboardViewportHoldToPanZoom_ToolTip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(79)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportHoldToPanZoom_ToolTip"
 msgid "Hold this key to pan (left mouse button) or zoom (right mouse button) the viewport"
-msgstr ""
+msgstr "ビューポートがパン（マウスの左ボタン）またはズーム（マウスの右ボタン）するには、このキーを長押しする"
 
 #. Key:	StoryboardViewportHoldToRotate
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(80)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(80)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportHoldToRotate"
 msgid "Storyboard Viewport Rotate (Hold)"
-msgstr ""
+msgstr "ストーリーボードのビューポートの回転（長押し）"
 
 #. Key:	StoryboardViewportHoldToRotate_ToolTip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(80)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(80)
 msgctxt "UICommands.EposSequenceEditorCommands,StoryboardViewportHoldToRotate_ToolTip"
 msgid "Hold this key to to rotate the viewport using the left mouse button"
-msgstr ""
+msgstr "マウスの左ボタンを使用してビューポートを回転するには、このキーを長押しする"
 
 #. Key:	FixActorReferences
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/EposSequenceEditorCommands.cpp(84)
@@ -1824,63 +1824,63 @@ msgstr "ノートがありません"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1012)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.viewport-zoom.label"
 msgid "Zoom"
-msgstr ""
+msgstr "ズームする"
 
 #. Key:	viewport-toolbar-options.zoom-options.label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1016)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1016)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.zoom-options.label"
 msgid "Zoom Options"
-msgstr ""
+msgstr "ズームオプション"
 
 #. Key:	viewport-toolbar-options.zoom-options.tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1017)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1017)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.zoom-options.tooltip"
 msgid "Zoom the viewport"
-msgstr ""
+msgstr "ビューポートをズームする"
 
 #. Key:	viewport-toolbar-options.reset-viewport-transform.label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1040)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1040)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.reset-viewport-transform.label"
 msgid "Reset Pan/Zoom/Rotation"
-msgstr ""
+msgstr "パン／ズーム／回転をリセットする"
 
 #. Key:	viewport-toolbar-options.reset-viewport-transform.tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1041)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1041)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.reset-viewport-transform.tooltip"
 msgid "Resets the Pan, Zoom and Rotation values of the viewport"
-msgstr ""
+msgstr "ビューポートのパン／ズーム／回転の数値をリセットする"
 
 #. Key:	note-settings.display-in-viewport-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1066)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1066)
 msgctxt "SStoryboardLevelViewport,note-settings.display-in-viewport-label"
 msgid "Display notes in viewport"
-msgstr ""
+msgstr "ビューポートにノートを表示する"
 
 #. Key:	note-settings.display-in-viewport-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1067)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1067)
 msgctxt "SStoryboardLevelViewport,note-settings.display-in-viewport-tooltip"
 msgid "Display the notes at the current frame under the 3D scene."
-msgstr ""
+msgstr "3D シーンの上に、現在のフレームのノートを表示する。"
 
 #. Key:	note-settings.display-as-overlay-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1087)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1087)
 msgctxt "SStoryboardLevelViewport,note-settings.display-as-overlay-label"
 msgid "Display notes as overlay"
-msgstr ""
+msgstr "ノートをオーバーレイで表示する"
 
 #. Key:	note-settings.display-as-overlay-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1088)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1088)
 msgctxt "SStoryboardLevelViewport,note-settings.display-as-overlay-tooltip"
 msgid "Display the notes at the current frame on the 3D scene."
-msgstr ""
+msgstr "3D シーンの下に、現在のフレームのノートを表示する。"
 
 #. Key:	storyboard-viewport-add-rotation-section
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1325)
@@ -1901,21 +1901,21 @@ msgstr "ビューポートの回転を設定する"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1428)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-add-zoom-section"
 msgid "Add Viewport Zoom"
-msgstr ""
+msgstr "ビューポートのズームを追加する"
 
 #. Key:	storyboard-viewport-set-zoom-section
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1433)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1433)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-set-zoom-section"
 msgid "Set Viewport Zoom"
-msgstr ""
+msgstr "ビューポートのズームを設定する"
 
 #. Key:	storyboard-viewport-fit-to-screen
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1441)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1441)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-fit-to-screen"
 msgid "Fit To Screen"
-msgstr ""
+msgstr "画面にフィット"
 
 #. Key:	TimeFormat
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1900)
@@ -2013,35 +2013,35 @@ msgstr "カメラの現在の焦点距離を変更する。"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(718)
 msgctxt "SStoryboardLevelViewport,NoSequencerMessage"
 msgid "No active Board/Shot Sequence Editor detected. Please edit a Board/Shot Sequence to enable full controls."
-msgstr "アクティブなボード／ショット シーケンス エディタがありません。完全にコントロールするためには、ボード／ショット シーケンスを編集してください。"
+msgstr "アクティブなボード／ショット シーケンスのエディタがありません。完全にコントロールするためには、ボード／ショット シーケンスを編集してください。"
 
 #. Key:	viewport-toolbar-options.film-overlay.label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(855)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(855)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.film-overlay.label"
 msgid "Film Overlays"
-msgstr ""
+msgstr "フィルムオーバーレイ"
 
 #. Key:	viewport-toolbar-options.film-overlay.tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(856)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(856)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.film-overlay.tooltip"
 msgid "Change the appearance of the film overlays."
-msgstr ""
+msgstr "フィルムオーバーレイの外観を変更する。"
 
 #. Key:	viewport-toolbar-options.viewport-settings.label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(874)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(874)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.viewport-settings.label"
 msgid "Viewport Settings"
-msgstr ""
+msgstr "ビューポートの設定"
 
 #. Key:	viewport-toolbar-options.viewport-settings.tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(875)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(875)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.viewport-settings.tooltip"
 msgid "Change the settings of the Storyboard viewport"
-msgstr ""
+msgstr "ストーリーボードのビューポートの設定を変更する"
 
 #. Key:	ViewportRotationTooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(890)
@@ -2055,133 +2055,133 @@ msgstr "ビューポートの回転を変更する。"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(942)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.viewport-rotation.label"
 msgid "Rotation"
-msgstr ""
+msgstr "回転"
 
 #. Key:	viewport-toolbar-options.rotation-options.label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(946)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(946)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.rotation-options.label"
 msgid "Rotation Options"
-msgstr ""
+msgstr "回転のオプション"
 
 #. Key:	viewport-toolbar-options.rotation-options.tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(947)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(947)
 msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.rotation-options.tooltip"
 msgid "Rotate the viewport"
-msgstr ""
+msgstr "ビューポートを回転する"
 
 #. Key:	ViewportZoomTooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(962)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(962)
 msgctxt "SStoryboardLevelViewport,ViewportZoomTooltip"
 msgid "Change the viewport zoom."
-msgstr ""
+msgstr "ビューポートのズームを変更する。"
 
 #. Key:	storyboard-viewport-settings.display-sequence-infos-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(107)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(107)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-sequence-infos-label"
 msgid "Display sequence infos"
-msgstr ""
+msgstr "シーケンス情報を表示する"
 
 #. Key:	storyboard-viewport-settings.display-sequence-infos-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(108)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(108)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-sequence-infos-tooltip"
 msgid "Diplays the sequence infos under the 3D scene."
-msgstr ""
+msgstr "3D シーンの下に、シーケンス情報を表示する。"
 
 #. Key:	storyboard-viewport-settings.display-actor-controls-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(128)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(128)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-actor-controls-label"
 msgid "Display actor controls"
-msgstr ""
+msgstr "アクタのコントロールを表示する"
 
 #. Key:	storyboard-viewport-settings.display-actor-controls-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(129)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(129)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-actor-controls-tooltip"
 msgid "Diplays the actor controls under the 3D scene."
-msgstr ""
+msgstr "3D シーンの下、にアクタのコントロールを表示する。"
 
 #. Key:	storyboard-viewport-settings.display-playback-controls-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(149)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(149)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-playback-controls-label"
 msgid "Display playback controls"
-msgstr ""
+msgstr "プレイバックのコントロールを表示する"
 
 #. Key:	storyboard-viewport-settings.display-playback-controls-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(150)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(150)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-playback-controls-tooltip"
 msgid "Diplays the playback controls under the 3D scene."
-msgstr ""
+msgstr "3D シーンの下に、プレイバックのコントロールを表示する。"
 
 #. Key:	storyboard-viewport-settings.display-in-viewport-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(170)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(170)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-in-viewport-label"
 msgid "Display notes in viewport"
-msgstr ""
+msgstr "ビューポートにノートを表示する"
 
 #. Key:	storyboard-viewport-settings.display-in-viewport-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(171)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(171)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-in-viewport-tooltip"
 msgid "Display the notes at the current frame under the 3D scene."
-msgstr ""
+msgstr "3D シーンの下に、現在のフレームのノートを表示する。"
 
 #. Key:	storyboard-viewport-settings.display-as-overlay-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(191)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(191)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-as-overlay-label"
 msgid "Display notes as overlay"
-msgstr ""
+msgstr "オーバーレイとしてノートを表示する"
 
 #. Key:	storyboard-viewport-settings.display-as-overlay-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(192)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(192)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-as-overlay-tooltip"
 msgid "Display the notes at the current frame on the 3D scene."
-msgstr ""
+msgstr "3D シーンの上に、現在のフレームのノートを表示する。"
 
 #. Key:	storyboard-viewport-settings-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(32)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(32)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings-tooltip"
 msgid "Storyboard Viewport Settings."
-msgstr ""
+msgstr "ストーリーボードのビューポートの設定。"
 
 #. Key:	storyboard-viewport-settings.overlay-toolbar-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(65)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(65)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.overlay-toolbar-label"
 msgid "Overlay toolbar"
-msgstr ""
+msgstr "オーバーレイのツールバー"
 
 #. Key:	storyboard-viewport-settings.overlay-toolbar-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(66)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(66)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.overlay-toolbar-tooltip"
 msgid "Diplays the toolbar on top of the 3D scene."
-msgstr ""
+msgstr "3D シーンの上に、ツールバーを表示する。"
 
 #. Key:	storyboard-viewport-settings.display-playback-track-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(86)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(86)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-playback-track-label"
 msgid "Display playback track"
-msgstr ""
+msgstr "プレイバック トラックを表示する"
 
 #. Key:	storyboard-viewport-settings.display-playback-track-tooltip
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(87)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(87)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-playback-track-tooltip"
 msgid "Diplays the playback track under the 3D scene."
-msgstr ""
+msgstr "3D シーンの下に、プレイバック トラックを表示する。"
 
 #. Key:	Disabled
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/StoryboardViewportCommands.cpp(15)
@@ -2321,14 +2321,14 @@ msgstr "ストーリーボードのビューポート"
 #: Plugins/Epos/Source/EposSequenceEditor/Private/ToolkitHelpers.cpp(157)
 msgctxt "ToolkitHelpers,SlotMaterialSwitcherTrackName"
 msgid "Material Slot: {0}"
-msgstr ""
+msgstr "マテリアル スロット: {0}"
 
 #. Key:	IndexedMaterialSwitcherTrackName
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/ToolkitHelpers.cpp(158)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/ToolkitHelpers.cpp(158)
 msgctxt "ToolkitHelpers,IndexedMaterialSwitcherTrackName"
 msgid "Material Element {0}"
-msgstr ""
+msgstr "マテリエル エレメント {0}"
 
 #. Key:	copyright.epos
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(138)
@@ -2349,7 +2349,7 @@ msgstr "EPOS は著作権法の対象であり、Praxinos,Inc の法的および
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(154)
 msgctxt "AboutWindowEpos,copyright.iddn"
 msgid "IDDN.FR.001.060015.008.S.X.2019.000.00000"
-msgstr ""
+msgstr "IDDN.FR.001.060015.008.S.X.2019.000.00000"
 
 #. Key:	copyright.team-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Widgets/SAboutWindow.cpp(162)
@@ -3966,14 +3966,14 @@ msgstr "シングル カメラ カット トラックを追加します。また
 #: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(205)
 msgctxt "FSingleCameraCutTrackEditor,SingleCameraCutText"
 msgid "Camera"
-msgstr ""
+msgstr "カメラ"
 
 #. Key:	AddCameraCutTrack_Transaction
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(428)
 #: Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(428)
 msgctxt "FSingleCameraCutTrackEditor,AddCameraCutTrack_Transaction"
 msgid "Add Camera Cut Track"
-msgstr "カメラカットトラックを追加する"
+msgstr "カメラカット トラックを追加する"
 
 #. Key:	SingleCameraCutTrack
 #. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/SingleCameraCutTrack/SingleCameraCutTrackEditor.cpp(51)
@@ -4032,22 +4032,22 @@ msgid "Toggle locking the viewport to the single camera cut track."
 msgstr "シングルカメラのカット トラックへのビューポートのロックを切り替える。"
 
 #. Key:	SetTrackName
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(123)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(123)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(144)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(144)
 msgctxt "EposSequenceTools,SetTrackName"
 msgid "Set Track Name"
 msgstr "トラック名を設定する"
 
 #. Key:	transaction.insert-board
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(674)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(674)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(676)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(676)
 msgctxt "EposSequenceTools_Board,transaction.insert-board"
 msgid "Insert Board"
 msgstr "ボードを挿入する"
 
 #. Key:	transaction.insert-shot
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(708)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(708)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(712)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(712)
 msgctxt "EposSequenceTools_Board,transaction.insert-shot"
 msgid "Insert Shot"
 msgstr "ショットを挿入する"
@@ -4060,8 +4060,8 @@ msgid "Add Board Track"
 msgstr "ボード トラックを追加する"
 
 #. Key:	CloneSection_Transaction
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(828)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(828)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(834)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(834)
 msgctxt "EposSequenceTools_Board,CloneSection_Transaction"
 msgid "Clone Section"
 msgstr "セクションを複製する"

@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2024-05-27 08:02\n"
-"PO-Revision-Date: 2024-05-27 08:02\n"
+"POT-Creation-Date: 2024-06-05 14:59\n"
+"PO-Revision-Date: 2024-06-05 14:59\n"
 "Language-Team: \n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
@@ -4032,22 +4032,22 @@ msgid "Toggle locking the viewport to the single camera cut track."
 msgstr "Toggle locking the viewport to the single camera cut track."
 
 #. Key:	SetTrackName
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(123)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(123)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(144)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(144)
 msgctxt "EposSequenceTools,SetTrackName"
 msgid "Set Track Name"
 msgstr "Set Track Name"
 
 #. Key:	transaction.insert-board
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(674)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(674)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(676)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(676)
 msgctxt "EposSequenceTools_Board,transaction.insert-board"
 msgid "Insert Board"
 msgstr "Insert Board"
 
 #. Key:	transaction.insert-shot
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(708)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(708)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(712)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(712)
 msgctxt "EposSequenceTools_Board,transaction.insert-shot"
 msgid "Insert Shot"
 msgstr "Insert Shot"
@@ -4060,8 +4060,8 @@ msgid "Add Board Track"
 msgstr "Add Board Track"
 
 #. Key:	CloneSection_Transaction
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(828)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(828)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(834)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Board.cpp(834)
 msgctxt "EposSequenceTools_Board,CloneSection_Transaction"
 msgid "Clone Section"
 msgstr "Clone Section"

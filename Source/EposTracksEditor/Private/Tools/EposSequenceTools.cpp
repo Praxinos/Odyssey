@@ -9,12 +9,33 @@
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneTimeHelpers.h"
+#include "LevelEditorViewport.h"
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
 #include "Shot/ShotSequence.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools"
+
+//---
+
+void
+EjectAnyActor()
+{
+    if( GCurrentLevelEditingViewportClient && GCurrentLevelEditingViewportClient->IsAnyActorLocked() )
+    {
+        if( GCurrentLevelEditingViewportClient && GCurrentLevelEditingViewportClient->GetViewMode() != VMI_Unknown && GCurrentLevelEditingViewportClient->AllowsCinematicControl() )
+        {
+            GCurrentLevelEditingViewportClient->SetCinematicActorLock( nullptr );
+            GCurrentLevelEditingViewportClient->SetActorLock( nullptr );
+            GCurrentLevelEditingViewportClient->bLockedCameraView = false;
+            GCurrentLevelEditingViewportClient->ViewFOV = GCurrentLevelEditingViewportClient->FOVAngle;
+            GCurrentLevelEditingViewportClient->RemoveCameraRoll();
+            GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
+            GCurrentLevelEditingViewportClient->Invalidate();
+        }
+    }
+}
 
 //---
 
