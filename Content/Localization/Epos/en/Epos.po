@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2024-06-05 10:23\n"
-"PO-Revision-Date: 2024-06-05 10:23\n"
+"POT-Creation-Date: 2024-06-05 14:59\n"
+"PO-Revision-Date: 2024-06-05 14:59\n"
 "Language-Team: \n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
@@ -145,13 +145,6 @@ msgstr "Some examples:\n\n- plane_{0} ->\n    plane_10\n    plane_20\n    plane_
 msgctxt "NamingConventionSettingsCustomization,board-pattern-tooltip"
 msgid "Some examples:\n\n- board_{0} ->\n    board_10\n    board_20\n    board_30\n    ...\n- {2}_board_{0}_{10} ->\n    MS_board_0010_xy\n    MS_board_0020_xy\n    MS_board_0030_xy\n    ...\n\n(Click on a keyword to Copy it)"
 msgstr "Some examples:\n\n- board_{0} ->\n    board_10\n    board_20\n    board_30\n    ...\n- {2}_board_{0}_{10} ->\n    MS_board_0010_xy\n    MS_board_0020_xy\n    MS_board_0030_xy\n    ...\n\n(Click on a keyword to Copy it)"
-
-#. Key:	Pattern
-#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
-#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
-msgctxt "NamingConventionSettingsCustomization,Pattern"
-msgid "Pattern"
-msgstr "Pattern"
 
 #. Key:	wrong-pattern
 #. SourceLocation:	Plugins/Epos/Source/EposPattern/Private/SPatternTextBox.cpp(164)
@@ -1503,6 +1496,13 @@ msgstr "the name of the current subsequence"
 msgctxt "NamingConventionSettingsCustomization,infobar-pattern-tooltip"
 msgid "Each keywords will be replaced by its corresponding value.\nThe separator will be used to join each line of the pattern field.\n\n(Click on a keyword to Copy it)"
 msgstr "Each keywords will be replaced by its corresponding value.\nThe separator will be used to join each line of the pattern field.\n\n(Click on a keyword to Copy it)"
+
+#. Key:	Pattern
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
+msgctxt "NamingConventionSettingsCustomization,Pattern"
+msgid "Pattern"
+msgstr "Pattern"
 
 #. Key:	AssetTypeActions_ShotSequence
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/AssetDefinition_ShotSequence.cpp(18)
