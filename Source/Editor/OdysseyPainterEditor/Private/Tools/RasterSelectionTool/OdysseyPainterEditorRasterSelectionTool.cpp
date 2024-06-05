@@ -14,11 +14,6 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterSelectionTool::~UOdysseyPainterEditorRasterSelectionTool()
 {
-    if (mSelectionBlock)
-    {
-        mSelectionBlock.Reset();
-        mSelectionBlock = nullptr;
-    }
 }
 
 UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTool()
@@ -27,8 +22,6 @@ UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTo
     , mSelectionHUD(MakeShared<FOdysseyHUDElement>())
     , mToolSelectionArea(nullptr)
     , mPaintEngine()
-    , mSelectionBlock(nullptr)
-    
 {
     Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Lasso32");
 }
@@ -201,11 +194,6 @@ void UOdysseyPainterEditorRasterSelectionTool::Unload()
     UOdysseyPainterEditorTool::Unload();
 }
 
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> UOdysseyPainterEditorRasterSelectionTool::GetSelectionBlock()
-{
-    return mSelectionBlock;
-}
-
 ::ULIS::FRectI UOdysseyPainterEditorRasterSelectionTool::GetSelectionAreaBoundingRect()
 {
     if (mToolSelectionArea && mToolSelectionArea->GetPoints().Num() != 0)
@@ -237,73 +225,8 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsSelectionValid(::ULIS::FRectI i
 void UOdysseyPainterEditorRasterSelectionTool::ClearSelection()
 {
     mSelectionHUD->EmptyElements();
-    if( mSelectionBlock )
-    {
-        mSelectionBlock.Reset();
-        mSelectionBlock = nullptr;
-    }
+
     mToolSelectionArea = nullptr;
-}
-
-TArray<::ULIS::FRectI> UOdysseyPainterEditorRasterSelectionTool::GetSelectionAreaAsScanlines()
-{
-    TArray<::ULIS::FRectI> rectangles;
-    ::ULIS::FRectI boundingBox = GetSelectionAreaBoundingRect();
-    int maxX = boundingBox.x + boundingBox.w;
-    int maxY = boundingBox.y + boundingBox.h;
-    int minX = boundingBox.x;
-    int minY = boundingBox.y;
-
-    TArray<FVector2D>& points = mToolSelectionArea->GetPoints();
-
-    for (int y = minY; y <= maxY; y++)
-    {
-        std::vector< int > nodesX;
-        int j = int(points.Num() - 1);
-
-        for (int i = 0; i < points.Num(); i++)
-        {
-            if ((points[i].Y < y && points[j].Y >= y) || (points[j].Y < y && points[i].Y >= y))
-            {
-                nodesX.push_back(int(points[i].X + double(y - points[i].Y) / double(points[j].Y - points[i]. Y) * (points[j].X - points[i].X)));
-            }
-            j = i;
-        }
-
-        int i = 0;
-        int size = int(nodesX.size() - 1);
-        while (i < size)
-        {
-            if (nodesX[i] > nodesX[i + 1])
-            {
-                int temp = nodesX[i];
-                nodesX[i] = nodesX[i + 1];
-                nodesX[i + 1] = temp;
-                if (i > 0)
-                    i--;
-            }
-            else
-            {
-                i++;
-            }
-        }
-
-        for (i = 0; i < nodesX.size(); i += 2)
-        {
-            if (nodesX[i] > maxX) break;
-            if (nodesX[i + 1] > minX)
-            {
-                if (nodesX[i] < minX)
-                    nodesX[i] = minX;
-                if (nodesX[i + 1] > maxX)
-                    nodesX[i + 1] = maxX;
-
-                rectangles.Add(::ULIS::FRectI::FromXYWH(nodesX[i], y, nodesX[i + 1] - nodesX[i], 1));
-            }
-        }
-    }
-
-    return rectangles;
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)

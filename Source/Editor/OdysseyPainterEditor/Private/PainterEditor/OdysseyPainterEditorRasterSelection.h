@@ -32,10 +32,13 @@ public:
     FSimpleMulticastDelegate& OnChanged();
     void RefreshHUD();
 
+    TArray<::ULIS::FRectI> GetSelectionAreaAsScanlines();
+
 private:
     ::ULIS::FRectI ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const;
 
 private:
+    TArray<FVector2D> mPoints;
     TSharedPtr<::ULIS::FBlock> mBlock;
     TSharedPtr<FOdysseyHUDElement> mHUD;
     ::ULIS::FRectI mBoundingRect;

@@ -93,8 +93,6 @@ public:
 
 private: 
     FOdysseyPaintEngine mPaintEngine;
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mOriginalTransformBlock; //The block we're transforming, without any deformation
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mTransformedBlock;
     FOdysseyRasterBlockMutator mRasterMutator;
 
     EOdysseyTransformCapture mTransformCaptureMode;

@@ -57,8 +57,6 @@ public:
 
     void ClearSelection();
 
-    TArray<::ULIS::FRectI> GetSelectionAreaAsScanlines();
-
 protected:
     bool IsSelectionValid(::ULIS::FRectI iSelectionArea);
     void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
@@ -80,8 +78,6 @@ protected:
     TSharedPtr<FOdysseyHUDElement> mSelectionHUD;
     TSharedPtr<FOdysseyHUDPolygon> mToolSelectionArea;
     FOdysseyPaintEngine mPaintEngine;
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mSelectionBlock;
 
     FVector2D mDownReference;
 };
