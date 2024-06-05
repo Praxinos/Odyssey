@@ -3,6 +3,8 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "InbetweenerTag/InbetweenerPoint.h"
+#include "InbetweenerTag/InbetweenerQuad.h"
 
 FOdysseyPainterEditorVectorMatchingToolHUD::~FOdysseyPainterEditorVectorMatchingToolHUD()
 {
@@ -33,9 +35,9 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
     iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
     iBLContext->setStrokeWidth( 1.0f );
 
-    for( FInbetweenerGridQuad& quad : iInbetweenerTag->GetGridQuadBuffer() )
+    for( FInbetweenerQuad& quad : iInbetweenerTag->GetGridQuadBuffer() )
     {
-        FInbetweenerGridPoint** gridPoint = quad.GetPoints();
+        FInbetweenerPoint** gridPoint = quad.GetPoints();
         BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetTargetPosition().x
                                               , gridPoint[0]->GetTargetPosition().y )
                         , worldMatrix.mapPoint( gridPoint[1]->GetTargetPosition().x
@@ -98,12 +100,12 @@ FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FOdysseyVectorTagI
                                                             , double iWorldX
                                                             , double iWorldY
                                                             , double iRadius
-                                                            , std::vector<FInbetweenerGridPoint*>& oPointArray
+                                                            , std::vector<FInbetweenerPoint*>& oPointArray
                                                             , std::vector<double>& oWorldDistanceArray )
 {
     BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
 
-    for( FInbetweenerGridPoint& point : iInbetweenerTag->GetGridPointBuffer() )
+    for( FInbetweenerPoint& point : iInbetweenerTag->GetGridPointBuffer() )
     {
         BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
                                          , point.GetTargetPosition().y );

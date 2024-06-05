@@ -2,6 +2,7 @@
 #include "Palette/OdysseyPaletteEntry.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "InbetweenerTag/InbetweenerPoint.h"
 #include "OdysseyVectorTagInbetweener.h"
 
 void
@@ -12,9 +13,9 @@ FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInb
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        std::vector<FInbetweenerGridPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
+        std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
 
-        for( FInbetweenerGridPoint& point : gridPointbuffer )
+        for( FInbetweenerPoint& point : gridPointbuffer )
         {
             double sourceX = point.GetSourcePosition().x;
             double sourceY = point.GetSourcePosition().y;

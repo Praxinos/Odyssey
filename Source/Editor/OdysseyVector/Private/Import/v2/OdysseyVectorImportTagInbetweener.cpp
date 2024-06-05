@@ -92,9 +92,9 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID_GEOMETRY:
                 {
-                    std::vector<FInbetweenerGridPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
+                    std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
 
-                    for( FInbetweenerGridPoint& point : gridPointbuffer )
+                    for( FInbetweenerPoint& point : gridPointbuffer )
                     {
                         double sourceX;
                         double sourceY;

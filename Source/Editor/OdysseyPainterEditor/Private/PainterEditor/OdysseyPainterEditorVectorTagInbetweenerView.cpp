@@ -25,6 +25,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
 void
 UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
 {
+    InterpolationType = mInbetweenerTag->GetInterpolationType();
     GridType = mInbetweenerTag->GetGridType();
     DivisionX = mInbetweenerTag->GetGridNumQuadX();
     DivisionY  = mInbetweenerTag->GetGridNumQuadY();
@@ -75,6 +76,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
 
         if( iPropertyName == "GridType" )
             mInbetweenerTag->SetGridType( GridType );
+
+        if( iPropertyName == "InterpolationType" )
+            mInbetweenerTag->SetInterpolationType( InterpolationType );
 
         if( iPropertyName == "DivisionX" )
             mInbetweenerTag->SetGridNumQuadX( DivisionX );

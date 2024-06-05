@@ -8,30 +8,26 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-// MACRO check exists in Unreal and conflicts with another one defined in Eigen. We temporarily undefine it.
-#pragma push_macro("check")
-#undef check
-
-#include <Eigen/Geometry>
-#include <Eigen/SparseCore>
-#include <Eigen/SparseLU>
-
-#pragma pop_macro("check")
-
 #include "OdysseyVectorTag.h"
+
+#include "InbetweenerTag/InbetweenerGrid.h"
+#include "InbetweenerTag/InbetweenerGridFFD.h"
+#include "InbetweenerTag/InbetweenerGridARAP.h"
+#include "InbetweenerTag/InbetweenerPoint.h"
+#include "InbetweenerTag/InbetweenerQuad.h"
+#include "InbetweenerTag/InterpolatedPoint.h"
+#include "InbetweenerTag/InterpolatedSegment.h"
+#include "InbetweenerTag/InterpolatedSegmentCubic.h"
+#include "InbetweenerTag/InterpolatedPath.h"
 
 #include "OdysseyVectorTagInbetweener.generated.h"
 
+class FOdysseyVectorObject;
 class FOdysseyVectorPoint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;
 class FOdysseyVectorSharedEnv;
-class FOdysseyVectorTagInbetweener;
-class FInbetweenerGridQuad;
-
-typedef Eigen::Triplet<double> TripletD;
-
 
 UENUM()
 enum class eInbetweenerGridType : uint8
@@ -40,82 +36,11 @@ enum class eInbetweenerGridType : uint8
     ARAP = 1
 };
 
-//////////////// interpolation data structures //////////////////
-
-class FInterpolatedPoint
+UENUM()
+enum class eInbetweenerInterpolationType : uint8
 {
-    public:
-        virtual ~FInterpolatedPoint();
-        FInterpolatedPoint( FOdysseyVectorPoint* iPoint
-                          , uint32 iIndex
-                          , double iU
-                          , double iV );
-
-        friend class FOdysseyVectorTagInbetweener;
-        friend class FInbetweenerGridFFD;
-        friend class FInbetweenerGrid;
-
-    protected:
-        FOdysseyVectorPoint* mOriginalPoint;
-        uint32 mIndex;
-        double mU;
-        double mV;
-};
-
-class FInterpolatedSegment
-{
-    public:
-        virtual ~FInterpolatedSegment();
-        FInterpolatedSegment( FOdysseyVectorSegment* iSegment
-                            , FInterpolatedPoint* iInterpolatedPoint0
-                            , FInterpolatedPoint* iInterpolatedPoint1 );
-
-        friend class FOdysseyVectorTagInbetweener;
-
-    protected:
-        FOdysseyVectorSegment* mOriginalSegment;
-        FInterpolatedPoint* mInterpolatedVertex[2];
-};
-
-class FInterpolatedSegmentCubic : public FInterpolatedSegment
-{
-    public:
-        virtual ~FInterpolatedSegmentCubic();
-        FInterpolatedSegmentCubic( FOdysseyVectorSegmentCubic* iCubicSegment
-                                 , FInterpolatedPoint* iInterpolatedPoint0
-                                 , FInterpolatedPoint* iInterpolatedHandle0
-                                 , FInterpolatedPoint* iInterpolatedHandle1
-                                 , FInterpolatedPoint* iInterpolatedPoint1 );
-
-        friend class FOdysseyVectorTagInbetweener;
-
-    protected:
-        FInterpolatedPoint* mInterpolatedHandle[2];
-};
-
-class FInterpolatedPath
-{
-    public:
-        virtual ~FInterpolatedPath();
-        FInterpolatedPath( FOdysseyVectorPath* iPath
-                         , const ::ULIS::FRectD& iSpaceBBox
-                         , const BLMatrix2D& iSpaceInverseMatrix
-                         , uint32 iInbetweenCount );
-        void Draw( BLContext* iBLContext
-                 , const ::ULIS::FRectD& iInvalidationArea
-                 , double iAncestorsOpacity
-                 , uint64 iDrawingFlags );
-        std::vector<FInterpolatedPoint>& GetInterpolatedPointBuffer();
-        std::vector<::ULIS::FVec2D>& GetInterpolatedPointPositionBuffer();
-
-        friend class FOdysseyVectorTagInbetweener;
-
-    protected:
-        FOdysseyVectorPath* mOriginalPath;
-        std::vector<FInterpolatedPoint> mInterpolatedPointBuffer;
-        std::vector<FInterpolatedSegmentCubic> mInterpolatedSegmentCubicBuffer;
-        // we alloc point position in one single big array.
-        std::vector<::ULIS::FVec2D> mInterpolatedPointPositionBuffer;
+    Linear = 0,
+    ARAP = 1
 };
 
 //////////////// Grid data structures //////////////////
@@ -129,176 +54,6 @@ struct FInbetweenerInbetween
 struct FInbetweenerChart
 {
     std::vector<FInbetweenerInbetween> inbetweenBuffer;
-};
-
-enum eGridPointPositionType
-{
-    SourcePosition = 0,
-    MotionPosition = 1,
-    TargetPosition = 2
-};
-
-class ODYSSEYVECTOR_API FInbetweenerGridPoint
-{
-    public:
-        typedef Eigen::Matrix<double, 2, 1> VectorType;
-        typedef Eigen::Transform<double, 2, Eigen::Affine> Affine;
-
-        virtual ~FInbetweenerGridPoint(){};
-        FInbetweenerGridPoint( );
-
-        void SetSourcePosition( double iX, double iY );
-        void SetTargetPosition( double iX, double iY );
-        void SetMotionPosition( double iX, double iY );
-        const ::ULIS::FVec2D& GetSourcePosition();
-        const ::ULIS::FVec2D& GetTargetPosition();
-        void AddQuad( FInbetweenerGridQuad* iQuad );
-        void RemoveQuad( FInbetweenerGridQuad* iQuad );
-        std::list<FInbetweenerGridQuad*>& GetQuadList();
-        void SetID( uint32 iID );
-        uint32 GetID();
-        ::ULIS::FVec2D GetPosition( eGridPointPositionType iPositionType );
-
-        friend class FOdysseyVectorTagInbetweener;
-        friend class FInbetweenerGridFFD;
-        friend class FInbetweenerGrid;
-
-    protected: 
-        void Init( FInbetweenerGrid* iGrid );
-
-    protected:
-        std::list<FInbetweenerGridQuad*> mQuadList;
-        FInbetweenerGrid* mGrid;
-        ::ULIS::FVec2D mSourcePosition;
-        ::ULIS::FVec2D mMotionPosition;
-        ::ULIS::FVec2D mTargetPosition;
-        uint32 mID;
-        double u, v;
-};
-
-class ODYSSEYVECTOR_API FInbetweenerGridQuad
-{
-    public:
-        virtual ~FInbetweenerGridQuad(){};
-        FInbetweenerGridQuad( );
-
-        FInbetweenerGridPoint** GetPoints();
-        void Link();
-        void Unlink();
-        bool IsLinked();
-
-        friend class FOdysseyVectorTagInbetweener;
-
-    public:
-        static const uint32 LINKED = 1L << 0;
-
-    protected:
-        uint32 mFlags;
-        FInbetweenerGridPoint* mPoint[4];
-};
-
-class FInbetweenerGrid
-{
-    public:
-        virtual ~FInbetweenerGrid(){};
-        FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                        , uint32 iNumQuadX
-                        , uint32 iNumQuadY );
-
-        virtual void Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY );
-
-        virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                                , uint32 iInbetweenIndex );
-        FOdysseyVectorTagInbetweener* GetInbetweenerTag();
-
-        friend class FOdysseyVectorTagInbetweener;
-
-    protected:
-        ::ULIS::FVec2D GetCenterOfMass( eGridPointPositionType iPositionType );
-
-    protected:
-        std::vector<FInbetweenerGridQuad>& GetQuadBuffer();
-        std::vector<FInbetweenerGridPoint>& GetPointBuffer();
-        uint32 GetNumQuadX();
-        uint32 GetNumQuadY();
-
-    protected:
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        std::vector<FInbetweenerGridPoint> mPointBuffer;
-        std::vector<FInbetweenerGridQuad> mQuadBuffer;
-        uint32 mNumQuadX;
-        uint32 mNumQuadY;
-        uint32 mUsedQuadCount;
-        uint32 mUsedPointCount;
-        double mQuadArea;
-};
-
-class FInbetweenerGridFFD : public FInbetweenerGrid
-{
-    public:
-        virtual ~FInbetweenerGridFFD(){};
-        FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                           , uint32 iNumQuadX
-                           , uint32 iNumQuadY );
-
-        virtual void Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY  ) override;
-        virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                                , uint32 iInbetweenIndex ) override;
-        void ComputeBinomialCoefficients();
-        ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint );
-
-        friend class FOdysseyVectorTagInbetweener;
-
-    protected:
-        std::vector<double> mUBinomialCoefficientBuffer;
-        std::vector<double> mVBinomialCoefficientBuffer;
-};
-
-class FInbetweenerGridARAP : public FInbetweenerGrid
-{
-    public:
-        virtual ~FInbetweenerGridARAP(){};
-        FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                            , uint32 iNumQuadX
-                            , uint32 iNumQuadY );
-
-        virtual void Make(  uint32 iNumQuadX
-                          , uint32 iNumQuadY ) override;
-
-        friend class FOdysseyVectorTagInbetweener;
-
-    protected:
-        bool Precompute();
-        void ComputePStar( FInbetweenerGridPoint* iTriangle[3]
-                         , int triRow
-                         , eGridPointPositionType iPositionType
-                         , std::vector<TripletD>& PTriplets );
-        bool InterpolateARAP( float alphaLinear
-                            , float alpha
-                           // , const FInbetweenerGridPoint::Affine &globalRigidTransform
-                            , bool useRigidTransform );
-        void ComputeJAM( FInbetweenerGridPoint* iTriangle[3]
-                       , bool iInverseOrientation
-                       , Eigen::Matrix2d& iA );
-        void ComputeQuadA( FInbetweenerGridQuad* iQuad
-                         , Eigen::MatrixXd& iAt
-                         , int &i
-                         , float iT
-                         , bool iInverseOrientation );
-        double PolarDecomp( Eigen::Matrix2d &A, Eigen::Matrix2d &S );
-
-    protected:
-        // center of mass of the lattice in its reference and target positions
-        ::ULIS::FVec2D mSourceCenterOfMass;
-        ::ULIS::FVec2D mTargetCenterOfMass;
-        // Constraints indices in the keyframe list
-        std::set<uint32> mConstraintsIdx;
-        // Matrices for ARAP interpolation
-        Eigen::SparseMatrix<double, Eigen::ColMajor> mPt;
-        Eigen::SparseLU<Eigen::SparseMatrix<double, Eigen::ColMajor>, Eigen::COLAMDOrdering<int>> mLU;
-        Eigen::VectorXd mW;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
@@ -332,7 +87,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void MakeGrid();
         void Map();
         void Interpolate();
-        void DrawMotionGrid( BLContext* iBLContext
+        void DrawMotionGrid( uint32 iInbetweenIndex
+                           , BLContext* iBLContext
                            , const ::ULIS::FRectD& iInvalidationArea
                            , double iAncestorsOpacity
                            , uint64 iDrawingFlags );
@@ -352,11 +108,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetGridNumQuadY( uint32 iNumQuadY );
         void SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY );
 
+        eInbetweenerInterpolationType GetInterpolationType();
+        void SetInterpolationType( eInbetweenerInterpolationType iInterpolationType );
+
         eInbetweenerGridType GetGridType();
         uint32 GetGridNumQuadX();
         uint32 GetGridNumQuadY();
-        std::vector<FInbetweenerGridPoint>& GetGridPointBuffer();
-        std::vector<FInbetweenerGridQuad>& GetGridQuadBuffer();
+        std::vector<FInbetweenerPoint>& GetGridPointBuffer();
+        std::vector<FInbetweenerQuad>& GetGridQuadBuffer();
 
         virtual void Update( uint32 iUpdateFlags ) override;
         void Commit();
@@ -413,6 +172,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
         FInbetweenerGrid* mGrid;
         eInbetweenerGridType mGridType;
+        eInbetweenerInterpolationType mInterpolationType;
         ::ULIS::FRectD mTargetGridBBox;
         FInbetweenerChart mChart;
         uint32 mInbetweenCount;

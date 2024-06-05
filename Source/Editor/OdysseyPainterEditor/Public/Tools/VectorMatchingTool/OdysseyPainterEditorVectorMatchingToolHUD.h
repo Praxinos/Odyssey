@@ -8,7 +8,7 @@
 
 class FOdysseyVectorTagInbetweener;
 struct FInbetweenerInbetween;
-class FInbetweenerGridPoint;
+class FInbetweenerPoint;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -33,7 +33,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
                              , double iWorldX
                              , double iWorldY
                              , double iRadius
-                             , std::vector<FInbetweenerGridPoint*>& oPointArray
+                             , std::vector<FInbetweenerPoint*>& oPointArray
                              , std::vector<double>& oWorldDistanceArray );
 
     private:

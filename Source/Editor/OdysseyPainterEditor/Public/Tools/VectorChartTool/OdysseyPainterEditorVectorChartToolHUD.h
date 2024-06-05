@@ -7,7 +7,6 @@
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 
 class FOdysseyVectorTagInbetweener;
-struct FInbetweenerPoint;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
