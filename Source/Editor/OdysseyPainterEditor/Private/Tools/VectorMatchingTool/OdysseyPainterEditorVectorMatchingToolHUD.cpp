@@ -93,6 +93,22 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
 
     iBLContext->save();
     iBLContext->resetMatrix();
+
+    iBLContext->setStrokeStyle( hcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+
+    iBLContext->strokeCircle( mCursorPosition.x
+                            , mCursorPosition.y
+                            , mMatchingTool->PickingRadius );
+
+    iBLContext->restore();
+}
+
+void
+FOdysseyPainterEditorVectorMatchingToolHUD::SetCursorPosition( double iX, double iY )
+{
+    mCursorPosition.x = iX;
+    mCursorPosition.y = iY;
 }
 
 void

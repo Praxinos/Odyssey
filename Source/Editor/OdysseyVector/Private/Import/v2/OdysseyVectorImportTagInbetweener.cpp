@@ -74,11 +74,11 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     iInbetweenerTag.Scale( scalingX, scalingY );
                 break;
 
-                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID:  // container
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID:  // container
                     iInbetweenerTag.SetGridType( eInbetweenerGridType::FFD );
                 break;
 
-                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID_SIZE:
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_SIZE:
                 {
                     uint32 numQuadX;
                     uint32 numQuadY;
@@ -90,7 +90,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
-                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID_GEOMETRY:
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_GEOMETRY:
                 {
                     std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
 

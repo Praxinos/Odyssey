@@ -30,6 +30,13 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
     DivisionX = mInbetweenerTag->GetGridNumQuadX();
     DivisionY  = mInbetweenerTag->GetGridNumQuadY();
     InbetweenCount = mInbetweenerTag->GetInbetweenCount();
+
+    if( GridType == eInbetweenerGridType::ARAP )
+    {
+        FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(mInbetweenerTag->GetGrid());
+
+        arapGrid->SetRigidity( Rigidity );
+    }
 }
 
 void 
@@ -74,9 +81,6 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             mInbetweenerTag->SetInbetweenCount( InbetweenCount );
         }
 
-        if( iPropertyName == "GridType" )
-            mInbetweenerTag->SetGridType( GridType );
-
         if( iPropertyName == "InterpolationType" )
             mInbetweenerTag->SetInterpolationType( InterpolationType );
 
@@ -85,6 +89,22 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
 
         if( iPropertyName == "DivisionY" )
             mInbetweenerTag->SetGridNumQuadY( DivisionY );
+
+        if( iPropertyName == "Rigidity" )
+        {
+            FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(mInbetweenerTag->GetGrid());
+
+            arapGrid->SetRigidity( Rigidity );
+        }
+
+        // must be last to be able to update correctly grid type-dependent fields
+        if( iPropertyName == "GridType" )
+        {
+            mInbetweenerTag->SetGridType( GridType );
+
+            // updates grid type-dependent fields
+            ImportParam();
+        }
     }
 }
 

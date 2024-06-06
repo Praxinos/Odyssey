@@ -23,25 +23,26 @@
 #endif
 
 void
-FOdysseyVectorTagInbetweener::UpdateGridBBox()
+FOdysseyVectorTagInbetweener::UpdateBBox( ::ULIS::FRectD& iBBox
+                                        , eInbetweenerPointPositionType iPositionType )
 {
     double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
     bool hasBBox = false;
 
     for( FInbetweenerPoint& gridPoint : mGrid->GetPointBuffer() )
     {
-        const ::ULIS::FVec2D& targetPosition = gridPoint.GetTargetPosition();
+        const ::ULIS::FVec2D& position = gridPoint.GetPosition( iPositionType );
 
         hasBBox = true;
 
-        if ( targetPosition.x < xmin ) xmin = targetPosition.x;
-        if ( targetPosition.y < ymin ) ymin = targetPosition.y;
-        if ( targetPosition.x > xmax ) xmax = targetPosition.x;
-        if ( targetPosition.y > ymax ) ymax = targetPosition.y;
+        if ( position.x < xmin ) xmin = position.x;
+        if ( position.y < ymin ) ymin = position.y;
+        if ( position.x > xmax ) xmax = position.x;
+        if ( position.y > ymax ) ymax = position.y;
     }
 
-    mTargetGridBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) 
-                                  : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+    iBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) 
+                        : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
 void
@@ -129,22 +130,29 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mGridType( eInbetweenerGridType::FFD )
     , mInterpolationType( eInbetweenerInterpolationType::ARAP )
     , mInbetweenCount( iInbetweenCount )
-    , mInvalidationFlags( 0 )
+    , mInvalidationFlags( INVALIDATE_MAP
+                        | INVALIDATE_BUFFERS
+                        | INVALIDATE_SPACING
+                        | INVALIDATE_CELLS )
+    , mTargetTranslationX( 0.0f )
+    , mTargetTranslationY( 0.0f )
+    , mTargetScalingX    ( 1.0f )
+    , mTargetScalingY    ( 1.0f )
+    , mTargetRotation    ( 0.0f )
 {
-    mTargetTranslationX = 0.0f;
-    mTargetTranslationY = 0.0f;
-    mTargetScalingX     = 1.0f;
-    mTargetScalingY     = 1.0f;
-    mTargetRotation     = 0.0f;
-
+    ResetChart();
+    // Note: Matrix needs chart to be allocated first.
     UpdateMatrix();
 
+    mSourceBBox = iOwnerObject->GetBBox( false );
+
+    // Note: Grid building needs the bbox to be set.
     SetGridType( mGridType );
 
     //mGrid->Make( iNumQuadX, iNumQuadY, iOwnerObject->GetBBox( false ), this );
 
     //Map();
-    //ResetChart();
+
     //AllocBuffers();
     //Interpolate();
 }
@@ -181,19 +189,22 @@ void FOdysseyVectorTagInbetweener::Removed()
 
 void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags )
 {
-    if( ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY )
+    if( ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
+     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) )
+    {
+        mInvalidationFlags |= INVALIDATE_MAP;
+    }
 
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_SHAPE    )
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY )
+    if( ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_SHAPE    )
      || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_TAGS     )
      || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_MATRIX   )
 
      || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
      || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAGS     )
      || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   ) )
     {
-        mInvalidationFlags |= ( INVALIDATE_MAP | INVALIDATE_BUFFERS | INVALIDATE_SPACING );
+        mInvalidationFlags |= ( INVALIDATE_BUFFERS | INVALIDATE_SPACING );
     }
 
     if( mInvalidationFlags & INVALIDATE_MAP )
@@ -206,9 +217,16 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags )
         AllocBuffers();
     }
 
-    if( mInvalidationFlags & INVALIDATE_BBOX )
+    if( mInvalidationFlags & INVALIDATE_SOURCEBBOX )
     {
-        UpdateGridBBox();
+        UpdateBBox( mSourceBBox, eInbetweenerPointPositionType::SourcePosition );
+    }
+
+    if( mInvalidationFlags & INVALIDATE_TARGETBBOX )
+    {
+        mGrid->Update();
+
+        UpdateBBox( mTargetBBox, eInbetweenerPointPositionType::TargetPosition );
     }
 
     if( mInvalidationFlags & INVALIDATE_SPACING )
@@ -246,14 +264,15 @@ FOdysseyVectorTagInbetweener::GetTargetInverseWorldMatrix()
 }
 
 ::ULIS::FRectD
-FOdysseyVectorTagInbetweener::GetTargetGridBBox( bool iWorld )
+FOdysseyVectorTagInbetweener::GetSourceBBox( bool iWorld )
 {
     if ( iWorld == true )
     {
-        BLPoint p0 = mTargetWorldMatrix.mapPoint( mTargetGridBBox.x                    , mTargetGridBBox.y                     );
-        BLPoint p1 = mTargetWorldMatrix.mapPoint( mTargetGridBBox.x + mTargetGridBBox.w, mTargetGridBBox.y                     );
-        BLPoint p2 = mTargetWorldMatrix.mapPoint( mTargetGridBBox.x + mTargetGridBBox.w, mTargetGridBBox.y + mTargetGridBBox.h );
-        BLPoint p3 = mTargetWorldMatrix.mapPoint( mTargetGridBBox.x                    , mTargetGridBBox.y + mTargetGridBBox.h );
+        BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
+        BLPoint p0 = worldMatrix.mapPoint( mSourceBBox.x                , mSourceBBox.y                 );
+        BLPoint p1 = worldMatrix.mapPoint( mSourceBBox.x + mSourceBBox.w, mSourceBBox.y                 );
+        BLPoint p2 = worldMatrix.mapPoint( mSourceBBox.x + mSourceBBox.w, mSourceBBox.y + mSourceBBox.h );
+        BLPoint p3 = worldMatrix.mapPoint( mSourceBBox.x                , mSourceBBox.y + mSourceBBox.h );
         ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                              , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                                              , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
@@ -262,7 +281,27 @@ FOdysseyVectorTagInbetweener::GetTargetGridBBox( bool iWorld )
         return worldBBox;
     }
 
-    return mTargetGridBBox;
+    return mSourceBBox;
+}
+
+::ULIS::FRectD
+FOdysseyVectorTagInbetweener::GetTargetBBox( bool iWorld )
+{
+    if ( iWorld == true )
+    {
+        BLPoint p0 = mTargetWorldMatrix.mapPoint( mTargetBBox.x                , mTargetBBox.y                 );
+        BLPoint p1 = mTargetWorldMatrix.mapPoint( mTargetBBox.x + mTargetBBox.w, mTargetBBox.y                 );
+        BLPoint p2 = mTargetWorldMatrix.mapPoint( mTargetBBox.x + mTargetBBox.w, mTargetBBox.y + mTargetBBox.h );
+        BLPoint p3 = mTargetWorldMatrix.mapPoint( mTargetBBox.x                , mTargetBBox.y + mTargetBBox.h );
+        ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                             , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                             , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                             , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+
+        return worldBBox;
+    }
+
+    return mTargetBBox;
 }
 
 void
@@ -790,7 +829,7 @@ FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
               | INVALIDATE_BUFFERS
               | INVALIDATE_CELLS );
 
-    mGrid->Make( mGrid->GetNumQuadX(), mGrid->GetNumQuadY() );
+    mGrid->Make( mGrid->GetNumQuadX(), mGrid->GetNumQuadY(), mSourceBBox );
 }
 
 void
@@ -799,7 +838,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY
     Invalidate( INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    mGrid->Make( iNumQuadX, iNumQuadY );
+    mGrid->Make( iNumQuadX, iNumQuadY, mSourceBBox );
 }
 
 void
@@ -808,7 +847,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuadX( uint32 iNumQuadX )
     Invalidate( INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    mGrid->Make( iNumQuadX, mGrid->GetNumQuadY() );
+    mGrid->Make( iNumQuadX, mGrid->GetNumQuadY(), mSourceBBox );
 }
 
 void
@@ -817,7 +856,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuadY( uint32 iNumQuadY )
     Invalidate( INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    mGrid->Make( mGrid->GetNumQuadX(), iNumQuadY );
+    mGrid->Make( mGrid->GetNumQuadX(), iNumQuadY, mSourceBBox );
 }
 
 void

@@ -103,9 +103,9 @@ namespace FOdysseyVectorExportV2
     void ODYSSEYVECTOR_API WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerInbetweenCount( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
-    void WriteTagInbetweenerFFDGrid( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
-    void WriteTagInbetweenerFFDGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
-    void WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerTransformTranslation( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                 , FArchive &Ar );
     void WriteTagInbetweenerTransformRotation( FOdysseyVectorTagInbetweener& iInbetweenerTag

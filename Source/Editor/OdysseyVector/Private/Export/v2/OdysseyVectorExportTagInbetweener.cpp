@@ -6,10 +6,10 @@
 #include "OdysseyVectorTagInbetweener.h"
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                          , FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                       , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID_GEOMETRY
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_GEOMETRY
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
@@ -31,9 +31,9 @@ FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridGeometry( FOdysseyVectorTagInb
 }
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID_SIZE
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_SIZE
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
@@ -46,15 +46,15 @@ FOdysseyVectorExportV2::WriteTagInbetweenerFFDGridSize( FOdysseyVectorTagInbetwe
 }
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerFFDGrid( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                  , FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                               , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_FFDGRID
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        WriteTagInbetweenerFFDGridSize( iInbetweenerTag, Ar );
-        WriteTagInbetweenerFFDGridGeometry( iInbetweenerTag, Ar );
+        WriteTagInbetweenerGridSize( iInbetweenerTag, Ar );
+        WriteTagInbetweenerGridGeometry( iInbetweenerTag, Ar );
     } );
 }
 
@@ -162,7 +162,7 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
 
         if( iInbetweenerTag.GetGridType() == eInbetweenerGridType::FFD )
         {
-            WriteTagInbetweenerFFDGrid( iInbetweenerTag, Ar );
+            WriteTagInbetweenerGrid( iInbetweenerTag, Ar );
         }
     } );
 }

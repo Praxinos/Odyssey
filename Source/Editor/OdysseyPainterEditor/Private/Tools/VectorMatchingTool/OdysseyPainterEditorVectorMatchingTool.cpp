@@ -93,11 +93,13 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
 
 uint64
 UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                       , const FOdysseyPoint& iPointInTexture )
+                                                           , const FOdysseyPoint& iPointInTexture )
 {
     // TODO: highlight grid handles ?
 
-    return 0;
+    mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64
@@ -105,6 +107,8 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                                                           , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+
+    mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
@@ -130,7 +134,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                 }
 
                 // update
-                inbetweenerTag->Interpolate();
+                iScene->Update( 0 );
             }
         }
     }

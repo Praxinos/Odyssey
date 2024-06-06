@@ -27,7 +27,7 @@ class FInterpolatedPath;
 
 typedef Eigen::Triplet<double> TripletD;
 
-class FInbetweenerGrid
+class ODYSSEYVECTOR_API FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGrid(){};
@@ -36,7 +36,8 @@ class FInbetweenerGrid
                         , uint32 iNumQuadY );
 
         virtual void Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY );
+                         , uint32 iNumQuadY
+                         , const ::ULIS::FRectD& iBBox );
 
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                                 , uint32 iInbetweenIndex );
@@ -44,6 +45,7 @@ class FInbetweenerGrid
         FInbetweenerQuad* GetQuad( const ::ULIS::FVec2D& iLocalCoords );
 
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
+        virtual void Update(){};
 
         friend class FOdysseyVectorTagInbetweener;
 
@@ -87,7 +89,6 @@ class FInbetweenerGrid
         uint32 mNumQuadY;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;
-        ::ULIS::FRectD mBBox;
 
     // ARAP interpolation (do not confuse with ARAP deformation)
     protected:

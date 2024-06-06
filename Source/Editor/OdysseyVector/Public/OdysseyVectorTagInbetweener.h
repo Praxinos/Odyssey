@@ -128,7 +128,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         double GetTargetRotation();
         double GetTargetScalingX();
         double GetTargetScalingY();
-        ::ULIS::FRectD GetTargetGridBBox( bool iWorld );
+        ::ULIS::FRectD GetSourceBBox( bool iWorld );
+        ::ULIS::FRectD GetTargetBBox( bool iWorld );
         BLMatrix2D& GetTargetWorldMatrix();
         BLMatrix2D& GetTargetInverseWorldMatrix();
         void Invalidate( uint64 iInvalidationFlags );
@@ -136,7 +137,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
     protected:
         void UpdateAnimationCells( uint32 iInbetweenCount );
-        void UpdateGridBBox();
+        void UpdateBBox( ::ULIS::FRectD& iBBox
+                       , eInbetweenerPointPositionType iPositionType );
         void InterpolateGeometry( uint32 iInbetweenIndex );
         void InterpolateTransform( uint32 iInbetweenIndex );
         void Reset( bool iResetGridShape );
@@ -152,12 +154,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static const uint64 INVALIDATE_BUFFERS    = ( 1LL << 1 );
         static const uint64 INVALIDATE_SPACING    = ( 1LL << 2 );
         static const uint64 INVALIDATE_CELLS      = ( 1LL << 3 );
-        static const uint64 INVALIDATE_BBOX       = ( 1LL << 4 );
+        static const uint64 INVALIDATE_SOURCEBBOX = ( 1LL << 4 );
+        static const uint64 INVALIDATE_TARGETBBOX = ( 1LL << 5 );
         static const uint64 INVALIDATE_ALL        = ( INVALIDATE_MAP
                                                     | INVALIDATE_BUFFERS
                                                     | INVALIDATE_SPACING
                                                     | INVALIDATE_CELLS
-                                                    | INVALIDATE_BBOX );
+                                                    | INVALIDATE_SOURCEBBOX
+                                                    | INVALIDATE_TARGETBBOX );
 
     protected:
         double mTargetTranslationX;
@@ -173,7 +177,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FInbetweenerGrid* mGrid;
         eInbetweenerGridType mGridType;
         eInbetweenerInterpolationType mInterpolationType;
-        ::ULIS::FRectD mTargetGridBBox;
+        ::ULIS::FRectD mSourceBBox;
+        ::ULIS::FRectD mTargetBBox;
         FInbetweenerChart mChart;
         uint32 mInbetweenCount;
         uint64 mInvalidationFlags;

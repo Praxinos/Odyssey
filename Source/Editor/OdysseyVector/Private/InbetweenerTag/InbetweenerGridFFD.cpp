@@ -13,7 +13,7 @@ FInbetweenerGridFFD::FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetwe
 ::ULIS::FVec2D
 FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
 {
-    ::ULIS::FRectD bbox = mInbetweenerTag->GetOwner()->GetBBox( false );
+    ::ULIS::FRectD bbox = mInbetweenerTag->GetSourceBBox( false );
     ::ULIS::FVec2D vi = ::ULIS::FVec2D( 0.0f, 0.0f );
     uint32 numVertexX = mNumQuadX + 1;
     uint32 numVertexY = mNumQuadY + 1;
@@ -61,9 +61,11 @@ FInbetweenerGridFFD::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedP
 }
 
 void
-FInbetweenerGridFFD::Make( uint32 iNumQuadX, uint32 iNumQuadY )
+FInbetweenerGridFFD::Make( uint32 iNumQuadX
+                         , uint32 iNumQuadY
+                         , const ::ULIS::FRectD& iBBox )
 {
-    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY );
+    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY, iBBox );
 
     if( iNumQuadX && iNumQuadY )
     {

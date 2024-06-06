@@ -58,7 +58,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Divisions X"
-                          , EditCondition = "( GridType == eInbetweenerGridType::FFD )"
+                          //, EditCondition = "( GridType == eInbetweenerGridType::FFD )"
                           , EditConditionHides
                           , ClampMin = "1"
                           , ClampMax = "8"
@@ -69,11 +69,22 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Divisions Y"
-                          , EditCondition = "( GridType == eInbetweenerGridType::FFD )"
+                          //, EditCondition = "( GridType == eInbetweenerGridType::FFD )"
                           , EditConditionHides
                           , ClampMin = "1"
                           , ClampMax = "8"
                           , UIMin    = "1"
                           , UIMax    = "8" ) )
         uint32 DivisionY;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Inbetweener"
+                 , meta = ( ToolTip  = "Rigidity"
+                          , EditCondition = "( GridType == eInbetweenerGridType::ARAP )"
+                          , EditConditionHides
+                          , ClampMin = "1"
+                          , ClampMax = "100"
+                          , UIMin    = "1"
+                          , UIMax    = "100" ) )
+        uint32 Rigidity;
 };

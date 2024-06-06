@@ -26,7 +26,7 @@ FInbetweenerGrid::GetInbetweenerTag()
 uint32
 FInbetweenerGrid::GetNumQuadX()
 {
-    return mNumQuadY;
+    return mNumQuadX;
 }
 
 uint32
@@ -55,23 +55,21 @@ FInbetweenerGrid::GetCenterOfMass( eInbetweenerPointPositionType iPositionType )
 }
 
 void
-FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY )
+FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD& iBBox )
 {
     mNumQuadX = iNumQuadX;
     mNumQuadY = iNumQuadY;
 
     if( mNumQuadX && mNumQuadY )
     {
-        ::ULIS::FRectD bbox = mInbetweenerTag->GetOwner()->GetBBox( false );
-        double x = bbox.x;
-        double y = bbox.y;
-        double stepx = bbox.w / iNumQuadX;
-        double stepy = bbox.h / iNumQuadY;
+        double x = iBBox.x;
+        double y = iBBox.y;
+        double stepx = iBBox.w / iNumQuadX;
+        double stepy = iBBox.h / iNumQuadY;
         uint32 numVertexX = iNumQuadX + 1;
         uint32 numVertexY = iNumQuadY + 1;
         uint32 pointID = 0;
 
-        mBBox = bbox;
         mPointBuffer.resize( numVertexX * numVertexY );
         mQuadBuffer.resize( mNumQuadX * mNumQuadY );
 
@@ -86,14 +84,14 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY )
                 mPointBuffer[offset].SetSourcePosition( x, y );
                 mPointBuffer[offset].mTargetPosition = mPointBuffer[offset].mSourcePosition;
 
-                mPointBuffer[offset].u = std::clamp<double>( ( x - bbox.x ) / bbox.w, 0.0f, 1.0f );
-                mPointBuffer[offset].v = std::clamp<double>( ( y - bbox.y ) / bbox.h, 0.0f, 1.0f );
+                mPointBuffer[offset].u = std::clamp<double>( ( x - iBBox.x ) / iBBox.w, 0.0f, 1.0f );
+                mPointBuffer[offset].v = std::clamp<double>( ( y - iBBox.y ) / iBBox.h, 0.0f, 1.0f );
 
                 x += stepx;
             }
 
             y += stepy;
-            x = bbox.x;
+            x = iBBox.x;
         }
 
         // design cells
@@ -131,10 +129,11 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY )
 FInbetweenerQuad*
 FInbetweenerGrid::GetQuad( const ::ULIS::FVec2D& iLocalCoords )
 {
-    double difX = iLocalCoords.x - mBBox.x;
-    double difY = iLocalCoords.y - mBBox.y;
-    double u = difX / mBBox.w;
-    double v = difY / mBBox.h;
+    ::ULIS::FRectD bbox = mInbetweenerTag->GetSourceBBox( false );
+    double difX = iLocalCoords.x - bbox.x;
+    double difY = iLocalCoords.y - bbox.y;
+    double u = difX / bbox.w;
+    double v = difY / bbox.h;
     FInbetweenerQuad* quad = nullptr;
 
     if( ( u >= 0.0f ) && ( u < 1.0f )

@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include <ULIS>
 
-class FInbetweenerPoint;
+#include "InbetweenerTag/InbetweenerPoint.h"
 
 class ODYSSEYVECTOR_API FInbetweenerQuad
 {
@@ -15,6 +15,16 @@ class ODYSSEYVECTOR_API FInbetweenerQuad
         void Link();
         void Unlink();
         bool IsLinked();
+        void ComputeCentroids();
+        void ComputeCentroid( eInbetweenerPointPositionType iPositionType );
+        ::ULIS::FVec2D BiasedCentroid( eInbetweenerPointPositionType iPositionType );
+        ::ULIS::FVec2D GetPoint( eInbetweenerPointPositionType iPositionType
+                               , double iU
+                               , double iV );
+        ::ULIS::FVec2D GetPinPosition();
+        double GetPinU();
+        double GetPinV();
+        bool IsPinned();
 
         friend class FOdysseyVectorTagInbetweener;
 
@@ -24,4 +34,9 @@ class ODYSSEYVECTOR_API FInbetweenerQuad
     protected:
         uint32 mFlags;
         FInbetweenerPoint* mPoint[4];
+        ::ULIS::FVec2D mCentroid[4];
+        ::ULIS::FVec2D mPinPosition;
+        bool bPinned;
+        double mPinU;
+        double mPinV;
 };

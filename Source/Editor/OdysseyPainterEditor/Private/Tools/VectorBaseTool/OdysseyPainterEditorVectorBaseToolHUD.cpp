@@ -174,7 +174,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysse
             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
             mSelectionBox.inited = true;
-            mSelectionBox.rect = inbetweenerTag->GetTargetGridBBox( false );
+            mSelectionBox.rect = inbetweenerTag->GetTargetBBox( false );
             mSelectionBox.worldMatrix = inbetweenerTag->GetTargetWorldMatrix();
             mSelectionBox.inverseWorldMatrix = inbetweenerTag->GetTargetInverseWorldMatrix();
         }
@@ -203,7 +203,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysse
                   {
                       FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
-                      ::ULIS::FRectD selectedObjectBBox = inbetweenerTag->GetTargetGridBBox( true );
+                      ::ULIS::FRectD selectedObjectBBox = inbetweenerTag->GetTargetBBox( true );
 
                       mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedObjectBBox
                                                                 : selectedObjectBBox;

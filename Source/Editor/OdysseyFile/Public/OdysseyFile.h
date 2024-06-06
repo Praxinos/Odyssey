@@ -122,9 +122,9 @@ namespace FOdysseyFile
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION = 0xaf8ba83b; // double(X)-double(Y)
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_ROTATION = 0xb941a26b; // double(A)
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_SCALING = 0xf6a73728; // double(X)-double(Y)
-                                static const uint32 CHUNK_TAGINBETWEENER_FFDGRID = 0x6b443e74; // container
-                                    static const uint32 CHUNK_TAGINBETWEENER_FFDGRID_SIZE = 0xb3e7577b; // uint32(x)-uint32(y)
-                                    static const uint32 CHUNK_TAGINBETWEENER_FFDGRID_GEOMETRY = 0x88fd3275; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
+                                static const uint32 CHUNK_TAGINBETWEENER_GRID = 0x6b443e74; // container
+                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_SIZE = 0xb3e7577b; // uint32(x)-uint32(y)
+                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_GEOMETRY = 0x88fd3275; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
 
 
                     static const uint32 CHUNK_PATH = 0x138d0bec; // container

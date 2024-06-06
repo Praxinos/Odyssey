@@ -5,7 +5,7 @@
 #include "InbetweenerGrid.h"
 
 
-class FInbetweenerGridFFD : public FInbetweenerGrid
+class ODYSSEYVECTOR_API FInbetweenerGridFFD : public FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGridFFD(){};
@@ -14,7 +14,8 @@ class FInbetweenerGridFFD : public FInbetweenerGrid
                            , uint32 iNumQuadY );
 
         virtual void Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY  ) override;
+                         , uint32 iNumQuadY
+                         , const ::ULIS::FRectD& iBBox  ) override;
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                                 , uint32 iInbetweenIndex ) override;
         void ComputeBinomialCoefficients();
