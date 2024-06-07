@@ -178,6 +178,13 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysse
             mSelectionBox.worldMatrix = inbetweenerTag->GetTargetWorldMatrix();
             mSelectionBox.inverseWorldMatrix = inbetweenerTag->GetTargetInverseWorldMatrix();
         }
+        else
+        {
+            mSelectionBox.inited = true;
+            mSelectionBox.rect = selectedObject->GetBBox( false );
+            mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
+            mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
+        }
     }
     else 
     {
@@ -198,20 +205,25 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysse
               if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
               {
                   FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+                  ::ULIS::FRectD selectedObjectBBox;
 
                   if( tag )
                   {
                       FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
-                      ::ULIS::FRectD selectedObjectBBox = inbetweenerTag->GetTargetBBox( true );
-
-                      mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedObjectBBox
-                                                                : selectedObjectBBox;
-
-                      mSelectionBox.inited = true;
-
-                      return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                      selectedObjectBBox = inbetweenerTag->GetTargetBBox( true );
                   }
+                  else
+                  {
+                      selectedObjectBBox = object->GetBBox( false );
+                  }
+
+                  mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedObjectBBox
+                                                            : selectedObjectBBox;
+
+                  mSelectionBox.inited = true;
+
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
               }
 
               return 0;

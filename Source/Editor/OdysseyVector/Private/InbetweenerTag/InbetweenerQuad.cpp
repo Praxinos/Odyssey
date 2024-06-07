@@ -48,6 +48,22 @@ FInbetweenerQuad::GetPinV()
     return mPinV;
 }
 
+::ULIS::FRectD
+FInbetweenerQuad::GetBBox( eInbetweenerPointPositionType iPositionType )
+{
+    ::ULIS::FVec2D p0Position = mPoint[0]->GetPosition( iPositionType );
+    ::ULIS::FVec2D p1Position = mPoint[1]->GetPosition( iPositionType );
+    ::ULIS::FVec2D p2Position = mPoint[2]->GetPosition( iPositionType );
+    ::ULIS::FVec2D p3Position = mPoint[3]->GetPosition( iPositionType );
+
+    double xmin = ::ULIS::FMath::Min4( p0Position.x, p1Position.x, p2Position.x, p3Position.x );
+    double xmax = ::ULIS::FMath::Max4( p0Position.x, p1Position.x, p2Position.x, p3Position.x );
+    double ymin = ::ULIS::FMath::Min4( p0Position.y, p1Position.y, p2Position.y, p3Position.y );
+    double ymax = ::ULIS::FMath::Max4( p0Position.y, p1Position.y, p2Position.y, p3Position.y );
+
+    return ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+}
+
 ::ULIS::FVec2D
 FInbetweenerQuad::GetPinPosition()
 {
@@ -121,7 +137,7 @@ void
 FInbetweenerQuad::ComputeCentroids()
 {
     ComputeCentroid(eInbetweenerPointPositionType::SourcePosition);
-    ComputeCentroid(eInbetweenerPointPositionType::MotionPosition);
+    ComputeCentroid(eInbetweenerPointPositionType::InterpPosition);
     ComputeCentroid(eInbetweenerPointPositionType::DeformPosition);
     ComputeCentroid(eInbetweenerPointPositionType::TargetPosition);
 /*
@@ -133,7 +149,7 @@ FInbetweenerQuad::ComputeCentroids()
     for ( uint32 j = 0; j < 4; j++ )
     {
         mCentroid[eInbetweenerPointPositionType::SourcePosition] += mPoint[j]->GetPosition( eInbetweenerPointPositionType::SourcePosition );
-        mCentroid[eInbetweenerPointPositionType::MotionPosition] += mPoint[j]->GetPosition( eInbetweenerPointPositionType::MotionPosition );
+        mCentroid[eInbetweenerPointPositionType::InterpPosition] += mPoint[j]->GetPosition( eInbetweenerPointPositionType::InterpPosition );
         mCentroid[eInbetweenerPointPositionType::DeformPosition] += mPoint[j]->GetPosition( eInbetweenerPointPositionType::DeformPosition );
         mCentroid[eInbetweenerPointPositionType::TargetPosition] += mPoint[j]->GetPosition( eInbetweenerPointPositionType::TargetPosition );
     }

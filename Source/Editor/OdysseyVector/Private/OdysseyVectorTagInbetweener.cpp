@@ -41,7 +41,8 @@ FOdysseyVectorTagInbetweener::UpdateBBox( ::ULIS::FRectD& iBBox
         if ( position.y > ymax ) ymax = position.y;
     }
 
-    iBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) 
+    iBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin - 0.001f, ymin - 0.001f
+                                                    , xmax + 0.001f, ymax + 0.001f ) 
                         : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
@@ -85,7 +86,6 @@ FOdysseyVectorTagInbetweener::Map()
     , 0
     , [ this ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
-          BLMatrix2D& inverseSpaceMatrix = mOwner->GetInverseWorldMatrix();
           FOdysseyVectorTag* objectInbetweenerTag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
           if( ( objectInbetweenerTag == nullptr ) || ( objectInbetweenerTag == this ) )
@@ -94,10 +94,7 @@ FOdysseyVectorTagInbetweener::Map()
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                  mInterpolatedPathBuffer.emplace_back( path
-                                                      , mOwner->GetBBox( false )
-                                                      , inverseSpaceMatrix
-                                                      , mInbetweenCount );
+                  mInterpolatedPathBuffer.emplace_back( path, mInbetweenCount );
 
                   return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
               }
@@ -109,6 +106,9 @@ FOdysseyVectorTagInbetweener::Map()
 
           return 0;
       } );
+
+    mGrid->MapInterpolatedPaths( mInterpolatedPathBuffer
+                               , mOwner->GetInverseWorldMatrix() );
 }
 
 FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
@@ -132,6 +132,8 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mInbetweenCount( iInbetweenCount )
     , mInvalidationFlags( INVALIDATE_MAP
                         | INVALIDATE_BUFFERS
+                        | INVALIDATE_SOURCEBBOX
+                        | INVALIDATE_TARGETBBOX
                         | INVALIDATE_SPACING
                         | INVALIDATE_CELLS )
     , mTargetTranslationX( 0.0f )
@@ -187,34 +189,26 @@ void FOdysseyVectorTagInbetweener::Removed()
     mSharedEnv->RemoveTag( this );
 }
 
-void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags )
+void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
+                                         , uint64 iOwnerInvalidationFlags )
 {
-    if( ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) )
+    if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAGS     )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) )
     {
         mInvalidationFlags |= INVALIDATE_MAP;
     }
 
-    if( ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_SHAPE    )
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_TAGS     )
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_MATRIX   )
+    if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE    )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TAGS     )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_MATRIX   )
 
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAGS     )
-     || ( iUpdateFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   ) )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAGS     )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   ) )
     {
-        mInvalidationFlags |= ( INVALIDATE_BUFFERS | INVALIDATE_SPACING );
-    }
-
-    if( mInvalidationFlags & INVALIDATE_MAP )
-    {
-        Map();
-    }
-
-    if( mInvalidationFlags & INVALIDATE_BUFFERS )
-    {
-        AllocBuffers();
+        mInvalidationFlags |= ( INVALIDATE_SPACING );
     }
 
     if( mInvalidationFlags & INVALIDATE_SOURCEBBOX )
@@ -227,6 +221,18 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags )
         mGrid->Update();
 
         UpdateBBox( mTargetBBox, eInbetweenerPointPositionType::TargetPosition );
+    }
+
+    if( mInvalidationFlags & INVALIDATE_MAP )
+    {
+        Map();
+
+        mInvalidationFlags |= INVALIDATE_BUFFERS;
+    }
+
+    if( mInvalidationFlags & INVALIDATE_BUFFERS )
+    {
+        AllocBuffers();
     }
 
     if( mInvalidationFlags & INVALIDATE_SPACING )
@@ -362,7 +368,7 @@ FOdysseyVectorTagInbetweener::InterpolateGeometry( uint32 iInbetweenIndex )
             double t = mChart.inbetweenBuffer[iInbetweenIndex].spacing;
             ::ULIS::FVec2D step = diff * t;
 
-            point.mMotionPosition = point.mSourcePosition + step;
+            point.mInterpPosition = point.mSourcePosition + step;
         }
     }
 
@@ -380,8 +386,8 @@ FOdysseyVectorTagInbetweener::InterpolateGeometry( uint32 iInbetweenIndex )
     {
         for( FInbetweenerPoint& point : mGrid->GetPointBuffer() )
         {
-            point.u = ( point.mMotionPosition.x - bbox.x ) / bbox.w;
-            point.v = ( point.mMotionPosition.y - bbox.y ) / bbox.h;
+            point.u = ( point.mInterpPosition.x - bbox.x ) / bbox.w;
+            point.v = ( point.mInterpPosition.y - bbox.y ) / bbox.h;
         }
     }
 
@@ -484,14 +490,14 @@ FOdysseyVectorTagInbetweener::DrawMotionGrid( uint32 iInbetweenIndex
     for( FInbetweenerQuad& quad : mGrid->GetQuadBuffer() )
     {
         FInbetweenerPoint** gridPoint = quad.GetPoints();
-        BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetPosition( eInbetweenerPointPositionType::MotionPosition ).x
-                                              , gridPoint[0]->GetPosition( eInbetweenerPointPositionType::MotionPosition ).y )
-                        , worldMatrix.mapPoint( gridPoint[1]->GetPosition( eInbetweenerPointPositionType::MotionPosition ).x
-                                              , gridPoint[1]->GetPosition( eInbetweenerPointPositionType::MotionPosition ).y )
-                        , worldMatrix.mapPoint( gridPoint[2]->GetPosition( eInbetweenerPointPositionType::MotionPosition ).x
-                                              , gridPoint[2]->GetPosition( eInbetweenerPointPositionType::MotionPosition ).y )
-                        , worldMatrix.mapPoint( gridPoint[3]->GetPosition( eInbetweenerPointPositionType::MotionPosition ).x
-                                              , gridPoint[3]->GetPosition( eInbetweenerPointPositionType::MotionPosition ).y ) };
+        BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
+                                              , gridPoint[0]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).y )
+                        , worldMatrix.mapPoint( gridPoint[1]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
+                                              , gridPoint[1]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).y )
+                        , worldMatrix.mapPoint( gridPoint[2]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
+                                              , gridPoint[2]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).y )
+                        , worldMatrix.mapPoint( gridPoint[3]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
+                                              , gridPoint[3]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).y ) };
 
         iBLContext->strokeLine( pt[0], pt[1] );
         iBLContext->strokeLine( pt[1], pt[2] );
@@ -550,7 +556,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
         iBLContext->restore();
 
 ////////////////////////////////// TEMP /////////////////////////
-
+/*
         if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
         {
             uint32 tagCellIndex = tagCell->GetIndex();
@@ -569,6 +575,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
                           , iAncestorsOpacity
                           , iDrawingFlags );
         }
+*/
 ////////////////////////////////////////////////////////////////
     }
 }

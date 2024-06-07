@@ -1,4 +1,5 @@
 #include "InbetweenerTag/InbetweenerGrid.h"
+#include "InbetweenerTag/InterpolatedPath.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorObject.h"
@@ -126,6 +127,41 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD
     }
 }
 
+::ULIS::FVec2D
+FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
+{
+    FInbetweenerQuad* mappedQuad = iInterpolatedPoint->GetMappedQuad();
+
+    if( mappedQuad )
+    {
+        return mappedQuad->GetPoint( eInbetweenerPointPositionType::InterpPosition
+                                   , iInterpolatedPoint->GetU()
+                                   , iInterpolatedPoint->GetV() );
+    }
+
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
+void
+FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
+                             , uint32 iInbetweenIndex )
+{
+
+    for( FInterpolatedPath& interpolatedPath : iInterpolatedPathBuffer )
+    {
+        std::vector<::ULIS::FVec2D>& interpolatedPointPositionBuffer = interpolatedPath.GetInterpolatedPointPositionBuffer();
+        uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
+        uint32 skippedOffset = ( iInbetweenIndex * pointCount );
+
+        for( uint32 i = 0; i < pointCount; i++ )
+        {
+            FInterpolatedPoint* interpolatedPoint = &interpolatedPath.GetInterpolatedPointBuffer()[i];
+
+            interpolatedPointPositionBuffer[skippedOffset + i] = DeformPoint( interpolatedPoint );
+        }
+    }
+}
+
 FInbetweenerQuad*
 FInbetweenerGrid::GetQuad( const ::ULIS::FVec2D& iLocalCoords )
 {
@@ -175,12 +211,6 @@ FInbetweenerGrid::AddTrajectory( const ::ULIS::FVec2D& iLocalCoords )
     }
 
     return false;
-}
-
-void
-FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                             , uint32 iInbetweenIndex )
-{
 }
 
 std::vector<FInbetweenerQuad>&
@@ -553,7 +583,7 @@ FInbetweenerGrid::ComputeARAPInterpolation( float alphaLinear
     {
         FInbetweenerPoint::VectorType coords = V.row( point.GetID() );
 
-        point.SetMotionPosition( coords.x(), coords.y() );
+        point.SetInterpPosition( coords.x(), coords.y() );
 
 /*
         if ( useRigidTransform )
@@ -569,4 +599,10 @@ FInbetweenerGrid::ComputeARAPInterpolation( float alphaLinear
     //sw.stop();
 
     return true;
+}
+
+void
+FInbetweenerGrid::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
+                                      , const BLMatrix2D& iSpaceInverseMatrix  )
+{
 }

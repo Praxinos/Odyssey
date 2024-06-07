@@ -45,14 +45,15 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY )
     mTargetPosition.x = iX;
     mTargetPosition.y = iY;
 
-    mGrid->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TARGETBBOX );
+    mGrid->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TARGETBBOX
+                                          | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
 }
 
 void
-FInbetweenerPoint::SetMotionPosition( double iX, double iY )
+FInbetweenerPoint::SetInterpPosition( double iX, double iY )
 {
-    mMotionPosition.x = iX;
-    mMotionPosition.y = iY;
+    mInterpPosition.x = iX;
+    mInterpPosition.y = iY;
 }
 
 void
@@ -112,8 +113,8 @@ FInbetweenerPoint::GetPosition( eInbetweenerPointPositionType iPositionType )
         case eInbetweenerPointPositionType::SourcePosition : 
         return mSourcePosition;
 
-        case eInbetweenerPointPositionType::MotionPosition : 
-        return mMotionPosition;
+        case eInbetweenerPointPositionType::InterpPosition : 
+        return mInterpPosition;
 
         case eInbetweenerPointPositionType::DeformPosition : 
         return mDeformPosition;
@@ -139,8 +140,8 @@ FInbetweenerPoint::SetPosition( eInbetweenerPointPositionType iPositionType
             mSourcePosition = ::ULIS::FVec2D( iX, iY );
         break;
 
-        case eInbetweenerPointPositionType::MotionPosition : 
-            mMotionPosition = ::ULIS::FVec2D( iX, iY );
+        case eInbetweenerPointPositionType::InterpPosition : 
+            mInterpPosition = ::ULIS::FVec2D( iX, iY );
         break;
 
         case eInbetweenerPointPositionType::DeformPosition : 

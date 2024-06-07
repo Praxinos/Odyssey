@@ -14,16 +14,14 @@ class FInterpolatedPath
 {
     public:
         virtual ~FInterpolatedPath();
-        FInterpolatedPath( FOdysseyVectorPath* iPath
-                         , const ::ULIS::FRectD& iSpaceBBox
-                         , const BLMatrix2D& iSpaceInverseMatrix
-                         , uint32 iInbetweenCount );
+        FInterpolatedPath( FOdysseyVectorPath* iPath, uint32 iInbetweenCount );
         void Draw( BLContext* iBLContext
                  , const ::ULIS::FRectD& iInvalidationArea
                  , double iAncestorsOpacity
                  , uint64 iDrawingFlags );
         std::vector<FInterpolatedPoint>& GetInterpolatedPointBuffer();
         std::vector<::ULIS::FVec2D>& GetInterpolatedPointPositionBuffer();
+        FOdysseyVectorPath* GetOriginalPath();
 
         friend class FOdysseyVectorTagInbetweener;
 

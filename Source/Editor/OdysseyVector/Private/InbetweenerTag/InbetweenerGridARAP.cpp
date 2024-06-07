@@ -1,5 +1,12 @@
 #include "InbetweenerTag/InbetweenerGridARAP.h"
+#include "InbetweenerTag/InterpolatedPath.h"
+#include "InbetweenerTag/InterpolatedSegment.h"
+#include "InbetweenerTag/InterpolatedSegmentCubic.h"
+#include "InbetweenerTag/InterpolatedPoint.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorPoint.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVector.h"
 
 FInbetweenerGridARAP::FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                           , uint32 iNumQuadX
@@ -36,8 +43,8 @@ FInbetweenerGridARAP::RegularizeQuad( FInbetweenerQuad* iQuad
     {
         FInbetweenerPoint* point = quadPoint[i];
 
-        ::ULIS::FVec2D p_minus_pc = point->GetPosition( eInbetweenerPointPositionType::MotionPosition )
-                                  - iQuad->BiasedCentroid( eInbetweenerPointPositionType::MotionPosition ); // source pose
+        ::ULIS::FVec2D p_minus_pc = point->GetPosition( eInbetweenerPointPositionType::InterpPosition )
+                                  - iQuad->BiasedCentroid( eInbetweenerPointPositionType::InterpPosition ); // source pose
         ::ULIS::FVec2D q_minus_qc = point->GetPosition( iPositionType )
                                   - iQuad->BiasedCentroid(iPositionType); // target pose
 
@@ -48,10 +55,10 @@ FInbetweenerGridARAP::RegularizeQuad( FInbetweenerQuad* iQuad
     // If the quad is pinned we add the contribution of the pin to the minimization problem
     if ( iQuad->IsPinned() )
     {
-        ::ULIS::FVec2D p_minus_pc = iQuad->GetPoint( eInbetweenerPointPositionType::MotionPosition
+        ::ULIS::FVec2D p_minus_pc = iQuad->GetPoint( eInbetweenerPointPositionType::InterpPosition
                                                    , iQuad->GetPinU()
                                                    , iQuad->GetPinV() )
-                                  - iQuad->BiasedCentroid( eInbetweenerPointPositionType::MotionPosition );
+                                  - iQuad->BiasedCentroid( eInbetweenerPointPositionType::InterpPosition );
         ::ULIS::FVec2D q_minus_qc = iQuad->GetPinPosition() - iQuad->BiasedCentroid( iPositionType );
 
         a += 10000.0 * q_minus_qc.DotProduct( p_minus_pc );
@@ -63,29 +70,29 @@ FInbetweenerGridARAP::RegularizeQuad( FInbetweenerQuad* iQuad
     double r1 = a / mu;
     double r2 = -b / mu;
     Eigen::Matrix2d R;
-    ::ULIS::FVec2D centroidMotionPosition = iQuad->BiasedCentroid( eInbetweenerPointPositionType::MotionPosition );
+    ::ULIS::FVec2D centroidInterpPosition = iQuad->BiasedCentroid( eInbetweenerPointPositionType::InterpPosition );
     ::ULIS::FVec2D centroidTypePosition   = iQuad->BiasedCentroid( iPositionType );
-    FInbetweenerPoint::VectorType eigenCentroidMotionPosition = FInbetweenerPoint::VectorType( centroidMotionPosition.x
-                                                                                             , centroidMotionPosition.y );
+    FInbetweenerPoint::VectorType eigenCentroidInterpPosition = FInbetweenerPoint::VectorType( centroidInterpPosition.x
+                                                                                             , centroidInterpPosition.y );
     FInbetweenerPoint::VectorType eigenCentroidTypePosition   = FInbetweenerPoint::VectorType( centroidTypePosition.x
                                                                                              , centroidTypePosition.y );
 
     R << r1, r2, -r2, r1;
 
-    FInbetweenerPoint::VectorType t = eigenCentroidTypePosition - ( R * eigenCentroidMotionPosition );
+    FInbetweenerPoint::VectorType t = eigenCentroidTypePosition - ( R * eigenCentroidInterpPosition );
 
     // Transform corners and average
     for ( uint32 i = 0; i < 4; i++ )
     {
         FInbetweenerPoint* point = quadPoint[i];
         ::ULIS::FVec2D deformPosition = point->GetPosition( eInbetweenerPointPositionType::DeformPosition );
-        ::ULIS::FVec2D motionPosition = point->GetPosition( eInbetweenerPointPositionType::MotionPosition );
+        ::ULIS::FVec2D interpPosition = point->GetPosition( eInbetweenerPointPositionType::InterpPosition );
         FInbetweenerPoint::VectorType eigenDeformPosition = FInbetweenerPoint::VectorType( deformPosition.x
                                                                                          , deformPosition.y );
-        FInbetweenerPoint::VectorType eigenMotionPosition   = FInbetweenerPoint::VectorType( motionPosition.x
-                                                                                           , motionPosition.y );
+        FInbetweenerPoint::VectorType eigenInterpPosition   = FInbetweenerPoint::VectorType( interpPosition.x
+                                                                                           , interpPosition.y );
 
-        eigenDeformPosition += ( R * eigenMotionPosition + t ) / double( point->GetQuadCount() );
+        eigenDeformPosition += ( R * eigenInterpPosition + t ) / double( point->GetQuadCount() );
 
         point->SetDeformPosition( eigenDeformPosition.x(), eigenDeformPosition.y() );
     }
@@ -172,7 +179,7 @@ FInbetweenerGridARAP::Regularize( eInbetweenerPointPositionType iSourcePositionT
         {
             ::ULIS::FVec2D position = point.GetPosition( iSourcePositionType );
 
-            point.SetMotionPosition( position.x, position.y );
+            point.SetInterpPosition( position.x, position.y );
             point.SetDeformPosition( 0.0f      , 0.0f       );
 
         }
@@ -206,11 +213,11 @@ FInbetweenerGridARAP::Regularize( eInbetweenerPointPositionType iSourcePositionT
     {
         if( point.GetQuadCount() )
         {
-            ::ULIS::FVec2D motionPosition = point.GetPosition( eInbetweenerPointPositionType::MotionPosition );
+            ::ULIS::FVec2D interpPosition = point.GetPosition( eInbetweenerPointPositionType::InterpPosition );
 
             point.SetPosition( eInbetweenerPointPositionType::DeformPosition
-                             , motionPosition.x
-                             , motionPosition.y );
+                             , interpPosition.x
+                             , interpPosition.y );
         }
     }
 
@@ -237,4 +244,47 @@ FInbetweenerGridARAP::Update()
               , mRigidity
               , true
               , true );
+}
+
+void
+FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
+                                          , const BLMatrix2D& iSpaceInverseMatrix )
+{
+    ::ULIS::FRectD spaceBBox = mInbetweenerTag->GetSourceBBox( false );
+    BLMatrix2D conversionMatrix;
+    uint32 pointID = 0;
+    uint32 segmentID = 0;
+
+    for( FInterpolatedPath& interpolatedPath : iPathBuffer )
+    {
+        std::vector<FInterpolatedPoint>& interpolatedPointBuffer = interpolatedPath.GetInterpolatedPointBuffer();
+
+        FOdysseyVector::MatrixMultiply( iSpaceInverseMatrix
+                                      , interpolatedPath.GetOriginalPath()->GetWorldMatrix()
+                                      , conversionMatrix );
+
+        for( FInterpolatedPoint& interpolatedPoint : interpolatedPointBuffer )
+        {
+            FOdysseyVectorPoint* originalPoint = interpolatedPoint.GetOriginalPoint();
+            BLPoint pt = conversionMatrix.mapPoint( originalPoint->GetX()
+                                                  , originalPoint->GetY() );
+
+
+            FInbetweenerQuad* matchedQuad = GetQuad( ::ULIS::FVec2D( pt.x, pt.y ) );
+
+            if( matchedQuad )
+            {
+                ::ULIS::FRectD quadBBox = matchedQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
+                double quadX = pt.x - quadBBox.x;
+                double quadY = pt.y - quadBBox.y;
+                //double u = std::clamp<double>( spaceX / iSpaceBBox.w, 0.0f, 1.0f );
+                //double v = std::clamp<double>( spaceY / iSpaceBBox.h, 0.0f, 1.0f );
+                double u = std::clamp<double>( quadX / quadBBox.w, 0.0f, 1.0f );
+                double v = std::clamp<double>( quadY / quadBBox.h, 0.0f, 1.0f );
+
+                // Note: we add +1 for the target position
+                interpolatedPoint.SetUV( matchedQuad, u, v );
+            }
+        }
+    }
 }

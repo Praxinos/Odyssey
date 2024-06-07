@@ -1,7 +1,12 @@
 #include "InbetweenerTag/InbetweenerGridFFD.h"
+#include "InbetweenerTag/InterpolatedPath.h"
+#include "InbetweenerTag/InterpolatedSegment.h"
+#include "InbetweenerTag/InterpolatedSegmentCubic.h"
+#include "InbetweenerTag/InterpolatedPoint.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorPoint.h"
+#include "OdysseyVectorPath.h"
 #include "OdysseyVector.h"
-#include "OdysseyVectorObject.h"
 
 FInbetweenerGridFFD::FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                         , uint32 iNumQuadX
@@ -38,26 +43,6 @@ FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
 
     return ::ULIS::FVec2D( ( bbox.x + ( bbox.w * vi.x ) )
                          , ( bbox.y + ( bbox.h * vi.y ) ) );
-}
-
-void
-FInbetweenerGridFFD::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                                , uint32 iInbetweenIndex )
-{
-
-    for( FInterpolatedPath& interpolatedPath : iInterpolatedPathBuffer )
-    {
-        std::vector<::ULIS::FVec2D>& interpolatedPointPositionBuffer = interpolatedPath.GetInterpolatedPointPositionBuffer();
-        uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
-        uint32 skippedOffset = ( iInbetweenIndex * pointCount );
-
-        for( uint32 i = 0; i < pointCount; i++ )
-        {
-            FInterpolatedPoint* interpolatedPoint = &interpolatedPath.GetInterpolatedPointBuffer()[i];
-
-            interpolatedPointPositionBuffer[skippedOffset + i] = DeformPoint( interpolatedPoint );
-        }
-    }
 }
 
 void
@@ -111,5 +96,40 @@ FInbetweenerGridFFD::ComputeBinomialCoefficients()
         double coeffV = BinomialCoeff ( mNumQuadY, i );
 
         mVBinomialCoefficientBuffer[i] = coeffV;
+    }
+}
+
+void
+FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
+                                         , const BLMatrix2D& iSpaceInverseMatrix )
+{
+    ::ULIS::FRectD spaceBBox = mInbetweenerTag->GetSourceBBox( false );
+    BLMatrix2D conversionMatrix;
+    uint32 pointID = 0;
+    uint32 segmentID = 0;
+
+    for( FInterpolatedPath& interpolatedPath : iPathBuffer )
+    {
+        std::vector<FInterpolatedPoint>& interpolatedPointBuffer = interpolatedPath.GetInterpolatedPointBuffer();
+
+        FOdysseyVector::MatrixMultiply( iSpaceInverseMatrix
+                                      , interpolatedPath.GetOriginalPath()->GetWorldMatrix()
+                                      , conversionMatrix );
+
+        for( FInterpolatedPoint& interpolatedPoint : interpolatedPointBuffer )
+        {
+            FOdysseyVectorPoint* originalPoint = interpolatedPoint.GetOriginalPoint();
+            BLPoint pt = conversionMatrix.mapPoint( originalPoint->GetX()
+                                                  , originalPoint->GetY() );
+            double spaceX = pt.x - spaceBBox.x;
+            double spaceY = pt.y - spaceBBox.y;
+            //double u = std::clamp<double>( spaceX / iSpaceBBox.w, 0.0f, 1.0f );
+            //double v = std::clamp<double>( spaceY / iSpaceBBox.h, 0.0f, 1.0f );
+            double u = std::clamp<double>( spaceX / spaceBBox.w, 0.0f, 1.0f );
+            double v = std::clamp<double>( spaceY / spaceBBox.h, 0.0f, 1.0f );
+
+            // Note: we add +1 for the target position
+            interpolatedPoint.SetUV( nullptr, u, v );
+        }
     }
 }

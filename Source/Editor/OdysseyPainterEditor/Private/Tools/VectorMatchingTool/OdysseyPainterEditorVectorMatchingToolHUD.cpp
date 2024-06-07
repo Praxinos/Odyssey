@@ -27,7 +27,7 @@ void
 FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag )
 {
-    BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+    BLMatrix2D worldMatrix = iInbetweenerTag->GetTargetWorldMatrix();
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -119,7 +119,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FOdysseyVectorTagI
                                                             , std::vector<FInbetweenerPoint*>& oPointArray
                                                             , std::vector<double>& oWorldDistanceArray )
 {
-    BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+    BLMatrix2D worldMatrix = iInbetweenerTag->GetTargetWorldMatrix();
 
     for( FInbetweenerPoint& point : iInbetweenerTag->GetGridPointBuffer() )
     {

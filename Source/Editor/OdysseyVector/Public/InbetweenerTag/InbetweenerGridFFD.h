@@ -16,10 +16,10 @@ class ODYSSEYVECTOR_API FInbetweenerGridFFD : public FInbetweenerGrid
         virtual void Make( uint32 iNumQuadX
                          , uint32 iNumQuadY
                          , const ::ULIS::FRectD& iBBox  ) override;
-        virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                                , uint32 iInbetweenIndex ) override;
         void ComputeBinomialCoefficients();
-        ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint );
+        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint ) override;
+        void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
+                                 , const BLMatrix2D& iSpaceInverseMatrix );
 
         friend class FOdysseyVectorTagInbetweener;
 

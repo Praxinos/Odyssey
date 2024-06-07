@@ -19,7 +19,7 @@ class FInbetweenerGrid;
 enum eInbetweenerPointPositionType
 {
     SourcePosition = 0,
-    MotionPosition = 1,
+    InterpPosition = 1,
     DeformPosition = 2,
     TargetPosition = 3
 };
@@ -35,7 +35,7 @@ class ODYSSEYVECTOR_API FInbetweenerPoint
 
         void SetSourcePosition( double iX, double iY );
         void SetTargetPosition( double iX, double iY );
-        void SetMotionPosition( double iX, double iY );
+        void SetInterpPosition( double iX, double iY );
         void SetDeformPosition( double iX, double iY );
         const ::ULIS::FVec2D& GetSourcePosition();
         const ::ULIS::FVec2D& GetTargetPosition();
@@ -63,7 +63,7 @@ class ODYSSEYVECTOR_API FInbetweenerPoint
         std::list<FInbetweenerQuad*> mQuadList;
         FInbetweenerGrid* mGrid;
         ::ULIS::FVec2D mSourcePosition;
-        ::ULIS::FVec2D mMotionPosition;
+        ::ULIS::FVec2D mInterpPosition;
         ::ULIS::FVec2D mDeformPosition;
         ::ULIS::FVec2D mTargetPosition;
         uint32 mID;

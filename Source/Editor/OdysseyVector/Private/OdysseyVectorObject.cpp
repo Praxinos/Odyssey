@@ -202,7 +202,7 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
         // update tags
         for( FOdysseyVectorTag* tag : mTagList )
         {
-            tag->Update( iUpdateFlags );
+            tag->Update( iUpdateFlags, mInvalidationFlags );
         }
 
         if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_KEEPINVALIDATED ) == 0 )

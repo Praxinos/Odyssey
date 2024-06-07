@@ -4,6 +4,7 @@
 
 #include <set>
 #include <ULIS>
+#include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
 
@@ -41,16 +42,20 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                                 , uint32 iInbetweenIndex );
+
         bool AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
         FInbetweenerQuad* GetQuad( const ::ULIS::FVec2D& iLocalCoords );
 
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         virtual void Update(){};
+        virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
+                                         , const BLMatrix2D& iSpaceInverseMatrix  );
 
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
+        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint );
 
     protected:
         std::vector<FInbetweenerQuad>& GetQuadBuffer();

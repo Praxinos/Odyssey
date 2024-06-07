@@ -117,7 +117,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::vector<FInbetweenerPoint>& GetGridPointBuffer();
         std::vector<FInbetweenerQuad>& GetGridQuadBuffer();
 
-        virtual void Update( uint32 iUpdateFlags ) override;
+        virtual void Update( uint32 iUpdateFlags
+                           , uint64 iOwnerInvalidationFlags ) override;
         void Commit();
         virtual void UpdateMatrix() override;
         void Translate( double iX, double iY );
