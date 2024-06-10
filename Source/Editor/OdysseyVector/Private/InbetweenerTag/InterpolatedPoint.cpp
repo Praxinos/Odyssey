@@ -15,6 +15,18 @@ FInterpolatedPoint::FInterpolatedPoint( FOdysseyVectorPoint* iPoint, uint32 iInd
 {
 }
 
+void
+FInterpolatedPoint::SetU( double iU )
+{
+    mU = iU;
+}
+
+void
+FInterpolatedPoint::SetV( double iV )
+{
+    mV = iV;
+}
+
 double
 FInterpolatedPoint::GetU()
 {

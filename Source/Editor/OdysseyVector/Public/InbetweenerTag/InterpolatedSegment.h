@@ -13,6 +13,7 @@ class FInterpolatedSegment
         FInterpolatedSegment( FOdysseyVectorSegment* iSegment
                             , FInterpolatedPoint* iInterpolatedPoint0
                             , FInterpolatedPoint* iInterpolatedPoint1 );
+        FOdysseyVectorSegment* GetOriginalSegment();
 
         friend class FOdysseyVectorTagInbetweener;
 

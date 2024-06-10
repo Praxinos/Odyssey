@@ -13,3 +13,9 @@ FInterpolatedSegment::FInterpolatedSegment( FOdysseyVectorSegment* iSegment
     , mInterpolatedVertex{ iInterpolatedPoint0, iInterpolatedPoint1 }
 {
 }
+
+FOdysseyVectorSegment*
+FInterpolatedSegment::GetOriginalSegment()
+{
+    return mOriginalSegment;
+} 

@@ -49,17 +49,22 @@ class ODYSSEYVECTOR_API FInbetweenerPoint
         void SetPosition( eInbetweenerPointPositionType iPositionType, double iX, double iY );
         void SetDeformable( bool iIsDeformable );
         bool IsDeformable();
+        void SetU( double iU );
+        void SetV( double iV );
+        double GetU();
+        double GetV();
+        void Init( FInbetweenerGrid* iGrid );
+        bool IsNeeded();
+        void SetNeeded( bool iNeeded );
 
         friend class FOdysseyVectorTagInbetweener;
-        friend class FInbetweenerGridFFD;
-        friend class FInbetweenerGrid;
 
-
-    protected: 
-        void Init( FInbetweenerGrid* iGrid );
+    public:
+        static const int DEFORMABLE = ( 1L << 0 );  // what is this ?
+        static const int NEEDED     = ( 1L << 1 );
 
     protected:
-        bool bIsDeformable;
+        uint32 mFlags;
         std::list<FInbetweenerQuad*> mQuadList;
         FInbetweenerGrid* mGrid;
         ::ULIS::FVec2D mSourcePosition;
@@ -67,5 +72,5 @@ class ODYSSEYVECTOR_API FInbetweenerPoint
         ::ULIS::FVec2D mDeformPosition;
         ::ULIS::FVec2D mTargetPosition;
         uint32 mID;
-        double u, v;
+        double mU, mV;
 };

@@ -58,6 +58,12 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath, uint32 iInbetwe
     }
 }
 
+std::vector<FInterpolatedSegmentCubic>&
+FInterpolatedPath::GetInterpolatedSegmentCubicBuffer()
+{
+    return mInterpolatedSegmentCubicBuffer;
+}
+
 std::vector<::ULIS::FVec2D>&
 FInterpolatedPath::GetInterpolatedPointPositionBuffer()
 {

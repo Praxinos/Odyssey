@@ -2,8 +2,20 @@
 #include "OdysseyVectorTagInbetweener.h"
 
 FInbetweenerPoint::FInbetweenerPoint()
-    : bIsDeformable ( true ) // what is this ?
+    : mFlags ( 0 )
 {
+}
+
+void
+FInbetweenerPoint::SetU( double iU )
+{
+    mU = iU;
+}
+
+void
+FInbetweenerPoint::SetV( double iV )
+{
+    mV = iV;
 }
 
 void
@@ -21,13 +33,39 @@ FInbetweenerPoint::GetQuadCount()
 void
 FInbetweenerPoint::SetDeformable( bool iIsDeformable )
 {
-    bIsDeformable = iIsDeformable;
+    if( iIsDeformable == true )
+    {
+        mFlags |= DEFORMABLE;
+    }
+    else
+    {
+        mFlags &= (~DEFORMABLE);
+    }
 }
 
 bool
 FInbetweenerPoint::IsDeformable()
 {
-    return bIsDeformable;
+    return ( mFlags & DEFORMABLE ) ? true : false;
+}
+
+void
+FInbetweenerPoint::SetNeeded( bool iIsNeeded )
+{
+    if( iIsNeeded == true )
+    {
+        mFlags |= NEEDED;
+    }
+    else
+    {
+        mFlags &= (~NEEDED);
+    }
+}
+
+bool
+FInbetweenerPoint::IsNeeded()
+{
+    return ( mFlags & NEEDED ) ? true : false;
 }
 
 void
@@ -103,6 +141,18 @@ uint32
 FInbetweenerPoint::GetID()
 {
     return mID;
+}
+
+double 
+FInbetweenerPoint::GetU()
+{
+    return mU;
+}
+
+double
+FInbetweenerPoint::GetV()
+{
+    return mV;
 }
 
 ::ULIS::FVec2D

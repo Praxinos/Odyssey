@@ -20,6 +20,7 @@ class FInterpolatedPath
                  , double iAncestorsOpacity
                  , uint64 iDrawingFlags );
         std::vector<FInterpolatedPoint>& GetInterpolatedPointBuffer();
+        std::vector<FInterpolatedSegmentCubic>& GetInterpolatedSegmentCubicBuffer();
         std::vector<::ULIS::FVec2D>& GetInterpolatedPointPositionBuffer();
         FOdysseyVectorPath* GetOriginalPath();
 

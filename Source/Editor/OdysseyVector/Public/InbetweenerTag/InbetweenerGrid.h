@@ -106,4 +106,5 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         Eigen::SparseMatrix<double, Eigen::ColMajor> mPt;
         Eigen::SparseLU<Eigen::SparseMatrix<double, Eigen::ColMajor>, Eigen::COLAMDOrdering<int>> mLU;
         Eigen::VectorXd mW;
+        double mQuadArea;
 };

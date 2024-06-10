@@ -135,6 +135,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         BLMatrix2D& GetTargetInverseWorldMatrix();
         void Invalidate( uint64 iInvalidationFlags );
         FInbetweenerGrid* GetGrid();
+        std::vector<FInterpolatedPath>& GetInterpolatedPathBuffer();
 
     protected:
         void UpdateAnimationCells( uint32 iInbetweenCount );

@@ -218,9 +218,9 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
     if( mInvalidationFlags & INVALIDATE_TARGETBBOX )
     {
-        mGrid->Update();
-
         UpdateBBox( mTargetBBox, eInbetweenerPointPositionType::TargetPosition );
+
+        mGrid->Update();
     }
 
     if( mInvalidationFlags & INVALIDATE_MAP )
@@ -386,8 +386,8 @@ FOdysseyVectorTagInbetweener::InterpolateGeometry( uint32 iInbetweenIndex )
     {
         for( FInbetweenerPoint& point : mGrid->GetPointBuffer() )
         {
-            point.u = ( point.mInterpPosition.x - bbox.x ) / bbox.w;
-            point.v = ( point.mInterpPosition.y - bbox.y ) / bbox.h;
+            point.SetU( ( point.mInterpPosition.x - bbox.x ) / bbox.w );
+            point.SetV( ( point.mInterpPosition.y - bbox.y ) / bbox.h );
         }
     }
 
@@ -609,6 +609,12 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
 
         iBLContext->strokePath( path );
     }
+}
+
+std::vector<FInterpolatedPath>&
+FOdysseyVectorTagInbetweener::GetInterpolatedPathBuffer()
+{
+    return mInterpolatedPathBuffer;
 }
 
 void
@@ -842,7 +848,8 @@ FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
 void
 FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY )
 {
-    Invalidate( INVALIDATE_SPACING
+    Invalidate( INVALIDATE_MAP
+              | INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
     mGrid->Make( iNumQuadX, iNumQuadY, mSourceBBox );
@@ -851,7 +858,8 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY
 void
 FOdysseyVectorTagInbetweener::SetGridNumQuadX( uint32 iNumQuadX )
 {
-    Invalidate( INVALIDATE_SPACING
+    Invalidate( INVALIDATE_MAP
+              | INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
     mGrid->Make( iNumQuadX, mGrid->GetNumQuadY(), mSourceBBox );
@@ -860,7 +868,8 @@ FOdysseyVectorTagInbetweener::SetGridNumQuadX( uint32 iNumQuadX )
 void
 FOdysseyVectorTagInbetweener::SetGridNumQuadY( uint32 iNumQuadY )
 {
-    Invalidate( INVALIDATE_SPACING
+    Invalidate( INVALIDATE_MAP
+              | INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
     mGrid->Make( mGrid->GetNumQuadX(), iNumQuadY, mSourceBBox );

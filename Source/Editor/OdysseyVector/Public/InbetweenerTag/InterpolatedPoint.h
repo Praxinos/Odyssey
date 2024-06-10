@@ -14,13 +14,13 @@ class FInterpolatedPoint
         FOdysseyVectorPoint* GetOriginalPoint();
         void SetUV( FInbetweenerQuad* iMappedQuad, double iU, double iV );
         FInbetweenerQuad* GetMappedQuad();
+        void SetU( double iU );
+        void SetV( double iV );
         double GetU();
         double GetV();
 
 
         friend class FOdysseyVectorTagInbetweener;
-        friend class FInbetweenerGridFFD;
-        friend class FInbetweenerGrid;
 
     protected:
         FInbetweenerQuad* mMappedQuad;

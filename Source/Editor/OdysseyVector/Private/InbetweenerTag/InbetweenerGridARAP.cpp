@@ -23,6 +23,8 @@ FInbetweenerGridARAP::Make( uint32 iNumQuadX
                           , const ::ULIS::FRectD& iBBox )
 {
     FInbetweenerGrid::Make( iNumQuadX, iNumQuadY, iBBox );
+
+    DiscardEmptyQuads( mInbetweenerTag->GetInterpolatedPathBuffer() );
 }
 
 #define EPSILON 0.001f
@@ -285,6 +287,74 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
                 // Note: we add +1 for the target position
                 interpolatedPoint.SetUV( matchedQuad, u, v );
             }
+        }
+    }
+}
+
+void
+FInbetweenerGridARAP::DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBuffer )
+{
+    ::ULIS::FRectD tagBBox = mInbetweenerTag->GetSourceBBox( false );
+
+    for( FInterpolatedPath& interpolatedPath : iPathBuffer )
+    {
+        FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();
+        BLMatrix2D& tagOwnerInverseWorldMatrix = mInbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+        BLMatrix2D& pathWorldMatrix = path->GetWorldMatrix();
+        BLMatrix2D conversionMatrix = pathWorldMatrix;
+
+        FOdysseyVector::MatrixMultiply( pathWorldMatrix 
+                                      , tagOwnerInverseWorldMatrix
+                                      , conversionMatrix );
+
+        for( FInterpolatedSegmentCubic& interpolatedSegment : interpolatedPath.GetInterpolatedSegmentCubicBuffer() )
+        {
+            FOdysseyVectorSegment* originalSegment = interpolatedSegment.GetOriginalSegment();
+            std::vector<FOdysseyVectorFraction>& fractionCache = originalSegment->GetFractionCache();
+
+            for( FOdysseyVectorFraction& fraction : fractionCache )
+            {
+                ::ULIS::FVec2D& p0Local = fraction.point[0]->GetCoords();
+                ::ULIS::FVec2D& p1Local = fraction.point[1]->GetCoords();
+                BLPoint pt0 = conversionMatrix.mapPoint( p0Local.x, p0Local.y );
+                BLPoint pt1 = conversionMatrix.mapPoint( p1Local.x, p1Local.y );
+                double xmin = ::ULIS::FMath::Min( pt0.x, pt1.x );
+                double xmax = ::ULIS::FMath::Max( pt0.x, pt1.x );
+                double ymin = ::ULIS::FMath::Min( pt0.y, pt1.y );
+                double ymax = ::ULIS::FMath::Max( pt0.y, pt1.y );
+                double umin = std::clamp<double>( ( xmin - tagBBox.x ) / tagBBox.w, 0.0f, 0.9999f );
+                double vmin = std::clamp<double>( ( ymin - tagBBox.y ) / tagBBox.h, 0.0f, 0.9999f );
+                double umax = std::clamp<double>( ( xmax - tagBBox.x ) / tagBBox.w, 0.0f, 0.9999f );
+                double vmax = std::clamp<double>( ( ymax - tagBBox.y ) / tagBBox.h, 0.0f, 0.9999f );
+                uint32 uminIdx = umin * mNumQuadX;
+                uint32 vminIdx = vmin * mNumQuadY;
+                uint32 umaxIdx = umax * mNumQuadX;
+                uint32 vmaxIdx = vmax * mNumQuadY;
+
+                for( uint32 i = vminIdx; i <= vmaxIdx; i++ )
+                {
+                    for( uint32 j = uminIdx; j <= umaxIdx; j++ )
+                    {
+                        uint32 offset = ( i * mNumQuadX ) + j;
+
+                        mQuadBuffer[offset].GetPoints()[0]->SetNeeded( true );
+                        mQuadBuffer[offset].GetPoints()[1]->SetNeeded( true );
+                        mQuadBuffer[offset].GetPoints()[2]->SetNeeded( true );
+                        mQuadBuffer[offset].GetPoints()[3]->SetNeeded( true );
+                    }
+                }
+            }
+        }
+    }
+
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    {
+        if( ( quad.GetPoints()[0]->IsNeeded() == false )
+         && ( quad.GetPoints()[1]->IsNeeded() == false )
+         && ( quad.GetPoints()[2]->IsNeeded() == false )
+         && ( quad.GetPoints()[3]->IsNeeded() == false ) )
+        {
+             quad.Unlink();
         }
     }
 }

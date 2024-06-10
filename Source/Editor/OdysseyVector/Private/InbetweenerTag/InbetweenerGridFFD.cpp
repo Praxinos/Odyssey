@@ -18,6 +18,8 @@ FInbetweenerGridFFD::FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetwe
 ::ULIS::FVec2D
 FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
 {
+    double interpolatedPointU = iInterpolatedPoint->GetU();
+    double interpolatedPointV = iInterpolatedPoint->GetV();
     ::ULIS::FRectD bbox = mInbetweenerTag->GetSourceBBox( false );
     ::ULIS::FVec2D vi = ::ULIS::FVec2D( 0.0f, 0.0f );
     uint32 numVertexX = mNumQuadX + 1;
@@ -32,13 +34,15 @@ FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
         {
             double bcu = mUBinomialCoefficientBuffer[j];
             uint32 offset = ( i * numVertexX ) + j;
+            double gridPointU = mPointBuffer[offset].GetU();
+            double gridPointV = mPointBuffer[offset].GetV();
 
-            vj.x += ( bcu * pow ( ( 1 - iInterpolatedPoint->mU ), (mNumQuadX) - j ) * pow ( iInterpolatedPoint->mU, j ) * mPointBuffer[offset].u );
-            vj.y += ( bcu * pow ( ( 1 - iInterpolatedPoint->mU ), (mNumQuadX) - j ) * pow ( iInterpolatedPoint->mU, j ) * mPointBuffer[offset].v );
+            vj.x += ( bcu * pow ( ( 1 - interpolatedPointU ), (mNumQuadX) - j ) * pow ( interpolatedPointU, j ) * gridPointU );
+            vj.y += ( bcu * pow ( ( 1 - interpolatedPointU ), (mNumQuadX) - j ) * pow ( interpolatedPointU, j ) * gridPointV );
         }
 
-        vi.x += ( bcv * pow ( ( 1 - iInterpolatedPoint->mV ), (mNumQuadY) - i ) * pow ( iInterpolatedPoint->mV, i ) * vj.x );
-        vi.y += ( bcv * pow ( ( 1 - iInterpolatedPoint->mV ), (mNumQuadY) - i ) * pow ( iInterpolatedPoint->mV, i ) * vj.y );
+        vi.x += ( bcv * pow ( ( 1 - interpolatedPointV ), (mNumQuadY) - i ) * pow ( interpolatedPointV, i ) * vj.x );
+        vi.y += ( bcv * pow ( ( 1 - interpolatedPointV ), (mNumQuadY) - i ) * pow ( interpolatedPointV, i ) * vj.y );
     }
 
     return ::ULIS::FVec2D( ( bbox.x + ( bbox.w * vi.x ) )

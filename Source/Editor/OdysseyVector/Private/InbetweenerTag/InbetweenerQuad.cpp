@@ -1,5 +1,6 @@
 #include "InbetweenerTag/InbetweenerQuad.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVector.h"
 
 FInbetweenerQuad::FInbetweenerQuad( )
     : mFlags ( 0 )
@@ -118,6 +119,19 @@ FInbetweenerQuad::BiasedCentroid( eInbetweenerPointPositionType iPositionType )
     }
 
     return mCentroid[iPositionType];
+}
+
+double
+FInbetweenerQuad::GetSourceArea()
+{
+    ::ULIS::FVec2D p0SourcePos = mPoint[0]->GetSourcePosition();
+    ::ULIS::FVec2D p1SourcePos = mPoint[1]->GetSourcePosition();
+    ::ULIS::FVec2D p2SourcePos = mPoint[2]->GetSourcePosition();
+    ::ULIS::FVec2D p3SourcePos = mPoint[3]->GetSourcePosition();
+
+    return FOdysseyVector::Cross2D( ( p1SourcePos - p0SourcePos )
+                                  , ( p2SourcePos - p1SourcePos ) );
+
 }
 
 void

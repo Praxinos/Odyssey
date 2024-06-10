@@ -44,7 +44,7 @@ FInbetweenerGrid::GetCenterOfMass( eInbetweenerPointPositionType iPositionType )
 
     for ( FInbetweenerPoint& point : mPointBuffer )
     {
-        if( point.mQuadList.size() )
+        if( point.GetQuadCount() )
         {
             center += point.GetPosition( iPositionType );
 
@@ -60,6 +60,10 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD
 {
     mNumQuadX = iNumQuadX;
     mNumQuadY = iNumQuadY;
+    mQuadArea = 0.0f;
+
+    mPointBuffer.clear();
+    mQuadBuffer.clear();
 
     if( mNumQuadX && mNumQuadY )
     {
@@ -83,10 +87,10 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD
 
                 mPointBuffer[offset].Init( this );
                 mPointBuffer[offset].SetSourcePosition( x, y );
-                mPointBuffer[offset].mTargetPosition = mPointBuffer[offset].mSourcePosition;
+                mPointBuffer[offset].SetTargetPosition( x, y );
 
-                mPointBuffer[offset].u = std::clamp<double>( ( x - iBBox.x ) / iBBox.w, 0.0f, 1.0f );
-                mPointBuffer[offset].v = std::clamp<double>( ( y - iBBox.y ) / iBBox.h, 0.0f, 1.0f );
+                mPointBuffer[offset].SetU( std::clamp<double>( ( x - iBBox.x ) / iBBox.w, 0.0f, 1.0f ) );
+                mPointBuffer[offset].SetV( std::clamp<double>( ( y - iBBox.y ) / iBBox.h, 0.0f, 1.0f ) );
 
                 x += stepx;
             }
@@ -124,6 +128,7 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD
 
         mUsedQuadCount = mQuadBuffer.size();
         mUsedPointCount = pointID;
+        mQuadArea = mQuadBuffer[0].GetSourceArea();
     }
 }
 
@@ -274,12 +279,9 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
         return;
     }
 */
-    double quadArea = FOdysseyVector::Cross2D( ( mQuadBuffer[0].GetPoints()[1]->mSourcePosition - mQuadBuffer[0].GetPoints()[0]->mSourcePosition )
-                                             , ( mQuadBuffer[0].GetPoints()[2]->mSourcePosition - mQuadBuffer[0].GetPoints()[1]->mSourcePosition ) );
-
     std::vector<TripletD> P_triplets;
     uint32 P_rows = 8 * mUsedQuadCount; // P_rows
-    double triArea = quadArea * 0.5f;
+    double triArea = mQuadArea * 0.5f;
     int triRow = 0;
 
     // Compute P (sparse) and store its transpose to construct the RHS of the equation later

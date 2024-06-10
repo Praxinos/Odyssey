@@ -26,7 +26,7 @@ class ODYSSEYVECTOR_API FInbetweenerQuad
         double GetPinV();
         bool IsPinned();
         ::ULIS::FRectD GetBBox( eInbetweenerPointPositionType iPositionType );
-
+        double GetSourceArea();
         friend class FOdysseyVectorTagInbetweener;
 
     public:

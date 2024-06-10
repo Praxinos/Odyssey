@@ -39,7 +39,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
 
     private:
         void DrawPaths( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
-        void DrawGrid( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        void DrawGrid( BLContext* iBLContext
+           , FOdysseyVectorTagInbetweener* iInbetweenerTag
+           , const BLRgba32& iFgColor
+           , const BLRgba32& iBgColor
+           , const BLRgba32& iHcColor );
         void DrawChart( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
     private:

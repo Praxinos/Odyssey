@@ -31,6 +31,7 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
         void SetRigidity( uint32 iRigidity );
         virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
                                          , const BLMatrix2D& iSpaceInverseMatrix ) override;
+        void DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBuffer );
 
         friend class FOdysseyVectorTagInbetweener;
 
