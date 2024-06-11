@@ -59,6 +59,7 @@ public class EposSequenceEditor : ModuleRules
                 "RHI",
                 "Niagara",
                 "Paper2D",
+                "UniversalObjectLocator", //PATCH: used for UEposSequenceEditorBlueprintLibrary::LocateBoundObjectsPATCH542() until the UMovieSceneSequenceExtensions::LocateBoundObjects() is patch in >=5.4.3, then remove it
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",

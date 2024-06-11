@@ -585,6 +585,38 @@ UShotSequenceEditorBlueprintLibrary::RenameBinding( const FMovieSceneBindingProx
 
 //---
 
+TArray<UObject*> UEposSequenceEditorBlueprintLibrary::LocateBoundObjects_PATCHBefore543( UMovieSceneSequence* Sequence, const FMovieSceneBindingProxy& InBinding, UObject* Context )
+{
+    if( !Sequence )
+    {
+        FFrame::KismetExecutionMessage( TEXT( "Cannot call LocateBoundObjects on a null sequence" ), ELogVerbosity::Error );
+        return TArray<UObject*>();
+    }
+
+    using namespace UE::MovieScene;
+
+    FSharedPlaybackStateCreateParams CreateParams;
+    CreateParams.PlaybackContext = Context;
+    TSharedRef<FSharedPlaybackState> TransientPlaybackState = MakeShared<FSharedPlaybackState>( *Sequence, CreateParams );
+
+    FMovieSceneEvaluationState State;
+    TransientPlaybackState->AddCapabilityRaw( &State );
+    State.AssignSequence( MovieSceneSequenceID::Root, *Sequence, TransientPlaybackState );
+
+    TArrayView<TWeakObjectPtr<>> Objects = State.FindBoundObjects( InBinding.BindingID, MovieSceneSequenceID::Root, TransientPlaybackState );
+
+    TArray<UObject*> Result;
+    for( TWeakObjectPtr<> WeakObject : Objects )
+    {
+        if( WeakObject.IsValid() )
+        {
+            Result.Add( WeakObject.Get() );
+        }
+    }
+    return Result;
+}
+
+
 bool UEposSequenceEditorBlueprintLibrary::OpenEposSequence( UEposMovieSceneSequence* iBoardSequence )
 {
     if( iBoardSequence )
