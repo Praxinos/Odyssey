@@ -36,6 +36,13 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
+        void IntersectNeededQuads( const ::ULIS::FRectD& iSourceBBox
+                                 , double iXMin
+                                 , double iYMin
+                                 , double iXMax
+                                 , double iYMax );
+
+    protected:
         bool k_cornersFixed;
         uint32 mRigidity;
 };

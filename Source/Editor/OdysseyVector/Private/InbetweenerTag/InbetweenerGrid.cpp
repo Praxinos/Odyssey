@@ -62,6 +62,7 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD
     mNumQuadY = iNumQuadY;
     mQuadArea = 0.0f;
 
+    mTrajectoryBuffer.clear();
     mPointBuffer.clear();
     mQuadBuffer.clear();
 
@@ -191,6 +192,12 @@ FInbetweenerGrid::GetQuad( const ::ULIS::FVec2D& iLocalCoords )
     }
 
     return quad;
+}
+
+std::vector<FInbetweenerTrajectory>&
+FInbetweenerGrid::GetTrajectoryBuffer()
+{
+    return mTrajectoryBuffer;
 }
 
 bool

@@ -463,6 +463,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Curve16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/curve_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.Polygon32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/polygon_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.FreeHand32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/freehand_32", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.Chart64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/chart_64", mIcon64x64 ) );
 
     //OdysseyPainterEditorTools
     Set( "OdysseyPainterEditorTools.Tile", mCoreTableRowStyle

@@ -176,6 +176,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 	mVectorTransformTool->BindShortcuts(iToolkit);
 	mVectorMatchingTool->BindShortcuts(iToolkit);
 	mVectorChartTool->BindShortcuts(iToolkit);
+	mVectorTrajectoryTool->BindShortcuts(iToolkit);
 
 	//---
 
@@ -216,6 +217,7 @@ FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
 	mVectorMatchingTool->ExtendMenu(iOwner, iMenuName);
 	mVectorChartTool->ExtendMenu(iOwner, iMenuName);
+	mVectorTrajectoryTool->ExtendMenu(iOwner, iMenuName);
 
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->ExtendMenu(iOwner, iMenuName);
@@ -264,6 +266,7 @@ FOdysseyPainterEditor::InitTools()
 	mVectorTransformTool = NewObject<UOdysseyPainterEditorVectorTransformTool>();
 	mVectorMatchingTool = NewObject<UOdysseyPainterEditorVectorMatchingTool>();
 	mVectorChartTool = NewObject<UOdysseyPainterEditorVectorChartTool>();
+	mVectorTrajectoryTool = NewObject<UOdysseyPainterEditorVectorTrajectoryTool>();
 
 	mRasterDrawingTool->SetEditor(this);
     mRasterEraserTool->SetEditor(this);
@@ -285,6 +288,7 @@ FOdysseyPainterEditor::InitTools()
 	mVectorTransformTool->SetEditor(this);
 	mVectorMatchingTool->SetEditor(this);
 	mVectorChartTool->SetEditor(this);
+	mVectorTrajectoryTool->SetEditor(this);
 	mRasterDrawingTool->SetBrushContexts(&mBrushContexts);
 
     //Default Tools a defined by their position in mTools
@@ -317,6 +321,7 @@ FOdysseyPainterEditor::InitTools()
 	mTools.Add(mVectorTransformTool);
 	mTools.Add(mVectorMatchingTool);
 	mTools.Add(mVectorChartTool);
+	mTools.Add(mVectorTrajectoryTool);
     //Generic Tools
 	mTools.Add(mColorPickerTool);
 }
@@ -424,6 +429,12 @@ UOdysseyPainterEditorVectorMatchingTool*
 FOdysseyPainterEditor::GetVectorMatchingTool() const
 {
     return mVectorMatchingTool;
+}
+
+UOdysseyPainterEditorVectorTrajectoryTool*
+FOdysseyPainterEditor::GetVectorTrajectoryTool() const
+{
+    return mVectorTrajectoryTool;
 }
 
 UOdysseyPainterEditorVectorChartTool*
@@ -2166,6 +2177,7 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 	Collector.AddReferencedObject(mVectorTransformTool);
 	Collector.AddReferencedObject(mVectorMatchingTool);
 	Collector.AddReferencedObject(mVectorChartTool);
+	Collector.AddReferencedObject(mVectorTrajectoryTool);
 }
 
 #undef LOCTEXT_NAMESPACE

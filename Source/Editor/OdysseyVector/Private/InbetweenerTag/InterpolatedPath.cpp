@@ -53,6 +53,7 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath, uint32 iInbetwe
                                                         , &mInterpolatedPointBuffer[handle1->GetID()]
                                                         , &mInterpolatedPointBuffer[vertex1->GetID()] );
 
+
             cubicSegment->SetID( segmentID++ );
         }
     }

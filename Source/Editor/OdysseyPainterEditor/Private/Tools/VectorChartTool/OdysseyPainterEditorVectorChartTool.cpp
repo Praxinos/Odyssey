@@ -4,6 +4,7 @@
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartToolHUD.h"
 #include "Undo/OdysseyVectorUndoChartAlter.h"
+#include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
@@ -22,7 +23,7 @@ UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorChartToolHUD( this ), false )
     , PickingRadius( 10.0f )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart64");
 
     mChartHUD = static_cast<FOdysseyPainterEditorVectorChartToolHUD*>( mBaseHUD );
 }

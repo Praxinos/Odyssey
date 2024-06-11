@@ -29,3 +29,21 @@ FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerQuad* iQuad
     mQuadV = difY ? ( iP0.y - p0Coords.y ) / difY : 0.0f;
 */
 }
+
+FInbetweenerQuad* 
+FInbetweenerTrajectory::GetQuad()
+{
+    return mQuad;
+}
+
+double
+FInbetweenerTrajectory::GetQuadU()
+{
+    return mQuadU;
+}
+
+double
+FInbetweenerTrajectory::GetQuadV()
+{
+    return mQuadV;
+}

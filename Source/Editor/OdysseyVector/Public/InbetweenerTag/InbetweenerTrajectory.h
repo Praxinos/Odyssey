@@ -12,6 +12,9 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         FInbetweenerTrajectory( FInbetweenerQuad* iQuad
                               , double iQuadU
                               , double iQuadV );
+        FInbetweenerQuad* GetQuad();
+        double GetQuadU();
+        double GetQuadV();
 
     private:
         ::ULIS::FVec2D mCubicBezier[4];

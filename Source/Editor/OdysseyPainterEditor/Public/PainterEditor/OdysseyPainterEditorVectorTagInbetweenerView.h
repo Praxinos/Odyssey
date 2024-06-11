@@ -61,9 +61,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                           //, EditCondition = "( GridType == eInbetweenerGridType::FFD )"
                           , EditConditionHides
                           , ClampMin = "1"
-                          , ClampMax = "8"
+                          , ClampMax = "16"
                           , UIMin    = "1"
-                          , UIMax    = "8" ) )
+                          , UIMax    = "16" ) )
         uint32 DivisionX;
 
         UPROPERTY( EditAnywhere
@@ -72,9 +72,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                           //, EditCondition = "( GridType == eInbetweenerGridType::FFD )"
                           , EditConditionHides
                           , ClampMin = "1"
-                          , ClampMax = "8"
+                          , ClampMax = "16"
                           , UIMin    = "1"
-                          , UIMax    = "8" ) )
+                          , UIMax    = "16" ) )
         uint32 DivisionY;
 
         UPROPERTY( EditAnywhere
