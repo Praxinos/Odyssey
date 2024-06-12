@@ -62,7 +62,13 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD
     mNumQuadY = iNumQuadY;
     mQuadArea = 0.0f;
 
-    mTrajectoryBuffer.clear();
+    mTrajectoryList.remove_if( []( FInbetweenerTrajectory* trajectory )
+                               {
+                                   delete trajectory;
+
+                                   return true;
+                               } );
+
     mPointBuffer.clear();
     mQuadBuffer.clear();
 
@@ -194,10 +200,10 @@ FInbetweenerGrid::GetQuad( const ::ULIS::FVec2D& iLocalCoords )
     return quad;
 }
 
-std::vector<FInbetweenerTrajectory>&
-FInbetweenerGrid::GetTrajectoryBuffer()
+std::list<FInbetweenerTrajectory*>&
+FInbetweenerGrid::GetTrajectoryList()
 {
-    return mTrajectoryBuffer;
+    return mTrajectoryList;
 }
 
 bool
@@ -217,7 +223,12 @@ FInbetweenerGrid::AddTrajectory( const ::ULIS::FVec2D& iLocalCoords )
         double quadU = difX ? ( iLocalCoords.x - p0Coords.x ) / difX : 0.0f;
         double quadV = difY ? ( iLocalCoords.y - p0Coords.y ) / difY : 0.0f;
 
-        mTrajectoryBuffer.emplace_back( quad, quadU, quadV );
+        mTrajectoryList.push_back( new FInbetweenerTrajectory( this
+                                                             , quad
+                                                             , quadU
+                                                             , quadV ) );
+
+        mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES );
 
         return true;
     }

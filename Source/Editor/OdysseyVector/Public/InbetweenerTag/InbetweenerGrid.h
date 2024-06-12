@@ -50,7 +50,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         virtual void Update(){};
         virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
                                          , const BLMatrix2D& iSpaceInverseMatrix  );
-        std::vector<FInbetweenerTrajectory>& GetTrajectoryBuffer();
+        std::list<FInbetweenerTrajectory*>& GetTrajectoryList();
 
         friend class FOdysseyVectorTagInbetweener;
 
@@ -88,7 +88,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        std::vector<FInbetweenerTrajectory> mTrajectoryBuffer;
+        std::list<FInbetweenerTrajectory*> mTrajectoryList;
         std::vector<FInbetweenerPoint> mPointBuffer;
         std::vector<FInbetweenerQuad> mQuadBuffer;
         uint32 mNumQuadX;

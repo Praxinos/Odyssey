@@ -57,8 +57,11 @@ namespace FOdysseyVector
                                      , const ::ULIS::FRectD& iMaskRect
                                      , const uint8* iPixelData );
 
-    double ODYSSEYVECTOR_API GetBezierApproximateLength( ::ULIS::FVec2D iBezier[4], uint32 iDivisions );
+    double ODYSSEYVECTOR_API GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+                                                       , uint32 iDivisions );
 
+    ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( BLMatrix2D& iMatrix
+                                             , const ::ULIS::FVec2D& iPoint );
     bool ProjectPoint( const ::ULIS::FVec2D& iPt
                      , const ::ULIS::FVec2D& iSegmentP0
                      , const ::ULIS::FVec2D& iSegmentP1

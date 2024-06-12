@@ -154,6 +154,15 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
 }
 */
 
+::ULIS::FVec2D
+FOdysseyVector::MapPoint( BLMatrix2D& iMatrix
+                        , const ::ULIS::FVec2D& iPoint )
+{
+    BLPoint pt = iMatrix.mapPoint( iPoint.x, iPoint.y );
+
+    return ::ULIS::FVec2D( pt.x, pt.y );
+}
+
 double
 FOdysseyVector::Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB )
 {
@@ -386,7 +395,8 @@ FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
 }
 
 double
-FOdysseyVector::GetBezierApproximateLength( ::ULIS::FVec2D iBezier[4], uint32 iDivisions )
+FOdysseyVector::GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+                                          , uint32 iDivisions )
 {
     ::ULIS::FVec2D p0 = iBezier[0];
     double step = 1.0f / iDivisions;

@@ -116,6 +116,12 @@ FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
     delete mGrid;
 }
 
+BLMatrix2D&
+FOdysseyVectorTagInbetweener::GetTargetLocalMatrix()
+{
+    return mTargetLocalMatrix;
+}
+
 FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
                                                           , FOdysseyVectorObject* iOwnerObject
                                                           , uint32 iNumQuadX
@@ -134,6 +140,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
                         | INVALIDATE_BUFFERS
                         | INVALIDATE_SOURCEBBOX
                         | INVALIDATE_TARGETBBOX
+                        | INVALIDATE_TRAJECTORIES
                         | INVALIDATE_SPACING
                         | INVALIDATE_CELLS )
     , mTargetTranslationX( 0.0f )
@@ -238,6 +245,14 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
     if( mInvalidationFlags & INVALIDATE_SPACING )
     {
         Interpolate();
+    }
+
+    if( mInvalidationFlags & INVALIDATE_TRAJECTORIES )
+    {
+        for( FInbetweenerTrajectory* trajectory : mGrid->GetTrajectoryList() )
+        {
+            trajectory->Update();
+        }
     }
 
     if( mInvalidationFlags & INVALIDATE_CELLS )
@@ -352,7 +367,7 @@ FOdysseyVectorTagInbetweener::UpdateMatrix()
         InterpolateTransform( inbetweenIndex );
     }
 
-    Invalidate( INVALIDATE_CELLS );
+    Invalidate( INVALIDATE_CELLS | INVALIDATE_TRAJECTORIES );
 }
 
 void

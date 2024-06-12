@@ -1,33 +1,61 @@
 #include "InbetweenerTag/InbetweenerTrajectory.h"
+#include "InbetweenerTag/InbetweenerGrid.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVector.h"
 
 FInbetweenerTrajectory::~FInbetweenerTrajectory()
 {
 }
 
-FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerQuad* iQuad
+FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerGrid* iGrid
+                                              , FInbetweenerQuad* iQuad
                                               , double iQuadU
-                                              , double iQuadV
-                                                     /*, const ::ULIS::FVec2D& iP0
-                                                      , const ::ULIS::FVec2D& iP1 
-                                                      , const ::ULIS::FVec2D& iP2 
-                                                      , const ::ULIS::FVec2D& iP3*/ )
-    : mQuad( iQuad )
+                                              , double iQuadV )
+    : mGrid( iGrid )
+    , mHandle{ (this), (this) }
+    , mQuad( iQuad )
     , mQuadU( iQuadU )
     , mQuadV( iQuadV )
 {
-/*
-    FInbetweenerGridPoint** quadPoint = mQuad->GetPoints();
-    ::ULIS::FVec2D p0Coords = quadPoint[0]->GetSourcePosition();
-    ::ULIS::FVec2D p1Coords = quadPoint[1]->GetSourcePosition();
-    ::ULIS::FVec2D p2Coords = quadPoint[2]->GetSourcePosition();
-    ::ULIS::FVec2D p3Coords = quadPoint[3]->GetSourcePosition();
-    double difX = p1Coords.x - p0Coords.x;
-    double difY = p2Coords.y - p1Coords.y;
+}
 
-    mQuadU = difX ? ( iP0.x - p0Coords.x ) / difX : 0.0f;
-    mQuadV = difY ? ( iP0.y - p0Coords.y ) / difY : 0.0f;
-*/
+void
+FInbetweenerTrajectory::Update()
+{
+    BLMatrix2D targetLocalMatrix = mGrid->GetInbetweenerTag()->GetTargetLocalMatrix();
+    double bezierLength;
+
+    mCubicBezier[0] = mQuad->GetPoint( eInbetweenerPointPositionType::SourcePosition
+                                     , mQuadU
+                                     , mQuadV );
+
+    mCubicBezier[3] = FOdysseyVector::MapPoint( targetLocalMatrix
+                                              , mQuad->GetPoint( eInbetweenerPointPositionType::TargetPosition
+                                                               , mQuadU
+                                                               , mQuadV ) );
+
+    bezierLength = ( mCubicBezier[3] - mCubicBezier[0] ).Distance();
+
+    mCubicBezier[1] = mCubicBezier[0] + ( mHandle[0].GetDirection() * mHandle[0].GetLengthRatio() * bezierLength );
+    mCubicBezier[2] = mCubicBezier[3] + ( mHandle[1].GetDirection() * mHandle[1].GetLengthRatio() * bezierLength );
+}
+
+FInbetweenerHandleTrajectory*
+FInbetweenerTrajectory::GetHandle( uint32 index )
+{
+    return &mHandle[index];
+}
+
+FInbetweenerGrid*
+FInbetweenerTrajectory::GetGrid()
+{
+    return mGrid;
+}
+
+::ULIS::FVec2D*
+FInbetweenerTrajectory::GetCubicBezier()
+{
+    return mCubicBezier;
 }
 
 FInbetweenerQuad* 
