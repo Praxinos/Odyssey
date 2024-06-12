@@ -327,6 +327,13 @@ class EPOSSEQUENCEEDITOR_API UEposSequenceEditorBlueprintLibrary
     GENERATED_BODY()
 
 public:
+    //PATCH: used for UEposSequenceEditorBlueprintLibrary::LocateBoundObjects_PATCHBefore543() until the UMovieSceneSequenceExtensions::LocateBoundObjects() is patch in >=5.4.3, then remove it and also update the .cs file
+    UE_DEPRECATED( 5.4, "Use UMovieSceneSequenceExtensions::LocateBoundObjects once fixed in 5.4.3" )
+    UFUNCTION(BlueprintCallable, Category="Sequencer|Sequence", meta=(ScriptMethod))
+    //UFUNCTION(BlueprintCallable, Category="Sequencer|Sequence", meta=(ScriptMethod, DeprecatedFunction, DeprecationMessage="Use UMovieSceneSequenceExtensions::LocateBoundObjects once fixed in 5.4.3"))
+    static TArray<UObject*> LocateBoundObjects_PATCHBefore543(UMovieSceneSequence* Sequence, const FMovieSceneBindingProxy& InBinding, UObject* Context);
+
+public:
 
     /**
      * Open a board sequence asset
