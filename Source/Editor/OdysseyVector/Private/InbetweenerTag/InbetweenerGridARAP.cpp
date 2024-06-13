@@ -22,11 +22,17 @@ FInbetweenerGridARAP::FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbet
 void
 FInbetweenerGridARAP::Make( uint32 iNumQuadX
                           , uint32 iNumQuadY
-                          , const ::ULIS::FRectD& iBBox )
+                          , const ::ULIS::FRectD& iBBox
+                          , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
+                          , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
 {
-    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY, iBBox );
+    FInbetweenerGrid::Make( iNumQuadX
+                          , iNumQuadY
+                          , iBBox
+                          , iSourcePositionBuffer
+                          , iTargetPositionBuffer );
 
-    DiscardEmptyQuads( mInbetweenerTag->GetInterpolatedPathBuffer() );
+    //DiscardEmptyQuads( mInbetweenerTag->GetInterpolatedPathBuffer() );
 }
 
 #define EPSILON 0.001f
@@ -241,8 +247,11 @@ FInbetweenerGridARAP::SetRigidity( uint32 iRigidity )
 }
 
 void
-FInbetweenerGridARAP::Update()
+FInbetweenerGridARAP::Update( uint32 iUpdateFlags
+                            , uint64 iTagInvalidationFlags )
 {
+    FInbetweenerGrid::Update( iUpdateFlags, iTagInvalidationFlags );
+
     Regularize( eInbetweenerPointPositionType::SourcePosition
               , eInbetweenerPointPositionType::TargetPosition
               , mRigidity

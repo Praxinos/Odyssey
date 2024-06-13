@@ -17,7 +17,10 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
 
         virtual void Make(  uint32 iNumQuadX
                           , uint32 iNumQuadY
-                          , const ::ULIS::FRectD& iBBox ) override;
+                          , const ::ULIS::FRectD& iBBox
+                          , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
+                          , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer ) override;
+
         double RegularizeQuads( eInbetweenerPointPositionType iPositionType );
         void RegularizeQuad( FInbetweenerQuad* iQuad
                            , eInbetweenerPointPositionType iPositionType );
@@ -26,7 +29,8 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
                          , int maxIterations
                          , bool allGrid
                          , bool convergenceStop );
-        virtual void Update() override;
+        virtual void Update( uint32 iUpdateFlags
+                           , uint64 iTagInvalidationFlags ) override;
         uint32 GetRigidity();
         void SetRigidity( uint32 iRigidity );
         virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer

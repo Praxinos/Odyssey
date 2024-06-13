@@ -17,7 +17,9 @@ FInbetweenerHandleTrajectory::Set( const ::ULIS::FVec2D& iDirection
     mDirection = iDirection;
     mLengthRatio = iLengthRatio;
 
-    mTrajectory->GetGrid()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES );
+    mTrajectory->GetGrid()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES
+                                                           | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+                                                           | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
 const ::ULIS::FVec2D&

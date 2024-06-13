@@ -52,9 +52,15 @@ FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
 void
 FInbetweenerGridFFD::Make( uint32 iNumQuadX
                          , uint32 iNumQuadY
-                         , const ::ULIS::FRectD& iBBox )
+                         , const ::ULIS::FRectD& iBBox
+                         , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
+                         , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
 {
-    FInbetweenerGrid::Make( iNumQuadX, iNumQuadY, iBBox );
+    FInbetweenerGrid::Make( iNumQuadX
+                          , iNumQuadY
+                          , iBBox
+                          , iSourcePositionBuffer
+                          , iTargetPositionBuffer );
 
     if( iNumQuadX && iNumQuadY )
     {

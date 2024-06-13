@@ -55,8 +55,22 @@ FInbetweenerGrid::GetCenterOfMass( eInbetweenerPointPositionType iPositionType )
     return pointCount ? ( center / pointCount ) : ::ULIS::FVec2D( 0.0f, 0.0f );
 }
 
+void FInbetweenerGrid::Make( uint32 iNumQuadX
+                           , uint32 iNumQuadY
+                           , const ::ULIS::FRectD& iBBox )
+{
+    std::vector<::ULIS::FVec2D> sourcePositionBuffer;
+    std::vector<::ULIS::FVec2D> targetPositionBuffer;
+
+    Make( iNumQuadX, iNumQuadY, iBBox, sourcePositionBuffer, targetPositionBuffer );
+}
+
 void
-FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD& iBBox )
+FInbetweenerGrid::Make( uint32 iNumQuadX
+                      , uint32 iNumQuadY
+                      , const ::ULIS::FRectD& iBBox
+                      , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
+                      , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
 {
     mNumQuadX = iNumQuadX;
     mNumQuadY = iNumQuadY;
@@ -106,6 +120,24 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD
             x = iBBox.x;
         }
 
+        if( iSourcePositionBuffer.size() )
+        {
+            for( uint32 i = 0; i < mPointBuffer.size(); i++ )
+            {
+                mPointBuffer[i].SetSourcePosition( iSourcePositionBuffer[i].x
+                                                 , iSourcePositionBuffer[i].y  );
+            }
+        }
+
+        if( iTargetPositionBuffer.size() )
+        {
+            for( uint32 i = 0; i < mPointBuffer.size(); i++ )
+            {
+                mPointBuffer[i].SetTargetPosition( iSourcePositionBuffer[i].x
+                                                 , iTargetPositionBuffer[i].y  );
+            }
+        }
+
         // design cells
         for( uint32 i = 0; i < mNumQuadY; i++ )
         {
@@ -137,6 +169,13 @@ FInbetweenerGrid::Make( uint32 iNumQuadX, uint32 iNumQuadY, const ::ULIS::FRectD
         mUsedPointCount = pointID;
         mQuadArea = mQuadBuffer[0].GetSourceArea();
     }
+}
+
+void
+FInbetweenerGrid::Update( uint32 iUpdateFlags
+                        , uint64 iTagInvalidationFlags )
+{
+
 }
 
 ::ULIS::FVec2D
@@ -228,7 +267,9 @@ FInbetweenerGrid::AddTrajectory( const ::ULIS::FVec2D& iLocalCoords )
                                                              , quadU
                                                              , quadV ) );
 
-        mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES );
+        mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES
+                                   | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+                                   | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 
         return true;
     }
@@ -341,7 +382,7 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
     }
 
     // Assembling LHS (with constraint)
-    uint32 constraintCount = mConstraintsIdx.size() > 0 ? mConstraintsIdx.size() : 1;
+    uint32 constraintCount = mTrajectoryList.size() > 0 ? mTrajectoryList.size() : 1;
     uint32 idx = mUsedPointCount;
     Eigen::SparseMatrix<double, Eigen::ColMajor> PTP = mPt * mW.asDiagonal() * P;
     // Left Hand Side is a square matrix
@@ -352,7 +393,7 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
     // TODO: is there a more efficient way to do this than using the intermediate var PTP?
     LHS.innerVectors( 0, mUsedPointCount ) = PTP.innerVectors( 0, mUsedPointCount );
 
-    if ( mConstraintsIdx.size() == 0 )
+    if ( mTrajectoryList.size() == 0 )
     {
         float constraintMean = mUsedPointCount ? 1.0f / mUsedPointCount : 0.0f;
 
@@ -364,22 +405,21 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
         ++idx;
     }
 
-/*
     // user defined hard constraints
-    for ( uint32 constraintIdx : mConstraintsIdx )
+    for ( FInbetweenerTrajectory* trajectory : mTrajectoryList )
     {
-        const Trajectory *traj = m_keyframe->trajectoryConstraintPtr(constraintIdx);
-        const UVInfo &latticeCoord = traj->latticeCoord();
+        FInbetweenerQuad* quad = trajectory->GetQuad();
+        FInbetweenerPoint** quadPoints = quad->GetPoints();
+        double u = trajectory->GetQuadU();
+        double v = trajectory->GetQuadV();
 
-        QuadPtr quad = m_hashTable[latticeCoord.quadKey];
         // the constraint coeff vector and its transpose are set at the same time
-        LHS.insert(idx, quad->corners[TOP_LEFT]->getKey()) = LHS.insert(quad->corners[TOP_LEFT]->getKey(), idx) = (1.0 - latticeCoord.uv.x()) * (1.0 - latticeCoord.uv.y());
-        LHS.insert(idx, quad->corners[TOP_RIGHT]->getKey()) = LHS.insert(quad->corners[TOP_RIGHT]->getKey(), idx) = latticeCoord.uv.x() * (1.0 - latticeCoord.uv.y());
-        LHS.insert(idx, quad->corners[BOTTOM_RIGHT]->getKey()) = LHS.insert(quad->corners[BOTTOM_RIGHT]->getKey(), idx) = latticeCoord.uv.x() * latticeCoord.uv.y();
-        LHS.insert(idx, quad->corners[BOTTOM_LEFT]->getKey()) = LHS.insert(quad->corners[BOTTOM_LEFT]->getKey(), idx) = (1.0 - latticeCoord.uv.x()) * latticeCoord.uv.y();
+        LHS.insert( idx, quadPoints[0]->GetID()) = LHS.insert( quadPoints[0]->GetID(), idx ) = ( 1.0f - u ) * ( 1.0f - v );
+        LHS.insert( idx, quadPoints[1]->GetID()) = LHS.insert( quadPoints[1]->GetID(), idx ) = u * ( 1.0 - v );
+        LHS.insert( idx, quadPoints[2]->GetID()) = LHS.insert( quadPoints[2]->GetID(), idx ) = u * v;
+        LHS.insert( idx, quadPoints[3]->GetID()) = LHS.insert( quadPoints[3]->GetID(), idx ) = ( 1.0f - v ) * v;
         ++idx;
     }
-*/
 
     // Factorization of LHS
     LHS.makeCompressed();
@@ -526,9 +566,10 @@ FInbetweenerGrid::ComputeQuadA( FInbetweenerQuad* iQuad
  * @param useRigidTransform If true the global rigid transformation is applied.
  */
 bool
-FInbetweenerGrid::ComputeARAPInterpolation( float alphaLinear
-                                          , float alpha
+FInbetweenerGrid::ComputeARAPInterpolation( //float alphaLinear
+                                          //, float alpha
                                           //, const FInbetweenerPoint::Affine& globalRigidTransform
+                                            const FInbetweenerInbetween* iInbetween
                                           , bool useRigidTransform )
 {
 //    qDebug() << "** Interpolating lattice at t=" << alpha;
@@ -545,7 +586,8 @@ FInbetweenerGrid::ComputeARAPInterpolation( float alphaLinear
 //    }
 
     Eigen::MatrixXd A( 2, 8 * mUsedQuadCount  );
-    double t = alpha;
+    //double t = alpha;
+    double t = iInbetween->spacing;
 
     // Compute A(t)
     int i = 0;
@@ -560,14 +602,14 @@ FInbetweenerGrid::ComputeARAPInterpolation( float alphaLinear
     }
 
     // Assembling final RHS matrix and concatenating constraints values
-    unsigned int constraintCount = mConstraintsIdx.size() > 0 ? mConstraintsIdx.size() : 1;
+    unsigned int constraintCount = mTrajectoryList.size() > 0 ? mTrajectoryList.size() : 1;
     unsigned int idx = mUsedPointCount;
     Eigen::MatrixXd PTAD( mUsedPointCount + constraintCount, 2 );
 
     PTAD.block( 0, 0, mUsedPointCount, 2 ) = mPt * mW.asDiagonal() * A.transpose();
 
     // Main constraint (linear interp of center of mass)
-    if ( mConstraintsIdx.size() == 0 )
+    if ( mTrajectoryList.size() == 0 )
     {
         PTAD( idx, 0 ) = mSourceCenterOfMass.x * ( 1.0f - t ) + mTargetCenterOfMass.x * t;
         PTAD( idx, 1 ) = mSourceCenterOfMass.y * ( 1.0f - t ) + mTargetCenterOfMass.y * t;
@@ -575,19 +617,25 @@ FInbetweenerGrid::ComputeARAPInterpolation( float alphaLinear
     }
 
     // User defined constraints values
-/*
-    float offset;
-    for ( uint32 constraintIdx : mConstraintsIdx )
+
+    //float offset;
+    for ( FInbetweenerTrajectory* trajectory : mTrajectoryList )
     {
-        Trajectory *traj = m_keyframe->trajectoryConstraintPtr(constraintIdx);
-        traj->localOffset()->frameChanged(alphaLinear);
-        offset = traj->localOffset()->get();
-        Point::VectorType pos = traj->eval(t + (std::abs(offset) < 1e-5f ? 0.0f : offset));
-        PTAD(idx, 0) = pos.x();
-        PTAD(idx, 1) = pos.y();
+        ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
+        ::ULIS::FVec2D coords = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
+                                                                                   , cubicBezier[1]
+                                                                                   , cubicBezier[2]
+                                                                                   , cubicBezier[3]
+                                                                                   , t );
+        BLPoint inbetweenCoords = iInbetween->inverseMatrix.mapPoint( coords.x, coords.y );
+
+        //offset = traj->localOffset()->get();
+        //Point::VectorType pos = traj->eval(t + (std::abs(offset) < 1e-5f ? 0.0f : offset));
+
+        PTAD( idx, 0 ) = inbetweenCoords.x;
+        PTAD( idx, 1 ) = inbetweenCoords.y;
         ++idx;
     }
-*/
 
     Eigen::MatrixXd V = mLU.solve( PTAD ).eval();
 

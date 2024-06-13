@@ -33,6 +33,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
         static const uint32 UPDATE_KEEPINVALIDATED = ( 1 << 1 );
         static const uint32 UPDATE_PAINTGROUPS     = ( 1 << 2 );
+        static const uint32 UPDATE_LOADED          = ( 1 << 3 );
 
         // invalidation mask
         static const uint32 INVALIDATE_MATRIX      = ( 1 << 0 );

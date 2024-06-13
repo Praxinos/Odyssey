@@ -25,6 +25,7 @@
 class FOdysseyVectorTagInbetweener;
 class FInterpolatedPoint;
 class FInterpolatedPath;
+struct FInbetweenerInbetween;
 
 typedef Eigen::Triplet<double> TripletD;
 
@@ -36,9 +37,15 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
                         , uint32 iNumQuadX
                         , uint32 iNumQuadY );
 
+        void Make( uint32 iNumQuadX
+                 , uint32 iNumQuadY
+                 , const ::ULIS::FRectD& iBBox );
+
         virtual void Make( uint32 iNumQuadX
                          , uint32 iNumQuadY
-                         , const ::ULIS::FRectD& iBBox );
+                         , const ::ULIS::FRectD& iBBox
+                         , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
+                         , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer );
 
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                                 , uint32 iInbetweenIndex );
@@ -47,7 +54,8 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         FInbetweenerQuad* GetQuad( const ::ULIS::FVec2D& iLocalCoords );
 
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
-        virtual void Update(){};
+        virtual void Update( uint32 iUpdateFlags
+                           , uint64 iTagInvalidationFlags );
         virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
                                          , const BLMatrix2D& iSpaceInverseMatrix  );
         std::list<FInbetweenerTrajectory*>& GetTrajectoryList();
@@ -68,9 +76,10 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
     // applies to all types of grid.
     protected:
         bool PrecomputeARAPInterpolation();
-        bool ComputeARAPInterpolation( float alphaLinear
-                                     , float alpha
+        bool ComputeARAPInterpolation( //float alphaLinear
+                                     //, float alpha
                                      // , const FInbetweenerPoint::Affine &globalRigidTransform
+                                       const FInbetweenerInbetween* iInbetween
                                      , bool useRigidTransform );
         void ComputePStar( FInbetweenerPoint* iTriangle[3]
                          , int triRow
@@ -101,8 +110,6 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         // center of mass of the lattice in its reference and target positions
         ::ULIS::FVec2D mSourceCenterOfMass;
         ::ULIS::FVec2D mTargetCenterOfMass;
-        // Constraints indices in the keyframe list
-        std::set<uint32> mConstraintsIdx;
         // Matrices for ARAP interpolation
         Eigen::SparseMatrix<double, Eigen::ColMajor> mPt;
         Eigen::SparseLU<Eigen::SparseMatrix<double, Eigen::ColMajor>, Eigen::COLAMDOrdering<int>> mLU;

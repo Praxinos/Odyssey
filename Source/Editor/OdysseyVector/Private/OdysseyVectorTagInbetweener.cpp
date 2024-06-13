@@ -226,9 +226,9 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
     if( mInvalidationFlags & INVALIDATE_TARGETBBOX )
     {
         UpdateBBox( mTargetBBox, eInbetweenerPointPositionType::TargetPosition );
-
-        mGrid->Update();
     }
+
+    mGrid->Update( iUpdateFlags, mInvalidationFlags );
 
     if( mInvalidationFlags & INVALIDATE_MAP )
     {
@@ -391,9 +391,10 @@ FOdysseyVectorTagInbetweener::InterpolateGeometry( uint32 iInbetweenIndex )
     {
         double t = mChart.inbetweenBuffer[iInbetweenIndex].spacing;
 
-        mGrid->ComputeARAPInterpolation( t
-                                       , t
+        mGrid->ComputeARAPInterpolation( //t
+                                       //, t
                                        // , const FInbetweenerPoint::Affine &globalRigidTransform
+                                         &mChart.inbetweenBuffer[iInbetweenIndex]
                                        , false );
     }
 
@@ -459,6 +460,8 @@ FOdysseyVectorTagInbetweener::InterpolateTransform( uint32 iInbetweenIndex )
     inbetween->matrix.translate( translationX, translationY );
     inbetween->matrix.rotate( rotation );
     inbetween->matrix.scale( scalingX, scalingY );
+
+    BLMatrix2D::invert( inbetween->inverseMatrix, inbetween->matrix );
 }
 
 void
@@ -858,6 +861,23 @@ FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
               | INVALIDATE_CELLS );
 
     mGrid->Make( mGrid->GetNumQuadX(), mGrid->GetNumQuadY(), mSourceBBox );
+}
+
+void
+FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iNumQuadX
+                                            , uint32 iNumQuadY
+                                            , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
+                                            , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
+{
+    Invalidate( INVALIDATE_MAP
+              | INVALIDATE_SPACING
+              | INVALIDATE_CELLS );
+
+    mGrid->Make( iNumQuadX
+               , iNumQuadY
+               , mSourceBBox
+               , iSourcePositionBuffer
+               , iTargetPositionBuffer );
 }
 
 void

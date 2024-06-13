@@ -49,6 +49,7 @@ struct FInbetweenerInbetween
 {
     float spacing;
     BLMatrix2D matrix;
+    BLMatrix2D inverseMatrix;
 };
 
 struct FInbetweenerChart
@@ -107,6 +108,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetGridNumQuadX( uint32 iNumQuadX );
         void SetGridNumQuadY( uint32 iNumQuadY );
         void SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY );
+        void SetGridNumQuad( uint32 iNumQuadX
+                           , uint32 iNumQuadY
+                           , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
+                           , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer );
 
         eInbetweenerInterpolationType GetInterpolationType();
         void SetInterpolationType( eInbetweenerInterpolationType iInterpolationType );

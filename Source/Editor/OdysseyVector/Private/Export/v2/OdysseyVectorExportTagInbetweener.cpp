@@ -6,6 +6,36 @@
 #include "OdysseyVectorTagInbetweener.h"
 
 void
+FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometryMk2( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                          , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_GEOMETRY_MK2
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
+        uint32 numQuadX = iInbetweenerTag.GetGridNumQuadX();
+        uint32 numQuadY = iInbetweenerTag.GetGridNumQuadY();
+
+        Ar << numQuadX;
+        Ar << numQuadY;
+
+        for( FInbetweenerPoint& point : gridPointbuffer )
+        {
+            double sourceX = point.GetSourcePosition().x;
+            double sourceY = point.GetSourcePosition().y;
+            double targetX = point.GetTargetPosition().x;
+            double targetY = point.GetTargetPosition().y;
+
+            Ar << sourceX;
+            Ar << sourceY;
+            Ar << targetX;
+            Ar << targetY;
+        }
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                        , FArchive &Ar )
 {
@@ -27,6 +57,32 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetw
             Ar << targetX;
             Ar << targetY;
         }
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerGridInterpolation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_INTERPOLATION
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        uint32 interpolationType = static_cast<uint32>(iInbetweenerTag.GetInterpolationType());
+
+        Ar << interpolationType;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerGridType( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_TYPE
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        uint32 gridType = static_cast<uint32>(iInbetweenerTag.GetGridType());
+
+        Ar << gridType;
     } );
 }
 
@@ -53,8 +109,11 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& i
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        WriteTagInbetweenerGridSize( iInbetweenerTag, Ar );
-        WriteTagInbetweenerGridGeometry( iInbetweenerTag, Ar );
+        WriteTagInbetweenerGridType( iInbetweenerTag, Ar );
+        WriteTagInbetweenerGridInterpolation( iInbetweenerTag, Ar );
+        //WriteTagInbetweenerGridSize( iInbetweenerTag, Ar );
+        //WriteTagInbetweenerGridGeometry( iInbetweenerTag, Ar );
+        WriteTagInbetweenerGridGeometryMk2( iInbetweenerTag, Ar );
     } );
 }
 
@@ -159,10 +218,6 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
         WriteTagInbetweenerInbetweenCount( iInbetweenerTag, Ar );
         WriteTagInbetweenerChart( iInbetweenerTag, Ar );
         WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
-
-        if( iInbetweenerTag.GetGridType() == eInbetweenerGridType::FFD )
-        {
-            WriteTagInbetweenerGrid( iInbetweenerTag, Ar );
-        }
+        WriteTagInbetweenerGrid( iInbetweenerTag, Ar );
     } );
 }

@@ -122,9 +122,16 @@ namespace FOdysseyFile
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION = 0xaf8ba83b; // double(X)-double(Y)
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_ROTATION = 0xb941a26b; // double(A)
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_SCALING = 0xf6a73728; // double(X)-double(Y)
-                                static const uint32 CHUNK_TAGINBETWEENER_GRID = 0x6b443e74; // container
+                                static const uint32 CHUNK_TAGINBETWEENER_GRID = 0x6b443e74; // container0
+                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_TYPE = 0x31327385; // uint32(type)
+                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_INTERPOLATION = 0x58d52354; // uint32(type)
                                     static const uint32 CHUNK_TAGINBETWEENER_GRID_SIZE = 0xb3e7577b; // uint32(x)-uint32(y)
                                     static const uint32 CHUNK_TAGINBETWEENER_GRID_GEOMETRY = 0x88fd3275; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
+                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_GEOMETRY_MK2 = 0xed2c6bcf; // uint32(x)-uint32(y)-array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
+                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_TRAJECTORIES = 0x7a7fe7ce; // container
+                                        static const uint32 CHUNK_TRAJECTORY = 0xac49261e; // container
+                                            static const uint32 CHUNK_TRAJECTORY_COORDS = 0x65ec54bd; // uint32(quadIndex)-double(u)-double(v)
+                                            static const uint32 CHUNK_TRAJECTORY_HANDLES = 0xf7413cb0; // double(x)-double(y)-double(lengthRatio)
 
 
                     static const uint32 CHUNK_PATH = 0x138d0bec; // container
