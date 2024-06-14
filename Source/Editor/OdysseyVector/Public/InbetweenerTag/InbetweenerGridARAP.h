@@ -29,6 +29,7 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
                          , int maxIterations
                          , bool allGrid
                          , bool convergenceStop );
+        void Regularize();
         virtual void Update( uint32 iUpdateFlags
                            , uint64 iTagInvalidationFlags ) override;
         uint32 GetRigidity();

@@ -133,7 +133,7 @@ FInbetweenerGrid::Make( uint32 iNumQuadX
         {
             for( uint32 i = 0; i < mPointBuffer.size(); i++ )
             {
-                mPointBuffer[i].SetTargetPosition( iSourcePositionBuffer[i].x
+                mPointBuffer[i].SetTargetPosition( iTargetPositionBuffer[i].x
                                                  , iTargetPositionBuffer[i].y  );
             }
         }
@@ -157,17 +157,10 @@ FInbetweenerGrid::Make( uint32 iNumQuadX
             }
         }
 
-        for( FInbetweenerPoint& point : mPointBuffer )
-        {
-            if( point.GetQuadList().size() )
-            {
-                point.SetID( pointID++ );
-            }
-        }
-
-        mUsedQuadCount = mQuadBuffer.size();
-        mUsedPointCount = pointID;
         mQuadArea = mQuadBuffer[0].GetSourceArea();
+
+        mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX
+                                   | FOdysseyVectorTagInbetweener::INVALIDATE_TARGETBBOX );
     }
 }
 
@@ -347,26 +340,32 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
     // TODO refactorize concatenation
     for( FInbetweenerQuad& quad : mQuadBuffer )
     {
-        FInbetweenerPoint** points = quad.GetPoints();
-        FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
-        FInbetweenerPoint* triangleB[3] = { points[2], points[3], points[0] };
+        if( quad.IsLinked() )
+        {
+            FInbetweenerPoint** points = quad.GetPoints();
+            FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
+            FInbetweenerPoint* triangleB[3] = { points[2], points[3], points[0] };
 
-        ComputePStar( triangleA, triRow, eInbetweenerPointPositionType::SourcePosition, P_triplets );
-        triRow++;
-        ComputePStar( triangleB, triRow, eInbetweenerPointPositionType::SourcePosition, P_triplets );
-        triRow++;
+            ComputePStar( triangleA, triRow, eInbetweenerPointPositionType::SourcePosition, P_triplets );
+            triRow++;
+            ComputePStar( triangleB, triRow, eInbetweenerPointPositionType::SourcePosition, P_triplets );
+            triRow++;
+        }
     }
 
     for( FInbetweenerQuad& quad : mQuadBuffer )
     {
-        FInbetweenerPoint** points = quad.GetPoints();
-        FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
-        FInbetweenerPoint* triangleB[3] = { points[2], points[3], points[0] };
+        if( quad.IsLinked() )
+        {
+            FInbetweenerPoint** points = quad.GetPoints();
+            FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
+            FInbetweenerPoint* triangleB[3] = { points[2], points[3], points[0] };
 
-        ComputePStar( triangleA, triRow, eInbetweenerPointPositionType::TargetPosition, P_triplets );
-        triRow++;
-        ComputePStar( triangleB, triRow, eInbetweenerPointPositionType::TargetPosition, P_triplets );
-        triRow++;
+            ComputePStar( triangleA, triRow, eInbetweenerPointPositionType::TargetPosition, P_triplets );
+            triRow++;
+            ComputePStar( triangleB, triRow, eInbetweenerPointPositionType::TargetPosition, P_triplets );
+            triRow++;
+        }
     }
 
     Eigen::SparseMatrix<double, Eigen::ColMajor> P( P_rows, mUsedPointCount );
@@ -593,12 +592,18 @@ FInbetweenerGrid::ComputeARAPInterpolation( //float alphaLinear
     int i = 0;
     for ( FInbetweenerQuad& quad : mQuadBuffer )
     {
-        ComputeQuadA( &quad, A, i, t, false );
+        if( quad.IsLinked() )
+        {
+            ComputeQuadA( &quad, A, i, t, false );
+        }
     }
 
     for ( FInbetweenerQuad& quad : mQuadBuffer )
     {
-        ComputeQuadA( &quad, A, i, t, true );
+        if( quad.IsLinked() )
+        {
+            ComputeQuadA( &quad, A, i, t, true );
+        }
     }
 
     // Assembling final RHS matrix and concatenating constraints values
@@ -649,18 +654,21 @@ FInbetweenerGrid::ComputeARAPInterpolation( //float alphaLinear
     // Setting new interpolated vertices in corners INTERP_POS coordinates
     for ( FInbetweenerPoint& point : mPointBuffer )
     {
-        FInbetweenerPoint::VectorType coords = V.row( point.GetID() );
-
-        point.SetInterpPosition( coords.x(), coords.y() );
-
-/*
-        if ( useRigidTransform )
+        if( point.GetQuadCount() )
         {
-            FInbetweenerPoint::VectorType rigidPoint = globalRigidTransform * coords;
+            FInbetweenerPoint::VectorType coords = V.row( point.GetID() );
 
-            point.SetMotionPosition( rigidPoint.x(), rigidPoint.y() );
+            point.SetInterpPosition( coords.x(), coords.y() );
+
+    /*
+            if ( useRigidTransform )
+            {
+                FInbetweenerPoint::VectorType rigidPoint = globalRigidTransform * coords;
+
+                point.SetMotionPosition( rigidPoint.x(), rigidPoint.y() );
+            }
+    */
         }
-*/
     }
 
     //m_arapDirty = false;

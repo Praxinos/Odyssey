@@ -3,6 +3,7 @@
 // from module OdysseyFile
 #include "OdysseyFile.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
+#include "InbetweenerTag/InbetweenerGrid.h"
 #include "OdysseyVectorTagInbetweener.h"
 
 void
@@ -74,7 +75,22 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridInterpolation( FOdysseyVectorTagI
 }
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerGridType( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerGridArapRigidity( FInbetweenerGridARAP& iArapGrid
+                                                           , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_ARAP_RIGIDITY
+                            , Ar
+                            , [&iArapGrid](FArchive &Ar) -> void
+    {
+        uint32 rigidty = static_cast<uint32>(iArapGrid.GetRigidity());
+
+        Ar << rigidty;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerGridType( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                   , FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_TYPE
                             , Ar
@@ -87,7 +103,8 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridType( FOdysseyVectorTagInbetweene
 }
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                   , FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_SIZE
                             , Ar
@@ -114,6 +131,13 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& i
         //WriteTagInbetweenerGridSize( iInbetweenerTag, Ar );
         //WriteTagInbetweenerGridGeometry( iInbetweenerTag, Ar );
         WriteTagInbetweenerGridGeometryMk2( iInbetweenerTag, Ar );
+
+        if( iInbetweenerTag.GetGridType() == eInbetweenerGridType::ARAP )
+        {
+            FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(iInbetweenerTag.GetGrid());
+
+            WriteTagInbetweenerGridArapRigidity( *arapGrid, Ar );
+        }
     } );
 }
 

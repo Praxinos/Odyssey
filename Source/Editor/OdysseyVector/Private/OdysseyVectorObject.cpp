@@ -84,7 +84,7 @@ FOdysseyVectorObject::AddTag( FOdysseyVectorTag* iTag )
 
     iTag->Added();
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAGS );
+    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
 }
 
 void
@@ -94,7 +94,7 @@ FOdysseyVectorObject::RemoveTag( FOdysseyVectorTag* iTag )
 
     iTag->Removed();
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAGS );
+    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
 }
 
 void
@@ -200,7 +200,7 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
         UpdateShape( iUpdateFlags );
 
         // update tags
-        for( FOdysseyVectorTag* tag : mTagList )
+        for( FOdysseyVectorTag* tag : mInvalidatedTagList )
         {
             tag->Update( iUpdateFlags, mInvalidationFlags );
         }
@@ -672,11 +672,13 @@ FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
               | ( ( iChildInvalidationFlags & INVALIDATE_SHAPE     ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_COLOR     ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_TOPOLOGY  ) << INVALIDATE_CHILD_SHIFT )
-              | ( ( iChildInvalidationFlags & INVALIDATE_TAGS      ) << INVALIDATE_CHILD_SHIFT )
+              | ( ( iChildInvalidationFlags & INVALIDATE_TAG       ) << INVALIDATE_CHILD_SHIFT )
+              | ( ( iChildInvalidationFlags & INVALIDATE_TAG_LIST  ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_MATRIX    ) << INVALIDATE_CHILD_SHIFT )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_SHAPE    )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_COLOR    )
-              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TAGS     )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TAG      )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TAG_LIST )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TOPOLOGY )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_MATRIX   ) );
 }
@@ -685,6 +687,19 @@ void
 FOdysseyVectorObject::Invalidate()
 {
     Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
+}
+
+void
+FOdysseyVectorObject::InvalidateTag( FOdysseyVectorTag* iTag )
+{
+    Invalidate( FOdysseyVectorObject::INVALIDATE_TAG );
+
+    if( std::find( mInvalidatedTagList.begin()
+                 , mInvalidatedTagList.end()
+                 , iTag ) == mInvalidatedTagList.end() )
+    {
+        mInvalidatedTagList.push_back( iTag );
+    }
 }
 
 void

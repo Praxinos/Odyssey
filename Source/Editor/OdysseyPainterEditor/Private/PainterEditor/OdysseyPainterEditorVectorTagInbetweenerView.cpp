@@ -35,7 +35,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
     {
         FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(mInbetweenerTag->GetGrid());
 
-        arapGrid->SetRigidity( Rigidity );
+        Rigidity = arapGrid->GetRigidity();
     }
 }
 

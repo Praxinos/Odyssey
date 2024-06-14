@@ -133,6 +133,13 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                     gridPoint->SetTargetPosition( targetPosition.x, targetPosition.y );
                 }
 
+                if( inbetweenerTag->GetGridType() == eInbetweenerGridType::ARAP )
+                {
+                    FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(inbetweenerTag->GetGrid());
+
+                    arapGrid->Regularize();
+                }
+
                 // update
                 iScene->Update( 0 );
             }

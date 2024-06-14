@@ -128,6 +128,7 @@ namespace FOdysseyFile
                                     static const uint32 CHUNK_TAGINBETWEENER_GRID_SIZE = 0xb3e7577b; // uint32(x)-uint32(y)
                                     static const uint32 CHUNK_TAGINBETWEENER_GRID_GEOMETRY = 0x88fd3275; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
                                     static const uint32 CHUNK_TAGINBETWEENER_GRID_GEOMETRY_MK2 = 0xed2c6bcf; // uint32(x)-uint32(y)-array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
+                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_ARAP_RIGIDITY = 0x480cdc13; // uint32(type)
                                     static const uint32 CHUNK_TAGINBETWEENER_GRID_TRAJECTORIES = 0x7a7fe7ce; // container
                                         static const uint32 CHUNK_TRAJECTORY = 0xac49261e; // container
                                             static const uint32 CHUNK_TRAJECTORY_COORDS = 0x65ec54bd; // uint32(quadIndex)-double(u)-double(v)

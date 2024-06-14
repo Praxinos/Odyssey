@@ -118,6 +118,9 @@ FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPath
     uint32 pointID = 0;
     uint32 segmentID = 0;
 
+    mUsedQuadCount = 0;
+    mUsedPointCount = 0;
+
     for( FInterpolatedPath& interpolatedPath : iPathBuffer )
     {
         std::vector<FInterpolatedPoint>& interpolatedPointBuffer = interpolatedPath.GetInterpolatedPointBuffer();
@@ -142,4 +145,19 @@ FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPath
             interpolatedPoint.SetUV( nullptr, u, v );
         }
     }
+
+    // TODO: do this in base class
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    {
+        if( quad.IsLinked() ) mUsedQuadCount++;
+    }
+
+    for( FInbetweenerPoint& point : mPointBuffer )
+    {
+        if( point.GetQuadCount() )
+        {
+            point.SetID( mUsedPointCount++ );
+        }
+    }
+    //---------------
 }

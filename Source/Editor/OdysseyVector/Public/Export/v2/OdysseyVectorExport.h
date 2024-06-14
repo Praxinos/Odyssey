@@ -18,6 +18,7 @@ class  FOdysseyVectorVertex;
 class  FOdysseyVectorGroup;
 class  FOdysseyVectorGroupPaint;
 class  FOdysseyVectorTagInbetweener;
+class  FInbetweenerGridARAP;
 
 namespace FOdysseyVectorExportV2
 {
@@ -117,4 +118,6 @@ namespace FOdysseyVectorExportV2
                                             , FArchive &Ar );
     void WriteTagInbetweenerTransform( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                      , FArchive &Ar );
+    void WriteTagInbetweenerGridArapRigidity( FInbetweenerGridARAP& iArapGrid
+                                            , FArchive &Ar );
 }

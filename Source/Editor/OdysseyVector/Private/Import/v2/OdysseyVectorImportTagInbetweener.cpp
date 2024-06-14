@@ -171,6 +171,17 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_ARAP_RIGIDITY:
+                {
+                    FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(iInbetweenerTag.GetGrid());
+                    uint32 rigidity;
+
+                    Ar << rigidity;
+
+                    arapGrid->SetRigidity( rigidity );
+                }
+                break;
+
                 default:
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

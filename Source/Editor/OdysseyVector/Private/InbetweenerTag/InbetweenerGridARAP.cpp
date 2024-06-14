@@ -31,8 +31,6 @@ FInbetweenerGridARAP::Make( uint32 iNumQuadX
                           , iBBox
                           , iSourcePositionBuffer
                           , iTargetPositionBuffer );
-
-    //DiscardEmptyQuads( mInbetweenerTag->GetInterpolatedPathBuffer() );
 }
 
 #define EPSILON 0.001f
@@ -234,6 +232,17 @@ FInbetweenerGridARAP::Regularize( eInbetweenerPointPositionType iSourcePositionT
     return i;
 }
 
+// polymorphic
+void
+FInbetweenerGridARAP::Regularize()
+{
+    Regularize( eInbetweenerPointPositionType::SourcePosition
+              , eInbetweenerPointPositionType::TargetPosition
+              , mRigidity
+              , true
+              , true );
+}
+
 uint32
 FInbetweenerGridARAP::GetRigidity()
 {
@@ -246,17 +255,13 @@ FInbetweenerGridARAP::SetRigidity( uint32 iRigidity )
     mRigidity = iRigidity;
 }
 
+
+
 void
 FInbetweenerGridARAP::Update( uint32 iUpdateFlags
                             , uint64 iTagInvalidationFlags )
 {
     FInbetweenerGrid::Update( iUpdateFlags, iTagInvalidationFlags );
-
-    Regularize( eInbetweenerPointPositionType::SourcePosition
-              , eInbetweenerPointPositionType::TargetPosition
-              , mRigidity
-              , true
-              , true );
 }
 
 void
@@ -267,6 +272,18 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
     BLMatrix2D conversionMatrix;
     uint32 pointID = 0;
     uint32 segmentID = 0;
+
+    mUsedQuadCount = 0;
+    mUsedPointCount = 0;
+
+    // relink unlinked quads before discarding unused ones at the end of the function
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    {
+        if( quad.IsLinked() == false )
+        {
+            quad.Link();
+        }
+    }
 
     for( FInterpolatedPath& interpolatedPath : iPathBuffer )
     {
@@ -300,6 +317,23 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
             }
         }
     }
+
+    DiscardEmptyQuads( mInbetweenerTag->GetInterpolatedPathBuffer() );
+
+    // TODO: do this in base class
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    {
+        if( quad.IsLinked() ) mUsedQuadCount++;
+    }
+
+    for( FInbetweenerPoint& point : mPointBuffer )
+    {
+        if( point.GetQuadCount() )
+        {
+            point.SetID( mUsedPointCount++ );
+        }
+    }
+    //---------------
 }
 
 void
