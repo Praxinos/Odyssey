@@ -51,6 +51,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
                                 , uint32 iInbetweenIndex );
 
         bool AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
+        bool AddTrajectory( FInbetweenerTrajectory* iTrajectory );
         FInbetweenerQuad* GetQuad( const ::ULIS::FVec2D& iLocalCoords );
 
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
@@ -59,6 +60,10 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
                                          , const BLMatrix2D& iSpaceInverseMatrix  );
         std::list<FInbetweenerTrajectory*>& GetTrajectoryList();
+        std::vector<FInbetweenerQuad>& GetQuadBuffer();
+        std::vector<FInbetweenerPoint>& GetPointBuffer();
+        uint32 GetNumQuadX();
+        uint32 GetNumQuadY();
 
         friend class FOdysseyVectorTagInbetweener;
 
@@ -66,11 +71,6 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
         virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint );
 
-    protected:
-        std::vector<FInbetweenerQuad>& GetQuadBuffer();
-        std::vector<FInbetweenerPoint>& GetPointBuffer();
-        uint32 GetNumQuadX();
-        uint32 GetNumQuadY();
 
     // ARAP interpolation (do not confuse with ARAP deformation)
     // applies to all types of grid.

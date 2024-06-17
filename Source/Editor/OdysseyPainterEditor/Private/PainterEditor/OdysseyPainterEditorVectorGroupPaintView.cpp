@@ -29,7 +29,7 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
             //Wireframe       = selectedPaintGroup->IsWireframe();
             WireframeColor    = selectedPaintGroup->GetWireframeColor();
             Multithreaded     = selectedPaintGroup->IsMultithreaded();
-            IntersectsCanevas = selectedPaintGroup->IntersectsCanevas();
+            IntersectsCanvas = selectedPaintGroup->IntersectsCanvas();
 
             break; // only one for now
         }
@@ -68,8 +68,8 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
             if( iPropertyName == "GapTolerance" )
                 selectedPaintGroup->SetGapTolerance( GapTolerance );
 
-            if( iPropertyName == "IntersectsCanevas" )
-                selectedPaintGroup->SetIntersectsCanevas( IntersectsCanevas );
+            if( iPropertyName == "IntersectsCanvas" )
+                selectedPaintGroup->SetIntersectsCanvas( IntersectsCanvas );
 
             //if( iPropertyName == "Wireframe" )
             //    selectedPaintGroup->SetWireframe( Wireframe );

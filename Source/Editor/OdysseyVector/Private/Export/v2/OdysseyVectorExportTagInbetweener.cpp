@@ -3,8 +3,27 @@
 // from module OdysseyFile
 #include "OdysseyFile.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
+#include "InbetweenerTag/InbetweenerTrajectory.h"
+#include "InbetweenerTag/InbetweenerHandleTrajectory.h"
 #include "InbetweenerTag/InbetweenerGrid.h"
 #include "OdysseyVectorTagInbetweener.h"
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerGridTrajectories( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                           , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_TRAJECTORIES
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag.GetGrid()->GetTrajectoryList();
+
+        for( FInbetweenerTrajectory* trajectory : trajectoryList )
+        {
+            WriteTrajectory( *trajectory, Ar );
+        }
+    } );
+}
 
 void
 FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometryMk2( FOdysseyVectorTagInbetweener& iInbetweenerTag
@@ -138,6 +157,11 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& i
 
             WriteTagInbetweenerGridArapRigidity( *arapGrid, Ar );
         }
+
+        if( iInbetweenerTag.GetGrid()->GetTrajectoryList().size() )
+        {
+            WriteTagInbetweenerGridTrajectories( iInbetweenerTag, Ar );
+        }
     } );
 }
 
@@ -209,8 +233,11 @@ FOdysseyVectorExportV2::WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& 
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        for( FInbetweenerInbetween& inbetween : iInbetweenerTag.GetChart().inbetweenBuffer )
+        // note; do not use inbetweenBuffer.size(), because it has 1 more inbetween
+        // than officially stated ( for the final frame)
+        for( uint32 i = 0; i < iInbetweenerTag.GetInbetweenCount(); i++ )
         {
+            FInbetweenerInbetween& inbetween = iInbetweenerTag.GetChart().inbetweenBuffer[i];
             float spacing = inbetween.spacing;
 
             Ar << spacing;

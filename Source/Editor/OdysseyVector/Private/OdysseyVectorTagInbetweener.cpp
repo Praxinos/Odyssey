@@ -201,7 +201,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 {
     if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
      || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
-     //|| ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAGS     )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
      || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) )
     {
         mInvalidationFlags |= INVALIDATE_MAP;

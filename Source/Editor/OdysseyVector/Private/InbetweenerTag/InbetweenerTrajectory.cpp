@@ -13,10 +13,18 @@ FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerGrid* iGrid
                                               , double iQuadV )
     : mGrid( iGrid )
     , mHandle{ (this), (this) }
-    , mQuad( iQuad )
-    , mQuadU( iQuadU )
-    , mQuadV( iQuadV )
 {
+    Init( iQuad, iQuadU, iQuadV );
+}
+
+void
+FInbetweenerTrajectory::Init( FInbetweenerQuad* iQuad
+                            , double iQuadU
+                            , double iQuadV )
+{
+    mQuad = iQuad;
+    mQuadU = iQuadU;
+    mQuadV = iQuadV;
 }
 
 void

@@ -18,6 +18,7 @@ class  FOdysseyVectorVertex;
 class  FOdysseyVectorGroup;
 class  FOdysseyVectorGroupPaint;
 class  FOdysseyVectorTagInbetweener;
+class  FInbetweenerTrajectory;
 class  FInbetweenerGridARAP;
 
 namespace FOdysseyVectorExportV2
@@ -120,4 +121,13 @@ namespace FOdysseyVectorExportV2
                                      , FArchive &Ar );
     void WriteTagInbetweenerGridArapRigidity( FInbetweenerGridARAP& iArapGrid
                                             , FArchive &Ar );
+    void WriteTagInbetweenerGridTrajectories( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                            , FArchive &Ar );
+
+    void ODYSSEYVECTOR_API WriteTrajectory( FInbetweenerTrajectory& iTrajectory
+                                          , FArchive &Ar );
+    void WriteTrajectoryCoords( FInbetweenerTrajectory& iTrajectory
+                              , FArchive &Ar );
+    void WriteTrajectoryGeometry( FInbetweenerTrajectory& iTrajectory
+                                , FArchive &Ar );
 }

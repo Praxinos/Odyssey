@@ -14,7 +14,10 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 {
     FOdysseyFile::ReadChunks( iChunkEnd
                             , Ar
-                            , [&iInbetweenerTag](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+                            , [ this
+                              , &iInbetweenerTag ]( uint32 iChunkID
+                                                  , uint64 iChunkLen
+                                                  , FArchive &Ar ) -> void
         {
             switch( iChunkID )
             {
@@ -179,6 +182,24 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << rigidity;
 
                     arapGrid->SetRigidity( rigidity );
+                }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_TRAJECTORIES: // container
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY:
+                {
+                    FInbetweenerTrajectory* trajectory = new FInbetweenerTrajectory( iInbetweenerTag.GetGrid()
+                                                                                   , nullptr
+                                                                                   , 0.0f
+                                                                                   , 0.0f );
+
+                    iInbetweenerTag.GetGrid()->AddTrajectory( trajectory );
+
+                    ReadTrajectory( *trajectory
+                                  , Ar.Tell() + iChunkLen
+                                  , Ar );
                 }
                 break;
 

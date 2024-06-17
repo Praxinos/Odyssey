@@ -155,13 +155,13 @@ FOdysseyVectorImportV2::ParseGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintG
         }
         break;
 
-        case FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_INTERSECTSCANEVAS:
+        case FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_INTERSECTSCANVAS:
         {
-            uint32 intersectsCanevas;
+            uint32 intersectsCanvas;
 
-            Ar << intersectsCanevas;
+            Ar << intersectsCanvas;
 
-            iPaintGroup.SetIntersectsCanevas( intersectsCanevas ? true : false );
+            iPaintGroup.SetIntersectsCanvas( intersectsCanvas ? true : false );
         }
         break;
 

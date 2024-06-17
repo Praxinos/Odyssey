@@ -51,8 +51,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
 
         UPROPERTY( EditAnywhere
                  , Category = PaintGroup
-                 , meta = ( ToolTip = "Intersects Canevas" ) )
-        bool IntersectsCanevas;
+                 , meta = ( ToolTip = "Intersects Canvas" ) )
+        bool IntersectsCanvas;
 
         // commented out: now handled at layer level
         //UPROPERTY( EditAnywhere, Category = PaintGroup )

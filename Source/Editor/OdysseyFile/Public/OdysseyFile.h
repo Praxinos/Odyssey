@@ -132,7 +132,7 @@ namespace FOdysseyFile
                                     static const uint32 CHUNK_TAGINBETWEENER_GRID_TRAJECTORIES = 0x7a7fe7ce; // container
                                         static const uint32 CHUNK_TRAJECTORY = 0xac49261e; // container
                                             static const uint32 CHUNK_TRAJECTORY_COORDS = 0x65ec54bd; // uint32(quadIndex)-double(u)-double(v)
-                                            static const uint32 CHUNK_TRAJECTORY_HANDLES = 0xf7413cb0; // double(x)-double(y)-double(lengthRatio)
+                                            static const uint32 CHUNK_TRAJECTORY_GEOMETRY = 0xf7413cb0; // double(handle0dirX)-double(handle0dirY)-double(handle0LengthRatio)-double(handle1dirX)-double(handle1dirY)-double(handle1LengthRatio)
 
 
                     static const uint32 CHUNK_PATH = 0x138d0bec; // container
@@ -162,7 +162,7 @@ namespace FOdysseyFile
                     static const uint32 CHUNK_GROUPPAINT = 0xac92b85d; // container
                         // ... +inherited chunks.
                         static const uint32 CHUNK_GROUPPAINT_PAINTED = 0x89854E17; // uint32(bool)
-                        static const uint32 CHUNK_GROUPPAINT_INTERSECTSCANEVAS = 0x8c0632f2; // uint32(bool)
+                        static const uint32 CHUNK_GROUPPAINT_INTERSECTSCANVAS = 0x8c0632f2; // uint32(bool)
                         static const uint32 CHUNK_GROUPPAINT_MONOCHROME = 0x8278C142; // uint32(bool)
                         static const uint32 CHUNK_GROUPPAINT_MONOCHROMECOLOR = 0x2E97CB32; //uint8(R)-uint8(G)-uint8(B)-uint8(A)
                         static const uint32 CHUNK_GROUPPAINT_WIREFRAME =  0x54F22893; // uint32(bool)

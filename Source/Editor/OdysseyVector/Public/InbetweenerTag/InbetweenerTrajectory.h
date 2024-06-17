@@ -16,6 +16,9 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
                               , FInbetweenerQuad* iQuad
                               , double iQuadU
                               , double iQuadV );
+        void Init( FInbetweenerQuad* iQuad
+                 , double iQuadU
+                 , double iQuadV );
         FInbetweenerHandleTrajectory* GetHandle( uint32 index );
         FInbetweenerQuad* GetQuad();
         double GetQuadU();

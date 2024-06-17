@@ -1902,6 +1902,75 @@ FOdysseyPainterEditor::UnpropagateBucket( FOdysseyPainterEditor* iEditor, FOdyss
     SetBucketPropagation( iEditor, iBucket, false );
 }
 
+static FInbetweenerChart*
+GetCopiedChart()
+{
+    static FInbetweenerChart copiedChart;
+
+    return &copiedChart;
+}
+
+// static
+void
+FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
+                                        , FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    for( FOdysseyVectorObject* selectedObject : iScene->GetEngine()->GetSelectedObjectList() )
+    {
+        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+        if( tag )
+        {
+            FOdysseyVectorTagInbetweener* tagInbetweener = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            FInbetweenerChart* copiedChart = GetCopiedChart();
+            // we substract 1 because the buffer also holds the final position
+            // which is not an inbetween per-se.
+            uint32 inbetweenCount = copiedChart->inbetweenBuffer.size() - 1;
+
+            if( inbetweenCount )
+            {
+                tagInbetweener->SetInbetweenCount( inbetweenCount );
+
+                for( uint32 i = 0; i < inbetweenCount; i++ )
+                {
+                    tagInbetweener->GetChart().inbetweenBuffer[i].spacing = copiedChart->inbetweenBuffer[i].spacing;
+                }
+
+                tagInbetweener->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+            }
+        }
+    }
+
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+    vectorEngine->ResetHUD();
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+// static
+void
+FOdysseyPainterEditor::CopySpacingChart( FOdysseyPainterEditor* iEditor
+                                       , FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
+
+    if( selectedObject )
+    {
+        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+        if( tag )
+        {
+            FOdysseyVectorTagInbetweener* tagInbetweener = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            FInbetweenerChart* copiedChart = GetCopiedChart();
+
+            (*copiedChart) = tagInbetweener->GetChart();
+        }
+    }
+}
+
 static std::list<FOdysseyVectorObject*>&
 GetCopiedObjectList()
 {

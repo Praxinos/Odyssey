@@ -239,6 +239,14 @@ FInbetweenerGrid::GetTrajectoryList()
 }
 
 bool
+FInbetweenerGrid::AddTrajectory( FInbetweenerTrajectory* iTrajectory )
+{
+    mTrajectoryList.push_back( iTrajectory );
+
+    return true;
+}
+
+bool
 FInbetweenerGrid::AddTrajectory( const ::ULIS::FVec2D& iLocalCoords )
 {
     FInbetweenerQuad* quad = GetQuad( iLocalCoords );
