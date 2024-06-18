@@ -692,6 +692,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource = nullptr;
 
         mRasterSelection.Reset();
+        mRasterSelection = MakeShared< FOdysseyPainterEditorRasterSelection >();
     }
 
     if (iSource)
