@@ -11,6 +11,7 @@
 #include "Framework/Notifications/NotificationManager.h"
 #include "ILevelEditor.h"
 #include "LevelEditor.h"
+#include "LevelEditorViewport.h"
 #include "MovieSceneTimeHelpers.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -95,6 +96,10 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     mSequencerActorAddedDelegates = mSequencer->OnActorAddedToSequencer().AddStatic( &ToolkitHelpers::HandleActorAddedToSequencer, mSequencer );
     mSequencerActivatedDelegates = mSequencer->OnActivateSequence().AddStatic( &ToolkitHelpers::HandleOnActivateSequence, mSequencer );
     mSequencerSelectionSectionChangedDelegates = mSequencer->GetSelectionChangedSections().AddStatic( &ToolkitHelpers::HandleOnSelectionChangedSections, mSequencer );
+
+    mSequencerBeginScrubbingDelegates = mSequencer->OnBeginScrubbingEvent().AddRaw( this, &FBoardSequenceCustomization::OnBeginScrubbing );
+    mSequencerEndScrubbingDelegates = mSequencer->OnEndScrubbingEvent().AddRaw( this, &FBoardSequenceCustomization::OnEndScrubbing );
+    mSequencerGlobalTimeChangedDelegates = mSequencer->OnGlobalTimeChanged().AddRaw( this, &FBoardSequenceCustomization::OnGlobalTimeChanged );
 }
 
 void
@@ -113,6 +118,10 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
         mSequencer->OnActorAddedToSequencer().Remove( mSequencerActorAddedDelegates );
         mSequencer->OnActivateSequence().Remove( mSequencerActivatedDelegates );
         mSequencer->GetSelectionChangedSections().Remove( mSequencerSelectionSectionChangedDelegates );
+
+        mSequencer->OnBeginScrubbingEvent().Remove( mSequencerBeginScrubbingDelegates );
+        mSequencer->OnBeginScrubbingEvent().Remove( mSequencerEndScrubbingDelegates );
+        mSequencer->OnGlobalTimeChanged().Remove( mSequencerGlobalTimeChangedDelegates );
     }
 
     mSequencer = nullptr;
@@ -589,6 +598,112 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
         ));
 
     MenuBuilder.EndSection();
+}
+
+//---
+
+// click
+//
+// down on antoher frame
+// - nothing
+//
+// up on anther frame
+// (playback status stopped)
+// - scrub end: old frame
+// - time changed: new frame
+//
+//LogTemp: Warning: scrub end: frame=0 state=0
+//LogTemp: Warning: global time changed : frame = 133000 state = 0
+//
+
+// drag
+//
+// down on another frame
+// - nothing
+//
+// dragging
+// (playback status scrubbing)
+// - scrub begin: old frame
+// - time changed: new frame
+//
+// up (end drag)
+// (playback status stopped)
+// - scrub end: new frame
+//
+//LogTemp: Warning: scrub begin: frame=133000 state=2
+//LogTemp: Warning: global time changed: frame=162000 state=2
+//LogTemp: Warning: global time changed: frame=163000 state=2
+//LogTemp: Warning: global time changed: frame=164000 state=2
+//LogTemp: Warning: global time changed: frame=165000 state=2
+//LogTemp: Warning: global time changed: frame=166000 state=2
+//LogTemp: Warning: global time changed: frame=167000 state=2
+//LogTemp: Warning: global time changed: frame=168000 state=2
+//LogTemp: Warning: global time changed: frame=169000 state=2
+//LogTemp: Warning: scrub end: frame=169000 state=0
+//
+
+void
+FBoardSequenceCustomization::OnGlobalTimeChanged()
+{
+    FString prefix = TEXT( "global time changed" );
+    FQualifiedFrameTime frame_time = mSequencer->GetLocalTime();
+    EMovieScenePlayerStatus::Type state = mSequencer->GetPlaybackStatus();
+
+    UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, state );
+
+    if( !GCurrentLevelEditingViewportClient  )
+        return;
+
+    if( !GCurrentLevelEditingViewportClient->IsAnyActorLocked() )
+        return;
+
+    //---
+
+    //FLevelViewportActorLock& lock = GCurrentLevelEditingViewportClient->GetCinematicActorLock();
+    //AActor* current_piloted_actor = lock.GetLockedActor();
+    AActor* current_piloted_actor = GCurrentLevelEditingViewportClient->GetActiveActorLock().Get();
+    if( !current_piloted_actor )
+        return;
+
+    //---
+
+    ACineCameraActor* camera_at_current_frame = BoardSequenceTools::GetCamera( mSequencer, frame_time.Time.GetFrame() );
+
+    if( !camera_at_current_frame )
+    {
+        //TODO: maybe eject the current piloted actor ?
+        // (as at the current frame, now, there is no camera)
+        return;
+    }
+
+    //---
+
+    if( current_piloted_actor == camera_at_current_frame )
+        return;
+
+    //---
+
+    BoardSequenceTools::PilotCamera( mSequencer, frame_time.Time.GetFrame() );
+}
+
+void
+FBoardSequenceCustomization::OnBeginScrubbing()
+{
+    //FString prefix = TEXT( "scrub begin" );
+    //FQualifiedFrameTime frame_time = mSequencer->GetLocalTime();
+    //EMovieScenePlayerStatus::Type state = mSequencer->GetPlaybackStatus();
+
+    //UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, state ); // 2=Scrubbing 0=Stopped
+}
+
+void
+FBoardSequenceCustomization::OnEndScrubbing()
+{
+    //FString prefix = TEXT( "scrub end" );
+    //FQualifiedFrameTime frame_time = mSequencer->GetLocalTime();
+    //EMovieScenePlayerStatus::Type state = mSequencer->GetPlaybackStatus();
+
+    //UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, state );
 }
 
 //---
