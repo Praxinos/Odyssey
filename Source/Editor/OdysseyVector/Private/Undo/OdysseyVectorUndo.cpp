@@ -1,4 +1,5 @@
 #include "Undo/OdysseyVectorUndo.h"
+#include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegmentCubic.h"
@@ -25,6 +26,167 @@ void
 FOdysseyVectorUndo::Revert( UObject* iIgnored )
 {
     mApplied = false;
+}
+
+FSnapshotTagInbetweener::~FSnapshotTagInbetweener()
+{
+
+}
+
+FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                , uint64 iSnapshotFlags )
+    : mSnapshotFlags( iSnapshotFlags )
+    , mInbetweenerTag( iInbetweenerTag )
+{
+            static const uint64 TRANSFORMATIONS   = ( 1ULL <<  0 );
+            static const uint64 CHART             = ( 1ULL <<  1 );
+            static const uint64 INBETWEENCOUNT    = ( 1ULL <<  3 );
+            static const uint64 GRIDSIZE          = ( 1ULL <<  4 );
+            static const uint64 GRIDTYPE          = ( 1ULL <<  5 );
+            static const uint64 GRIDGEOMETRY      = ( 1ULL <<  6 );
+            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  7 );
+
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
+    {
+        mInbetweenerTag->GetTargetTransform( mTranslationX
+                                           , mTranslationY
+                                           , mRotation
+                                           , mScalingX
+                                           , mScalingY );
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+    {
+        mInbetweenCount = mInbetweenerTag->GetInbetweenCount();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART )
+    {
+        mChart = mInbetweenerTag->GetChart();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+    {
+        mGridSizeX = mInbetweenerTag->GetGrid()->GetNumQuadX();
+        mGridSizeY = mInbetweenerTag->GetGrid()->GetNumQuadY();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
+    {
+        mGridType = mInbetweenerTag->GetGridType();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE )
+    {
+        mInterpolationType = mInbetweenerTag->GetInterpolationType();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY )
+    {
+        mInbetweenerTag->GetGrid()->GetGeometry( mGridGeometry
+                                               , eInbetweenerPointPositionType::TargetPosition );
+    }
+}
+
+bool
+FSnapshotTagInbetweener::Restore()
+{
+    std::vector<::ULIS::FVec2D> swapGridGeometry;
+
+    // pre-step. Backup grid geometry before being changed
+    
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
+    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
+    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
+    {
+        mInbetweenerTag->GetGrid()->GetGeometry( swapGridGeometry
+                                               , eInbetweenerPointPositionType::TargetPosition );
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
+    {
+        double swapTranslationX, swapTranslationY, swapRotation, swapScalingX, swapScalingY;
+
+        mInbetweenerTag->GetTargetTransform( swapTranslationX
+                                           , swapTranslationY
+                                           , swapRotation
+                                           , swapScalingX
+                                           , swapScalingY );
+
+        mInbetweenerTag->SetTargetTransform( mTranslationX
+                                           , mTranslationY
+                                           , mRotation
+                                           , mScalingX
+                                           , mScalingY );
+
+        mInbetweenerTag->UpdateMatrix();
+
+        mTranslationX = swapTranslationX;
+        mTranslationY = swapTranslationY;
+        mRotation     = swapRotation;
+        mScalingX     = swapScalingX;
+        mScalingY     = swapScalingY;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+    {
+        uint32 swapCount = mInbetweenerTag->GetInbetweenCount();
+
+        mInbetweenerTag->SetInbetweenCount( mInbetweenCount );
+
+        mInbetweenCount = swapCount;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART )
+    {
+        FInbetweenerChart swapChart = mInbetweenerTag->GetChart();
+
+        mInbetweenerTag->GetChart() = mChart;
+
+        mChart = swapChart;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+    {
+        uint32 swaGridSizeX = mInbetweenerTag->GetGrid()->GetNumQuadX();
+        uint32 swaGridSizeY = mInbetweenerTag->GetGrid()->GetNumQuadY();
+
+        mInbetweenerTag->SetGridNumQuad( mGridSizeX, mGridSizeY );
+
+        mGridSizeX = swaGridSizeX;
+        mGridSizeY = swaGridSizeY;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
+    {
+        eInbetweenerGridType swapGridType = mInbetweenerTag->GetGridType();
+
+        mInbetweenerTag->SetGridType( mGridType );
+
+        mGridType = swapGridType;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE )
+    {
+        eInbetweenerInterpolationType swapInterpolationType = mInbetweenerTag->GetInterpolationType();
+
+        mInbetweenerTag->SetInterpolationType( mInterpolationType );
+
+        mInterpolationType = swapInterpolationType;
+    }
+
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
+    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
+    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
+    {
+        mInbetweenerTag->GetGrid()->SetGeometry( mGridGeometry
+                                               , eInbetweenerPointPositionType::TargetPosition );
+
+        mGridGeometry = swapGridGeometry;
+    }
+
+    return true; // restore succeeded
 }
 
 FSnapshotObject::~FSnapshotObject()

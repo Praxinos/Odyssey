@@ -142,6 +142,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void Invalidate( uint64 iInvalidationFlags );
         FInbetweenerGrid* GetGrid();
         std::vector<FInterpolatedPath>& GetInterpolatedPathBuffer();
+        void GetTargetTransform( double& oTranslationX
+                               , double& oTranslationY
+                               , double& oRotation
+                               , double& oScalingX
+                               , double& oScalingY );
+        void SetTargetTransform( double iTranslationX
+                               , double iTranslationY
+                               , double iRotation
+                               , double iScalingX
+                               , double iScalingY );
 
     protected:
         void UpdateAnimationCells( uint32 iInbetweenCount );

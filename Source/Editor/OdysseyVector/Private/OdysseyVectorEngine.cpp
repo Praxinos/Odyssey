@@ -4,6 +4,7 @@
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
 #include <future>
 #include <execution>
@@ -1721,4 +1722,32 @@ FOdysseyVectorEngine::RemoveObjects( const std::list<FOdysseyVectorObject*>& iOb
             oRemovedObjectArray.push_back( vectorObject );
         }
     }
+}
+
+void
+FOdysseyVectorEngine::GetTransformedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oTransformedInbetweenerTagList )
+{
+    Traverse
+    ( mScene
+    , 0
+    , [ this
+      , &oTransformedInbetweenerTagList ]( FOdysseyVectorObject* object
+                                         , uint64 travesalFlags ) -> uint64
+      {
+          if( ObjectHasFocus( mScene, object, travesalFlags ) )
+          {
+              FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+              if( tag )
+              {
+                  FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                  oTransformedInbetweenerTagList.push_back( inbetweenerTag );
+
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              }
+          }
+
+          return 0;
+      } );
 }

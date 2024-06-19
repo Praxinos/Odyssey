@@ -278,6 +278,28 @@ FInbetweenerGrid::AddTrajectory( const ::ULIS::FVec2D& iLocalCoords )
     return false;
 }
 
+void
+FInbetweenerGrid::SetGeometry( const std::vector<::ULIS::FVec2D>& iGeometry
+                             , eInbetweenerPointPositionType iPositionType )
+{
+    for( uint32 i = 0; i < mPointBuffer.size(); i++ )
+    {
+        mPointBuffer[i].SetPosition( iPositionType, iGeometry[i].x, iGeometry[i].y );
+    }
+}
+
+void
+FInbetweenerGrid::GetGeometry( std::vector<::ULIS::FVec2D>& oGeometry
+                             , eInbetweenerPointPositionType iPositionType )
+{
+    oGeometry.reserve( mPointBuffer.size() );
+
+    for( FInbetweenerPoint& point : mPointBuffer )
+    {
+        oGeometry.emplace_back( point.GetPosition( iPositionType ) );
+    }
+}
+
 std::vector<FInbetweenerQuad>&
 FInbetweenerGrid::GetQuadBuffer()
 {

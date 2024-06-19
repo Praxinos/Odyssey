@@ -6,12 +6,12 @@
 #include "CoreMinimal.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoPointPosition.h"
-#include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #include "OdysseyPainterEditorVectorTransformTool.generated.h"
 
 class FOdysseyPainterEditorVectorTransformToolHUD;
+class FOdysseyVectorTagInbetweener;
+class FOdysseyVectorUndo;
 
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorVectorSelectionTool
@@ -65,8 +65,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                                  , const FOdysseyPoint& iPointInTexture );
         void GetTransformedObjectList( FOdysseyVectorGroupPaint* iScene
                                      , std::list<FOdysseyVectorObject*>& oObjectList );
+        void UpdateTransformedInbetweenerTagList( FOdysseyVectorGroupPaint* iScene );
 
     private:
+        std::list<FOdysseyVectorTagInbetweener*> mTransformedInbetweenerTagList;
         FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
         std::vector<FOdysseyVectorVertex*> mTransformedVertexArray;
         std::vector<FOdysseyVectorHandleSegment*> mTransformedHandleArray;

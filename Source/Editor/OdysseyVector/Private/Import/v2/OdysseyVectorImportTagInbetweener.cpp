@@ -35,13 +35,13 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHART:
                 {
-                    for( FInbetweenerInbetween& inbetween : iInbetweenerTag.GetChart().inbetweenBuffer )
+                    for( uint32 i = 0; i < iInbetweenerTag.GetInbetweenCount(); i++ )
                     {
                         float spacing;
 
                         Ar << spacing;
 
-                        inbetween.spacing = spacing;
+                        iInbetweenerTag.GetChart().inbetweenBuffer[i].spacing = spacing;
                     }
                 }
                 break;

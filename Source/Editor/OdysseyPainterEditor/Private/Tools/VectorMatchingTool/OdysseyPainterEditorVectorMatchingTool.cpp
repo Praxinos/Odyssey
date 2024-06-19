@@ -9,6 +9,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 
 #include "OdysseyVectorTagInbetweener.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -77,12 +78,26 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
 
             if( inbetweenerTag )
             {
+                // needed for valid GUndo pointer
+                GEditor->BeginTransaction(LOCTEXT("vector-matching-tool.transaction.match-grid","Vector Matching Tool"));
+                if( GUndo )
+                {
+                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene, inbetweenerTag );
+
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+                    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                    if (source)
+                        source->RecordCurrentFrameUndo();
+                }
+                GEditor->EndTransaction();
+
                 mMatchingHUD->PickTargetPoints( inbetweenerTag
-                                                , iPointInTexture.x
-                                                , iPointInTexture.y
-                                                , PickingRadius
-                                                , mPickedPointArray
-                                                , mWorldDistanceArray );
+                                              , iPointInTexture.x
+                                              , iPointInTexture.y
+                                              , PickingRadius
+                                              , mPickedPointArray
+                                              , mWorldDistanceArray );
             }
         }
     }

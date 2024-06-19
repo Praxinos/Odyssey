@@ -11,12 +11,14 @@
 
 #include "OdysseyVectorBrush.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 class FOdysseyVectorPoint;
 class FOdysseyVectorObject;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorVertex;
 class FOdysseyVectorSegmentCubic;
+class FOdysseyVectorTagInbetweener;
 
 namespace FSnapshotFlags
 {
@@ -67,6 +69,25 @@ namespace FSnapshotFlags
         }
 
         //static const uint32 SNAPSHOT_ALL = 0xFFFFFFFFFFFFFFFFULL;
+    }
+
+    namespace Tag
+    {
+        namespace Inbetweener
+        {
+            static const uint64 TRANSFORMATIONS   = ( 1ULL <<  0 );
+            static const uint64 CHART             = ( 1ULL <<  1 );
+            static const uint64 INBETWEENCOUNT    = ( 1ULL <<  3 );
+            static const uint64 GRIDSIZE          = ( 1ULL <<  4 );
+            static const uint64 GRIDTYPE          = ( 1ULL <<  5 );
+            static const uint64 GRIDGEOMETRY      = ( 1ULL <<  6 );
+            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  7 );
+            static const uint64 PARAM             = ( INBETWEENCOUNT
+                                                    | GRIDSIZE
+                                                    | GRIDTYPE
+                                                    | GRIDGEOMETRY
+                                                    | INTERPOLATIONTYPE );
+        }
     }
 
     namespace Object
@@ -184,6 +205,32 @@ class ODYSSEYVECTOR_API FSnapshotSegmentCubic
         uint32 mSnapshotFlags;
         FOdysseyVectorSegmentCubic* mCubicSegment;
         ULIS::FVec2D mHandleCoords[2];
+};
+
+class ODYSSEYVECTOR_API FSnapshotTagInbetweener
+{
+    public:
+        virtual ~FSnapshotTagInbetweener();
+        FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iObject
+                               , uint64 iSnapshotFlags );
+
+        virtual bool Restore();
+
+    protected:
+        uint64 mSnapshotFlags;
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        FInbetweenerChart  mChart;
+        double mTranslationX;
+        double mTranslationY;
+        double mRotation;
+        double mScalingX;
+        double mScalingY;
+        uint32 mInbetweenCount;
+        eInbetweenerGridType mGridType;
+        eInbetweenerInterpolationType mInterpolationType;
+        uint32 mGridSizeX;
+        uint32 mGridSizeY;
+        std::vector<::ULIS::FVec2D> mGridGeometry;
 };
 
 class ODYSSEYVECTOR_API FSnapshotObject

@@ -20,6 +20,7 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorSharedEnv;
 class FOdysseyVectorHandleSegment;
 class IOdysseyVectorAnimationCell;
+class FOdysseyVectorTagInbetweener;
 
 //#include "OdysseyVectorGroupPaint.generated.h"
 
@@ -341,6 +342,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                        , uint32 iImageHeight
                        , int32  iImageBitsPerPixel
                        , const FColor& iColor );
+
+        void GetTransformedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oTransformedInbetweenerTagList );
 
 /*
        uint64 GetDrawingFlags();

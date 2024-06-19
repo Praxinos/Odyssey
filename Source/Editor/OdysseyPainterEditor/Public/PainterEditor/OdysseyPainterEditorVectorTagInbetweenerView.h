@@ -5,6 +5,7 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
 
 #include "OdysseyPainterEditorVectorTagInbetweenerView.generated.h"
@@ -21,10 +22,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         ~UOdysseyPainterEditorVectorTagInbetweenerView();
         UOdysseyPainterEditorVectorTagInbetweenerView();
         UOdysseyPainterEditorVectorTagInbetweenerView( FOdysseyPainterEditor* iEditor
-                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+                                                     , FOdysseyVectorGroupPaint* iScene );
 
         void Update( FOdysseyPainterEditor* iEditor
-                   , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+                   , FOdysseyVectorGroupPaint* iScene
+                   , const std::list<FOdysseyVectorTagInbetweener*>& iSelectedInbetweenerTagList );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     protected:
@@ -35,7 +37,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
 
     protected:
         FOdysseyPainterEditor* mEditor;
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        FOdysseyVectorGroupPaint* mScene;
+        std::vector<FOdysseyVectorTagInbetweener*> mSelectedInbetweenerTagArray;
 
     public:
         UPROPERTY( EditAnywhere

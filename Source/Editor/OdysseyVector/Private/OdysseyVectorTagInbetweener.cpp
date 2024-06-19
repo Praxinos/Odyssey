@@ -351,6 +351,36 @@ FOdysseyVectorTagInbetweener::GetChart()
 }
 
 void
+FOdysseyVectorTagInbetweener::GetTargetTransform( double& oTranslationX
+                                                , double& oTranslationY
+                                                , double& oRotation
+                                                , double& oScalingX
+                                                , double& oScalingY )
+{
+    oTranslationX = mTargetTranslationX;
+    oTranslationY = mTargetTranslationY;
+    oRotation = mTargetRotation;
+    oScalingX = mTargetScalingX;
+    oScalingY = mTargetScalingY;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetTargetTransform( double iTranslationX
+                                                , double iTranslationY
+                                                , double iRotation
+                                                , double iScalingX
+                                                , double iScalingY )
+{
+    mTargetTranslationX = iTranslationX;
+    mTargetTranslationY = iTranslationY;
+    mTargetRotation = iRotation;
+    mTargetScalingX = iScalingX;
+    mTargetScalingY = iScalingY;
+
+    UpdateMatrix( );
+}
+
+void
 FOdysseyVectorTagInbetweener::UpdateMatrix()
 {
     mTargetLocalMatrix.reset();

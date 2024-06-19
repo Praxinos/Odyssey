@@ -11,6 +11,9 @@
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorObject.h"
+#include "Undo/OdysseyVectorUndoPointPosition.h"
+#include "Undo/OdysseyVectorUndoObjectTransform.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerTransform.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -158,6 +161,16 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
       } );
 }
 
+void
+UOdysseyPainterEditorVectorTransformTool::UpdateTransformedInbetweenerTagList( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    mTransformedInbetweenerTagList.clear();
+
+    vectorEngine->GetTransformedInbetweenerTagList( mTransformedInbetweenerTagList );
+}
+
 uint64
 UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
@@ -202,6 +215,15 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoObjectTransform( iScene, transformedObjectList );
+        }
+
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+        {
+            UpdateTransformedInbetweenerTagList( iScene );
+
+            // remember for undos. we don't register the undo in the mouse down event yet because
+            // it could conflict with the undo created by th emouse up event in the case of a no-drag
+            mUndo = new FOdysseyVectorUndoTagInbetweenerTransform( iScene, mTransformedInbetweenerTagList );
         }
 
         if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
@@ -404,67 +426,46 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
                                     , pivot.y - selectionBox.rect.y );
 
-        // run lambda recursively on altered objects
-        iEngine->Traverse
-        ( iScene
-        , 0
-        , [ iScene
-          , iEngine
-          , &spaceMatrix
-          , &inverseSpaceMatrix
-          , &translateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
-          {
-              if( iEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
-              {
-                  FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+        for( FOdysseyVectorTagInbetweener* inbetweenerTag : mTransformedInbetweenerTagList )
+        {
+            double translationX;
+            double translationY;
+            double rotation;
+            double scalingX;
+            double scalingY;
+            BLMatrix2D tagSpaceMatrix;
+            BLMatrix2D tagTranslateMatrix;
+            BLMatrix2D tagLocalMatrix;
+            BLMatrix2D tagWorldMatrix = inbetweenerTag->GetTargetWorldMatrix();
+            BLMatrix2D parentInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
 
-                  if( tag )
-                  {
-                      FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                      double translationX;
-                      double translationY;
-                      double rotation;
-                      double scalingX;
-                      double scalingY;
-                      BLMatrix2D tagSpaceMatrix;
-                      BLMatrix2D tagTranslateMatrix;
-                      BLMatrix2D tagLocalMatrix;
-                      BLMatrix2D tagWorldMatrix = inbetweenerTag->GetTargetWorldMatrix();
-                      BLMatrix2D parentInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+            // transfer object in "Selection Space" coordinates system
+            FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
 
-                      // transfer object in "Selection Space" coordinates system
-                      FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
+            // translate the object (local to the "Selection Space" coordinates system)
+            FOdysseyVector::MatrixMultiply( translateMatrix, tagSpaceMatrix, tagTranslateMatrix );
 
-                      // translate the object (local to the "Selection Space" coordinates system)
-                      FOdysseyVector::MatrixMultiply( translateMatrix, tagSpaceMatrix, tagTranslateMatrix );
+            // transfer the object back to world coordinates system
+            FOdysseyVector::MatrixMultiply( spaceMatrix, tagTranslateMatrix, tagWorldMatrix );
 
-                      // transfer the object back to world coordinates system
-                      FOdysseyVector::MatrixMultiply( spaceMatrix, tagTranslateMatrix, tagWorldMatrix );
+            // Convert the object to its parent coordinate system, i.e its local coordinates system.
+            FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, tagWorldMatrix, tagLocalMatrix );
 
-                      // Convert the object to its parent coordinate system, i.e its local coordinates system.
-                      FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, tagWorldMatrix, tagLocalMatrix );
+            // Extract the local transformations
+            FOdysseyVector::ExtractTransformations( tagLocalMatrix
+                                                 , &translationX
+                                                 , &translationY
+                                                 , &rotation // in radians
+                                                 , &scalingX
+                                                 , &scalingY );
 
-                      // Extract the local transformations
-                      FOdysseyVector::ExtractTransformations( tagLocalMatrix
-                                                            , &translationX
-                                                            , &translationY
-                                                            , &rotation // in radians
-                                                            , &scalingX
-                                                            , &scalingY );
+            // Apply the local transformations
+            inbetweenerTag->Translate( translationX, translationY );
+            inbetweenerTag->Rotate( rotation / M_PI * 180 ); // in degrees
+            inbetweenerTag->Scale( scalingX, scalingY );
 
-                      // Apply the local transformations
-                      inbetweenerTag->Translate( translationX, translationY );
-                      inbetweenerTag->Rotate( rotation / M_PI * 180 ); // in degrees
-                      inbetweenerTag->Scale( scalingX, scalingY );
-
-                      inbetweenerTag->UpdateMatrix();
-
-                      return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-                  }
-              }
-
-              return 0;
-          } );
+            inbetweenerTag->UpdateMatrix();
+        } 
 
         iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
 

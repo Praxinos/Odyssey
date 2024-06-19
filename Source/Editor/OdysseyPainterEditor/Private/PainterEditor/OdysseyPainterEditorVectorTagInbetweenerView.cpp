@@ -1,5 +1,5 @@
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
-#include "Undo/OdysseyVectorUndoChartAlter.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerParam.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
@@ -12,39 +12,55 @@ UOdysseyPainterEditorVectorTagInbetweenerView::~UOdysseyPainterEditorVectorTagIn
 
 UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInbetweenerView()
     : mEditor( nullptr )
-    , mInbetweenerTag( nullptr )
+    , mScene( nullptr )
 {
 }
 
 UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInbetweenerView( FOdysseyPainterEditor* iEditor
-                                                                                            , FOdysseyVectorTagInbetweener* iBucket )
+                                                                                            , FOdysseyVectorGroupPaint* iScene )
 {
-    Update( iEditor, iBucket );
+    std::list<FOdysseyVectorTagInbetweener*> emptyList;
+
+    Update( iEditor, iScene, emptyList );
 }
 
 void
 UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
 {
-    InterpolationType = mInbetweenerTag->GetInterpolationType();
-    GridType = mInbetweenerTag->GetGridType();
-    DivisionX = mInbetweenerTag->GetGridNumQuadX();
-    DivisionY  = mInbetweenerTag->GetGridNumQuadY();
-    InbetweenCount = mInbetweenerTag->GetInbetweenCount();
-
-    if( GridType == eInbetweenerGridType::ARAP )
+    if( mSelectedInbetweenerTagArray.size() )
     {
-        FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(mInbetweenerTag->GetGrid());
+        FOdysseyVectorTagInbetweener* selectedInbetweenerTag = mSelectedInbetweenerTagArray[0];
 
-        Rigidity = arapGrid->GetRigidity();
+        InterpolationType = selectedInbetweenerTag->GetInterpolationType();
+        GridType = selectedInbetweenerTag->GetGridType();
+        DivisionX = selectedInbetweenerTag->GetGridNumQuadX();
+        DivisionY = selectedInbetweenerTag->GetGridNumQuadY();
+        InbetweenCount = selectedInbetweenerTag->GetInbetweenCount();
+
+        if( GridType == eInbetweenerGridType::ARAP )
+        {
+            FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(selectedInbetweenerTag->GetGrid());
+
+            Rigidity = arapGrid->GetRigidity();
+        }
     }
 }
 
 void 
 UOdysseyPainterEditorVectorTagInbetweenerView::Update( FOdysseyPainterEditor* iEditor
-                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+                                                     , FOdysseyVectorGroupPaint* iScene
+                                                     , const std::list<FOdysseyVectorTagInbetweener*>& iSelectedInbetweenerTagList )
 {
     mEditor = iEditor;
-    mInbetweenerTag = iInbetweenerTag;
+    mScene = iScene;
+
+    mSelectedInbetweenerTagArray.clear();
+    mSelectedInbetweenerTagArray.reserve( iSelectedInbetweenerTagList.size() );
+
+    for( FOdysseyVectorTagInbetweener* selectedInbetweenerTag : iSelectedInbetweenerTagList )
+    {
+        mSelectedInbetweenerTagArray.push_back( selectedInbetweenerTag );
+    }
 
     ImportParam();
 }
@@ -54,45 +70,24 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
                                                               , const FName& iMemberPropertyName
                                                               , const FName& iCategory)
 {
-    if( mInbetweenerTag )
+    for( FOdysseyVectorTagInbetweener* selectedInbetweenerTag : mSelectedInbetweenerTagArray )
     {
-        FOdysseyVectorGroupPaint* vectorScene = mInbetweenerTag->GetOwner()->GetScene();
-
         //////////
         if( iPropertyName == "InbetweenCount" )
-        {
-            // needed for valid GUndo pointer
-            GEditor->BeginTransaction(LOCTEXT("vector-tag.transaction.property-changed","Property Changed"));
-            if( GUndo )
-            {
-                FOdysseyVectorUndo *undo = new FOdysseyVectorUndoChartAlter( vectorScene
-                                                                           , mInbetweenerTag );
-                // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
-                // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
-                // of a call to GEditor::PostEditChangeProperty()
-                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
-                TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-                if (source)
-                    source->RecordCurrentFrameUndo();
-            }
-            GEditor->EndTransaction();
-
-            mInbetweenerTag->SetInbetweenCount( InbetweenCount );
-        }
+            selectedInbetweenerTag->SetInbetweenCount( InbetweenCount );
 
         if( iPropertyName == "InterpolationType" )
-            mInbetweenerTag->SetInterpolationType( InterpolationType );
+            selectedInbetweenerTag->SetInterpolationType( InterpolationType );
 
         if( iPropertyName == "DivisionX" )
-            mInbetweenerTag->SetGridNumQuadX( DivisionX );
+            selectedInbetweenerTag->SetGridNumQuadX( DivisionX );
 
         if( iPropertyName == "DivisionY" )
-            mInbetweenerTag->SetGridNumQuadY( DivisionY );
+            selectedInbetweenerTag->SetGridNumQuadY( DivisionY );
 
         if( iPropertyName == "Rigidity" )
         {
-            FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(mInbetweenerTag->GetGrid());
+            FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(selectedInbetweenerTag->GetGrid());
 
             arapGrid->SetRigidity( Rigidity );
         }
@@ -100,7 +95,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
         // must be last to be able to update correctly grid type-dependent fields
         if( iPropertyName == "GridType" )
         {
-            mInbetweenerTag->SetGridType( GridType );
+            selectedInbetweenerTag->SetGridType( GridType );
 
             // updates grid type-dependent fields
             ImportParam();
@@ -116,17 +111,33 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive )
         return;
 
-    if( mInbetweenerTag )
+    if( mSelectedInbetweenerTagArray.size() )
     {
-        FOdysseyVectorGroupPaint* vectorScene = mInbetweenerTag->GetOwner()->GetScene();
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("vector-tag.transaction.property-changed","Property Changed"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerParam( mScene
+                                                                                , mSelectedInbetweenerTagArray );
+
+            // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
+            // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
+            // of a call to GEditor::PostEditChangeProperty()
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
 
         PropertyChanged( PropertyChangedEvent.GetPropertyName()
                        , PropertyChangedEvent.MemberProperty->GetFName()
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
-        vectorScene->Update( 0 );
+        mScene->Update( 0 );
         // calls delegates
-        vectorScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 }
 

@@ -64,6 +64,10 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         std::vector<FInbetweenerPoint>& GetPointBuffer();
         uint32 GetNumQuadX();
         uint32 GetNumQuadY();
+        void GetGeometry( std::vector<::ULIS::FVec2D>& oGeometry
+                        , eInbetweenerPointPositionType iPositionType );
+        void SetGeometry( const std::vector<::ULIS::FVec2D>& iGeometry
+                        , eInbetweenerPointPositionType iPositionType );
 
         friend class FOdysseyVectorTagInbetweener;
 

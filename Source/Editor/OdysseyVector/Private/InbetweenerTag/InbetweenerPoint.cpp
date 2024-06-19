@@ -187,7 +187,7 @@ FInbetweenerPoint::SetPosition( eInbetweenerPointPositionType iPositionType
     switch( iPositionType )
     {
         case eInbetweenerPointPositionType::SourcePosition : 
-            mSourcePosition = ::ULIS::FVec2D( iX, iY );
+            SetSourcePosition( iX, iY );
         break;
 
         case eInbetweenerPointPositionType::InterpPosition : 
@@ -199,7 +199,7 @@ FInbetweenerPoint::SetPosition( eInbetweenerPointPositionType iPositionType
         break;
 
         case eInbetweenerPointPositionType::TargetPosition : 
-            mTargetPosition = ::ULIS::FVec2D( iX, iY );
+            SetTargetPosition( iX, iY );
         break;
 
         default:
