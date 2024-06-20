@@ -50,9 +50,10 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                                 , uint32 iInbetweenIndex );
 
-        bool AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
-        bool AddTrajectory( FInbetweenerTrajectory* iTrajectory );
-        FInbetweenerQuad* GetQuad( const ::ULIS::FVec2D& iLocalCoords );
+        FInbetweenerTrajectory* AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
+        void AddTrajectory( FInbetweenerTrajectory* iTrajectory );
+        void RemoveTrajectory( FInbetweenerTrajectory* iTrajectory );
+        int GetQuadIndex( const ::ULIS::FVec2D& iLocalCoords );
 
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         virtual void Update( uint32 iUpdateFlags

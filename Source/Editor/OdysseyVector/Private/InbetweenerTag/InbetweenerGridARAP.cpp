@@ -299,11 +299,11 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
             BLPoint pt = conversionMatrix.mapPoint( originalPoint->GetX()
                                                   , originalPoint->GetY() );
 
+            int quadIndex = GetQuadIndex( ::ULIS::FVec2D( pt.x, pt.y ) );
 
-            FInbetweenerQuad* matchedQuad = GetQuad( ::ULIS::FVec2D( pt.x, pt.y ) );
-
-            if( matchedQuad )
+            if( quadIndex >= 0 )
             {
+                FInbetweenerQuad* matchedQuad = &mQuadBuffer[quadIndex];
                 ::ULIS::FRectD quadBBox = matchedQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
                 double quadX = pt.x - quadBBox.x;
                 double quadY = pt.y - quadBBox.y;

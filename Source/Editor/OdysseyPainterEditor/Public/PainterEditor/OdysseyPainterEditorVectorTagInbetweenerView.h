@@ -43,7 +43,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
     public:
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
-                 , meta = ( ToolTip  = "InbetweenCount"
+                 , meta = ( ToolTip  = "Inbetween Count"
                           , ClampMin = "0"
                           , ClampMax = "16"
                           , UIMin    = "0"
@@ -51,11 +51,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         uint32 InbetweenCount;
 
         UPROPERTY( EditAnywhere
-                 , Category = "Inbetweener" )
+                 , Category = "Inbetweener"
+                 , meta = ( ToolTip  = "Interpolation Type" ) )
         eInbetweenerInterpolationType InterpolationType;
 
         UPROPERTY( EditAnywhere
-                 , Category = "Inbetweener" )
+                 , Category = "Inbetweener"
+                 , meta = ( ToolTip  = "Grid Type" ) )
         eInbetweenerGridType GridType;
 
         UPROPERTY( EditAnywhere

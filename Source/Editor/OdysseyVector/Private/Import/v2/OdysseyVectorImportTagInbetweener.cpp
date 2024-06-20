@@ -191,7 +191,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY:
                 {
                     FInbetweenerTrajectory* trajectory = new FInbetweenerTrajectory( iInbetweenerTag.GetGrid()
-                                                                                   , nullptr
+                                                                                   , 0
                                                                                    , 0.0f
                                                                                    , 0.0f );
 

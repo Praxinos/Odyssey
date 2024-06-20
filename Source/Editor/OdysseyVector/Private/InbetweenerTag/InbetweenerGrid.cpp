@@ -206,8 +206,8 @@ FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPath
     }
 }
 
-FInbetweenerQuad*
-FInbetweenerGrid::GetQuad( const ::ULIS::FVec2D& iLocalCoords )
+int
+FInbetweenerGrid::GetQuadIndex( const ::ULIS::FVec2D& iLocalCoords )
 {
     ::ULIS::FRectD bbox = mInbetweenerTag->GetSourceBBox( false );
     double difX = iLocalCoords.x - bbox.x;
@@ -225,11 +225,11 @@ FInbetweenerGrid::GetQuad( const ::ULIS::FVec2D& iLocalCoords )
 
         if( mQuadBuffer[offset].IsLinked() == true )
         {
-            return &mQuadBuffer[offset];
+            return offset;
         }
     }
 
-    return quad;
+    return -1;
 }
 
 std::list<FInbetweenerTrajectory*>&
@@ -238,21 +238,26 @@ FInbetweenerGrid::GetTrajectoryList()
     return mTrajectoryList;
 }
 
-bool
+void
 FInbetweenerGrid::AddTrajectory( FInbetweenerTrajectory* iTrajectory )
 {
     mTrajectoryList.push_back( iTrajectory );
-
-    return true;
 }
 
-bool
+void
+FInbetweenerGrid::RemoveTrajectory( FInbetweenerTrajectory* iTrajectory )
+{
+    mTrajectoryList.remove( iTrajectory );
+}
+
+FInbetweenerTrajectory*
 FInbetweenerGrid::AddTrajectory( const ::ULIS::FVec2D& iLocalCoords )
 {
-    FInbetweenerQuad* quad = GetQuad( iLocalCoords );
+    int quadIndex = GetQuadIndex( iLocalCoords );
 
-    if( quad )
+    if( quadIndex >= 0 )
     {
+        FInbetweenerQuad* quad = &mQuadBuffer[quadIndex];
         FInbetweenerPoint** quadPoint = quad->GetPoints();
         ::ULIS::FVec2D p0Coords = quadPoint[0]->GetSourcePosition();
         ::ULIS::FVec2D p1Coords = quadPoint[1]->GetSourcePosition();
@@ -262,20 +267,21 @@ FInbetweenerGrid::AddTrajectory( const ::ULIS::FVec2D& iLocalCoords )
         double difY = p2Coords.y - p1Coords.y;
         double quadU = difX ? ( iLocalCoords.x - p0Coords.x ) / difX : 0.0f;
         double quadV = difY ? ( iLocalCoords.y - p0Coords.y ) / difY : 0.0f;
+        FInbetweenerTrajectory* trajectory = new FInbetweenerTrajectory( this
+                                                                       , quadIndex
+                                                                       , quadU
+                                                                       , quadV );
 
-        mTrajectoryList.push_back( new FInbetweenerTrajectory( this
-                                                             , quad
-                                                             , quadU
-                                                             , quadV ) );
+        mTrajectoryList.push_back( trajectory );
 
         mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES
                                    | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                    | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 
-        return true;
+        return trajectory;
     }
 
-    return false;
+    return nullptr;
 }
 
 void

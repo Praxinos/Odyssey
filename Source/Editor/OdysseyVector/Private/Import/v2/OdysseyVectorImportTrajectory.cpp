@@ -29,7 +29,7 @@ FOdysseyVectorImportV2::ReadTrajectory( FInbetweenerTrajectory& iTrajectory
                     Ar << quadU;
                     Ar << quadV;
 
-                    iTrajectory.Init( &quadBuffer[quadID], quadU, quadV );
+                    iTrajectory.Init( quadID, quadU, quadV );
                 }
                 break;
 

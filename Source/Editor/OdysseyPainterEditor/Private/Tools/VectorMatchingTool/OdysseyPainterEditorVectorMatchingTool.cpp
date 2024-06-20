@@ -21,7 +21,7 @@ UOdysseyPainterEditorVectorMatchingTool::~UOdysseyPainterEditorVectorMatchingToo
 
 UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorMatchingToolHUD( this ), false )
-    , PickingRadius( 10.0f )
+    , PickingRadius( 75.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
 
@@ -207,12 +207,9 @@ UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FSinglePropertyParams defaultPropertyParams;
-/*
-    const TSharedPtr<ISinglePropertyView> XDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsX", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> YDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsY", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> XDivHandle = XDivPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> YDivHandle = YDivPropertyView->GetPropertyHandle();
-*/
+    const TSharedPtr<ISinglePropertyView> pickingRadiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> pickingRadiusHandle = pickingRadiusPropertyView->GetPropertyHandle();
+
     return SNew(SUniformWrapPanel)
         .SlotPadding(FVector2D(3.f, 0.f))
         .EvenRowDistribution(true)
@@ -221,11 +218,12 @@ UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
         [
             SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
         ]
-/*
+
         + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(XDivHandle, XDivPropertyView).ToSharedRef()
+            CreatePropertyWidget(pickingRadiusHandle, pickingRadiusPropertyView).ToSharedRef()
         ]
+/*
         + SUniformWrapPanel::Slot()
         [
             CreatePropertyWidget(YDivHandle, YDivPropertyView).ToSharedRef()

@@ -137,6 +137,20 @@ namespace FSnapshotFlags
     }
 }
 
+class ODYSSEYVECTOR_API FSnapshotTrajectory
+{
+    public:
+        virtual ~FSnapshotTrajectory();
+        FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory );
+
+        virtual void Restore();
+
+    protected:
+        FInbetweenerTrajectory* mTrajectory;
+        ::ULIS::FVec2D mHandleDirection[2];
+        double mHandleLengthRatio[2];
+};
+
 class ODYSSEYVECTOR_API FSnapshotPoint
 {
     public:

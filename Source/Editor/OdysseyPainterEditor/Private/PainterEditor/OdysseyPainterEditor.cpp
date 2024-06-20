@@ -41,6 +41,7 @@
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "Undo/OdysseyVectorUndoTagAdd.h"
 #include "Undo/OdysseyVectorUndoTagRemove.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerChartAlter.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
@@ -1639,17 +1640,29 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
 void
 FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
+    std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
 
-    if( selectedObject )
+    vectorEngine->GetSelectedInbetweenerTagList( selectedInbetweenerTagList );
+
+    if( selectedInbetweenerTagList.size() )
     {
-        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-
-        if( tag )
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-chart","Reset Spacing Chart"));
+        if( GUndo )
         {
-            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene, selectedInbetweenerTagList );
 
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
+        for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
+        {
             inbetweenerTag->ResetChart();
         }
     }
@@ -1915,30 +1928,44 @@ void
 FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
                                         , FOdysseyVectorGroupPaint* iScene )
 {
+    std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FInbetweenerChart* copiedChart = GetCopiedChart();
 
-    for( FOdysseyVectorObject* selectedObject : iScene->GetEngine()->GetSelectedObjectList() )
+    if( copiedChart->inbetweenBuffer.size() > 1 )
     {
-        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+        // we substract 1 because the buffer also holds the final position
+        // which is not an inbetween per-se.
+        uint32 inbetweenCount = copiedChart->inbetweenBuffer.size() - 1;
 
-        if( tag )
+        vectorEngine->GetSelectedInbetweenerTagList( selectedInbetweenerTagList );
+
+        if( selectedInbetweenerTagList.size() )
         {
-            FOdysseyVectorTagInbetweener* tagInbetweener = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-            FInbetweenerChart* copiedChart = GetCopiedChart();
-            // we substract 1 because the buffer also holds the final position
-            // which is not an inbetween per-se.
-            uint32 inbetweenCount = copiedChart->inbetweenBuffer.size() - 1;
-
-            if( inbetweenCount )
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.paste-chart","Paste Spacing Chart"));
+            if( GUndo )
             {
-                tagInbetweener->SetInbetweenCount( inbetweenCount );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene, selectedInbetweenerTagList );
+
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
+            GEditor->EndTransaction();
+
+            for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
+            {
+                inbetweenerTag->SetInbetweenCount( inbetweenCount );
 
                 for( uint32 i = 0; i < inbetweenCount; i++ )
                 {
-                    tagInbetweener->GetChart().inbetweenBuffer[i].spacing = copiedChart->inbetweenBuffer[i].spacing;
+                    inbetweenerTag->GetChart().inbetweenBuffer[i].spacing = copiedChart->inbetweenBuffer[i].spacing;
                 }
 
-                tagInbetweener->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+                inbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
             }
         }
     }

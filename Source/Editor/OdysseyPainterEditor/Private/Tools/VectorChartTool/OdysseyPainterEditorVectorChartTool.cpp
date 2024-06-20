@@ -3,7 +3,7 @@
 
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartToolHUD.h"
-#include "Undo/OdysseyVectorUndoChartAlter.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerChartAlter.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
@@ -86,7 +86,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                 GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
                 if( GUndo )
                 {
-                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoChartAlter( iScene, inbetweenerTag );
+                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene, inbetweenerTag );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 

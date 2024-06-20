@@ -13,14 +13,15 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
     public:
         virtual ~FInbetweenerTrajectory();
         FInbetweenerTrajectory( FInbetweenerGrid* iGrid
-                              , FInbetweenerQuad* iQuad
+                              , uint32 iQuadIndex
                               , double iQuadU
                               , double iQuadV );
-        void Init( FInbetweenerQuad* iQuad
+        void Init( uint32 iQuadIndex
                  , double iQuadU
                  , double iQuadV );
         FInbetweenerHandleTrajectory* GetHandle( uint32 index );
         FInbetweenerQuad* GetQuad();
+        uint32 GetQuadIndex();
         double GetQuadU();
         double GetQuadV();
         void Update();
@@ -31,7 +32,7 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         FInbetweenerGrid* mGrid;
         ::ULIS::FVec2D mCubicBezier[4];
         FInbetweenerHandleTrajectory mHandle[2];
-        FInbetweenerQuad* mQuad;
+        uint32 mQuadIndex;
         double mQuadU;
         double mQuadV;
 };

@@ -1725,14 +1725,30 @@ FOdysseyVectorEngine::RemoveObjects( const std::list<FOdysseyVectorObject*>& iOb
 }
 
 void
-FOdysseyVectorEngine::GetTransformedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oTransformedInbetweenerTagList )
+FOdysseyVectorEngine::GetSelectedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList )
+{
+    for( FOdysseyVectorObject* selectedObject : mSelectedObjectList )
+    {
+        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+        if( tag )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+            oSelectedInbetweenerTagList.push_back( inbetweenerTag );
+        }
+    }
+}
+
+void
+FOdysseyVectorEngine::GetFocusedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oFocusedInbetweenerTagList )
 {
     Traverse
     ( mScene
     , 0
     , [ this
-      , &oTransformedInbetweenerTagList ]( FOdysseyVectorObject* object
-                                         , uint64 travesalFlags ) -> uint64
+      , &oFocusedInbetweenerTagList ]( FOdysseyVectorObject* object
+                                     , uint64 travesalFlags ) -> uint64
       {
           if( ObjectHasFocus( mScene, object, travesalFlags ) )
           {
@@ -1742,7 +1758,7 @@ FOdysseyVectorEngine::GetTransformedInbetweenerTagList( std::list<FOdysseyVector
               {
                   FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
-                  oTransformedInbetweenerTagList.push_back( inbetweenerTag );
+                  oFocusedInbetweenerTagList.push_back( inbetweenerTag );
 
                   return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
               }

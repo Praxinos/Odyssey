@@ -43,11 +43,11 @@ FOdysseyVectorExportV2::WriteTrajectoryCoords( FInbetweenerTrajectory& iTrajecto
                             , [&iTrajectory](FArchive &Ar) -> void
     {
         std::vector<FInbetweenerQuad>& quadBuffer = iTrajectory.GetGrid()->GetQuadBuffer();
-        uint32 quadID = ( iTrajectory.GetQuad() - &quadBuffer[0] );
+        uint32 quadIndex = iTrajectory.GetQuadIndex();
         double quadU = iTrajectory.GetQuadU();
         double quadV = iTrajectory.GetQuadV();
 
-        Ar << quadID;
+        Ar << quadIndex;
         Ar << quadU;
         Ar << quadV;
     } );

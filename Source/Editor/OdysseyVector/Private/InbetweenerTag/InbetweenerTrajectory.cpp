@@ -8,21 +8,21 @@ FInbetweenerTrajectory::~FInbetweenerTrajectory()
 }
 
 FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerGrid* iGrid
-                                              , FInbetweenerQuad* iQuad
+                                              , uint32 iQuadIndex
                                               , double iQuadU
                                               , double iQuadV )
     : mGrid( iGrid )
     , mHandle{ (this), (this) }
 {
-    Init( iQuad, iQuadU, iQuadV );
+    Init( iQuadIndex, iQuadU, iQuadV );
 }
 
 void
-FInbetweenerTrajectory::Init( FInbetweenerQuad* iQuad
+FInbetweenerTrajectory::Init( uint32 iQuadIndex
                             , double iQuadU
                             , double iQuadV )
 {
-    mQuad = iQuad;
+    mQuadIndex = iQuadIndex;
     mQuadU = iQuadU;
     mQuadV = iQuadV;
 }
@@ -32,15 +32,16 @@ FInbetweenerTrajectory::Update()
 {
     BLMatrix2D targetLocalMatrix = mGrid->GetInbetweenerTag()->GetTargetLocalMatrix();
     double bezierLength;
+    FInbetweenerQuad* quad = GetQuad();
 
-    mCubicBezier[0] = mQuad->GetPoint( eInbetweenerPointPositionType::SourcePosition
-                                     , mQuadU
-                                     , mQuadV );
+    mCubicBezier[0] = quad->GetPoint( eInbetweenerPointPositionType::SourcePosition
+                                    , mQuadU
+                                    , mQuadV );
 
     mCubicBezier[3] = FOdysseyVector::MapPoint( targetLocalMatrix
-                                              , mQuad->GetPoint( eInbetweenerPointPositionType::TargetPosition
-                                                               , mQuadU
-                                                               , mQuadV ) );
+                                              , quad->GetPoint( eInbetweenerPointPositionType::TargetPosition
+                                                              , mQuadU
+                                                              , mQuadV ) );
 
     bezierLength = ( mCubicBezier[3] - mCubicBezier[0] ).Distance();
 
@@ -69,7 +70,13 @@ FInbetweenerTrajectory::GetCubicBezier()
 FInbetweenerQuad* 
 FInbetweenerTrajectory::GetQuad()
 {
-    return mQuad;
+    return &mGrid->GetQuadBuffer()[mQuadIndex];
+}
+
+uint32
+FInbetweenerTrajectory::GetQuadIndex()
+{
+    return mQuadIndex;
 }
 
 double

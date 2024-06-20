@@ -168,7 +168,7 @@ UOdysseyPainterEditorVectorTransformTool::UpdateTransformedInbetweenerTagList( F
 
     mTransformedInbetweenerTagList.clear();
 
-    vectorEngine->GetTransformedInbetweenerTagList( mTransformedInbetweenerTagList );
+    vectorEngine->GetFocusedInbetweenerTagList( mTransformedInbetweenerTagList );
 }
 
 uint64

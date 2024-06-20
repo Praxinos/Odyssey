@@ -343,7 +343,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                        , int32  iImageBitsPerPixel
                        , const FColor& iColor );
 
-        void GetTransformedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oTransformedInbetweenerTagList );
+        void GetFocusedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oTransformedInbetweenerTagList );
+        void GetSelectedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList );
 
 /*
        uint64 GetDrawingFlags();
