@@ -96,7 +96,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
 {
     TSharedPtr<SWidget> widget = SAssignNew( mWrapBox, SWrapBox )
         .UseAllottedSize(true)
-        //.InnerSlotPadding(FVector2D(3.f, 3.f))
+        .InnerSlotPadding(FVector2D(2.f, 2.f))
         +SWrapBox::Slot()
         [
             SNew( SButton )
