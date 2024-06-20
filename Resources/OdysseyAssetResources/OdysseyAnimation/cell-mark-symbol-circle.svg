@@ -1,9 +1,13 @@
-<svg width="122.88" height="122.88" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" enable-background="new 0 0 122.88 122.88" version="1.1">
-
- <g>
-  <title>Layer 1</title>
-  <g id="svg_1">
-   <path fill="#ffffff" id="svg_2" d="m61.438,0c33.93,0 61.441,27.512 61.441,61.441c0,33.929 -27.512,61.438 -61.441,61.438c-33.926,0.001 -61.438,-27.509 -61.438,-61.438c0,-33.929 27.512,-61.441 61.438,-61.441l0,0z" clip-rule="evenodd" fill-rule="evenodd"/>
-  </g>
- </g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 12px;
+      }
+    </style>
+  </defs>
+  <path id="svg_2" data-name="svg 2" class="cls-1" d="M64,12c28.7,0,52,23.3,52,52s-23.3,52-52,52S12,92.7,12,64,35.3,12,64,12h0Z"/>
 </svg>

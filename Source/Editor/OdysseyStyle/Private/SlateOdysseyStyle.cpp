@@ -762,6 +762,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.CellMark.Symbol.Diamond", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-diamond", mIcon16x16));
     Set("Animation.CellMark.Symbol.Circle", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-circle", mIcon16x16));
     Set("Animation.CellMark.Symbol.Star", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-star", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Filled.Triangle", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-filled-triangle", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Filled.Diamond", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-filled-diamond", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Filled.Circle", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-filled-circle", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Filled.Star", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-filled-star", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Cross", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-cross", mIcon16x16));
+    Set("Animation.CellMark.Symbol.Checkmark", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-checkmark", mIcon16x16));
     Set("Animation.CellMark.Symbol.Invalid", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-invalid", mIcon16x16));
 
     FSlateColor primary( FStyleColors::Primary );

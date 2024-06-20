@@ -12,9 +12,15 @@ enum class EOdysseyAnimationCellMarkSymbol : uint8
 {
     Fill,
     Triangle,
+    FilledTriangle,
     Circle,
+    FilledCircle,
     Diamond,
-    Star
+    FilledDiamond,
+    Star,
+    FilledStar,
+    Cross,
+    Checkmark,
 };
 
 USTRUCT()
@@ -35,7 +41,7 @@ struct FAnimationCellMarkSettings
     bool DisplayInContextMenu = true;
 };
 
-UCLASS(config=Engine)
+UCLASS(config=EditorPerProjectUserSettings)
 class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationEditorProjectSettings
     : public UObject
 {
@@ -47,6 +53,7 @@ public:
  
 
     virtual void PostInitProperties() override;
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 public:
     /** The type of background to draw in the texture editor view port. */
@@ -54,5 +61,5 @@ public:
     TArray<FAnimationCellMarkSettings> AnimationCellsMarks;
 
     UPROPERTY(config, EditAnywhere, Category = "Animation Cell Marks Settings", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
-    float AnimationCellsMarksFillOpacity = 10.f;
+    float AnimationCellsMarksFillOpacity = 75.f;
 };

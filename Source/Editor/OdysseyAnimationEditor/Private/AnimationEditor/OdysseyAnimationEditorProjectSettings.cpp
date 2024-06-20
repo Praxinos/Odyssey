@@ -4,7 +4,6 @@
 #include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
 
 UOdysseyAnimationEditorProjectSettings::UOdysseyAnimationEditorProjectSettings()
-    : AnimationCellsMarks()
 {
 }
 
@@ -13,101 +12,103 @@ UOdysseyAnimationEditorProjectSettings::PostInitProperties()
 {
     Super::PostInitProperties();
 
+    LoadConfig();
+
     TArray<FAnimationCellMarkSettings> defaultCellMarks;
     
     defaultCellMarks.Add(
         {
-            TEXT("Red"),
+            TEXT("Key 1"),
             FLinearColor::Red,
-            EOdysseyAnimationCellMarkSymbol::Fill
+            EOdysseyAnimationCellMarkSymbol::Circle
         }
     );
 
     defaultCellMarks.Add(
         {
-            TEXT("Green"),
+            TEXT("Key 2"),
             FLinearColor::Green,
-            EOdysseyAnimationCellMarkSymbol::Fill
+            EOdysseyAnimationCellMarkSymbol::Circle
         }
     );
 
     defaultCellMarks.Add(
         {
-            TEXT("Blue"),
+            TEXT("Key 3"),
             FLinearColor::Blue,
+            EOdysseyAnimationCellMarkSymbol::Circle
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Breakdown 1"),
+            FLinearColor( 1.f, 0.f, 1.f ),
+            EOdysseyAnimationCellMarkSymbol::Triangle
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Breakdown 2"),
+            FLinearColor( 1.f, 1.f, 0.f ),
+            EOdysseyAnimationCellMarkSymbol::Triangle
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Breakdown 3"),
+            FLinearColor( 0.f, 1.f, 1.f ),
+            EOdysseyAnimationCellMarkSymbol::Triangle
+        }
+    );
+
+    defaultCellMarks.Add(
+        {
+            TEXT("Cleaned Key"),
+            FLinearColor::Black,
             EOdysseyAnimationCellMarkSymbol::Fill
         }
     );
 
     defaultCellMarks.Add(
         {
-            TEXT("Red"),
-            FLinearColor::Red,
+            TEXT("Empty Cell"),
+            FLinearColor::White,
             EOdysseyAnimationCellMarkSymbol::Fill
         }
     );
 
     defaultCellMarks.Add(
         {
-            TEXT("Green"),
-            FLinearColor::Green,
-            EOdysseyAnimationCellMarkSymbol::Fill
+            TEXT("To be checked"),
+            FLinearColor( 1.f, 0.3f, 0.475 ),
+            EOdysseyAnimationCellMarkSymbol::Star
         }
     );
 
     defaultCellMarks.Add(
         {
-            TEXT("Blue"),
-            FLinearColor::Blue,
-            EOdysseyAnimationCellMarkSymbol::Fill
+            TEXT("To redo"),
+            FLinearColor( 1.f, 0.2f, 0.f ),
+            EOdysseyAnimationCellMarkSymbol::Diamond
         }
     );
 
     defaultCellMarks.Add(
         {
-            TEXT("Red"),
-            FLinearColor::Red,
-            EOdysseyAnimationCellMarkSymbol::Fill
+            TEXT("Note"),
+            FLinearColor( 0.3f, 0.f, 0.6f ),
+            EOdysseyAnimationCellMarkSymbol::Diamond
         }
     );
 
     defaultCellMarks.Add(
         {
-            TEXT("Green"),
-            FLinearColor::Green,
-            EOdysseyAnimationCellMarkSymbol::Fill
-        }
-    );
-
-    defaultCellMarks.Add(
-        {
-            TEXT("Blue"),
-            FLinearColor::Blue,
-            EOdysseyAnimationCellMarkSymbol::Fill
-        }
-    );
-
-    defaultCellMarks.Add(
-        {
-            TEXT("Red"),
-            FLinearColor::Red,
-            EOdysseyAnimationCellMarkSymbol::Fill
-        }
-    );
-
-    defaultCellMarks.Add(
-        {
-            TEXT("Green"),
-            FLinearColor::Green,
-            EOdysseyAnimationCellMarkSymbol::Fill
-        }
-    );
-
-    defaultCellMarks.Add(
-        {
-            TEXT("Blue"),
-            FLinearColor::Blue,
-            EOdysseyAnimationCellMarkSymbol::Fill
+            TEXT("Validated"),
+            FLinearColor( 0.f, 0.5f, 0.3f ),
+            EOdysseyAnimationCellMarkSymbol::Star
         }
     );   
 
@@ -116,10 +117,17 @@ UOdysseyAnimationEditorProjectSettings::PostInitProperties()
         AnimationCellsMarks.Add(defaultCellMarks[i]);
     }
 
+    //Force the number of marks to 12, not more
     for (int i = AnimationCellsMarks.Num() - 1; i >= 12; i--)
     {
         AnimationCellsMarks.RemoveAt(i);
     }
+}
+
+void UOdysseyAnimationEditorProjectSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+    SaveConfig();
 }
 
 //Static

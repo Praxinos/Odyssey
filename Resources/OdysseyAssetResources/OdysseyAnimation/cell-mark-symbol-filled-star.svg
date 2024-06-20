@@ -3,12 +3,11 @@
   <defs>
     <style>
       .cls-1 {
-        fill: none;
+        fill: #fff;
         stroke: #fff;
-        stroke-miterlimit: 10;
         stroke-width: 12px;
       }
     </style>
   </defs>
-  <rect class="cls-1" x="25.8" y="25.8" width="76.4" height="76.4" transform="translate(-26.5 64) rotate(-45)"/>
+  <polygon id="svg_2" data-name="svg 2" class="cls-1" points="64 20 77.2 52.5 112 55.1 85.4 77.9 93.7 112 64 93.5 34.3 112 42.6 77.9 16 55.1 50.8 52.5 64 20"/>
 </svg>
