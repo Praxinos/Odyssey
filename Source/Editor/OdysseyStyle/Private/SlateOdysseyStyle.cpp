@@ -779,8 +779,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.LightTableKey.BackColor", primary);
     Set("Animation.LightTableKey.FrontColor", background);
 
-    Set("Animation.LightTable.OutOfPegs.Button.Dirty", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-dirty", mIcon16x16));
-    Set("Animation.LightTable.OutOfPegs.Button.None", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-none", mIcon16x16));
+    Set("Animation.LightTable.OutOfPegs.Button.On", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-on", mIcon16x16));
+    Set("Animation.LightTable.OutOfPegs.Button.Off", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-off", mIcon16x16));
     Set("Animation.LightTable.OutOfPegs.Button.Color", primary);
 
     //Texture

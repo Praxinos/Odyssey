@@ -272,9 +272,9 @@ SOdysseyAnimationTimelineLightTable::GetOutOfPegsButtonImage(int iCellOffset) co
 
 	TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
 	if (cell->IsOutOfPegs())
-		return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.Dirty");
+		return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.On");
 
-	return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.None");
+	return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.Off");
 }
 
 void
