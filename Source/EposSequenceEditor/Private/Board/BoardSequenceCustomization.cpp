@@ -645,11 +645,13 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
 void
 FBoardSequenceCustomization::OnGlobalTimeChanged()
 {
-    FString prefix = TEXT( "global time changed" );
-    FQualifiedFrameTime frame_time = mSequencer->GetLocalTime();
-    EMovieScenePlayerStatus::Type state = mSequencer->GetPlaybackStatus();
+    //FString prefix = TEXT( "global time changed" );
+    //FQualifiedFrameTime frame_time = mSequencer->GetLocalTime();
+    //EMovieScenePlayerStatus::Type state = mSequencer->GetPlaybackStatus();
 
-    UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, state );
+    //UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, state );
+
+    //---
 
     if( !GCurrentLevelEditingViewportClient  )
         return;
@@ -660,14 +662,16 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
     //---
 
     //FLevelViewportActorLock& lock = GCurrentLevelEditingViewportClient->GetCinematicActorLock();
-    //AActor* current_piloted_actor = lock.GetLockedActor();
+    //AActor* current_piloted_actor = lock.GetLockedActor(); // return nullptr
     AActor* current_piloted_actor = GCurrentLevelEditingViewportClient->GetActiveActorLock().Get();
     if( !current_piloted_actor )
         return;
 
     //---
 
-    ACineCameraActor* camera_at_current_frame = BoardSequenceTools::GetCamera( mSequencer, frame_time.Time.GetFrame() );
+    FFrameNumber current_frame = mSequencer->GetLocalTime().Time.GetFrame();
+
+    ACineCameraActor* camera_at_current_frame = BoardSequenceTools::GetCamera( mSequencer, current_frame );
 
     if( !camera_at_current_frame )
     {
@@ -683,7 +687,7 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
 
     //---
 
-    BoardSequenceTools::PilotCamera( mSequencer, frame_time.Time.GetFrame() );
+    BoardSequenceTools::PilotCamera( mSequencer, current_frame );
 }
 
 void
