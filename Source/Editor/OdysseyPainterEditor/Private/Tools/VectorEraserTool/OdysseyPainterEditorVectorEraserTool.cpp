@@ -8,6 +8,7 @@
 #include "ISinglePropertyView.h"
 #include "OdysseyVector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "Undo/OdysseyVectorUndoErase.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

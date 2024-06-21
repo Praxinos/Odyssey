@@ -14,6 +14,8 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorGUI

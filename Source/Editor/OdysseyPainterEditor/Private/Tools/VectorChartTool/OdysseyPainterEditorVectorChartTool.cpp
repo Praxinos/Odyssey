@@ -4,12 +4,12 @@
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartToolHUD.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerChartAlter.h"
-#include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
-
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

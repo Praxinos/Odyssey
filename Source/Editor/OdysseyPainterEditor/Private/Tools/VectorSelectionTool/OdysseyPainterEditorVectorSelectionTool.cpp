@@ -7,13 +7,15 @@
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorViewportTab.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
-
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+
 
 #include <chrono>
 

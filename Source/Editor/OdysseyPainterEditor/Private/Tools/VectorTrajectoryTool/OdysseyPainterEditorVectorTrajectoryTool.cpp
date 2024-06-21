@@ -3,15 +3,16 @@
 
 #include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
 #include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryToolHUD.h"
-//#include "Undo/OdysseyVectorUndoTrajectoryAlter.h"
-#include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
-
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorTagInbetweener.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryAlter.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryAdd.h"
+#include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryRemove.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -93,8 +94,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
     if ( ( iKey == EKeys::LeftAlt ) || ( iKey == EKeys::RightAlt ) )
     {
-        //mPickingMode  = ePathPickingMode::Alter;
-        //mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
+        mPickingMode = eTrajectoryPickingMode::Remove;
 
         retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
@@ -155,19 +155,22 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                     BLPoint pt = ownerInverseWolrdMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
                     FInbetweenerTrajectory* trajectory = inbetweenerTag->GetGrid()->AddTrajectory( ::ULIS::FVec2D( pt.x, pt.y ));
 
-                    // needed for valid GUndo pointer
-                    GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.add","Vector Trajectory Tool"));
-                    if( GUndo )
+                    if( trajectory )
                     {
-                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryAdd( iScene, inbetweenerTag, trajectory );
+                        // needed for valid GUndo pointer
+                        GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.add","Vector Trajectory Tool"));
+                        if( GUndo )
+                        {
+                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryAdd( iScene, inbetweenerTag, trajectory );
 
-                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                        if (source)
-                            source->RecordCurrentFrameUndo();
+                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                            if (source)
+                                source->RecordCurrentFrameUndo();
+                        }
+                        GEditor->EndTransaction();
                     }
-                    GEditor->EndTransaction();
                 }
 
                 if( mPickingMode == eTrajectoryPickingMode::Alter )
@@ -184,6 +187,34 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                         if( GUndo )
                         {
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( iScene, mPickedHandle->GetTrajectory() );
+
+                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                            if (source)
+                                source->RecordCurrentFrameUndo();
+                        }
+                        GEditor->EndTransaction();
+                    }
+                }
+
+                if( mPickingMode == eTrajectoryPickingMode::Remove )
+                {
+                    BLMatrix2D& ownerInverseWolrdMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+                    FInbetweenerTrajectory* trajectory = mTrajectoryHUD->PickTrajectory( inbetweenerTag
+                                                                                       , iPointInTexture.x
+                                                                                       , iPointInTexture.y
+                                                                                       , PickingRadius );
+
+                    if( trajectory )
+                    {
+                        inbetweenerTag->GetGrid()->RemoveTrajectory( trajectory );
+
+                        // needed for valid GUndo pointer
+                        GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.remove","Vector Trajectory Tool"));
+                        if( GUndo )
+                        {
+                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryRemove( iScene, inbetweenerTag, trajectory );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

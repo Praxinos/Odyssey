@@ -7,9 +7,6 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyPaintEngine.h"
 
-#include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndo.h"
-
 #include "OdysseyPainterEditorVectorPaintBucketTool.generated.h"
 
 class FOdysseyPaintEngine;

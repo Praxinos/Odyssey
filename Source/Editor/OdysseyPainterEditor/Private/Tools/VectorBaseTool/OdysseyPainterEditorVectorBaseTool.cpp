@@ -13,7 +13,8 @@
 #include "Palette/OdysseyPalette.h"
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "ISinglePropertyView.h"
-
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEllipse.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

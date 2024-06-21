@@ -1,6 +1,7 @@
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserToolHUD.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorEraserToolHUD::~FOdysseyPainterEditorVectorEraserToolHUD()
 {

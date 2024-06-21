@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
-#include "OdysseyVector.h"
+
 #include "OdysseyPainterEditorVectorSelectionTool.generated.h"
 
 UENUM()

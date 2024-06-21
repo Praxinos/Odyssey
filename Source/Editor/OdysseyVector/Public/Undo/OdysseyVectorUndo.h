@@ -82,11 +82,13 @@ namespace FSnapshotFlags
             static const uint64 GRIDTYPE          = ( 1ULL <<  5 );
             static const uint64 GRIDGEOMETRY      = ( 1ULL <<  6 );
             static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  7 );
+            static const uint64 ARAPRIGIDITY      = ( 1ULL <<  8 );
             static const uint64 PARAM             = ( INBETWEENCOUNT
                                                     | GRIDSIZE
                                                     | GRIDTYPE
                                                     | GRIDGEOMETRY
-                                                    | INTERPOLATIONTYPE );
+                                                    | INTERPOLATIONTYPE
+                                                    | ARAPRIGIDITY );
         }
     }
 
@@ -231,6 +233,10 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         virtual bool Restore();
 
     protected:
+        void SaveTrajectories( std::vector<FInbetweenerTrajectory*>& oTrajectoryArray );
+        void RestoreTrajectories();
+
+    protected:
         uint64 mSnapshotFlags;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         FInbetweenerChart  mChart;
@@ -245,6 +251,8 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         uint32 mGridSizeX;
         uint32 mGridSizeY;
         std::vector<::ULIS::FVec2D> mGridGeometry;
+        uint32 mARAPRigidity;
+        std::vector<FInbetweenerTrajectory*> mTrajectoryArray;
 };
 
 class ODYSSEYVECTOR_API FSnapshotObject

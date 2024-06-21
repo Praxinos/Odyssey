@@ -7,6 +7,16 @@
 // for pow()
 #include <unsupported/Eigen/MatrixFunctions>
 
+FInbetweenerGrid::~FInbetweenerGrid()
+{
+    mTrajectoryList.remove_if( []( FInbetweenerTrajectory* trajectory )
+                               {
+                                   delete trajectory;
+
+                                   return true;
+                               } );
+}
+
 FInbetweenerGrid::FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                   , uint32 iNumQuadX
                                   , uint32 iNumQuadY )
@@ -76,13 +86,7 @@ FInbetweenerGrid::Make( uint32 iNumQuadX
     mNumQuadY = iNumQuadY;
     mQuadArea = 0.0f;
 
-    mTrajectoryList.remove_if( []( FInbetweenerTrajectory* trajectory )
-                               {
-                                   delete trajectory;
-
-                                   return true;
-                               } );
-
+    RemoveAllTrajectories();
     mPointBuffer.clear();
     mQuadBuffer.clear();
 
@@ -168,7 +172,15 @@ void
 FInbetweenerGrid::Update( uint32 iUpdateFlags
                         , uint64 iTagInvalidationFlags )
 {
+    if( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX )
+    {
+        mSourceCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::SourcePosition );
+    }
 
+    if( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETBBOX )
+    {
+        mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition );
+    }
 }
 
 ::ULIS::FVec2D
@@ -248,6 +260,12 @@ void
 FInbetweenerGrid::RemoveTrajectory( FInbetweenerTrajectory* iTrajectory )
 {
     mTrajectoryList.remove( iTrajectory );
+}
+
+void
+FInbetweenerGrid::RemoveAllTrajectories()
+{
+    mTrajectoryList.clear();
 }
 
 FInbetweenerTrajectory*
@@ -468,8 +486,8 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
     }
 
     // Compute ref and target center of mass
-    mSourceCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::SourcePosition );
-    mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition );
+    //mSourceCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::SourcePosition );
+    //mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition );
 
     //m_precomputeDirty = false;
     //m_arapDirty = true;

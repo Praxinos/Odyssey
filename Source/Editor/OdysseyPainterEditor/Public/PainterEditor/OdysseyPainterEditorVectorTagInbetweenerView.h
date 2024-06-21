@@ -30,6 +30,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     protected:
+        static uint64 GetSnapshotFlags( const FName& iPropertyName
+                                      , const FName& iMemberPropertyName
+                                      , const FName& iCategory );
         virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName
                                     , const FName& iMemberPropertyName

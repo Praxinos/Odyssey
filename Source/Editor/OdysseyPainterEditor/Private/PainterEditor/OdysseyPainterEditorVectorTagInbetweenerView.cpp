@@ -103,6 +103,35 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
     }
 }
 
+// static
+uint64
+UOdysseyPainterEditorVectorTagInbetweenerView::GetSnapshotFlags( const FName& iPropertyName
+                                                               , const FName& iMemberPropertyName
+                                                               , const FName& iCategory )
+{ 
+    uint64 snapshotFlags = 0;
+
+    if( iPropertyName == "InbetweenCount" )
+        snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT;
+
+    if( iPropertyName == "InterpolationType" )
+        snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE;
+
+    if( iPropertyName == "DivisionX" )
+        snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::GRIDSIZE;
+
+    if( iPropertyName == "DivisionY" )
+        snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::GRIDSIZE;
+
+    if( iPropertyName == "Rigidity" )
+        snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::ARAPRIGIDITY;
+
+    if( iPropertyName == "GridType" )
+        snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::GRIDTYPE;
+
+    return snapshotFlags;
+}
+
 void
 UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
@@ -113,12 +142,17 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
 
     if( mSelectedInbetweenerTagArray.size() )
     {
+        uint64 snapshotFlags = GetSnapshotFlags( PropertyChangedEvent.GetPropertyName()
+                                               , PropertyChangedEvent.MemberProperty->GetFName()
+                                               , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
+
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-tag.transaction.property-changed","Property Changed"));
         if( GUndo )
         {
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerParam( mScene
-                                                                                , mSelectedInbetweenerTagArray );
+                                                                                , mSelectedInbetweenerTagArray
+                                                                                , snapshotFlags );
 
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences

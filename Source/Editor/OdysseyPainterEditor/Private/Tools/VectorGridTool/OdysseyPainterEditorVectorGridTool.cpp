@@ -7,6 +7,9 @@
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "Undo/OdysseyVectorUndoPointPosition.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 
 // testing
 #include "Import/svg/OdysseyVectorImportSVG.h"

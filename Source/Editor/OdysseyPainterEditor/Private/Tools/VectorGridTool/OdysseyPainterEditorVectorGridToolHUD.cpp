@@ -3,6 +3,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorGridToolHUD::~FOdysseyPainterEditorVectorGridToolHUD()
 {

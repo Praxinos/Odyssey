@@ -62,7 +62,10 @@ FSnapshotTrajectory::Restore()
 
 FSnapshotTagInbetweener::~FSnapshotTagInbetweener()
 {
-
+    for ( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
+    {
+        delete trajectory;
+    }
 }
 
 FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iInbetweenerTag
@@ -70,14 +73,11 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     : mSnapshotFlags( iSnapshotFlags )
     , mInbetweenerTag( iInbetweenerTag )
 {
-            static const uint64 TRANSFORMATIONS   = ( 1ULL <<  0 );
-            static const uint64 CHART             = ( 1ULL <<  1 );
-            static const uint64 INBETWEENCOUNT    = ( 1ULL <<  3 );
-            static const uint64 GRIDSIZE          = ( 1ULL <<  4 );
-            static const uint64 GRIDTYPE          = ( 1ULL <<  5 );
-            static const uint64 GRIDGEOMETRY      = ( 1ULL <<  6 );
-            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  7 );
-
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE ) )
+    {
+        SaveTrajectories( mTrajectoryArray );
+    }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
     {
@@ -109,12 +109,21 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
         mGridType = mInbetweenerTag->GetGridType();
     }
 
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ARAPRIGIDITY )
+    {
+        FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(mInbetweenerTag->GetGrid());
+
+        mARAPRigidity = arapGrid->GetRigidity();
+    }
+
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE )
     {
         mInterpolationType = mInbetweenerTag->GetInterpolationType();
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY )
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
+    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
+    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
     {
         mInbetweenerTag->GetGrid()->GetGeometry( mGridGeometry
                                                , eInbetweenerPointPositionType::TargetPosition );
@@ -124,11 +133,18 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
 bool
 FSnapshotTagInbetweener::Restore()
 {
+    std::vector<FInbetweenerTrajectory*> swapTrajectoryArray;
     std::vector<::ULIS::FVec2D> swapGridGeometry;
     FInbetweenerChart swapChart;
 
     // pre-step. Backup grid geometry before being changed
-    
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE ) )
+    {
+        SaveTrajectories( swapTrajectoryArray );
+    }
+
+    // pre-step. Backup grid geometry before being changed
     if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
@@ -143,8 +159,6 @@ FSnapshotTagInbetweener::Restore()
     {
         swapChart = mInbetweenerTag->GetChart();
     }
-
-
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
     {
@@ -209,7 +223,23 @@ FSnapshotTagInbetweener::Restore()
         mInterpolationType = swapInterpolationType;
     }
 
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ARAPRIGIDITY )
+    {
+        FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(mInbetweenerTag->GetGrid());
+        uint32 swapARAPRigidity = arapGrid->GetRigidity();
 
+        arapGrid->SetRigidity( mARAPRigidity );
+
+        mARAPRigidity = swapARAPRigidity;
+    }
+
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE ) )
+    {
+        RestoreTrajectories();
+
+        mTrajectoryArray = swapTrajectoryArray;
+    }
 
     // restore grid geometry after params have been set
     if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
@@ -232,6 +262,31 @@ FSnapshotTagInbetweener::Restore()
     }
 
     return true; // restore succeeded
+}
+
+void
+FSnapshotTagInbetweener::SaveTrajectories( std::vector<FInbetweenerTrajectory*>& oTrajectoryArray )
+{
+    std::list<FInbetweenerTrajectory*>& trajectoryList = mInbetweenerTag->GetGrid()->GetTrajectoryList();
+
+    oTrajectoryArray.clear();
+    oTrajectoryArray.reserve( trajectoryList.size() );
+
+    for( FInbetweenerTrajectory* trajectory : trajectoryList )
+    {
+        oTrajectoryArray.push_back( trajectory );
+    }
+}
+
+void
+FSnapshotTagInbetweener::RestoreTrajectories()
+{
+    mInbetweenerTag->GetGrid()->RemoveAllTrajectories();
+
+    for( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
+    {
+        mInbetweenerTag->GetGrid()->AddTrajectory( trajectory );
+    }
 }
 
 FSnapshotObject::~FSnapshotObject()

@@ -5,6 +5,8 @@
 #include "ISinglePropertyView.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
 #include "HUD/OdysseyVectorHUD.h"
 
 /////////////////////////////////////////////////////

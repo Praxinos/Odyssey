@@ -6,9 +6,6 @@
 
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyMediaVector.h"
-#include "Undo/OdysseyVectorUndoBucketAdd.h"
-#include "Undo/OdysseyVectorUndoBucketRemove.h"
-#include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorBucketView.h"
@@ -20,6 +17,10 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorEngine.h"
+#include "Undo/OdysseyVectorUndoPointPosition.h"
+#include "Undo/OdysseyVectorUndoBucketAdd.h"
+#include "Undo/OdysseyVectorUndoBucketRemove.h"
+#include "Undo/OdysseyVectorUndoBucketParam.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

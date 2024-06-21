@@ -29,6 +29,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                           , double iWorldY
                           , bool iRelative );
 
+        FInbetweenerTrajectory* PickTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                              , double iWorldX
+                                              , double iWorldY
+                                              , double iPickingRadius );
+
         FInbetweenerHandleTrajectory* PickHandle( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                 , double iWorldX
                                                 , double iWorldY

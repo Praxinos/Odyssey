@@ -6,6 +6,9 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
+#include "Undo/OdysseyVectorUndoSegmentReshape.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

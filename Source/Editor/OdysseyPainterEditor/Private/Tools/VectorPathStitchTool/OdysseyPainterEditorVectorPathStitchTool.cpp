@@ -9,6 +9,7 @@
 #include "OdysseyPainterEditorSource.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
+#include "Undo/OdysseyVectorUndoPathStitch.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

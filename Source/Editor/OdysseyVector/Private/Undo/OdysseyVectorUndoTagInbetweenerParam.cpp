@@ -16,13 +16,6 @@ FOdysseyVectorUndoTagInbetweenerParam::~FOdysseyVectorUndoTagInbetweenerParam()
 }
 
 FOdysseyVectorUndoTagInbetweenerParam::FOdysseyVectorUndoTagInbetweenerParam( FOdysseyVectorGroupPaint* iScene
-                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
-    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, FSnapshotFlags::Tag::Inbetweener::PARAM )
-{
-
-}
-
-FOdysseyVectorUndoTagInbetweenerParam::FOdysseyVectorUndoTagInbetweenerParam( FOdysseyVectorGroupPaint* iScene
                                                                             , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
                                                                             , uint64 iSnapshotFlags )
     : FOdysseyVectorUndo( iScene )

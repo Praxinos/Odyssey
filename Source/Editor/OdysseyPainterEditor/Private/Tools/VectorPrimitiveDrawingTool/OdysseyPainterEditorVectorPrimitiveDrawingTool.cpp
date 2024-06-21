@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
-#include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "OdysseyPaletteEntryColor.h"
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
@@ -12,10 +11,13 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorPrimitive.h"
 #include "OdysseyVectorEllipse.h"
 #include "OdysseyVectorLine.h"
 #include "OdysseyVectorRectangle.h"
+#include "Undo/OdysseyVectorUndoObjectAdd.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L

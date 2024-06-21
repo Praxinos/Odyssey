@@ -5,14 +5,14 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
-#include "OdysseyVector.h"
+#include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
-
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
 
 class FOdysseyPainterEditorVectorPathEditToolHUD;
 class FOdysseyVectorVertex;
 class FOdysseyVectorGroupPaint;
+class FOdysseyVectorHandleSegment;
 
 UENUM()
 enum class ePathPickingMode : uint8

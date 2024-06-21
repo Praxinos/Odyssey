@@ -2,6 +2,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorBaseToolHUD::~FOdysseyPainterEditorVectorBaseToolHUD()
 {

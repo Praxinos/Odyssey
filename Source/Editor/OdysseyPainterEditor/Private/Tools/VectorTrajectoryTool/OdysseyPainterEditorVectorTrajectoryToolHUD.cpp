@@ -1,6 +1,8 @@
 #include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryToolHUD.h"
 #include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
 #include "OdysseyPainterEditor.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "InbetweenerTag/InbetweenerTrajectory.h"
@@ -19,6 +21,41 @@ void
 FOdysseyPainterEditorVectorTrajectoryToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
 
+}
+
+FInbetweenerTrajectory*
+FOdysseyPainterEditorVectorTrajectoryToolHUD::PickTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                            , double iWorldX
+                                                            , double iWorldY
+                                                            , double iPickingRadius )
+{
+    std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag->GetGrid()->GetTrajectoryList();
+    BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+    for( FInbetweenerTrajectory* trajectory : trajectoryList )
+    {
+        ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
+
+        BLPoint p0World = ownerWorldMatrix.mapPoint( cubicBezier[0].x, cubicBezier[0].y );
+        BLPoint p1World = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
+        BLPoint p2World = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
+        BLPoint p3World = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y ); 
+
+
+        if( ( ::ULIS::FVec2D( p0World.x, p0World.y )
+            - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
+        {
+            return trajectory;
+        }
+
+        if( ( ::ULIS::FVec2D( p3World.x, p3World.y )
+            - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
+        {
+            return trajectory;
+        }
+    }
+
+    return nullptr;
 }
 
 FInbetweenerHandleTrajectory*

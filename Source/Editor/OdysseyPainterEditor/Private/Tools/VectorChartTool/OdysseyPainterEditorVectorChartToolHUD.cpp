@@ -3,6 +3,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHUD()
 {

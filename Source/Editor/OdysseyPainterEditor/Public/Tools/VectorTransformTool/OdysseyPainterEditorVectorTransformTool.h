@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
-#include "OdysseyVector.h"
 
 #include "OdysseyPainterEditorVectorTransformTool.generated.h"
 

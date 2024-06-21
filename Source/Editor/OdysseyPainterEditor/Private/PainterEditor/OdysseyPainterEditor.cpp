@@ -1667,6 +1667,8 @@ FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor, FOdyss
         }
     }
 
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
     // call callbacks if any (for refreshing GUI e.g)
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );

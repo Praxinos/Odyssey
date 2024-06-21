@@ -13,6 +13,8 @@
 #include "OdysseyPainterEditor.h"
 #include "TextureEditor/OdysseyTextureEditorCommands.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

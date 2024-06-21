@@ -2,6 +2,7 @@
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
 #include "InbetweenerTag/InbetweenerQuad.h"

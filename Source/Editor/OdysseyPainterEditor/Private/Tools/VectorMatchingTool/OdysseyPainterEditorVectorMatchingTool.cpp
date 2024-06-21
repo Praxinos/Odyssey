@@ -7,7 +7,7 @@
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
-
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 

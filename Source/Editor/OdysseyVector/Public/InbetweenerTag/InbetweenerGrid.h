@@ -32,7 +32,7 @@ typedef Eigen::Triplet<double> TripletD;
 class ODYSSEYVECTOR_API FInbetweenerGrid
 {
     public:
-        virtual ~FInbetweenerGrid(){};
+        virtual ~FInbetweenerGrid();
         FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag
                         , uint32 iNumQuadX
                         , uint32 iNumQuadY );
@@ -53,6 +53,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         FInbetweenerTrajectory* AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
         void AddTrajectory( FInbetweenerTrajectory* iTrajectory );
         void RemoveTrajectory( FInbetweenerTrajectory* iTrajectory );
+        void RemoveAllTrajectories();
         int GetQuadIndex( const ::ULIS::FVec2D& iLocalCoords );
 
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
