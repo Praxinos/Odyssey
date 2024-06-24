@@ -16,8 +16,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerTrajectoryRemove : publi
     public:
         ~FOdysseyVectorUndoTagInbetweenerTrajectoryRemove();
         FOdysseyVectorUndoTagInbetweenerTrajectoryRemove( FOdysseyVectorGroupPaint* iScene
-                                                        , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                         , FInbetweenerTrajectory* iTrajectory );
+        FOdysseyVectorUndoTagInbetweenerTrajectoryRemove( FOdysseyVectorGroupPaint* iScene
+                                                        , const std::list<FInbetweenerTrajectory*>& iTrajectoryList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -29,6 +30,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerTrajectoryRemove : publi
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        FInbetweenerTrajectory* mTrajectory;
+        std::vector<FInbetweenerTrajectory*> mTrajectoryArray;
 };

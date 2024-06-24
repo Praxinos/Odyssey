@@ -391,6 +391,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.TopBar.Clear32", new IMAGE_BRUSH_SVG( "PainterEditor/trash", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.VectorModeVertex32",new IMAGE_BRUSH_SVG("PainterEditor/vector_mode_vertex",mIcon32x32));
     Set( "PainterEditor.TopBar.VectorModeObject32",new IMAGE_BRUSH_SVG("PainterEditor/vector_mode_object",mIcon32x32));
+    Set( "PainterEditor.TopBar.VectorModeInbetween32",new IMAGE_BRUSH_SVG("PainterEditor/vector_mode_inbetween",mIcon32x32));
 
     //PainterEditor - ToolsTab
     Set( "PainterEditor.ToolsTab.Transform64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon64x64 ) );
@@ -463,7 +464,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Curve16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/curve_16", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.Polygon32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/polygon_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.FreeHand32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/freehand_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Chart64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/chart_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.Chart64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/chart_tool", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.Trajectory64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/trajectory_tool", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.Matching64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/matching_tool", mIcon64x64 ) );
 
     //OdysseyPainterEditorTools
     Set( "OdysseyPainterEditorTools.Tile", mCoreTableRowStyle

@@ -28,7 +28,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                           , double iWorldX
                           , double iWorldY
                           , bool iRelative );
-
+        void PickTrajectory( FOdysseyVectorGroupPaint* iScene
+                           , double iWorldX
+                           , double iWorldY
+                           , double iPickingRadius
+                           , std::list<FInbetweenerTrajectory*>& oTrajectoryList );
         FInbetweenerTrajectory* PickTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                               , double iWorldX
                                               , double iWorldY
@@ -38,6 +42,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                                                 , double iWorldX
                                                 , double iWorldY
                                                 , double iPickingRadius );
+        void PickHandle( FOdysseyVectorGroupPaint* iScene
+                       , double iWorldX
+                       , double iWorldY
+                       , double iPickingRadius
+                       , std::list<FInbetweenerHandleTrajectory*>& oTrajectoryHandleList );
 
     private:
         void DrawTrajectory( BLContext* iBLContext

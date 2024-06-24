@@ -7,7 +7,10 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryRemove::~FOdysseyVectorUndoTagInbetwee
 {
     if( mApplied )
     {
-        delete mTrajectory;
+        for( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
+        {
+            delete trajectory;
+        }
     }
     else
     {
@@ -16,12 +19,22 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryRemove::~FOdysseyVectorUndoTagInbetwee
 }
 
 FOdysseyVectorUndoTagInbetweenerTrajectoryRemove::FOdysseyVectorUndoTagInbetweenerTrajectoryRemove( FOdysseyVectorGroupPaint* iScene
-                                                                                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                                                                   , FInbetweenerTrajectory* iTrajectory )
     : FOdysseyVectorUndo( iScene )
-    , mInbetweenerTag( iInbetweenerTag )
-    , mTrajectory( iTrajectory )
 {
+    mTrajectoryArray.push_back( iTrajectory );
+}
+
+FOdysseyVectorUndoTagInbetweenerTrajectoryRemove::FOdysseyVectorUndoTagInbetweenerTrajectoryRemove( FOdysseyVectorGroupPaint* iScene
+                                                                                                  , const std::list<FInbetweenerTrajectory*>& iTrajectoryList )
+    : FOdysseyVectorUndo( iScene )
+{
+    mTrajectoryArray.reserve( iTrajectoryList.size() );
+
+    for( FInbetweenerTrajectory* trajectory : iTrajectoryList )
+    {
+        mTrajectoryArray.push_back( trajectory );
+    }
 }
 
 void
@@ -30,7 +43,10 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryRemove::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mInbetweenerTag->GetGrid()->RemoveTrajectory( mTrajectory );
+    for( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
+    {
+        trajectory->GetGrid()->RemoveTrajectory( trajectory );
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
@@ -47,7 +63,10 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryRemove::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mInbetweenerTag->GetGrid()->AddTrajectory( mTrajectory );
+    for( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
+    {
+        trajectory->GetGrid()->AddTrajectory( trajectory );
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );

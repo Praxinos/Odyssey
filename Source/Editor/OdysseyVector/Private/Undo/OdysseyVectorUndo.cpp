@@ -42,6 +42,12 @@ FSnapshotTrajectory::FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory )
 {
 }
 
+FInbetweenerTrajectory*
+FSnapshotTrajectory::GetTrajectory()
+{
+    return mTrajectory;
+}
+
 void
 FSnapshotTrajectory::Restore()
 {
@@ -119,6 +125,11 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE )
     {
         mInterpolationType = mInbetweenerTag->GetInterpolationType();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::COLOR )
+    {
+        mColor = mInbetweenerTag->GetColor();
     }
 
     if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
@@ -231,6 +242,15 @@ FSnapshotTagInbetweener::Restore()
         arapGrid->SetRigidity( mARAPRigidity );
 
         mARAPRigidity = swapARAPRigidity;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::COLOR )
+    {
+        const FColor swapColor = mInbetweenerTag->GetColor();
+
+        mInbetweenerTag->SetColor( mColor );
+
+        mColor = swapColor;
     }
 
     if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )

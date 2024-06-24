@@ -108,7 +108,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                             , uint64 iHUDFlags );
 
         static void DrawInbetweens( BLContext* iBLContext
-                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag  );
 
         static ::ULIS::FVec2D GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld );

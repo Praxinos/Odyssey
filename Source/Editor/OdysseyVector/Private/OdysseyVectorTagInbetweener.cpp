@@ -148,6 +148,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mTargetScalingX    ( 1.0f )
     , mTargetScalingY    ( 1.0f )
     , mTargetRotation    ( 0.0f )
+    , mColor ( 255, 0, 255, 255 )
 {
     ResetChart();
     // Note: Matrix needs chart to be allocated first.
@@ -164,6 +165,27 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
 
     //AllocBuffers();
     //Interpolate();
+}
+
+const FColor&
+FOdysseyVectorTagInbetweener::GetColor()
+{
+    return mColor;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+{
+    mColor.R = iR;
+    mColor.G = iG;
+    mColor.B = iB;
+    mColor.A = iA;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetColor( const FColor& iColor )
+{
+    mColor = iColor;
 }
 
 void
@@ -489,7 +511,7 @@ FOdysseyVectorTagInbetweener::InterpolateTransform( uint32 iInbetweenIndex )
 
     inbetween->matrix.reset();
     inbetween->matrix.translate( translationX, translationY );
-    inbetween->matrix.rotate( rotation );
+    inbetween->matrix.rotate( rotation * M_PI / 180.0f ); // convert to radians
     inbetween->matrix.scale( scalingX, scalingY );
 
     BLMatrix2D::invert( inbetween->inverseMatrix, inbetween->matrix );
@@ -672,6 +694,9 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iInbetweenIndex
 {
     BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
 
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
     worldMatrix.transform( mChart.inbetweenBuffer[iInbetweenIndex].matrix );
 
     for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
@@ -684,12 +709,17 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iInbetweenIndex
                   , worldMatrix
                   , iBLContext );
     }
+
+    iBLContext->restore();
 }
 
 void
 FOdysseyVectorTagInbetweener::DrawPathsTarget( BLContext* iBLContext )
 {
     BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
+
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
     worldMatrix.transform( mTargetLocalMatrix );
 
@@ -703,6 +733,8 @@ FOdysseyVectorTagInbetweener::DrawPathsTarget( BLContext* iBLContext )
                   , worldMatrix
                   , iBLContext );
     }
+
+    iBLContext->restore();
 }
 
 FInbetweenerGrid*

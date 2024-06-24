@@ -345,7 +345,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         void GetFocusedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oTransformedInbetweenerTagList );
         void GetSelectedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList );
-
 /*
        uint64 GetDrawingFlags();
        void SetDrawingFlags( uint64 iDrawingFlags );

@@ -23,6 +23,52 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Reset( FOdysseyVectorGroupPaint* i
 
 }
 
+void
+FOdysseyPainterEditorVectorTrajectoryToolHUD::PickTrajectory( FOdysseyVectorGroupPaint* iScene
+                                                            , double iWorldX
+                                                            , double iWorldY
+                                                            , double iPickingRadius
+                                                            , std::list<FInbetweenerTrajectory*>& oTrajectoryList )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    vectorEngine->Traverse
+    ( iScene
+    , 0
+    , [ vectorEngine
+      , iScene
+      , this
+      , iWorldX
+      , iWorldY
+      , iPickingRadius
+      , &oTrajectoryList ]( FOdysseyVectorObject* object
+                          , uint64 travesalFlags ) -> uint64
+      {
+          if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
+          {
+              FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+              if( tag )
+              {
+                  FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                  FInbetweenerTrajectory* trajectory = PickTrajectory( inbetweenerTag
+                                                                     , iWorldX
+                                                                     , iWorldY
+                                                                     , iPickingRadius );
+
+                  if( trajectory )
+                  {
+                      oTrajectoryList.push_back( trajectory );
+                  }
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+}
+
 FInbetweenerTrajectory*
 FOdysseyPainterEditorVectorTrajectoryToolHUD::PickTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                             , double iWorldX
@@ -56,6 +102,52 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickTrajectory( FOdysseyVectorTagI
     }
 
     return nullptr;
+}
+
+void
+FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorGroupPaint* iScene
+                                                        , double iWorldX
+                                                        , double iWorldY
+                                                        , double iPickingRadius
+                                                        , std::list<FInbetweenerHandleTrajectory*>& oTrajectoryHandleList )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    vectorEngine->Traverse
+    ( iScene
+    , 0
+    , [ vectorEngine
+      , iScene
+      , this
+      , iWorldX
+      , iWorldY
+      , iPickingRadius
+      , &oTrajectoryHandleList ]( FOdysseyVectorObject* object
+                                , uint64 travesalFlags ) -> uint64
+      {
+          if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
+          {
+              FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+              if( tag )
+              {
+                  FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                  FInbetweenerHandleTrajectory* trajectoryHandle = PickHandle( inbetweenerTag
+                                                                             , iWorldX
+                                                                             , iWorldY
+                                                                             , iPickingRadius );
+
+                  if( trajectoryHandle )
+                  {
+                      oTrajectoryHandleList.push_back( trajectoryHandle );
+                  }
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
 }
 
 FInbetweenerHandleTrajectory*
@@ -152,32 +244,45 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
+        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-        if( selectedObject )
-        {
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+        vectorEngine->Traverse
+        ( iScene
+        , 0
+        , [ vectorEngine
+          , iScene
+          , iBLContext
+          , &fgColor
+          , &bgColor
+          , &hcColor
+          , this ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
+          {
+              if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
+              {
+                  FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
-            if( tag )
-            {
-                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( tag );
-                std::list<FInbetweenerTrajectory*>& trajectoryList = inbetweenerTag->GetGrid()->GetTrajectoryList();
+                  if( tag )
+                  {
+                      FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                      std::list<FInbetweenerTrajectory*>& trajectoryList = inbetweenerTag->GetGrid()->GetTrajectoryList();
 
-                for( FInbetweenerTrajectory* trajectory : trajectoryList )
-                {
-                    DrawTrajectory( iBLContext
-                                  , fgColor
-                                  , bgColor
-                                  , hcColor
-                                  , inbetweenerTag
-                                  , trajectory );
-                }
-            }
-        }
+                      for( FInbetweenerTrajectory* trajectory : trajectoryList )
+                      {
+                          DrawTrajectory( iBLContext
+                                        , fgColor
+                                        , bgColor
+                                        , hcColor
+                                        , inbetweenerTag
+                                        , trajectory );
+                      }
+                  }
+
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              }
+
+              return 0;
+          } );
     }
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
 }
 
 /*

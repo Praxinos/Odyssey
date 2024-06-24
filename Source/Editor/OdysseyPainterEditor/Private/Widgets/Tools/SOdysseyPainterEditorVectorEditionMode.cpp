@@ -82,7 +82,7 @@ SOdysseyPainterEditorVectorEditionMode::Construct( const FArguments& InArgs, FOd
    .ToolTipText(LOCTEXT("vector-edition-mode.inbetween-mode.tooltip", "Inbetween Mode"))
     [
         SNew(SImage)
-       .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeInbetweening32"))
+       .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.VectorModeInbetween32"))
     ];
 
     ChildSlot

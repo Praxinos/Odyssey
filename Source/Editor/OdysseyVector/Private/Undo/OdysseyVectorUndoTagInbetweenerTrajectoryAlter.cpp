@@ -22,6 +22,39 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweene
     mTrajectorySnapshotBuffer.emplace_back( iTrajectory );
 }
 
+FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
+                                                                                                , const std::list<FInbetweenerTrajectory*>& iTrajectoryList )
+    : FOdysseyVectorUndo( iScene )
+{
+    for( FInbetweenerTrajectory* trajectory : iTrajectoryList )
+    {
+        mTrajectorySnapshotBuffer.emplace_back( trajectory );
+    }
+}
+
+FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
+                                                                                                , const std::list<FInbetweenerHandleTrajectory*>& iTrajectoryHandleList )
+    : FOdysseyVectorUndo( iScene )
+{
+    for( FInbetweenerHandleTrajectory* trajectoryHandle : iTrajectoryHandleList )
+    {
+        if( std::find_if( mTrajectorySnapshotBuffer.begin()
+                        , mTrajectorySnapshotBuffer.end()
+                        , [trajectoryHandle]( FSnapshotTrajectory& trajectorySnapshot )
+                          {
+                              if( trajectorySnapshot.GetTrajectory() == trajectoryHandle->GetTrajectory() )
+                              {
+                                  return true;
+                              }
+
+                              return false;
+                          } ) == mTrajectorySnapshotBuffer.end() )
+        {
+            mTrajectorySnapshotBuffer.emplace_back( trajectoryHandle->GetTrajectory() );
+        }
+    }
+}
+
 void
 FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Apply( UObject* iIgnored )
 {

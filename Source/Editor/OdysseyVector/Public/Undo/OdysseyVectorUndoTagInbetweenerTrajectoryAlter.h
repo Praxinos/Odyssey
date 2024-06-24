@@ -17,6 +17,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerTrajectoryAlter : public
         ~FOdysseyVectorUndoTagInbetweenerTrajectoryAlter();
         FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
                                                        , FInbetweenerTrajectory* iTrajectory );
+        FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
+                                                       , const std::list<FInbetweenerTrajectory*>& iTrajectoryList );
+        FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
+                                                       , const std::list<FInbetweenerHandleTrajectory*>& iTrajectoryHandleList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

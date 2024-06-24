@@ -36,6 +36,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
         DivisionX = selectedInbetweenerTag->GetGridNumQuadX();
         DivisionY = selectedInbetweenerTag->GetGridNumQuadY();
         InbetweenCount = selectedInbetweenerTag->GetInbetweenCount();
+        Color = selectedInbetweenerTag->GetColor();
 
         if( GridType == eInbetweenerGridType::ARAP )
         {
@@ -92,6 +93,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             arapGrid->SetRigidity( Rigidity );
         }
 
+        if( iPropertyName == "Color" )
+            selectedInbetweenerTag->SetColor( Color );
+
         // must be last to be able to update correctly grid type-dependent fields
         if( iPropertyName == "GridType" )
         {
@@ -128,6 +132,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::GetSnapshotFlags( const FName& iP
 
     if( iPropertyName == "GridType" )
         snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::GRIDTYPE;
+
+    if( iPropertyName == "Color" )
+        snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::COLOR;
 
     return snapshotFlags;
 }

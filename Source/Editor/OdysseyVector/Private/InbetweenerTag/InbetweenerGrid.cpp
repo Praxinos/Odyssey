@@ -470,7 +470,7 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
         LHS.insert( idx, quadPoints[0]->GetID()) = LHS.insert( quadPoints[0]->GetID(), idx ) = ( 1.0f - u ) * ( 1.0f - v );
         LHS.insert( idx, quadPoints[1]->GetID()) = LHS.insert( quadPoints[1]->GetID(), idx ) = u * ( 1.0 - v );
         LHS.insert( idx, quadPoints[2]->GetID()) = LHS.insert( quadPoints[2]->GetID(), idx ) = u * v;
-        LHS.insert( idx, quadPoints[3]->GetID()) = LHS.insert( quadPoints[3]->GetID(), idx ) = ( 1.0f - v ) * v;
+        LHS.insert( idx, quadPoints[3]->GetID()) = LHS.insert( quadPoints[3]->GetID(), idx ) = ( 1.0f - u ) * v;
         ++idx;
     }
 

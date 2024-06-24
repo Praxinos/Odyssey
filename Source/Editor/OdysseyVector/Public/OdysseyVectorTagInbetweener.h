@@ -152,6 +152,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                , double iRotation
                                , double iScalingX
                                , double iScalingY );
+        const FColor& GetColor();
+        void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        void SetColor( const FColor& iColor );
 
     protected:
         void UpdateAnimationCells( uint32 iInbetweenCount );
@@ -202,4 +205,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FInbetweenerChart mChart;
         uint32 mInbetweenCount;
         uint64 mInvalidationFlags;
+        FColor mColor;
 };

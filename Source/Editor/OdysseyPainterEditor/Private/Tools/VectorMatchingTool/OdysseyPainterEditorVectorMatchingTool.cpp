@@ -23,7 +23,7 @@ UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorMatchingToolHUD( this ), false )
     , PickingRadius( 75.0f )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching64");
 
     mMatchingHUD = static_cast<FOdysseyPainterEditorVectorMatchingToolHUD*>( mBaseHUD );
 }

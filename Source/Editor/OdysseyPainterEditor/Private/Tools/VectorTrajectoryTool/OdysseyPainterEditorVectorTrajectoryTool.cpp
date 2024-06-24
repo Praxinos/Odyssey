@@ -26,7 +26,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectory
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorTrajectoryToolHUD( this ), false )
     , PickingRadius( 10.0f )
     , mPickingMode( eTrajectoryPickingMode::Add )
-    , mPickedHandle( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
 
@@ -129,30 +128,33 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
          | retFlags;
 }
 
+
+
 uint64
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey )
+                                                            , const FOdysseyPoint& iPointInTexture
+                                                            , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    mPickedHandle = nullptr;
+    mPickedHandleList.clear();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( iEngine->GetSelectedObjectList().size() )
+        if( mPickingMode == eTrajectoryPickingMode::Add )
         {
             FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
-            if( inbetweenerTag )
+            if( selectedObject )
             {
-                if( mPickingMode == eTrajectoryPickingMode::Add )
+                FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+                if( tag )
                 {
-                    BLMatrix2D& ownerInverseWolrdMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
-                    BLPoint pt = ownerInverseWolrdMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                    BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+                    BLPoint pt = ownerInverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
                     FInbetweenerTrajectory* trajectory = inbetweenerTag->GetGrid()->AddTrajectory( ::ULIS::FVec2D( pt.x, pt.y ));
 
                     if( trajectory )
@@ -172,60 +174,62 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                         GEditor->EndTransaction();
                     }
                 }
-
-                if( mPickingMode == eTrajectoryPickingMode::Alter )
-                {
-                    mPickedHandle = mTrajectoryHUD->PickHandle( inbetweenerTag
-                                                              , iPointInTexture.x
-                                                              , iPointInTexture.y
-                                                              , PickingRadius );
-
-                    if( mPickedHandle )
-                    {
-                        // needed for valid GUndo pointer
-                        GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.alter","Vector Trajectory Tool"));
-                        if( GUndo )
-                        {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( iScene, mPickedHandle->GetTrajectory() );
-
-                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                            if (source)
-                                source->RecordCurrentFrameUndo();
-                        }
-                        GEditor->EndTransaction();
-                    }
-                }
-
-                if( mPickingMode == eTrajectoryPickingMode::Remove )
-                {
-                    BLMatrix2D& ownerInverseWolrdMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
-                    FInbetweenerTrajectory* trajectory = mTrajectoryHUD->PickTrajectory( inbetweenerTag
-                                                                                       , iPointInTexture.x
-                                                                                       , iPointInTexture.y
-                                                                                       , PickingRadius );
-
-                    if( trajectory )
-                    {
-                        inbetweenerTag->GetGrid()->RemoveTrajectory( trajectory );
-
-                        // needed for valid GUndo pointer
-                        GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.remove","Vector Trajectory Tool"));
-                        if( GUndo )
-                        {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryRemove( iScene, inbetweenerTag, trajectory );
-
-                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                            if (source)
-                                source->RecordCurrentFrameUndo();
-                        }
-                        GEditor->EndTransaction();
-                    }
-                }
             }
+        }
+
+        if( mPickingMode == eTrajectoryPickingMode::Alter )
+        {
+            mTrajectoryHUD->PickHandle( iScene
+                                      , iPointInTexture.x
+                                      , iPointInTexture.y
+                                      , PickingRadius
+                                      , mPickedHandleList );
+
+            if( mPickedHandleList.size() )
+            {
+                // needed for valid GUndo pointer
+                GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.alter","Vector Trajectory Tool"));
+                if( GUndo )
+                {
+                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( iScene, mPickedHandleList );
+
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                    if (source)
+                        source->RecordCurrentFrameUndo();
+                }
+                GEditor->EndTransaction();
+            }
+        }
+
+        if( mPickingMode == eTrajectoryPickingMode::Remove )
+        {
+            std::list<FInbetweenerTrajectory*> pickedTrajectoryList;
+            mTrajectoryHUD->PickTrajectory( iScene
+                                          , iPointInTexture.x
+                                          , iPointInTexture.y
+                                          , PickingRadius
+                                          , pickedTrajectoryList );
+
+            for( FInbetweenerTrajectory* trajectory : pickedTrajectoryList )
+            {
+                trajectory->GetGrid()->RemoveTrajectory( trajectory );
+            }
+
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.remove","Vector Trajectory Tool"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryRemove( iScene, pickedTrajectoryList );
+
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
+            GEditor->EndTransaction();
         }
     }
 
@@ -252,44 +256,34 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        if( iEngine->GetSelectedObjectList().size() )
+        if( mPickingMode == eTrajectoryPickingMode::Add )
         {
-            FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+        }
 
-            if( inbetweenerTag )
+        if( mPickingMode == eTrajectoryPickingMode::Alter )
+        {
+            for( FInbetweenerHandleTrajectory* trajectoryHandle : mPickedHandleList )
             {
-                if( mPickingMode == eTrajectoryPickingMode::Add )
+                FInbetweenerTrajectory* trajectory = trajectoryHandle->GetTrajectory();
+                BLMatrix2D ownerInverseWorldMatrix = trajectory->GetGrid()->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+                uint32 endpointIndex = ( trajectoryHandle == trajectory->GetHandle(0) ) ? 0 : 3;
+                uint32 handleIndex   = ( trajectoryHandle == trajectory->GetHandle(0) ) ? 1 : 2;
+                BLPoint diff = ownerInverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
+                                                                , iPointInTexture.deltaPosition.Y );
+                ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
+                ::ULIS::FVec2D controlPosition = cubicBezier[endpointIndex];
+                ::ULIS::FVec2D handlePosition = cubicBezier[handleIndex];
+                ::ULIS::FVec2D direction = ( ( handlePosition + ::ULIS::FVec2D( diff.x, diff.y ) ) - controlPosition );
+
+                if( direction.DistanceSquared() )
                 {
-                }
+                    double bezierLength = ( cubicBezier[3] - cubicBezier[0] ).Distance();
+                    double length = direction.Distance();
+                    double lengthRatio = bezierLength ? length / bezierLength : 0.0f;
 
-                if( mPickingMode == eTrajectoryPickingMode::Alter )
-                {
-                    if( mPickedHandle )
-                    {
-                        FInbetweenerTrajectory* trajectory = mPickedHandle->GetTrajectory();
-                        BLMatrix2D ownerInverseWorldMatrix = trajectory->GetGrid()->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
-                        uint32 endpointIndex = ( mPickedHandle == trajectory->GetHandle(0) ) ? 0 : 3;
-                        uint32 handleIndex   = ( mPickedHandle == trajectory->GetHandle(0) ) ? 1 : 2;
-                        BLPoint diff = ownerInverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
-                                                                        , iPointInTexture.deltaPosition.Y );
-                        ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-                        ::ULIS::FVec2D controlPosition = cubicBezier[endpointIndex];
-                        ::ULIS::FVec2D handlePosition = cubicBezier[handleIndex];
-                        ::ULIS::FVec2D direction = ( ( handlePosition + ::ULIS::FVec2D( diff.x, diff.y ) ) - controlPosition );
+                    direction.Normalize();
 
-                        if( direction.DistanceSquared() )
-                        {
-                            double bezierLength = ( cubicBezier[3] - cubicBezier[0] ).Distance();
-                            double length = direction.Distance();
-                            double lengthRatio = bezierLength ? length / bezierLength : 0.0f;
-
-                            direction.Normalize();
-
-                            mPickedHandle->Set( direction, lengthRatio );
-                        }
-                    }
+                    trajectoryHandle->Set( direction, lengthRatio );
                 }
             }
         }

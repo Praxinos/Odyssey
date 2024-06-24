@@ -470,24 +470,26 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag )
 {
     BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+    FColor color = iInbetweenerTag->GetColor();
 
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
-    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->setStrokeWidth( 2.0f );
 
     // note: mInbetweenCount+1 holds the target position
     for( uint32 i = 0; i < iInbetweenerTag->GetInbetweenCount(); i++ )
     {
+        FInbetweenerInbetween& inbetween = iInbetweenerTag->GetChart().inbetweenBuffer[i];
+
+        iBLContext->setStrokeStyle( BLRgba32( color.R
+                                            , color.G
+                                            , color.B
+                                            , 127 + ( color.A * 0.5f * inbetween.spacing ) ) );
+
         iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
     }
 
     iBLContext->setStrokeWidth( 3.0f );
 
     iInbetweenerTag->DrawPathsTarget( iBLContext );
-
-    iBLContext->restore();
 }
 
 // static
