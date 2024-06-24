@@ -11,6 +11,7 @@
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyHUDSystem.h"
 #include "OdysseyHUDElement.h"
+#include "OdysseyMediaRaster.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyPainterEditorExtension.h"
@@ -76,6 +77,7 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iName, UObject* iEditedObject, const FName& iLayoutName)
     : FOdysseyEditor(iId, iName, iEditedObject)
     , mLayoutName(iLayoutName)
+    , mCopyBlock(nullptr)
     , mSource(nullptr)
     , mMeshSelector(MakeShared<FOdysseyMeshSelector>())
     , mCurrentMainTool(nullptr)
@@ -1680,6 +1682,59 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
     //for( )
 
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+}
+
+bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
+{
+    if (GetCurrentMediaProvider().IsLocked())
+        return false;
+
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return false;
+
+    if (RasterSelection()->IsEmpty())
+    {
+        return false;
+    }
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    ::ULIS::FRectI boundingBox = rasterBlock->GetRect();
+
+    mCopyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+    ctx.Clear(*mCopyBlock);
+
+    TArray<::ULIS::FRectI> rectangles = RasterSelection()->GetSelectionAreaAsScanlines();
+
+    for (int i = 0; i < rectangles.Num(); i++)
+    {
+        int decalX = FMath::Min(rectangles[i].x, 0);
+        int decalY = FMath::Min(rectangles[i].y, 0);
+
+        ctx.Copy(
+            *rasterBlock->GetBlock(),
+            *mCopyBlock,
+            rectangles[i],
+            ::ULIS::FVec2I(-decalX - boundingBox.x + rectangles[i].x, -decalY - boundingBox.y + rectangles[i].y),
+            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+            0,
+            nullptr,
+            nullptr
+        );
+    }
+
+    ctx.Finish();
+
+    return true;
+}
+
+void FOdysseyPainterEditor::PasteCopiedBlockToNewLayer()
+{
+    mSource->PasteBlockToNewLayer( mCopyBlock );
+    mCopyBlock.Reset();
+    mCopyBlock = nullptr;
 }
 
 static void

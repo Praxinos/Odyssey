@@ -56,9 +56,8 @@ protected:
 
     void ClearCurrentLayer();
     void ClearCurrentSelection();
-    /* void CopyCurrentSelection();
+    void CopyCurrentSelection();
     void PasteCurrentSelection();
-    void PasteCurrentSelectionInNewLayer(); */
 
     void ToggleEraserButton();
 

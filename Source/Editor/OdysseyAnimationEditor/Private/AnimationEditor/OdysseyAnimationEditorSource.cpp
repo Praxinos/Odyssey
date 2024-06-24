@@ -257,6 +257,43 @@ FOdysseyAnimationEditorSource::Clear()
 	}
 }
 
+void 
+FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iBlock )
+{
+	/*
+		if (!mCopyBlock)
+			return;
+
+		if (GetCurrentMediaProvider().IsLocked())
+			return;
+
+		TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+		if (mediaRasters.Num() <= 0)
+			return;
+
+		TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+
+		LayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), LayerStack()->CurrentLayer);
+
+		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mCopyBlock->Format());
+
+		ctx.Blend(
+			*mCopyBlock,
+			*rasterBlock->GetBlock(),
+			mCopyBlock->Rect(),
+			::ULIS::FVec2I(0, 0),
+			::ULIS::Blend_Normal,
+			::ULIS::Alpha_Normal,
+			1.f,
+			::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+			0,
+			nullptr,
+			nullptr
+		);
+
+		ctx.Finish();*/
+}
+
 void
 FOdysseyAnimationEditorSource::RecordCurrentFrameUndo() const
 {

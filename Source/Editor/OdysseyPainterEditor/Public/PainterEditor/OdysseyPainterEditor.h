@@ -136,10 +136,10 @@ public:
     TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
     virtual FOdysseyPainterEditorGUI*                    GetGUI();
 
-    virtual FOdysseyHUDSystem*                              HUDSystem() const;
-	virtual const FOdysseyBrushColor&                       PaintColor() const;
-    virtual FOdysseyMediaProvider                           GetCurrentMediaProvider();
-    virtual UOdysseyLayerStack*                             LayerStack() const;
+    virtual FOdysseyHUDSystem*                               HUDSystem() const;
+	virtual const FOdysseyBrushColor&                        PaintColor() const;
+    virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
+    virtual UOdysseyLayerStack*                              LayerStack() const;
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
 
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
@@ -193,22 +193,18 @@ public:
                                  , double iValue
                                  , bool   iAbsolute );
 
+    // Utility functions
+    bool CopyCurrentSelectionToCopyBlock();
+    void PasteCopiedBlockToNewLayer();
+
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );
-
-    //HUD system related
-    //void MakeHUDPersistent( FOdysseyHUDElement* iHUD ); //Make HUD in parameter persistent in this editor, relinquishing ownership to this editor
-    //void ClearHUDPersistent(); //Clear persistent HUD, happens on actions like deselect
-    //void RemoveHUDPersistent( FString iName) //Removes a particular HUD from the persistent HUD. Todo when we'll be stacking HUDs on top of each other, like selection + guides, things like that
 
 public:
     // Setters
     void  AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension);
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
-    /* void  RefreshMaskHUD();
-    void  ClearMask(); //Clears the mask data and HUD
-    void  ClearMaskHUD(); //Only clears the HUD */
 
 protected:
     //Callbacks
@@ -233,6 +229,7 @@ protected:
     FText                                    mName;
     FName                                    mLayoutName;
     TSharedPtr<FTabManager::FLayout>         mLayout;
+    TSharedPtr<::ULIS::FBlock>               mCopyBlock; // Pixel block in clipboard (ctrl + c, ctrl + v)
 
     //Tools
     TSharedPtr<FOdysseyPainterEditorSource>  mSource;

@@ -36,13 +36,13 @@ UOdysseyPainterEditorRasterTransformTool::~UOdysseyPainterEditorRasterTransformT
 
 UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTool()
     : mPaintEngine()
-    , mSelectionBlock(nullptr)
-    , mTransformSelectionBlock(nullptr)
     , mRasterMutator(true)
     , mTransformCaptureMode(EOdysseyTransformCapture::NoCapture)
     , mTransformHUD(MakeShared<FOdysseyHUDElement>())
     , mTransformArea(nullptr)
     , mMouseCursor(EMouseCursor::Crosshairs)
+    , mSelectionBlock(nullptr)
+    , mTransformSelectionBlock(nullptr)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
 }
@@ -741,12 +741,10 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection()
     ::ULIS::FRectI boundingBox = rasterSelection->GetMaskBoundingRect();
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    mPaintEngine.RasterBlock(rasterBlock);
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
 
-    mSelectionBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, paintBlock->Format());
+    mSelectionBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(paintBlock->Format());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
     ctx.Clear(*mSelectionBlock);
     
     TArray<::ULIS::FRectI> rectangles = mEditor->RasterSelection()->GetSelectionAreaAsScanlines();

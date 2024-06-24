@@ -219,4 +219,43 @@ FOdysseyTextureEditorSource::Clear()
 	}
 }
 
+void FOdysseyTextureEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iBlock )
+{
+    if (!iBlock)
+        return;
+
+    if (GetCurrentMediaProvider().IsLocked())
+        return;
+
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return;
+
+	UOdysseyTextureLayerImageRaster* layer = Cast< UOdysseyTextureLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
+	GetLayerStack()->CurrentLayer = layer;
+
+    layer->GetRasterBlock()->SetBlock(iBlock);
+
+	/*
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+
+    ctx.Blend(
+        *iBlock,
+        *rasterBlock->GetBlock(),
+		iBlock->Rect(),
+        ::ULIS::FVec2I(0, 0),
+        ::ULIS::Blend_Normal,
+        ::ULIS::Alpha_Normal,
+        1.f,
+        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+        0,
+        nullptr,
+        nullptr
+    );
+
+    ctx.Finish();*/
+}
+
 #undef LOCTEXT_NAMESPACE

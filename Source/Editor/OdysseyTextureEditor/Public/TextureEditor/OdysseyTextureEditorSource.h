@@ -32,7 +32,9 @@ public:
     virtual UTexture* DisplayTexture() const override;
     virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
     virtual FOdysseyMediaProvider GetCurrentMediaProvider() override;
+
     virtual void Clear() override;
+    virtual void PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iBlock ) override;
 
 public:
     UTexture2D* GetTexture() const;
