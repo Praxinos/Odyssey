@@ -195,6 +195,7 @@ public:
 
     // Utility functions
     bool CopyCurrentSelectionToCopyBlock();
+    bool CutCurrentSelectionToCopyBlock();
     void PasteCopiedBlockToNewLayer();
 
     // Populates the Edit Menu everytime it is displayed

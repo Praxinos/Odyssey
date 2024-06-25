@@ -129,6 +129,7 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.ClearCurrentLayer, ClearCurrentLayer)
     MAP_ACTION(painterEditorCommands.ClearCurrentSelection, ClearCurrentSelection)
     MAP_ACTION(painterEditorCommands.CopyCurrentSelection, CopyCurrentSelection)
+    MAP_ACTION(painterEditorCommands.CutCurrentSelection, CutCurrentSelection)
     MAP_ACTION(painterEditorCommands.PasteCurrentSelection, PasteCurrentSelection)
 
     MAP_ACTION(painterEditorCommands.ToggleEraserButton, ToggleEraserButton)
@@ -432,6 +433,11 @@ FOdysseyPainterEditorGUI::ClearCurrentSelection()
 void FOdysseyPainterEditorGUI::CopyCurrentSelection()
 {
     mEditor->CopyCurrentSelectionToCopyBlock();
+}
+
+void FOdysseyPainterEditorGUI::CutCurrentSelection()
+{
+    mEditor->CutCurrentSelectionToCopyBlock();
 }
 
 void FOdysseyPainterEditorGUI::PasteCurrentSelection()

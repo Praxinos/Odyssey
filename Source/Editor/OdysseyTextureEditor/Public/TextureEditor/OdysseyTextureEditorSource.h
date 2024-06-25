@@ -34,7 +34,8 @@ public:
     virtual FOdysseyMediaProvider GetCurrentMediaProvider() override;
 
     virtual void Clear() override;
-    virtual void PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iBlock ) override;
+    virtual void ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iBlock) override;
+    virtual void PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iCopyBlock ) override;
 
 public:
     UTexture2D* GetTexture() const;

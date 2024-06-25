@@ -8,6 +8,8 @@
 #include "OdysseyAnimationTexture.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
@@ -15,6 +17,7 @@
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
+
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -257,41 +260,118 @@ FOdysseyAnimationEditorSource::Clear()
 	}
 }
 
+void FOdysseyAnimationEditorSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iCopyBlock)
+{
+    FText transactionName = LOCTEXT("actions.cut", "Cut");
+
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->CurrentLayer.Get());
+    if (!currentLayer)
+        return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(transactionName);
+#endif
+    FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(mAnimation->CurrentFrame);
+    if (mediaProvider.IsLocked())
+        return;
+
+    if (mediaProvider.HasMedia<FOdysseyMediaRaster>())
+    {
+        TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+        for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
+        {
+            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
+            if (!rasterBlock)
+                continue;
+
+            FOdysseyRasterBlockMutator mutator(rasterBlock);
+            mutator.EditTilesFromRects(
+                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                    {
+                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+                        ::ULIS::FEvent eventCut;
+
+                        ctx.Blend(
+                            *iCopyBlock,
+                            *iBlock,
+                            iCopyBlock->Rect(),
+                            ::ULIS::FVec2I(0, 0),
+                            ::ULIS::Blend_Normal,
+                            ::ULIS::Alpha_Sub,
+                            1.f,
+                            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                            0,
+                            nullptr,
+                            &eventCut
+                        );                        
+						
+						return { eventCut };
+                    }
+                )
+            );
+            mutator.Commit();
+
+            FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
+            currentFrameMutator.Set(mAnimation->CurrentFrame);
+            currentFrameMutator.Commit();
+        }
+    }
+}
+
 void 
 FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iBlock )
 {
-	/*
-		if (!mCopyBlock)
-			return;
+    if (!iBlock)
+        return;
 
-		if (GetCurrentMediaProvider().IsLocked())
-			return;
+    if (GetCurrentMediaProvider().IsLocked())
+        return;
 
-		TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
-		if (mediaRasters.Num() <= 0)
-			return;
+    if (!GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>())
+        return;
 
-		TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return;
 
-		LayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), LayerStack()->CurrentLayer);
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
+#endif
 
-		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mCopyBlock->Format());
+    TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(iBlock->Rect().w, iBlock->Rect().h, iBlock->Format());
 
-		ctx.Blend(
-			*mCopyBlock,
-			*rasterBlock->GetBlock(),
-			mCopyBlock->Rect(),
-			::ULIS::FVec2I(0, 0),
-			::ULIS::Blend_Normal,
-			::ULIS::Alpha_Normal,
-			1.f,
-			::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-			0,
-			nullptr,
-			nullptr
-		);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+    ctx.Clear(*copyBlock);
 
-		ctx.Finish();*/
+    ctx.Copy(
+        *iBlock,
+        *copyBlock,
+		iBlock->Rect(),
+        ::ULIS::FVec2I(0, 0),
+        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+        0,
+        nullptr,
+        nullptr
+    );
+
+    ctx.Finish();
+
+    UOdysseyAnimationLayerImageRaster* layer = Cast< UOdysseyAnimationLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    GetLayerStack()->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+
+    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
+    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, copyBlock);
+    cells.Add(cell);
+
+    FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
+    mutator.AddAtFrame(cells, mAnimation->CurrentFrame);
+    mutator.Commit();
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
+    currentFrameMutator.Set(mAnimation->CurrentFrame);
+    currentFrameMutator.Commit();
 }
 
 void

@@ -53,6 +53,9 @@ public:
     /** Action for copying the current selection block, if it exists */
     TSharedPtr<FUICommandInfo> CopyCurrentSelection;
 
+    /** Action for cuting the current selection block, if it exists */
+    TSharedPtr<FUICommandInfo> CutCurrentSelection;
+
     /** Action for pasting the current selection */
     TSharedPtr<FUICommandInfo> PasteCurrentSelection;
 

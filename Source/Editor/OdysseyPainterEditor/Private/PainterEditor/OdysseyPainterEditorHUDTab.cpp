@@ -59,7 +59,7 @@ FOdysseyPainterEditorHUDTab::CreateWidget()
 void
 FOdysseyPainterEditorHUDTab::RefreshWidgetContent()
 {
-    UE_LOG(LogTemp, Display, TEXT("CHANGED WIDGET"));
+    //UE_LOG(LogTemp, Display, TEXT("CHANGED WIDGET"));
 }
 
 void

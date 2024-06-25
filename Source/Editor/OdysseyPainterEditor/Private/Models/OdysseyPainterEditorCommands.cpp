@@ -42,8 +42,9 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 
 // Uncategorized Yet Shortcuts
     UI_BUNDLE_COMMAND( ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer",                                                      EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) ); 
-    UI_BUNDLE_COMMAND( ClearCurrentSelection, UncategorizedYetShortcuts, "Clear Current Selection", "Clear current selection", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::D) );
+    UI_BUNDLE_COMMAND( ClearCurrentSelection, UncategorizedYetShortcuts, "Clear Current Selection", "Clear current selection",                                          EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::D) );
     UI_BUNDLE_COMMAND( CopyCurrentSelection, UncategorizedYetShortcuts, "Copy Current Selection", "Copy current selection",                                             EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::C));
+    UI_BUNDLE_COMMAND( CutCurrentSelection, UncategorizedYetShortcuts, "Cut Current Selection", "Cut current selection",                                                EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::X));
     UI_BUNDLE_COMMAND( PasteCurrentSelection, UncategorizedYetShortcuts, "Paste Current Selection", "Clear current selection",                                          EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::V));    
 
 // Viewport Shortcuts Category

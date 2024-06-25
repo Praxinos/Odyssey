@@ -1689,6 +1689,9 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
     if (GetCurrentMediaProvider().IsLocked())
         return false;
 
+    if( !GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>() )
+        return false;
+
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
         return false;
@@ -1730,11 +1733,60 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
     return true;
 }
 
+bool FOdysseyPainterEditor::CutCurrentSelectionToCopyBlock()
+{
+    if (GetCurrentMediaProvider().IsLocked())
+        return false;
+
+    if (!GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>())
+        return false;
+
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return false;
+
+    if (RasterSelection()->IsEmpty())
+    {
+        return false;
+    }
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    ::ULIS::FRectI boundingBox = rasterBlock->GetRect();
+
+    mCopyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+    ctx.Clear(*mCopyBlock);
+
+    TArray<::ULIS::FRectI> rectangles = RasterSelection()->GetSelectionAreaAsScanlines();
+
+    for (int i = 0; i < rectangles.Num(); i++)
+    {
+        int decalX = FMath::Min(rectangles[i].x, 0);
+        int decalY = FMath::Min(rectangles[i].y, 0);
+
+        ctx.Copy(
+            *rasterBlock->GetBlock(),
+            *mCopyBlock,
+            rectangles[i],
+            ::ULIS::FVec2I(-decalX - boundingBox.x + rectangles[i].x, -decalY - boundingBox.y + rectangles[i].y),
+            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+            0,
+            nullptr,
+            nullptr
+        );
+    }
+
+    ctx.Finish();
+
+    mSource->ClearFromCopyBlock(mCopyBlock);
+
+    return true;
+}
+
 void FOdysseyPainterEditor::PasteCopiedBlockToNewLayer()
 {
     mSource->PasteBlockToNewLayer( mCopyBlock );
-    mCopyBlock.Reset();
-    mCopyBlock = nullptr;
 }
 
 static void
