@@ -42,6 +42,12 @@ private:
     FText CreateInfoText() const;
 
 private:
+    void OnGlobalTimeChanged();
+
+    void OnBeginScrubbing();
+    void OnEndScrubbing();
+
+private:
     /**
      * Called before an actor or component transform changes
      *
@@ -90,6 +96,9 @@ private:
     FDelegateHandle mSequencerActorAddedDelegates;
     FDelegateHandle mSequencerActivatedDelegates;
     FDelegateHandle mSequencerSelectionSectionChangedDelegates;
+    FDelegateHandle mSequencerBeginScrubbingDelegates;
+    FDelegateHandle mSequencerEndScrubbingDelegates;
+    FDelegateHandle mSequencerGlobalTimeChangedDelegates;
     UBoardSequence* mBoardSequence;
 
     TSharedPtr<FUICommandList> mBoardCommandList;

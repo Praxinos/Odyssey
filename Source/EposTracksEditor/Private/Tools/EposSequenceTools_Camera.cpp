@@ -1066,7 +1066,7 @@ GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastT
 
 // From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Public\KeyframeTrackEditor.h
 static
-void
+bool
 AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNumber KeyTime, const FGeneratedTrackKeys& Keys, ESequencerKeyMode KeyMode, EKeyFrameTrackEditorSetDefault SetDefault = EKeyFrameTrackEditorSetDefault::SetDefault )
 {
     EAutoChangeMode AutoChangeMode = iSequencer.GetAutoChangeMode();
@@ -1087,6 +1087,8 @@ AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNum
         }
     }
 
+    bool key_created = false;
+
     if( KeyMode != ESequencerKeyMode::AutoKey || AutoChangeMode == EAutoChangeMode::AutoKey || AutoChangeMode == EAutoChangeMode::All )
     {
         EMovieSceneKeyInterpolation InterpolationMode = iSequencer.GetKeyInterpolation();
@@ -1102,9 +1104,11 @@ AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNum
 
         for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
         {
-            GeneratedKey->Apply( Section, Proxy, KeyTime, InterpolationMode, bKeyEvenIfUnchanged, bKeyEvenIfEmpty );
+            key_created |= GeneratedKey->Apply( Section, Proxy, KeyTime, InterpolationMode, bKeyEvenIfUnchanged, bKeyEvenIfEmpty );
         }
     }
+
+    return key_created;
 }
 
 //static
@@ -1167,13 +1171,14 @@ ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     //---
 
-    AddKeysToSection( iSequencer, section, iFrameNumber, generated_keys, ESequencerKeyMode::AutoKey );
+    bool key_created = AddKeysToSection( iSequencer, section, iFrameNumber, generated_keys, ESequencerKeyMode::AutoKey );
 
 //TODO: set all (?) key planes ?
 
     //---
 
-    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    if( key_created )
+        iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 //---
