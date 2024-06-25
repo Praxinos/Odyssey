@@ -265,7 +265,8 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         AllocBuffers();
     }
 
-    if( mInvalidationFlags & INVALIDATE_TRAJECTORIES )
+    if( ( mInvalidationFlags & INVALIDATE_TRAJECTORIES )
+    ||  ( mInvalidationFlags & INVALIDATE_TARGETBBOX   ) )
     {
         for( FInbetweenerTrajectory* trajectory : mGrid->GetTrajectoryList() )
         {
@@ -530,8 +531,8 @@ FOdysseyVectorTagInbetweener::Interpolate()
 
     for( uint32 i = 0; i <= mInbetweenCount; i++ )
     {
-        InterpolateGeometry( i );
         InterpolateTransform( i );
+        InterpolateGeometry( i );
     }
 }
 

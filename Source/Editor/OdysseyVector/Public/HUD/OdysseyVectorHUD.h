@@ -108,7 +108,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                             , uint64 iHUDFlags );
 
         static void DrawInbetweens( BLContext* iBLContext
-                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag  );
+                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                  , const BLRgba32& fgColor
+                                  , const BLRgba32& bgColor
+                                  , const BLRgba32& hcColo
+                                  , uint64 iHUDFlags  );
 
         static ::ULIS::FVec2D GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld );
@@ -180,10 +184,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 HUD_GROUPPAINT_BUCKET_HANDLE = ( 1ULL << 14 );
         static const uint64 HUD_GROUPPAINT_ALL           = HUD_GROUPPAINT_BUCKET
                                                          | HUD_GROUPPAINT_BUCKET_HANDLE;
-        static const uint64 HUD_TAGINBETWEENER_ALL       = ( 1ULL << 15 );
-        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 16 );
-        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 17 );
-        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 18 );
+        static const uint64 HUD_TAGINBETWEENER_TARGET    = ( 1ULL << 15 );
+        static const uint64 HUD_TAGINBETWEENER_INBETWEEN = ( 1ULL << 16 );
+        static const uint64 HUD_TAGINBETWEENER_ALL       = HUD_TAGINBETWEENER_TARGET
+                                                         | HUD_TAGINBETWEENER_INBETWEEN;
+        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 18 );
+        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 19 );
+        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 20 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) = 0;

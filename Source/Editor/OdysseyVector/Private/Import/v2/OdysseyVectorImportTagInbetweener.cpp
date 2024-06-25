@@ -57,6 +57,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << translationY;
 
                     iInbetweenerTag.Translate( translationX, translationY );
+                    //iInbetweenerTag.UpdateMatrix();
                 break;
 
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_ROTATION:
@@ -65,6 +66,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << rotation;
 
                     iInbetweenerTag.Rotate( rotation );
+                    //iInbetweenerTag.UpdateMatrix();
                 break;
 
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_SCALING:
@@ -75,6 +77,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << scalingY;
 
                     iInbetweenerTag.Scale( scalingX, scalingY );
+                    //iInbetweenerTag.UpdateMatrix();
                 break;
 
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID:  // container

@@ -467,29 +467,44 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
 // static
 void
 FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
-                                 , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+                                 , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                 , const BLRgba32& fgColor
+                                 , const BLRgba32& bgColor
+                                 , const BLRgba32& hcColor
+                                 , uint64 iHUDFlags )
 {
     BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
     FColor color = iInbetweenerTag->GetColor();
 
-    iBLContext->setStrokeWidth( 2.0f );
-
-    // note: mInbetweenCount+1 holds the target position
-    for( uint32 i = 0; i < iInbetweenerTag->GetInbetweenCount(); i++ )
+    if( iHUDFlags & HUD_TAGINBETWEENER_INBETWEEN )
     {
-        FInbetweenerInbetween& inbetween = iInbetweenerTag->GetChart().inbetweenBuffer[i];
+        iBLContext->setStrokeWidth( 2.0f );
+
+        // note: mInbetweenCount+1 holds the target position
+        for( uint32 i = 0; i < iInbetweenerTag->GetInbetweenCount(); i++ )
+        {
+            FInbetweenerInbetween& inbetween = iInbetweenerTag->GetChart().inbetweenBuffer[i];
+
+            iBLContext->setStrokeStyle( BLRgba32( color.R
+                                                , color.G
+                                                , color.B
+                                                , 127 + ( color.A * 0.5f * inbetween.spacing ) ) );
+
+            iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
+        }
+    }
+
+    if( iHUDFlags & HUD_TAGINBETWEENER_TARGET )
+    {
+        iBLContext->setStrokeWidth( 3.0f );
 
         iBLContext->setStrokeStyle( BLRgba32( color.R
                                             , color.G
                                             , color.B
-                                            , 127 + ( color.A * 0.5f * inbetween.spacing ) ) );
+                                            , color.A ) );
 
-        iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
+        iInbetweenerTag->DrawPathsTarget( iBLContext );
     }
-
-    iBLContext->setStrokeWidth( 3.0f );
-
-    iInbetweenerTag->DrawPathsTarget( iBLContext );
 }
 
 // static

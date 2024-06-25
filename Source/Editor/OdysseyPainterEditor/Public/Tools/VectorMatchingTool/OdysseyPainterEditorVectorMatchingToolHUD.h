@@ -20,15 +20,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
-        FInbetweenerInbetween* PickInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                            , double iWorldX
-                                            , double iWorldY
-                                            , double iRadius );
-        void MoveInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                          , FInbetweenerInbetween* iInbetween
-                          , double iWorldX
-                          , double iWorldY
-                          , bool iRelative );
         void PickTargetPoints( FOdysseyVectorTagInbetweener* iInbetweenerTag
                              , double iWorldX
                              , double iWorldY
@@ -44,7 +35,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
            , const BLRgba32& iFgColor
            , const BLRgba32& iBgColor
            , const BLRgba32& iHcColor );
-        void DrawChart( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
     private:
         UOdysseyPainterEditorVectorMatchingTool* mMatchingTool;

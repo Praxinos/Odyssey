@@ -855,10 +855,60 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                   return 0;
               } );
         }
+
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+        {
+            BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
+                                        , pivot.y - selectionBox.rect.y );
+
+            for( FOdysseyVectorTagInbetweener* inbetweenerTag : mTransformedInbetweenerTagList )
+            {
+                double translationX;
+                double translationY;
+                double rotation;
+                double scalingX;
+                double scalingY;
+                BLMatrix2D tagSpaceMatrix;
+                BLMatrix2D tagScaledMatrix;
+                BLMatrix2D tagLocalMatrix;
+                BLMatrix2D tagWorldMatrix = inbetweenerTag->GetTargetWorldMatrix();
+                BLMatrix2D parentInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+
+                // transfer object in "Rotation Space" coordinates system
+                FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
+
+                // rotate the object (local to the "Rotation Space" coordinates system)
+                FOdysseyVector::MatrixMultiply( scalingMatrix, tagSpaceMatrix, tagScaledMatrix );
+
+                // transfer the object back to world coordinates system
+                FOdysseyVector::MatrixMultiply( spaceMatrix, tagScaledMatrix, tagWorldMatrix );
+
+                // Convert the object to its parent coordinate system, i.e its local coordinates system.
+                FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, tagWorldMatrix, tagLocalMatrix );
+
+                // Extract the local transformations
+                FOdysseyVector::ExtractTransformations( tagLocalMatrix
+                                                      , &translationX
+                                                      , &translationY
+                                                      , &rotation // in radians
+                                                      , &scalingX
+                                                      , &scalingY );
+
+                // Apply the local transformations
+                inbetweenerTag->Translate( translationX, translationY );
+                // for some reasons this affects the rotation, so we ignore it.
+                inbetweenerTag->Rotate( inbetweenerTag->GetTargetRotation() ); // in degrees
+                inbetweenerTag->Scale( scalingX, scalingY );
+
+                inbetweenerTag->UpdateMatrix();
+            }
+        }
     }
 
     // Update the matrix for all objects
     //iScene->UpdateMatrix();
+
+    iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
 
     // update the selection box with the newly modified matrices
     iEngine->ResetHUD();

@@ -80,11 +80,18 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    //FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
         FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
+
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_TAGINBETWEENER_TARGET );
 
         if( selectedObject )
         {
